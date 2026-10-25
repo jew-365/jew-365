@@ -44,44 +44,54 @@ Every mitzvah in its time
 
 ## Promotional Text
 
-Accurate zmanim, a reminder inside each mitzvah's exact window, a siddur in four nusachim, and an app that rests on Shabbat and Yom Tov. No account needed.
+Accurate zmanim, reminders inside each mitzvah's exact window, a siddur in four nusachim, and an app that rests on Shabbat and Yom Tov. No account needed.
 
 ## Description
 
 Jew 365: every mitzvah in its time. The app calculates halachic times from your location and reminds you inside each mitzvah's exact window.
 
 Mitzvot, on time
-- Nine time-bound mitzvot: tefillin, Shema, Shacharit, Mincha, Maariv, morning blessings, candle lighting, Havdalah and the Omer
-- Add your own mitzvot, with reminders you set
-- Two buttons on the notification itself: "Done" and "Open text"
+- Daily prayers and mitzvot, such as tefillin, Shema, Shacharit, Mincha, Maariv, the morning blessings and the bedtime Shema
+- Shabbat and Yom Tov mitzvot, such as candle lighting and Havdalah
+- Seasonal and monthly mitzvot that appear only in their time, such as the Omer, Chanukah candles, Selichot, Kiddush Levana and Ushpizin
+- A mitzvah library that grows with updates, each mitzvah on its own switch
+- Your own mitzvot: set the hours, schedule them by weekdays, a date range or a number of days in a row, and add the reminders you want
 - A home screen sorted by urgency: what is open now, what comes next, what has passed
-- Day, week and month schedule, and a history with a day streak
 - Hebrew calendar, parasha, holidays and halachic opinions, set for Israel or the Diaspora
 
+Reminders
+- As many reminders as you like for each mitzvah: from the start of its window, before the end or at a set time
+- Two buttons on the notification itself: "Done" marks the mitzvah without opening the app, and "Open text" opens its text
+- For your own mitzvot, a reminder after the window ends if the mitzvah is not marked yet
+
 A siddur in four nusachim
-The prayer text for each mitzvah, plus 16 more texts: Grace After Meals, Me'ein Shalosh, Borei Nefashot, the Traveler's Prayer, Asher Yatzar, blessings on food and fragrance, blessings on sights and sounds, the bedtime Shema, Kiddush Levana, affixing a mezuzah, Sheva Berachot, Chanukah candle lighting, Selichot, Nishmat Kol Chai, Tikkun HaKlali and the whole of Tehillim, with a jump to each day of the week's portion. Ashkenaz, Sefard, Edot HaMizrach or Chabad, adjusted to the day, with auto-scroll so you can read without touching the screen.
+Ashkenaz, Sefard, Edot HaMizrach or Chabad, adjusted to the day: the prayers with each day's additions, blessings and prayers for meals, the home, the road, festivals and celebrations, and the whole of Tehillim divided by the days of the week. A man's or a woman's wording, following your profile. Auto-scroll so you can read without touching the screen, bookmarks, and a return to where you left off. In English, the translation appears under the Hebrew wherever the source has one. Selichot download in your nusach, offered ahead of their season. The siddur keeps growing with updates.
+
+Chok LeYisrael
+An optional add-on downloaded from within the app: the day's portion of the week's parasha, with a mark for each day and make-ups for the days you missed that week.
 
 Shabbat and Yom Tov
 The app rests on Shabbat and Yom Tov: no notifications and a quiet screen. When it ends, mark what you did so your streak holds. An hour before it begins, a notice gives candle-lighting and exit times.
 
-Hilulot of tzaddikim
-Optional notices for the hilulot of 57 tzaddikim: the evening before and the evening it begins.
+Rosh Chodesh and hilulot of tzaddikim
+Optional notices for Rosh Chodesh and for the hilulot of tzaddikim, on the days and at the times you choose.
 
-Rosh Chodesh
-Optional notices for every Rosh Chodesh: three days before, the evening before and on the day itself.
-
-Weekly report
-After Shabbat, a notification opens your report for the week: what you marked, what to improve and what the coming week holds. Past reports are in the history tab. On by default, and you can switch it off in Settings.
+History and the weekly report
+A history with a day streak and consistency for each mitzvah, and a day, week and month schedule. After Shabbat, a notification opens your report for the week: what you marked, what to improve and what the coming week holds. Past reports are in the history tab. On by default, and you can switch it off in Settings.
 
 Family purity tracking (optional)
 Track the count, the bedikot and the mikveh night, with reminders by halachic times and the minhag you choose. Offered to married users only and off until you turn it on. Notification wording is discreet, the screens are locked with biometrics, and the data is kept encrypted. The app does not rule on halacha; in any doubt, ask a rav.
 
+And more
+- Halacha hotline: call a rav on a line that follows your nusach's rulings, some by WhatsApp too
+- A search in Settings that also finds mitzvot, siddur texts and the sections inside them
+- A user guide inside the app, with what's new in each update
+
 Private by design
 - No account and no sign-up
-- 20 cities to choose from, or GPS
-- Halacha hotline: call or WhatsApp an Ashkenazi or Sephardi halacha line, by your nusach
+- Cities in Israel and around the world, or GPS
 - Backup and restore: through the device's iCloud backup, and a backup file you can export and restore on any phone
-- Hebrew and English, and six themes: gold, pink, purple, blue, dark and plum
+- Hebrew and English, and themes in several colors, light and dark
 - Crash reports are technical, with no personal information
 
 ## Keywords

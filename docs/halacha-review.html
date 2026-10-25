@@ -1,0 +1,1017 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>זמני מצוות ונוסח התפילה — כללים לאישור הרב</title>
+<meta name="description" content="הכללים ההלכתיים שאפליקציית יהודי 365 מיישמת בזמני המצוות ובנוסח התפילה, לעיון ולאישור הרב.">
+<link rel="icon" href="favicon.png" sizes="48x48">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<style>
+header,
+main {
+  max-width: 900px;
+}
+
+main > p,
+main > ul,
+main > ol {
+  max-width: 40rem;
+}
+
+main li {
+  margin-bottom: 14px;
+}
+
+h1 {
+  line-height: 1.35;
+}
+
+h2 {
+  margin-top: 40px;
+  scroll-margin-top: 12px;
+}
+
+h3 {
+  font-size: 19px;
+  margin: 28px 0 10px;
+}
+
+.source {
+  color: var(--text-sub);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.howto {
+  margin: 24px 0 8px;
+  padding: 16px 18px;
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  background: var(--note-bg);
+}
+
+.howto p {
+  margin: 0;
+}
+
+.howto strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 14px;
+  direction: ltr;
+  unicode-bidi: isolate;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  body {
+    padding: 24px 14px 56px;
+  }
+
+  main {
+    padding: 28px 20px;
+  }
+}
+
+@media (max-width: 599.98px) {
+  body {
+    padding: 16px 10px 48px;
+  }
+
+  main {
+    padding: 22px 16px;
+  }
+
+  h1 {
+    font-size: 25px;
+  }
+}
+
+@media print {
+  :root {
+    --bg: #fff;
+    --surface: #fff;
+    --text: #000;
+    --text-sub: #333;
+    --gold: #000;
+    --gold-text: #000;
+    --border: #999;
+    --note-bg: #fff;
+    --shadow: transparent;
+  }
+
+  body {
+    padding: 0;
+    background: #fff;
+    color: #000;
+    font-size: 12pt;
+  }
+
+  header a {
+    display: none;
+  }
+
+  main {
+    max-width: none;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: #fff;
+  }
+
+  main > p,
+  main > ul,
+  main > ol {
+    max-width: none;
+  }
+
+  a {
+    color: #000;
+    text-decoration: none;
+  }
+
+  .howto,
+  main li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  h2,
+  h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}
+.rv-jump {
+  margin: 12px 0 0;
+}
+
+.rv-cta,
+.rv-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 26px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--on-gold);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.rv-send:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.rv-form {
+  margin-top: 16px;
+}
+
+.rv-who {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.rv-who legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.rv-field,
+.rv-note {
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.rv-form input[type="text"],
+.rv-form textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 400;
+}
+
+.rv-form textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.rv-form input[type="text"]:focus,
+.rv-form textarea:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.rv-items {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+main .rv-items li {
+  margin: 0 0 14px;
+}
+
+.rv-item {
+  padding: 16px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  scroll-margin-top: 16px;
+}
+
+.rv-item.answered {
+  border-color: var(--gold);
+}
+
+.rv-q {
+  margin: 0 0 12px;
+}
+
+.rv-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  margin-inline-end: 6px;
+  border-radius: 999px;
+  background: var(--note-bg);
+  color: var(--gold-text);
+  font-weight: 700;
+}
+
+.rv-choice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+.rv-choice label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+
+.rv-choice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.rv-choice label.is-on {
+  border-color: var(--gold);
+  background: var(--note-bg);
+  color: var(--gold-text);
+}
+
+.rv-choice label.is-on::before {
+  content: "✓";
+  margin-inline-end: 6px;
+}
+
+.rv-choice label:focus-within {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.rv-err {
+  display: block;
+  color: var(--gold-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.rv-err:empty {
+  display: none;
+}
+
+.rv-item .rv-err {
+  margin-top: 8px;
+}
+
+.rv-item .back {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.rv-item.invalid,
+.rv-field.invalid input {
+  border-color: var(--gold-text);
+  box-shadow: 0 0 0 2px var(--gold-text);
+}
+
+.rv-general {
+  margin-top: 20px;
+}
+
+.rv-privacy {
+  margin: 14px 0 0;
+  color: var(--text-sub);
+  font-size: 15px;
+}
+
+.rv-bar {
+  position: sticky;
+  bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 2px 16px var(--shadow);
+}
+
+.rv-progress {
+  font-weight: 700;
+}
+
+.rv-status {
+  flex: 1 1 14rem;
+  color: var(--gold-text);
+  font-size: 15px;
+}
+
+.rv-status:empty {
+  display: none;
+}
+
+.rv-done {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border: 1.5px solid var(--gold);
+  border-radius: 12px;
+  background: var(--note-bg);
+}
+
+.rv-done p {
+  margin: 0 0 8px;
+}
+
+.rv-done-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.rv-done-summary {
+  margin: 0;
+  font: inherit;
+  white-space: pre-wrap;
+}
+
+.rv-form.sent .rv-bar {
+  display: none;
+}
+
+@media (max-width: 599.98px) {
+  .rv-send {
+    flex: 1 1 100%;
+  }
+}
+
+@media print {
+  .rv-jump,
+  .rv-bar,
+  .rv-err,
+  .rv-privacy,
+  .rv-item .back {
+    display: none;
+  }
+
+  .rv-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+.rv-group-note {
+  margin: 0 0 14px;
+}
+
+.rv-rule {
+  margin: 0 0 10px;
+}
+
+.rv-rule-title {
+  margin: 0 0 4px;
+  color: var(--gold-text);
+  font-weight: 700;
+}
+
+.rv-rule ul {
+  margin: 0;
+  padding-inline-start: 22px;
+  list-style: disc;
+}
+
+main .rv-rule li {
+  margin: 0 0 6px;
+}
+
+.rv-item .source {
+  margin: 0 0 12px;
+}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">יהודי 365</span>
+  <a href="./">דף התמיכה</a>
+</header>
+
+<main>
+  <h1>זמני מצוות ונוסח התפילה — הכללים לאישור הרב</h1>
+  <p class="meta">אפליקציית ״יהודי 365״ · גרסת כללים 1 · 25 באוקטובר 2026 (י״ד בחשוון תשפ״ז)</p>
+
+  <p class="lead">האפליקציה אינה פוסקת הלכה. היא מחשבת את זמני המצוות לפי המיקום של המשתמש, מזכירה אותם, ומציגה את נוסח התפילה לפי הנוסח שבחר. הדף הזה מפרט כללים שנקבעו בה ועדיין לא אושרו: זמני קידוש לבנה, סליחות, קריאת שמע על המיטה, נרות חנוכה, אושפיזין, ערבית וברכות השחר, ונוסח התפילה לאישה. כל כלל כתוב כאן בדיוק כפי שהאפליקציה מיישמת אותו, עם המקור שעליו הוא נשען, כדי שהרב יאשר או יתקן. כלל או חלק מכלל שאין לו מקור שנבדק מסומן כך במפורש. כל תיקון משנה כלל אחד, במקום אחד.</p>
+
+  <aside class="howto">
+    <p><strong>איך לענות</strong>ב<a href="#s2">טופס התשובות בסעיף 2</a> יש 17 פריטים. בכל פריט כתובים השאלה, מה האפליקציה עושה היום והמקור לכלל, ומסמנים ״נכון״ או ״לא נכון״. ליד כל פריט יש מקום להערה, וכשמסמנים ״לא נכון״ כותבים בה מה הנכון. הסימונים נשמרים בדפדפן, כך שאפשר להפסיק ולחזור, ולחיצה על ״שליחה״ בסוף שולחת הכול אלינו.</p>
+    <p class="rv-jump"><a class="rv-cta" href="#s2">לטופס התשובות</a></p>
+  </aside>
+
+  <h2 id="s1">1. הזמנים שהכללים משתמשים בהם</h2>
+  <p>כל הזמנים מחושבים לפי המיקום שבחר המשתמש, לא לפי שעון המכשיר.</p>
+  <ul>
+    <li><strong>זריחה ושקיעה:</strong> בגובה פני הים.</li>
+    <li><strong>עלות השחר:</strong> כשהשמש 16.1 מעלות מתחת לאופק. במקום ובעונה שבהם השמש אינה יורדת כל כך (קיץ בצפון אירופה), 72 דקות לפני הזריחה.</li>
+    <li><strong>צאת הכוכבים:</strong> כשהשמש 7.083 מעלות מתחת לאופק; כשאין לכך פתרון, 30 דקות אחרי השקיעה.</li>
+    <li><strong>שעה זמנית:</strong> חלק שנים עשר מהזמן שבין הזריחה לשקיעה, לפי הגר״א. סוף זמן תפילה הוא ארבע שעות זמניות אחרי הזריחה, ופלג המנחה עשר שעות זמניות ושלושה רבעים אחריה.</li>
+    <li><strong>חצות היום וחצות הלילה:</strong> חצות אסטרונומית: כשהשמש בשיא גובהה, ובלילה כשהיא בנקודה הנמוכה ביותר.</li>
+    <li><strong>הדלקת נרות שבת וחג:</strong> 40 דקות לפני השקיעה בירושלים, 18 דקות בשאר ערי ארץ ישראל, ו־20 דקות בחוץ לארץ.</li>
+    <li><strong>יציאת שבת וחג:</strong> צאת הכוכבים ועוד 10 דקות. במוצאי שבת וחג, כל זמן שמתחיל ״מצאת הכוכבים״ מתחיל ביציאה, כדי שאף תזכורת לא תצא בתוך השבת.</li>
+    <li><strong>שבת וחג:</strong> מהדלקת הנרות ועד היציאה האפליקציה שותקת: אין תזכורות ואין מסכים. מה שחל בהם מסמנים אחרי היציאה, במסך ״מה עשית בשבת?״.</li>
+  </ul>
+
+  <h2 id="s2">2. טופס התשובות</h2>
+  <p>בכל פריט כתובים השאלה, מה האפליקציה עושה היום והמקור לכלל: מקור הלכתי או סידור, או הערה שהכלל הוא החלטה של האפליקציה. מסמנים <strong>נכון</strong> או <strong>לא נכון</strong>, ואפשר לכתוב הערה. כשמסמנים ״לא נכון״, כותבים בהערה מה הנכון. שורת ״מקום בקוד״ מיועדת לנו: כך כל תשובה מגיעה אל הכלל שהיא משנה.</p>
+
+  <form id="review" class="rv-form" novalidate>
+    <fieldset class="rv-who">
+      <legend>פרטי הרב</legend>
+      <label class="rv-field" for="rv-rav">שם
+        <input id="rv-rav" name="rav" type="text" autocomplete="name" required>
+        <span class="rv-err" aria-live="polite"></span>
+      </label>
+      <label class="rv-field" for="rv-contact">טלפון או מייל לחזרה (רשות)
+        <input id="rv-contact" name="contact" type="text" autocomplete="email" dir="auto">
+      </label>
+    </fieldset>
+
+    <h3>מצוות וזמנים</h3>
+    <ol class="rv-items">
+      <li id="r1" class="rv-item" data-key="R1" data-title="קידוש לבנה — זמן">
+        <p class="rv-q"><span class="rv-num">1</span> מתי מתחיל ומתי נגמר זמן קידוש לבנה?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>המולד מחושב בשעון ירושלים הממוצע (זמן השמש של ירושלים).</li>
+            <li>תחילת הזמן: 3 ימים שלמים (72 שעות) אחרי המולד באשכנז; 7 ימים שלמים אחרי המולד בספרד, בעדות המזרח ובחב״ד.</li>
+            <li>סוף הזמן: 14 ימים, 18 שעות ו־22 דקות אחרי המולד באשכנז, בספרד ובחב״ד; 15 ימים שלמים אחרי המולד בעדות המזרח.</li>
+            <li>בתשרי הזמן מתחיל לא לפני מוצאי יום הכיפורים, ובאב לא לפני צאת הכוכבים במוצאי תשעה באב (גם כשהצום נדחה לי׳ באב).</li>
+            <li>אומרים אותו רק בלילה: לילה נכלל כשצאת הכוכבים שלו (במוצאי שבת וחג — היציאה) בתוך הזמן. לא בליל שבת, לא בליל יום טוב ולא בליל יום הכיפורים.</li>
+            <li>בלילה האחרון הנוסח בסידור נסגר בדיוק בסוף הזמן, גם באמצע הלילה.</li>
+            <li>המצווה מופיעה פעם אחת בחודש: מהלילה הראשון שבו אפשר לומר אותה ועד סוף הזמן, גם בשעות היום, עד שמסמנים אותה. יש תזכורת בצאת הכוכבים של הלילה הראשון, ותזכורת 15 דקות אחרי היציאה של כל שבת וחג שמסתיימים בתוך הזמן, אם עוד לא סומנה.</li>
+            <li>למי שבחרה ״אישה״ בפרופיל המצווה כבויה כברירת מחדל, ואפשר להפעיל אותה. הנוסח בסידור פתוח לכולם.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: שו״ע או״ח תכו, ב–ד והרמ״א שם; משנה ברורה שם. תחילה: שבעה ימים מהמולד (שו״ע), ולרוב האחרונים שלושה ימים (משנה ברורה ס״ק כ; אשכנז). סוף: ט״ו ימים מהמולד (שו״ע) או חצי חודש, 14 ימים 18 שעות ו־22 דקות (רמ״א). תשרי: לא לפני מוצאי יום הכיפורים (רמ״א תכו, ב ותרב, א). אב: הרמ״א אוסר גם במוצאי תשעה באב, והאחרונים מתירים (משנה ברורה ס״ק יא), והאפליקציה כאחרונים. נשים פטורות (משנה ברורה ס״ק א). חב״ד: להמתין שבעה ימים מהמולד, ויש מקילים מכניסת היום השביעי (אתר שולחן ערוך הרב). השו״ע והרמ״א מעדיפים מוצאי שבת, והרמ״א ממתין לו רק אם הוא לפני י׳ בחודש; האפליקציה אינה ממתינה לו. בליל שבת ויום טוב אין מקדשים, ואם הזמן עומד לעבור מותר (משנה ברורה ס״ק יב); האפליקציה שותקת בשבת וחג ואינה מתירה זאת. בלי מקור שנבדק: נוסח ספרד כעדות המזרח וכחב״ד, וסוף הזמן בחב״ד כרמ״א.</p>
+        <p class="source">מקום בקוד: <code>kiddushLevanaPeriod()</code> ב־<code>src/utils/siddur.ts</code>; לנשים: <code>MENS_MITZVOT</code> ב־<code>src/stores/taharahOptIn.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 1"><label><input type="radio" name="r1" value="נכון">נכון</label><label><input type="radio" name="r1" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r1-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r2" class="rv-item" data-key="R2" data-title="סליחות — ימים ושעות">
+        <p class="rv-q"><span class="rv-num">2</span> סליחות: האם הימים והשעות נכונים?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>עדות המזרח: מליל ב׳ באלול.</li>
+            <li>אשכנז, ספרד וחב״ד: מליל הסליחות, מוצאי השבת שלפני ראש השנה. כשנשארים ממנו פחות מארבעה ימי סליחות עד ראש השנה (ערב ראש השנה בכלל), מתחילים במוצאי השבת שלפניה.</li>
+            <li>בכל הנוסחים עד ערב יום הכיפורים (ט׳ בתשרי) בכלל, ולא בשבת, לא בראש השנה, לא ביום טוב ולא ביום הכיפורים.</li>
+            <li>השעות: מחצות הלילה עד סוף זמן תפילה של הבוקר שאחריו.</li>
+            <li>התזכורת יוצאת בחצות הלילה של כל לילה בעונה.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: שו״ע או״ח תקפא, א: ״לקום באשמורת לומר סליחות ותחנונים מראש חדש אלול ואילך עד יום הכפורים״ (עדות המזרח); משנה ברורה שם, ס״ק א: בראש חודש עצמו לא אומרים, ולכן מ־ב׳ באלול. רמ״א שם: מנהג אשכנז להתחיל ביום א׳ שלפני ראש השנה, ואם חל בשני או בשלישי, ביום א׳ שלפניו; הטעם, לפחות ארבעה ימים (משנה ברורה ס״ק ו). האפליקציה מחילה את מנהג אשכנז גם על ספרד וחב״ד. בלי מקור שנבדק: השעות, מחצות הלילה עד סוף זמן תפילה (לפי ״באשמורת״), והפסקה בשבת ובחג.</p>
+        <p class="source">מקום בקוד: <code>selichotFlags()</code> ב־<code>src/utils/siddur.ts</code>; השעות: <code>MIDNIGHT_TO_MORNING_PRAYER</code> ב־<code>src/data/siddur.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 2"><label><input type="radio" name="r2" value="נכון">נכון</label><label><input type="radio" name="r2" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r2-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r3" class="rv-item" data-key="R3" data-title="קריאת שמע על המיטה — זמן">
+        <p class="rv-q"><span class="rv-num">3</span> מה הזמן של קריאת שמע על המיטה?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>מצאת הכוכבים (במוצאי שבת וחג — מהיציאה) עד עלות השחר.</li>
+            <li>במסך המצווה כתוב ״לכתחילה לפני חצות הלילה״.</li>
+            <li>תזכורת ב־22:30 לפי שעון המקום. במקום ובעונה שבהם צאת הכוכבים מאוחר יותר (קיץ בפריז, באנטוורפן ובמוסקבה) היא יוצאת לפני צאת הכוכבים, כהודעה מוקדמת.</li>
+            <li>בליל שבת ובליל חג אין תזכורת, ושואלים עליה אחרי היציאה.</li>
+            <li>במוצאי שבת או חג שהיציאה בהם מאוחרת מ־22:30 (קיץ בפריז, באנטוורפן ובמוסקבה, ובלונדון בשבתות הסמוכות לאמצע יוני) ההודעה המוקדמת נופלת בתוך השבת או החג, ולכן באותו לילה אין תזכורת כלל.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: ברכות ד ע״ב: ״מצוה לקרותו על מטתו״; ברכות ה ע״א. שו״ע או״ח רלט, א: פרשה ראשונה והמפיל; משנה ברורה שם, ס״ק ג: סמוך לשינה, כשהשינה באה עליו. בלי מקור שנבדק: הזמן מצאת הכוכבים עד עלות השחר ו״לכתחילה לפני חצות הלילה״; ההנחה היא שזמנה כזמן ערבית.</p>
+        <p class="source">מקום בקוד: הרשומה <code>krias_shma_al_hamita</code> ב־<code>src/data/mitzvot.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 3"><label><input type="radio" name="r3" value="נכון">נכון</label><label><input type="radio" name="r3" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r3-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r4" class="rv-item" data-key="R4" data-title="נרות חנוכה — זמן ההדלקה">
+        <p class="rv-q"><span class="rv-num">4</span> מתי מדליקים נרות חנוכה בכל לילה?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>שמונה לילות, מהלילה של כ״ה בכסלו.</li>
+            <li>ביום חול: מצאת הכוכבים באשכנז, בספרד ובעדות המזרח, ומהשקיעה בחב״ד, עד עלות השחר.</li>
+            <li>ביום שישי: מפלג המנחה עד זמן הדלקת נרות שבת.</li>
+            <li>במוצאי שבת: מיציאת השבת (צאת הכוכבים ועוד 10 דקות) בכל הנוסחים, חב״ד בכלל, עד עלות השחר.</li>
+            <li>תזכורת בתחילת הזמן, עם מספר הנר של הלילה. המצווה פעילה כברירת מחדל גם לנשים.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: שו״ע או״ח תרעב, א: ״עם סוף שקיעתה״, ובמשנה ברורה שם, ס״ק א: צאת הכוכבים (אשכנז, ספרד ועדות המזרח). חב״ד: זמן קצר אחרי השקיעה (אתר חב״ד, מדריך חנוכה); האפליקציה פותחת את הזמן בשקיעה עצמה. ערב שבת: שו״ע תרעט, א; משנה ברורה שם, ס״ק ב: אחרי פלג המנחה. בלי מקור שנבדק: פתיחת הזמן במוצאי שבת ביציאת השבת, גם בחב״ד.</p>
+        <p class="source">מקום בקוד: הרשומה <code>chanukah_candles</code> ב־<code>src/data/mitzvot.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 4"><label><input type="radio" name="r4" value="נכון">נכון</label><label><input type="radio" name="r4" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r4-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r5" class="rv-item" data-key="R5" data-title="אושפיזין — לילות, סדר וחב״ד">
+        <p class="rv-q"><span class="rv-num">5</span> באילו לילות אומרים אושפיזין, איזה אורח בכל לילה, והאם בחב״ד אומרים?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>בכל אחד משבעת לילות סוכות (ט״ו עד כ״א בתשרי), לפני הכניסה לסוכה, מצאת הכוכבים עד עלות השחר.</li>
+            <li>הסדר: אברהם, יצחק, יעקב, משה, אהרן, יוסף, דוד.</li>
+            <li>מנהג חב״ד אינו לומר את נוסח ״עולו אושפיזין״, ולכן הנוסח והמצווה אינם מוצעים למי שבחר נוסח חב״ד.</li>
+            <li>לילה שחל ביום טוב או בשבת: אין תזכורת. הוא נזכר בהודעה שלפני השבת או החג, ושואלים עליו אחרי היציאה.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: זוהר ח״ג (אמור) קג ע״ב – קד ע״א: ״אברהם וחמשה צדיקייא, ודוד מלכא, שויין מדוריהון עמיה״, ורב המנונא סבא בכניסתו לסוכה: ״תיבו אושפיזין עלאין, תיבו״. בקטע הזה הזוהר אינו מונה את כל האורחים בסדר אחד. שמות האורחים וסדרם: סידור תורת אמת, נוסח ספרד, ״אזמין לסעודתי אושפיזין עילאין אברהם יצחק יעקב משה אהרן יוסף ודוד״ ובכל יום אורח אחר; וסידור עדות המזרח (אתר ספריא), ״סדר שבעה אושפיזין״: ״ליל א׳ ליעול אברהם״ עד ״ליל ז׳ ליעול דוד מלכא משיחא״, לפי הסדר הזה. חב״ד: אין נוהגים להזמין את האורחים בשמותם (אתר חב״ד, מאמר על האושפיזין). בלי מקור שנבדק: הטיפול בלילה שחל בשבת או ביום טוב.</p>
+        <p class="source">מקום בקוד: הרשומה <code>ushpizin</code> ב־<code>src/data/mitzvot.ts</code> והרשומה שלה ב־<code>scripts/siddur/manifest.js</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 5"><label><input type="radio" name="r5" value="נכון">נכון</label><label><input type="radio" name="r5" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r5-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r6" class="rv-item" data-key="R6" data-title="ערבית — עד מתי">
+        <p class="rv-q"><span class="rv-num">6</span> עד מתי אפשר להתפלל ערבית?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>מצאת הכוכבים (במוצאי שבת וחג — מהיציאה) עד עלות השחר.</li>
+            <li>במסך המצווה כתוב ״לכתחילה עד חצות הלילה״.</li>
+            <li>תזכורת בתחילת הזמן, ועוד אחת שעתיים אחריה אם עוד לא סומנה.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: משנה ברכות א, א: חכמים ״עד חצות״, רבן גמליאל ״עד שיעלה עמוד השחר״; ברכות ד ע״ב: חכמים סוברים כרבן גמליאל, ו״עד חצות״ הוא סייג להרחיק מן העבירה. שו״ע או״ח רלה, א ו־ג: קריאת שמע של ערבית מצאת שלושה כוכבים קטנים, ״וזמנה עד חצי הלילה״ לכתחילה, ואם איחר קורא עד עלות השחר. ברכות כו ע״ב: ״תפלת הערב אין לה קבע״. השו״ע קובע זמן לקריאת שמע של ערבית; האפליקציה מחילה אותו על תפילת ערבית.</p>
+        <p class="source">מקום בקוד: <code>computeWindow</code> של <code>maariv</code> ב־<code>src/data/mitzvot.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 6"><label><input type="radio" name="r6" value="נכון">נכון</label><label><input type="radio" name="r6" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r6-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r7" class="rv-item" data-key="R7" data-title="ברכות השחר — עד מתי">
+        <p class="rv-q"><span class="rv-num">7</span> עד מתי אפשר לומר ברכות השחר?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>מעלות השחר עד חצות היום. קודם לכן האפליקציה סגרה אותן בסוף זמן קריאת שמע.</li>
+            <li>כשהמצווה פעילה, התזכורת יוצאת בעלות השחר.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: שו״ע או״ח מו, א: ברכות השחר נאמרות בהקמה, ״כשיעור משנתו יאמר אלהי נשמה״; משנה ברורה נב, ס״ק י: לכתחילה לא לאחר את הברכות יותר מארבע שעות על היום, בדיעבד עד חצות, והמקל לברך אחרי חצות ״אין למחות בידו״. האפליקציה פותחת את הזמן בעלות השחר וסוגרת בחצות היום, בלי הבחנה בין לכתחילה לבדיעבד.</p>
+        <p class="source">מקום בקוד: <code>computeWindow</code> של <code>birchot_hashachar</code> ב־<code>src/data/mitzvot.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 7"><label><input type="radio" name="r7" value="נכון">נכון</label><label><input type="radio" name="r7" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r7-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+    </ol>
+
+    <h3>נוסח התפילה לאישה ולגבר</h3>
+    <p class="rv-group-note">נוסח לאישה מוצג למי שבחרה בהגדרות ״נוסח הסידור: אישה״, ונוסח לגבר למי שבחר ״גבר״. הבחירה נקבעת לפי המגדר בפרופיל, ואפשר לשנות אותה. מי שלא בחר רואה את הנוסח כפי שהוא מודפס בסידור המקור.</p>
+    <ol class="rv-items">
+      <li id="r8-1" class="rv-item" data-key="R8.1" data-title="נוסח לאישה — ברכות השחר">
+        <p class="rv-q"><span class="rv-num">8.1</span> מה אישה מברכת בברכות השחר?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>״שלא עשני אשה״ אינו מוצג לאישה, בכל הנוסחים.</li>
+            <li>״שעשני כרצונו״: בשם ומלכות באשכנז, בספרד ובחב״ד; בעדות המזרח בלי שם ומלכות, כפי שכתוב שם בהערה.</li>
+            <li>בחב״ד האפליקציה הוסיפה את הברכה בעצמה, כי אף סידור חב״ד שהיא מסתמכת עליו אינו מדפיס אותה.</li>
+            <li>לגבר ״שעשני כרצונו״ אינו מוצג.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: שו״ע או״ח מו, ד והרמ״א: האיש מברך ״שלא עשני אשה״, ו״הנשים מברכות שעשני כרצונו״. סידורי מצודה של אשכנז וספרד מדפיסים ״נשים אומרות: שעשני כרצונו״; בסידור עדות המזרח (אתר ספריא) כתוב ״האשה מברכת בלי שם ומלכות״. סידור חב״ד שהאפליקציה מסתמכת עליו (ויקיטקסט) אינו מדפיס את הברכה; הוספתה בשם ומלכות היא החלטה של האפליקציה.</p>
+        <p class="source">מקום בקוד: <code>WHEN_SAID.women</code>, <code>CHABAD_WOMEN_KIRTZONO</code> ו־<code>NOT_FOR_WOMEN</code> ב־<code>scripts/siddur/manifest.js</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 8.1"><label><input type="radio" name="r8-1" value="נכון">נכון</label><label><input type="radio" name="r8-1" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r8-1-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r8-2" class="rv-item" data-key="R8.2" data-title="נוסח לאישה — גויה ושפחה">
+        <p class="rv-q"><span class="rv-num">8.2</span> ״שלא עשני גוי״ ו״שלא עשני עבד״: מה אישה אומרת?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>בעדות המזרח: ״שלא עשני גויה״ ו״שלא עשני שפחה״.</li>
+            <li>באשכנז, בספרד ובחב״ד הנוסח נשאר ״גוי״ ו״עבד״ גם לאישה.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: בסידור עדות המזרח (אתר ספריא) כתוב ״שלא עשני גוי: האשה אומרת גויה״ ו״שלא עשני עבד: האשה אומרת שפחה״. בסידורי אשכנז, ספרד וחב״ד שהאפליקציה בנויה מהם אין הערה כזו, והשארת ״גוי״ ו״עבד״ בהם היא החלטה של האפליקציה.</p>
+        <p class="source">מקום בקוד: תיקוני ברכות השחר של עדות המזרח ב־<code>scripts/siddur/manifest.js</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 8.2"><label><input type="radio" name="r8-2" value="נכון">נכון</label><label><input type="radio" name="r8-2" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r8-2-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r8-3" class="rv-item" data-key="R8.3" data-title="נוסח לאישה — לשון נקבה">
+        <p class="rv-q"><span class="rv-num">8.3</span> באילו מילים אישה עוברת ללשון נקבה?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>מודה אני ואלהי נשמה: מוֹדָה (בכל הנוסחים).</li>
+            <li>ספירת העומר, גם בתוך ערבית: מוּכָנָה וּמְזֻמֶּנֶת (אשכנז, ספרד, עדות המזרח).</li>
+            <li>מה טובו: מְקַבֶּלֶת (ספרד, חב״ד).</li>
+            <li>העקדה בשחרית (עדות המזרח): מְקַבֶּלֶת, אוֹהֶבֶת, מְזַמֶּנֶת.</li>
+            <li>קריאת שמע על המיטה: מוֹחֶלֶת (אשכנז, ספרד, חב״ד); בעדות המזרח מוֹחֶלֶת וְסוֹלַחַת, ובלשם יחוד שלפניה מְקַבֶּלֶת, יְרֵאָה, מַמְלִיכָתוֹ; בחב״ד ״מקבלת״ בארבע מיתות בית דין.</li>
+            <li>תיקון הכללי: מְזַמֶּנֶת, מְקַשֶּׁרֶת, ״אני אומרת״.</li>
+            <li>הדלקת נרות חנוכה (ספרד): מְכַוֶּנֶת, עוֹשָׂה.</li>
+            <li>נטילת ידיים וקביעת מזוזה (עדות המזרח): בָּאָה לְקַיֵּם.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: במילים האלה הסידורים שהאפליקציה בנויה מהם מדפיסים לשון זכר, וצורת הנקבה היא החלטה של האפליקציה. היוצא מן הכלל: בסידור עדות המזרח כתוב ״האשה אומרת: מודה״ במודה אני ובאלהי נשמה.</p>
+        <p class="source">מקום בקוד: <code>womenSay()</code> ב־<code>scripts/siddur/manifest.js</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 8.3"><label><input type="radio" name="r8-3" value="נכון">נכון</label><label><input type="radio" name="r8-3" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r8-3-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r8-4" class="rv-item" data-key="R8.4" data-title="נוסח לאישה — עומר והלל בעדות המזרח">
+        <p class="rv-q"><span class="rv-num">8.4</span> האם אישה סופרת את העומר ואומרת הלל בברכה?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>בעדות המזרח: בלי ברכה. לאישה, ברכת ספירת העומר והברכות שלפני ההלל ואחריו מקופלות תחת ״נשים סופרות בלי ברכה״ ו״נשים אומרות בלי ברכה״, והכותרת היא גם ההוראה.</li>
+            <li>באשכנז, בספרד ובחב״ד אין שינוי.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: משנה ברורה תפט, ס״ק ג: נשים פטורות מספירת העומר (מצות עשה שהזמן גרמא), ובשם ״שולחן שלמה״ לפחות שלא יברכו, כי ודאי יטעו ביום. פניני הלכה, תפילת נשים כג, י: ״למנהג יוצאות ספרד לא תברך״. הלל: פניני הלכה, תפילת נשים כג, ה: לדעת רוב הפוסקים נשים פטורות מהלל בחנוכה, ולמנהג ספרד אומרות אותו בלא ברכה. פניני הלכה דן בהלל בחנוכה; האפליקציה מחילה את הכלל על כל הלל לאישה בעדות המזרח.</p>
+        <p class="source">מקום בקוד: <code>WHEN_SAID.womenCountOmer</code> ו־<code>WHEN_SAID.womenHallel</code> ב־<code>scripts/siddur/manifest.js</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 8.4"><label><input type="radio" name="r8-4" value="נכון">נכון</label><label><input type="radio" name="r8-4" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r8-4-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r8-5" class="rv-item" data-key="R8.5" data-title="נוסח לאישה — ועל בריתך ועל תורתך">
+        <p class="rv-q"><span class="rv-num">8.5</span> האם אישה משנה בברכת המזון את ״ועל בריתך שחתמת בבשרנו ועל תורתך שלמדתנו״?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>לא. הנוסח נשאר כפי שהוא, בכל הנוסחים.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: רמ״א או״ח קפז, ג: נשים לא יאמרו ״ברית ותורה״, כי ״נשים לאו בני ברית נינהו״; משנה ברורה שם, ס״ק ט: בימינו נהגו הנשים לומר גם ״על בריתך שחתמת בבשרנו״ ו״על תורתך שלמדתנו״, והכוונה לברית הזכרים ולמודם. האפליקציה כמנהג שבמשנה ברורה.</p>
+        <p class="source">מקום בקוד: אין תיקון (<code>scripts/siddur/manifest.js</code>).</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 8.5"><label><input type="radio" name="r8-5" value="נכון">נכון</label><label><input type="radio" name="r8-5" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r8-5-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r8-6" class="rv-item" data-key="R8.6" data-title="נוסח לאישה — טלית ותפילין">
+        <p class="rv-q"><span class="rv-num">8.6</span> האם להציג לאישה את ברכות הטלית והתפילין?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>לא. בשחרית שלה אין את קטע הטלית והתפילין (טלית קטן, טלית גדול ותפילין, ובחב״ד גם תפילין דרבנו תם), ואין לו פרק ברשימת הפרקים.</li>
+            <li>נוסח ״הנחת תפילין״ אינו מופיע לה ברשימת הסידור; אם נפתח, נשארת בו רק קריאת שמע.</li>
+            <li>מצוות הנחת תפילין כבויה אצלה כברירת מחדל.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: שו״ע או״ח לח, ג: ״נשים ועבדים פטורים מתפילין מפני שהוא מצות עשה שהזמן גרמא״, והרמ״א: אם נשים רוצות להחמיר ״מוחין בידם״. שו״ע יז, ב: נשים פטורות מציצית, והרמ״א: אם רוצות לברך הרשות בידן, ״אך מחזי כיוהרא לכן אין להן ללבוש ציצית״.</p>
+        <p class="source">מקום בקוד: <code>notForWomen()</code> ב־<code>scripts/siddur/manifest.js</code>, <code>FEMALE_HIDDEN_TEXTS</code> ב־<code>src/utils/siddur.ts</code>, <code>MENS_MITZVOT</code> ב־<code>src/stores/taharahOptIn.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 8.6"><label><input type="radio" name="r8-6" value="נכון">נכון</label><label><input type="radio" name="r8-6" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r8-6-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r8-7" class="rv-item" data-key="R8.7" data-title="הרחמן בברכת המזון — בן או בת הזוג">
+        <p class="rv-q"><span class="rv-num">8.7</span> ב״הרחמן״ של ברכת המזון, את מי מזכירים?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>בסידור המודפס (אשכנז, ספרד): ״(ואת אשתי/בעלי ואת זרעי)״.</li>
+            <li>גבר נשוי: ״ואת אשתי ואת זרעי״. אישה נשואה: ״ואת בעלי ואת זרעי״. מי שאינו נשוי: ״ואת זרעי״ בלבד.</li>
+            <li>מי שלא ענה על המצב המשפחתי נחשב נשוי; מי שלא בחר נוסח רואה את המודפס.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: סידורי מצודה של אשכנז וספרד מדפיסים ״הוא יברך אותי (ואת אשתי/בעלי ואת זרעי) ואת כל אשר לי״. ההתאמה לפי מגדר ומצב משפחתי, והשארת ״ואת זרעי״ למי שאינו נשוי, הן החלטה של האפליקציה.</p>
+        <p class="source">מקום בקוד: <code>spouseBlessing()</code> ב־<code>scripts/siddur/manifest.js</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 8.7"><label><input type="radio" name="r8-7" value="נכון">נכון</label><label><input type="radio" name="r8-7" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r8-7-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r8-8" class="rv-item" data-key="R8.8" data-title="נוסח לאישה — מה שנשאר בלשון זכר">
+        <p class="rv-q"><span class="rv-num">8.8</span> האם הנוסחים האלה צריכים לשון נקבה לאישה?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>נשארו בלשון זכר בכוונה: ״הריני עבד״ בקריאת שמע על המיטה (עדות המזרח), ״הנני מוכן ומזומן״ בקידוש לבנה, ״מודה אני״ בתפילת הדרך בכניסה לעיר (ספרד), ״הריני בא״ וההערות בהדלקת נרות שבת (עדות המזרח), ולשם יחוד של הכהנים.</li>
+            <li>נשארו בלשון זכר עד לתשובת הרב: ״הריני מכין עצמי״ בערבית של מוצאי שבת (עדות המזרח), ״כשאומר״ בקבלת תענית במנחה (עדות המזרח), ״במקום שאני עומד״ בתפילה שאחרי תיקון הכללי, ו״אנא עבדא״ בבריך שמיה בקריאת התורה (בשחרית של כל הנוסחים).</li>
+          </ul>
+        </div>
+        <p class="source">מקור: הנוסח המודפס בסידורי המקור, בלי הערה לאישה (למשל ״והריני עבד להשם יתברך״ בסידור עדות המזרח). לא נבדקה פסיקה בשאלה אם לשנות אותם; ההכרעה בשני הסעיפים היא של הרב.</p>
+        <p class="source">מקום בקוד: אין תיקון עדיין; תיקון יהיה ב־<code>womenSay()</code> ב־<code>scripts/siddur/manifest.js</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 8.8"><label><input type="radio" name="r8-8" value="נכון">נכון</label><label><input type="radio" name="r8-8" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r8-8-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r9" class="rv-item" data-key="R9" data-title="הדלקת נרות שבת בעדות המזרח — גבר">
+        <p class="rv-q"><span class="rv-num">9</span> מה קורא גבר כשהוא מדליק נרות שבת בנוסח עדות המזרח?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>התפילה כתובה בסידור בלשון אישה. מי שבחר ״גבר״ קורא אותה בלשון זכר: ״נוֹתֵן״ במקום ״נוֹתֶנֶת״ (פעמיים), ״עַל אִשְׁתִּי (פלונית בת פלוני) וְתִתֶּן לָהּ״ במקום ״עַל בַּעֲלִי (פלוני בן פלוני) וְתִתֶּן לוֹ״, ו״וּתְסַיְּעֶהָ״ במקום ״וּתְסַיְּעֵהוּ״.</li>
+            <li>אישה, ומי שלא בחר, קוראים את הנוסח כפי שהוא מודפס.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: סידור עדות המזרח (אתר ספריא), הדלקת נרות שבת: התפילה מודפסת בלשון אישה, ״וגם תחוס ותרחם על בעלי (פלוני בן פלוני) ותתן לו אורך ימים ושנות חיים עם ברכה והצלחה ותסיעהו לעשות רצונך״. ההמרה ללשון זכר לגבר היא החלטה של האפליקציה.</p>
+        <p class="source">מקום בקוד: <code>menSay()</code> ברשומת <code>candle_lighting</code> של עדות המזרח ב־<code>scripts/siddur/manifest.js</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 9"><label><input type="radio" name="r9" value="נכון">נכון</label><label><input type="radio" name="r9" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r9-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r10" class="rv-item" data-key="R10" data-title="אושפיזין — הנוסח ולמי הוא מוצע">
+        <p class="rv-q"><span class="rv-num">10</span> האם נוסח האושפיזין שבאפליקציה, שעות הצגתו ומי שהוא מוצע לו נכונים?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה היום</p>
+          <ul>
+            <li>הנוסח מוצג כנוסח של ערב: מאחר הצהריים שלפני כל לילה ועד סוף אותו לילה. לכן בסעודת היום של יום א׳ מופיע האורח של ליל ב׳, וביום הושענא רבה הנוסח סגור.</li>
+            <li>ביהי רצון: ״לְעַבְדֶּךָ (פב״פ) אֲמָתֶךָ״, שם האם (״עבדך בן אמתך״). אישה קוראת ״שֶׁאֲנִי מְקַיֵּם״ ו״לְעַבְדֶּךָ״ כפי שהם מודפסים.</li>
+            <li>הנוסח והמצווה מוצעים גם לנשים, ומופעלים להן מעצמם.</li>
+            <li>נוסח ספרד לפי תורת אמת, בעברית בלבד, בלי הקטע ״עולו אושפיזין … ליעול״ שמודפס בסידור מצודה לשבת ובסידור עדות המזרח. התפילות ביציאה מהסוכה ו״זוהר לסעודת סוכה״ של עדות המזרח לא נכללו.</li>
+            <li>בנוסחי אשכנז וספרד שבאפליקציה כתוב ״תיבו אושפיזין״ ולא ״עולו״, ולכן כדאי לבדוק אם הנימוק שבפריט 5, שבחב״ד אין אומרים ״עולו אושפיזין״, מתאים גם לנוסח הזה.</li>
+          </ul>
+        </div>
+        <p class="source">מקור: סידור דעת, נוסח אשכנז (״הכניסה לסוכה״ ו״אושפיזין״), וסידור תורת אמת, נוסח ספרד (״תפילה בכניסה לסוכה״): ״תיבו תיבו אושפיזין״, ״ובכל יום קודם סעודתו״; סידור מצודה לשבת וסידור עדות המזרח (״סדר שבעה אושפיזין״): ״עולו אושפיזין״; כולם מאתר ספריא. ההחלטות על שעות ההצגה, על נשים ועל הקטעים שלא נכללו הן של האפליקציה.</p>
+        <p class="source">מקום בקוד: <code>ushpizin</code> ב־<code>STANDALONE_TEXTS</code> ב־<code>src/data/siddur.ts</code>, <code>ashkenazUshpizin()</code>, <code>sefardUshpizin()</code> ו־<code>edotUshpizin()</code> ב־<code>scripts/siddur/manifest.js</code>, ו־<code>MENS_MITZVOT</code> ב־<code>src/stores/taharahOptIn.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 10"><label><input type="radio" name="r10" value="נכון">נכון</label><label><input type="radio" name="r10" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r10-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+    </ol>
+
+    <label class="rv-field rv-general" for="rv-general">הערות על כל כלל אחר בדף (רשות)
+      <textarea id="rv-general" name="general" rows="4"></textarea>
+    </label>
+
+    <p class="rv-privacy">השם, פרטי הקשר והתשובות נשלחים אלינו דרך Formspree ומגיעים למייל <a href="mailto:365jew@gmail.com">365jew@gmail.com</a>.</p>
+
+    <div class="rv-bar">
+      <span class="rv-progress" aria-live="polite"></span>
+      <span class="rv-status" role="status"></span>
+      <a class="rv-mail" hidden>לשלוח במייל במקום</a>
+      <button class="rv-send" type="submit">שליחה</button>
+    </div>
+
+    <div class="rv-done" hidden>
+      <p class="rv-done-title">תודה רבה! התשובות נשלחו.</p>
+      <p>הנה מה שנשלח:</p>
+      <pre class="rv-done-summary"></pre>
+    </div>
+  </form>
+</main>
+
+<footer>יהודי 365 · Avraham Sason · <a href="mailto:365jew@gmail.com">365jew@gmail.com</a></footer>
+<script>
+(() => {
+  const ENDPOINT = 'https://formspree.io/f/xwlvgagp';
+  const RULES_VERSION = '1';
+  const DRAFT_KEY = 'jew365-halacha-review-v1';
+  const RIGHT = 'נכון';
+  const WRONG = 'לא נכון';
+
+  const form = document.getElementById('review');
+  if (!form) return;
+  const items = [...form.querySelectorAll('.rv-item')];
+  const ravField = form.querySelector('#rv-rav');
+  const contactField = form.querySelector('#rv-contact');
+  const generalField = form.querySelector('#rv-general');
+  const progress = form.querySelector('.rv-progress');
+  const status = form.querySelector('.rv-status');
+  const sendButton = form.querySelector('.rv-send');
+  const mailLink = form.querySelector('.rv-mail');
+  const done = form.querySelector('.rv-done');
+
+  const draft = {
+    load() {
+      try {
+        return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+      } catch {
+        return {};
+      }
+    },
+    save(value) {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(value));
+      } catch {}
+    },
+    clear() {
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {}
+    },
+  };
+
+  const verdictOf = (item) => item.querySelector('input[type=radio]:checked')?.value ?? '';
+  const noteOf = (item) => item.querySelector('textarea').value.trim();
+
+  function problemOf(item) {
+    const verdict = verdictOf(item);
+    if (!verdict) return 'צריך לסמן נכון או לא נכון.';
+    if (verdict === WRONG && !noteOf(item)) return 'כשמסמנים לא נכון, צריך לכתוב בהערה מה הנכון.';
+    return '';
+  }
+
+  function collect() {
+    const answers = {};
+    for (const item of items) {
+      answers[item.dataset.key] = { verdict: verdictOf(item), note: item.querySelector('textarea').value };
+    }
+    return { rav: ravField.value, contact: contactField.value, general: generalField.value, answers };
+  }
+
+  function restore() {
+    const saved = draft.load();
+    ravField.value = saved.rav ?? '';
+    contactField.value = saved.contact ?? '';
+    generalField.value = saved.general ?? '';
+    for (const item of items) {
+      const answer = saved.answers?.[item.dataset.key];
+      if (!answer) continue;
+      for (const radio of item.querySelectorAll('input[type=radio]')) radio.checked = radio.value === answer.verdict;
+      item.querySelector('textarea').value = answer.note ?? '';
+    }
+  }
+
+  function showProblem(item, message) {
+    item.classList.toggle('invalid', Boolean(message));
+    item.querySelector('.rv-err').textContent = message;
+  }
+
+  function refresh() {
+    let answered = 0;
+    for (const item of items) {
+      const verdict = verdictOf(item);
+      if (verdict) answered += 1;
+      item.classList.toggle('answered', Boolean(verdict));
+      for (const label of item.querySelectorAll('.rv-choice label')) {
+        label.classList.toggle('is-on', label.querySelector('input').checked);
+      }
+      if (item.classList.contains('invalid')) showProblem(item, problemOf(item));
+    }
+    const ravBox = ravField.closest('.rv-field');
+    if (ravBox.classList.contains('invalid') && ravField.value.trim()) {
+      ravBox.classList.remove('invalid');
+      ravBox.querySelector('.rv-err').textContent = '';
+    }
+    progress.textContent = `סומנו ${answered} מתוך ${items.length}`;
+  }
+
+  function lineFor(item) {
+    const note = noteOf(item);
+    return note ? `${verdictOf(item)}. הערה: ${note}` : verdictOf(item);
+  }
+
+  function summary() {
+    const lines = [`שם הרב: ${ravField.value.trim()}`];
+    if (contactField.value.trim()) lines.push(`טלפון או מייל: ${contactField.value.trim()}`);
+    lines.push('');
+    for (const item of items) lines.push(`${item.dataset.key}. ${item.dataset.title}: ${lineFor(item)}`);
+    if (generalField.value.trim()) lines.push('', `הערות נוספות: ${generalField.value.trim()}`);
+    return lines.join('\n');
+  }
+
+  function validate() {
+    let first = null;
+    const ravBox = ravField.closest('.rv-field');
+    const missingName = !ravField.value.trim();
+    ravBox.classList.toggle('invalid', missingName);
+    ravBox.querySelector('.rv-err').textContent = missingName ? 'צריך לכתוב שם.' : '';
+    if (missingName) first = ravField;
+    for (const item of items) {
+      const message = problemOf(item);
+      showProblem(item, message);
+      if (message && !first) first = item;
+    }
+    return first;
+  }
+
+  function payload() {
+    const right = items.filter((item) => verdictOf(item) === RIGHT).length;
+    const name = ravField.value.trim();
+    const contact = contactField.value.trim();
+    const body = {
+      _subject: `תשובת הרב להחלטות ההלכתיות (גרסה ${RULES_VERSION}): ${name}`,
+      'שם הרב': name,
+      'טלפון או מייל': contact || '—',
+      'גרסת כללים': RULES_VERSION,
+      סיכום: `נכון ${right} · לא נכון ${items.length - right}`,
+    };
+    if (contact.includes('@')) body._replyto = contact;
+    for (const item of items) body[`${item.dataset.key.padStart(2, '0')}. ${item.dataset.title}`] = lineFor(item);
+    body['הערות נוספות'] = generalField.value.trim() || '—';
+    return body;
+  }
+
+  function offerMail(text) {
+    const subject = `תשובת הרב להחלטות ההלכתיות (גרסה ${RULES_VERSION})`;
+    mailLink.href = `mailto:365jew@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+    mailLink.hidden = false;
+  }
+
+  form.addEventListener('input', () => {
+    draft.save(collect());
+    refresh();
+  });
+  form.addEventListener('change', () => {
+    draft.save(collect());
+    refresh();
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const first = validate();
+    if (first) {
+      status.textContent = 'יש פריטים שעוד צריך להשלים, הם מסומנים בדף.';
+      first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      (first.querySelector?.('input[type=radio]') ?? first).focus({ preventScroll: true });
+      return;
+    }
+
+    const text = summary();
+    sendButton.disabled = true;
+    status.textContent = 'שולח…';
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    try {
+      const response = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload()),
+        signal: controller.signal,
+      });
+      if (!response.ok) throw new Error(`Formspree ${response.status}`);
+      draft.clear();
+      form.classList.add('sent');
+      for (const control of form.querySelectorAll('input, textarea')) control.disabled = true;
+      done.querySelector('.rv-done-summary').textContent = text;
+      done.hidden = false;
+      done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch {
+      status.textContent = navigator.onLine === false
+        ? 'אין חיבור לאינטרנט. התשובות שמורות כאן, ואפשר לנסות שוב.'
+        : 'השליחה לא הצליחה. התשובות שמורות כאן: אפשר לנסות שוב, או לשלוח במייל.';
+      offerMail(text);
+    } finally {
+      clearTimeout(timer);
+      sendButton.disabled = false;
+    }
+  });
+
+  restore();
+  refresh();
+})();
+</script>
+</body>
+</html>

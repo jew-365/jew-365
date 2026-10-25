@@ -1,2 +1,3 @@
 scripts/chok/source/** -text -diff
 docs/chok/** -text
+docs/selichot/** -text

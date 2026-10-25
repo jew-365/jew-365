@@ -12,6 +12,7 @@ assets
 skills-lock.json
 pnpm-lock.yaml
 src/data/siddurAssets.generated.ts
+src/data/siddurChapters.generated.ts
 scripts/siddur/.cache
 scripts/chok/source
 *.md

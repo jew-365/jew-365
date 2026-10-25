@@ -11,6 +11,7 @@
     "urlHe": "https://creativecommons.org/licenses/by-nc-sa/2.5/"
   },
   "bytes": 18613704,
+  "gzipBytes": 4799405,
   "files": {
     "Bereshit": {
       "path": "bereshit.2fa891b3.json",
@@ -281,6 +282,278 @@
       "path": "vezot-haberakhah.2a36cbd8.json",
       "sha256": "2a36cbd8744e8587210c4dbd3238aa19b960d80de182b358f8c7846b876361bb",
       "bytes": 326884
+    }
+  },
+  "gz": {
+    "Bereshit": {
+      "path": "bereshit.ef4a25a5.json.gz",
+      "sha256": "ef4a25a50d431b4a0f074649d2c5c92f5ce68381d7e3df6bdaedcaec960eb827",
+      "bytes": 99076
+    },
+    "Noach": {
+      "path": "noach.da1db3a0.json.gz",
+      "sha256": "da1db3a0780ce75d015a578831cf91ade819430a4a94a8a70cdab7cb25cc9fd3",
+      "bytes": 88987
+    },
+    "Lech-Lecha": {
+      "path": "lech-lecha.9c1730fc.json.gz",
+      "sha256": "9c1730fc8c5b558601f77ae9c114001e84d71b9d3d8de62926ab2f7d1271e258",
+      "bytes": 85961
+    },
+    "Vayera": {
+      "path": "vayera.bbd411c3.json.gz",
+      "sha256": "bbd411c3a79f8a01c5fdffce1faf8b10d3189f9f380fa684e85a3a4e20591545",
+      "bytes": 96485
+    },
+    "Chayei Sara": {
+      "path": "chayei-sara.4a9f57dc.json.gz",
+      "sha256": "4a9f57dcd5e2b85d23acade51e1bff4be62473dfdfb151a95925fac431677d3c",
+      "bytes": 80897
+    },
+    "Toldot": {
+      "path": "toldot.250e0fb7.json.gz",
+      "sha256": "250e0fb7d01d799be72451a7cd622fd7160b25cfda3c770300c90bd4a73479d6",
+      "bytes": 93115
+    },
+    "Vayetzei": {
+      "path": "vayetzei.1b829a6a.json.gz",
+      "sha256": "1b829a6a69dc049a5efbab9ace1c3dd4c59c63a52e7b5fcadc7edb71f19541de",
+      "bytes": 95335
+    },
+    "Vayishlach": {
+      "path": "vayishlach.b25795cb.json.gz",
+      "sha256": "b25795cb035fe673b4b4194a11c20f937fd4e453f1b7679711ef96b62917face",
+      "bytes": 92984
+    },
+    "Vayeshev": {
+      "path": "vayeshev.3ad5927b.json.gz",
+      "sha256": "3ad5927b971b92095c18d2a2e66ebdfb9fa9917bbbc13ca7ff8d1fce6baa1f9d",
+      "bytes": 85689
+    },
+    "Miketz": {
+      "path": "miketz.b4442507.json.gz",
+      "sha256": "b44425076bb8bb1685c67e38002daa982289a7ad8b9311f1bb1423c9f7dc9499",
+      "bytes": 93552
+    },
+    "Vayigash": {
+      "path": "vayigash.04878cfb.json.gz",
+      "sha256": "04878cfb406643e867da8f79f1ffbb7ed54fa305bb9ede3181c1d278fa06f92e",
+      "bytes": 79106
+    },
+    "Vayechi": {
+      "path": "vayechi.07898be7.json.gz",
+      "sha256": "07898be700be9f7077c28310055eb56c37efede034c7896ca38b9c128e8538b9",
+      "bytes": 86800
+    },
+    "Shemot": {
+      "path": "shemot.a76c4e9b.json.gz",
+      "sha256": "a76c4e9b61ffc7520ca24d2584218643f299bd23c0d38d499d632c5da6dc4135",
+      "bytes": 103829
+    },
+    "Vaera": {
+      "path": "vaera.f20864b3.json.gz",
+      "sha256": "f20864b32cacfe72aa0ab5ca7d3dfdb5642a348422717b955c0020b107c2800b",
+      "bytes": 84601
+    },
+    "Bo": {
+      "path": "bo.a8f112a2.json.gz",
+      "sha256": "a8f112a20bfa8aaab68be72c42674c32cf6f28d3b3a8a8da32e1ac286ba8964a",
+      "bytes": 91265
+    },
+    "Beshalach": {
+      "path": "beshalach.c8d81c48.json.gz",
+      "sha256": "c8d81c482b5cedb927ae8cc402a3ad2e781e3a3e5f2f7c048ba311a35ada438d",
+      "bytes": 95420
+    },
+    "Yitro": {
+      "path": "yitro.2b1abadb.json.gz",
+      "sha256": "2b1abadbb6e89f72541bc7ec4521deac621fea65343f13dd2c1b98e38e85fa0d",
+      "bytes": 86068
+    },
+    "Mishpatim": {
+      "path": "mishpatim.08f5a2c5.json.gz",
+      "sha256": "08f5a2c5ea0d6b090e9f954f5693ea50c1b533dcadc99b8e7b0b33ca868b2a82",
+      "bytes": 91964
+    },
+    "Terumah": {
+      "path": "terumah.34f7aa30.json.gz",
+      "sha256": "34f7aa309a6dffea11050c71c7d95507a5cfef5e636fe00a06bff5d987f1a74e",
+      "bytes": 89583
+    },
+    "Tetzaveh": {
+      "path": "tetzaveh.1a7522f2.json.gz",
+      "sha256": "1a7522f2beb050b9dec222a2d175aa96be82555b4f61d109dd7480b642f03cef",
+      "bytes": 85264
+    },
+    "Ki Tisa": {
+      "path": "ki-tisa.187db9ed.json.gz",
+      "sha256": "187db9ed2e4344e2085bfa5db3dda8c3a9d9a91712089366ee96a8208250a029",
+      "bytes": 100199
+    },
+    "Vayakhel": {
+      "path": "vayakhel.1b324f8b.json.gz",
+      "sha256": "1b324f8b30c1311350b0dc52af462faaf8706727b6e44ebd09c5e5d97dd64173",
+      "bytes": 88532
+    },
+    "Pekudei": {
+      "path": "pekudei.bdc505d6.json.gz",
+      "sha256": "bdc505d6114ee09be1e19437a16b23d26d5be63e595dbea3ca933ac43f13cef0",
+      "bytes": 79761
+    },
+    "Vayikra": {
+      "path": "vayikra.bcabfdff.json.gz",
+      "sha256": "bcabfdffa5a2e9290130909fb1e199510aeee95f140609803acf5e5558800537",
+      "bytes": 87894
+    },
+    "Tzav": {
+      "path": "tzav.3a8c4ecf.json.gz",
+      "sha256": "3a8c4ecfefc4a643faa7ca8173252dcb5eeca0b8590ee5e2f44041c28a0761fe",
+      "bytes": 88736
+    },
+    "Shmini": {
+      "path": "shmini.9b6f9511.json.gz",
+      "sha256": "9b6f95118ac819e166a7975c3b16bf79293579f0cbd6080289469859a1a8d301",
+      "bytes": 88031
+    },
+    "Tazria": {
+      "path": "tazria.59ea5270.json.gz",
+      "sha256": "59ea5270841c3ddc8f5215128e69f4774ff7c8ade993d62e1fd6d0a26f16206a",
+      "bytes": 82571
+    },
+    "Metzora": {
+      "path": "metzora.544ccf05.json.gz",
+      "sha256": "544ccf05b2ba63f3db1c3b101745eac840f0a8ac4767ace55156c838a8f8ef2b",
+      "bytes": 82327
+    },
+    "Achrei Mot": {
+      "path": "achrei-mot.c52fd951.json.gz",
+      "sha256": "c52fd951c30ec7dc60790691fb2ad1171753db346fe9edce2672044925e0e178",
+      "bytes": 89253
+    },
+    "Kedoshim": {
+      "path": "kedoshim.20b640e9.json.gz",
+      "sha256": "20b640e9aaf5027fd1213f0e2e12fc46bdd65c789d1a42e82ec9c34238246a6c",
+      "bytes": 90124
+    },
+    "Emor": {
+      "path": "emor.26f3e793.json.gz",
+      "sha256": "26f3e7930b17cd496d850ea3c1fd27bb058dd44527aa66a0c675f1a9a0401faf",
+      "bytes": 96200
+    },
+    "Behar": {
+      "path": "behar.9539a419.json.gz",
+      "sha256": "9539a41905f22cbf4f05b7789e5132013dc8ce51973bc12e50862b20a0e15116",
+      "bytes": 81924
+    },
+    "Bechukotai": {
+      "path": "bechukotai.7e55440f.json.gz",
+      "sha256": "7e55440f44eaf421649a409bb9b41af2303d08669cc5453b21778b6f36cf5de8",
+      "bytes": 87030
+    },
+    "Bamidbar": {
+      "path": "bamidbar.e2d2897f.json.gz",
+      "sha256": "e2d2897f782af8f818b7bd6bd88ee0226c9176b70352a9986bc4e5f0a0626162",
+      "bytes": 89156
+    },
+    "Nasso": {
+      "path": "nasso.4468bd3f.json.gz",
+      "sha256": "4468bd3fab571833ed638c4a4c1e54e1538497f9d29ab09b69aa0658efc23c71",
+      "bytes": 89840
+    },
+    "Beha'alotcha": {
+      "path": "beha-alotcha.86eff429.json.gz",
+      "sha256": "86eff429f0fd7cf3d8b36a5a5a7150c7122b2ccb7131efd80e8a8e7d1843e392",
+      "bytes": 98002
+    },
+    "Sh'lach": {
+      "path": "sh-lach.f29ce934.json.gz",
+      "sha256": "f29ce934c5d87416faf9decf1d525b3771938516e574271a7bbd755b95fd3b74",
+      "bytes": 98236
+    },
+    "Korach": {
+      "path": "korach.327c00d8.json.gz",
+      "sha256": "327c00d814ee7c0566465ee113396e32929568c9e16342a90fdf4b4ac494b3ea",
+      "bytes": 86493
+    },
+    "Chukat": {
+      "path": "chukat.3447f199.json.gz",
+      "sha256": "3447f199261d8366de6bbf939ec2944043b66ff8d9056ad99b9c5a6412401328",
+      "bytes": 84118
+    },
+    "Balak": {
+      "path": "balak.3b15baac.json.gz",
+      "sha256": "3b15baacad9960aaad1692fcf9fb6efbb6695d364892d44a11d84378ed7fde3f",
+      "bytes": 90787
+    },
+    "Pinchas": {
+      "path": "pinchas.fe6c3cba.json.gz",
+      "sha256": "fe6c3cba729e328a33ceff8b5455293db684efb79cfb2bcd517b0fc44de01590",
+      "bytes": 88105
+    },
+    "Matot": {
+      "path": "matot.90e889b8.json.gz",
+      "sha256": "90e889b802a419a49809004da9ca82b2265daba872f3787b6802a63f9f63c56f",
+      "bytes": 84539
+    },
+    "Masei": {
+      "path": "masei.44557fee.json.gz",
+      "sha256": "44557feeb9e211b5826bfe74c91e61e57829fd8c3a1a3d251d0dff28cca8f121",
+      "bytes": 88741
+    },
+    "Devarim": {
+      "path": "devarim.400275bd.json.gz",
+      "sha256": "400275bd209e1009fc34cf769d27fc54a2ae9cb78a572e38b103c187aaea4428",
+      "bytes": 98918
+    },
+    "Vaetchanan": {
+      "path": "vaetchanan.e33d26b2.json.gz",
+      "sha256": "e33d26b2a4869b54d927ba4412abb2f273aad9c02b4756ec99d8f5430aef4140",
+      "bytes": 95523
+    },
+    "Eikev": {
+      "path": "eikev.0d3b1893.json.gz",
+      "sha256": "0d3b18935efb3ca9c98b6276fd7888f9204d4fb2124251487eaa72fa28fdd550",
+      "bytes": 86713
+    },
+    "Re'eh": {
+      "path": "re-eh.90b6a9d8.json.gz",
+      "sha256": "90b6a9d82049bffffe2dcae247c6418ada4309ed6d840d7cbe7d7c17fdf4c2a1",
+      "bytes": 95967
+    },
+    "Shoftim": {
+      "path": "shoftim.c48fd143.json.gz",
+      "sha256": "c48fd1439956d4da13d407779d0bfe56e9c13532837288b71f2fa38052c0023f",
+      "bytes": 90784
+    },
+    "Ki Teitzei": {
+      "path": "ki-teitzei.fa8049b2.json.gz",
+      "sha256": "fa8049b2aa3949adf0affd8f951d0a967abf0cb13d92da9f03e868b43c96e7af",
+      "bytes": 82769
+    },
+    "Ki Tavo": {
+      "path": "ki-tavo.517fc315.json.gz",
+      "sha256": "517fc3151e69a94ab79352959851dda794b97a609d142760eec096cb77663e56",
+      "bytes": 85645
+    },
+    "Nitzavim": {
+      "path": "nitzavim.bbba12b2.json.gz",
+      "sha256": "bbba12b2fdd281a736661e2574b73873dd67e890e8bf9f4167d9ec1a9947ee50",
+      "bytes": 78615
+    },
+    "Vayeilech": {
+      "path": "vayeilech.f5fe04b3.json.gz",
+      "sha256": "f5fe04b3c07d3b0811379bb55c3621ae981de2dea2d84a98e1650971cf157e29",
+      "bytes": 67471
+    },
+    "Ha'azinu": {
+      "path": "ha-azinu.4f4a4894.json.gz",
+      "sha256": "4f4a489406b1131a092440a8ab651ec042e0679f0958244c7082a1b39cc5e617",
+      "bytes": 83480
+    },
+    "Vezot Haberakhah": {
+      "path": "vezot-haberakhah.39007b04.json.gz",
+      "sha256": "39007b045de9299a6180a567568e1efd8f5d44bfd5565952f3f62763090a86ee",
+      "bytes": 86940
     }
   }
 }
