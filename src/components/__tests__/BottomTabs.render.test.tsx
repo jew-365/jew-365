@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { fireEvent, screen } from '@testing-library/react-native';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BottomTabs } from '../BottomTabs';
@@ -42,6 +42,15 @@ const hostParent = (node: Node): Node => {
 };
 const barOf = () => hostParent(screen.getAllByRole('tab')[0]);
 
+function onOS(os: typeof Platform.OS, run: () => void) {
+  const replaced = jest.replaceProperty(Platform, 'OS', os);
+  try {
+    run();
+  } finally {
+    replaced.restore();
+  }
+}
+
 describe('BottomTabs', () => {
   beforeEach(() => {
     useUserStore.getState().reset();
@@ -76,19 +85,36 @@ describe('BottomTabs', () => {
     expect(screen.getByRole('tab', { name: 'בית' })).not.toBeSelected();
   });
 
-  it('sits the bar spacing.sm above the bottom inset on a bg strip', () => {
-    const first = renderWithTheme(<BottomTabs {...tabBarProps('home', 34).props} />);
-    const strip = hostParent(barOf());
-    expect(strip).toHaveStyle({
-      backgroundColor: THEMES.gold.bg,
-      paddingBottom: 34 + spacing.sm,
-      paddingTop: spacing.sm,
-      paddingHorizontal: spacing.md,
-    });
-    first.unmount();
+  it.each(['android', 'web'] as const)('%s: sits the bar spacing.sm above the bottom inset on a bg strip', (os) => {
+    onOS(os, () => {
+      const first = renderWithTheme(<BottomTabs {...tabBarProps('home', 34).props} />);
+      expect(hostParent(barOf())).toHaveStyle({
+        backgroundColor: THEMES.gold.bg,
+        paddingBottom: 34 + spacing.sm,
+        paddingTop: spacing.sm,
+        paddingHorizontal: spacing.md,
+      });
+      first.unmount();
 
-    renderWithTheme(<BottomTabs {...tabBarProps('home').props} />);
-    expect(hostParent(barOf())).toHaveStyle({ paddingBottom: spacing.sm });
+      renderWithTheme(<BottomTabs {...tabBarProps('home').props} />);
+      expect(hostParent(barOf())).toHaveStyle({ paddingBottom: spacing.sm });
+    });
+  });
+
+  it.each([
+    [34, 14],
+    [24, spacing.sm],
+    [0, spacing.sm],
+  ])('ios: a bottom inset of %i leaves %i under the bar, just above the home indicator', (inset, padding) => {
+    onOS('ios', () => {
+      renderWithTheme(<BottomTabs {...tabBarProps('home', inset).props} />);
+      expect(hostParent(barOf())).toHaveStyle({
+        backgroundColor: THEMES.gold.bg,
+        paddingBottom: padding,
+        paddingTop: spacing.sm,
+        paddingHorizontal: spacing.md,
+      });
+    });
   });
 
   it.each(THEME_NAMES)('%s: draws the bar as a floating tabBg card with no border', (name) => {
@@ -116,13 +142,15 @@ describe('BottomTabs', () => {
     },
   );
 
-  it('draws the other tabs with a textMuted regular label and no pill fill', () => {
+  it('draws the other tabs with a textMuted regular label and a transparent pill', () => {
     renderWithTheme(<BottomTabs {...tabBarProps('siddur').props} />);
     expect(screen.getByText('בית')).toHaveStyle({
       color: THEMES.gold.textMuted,
       fontFamily: fontFamilies.heebo.regular,
     });
-    expect(pills().filter((pill) => fillOf(pill) !== undefined)).toHaveLength(1);
+    const fills = pills().map(fillOf);
+    expect(fills.filter((fill) => fill === THEMES.gold.goldLight)).toHaveLength(1);
+    expect(fills.filter((fill) => fill === 'transparent')).toHaveLength(4);
   });
 
   it('colours the focused icon gold and an unfocused one textMuted', () => {
@@ -139,9 +167,51 @@ describe('BottomTabs', () => {
     const all = pills();
     expect(all).toHaveLength(5);
     all.forEach((pill) => {
-      expect(pill).toHaveStyle({ width: 48, height: 32, borderRadius: radius.full });
+      expect(pill).toHaveStyle({ width: 48, height: 32 });
       expect(StyleSheet.flatten(pill.props.style).marginTop).toBeUndefined();
     });
     expect(hostsStyled((s) => s.width === 44 && s.height === 44)).toHaveLength(0);
+  });
+
+  it.each(ROUTE_NAMES.slice(1))(
+    '%s focused: every pill, filled or transparent, is a real native view with a radius of half its height and never radius.full',
+    (name) => {
+      renderWithTheme(<BottomTabs {...tabBarProps(name).props} />);
+      const all = pills();
+      expect(all).toHaveLength(5);
+      all.forEach((pill) => {
+        expect(StyleSheet.flatten(pill.props.style).borderRadius).toBe(16);
+        expect(StyleSheet.flatten(pill.props.style).borderRadius).not.toBe(radius.full);
+        expect(pill.props.collapsable).toBe(false);
+        expect([THEMES.gold.goldLight, 'transparent']).toContain(fillOf(pill));
+      });
+    },
+  );
+
+  it('draws every underline as a real native view too, so its rounded ends survive a tab switch', () => {
+    renderWithTheme(<BottomTabs {...tabBarProps('home').props} />);
+    const lines = underlines();
+    expect(lines).toHaveLength(5);
+    lines.forEach((line) => {
+      expect(line.props.collapsable).toBe(false);
+    });
+  });
+
+  it('keeps the same pill views mounted across a tab switch and only moves the fill', () => {
+    const view = renderWithTheme(<BottomTabs {...tabBarProps('home').props} />);
+    const before = pills();
+    const filledBefore = before.map((pill) => fillOf(pill) === THEMES.gold.goldLight);
+    expect(filledBefore.filter(Boolean)).toHaveLength(1);
+
+    view.rerender(<BottomTabs {...tabBarProps('history').props} />);
+    const after = pills();
+    expect(after).toHaveLength(5);
+    after.forEach((pill, index) => {
+      expect(pill).toBe(before[index]);
+      expect(StyleSheet.flatten(pill.props.style).borderRadius).toBe(16);
+    });
+    const filledAfter = after.map((pill) => fillOf(pill) === THEMES.gold.goldLight);
+    expect(filledAfter.filter(Boolean)).toHaveLength(1);
+    expect(filledAfter).not.toEqual(filledBefore);
   });
 });

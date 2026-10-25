@@ -1,11 +1,23 @@
 import { HDate, months } from '@hebcal/core';
 import { DateTime } from 'luxon';
-import { ComputeContext, Mitzvah, MitzvahWindow, Nusach } from '@/types/mitzvah';
+import { ComputeContext, LibraryGroup, Mitzvah, MitzvahWindow, Nusach } from '@/types/mitzvah';
 import { Location, Zmanim } from '@/types/zmanim';
 import { CHOK_TEXT_ID, hasChokContent } from '@/data/chok';
+import { hasSelichotContent } from '@/data/selichot';
+import { MIDNIGHT_TO_MORNING_PRAYER, siddurPlace, standaloneAvailability } from '@/data/siddur';
 import { HebcalService } from '@/services/HebcalService';
 import { ZmanimService, candleLightingMinutes, isJerusalem } from '@/services/ZmanimService';
 import { chokPortionOn } from '@/utils/chok';
+import { BLOCK_EXIT_DEFAULT_MIN } from '@/utils/skipRules';
+import {
+  chanukahNightOn,
+  dayFeatures,
+  kiddushLevanaFirstNight,
+  kiddushLevanaPeriod,
+  liturgicalDay,
+  matchesCondition,
+  ushpizinNight,
+} from '@/utils/siddur';
 
 const ALL_NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
 const SUNDAY = 0;
@@ -76,11 +88,41 @@ function omerDayFor(date: Date, timeZone?: string): number | null {
   return days >= 1 && days <= 49 ? days : null;
 }
 
+function nextDayZmanim({ location, zmanim }: ComputeContext): Zmanim | null {
+  return ZmanimService.getZmanim(dayOf(zmanim, location).plus({ days: 1 }).toJSDate(), location);
+}
+
 // The next day's alot hashachar: the Omer may be counted until then, and the Chok LeYisrael learning
-// day ends then. Falls back to chatzot halayla if the next day's zmanim cannot be computed.
-function nextAlot({ location, zmanim }: ComputeContext): Date {
-  const nextDay = dayOf(zmanim, location).plus({ days: 1 }).toJSDate();
-  return ZmanimService.getZmanim(nextDay, location)?.alotHaShachar ?? zmanim.chatzotLayla;
+// day, maariv and the bedtime Shema end then. Falls back to chatzot halayla if the next day's zmanim cannot be computed.
+function nextAlot(ctx: ComputeContext): Date {
+  return nextDayZmanim(ctx)?.alotHaShachar ?? ctx.zmanim.chatzotLayla;
+}
+
+function chanukahNight({ location, zmanim }: ComputeContext): number | null {
+  const day = dayOf(zmanim, location);
+  return chanukahNightOn(new Date(day.year, day.month - 1, day.day));
+}
+
+export type UshpizinGuest = { he: string; en: string };
+
+export const USHPIZIN_GUESTS: readonly UshpizinGuest[] = [
+  { he: 'אברהם', en: 'Avraham' },
+  { he: 'יצחק', en: 'Yitzchak' },
+  { he: 'יעקב', en: 'Yaakov' },
+  { he: 'משה', en: 'Moshe' },
+  { he: 'אהרן', en: 'Aharon' },
+  { he: 'יוסף', en: 'Yosef' },
+  { he: 'דוד', en: 'David' },
+];
+
+export function ushpizOfEvening(evening: Date): UshpizinGuest | null {
+  const night = ushpizinNight(liturgicalDay(evening, true));
+  return night === null ? null : USHPIZIN_GUESTS[night - 1];
+}
+
+function ushpizOf({ location, zmanim }: ComputeContext): UshpizinGuest | null {
+  const day = dayOf(zmanim, location);
+  return ushpizOfEvening(new Date(day.year, day.month - 1, day.day));
 }
 
 export const CHOK_LEYISRAEL: Mitzvah = {
@@ -89,6 +131,7 @@ export const CHOK_LEYISRAEL: Mitzvah = {
   icon: 'chok',
   timeType: 'range-within-day',
   category: 'learning',
+  group: 'other',
   skipOn: ['shabbat', 'yomtov'],
   nuschaotSupported: ALL_NUSCHAOT,
   defaultReminders: [
@@ -115,6 +158,7 @@ export const MITZVOT: Mitzvah[] = [
     icon: 'tefillin',
     timeType: 'range-within-day',
     category: 'daily-morning',
+    group: 'daily',
     skipOn: ['shabbat', 'yomtov', 'cholHamoed'],
     nuschaotSupported: ALL_NUSCHAOT,
     defaultReminders: [
@@ -135,6 +179,7 @@ export const MITZVOT: Mitzvah[] = [
     icon: 'shema',
     timeType: 'range-within-day',
     category: 'daily-morning',
+    group: 'daily',
     skipOn: [],
     nuschaotSupported: ALL_NUSCHAOT,
     defaultReminders: [
@@ -154,6 +199,7 @@ export const MITZVOT: Mitzvah[] = [
     icon: 'shacharit',
     timeType: 'range-within-day',
     category: 'daily-morning',
+    group: 'prayers',
     skipOn: [],
     nuschaotSupported: ALL_NUSCHAOT,
     defaultReminders: [
@@ -173,6 +219,7 @@ export const MITZVOT: Mitzvah[] = [
     icon: 'mincha',
     timeType: 'range-within-day',
     category: 'daily-afternoon',
+    group: 'prayers',
     skipOn: [],
     nuschaotSupported: ALL_NUSCHAOT,
     defaultReminders: [
@@ -192,8 +239,10 @@ export const MITZVOT: Mitzvah[] = [
     icon: 'maariv',
     timeType: 'range-within-day',
     category: 'daily-evening',
+    group: 'prayers',
     skipOn: [],
     nuschaotSupported: ALL_NUSCHAOT,
+    description: { he: 'לכתחילה עד חצות הלילה', en: 'Ideally before chatzot (halachic midnight)' },
     defaultReminders: [
       {
         anchor: 'start',
@@ -203,7 +252,7 @@ export const MITZVOT: Mitzvah[] = [
       },
       { anchor: 'start', offsetMin: 120, label: 'תזכורת — ערבית', skipIfDone: true },
     ],
-    computeWindow: ({ zmanim, location }) => win(nightfall(zmanim, location), zmanim.chatzotLayla),
+    computeWindow: (ctx) => win(nightfall(ctx.zmanim, ctx.location), nextAlot(ctx)),
   },
   {
     id: 'birchot_hashachar',
@@ -211,6 +260,7 @@ export const MITZVOT: Mitzvah[] = [
     icon: 'brachot',
     timeType: 'range-within-day',
     category: 'daily-morning',
+    group: 'daily',
     skipOn: [],
     nuschaotSupported: ALL_NUSCHAOT,
     defaultReminders: [
@@ -221,7 +271,27 @@ export const MITZVOT: Mitzvah[] = [
         bodyVariants: ['זמן ברכות השחר', 'פתח את הבוקר בברכות השחר', 'ברכות השחר מחכות לך'],
       },
     ],
-    computeWindow: (ctx) => win(ctx.zmanim.alotHaShachar, sofZmanShma(ctx)),
+    computeWindow: (ctx) => win(ctx.zmanim.alotHaShachar, ctx.zmanim.chatzot),
+  },
+  {
+    id: 'krias_shma_al_hamita',
+    name: { he: 'קריאת שמע על המיטה', en: 'Bedtime Shema' },
+    icon: 'night',
+    timeType: 'range-within-day',
+    category: 'daily-evening',
+    group: 'daily',
+    skipOn: [],
+    nuschaotSupported: ALL_NUSCHAOT,
+    description: { he: 'לכתחילה לפני חצות הלילה', en: 'Ideally before chatzot (halachic midnight)' },
+    defaultReminders: [
+      {
+        anchor: 'clock',
+        offsetMin: 22 * 60 + 30,
+        label: 'זמן קריאת שמע על המיטה',
+        bodyVariants: ['זמן קריאת שמע על המיטה', 'קריאת שמע לפני השינה', 'לסיים את היום בשמע ישראל'],
+      },
+    ],
+    computeWindow: (ctx) => win(nightfall(ctx.zmanim, ctx.location), nextAlot(ctx)),
   },
   {
     id: 'candle_lighting',
@@ -229,6 +299,7 @@ export const MITZVOT: Mitzvah[] = [
     icon: 'candles',
     timeType: 'fixed-moment',
     category: 'weekly',
+    group: 'weekly',
     skipOn: [],
     nuschaotSupported: ALL_NUSCHAOT,
     defaultReminders: [{ anchor: 'start', offsetMin: 0, label: 'זמן הדלקת נרות' }],
@@ -249,6 +320,7 @@ export const MITZVOT: Mitzvah[] = [
     icon: 'havdalah',
     timeType: 'fixed-moment',
     category: 'weekly',
+    group: 'weekly',
     skipOn: [],
     nuschaotSupported: ALL_NUSCHAOT,
     defaultReminders: [
@@ -276,6 +348,7 @@ export const MITZVOT: Mitzvah[] = [
     icon: 'omer',
     timeType: 'date-range',
     category: 'seasonal',
+    group: 'seasonal',
     skipOn: [],
     nuschaotSupported: ALL_NUSCHAOT,
     contentBlocks: [
@@ -299,8 +372,147 @@ export const MITZVOT: Mitzvah[] = [
       return win(nightfall(ctx.zmanim, ctx.location), nextAlot(ctx));
     },
   },
+  {
+    id: 'chanukah_candles',
+    name: { he: 'נרות חנוכה', en: 'Chanukah candles' },
+    icon: 'chanukiah',
+    timeType: 'annual-seasonal',
+    category: 'seasonal',
+    group: 'seasonal',
+    skipOn: [],
+    nuschaotSupported: ALL_NUSCHAOT,
+    defaultReminders: [
+      {
+        anchor: 'start',
+        offsetMin: 0,
+        label: 'זמן הדלקת נרות חנוכה',
+        bodyVariants: [
+          'זמן הדלקת נרות חנוכה: הנר ה־%{n}',
+          'הלילה מדליקים את הנר ה־%{n}',
+          'חנוכה שמח, זה הזמן להדליק את הנר ה־%{n}',
+        ],
+      },
+    ],
+    bodyParams: (ctx) => {
+      const n = chanukahNight(ctx);
+      return n === null ? null : { n };
+    },
+    bodyKey: 'notifications.chanukahNight',
+    computeWindow: (ctx) => {
+      if (chanukahNight(ctx) === null) return null;
+      const day = dayOf(ctx.zmanim, ctx.location);
+      const block = HebcalService.holyBlockOn(day.plus({ days: 1 }).toJSDate(), ctx.location);
+      if (block) return win(ctx.zmanim.plagHaMincha, block.start);
+      const fromShkia = ctx.settings.nusach === 'chabad' && !closesHolyBlock(day, ctx.location);
+      return win(fromShkia ? ctx.zmanim.shkia : nightfall(ctx.zmanim, ctx.location), nextAlot(ctx));
+    },
+  },
+  {
+    id: 'selichot',
+    name: { he: 'סליחות', en: 'Selichot' },
+    icon: 'shofar',
+    timeType: 'annual-seasonal',
+    category: 'seasonal',
+    group: 'seasonal',
+    skipOn: [],
+    nuschaotSupported: ALL_NUSCHAOT,
+    defaultReminders: [
+      {
+        anchor: 'start',
+        offsetMin: 0,
+        label: 'זמן אמירת סליחות',
+        bodyVariants: ['זמן אמירת סליחות', 'הגיע הזמן לומר סליחות', 'סליחות לפני תפילת שחרית'],
+      },
+    ],
+    computeWindow: (ctx) => {
+      if (!hasSelichotContent(ctx.settings.nusach)) return null;
+      const day = dayOf(ctx.zmanim, ctx.location);
+      const night = liturgicalDay(new Date(day.year, day.month - 1, day.day), true);
+      const { available } = standaloneAvailability('selichot', ctx.settings.nusach);
+      if (!matchesCondition(available, dayFeatures(night, siddurPlace(ctx.location, ctx.settings.inIsrael))))
+        return null;
+      const next = nextDayZmanim(ctx);
+      if (!next) return null;
+      const { start, end } = MIDNIGHT_TO_MORNING_PRAYER(ctx.zmanim, next, ctx.location);
+      return win(start, end);
+    },
+  },
+  {
+    id: 'ushpizin',
+    name: { he: 'אושפיזין', en: 'Ushpizin' },
+    icon: 'sukkah',
+    timeType: 'annual-seasonal',
+    category: 'seasonal',
+    group: 'seasonal',
+    skipOn: [],
+    nuschaotSupported: ['ashkenaz', 'sefard', 'edot_hamizrach'],
+    defaultReminders: [
+      {
+        anchor: 'start',
+        offsetMin: 0,
+        label: 'זמן אושפיזין',
+        bodyVariants: [
+          'זמן אושפיזין: %{guest}',
+          'הלילה מזמינים לסוכה את %{guest}',
+          'חג שמח, האושפיז של הלילה הוא %{guest}',
+        ],
+      },
+    ],
+    bodyParams: (ctx) => {
+      const guest = ushpizOf(ctx);
+      return guest ? { guest } : null;
+    },
+    bodyKey: 'notifications.ushpizinNight',
+    computeWindow: (ctx) => (ushpizOf(ctx) ? win(nightfall(ctx.zmanim, ctx.location), nextAlot(ctx)) : null),
+  },
+  {
+    id: 'kiddush_levana',
+    name: { he: 'קידוש לבנה', en: 'Kiddush Levana' },
+    icon: 'moon',
+    timeType: 'monthly-window',
+    category: 'seasonal',
+    group: 'other',
+    skipOn: [],
+    nuschaotSupported: ALL_NUSCHAOT,
+    multiDay: { maxDays: 16 },
+    defaultReminders: [
+      {
+        anchor: 'start',
+        offsetMin: 0,
+        label: 'זמן קידוש לבנה',
+        bodyVariants: ['זמן קידוש לבנה', 'מהלילה אפשר לקדש את הלבנה', 'הלבנה מתחדשת, זה הזמן לברך עליה'],
+      },
+      {
+        anchor: 'blockExit',
+        offsetMin: BLOCK_EXIT_DEFAULT_MIN,
+        label: 'קידוש לבנה במוצאי שבת וחג',
+        skipIfDone: true,
+        bodyVariants: [
+          'קידוש לבנה במוצאי שבת וחג',
+          'במוצאי שבת וחג נוהגים לקדש את הלבנה',
+          'יצאנו לחול, זה זמן טוב לקידוש לבנה',
+        ],
+      },
+    ],
+    computeWindow: (ctx) => {
+      const day = dayOf(ctx.zmanim, ctx.location);
+      const night = liturgicalDay(new Date(day.year, day.month - 1, day.day), true);
+      const first = kiddushLevanaFirstNight(
+        night,
+        ctx.settings.nusach,
+        siddurPlace(ctx.location, ctx.settings.inIsrael),
+      );
+      if (!first || first.abs() !== night.abs()) return null;
+      return win(
+        nightfall(ctx.zmanim, ctx.location),
+        kiddushLevanaPeriod(night, ctx.settings.nusach, ctx.location).end,
+      );
+    },
+  },
   CHOK_LEYISRAEL,
 ];
+
+export const LIBRARY_GROUPS: readonly LibraryGroup[] = ['prayers', 'daily', 'weekly', 'seasonal', 'other', 'mine'];
 
 export function findMitzvah(id: string): Mitzvah | undefined {
   return MITZVOT.find((m) => m.id === id);

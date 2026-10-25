@@ -1,5 +1,5 @@
 import React from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View, ViewProps } from 'react-native';
+import { KeyboardAvoidingView, Modal, Pressable, StyleSheet, Text, View, ViewProps } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -21,7 +21,7 @@ export function BottomSheet({ visible, title, caption, onClose, children }: Bott
 
   return (
     <Modal visible={visible && !quiet} transparent animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={styles.fill} behavior="padding">
         <View style={[styles.backdrop, { backgroundColor: colors.overlay }]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessible={false} />
           <View style={[styles.sheet, { backgroundColor: colors.surface }]}>

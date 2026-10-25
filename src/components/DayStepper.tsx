@@ -1,13 +1,12 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { DateTime } from 'luxon';
 import { MitzvahIcon, backIcon, forwardIcon } from '@/components/MitzvahIcon';
 import { HebcalService } from '@/services/HebcalService';
 import { useTheme } from '@/theme/ThemeProvider';
 import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
-import { AppLanguage, useI18n } from '@/i18n';
+import { AppLanguage, formatDate, useI18n } from '@/i18n';
 
 type Props = {
   value: Date;
@@ -17,9 +16,7 @@ type Props = {
 };
 
 export function formatDayLine(date: Date, language: AppLanguage): string {
-  return DateTime.fromJSDate(date)
-    .setLocale(language)
-    .toFormat(language === 'he' ? 'cccc · d LLLL' : 'cccc · LLL d');
+  return formatDate(date, language === 'he' ? 'cccc · d LLLL' : 'cccc · LLL d', language);
 }
 
 const ARROW_SIZE = 20;

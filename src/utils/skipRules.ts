@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { Mitzvah, UserSettings } from '@/types/mitzvah';
+import { Mitzvah, Reminder, ReminderAnchor, UserSettings } from '@/types/mitzvah';
 import { HolyBlock, Location } from '@/types/zmanim';
 import { HebcalService } from '@/services/HebcalService';
 
@@ -67,19 +67,54 @@ export function opensQuietBlock(instant: Date, location: Location): boolean {
   return HebcalService.holyBlockAt(instant, location)?.start.getTime() === instant.getTime();
 }
 
-// Whether a reminder goes out at all: still ahead, inside its own window — "time for X" after X
-// has closed does nothing — and outside the quiet window. The scheduler and every preview of the
-// next reminder share it, so a preview never promises one the scheduler drops.
+export const HEADS_UP_MAX_MIN = 180;
+export const FOLLOW_UP_MAX_MIN = 720;
+export const FOLLOW_UP_DEFAULT_MIN = 60;
+export const BLOCK_EXIT_DEFAULT_MIN = 15;
+
+export function skipsIfDone(reminder: Pick<Reminder, 'anchor' | 'skipIfDone'>): boolean {
+  return reminder.anchor === 'followUp' || reminder.skipIfDone === true;
+}
+
+// Whether a reminder goes out at all: still ahead, no earlier than HEADS_UP_MAX_MIN minutes before
+// its window opens and never after it closes — "time for X" after X has closed does nothing — except
+// a follow-up, which fires only in the FOLLOW_UP_MAX_MIN minutes after the window closes; and never
+// inside the quiet window. The scheduler and every preview of the next reminder share it, so a
+// preview never promises one the scheduler drops.
 export function reminderFires(
   trigger: Date,
   window: { start: Date; end: Date },
   location: Location,
   now: Date = new Date(),
+  anchor: ReminderAnchor = 'start',
 ): boolean {
   const at = trigger.getTime();
   if (at <= now.getTime()) return false;
-  if (at < window.start.getTime() || at > window.end.getTime()) return false;
+  const end = window.end.getTime();
+  const inRange =
+    anchor === 'followUp'
+      ? at > end && at <= end + FOLLOW_UP_MAX_MIN * 60_000
+      : anchor === 'blockExit'
+        ? at > window.start.getTime() && at <= end
+        : at >= window.start.getTime() - HEADS_UP_MAX_MIN * 60_000 && at <= end;
+  if (!inRange) return false;
   return !isQuietAt(trigger, location);
+}
+
+export function blockExitsWithin(window: { start: Date; end: Date }, location: Location): Date[] {
+  const exits = new Map<string, Date>();
+  const last = DateTime.fromJSDate(window.end, { zone: location.tz }).startOf('day');
+  for (
+    let day = DateTime.fromJSDate(window.start, { zone: location.tz }).startOf('day').minus({ days: 1 });
+    day <= last;
+    day = day.plus({ days: 1 })
+  ) {
+    const block = HebcalService.holyBlockOn(day.set({ hour: 12 }).toJSDate(), location);
+    if (block && block.end.getTime() > window.start.getTime() && block.end.getTime() < window.end.getTime()) {
+      exits.set(block.days[0], block.end);
+    }
+  }
+  return [...exits.values()].sort((a, b) => a.getTime() - b.getTime());
 }
 
 const BOUNDARY_LOOKAHEAD_DAYS = 2;

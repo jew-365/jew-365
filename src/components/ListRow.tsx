@@ -36,16 +36,17 @@ export function ListRow({
 }: Props) {
   const { colors } = useTheme();
   const { language } = useI18n();
-  return (
-    <Pressable
-      onPress={onPress}
-      onLongPress={onLongPress}
-      disabled={disabled}
-      accessibilityRole={onPress ? 'button' : undefined}
-      accessibilityLabel={accessibilityLabel}
-      android_ripple={onPress ? { color: colors.border } : undefined}
-      style={[styles.row, { opacity: disabled ? 0.5 : 1 }, style]}
-    >
+  const dim = { opacity: disabled ? 0.5 : 1 };
+  const pressableProps = {
+    onPress,
+    onLongPress,
+    disabled,
+    accessibilityRole: onPress ? ('button' as const) : undefined,
+    accessibilityLabel,
+    android_ripple: onPress ? { color: colors.border } : undefined,
+  };
+  const content = (
+    <>
       <IconTile name={icon} tone={iconTone} />
       <View style={styles.meta}>
         <Text style={[typography.heading, { color: iconTone === 'muted' ? colors.textMuted : colors.text }]}>
@@ -55,10 +56,24 @@ export function ListRow({
           <Text style={[typography.caption, styles.caption, { color: colors.textSub }]}>{caption}</Text>
         ) : null}
       </View>
-      {trailing ??
-        (chevron ? (
-          <MitzvahIcon name={forwardIcon(language)} size={16} color={colors.textMuted} strokeWidth={2.5} />
-        ) : null)}
+    </>
+  );
+  if (trailing) {
+    return (
+      <View style={[styles.split, dim, style]}>
+        <Pressable {...pressableProps} style={styles.main}>
+          {content}
+        </Pressable>
+        <View style={styles.trailing}>{trailing}</View>
+      </View>
+    );
+  }
+  return (
+    <Pressable {...pressableProps} style={[styles.row, dim, style]}>
+      {content}
+      {chevron ? (
+        <MitzvahIcon name={forwardIcon(language)} size={16} color={colors.textMuted} strokeWidth={2.5} />
+      ) : null}
     </Pressable>
   );
 }
@@ -70,6 +85,24 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.lg,
+  },
+  split: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+  },
+  main: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingStart: spacing.lg,
+    paddingEnd: spacing.md,
+    paddingVertical: spacing.lg,
+  },
+  trailing: {
+    justifyContent: 'center',
+    paddingEnd: spacing.lg,
   },
   meta: {
     flex: 1,

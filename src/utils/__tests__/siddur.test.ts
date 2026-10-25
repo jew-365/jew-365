@@ -2,21 +2,43 @@ import { HDate, months } from '@hebcal/core';
 import {
   aloneFolds,
   autoScrollPixelsPerSecond,
+  catalogListsText,
+  chanukahDay,
+  chanukahNightOn,
   dayFeatures,
+  FEMALE_HIDDEN_TEXTS,
+  firstPlace,
   forMaritalStatus,
+  forVoice,
+  isTextStart,
   liturgicalDay,
   matchesCondition,
   pickerEntries,
   pickerEntryAt,
+  placeAt,
+  placeTarget,
   resolveSiddurText,
   segmentBlocks,
+  segmentLead,
   siddurLineHeight,
+  ushpizinNight,
 } from '../siddur';
-import { DayFeatures, DayFlag, PassageLabel, Place, SiddurSection, SiddurSegment, SiddurText } from '@/types/siddur';
+import { CITIES } from '@/data/cities';
+import {
+  DayFeatures,
+  DayFlag,
+  PassageLabel,
+  Place,
+  Run,
+  SiddurSection,
+  SiddurSegment,
+  SiddurText,
+} from '@/types/siddur';
 import type { PrayerMode } from '@/stores/useUserStore';
 
 const ISRAEL: Place = { inIsrael: true, jerusalem: false };
 const DIASPORA: Place = { inIsrael: false, jerusalem: false };
+const JERUSALEM_PLACE: Place = { inIsrael: true, jerusalem: true, location: CITIES[0] };
 
 function hasAll(flags: ReadonlySet<DayFlag>, expected: DayFlag[]): boolean {
   return expected.every((flag) => flags.has(flag));
@@ -64,6 +86,92 @@ describe('liturgicalDay', () => {
     const lateFriday = new Date(2026, 9, 9, 23, 45);
     expect(liturgicalDay(lateFriday, true).isSameDate(liturgicalDay(friday, true))).toBe(true);
     expect(liturgicalDay(lateFriday, false).isSameDate(liturgicalDay(friday, false))).toBe(true);
+  });
+});
+
+describe('chanukahDay', () => {
+  const first = new HDate(25, months.KISLEV, 5787);
+
+  it('counts 1 to 8 from 25 Kislev and is null on either side', () => {
+    expect([first.prev(), first, first.add(5), first.add(7), first.add(8)].map(chanukahDay)).toEqual([
+      null,
+      1,
+      6,
+      8,
+      null,
+    ]);
+    expect(chanukahDay(new HDate(2, months.TEVET, 5787))).toBe(8);
+  });
+
+  it('runs to 3 Tevet when Kislev has 29 days', () => {
+    expect(chanukahDay(new HDate(3, months.TEVET, 5784))).toBe(8);
+    expect(chanukahDay(new HDate(4, months.TEVET, 5784))).toBeNull();
+  });
+
+  it('is null on days far from Chanukah', () => {
+    expect(
+      [new HDate(1, months.TISHREI, 5787), new HDate(24, months.KISLEV, 5787), new HDate(15, months.NISAN, 5787)].map(
+        chanukahDay,
+      ),
+    ).toEqual([null, null, null]);
+  });
+});
+
+describe('ushpizinNight', () => {
+  const erev = new HDate(14, months.TISHREI, 5787);
+
+  it('counts 1 to 7 from 15 Tishrei and is null on Erev Sukkot and Shemini Atzeret', () => {
+    expect([0, 1, 2, 3, 4, 5, 6, 7, 8].map((offset) => ushpizinNight(erev.add(offset)))).toEqual([
+      null,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      null,
+    ]);
+  });
+
+  it('is null on the same dates of other months', () => {
+    expect(
+      [new HDate(15, months.NISAN, 5787), new HDate(21, months.CHESHVAN, 5787), new HDate(15, months.ELUL, 5786)].map(
+        ushpizinNight,
+      ),
+    ).toEqual([null, null, null]);
+  });
+
+  it('sets sukkotNight and the night’s own flag, the same in Israel and abroad', () => {
+    for (const place of [ISRAEL, { inIsrael: false, jerusalem: false }]) {
+      for (let night = 1; night <= 7; night++) {
+        const flags = [...dayFeatures(erev.add(night), place).flags];
+        expect(flags).toContain('sukkotNight');
+        expect(flags.filter((flag) => flag.startsWith('ushpizinNight'))).toEqual([`ushpizinNight${night}`]);
+      }
+      for (const hd of [erev, erev.add(8)]) {
+        expect([...dayFeatures(hd, place).flags].filter((flag) => /^(sukkotNight|ushpizinNight)/.test(flag))).toEqual(
+          [],
+        );
+      }
+    }
+  });
+});
+
+describe('chanukahNightOn', () => {
+  it('names the night lit on the evening of each calendar day of Chanukah 5787, and null on the evenings either side', () => {
+    const evenings = Array.from({ length: 10 }, (_, i) => new Date(2026, 11, 3 + i));
+    expect(evenings.map((day) => chanukahNightOn(day))).toEqual([null, 1, 2, 3, 4, 5, 6, 7, 8, null]);
+  });
+
+  it('lights the eighth night on the evening that opens 3 Tevet when Kislev has 29 days', () => {
+    expect(chanukahNightOn(new Date(2023, 11, 14))).toBe(8);
+    expect(chanukahNightOn(new Date(2023, 11, 15))).toBeNull();
+  });
+
+  it('ignores the clock time the day carries', () => {
+    expect(chanukahNightOn(new Date(2026, 11, 7, 0, 5))).toBe(4);
+    expect(chanukahNightOn(new Date(2026, 11, 7, 23, 45))).toBe(4);
   });
 });
 
@@ -179,14 +287,17 @@ describe('dayFeatures', () => {
     expect(on(first.add(8)).has('chanukah')).toBe(false);
   });
 
-  it('marks the first night of Chanukah, the Kiddush Levana days and Av before the observed Tisha B’Av', () => {
+  it('marks the first night of Chanukah, the Kiddush Levana nights and Av before the observed Tisha B’Av', () => {
     expect(at(25, months.KISLEV, 5787).has('chanukahFirstNight')).toBe(true);
     expect(at(26, months.KISLEV, 5787).has('chanukahFirstNight')).toBe(false);
     expect(at(24, months.KISLEV, 5787).has('chanukahFirstNight')).toBe(false);
-    expect(at(2, months.CHESHVAN, 5787).has('kiddushLevana')).toBe(false);
-    expect(at(3, months.CHESHVAN, 5787).has('kiddushLevana')).toBe(true);
-    expect(at(15, months.CHESHVAN, 5787).has('kiddushLevana')).toBe(true);
-    expect(at(16, months.CHESHVAN, 5787).has('kiddushLevana')).toBe(false);
+    expect(at(3, months.CHESHVAN, 5787, JERUSALEM_PLACE).has('kiddushLevanaAshkenaz')).toBe(false);
+    expect(at(4, months.CHESHVAN, 5787, JERUSALEM_PLACE).has('kiddushLevanaAshkenaz')).toBe(true);
+    expect(at(15, months.CHESHVAN, 5787, JERUSALEM_PLACE).has('kiddushLevanaAshkenaz')).toBe(true);
+    expect(at(16, months.CHESHVAN, 5787, JERUSALEM_PLACE).has('kiddushLevanaAshkenaz')).toBe(false);
+    expect(at(7, months.CHESHVAN, 5787, JERUSALEM_PLACE).has('kiddushLevanaSefard')).toBe(false);
+    expect(at(8, months.CHESHVAN, 5787, JERUSALEM_PLACE).has('kiddushLevanaSefard')).toBe(true);
+    expect(at(10, months.CHESHVAN, 5787).has('kiddushLevanaAshkenaz')).toBe(false);
     expect(new HDate(9, months.AV, 5786).getDay()).not.toBe(6);
     expect(at(9, months.AV, 5786).has('avBeforeTishaBav')).toBe(true);
     expect(at(10, months.AV, 5786).has('avBeforeTishaBav')).toBe(false);
@@ -884,6 +995,238 @@ describe('forMaritalStatus', () => {
       expect(kept[2].segments[1].optional).toBe(marriedOnly);
     }
   });
+
+  it('drops a run only a married reader reads for a single reader, and keeps it otherwise', () => {
+    const runs: Run[] = [
+      { t: 'אוֹתִי ' },
+      { t: '(וְאֶת אִשְׁתִּי/בַּעֲלִי) ', voice: ['unset'] },
+      { t: 'וְאֶת אִשְׁתִּי ', voice: ['male'], marriedOnly: true },
+      { t: 'וְאֶת בַּעֲלִי ', voice: ['female'], marriedOnly: true },
+      { t: 'וְאֶת כָּל אֲשֶׁר לִי' },
+    ];
+    const input = [section('הרחמן', [{ he: [runs] }])];
+    const joined = (status: 'married' | 'single' | null, voice: 'male' | 'female' | null) =>
+      forVoice(forMaritalStatus(input, status), voice)[0]
+        .segments[0].he[0].map((run) => run.t)
+        .join('');
+    expect(forMaritalStatus(input, 'married')).toBe(input);
+    expect(forMaritalStatus(input, null)).toBe(input);
+    expect(forMaritalStatus(input, 'single')[0].segments[0].he[0].some((run) => run.marriedOnly)).toBe(false);
+    expect(joined('married', 'male')).toBe('אוֹתִי וְאֶת אִשְׁתִּי וְאֶת כָּל אֲשֶׁר לִי');
+    expect(joined(null, 'male')).toBe('אוֹתִי וְאֶת אִשְׁתִּי וְאֶת כָּל אֲשֶׁר לִי');
+    expect(joined('married', 'female')).toBe('אוֹתִי וְאֶת בַּעֲלִי וְאֶת כָּל אֲשֶׁר לִי');
+    expect(joined('single', 'male')).toBe('אוֹתִי וְאֶת כָּל אֲשֶׁר לִי');
+    expect(joined('single', 'female')).toBe('אוֹתִי וְאֶת כָּל אֲשֶׁר לִי');
+    expect(joined('single', null)).toBe('אוֹתִי (וְאֶת אִשְׁתִּי/בַּעֲלִי) וְאֶת כָּל אֲשֶׁר לִי');
+  });
+});
+
+describe('forVoice', () => {
+  const women: PassageLabel = { he: 'נשים אומרות', en: 'Women say', voice: 'female' };
+  const men: PassageLabel = { he: 'אנשים אומרים', en: 'Men say', voice: 'male' };
+  const someSay: PassageLabel = { he: 'יש אומרים', en: 'Some say' };
+  const said = (t: string, optional?: PassageLabel): SiddurSegment => ({
+    he: [[{ t }]],
+    ...(optional ? { optional } : {}),
+  });
+  const section = (he: string, segments: SiddurSegment[], optional?: PassageLabel): SiddurSection => ({
+    title: { he, en: he },
+    ...(optional ? { optional } : {}),
+    segments,
+  });
+  const plain = section('קדיש', [said('יתגדל')]);
+  const modeh = section('מודה אני', [
+    {
+      he: [[{ t: 'מוֹדֶה', voice: ['male', 'unset'] }, { t: 'מוֹדָה', voice: ['female'] }, { t: ' אֲנִי לְפָנֶיךָ' }]],
+    },
+  ]);
+  const blessings = section('ברכות השחר', [
+    said('שלא עשני גוי'),
+    said('שעשני כרצונו', women),
+    said('יש אומרים', someSay),
+    said('ברכה לאנשים', men),
+  ]);
+  const womenOnly = section('לנשים', [said('תפילה לנשים')], women);
+  const line = (segment: SiddurSegment) => segment.he[0].map((run) => run.t).join('');
+  const titles = (list: SiddurSection[]) => list.map((candidate) => candidate.title.he);
+  const texts = (list: SiddurSection[]) => list[0].segments.map(line);
+
+  it('returns the same sections for a text with no voice', () => {
+    for (const voice of [null, 'male', 'female'] as const) {
+      const input = [plain];
+      expect(forVoice(input, voice)).toBe(input);
+    }
+  });
+
+  it("reads the printed alternative with no voice and the voice's own with one", () => {
+    expect(line(forVoice([modeh], null)[0].segments[0])).toBe('מוֹדֶה אֲנִי לְפָנֶיךָ');
+    expect(line(forVoice([modeh], 'male')[0].segments[0])).toBe('מוֹדֶה אֲנִי לְפָנֶיךָ');
+    expect(line(forVoice([modeh], 'female')[0].segments[0])).toBe('מוֹדָה אֲנִי לְפָנֶיךָ');
+  });
+
+  it('shows a note meant for a reader with no voice only to that reader', () => {
+    const noted = section('מודה אני', [
+      {
+        he: [
+          [
+            { t: 'מוֹדֶה', voice: ['male', 'unset'] },
+            { t: ' (האשה אומרת: מודה)', s: 'n', voice: ['unset'] },
+            { t: 'מוֹדָה', voice: ['female'] },
+          ],
+        ],
+      },
+    ]);
+    expect(line(forVoice([noted], null)[0].segments[0])).toBe('מוֹדֶה (האשה אומרת: מודה)');
+    expect(line(forVoice([noted], 'male')[0].segments[0])).toBe('מוֹדֶה');
+    expect(line(forVoice([noted], 'female')[0].segments[0])).toBe('מוֹדָה');
+  });
+
+  it('leaves a single space where a voiced word was dropped', () => {
+    const between = section('ברכה', [{ he: [[{ t: 'ברוך ' }, { t: 'אתה', voice: ['female'] }, { t: ' ה׳' }]] }]);
+    expect(line(forVoice([between], 'male')[0].segments[0])).toBe('ברוך ה׳');
+  });
+
+  it('leaves no stray space at the edge where a voiced run was dropped', () => {
+    const edge = section('מודה', [{ he: [[{ t: 'מוֹדָה', voice: ['female'] }, { t: ' אֲנִי' }]] }]);
+    expect(forVoice([edge], 'male')[0].segments[0].he[0]).toEqual([{ t: 'אֲנִי' }]);
+  });
+
+  it('drops a paragraph, a segment and a section left empty by the voice', () => {
+    const femaleLine = section('נוסח אישה', [{ he: [[{ t: 'מוֹדָה', voice: ['female'] }]] }]);
+    const twoLines = section('שתי שורות', [
+      { he: [[{ t: 'שורה לכולם' }], [{ t: 'שורה לאישה', voice: ['female'] }]] },
+      { he: [[{ t: 'קטע לאישה', voice: ['female'] }]] },
+    ]);
+    const input = [femaleLine, twoLines];
+    for (const voice of ['male', null] as const) {
+      const kept = forVoice(input, voice);
+      expect(titles(kept)).toEqual(['שתי שורות']);
+      expect(kept[0].segments).toHaveLength(1);
+      expect(kept[0].segments[0].he).toEqual([[{ t: 'שורה לכולם' }]]);
+    }
+    const kept = forVoice(input, 'female');
+    expect(titles(kept)).toEqual(['נוסח אישה', 'שתי שורות']);
+    expect(kept[1].segments).toHaveLength(2);
+    expect(kept[1].segments[0].he).toHaveLength(2);
+  });
+
+  it('opens a voiced passage for its voice, hides it from the other and keeps it folded with no voice', () => {
+    const input = [blessings];
+    const female = forVoice(input, 'female');
+    expect(texts(female)).toEqual(['שלא עשני גוי', 'שעשני כרצונו', 'יש אומרים']);
+    expect(female[0].segments[1].optional).toBeUndefined();
+    expect(female[0].segments[2].optional).toBe(someSay);
+    expect(female[0].segments[0]).toBe(blessings.segments[0]);
+
+    const male = forVoice(input, 'male');
+    expect(texts(male)).toEqual(['שלא עשני גוי', 'יש אומרים', 'ברכה לאנשים']);
+    expect(male[0].segments[2].optional).toBeUndefined();
+
+    const unset = forVoice(input, null);
+    expect(unset).toBe(input);
+    expect(unset[0].segments[1].optional).toBe(women);
+    expect(unset[0].segments[3].optional).toBe(men);
+  });
+
+  it('treats a section label the same way', () => {
+    const input = [plain, womenOnly];
+    const female = forVoice(input, 'female');
+    expect(female).toHaveLength(2);
+    expect(female[1].optional).toBeUndefined();
+    expect(female[1].title.he).toBe('לנשים');
+    expect(female[0]).toBe(plain);
+    expect(titles(forVoice(input, 'male'))).toEqual(['קדיש']);
+    expect(forVoice(input, null)).toBe(input);
+  });
+
+  it('keeps each voice through resolveSiddurText, as the reader chains them', () => {
+    const text: SiddurText = {
+      nusach: 'ashkenaz',
+      id: 'shacharit',
+      credits: [],
+      sections: [
+        {
+          title: { he: 'ברכות השחר', en: 'Morning blessings' },
+          segments: [modeh.segments[0], { he: [[{ t: 'שעשני כרצונו' }]], optional: women }],
+        },
+      ],
+    };
+    const resolved = resolveSiddurText(text, features([]));
+    expect(resolved[0].segments[0].he[0]).toEqual([
+      { t: 'מוֹדֶה', voice: ['male', 'unset'] },
+      { t: 'מוֹדָה', voice: ['female'] },
+      { t: ' אֲנִי לְפָנֶיךָ' },
+    ]);
+    expect(resolved[0].segments[1].optional).toEqual(women);
+    const female = forVoice(resolved, 'female');
+    expect(line(female[0].segments[0])).toBe('מוֹדָה אֲנִי לְפָנֶיךָ');
+    expect(female[0].segments[1].optional).toBeUndefined();
+  });
+
+  it('joins the runs a voice leaves, so a reader with no voice reads the printed runs', () => {
+    const runs: Run[] = [
+      { t: 'מוֹדֶה', s: 'b', voice: ['male', 'unset'] },
+      { t: 'מוֹדָה', s: 'b', voice: ['female'] },
+      { t: ' ', voice: ['unset'] },
+      { t: 'האשה אומרת: מוֹדָה', s: 'n', voice: ['unset'] },
+      { t: ' אֲנִי' },
+    ];
+    const input = [section('מודה אני', [{ he: [runs] }])];
+    expect(forVoice(input, null)[0].segments[0].he[0]).toEqual([
+      { t: 'מוֹדֶה ', s: 'b' },
+      { t: 'האשה אומרת: מוֹדָה', s: 'n' },
+      { t: ' אֲנִי' },
+    ]);
+    expect(forVoice(input, 'female')[0].segments[0].he[0]).toEqual([{ t: 'מוֹדָה', s: 'b' }, { t: ' אֲנִי' }]);
+    expect(forVoice([modeh], null)[0].segments[0].he[0]).toEqual([{ t: 'מוֹדֶה אֲנִי לְפָנֶיךָ' }]);
+  });
+
+  it('strips the voice from a segment every voice but one reads, and drops it for that one', () => {
+    const notForWomen = section('ברכות השחר', [
+      { he: [[{ t: 'שלא עשני אשה', voice: ['male', 'unset'] }]] },
+      said('פוקח עורים'),
+    ]);
+    for (const voice of [null, 'male'] as const) {
+      expect(forVoice([notForWomen], voice)[0].segments[0].he).toEqual([[{ t: 'שלא עשני אשה' }]]);
+    }
+    expect(texts(forVoice([notForWomen], 'female'))).toEqual(['פוקח עורים']);
+  });
+
+  it('folds a passage only for the voice its label folds for, and reads it open for the other voice and with no voice', () => {
+    const counts: PassageLabel = {
+      he: 'נשים סופרות בלי ברכה',
+      en: 'Women count without a blessing',
+      foldsFor: 'female',
+    };
+    const bySegment = section('ספירה', [said('לפני'), said('וצונו על ספירת העמר', counts), said('אחרי')]);
+    const bySection = section('ספירת העומר', [said('וצונו')], counts);
+    const input = [bySegment, bySection];
+    const female = forVoice(input, 'female');
+    expect(female).toBe(input);
+    expect(female[0].segments[1].optional).toBe(counts);
+    expect(female[1].optional).toBe(counts);
+    for (const voice of ['male', null] as const) {
+      const open = forVoice(input, voice);
+      expect(open[0].segments[1].optional).toBeUndefined();
+      expect(open[1].optional).toBeUndefined();
+      expect(texts(open)).toEqual(['לפני', 'וצונו על ספירת העמר', 'אחרי']);
+      expect(open[0].segments[0]).toBe(bySegment.segments[0]);
+      expect(open[0].segments[2]).toBe(bySegment.segments[2]);
+      expect(line(open[1].segments[0])).toBe('וצונו');
+    }
+  });
+});
+
+describe('catalogListsText', () => {
+  it('leaves only the tefillin text out of the catalog, and only for a female voice', () => {
+    expect(catalogListsText('tefillin', 'female')).toBe(false);
+    expect(catalogListsText('tefillin', 'male')).toBe(true);
+    expect(catalogListsText('tefillin', null)).toBe(true);
+    for (const id of ['shacharit', 'birchot_hashachar', 'tehillim'] as const) {
+      expect(catalogListsText(id, 'female')).toBe(true);
+    }
+    expect(FEMALE_HIDDEN_TEXTS).toEqual(['tefillin']);
+  });
 });
 
 describe('pickerEntries', () => {
@@ -927,5 +1270,114 @@ describe('pickerEntries', () => {
     const entries = pickerEntries(sections);
     expect(entries).toEqual([{ index: 1, title: { he: 'ברכות השחר', en: 'ברכות השחר' } }]);
     expect(pickerEntryAt(entries, sections, 0)).toEqual({ index: 0, title: { he: 'הקדמה', en: 'הקדמה' } });
+  });
+});
+
+describe('reader places', () => {
+  const KEYED: SiddurSection[] = [
+    {
+      title: { he: 'פתיחה', en: 'Opening' },
+      segments: [
+        { key: 'k-open-1', he: [[{ t: 'אֶחָד שְׁנַיִם שְׁלֹשָׁה אַרְבַּע' }]] },
+        { key: 'k-open-2', he: [[{ t: 'חֲמִשָּׁה שִׁשָּׁה' }]] },
+      ],
+    },
+    {
+      title: { he: 'אמצע', en: 'Middle' },
+      segments: [
+        { key: 'k-mid-1', he: [[{ t: 'הוראה ', s: 'n' }, { t: 'בָּרוּךְ אַתָּה יְהוָה אֱלֹהֵינוּ' }]] },
+        { key: 'k-mid-2', he: [[{ t: 'שְׁמַע יִשְׂרָאֵל יְהוָה אֱלֹהֵינוּ' }]] },
+      ],
+    },
+  ];
+  const HEIGHTS: Record<string, number> = { פתיחה: 300, אמצע: 400 };
+  const OFFSETS: Record<string, number> = { 'k-open-1': 16, 'k-open-2': 120, 'k-mid-1': 60, 'k-mid-2': 150 };
+  const LIST_TOP = 16;
+  const height = (title: string): number | undefined => HEIGHTS[title];
+  const offset = (key: string): number | undefined => OFFSETS[key];
+  const placeAtTop = (viewportTop: number, heightOf = height, offsetOf = offset) =>
+    placeAt(KEYED, heightOf, offsetOf, LIST_TOP, viewportTop);
+
+  it('keeps the segment keys through the day, marital status and voice', () => {
+    const text: SiddurText = {
+      id: 'shacharit',
+      credits: [],
+      sections: [
+        {
+          title: { he: 'חלק', en: 'Part' },
+          segments: [
+            { key: 'k1', he: [[{ t: 'א' }]] },
+            { key: 'k2', he: [[{ t: 'ב' }]], when: { all: ['shabbat'] } },
+            {
+              key: 'k3',
+              he: [[{ t: 'מוֹדֶה', voice: ['male', 'unset'] }, { t: 'מוֹדָה', voice: ['female'] }, { t: ' אֲנִי' }]],
+            },
+            { key: 'k4', he: [[{ t: 'לנשואים', marriedOnly: true }, { t: 'לכולם' }]] },
+          ],
+        },
+      ],
+    };
+    const resolved = forVoice(
+      forMaritalStatus(resolveSiddurText(text, dayFeatures(new HDate(9, months.CHESHVAN, 5787), ISRAEL)), 'single'),
+      'female',
+    );
+    expect(resolved[0].segments.map((segment) => segment.key)).toEqual(['k1', 'k3', 'k4']);
+  });
+
+  it('leads a segment with its first said words', () => {
+    expect(segmentLead(KEYED[1].segments[0])).toBe('בָּרוּךְ אַתָּה יְהוָה');
+    expect(segmentLead({ he: [[{ t: 'שִׁיר' }], [{ t: 'הַמַּעֲלוֹת לְדָוִד' }]] })).toBe('שִׁיר הַמַּעֲלוֹת לְדָוִד');
+    expect(segmentLead({ he: [[{ t: 'אומרים כאן קדיש', s: 'n' }]] })).toBe('אומרים כאן קדיש');
+    expect(segmentLead({ he: [[{ t: 'אָמֵן' }]] })).toBe('אָמֵן');
+    expect(segmentLead(KEYED[1].segments[1], 1)).toBe('שְׁמַע');
+  });
+
+  it('names the first keyed segment of a section', () => {
+    const section: SiddurSection = {
+      title: { he: 'ס', en: 'S' },
+      segments: [{ he: [[{ t: 'א' }]] }, { key: 'b', he: [[{ t: 'ב' }]] }],
+    };
+    expect(firstPlace(section)).toEqual({ sectionTitle: 'ס', segmentKey: 'b' });
+    expect(firstPlace({ title: { he: 'ס', en: 'S' }, segments: [{ he: [[{ t: 'א' }]] }] })).toBeNull();
+  });
+
+  it('knows the start of a text from its first keyed segment', () => {
+    expect(isTextStart(KEYED, { sectionTitle: 'פתיחה', segmentKey: 'k-open-1' })).toBe(true);
+    expect(isTextStart(KEYED, { sectionTitle: 'פתיחה', segmentKey: 'k-open-2' })).toBe(false);
+    const unkeyed: SiddurSection = { title: { he: 'בלי', en: 'None' }, segments: [{ he: [[{ t: 'א' }]] }] };
+    expect(isTextStart([unkeyed, ...KEYED], { sectionTitle: 'פתיחה', segmentKey: 'k-open-1' })).toBe(true);
+  });
+
+  it('finds the segment at the top of the screen from measured heights and offsets', () => {
+    expect(placeAtTop(476)).toEqual({ sectionTitle: 'אמצע', segmentKey: 'k-mid-2' });
+    expect(placeAtTop(465)).toEqual({ sectionTitle: 'אמצע', segmentKey: 'k-mid-2' });
+    expect(placeAtTop(464)).toEqual({ sectionTitle: 'אמצע', segmentKey: 'k-mid-1' });
+    expect(placeAtTop(200)).toEqual({ sectionTitle: 'פתיחה', segmentKey: 'k-open-2' });
+    expect(placeAtTop(0)).toEqual({ sectionTitle: 'פתיחה', segmentKey: 'k-open-1' });
+    expect(placeAtTop(2000)).toBeNull();
+  });
+
+  it('gives no place while a section above the screen is unmeasured', () => {
+    expect(placeAtTop(476, (title) => (title === 'פתיחה' ? undefined : HEIGHTS[title]))).toBeNull();
+  });
+
+  it('falls back to the previous segment when the next one is unmeasured', () => {
+    expect(placeAtTop(476, height, (key) => (key === 'k-mid-2' ? undefined : OFFSETS[key]))).toEqual({
+      sectionTitle: 'אמצע',
+      segmentKey: 'k-mid-1',
+    });
+  });
+
+  it('targets a place by its key, else by its section, else nothing', () => {
+    expect(placeTarget(KEYED, { sectionTitle: 'אמצע', segmentKey: 'k-mid-2' })).toEqual({
+      index: 1,
+      segmentKey: 'k-mid-2',
+    });
+    expect(placeTarget(KEYED, { sectionTitle: 'פתיחה', segmentKey: 'k-mid-2' })).toEqual({
+      index: 1,
+      segmentKey: 'k-mid-2',
+    });
+    expect(placeTarget(KEYED, { sectionTitle: 'אמצע', segmentKey: 'gone' })).toEqual({ index: 1, segmentKey: null });
+    expect(placeTarget(KEYED, { sectionTitle: 'נעלם', segmentKey: 'gone' })).toBeNull();
   });
 });

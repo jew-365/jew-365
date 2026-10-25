@@ -216,7 +216,7 @@ describe('weekSummary', () => {
     expect([finished.done, finished.missed, finished.pending]).toEqual([9, 11, 1]);
   });
 
-  it('settles a skipped item at once as a miss, and ignores a mitzvah switched on after the week', () => {
+  it('settles a skipped item at once as a miss, and judges no unmarked day of a mitzvah switched on after the week, while its marks still count', () => {
     const skipped = weekSummary(
       input({ skipped: { '2026-11-13': { mincha: 1 } } }),
       WEEK_START,
@@ -231,7 +231,8 @@ describe('weekSummary', () => {
       SHABBAT_NOACH,
       MONDAY_AFTER,
     );
-    expect(lateMaariv.perMitzvah.map((entry) => entry.id).sort()).toEqual(['mincha', 'shacharit']);
+    expect(lateMaariv.perMitzvah.map((entry) => entry.id).sort()).toEqual(['maariv', 'mincha', 'shacharit']);
+    expect(lateMaariv.perMitzvah.find((entry) => entry.id === 'maariv')).toMatchObject({ done: 2, missed: 0 });
   });
 
   it('has no best day and nothing to improve in a week with no mitzvot, or a week without a miss', () => {

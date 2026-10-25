@@ -1,6 +1,9 @@
 import { buildDayTimeline, currentOrNextWindow } from '../buildDayTimeline';
 import { computeStats } from '../historyStats';
 import {
+  FOLLOW_UP_MAX_MIN,
+  HEADS_UP_MAX_MIN,
+  blockExitsWithin,
   holyBlockLabelKeys,
   isQuietAt,
   isSkipped,
@@ -9,12 +12,15 @@ import {
   nextQuietBoundary,
   observanceFor,
   quietBlockAt,
+  reminderFires,
+  skipsIfDone,
 } from '../skipRules';
 import { findMitzvah } from '@/data/mitzvot';
 import { CITIES } from '@/data/cities';
 import { HebcalService } from '@/services/HebcalService';
 import { UserSettings } from '@/types/mitzvah';
-import { at } from '@/testing/zmanim';
+import { at, zmanimFor } from '@/testing/zmanim';
+import { calendarDay } from '@/utils/checkIn';
 
 const JERUSALEM = CITIES[0];
 const NEW_YORK = CITIES.find((city) => city.nameEn === 'New York')!;
@@ -222,5 +228,101 @@ describe('skipRules', () => {
     expect(stats.daily.find((day) => day.date === '2027-10-18')).toMatchObject({ totalCount: 1, pendingCount: 0 });
     expect(stats.perMitzvah.tefillin.eligible).toBe(0);
     expect(stats.perMitzvah.shacharit.eligible).toBeGreaterThanOrEqual(1);
+  });
+
+  describe('reminderFires', () => {
+    const window = { start: at(JERUSALEM, '2026-04-23T10:00'), end: at(JERUSALEM, '2026-04-23T11:00') };
+    const before = at(JERUSALEM, '2026-04-23T00:00');
+
+    it('accepts a heads-up up to 180 minutes before the window and nothing earlier', () => {
+      expect(HEADS_UP_MAX_MIN).toBe(180);
+      expect(reminderFires(at(JERUSALEM, '2026-04-23T07:00'), window, JERUSALEM, before)).toBe(true);
+      expect(reminderFires(at(JERUSALEM, '2026-04-23T06:59'), window, JERUSALEM, before)).toBe(false);
+    });
+
+    it('accepts the window itself and nothing after its end', () => {
+      expect(reminderFires(window.start, window, JERUSALEM, before)).toBe(true);
+      expect(reminderFires(window.end, window, JERUSALEM, before)).toBe(true);
+      expect(reminderFires(minutesFrom(window.end, 1), window, JERUSALEM, before)).toBe(false);
+    });
+
+    it('never fires at or before now', () => {
+      expect(reminderFires(window.start, window, JERUSALEM, window.start)).toBe(false);
+    });
+
+    it('never fires a heads-up strictly inside a holy block, and does at its exit', () => {
+      const block = HebcalService.holyBlockAt(SHABBAT_NOON, JERUSALEM)!;
+      const after = { start: minutesFrom(block.end, 60), end: minutesFrom(block.end, 120) };
+      const friday = at(JERUSALEM, '2026-04-24T08:00');
+      expect(reminderFires(minutesFrom(block.end, -1), after, JERUSALEM, friday)).toBe(false);
+      expect(reminderFires(block.end, after, JERUSALEM, friday)).toBe(true);
+    });
+
+    describe('a follow-up after the window', () => {
+      it('fires from one minute to 720 minutes after the end and at no other time', () => {
+        expect(FOLLOW_UP_MAX_MIN).toBe(720);
+        expect(reminderFires(minutesFrom(window.end, 1), window, JERUSALEM, before, 'followUp')).toBe(true);
+        expect(reminderFires(minutesFrom(window.end, 720), window, JERUSALEM, before, 'followUp')).toBe(true);
+        expect(reminderFires(minutesFrom(window.end, 721), window, JERUSALEM, before, 'followUp')).toBe(false);
+        expect(reminderFires(window.end, window, JERUSALEM, before, 'followUp')).toBe(false);
+        expect(reminderFires(window.start, window, JERUSALEM, before, 'followUp')).toBe(false);
+      });
+
+      it.each(['start', 'end', 'clock'] as const)('is dropped for a %s reminder', (anchor) => {
+        expect(reminderFires(minutesFrom(window.end, 1), window, JERUSALEM, before, anchor)).toBe(false);
+      });
+
+      it('is dropped inside a holy block and kept before it', () => {
+        const friday = { start: at(JERUSALEM, '2026-04-24T10:00'), end: at(JERUSALEM, '2026-04-24T11:00') };
+        const thursday = at(JERUSALEM, '2026-04-24T00:00');
+        expect(reminderFires(at(JERUSALEM, '2026-04-24T12:00'), friday, JERUSALEM, thursday, 'followUp')).toBe(true);
+        expect(reminderFires(at(JERUSALEM, '2026-04-24T21:00'), friday, JERUSALEM, thursday, 'followUp')).toBe(false);
+      });
+    });
+  });
+
+  describe('a blockExit reminder and the exits inside a window', () => {
+    const levana = findMitzvah('kiddush_levana')!;
+    const window = levana.computeWindow({
+      date: calendarDay('2026-10-14'),
+      location: JERUSALEM,
+      settings: SETTINGS,
+      zmanim: zmanimFor(at(JERUSALEM, '2026-10-14T12:00'), JERUSALEM),
+    })!;
+    const before = at(JERUSALEM, '2026-10-14T10:00');
+    const exitOn = (iso: string) => HebcalService.holyBlockOn(at(JERUSALEM, `${iso}T12:00`), JERUSALEM)!.end;
+
+    it('fires after the window opens, up to and including its end, and never inside a block', () => {
+      const fires = (trigger: Date) => reminderFires(trigger, window, JERUSALEM, before, 'blockExit');
+      expect(fires(window.start)).toBe(false);
+      expect(fires(minutesFrom(window.start, 1))).toBe(true);
+      expect(fires(window.end)).toBe(true);
+      expect(fires(minutesFrom(window.end, 1))).toBe(false);
+      expect(fires(at(JERUSALEM, '2026-10-17T12:00'))).toBe(false);
+    });
+
+    it('takes no heads-up before the window, as a start reminder does', () => {
+      const early = minutesFrom(window.start, -60);
+      expect(reminderFires(early, window, JERUSALEM, before, 'blockExit')).toBe(false);
+      expect(reminderFires(early, window, JERUSALEM, before, 'start')).toBe(true);
+    });
+
+    it('lists the exits of the blocks that end strictly inside the window, in order', () => {
+      const first = exitOn('2026-10-17');
+      const second = exitOn('2026-10-24');
+      expect(blockExitsWithin(window, JERUSALEM)).toEqual([first, second]);
+      expect(blockExitsWithin({ start: first, end: window.end }, JERUSALEM)).toEqual([second]);
+      expect(blockExitsWithin({ start: window.start, end: second }, JERUSALEM)).toEqual([first]);
+    });
+  });
+
+  describe('skipsIfDone', () => {
+    it('is true for every follow-up and only for the other anchors that ask for it', () => {
+      expect(skipsIfDone({ anchor: 'followUp' })).toBe(true);
+      expect(skipsIfDone({ anchor: 'followUp', skipIfDone: false })).toBe(true);
+      expect(skipsIfDone({ anchor: 'end', skipIfDone: true })).toBe(true);
+      expect(skipsIfDone({ anchor: 'end' })).toBe(false);
+      expect(skipsIfDone({ anchor: 'start', skipIfDone: false })).toBe(false);
+    });
   });
 });

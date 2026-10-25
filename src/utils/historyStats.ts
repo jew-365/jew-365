@@ -3,7 +3,7 @@ import { Location } from '@/types/zmanim';
 import { ZmanimService } from '@/services/ZmanimService';
 import { isSkippedAt } from '@/utils/skipRules';
 import { appDay, appDayEnd, locationNoon } from '@/utils/locationDay';
-import { blockForDay, checkInPending, overlapsBlock, wasEnabledBy } from '@/utils/checkIn';
+import { blockForDay, checkInPending, trackedOn, waitsInCheckIn } from '@/utils/checkIn';
 import { ArchivedDays, CheckIns, Completions, dateKey, isArchivedDay } from '@/stores/useCompletionsStore';
 
 export type HistoryStats = {
@@ -38,7 +38,8 @@ export function addDays(day: Date, days: number): Date {
 // long as it can still be marked: until its day ends at the next alot, or — when its window reaches
 // into a Shabbat / Yom Tov block — until that block's check-in is finished or its deadline passes.
 // Only then can a missing mark count against the user. A skip settles it at once, and a mitzvah
-// switched on after the day ended is not judged on it.
+// whose window ended unmarked before it was switched on is not judged on it, while a done mark always counts
+// (`trackedOn()`), the install day's morning included.
 export function judgeDay(day: Date, input: HistoryInput, now: Date): DayVerdict {
   const key = dateKey(day);
   const verdict: DayVerdict = { key, done: [], missed: [], pending: [] };
@@ -51,9 +52,9 @@ export function judgeDay(day: Date, input: HistoryInput, now: Date): DayVerdict 
   const skippedMap = input.skipped?.[key] ?? {};
   let block: ReturnType<typeof blockForDay> | undefined;
   for (const mitzvah of input.mitzvot) {
-    if (!wasEnabledBy(mitzvah, dayEnd, input.enabledSince)) continue;
     const window = mitzvah.computeWindow({ date: day, location, settings, zmanim });
     if (!window) continue;
+    if (!trackedOn(mitzvah, window, input.enabledSince, Boolean(doneMap[mitzvah.id]))) continue;
     if (isSkippedAt(mitzvah, window.start, location, settings)) continue;
     if (doneMap[mitzvah.id]) {
       verdict.done.push(mitzvah.id);
@@ -65,7 +66,7 @@ export function judgeDay(day: Date, input: HistoryInput, now: Date): DayVerdict 
     }
     // Looked up only for a day with something unmarked: most days of a long streak never need it.
     if (block === undefined) block = blockForDay(day, location);
-    const inBlock = block !== null && overlapsBlock(window, block);
+    const inBlock = block !== null && waitsInCheckIn(mitzvah, window, block);
     const open = now.getTime() < Math.max(dayEnd.getTime(), window.end.getTime());
     if (inBlock ? checkInPending(block!, input.checkIns ?? {}, now, location) : open) {
       verdict.pending.push(mitzvah.id);
@@ -84,8 +85,10 @@ function earliestKey(input: HistoryInput): string | null {
 // Consecutive days, back from today, each with at least one mitzvah marked. A day that can still
 // be marked (today, or a Shabbat / Yom Tov whose check-in is open) neither counts nor breaks, nor
 // does a day with nothing to do. Shabbat and Yom Tov are ordinary days here: kept when marked in
-// the check-in, broken when not. The walk is not bounded by the stats window — past retention the
-// archive still knows which days were kept — and stops at the oldest day anything was recorded.
+// the check-in, broken when not. A multi-day item that is still open does not hold its day, which
+// is judged by its other items, so a miss is not hidden until the whole period ends. The walk is not
+// bounded by the stats window — past retention the archive still knows which days were kept — and
+// stops at the oldest day anything was recorded.
 export function computeStreak(input: HistoryInput, now: Date = new Date(), judge = judgeDay): number {
   const floor = earliestKey(input);
   if (!floor) return 0;
@@ -99,7 +102,8 @@ export function computeStreak(input: HistoryInput, now: Date = new Date(), judge
     // With nothing enabled every day is empty, and walking past them would count every day ever kept.
     if (!input.mitzvot.length) break;
     const verdict = judge(day, input, now);
-    if (verdict.pending.length || !verdict.missed.length) continue;
+    const holdsDay = verdict.pending.some((id) => !input.mitzvot.find((mitzvah) => mitzvah.id === id)?.multiDay);
+    if (holdsDay || !verdict.missed.length) continue;
     break;
   }
   return streak;

@@ -8,6 +8,7 @@ import {
   latestCheckIn,
   overlapsBlock,
   pendingCheckInIds,
+  waitsInCheckIn,
 } from '../checkIn';
 import { judgeDay } from '../historyStats';
 import { locationNoon } from '../locationDay';
@@ -16,6 +17,7 @@ import { CITIES, findCityById } from '@/data/cities';
 import { HebcalService } from '@/services/HebcalService';
 import { Mitzvah, UserSettings } from '@/types/mitzvah';
 import { Location } from '@/types/zmanim';
+import { dateKey } from '@/stores/useCompletionsStore';
 import { at, zmanimFor } from '@/testing/zmanim';
 
 const JERUSALEM = CITIES[0];
@@ -64,6 +66,32 @@ describe('checkIn', () => {
     expect(idsOn(checkIn, '2026-11-14')).not.toContain('havdalah');
   });
 
+  it("asks about Friday's maariv, which runs to Shabbat's alot, and never about Thursday's, which ends at Friday's alot", () => {
+    const maarivOnly = input({ mitzvot: [findMitzvah('maariv')!] });
+    const checkIn = checkInFor(block, maarivOnly, block.end)!;
+    expect(checkIn.days.map((day) => [day.key, day.items.map((item) => item.mitzvah.id)])).toEqual([
+      ['2026-11-13', ['maariv']],
+    ]);
+    expect(checkIn.days[0].items[0].window.end).toEqual(alotOf('2026-11-14', JERUSALEM));
+    const fridayAlot = alotOf('2026-11-13', JERUSALEM);
+    expect(judgeDay(calendarDay('2026-11-12'), maarivOnly, new Date(fridayAlot.getTime() - 1)).pending).toEqual([
+      'maariv',
+    ]);
+    expect(judgeDay(calendarDay('2026-11-12'), maarivOnly, fridayAlot).missed).toEqual(['maariv']);
+  });
+
+  it("asks about Friday's bedtime Shema, inside Shabbat, and not about Saturday night's, which opens at the exit (R3)", () => {
+    const bedtimeOnly = (completions = {}) => input({ mitzvot: [findMitzvah('krias_shma_al_hamita')!], completions });
+    const checkIn = checkInFor(block, bedtimeOnly(), block.end)!;
+    expect(checkIn.days.map((day) => [day.key, day.items.map((item) => item.mitzvah.id)])).toEqual([
+      ['2026-11-13', ['krias_shma_al_hamita']],
+    ]);
+    expect(checkIn.days[0].items[0].window.end).toEqual(alotOf('2026-11-14', JERUSALEM));
+    expect(checkIn.days[0].items[0].done).toBe(false);
+    const marked = checkInFor(block, bedtimeOnly({ '2026-11-13': { krias_shma_al_hamita: 1 } }), block.end)!;
+    expect(marked.days[0].items[0].done).toBe(true);
+  });
+
   it('counts a window that ends exactly at candle lighting as reaching into the block', () => {
     const lighting = block.start.getTime();
     const morning = new Date(lighting - 10 * 3_600_000);
@@ -79,6 +107,7 @@ describe('checkIn', () => {
       icon: 'custom',
       timeType: 'range-within-day',
       category: 'daily-allday',
+      group: 'daily',
       skipOn: [],
       nuschaotSupported: ['ashkenaz'],
       defaultReminders: [],
@@ -188,5 +217,37 @@ describe('checkIn', () => {
     expect(pending.has('shacharit')).toBe(false);
     expect(pendingCheckInIds(checkInFor(block, input(), SHABBAT), '2026-11-14').size).toBe(0);
     expect(pendingCheckInIds(null, '2026-11-14').size).toBe(0);
+  });
+});
+
+describe('a window that outlasts the block', () => {
+  const shabbat = HebcalService.holyBlockOn(at(JERUSALEM, '2026-10-17T12:00'), JERUSALEM)!;
+  const erev = zmanimFor(at(JERUSALEM, '2026-10-16T12:00'), JERUSALEM);
+  const LATE = at(JERUSALEM, '2026-10-20T12:00');
+  const BEFORE_EXIT = at(JERUSALEM, '2026-10-17T12:00');
+  const windowEnding = (end: Date) => ({ start: erev.plagHaMincha, end });
+  const synthetic = (end: Date, multiDay?: { maxDays: number }): Mitzvah => ({
+    ...findMitzvah('maariv')!,
+    id: 'long',
+    multiDay,
+    computeWindow: (ctx) => (dateKey(ctx.date) === '2026-10-16' ? windowEnding(end) : null),
+  });
+  const longOne = synthetic(LATE, { maxDays: 16 });
+  const checkInOf = (mitzvah: Mitzvah) => checkInFor(shabbat, input({ mitzvot: [mitzvah] }), shabbat.end);
+
+  it('never waits in the check-in it spans', () => {
+    expect(checkInOf(longOne)).toBeNull();
+    expect(waitsInCheckIn(longOne, windowEnding(LATE), shabbat)).toBe(false);
+  });
+
+  it('waits when it is not multi-day', () => {
+    expect(idsOn(checkInOf(synthetic(LATE)), '2026-10-16')).toEqual(['long']);
+    expect(waitsInCheckIn({ multiDay: undefined }, windowEnding(LATE), shabbat)).toBe(true);
+  });
+
+  it('waits when it ends before the block does', () => {
+    const ends = synthetic(BEFORE_EXIT, { maxDays: 16 });
+    expect(idsOn(checkInOf(ends), '2026-10-16')).toEqual(['long']);
+    expect(waitsInCheckIn(ends, windowEnding(BEFORE_EXIT), shabbat)).toBe(true);
   });
 });

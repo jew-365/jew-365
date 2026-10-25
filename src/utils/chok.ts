@@ -3,9 +3,17 @@ import { CHOK_TEXT_ID, chokAsset, hasChokContent } from '@/data/chok';
 import { HebcalService } from '@/services/HebcalService';
 import { ZmanimService } from '@/services/ZmanimService';
 import { Completions, dateKey } from '@/stores/useCompletionsStore';
-import { ChokAsset, ChokDoubleChoice, ChokSection, ChokSectionKind, ChokSlot, HaftarahVariant } from '@/types/chok';
+import {
+  ChokAsset,
+  ChokDoubleChoice,
+  ChokSection,
+  ChokSectionKind,
+  ChokSlot,
+  ChokThuNightDay,
+  HaftarahVariant,
+} from '@/types/chok';
 import { Nusach } from '@/types/mitzvah';
-import { SiddurSection, SiddurText } from '@/types/siddur';
+import { PassageLabel, SiddurSection, SiddurText } from '@/types/siddur';
 import { Location } from '@/types/zmanim';
 import { calendarDay } from '@/utils/checkIn';
 import { appDayEnd, locationNoon } from '@/utils/locationDay';
@@ -55,6 +63,12 @@ export const HAFTARAH_VARIANT: Readonly<Record<Nusach, HaftarahVariant>> = {
   edot_hamizrach: 'sephardi',
   chabad: 'ashkenazi',
 };
+
+export const CHOK_COMMENTARY_LABELS: readonly string[] = ['Rashi', 'Bartenura'];
+
+export function isChokCommentary(label: PassageLabel | undefined): boolean {
+  return label !== undefined && CHOK_COMMENTARY_LABELS.includes(label.en);
+}
 
 const VEZOT_SLOTS: readonly ChokSlot[] = CHOK_SLOTS.filter((slot) => slot !== 'fri');
 const SLOT_OF_WEEKDAY: readonly (ChokSlot | null)[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', null];
@@ -156,12 +170,14 @@ export function chokToday(now: Date, location: Location, inIsrael: boolean): Dat
   return portion ? chokSlotDay(portion) : civilHebrewDayAt(now, location).greg();
 }
 
-export function chokDoneDay(portion: ChokPortion, today: Date): Date | null {
-  if (portion.slot === 'thuNight') return null;
+export function chokDoneDay(portion: ChokPortion, today: Date, thuNightDay: ChokThuNightDay): Date | null {
   const day = slotDay(portion);
   const current = new HDate(today);
   const sameWeek = portion.shabbat.abs() === current.onOrAfter(SATURDAY).abs();
-  return sameWeek && day.abs() <= current.abs() ? day.greg() : null;
+  if (!sameWeek || day.abs() > current.abs()) return null;
+  const toFriday =
+    portion.slot === 'thuNight' && thuNightDay === 'fri' && chokSlotsOf(portion.parashiyot[0]).includes('fri');
+  return toFriday ? hebrewDay(day.abs() + 1).greg() : day.greg();
 }
 
 export function chokOpenMakeUps(
@@ -225,18 +241,25 @@ function slotText(chosen: readonly ChokAsset[], slot: ChokSlot, titles: ChokTitl
           ? { he: `${he} · ${section.heading}`, en: `${asset.parasha} · ${kind}` }
           : { he: section.heading, en: kind },
         ...(prefixed && index === 0 ? { chapter: { he, en: asset.parasha } } : {}),
-        segments: section.segments,
+        segments: section.segments.map((segment, segmentIndex) => ({
+          ...segment,
+          key: `${asset.parasha}:${slot}:${section.heading}:${segmentIndex}`,
+        })),
       };
     });
   });
 }
 
-function makeUpSection(sections: readonly SiddurSection[], label: ChokMakeUpFold['label']): SiddurSection {
+function makeUpSection(sections: readonly SiddurSection[], makeUp: ChokMakeUpFold): SiddurSection {
   return {
-    title: label,
-    optional: label,
+    title: makeUp.label,
+    optional: makeUp.label,
     segments: sections.flatMap((section) => [
-      { he: [[{ t: section.title.he, s: 'b' as const }]], en: section.title.en },
+      {
+        key: `makeUp:${makeUp.slot}:${section.title.he}`,
+        he: [[{ t: section.title.he, s: 'b' as const }]],
+        en: section.title.en,
+      },
       ...section.segments,
     ]),
   };
@@ -246,7 +269,7 @@ export function chokText(assets: readonly ChokAsset[], options: ChokTextOptions)
   const { slot, choice, makeUps = [], ...titles } = options;
   const chosen = assets.length < 2 || choice === 'both' ? assets : [assets[choice === 'first' ? 0 : 1]];
   const sections = [
-    ...makeUps.map((makeUp) => makeUpSection(slotText(chosen, makeUp.slot, titles), makeUp.label)),
+    ...makeUps.map((makeUp) => makeUpSection(slotText(chosen, makeUp.slot, titles), makeUp)),
     ...slotText(chosen, slot, titles),
   ];
   const credits = [...new Map(chosen.map((asset) => [asset.credit.title, asset.credit])).values()];

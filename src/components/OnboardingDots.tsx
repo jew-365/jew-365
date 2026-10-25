@@ -3,7 +3,7 @@ import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 
-export const ONBOARDING_STEPS = 5;
+export const ONBOARDING_STEPS = 6;
 
 export function OnboardingDots({ step, total, style }: { step: number; total: number; style?: StyleProp<ViewStyle> }) {
   const { colors } = useTheme();

@@ -3,13 +3,14 @@ jest.mock('react-native-mmkv', () => {
   return { MMKV: jest.fn(() => createMockMMKV()) };
 });
 
-import { CHOK_LEYISRAEL, MITZVOT } from '../mitzvot';
+import { CHOK_LEYISRAEL, LIBRARY_GROUPS, MITZVOT } from '../mitzvot';
 import { CITIES } from '../cities';
 import { customToMitzvah } from '../customMitzvotAdapter';
 import { HebcalService } from '@/services/HebcalService';
 import { at, zmanimFor } from '@/testing/zmanim';
 import { CustomMitzvah, UserSettings } from '@/types/mitzvah';
 import { categoryForWindow } from '@/utils/customMitzvah';
+import { appDayKey } from '@/utils/locationDay';
 
 describe('Mitzvot extras', () => {
   it('7.2 nusach options match supported set', () => {
@@ -29,12 +30,18 @@ describe('Mitzvot extras', () => {
       expect(m.defaultReminders.length).toBeGreaterThan(0);
       for (const reminder of m.defaultReminders) {
         expect(reminder.label.trim().length).toBeGreaterThan(0);
-        expect(['start', 'end', 'clock']).toContain(reminder.anchor);
+        expect(['start', 'end', 'clock', 'blockExit']).toContain(reminder.anchor);
         expect(Number.isFinite(reminder.offsetMin)).toBe(true);
         if (reminder.anchor === 'clock') {
           expect(Number.isInteger(reminder.offsetMin)).toBe(true);
           expect(reminder.offsetMin).toBeGreaterThanOrEqual(0);
           expect(reminder.offsetMin).toBeLessThan(24 * 60);
+        }
+        if (reminder.anchor === 'blockExit') {
+          expect(m.multiDay).toBeDefined();
+          expect(Number.isInteger(reminder.offsetMin)).toBe(true);
+          expect(reminder.offsetMin).toBeGreaterThanOrEqual(0);
+          expect(reminder.offsetMin).toBeLessThanOrEqual(720);
         }
       }
     }
@@ -182,6 +189,42 @@ describe('custom mitzvah category', () => {
   });
 });
 
+describe('library groups', () => {
+  it('orders the library sections', () => {
+    expect(LIBRARY_GROUPS).toEqual(['prayers', 'daily', 'weekly', 'seasonal', 'other', 'mine']);
+  });
+
+  it('gives every registry mitzvah a group other than mine', () => {
+    for (const m of MITZVOT) {
+      expect(LIBRARY_GROUPS).toContain(m.group);
+      expect(m.group).not.toBe('mine');
+    }
+  });
+
+  it('files each registry mitzvah under its group', () => {
+    expect(Object.fromEntries(MITZVOT.map((m) => [m.id, m.group]))).toMatchObject({
+      chok_leyisrael: 'other',
+      kiddush_levana: 'other',
+      tefillin: 'daily',
+      krias_shma_shacharit: 'daily',
+      shacharit: 'prayers',
+      mincha: 'prayers',
+      maariv: 'prayers',
+      birchot_hashachar: 'daily',
+      krias_shma_al_hamita: 'daily',
+      candle_lighting: 'weekly',
+      havdalah: 'weekly',
+      sefirat_haomer: 'seasonal',
+      chanukah_candles: 'seasonal',
+      selichot: 'seasonal',
+    });
+  });
+
+  it('puts a custom mitzvah in My mitzvot', () => {
+    expect(customToMitzvah(customMitzvah()).group).toBe('mine');
+  });
+});
+
 describe('custom mitzvah active days', () => {
   const JERUSALEM = CITIES[0];
   const SETTINGS: UserSettings = { nusach: 'ashkenaz', halachicOpinions: { ksSofZman: 'GRA' }, inIsrael: true };
@@ -228,6 +271,45 @@ describe('custom mitzvah active days', () => {
 
   it('never has a window with an empty list', () => {
     expect(WEEK.some((day) => windowOn(customMitzvah({ activeDays: [] }), day) !== null)).toBe(false);
+  });
+});
+
+describe('custom mitzvah schedules', () => {
+  const JERUSALEM = CITIES[0];
+  const SETTINGS: UserSettings = { nusach: 'ashkenaz', halachicOpinions: { ksSofZman: 'GRA' }, inIsrael: true };
+  const windowOn = (custom: CustomMitzvah, date: Date) =>
+    customToMitzvah(custom).computeWindow({
+      date,
+      location: JERUSALEM,
+      settings: SETTINGS,
+      zmanim: zmanimFor(date, JERUSALEM),
+    });
+  const ranged = (startHHMM: string, endHHMM: string) =>
+    customMitzvah({
+      startHHMM,
+      endHHMM,
+      schedules: [{ from: '2026-10-01', schedule: { mode: 'range', start: '2026-10-14', end: '2026-10-15' } }],
+    });
+
+  it('has a window only on the days of its range', () => {
+    const days = [13, 14, 15, 16].map((day) => windowOn(ranged('08:00', '12:00'), new Date(2026, 9, day)));
+    expect(days.map((window) => window !== null)).toEqual([false, true, true, false]);
+    expect(days[1]?.start.getTime()).toBe(at(JERUSALEM, '2026-10-14T08:00').getTime());
+  });
+
+  it('judges the range on the day an overnight window starts', () => {
+    const lastDay = windowOn(ranged('22:00', '01:00'), new Date(2026, 9, 15));
+    expect(lastDay?.end.getTime()).toBe(at(JERUSALEM, '2026-10-16T01:00').getTime());
+    expect(windowOn(ranged('22:00', '01:00'), new Date(2026, 9, 16))).toBeNull();
+  });
+
+  it('reads its schedules over a legacy activeDays it still carries', () => {
+    const custom = customMitzvah({
+      activeDays: [6],
+      schedules: [{ from: '2026-10-01', schedule: { mode: 'weekdays', days: [3] } }],
+    });
+    expect(windowOn(custom, new Date(2026, 9, 14))).not.toBeNull();
+    expect(windowOn(custom, new Date(2026, 9, 17))).toBeNull();
   });
 });
 
@@ -330,8 +412,9 @@ describe('custom mitzvah windows across midnight', () => {
   });
 
   it('keeps the configured length when a spring-forward gap swallows the start', () => {
-    const window = windowOn(customMitzvah({ startHHMM: '02:30', endHHMM: '03:00' }), new Date(2026, 2, 27));
+    const window = windowOn(customMitzvah({ startHHMM: '02:30', endHHMM: '03:00' }), new Date(2026, 2, 26));
     expect(window).not.toBeNull();
+    expect(appDayKey(window!.start, JERUSALEM)).toBe('2026-03-26');
     expect(minutesBetween(window!)).toBe(30);
   });
 });

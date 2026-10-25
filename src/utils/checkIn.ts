@@ -35,6 +35,18 @@ export function wasEnabledBy(mitzvah: Mitzvah, until: Date, enabledSince: Record
   return since === undefined || since < until.getTime();
 }
 
+// A window counts for the mitzvah when it holds a done mark, whenever that mark was made, or when the
+// mitzvah was switched on before the window ended, while it could still be done: an unmarked window that
+// closed before then, the install day's morning included, is never a miss.
+export function trackedOn(
+  mitzvah: Mitzvah,
+  window: { end: Date },
+  enabledSince: Record<string, number> = {},
+  done = false,
+): boolean {
+  return done || wasEnabledBy(mitzvah, window.end, enabledSince);
+}
+
 const RECENT_DAYS = 3;
 
 // The block whose check-in the app last opened by itself, so it opens on its own only once.
@@ -55,6 +67,14 @@ export function checkInId(block: HolyBlock): string {
 // candle lighting, and Chok LeYisrael, which ends at lighting and cannot be marked after it).
 export function overlapsBlock(window: { start: Date; end: Date }, block: HolyBlock): boolean {
   return window.end.getTime() >= block.start.getTime() && window.start.getTime() < block.end.getTime();
+}
+
+export function waitsInCheckIn(
+  mitzvah: Pick<Mitzvah, 'multiDay'>,
+  window: { start: Date; end: Date },
+  block: HolyBlock,
+): boolean {
+  return overlapsBlock(window, block) && !(mitzvah.multiDay && window.end.getTime() > block.end.getTime());
 }
 
 // The calendar day whose app day closes the check-in, for "until dawn after Sunday".
@@ -89,9 +109,10 @@ export function checkInFor(block: HolyBlock, input: CheckInInput, now: Date): Ch
     const key = dateKey(date);
     const items: CheckInItem[] = [];
     for (const mitzvah of mitzvot) {
-      if (!wasEnabledBy(mitzvah, block.end, enabledSince) || skipped[key]?.[mitzvah.id]) continue;
+      if (skipped[key]?.[mitzvah.id]) continue;
       const window = mitzvah.computeWindow({ date, location, settings, zmanim });
-      if (!window || !overlapsBlock(window, block)) continue;
+      if (!window || !waitsInCheckIn(mitzvah, window, block)) continue;
+      if (!trackedOn(mitzvah, window, enabledSince, Boolean(completions[key]?.[mitzvah.id]))) continue;
       if (isSkippedAt(mitzvah, window.start, location, settings)) continue;
       items.push({ mitzvah, window, done: Boolean(completions[key]?.[mitzvah.id]) });
     }

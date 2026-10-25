@@ -1,5 +1,5 @@
 import React from 'react';
-import { I18nManager, Keyboard, Modal, Platform, StyleSheet } from 'react-native';
+import { I18nManager, Keyboard, Modal, Platform, StyleSheet, TextInput } from 'react-native';
 import { fireEvent, screen, within } from '@testing-library/react-native';
 import { PICKER_HOURS, PICKER_MINUTES, TimeField, normalizeTimeInput } from '../TimeField';
 import { WHEEL_ITEM_HEIGHT } from '../WheelPicker';
@@ -525,5 +525,116 @@ describe('TimeField inline', () => {
     renderField('08:30');
     expect(field()).toBeOnTheScreen();
     expect(screen.queryByLabelText(t('custom.pickHour'))).toBeNull();
+  });
+});
+
+describe('typing a time on a phone keyboard', () => {
+  beforeEach(() => {
+    useUserStore.getState().reset();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  function renderFull(inline: boolean) {
+    renderWithTheme(<TimeField inline={inline} label={LABEL} value="20:00" onChange={jest.fn()} />);
+    if (!inline) openPicker();
+  }
+
+  it.each([
+    ['sheet', false],
+    ['inline', true],
+  ])('selects the whole time when the %s input gets focus, so a digit replaces a full time', (_mode, inline) => {
+    renderFull(inline);
+    expect(sheetInput().props.selectTextOnFocus).toBe(true);
+    expect(sheetInput().props.maxLength).toBe(5);
+  });
+
+  it.each([
+    ['sheet', false],
+    ['inline', true],
+  ])('opens a number pad on Android in the %s input', (_mode, inline) => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+    renderFull(inline);
+    expect(sheetInput().props.keyboardType).toBe('number-pad');
+  });
+
+  it.each(['ios', 'web'] as const)('keeps the numbers-and-punctuation keyboard on %s', (os) => {
+    jest.replaceProperty(Platform, 'OS', os);
+    renderFull(false);
+    expect(sheetInput().props.keyboardType).toBe('numbers-and-punctuation');
+  });
+
+  describe('the selection on focus', () => {
+    const setSelection = jest.fn();
+
+    beforeEach(() => {
+      setSelection.mockClear();
+      Object.assign(TextInput.prototype, { setSelection });
+    });
+
+    afterEach(() => {
+      delete (TextInput.prototype as { setSelection?: unknown }).setSelection;
+    });
+
+    it.each([
+      ['a full time', '20:00', 5],
+      ['a partial draft', '', 0],
+    ])(
+      'selects %s through the input on Android, where selectTextOnFocus loses the first digit',
+      (_name, value, end) => {
+        jest.replaceProperty(Platform, 'OS', 'android');
+        renderWithTheme(<TimeField label={LABEL} value={value} onChange={jest.fn()} />);
+        openPicker();
+        expect(sheetInput().props.selectTextOnFocus).toBe(false);
+        expect(setSelection).not.toHaveBeenCalled();
+        fireEvent(sheetInput(), 'focus');
+        expect(setSelection).toHaveBeenCalledTimes(1);
+        expect(setSelection).toHaveBeenCalledWith(0, end);
+      },
+    );
+
+    it.each(['ios', 'web'] as const)('leaves the selection to selectTextOnFocus on %s', (os) => {
+      jest.replaceProperty(Platform, 'OS', os);
+      renderFull(false);
+      expect(sheetInput().props.selectTextOnFocus).toBe(true);
+      fireEvent(sheetInput(), 'focus');
+      expect(setSelection).not.toHaveBeenCalled();
+    });
+  });
+
+  it('replaces a full time with one typed digit by digit, the way a number pad sends it', () => {
+    const onChange = jest.fn();
+    const Controlled = () => {
+      const [value, setValue] = React.useState('20:00');
+      return (
+        <TimeField
+          label={LABEL}
+          value={value}
+          onChange={(next) => {
+            onChange(next);
+            setValue(next);
+          }}
+        />
+      );
+    };
+    renderWithTheme(<Controlled />);
+    openPicker();
+    for (const [typed, shown] of [
+      ['2', '2'],
+      ['21', '21'],
+      ['211', '21:1'],
+      ['21:15', '21:15'],
+    ]) {
+      fireEvent.changeText(sheetInput(), typed);
+      expect(sheetInput()).toHaveDisplayValue(shown);
+    }
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith('21:15');
+    expect(hourWheel()).toHaveAccessibilityValue({ text: '21' });
+    expect(minuteWheel()).toHaveAccessibilityValue({ text: '15' });
+    closeSheet();
+    expect(within(field()).getByText('21:15')).toBeOnTheScreen();
   });
 });

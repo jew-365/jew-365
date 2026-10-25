@@ -259,6 +259,66 @@ describe('MitzvahIcon', () => {
     });
   });
 
+  describe('the guide icon', () => {
+    const drawing = (variant: IconVariant) =>
+      render(createElement(MitzvahIcon, { name: 'guide', color: '#111111', tint: '#eeeeee', variant }));
+
+    it('is one disc, unfilled in outline and tinted in duotone', () => {
+      expect(
+        drawing('outline')
+          .UNSAFE_getAllByType(Circle)
+          .map((disc) => disc.props.fill),
+      ).toEqual(['none']);
+      expect(
+        drawing('duotone')
+          .UNSAFE_getAllByType(Circle)
+          .map((disc) => disc.props.fill),
+      ).toEqual(['#eeeeee']);
+    });
+
+    it('carries a question mark: a hook and a dot', () => {
+      const outline = drawing('outline');
+      expect(outline.UNSAFE_getAllByType(Path)).toHaveLength(1);
+      expect(outline.UNSAFE_getAllByType(Line)).toHaveLength(1);
+    });
+  });
+
+  describe("the new mitzvot's icons", () => {
+    const drawing = (name: IconName, variant: IconVariant) =>
+      render(createElement(MitzvahIcon, { name, color: '#111111', tint: '#eeeeee', variant }));
+    const pathFills = (name: IconName, variant: IconVariant) =>
+      drawing(name, variant)
+        .UNSAFE_getAllByType(Path)
+        .map((shape) => shape.props.fill);
+    const rectFills = (name: IconName, variant: IconVariant) =>
+      drawing(name, variant)
+        .UNSAFE_getAllByType(Rect)
+        .map((shape) => shape.props.fill);
+
+    it("names the new mitzvot's icons", () => {
+      expect(ICON_NAMES).toEqual(expect.arrayContaining(['chanukiah', 'sukkah', 'shofar', 'night', 'moon']));
+    });
+
+    it('draws the chanukiah as a flame, a stem with a base and two arms, only the flame taking the tint', () => {
+      expect(pathFills('chanukiah', 'outline')).toEqual(['none', undefined, undefined]);
+      expect(pathFills('chanukiah', 'duotone')).toEqual(['#eeeeee', undefined, undefined]);
+      expect(drawing('chanukiah', 'outline').UNSAFE_getAllByType(Line)).toHaveLength(2);
+    });
+
+    it('draws the sukkah as a hut with a door, a beam and a wavy roof, only the hut taking the tint', () => {
+      expect(rectFills('sukkah', 'outline')).toEqual(['none']);
+      expect(rectFills('sukkah', 'duotone')).toEqual(['#eeeeee']);
+      expect(pathFills('sukkah', 'outline')).toEqual([undefined, undefined]);
+      expect(drawing('sukkah', 'outline').UNSAFE_getAllByType(Line)).toHaveLength(1);
+    });
+
+    it('draws the shofar as a closed horn and its rim, only the horn taking the tint', () => {
+      expect(pathFills('shofar', 'outline')).toEqual(['none', undefined]);
+      expect(pathFills('shofar', 'duotone')).toEqual(['#eeeeee', undefined]);
+      expect(String(drawing('shofar', 'outline').UNSAFE_getAllByType(Path)[0].props.d).endsWith('Z')).toBe(true);
+    });
+  });
+
   describe('every icon', () => {
     it.each(ICON_NAMES)('%s draws something in both variants', (name) => {
       (['outline', 'duotone'] as const).forEach((variant) => {

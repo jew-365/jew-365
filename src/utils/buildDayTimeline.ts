@@ -2,6 +2,7 @@ import { Mitzvah, UserSettings } from '@/types/mitzvah';
 import { Location, Zmanim } from '@/types/zmanim';
 import { ZmanimService } from '@/services/ZmanimService';
 import { isSkippedAt } from '@/utils/skipRules';
+import { trackedOn } from '@/utils/checkIn';
 import { appDay, appDayKey, locationNoon } from '@/utils/locationDay';
 import { addDays } from '@/utils/historyStats';
 import { mitzvahName } from '@/utils/mitzvahName';
@@ -33,6 +34,9 @@ export const ZMAN_KEYS = [
 type Translate = (key: string, params?: Record<string, unknown>) => string;
 
 const NEXT_WINDOW_LOOKAHEAD_DAYS = 9;
+export const MULTI_DAY_LOOKAHEAD_DAYS = 45;
+
+const daysBack = (mitzvah: Mitzvah) => mitzvah.multiDay?.maxDays ?? 1;
 
 export type DayWindow = { start: Date; end: Date; date: Date };
 
@@ -55,7 +59,8 @@ export function currentOrNextWindow(
   const today = appDay(now, location);
   // Far enough ahead to clear the longest run of skipped days — Sukkot in Israel keeps tefillin
   // off for chol hamoed, Shemini Atzeret and a Shabbat — and to reach next week's candle lighting.
-  for (let offset = -1; offset <= NEXT_WINDOW_LOOKAHEAD_DAYS; offset++) {
+  const ahead = mitzvah.multiDay ? MULTI_DAY_LOOKAHEAD_DAYS : NEXT_WINDOW_LOOKAHEAD_DAYS;
+  for (let offset = -daysBack(mitzvah); offset <= ahead; offset++) {
     const window = dayWindow(mitzvah, addDays(today, offset), location, settings);
     if (window && window.end.getTime() > now.getTime()) return window;
   }
@@ -74,13 +79,21 @@ export function appDayWindow(
 ): DayWindow | null {
   const today = appDay(now, location);
   const todayKey = dateKey(today);
-  const windows = [-1, 0, 1].map((offset) => dayWindow(mitzvah, addDays(today, offset), location, settings));
-  const [, own, next] = windows;
+  const back = daysBack(mitzvah);
+  const windows = Array.from({ length: back + 2 }, (_, index) =>
+    dayWindow(mitzvah, addDays(today, index - back), location, settings),
+  );
+  const own = windows[back];
+  const next = windows[back + 1];
   const open = windows
     .filter(isWindow)
     .find((window) => window.start.getTime() <= now.getTime() && now.getTime() < window.end.getTime());
   if (open) return open;
   return [own, next].filter(isWindow).find((window) => appDayKey(window.start, location) === todayKey) ?? null;
+}
+
+export function windowStillOpen(item: Pick<TimelineItem, 'windowEnd'>, now: Date = new Date()): boolean {
+  return item.windowEnd !== undefined && item.windowEnd.getTime() > now.getTime();
 }
 
 export function buildDayTimeline(
@@ -91,6 +104,7 @@ export function buildDayTimeline(
   settings: UserSettings,
   language: 'he' | 'en',
   t: Translate,
+  enabledSince: Record<string, number> = {},
   zmanim: Zmanim | null = ZmanimService.getZmanim(locationNoon(date, location), location),
 ): TimelineItem[] {
   if (!zmanim) return [];
@@ -106,6 +120,7 @@ export function buildDayTimeline(
   mitzvot.forEach((mitzvah) => {
     const window = mitzvah.computeWindow({ date, location, settings, zmanim });
     if (!window) return;
+    if (!trackedOn(mitzvah, window, enabledSince, Boolean(doneToday[mitzvah.id]))) return;
     if (isSkippedAt(mitzvah, window.start, location, settings)) return;
     timeline.push({
       id: `${mitzvah.id}-${window.start.toISOString()}`,

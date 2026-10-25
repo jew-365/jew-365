@@ -1,4 +1,4 @@
-import { Modal, Text } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Text } from 'react-native';
 import { fireEvent, screen, userEvent } from '@testing-library/react-native';
 import { BottomSheet, SheetAction } from '../BottomSheet';
 import { QuietBlockContext } from '../ShabbatScreen';
@@ -187,5 +187,25 @@ describe('SheetAction', () => {
     );
     await userEvent.setup().press(screen.getByRole('button', { name: 'Skip today' }));
     expect(onPress).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('BottomSheet keyboard', () => {
+  beforeEach(() => {
+    useUserStore.getState().reset();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it.each(['ios', 'android', 'web'] as const)('lifts the sheet above the keyboard with padding on %s', (os) => {
+    jest.replaceProperty(Platform, 'OS', os);
+    renderWithTheme(
+      <BottomSheet visible title="T" onClose={jest.fn()}>
+        <Text>Body</Text>
+      </BottomSheet>,
+    );
+    expect(screen.UNSAFE_getByType(KeyboardAvoidingView).props.behavior).toBe('padding');
   });
 });

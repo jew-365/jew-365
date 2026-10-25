@@ -1,11 +1,13 @@
-import { HDate } from '@hebcal/core';
+import { HDate, months } from '@hebcal/core';
 import { ContentBlock, Mitzvah, Nusach } from '@/types/mitzvah';
 import { Location, Zmanim } from '@/types/zmanim';
 import { HebcalService } from '@/services/HebcalService';
-import { ZmanimService } from '@/services/ZmanimService';
+import { ZmanimService, isJerusalem } from '@/services/ZmanimService';
+import { useUserStore } from '@/stores/useUserStore';
 import {
   Condition,
   DayFeatures,
+  DayFlag,
   MitzvahTextId,
   Place,
   SiddurGroup,
@@ -14,10 +16,17 @@ import {
   StandaloneTextId,
 } from '@/types/siddur';
 import { CHOK_TEXT_ID } from './chok';
-import { isJerusalem } from './mitzvot';
+import { dayWindow } from '@/utils/buildDayTimeline';
+import { SELICHOT_NUSCHAOT, SELICHOT_TEXT_ID, hasSelichotContent } from './selichot';
 import { chokDayHasText } from '@/utils/chok';
 import { appDay, locationNoon } from '@/utils/locationDay';
-import { dayFeatures, liturgicalDay, matchesCondition } from '@/utils/siddur';
+import {
+  KIDDUSH_LEVANA_FLAGS,
+  dayFeatures,
+  kiddushLevanaPeriod,
+  liturgicalDay,
+  matchesCondition,
+} from '@/utils/siddur';
 import { SIDDUR_ASSETS } from './siddurAssets.generated';
 
 type SiddurEntry = { evening: boolean; available?: Condition };
@@ -42,22 +51,32 @@ type TextHours = (day: Zmanim, next: Zmanim, location: Location) => { start: Dat
 // `evening` texts are said at night and resolve for the night in effect or coming next;
 // `availableLabel` tells the catalog when a text whose `available` fails today can be said, and
 // `availableIn` replaces both for a nusach whose minhag sets other days. `hours` puts a text in the
-// catalog's "now" card while they hold; a text without them has no time of its own.
+// catalog's "now" card while they hold, and `'mitzvah'` reads them from the window of the mitzvah that
+// `MITZVAH_STANDALONE_TEXT` links to the text; a text without them has no time of its own. `periodEnd` is the
+// instant after which a night's text is no longer said, even where the night's hours run on.
 export type StandaloneEntry = Availability & {
   name: { he: string; en: string };
   group: SiddurGroup;
   evening?: boolean;
   availableIn?: Partial<Record<Nusach, Availability>>;
-  hours?: TextHours;
+  hours?: TextHours | 'mitzvah';
+  periodEnd?: (night: HDate, nusach: Nusach, location: Location) => Date;
 };
 
 const TONIGHT_TO_DAWN: TextHours = (day, next, location) => ({
   start: HebcalService.nightfall(day, location),
   end: next.alotHaShachar,
 });
-const MIDNIGHT_TO_MORNING_PRAYER: TextHours = (day, next) => ({
+export const MIDNIGHT_TO_MORNING_PRAYER: TextHours = (day, next) => ({
   start: day.chatzotLayla,
   end: next.sofZmanTfilaGra,
+});
+
+const HOLY_NIGHTS: DayFlag[] = ['shabbat', 'yomTov', 'yomKippur'];
+
+const kiddushLevanaOn = (nusach: Nusach, he: string, en: string): Availability => ({
+  available: { all: [KIDDUSH_LEVANA_FLAGS[nusach]], none: HOLY_NIGHTS },
+  availableLabel: { he, en },
 });
 
 export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
@@ -82,9 +101,30 @@ export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
     name: { he: 'קידוש לבנה', en: 'Kiddush Levana' },
     group: 'general',
     evening: true,
-    available: { all: ['kiddushLevana'], none: ['shabbat', 'yomTov', 'yomKippur'] },
-    availableLabel: { he: 'מג׳ עד ט״ו בחודש', en: 'From the 3rd to the 15th of the month' },
+    ...kiddushLevanaOn(
+      'ashkenaz',
+      'משלושה ימים אחרי המולד עד חצי החודש',
+      'From three days after the molad to mid-month',
+    ),
+    availableIn: {
+      sefard: kiddushLevanaOn(
+        'sefard',
+        'משבעה ימים אחרי המולד עד חצי החודש',
+        'From seven days after the molad to mid-month',
+      ),
+      edot_hamizrach: kiddushLevanaOn(
+        'edot_hamizrach',
+        'משבעה עד חמישה עשר ימים אחרי המולד',
+        'From seven to fifteen days after the molad',
+      ),
+      chabad: kiddushLevanaOn(
+        'chabad',
+        'משבעה ימים אחרי המולד עד חצי החודש',
+        'From seven days after the molad to mid-month',
+      ),
+    },
     hours: TONIGHT_TO_DAWN,
+    periodEnd: (night, nusach, location) => kiddushLevanaPeriod(night, nusach, location).end,
   },
   sheva_berachot: { name: { he: 'שבע ברכות', en: 'Sheva Berachot' }, group: 'occasions' },
   chanukah_candles: {
@@ -93,7 +133,7 @@ export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
     evening: true,
     available: { all: ['chanukah'] },
     availableLabel: { he: 'בחנוכה', en: 'On Chanukah' },
-    hours: TONIGHT_TO_DAWN,
+    hours: 'mitzvah',
   },
   selichot: {
     name: { he: 'סליחות', en: 'Selichot' },
@@ -108,6 +148,22 @@ export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
       },
     },
   },
+  ushpizin: {
+    name: { he: 'אושפיזין', en: 'Ushpizin' },
+    group: 'occasions',
+    evening: true,
+    available: { all: ['sukkotNight'] },
+    availableLabel: { he: 'בלילות סוכות', en: 'On the nights of Sukkot' },
+    hours: TONIGHT_TO_DAWN,
+  },
+};
+
+export const MITZVAH_STANDALONE_TEXT: Partial<Record<string, StandaloneTextId>> = {
+  krias_shma_al_hamita: 'kriat_shema_al_hamita',
+  kiddush_levana: 'kiddush_levana',
+  selichot: 'selichot',
+  chanukah_candles: 'chanukah_candles',
+  ushpizin: 'ushpizin',
 };
 
 const CHOK_DAYS: Condition = { none: ['shabbat', 'yomTov', 'yomKippur'] };
@@ -129,6 +185,12 @@ export function mitzvahTextId(mitzvahId: string): MitzvahTextId | null {
   return mitzvahId in SIDDUR_TEXTS ? (mitzvahId as MitzvahTextId) : null;
 }
 
+// A mitzvah linked to a standalone text is a night mitzvah keyed on the civil day whose evening it opens.
+export function mitzvahTextEvening(mitzvahId: string): boolean {
+  const own = mitzvahTextId(mitzvahId);
+  return own ? SIDDUR_TEXTS[own].evening : mitzvahId in MITZVAH_STANDALONE_TEXT;
+}
+
 export function standaloneTextId(id: string): StandaloneTextId | null {
   return id in STANDALONE_TEXTS ? (id as StandaloneTextId) : null;
 }
@@ -137,8 +199,10 @@ export function siddurAsset(nusach: Nusach, id: SiddurTextId): number | undefine
   return ASSETS[nusach]?.[id];
 }
 
-export function standaloneTextsIn(group: SiddurGroup): StandaloneTextId[] {
-  return (Object.keys(STANDALONE_TEXTS) as StandaloneTextId[]).filter((id) => STANDALONE_TEXTS[id].group === group);
+export function standaloneTextsIn(group: SiddurGroup, nusach?: Nusach): StandaloneTextId[] {
+  return (Object.keys(STANDALONE_TEXTS) as StandaloneTextId[]).filter(
+    (id) => STANDALONE_TEXTS[id].group === group && (!nusach || siddurTextBuiltFor(nusach, id)),
+  );
 }
 
 export function standaloneAvailability(id: StandaloneTextId, nusach: Nusach): Availability {
@@ -147,9 +211,7 @@ export function standaloneAvailability(id: StandaloneTextId, nusach: Nusach): Av
 }
 
 export function hasStandaloneText(id: StandaloneTextId, nusach: Nusach, features: DayFeatures): boolean {
-  return (
-    siddurAsset(nusach, id) !== undefined && matchesCondition(standaloneAvailability(id, nusach).available, features)
-  );
+  return siddurTextPresent(nusach, id) && matchesCondition(standaloneAvailability(id, nusach).available, features);
 }
 
 // The Hebrew day a standalone text opened with no date resolves for at this instant.
@@ -159,8 +221,43 @@ export function standaloneTextDay(id: StandaloneTextId, instant: Date, location:
     : HebcalService.hebrewDayAt(instant, location);
 }
 
+function periodEndAt(id: StandaloneTextId, nusach: Nusach, instant: Date, location: Location): number | null {
+  const { periodEnd } = STANDALONE_TEXTS[id];
+  return periodEnd ? periodEnd(standaloneTextDay(id, instant, location), nusach, location).getTime() : null;
+}
+
+// Whether the night in effect at `instant` has run past the end of its text's period, as the last night
+// of Kiddush Levana does between the period's end and the next alot.
+export function standalonePeriodEnded(
+  id: StandaloneTextId,
+  nusach: Nusach,
+  instant: Date,
+  location: Location,
+): boolean {
+  const end = periodEndAt(id, nusach, instant, location);
+  return end !== null && instant.getTime() >= end;
+}
+
+function linkedMitzvahWindow(
+  id: StandaloneTextId,
+  date: Date,
+  nusach: Nusach,
+  location: Location,
+  place: Place,
+): { start: Date; end: Date } | null {
+  const mitzvahId = Object.keys(MITZVAH_STANDALONE_TEXT).find((key) => MITZVAH_STANDALONE_TEXT[key] === id);
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy: the registry imports this module
+  const { findMitzvah } = require('./mitzvot') as typeof import('./mitzvot');
+  const mitzvah = mitzvahId ? findMitzvah(mitzvahId) : undefined;
+  if (!mitzvah) return null;
+  const { halachicOpinions } = useUserStore.getState();
+  const window = dayWindow(mitzvah, date, location, { nusach, halachicOpinions, inIsrael: place.inIsrael });
+  return window && { start: window.start, end: window.end };
+}
+
 // The hours of `id` open at `instant` (from the evening before through the next morning), when its
 // day offers it in `nusach`, else null: what the catalog's "now" card lists for a standalone text.
+// A text with a `periodEnd` closes there, even when its hours run on to the next morning.
 export function standaloneHoursAt(
   id: StandaloneTextId,
   nusach: Nusach,
@@ -171,18 +268,22 @@ export function standaloneHoursAt(
   const { hours } = STANDALONE_TEXTS[id];
   if (!hours) return null;
   if (!hasStandaloneText(id, nusach, dayFeatures(standaloneTextDay(id, instant, location), place))) return null;
+  const periodEnd = periodEndAt(id, nusach, instant, location);
   const today = appDay(instant, location);
-  const zmanimOn = (offset: number) =>
-    ZmanimService.getZmanim(
-      locationNoon(new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset), location),
-      location,
-    );
+  const dateOn = (offset: number) => new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
+  const zmanimOn = (offset: number) => ZmanimService.getZmanim(locationNoon(dateOn(offset), location), location);
   for (const offset of [-1, 0]) {
     const day = zmanimOn(offset);
     const next = zmanimOn(offset + 1);
-    if (!day || !next) continue;
-    const open = hours(day, next, location);
-    if (open.start.getTime() <= instant.getTime() && instant.getTime() < open.end.getTime()) return open;
+    const open =
+      hours === 'mitzvah'
+        ? linkedMitzvahWindow(id, dateOn(offset), nusach, location, place)
+        : day && next
+          ? hours(day, next, location)
+          : null;
+    if (!open) continue;
+    const end = new Date(Math.min(open.end.getTime(), periodEnd ?? Number.POSITIVE_INFINITY));
+    if (open.start.getTime() <= instant.getTime() && instant.getTime() < end.getTime()) return { ...open, end };
   }
   return null;
 }
@@ -210,7 +311,7 @@ export function customSiddurText(mitzvah: Mitzvah, nusach: Nusach): SiddurText |
 }
 
 export function siddurPlace(location: Location, inIsrael: boolean): Place {
-  return { inIsrael, jerusalem: isJerusalem(location) };
+  return { inIsrael, jerusalem: isJerusalem(location), location };
 }
 
 export function hasSiddurText(mitzvah: Mitzvah, nusach: Nusach, windowDate: Date, place: Place): boolean {
@@ -219,8 +320,59 @@ export function hasSiddurText(mitzvah: Mitzvah, nusach: Nusach, windowDate: Date
     const day = liturgicalDay(windowDate, false);
     return chokDayHasText(day, place.inIsrael) && matchesCondition(CHOK_DAYS, dayFeatures(day, place));
   }
+  const linked = MITZVAH_STANDALONE_TEXT[mitzvah.id];
+  if (linked) {
+    return hasStandaloneText(
+      linked,
+      nusach,
+      dayFeatures(liturgicalDay(windowDate, mitzvahTextEvening(mitzvah.id)), place),
+    );
+  }
   const id = mitzvahTextId(mitzvah.id);
   if (!id || siddurAsset(nusach, id) === undefined) return false;
   const { evening, available } = SIDDUR_TEXTS[id];
   return matchesCondition(available, dayFeatures(liturgicalDay(windowDate, evening), place));
+}
+
+export function siddurTextBuiltFor(nusach: Nusach, id: SiddurTextId): boolean {
+  return id === SELICHOT_TEXT_ID ? SELICHOT_NUSCHAOT.includes(nusach) : siddurAsset(nusach, id) !== undefined;
+}
+
+export function siddurTextPresent(nusach: Nusach, id: SiddurTextId): boolean {
+  return id === SELICHOT_TEXT_ID ? hasSelichotContent(nusach) : siddurAsset(nusach, id) !== undefined;
+}
+
+export const SELICHOT_OFFER_LEAD_DAYS = 7;
+
+export type SelichotSeason = { year: number; first: Date; last: Date };
+
+export type SelichotOffer = SelichotSeason & { begun: boolean };
+
+export function selichotSeason(year: number, nusach: Nusach, place: Place): SelichotSeason | null {
+  const { available } = standaloneAvailability(SELICHOT_TEXT_ID, nusach);
+  const days: number[] = [];
+  const end = new HDate(9, months.TISHREI, year).abs();
+  for (let abs = new HDate(1, months.ELUL, year - 1).abs(); abs <= end; abs++) {
+    if (matchesCondition(available, dayFeatures(new HDate(abs), place))) days.push(abs);
+  }
+  if (!days.length) return null;
+  return { year, first: new HDate(days[0] - 1).greg(), last: new HDate(days[days.length - 1] - 1).greg() };
+}
+
+export function selichotOfferOn(today: Date, nusach: Nusach, place: Place): SelichotOffer | null {
+  const hd = new HDate(today);
+  const season = selichotSeason(
+    hd.getMonth() === months.TISHREI ? hd.getFullYear() : hd.getFullYear() + 1,
+    nusach,
+    place,
+  );
+  if (!season) return null;
+  const day = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const from = new Date(
+    season.first.getFullYear(),
+    season.first.getMonth(),
+    season.first.getDate() - SELICHOT_OFFER_LEAD_DAYS,
+  ).getTime();
+  if (day < from || day > season.last.getTime()) return null;
+  return { ...season, begun: day >= season.first.getTime() };
 }

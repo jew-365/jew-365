@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import { DateTime } from 'luxon';
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { Mitzvah, Reminder, ReminderAnchor, UserSettings } from '@/types/mitzvah';
 import type { Location } from '@/types/zmanim';
 import { nextReminderAt } from '@/services/NotificationScheduler';
@@ -9,7 +20,16 @@ import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
 import { currentOrNextWindow } from '@/utils/buildDayTimeline';
-import { TIME_PATTERN, minutesToTime, timeToMinutes } from '@/utils/clock';
+import { TIME_PATTERN, clockOf, minutesToTime, timeToMinutes } from '@/utils/clock';
+import { appDayKey } from '@/utils/locationDay';
+import { reminderLabel } from '@/utils/mitzvahName';
+import {
+  BLOCK_EXIT_DEFAULT_MIN,
+  FOLLOW_UP_DEFAULT_MIN,
+  FOLLOW_UP_MAX_MIN,
+  HEADS_UP_MAX_MIN,
+  skipsIfDone,
+} from '@/utils/skipRules';
 import { BottomSheet } from './BottomSheet';
 import { SegmentedControl } from './SegmentedControl';
 import { TimeField } from './TimeField';
@@ -18,13 +38,20 @@ const BODY_HEIGHT_SHARE = 0.65;
 
 const MAX_OFFSET_MIN = 720;
 
+const OFFSET_PATTERN = /^[-+]?[0-9]+$/;
+
+export function parseOffsetMinutes(raw: string): number | null {
+  const typed = raw.trim();
+  if (!OFFSET_PATTERN.test(typed)) return null;
+  return Number(typed) || 0;
+}
+
 type Props = {
   visible: boolean;
   initialValue?: Reminder | null;
   mitzvah: Mitzvah;
   location: Location;
   settings: UserSettings;
-  allowClock?: boolean;
   mitzvahName?: string;
   onClose: () => void;
   onSave: (value: Reminder) => void;
@@ -36,7 +63,6 @@ export function ReminderEditor({
   mitzvah,
   location,
   settings,
-  allowClock = false,
   mitzvahName,
   onClose,
   onSave,
@@ -62,17 +88,14 @@ export function ReminderEditor({
     setError(null);
   }, [initialValue, visible]);
 
-  const changeAnchor = (next: ReminderAnchor) => {
-    if (anchor === 'clock' && next !== 'clock') setOffsetMin('0');
-    setAnchor(next);
-  };
+  const followUpLabel = reminderLabel({ anchor: 'followUp', label: '' }, mitzvahName ?? mitzvah.name.he);
 
-  // A reminder is sendable when the scheduler would fire it at least once in its own lookahead. The marks
-  // are left out, so a mitzvah already done today never makes a sendable reminder look dead.
-  const firesAtLeastOnce = (reminder: Reminder) => {
-    const now = new Date();
-    if (!currentOrNextWindow(mitzvah, location, settings, now)) return true;
-    return nextReminderAt(mitzvah, [reminder], { now, location, settings, completions: {}, skipped: {} }) !== null;
+  const changeAnchor = (next: ReminderAnchor) => {
+    if (next === anchor) return;
+    if (next === 'followUp') setOffsetMin(String(FOLLOW_UP_DEFAULT_MIN));
+    else if (next === 'blockExit') setOffsetMin(String(BLOCK_EXIT_DEFAULT_MIN));
+    else if (anchor === 'clock' || anchor === 'followUp' || anchor === 'blockExit') setOffsetMin('0');
+    setAnchor(next);
   };
 
   const save = () => {
@@ -81,7 +104,19 @@ export function ReminderEditor({
       setError(t('reminder.errors.timeRequired'));
       return;
     }
-    const minutes = onClock ? timeToMinutes(time) : Number(offsetMin) || 0;
+    const minutes = onClock ? timeToMinutes(time) : parseOffsetMinutes(offsetMin);
+    if (minutes === null) {
+      setError(t('reminder.errors.offsetInvalid'));
+      return;
+    }
+    if (anchor === 'followUp' && !(minutes >= 1 && minutes <= FOLLOW_UP_MAX_MIN)) {
+      setError(t('reminder.errors.followUpRange', { max: FOLLOW_UP_MAX_MIN }));
+      return;
+    }
+    if (anchor === 'blockExit' && !(minutes >= 0 && minutes <= MAX_OFFSET_MIN)) {
+      setError(t('reminder.errors.blockExitRange', { max: MAX_OFFSET_MIN }));
+      return;
+    }
     if (!onClock && Math.abs(minutes) > MAX_OFFSET_MIN) {
       setError(t('reminder.errors.offsetRange', { max: MAX_OFFSET_MIN }));
       return;
@@ -89,11 +124,26 @@ export function ReminderEditor({
     const reminder: Reminder = {
       anchor,
       offsetMin: minutes,
-      label: label.trim() || mitzvahName || t('detail.addReminder'),
-      skipIfDone,
+      label: label.trim() || (anchor === 'followUp' ? '' : mitzvahName || t('detail.addReminder')),
+      skipIfDone: skipsIfDone({ anchor, skipIfDone }),
     };
-    if (!firesAtLeastOnce(reminder)) {
-      setError(t(onClock ? 'reminder.errors.timeOutsideWindow' : 'reminder.errors.outsideWindow'));
+    const now = new Date();
+    const window = currentOrNextWindow(mitzvah, location, settings, now);
+    if (
+      window &&
+      nextReminderAt(mitzvah, [reminder], { now, location, settings, completions: {}, skipped: {} }) === null
+    ) {
+      const hours = { start: clockOf(window.start, location.tz), end: clockOf(window.end, location.tz) };
+      const isToday =
+        window.start.getTime() <= now.getTime() || appDayKey(window.start, location) === appDayKey(now, location);
+      setError(
+        isToday
+          ? t('reminder.errors.outsideWindowToday', hours)
+          : t('reminder.errors.outsideWindowNext', {
+              ...hours,
+              date: DateTime.fromJSDate(window.start, { zone: location.tz }).toFormat('dd/MM'),
+            }),
+      );
       return;
     }
     setError(null);
@@ -104,8 +154,18 @@ export function ReminderEditor({
   const anchorOptions: { value: ReminderAnchor; label: string }[] = [
     { value: 'start', label: t('reminder.anchor.start') },
     { value: 'end', label: t('reminder.anchor.end') },
-    ...(allowClock ? [{ value: 'clock' as const, label: t('reminder.anchor.clock') }] : []),
+    { value: 'clock', label: t('reminder.anchor.clock') },
+    ...(mitzvah.isCustom ? [{ value: 'followUp' as const, label: t('reminder.anchor.followUp') }] : []),
+    ...(mitzvah.multiDay ? [{ value: 'blockExit' as const, label: t('reminder.anchor.blockExit') }] : []),
   ];
+  const offsetHint =
+    anchor === 'start'
+      ? t('reminder.headsUpHint', { max: HEADS_UP_MAX_MIN })
+      : anchor === 'followUp'
+        ? t('reminder.followUp.hint', { max: FOLLOW_UP_MAX_MIN })
+        : anchor === 'blockExit'
+          ? t('reminder.blockExit.hint', { max: MAX_OFFSET_MIN })
+          : null;
 
   return (
     <BottomSheet
@@ -125,7 +185,7 @@ export function ReminderEditor({
           accessibilityLabel={t('reminder.label')}
           value={label}
           onChangeText={setLabel}
-          placeholder={t('detail.addReminder')}
+          placeholder={anchor === 'followUp' ? followUpLabel : t('detail.addReminder')}
           placeholderTextColor={colors.textMuted}
           style={[styles.input, { backgroundColor: colors.surface2, color: colors.text, borderColor: colors.border }]}
         />
@@ -138,14 +198,14 @@ export function ReminderEditor({
             </Text>
             <View style={styles.offsetRow}>
               <Pressable
-                onPress={() => setOffsetMin(String((Number(offsetMin) || 0) - 5))}
+                onPress={() => setOffsetMin(String((parseOffsetMinutes(offsetMin) ?? 0) - 5))}
                 style={[styles.stepper, { backgroundColor: colors.surface2, borderColor: colors.border }]}
               >
                 <Text style={[typography.bodyBold, { color: colors.text }]}>-5</Text>
               </Pressable>
               <TextInput
                 accessibilityLabel={t('reminder.offset')}
-                keyboardType="numbers-and-punctuation"
+                keyboardType={Platform.OS === 'android' ? 'numeric' : 'numbers-and-punctuation'}
                 value={offsetMin}
                 onChangeText={setOffsetMin}
                 style={[
@@ -155,25 +215,30 @@ export function ReminderEditor({
                 ]}
               />
               <Pressable
-                onPress={() => setOffsetMin(String((Number(offsetMin) || 0) + 5))}
+                onPress={() => setOffsetMin(String((parseOffsetMinutes(offsetMin) ?? 0) + 5))}
                 style={[styles.stepper, { backgroundColor: colors.surface2, borderColor: colors.border }]}
               >
                 <Text style={[typography.bodyBold, { color: colors.text }]}>+5</Text>
               </Pressable>
             </View>
+            {offsetHint ? (
+              <Text style={[typography.small, styles.hint, { color: colors.textMuted }]}>{offsetHint}</Text>
+            ) : null}
           </>
         )}
-        <View style={[styles.switchRow, { borderTopColor: colors.border }]}>
-          <View style={styles.switchLabel}>
-            <Text style={[typography.subheading, { color: colors.text }]}>{t('reminder.skipIfDone')}</Text>
+        {anchor !== 'followUp' ? (
+          <View style={[styles.switchRow, { borderTopColor: colors.border }]}>
+            <View style={styles.switchLabel}>
+              <Text style={[typography.subheading, { color: colors.text }]}>{t('reminder.skipIfDone')}</Text>
+            </View>
+            <Switch
+              value={skipIfDone}
+              onValueChange={setSkipIfDone}
+              thumbColor={BRAND.white}
+              trackColor={{ false: colors.border, true: colors.gold }}
+            />
           </View>
-          <Switch
-            value={skipIfDone}
-            onValueChange={setSkipIfDone}
-            thumbColor={BRAND.white}
-            trackColor={{ false: colors.border, true: colors.gold }}
-          />
-        </View>
+        ) : null}
         {error ? <Text style={[typography.small, styles.error, { color: colors.urgent }]}>{error}</Text> : null}
         <Pressable onPress={save} accessibilityRole="button" style={[styles.saveBtn, { backgroundColor: colors.gold }]}>
           <Text style={[typography.bodyBold, { color: colors.onGold }]}>{t('common.save')}</Text>
@@ -218,6 +283,9 @@ const styles = StyleSheet.create({
     minWidth: 0,
     marginBottom: 0,
     textAlign: 'center',
+  },
+  hint: {
+    marginTop: spacing.xs,
   },
   switchRow: {
     flexDirection: 'row',

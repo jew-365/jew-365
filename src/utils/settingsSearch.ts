@@ -1,22 +1,64 @@
 import { CITIES } from '@/data/cities';
-import type { IconName } from '@/components/MitzvahIcon';
+import { iconFor, type IconName } from '@/components/MitzvahIcon';
+import { CHOK_TEXT_ID } from '@/data/chok';
+import {
+  SIDDUR_GROUPS,
+  STANDALONE_TEXTS,
+  hasStandaloneText,
+  mitzvahTextId,
+  siddurAsset,
+  siddurPlace,
+  siddurTextPresent,
+  standaloneAvailability,
+  standalonePeriodEnded,
+  standaloneTextDay,
+  standaloneTextsIn,
+} from '@/data/siddur';
+import { SIDDUR_CHAPTERS } from '@/data/siddurChapters.generated';
+import type { MaritalStatus } from '@/stores/useUserStore';
+import type { Mitzvah, Nusach } from '@/types/mitzvah';
+import type { SiddurChapterTitle, SiddurTextId, SiddurVoice } from '@/types/siddur';
+import type { Location } from '@/types/zmanim';
+import { mitzvahName } from './mitzvahName';
+import { catalogListsText, chapterVisible, dayFeatures } from './siddur';
 
 export type SettingsSectionKey = 'profile' | 'prayer' | 'device' | 'backup' | 'contact';
 
 export type SettingsSearchCondition = 'taharah' | 'backup' | 'battery';
 
-export type SettingsSearchItem = {
+type SearchItemBase = {
   id: string;
   icon: IconName;
-  titleKey: string;
   labelKeys?: readonly string[];
   terms: readonly string[];
-  section?: SettingsSectionKey;
-  route?: '/mitzvot' | '/custom-mitzvah' | '/hilulot' | '/rosh-chodesh';
   when?: SettingsSearchCondition;
 };
 
-export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchItem[] = [
+export type SettingsSearchSettingItem = SearchItemBase & {
+  kind?: undefined;
+  titleKey: string;
+  section?: SettingsSectionKey;
+  route?: '/mitzvot' | '/custom-mitzvah' | '/hilulot' | '/rosh-chodesh' | '/guide';
+};
+
+export type SettingsSearchName = { he: string; en: string };
+
+export type SettingsSearchHref =
+  | { pathname: '/mitzvah/[id]'; params: { id: string } }
+  | { pathname: '/siddur/[id]'; params: { id: string; section?: string } };
+
+export type SettingsSearchClosed = { label: SettingsSearchName | null };
+
+export type SettingsSearchContentItem = SearchItemBase & {
+  title: SettingsSearchName;
+  href: SettingsSearchHref;
+  closed?: SettingsSearchClosed;
+} & ({ kind: 'mitzvah' | 'siddur' } | { kind: 'chapter'; textName: SettingsSearchName });
+
+export type SettingsSearchItem = SettingsSearchSettingItem | SettingsSearchContentItem;
+export type SettingsSearchKind = SettingsSearchContentItem['kind'];
+
+export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
   {
     id: 'mitzvot',
     icon: 'custom',
@@ -67,6 +109,7 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchItem[] = [
     id: 'hilulot',
     icon: 'hilula',
     titleKey: 'hilulot.title',
+    labelKeys: ['hilulot.kind.before', 'hilulot.kind.evening'],
     route: '/hilulot',
     terms: ['הילולה', 'הילולות', 'צדיקים', 'צדיק', 'יארצייט', 'יום פטירה', 'hilula', 'yahrzeit', 'tzaddik'],
   },
@@ -74,8 +117,31 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchItem[] = [
     id: 'roshChodesh',
     icon: 'moon',
     titleKey: 'roshChodesh.title',
+    labelKeys: ['roshChodesh.kind.before', 'roshChodesh.kind.evening', 'roshChodesh.kind.day'],
     route: '/rosh-chodesh',
     terms: ['ראש חודש', 'חודש', 'מולד', 'rosh chodesh', 'new month'],
+  },
+  {
+    id: 'guide',
+    icon: 'guide',
+    titleKey: 'guide.title',
+    route: '/guide',
+    terms: [
+      'מדריך',
+      'מדריך למשתמש',
+      'הדרכה',
+      'עזרה',
+      'הסבר',
+      'הסברים',
+      'איך',
+      'מה חדש',
+      'שאלות',
+      'guide',
+      'user guide',
+      'how to',
+      'manual',
+      'tutorial',
+    ],
   },
   {
     id: 'profileName',
@@ -184,12 +250,63 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchItem[] = [
     terms: ['מניין', 'מנין', 'יחיד', 'קדיש', 'ברכו', 'קדושה', 'קריאת התורה', 'minyan', 'alone', 'kaddish'],
   },
   {
+    id: 'siddurVoice',
+    icon: 'siddur',
+    titleKey: 'settings.siddurVoice',
+    labelKeys: ['settings.siddurVoice.male', 'settings.siddurVoice.female'],
+    section: 'prayer',
+    terms: ['לשון', 'לשון נקבה', 'לשון זכר', 'נשים', 'voice', 'feminine', 'masculine', 'women'],
+  },
+  {
     id: 'reading',
     icon: 'siddur',
     titleKey: 'settings.reading',
     labelKeys: ['settings.autoScroll', 'settings.autoScrollSpeed'],
     section: 'prayer',
     terms: ['גלילה', 'גלילה אוטומטית', 'מהירות', 'קריאה', 'סידור', 'scroll', 'speed', 'reading', 'siddur'],
+  },
+  {
+    id: 'chokCommentary',
+    icon: 'chok',
+    titleKey: 'settings.chokCommentaryOpen',
+    labelKeys: ['chok.commentary', 'chok.commentary.folded', 'chok.commentary.open'],
+    section: 'prayer',
+    terms: [
+      'רש״י',
+      'רשי',
+      'ברטנורה',
+      'פירוש',
+      'פירושים',
+      'מפרשים',
+      'חק לישראל',
+      'חוק לישראל',
+      'מקופל',
+      'קיפול',
+      'rashi',
+      'bartenura',
+      'commentary',
+      'commentaries',
+      'chok',
+    ],
+  },
+  {
+    id: 'chokThuNightDay',
+    icon: 'chok',
+    titleKey: 'settings.chokThuNightDay',
+    labelKeys: ['chok.thuNight.thu', 'chok.thuNight.fri'],
+    section: 'prayer',
+    terms: [
+      'ליל שישי',
+      'חמישי בלילה',
+      'יום חמישי',
+      'יום שישי',
+      'חק לישראל',
+      'חוק לישראל',
+      'thursday night',
+      'thursday',
+      'friday',
+      'chok',
+    ],
   },
   {
     id: 'location',
@@ -290,14 +407,33 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchItem[] = [
     id: 'reset',
     icon: 'sliders',
     titleKey: 'settings.logout',
-    section: 'device',
-    terms: ['איפוס', 'אפס', 'מחיקה', 'מחק', 'התחלה מחדש', 'reset', 'delete', 'erase', 'start over'],
+    labelKeys: ['settings.deleteData', 'settings.backup'],
+    section: 'backup',
+    terms: [
+      'איפוס',
+      'אפס',
+      'מחיקה',
+      'מחק',
+      'התחלה מחדש',
+      'reset',
+      'delete',
+      'erase',
+      'start over',
+      'גיבוי',
+      'שחזור',
+      'מחיקת נתונים',
+      'נתונים',
+      'backup',
+      'restore',
+      'delete data',
+      'data',
+    ],
   },
   {
     id: 'version',
     icon: 'sliders',
     titleKey: 'settings.searchVersion',
-    section: 'device',
+    section: 'contact',
     terms: ['גרסה', 'גירסה', 'גרסא', 'עדכון', 'version', 'update', 'build'],
   },
   {
@@ -336,12 +472,22 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchItem[] = [
       'מייל',
       'אימייל',
       'מפתחים',
+      'אודות',
+      'גרסה',
       'support',
       'bug',
       'feedback',
       'email',
       'help',
+      'about',
     ],
+  },
+  {
+    id: 'links',
+    icon: 'chat',
+    titleKey: 'settings.links',
+    section: 'contact',
+    terms: ['קישורים', 'links', 'אתר', 'site', 'מדיניות פרטיות', 'privacy', 'רישיון', 'license', 'חנות', 'store'],
   },
 ];
 
@@ -412,10 +558,108 @@ export function buildSettingsSearchIndex(
   items: readonly SettingsSearchItem[] = SETTINGS_SEARCH_ITEMS,
 ): SettingsSearchEntry[] {
   return items.map((item) => {
-    const titleWords = [...new Set(lookup(item.titleKey).flatMap(wordsOf))];
+    const titles = item.kind ? [item.title.he, item.title.en] : lookup(item.titleKey);
+    const titleWords = [...new Set(titles.flatMap(wordsOf))];
     const rest = [...(item.labelKeys ?? []).flatMap(lookup), ...item.terms].flatMap(wordsOf);
     return { item, titleWords, words: [...new Set([...titleWords, ...rest])] };
   });
+}
+
+export type SettingsContentInput = {
+  mitzvot: readonly Mitzvah[];
+  nusach: Nusach;
+  voice: SiddurVoice | null;
+  maritalStatus: MaritalStatus | null;
+  chokInstalled: boolean;
+  now: Date;
+  location: Location;
+  inIsrael: boolean;
+};
+
+type ContentText = {
+  id: SiddurTextId | typeof CHOK_TEXT_ID;
+  title: SettingsSearchName;
+  icon: IconName;
+  chapters: readonly SiddurChapterTitle[];
+  closed?: SettingsSearchClosed;
+};
+
+const nameOf = (mitzvah: Mitzvah): SettingsSearchName => ({ he: mitzvah.name.he, en: mitzvahName(mitzvah, 'en') });
+
+export function settingsContentItems({
+  mitzvot,
+  nusach,
+  voice,
+  maritalStatus,
+  chokInstalled,
+  now,
+  location,
+  inIsrael,
+}: SettingsContentInput): SettingsSearchContentItem[] {
+  const mitzvahItems = mitzvot.map((mitzvah): SettingsSearchContentItem => ({
+    id: `mitzvah:${mitzvah.id}`,
+    kind: 'mitzvah',
+    icon: iconFor(mitzvah.icon),
+    title: nameOf(mitzvah),
+    terms: [],
+    href: { pathname: '/mitzvah/[id]', params: { id: mitzvah.id } },
+  }));
+  const texts: ContentText[] = [];
+  for (const mitzvah of mitzvot) {
+    if (mitzvah.isCustom) continue;
+    if (mitzvah.id === CHOK_TEXT_ID) {
+      if (chokInstalled)
+        texts.push({ id: CHOK_TEXT_ID, title: nameOf(mitzvah), icon: iconFor(mitzvah.icon), chapters: [] });
+      continue;
+    }
+    const id = mitzvahTextId(mitzvah.id);
+    if (!id || !catalogListsText(id, voice) || siddurAsset(nusach, id) === undefined) continue;
+    texts.push({
+      id,
+      title: nameOf(mitzvah),
+      icon: iconFor(mitzvah.icon),
+      chapters: SIDDUR_CHAPTERS[id]?.[nusach] ?? [],
+    });
+  }
+  const place = siddurPlace(location, inIsrael);
+  for (const id of SIDDUR_GROUPS.flatMap((group) => standaloneTextsIn(group, nusach))) {
+    if (!catalogListsText(id, voice) || !siddurTextPresent(nusach, id)) continue;
+    const { name, group } = STANDALONE_TEXTS[id];
+    const open =
+      hasStandaloneText(id, nusach, dayFeatures(standaloneTextDay(id, now, location), place)) &&
+      !standalonePeriodEnded(id, nusach, now, location);
+    texts.push({
+      id,
+      title: name,
+      icon: group,
+      chapters: SIDDUR_CHAPTERS[id]?.[nusach] ?? [],
+      closed: open ? undefined : { label: standaloneAvailability(id, nusach).availableLabel ?? null },
+    });
+  }
+  const textItems = texts.map((text): SettingsSearchContentItem => ({
+    id: `siddur:${text.id}`,
+    kind: 'siddur',
+    icon: text.icon,
+    title: text.title,
+    terms: [],
+    href: { pathname: '/siddur/[id]', params: { id: text.id } },
+    closed: text.closed,
+  }));
+  const chapterItems = texts.flatMap((text) => {
+    const shown = text.chapters.filter((chapter) => chapterVisible(chapter, voice, maritalStatus));
+    if (shown.length < 2) return [];
+    return shown.map((chapter): SettingsSearchContentItem => ({
+      id: `chapter:${text.id}:${chapter.he}`,
+      kind: 'chapter',
+      icon: text.icon,
+      title: { he: chapter.he, en: chapter.en },
+      textName: text.title,
+      terms: [text.title.he, text.title.en],
+      href: { pathname: '/siddur/[id]', params: { id: text.id, section: chapter.he } },
+      closed: text.closed,
+    }));
+  });
+  return [...mitzvahItems, ...textItems, ...chapterItems];
 }
 
 export function typedInOtherLayout(query: string): string | null {
@@ -507,7 +751,10 @@ function queryScore(query: string, entry: SettingsSearchEntry, fuzzy: boolean): 
   return total / tokens.length;
 }
 
-export const SETTINGS_SEARCH_LIMIT = 8;
+export const SETTINGS_SEARCH_LIMIT = 12;
+
+const KIND_RANK: Record<SettingsSearchKind, number> = { mitzvah: 1, siddur: 2, chapter: 3 };
+const kindRank = (item: SettingsSearchItem): number => (item.kind ? KIND_RANK[item.kind] : 0);
 
 // Exact, prefix and substring matches first; typo tolerance only when they find nothing,
 // so a near-miss of another word (גיבוי / כיבוי) never crowds out what the user typed.
@@ -528,7 +775,7 @@ export function searchSettings(
         return { entry, order, score: Math.max(direct, viaLayout) };
       })
       .filter((result) => result.score > 0)
-      .sort((a, b) => b.score - a.score || a.order - b.order);
+      .sort((a, b) => b.score - a.score || kindRank(a.entry.item) - kindRank(b.entry.item) || a.order - b.order);
   const strict = rank(false);
   return (strict.length > 0 ? strict : rank(true)).slice(0, limit).map((result) => result.entry.item);
 }

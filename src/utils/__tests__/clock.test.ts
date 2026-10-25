@@ -38,6 +38,9 @@ describe('formatRemaining', () => {
     [60 * MINUTE, '1:00 שעות'],
     [125 * MINUTE, '2:05 שעות'],
     [600 * MINUTE, '10:00 שעות'],
+    [48 * 60 * MINUTE - MINUTE, '47:59 שעות'],
+    [48 * 60 * MINUTE, '2 ימים'],
+    [(10 * 1440 + 300) * MINUTE, '10 ימים'],
   ])('writes %d ms as "%s"', (ms, expected) => {
     expect(formatRemaining(ms, he)).toBe(expected);
   });
@@ -49,6 +52,7 @@ describe('formatRemaining', () => {
   it('takes its unit words from the translator it is given', () => {
     expect(formatRemaining(59 * MINUTE, en)).toBe('59 min');
     expect(formatRemaining(125 * MINUTE, en)).toBe('2:05 h');
+    expect(formatRemaining((10 * 1440 + 300) * MINUTE, en)).toBe('10 days');
   });
 });
 
@@ -92,5 +96,53 @@ describe('clockRange', () => {
     expect(clockRange(start, end, heWith)).toBe('05:27 עד 05:28 למחרת');
     expect(clockRange(start, end, enWith)).toBe('05:27 to 05:28 the next day');
     expect(clockRange(new Date(2026, 9, 12, 20, 15), new Date(2026, 9, 13), heWith)).toBe('20:15 עד 00:00 למחרת');
+  });
+
+  it('says the next day for a window that falls entirely after the day it was computed for, as the Selichot night does', () => {
+    const start = new Date(2025, 8, 16, 0, 42);
+    const end = new Date(2025, 8, 16, 9, 31);
+    expect(clockRange(start, end, heWith)).toBe('00:42 עד 09:31');
+    expect(clockRange(start, end, heWith, undefined, new Date(2025, 8, 15))).toBe('00:42 עד 09:31 למחרת');
+    expect(clockRange(start, end, enWith, undefined, new Date(2025, 8, 15))).toBe('00:42 to 09:31 the next day');
+    expect(clockRange(start, end, heWith, undefined, new Date(2025, 8, 16))).toBe('00:42 עד 09:31');
+  });
+
+  it('keeps a window inside its own day plain, and a window that ends the day after its start next-day, when the day is given', () => {
+    const day = new Date(2026, 9, 12);
+    expect(clockRange(new Date(2026, 9, 12, 5, 27), new Date(2026, 9, 12, 18, 5), heWith, undefined, day)).toBe(
+      '05:27 עד 18:05',
+    );
+    expect(clockRange(new Date(2026, 9, 12, 20, 15), new Date(2026, 9, 13, 4, 0), heWith, undefined, day)).toBe(
+      '20:15 עד 04:00 למחרת',
+    );
+    expect(clockRange(new Date(2026, 9, 11, 22, 0), new Date(2026, 9, 12, 3, 0), heWith, undefined, day)).toBe(
+      '22:00 עד 03:00 למחרת',
+    );
+  });
+
+  it('prints both dates for a window that spans two days or more, as the Kiddush Levana period does', () => {
+    const start = new Date(2026, 9, 14, 18, 37);
+    expect(clockRange(start, new Date(2026, 9, 26, 3, 44), heWith)).toBe('14/10 18:37 עד 26/10 03:44');
+    expect(clockRange(start, new Date(2026, 9, 26, 3, 44), enWith)).toBe('14/10 18:37 to 26/10 03:44');
+    expect(clockRange(start, new Date(2026, 9, 16, 1, 0), heWith)).toBe('14/10 18:37 עד 16/10 01:00');
+    expect(
+      clockRange(new Date('2026-10-14T15:37:57Z'), new Date('2026-10-26T01:44:10Z'), heWith, 'Asia/Jerusalem'),
+    ).toBe('14/10 18:37 עד 26/10 03:44');
+  });
+
+  it('reads the day it was computed for in the zone it is given', () => {
+    const start = new Date('2025-09-15T21:42:00Z');
+    const end = new Date('2025-09-16T06:31:00Z');
+    expect(clockRange(start, end, heWith, 'Asia/Jerusalem', new Date(2025, 8, 15))).toBe('00:42 עד 09:31 למחרת');
+    expect(clockRange(start, end, heWith, 'Asia/Jerusalem', new Date(2025, 8, 16))).toBe('00:42 עד 09:31');
+    expect(clockRange(start, end, heWith, 'UTC', new Date(2025, 8, 15))).toBe('21:42 עד 06:31 למחרת');
+  });
+
+  it('reads both clocks, and the calendar day between them, in the zone it is given', () => {
+    const start = new Date('2026-05-06T20:00:00Z');
+    const end = new Date('2026-05-06T22:30:00Z');
+    expect(clockRange(start, end, heWith, 'UTC')).toBe('20:00 עד 22:30');
+    expect(clockRange(start, end, heWith, 'Asia/Jerusalem')).toBe('23:00 עד 01:30 למחרת');
+    expect(clockRange(start, end, enWith, 'America/Los_Angeles')).toBe('13:00 to 15:30');
   });
 });

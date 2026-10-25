@@ -4,7 +4,8 @@ import { CITIES } from '../cities';
 import { at, zmanimFor } from '@/testing/zmanim';
 import { HebcalService } from '@/services/HebcalService';
 import { HOLY_BLOCK_EXIT_MIN } from '@/services/ZmanimService';
-import { locationNoon } from '@/utils/locationDay';
+import { appDayEnd, locationNoon } from '@/utils/locationDay';
+import { calendarDay } from '@/utils/checkIn';
 import { UserSettings } from '@/types/mitzvah';
 
 const JERUSALEM = CITIES[0];
@@ -56,20 +57,105 @@ describe('mitzvot windows extra', () => {
     expect(w!.end.getTime()).toBe(c.zmanim.shkia.getTime());
   });
 
-  // Was `end > start`, which the old 18-hour window (tzeit → next-day MIDDAY chatzot) satisfied
-  // happily. Maariv ends at chatzot halayla — never into the following morning.
-  it('3.7 maariv: tzeit → chatzot halayla, and never past the next dawn', () => {
-    const c = ctx(WEEKDAY);
-    const w = findMitzvah('maariv')!.computeWindow(c)!;
-    const nextDay = new Date(WEEKDAY.getFullYear(), WEEKDAY.getMonth(), WEEKDAY.getDate() + 1, 12);
-    const nextAlot = zmanimFor(nextDay, JERUSALEM).alotHaShachar;
+  describe('3.7 maariv runs from nightfall to the next alot (R6)', () => {
+    const LOS_ANGELES = CITIES.find((city) => city.nameEn === 'Los Angeles')!;
+    const ABROAD: UserSettings = { ...SETTINGS_GRA, inIsrael: false };
 
-    expect(w.start.getTime()).toBe(c.zmanim.tzeitHakochavim.getTime());
-    expect(w.end.getTime()).toBe(c.zmanim.chatzotLayla.getTime());
-    expect(w.end.getTime()).toBeLessThan(nextAlot.getTime());
-    const hours = (w.end.getTime() - w.start.getTime()) / 3_600_000;
-    expect(hours).toBeGreaterThan(2);
-    expect(hours).toBeLessThan(9);
+    it.each([
+      ['Jerusalem, a weeknight', JERUSALEM, SETTINGS_GRA, '2026-04-23', '2026-04-24'],
+      ['Jerusalem, the night the clock moves forward', JERUSALEM, SETTINGS_GRA, '2026-03-26', '2026-03-27'],
+      ['Los Angeles, a winter weeknight', LOS_ANGELES, ABROAD, '2026-12-16', '2026-12-17'],
+      ['Los Angeles, the night the clock moves back', LOS_ANGELES, ABROAD, '2026-10-31', '2026-11-01'],
+    ])('%s', (_label, loc, settings, day, nextDay) => {
+      const c = ctx(at(loc, `${day}T12:00`), settings, loc);
+      const w = findMitzvah('maariv')!.computeWindow(c)!;
+      expect(w.start).toEqual(HebcalService.nightfall(c.zmanim, loc));
+      expect(w.end).toEqual(zmanimFor(at(loc, `${nextDay}T12:00`), loc).alotHaShachar);
+      expect(w.end).toEqual(appDayEnd(calendarDay(day), loc));
+      expect(w.end.getTime()).toBeGreaterThan(c.zmanim.chatzotLayla.getTime());
+    });
+  });
+
+  it("3.7c Friday's maariv lies wholly inside Shabbat, from tzeit to Shabbat's alot", () => {
+    const block = HebcalService.holyBlockOn(at(JERUSALEM, '2026-11-14T12:00'), JERUSALEM)!;
+    const c = ctx(at(JERUSALEM, '2026-11-13T12:00'));
+    const w = findMitzvah('maariv')!.computeWindow(c)!;
+    expect(w.start).toEqual(c.zmanim.tzeitHakochavim);
+    expect(w.end).toEqual(zmanimFor(at(JERUSALEM, '2026-11-14T12:00'), JERUSALEM).alotHaShachar);
+    expect(w.start.getTime()).toBeGreaterThan(block.start.getTime());
+    expect(w.end.getTime()).toBeLessThan(block.end.getTime());
+  });
+
+  it('3.7d maariv says it is ideally prayed before chatzot and keeps its two reminders', () => {
+    const maariv = findMitzvah('maariv')!;
+    expect(maariv.description).toEqual({
+      he: 'לכתחילה עד חצות הלילה',
+      en: 'Ideally before chatzot (halachic midnight)',
+    });
+    expect(maariv.defaultReminders.map((reminder) => [reminder.anchor, reminder.offsetMin])).toEqual([
+      ['start', 0],
+      ['start', 120],
+    ]);
+  });
+
+  describe('3.7e the bedtime Shema runs from nightfall to the next alot (R3)', () => {
+    const LOS_ANGELES = CITIES.find((city) => city.nameEn === 'Los Angeles')!;
+    const ABROAD: UserSettings = { ...SETTINGS_GRA, inIsrael: false };
+    const bedtime = () => findMitzvah('krias_shma_al_hamita')!;
+    const SHABBAT_NOON = at(JERUSALEM, '2026-11-14T12:00');
+
+    it.each([
+      ['Jerusalem, a weeknight', JERUSALEM, SETTINGS_GRA, '2026-04-23', '2026-04-24'],
+      ['Jerusalem, the night the clock moves forward', JERUSALEM, SETTINGS_GRA, '2026-03-26', '2026-03-27'],
+      ['Los Angeles, a winter weeknight', LOS_ANGELES, ABROAD, '2026-12-16', '2026-12-17'],
+      ['Los Angeles, the night the clock moves back', LOS_ANGELES, ABROAD, '2026-10-31', '2026-11-01'],
+    ])('%s', (_label, loc, settings, day, nextDay) => {
+      const c = ctx(at(loc, `${day}T12:00`), settings, loc);
+      const w = bedtime().computeWindow(c)!;
+      expect(w.start).toEqual(HebcalService.nightfall(c.zmanim, loc));
+      expect(w.end).toEqual(zmanimFor(at(loc, `${nextDay}T12:00`), loc).alotHaShachar);
+      expect(w.end).toEqual(appDayEnd(calendarDay(day), loc));
+      expect(w.end.getTime()).toBeGreaterThan(c.zmanim.chatzotLayla.getTime());
+    });
+
+    it("opens on motzaei Shabbat at the block's exit", () => {
+      const c = ctx(SHABBAT_NOON);
+      const block = HebcalService.holyBlockOn(SHABBAT_NOON, JERUSALEM)!;
+      const w = bedtime().computeWindow(c)!;
+      expect(w.start).toEqual(block.end);
+      expect(w.start.getTime()).toBe(c.zmanim.tzeitHakochavim.getTime() + HOLY_BLOCK_EXIT_MIN * 60_000);
+    });
+
+    it("lies wholly inside Shabbat on Friday night, from tzeit to Shabbat's alot", () => {
+      const block = HebcalService.holyBlockOn(SHABBAT_NOON, JERUSALEM)!;
+      const c = ctx(at(JERUSALEM, '2026-11-13T12:00'));
+      const w = bedtime().computeWindow(c)!;
+      expect(w.start).toEqual(c.zmanim.tzeitHakochavim);
+      expect(w.end).toEqual(zmanimFor(SHABBAT_NOON, JERUSALEM).alotHaShachar);
+      expect(w.start.getTime()).toBeGreaterThan(block.start.getTime());
+      expect(w.end.getTime()).toBeLessThan(block.end.getTime());
+    });
+
+    it('is a daily evening mitzvah of every nusach, ideally before chatzot, with one 22:30 clock reminder', () => {
+      expect(bedtime()).toMatchObject({
+        name: { he: 'קריאת שמע על המיטה', en: 'Bedtime Shema' },
+        icon: 'night',
+        timeType: 'range-within-day',
+        category: 'daily-evening',
+        group: 'daily',
+        skipOn: [],
+        nuschaotSupported: ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'],
+        description: { he: 'לכתחילה לפני חצות הלילה', en: 'Ideally before chatzot (halachic midnight)' },
+      });
+      expect(bedtime().defaultReminders).toEqual([
+        {
+          anchor: 'clock',
+          offsetMin: 1350,
+          label: 'זמן קריאת שמע על המיטה',
+          bodyVariants: ['זמן קריאת שמע על המיטה', 'קריאת שמע לפני השינה', 'לסיים את היום בשמע ישראל'],
+        },
+      ]);
+    });
   });
 
   it("3.7b sefirat haomer: tzeit → the next day's alot hashachar", () => {
@@ -83,11 +169,24 @@ describe('mitzvot windows extra', () => {
     expect(w.end.getTime()).toBeGreaterThan(c.zmanim.chatzotLayla.getTime());
   });
 
-  it('3.8 birchot_hashachar: alot → sofZmanShma', () => {
+  it('3.8 birchot_hashachar: alot → chatzot hayom (R7)', () => {
     const c = ctx(WEEKDAY);
     const w = findMitzvah('birchot_hashachar')!.computeWindow(c);
     expect(w!.start.getTime()).toBe(c.zmanim.alotHaShachar.getTime());
-    expect(w!.end.getTime()).toBe(c.zmanim.sofZmanShmaGra.getTime());
+    expect(w!.end.getTime()).toBe(c.zmanim.chatzot.getTime());
+    expect(w!.end.getTime()).toBeGreaterThan(c.zmanim.sofZmanShmaGra.getTime());
+  });
+
+  it('3.8b birchot_hashachar ends at chatzot in Los Angeles too, so 10:00 is inside it', () => {
+    const losAngeles = CITIES.find((city) => city.nameEn === 'Los Angeles')!;
+    const c = ctx(at(losAngeles, '2026-12-16T12:00'), { ...SETTINGS_GRA, inIsrael: false }, losAngeles);
+    const w = findMitzvah('birchot_hashachar')!.computeWindow(c)!;
+    const tenOClock = at(losAngeles, '2026-12-16T10:00').getTime();
+
+    expect(w.end.getTime()).toBe(c.zmanim.chatzot.getTime());
+    expect(tenOClock).toBeGreaterThan(w.start.getTime());
+    expect(tenOClock).toBeLessThan(w.end.getTime());
+    expect(tenOClock).toBeGreaterThan(c.zmanim.sofZmanShmaGra.getTime());
   });
 
   it('3.9 candle lighting follows the local minhag: 40 min in Jerusalem, 18 elsewhere in Israel', () => {

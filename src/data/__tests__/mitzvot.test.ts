@@ -66,16 +66,26 @@ describe('mitzvot windows', () => {
     expect(omerDayFor(april12)).toBe(11);
   });
 
-  it('a reminder that rotates body variants shows its first variant as the label', () => {
+  it('a reminder that rotates body variants shows its first variant as the label, or the label and a colon before the placeholder tail when the mitzvah has bodyParams', () => {
     const rotating = MITZVOT.flatMap((m) =>
       m.defaultReminders.flatMap((reminder) =>
-        reminder.bodyVariants ? [{ id: m.id, label: reminder.label, first: reminder.bodyVariants[0] }] : [],
+        reminder.bodyVariants
+          ? [{ id: m.id, params: Boolean(m.bodyParams), label: reminder.label, first: reminder.bodyVariants[0] }]
+          : [],
       ),
     );
-    expect(rotating.map((r) => r.id)).toContain('krias_shma_shacharit');
-    expect(rotating.map(({ id, label }) => ({ id, label }))).toEqual(
-      rotating.map(({ id, first }) => ({ id, label: first })),
-    );
+    const plain = rotating.filter((r) => !r.params);
+    const withParams = rotating.filter((r) => r.params);
+    expect(rotating.map((r) => r.id)).toEqual(expect.arrayContaining(['krias_shma_shacharit', 'chanukah_candles']));
+    expect(plain.map(({ id, label }) => ({ id, label }))).toEqual(plain.map(({ id, first }) => ({ id, label: first })));
+    expect(
+      withParams.map(({ id, label, first }) => ({
+        id,
+        prefix: first.startsWith(`${label}: `),
+        placeholder: /%\{\w+\}/.test(first),
+        labelPlaceholder: /%\{/.test(label),
+      })),
+    ).toEqual(withParams.map(({ id }) => ({ id, prefix: true, placeholder: true, labelPlaceholder: false })));
   });
 
   it('candle lighting returns null on non-Friday', () => {

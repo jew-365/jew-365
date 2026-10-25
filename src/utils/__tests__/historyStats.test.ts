@@ -3,6 +3,7 @@ import { calendarDay } from '../checkIn';
 import { locationNoon } from '../locationDay';
 import { Mitzvah } from '@/types/mitzvah';
 import { CITIES } from '@/data/cities';
+import { customToMitzvah } from '@/data/customMitzvotAdapter';
 import { findMitzvah } from '@/data/mitzvot';
 import { dateKey } from '@/stores/useCompletionsStore';
 import { at, zmanimFor } from '@/testing/zmanim';
@@ -14,6 +15,7 @@ function fixtureMitzvah(id: string, skipOn: Mitzvah['skipOn'] = []): Mitzvah {
     icon: id,
     timeType: 'range-within-day',
     category: 'daily-morning',
+    group: 'daily',
     skipOn,
     nuschaotSupported: ['ashkenaz'],
     defaultReminders: [],
@@ -294,5 +296,116 @@ describe('the night belongs to the evening before', () => {
     const afterAlot = { maariv: at(location, '2027-06-15T04:20').getTime() };
     const verdict = verdictAt(at(location, '2027-06-15T04:30'), { enabledSince: afterAlot });
     expect([...verdict.done, ...verdict.missed, ...verdict.pending]).not.toContain('maariv');
+  });
+
+  it('does not judge the install day on a window that closed before the install, and judges its evening', () => {
+    const installedAt = at(location, '2027-06-14T21:30').getTime();
+    const verdict = verdictAt(at(location, '2027-06-15T04:30'), {
+      enabledSince: { maariv: installedAt, shacharit: installedAt },
+    });
+    expect(verdict).toEqual({ key: '2027-06-14', done: [], missed: ['maariv'], pending: [] });
+  });
+
+  it('counts a done mark made before the mitzvah was switched on again, and judges no unmarked window then', () => {
+    const switchedOnAgain = at(location, '2027-06-15T12:00').getTime();
+    const verdict = verdictAt(at(location, '2027-06-15T04:30'), {
+      enabledSince: { maariv: switchedOnAgain, shacharit: switchedOnAgain },
+      completions: { '2027-06-14': { shacharit: at(location, '2027-06-14T08:00').getTime() } },
+    });
+    expect(verdict).toEqual({ key: '2027-06-14', done: ['shacharit'], missed: [], pending: [] });
+  });
+
+  it('calls an unmarked maariv missed only at the next alot, in Los Angeles too (R6)', () => {
+    const losAngeles = CITIES.find((city) => city.nameEn === 'Los Angeles')!;
+    const day = calendarDay('2026-12-16');
+    const input = {
+      mitzvot: [maariv],
+      completions: {},
+      location: losAngeles,
+      settings: { ...settings, inIsrael: false },
+    };
+    const chatzot = zmanimFor(locationNoon(day, losAngeles), losAngeles).chatzotLayla;
+    const alot = zmanimFor(locationNoon(calendarDay('2026-12-17'), losAngeles), losAngeles).alotHaShachar;
+    expect(judgeDay(day, input, new Date(chatzot.getTime() + 60 * 60_000)).pending).toEqual(['maariv']);
+    expect(judgeDay(day, input, new Date(alot.getTime() - 1)).pending).toEqual(['maariv']);
+    expect(judgeDay(day, input, alot).missed).toEqual(['maariv']);
+  });
+});
+
+describe('a custom mitzvah on a date range', () => {
+  const location = CITIES[0];
+  const ID = 'custom_1_range';
+  const ranged = customToMitzvah({
+    id: ID,
+    name: 'לימוד',
+    startHHMM: '08:00',
+    endHHMM: '09:00',
+    reminders: [],
+    skipOn: [],
+    createdAt: 1,
+    schedules: [{ from: '2026-05-01', schedule: { mode: 'range', start: '2026-05-04', end: '2026-05-06' } }],
+  });
+  const completions = { '2026-05-04': { [ID]: 1 }, '2026-05-05': { [ID]: 1 }, '2026-05-06': { [ID]: 1 } };
+  const now = at(location, '2026-05-08T12:00');
+
+  it('neither misses nor counts the days outside the range, and keeps the streak', () => {
+    const stats = computeStats([ranged], completions, location, settings, 7, now);
+    expect(stats.daily.map((entry) => [entry.date, entry.doneCount, entry.totalCount])).toEqual([
+      ['2026-05-02', 0, 0],
+      ['2026-05-03', 0, 0],
+      ['2026-05-04', 1, 1],
+      ['2026-05-05', 1, 1],
+      ['2026-05-06', 1, 1],
+      ['2026-05-07', 0, 0],
+      ['2026-05-08', 0, 0],
+    ]);
+    expect(stats.perMitzvah[ID]).toEqual({ done: 3, eligible: 3, pending: 0, percent: 100 });
+    expect(stats.streak).toBe(3);
+    expect(stats.missedYesterday).toEqual([]);
+  });
+
+  it('judges the day after the range as having nothing to do', () => {
+    expect(judgeDay(new Date(2026, 4, 7), { mitzvot: [ranged], completions, location, settings }, now)).toEqual({
+      key: '2026-05-07',
+      done: [],
+      missed: [],
+      pending: [],
+    });
+  });
+});
+
+describe('a window that outlasts a Shabbat check-in', () => {
+  const location = CITIES[0];
+  const LATE = at(location, '2026-10-20T12:00');
+  const erev = zmanimFor(at(location, '2026-10-16T12:00'), location);
+  const synthetic = (multiDay?: Mitzvah['multiDay']): Mitzvah => ({
+    ...fixtureMitzvah('long'),
+    multiDay,
+    computeWindow: (ctx) => (dateKey(ctx.date) === '2026-10-16' ? { start: erev.plagHaMincha, end: LATE } : null),
+  });
+  const verdictAt = (mitzvah: Mitzvah, wallClock: string) =>
+    judgeDay(
+      calendarDay('2026-10-16'),
+      { mitzvot: [mitzvah], completions: {}, location, settings },
+      at(location, wallClock),
+    );
+
+  it('stays pending past the check-in deadline when it is multi-day, and is missed when it is not', () => {
+    expect(verdictAt(synthetic({ maxDays: 16 }), '2026-10-19T06:00')).toEqual({
+      key: '2026-10-16',
+      done: [],
+      missed: [],
+      pending: ['long'],
+    });
+    expect(verdictAt(synthetic(), '2026-10-19T06:00')).toEqual({
+      key: '2026-10-16',
+      done: [],
+      missed: ['long'],
+      pending: [],
+    });
+  });
+
+  it('is missed once its own end has passed', () => {
+    expect(verdictAt(synthetic({ maxDays: 16 }), '2026-10-20T12:01').missed).toEqual(['long']);
   });
 });

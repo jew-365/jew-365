@@ -23,6 +23,9 @@ export const ICON_NAMES = [
   'calendar',
   'chok',
   'tehillim',
+  'chanukiah',
+  'sukkah',
+  'shofar',
   'chevronLeft',
   'chevronRight',
   'chevronDown',
@@ -43,6 +46,7 @@ export const ICON_NAMES = [
   'star',
   'cloud',
   'chat',
+  'guide',
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];
@@ -234,6 +238,29 @@ const DRAWINGS: Record<IconName, (p: Drawing) => React.ReactElement> = {
       <Line x1={14} y1={7} x2={14} y2={17.5} />
     </>
   ),
+  chanukiah: ({ fill }) => (
+    <>
+      <Path d="M12,1.8C12,1.8 10.5,3.5 10.5,4.7A1.5,1.5 0 0 0 13.5,4.7C13.5,3.5 12,1.8 12,1.8Z" fill={fill} />
+      <Line x1={12} y1={8.7} x2={12} y2={20.5} />
+      <Line x1={8} y1={20.5} x2={16} y2={20.5} />
+      <Path d="M3.5,8.5V10.5A8.5,5.5 0 0 0 20.5,10.5V8.5" />
+      <Path d="M7.75,8.5V10.5A4.25,3 0 0 0 16.25,10.5V8.5" />
+    </>
+  ),
+  sukkah: ({ fill }) => (
+    <>
+      <Rect x={4.5} y={10} width={15} height={10.5} rx={1} fill={fill} />
+      <Path d="M10,20.5V16A2,2 0 0 1 14,16V20.5" />
+      <Line x1={3} y1={10} x2={21} y2={10} />
+      <Path d="M3,5.5Q6,3 9,5.5T15,5.5T21,5.5" />
+    </>
+  ),
+  shofar: ({ fill }) => (
+    <>
+      <Path d="M3,18.5Q14,21 21,10.5Q20.5,5.5 16,5.5Q14.5,15.5 3,18.5Z" fill={fill} />
+      <Path d="M21,10.5Q17,10 16,5.5" />
+    </>
+  ),
   chevronLeft: () => <Path d="M15,6L9,12L15,18" />,
   chevronRight: () => <Path d="M9,6L15,12L9,18" />,
   chevronDown: () => <Path d="M6,9L12,15L18,9" />,
@@ -304,6 +331,13 @@ const DRAWINGS: Record<IconName, (p: Drawing) => React.ReactElement> = {
         fill={fill}
       />
       <Path d="M8,9H16M8,12.5H13" />
+    </>
+  ),
+  guide: ({ fill }) => (
+    <>
+      <Circle cx={12} cy={12} r={8.5} fill={fill} />
+      <Path d="M9.6,9.6A2.4,2.4 0 1 1 12,12V13.6" />
+      <Line x1={12} y1={16.6} x2={12} y2={16.7} />
     </>
   ),
 };

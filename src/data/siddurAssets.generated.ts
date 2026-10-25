@@ -21,10 +21,10 @@ export const SIDDUR_ASSETS = {
     mezuzah: require('../../assets/siddur/ashkenaz/mezuzah.siddur'),
     sheva_berachot: require('../../assets/siddur/ashkenaz/sheva_berachot.siddur'),
     chanukah_candles: require('../../assets/siddur/ashkenaz/chanukah_candles.siddur'),
+    ushpizin: require('../../assets/siddur/ashkenaz/ushpizin.siddur'),
     tikkun_haklali: require('../../assets/siddur/shared/tikkun_haklali.siddur'),
     tehillim: require('../../assets/siddur/shared/tehillim.siddur'),
     nishmat: require('../../assets/siddur/ashkenaz/nishmat.siddur'),
-    selichot: require('../../assets/siddur/ashkenaz/selichot.siddur'),
   },
   sefard: {
     tefillin: require('../../assets/siddur/sefard/tefillin.siddur'),
@@ -48,10 +48,10 @@ export const SIDDUR_ASSETS = {
     mezuzah: require('../../assets/siddur/sefard/mezuzah.siddur'),
     sheva_berachot: require('../../assets/siddur/sefard/sheva_berachot.siddur'),
     chanukah_candles: require('../../assets/siddur/sefard/chanukah_candles.siddur'),
+    ushpizin: require('../../assets/siddur/sefard/ushpizin.siddur'),
     tikkun_haklali: require('../../assets/siddur/shared/tikkun_haklali.siddur'),
     tehillim: require('../../assets/siddur/shared/tehillim.siddur'),
     nishmat: require('../../assets/siddur/sefard/nishmat.siddur'),
-    selichot: require('../../assets/siddur/sefard/selichot.siddur'),
   },
   edot_hamizrach: {
     tefillin: require('../../assets/siddur/edot_hamizrach/tefillin.siddur'),
@@ -75,10 +75,10 @@ export const SIDDUR_ASSETS = {
     mezuzah: require('../../assets/siddur/edot_hamizrach/mezuzah.siddur'),
     sheva_berachot: require('../../assets/siddur/edot_hamizrach/sheva_berachot.siddur'),
     chanukah_candles: require('../../assets/siddur/edot_hamizrach/chanukah_candles.siddur'),
+    ushpizin: require('../../assets/siddur/edot_hamizrach/ushpizin.siddur'),
     tikkun_haklali: require('../../assets/siddur/shared/tikkun_haklali.siddur'),
     tehillim: require('../../assets/siddur/shared/tehillim.siddur'),
     nishmat: require('../../assets/siddur/edot_hamizrach/nishmat.siddur'),
-    selichot: require('../../assets/siddur/edot_hamizrach/selichot.siddur'),
   },
   chabad: {
     tefillin: require('../../assets/siddur/chabad/tefillin.siddur'),
@@ -105,8 +105,8 @@ export const SIDDUR_ASSETS = {
     tikkun_haklali: require('../../assets/siddur/shared/tikkun_haklali.siddur'),
     tehillim: require('../../assets/siddur/shared/tehillim.siddur'),
     nishmat: require('../../assets/siddur/chabad/nishmat.siddur'),
-    selichot: require('../../assets/siddur/chabad/selichot.siddur'),
   },
 } as const;
 
 export const SHARED_SIDDUR_TEXT_IDS = ['tikkun_haklali', 'tehillim'] as const;
+export const DOWNLOADED_SIDDUR_TEXT_IDS = ['selichot'] as const;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   I18nManager,
   Keyboard,
@@ -26,6 +26,8 @@ const PLACEHOLDER = 'HH:MM';
 
 const pad = (value: number) => String(value).padStart(2, '0');
 
+export const timeInputKeyboard = () => (Platform.OS === 'android' ? 'number-pad' : 'numbers-and-punctuation');
+
 export function normalizeTimeInput(raw: string): string {
   const [head, ...tail] = raw.replace(/[^\d:]/g, '').split(':');
   const joined =
@@ -48,11 +50,13 @@ function TimePicker({ value, onChange }: PickerProps) {
   const { colors } = useTheme();
   const { t, language } = useI18n();
   const [draft, setDraft] = useState(value);
+  const inputRef = useRef<TextInput>(null);
   const valid = TIME_PATTERN.test(value);
   const hour = valid ? Number(value.slice(0, 2)) : null;
   const minute = valid ? Number(value.slice(3)) : null;
   // react-native-web has no I18nManager.isRTL: its rows mirror through the document dir, which follows the language.
   const rowMirrored = Platform.OS === 'web' ? language === 'he' : I18nManager.isRTL;
+  const android = Platform.OS === 'android';
 
   useEffect(() => {
     setDraft(value);
@@ -104,7 +108,10 @@ function TimePicker({ value, onChange }: PickerProps) {
         accessibilityLabel={t('custom.typeTime')}
         placeholder={PLACEHOLDER}
         placeholderTextColor={colors.textMuted}
-        keyboardType="numbers-and-punctuation"
+        ref={inputRef}
+        keyboardType={timeInputKeyboard()}
+        selectTextOnFocus={!android}
+        onFocus={android ? () => inputRef.current?.setSelection(0, draft.length) : undefined}
         maxLength={5}
         style={[
           styles.box,

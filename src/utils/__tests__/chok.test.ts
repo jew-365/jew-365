@@ -399,27 +399,43 @@ describe('the day a portion belongs to', () => {
     expect(keyOf(chokToday(at(JERUSALEM, '2026-10-02T08:00'), JERUSALEM, true))).toBe('2026-10-02');
   });
 
-  it('chokDoneDay marks a day slot of this week up to today, never Thursday night', () => {
+  it('chokDoneDay marks a day slot of this week up to today', () => {
     const wednesday = day(2026, 11, 18);
-    expect(keyOf(chokDoneDay({ ...VAYETZEI, slot: 'sun' }, wednesday))).toBe('2026-11-15');
-    expect(keyOf(chokDoneDay({ ...VAYETZEI, slot: 'wed' }, wednesday))).toBe('2026-11-18');
-    expect(chokDoneDay({ ...VAYETZEI, slot: 'thu' }, wednesday)).toBeNull();
-    expect(chokDoneDay({ ...VAYETZEI, slot: 'thuNight' }, day(2026, 11, 20))).toBeNull();
-    expect(keyOf(chokDoneDay({ ...VAYETZEI, slot: 'thu' }, day(2026, 11, 20)))).toBe('2026-11-19');
+    expect(keyOf(chokDoneDay({ ...VAYETZEI, slot: 'sun' }, wednesday, 'thu'))).toBe('2026-11-15');
+    expect(keyOf(chokDoneDay({ ...VAYETZEI, slot: 'wed' }, wednesday, 'thu'))).toBe('2026-11-18');
+    expect(chokDoneDay({ ...VAYETZEI, slot: 'thu' }, wednesday, 'thu')).toBeNull();
+    expect(keyOf(chokDoneDay({ ...VAYETZEI, slot: 'thu' }, day(2026, 11, 20), 'thu'))).toBe('2026-11-19');
+    expect(keyOf(chokDoneDay({ ...VAYETZEI, slot: 'fri' }, day(2026, 11, 20), 'thu'))).toBe('2026-11-20');
+  });
+
+  it.each([
+    ['thu', '2026-11-19'],
+    ['fri', '2026-11-20'],
+  ] as const)('chokDoneDay files Thursday night under the day chosen, %s', (choice, expected) => {
+    const thursdayNight = { ...VAYETZEI, slot: 'thuNight' } as const;
+    expect(keyOf(chokDoneDay(thursdayNight, day(2026, 11, 19), choice))).toBe(expected);
+    expect(keyOf(chokDoneDay(thursdayNight, day(2026, 11, 20), choice))).toBe(expected);
+    expect(chokDoneDay(thursdayNight, day(2026, 11, 18), choice)).toBeNull();
+    expect(chokDoneDay(thursdayNight, day(2026, 11, 23), choice)).toBeNull();
+  });
+
+  it('chokDoneDay files Thursday night under Thursday in a Vezot Haberakhah week, which has no Friday portion', () => {
+    expect(keyOf(chokDoneDay({ ...VEZOT, slot: 'thuNight' }, day(2026, 10, 1), 'fri'))).toBe('2026-10-01');
   });
 
   it('chokDoneDay refuses another week', () => {
-    expect(chokDoneDay({ ...VAYETZEI, slot: 'mon' }, day(2026, 11, 23))).toBeNull();
+    expect(chokDoneDay({ ...VAYETZEI, slot: 'mon' }, day(2026, 11, 23), 'thu')).toBeNull();
     expect(
       chokDoneDay(
         { parashiyot: ['Vayishlach'], shabbat: new HDate(day(2026, 11, 28)), slot: 'sun' },
         day(2026, 11, 18),
+        'thu',
       ),
     ).toBeNull();
   });
 
   it('chokDoneDay lets the Friday of Vezot Haberakhah mark Thursday', () => {
-    expect(keyOf(chokDoneDay({ ...VEZOT, slot: 'thu' }, day(2026, 10, 2)))).toBe('2026-10-01');
+    expect(keyOf(chokDoneDay({ ...VEZOT, slot: 'thu' }, day(2026, 10, 2), 'thu'))).toBe('2026-10-01');
   });
 });
 

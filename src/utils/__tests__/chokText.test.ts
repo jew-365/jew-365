@@ -1,10 +1,12 @@
 import {
+  CHOK_COMMENTARY_LABELS,
   HAFTARAH_VARIANT,
   chokParashaName,
   chokReaderPortion,
   chokSlotSections,
   chokText,
   chokWeekName,
+  isChokCommentary,
 } from '../chok';
 import type { ChokPortion } from '../chok';
 import { CITIES } from '@/data/cities';
@@ -12,6 +14,10 @@ import { dateKey } from '@/stores/useCompletionsStore';
 import { at } from '@/testing/zmanim';
 import { ChokAsset, ChokSection, ChokSectionKind, HaftarahVariant } from '@/types/chok';
 import { pickerEntries } from '@/utils/siddur';
+
+const { COMMENTARIES } = require('../../../scripts/chok/parse') as {
+  COMMENTARIES: Readonly<Record<string, { he: string; en: string }>>;
+};
 
 const JERUSALEM = CITIES[0];
 const LOS_ANGELES = CITIES.find((city) => city.nameEn === 'Los Angeles')!;
@@ -72,6 +78,23 @@ describe('HAFTARAH_VARIANT', () => {
   });
 });
 
+describe('CHOK_COMMENTARY_LABELS', () => {
+  it('names Rashi and Bartenura as the Chok build labels them, and leaves the Zohar translation out', () => {
+    const built = Object.values(COMMENTARIES).map((label) => label.en);
+    expect(CHOK_COMMENTARY_LABELS).toEqual(['Rashi', 'Bartenura']);
+    expect(built.filter((en) => CHOK_COMMENTARY_LABELS.includes(en))).toEqual(['Rashi', 'Bartenura']);
+    expect(built.filter((en) => !CHOK_COMMENTARY_LABELS.includes(en))).toEqual(['Zohar translation']);
+  });
+
+  it('tells a Rashi or Bartenura label from any other', () => {
+    expect(isChokCommentary({ he: 'רש״י', en: 'Rashi' })).toBe(true);
+    expect(isChokCommentary({ he: 'ברטנורה', en: 'Bartenura' })).toBe(true);
+    expect(isChokCommentary({ he: 'תרגום הזוהר', en: 'Zohar translation' })).toBe(false);
+    expect(isChokCommentary({ he: 'השלמה: יום שני', en: 'Make-up: Monday' })).toBe(false);
+    expect(isChokCommentary(undefined)).toBe(false);
+  });
+});
+
 describe('parasha names', () => {
   it("takes the Hebrew name from hebcal's locale and keeps the English one", () => {
     expect(chokParashaName('Vayetzei', 'he')).toBe('ויצא');
@@ -118,8 +141,11 @@ describe('chokText', () => {
     expect(text).not.toHaveProperty('dedication');
     expect(text.credits).toEqual([CREDIT]);
     expect(text.sections).toEqual([
-      { title: { he: 'תורה', en: 'Torah' }, segments: VAYAKHEL.slots.sun![0].segments },
-      { title: { he: 'נביאים - מלכים א - פרק ז', en: 'Prophets' }, segments: VAYAKHEL.slots.sun![1].segments },
+      { title: { he: 'תורה', en: 'Torah' }, segments: [{ key: 'Vayakhel:sun:תורה:0', he: [[{ t: 'תורה' }]] }] },
+      {
+        title: { he: 'נביאים - מלכים א - פרק ז', en: 'Prophets' },
+        segments: [{ key: 'Vayakhel:sun:נביאים - מלכים א - פרק ז:0', he: [[{ t: 'נביאים - מלכים א - פרק ז' }]] }],
+      },
     ]);
     expect(pickerEntries(text.sections).map((entry) => entry.title.he)).toEqual(['תורה', 'נביאים - מלכים א - פרק ז']);
   });
@@ -130,7 +156,7 @@ describe('chokText', () => {
       'נביאים - מלכים א - פרק ז',
     ]);
     const second = chokText([VAYAKHEL, PEKUDEI], { ...options, choice: 'second' });
-    expect(second.sections[0].segments).toBe(PEKUDEI.slots.sun![0].segments);
+    expect(second.sections[0].segments).toEqual([{ key: 'Pekudei:sun:תורה:0', he: [[{ t: 'תורה' }]] }]);
     expect(second.sections.every((s) => s.chapter === undefined)).toBe(true);
   });
 
@@ -227,10 +253,14 @@ describe('chokText', () => {
       title: label,
       optional: label,
       segments: [
-        { he: [[{ t: 'תורה', s: 'b' }]], en: 'Torah' },
-        ...VAYAKHEL.slots.sun![0].segments,
-        { he: [[{ t: 'נביאים - מלכים א - פרק ז', s: 'b' }]], en: 'Prophets' },
-        ...VAYAKHEL.slots.sun![1].segments,
+        { key: 'makeUp:sun:תורה', he: [[{ t: 'תורה', s: 'b' }]], en: 'Torah' },
+        { key: 'Vayakhel:sun:תורה:0', he: [[{ t: 'תורה' }]] },
+        {
+          key: 'makeUp:sun:נביאים - מלכים א - פרק ז',
+          he: [[{ t: 'נביאים - מלכים א - פרק ז', s: 'b' }]],
+          en: 'Prophets',
+        },
+        { key: 'Vayakhel:sun:נביאים - מלכים א - פרק ז:0', he: [[{ t: 'נביאים - מלכים א - פרק ז' }]] },
       ],
     });
   });
@@ -256,6 +286,31 @@ describe('chokText', () => {
       { index: 1, title: { he: 'ויקהל', en: 'Vayakhel' } },
       { index: 3, title: { he: 'פקודי', en: 'Pekudei' } },
     ]);
+  });
+
+  it('keys every segment by parasha, slot, heading and index, unique in the text', () => {
+    const text = chokText([VAYAKHEL, PEKUDEI], {
+      ...options,
+      makeUps: [{ dateKey: '2028-03-24', slot: 'fri', label: { he: 'השלמה: יום שישי', en: 'Make-up: Friday' } }],
+    });
+    const keys = text.sections.flatMap((s) => s.segments.map((segment) => segment.key));
+    const friday = (he: string, en: string) => [
+      `makeUp:fri:${he} · תורה`,
+      `${en}:fri:תורה:0`,
+      `makeUp:fri:${he} · הפטרה כמנהג האשכנזים`,
+      `${en}:fri:הפטרה כמנהג האשכנזים:0`,
+      `makeUp:fri:${he} · משנה שבת פרק כב`,
+      `${en}:fri:משנה שבת פרק כב:0`,
+    ];
+    expect(keys).toEqual([
+      ...friday('ויקהל', 'Vayakhel'),
+      ...friday('פקודי', 'Pekudei'),
+      'Vayakhel:sun:תורה:0',
+      'Vayakhel:sun:נביאים - מלכים א - פרק ז:0',
+      'Pekudei:sun:תורה:0',
+      'Pekudei:sun:נביאים - מלכים א - פרק ז:0',
+    ]);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 });
 

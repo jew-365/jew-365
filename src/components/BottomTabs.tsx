@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { BottomTabBarProps, BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { MitzvahIcon } from '@/components/MitzvahIcon';
@@ -13,6 +13,16 @@ type TabOptionsWithHref = BottomTabNavigationOptions & { href?: string | null };
 
 const TAB_ICON_SIZE = 22;
 const TAB_ICON_STROKE = 1.8;
+const PILL_WIDTH = 48;
+const PILL_HEIGHT = 32;
+
+const IOS_HOME_INDICATOR_OVERLAP = 20;
+
+function stripBottomPadding(bottomInset: number): number {
+  return Platform.OS === 'ios'
+    ? Math.max(spacing.sm, bottomInset - IOS_HOME_INDICATOR_OVERLAP)
+    : bottomInset + spacing.sm;
+}
 
 function HomeIcon({ color }: { color: string }) {
   return (
@@ -86,7 +96,7 @@ export function BottomTabs({ state, descriptors, navigation, insets }: BottomTab
   };
 
   return (
-    <View style={[styles.strip, { backgroundColor: colors.bg, paddingBottom: insets.bottom + spacing.sm }]}>
+    <View style={[styles.strip, { backgroundColor: colors.bg, paddingBottom: stripBottomPadding(insets.bottom) }]}>
       <View style={[styles.bar, { backgroundColor: colors.tabBg }, shadowStyle(colors.shadow, shadowPresets.raised)]}>
         {visibleRoutes.map((route) => {
           const focused = state.routes[state.index]?.key === route.key;
@@ -108,7 +118,10 @@ export function BottomTabs({ state, descriptors, navigation, insets }: BottomTab
               onPress={onPress}
               style={styles.tab}
             >
-              <View style={[styles.pill, focused && { backgroundColor: colors.goldLight }]}>
+              <View
+                collapsable={false}
+                style={[styles.pill, { backgroundColor: focused ? colors.goldLight : 'transparent' }]}
+              >
                 {icon?.(focused ? colors.gold : colors.textMuted)}
               </View>
               <Text
@@ -124,7 +137,7 @@ export function BottomTabs({ state, descriptors, navigation, insets }: BottomTab
               >
                 {label}
               </Text>
-              <View style={[styles.underline, focused && { backgroundColor: colors.gold }]} />
+              <View collapsable={false} style={[styles.underline, focused && { backgroundColor: colors.gold }]} />
             </Pressable>
           );
         })}
@@ -151,9 +164,9 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   pill: {
-    width: 48,
-    height: 32,
-    borderRadius: radius.full,
+    width: PILL_WIDTH,
+    height: PILL_HEIGHT,
+    borderRadius: PILL_HEIGHT / 2,
     alignItems: 'center',
     justifyContent: 'center',
   },

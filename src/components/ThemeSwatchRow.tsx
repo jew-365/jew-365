@@ -29,7 +29,9 @@ export function ThemeSwatchRow({ selected, onSelect, labelFor }: Props) {
           >
             <View style={[styles.ring, { borderColor: active ? colors.gold : colors.border }]}>
               <View style={[styles.swatch, { backgroundColor: palette.bg }]}>
-                <View style={[styles.dot, { backgroundColor: palette.gold }]} />
+                <View style={[styles.surface, { backgroundColor: palette.surface }]}>
+                  <View style={[styles.dot, { backgroundColor: palette.gold }]} />
+                </View>
               </View>
             </View>
           </Pressable>
@@ -63,9 +65,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  surface: {
+    width: 23,
+    height: 23,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   dot: {
-    width: 16,
-    height: 16,
+    width: 15,
+    height: 15,
     borderRadius: radius.sm,
   },
 });

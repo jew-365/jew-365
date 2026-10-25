@@ -12,6 +12,7 @@ import { buildTriggerTime } from '@/services/notifications/planners/mitzvot';
 import type { PlanInput } from '@/services/notifications/types';
 import { useChokStore } from '@/stores/useChokStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
+import { DEFAULT_HILULA_NOTICES, DEFAULT_ROSH_CHODESH_NOTICES } from '@/stores/useUserStore';
 import { installChokFixture } from '@/testing/chok';
 import { at, zmanimFor } from '@/testing/zmanim';
 import type { Mitzvah, UserSettings } from '@/types/mitzvah';
@@ -88,6 +89,8 @@ function planInput(overrides: Partial<PlanInput> = {}): PlanInput {
     enabledSince: {},
     hilulotEnabled: false,
     roshChodeshEnabled: false,
+    hilulaNotices: DEFAULT_HILULA_NOTICES,
+    roshChodeshNotices: DEFAULT_ROSH_CHODESH_NOTICES,
     weeklyReportEnabled: false,
     taharahEnabled: false,
     taharah: {
@@ -199,16 +202,25 @@ describe('computeWindow', () => {
     expect(windowOn(location, iso, settings)).toBeNull();
   });
 
-  it('ends at the next alot, or at the start of the block that opens that evening', () => {
-    const monday = windowOn(JERUSALEM, '2026-12-14', IL)!;
-    const mondayZmanim = zmanimFor(at(JERUSALEM, '2026-12-14T12:00'), JERUSALEM);
-    const tuesdayZmanim = zmanimFor(at(JERUSALEM, '2026-12-15T12:00'), JERUSALEM);
-    expect(monday.start.getTime()).toBe(mondayZmanim.alotHaShachar.getTime());
-    expect(monday.end.getTime()).toBe(tuesdayZmanim.alotHaShachar.getTime());
-    const friday = windowOn(JERUSALEM, '2026-12-18', IL)!;
-    const shabbat = HebcalService.holyBlockOn(at(JERUSALEM, '2026-12-19T12:00'), JERUSALEM)!;
-    expect(friday.end.getTime()).toBe(shabbat.start.getTime());
-  });
+  it.each([
+    ['Jerusalem', JERUSALEM, IL],
+    ['Los Angeles', LOS_ANGELES, ABROAD],
+  ] as const)(
+    'runs from alot to the next alot, or to the start of the block that opens that evening, in %s',
+    (_name, location, settings) => {
+      const monday = windowOn(location, '2026-12-14', settings)!;
+      const mondayZmanim = zmanimFor(at(location, '2026-12-14T12:00'), location);
+      const tuesdayZmanim = zmanimFor(at(location, '2026-12-15T12:00'), location);
+      expect(monday.start.getTime()).toBe(mondayZmanim.alotHaShachar.getTime());
+      expect(monday.end.getTime()).toBe(tuesdayZmanim.alotHaShachar.getTime());
+      const friday = windowOn(location, '2026-12-18', settings)!;
+      const fridayZmanim = zmanimFor(at(location, '2026-12-18T12:00'), location);
+      const shabbat = HebcalService.holyBlockOn(at(location, '2026-12-19T12:00'), location)!;
+      expect(friday.start.getTime()).toBe(fridayZmanim.alotHaShachar.getTime());
+      expect(friday.end.getTime()).toBe(shabbat.start.getTime());
+      expect(windowOn(location, '2026-12-19', settings)).toBeNull();
+    },
+  );
 });
 
 describe('the default reminder at 09:00 on the clock of the location', () => {
