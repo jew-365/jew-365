@@ -29,7 +29,7 @@ import {
   weekStartFor,
   weekSummary,
 } from '@/utils/weeklyReport';
-import { useI18n } from '@/i18n';
+import { formatDate, useI18n } from '@/i18n';
 
 export default function ReportScreen() {
   const { colors } = useTheme();
@@ -91,7 +91,7 @@ export default function ReportScreen() {
     [weekEnd, location, locale, inIsrael, hilulotEnabled],
   );
 
-  const dayLabel = (iso: string, pattern: string) => DateTime.fromISO(iso).setLocale(locale).toFormat(pattern);
+  const dayLabel = (iso: string, pattern: string) => formatDate(DateTime.fromISO(iso), pattern, locale);
   const parasha = useMemo(
     () => (weekEnd ? HebcalService.getParasha(shabbatOf(weekEnd), location, calendarLocale(locale)) : undefined),
     [weekEnd, location, locale],

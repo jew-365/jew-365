@@ -16,7 +16,7 @@ import { BRAND } from '@/theme/colors';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies, typography } from '@/theme/typography';
-import { useI18n } from '@/i18n';
+import { formatDate, useI18n } from '@/i18n';
 import { Onah, OnahKind, PerishaOnah } from '@/types/taharah';
 import { locationNoon } from '@/utils/locationDay';
 import { deriveCycle } from '@/utils/taharah/cycle';
@@ -144,7 +144,7 @@ export default function TaharahCalendar() {
   }, [ready, cursor, location, marksByDay, now]);
 
   const monthEmpty = ready && !weeks.some((week) => week.some((cell) => cell.inMonth && cell.marks));
-  const monthLabel = (month: DateTime) => `${t(`month.${month.month - 1}`)} ${month.year}`;
+  const monthLabel = (month: DateTime) => formatDate(month, 'LLLL yyyy', language);
   const close = () => {
     if (router.canGoBack()) router.back();
     else router.replace('/taharah');

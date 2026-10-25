@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -12,12 +12,17 @@ import { IconTile } from '@/components/IconTile';
 import { MitzvahIcon, iconFor } from '@/components/MitzvahIcon';
 import { ReminderEditor } from '@/components/ReminderEditor';
 import { ScreenHeader } from '@/components/ScreenHeader';
+import { SelichotAddonCard } from '@/components/SelichotAddonCard';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
+import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import { hasSiddurText, isSiddurTextId, siddurPlace } from '@/data/siddur';
+import { useNeedsReminderDialog } from '@/hooks/useNeedsReminderDialog';
 import { useChokStore } from '@/stores/useChokStore';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
-import { selectActive, useMitzvotStore } from '@/stores/useMitzvotStore';
+import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
+import { remindersOf, selectActive, useMitzvotStore } from '@/stores/useMitzvotStore';
+import { selectSelichotInstalledFor, useSelichotStore } from '@/stores/useSelichotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { BRAND } from '@/theme/colors';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -26,8 +31,10 @@ import { typography } from '@/theme/typography';
 import { ContentBlock, Reminder, UserSettings } from '@/types/mitzvah';
 import { currentOrNextWindow } from '@/utils/buildDayTimeline';
 import { clockOf, clockRange, minutesToTime } from '@/utils/clock';
-import { mitzvahName } from '@/utils/mitzvahName';
-import { nextReminderAt } from '@/services/NotificationScheduler';
+import { customStartsOn, scheduleDateLabel } from '@/utils/customMitzvah';
+import { appDayKey } from '@/utils/locationDay';
+import { mitzvahName, reminderLabel } from '@/utils/mitzvahName';
+import { buildTriggerTime, nextReminderAt } from '@/services/NotificationScheduler';
 import { useI18n } from '@/i18n';
 
 const LEGEND_DOT_SIZE = 8;
@@ -41,6 +48,7 @@ export default function MitzvahDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id: string; highlightContent?: string }>();
   const mitzvah = useMemo(() => findAnyMitzvah(params.id), [params.id]);
+  const custom = useCustomMitzvotStore((s) => s.items[params.id]);
   const location = useUserStore((s) => s.location);
   const nusach = useUserStore((s) => s.nusach);
   const ksSofZman = useUserStore((s) => s.halachicOpinions.ksSofZman);
@@ -48,39 +56,53 @@ export default function MitzvahDetailScreen() {
   const completions = useCompletionsStore((s) => s.completions);
   const skipped = useCompletionsStore((s) => s.skipped);
   const active = useMitzvotStore(selectActive(params.id));
-  const setEnabled = useMitzvotStore((s) => s.setEnabled);
   const setReminders = useMitzvotStore((s) => s.setReminders);
   const resetToDefault = useMitzvotStore((s) => s.resetToDefault);
   const [editorVisible, setEditorVisible] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  const [lastReminderRefused, setLastReminderRefused] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
+  const needsReminder = useNeedsReminderDialog();
   const isChok = mitzvah?.id === CHOK_TEXT_ID;
   const chokInstalled = useChokStore((s) => s.installed !== null);
   const awaitingAddon = isChok && !chokInstalled;
+  const isSelichot = mitzvah?.id === SELICHOT_TEXT_ID;
+  const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(nusach));
+  const addonMissing = awaitingAddon || (isSelichot && !selichotInstalled);
 
-  const reminders = useMemo(
-    () => active.customReminders ?? mitzvah?.defaultReminders ?? [],
-    [active.customReminders, mitzvah],
-  );
+  const reminders = useMemo(() => remindersOf(active, mitzvah), [active, mitzvah]);
   const includeContentInNotification = reminders.some((reminder) => reminder.includeContentInBody);
   const settings = useMemo<UserSettings>(
     () => ({ nusach, halachicOpinions: { ksSofZman }, inIsrael }),
     [nusach, ksSofZman, inIsrael],
   );
   const window = useMemo(
-    () => (mitzvah && !awaitingAddon ? currentOrNextWindow(mitzvah, location, settings) : null),
-    [mitzvah, awaitingAddon, location, settings],
+    () => (mitzvah && !addonMissing ? currentOrNextWindow(mitzvah, location, settings) : null),
+    [mitzvah, addonMissing, location, settings],
   );
   const showText = Boolean(
     mitzvah && window && hasSiddurText(mitzvah, nusach, window.date, siddurPlace(location, inIsrael)),
   );
+  const showNext = Boolean(mitzvah) && !addonMissing && active.enabled;
   const nextTrigger = useMemo(
     () =>
-      mitzvah && !awaitingAddon
+      mitzvah && showNext
         ? nextReminderAt(mitzvah, reminders, { now: new Date(), location, settings, completions, skipped })
         : null,
-    [mitzvah, awaitingAddon, reminders, location, settings, completions, skipped],
+    [mitzvah, showNext, reminders, location, settings, completions, skipped],
   );
+  const reminderRows = useMemo(() => {
+    const scope = { now: new Date(), location, settings, completions, skipped };
+    return reminders
+      .map((reminder, index) => ({
+        reminder,
+        index,
+        next: mitzvah && showNext ? nextReminderAt(mitzvah, [reminder], scope) : null,
+        order: window ? buildTriggerTime(reminder, window, location).getTime() : index,
+      }))
+      .sort((a, b) => a.order - b.order || a.index - b.index);
+  }, [mitzvah, showNext, reminders, window, location, settings, completions, skipped]);
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
 
@@ -101,9 +123,17 @@ export default function MitzvahDetailScreen() {
         ? t('mitzvah.cycle.seasonal')
         : t('mitzvah.cycle.daily');
 
-  const timeRange = window ? clockRange(window.start, window.end, t) : '-';
+  const startsOn = !window && custom ? customStartsOn(custom, appDayKey(new Date(), location)) : null;
+  const timeRange = window
+    ? clockRange(window.start, window.end, t, location.tz, window.date)
+    : startsOn
+      ? t('custom.startsOn', {
+          date: scheduleDateLabel(startsOn, language),
+        })
+      : '-';
 
   const saveReminder = (value: Reminder) => {
+    setLastReminderRefused(false);
     const next = [...reminders];
     if (editIndex === null) next.push(value);
     else next[editIndex] = value;
@@ -128,6 +158,18 @@ export default function MitzvahDetailScreen() {
     }
     setDeleteIndex(null);
   };
+  const requestDeleteReminder = (index: number) => {
+    if (active.enabled && reminders.length === 1) setLastReminderRefused(true);
+    else setDeleteIndex(index);
+  };
+  const switchEnabled = (value: boolean) => {
+    setLastReminderRefused(false);
+    needsReminder.setMitzvahEnabled(mitzvah.id, value, () => scrollRef.current?.scrollToEnd({ animated: true }));
+  };
+  const resetReminders = () => {
+    setLastReminderRefused(false);
+    resetToDefault(mitzvah.id);
+  };
   const pendingDeleteReminder = deleteIndex === null ? null : (reminders[deleteIndex] ?? null);
 
   return (
@@ -141,18 +183,22 @@ export default function MitzvahDetailScreen() {
       >
         {nextTrigger ? (
           <Text style={[typography.micro, { color: colors.goldText }]}>
-            {t('detail.previewNext', { time: DateTime.fromJSDate(nextTrigger).toFormat('dd/MM HH:mm') })}
+            {t('detail.previewNext', { time: fireTimeText(nextTrigger, location.tz) })}
           </Text>
         ) : null}
       </ScreenHeader>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {isChok ? <ChokAddonCard /> : null}
+        {isSelichot ? <SelichotAddonCard /> : null}
         {showText && window ? (
           <Button
             label={t('siddur.open')}
             onPress={() =>
-              router.push({ pathname: '/siddur/[id]', params: { id: mitzvah.id, date: dateKey(window.date) } })
+              router.push({
+                pathname: '/siddur/[id]',
+                params: isChok ? { id: mitzvah.id } : { id: mitzvah.id, date: dateKey(window.date) },
+              })
             }
           />
         ) : null}
@@ -162,7 +208,7 @@ export default function MitzvahDetailScreen() {
           </Text>
           <View style={styles.windowRow}>
             <Text style={[typography.micro, { color: colors.textMuted, width: 40 }]}>
-              {window ? clockOf(window.start) : '--:--'}
+              {window ? clockOf(window.start, location.tz) : '--:--'}
             </Text>
             <View style={styles.ribbon}>
               <Svg width="100%" height="10" viewBox="0 0 100 10" preserveAspectRatio="none">
@@ -177,7 +223,7 @@ export default function MitzvahDetailScreen() {
               </Svg>
             </View>
             <Text style={[typography.micro, { color: colors.textMuted, width: 40 }]}>
-              {window ? clockOf(window.end) : '--:--'}
+              {window ? clockOf(window.end, location.tz) : '--:--'}
             </Text>
           </View>
           <View style={styles.legend}>
@@ -233,8 +279,9 @@ export default function MitzvahDetailScreen() {
             <Text style={[typography.subheading, { color: colors.text }]}>{t('detail.settings')}</Text>
             <Switch
               value={active.enabled}
-              onValueChange={(value) => setEnabled(mitzvah.id, value)}
+              onValueChange={switchEnabled}
               disabled={awaitingAddon}
+              accessibilityLabel={t('detail.settings')}
               thumbColor={BRAND.white}
               trackColor={{ false: colors.border, true: colors.gold }}
             />
@@ -254,9 +301,9 @@ export default function MitzvahDetailScreen() {
             <Text style={[typography.subheading, { color: colors.text, marginBottom: spacing.md }]}>
               {t('detail.reminders')}
             </Text>
-            {reminders.map((reminder, index) => (
+            {reminderRows.map(({ reminder, index, next }) => (
               <View
-                key={`${reminder.label}-${index}`}
+                key={`${index}-${reminder.anchor}-${reminder.offsetMin}`}
                 style={[styles.reminderRow, { borderBottomColor: colors.border }]}
               >
                 <Pressable
@@ -266,14 +313,19 @@ export default function MitzvahDetailScreen() {
                   }}
                   style={{ flex: 1 }}
                 >
-                  <Text style={[typography.bodyBold, { color: colors.text }]}>{reminder.label}</Text>
+                  <Text style={[typography.bodyBold, { color: colors.text }]}>{reminderLabel(reminder, name)}</Text>
                   <Text style={[typography.micro, { color: colors.textMuted, marginTop: 2 }]}>
                     {t(`reminder.anchor.${reminder.anchor}`)} ·{' '}
                     {reminderOffsetText(reminder, t('reminder.minutesShort'))}
                   </Text>
+                  {next ? (
+                    <Text style={[typography.micro, { color: colors.goldText, marginTop: 2 }]}>
+                      {t('detail.reminderNextAt', { time: fireTimeText(next, location.tz) })}
+                    </Text>
+                  ) : null}
                 </Pressable>
                 <Pressable
-                  onPress={() => setDeleteIndex(index)}
+                  onPress={() => requestDeleteReminder(index)}
                   accessibilityRole="button"
                   accessibilityLabel={t('reminder.delete')}
                   hitSlop={10}
@@ -293,6 +345,11 @@ export default function MitzvahDetailScreen() {
                 {t('detail.noReminders')}
               </Text>
             ) : null}
+            {lastReminderRefused ? (
+              <Text style={[typography.small, styles.reminderError, { color: colors.urgent }]}>
+                {t('reminder.errors.lastReminder')}
+              </Text>
+            ) : null}
             <Pressable
               onPress={() => {
                 setEditIndex(null);
@@ -308,7 +365,7 @@ export default function MitzvahDetailScreen() {
             <Button
               variant="secondary"
               label={t('detail.defaultReset')}
-              onPress={() => resetToDefault(mitzvah.id)}
+              onPress={resetReminders}
               style={styles.resetAction}
             />
           </Card>
@@ -321,7 +378,6 @@ export default function MitzvahDetailScreen() {
         mitzvah={mitzvah}
         location={location}
         settings={settings}
-        allowClock={!mitzvah.isCustom}
         mitzvahName={name}
         onClose={() => {
           setEditorVisible(false);
@@ -332,12 +388,15 @@ export default function MitzvahDetailScreen() {
       <ConfirmDialog
         visible={deleteIndex !== null}
         title={t('reminder.deleteConfirmTitle')}
-        body={t('reminder.deleteConfirmBody', { label: pendingDeleteReminder?.label ?? t('detail.addReminder') })}
+        body={t('reminder.deleteConfirmBody', {
+          label: pendingDeleteReminder ? reminderLabel(pendingDeleteReminder, name) : t('detail.addReminder'),
+        })}
         confirmLabel={t('reminder.deleteConfirmAction')}
         destructive
         onConfirm={confirmDeleteReminder}
         onCancel={() => setDeleteIndex(null)}
       />
+      {needsReminder.dialog}
     </SafeAreaView>
   );
 }
@@ -345,6 +404,10 @@ export default function MitzvahDetailScreen() {
 function reminderOffsetText(reminder: Reminder, minutesShort: string): string {
   if (reminder.anchor === 'clock') return minutesToTime(reminder.offsetMin);
   return `${reminder.offsetMin >= 0 ? '+' : ''}${reminder.offsetMin} ${minutesShort}`;
+}
+
+function fireTimeText(date: Date, zone: string): string {
+  return DateTime.fromJSDate(date, { zone }).toFormat('dd/MM HH:mm');
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
@@ -470,6 +533,9 @@ const styles = StyleSheet.create({
   },
   resetAction: {
     marginTop: spacing.md,
+  },
+  reminderError: {
+    marginTop: spacing.sm,
   },
   contentBlock: {
     borderRadius: radius.md,

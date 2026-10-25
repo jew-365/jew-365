@@ -4,39 +4,60 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { Button } from '@/components/Button';
+import { CalendarRangePicker, DateRange } from '@/components/CalendarRangePicker';
 import { Card } from '@/components/Card';
 import { ChipRow } from '@/components/ChipRow';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { ListRow } from '@/components/ListRow';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { TimeField } from '@/components/TimeField';
 import { WeekdayPicker } from '@/components/WeekdayPicker';
+import { WheelPicker } from '@/components/WheelPicker';
 import { SIDDUR_GROUPS, SIDDUR_TEXTS, standaloneTextsIn } from '@/data/siddur';
 import { useCustomMitzvotStore, makeCustomMitzvahId } from '@/stores/useCustomMitzvotStore';
-import { useMitzvotStore } from '@/stores/useMitzvotStore';
+import { effectiveReminders, useMitzvotStore } from '@/stores/useMitzvotStore';
+import { useUserStore } from '@/stores/useUserStore';
 import { BRAND } from '@/theme/colors';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
-import { TIME_PATTERN, timeToMinutes } from '@/utils/clock';
+import { TIME_PATTERN, minutesToTime, timeToMinutes } from '@/utils/clock';
 import {
   DraftBlock,
+  STREAK_DEFAULT_DAYS,
+  STREAK_MAX_DAYS,
   WEEKDAYS,
+  addDaysToKey,
   categoryForWindow,
   cleanContentBlocks,
+  currentSchedule,
   reminderClock,
+  scheduleDateLabel,
+  scheduleOnSave,
   siddurTextName,
+  streakEndedOnSave,
+  streakStartOnSave,
+  validStreakDays,
 } from '@/utils/customMitzvah';
-import { Reminder, ReminderAnchor, SkipContext, Weekday } from '@/types/mitzvah';
+import { appDayKey } from '@/utils/locationDay';
+import { reminderLabel } from '@/utils/mitzvahName';
+import { FOLLOW_UP_DEFAULT_MIN, FOLLOW_UP_MAX_MIN, HEADS_UP_MAX_MIN } from '@/utils/skipRules';
+import { CustomSchedule, Nusach, Reminder, ReminderAnchor, SkipContext, Weekday } from '@/types/mitzvah';
 import { MitzvahTextId, SiddurTextId } from '@/types/siddur';
 
+type ScheduleMode = CustomSchedule['mode'];
+
 const CONTENT_TYPES: DraftBlock['type'][] = ['text', 'blessing', 'link', 'siddur'];
-const SIDDUR_CHOICES: readonly SiddurTextId[] = [
-  ...(Object.keys(SIDDUR_TEXTS) as MitzvahTextId[]),
-  ...SIDDUR_GROUPS.flatMap(standaloneTextsIn),
-];
+const STREAK_CHOICES: readonly number[] = Array.from({ length: STREAK_MAX_DAYS }, (_, index) => index + 1);
+function siddurChoices(nusach: Nusach): SiddurTextId[] {
+  return [
+    ...(Object.keys(SIDDUR_TEXTS) as MitzvahTextId[]),
+    ...SIDDUR_GROUPS.flatMap((group) => standaloneTextsIn(group, nusach)),
+  ];
+}
 
 function emptyReminder(): Reminder {
   return { anchor: 'start', offsetMin: 0, label: '' };
@@ -78,17 +99,30 @@ export default function CustomMitzvahScreen() {
   const removeCustom = useCustomMitzvotStore((s) => s.remove);
   const setEnabled = useMitzvotStore((s) => s.setEnabled);
   const removeFromActive = useMitzvotStore((s) => s.removeMitzvah);
+  const location = useUserStore((s) => s.location);
+  const nusach = useUserStore((s) => s.nusach);
 
   const [name, setName] = useState(existing?.name ?? '');
   const [startTime, setStartTime] = useState(existing?.startHHMM ?? '08:00');
   const [endTime, setEndTime] = useState(existing?.endHHMM ?? '12:00');
-  const [activeDays, setActiveDays] = useState<Weekday[]>(existing?.activeDays ?? [...WEEKDAYS]);
+  const [initialSchedule] = useState(() => (existing ? currentSchedule(existing) : null));
+  const [scheduleMode, setScheduleMode] = useState<ScheduleMode>(initialSchedule?.mode ?? 'weekdays');
+  const [activeDays, setActiveDays] = useState<Weekday[]>(() =>
+    initialSchedule?.mode === 'weekdays' ? [...initialSchedule.days] : [...WEEKDAYS],
+  );
+  const [range, setRange] = useState<DateRange>(() =>
+    initialSchedule?.mode === 'range'
+      ? { start: initialSchedule.start, end: initialSchedule.end }
+      : { start: null, end: null },
+  );
+  const [streakDays, setStreakDays] = useState(
+    initialSchedule?.mode === 'streak' ? initialSchedule.days : STREAK_DEFAULT_DAYS,
+  );
+  const [rangeOpen, setRangeOpen] = useState(false);
   const [skipShabbat, setSkipShabbat] = useState(existing?.skipOn.includes('shabbat') ?? false);
   const [skipYomtov, setSkipYomtov] = useState(existing?.skipOn.includes('yomtov') ?? false);
-  const [reminders, setReminders] = useState<Reminder[]>(
-    () =>
-      (editingId ? useMitzvotStore.getState().activeMitzvot[editingId]?.customReminders : undefined) ??
-      existing?.reminders ?? [emptyReminder()],
+  const [reminders, setReminders] = useState<Reminder[]>(() =>
+    existing ? effectiveReminders(existing.id) : [emptyReminder()],
   );
   const [contentBlocks, setContentBlocks] = useState<DraftBlock[]>(existing?.contentBlocks ?? []);
   const [pickingBlockIndex, setPickingBlockIndex] = useState<number | null>(null);
@@ -107,6 +141,41 @@ export default function CustomMitzvahScreen() {
         : null;
   const pickingBlock = pickingBlockIndex === null ? undefined : contentBlocks[pickingBlockIndex];
   const pickedTextId = pickingBlock?.type === 'siddur' ? pickingBlock.textId : null;
+  const todayKey = appDayKey(new Date(), location);
+  const rangeSummary =
+    range.start && range.end
+      ? t('custom.schedule.rangeSummary', {
+          from: scheduleDateLabel(range.start, language),
+          to: scheduleDateLabel(range.end, language),
+        })
+      : range.start
+        ? t('custom.schedule.rangeStartOnly', { from: scheduleDateLabel(range.start, language) })
+        : t('custom.schedule.rangeEmpty');
+  const streakStart = streakStartOnSave(existing, streakDays, todayKey);
+  const streakSummaryKey =
+    streakEndedOnSave(existing, streakDays, todayKey) !== null
+      ? 'custom.schedule.streakEnded'
+      : streakStart === todayKey
+        ? 'custom.schedule.streakSummary'
+        : 'custom.schedule.streakKept';
+  const streakSummary = t(streakSummaryKey, {
+    from: scheduleDateLabel(streakStart, language),
+    to: scheduleDateLabel(addDaysToKey(streakStart, streakDays - 1), language),
+  });
+  const openRange = () => {
+    Keyboard.dismiss();
+    setRangeOpen(true);
+  };
+
+  const outsideCopy = (
+    reminder: Reminder,
+    key: 'custom.reminderOutsideWindow' | 'custom.errors.reminderOutsideWindow',
+  ) =>
+    reminder.anchor === 'followUp'
+      ? t('reminder.errors.followUpRange', { max: FOLLOW_UP_MAX_MIN })
+      : t(key, { hours: HEADS_UP_MAX_MIN / 60 });
+
+  const leave = () => (router.canGoBack() ? router.back() : router.replace('/mitzvot'));
 
   const onSave = () => {
     setError(null);
@@ -118,9 +187,26 @@ export default function CustomMitzvahScreen() {
       setError(t('custom.errors.timeInvalid'));
       return;
     }
-    if (!activeDays.length) {
-      setError(t('custom.errors.daysRequired'));
-      return;
+    const todayOnSave = appDayKey(new Date(), location);
+    let schedule: CustomSchedule;
+    if (scheduleMode === 'weekdays') {
+      if (!activeDays.length) {
+        setError(t('custom.errors.daysRequired'));
+        return;
+      }
+      schedule = { mode: 'weekdays', days: activeDays };
+    } else if (scheduleMode === 'range') {
+      if (!range.start || !range.end) {
+        setError(t('custom.errors.rangeRequired'));
+        return;
+      }
+      schedule = { mode: 'range', start: range.start, end: range.end };
+    } else {
+      if (!validStreakDays(streakDays)) {
+        setError(t('custom.errors.streakRange', { max: STREAK_MAX_DAYS }));
+        return;
+      }
+      schedule = { mode: 'streak', start: todayOnSave, days: streakDays };
     }
     const skipOn: SkipContext[] = [];
     if (skipShabbat) skipOn.push('shabbat');
@@ -129,16 +215,17 @@ export default function CustomMitzvahScreen() {
       setError(t('custom.errors.reminderRequired'));
       return;
     }
-    if (reminders.some((r) => !r.label.trim())) {
-      setError(t('custom.errors.reminderLabelRequired'));
-      return;
-    }
     const cleanedReminders = reminders.map(({ bodyVariants: _dropped, ...r }) => ({
       ...r,
       label: r.label.trim(),
     }));
-    if (cleanedReminders.some((r) => reminderClock(startTime, endTime, r) === null)) {
-      setError(t('custom.errors.reminderOutsideWindow'));
+    if (cleanedReminders.some((r) => r.anchor !== 'followUp' && !r.label)) {
+      setError(t('custom.errors.reminderLabelRequired'));
+      return;
+    }
+    const outside = cleanedReminders.find((r) => reminderClock(startTime, endTime, r) === null);
+    if (outside) {
+      setError(outsideCopy(outside, 'custom.errors.reminderOutsideWindow'));
       return;
     }
     const fields = {
@@ -146,7 +233,8 @@ export default function CustomMitzvahScreen() {
       startHHMM: startTime,
       endHHMM: endTime,
       skipOn,
-      activeDays: [...activeDays].sort((a, b) => a - b),
+      activeDays: undefined,
+      schedules: scheduleOnSave(existing, schedule, todayOnSave),
       reminders: cleanedReminders,
       contentBlocks: cleanContentBlocks(contentBlocks),
     };
@@ -158,7 +246,7 @@ export default function CustomMitzvahScreen() {
       addCustom({ id, ...fields, createdAt: Date.now() });
       setEnabled(id, true);
     }
-    router.back();
+    leave();
   };
 
   const onDelete = () => {
@@ -166,7 +254,7 @@ export default function CustomMitzvahScreen() {
     removeCustom(editingId);
     removeFromActive(editingId);
     setDeleteVisible(false);
-    router.back();
+    leave();
   };
 
   const toggleDay = (day: number) => {
@@ -179,9 +267,16 @@ export default function CustomMitzvahScreen() {
   };
   const changeAnchor = (idx: number, anchor: ReminderAnchor) => {
     setReminders((prev) =>
-      prev.map((r, i) =>
-        i === idx ? { ...r, anchor, offsetMin: anchor === 'end' ? -Math.abs(r.offsetMin) : Math.abs(r.offsetMin) } : r,
-      ),
+      prev.map((r, i) => {
+        if (i !== idx || r.anchor === anchor) return r;
+        if (anchor === 'followUp') return { ...r, anchor, offsetMin: FOLLOW_UP_DEFAULT_MIN };
+        if (anchor === 'clock') {
+          const fires = r.anchor === 'followUp' ? null : reminderClock(startTime, endTime, r);
+          return { ...r, anchor, offsetMin: fires ? timeToMinutes(fires) : timesValid ? timeToMinutes(startTime) : 0 };
+        }
+        if (r.anchor === 'clock' || r.anchor === 'followUp') return { ...r, anchor, offsetMin: 0 };
+        return { ...r, anchor, offsetMin: anchor === 'end' ? -Math.abs(r.offsetMin) : Math.abs(r.offsetMin) };
+      }),
     );
   };
   const removeReminder = (idx: number) => {
@@ -225,6 +320,13 @@ export default function CustomMitzvahScreen() {
   const anchorOptions: { value: ReminderAnchor; label: string }[] = [
     { value: 'start', label: t('custom.anchor.fromStart') },
     { value: 'end', label: t('custom.anchor.beforeEnd') },
+    { value: 'clock', label: t('reminder.anchor.clock') },
+    { value: 'followUp', label: t('reminder.anchor.followUp') },
+  ];
+  const scheduleOptions: { value: ScheduleMode; label: string }[] = [
+    { value: 'weekdays', label: t('custom.schedule.weekdays') },
+    { value: 'range', label: t('custom.schedule.range') },
+    { value: 'streak', label: t('custom.schedule.streak') },
   ];
   const categoryLabel = timesValid ? t(`library.category.${categoryForWindow(startTime, endTime)}`) : null;
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
@@ -277,9 +379,45 @@ export default function CustomMitzvahScreen() {
         </View>
 
         <View style={styles.section}>
-          <SectionLabel variant="field" text={t('custom.activeDays')} />
-          <WeekdayPicker selected={activeDays} onToggle={toggleDay} />
-          <Hint text={t('custom.hint.days')} />
+          <SectionLabel variant="field" text={t('custom.schedule')} />
+          <SegmentedControl
+            options={scheduleOptions}
+            value={scheduleMode}
+            onChange={setScheduleMode}
+            style={styles.scheduleMode}
+          />
+          {scheduleMode === 'weekdays' ? (
+            <>
+              <WeekdayPicker selected={activeDays} onToggle={toggleDay} />
+              <Hint text={t('custom.hint.days')} />
+            </>
+          ) : scheduleMode === 'range' ? (
+            <>
+              <Card>
+                <ListRow
+                  icon="calendar"
+                  title={rangeSummary}
+                  accessibilityLabel={rangeSummary}
+                  chevron
+                  onPress={openRange}
+                />
+              </Card>
+              <Hint text={t('custom.hint.range')} />
+            </>
+          ) : (
+            <>
+              <SectionLabel variant="field" text={t('custom.schedule.streakDays')} />
+              <WheelPicker
+                values={STREAK_CHOICES}
+                selected={streakDays}
+                onChange={setStreakDays}
+                accessibilityLabel={t('custom.schedule.streakDays')}
+                style={styles.streakWheel}
+              />
+              <Text style={[typography.small, styles.note, { color: colors.goldText }]}>{streakSummary}</Text>
+              <Hint text={t('custom.hint.streak')} />
+            </>
+          )}
           <Affects surfaces={DAY_SURFACES} />
         </View>
 
@@ -314,7 +452,11 @@ export default function CustomMitzvahScreen() {
               <TextInput
                 value={r.label}
                 onChangeText={(v) => updateReminder(idx, { label: v })}
-                placeholder={t('custom.reminderLabelPlaceholder')}
+                placeholder={
+                  r.anchor === 'followUp'
+                    ? reminderLabel({ anchor: r.anchor, label: '' }, name.trim())
+                    : t('custom.reminderLabelPlaceholder')
+                }
                 placeholderTextColor={colors.textMuted}
                 style={[
                   styles.input,
@@ -327,46 +469,63 @@ export default function CustomMitzvahScreen() {
                   },
                 ]}
               />
-              <View style={styles.reminderRow}>
-                <TextInput
-                  value={String(r.anchor === 'end' ? Math.abs(r.offsetMin) : r.offsetMin)}
-                  onChangeText={(v) => {
-                    const num = Math.max(0, Math.min(720, Number(v.replace(/[^0-9]/g, '')) || 0));
-                    updateReminder(idx, { offsetMin: r.anchor === 'end' ? -num : num });
-                  }}
-                  accessibilityLabel={t('custom.offsetMinutes')}
-                  keyboardType="number-pad"
-                  style={[
-                    styles.input,
-                    styles.offsetInput,
-                    {
-                      backgroundColor: colors.surface2,
-                      color: colors.text,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                  maxLength={3}
+              <SegmentedControl
+                options={anchorOptions}
+                value={r.anchor}
+                onChange={(v) => changeAnchor(idx, v)}
+                style={styles.anchor}
+              />
+              {r.anchor === 'clock' ? (
+                <TimeField
+                  label={t('reminder.time')}
+                  value={minutesToTime(r.offsetMin)}
+                  onChange={(value) => updateReminder(idx, { offsetMin: timeToMinutes(value) })}
                 />
-                <Text style={[typography.caption, styles.offsetWord, { color: colors.textSub }]}>
-                  {t('custom.offsetMinutes')}
-                </Text>
-                <SegmentedControl
-                  options={anchorOptions}
-                  value={r.anchor}
-                  onChange={(v) => changeAnchor(idx, v)}
-                  style={styles.anchor}
-                />
-              </View>
+              ) : (
+                <View style={styles.reminderRow}>
+                  <TextInput
+                    value={String(r.anchor === 'end' ? Math.abs(r.offsetMin) : r.offsetMin)}
+                    onChangeText={(v) => {
+                      const early = r.anchor === 'end' || r.offsetMin < 0;
+                      const max = r.anchor === 'start' && early ? HEADS_UP_MAX_MIN : 720;
+                      const num = Math.min(max, Number(v.replace(/[^0-9]/g, '')) || 0);
+                      updateReminder(idx, { offsetMin: early ? -num : num });
+                    }}
+                    accessibilityLabel={t('custom.offsetMinutes')}
+                    keyboardType="number-pad"
+                    style={[
+                      styles.input,
+                      styles.offsetInput,
+                      {
+                        backgroundColor: colors.surface2,
+                        color: colors.text,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                    maxLength={4}
+                  />
+                  <Text style={[typography.caption, styles.offsetWord, { color: colors.textSub }]}>
+                    {t('custom.offsetMinutes')}
+                  </Text>
+                </View>
+              )}
               {clock ? (
                 <Text style={[typography.small, styles.note, { color: colors.goldText }]}>
                   {t('custom.reminderPreview', { time: clock })}
                 </Text>
               ) : timesValid ? (
                 <Text style={[typography.small, styles.note, { color: colors.urgent }]}>
-                  {t('custom.reminderOutsideWindow')}
+                  {outsideCopy(r, 'custom.reminderOutsideWindow')}
                 </Text>
               ) : null}
-              <Hint text={t('custom.hint.reminderAnchor')} style={styles.tightHint} />
+              <Hint
+                text={
+                  r.anchor === 'followUp'
+                    ? t('reminder.followUp.hint', { max: FOLLOW_UP_MAX_MIN })
+                    : t('custom.hint.reminderAnchor', { max: HEADS_UP_MAX_MIN })
+                }
+                style={styles.tightHint}
+              />
               <Button
                 variant="danger"
                 size="compact"
@@ -497,7 +656,7 @@ export default function CustomMitzvahScreen() {
         onClose={() => setPickingBlockIndex(null)}
       >
         <ScrollView ref={pickerRef} style={styles.sheetList}>
-          {SIDDUR_CHOICES.map((id) => {
+          {siddurChoices(nusach).map((id) => {
             const selected = id === pickedTextId;
             return (
               <SheetAction
@@ -518,6 +677,14 @@ export default function CustomMitzvahScreen() {
             );
           })}
         </ScrollView>
+      </BottomSheet>
+      <BottomSheet
+        visible={rangeOpen}
+        title={t('custom.schedule.range')}
+        caption={t('custom.schedule.rangeHint')}
+        onClose={() => setRangeOpen(false)}
+      >
+        <CalendarRangePicker value={range} todayKey={todayKey} onChange={setRange} />
       </BottomSheet>
       <ConfirmDialog
         visible={deleteVisible}
@@ -559,7 +726,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
   },
-  anchor: { flex: 1 },
+  anchor: { marginBottom: spacing.md },
+  scheduleMode: { marginBottom: spacing.md },
+  streakWheel: { width: 96, alignSelf: 'center' },
   switchRow: {
     flexDirection: 'row',
     alignItems: 'center',

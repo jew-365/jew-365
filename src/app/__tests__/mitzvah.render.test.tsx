@@ -13,6 +13,10 @@ jest.mock('@/services/ChokContentService', () => ({
   ...jest.requireActual('@/services/ChokContentService'),
   checkChokUpdate: jest.fn(async () => {}),
 }));
+jest.mock('@/services/SelichotContentService', () => ({
+  ...jest.requireActual('@/services/SelichotContentService'),
+  checkSelichotUpdate: jest.fn(async () => {}),
+}));
 jest.mock('expo-notifications', () => ({
   scheduleNotificationAsync: jest.fn(async () => 'id'),
   cancelAllScheduledNotificationsAsync: jest.fn(async () => {}),
@@ -45,18 +49,31 @@ jest.mock('expo-background-task', () => ({
   BackgroundTaskStatus: { Restricted: 1, Available: 2 },
 }));
 
-import { cleanup, fireEvent, screen } from '@testing-library/react-native';
+import { ScrollView } from 'react-native';
+import { act, cleanup, fireEvent, screen } from '@testing-library/react-native';
+import { DateTime } from 'luxon';
 import MitzvahDetailScreen from '../mitzvah/[id]';
 import { CITIES } from '@/data/cities';
+import { HebcalService } from '@/services/HebcalService';
 import { useChokStore } from '@/stores/useChokStore';
 import { installChokFixture } from '@/testing/chok';
 import { renderWithTheme } from '@/testing/render';
-import { at } from '@/testing/zmanim';
+import { installSelichotFixture } from '@/testing/selichot';
+import { at, zmanimFor } from '@/testing/zmanim';
+import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
+import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { THEMES } from '@/theme/colors';
+import { clockOf } from '@/utils/clock';
 
 const JERUSALEM = CITIES[0];
+const SETTINGS_SWITCH = 'הגדרות מצווה';
+const NEEDS_REMINDER_TITLE = 'אין התראות';
+const NEEDS_REMINDER_BODY = 'יש להגדיר לפחות התראה אחת בשביל להפעיל מעקב על המצווה';
+const LAST_REMINDER_ERROR = 'יש להשאיר לפחות התראה אחת כל עוד המצווה פעילה';
+const DELETE_REMINDER = 'מחק תזכורת';
+const DELETE_TITLE = 'למחוק את ההתראה?';
 const ONLY_DATE = [
   'nextTick',
   'queueMicrotask',
@@ -95,6 +112,7 @@ describe('Mitzvah screen', () => {
     cleanup();
     jest.useRealTimers();
     useChokStore.getState().reset();
+    useSelichotStore.getState().reset();
   });
 
   it('gives an unknown id a header with a way back', () => {
@@ -115,15 +133,464 @@ describe('Mitzvah screen', () => {
     });
   });
 
+  it("shows Kiddush Levana's period with its dates and its two reminders", () => {
+    jest.setSystemTime(at(JERUSALEM, '2026-10-19T12:00'));
+    const opens = HebcalService.nightfall(zmanimFor(at(JERUSALEM, '2026-10-14T12:00'), JERUSALEM), JERUSALEM);
+    renderMitzvah({ id: 'kiddush_levana' });
+    expect(screen.getByText(`עונתי · 14/10 ${clockOf(opens, JERUSALEM.tz)} עד 26/10 03:44`)).toBeOnTheScreen();
+    expect(screen.getByText('זמן קידוש לבנה')).toBeOnTheScreen();
+    expect(screen.getByText('קידוש לבנה במוצאי שבת וחג')).toBeOnTheScreen();
+    expect(screen.getByText("במוצאי שבת וחג · +15 דק'")).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'פתח נוסח' }));
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/siddur/[id]',
+      params: { id: 'kiddush_levana', date: '2026-10-14' },
+    });
+  });
+
   it('prints the next reminder in the accent text colour', () => {
     renderMitzvah({ id: 'shacharit' });
     expect(screen.getByText(/^ההתראה הבאה תישלח ב-/)).toHaveStyle({ color: THEMES.gold.goldText });
+  });
+
+  it('lets the first tap on a sheet button through while the keyboard is open', () => {
+    renderMitzvah({ id: 'shacharit' });
+    expect(screen.UNSAFE_getByType(ScrollView).props.keyboardShouldPersistTaps).toBe('handled');
+  });
+
+  describe('the next reminder follows the switch', () => {
+    const HEADER_NEXT = /^ההתראה הבאה תישלח ב-/;
+    const ROW_NEXT = /^הבאה ב-/;
+    const flip = (value: boolean) =>
+      fireEvent(screen.getByRole('switch', { name: SETTINGS_SWITCH }), 'valueChange', value);
+
+    it('a switched-off mitzvah names no next reminder in the header and none in its rows, and switching it on shows both', () => {
+      renderMitzvah({ id: 'havdalah' });
+      expect(screen.getByRole('switch', { name: SETTINGS_SWITCH })).not.toBeChecked();
+      expect(screen.getByText('זמן הבדלה')).toBeOnTheScreen();
+      expect(screen.queryByText(HEADER_NEXT)).toBeNull();
+      expect(screen.queryByText(ROW_NEXT)).toBeNull();
+
+      flip(true);
+
+      expect(screen.getByText(HEADER_NEXT)).toBeOnTheScreen();
+      expect(screen.getAllByText(ROW_NEXT)).toHaveLength(1);
+
+      flip(false);
+
+      expect(screen.queryByText(HEADER_NEXT)).toBeNull();
+      expect(screen.queryByText(ROW_NEXT)).toBeNull();
+    });
+
+    it('an enabled mitzvah names the next reminder in the header and in every row', () => {
+      renderMitzvah({ id: 'tefillin' });
+      expect(screen.getByRole('switch', { name: SETTINGS_SWITCH })).toBeChecked();
+      expect(screen.getByText(HEADER_NEXT)).toBeOnTheScreen();
+      expect(screen.getAllByText(ROW_NEXT).length).toBeGreaterThan(0);
+    });
   });
 
   it('resets the reminders from a secondary button', () => {
     renderMitzvah({ id: 'shacharit' });
     expect(screen.getByRole('button', { name: 'חזרה לברירת מחדל' })).toHaveStyle({
       backgroundColor: THEMES.gold.surface2,
+    });
+  });
+
+  describe('at least one reminder', () => {
+    const stored = (id: string) => useMitzvotStore.getState().activeMitzvot[id];
+    const flip = (value: boolean) =>
+      fireEvent(screen.getByRole('switch', { name: SETTINGS_SWITCH }), 'valueChange', value);
+
+    it('switching on a mitzvah whose reminders were emptied opens the dialog, and Cancel leaves it off', () => {
+      useMitzvotStore.getState().setReminders('havdalah', []);
+      renderMitzvah({ id: 'havdalah' });
+
+      flip(true);
+
+      expect(screen.getByText(NEEDS_REMINDER_TITLE)).toBeOnTheScreen();
+      expect(screen.getByText(NEEDS_REMINDER_BODY)).toBeOnTheScreen();
+      expect(stored('havdalah').enabled).toBe(false);
+      expect(screen.getByRole('switch', { name: SETTINGS_SWITCH })).not.toBeChecked();
+
+      fireEvent.press(screen.getByRole('button', { name: 'ביטול' }));
+
+      expect(screen.queryByText(NEEDS_REMINDER_TITLE)).toBeNull();
+      expect(stored('havdalah').enabled).toBe(false);
+      expect(screen.getByRole('switch', { name: SETTINGS_SWITCH })).not.toBeChecked();
+    });
+
+    it('Settings on the dialog keeps it off and scrolls to the reminders card', () => {
+      const spy = jest.spyOn(ScrollView.prototype, 'scrollToEnd');
+      useMitzvotStore.getState().setReminders('havdalah', []);
+      renderMitzvah({ id: 'havdalah' });
+
+      flip(true);
+      fireEvent.press(screen.getByRole('button', { name: 'הגדרה' }));
+
+      expect(screen.queryByText(NEEDS_REMINDER_TITLE)).toBeNull();
+      expect(stored('havdalah').enabled).toBe(false);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith({ animated: true });
+      expect(mockPush).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    it('a mitzvah with reminders switches on with no dialog', () => {
+      renderMitzvah({ id: 'havdalah' });
+
+      flip(true);
+
+      expect(stored('havdalah').enabled).toBe(true);
+      expect(screen.queryByText(NEEDS_REMINDER_TITLE)).toBeNull();
+    });
+
+    it('deleting the last reminder of an enabled mitzvah shows the error and keeps the reminder', () => {
+      useMitzvotStore.getState().setEnabled('havdalah', true);
+      renderMitzvah({ id: 'havdalah' });
+      expect(screen.queryByText(LAST_REMINDER_ERROR)).toBeNull();
+
+      fireEvent.press(screen.getByRole('button', { name: DELETE_REMINDER }));
+
+      expect(screen.getByText(LAST_REMINDER_ERROR)).toBeOnTheScreen();
+      expect(screen.getByText(LAST_REMINDER_ERROR)).toHaveStyle({ color: THEMES.gold.urgent });
+      expect(screen.queryByText(DELETE_TITLE)).toBeNull();
+      expect(stored('havdalah').customReminders).toBeUndefined();
+      expect(screen.getByText('זמן הבדלה')).toBeOnTheScreen();
+
+      flip(false);
+
+      expect(screen.queryByText(LAST_REMINDER_ERROR)).toBeNull();
+    });
+
+    it('a reset clears the last-reminder error', () => {
+      useMitzvotStore.getState().setEnabled('havdalah', true);
+      renderMitzvah({ id: 'havdalah' });
+      fireEvent.press(screen.getByRole('button', { name: DELETE_REMINDER }));
+      expect(screen.getByText(LAST_REMINDER_ERROR)).toBeOnTheScreen();
+
+      fireEvent.press(screen.getByRole('button', { name: 'חזרה לברירת מחדל' }));
+
+      expect(screen.queryByText(LAST_REMINDER_ERROR)).toBeNull();
+    });
+
+    it('deleting the last reminder while the mitzvah is off asks, deletes, and the switch then asks for a reminder', () => {
+      renderMitzvah({ id: 'havdalah' });
+
+      fireEvent.press(screen.getByRole('button', { name: DELETE_REMINDER }));
+      expect(screen.getByText(DELETE_TITLE)).toBeOnTheScreen();
+      expect(screen.queryByText(LAST_REMINDER_ERROR)).toBeNull();
+      fireEvent.press(screen.getByRole('button', { name: 'כן, מחק' }));
+
+      expect(stored('havdalah').customReminders).toEqual([]);
+      expect(screen.getByText('אין תזכורות מותאמות למצווה זו.')).toBeOnTheScreen();
+
+      flip(true);
+
+      expect(screen.getByText(NEEDS_REMINDER_TITLE)).toBeOnTheScreen();
+      expect(stored('havdalah').enabled).toBe(false);
+    });
+
+    it('deleting one of several reminders of an enabled mitzvah still asks and deletes', () => {
+      renderMitzvah({ id: 'tefillin' });
+      expect(stored('tefillin').enabled).toBe(true);
+
+      fireEvent.press(screen.getAllByRole('button', { name: DELETE_REMINDER })[0]);
+      expect(screen.getByText(DELETE_TITLE)).toBeOnTheScreen();
+      fireEvent.press(screen.getByRole('button', { name: 'כן, מחק' }));
+
+      expect(stored('tefillin').customReminders).toHaveLength(2);
+      expect(screen.queryByText(LAST_REMINDER_ERROR)).toBeNull();
+    });
+  });
+
+  describe('the reminders list', () => {
+    const fmt = (instant: Date) => DateTime.fromJSDate(instant, { zone: JERUSALEM.tz }).toFormat('dd/MM HH:mm');
+    const zmanimOn = (iso: string) => zmanimFor(at(JERUSALEM, `${iso}T12:00`), JERUSALEM);
+    const texts = (pattern: RegExp) => screen.getAllByText(pattern).map((node) => node.props.children);
+
+    beforeEach(() => {
+      useMitzvotStore.getState().setReminders('shacharit', [
+        { anchor: 'end', offsetMin: -30, label: 'סוף' },
+        { anchor: 'clock', offsetMin: 480, label: 'שמונה' },
+        { anchor: 'start', offsetMin: -60, label: 'הקדמה' },
+      ]);
+    });
+
+    it('lists the reminders in trigger order, each with its own next fire time on the location clock', () => {
+      renderMitzvah({ id: 'shacharit' });
+
+      expect(texts(/^(הקדמה|שמונה|סוף)$/)).toEqual(['הקדמה', 'שמונה', 'סוף']);
+      expect(texts(/^הבאה ב-/)).toEqual([
+        `הבאה ב-${fmt(new Date(zmanimOn('2026-10-29').netzHaChama.getTime() - 60 * 60_000))}`,
+        'הבאה ב-28/10 08:00',
+        `הבאה ב-${fmt(new Date(zmanimOn('2026-10-28').sofZmanTfilaGra.getTime() - 30 * 60_000))}`,
+      ]);
+      expect(screen.getByText('ההתראה הבאה תישלח ב-28/10 08:00')).toBeOnTheScreen();
+    });
+
+    it('edits and deletes the reminder pressed, whatever its place in the list', () => {
+      renderMitzvah({ id: 'shacharit' });
+
+      fireEvent.press(screen.getByText('סוף'));
+      expect(screen.getByDisplayValue('סוף')).toBeOnTheScreen();
+      fireEvent.press(screen.getByRole('button', { name: 'סגור' }));
+
+      fireEvent.press(screen.getAllByRole('button', { name: DELETE_REMINDER })[0]);
+      expect(screen.getByText(/"הקדמה"/)).toBeOnTheScreen();
+      fireEvent.press(screen.getByRole('button', { name: 'כן, מחק' }));
+
+      expect(useMitzvotStore.getState().activeMitzvot.shacharit.customReminders?.map((r) => r.label)).toEqual([
+        'סוף',
+        'שמונה',
+      ]);
+    });
+
+    it('lists a follow-up of a custom mitzvah after the window, with its label and next fire time', () => {
+      useCustomMitzvotStore.getState().reset();
+      useCustomMitzvotStore.getState().add({
+        id: 'custom_1800000000000_abc',
+        name: 'לימוד',
+        startHHMM: '10:00',
+        endHHMM: '11:00',
+        reminders: [
+          { anchor: 'followUp', offsetMin: 60, label: 'אחרי' },
+          { anchor: 'start', offsetMin: 0, label: 'התחלה' },
+        ],
+        skipOn: [],
+        createdAt: 1800000000000,
+      });
+      useMitzvotStore.getState().setEnabled('custom_1800000000000_abc', true);
+      renderMitzvah({ id: 'custom_1800000000000_abc' });
+
+      expect(texts(/^(התחלה|אחרי)$/)).toEqual(['התחלה', 'אחרי']);
+      expect(screen.getByText(/^אחרי הסוף, אם לא בוצע · \+60 דק'$/)).toBeOnTheScreen();
+      expect(texts(/^הבאה ב-/)).toEqual(['הבאה ב-28/10 10:00', 'הבאה ב-28/10 12:00']);
+      cleanup();
+      useCustomMitzvotStore.getState().reset();
+    });
+
+    describe('a follow-up saved with no label', () => {
+      const id = 'custom_1800000000000_abc';
+      const storeFollowUp = (name: string) => {
+        useCustomMitzvotStore.getState().reset();
+        useCustomMitzvotStore.getState().add({
+          id,
+          name,
+          startHHMM: '10:00',
+          endHHMM: '11:00',
+          reminders: [
+            { anchor: 'start', offsetMin: 0, label: 'התחלה' },
+            { anchor: 'followUp', offsetMin: 60, label: '' },
+          ],
+          skipOn: [],
+          createdAt: 1800000000000,
+        });
+      };
+      afterEach(() => {
+        cleanup();
+        useCustomMitzvotStore.getState().reset();
+      });
+
+      it('shows the resolved default text in its row and in the delete confirmation', () => {
+        storeFollowUp('לימוד');
+        renderMitzvah({ id });
+
+        expect(screen.getByText('עוד לא סימנת: לימוד')).toBeOnTheScreen();
+        fireEvent.press(screen.getAllByRole('button', { name: DELETE_REMINDER })[1]);
+        expect(screen.getByText(/"עוד לא סימנת: לימוד"/)).toBeOnTheScreen();
+      });
+
+      it('follows a rename of the mitzvah', () => {
+        storeFollowUp('לימוד');
+        useCustomMitzvotStore.getState().update(id, { name: 'שיעור' });
+        renderMitzvah({ id });
+
+        expect(screen.getByText('עוד לא סימנת: שיעור')).toBeOnTheScreen();
+        expect(screen.queryByText('עוד לא סימנת: לימוד')).toBeNull();
+      });
+    });
+
+    it('shows a typed follow-up label as it is', () => {
+      const id = 'custom_1800000000000_abc';
+      useCustomMitzvotStore.getState().reset();
+      useCustomMitzvotStore.getState().add({
+        id,
+        name: 'לימוד',
+        startHHMM: '10:00',
+        endHHMM: '11:00',
+        reminders: [{ anchor: 'followUp', offsetMin: 60, label: 'חזור ללמוד' }],
+        skipOn: [],
+        createdAt: 1800000000000,
+      });
+      renderMitzvah({ id });
+
+      expect(screen.getByText('חזור ללמוד')).toBeOnTheScreen();
+      expect(screen.queryByText(/עוד לא סימנת/)).toBeNull();
+      cleanup();
+      useCustomMitzvotStore.getState().reset();
+    });
+  });
+
+  describe('the window shown', () => {
+    it("prints the subtitle and the clocks beside the ribbon on the location's clock", () => {
+      const zmanim = zmanimFor(at(JERUSALEM, '2026-10-28T12:00'), JERUSALEM);
+      const clock = (instant: Date) => DateTime.fromJSDate(instant, { zone: JERUSALEM.tz }).toFormat('HH:mm');
+      const start = clock(zmanim.netzHaChama);
+      const end = clock(zmanim.sofZmanTfilaGra);
+      renderMitzvah({ id: 'shacharit' });
+
+      expect(screen.getByText(`יומי · ${start} עד ${end}`)).toBeOnTheScreen();
+      expect(screen.getByText(start)).toBeOnTheScreen();
+      expect(screen.getByText(end)).toBeOnTheScreen();
+    });
+
+    it('runs maariv to the next alot and prints its description in Hebrew', () => {
+      const clock = (instant: Date) => DateTime.fromJSDate(instant, { zone: JERUSALEM.tz }).toFormat('HH:mm');
+      const start = clock(zmanimFor(at(JERUSALEM, '2026-10-28T12:00'), JERUSALEM).tzeitHakochavim);
+      const end = clock(zmanimFor(at(JERUSALEM, '2026-10-29T12:00'), JERUSALEM).alotHaShachar);
+      renderMitzvah({ id: 'maariv' });
+      expect(screen.getByText(`יומי · ${start} עד ${end} למחרת`)).toBeOnTheScreen();
+      expect(screen.getByText('לכתחילה עד חצות הלילה')).toBeOnTheScreen();
+    });
+
+    it('prints the maariv description in English', () => {
+      useUserStore.setState({ language: 'en' });
+      renderMitzvah({ id: 'maariv' });
+      expect(screen.getByText('Ideally before chatzot (halachic midnight)')).toBeOnTheScreen();
+    });
+
+    it('runs the bedtime Shema to the next alot, prints its description and 22:30 reminder, and opens its text', () => {
+      const clock = (instant: Date) => DateTime.fromJSDate(instant, { zone: JERUSALEM.tz }).toFormat('HH:mm');
+      const start = clock(zmanimFor(at(JERUSALEM, '2026-10-28T12:00'), JERUSALEM).tzeitHakochavim);
+      const end = clock(zmanimFor(at(JERUSALEM, '2026-10-29T12:00'), JERUSALEM).alotHaShachar);
+      renderMitzvah({ id: 'krias_shma_al_hamita' });
+      expect(screen.getByText(`יומי · ${start} עד ${end} למחרת`)).toBeOnTheScreen();
+      expect(screen.getByText('לכתחילה לפני חצות הלילה')).toBeOnTheScreen();
+      expect(screen.getByText('זמן קריאת שמע על המיטה')).toBeOnTheScreen();
+      expect(screen.getByText('ההתראה הבאה תישלח ב-28/10 22:30')).toBeOnTheScreen();
+      expect(screen.getByText('הבאה ב-28/10 22:30')).toBeOnTheScreen();
+      fireEvent.press(screen.getByRole('button', { name: 'פתח נוסח' }));
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/siddur/[id]',
+        params: { id: 'krias_shma_al_hamita', date: '2026-10-28' },
+      });
+    });
+
+    it('runs Selichot in its season from chatzot halayla to the end of the time for Shacharit, and opens its text for that night', () => {
+      installSelichotFixture();
+      jest.setSystemTime(at(JERUSALEM, '2025-09-15T14:00'));
+      const clock = (instant: Date) => DateTime.fromJSDate(instant, { zone: JERUSALEM.tz }).toFormat('HH:mm');
+      const chatzot = zmanimFor(at(JERUSALEM, '2025-09-15T12:00'), JERUSALEM).chatzotLayla;
+      const end = clock(zmanimFor(at(JERUSALEM, '2025-09-16T12:00'), JERUSALEM).sofZmanTfilaGra);
+      renderMitzvah({ id: 'selichot' });
+      expect(screen.getByText(`עונתי · ${clock(chatzot)} עד ${end} למחרת`)).toBeOnTheScreen();
+      expect(screen.getByText('זמן אמירת סליחות')).toBeOnTheScreen();
+      const next = DateTime.fromJSDate(chatzot, { zone: JERUSALEM.tz }).toFormat('dd/MM HH:mm');
+      expect(screen.getByText(`ההתראה הבאה תישלח ב-${next}`)).toBeOnTheScreen();
+      fireEvent.press(screen.getByRole('button', { name: 'פתח נוסח' }));
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/siddur/[id]',
+        params: { id: 'selichot', date: '2025-09-15' },
+      });
+    });
+
+    it('has no window and no text outside the Selichot season', () => {
+      renderMitzvah({ id: 'selichot' });
+      expect(screen.getByText('עונתי · -')).toBeOnTheScreen();
+      expect(screen.queryByRole('button', { name: 'פתח נוסח' })).toBeNull();
+    });
+
+    it("offers the download of the user's nusach and shows no window while it is missing", () => {
+      jest.setSystemTime(at(JERUSALEM, '2025-09-15T14:00'));
+      renderMitzvah({ id: 'selichot' });
+      expect(screen.getByText('עונתי · -')).toBeOnTheScreen();
+      expect(screen.queryByRole('button', { name: 'פתח נוסח' })).toBeNull();
+      expect(screen.getByText('תוסף הסליחות')).toBeOnTheScreen();
+      expect(screen.getByRole('switch').props.disabled).toBeFalsy();
+      expect(screen.queryByText(/ההתראה הבאה תישלח/)).toBeNull();
+    });
+
+    it('shows the window and the next reminder the moment the nusach file installs on the screen', () => {
+      jest.setSystemTime(at(JERUSALEM, '2025-09-15T14:00'));
+      const chatzot = zmanimFor(at(JERUSALEM, '2025-09-15T12:00'), JERUSALEM).chatzotLayla;
+      renderMitzvah({ id: 'selichot' });
+      expect(screen.getByText('עונתי · -')).toBeOnTheScreen();
+      act(() => {
+        installSelichotFixture(['ashkenaz']);
+      });
+      expect(screen.queryByText('עונתי · -')).toBeNull();
+      const next = DateTime.fromJSDate(chatzot, { zone: JERUSALEM.tz }).toFormat('dd/MM HH:mm');
+      expect(screen.getByText(`ההתראה הבאה תישלח ב-${next}`)).toBeOnTheScreen();
+      expect(screen.getByRole('button', { name: 'פתח נוסח' })).toBeOnTheScreen();
+    });
+
+    it('runs the Chanukah candles from tzeit to the next alot, shows its reminder label without a placeholder, and opens its text for that night', () => {
+      jest.setSystemTime(at(JERUSALEM, '2025-12-15T14:00'));
+      const clock = (instant: Date) => DateTime.fromJSDate(instant, { zone: JERUSALEM.tz }).toFormat('HH:mm');
+      const tzeit = zmanimFor(at(JERUSALEM, '2025-12-15T12:00'), JERUSALEM).tzeitHakochavim;
+      const end = clock(zmanimFor(at(JERUSALEM, '2025-12-16T12:00'), JERUSALEM).alotHaShachar);
+      renderMitzvah({ id: 'chanukah_candles' });
+      expect(screen.getByText(`עונתי · ${clock(tzeit)} עד ${end} למחרת`)).toBeOnTheScreen();
+      expect(screen.getByText('זמן הדלקת נרות חנוכה')).toBeOnTheScreen();
+      expect(screen.queryByText(/%\{/)).toBeNull();
+      const next = DateTime.fromJSDate(tzeit, { zone: JERUSALEM.tz }).toFormat('dd/MM HH:mm');
+      expect(screen.getByText(`ההתראה הבאה תישלח ב-${next}`)).toBeOnTheScreen();
+      fireEvent.press(screen.getByRole('button', { name: 'פתח נוסח' }));
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/siddur/[id]',
+        params: { id: 'chanukah_candles', date: '2025-12-15' },
+      });
+    });
+
+    it('has no window and no text outside Chanukah', () => {
+      renderMitzvah({ id: 'chanukah_candles' });
+      expect(screen.getByText('עונתי · -')).toBeOnTheScreen();
+      expect(screen.queryByRole('button', { name: 'פתח נוסח' })).toBeNull();
+    });
+
+    const CUSTOM_ID = 'custom_1800000000000_abc';
+    const storeRange = (start: string, end: string) =>
+      useCustomMitzvotStore.getState().add({
+        id: CUSTOM_ID,
+        name: 'לימוד',
+        startHHMM: '10:00',
+        endHHMM: '11:00',
+        reminders: [{ anchor: 'start', offsetMin: 0, label: 'התחלה' }],
+        skipOn: [],
+        createdAt: 1800000000000,
+        schedules: [{ from: '2026-10-28', schedule: { mode: 'range', start, end } }],
+      });
+
+    afterEach(() => {
+      cleanup();
+      useCustomMitzvotStore.getState().reset();
+    });
+
+    it('names the start day of a range beyond the look-ahead', () => {
+      storeRange('2026-11-20', '2026-11-25');
+      renderMitzvah({ id: CUSTOM_ID });
+      expect(screen.getByText('יומי · מתחילה ב־20 נובמבר 2026')).toBeOnTheScreen();
+    });
+
+    it('names the start day of a range beyond the look-ahead in English', () => {
+      storeRange('2026-11-20', '2026-11-25');
+      useUserStore.setState({ language: 'en' });
+      renderMitzvah({ id: CUSTOM_ID });
+      expect(screen.getByText('Daily · Starts on Nov 20, 2026')).toBeOnTheScreen();
+    });
+
+    it('keeps the time range for a range inside the look-ahead', () => {
+      storeRange('2026-11-02', '2026-11-05');
+      renderMitzvah({ id: CUSTOM_ID });
+      expect(screen.getByText('יומי · 10:00 עד 11:00')).toBeOnTheScreen();
+      expect(screen.queryByText(/מתחילה/)).toBeNull();
+    });
+
+    it('shows no start day for an ended range', () => {
+      storeRange('2026-10-01', '2026-10-20');
+      renderMitzvah({ id: CUSTOM_ID });
+      expect(screen.getByText('יומי · -')).toBeOnTheScreen();
     });
   });
 
@@ -144,8 +611,25 @@ describe('Mitzvah screen', () => {
       expect(screen.getByText(/^התוסף מותקן/)).toBeOnTheScreen();
       expect(screen.getByText('תזכורות')).toBeOnTheScreen();
       expect(screen.getByText(/ · 09:00$/)).toBeOnTheScreen();
+      const monAlot = zmanimFor(at(JERUSALEM, '2026-11-16T12:00'), JERUSALEM).alotHaShachar;
+      const tueAlot = zmanimFor(at(JERUSALEM, '2026-11-17T12:00'), JERUSALEM).alotHaShachar;
+      expect(
+        screen.getByText(`יומי · ${clockOf(monAlot, JERUSALEM.tz)} עד ${clockOf(tueAlot, JERUSALEM.tz)} למחרת`),
+      ).toBeOnTheScreen();
       expect(screen.getByRole('switch').props.disabled).toBeFalsy();
       expect(screen.queryByText('אפשר להפעיל את המצווה אחרי ההורדה.')).toBeNull();
     });
+
+    it.each(['2026-11-18T12:00', '2026-11-18T20:00', '2026-11-19T02:00', '2026-11-19T21:00'])(
+      'opens the reader with no date, on its own learning day, at %s',
+      (wallClock) => {
+        jest.setSystemTime(at(JERUSALEM, wallClock));
+        installChokFixture();
+        renderMitzvah({ id: 'chok_leyisrael' });
+        fireEvent.press(screen.getByRole('button', { name: 'פתח נוסח' }));
+        expect(mockPush).toHaveBeenCalledTimes(1);
+        expect(mockPush.mock.calls[0][0]).toStrictEqual({ pathname: '/siddur/[id]', params: { id: 'chok_leyisrael' } });
+      },
+    );
   });
 });

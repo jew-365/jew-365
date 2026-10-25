@@ -11,6 +11,7 @@ const mockRouter = {
   canGoBack: () => true,
   canDismiss: () => false,
 };
+const mockNavigation = { isFocused: () => true, addListener: () => () => {} };
 
 jest.mock('expo-router', () => {
   const React = require('react');
@@ -50,6 +51,7 @@ jest.mock('expo-router', () => {
       return null;
     },
     useRouter: () => mockRouter,
+    useNavigation: () => mockNavigation,
     useLocalSearchParams: () => mockParams,
     useSegments: () => mockSegments,
     useFocusEffect: (effect: () => void) => React.useEffect(effect, [effect]),
@@ -76,6 +78,7 @@ jest.mock('@/services/SiddurService', () => {
         ),
       }),
     clearChokCache: () => {},
+    clearSelichotCache: () => {},
   };
 });
 jest.mock('expo-notifications', () => ({
@@ -149,6 +152,7 @@ import RootIndex from '../index';
 import CheckInScreen from '../checkin';
 import CustomMitzvahScreen from '../custom-mitzvah';
 import DayScreen from '../day/[date]';
+import GuideScreen from '../guide';
 import HilulotScreen from '../hilulot';
 import MitzvahScreen from '../mitzvah/[id]';
 import MitzvotScreen from '../mitzvot';
@@ -166,6 +170,7 @@ import SettingsScreen from '../(tabs)/settings';
 import SiddurTabScreen from '../(tabs)/siddur';
 import OnboardingWelcomeScreen from '../onboarding/index';
 import OnboardingLocationScreen from '../onboarding/location';
+import OnboardingMitzvotScreen from '../onboarding/mitzvot';
 import OnboardingNusachScreen from '../onboarding/nusach';
 import OnboardingProfileScreen from '../onboarding/profile';
 import OnboardingReadyScreen from '../onboarding/ready';
@@ -175,14 +180,17 @@ import TaharahDashboardScreen from '../taharah/index';
 import TaharahLogScreen from '../taharah/log';
 import TaharahSettingsScreen from '../taharah/settings';
 import { CITIES } from '@/data/cities';
-import { setLocale } from '@/i18n';
+import { WHATS_NEW } from '@/data/guide';
+import { formatDate, setLocale } from '@/i18n';
 import { useChokStore } from '@/stores/useChokStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
+import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { installChokFixture } from '@/testing/chok';
+import { installSelichotFixture } from '@/testing/selichot';
 import { renderWithTheme } from '@/testing/render';
 import { at } from '@/testing/zmanim';
 import type { CustomMitzvah } from '@/types/mitzvah';
@@ -244,16 +252,16 @@ const NIGHT_CUSTOM: CustomMitzvah = {
   name: 'תיקון חצות',
   startHHMM: '00:30',
   endHHMM: '01:30',
-  reminders: [],
+  reminders: [{ anchor: 'start', offsetMin: 0, label: 'תיקון חצות' }],
   skipOn: [],
   contentBlocks: [{ type: 'text', he: 'שיר המעלות' }],
   createdAt: 1800000000000,
 };
 const NIGHT_OF_THE_14TH = '2027-06-15T00:20';
 const SIVAN = {
-  9: { he: 'ט׳ סִיוָן תשפ״ז', en: '9th of Sivan, 5787' },
-  10: { he: 'י׳ סִיוָן תשפ״ז', en: '10th of Sivan, 5787' },
-  11: { he: 'י״א סִיוָן תשפ״ז', en: '11th of Sivan, 5787' },
+  9: { he: 'ט׳ סיון תשפ״ז', en: '9th of Sivan, 5787' },
+  10: { he: 'י׳ סיון תשפ״ז', en: '10th of Sivan, 5787' },
+  11: { he: 'י״א סיון תשפ״ז', en: '11th of Sivan, 5787' },
 } as const;
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -293,6 +301,7 @@ function seedStores(language: Locale, fresh: boolean, now: Date) {
   useCustomMitzvotStore.getState().reset();
   useTaharahStore.getState().reset();
   useChokStore.getState().reset();
+  useSelichotStore.getState().reset();
   useUserStore.setState({ language, location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
   if (fresh) return;
 
@@ -371,6 +380,27 @@ const CASES: SmokeCase[] = [
     },
   },
   {
+    file: '_layout',
+    label: 'keeps a new user on an onboarding step',
+    Screen: RootLayout as ComponentType,
+    fresh: true,
+    segments: ['onboarding', 'mitzvot'],
+    check: async () => {
+      await screen.findByTestId('stack');
+      expect(mockRouter.replace).not.toHaveBeenCalled();
+    },
+  },
+  {
+    file: '_layout',
+    label: 'sends an onboarded user on an onboarding step home',
+    Screen: RootLayout as ComponentType,
+    segments: ['onboarding', 'mitzvot'],
+    check: async () => {
+      await screen.findByTestId('stack');
+      expect(mockRouter.replace).toHaveBeenCalledWith('/(tabs)/home');
+    },
+  },
+  {
     file: 'checkin',
     label: 'with nothing to mark',
     Screen: CheckInScreen,
@@ -438,6 +468,12 @@ const CASES: SmokeCase[] = [
     params: { date: 'not-a-date' },
     check: text('המצוות של היום', 'Day view'),
   },
+  {
+    file: 'guide',
+    label: 'default',
+    Screen: GuideScreen,
+    check: both(text('מדריך למשתמש', 'User guide'), text(WHATS_NEW[0].items[0].he, WHATS_NEW[0].items[0].en)),
+  },
   { file: 'hilulot', label: 'default', Screen: HilulotScreen, check: text('הילולות צדיקים', 'Hilulot of tzaddikim') },
   {
     file: 'mitzvah/[id]',
@@ -470,6 +506,23 @@ const CASES: SmokeCase[] = [
     },
     check: text(/התוסף מותקן/, /Installed/),
   },
+  {
+    file: 'mitzvah/[id]',
+    label: 'Selichot before the add-on is downloaded',
+    Screen: MitzvahScreen,
+    params: { id: 'selichot' },
+    check: text('תוסף הסליחות', 'Selichot add-on'),
+  },
+  {
+    file: 'mitzvah/[id]',
+    label: 'Selichot with the nusach installed',
+    Screen: MitzvahScreen,
+    params: { id: 'selichot' },
+    setup: () => {
+      installSelichotFixture(['ashkenaz']);
+    },
+    check: text(/מותקן בנוסח אשכנז/, /Installed for Ashkenaz/),
+  },
   { file: 'mitzvot', label: 'default', Screen: MitzvotScreen, check: text('המצוות שלי', 'My mitzvot') },
   { file: 'report', label: 'latest week', Screen: ReportScreen, check: text('סיכום שבועי', 'Weekly report') },
   {
@@ -487,9 +540,11 @@ const CASES: SmokeCase[] = [
     Screen: ScheduleScreen,
     wallClock: NIGHT_OF_THE_14TH,
     check: async (language) => {
-      const evening = DateTime.fromObject({ year: 2027, month: 6, day: 14 })
-        .setLocale(language)
-        .toFormat(language === 'he' ? 'd LLLL yyyy' : 'LLL d, yyyy');
+      const evening = formatDate(
+        DateTime.fromObject({ year: 2027, month: 6, day: 14 }),
+        language === 'he' ? 'd LLLL yyyy' : 'LLL d, yyyy',
+        language,
+      );
       await screen.findByText(new RegExp(`^${escapeRegExp(evening)}`));
     },
   },
@@ -521,7 +576,7 @@ const CASES: SmokeCase[] = [
   },
   {
     file: 'siddur/[id]',
-    label: 'a custom text opened bare resolves for the day of its window',
+    label: 'a custom text opened bare at night names the Hebrew date of the night',
     Screen: SiddurReaderScreen,
     params: { id: NIGHT_CUSTOM_ID },
     wallClock: '2027-06-15T00:45',
@@ -617,6 +672,13 @@ const CASES: SmokeCase[] = [
     check: text('איפה אתה נמצא?', 'Where are you?'),
   },
   {
+    file: 'onboarding/mitzvot',
+    label: 'mitzvot',
+    Screen: OnboardingMitzvotScreen,
+    fresh: true,
+    check: text('אילו מצוות לעקוב?', 'Which mitzvot to track?'),
+  },
+  {
     file: 'onboarding/nusach',
     label: 'nusach',
     Screen: OnboardingNusachScreen,
@@ -649,7 +711,7 @@ const CASES: SmokeCase[] = [
     file: 'taharah/calendar',
     label: 'default',
     Screen: TaharahCalendarScreen,
-    check: text('לוח טהרה', 'Taharah calendar'),
+    check: both(text('לוח טהרה', 'Taharah calendar'), text('אוקטובר 2026', 'October 2026')),
   },
   {
     file: 'taharah/index',

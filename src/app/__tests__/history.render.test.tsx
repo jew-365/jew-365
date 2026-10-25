@@ -33,6 +33,18 @@ const lastTwoDays = {
   '2026-10-27': { tefillin: 1 },
 };
 
+const NEW_CAPTION = 'חדש · עוד לא נספר יום';
+
+function enableMinchaThisMorning() {
+  useMitzvotStore.setState({
+    activeMitzvot: {
+      tefillin: { enabled: true },
+      shacharit: { enabled: true },
+      mincha: { enabled: true, enabledAt: at(JERUSALEM, '2026-10-28T09:00').getTime() },
+    },
+  });
+}
+
 function renderHistory(completions: Record<string, Record<string, number>>) {
   useCompletionsStore.setState({ completions });
   return renderWithTheme(<HistoryScreen />);
@@ -110,6 +122,40 @@ describe('history', () => {
     );
     expect(percent).toBeGreaterThan(0);
     expect(screen.getByTestId('history-bar-tefillin')).toHaveStyle({ width: `${percent}%` });
+  });
+
+  it('captions a mitzvah switched on today as new, with no percent or bar, after the rows with a percent', async () => {
+    enableMinchaThisMorning();
+    renderHistory(lastTwoDays);
+    await screen.findAllByTestId(/^history-day-/);
+    const row = screen.getByRole('button', { name: `תפילת מנחה, ${NEW_CAPTION}` });
+    expect(within(row).getByText(NEW_CAPTION).props.testID).toBe('history-new-mincha');
+    expect(within(row).queryByText(/%$/)).toBeNull();
+    expect(screen.queryByTestId('history-bar-mincha')).toBeNull();
+    expect(
+      screen
+        .getAllByRole('button', { name: /^(הנחת תפילין|תפילת שחרית|תפילת מנחה), / })
+        .map((r) => r.props.accessibilityLabel),
+    ).toEqual(['תפילת שחרית, 3%', 'הנחת תפילין, 10%', `תפילת מנחה, ${NEW_CAPTION}`]);
+  });
+
+  it('gives the new mitzvah its percent once a day of it is decided', async () => {
+    enableMinchaThisMorning();
+    jest.setSystemTime(at(JERUSALEM, '2026-10-29T10:00'));
+    renderHistory({ '2026-10-29': { mincha: 1 } });
+    await screen.findAllByTestId(/^history-day-/);
+    const row = screen.getByRole('button', { name: 'תפילת מנחה, 50%' });
+    expect(within(row).getByText('50%')).toBeOnTheScreen();
+    expect(screen.getByTestId('history-bar-mincha')).toHaveStyle({ width: '50%' });
+    expect(screen.queryByTestId('history-new-mincha')).toBeNull();
+  });
+
+  it('captions the new mitzvah in English too', async () => {
+    enableMinchaThisMorning();
+    useUserStore.setState({ language: 'en' });
+    renderHistory({});
+    await screen.findAllByTestId(/^history-day-/);
+    expect(screen.getByRole('button', { name: 'Mincha, New · no day counted yet' })).toBeOnTheScreen();
   });
 
   it('keeps the Reports pill', async () => {

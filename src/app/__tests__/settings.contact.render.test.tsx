@@ -1,7 +1,9 @@
+const mockPush = jest.fn();
+
 jest.mock('expo-router', () => {
   const React = require('react');
   return {
-    useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
+    useRouter: () => ({ push: mockPush, replace: jest.fn() }),
     useFocusEffect: (effect: () => void) => React.useEffect(effect, [effect]),
   };
 });
@@ -16,9 +18,13 @@ jest.mock('@/services/ContactService', () => ({
   sendContactMessage: jest.fn(async () => {}),
 }));
 
-import { Linking } from 'react-native';
-import { act, fireEvent, screen } from '@testing-library/react-native';
+import * as fs from 'fs';
+import * as path from 'path';
+import { Linking, Platform } from 'react-native';
+import { act, fireEvent, screen, within } from '@testing-library/react-native';
 import SettingsScreen from '../(tabs)/settings';
+import { Card } from '@/components/Card';
+import { ListRow } from '@/components/ListRow';
 import {
   CONTACT_EMAIL,
   ContactError,
@@ -26,11 +32,13 @@ import {
   isContactConfigured,
   sendContactMessage,
 } from '@/services/ContactService';
+import { appVersionLabel } from '@/services/appUpdates';
 import { translate } from '@/i18n';
 import { renderWithTheme } from '@/testing/render';
 import { useUserStore } from '@/stores/useUserStore';
 
-const he = (key: string) => translate(key, undefined, 'he', null);
+const he = (key: string, options?: Record<string, unknown>) => translate(key, options, 'he', null);
+const en = (key: string) => translate(key, undefined, 'en', null);
 const mockSend = jest.mocked(sendContactMessage);
 const mockConfigured = jest.mocked(isContactConfigured);
 
@@ -41,6 +49,14 @@ async function openContactSection() {
 }
 
 const field = (key: string) => screen.getByLabelText(he(key));
+
+function linkTitles() {
+  const cards = screen.UNSAFE_getAllByType(Card).filter((card) => card.props.divided);
+  expect(cards).toHaveLength(1);
+  return within(cards[0])
+    .UNSAFE_getAllByType(ListRow)
+    .map((row) => row.props.title);
+}
 
 const send = async () => {
   await act(async () => {
@@ -65,6 +81,40 @@ describe('Settings contact', () => {
     expect(screen.getByText(he('settings.contactHint'))).toBeOnTheScreen();
     expect(screen.getByText(he('settings.contactSend'))).toBeOnTheScreen();
     expect(screen.getByText(he('settings.contactPrivacy'))).toBeOnTheScreen();
+  });
+
+  it('is titled about and contact, with the version first and the links last', async () => {
+    renderWithTheme(<SettingsScreen />);
+    await act(async () => {});
+    expect(screen.getByText('אודות ויצירת קשר')).toBeOnTheScreen();
+    expect(screen.getByText(he('settings.contactSummary'))).toBeOnTheScreen();
+    expect(en('settings.contact')).toBe('About and contact');
+
+    fireEvent.press(screen.getByText(he('settings.contact')));
+
+    expect(screen.getByText(he('settings.version', { version: appVersionLabel() }))).toBeOnTheScreen();
+    expect(screen.getAllByTestId(/^settings-anchor-/).map((node) => node.props.testID)).toEqual([
+      'settings-anchor-version',
+      'settings-anchor-contact',
+      'settings-anchor-links',
+    ]);
+    const tree = JSON.stringify(screen.toJSON());
+    const position = (id: string) => tree.indexOf(`"testID":"settings-anchor-${id}"`);
+    expect(position('version')).toBeGreaterThan(-1);
+    expect(position('contact')).toBeGreaterThan(position('version'));
+    expect(position('links')).toBeGreaterThan(position('contact'));
+    expect(
+      within(screen.getByTestId('settings-anchor-contact')).getByLabelText(he('settings.contactMessage')),
+    ).toBeOnTheScreen();
+    expect(within(screen.getByTestId('settings-anchor-links')).getByText(he('settings.links'))).toBeOnTheScreen();
+    expect(linkTitles()).toEqual([
+      he('guide.title'),
+      he('settings.linkSupport'),
+      he('settings.linkPrivacy'),
+      he('settings.linkStore.ios'),
+      he('settings.linkChok'),
+    ]);
+    expect(screen.getByLabelText(he('settings.contactMessage'))).toBeOnTheScreen();
   });
 
   it('fills the name and phone from the profile and leaves the message empty', async () => {
@@ -171,5 +221,111 @@ describe('Settings contact', () => {
     expect(screen.queryByText(he('settings.contactSend'))).toBeNull();
     expect(screen.queryByLabelText(he('settings.contactMessage'))).toBeNull();
     expect(screen.getByText(CONTACT_EMAIL)).toBeOnTheScreen();
+    expect(screen.getByText(he('settings.linkSupport'))).toBeOnTheScreen();
+  });
+});
+
+describe('Settings about and contact links', () => {
+  const SITE = 'https://jew-365.github.io/jew-365/';
+  const APP_STORE = 'https://apps.apple.com/app/id6825802248';
+  const PLAY = 'https://play.google.com/store/apps/details?id=com.jew365.app';
+  let openURL: jest.SpyInstance;
+
+  beforeEach(() => {
+    useUserStore.getState().reset();
+    useUserStore.setState({ isOnboarded: true });
+    jest.clearAllMocks();
+    mockConfigured.mockReturnValue(true);
+    openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+  });
+
+  afterEach(() => {
+    openURL.mockRestore();
+  });
+
+  async function openAbout(language: 'he' | 'en') {
+    useUserStore.setState({ language });
+    renderWithTheme(<SettingsScreen />);
+    await act(async () => {});
+    fireEvent.press(screen.getByText(translate('settings.contact', undefined, language, null)));
+  }
+
+  it.each([
+    ['he', 'settings.linkSupport', SITE],
+    ['en', 'settings.linkSupport', SITE],
+    ['he', 'settings.linkPrivacy', `${SITE}privacy/`],
+    ['en', 'settings.linkPrivacy', `${SITE}privacy/en/`],
+    ['he', 'settings.linkChok', `${SITE}chok/LICENSE.txt`],
+    ['en', 'settings.linkChok', `${SITE}chok/LICENSE.txt`],
+    ['he', 'settings.linkStore.ios', APP_STORE],
+    ['en', 'settings.linkStore.ios', APP_STORE],
+  ] as const)('in %s, %s opens %s', async (language, key, url) => {
+    await openAbout(language);
+    fireEvent.press(screen.getByText(translate(key, undefined, language, null)));
+
+    expect(openURL).toHaveBeenCalledTimes(1);
+    expect(openURL).toHaveBeenCalledWith(url);
+  });
+
+  it('opens Google Play on Android', async () => {
+    const restore = jest.replaceProperty(Platform, 'OS', 'android');
+    try {
+      await openAbout('he');
+      fireEvent.press(screen.getByText(he('settings.linkStore.android')));
+
+      expect(openURL).toHaveBeenCalledWith(PLAY);
+      expect(screen.queryByText(he('settings.linkStore.ios'))).toBeNull();
+    } finally {
+      restore.restore();
+    }
+  });
+
+  it('has no store row on web', async () => {
+    const restore = jest.replaceProperty(Platform, 'OS', 'web');
+    try {
+      await openAbout('he');
+
+      expect(linkTitles()).toEqual([
+        he('guide.title'),
+        he('settings.linkSupport'),
+        he('settings.linkPrivacy'),
+        he('settings.linkChok'),
+      ]);
+      expect(screen.queryByText(he('settings.linkStore.android'))).toBeNull();
+      expect(screen.queryByText(he('settings.linkStore.ios'))).toBeNull();
+    } finally {
+      restore.restore();
+    }
+  });
+
+  it('opens the user guide from the first row of the links card', async () => {
+    await openAbout('he');
+    expect(linkTitles()[0]).toBe(he('guide.title'));
+    fireEvent.press(screen.getByText(he('guide.title')));
+
+    expect(mockPush).toHaveBeenCalledWith('/guide');
+    expect(openURL).not.toHaveBeenCalled();
+  });
+});
+
+describe('About and contact in the public pages', () => {
+  const page = (file: string) => fs.readFileSync(path.join(__dirname, '..', '..', '..', 'docs', file), 'utf8');
+
+  it('names the section by its Settings label', () => {
+    const faq = page('index.html');
+    const policy = page('privacy/index.html');
+    const policyEn = page('privacy/en/index.html');
+    const testers = page('testers/index.html');
+
+    expect(faq).toContain(`הגדרות ← ${he('settings.contact')}`);
+    expect(policy).toContain(`בהגדרות ← ${he('settings.contact')} `);
+    expect(policyEn).toContain(`under Settings → ${en('settings.contact')} `);
+    expect(testers).toContain(`הגדרות ← ${he('settings.contact')}`);
+
+    for (const hebrew of [faq, policy, testers]) {
+      expect(hebrew).not.toContain('← יצירת קשר');
+      expect(hebrew).not.toContain('״יצירת קשר״');
+    }
+    expect(policyEn).not.toContain('Contact us');
   });
 });

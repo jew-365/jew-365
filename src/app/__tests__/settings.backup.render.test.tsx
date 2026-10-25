@@ -1,7 +1,8 @@
+const mockReplace = jest.fn();
 jest.mock('expo-router', () => {
   const React = require('react');
   return {
-    useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
+    useRouter: () => ({ push: jest.fn(), replace: mockReplace }),
     useFocusEffect: (effect: () => void) => React.useEffect(effect, [effect]),
   };
 });
@@ -10,6 +11,7 @@ jest.mock('@/services/NotificationScheduler', () => ({
   requestNotificationPermissions: jest.fn(async () => true),
   syncNotificationPermissionStatus: jest.fn(async () => true),
 }));
+jest.mock('@/services/AppResetService', () => ({ AppResetService: { reset: jest.fn(async () => {}) } }));
 jest.mock('@/services/BackupService', () => ({
   ...(jest.requireActual('@/services/BackupService') as object),
   exportBackup: jest.fn(async () => {}),
@@ -17,14 +19,22 @@ jest.mock('@/services/BackupService', () => ({
   restoreBackup: jest.fn(),
 }));
 
+import * as fs from 'fs';
+import * as path from 'path';
+import { Linking, Platform } from 'react-native';
 import { act, fireEvent, screen } from '@testing-library/react-native';
 import SettingsScreen from '../(tabs)/settings';
+import { AppResetService } from '@/services/AppResetService';
+import { appVersionLabel } from '@/services/appUpdates';
 import { BackupError, exportBackup, pickBackup, restoreBackup, type Backup } from '@/services/BackupService';
+import { Button } from '@/components/Button';
 import { translate } from '@/i18n';
 import { renderWithTheme } from '@/testing/render';
 import { useUserStore } from '@/stores/useUserStore';
 
 const he = (key: string, options?: Record<string, unknown>) => translate(key, options, 'he', null);
+const en = (key: string) => translate(key, undefined, 'en', null);
+const mockReset = jest.mocked(AppResetService.reset);
 const mockExport = jest.mocked(exportBackup);
 const mockPick = jest.mocked(pickBackup);
 const mockRestore = jest.mocked(restoreBackup);
@@ -161,5 +171,132 @@ describe('Settings backup', () => {
 
     expect(screen.getByText(he('settings.backupFailed'))).toBeOnTheScreen();
     expect(screen.queryByText(he('settings.backupConfirmTitle'))).toBeNull();
+  });
+
+  it('is titled backup, restore and reset', async () => {
+    renderWithTheme(<SettingsScreen />);
+    await act(async () => {});
+
+    expect(screen.getByText('גיבוי, שחזור ואיפוס')).toBeOnTheScreen();
+    expect(screen.getByText(he('settings.backupSummary'))).toBeOnTheScreen();
+    expect(en('settings.backup')).toBe('Backup, restore and reset');
+  });
+
+  it('puts the reset below the restore', async () => {
+    await openBackupSection();
+
+    expect(screen.UNSAFE_getAllByType(Button).map((button) => button.props.label)).toEqual([
+      he('settings.backupExport'),
+      he('settings.backupImport'),
+      he('settings.logout'),
+    ]);
+  });
+
+  it('resets the app from this section after confirming', async () => {
+    await openBackupSection();
+    await press(he('settings.logout'));
+
+    expect(screen.getByText(he('settings.logoutConfirmTitle'))).toBeOnTheScreen();
+    expect(mockReset).not.toHaveBeenCalled();
+
+    await press(he('settings.logoutConfirmAction'));
+
+    expect(mockReset).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledWith('/onboarding');
+    expect(screen.queryByText(he('settings.logoutConfirmTitle'))).toBeNull();
+  });
+
+  it('keeps everything when the reset is cancelled', async () => {
+    await openBackupSection();
+    await press(he('settings.logout'));
+    await press(he('common.cancel'));
+
+    expect(mockReset).not.toHaveBeenCalled();
+    expect(screen.queryByText(he('settings.logoutConfirmTitle'))).toBeNull();
+  });
+
+  it.each([
+    ['he', 'https://jew-365.github.io/jew-365/privacy/#delete'],
+    ['en', 'https://jew-365.github.io/jew-365/privacy/en/#delete'],
+  ] as const)('opens the %s privacy policy at its data deletion section', async (language, url) => {
+    const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    useUserStore.setState({ language });
+    renderWithTheme(<SettingsScreen />);
+    await act(async () => {});
+    fireEvent.press(screen.getByText(translate('settings.backup', undefined, language, null)));
+    fireEvent.press(screen.getByRole('link', { name: translate('settings.deleteData', undefined, language, null) }));
+
+    expect(openURL).toHaveBeenCalledWith(url);
+    openURL.mockRestore();
+  });
+
+  it('leaves the device section without the reset, its App heading and the version', async () => {
+    renderWithTheme(<SettingsScreen />);
+    await act(async () => {});
+    fireEvent.press(screen.getByText(he('settings.device')));
+
+    const headings = screen
+      .getAllByRole('header')
+      .map((heading) => heading.props.children)
+      .filter((text) => text !== he('settings.title'));
+    expect(headings).toEqual([he('settings.zmanim'), he('settings.notifications'), he('settings.display')]);
+    expect(screen.queryByRole('button', { name: he('settings.logout') })).toBeNull();
+    expect(screen.queryByText(he('settings.version', { version: appVersionLabel() }))).toBeNull();
+  });
+
+  it('on web holds only the reset and the delete link', async () => {
+    const restore = jest.replaceProperty(Platform, 'OS', 'web');
+    try {
+      renderWithTheme(<SettingsScreen />);
+      await act(async () => {});
+
+      expect(screen.getByText(he('settings.backupSummaryWeb'))).toBeOnTheScreen();
+      expect(screen.queryByText(he('settings.backupSummary'))).toBeNull();
+
+      fireEvent.press(screen.getByText(he('settings.backup')));
+
+      expect(screen.getByRole('button', { name: he('settings.logout') })).toBeOnTheScreen();
+      expect(screen.getByRole('link', { name: he('settings.deleteData') })).toBeOnTheScreen();
+      for (const key of [
+        'settings.backupHint.ios',
+        'settings.backupHint.android',
+        'settings.backupExport',
+        'settings.backupImport',
+      ]) {
+        expect(screen.queryByText(he(key))).toBeNull();
+      }
+    } finally {
+      restore.restore();
+    }
+  });
+});
+
+describe('Settings paths in the public pages', () => {
+  const page = (file: string) => fs.readFileSync(path.join(__dirname, '..', '..', '..', 'docs', file), 'utf8');
+
+  it('names the reset and the export by their Settings labels', () => {
+    const resetPath = `הגדרות ← ${he('settings.backup')} ← ${he('settings.logout')}`;
+    const faq = page('index.html');
+    const policy = page('privacy/index.html');
+    const policyEn = page('privacy/en/index.html');
+
+    expect(faq).toContain(resetPath);
+    expect(faq).toContain(`הגדרות ← ${he('settings.backup')} ← ${he('settings.backupExport')}`);
+    expect(policy).toContain(resetPath);
+    expect(policy).toContain(`בהגדרות ← ${he('settings.backup')} `);
+    expect(policyEn).toContain(`Settings → ${en('settings.backup')} → ${en('settings.logout')}`);
+    expect(policyEn).toContain(`under Settings → ${en('settings.backup')} `);
+
+    for (const hebrew of [faq, policy]) {
+      expect(hebrew).not.toContain('מכשיר והתראות ← אפליקציה');
+      expect(hebrew).not.toContain('← גיבוי ושחזור');
+    }
+    expect(policyEn).not.toContain('Device and notifications → App');
+    expect(policyEn).not.toContain('→ Backup and restore');
+  });
+
+  it('keeps the #delete heading the app opens', () => {
+    expect(page('privacy/index.html')).toContain('<h2 id="delete">');
+    expect(page('privacy/en/index.html')).toContain('<h2 id="delete">');
   });
 });

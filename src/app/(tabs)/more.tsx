@@ -8,12 +8,16 @@ import { chokAddonCaption, useChokDownloadFlow } from '@/components/ChokAddonCar
 import { ListRow } from '@/components/ListRow';
 import { NavBar } from '@/components/NavBar';
 import { SectionLabel } from '@/components/SectionLabel';
+import { selichotAddonCaption, useSelichotDownloadFlow } from '@/components/SelichotAddonCard';
 import { CHOK_TEXT_ID } from '@/data/chok';
+import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import { STANDALONE_TEXTS } from '@/data/siddur';
 import { HALACHA_LINES, callUrl, halachaRulingFor, phoneLabel, whatsappUrl } from '@/data/halachaLines';
 import { useNow } from '@/hooks/useNow';
 import { checkChokUpdate, chokDownloadSupported } from '@/services/ChokContentService';
+import { checkSelichotUpdate, selichotDownloadSupported } from '@/services/SelichotContentService';
 import { useChokStore } from '@/stores/useChokStore';
+import { selectSelichotInstalledFor, useSelichotStore } from '@/stores/useSelichotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
@@ -34,15 +38,26 @@ export default function MoreScreen() {
   const chokInstall = useChokStore((s) => s.installed);
   const chokDownload = useChokStore((s) => s.download);
   const { preparing, prepare, dialog: chokDialog } = useChokDownloadFlow();
+  const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(nusach));
+  const selichotDownload = useSelichotStore((s) => s.download);
+  const selichotFlow = useSelichotDownloadFlow();
   useFocusEffect(
     useCallback(() => {
       void checkChokUpdate();
+      void checkSelichotUpdate();
     }, []),
   );
   const openChok = () => {
     if (chokInstall) router.push({ pathname: '/siddur/[id]', params: { id: CHOK_TEXT_ID } });
     else if (!chokDownloadSupported() || chokDownload.status === 'downloading') router.push(`/mitzvah/${CHOK_TEXT_ID}`);
     else void prepare();
+  };
+  const openSelichot = () => {
+    if (selichotInstalled || !selichotDownloadSupported() || selichotDownload.status === 'downloading') {
+      router.push(`/mitzvah/${SELICHOT_TEXT_ID}`);
+    } else {
+      void selichotFlow.prepare();
+    }
   };
   const portion = chokInstall ? chokPortionAt(now, location, inIsrael) : null;
   const chokCaption = portion
@@ -71,6 +86,19 @@ export default function MoreScreen() {
             onPress={openChok}
           />
           <ListRow
+            icon="shofar"
+            iconTone={selichotInstalled ? 'accent' : 'muted'}
+            title={STANDALONE_TEXTS.selichot.name[language]}
+            caption={
+              selichotInstalled
+                ? t('selichot.addon.installedShort', { nusach: t(`nusach.${nusach}`) })
+                : selichotAddonCaption(selichotDownload, t(`nusach.${nusach}`), t)
+            }
+            chevron
+            disabled={selichotFlow.preparing}
+            onPress={openSelichot}
+          />
+          <ListRow
             icon="tehillim"
             title={STANDALONE_TEXTS.tehillim.name[language]}
             caption={t('more.tehillimCaption')}
@@ -84,10 +112,18 @@ export default function MoreScreen() {
             chevron
             onPress={() => setHalachaOpen(true)}
           />
+          <ListRow
+            icon="guide"
+            title={t('guide.title')}
+            caption={t('more.guideCaption')}
+            chevron
+            onPress={() => router.push('/guide')}
+          />
         </Card>
       </ScrollView>
 
       {chokDialog}
+      {selichotFlow.dialog}
 
       <BottomSheet
         visible={halachaOpen}

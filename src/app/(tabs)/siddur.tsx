@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { HDate } from '@hebcal/core';
 import { DateTime } from 'luxon';
 import { MITZVOT } from '@/data/mitzvot';
+import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import {
   SIDDUR_GROUPS,
   STANDALONE_TEXTS,
@@ -14,6 +15,7 @@ import {
   mitzvahTextId,
   siddurPlace,
   standaloneHoursAt,
+  standalonePeriodEnded,
   standaloneTextDay,
   standaloneTextsIn,
 } from '@/data/siddur';
@@ -22,16 +24,20 @@ import { ListRow } from '@/components/ListRow';
 import { iconFor } from '@/components/MitzvahIcon';
 import { NavBar } from '@/components/NavBar';
 import { SectionLabel } from '@/components/SectionLabel';
+import { selichotAddonCaption, useSelichotDownloadFlow } from '@/components/SelichotAddonCard';
 import { useDayModel } from '@/hooks/useDayModel';
 import { useNow } from '@/hooks/useNow';
+import { selichotDownloadSupported } from '@/services/SelichotContentService';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
+import { useSelichotStore } from '@/stores/useSelichotStore';
+import { useUserStore } from '@/stores/useUserStore';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { SiddurGroup, StandaloneTextId } from '@/types/siddur';
 import { currentOrNextWindow } from '@/utils/buildDayTimeline';
 import { clockOf } from '@/utils/clock';
-import { dayFeatures } from '@/utils/siddur';
-import { useI18n } from '@/i18n';
+import { catalogListsText, dayFeatures } from '@/utils/siddur';
+import { formatDate, useI18n } from '@/i18n';
 
 const MITZVAH_TEXTS = MITZVOT.filter((mitzvah) => mitzvahTextId(mitzvah.id));
 const PRAYER_IDS = ['shacharit', 'mincha', 'maariv'];
@@ -48,13 +54,17 @@ function CatalogSection({ title, children, testID }: { title: string; children: 
 export default function SiddurScreen() {
   const { colors } = useTheme();
   const { t } = useI18n();
-  const { settings, location, nusach, inIsrael, language, nameFor } = useDayModel();
+  const { settings, location, nusach, inIsrael, language, nameFor, selichotInstalled } = useDayModel();
   const router = useRouter();
+  const selichotDownload = useSelichotStore((state) => state.download);
+  const selichotFlow = useSelichotDownloadFlow();
   const now = useNow();
   const completions = useCompletionsStore((state) => state.completions);
+  const siddurVoice = useUserStore((state) => state.siddurVoice);
   const groups = useMemo(
-    () => SIDDUR_GROUPS.map((group) => ({ group, ids: standaloneTextsIn(group) })).filter(({ ids }) => ids.length),
-    [],
+    () =>
+      SIDDUR_GROUPS.map((group) => ({ group, ids: standaloneTextsIn(group, nusach) })).filter(({ ids }) => ids.length),
+    [nusach],
   );
   // Keyed by each text's day number, so the clock tick re-checks availability only when a day turns.
   const dayKey = groups.flatMap(({ ids }) => ids.map((id) => standaloneTextDay(id, now, location).abs())).join(',');
@@ -65,26 +75,29 @@ export default function SiddurScreen() {
     return new Map(
       ids.map((id, index) => [id, hasStandaloneText(id, nusach, dayFeatures(new HDate(days[index]), place))]),
     );
-  }, [dayKey, groups, location, inIsrael, nusach]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- selichotInstalled re-runs the memo on purpose: hasStandaloneText() reads the Selichot install from its store
+  }, [dayKey, groups, location, inIsrael, nusach, selichotInstalled]);
   const today = useMemo(() => {
     const place = siddurPlace(location, inIsrael);
-    return MITZVAH_TEXTS.map((mitzvah) => {
-      const window = currentOrNextWindow(mitzvah, location, settings, now);
-      const hasText = window !== null && hasSiddurText(mitzvah, nusach, window.date, place);
-      return { mitzvah, window, hasText, openNow: hasText && window.start.getTime() <= now.getTime() };
-    }).sort(
-      (a, b) =>
-        (a.window?.start.getTime() ?? Number.POSITIVE_INFINITY) -
-        (b.window?.start.getTime() ?? Number.POSITIVE_INFINITY),
-    );
-  }, [nusach, settings, inIsrael, location, now]);
+    return MITZVAH_TEXTS.filter((mitzvah) => catalogListsText(mitzvahTextId(mitzvah.id)!, siddurVoice))
+      .map((mitzvah) => {
+        const window = currentOrNextWindow(mitzvah, location, settings, now);
+        const hasText = window !== null && hasSiddurText(mitzvah, nusach, window.date, place);
+        return { mitzvah, window, hasText, openNow: hasText && window.start.getTime() <= now.getTime() };
+      })
+      .sort(
+        (a, b) =>
+          (a.window?.start.getTime() ?? Number.POSITIVE_INFINITY) -
+          (b.window?.start.getTime() ?? Number.POSITIVE_INFINITY),
+      );
+  }, [nusach, settings, inIsrael, location, now, siddurVoice]);
   const label = (entry: { he: string; en: string }) => (language === 'en' ? entry.en : entry.he);
   // The day belongs to the instant whose clock is printed, so it is read off `start`, not off the window's date.
   const laterCaption = (start: Date) => {
     const startKey = dateKey(start);
     if (startKey === dateKey(now)) return t('siddur.today.later', { time: clockOf(start) });
     const isTomorrow = startKey === dateKey(DateTime.fromJSDate(now).plus({ days: 1 }).toJSDate());
-    const day = isTomorrow ? t('common.tomorrow') : DateTime.fromJSDate(start).setLocale(language).toFormat('cccc');
+    const day = isTomorrow ? t('common.tomorrow') : formatDate(start, 'cccc', language);
     return t('siddur.today.laterOn', { day, time: clockOf(start) });
   };
   const standaloneNow = useMemo(() => {
@@ -95,7 +108,8 @@ export default function SiddurScreen() {
         return hours ? [{ id, group, hours }] : [];
       }),
     );
-  }, [groups, nusach, now, location, inIsrael]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- selichotInstalled re-runs the memo on purpose: hasStandaloneText() reads the Selichot install from its store
+  }, [groups, nusach, now, location, inIsrael, selichotInstalled]);
   // What is said now: the mitzvah texts whose window is open and not yet marked done, and the standalone
   // texts whose hours hold, by opening time, so later windows never share the card with the one open now.
   type NowEntry =
@@ -164,10 +178,33 @@ export default function SiddurScreen() {
     );
   };
 
+  const openSelichotDownload = () => {
+    if (!selichotDownloadSupported() || selichotDownload.status === 'downloading') {
+      router.push(`/mitzvah/${SELICHOT_TEXT_ID}`);
+      return;
+    }
+    void selichotFlow.prepare();
+  };
+
   const row = (id: StandaloneTextId, group: SiddurGroup) => {
     const { name } = STANDALONE_TEXTS[id];
+    if (id === SELICHOT_TEXT_ID && !selichotInstalled) {
+      return (
+        <Card key={id}>
+          <ListRow
+            icon={group}
+            iconTone="muted"
+            title={label(name)}
+            caption={selichotAddonCaption(selichotDownload, t(`nusach.${nusach}`), t)}
+            chevron
+            disabled={selichotFlow.preparing}
+            onPress={openSelichotDownload}
+          />
+        </Card>
+      );
+    }
     const { availableLabel } = standaloneAvailability(id, nusach);
-    const open = available.get(id) ?? false;
+    const open = (available.get(id) ?? false) && !standalonePeriodEnded(id, nusach, now, location);
     return (
       <Card key={id}>
         <ListRow
@@ -202,6 +239,7 @@ export default function SiddurScreen() {
           </CatalogSection>
         ))}
       </ScrollView>
+      {selichotFlow.dialog}
     </SafeAreaView>
   );
 }

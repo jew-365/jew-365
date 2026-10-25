@@ -15,11 +15,11 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies, typography } from '@/theme/typography';
-import { buildDayTimeline } from '@/utils/buildDayTimeline';
+import { buildDayTimeline, windowStillOpen } from '@/utils/buildDayTimeline';
 import { latestCheckIn, pendingCheckInIds } from '@/utils/checkIn';
 import { clockOf } from '@/utils/clock';
 import { appDay } from '@/utils/locationDay';
-import { useI18n } from '@/i18n';
+import { formatDate, useI18n } from '@/i18n';
 
 const VIEW_MODES = ['day', 'week', 'month'] as const;
 type ViewMode = (typeof VIEW_MODES)[number];
@@ -41,7 +41,7 @@ const HOLIDAY_PING_SIZE = 7;
 export default function ScheduleScreen() {
   const { colors } = useTheme();
   const { t } = useI18n();
-  const { enabled, location, language, settings, checkInInput } = useDayModel();
+  const { enabled, location, language, settings, checkInInput, enabledSince } = useDayModel();
   const router = useRouter();
   const completions = useCompletionsStore((s) => s.completions);
   const [view, setView] = useState<ViewMode>('day');
@@ -56,8 +56,8 @@ export default function ScheduleScreen() {
   const dayItems = useMemo(() => {
     if (view !== 'day') return [];
     const date = cursor.startOf('day').toJSDate();
-    return buildDayTimeline(date, enabled, dayCompletions, location, settings, language, t);
-  }, [view, enabled, dayCompletions, cursor, location, settings, language, t]);
+    return buildDayTimeline(date, enabled, dayCompletions, location, settings, language, t, enabledSince);
+  }, [view, enabled, dayCompletions, cursor, location, settings, language, t, enabledSince]);
 
   const checkIns = useCompletionsStore((s) => s.checkIns);
   const skipped = useCompletionsStore((s) => s.skipped);
@@ -74,14 +74,21 @@ export default function ScheduleScreen() {
     const start = cursor.startOf('day').minus({ days: cursor.weekday % 7 });
     return Array.from({ length: 7 }, (_, index) => {
       const day = start.plus({ days: index });
-      const items = buildDayTimeline(day.toJSDate(), enabled, completions, location, settings, language, t).filter(
-        (item) => item.type === 'mitzvah',
-      );
+      const items = buildDayTimeline(
+        day.toJSDate(),
+        enabled,
+        completions,
+        location,
+        settings,
+        language,
+        t,
+        enabledSince,
+      ).filter((item) => item.type === 'mitzvah');
       const count = items.length;
       const holidays = HebcalService.getHolidays(day.toJSDate(), location);
       return { day, count, holidays, items: items.slice(0, 4) };
     });
-  }, [view, enabled, completions, cursor, location, settings, language, t]);
+  }, [view, enabled, completions, cursor, location, settings, language, t, enabledSince]);
 
   // 42 cells × (hebcal calendar + zmanim + every window) on the render thread. Deferred behind
   // InteractionManager the way the history screen already does, so switching to the month is not a freeze.
@@ -103,9 +110,16 @@ export default function ScheduleScreen() {
       const day = gridStart.plus({ days: index });
       const holidays = HebcalService.getHolidays(day.toJSDate(), location);
       const hebrew = HebcalService.getHebrewDate(day.toJSDate());
-      const openCount = buildDayTimeline(day.toJSDate(), enabled, completions, location, settings, language, t).filter(
-        (item) => item.type === 'mitzvah' && !item.done,
-      ).length;
+      const openCount = buildDayTimeline(
+        day.toJSDate(),
+        enabled,
+        completions,
+        location,
+        settings,
+        language,
+        t,
+        enabledSince,
+      ).filter((item) => item.type === 'mitzvah' && !item.done).length;
       return {
         day,
         inMonth: day.month === cursor.month,
@@ -114,7 +128,7 @@ export default function ScheduleScreen() {
         openCount,
       };
     });
-  }, [view, monthReady, cursor, enabled, completions, location, settings, language, t]);
+  }, [view, monthReady, cursor, enabled, completions, location, settings, language, t, enabledSince]);
 
   const monthWeeks = useMemo(
     () => Array.from({ length: monthGrid.length / 7 }, (_, row) => monthGrid.slice(row * 7, row * 7 + 7)),
@@ -130,7 +144,7 @@ export default function ScheduleScreen() {
     });
   }, [isSelectedToday, dayItems]);
 
-  const subtitle = `${cursor.setLocale(language).toFormat(language === 'he' ? 'd LLLL yyyy' : 'LLL d, yyyy')} · ${getLocationName(location, language)}`;
+  const subtitle = `${formatDate(cursor, language === 'he' ? 'd LLLL yyyy' : 'LLL d, yyyy', language)} · ${getLocationName(location, language)}`;
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
 
   return (
@@ -151,8 +165,8 @@ export default function ScheduleScreen() {
           />
           <Text style={[typography.captionBold, { color: colors.text }]}>
             {view === 'month'
-              ? t(`month.${cursor.month - 1}`)
-              : cursor.setLocale(language).toFormat(language === 'he' ? 'cccc d LLL' : 'ccc LLL d')}
+              ? formatDate(cursor, 'LLLL', language)
+              : formatDate(cursor, language === 'he' ? 'cccc d LLL' : 'ccc LLL d', language)}
           </Text>
           <HeaderPill
             icon={forwardIcon(language)}
@@ -170,7 +184,8 @@ export default function ScheduleScreen() {
                 const highlight = index === highlightIndex;
                 const waiting =
                   item.type === 'mitzvah' && !item.done && Boolean(item.mitzvahId && pendingIds.has(item.mitzvahId));
-                const missed = isSelectedPast && item.type === 'mitzvah' && !item.done && !waiting;
+                const missed =
+                  isSelectedPast && item.type === 'mitzvah' && !item.done && !waiting && !windowStillOpen(item);
                 const rowUrgent = missed || (isSelectedToday && item.urgent);
                 const statusText =
                   item.type === 'mitzvah'

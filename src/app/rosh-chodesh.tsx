@@ -1,24 +1,26 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
-import { DateTime } from 'luxon';
 import { HDate } from '@hebcal/core';
 import { hilulaDateLabel } from '@/data/hilulot';
 import { roshChodeshLabel, upcomingRoshChodesh } from '@/data/roshChodesh';
 import { Card } from '@/components/Card';
 import { ListRow } from '@/components/ListRow';
+import { NoticeSettingsCard, type NoticeKindOption } from '@/components/NoticeSettingsCard';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
 import { SettingsSection } from '@/components/SettingsSection';
+import { useNeedsReminderDialog } from '@/hooks/useNeedsReminderDialog';
 import { useNow } from '@/hooks/useNow';
 import { HebcalService } from '@/services/HebcalService';
-import { useUserStore } from '@/stores/useUserStore';
+import type { RoshChodeshWhen } from '@/services/notifications/ids';
+import { ROSH_CHODESH_BEFORE_DAYS, useUserStore } from '@/stores/useUserStore';
 import { BRAND } from '@/theme/colors';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
-import { useI18n } from '@/i18n';
+import { formatDate, useI18n } from '@/i18n';
 
 const UPCOMING_COUNT = 6;
 
@@ -28,7 +30,10 @@ export default function RoshChodeshScreen() {
   const router = useRouter();
   const location = useUserStore((s) => s.location);
   const enabled = useUserStore((s) => s.roshChodeshEnabled);
-  const setEnabled = useUserStore((s) => s.setRoshChodeshEnabled);
+  const notices = useUserStore((s) => s.roshChodeshNotices);
+  const setNotice = useUserStore((s) => s.setRoshChodeshNotice);
+  const needsReminder = useNeedsReminderDialog();
+  const scrollRef = useRef<ScrollView>(null);
   const now = useNow();
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
   const todayAbs = HebcalService.hebrewDayAt(now, location).abs();
@@ -44,15 +49,21 @@ export default function RoshChodeshScreen() {
 
   const dayLabels = (days: HDate[]) => {
     const hebrew = days.map((day) => hilulaDateLabel(day, locale)).join('–');
-    const civil = days.map((day) => DateTime.fromJSDate(day.greg()).setLocale(locale).toFormat('ccc d.M')).join('–');
+    const civil = days.map((day) => formatDate(day.greg(), 'ccc d.M', locale)).join('–');
     return `${hebrew} · ${civil}`;
   };
+
+  const kinds: NoticeKindOption<RoshChodeshWhen>[] = [
+    { kind: 'before', title: t('roshChodesh.kind.before'), defaultDaysBefore: ROSH_CHODESH_BEFORE_DAYS },
+    { kind: 'evening', title: t('roshChodesh.kind.evening') },
+    { kind: 'day', title: t('roshChodesh.kind.day') },
+  ];
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
       <Stack.Screen options={{ headerShown: false }} />
       <ScreenHeader title={t('roshChodesh.title')} subtitle={t('roshChodesh.subtitle')} onBack={goBack} />
-      <ScrollView contentContainerStyle={styles.list}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
         <SettingsSection title={t('roshChodesh.notifications')}>
           <View style={styles.switchRow}>
             <Text style={[typography.small, styles.switchHint, { color: colors.textMuted }]}>
@@ -60,13 +71,26 @@ export default function RoshChodeshScreen() {
             </Text>
             <Switch
               value={enabled}
-              onValueChange={setEnabled}
+              onValueChange={(value) =>
+                needsReminder.setNoticesEnabled('roshChodesh', value, () =>
+                  scrollRef.current?.scrollTo({ y: 0, animated: true }),
+                )
+              }
               accessibilityLabel={t('roshChodesh.notifications')}
               thumbColor={BRAND.white}
               trackColor={{ false: colors.border, true: colors.gold }}
             />
           </View>
         </SettingsSection>
+        <SectionLabel text={t('notices.kinds')} />
+        <NoticeSettingsCard
+          icon="moon"
+          topic={t('roshChodesh.title')}
+          kinds={kinds}
+          notices={notices}
+          masterOn={enabled}
+          onChange={setNotice}
+        />
         <SectionLabel text={t('roshChodesh.upcoming')} />
         <Card divided>
           {upcoming.map(({ first, days, month }) => (
@@ -82,6 +106,7 @@ export default function RoshChodeshScreen() {
           ))}
         </Card>
       </ScrollView>
+      {needsReminder.dialog}
     </SafeAreaView>
   );
 }

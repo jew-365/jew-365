@@ -2,10 +2,10 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
-import { DateTime } from 'luxon';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { CompletedRow } from '@/components/CompletedRow';
+import { formatDayLine } from '@/components/DayStepper';
 import { iconFor } from '@/components/MitzvahIcon';
 import { MitzvahCard } from '@/components/MitzvahCard';
 import { ScreenHeader } from '@/components/ScreenHeader';
@@ -19,7 +19,7 @@ import { typography } from '@/theme/typography';
 import { HolyBlock } from '@/types/zmanim';
 import { CHECK_IN_PROMPTED_KEY, checkInFor, checkInLastDay, checkInPhraseKey, latestCheckIn } from '@/utils/checkIn';
 import { clockOf } from '@/utils/clock';
-import { useI18n } from '@/i18n';
+import { formatDate, useI18n } from '@/i18n';
 
 // Marks for the days of a Shabbat / Yom Tov block, written after it ends. The one route allowed to
 // write a past day: those days could not be marked while they happened.
@@ -85,7 +85,7 @@ export default function CheckInRoute() {
   const title = checkIn ? t('checkin.title', { in: t(checkInPhraseKey(checkIn.block)) }) : t('checkin.empty');
   const deadline = checkIn
     ? t('checkin.deadline', {
-        day: DateTime.fromJSDate(checkInLastDay(checkIn.block)).setLocale(language).toFormat('cccc'),
+        day: formatDate(checkInLastDay(checkIn.block), 'cccc', language),
       })
     : '';
 
@@ -98,11 +98,7 @@ export default function CheckInRoute() {
           <ScrollView contentContainerStyle={styles.content}>
             {checkIn.days.map((day) => (
               <View key={day.key} style={styles.day}>
-                <SectionLabel
-                  text={DateTime.fromJSDate(day.date)
-                    .setLocale(language)
-                    .toFormat(language === 'he' ? 'cccc · d LLLL' : 'cccc · LLL d')}
-                />
+                <SectionLabel text={formatDayLine(day.date, language)} />
                 <View style={styles.list}>
                   {day.items
                     .filter((item) => !item.done)

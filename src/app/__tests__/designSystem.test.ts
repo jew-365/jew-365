@@ -10,13 +10,13 @@ const COMPONENTS_DIR = path.join(SRC_DIR, 'components');
 
 type SourceFile = { rel: string; source: string };
 
-function walk(dir: string): SourceFile[] {
+function walk(dir: string, extension: RegExp = /\.tsx$/): SourceFile[] {
   const out: SourceFile[] = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name !== '__tests__') out.push(...walk(full));
-    } else if (entry.name.endsWith('.tsx')) {
+      if (entry.name !== '__tests__') out.push(...walk(full, extension));
+    } else if (extension.test(entry.name)) {
       out.push({
         rel: path.relative(SRC_DIR, full).split(path.sep).join('/'),
         source: fs.readFileSync(full, 'utf8'),
@@ -28,6 +28,15 @@ function walk(dir: string): SourceFile[] {
 
 const appFiles = walk(APP_DIR);
 const allFiles = [...appFiles, ...walk(COMPONENTS_DIR)];
+const sourceFiles = walk(SRC_DIR, /\.tsx?$/);
+
+const TO_FORMAT_CALL = /\.toFormat\(([^)]*)\)/g;
+const NAME_TOKEN = /c{3}|E{3}|L{3}|M{3}/;
+const PLAIN_LITERAL = /^\s*(['"`])[^'"`$]*\1\s*$/;
+const LUXON_NAME_GETTER =
+  /\.(?:weekdayLong|weekdayShort|monthLong|monthShort)\b|\bInfo\.(?:weekdays|weekdaysFormat|months|monthsFormat)\(/;
+const formatsNames = (source: string) =>
+  [...source.matchAll(TO_FORMAT_CALL)].some(([, pattern]) => !PLAIN_LITERAL.test(pattern) || NAME_TOKEN.test(pattern));
 
 function offenders(files: SourceFile[], offends: (file: SourceFile) => boolean): string[] {
   return files.filter(offends).map((file) => file.rel);
@@ -131,5 +140,42 @@ describe('design system tripwires', () => {
       .filter((key) => key.startsWith('settings.theme.'))
       .sort();
     expect(themeKeys).toEqual(THEME_NAMES.map((name) => `settings.theme.${name}`).sort());
+  });
+
+  it('walks every source file under src, services included', () => {
+    const rels = sourceFiles.map(({ rel }) => rel);
+    expect(rels).toEqual(
+      expect.arrayContaining([
+        'i18n/index.ts',
+        'services/BackupService.ts',
+        'services/notifications/planners/roshChodesh.ts',
+        'app/(tabs)/home.tsx',
+      ]),
+    );
+    expect(rels.filter((rel) => rel.includes('__tests__'))).toEqual([]);
+  });
+
+  it('the name scan flags a name token, a pattern passed by variable and a ternary, and passes a numeric literal', () => {
+    for (const flagged of [
+      ".toFormat('cccc')",
+      ".toFormat('d LLLL')",
+      ".toFormat('EEE d')",
+      ".toFormat('MMM d')",
+      '.toFormat(pattern)',
+      ".toFormat(language === 'he' ? 'd.M' : 'M/d')",
+    ]) {
+      expect(formatsNames(flagged)).toBe(true);
+    }
+    for (const allowed of [".toFormat('HH:mm')", ".toFormat('dd/MM HH:mm')"]) {
+      expect(formatsNames(allowed)).toBe(false);
+    }
+  });
+
+  it('no Luxon toFormat names a weekday or month; names come from formatDate() in src/i18n', () => {
+    expect(offenders(sourceFiles, ({ source }) => formatsNames(source))).toEqual([]);
+  });
+
+  it('no Luxon weekday or month name getter; names come from formatDate() in src/i18n', () => {
+    expect(offenders(sourceFiles, ({ source }) => LUXON_NAME_GETTER.test(source))).toEqual([]);
   });
 });

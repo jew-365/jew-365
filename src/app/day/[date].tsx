@@ -12,18 +12,18 @@ import { Completions, RETENTION_DAYS, useCompletionsStore } from '@/stores/useCo
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
-import { buildDayTimeline } from '@/utils/buildDayTimeline';
+import { buildDayTimeline, windowStillOpen } from '@/utils/buildDayTimeline';
 import { latestCheckIn, pendingCheckInIds } from '@/utils/checkIn';
 import { clockRange, formatRemaining } from '@/utils/clock';
 import { appDay } from '@/utils/locationDay';
-import { useI18n } from '@/i18n';
+import { formatDate, useI18n } from '@/i18n';
 
 const EMPTY_COMPLETIONS = Object.freeze({}) as Completions;
 
 export default function DayRoute() {
   const { colors } = useTheme();
   const { t } = useI18n();
-  const { enabled, location, language, settings, checkInInput } = useDayModel();
+  const { enabled, location, language, settings, checkInInput, enabledSince } = useDayModel();
   const router = useRouter();
   const params = useLocalSearchParams<{ date?: string }>();
   const completions = useCompletionsStore((s) => s.completions);
@@ -46,11 +46,11 @@ export default function DayRoute() {
   const items = useMemo(
     () =>
       valid
-        ? buildDayTimeline(date, enabled, displayCompletions, location, settings, language, t).filter(
+        ? buildDayTimeline(date, enabled, displayCompletions, location, settings, language, t, enabledSince).filter(
             (item) => item.type === 'mitzvah',
           )
         : [],
-    [valid, date, enabled, displayCompletions, location, settings, language, t],
+    [valid, date, enabled, displayCompletions, location, settings, language, t, enabledSince],
   );
 
   const checkIns = useCompletionsStore((s) => s.checkIns);
@@ -63,13 +63,12 @@ export default function DayRoute() {
   }, [valid, checkInInput, completions, skipped, checkIns, dateParam]);
 
   const title = valid
-    ? parsed.setLocale(language).toFormat(language === 'he' ? 'cccc d LLLL yyyy' : 'cccc, LLL d yyyy')
+    ? formatDate(parsed, language === 'he' ? 'cccc d LLLL yyyy' : 'cccc, LLL d yyyy', language)
     : t('day.title');
   const bannerText = isPast ? t('day.readOnlyBanner') : isFuture ? t('day.futureReadOnlyBanner') : null;
   const previousDay = parsed.minus({ days: 1 });
   const nextDay = parsed.plus({ days: 1 });
-  const dayLabel = (day: DateTime) =>
-    day.setLocale(language).toFormat(language === 'he' ? 'cccc d LLLL' : 'cccc, LLL d');
+  const dayLabel = (day: DateTime) => formatDate(day, language === 'he' ? 'cccc d LLLL' : 'cccc, LLL d', language);
   const doneCount = items.filter((item) => item.done).length;
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
 
@@ -119,9 +118,9 @@ export default function DayRoute() {
             const totalMs = item.windowEnd ? item.windowEnd.getTime() - item.time.getTime() : 1;
             const remainingMs = item.windowEnd ? item.windowEnd.getTime() - Date.now() : 0;
             const pct = totalMs > 0 ? Math.max(0, Math.min(1, remainingMs / totalMs)) : 0;
-            const timeRange = clockRange(item.time, item.windowEnd ?? item.time, t);
+            const timeRange = clockRange(item.time, item.windowEnd ?? item.time, t, location.tz, date);
             const waiting = !item.done && Boolean(item.mitzvahId && pending.has(item.mitzvahId));
-            const missed = isPast && !item.done && !waiting;
+            const missed = isPast && !item.done && !waiting && !windowStillOpen(item);
             const statusText = waiting
               ? t('checkin.pending')
               : missed

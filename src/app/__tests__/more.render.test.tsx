@@ -10,6 +10,12 @@ jest.mock('@/services/ChokContentService', () => ({
   prepareChokDownload: jest.fn(),
   installChok: jest.fn(async () => true),
 }));
+jest.mock('@/services/SelichotContentService', () => ({
+  ...jest.requireActual('@/services/SelichotContentService'),
+  checkSelichotUpdate: jest.fn(async () => {}),
+  prepareSelichotDownload: jest.fn(),
+  installSelichot: jest.fn(async () => true),
+}));
 
 import { Linking } from 'react-native';
 import { act, fireEvent, screen, within } from '@testing-library/react-native';
@@ -23,18 +29,31 @@ import {
   installChok,
   prepareChokDownload,
 } from '@/services/ChokContentService';
+import { checkSelichotUpdate, installSelichot, prepareSelichotDownload } from '@/services/SelichotContentService';
 import { useChokStore } from '@/stores/useChokStore';
+import { useSelichotStore } from '@/stores/useSelichotStore';
 import { installChokFixture } from '@/testing/chok';
 import { renderWithTheme } from '@/testing/render';
+import { installSelichotFixture } from '@/testing/selichot';
 import { at } from '@/testing/zmanim';
 import { useUserStore } from '@/stores/useUserStore';
+import type { AddonManifest } from '@/types/addon';
 import type { ChokManifest } from '@/types/chok';
 
 const JERUSALEM = CITIES[0];
 const mockCheck = jest.mocked(checkChokUpdate);
 const mockPrepare = jest.mocked(prepareChokDownload);
 const mockInstall = jest.mocked(installChok);
+const mockSelichotCheck = jest.mocked(checkSelichotUpdate);
+const mockSelichotPrepare = jest.mocked(prepareSelichotDownload);
+const mockSelichotInstall = jest.mocked(installSelichot);
 const MANIFEST = { version: 3, bytes: 18_600_000 } as ChokManifest;
+const SELICHOT_MANIFEST: AddonManifest = {
+  format: 1,
+  version: 1,
+  gzipBytes: 631_793,
+  gz: { ashkenaz: { path: 'ashkenaz.0a0b0c0d.siddur.gz', sha256: '0'.repeat(64), bytes: 631_793 } },
+};
 const ONLY_DATE = [
   'nextTick',
   'queueMicrotask',
@@ -53,6 +72,7 @@ function renderAt(wallClock: string) {
 
 afterEach(() => {
   useChokStore.getState().reset();
+  useSelichotStore.getState().reset();
 });
 
 describe('More tab', () => {
@@ -63,6 +83,10 @@ describe('More tab', () => {
     mockCheck.mockClear();
     mockPrepare.mockReset();
     mockInstall.mockClear();
+    mockSelichotCheck.mockClear();
+    mockSelichotPrepare.mockReset();
+    mockSelichotInstall.mockClear();
+    useSelichotStore.getState().reset();
     installChokFixture();
   });
 
@@ -163,10 +187,10 @@ describe('More tab', () => {
       else useChokStore.getState().reset();
       const { unmount } = renderAt('2026-11-16T12:00');
       const rows = screen.getAllByRole('button');
-      expect(rows).toHaveLength(4);
-      expect(within(rows[rows.length - 2]).getByText('תהילים')).toBeOnTheScreen();
-      expect(within(rows[rows.length - 2]).getByText('מחולק לפי ימי השבוע')).toBeOnTheScreen();
-      expect(within(rows[rows.length - 1]).getByText('קו ההלכה')).toBeOnTheScreen();
+      expect(rows).toHaveLength(6);
+      expect(within(rows[rows.length - 3]).getByText('תהילים')).toBeOnTheScreen();
+      expect(within(rows[rows.length - 3]).getByText('מחולק לפי ימי השבוע')).toBeOnTheScreen();
+      expect(within(rows[rows.length - 2]).getByText('קו ההלכה')).toBeOnTheScreen();
       fireEvent.press(screen.getByText('תהילים'));
       expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/siddur/[id]', params: { id: 'tehillim' } });
       unmount();
@@ -185,7 +209,79 @@ describe('More tab', () => {
     const cards = screen.UNSAFE_getAllByType(Card);
     expect(cards).toHaveLength(1);
     expect(cards[0].props.divided).toBe(true);
-    expect(within(cards[0]).UNSAFE_getAllByType(ListRow)).toHaveLength(4);
+    expect(within(cards[0]).UNSAFE_getAllByType(ListRow)).toHaveLength(6);
+  });
+
+  it('ends with the user guide, which opens it', () => {
+    renderAt('2026-11-16T12:00');
+    const rows = screen.getAllByRole('button');
+    const last = rows[rows.length - 1];
+    expect(within(last).getByText('מדריך למשתמש')).toBeOnTheScreen();
+    expect(within(last).getByText('איך עובד כל חלק באפליקציה, ומה חדש')).toBeOnTheScreen();
+    fireEvent.press(last);
+    expect(mockPush).toHaveBeenLastCalledWith('/guide');
+  });
+
+  it('names the guide in English', () => {
+    useUserStore.setState({ language: 'en' });
+    renderAt('2026-11-16T12:00');
+    expect(screen.getByText('User guide')).toBeOnTheScreen();
+    expect(screen.getByText("How each part of the app works, and what's new")).toBeOnTheScreen();
+  });
+
+  it('lists the Selichot row between Chok LeYisrael and Tehillim, with the download of the nusach', () => {
+    renderAt('2026-11-16T12:00');
+    const rows = screen.getAllByRole('button');
+    expect(within(rows[1]).getByText('חק לישראל')).toBeOnTheScreen();
+    expect(within(rows[2]).getByText('סליחות')).toBeOnTheScreen();
+    expect(within(rows[2]).getByText('להורדה בנוסח אשכנז · כ־1 MB')).toBeOnTheScreen();
+    expect(within(rows[3]).getByText('תהילים')).toBeOnTheScreen();
+  });
+
+  it('starts the Selichot download from its row, and installs the nusach on confirm', async () => {
+    mockSelichotPrepare.mockResolvedValue(SELICHOT_MANIFEST);
+    renderAt('2026-11-16T12:00');
+    await act(async () => {
+      fireEvent.press(screen.getByText('סליחות'));
+    });
+    expect(mockSelichotPrepare).toHaveBeenCalledTimes(1);
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(screen.getByText('הורדת הסליחות בנוסח אשכנז')).toBeOnTheScreen();
+    await act(async () => {
+      fireEvent.press(screen.getAllByText('הורדה').at(-1)!);
+    });
+    expect(mockSelichotInstall).toHaveBeenCalledWith(SELICHOT_MANIFEST, 'ashkenaz');
+  });
+
+  it('says the nusach is installed and opens the mitzvah screen from the Selichot row', () => {
+    installSelichotFixture(['ashkenaz']);
+    renderAt('2026-11-16T12:00');
+    expect(screen.getByText('מותקן בנוסח אשכנז')).toBeOnTheScreen();
+    fireEvent.press(screen.getByText('סליחות'));
+    expect(mockPush).toHaveBeenCalledWith('/mitzvah/selichot');
+    expect(mockSelichotPrepare).not.toHaveBeenCalled();
+  });
+
+  it('offers the download again when only another nusach is installed', () => {
+    installSelichotFixture(['ashkenaz']);
+    useUserStore.setState({ nusach: 'sefard' });
+    renderAt('2026-11-16T12:00');
+    expect(screen.getByText('להורדה בנוסח ספרד · כ־1 MB')).toBeOnTheScreen();
+    expect(screen.queryByText('מותקן בנוסח אשכנז')).toBeNull();
+  });
+
+  it('opens the mitzvah screen from the Selichot row while its download runs', () => {
+    useSelichotStore.getState().setDownload({ status: 'downloading', done: 0, total: 1, bytes: 1, totalBytes: 2 });
+    renderAt('2026-11-16T12:00');
+    expect(screen.getByText('בהורדה…')).toBeOnTheScreen();
+    fireEvent.press(screen.getByText('סליחות'));
+    expect(mockPush).toHaveBeenCalledWith('/mitzvah/selichot');
+    expect(mockSelichotPrepare).not.toHaveBeenCalled();
+  });
+
+  it('checks for a newer Selichot version when the tab is focused', () => {
+    renderAt('2026-11-16T12:00');
+    expect(mockSelichotCheck).toHaveBeenCalled();
   });
 });
 

@@ -1,23 +1,25 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
-import { DateTime } from 'luxon';
 import { HDate } from '@hebcal/core';
 import { hilulaDateLabel, upcomingHilulot } from '@/data/hilulot';
 import { Card } from '@/components/Card';
 import { ListRow } from '@/components/ListRow';
+import { NoticeSettingsCard, type NoticeKindOption } from '@/components/NoticeSettingsCard';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
 import { SettingsSection } from '@/components/SettingsSection';
+import { useNeedsReminderDialog } from '@/hooks/useNeedsReminderDialog';
 import { useNow } from '@/hooks/useNow';
 import { HebcalService } from '@/services/HebcalService';
-import { useUserStore } from '@/stores/useUserStore';
+import type { HilulaWhen } from '@/services/notifications/ids';
+import { HILULA_BEFORE_DAYS, useUserStore } from '@/stores/useUserStore';
 import { BRAND } from '@/theme/colors';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
-import { useI18n } from '@/i18n';
+import { formatDate, useI18n } from '@/i18n';
 
 export default function HilulotScreen() {
   const { colors } = useTheme();
@@ -26,7 +28,10 @@ export default function HilulotScreen() {
   const location = useUserStore((s) => s.location);
   const inIsrael = useUserStore((s) => s.inIsrael);
   const enabled = useUserStore((s) => s.hilulotEnabled);
-  const setEnabled = useUserStore((s) => s.setHilulotEnabled);
+  const notices = useUserStore((s) => s.hilulaNotices);
+  const setNotice = useUserStore((s) => s.setHilulaNotice);
+  const needsReminder = useNeedsReminderDialog();
+  const scrollRef = useRef<ScrollView>(null);
   const now = useNow();
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
   // The Hebrew day in effect now, so a hilula that began at this evening's shkia reads as today.
@@ -41,11 +46,16 @@ export default function HilulotScreen() {
     return t('hilulot.inDays', { count: days });
   };
 
+  const kinds: NoticeKindOption<HilulaWhen>[] = [
+    { kind: 'before', title: t('hilulot.kind.before'), defaultDaysBefore: HILULA_BEFORE_DAYS },
+    { kind: 'evening', title: t('hilulot.kind.evening') },
+  ];
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
       <Stack.Screen options={{ headerShown: false }} />
       <ScreenHeader title={t('hilulot.title')} subtitle={t('hilulot.subtitle')} onBack={goBack} />
-      <ScrollView contentContainerStyle={styles.list}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
         <SettingsSection title={t('hilulot.notifications')}>
           <View style={styles.switchRow}>
             <Text style={[typography.small, styles.switchHint, { color: colors.textMuted }]}>
@@ -53,13 +63,26 @@ export default function HilulotScreen() {
             </Text>
             <Switch
               value={enabled}
-              onValueChange={setEnabled}
+              onValueChange={(value) =>
+                needsReminder.setNoticesEnabled('hilulot', value, () =>
+                  scrollRef.current?.scrollTo({ y: 0, animated: true }),
+                )
+              }
               accessibilityLabel={t('hilulot.notifications')}
               thumbColor={BRAND.white}
               trackColor={{ false: colors.border, true: colors.gold }}
             />
           </View>
         </SettingsSection>
+        <SectionLabel text={t('notices.kinds')} />
+        <NoticeSettingsCard
+          icon="hilula"
+          topic={t('hilulot.title')}
+          kinds={kinds}
+          notices={notices}
+          masterOn={enabled}
+          onChange={setNotice}
+        />
         <SectionLabel text={t('hilulot.upcoming')} />
         <Card divided>
           {upcoming.map(({ hilula, day }) => (
@@ -67,7 +90,7 @@ export default function HilulotScreen() {
               key={hilula.id}
               icon="hilula"
               title={language === 'en' ? hilula.name.en : hilula.name.he}
-              caption={`${hilulaDateLabel(day, locale)} · ${DateTime.fromJSDate(day.greg()).setLocale(locale).toFormat('ccc d.M')}`}
+              caption={`${hilulaDateLabel(day, locale)} · ${formatDate(day.greg(), 'ccc d.M', locale)}`}
               trailing={
                 <Text style={[typography.captionBold, { color: colors.goldText }]}>{whenLabel(day.abs())}</Text>
               }
@@ -75,6 +98,7 @@ export default function HilulotScreen() {
           ))}
         </Card>
       </ScrollView>
+      {needsReminder.dialog}
     </SafeAreaView>
   );
 }

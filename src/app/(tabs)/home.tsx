@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { AppState, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { DateTime } from 'luxon';
+import { useNavigation, useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Banner, BannerTone } from '@/components/Banner';
@@ -10,6 +9,7 @@ import { AppLogo } from '@/components/AppLogo';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { Card } from '@/components/Card';
 import { CompletedRow } from '@/components/CompletedRow';
+import { formatDayLine } from '@/components/DayStepper';
 import { IconTile } from '@/components/IconTile';
 import { ListRow } from '@/components/ListRow';
 import { iconFor } from '@/components/MitzvahIcon';
@@ -17,14 +17,19 @@ import { MitzvahCard } from '@/components/MitzvahCard';
 import { NavBar } from '@/components/NavBar';
 import { CounterPill } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
+import { useSelichotDownloadFlow } from '@/components/SelichotAddonCard';
 import { useDayModel } from '@/hooks/useDayModel';
 import { useNow } from '@/hooks/useNow';
+import { CHOK_TEXT_ID } from '@/data/chok';
 import { getLocationName } from '@/data/cities';
-import { hasSiddurText, siddurPlace } from '@/data/siddur';
+import { SELICHOT_TEXT_ID } from '@/data/selichot';
+import { hasSiddurText, selichotOfferOn, siddurPlace } from '@/data/siddur';
 import { HebcalService } from '@/services/HebcalService';
 import { StorageService } from '@/services/StorageService';
 import { CompletionService } from '@/services/CompletionService';
+import { selichotDownloadSupported } from '@/services/SelichotContentService';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
+import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -34,11 +39,11 @@ import { typography } from '@/theme/typography';
 import { durations, spacing } from '@/theme/tokens';
 import { clockOf, formatRemaining } from '@/utils/clock';
 import { DayWindow, appDayWindow } from '@/utils/buildDayTimeline';
-import { checkInLastDay, checkInPhraseKey, latestCheckIn, overlapsBlock } from '@/utils/checkIn';
+import { checkInLastDay, checkInPhraseKey, latestCheckIn, overlapsBlock, trackedOn } from '@/utils/checkIn';
 import { Mitzvah } from '@/types/mitzvah';
 import { TaharahEvent, TaharahSettings } from '@/types/taharah';
 import { Location } from '@/types/zmanim';
-import { appDay, locationNoon } from '@/utils/locationDay';
+import { appDay, appDayKey, locationNoon } from '@/utils/locationDay';
 import { deriveCycle } from '@/utils/taharah/cycle';
 import { currentOnah } from '@/utils/taharah/onot';
 import { renderHint, stageHint, visibleStage } from '@/utils/taharah/summary';
@@ -51,7 +56,7 @@ import {
   refreshSchedulingOnForeground,
 } from '@/services/NotificationScheduler';
 import { clearLastError, reportError, useLastError } from '@/services/errors';
-import { useI18n } from '@/i18n';
+import { formatDate, useI18n } from '@/i18n';
 
 type LiveItem = {
   mitzvah: Mitzvah;
@@ -99,7 +104,7 @@ function taharahCardFor(
       ? `${t(`taharah.task.${task.kind}`)} · ${t('taharah.task.until', { time: clockOf(task.end) })}`
       : renderHint(
           stageHint(state, events, settings.rules, settings.role, location, now, {
-            date: (civil) => DateTime.fromJSDate(civil).setLocale(language).toFormat('d LLLL'),
+            date: (civil) => formatDate(civil, 'd LLLL', language),
             clock: clockOf,
           }),
           t,
@@ -107,12 +112,42 @@ function taharahCardFor(
   };
 }
 
+function useIsFocused(): boolean {
+  const navigation = useNavigation();
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      const offFocus = navigation.addListener('focus', onChange);
+      const offBlur = navigation.addListener('blur', onChange);
+      return () => {
+        offFocus();
+        offBlur();
+      };
+    },
+    [navigation],
+  );
+  const isFocused = useCallback(() => navigation.isFocused(), [navigation]);
+  return useSyncExternalStore(subscribe, isFocused, isFocused);
+}
+
 export default function HomeScreen() {
   const { colors } = useTheme();
   const quiet = useQuietBlock() !== null;
   const { t } = useI18n();
-  const { allMitzvot, enabled, location, nusach, inIsrael, language, settings, nameFor, checkInInput } = useDayModel();
+  const {
+    allMitzvot,
+    enabled,
+    location,
+    nusach,
+    inIsrael,
+    language,
+    settings,
+    nameFor,
+    checkInInput,
+    selichotInstalled,
+    enabledSince,
+  } = useDayModel();
   const router = useRouter();
+  const focused = useIsFocused();
   const user = useUserStore(
     useShallow((s) => ({
       locationStatus: s.locationStatus,
@@ -156,9 +191,7 @@ export default function HomeScreen() {
     const now = new Date();
     const today = appDay(now, location);
     const hebrew = HebcalService.getHebrewDateAt(now, location);
-    const greg = DateTime.fromJSDate(today)
-      .setLocale(language)
-      .toFormat(language === 'he' ? 'cccc · d LLLL' : 'cccc · LLL d');
+    const greg = formatDayLine(today, language);
     const parasha = HebcalService.getParasha(today, location);
     const subtitleText = [greg, getLocationName(location, language), parasha].filter(Boolean).join(' · ');
 
@@ -175,6 +208,12 @@ export default function HomeScreen() {
     for (const mitzvah of enabled) {
       const window = appDayWindow(mitzvah, location, settings, now);
       if (!window) continue;
+      const key = dateKey(window.date);
+      if (!trackedOn(mitzvah, window, enabledSince, Boolean(completions[key]?.[mitzvah.id]))) continue;
+      const markedAt = completions[key]?.[mitzvah.id] ?? skipped[key]?.[mitzvah.id];
+      if (mitzvah.multiDay && markedAt !== undefined && appDayKey(new Date(markedAt), location) !== dateKey(today)) {
+        continue;
+      }
       windowDays.set(mitzvah.id, window.date);
       const totalMs = window.end.getTime() - window.start.getTime();
       const remainingMs = window.end.getTime() - now.getTime();
@@ -189,7 +228,6 @@ export default function HomeScreen() {
       };
       // The card being stamped stays put until its animation ends, even though the completion is
       // already persisted.
-      const key = dateKey(window.date);
       if ((completions[key]?.[mitzvah.id] || skipped[key]?.[mitzvah.id]) && mitzvah.id !== stampingId) {
         continue;
       }
@@ -253,6 +291,7 @@ export default function HomeScreen() {
   }, [
     allMitzvot,
     enabled,
+    enabledSince,
     nameFor,
     checkInInput,
     settings,
@@ -273,6 +312,20 @@ export default function HomeScreen() {
     quiet,
     tickedAt,
   ]);
+
+  const todayTime = today.getTime();
+  const selichotOffer = useMemo(
+    () => selichotOfferOn(new Date(todayTime), nusach, siddurPlace(location, inIsrael)),
+    [todayTime, nusach, location, inIsrael],
+  );
+  const selichotDismissed = useSelichotStore((s) => s.dismissedSeason);
+  const selichotDownload = useSelichotStore((s) => s.download);
+  const selichotFlow = useSelichotDownloadFlow({
+    cancelLabel: t('selichot.banner.notNow'),
+    onCancel: () => {
+      if (selichotOffer) useSelichotStore.getState().dismissSeason(selichotOffer.year);
+    },
+  });
 
   // Persist first — the stamp is decoration. Deferring the write behind the 1.3s animation meant
   // leaving the screen mid-animation silently discarded the completion, and the `stampingId` gate
@@ -307,6 +360,11 @@ export default function HomeScreen() {
     router.push('/(tabs)/settings');
   };
 
+  const openSelichotOffer = () => {
+    if (selichotDownload.status === 'downloading') router.push(`/mitzvah/${SELICHOT_TEXT_ID}`);
+    else void selichotFlow.prepare();
+  };
+
   const pickBanner = (): BannerSpec | null => {
     if (zmanimUnavailable) {
       return { tone: 'warning', text: t('home.zmanimUnavailable'), onPress: () => router.push('/(tabs)/settings') };
@@ -324,7 +382,7 @@ export default function HomeScreen() {
         text: t('checkin.banner', {
           in: t(checkInPhraseKey(checkIn.block)),
           deadline: t('checkin.deadline', {
-            day: DateTime.fromJSDate(checkInLastDay(checkIn.block)).setLocale(language).toFormat('cccc'),
+            day: formatDate(checkInLastDay(checkIn.block), 'cccc', language),
           }),
         }),
         onPress: () => router.push('/checkin'),
@@ -336,6 +394,26 @@ export default function HomeScreen() {
     if (user.locationStatus === 'timeout') return { tone: 'warning', text: t('home.gpsTimeout') };
     if (isOnboarded && (gender === null || maritalStatus === null) && !introDismissed) {
       return { tone: 'accent', text: t('home.completeProfile'), onPress: openProfileIntro };
+    }
+    if (
+      selichotOffer &&
+      !selichotInstalled &&
+      selichotDismissed !== selichotOffer.year &&
+      selichotDownloadSupported()
+    ) {
+      let text: string;
+      if (selichotDownload.status === 'downloading') {
+        text = t('selichot.banner.downloading', { nusach: t(`nusach.${nusach}`) });
+      } else if (selichotDownload.status === 'failed') {
+        text = t('selichot.banner.failed');
+      } else if (selichotOffer.begun) {
+        text = t('selichot.banner.during');
+      } else {
+        text = t('selichot.banner.upcoming', {
+          date: formatDate(selichotOffer.first, language === 'he' ? 'd LLLL' : 'LLLL d', language),
+        });
+      }
+      return { tone: 'accent', text, onPress: selichotFlow.preparing ? undefined : openSelichotOffer };
     }
     return null;
   };
@@ -350,7 +428,13 @@ export default function HomeScreen() {
   const openText = (item: LiveItem) =>
     item.hasText
       ? () =>
-          router.push({ pathname: '/siddur/[id]', params: { id: item.mitzvah.id, date: dateKey(item.window.date) } })
+          router.push({
+            pathname: '/siddur/[id]',
+            params:
+              item.mitzvah.id === CHOK_TEXT_ID
+                ? { id: item.mitzvah.id }
+                : { id: item.mitzvah.id, date: dateKey(item.window.date) },
+          })
       : undefined;
 
   const openDetail = (id: string) => {
@@ -416,7 +500,10 @@ export default function HomeScreen() {
         <View style={styles.list}>
           {current.length ? (
             current.map((item, index) => (
-              <Animated.View key={item.mitzvah.id} entering={FadeInDown.delay(index * 40).duration(280)}>
+              <Animated.View
+                key={item.mitzvah.id}
+                entering={focused ? FadeInDown.delay(index * 40).duration(280) : undefined}
+              >
                 <MitzvahCard
                   icon={iconFor(item.mitzvah.icon)}
                   name={item.name}
@@ -459,7 +546,10 @@ export default function HomeScreen() {
             <SectionLabel text={t('home.missed')} count={missed.length} />
             <View style={styles.list}>
               {missed.map((item, index) => (
-                <Animated.View key={item.mitzvah.id} entering={FadeInDown.delay(index * 30).duration(260)}>
+                <Animated.View
+                  key={item.mitzvah.id}
+                  entering={focused ? FadeInDown.delay(index * 30).duration(260) : undefined}
+                >
                   <MitzvahCard
                     icon={iconFor(item.mitzvah.icon)}
                     name={item.name}
@@ -544,6 +634,7 @@ export default function HomeScreen() {
           }}
         />
       </BottomSheet>
+      {selichotFlow.dialog}
     </SafeAreaView>
   );
 }

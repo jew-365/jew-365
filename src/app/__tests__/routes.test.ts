@@ -32,6 +32,7 @@ describe('expo-router routes', () => {
     expect(routes).toContain('report');
     expect(routes).toContain('mitzvot');
     expect(routes).toContain('schedule');
+    expect(routes).toContain('guide');
   });
 
   it('discovers taharah routes', () => {
@@ -54,6 +55,7 @@ describe('expo-router routes', () => {
   it('discovers onboarding flow', () => {
     expect(routes).toContain('onboarding/index');
     expect(routes).toContain('onboarding/nusach');
+    expect(routes).toContain('onboarding/mitzvot');
     expect(routes).toContain('onboarding/location');
     expect(routes).toContain('onboarding/ready');
   });

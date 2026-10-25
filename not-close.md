@@ -16,162 +16,9 @@ The user's batch of fifteen requests, all decisions taken in the session of 2026
 - **New mitzvot are on by default**, except the ids in `MENS_MITZVOT` ([src/stores/taharahOptIn.ts](src/stores/taharahOptIn.ts)) for a user whose gender is `female`.
 - **Gender changes are automatic:** `chooseGender()` is the one place a gender change fans out (mitzvot defaults, palette, taharah role, and from this batch the siddur voice).
 - **Declined on 2026-10-24:** offering Tehillim as a download (0.4 MB, not worth the step), and installing only the user's nusach (it would make the first launch depend on the network).
-- **Done means:** both dictionaries updated, a DOX pass on every touched AGENTS.md, once the user guide exists its topic and a `WHATS_NEW` item updated, and `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, `pnpm test:tz` green. No commit and no OTA without the user's per-action approval.
+- **Done means:** both dictionaries updated, a DOX pass on every touched AGENTS.md, once the user guide exists its topic and a `WHATS_NEW` item updated and `pnpm guide:build` run, and `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, `pnpm test:tz` green. No commit and no OTA without the user's per-action approval.
 
 ### High — Requests of 2026-10-24
-
-- [ ] Fix the blank tab screen on iOS
-  - **Flag:** `OTA` — screen options in JS only.
-  - **What it is:** [src/app/(tabs)/_layout.tsx](<src/app/(tabs)/_layout.tsx>) sets `animation: 'fade'` while inactive tabs stay detachable (the iOS default). `@react-navigation/bottom-tabs` 7.15.11 then derives each tab's detached state from an `Animated` value (`node_modules/@react-navigation/bottom-tabs/src/views/BottomTabView.tsx`, lines 304-325), which under Fabric sometimes leaves the focused tab detached. The screen is blank and the tab bar still shows (react-navigation#12755, react-native-screens#3824; fixed upstream in 7.18.8). Change: pass `detachInactiveScreens={false}` to `<Tabs>` on every platform, and drop `freezeOnBlur: true`, which never worked with an animation set (react-navigation#12621) and would start freezing tabs once the animated path is gone. Keep `animation: 'fade'` and `lazy: false`. In [home.tsx](<src/app/(tabs)/home.tsx>) the `Animated.View entering={FadeInDown…}` wrappers (about lines 419 and 462) run only while the tab is focused (`useIsFocused()`; `entering={focused ? FadeInDown… : undefined}`), so a card that mounts while home is off-screen never sticks at opacity 0.
-  - **What it solves:** Moving between home, history, siddur and the other tabs on an iPhone sometimes shows an empty page.
-  - **Expected result:** A Jest test pins the tabs' `detachInactiveScreens` as `false` and that no `freezeOnBlur` is set. The Android emulator shows no regression: switching through all five tabs 30 times, and switching right after scrolling siddur and home, never blanks. The iOS check is the user's: after the OTA, on TestFlight, scroll the siddur tab and tap home at once, repeated 30 times, then 30 rapid switches across all tabs, with no blank page. Root [AGENTS.md](AGENTS.md) and [src/app/AGENTS.md](src/app/AGENTS.md) state why the tabs are never detached.
-
-- [ ] Fix weekday and month names that read "null" on iOS
-  - **Flag:** `OTA`.
-  - **What it is:**
-    - **Where it shows:** on an iPhone the home subtitle reads "null · 24 null" where Android reads "יום שבת · 24 אוקטובר" (screenshots of 2026-10-24).
-    - **Why:** every weekday and month name in the app comes from Luxon's `toFormat('cccc' | 'ccc' | 'LLLL' | 'LLL')`. Luxon builds these from `Intl.DateTimeFormat().formatToParts()`, and when no part of the requested type comes back it returns `null`. Hermes's `Intl` on iOS does not return those parts, while Hermes on Android does.
-    - **The fix:** one formatter, `formatDate(date, pattern, language)`, in [src/i18n/index.ts](src/i18n/index.ts). It reads names from the dictionaries (new keys `weekday.long.0-6`, `month.long.1-12`, `month.short.1-12` beside the existing `weekday.short.0-6`) and numbers from Luxon's numeric getters, so it never touches `Intl`. It supports the tokens in use (`cccc`, `ccc`, `d`, `M`, `LLLL`, `LLL`, `yyyy` and literal separators).
-    - **Call sites:** it replaces all 18 name-formatting calls: [home.tsx](<src/app/(tabs)/home.tsx>) lines 102, 161 and 327; [history.tsx](<src/app/(tabs)/history.tsx>):108; [siddur.tsx](<src/app/(tabs)/siddur.tsx>):87; [checkin.tsx](src/app/checkin.tsx):88 and 104; [day/[date].tsx](<src/app/day/[date].tsx>):66 and 72; [hilulot.tsx](src/app/hilulot.tsx):70; [rosh-chodesh.tsx](src/app/rosh-chodesh.tsx):47; [schedule.tsx](src/app/schedule.tsx):133 and 155; [DayStepper.tsx](src/components/DayStepper.tsx):22; [BackupService.ts](src/services/BackupService.ts):165; [planners/hilulot.ts](src/services/notifications/planners/hilulot.ts):80; [planners/holyBlock.ts](src/services/notifications/planners/holyBlock.ts):37; [planners/roshChodesh.ts](src/services/notifications/planners/roshChodesh.ts):58. The last three put text into notifications, so iPhone notifications carry "null" today too.
-  - **What it solves:** Dates on iPhone screens and in iPhone notifications show "null" instead of the day and month.
-  - **Expected result:**
-    - A test that deletes `Intl.DateTimeFormat.prototype.formatToParts` (the Hermes-on-iOS case) renders home and the day view, and builds a Rosh Chodesh notice, all with real Hebrew and English names and no "null".
-    - A source-scan test in [designSystem.test.ts](src/app/__tests__/designSystem.test.ts) fails on any `toFormat(` with `ccc`, `LLL` or `EEE` outside `formatDate`.
-    - The i18n parity test covers the new keys.
-    - The user confirms on TestFlight after the OTA.
-
-- [ ] Seat the tab bar at the bottom on iPhone
-  - **Flag:** `OTA`.
-  - **What it is:**
-    - **Why it floats:** [BottomTabs.tsx](src/components/BottomTabs.tsx) pads the strip under the floating bar by `insets.bottom + spacing.sm`. On an iPhone the home-indicator inset is 34 pt, so the bar floats about 42 pt above the edge. On Android the gesture inset is small, so there the bar sits at the bottom (screenshots of 2026-10-24).
-    - **The change:** on iOS only, `paddingBottom = Math.max(spacing.sm, insets.bottom − IOS_HOME_INDICATOR_OVERLAP)` with `IOS_HOME_INDICATOR_OVERLAP = 20`. That gives about 14 pt on a Face ID iPhone and 8 pt on a home-button iPhone (inset 0), so the bar's bottom edge sits just above the home indicator.
-    - Android keeps today's padding.
-    - Screens that pad their content for the bar keep using its measured height, so no screen needs a literal.
-  - **What it solves:** On iPhone the navigation bar sits too high, unlike Android.
-  - **Expected result:**
-    - A render test with a mocked inset of 34 on iOS gives a bottom padding of 14, and on Android gives 34 + `spacing.sm`.
-    - On TestFlight (the user's check) the bar sits right above the home indicator, the last row of a scrolled list is not hidden, and the home indicator stays uncovered.
-
-- [ ] Require at least one reminder on every enabled mitzvah
-  - **Flag:** `OTA`.
-  - **What it is:** A mitzvah's effective reminders are `activeMitzvot[id].customReminders ?? mitzvah.defaultReminders`.
-    - **Switching on with none:** switching it on anywhere while that list is empty (the library switch in [src/app/mitzvot.tsx](src/app/mitzvot.tsx), the mitzvah screen, and the master switches of Rosh Chodesh and hilulot when every notice kind is off) does not switch it on. A `ConfirmDialog` opens instead:
-      - title `mitzvah.needsReminder.title` ("אין התראות" / "No reminders");
-      - body `mitzvah.needsReminder.body` ("יש להגדיר לפחות התראה אחת בשביל להפעיל מעקב על המצווה" / "Set at least one reminder to start tracking this mitzvah");
-      - cancel `common.cancel` ("ביטול"), which only closes;
-      - confirm `mitzvah.needsReminder.settings` ("הגדרה" / "Settings"), which pushes `/mitzvah/[id]`, or `/rosh-chodesh` / `/hilulot` for those two.
-    - **Deleting the last one:** on the mitzvah screen, deleting the last reminder of an enabled mitzvah is refused with an inline error `reminder.errors.lastReminder` ("יש להשאיר לפחות התראה אחת כל עוד המצווה פעילה" / "Keep at least one reminder while the mitzvah is on").
-    - **Existing state:** on hydrate, the `merge` of [useMitzvotStore.ts](src/stores/useMitzvotStore.ts) turns a persisted `customReminders: []` into `undefined`, so the defaults apply. A custom mitzvah already requires one reminder in its form; that stays.
-    - **One home for the rule:** a single helper `canEnable(id)` / `effectiveReminders(id)` in [useMitzvotStore.ts](src/stores/useMitzvotStore.ts), used by every switch, never a copy per screen.
-  - **What it solves:** The user's rule: tracking a mitzvah without any reminder is never possible.
-  - **Expected result:**
-    - Render tests show that switching on a mitzvah whose reminders were emptied opens the dialog, that Cancel leaves it off, and that Settings navigates to its screen.
-    - Deleting the last reminder of an enabled mitzvah shows the error and keeps the reminder.
-    - A store test shows that `customReminders: []` hydrates as defaults.
-    - [src/stores/AGENTS.md](src/stores/AGENTS.md) states the rule.
-
-- [ ] Give every mitzvah full reminder flexibility
-  - **Flag:** `OTA`.
-  - **What it is:** Today [ReminderEditor.tsx](src/components/ReminderEditor.tsx) offers `start`, `end` and `clock` (the last for registry mitzvot only), an offset up to `MAX_OFFSET_MIN` (720), a label and "skip if done". `reminderFires()` ([skipRules.ts](src/utils/skipRules.ts)) drops any trigger outside `[window.start, window.end]`, so a reminder outside the window is refused at save (birchot hashachar at 10:00 is refused because its window ends at sof zman Shema). Change:
-    - (1) Every mitzvah, registry and custom alike, gets all three anchors: `allowClock` goes away, and a custom mitzvah may store a `clock` reminder. Update the root AGENTS.md line that says a custom mitzvah never stores one.
-    - (2) A heads-up before the window: a trigger may fall up to `HEADS_UP_MAX_MIN = 180` minutes before `window.start`.
-      - `reminderFires()` accepts `[window.start − 180 min, window.end]`, still never strictly inside a holy block.
-      - A `start` offset may be negative down to −180.
-      - A `clock` reminder resolves to the first such wall-clock time at or after `window.start − 180 min` (`clockTriggerAfter` in [planners/mitzvot.ts](src/services/notifications/planners/mitzvot.ts)).
-      - `nextReminderAt()` and the planner share the rule, as today.
-    - (3) Any number of reminders per mitzvah, listed on the mitzvah screen in trigger order, each with its next fire time (`nextReminderAt` per reminder).
-    - (4) When a reminder cannot fire, the editor's error names today's window: `reminder.errors.outsideWindowToday` ("החלון היום פתוח מ־%{start} עד %{end}; בשעה הזו התזכורת לא תישלח").
-    - (5) The window of `birchot_hashachar` ends at chatzot hayom (`zmanim.chatzot`) instead of sof zman Shema (R7), so 10:00 is a valid reminder.
-    - (6) "Reset to defaults" stays.
-  - **What it solves:** The user wants to set any reminder on any mitzvah, not only the defaults, e.g. birchot hashachar at 10:00 instead of at alot.
-  - **Expected result:**
-    - On a pinned date in Jerusalem, birchot hashachar saves a 10:00 clock reminder, and the planner schedules it at 10:00 local.
-    - A custom mitzvah saves a clock reminder.
-    - A start reminder at −60 fires an hour before the window opens.
-    - A trigger more than 180 minutes before the window, or after its end, is refused with the window named.
-    - [NotificationScheduler.nextReminder.test.ts](src/services/__tests__/NotificationScheduler.nextReminder.test.ts), [ReminderEditor.render.test.tsx](src/components/__tests__/ReminderEditor.render.test.tsx) and the window tests in [src/data/__tests__/](src/data/__tests__) cover each case under `pnpm test:tz`.
-    - Root [AGENTS.md](AGENTS.md) (Mitzvah Data Model, `defaultReminders`) and [src/services/notifications/AGENTS.md](src/services/notifications/AGENTS.md) state the heads-up limit.
-
-- [ ] Add a follow-up reminder after the window for custom mitzvot
-  - **Flag:** `OTA`.
-  - **What it is:** A new reminder anchor `followUp` in `ReminderAnchor` ([src/types/mitzvah.ts](src/types/mitzvah.ts)): `offsetMin` (1–720) counts minutes after `window.end`.
-    - **When it fires:** only if that window's mitzvah is neither done nor skipped. Behind that:
-      - the planner already drops completed and skipped dates;
-      - a later mark cancels it through `cancelForMitzvah()`;
-      - `skipIfDone` is implied.
-    - **The window rule:** `reminderFires()` ([skipRules.ts](src/utils/skipRules.ts)) accepts a `followUp` trigger in `(window.end, window.end + 720 min]`. This is the only exception to "never after the window", and it is still never strictly inside a holy block.
-    - **The editor:** [ReminderEditor.tsx](src/components/ReminderEditor.tsx) offers it as a fourth `SegmentedControl` option, `reminder.anchor.followUp` "אחרי הסוף, אם לא בוצע" ("After the end, if not done"), for custom mitzvot only (the user's call, 2026-10-24). The planner and the rule are generic, so offering it to registry mitzvot later is one condition.
-    - **The custom form:** in [custom-mitzvah.tsx](src/app/custom-mitzvah.tsx), the reminder check (today "every reminder inside the hours") accepts it.
-    - **Its notification:** the default label is `reminder.followUp.label` "עוד לא סימנת: %{name}" / "Not marked yet: %{name}". It keeps the mark-done action, which files under the window's `dateKey` as every mark does.
-  - **What it solves:** A custom mitzvah at 10:00 can remind again two hours later if it was not marked done.
-  - **Expected result:**
-    - A custom mitzvah 10:00–11:00 with a `followUp/60` reminder schedules 12:00.
-    - Marking it at 11:30 cancels the 12:00 notification.
-    - A follow-up that lands inside Shabbat is not scheduled.
-    - The registry editor shows no fourth option.
-    - Covered in [NotificationScheduler.test.ts](src/services/__tests__/NotificationScheduler.test.ts), [ReminderEditor.render.test.tsx](src/components/__tests__/ReminderEditor.render.test.tsx) and [customMitzvah.render.test.tsx](src/app/__tests__/customMitzvah.render.test.tsx) under `pnpm test:tz`.
-    - Root [AGENTS.md](AGENTS.md) (Mitzvah Data Model, `defaultReminders`) documents the anchor.
-
-- [ ] Group the mitzvot library by category with a floating add button
-  - **Flag:** `OTA`.
-  - **What it is:** [src/app/mitzvot.tsx](src/app/mitzvot.tsx) is today one flat `Card` filtered by a `ChipRow` of categories, with the add-custom entry as a header `HeaderPill` "+".
-    - **Group field:** add `group: LibraryGroup` to `Mitzvah` ([src/types/mitzvah.ts](src/types/mitzvah.ts)), with `LibraryGroup = 'prayers' | 'daily' | 'weekly' | 'seasonal' | 'other' | 'mine'`. It is required on every registry entry; the custom adapter sets `'mine'`. `category` stays as is: it still drives the custom-form pill and the mitzvah screen's cycle label.
-    - **Mapping:**
-      - prayers: `shacharit`, `mincha`, `maariv`;
-      - daily: `tefillin`, `krias_shma_shacharit`, `birchot_hashachar`, `krias_shma_al_hamita`;
-      - weekly: `candle_lighting`, `havdalah`;
-      - seasonal: `sefirat_haomer`, `chanukah_candles`, `selichot`, `ushpizin`;
-      - other: `kiddush_levana`, `chok_leyisrael`, plus the hilulot and Rosh Chodesh setting rows;
-      - mine: every custom mitzvah.
-    - **Layout:** the screen renders, in that order, one `SectionLabel` plus one `Card divided` per non-empty group, with titles `library.group.prayers` "תפילות", `.daily` "מצוות יומיות", `.weekly` "מצוות שבועיות", `.seasonal` "מצוות עונתיות", `.other` "עוד" and `.mine` "המצוות שלי" (English: Prayers, Daily mitzvot, Weekly mitzvot, Seasonal mitzvot, More, My mitzvot). Within a group the order is `MITZVOT` order, and customs are ordered by `createdAt`. The `ChipRow` filter and the header "+" are removed.
-    - **Floating add button:** the shared `Button` with a plus icon, label `library.addCustom`, pushing `/custom-mitzvah`.
-      - It is absolutely positioned: `left`/`right` `spacing.lg`, `bottom` = safe-area bottom inset + `spacing.md`, with the `cardSoft` shadow.
-      - It always stays at the bottom while the list scrolls.
-      - The `ScrollView`'s `contentContainerStyle.paddingBottom` = the button's measured height (`onLayout`) + bottom inset + `spacing.xl`, so the last row scrolls fully above the button.
-    - **Cleanup:** remove the unused `library.category.*` keys only if no other file reads them (the custom form's pill does today, so they likely stay), and the unused `library.customSection`. The `mitzvot` search item stays.
-  - **What it solves:** The library is hard to scan, and the add button at the top is not accessible or clear.
-  - **Expected result:**
-    - [mitzvot.render.test.tsx](src/app/__tests__/mitzvot.render.test.tsx) asserts the six section titles in order, each mitzvah under its group, the hilulot and Rosh Chodesh rows under "עוד", no "המצוות שלי" section without customs, and the floating button's label and navigation.
-    - It also asserts `paddingBottom ≥` button height + inset.
-    - [designSystem.test.ts](src/app/__tests__/designSystem.test.ts) and the smoke test stay green.
-    - A screenshot from the `expo-web` preview at phone width shows the last row fully visible above the button when scrolled to the end.
-    - [src/app/AGENTS.md](src/app/AGENTS.md) describes the screen.
-
-- [ ] Prepare the registry for new default-on mitzvot
-  - **Flag:** `OTA`.
-  - **What it is:** The groundwork the five new mitzvot below share.
-    - (1) **Default on:** add each new id to the default-on list in [useMitzvotStore.ts](src/stores/useMitzvotStore.ts) (`DEFAULT_ACTIVE`).
-    - (2) **Stamp `enabledAt` for existing installs:** today `merge` unions `DEFAULT_ACTIVE` back in without `enabledAt`, and a mitzvah with no `enabledAt` counts as enabled forever ([checkIn.ts](src/utils/checkIn.ts) `wasEnabledBy`). That would turn every past day into a miss and break the streak. So `merge` stamps `enabledAt: Date.now()` on every id it adds that the persisted map lacked, and records those ids in a module-level `addedOnHydrate` list.
-    - (3) **Gender defaults:**
-      - Add `kiddush_levana` to `MENS_MITZVOT` in [taharahOptIn.ts](src/stores/taharahOptIn.ts), so a switch to `female` turns it off with tefillin, and a switch back turns both on.
-      - After both stores hydrate, the root layout calls `applyGenderDefaultsToNew()`, which switches off `addedOnHydrate ∩ MENS_MITZVOT` when `gender === 'female'`.
-      - In the library, a mitzvah in `MENS_MITZVOT` shows the caption `library.notForWomen` ("לא נהוג אצל נשים") for a woman, and she can still switch it on.
-    - (4) **Siddur text mapping:** a `MITZVAH_STANDALONE_TEXT: Partial<Record<string, StandaloneTextId>>` map in [src/data/siddur.ts](src/data/siddur.ts) links a mitzvah to an existing standalone text. `hasSiddurText()`, the reader, `OPEN_TEXT` and the notification category use it. The text keeps its place in the siddur tab's groups, and `mitzvahTextId()` / `MITZVAH_TEXTS` stay unchanged, so no siddur-tab row is duplicated.
-    - (5) **Icons:** new `MitzvahIcon` names with drawings in `DRAWINGS`: `chanukiah`, `sukkah`, `shofar`. The bedtime Shema uses `night` and Kiddush Levana uses `moon`.
-    - (6) Raise `SCHEDULE_FORMAT` in [ids.ts](src/services/notifications/ids.ts) once for the batch.
-  - **What it solves:** New mitzvot reach existing installs switched on, without rewriting their history or switching on men's mitzvot for women.
-  - **Expected result:**
-    - A store test: hydrating a persisted map without the new ids yields them `enabled: true` with `enabledAt` ≈ now, and `computeStats()` over the previous 30 days counts no miss for them.
-    - The same hydrate with `gender: 'female'` leaves `kiddush_levana` off.
-    - `chooseGender('female')` turns `tefillin` and `kiddush_levana` off, and `chooseGender('male')` turns them back on.
-    - [stores.test.ts](src/stores/__tests__/stores.test.ts) (the fresh-install enabled set) and [mitzvahIcon.test.ts](src/components/__tests__/mitzvahIcon.test.ts) are updated.
-
-- [ ] Add the bedtime Shema as a mitzvah
-  - **Flag:** `OTA`.
-  - **What it is:** A registry entry `krias_shma_al_hamita`:
-    - he "קריאת שמע על המיטה", en "Bedtime Shema";
-    - icon `night`, `category: 'daily-evening'`, `group: 'daily'`, `timeType: 'range-within-day'`, `skipOn: []`, all nuschaot;
-    - window from `nightfall(zmanim, location)` to `nextAlot(ctx)` (R3);
-    - one default reminder `{ anchor: 'clock', offsetMin: 1350 }` (22:30) with three `bodyVariants`;
-    - a description line "לכתחילה לפני חצות הלילה" (R3);
-    - linked to the standalone text `kriat_shema_al_hamita` through `MITZVAH_STANDALONE_TEXT`.
-    - Inside a holy block no reminder fires, and the night is asked about in the block's check-in like every other window that reaches into a block.
-  - **What it solves:** Reminders and tracking for the bedtime Shema, not only its text.
-  - **Expected result:**
-    - Window tests on dated days in Jerusalem and Los Angeles under `pnpm test:tz`.
-    - The reminder schedules at 22:30 on a weekday and not on Friday night.
-    - The Shabbat check-in lists it.
-    - The mitzvah screen opens its text, and a notification gets the open-text action.
 
 - [ ] Add Kiddush Levana as a monthly mitzvah
   - **Flag:** `OTA`.
@@ -265,64 +112,7 @@ The user's batch of fifteen requests, all decisions taken in the session of 2026
     - The check-in after the first Yom Tov lists the Yom Tov nights.
     - [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md) records the sources and the Chabad exception.
 
-- [ ] Keep Maariv open all night
-  - **Flag:** `OTA`.
-  - **What it is:** In [src/data/mitzvot.ts](src/data/mitzvot.ts), maariv's `computeWindow` ends at `nextAlot(ctx)` instead of `zmanim.chatzotLayla` (R6). The mitzvah's description gains the line "לכתחילה עד חצות הלילה". Its default reminders (`start/0`, `start/120`) stay.
-  - **What it solves:** Maariv may be prayed all night; today home, history and reminders treat it as closed at chatzot.
-  - **Expected result:**
-    - Window tests show the end at the next alot in Jerusalem and Los Angeles.
-    - Home between chatzot and alot still lists maariv as current ([home.render.test.tsx](src/app/__tests__/home.render.test.tsx)).
-    - History marks it missed only after alot.
-    - The pre-block notice and check-in behaviour on Friday are unchanged.
-
 ### Medium — Requests of 2026-10-24
-
-- [ ] Add schedule modes to the custom mitzvah model
-  - **Flag:** `OTA`.
-  - **What it is:**
-    - **The model:** `CustomMitzvah` ([src/types/mitzvah.ts](src/types/mitzvah.ts)) gains `schedules?: ScheduleEntry[]`, with:
-      - `ScheduleEntry = { from: 'YYYY-MM-DD'; schedule: CustomSchedule }`, sorted by `from`;
-      - `CustomSchedule = { mode: 'weekdays'; days: Weekday[] } | { mode: 'range'; start: 'YYYY-MM-DD'; end: 'YYYY-MM-DD' } | { mode: 'streak'; start: 'YYYY-MM-DD'; days: number }`.
-    - **The rule:**
-      - The schedule in force on a location day is the last entry whose `from` ≤ that day.
-      - `weekdays` applies on its days.
-      - `range` applies on `start..end` inclusive.
-      - `streak` applies on `start .. start + days − 1`.
-      - A mitzvah without `schedules` reads its legacy `activeDays` as one weekdays entry from the beginning of time, so no migration and no `STORE_VERSION` bump.
-    - **One home:** `appliesOn(custom, dayKey)` in [src/utils/customMitzvah.ts](src/utils/customMitzvah.ts), beside `isActiveOn`. The adapter ([customMitzvotAdapter.ts](src/data/customMitzvotAdapter.ts)) calls it in place of today's weekday check, still on the location day the window starts on. That is the only line any surface reads, so home, schedule, day view, history, streak, weekly report, check-in and notifications follow with no change of their own.
-    - **Editing never rewrites the past:** saving a changed schedule appends an entry with `from` = today's app day (`appDay()`), so earlier days keep the schedule they had. A streak counts from the app day it was saved. Its count restarts only when `days` or the mode changes; editing the name, hours or reminders keeps the entry as it is.
-    - **Ended:** a `range` or `streak` mitzvah whose last day is before today's app day is ended. On every foreground, `reconcileEndedCustomMitzvot()` switches it off (keeping its history and completions).
-    - **Short look-ahead:** for a schedule that starts beyond the 9-day look-ahead of `currentOrNextWindow()`, the mitzvah screen shows `custom.startsOn` "מתחילה ב־%{date}" in place of the empty time range.
-  - **What it solves:** The model and every surface behind the three scheduling modes, with history kept honest.
-  - **Expected result:**
-    - Unit tests for `appliesOn` across all three modes, a legacy `activeDays` item, a schedule changed mid-week (days before the change keep the old answer), and a streak that ends.
-    - A history test: days before a range and after its end are neither missed nor counted, and the streak is unbroken.
-    - A planner test: no reminders outside the range.
-    - Everything passes under `pnpm test:tz`.
-    - Root [AGENTS.md](AGENTS.md), [src/types/AGENTS.md](src/types/AGENTS.md), [src/data/AGENTS.md](src/data/AGENTS.md), [src/utils/AGENTS.md](src/utils/AGENTS.md) and [src/app/AGENTS.md](src/app/AGENTS.md) describe schedules instead of `activeDays`.
-
-- [ ] Build the schedule picker in the custom mitzvah form
-  - **Flag:** `OTA` — the calendar is built in JS. No date-picker package is added, since every such package is native.
-  - **What it is:** In [src/app/custom-mitzvah.tsx](src/app/custom-mitzvah.tsx), the "active days" section becomes "תזמון המצווה" (`custom.schedule`).
-    - **Mode choice:** a `SegmentedControl` with three options:
-      - `custom.schedule.weekdays` "הגדר לפי ימי פעילות": today's `WeekdayPicker`, unchanged;
-      - `custom.schedule.range` "בחירה ביומן": a summary row "מ־%{from} עד %{to}" that opens a `BottomSheet` with a new shared `CalendarRangePicker` (`src/components/CalendarRangePicker.tsx`);
-      - `custom.schedule.streak` "בחירת ימים ברצף": a number chosen through `WheelPicker` (1–365) and the line "פעילה מהיום (%{from}) עד %{to}".
-    - **`CalendarRangePicker`:**
-      - a month grid on theme tokens, RTL-aware, with previous/next month in `ScreenHeader`-style pills;
-      - each cell shows the Gregorian day and, below it, the Hebrew day in small type;
-      - the first tap sets the start and the second the end, which must be on or after the start;
-      - the range is shaded with `goldWash`, today is ringed, and days before today are disabled;
-      - the maximum is today + 2 years.
-    - **Validation:** a range with both ends (`custom.errors.rangeRequired`) and a streak of 1–365 (`custom.errors.streakRange`), in the existing order of checks. `Affects` still lists the day surfaces.
-    - **Library:** an ended mitzvah stays under "המצוות שלי" with the caption `custom.ended` "הסתיימה ב־%{date}" and its switch off. Switching it on opens its edit form, so the schedule can be extended.
-  - **What it solves:** The three scheduling options the user asked for in place of the fixed weekdays.
-  - **Expected result:**
-    - [customMitzvah.render.test.tsx](src/app/__tests__/customMitzvah.render.test.tsx) covers each mode, the summary lines, the validation errors and that save writes the right `schedules` entry.
-    - A new `CalendarRangePicker.render.test.tsx` covers start/end selection, the disabled past, month paging and the Hebrew day labels.
-    - The library shows an ended mitzvah with its caption.
-    - A web-preview screenshot at phone width of each mode.
-    - [src/components/AGENTS.md](src/components/AGENTS.md) lists the new component.
 
 - [ ] Ask which mitzvot to track during onboarding
   - **Flag:** `OTA`.
@@ -341,40 +131,6 @@ The user's batch of fifteen requests, all decisions taken in the session of 2026
     - An onboarding render test: the step lists the groups, a toggle changes `useMitzvotStore`, and Continue goes to location.
     - The library's render test still passes on the extracted component.
     - [src/app/onboarding/AGENTS.md](src/app/onboarding/AGENTS.md) lists the step.
-
-- [ ] Fold Rashi and Bartenura in Chok LeYisrael, globally and per passage
-  - **Flag:** `OTA`.
-  - **What it is:**
-    - **Today:** Chok's commentaries already come as folded passages: each Rashi, Bartenura or Zohar-translation segment carries an `optional` label from [scripts/chok/parse.js](scripts/chok/parse.js) `COMMENTARIES`, and the reader opens or closes each one on tap (`isOpen(key, openByDefault)` in [src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>)). They always start closed.
-    - **New setting:** `useUserStore.chokCommentaryOpen: boolean`, default `false` (today's behaviour). It sets the default state of every Rashi and Bartenura passage, the same way prayer mode sets the minyan folds.
-      - The labels are matched through one constant `CHOK_COMMENTARY_LABELS = ['Rashi', 'Bartenura']` in [src/utils/chok.ts](src/utils/chok.ts), pinned by a test against `COMMENTARIES` in parse.js. That needs no content rebuild.
-      - The Zohar translation keeps today's folding.
-    - **Toolbar:** in the Chok reader, a `SegmentedControl` labelled `chok.commentary` "פירושים" with `chok.commentary.folded` "מקופלים" and `chok.commentary.open` "פתוחים". It sits in the toolbar's prayer-mode slot, since prayer mode does not apply to Chok.
-    - **Per passage:** each passage still toggles on tap against the default. Changing the global setting clears the per-passage toggles of commentary passages, so all of them follow it.
-    - **Settings:** the same choice as a switch in Settings → Prayer → reading (`settings.chokCommentaryOpen`, "פירושים פתוחים בחוק לישראל"), with a search item.
-  - **What it solves:** The reader chooses whether Rashi and Bartenura are open or folded everywhere, and can still open or close one passage.
-  - **Expected result:**
-    - [chokReader.render.test.tsx](src/app/__tests__/chokReader.render.test.tsx): the default closes Rashi and Bartenura; "פתוחים" opens them all; tapping one closes only it; switching back to "מקופלים" closes all.
-    - The Zohar translation is unaffected.
-    - The Settings switch and the toolbar stay in sync.
-
-- [ ] Show the Chok add-on's real download size
-  - **Flag:** `OTA` for the app text. The manifest change ships by `pnpm chok:build` and a push to `main`.
-  - **What it is:**
-    - **The numbers (measured 2026-10-24):** the add-on takes 18.6 MB on the device. That is the uncompressed JSON of 54 parashiyot × 7 days: Hebrew is 2 bytes a letter in UTF-8; nikud and teamim are 4.6 MB of it; the commentaries alone (Bartenura 2.8, Rashi 2.4, Zohar translation 1.4) are 6.7 MB; JSON structure is 2.3 MB. GitHub Pages serves it gzipped, and the phone's HTTP client unzips it as it arrives, so the download itself is about 4.7 MB.
-    - **What's wrong today:** the copy says "יורדים 18.6 MB… מומלץ Wi‑Fi" (`chok.addon.downloadBody`), and the list caption says "כ־19 MB" with no distinction.
-    - **Change:**
-      - [scripts/chok/build.js](scripts/chok/build.js) records each file's gzip size (`gzipBytes`, level 9) and the total in [docs/chok/manifest.json](docs/chok/manifest.json). Additive fields, so `format` stays 1 and older apps ignore them.
-      - `chok.addon.listCaption` becomes "תוסף להורדה · הורדה כ־%{download} MB, כ־%{disk} MB במכשיר".
-      - `chok.addon.downloadBody` becomes "יורדים כ־%{download} MB (כ־%{disk} MB במכשיר) מאתר יהודי 365 ב־GitHub Pages".
-      - The progress line counts parashiyot and MB on the device as today.
-      - `CHOK_SIZE_ESTIMATE_MB` splits into a download and a disk estimate for the offline caption.
-    - **If this ships together with "Store the Chok add-on compressed on the device"**, show one number (about 5 MB) instead of two.
-  - **What it solves:** The size the user sees before downloading is the real download, and the size on the device is stated separately.
-  - **Expected result:**
-    - The manifest carries `gzipBytes`.
-    - [ChokAddonCard.render.test.tsx](src/components/__tests__/ChokAddonCard.render.test.tsx) shows both numbers from a fixture manifest.
-    - [scripts/chok/AGENTS.md](scripts/chok/AGENTS.md) explains the two sizes.
 
 - [ ] Build the direct APK for phone processors only
   - **Flag:** `Build`.
@@ -407,37 +163,6 @@ The user's batch of fifteen requests, all decisions taken in the session of 2026
     - the Chok download.
 
     The dex size before and after is logged in [release/RELEASE_LOG.md](release/RELEASE_LOG.md). Any keep rule added is commented with the crash it fixed.
-
-- [ ] Store the Chok add-on compressed on the device
-  - **Flag:** `OTA` — `fflate` is pure JS. The content side ships by `pnpm chok:build` and a push to `main`.
-  - **What it is:**
-    - **Build:** [scripts/chok/build.js](scripts/chok/build.js) also writes each parasha as `<name>.<hash>.json.gz` (gzip level 9, about 4.7 MB in all against 18.6 MB). [docs/chok/manifest.json](docs/chok/manifest.json) gains a `gz` map (`path`, `sha256` of the `.gz` bytes, `bytes`) beside `files`. Older apps keep reading `files`, so both sets stay published until a later content version drops the plain files, once no installed bundle reads them.
-    - **Why the files arrive still compressed:** Pages serves a `.gz` as `application/gzip` with no `Content-Encoding`, so the phone stores the compressed bytes as they are.
-    - **Download:** [ChokContentService.ts](src/services/ChokContentService.ts) downloads and verifies the `.gz` files.
-    - **Reading:** [chokFiles.ts](src/services/chokFiles.ts) reads them with `gunzipSync` from `fflate` (a new dependency), then `JSON.parse`. A file named `.json` (an install made before this change) is still read as plain, and the next content update replaces it.
-    - **Size labels:** both numbers on the add-on card become the same, about 5 MB.
-  - **What it solves:** The add-on takes about 5 MB on the phone instead of 18.6 MB.
-  - **Expected result:**
-    - [ChokContentService.test.ts](src/services/__tests__/ChokContentService.test.ts) covers the `.gz` download and its hash check, reading both `.gz` and legacy `.json` installs, and a corrupt `.gz` turning into "download again".
-    - On the Android emulator against the live site: download, read a parasha offline, delete, download again; Settings › Storage shows about 5 MB for the add-on files.
-    - [scripts/chok/AGENTS.md](scripts/chok/AGENTS.md) and [src/services/AGENTS.md](src/services/AGENTS.md) describe the format.
-
-- [ ] Make every Rosh Chodesh and hilula notice configurable
-  - **Flag:** `OTA`.
-  - **What it is:** Today the times are constants ([planners/roshChodesh.ts](src/services/notifications/planners/roshChodesh.ts): `before` 3 days ahead at 20:00, `evening` at shkia, `day` at 07:00; [planners/hilulot.ts](src/services/notifications/planners/hilulot.ts): `before` a day ahead at shkia, `evening` at shkia).
-    - **Settings:** `useUserStore` gains `roshChodeshNotices` and `hilulaNotices`, each mapping its notice kinds to `{ enabled: boolean; daysBefore?: number; timing: { anchor: 'shkia'; offsetMin: number } | { anchor: 'clock'; minutes: number } }`. The defaults reproduce today exactly, and a missing field reads as the default, so there is no version bump.
-    - **Planners:** they read these settings in place of the constants. `roshChodeshLines()` and `hilulaLines()` follow the same settings.
-    - **Screens:** in [rosh-chodesh.tsx](src/app/rosh-chodesh.tsx) and [hilulot.tsx](src/app/hilulot.tsx), under the master switch, a `Card divided` with one `ListRow` per kind:
-      - a switch, and a caption describing its time ("3 ימים לפני, 20:00", "בשקיעה");
-      - tapping the row opens a `BottomSheet` with a `SegmentedControl` (בשקיעה / בשעה קבועה), an offset or a `TimeField`, and for `before` a days-before choice (1–7).
-    - **The one-reminder rule:** switching the master switch on with every kind off opens the dialog of the at-least-one-reminder task.
-    - **Search:** add the kinds' labels to the existing search items' terms.
-  - **What it solves:** The user wants to add or remove any of these notices and change their times.
-  - **Expected result:**
-    - Planner tests: each kind off drops only its notices; a changed days-before and clock time move the trigger; the defaults equal today's output.
-    - Render tests for both screens.
-    - The pre-block lines follow the settings.
-    - Root [AGENTS.md](AGENTS.md) (Notification Engine) describes the settings instead of fixed times.
 
 - [ ] Add the siddur voice setting that follows gender
   - **Flag:** `OTA`.
@@ -534,39 +259,6 @@ The user's batch of fifteen requests, all decisions taken in the session of 2026
     - A build test asserts every segment of every asset has a unique `key` within its text.
     - [src/app/AGENTS.md](src/app/AGENTS.md), [src/stores/AGENTS.md](src/stores/AGENTS.md) and [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md) are updated.
 
-- [ ] Merge app reset into a "Backup, restore and reset" section
-  - **Flag:** `OTA`.
-  - **What it is:** In [settings.tsx](<src/app/(tabs)/settings.tsx>), the `settings.backup` section's title becomes "גיבוי, שחזור ואיפוס" / "Backup, restore and reset".
-    - **Reset:** the reset `danger` Button and its `ConfirmDialog` (today under Device → App) move into it, below restore. Both behave as today.
-    - **Delete data:** a link row "מחיקת הנתונים שלך" / "Delete your data" opens the privacy policy's `#delete` section (`…/privacy/#delete` in Hebrew, `…/privacy/en/#delete` in English) through `Linking`.
-    - **Web:** the section now shows on web too, with the reset and the link only, because export and import stay native-only.
-    - **Device section:** its `settings.app` sub-heading goes away; the version moves to "About and contact".
-    - **Search and docs:** the `reset` search item points to the new section, and its terms gain backup words. Update the reset path in the public FAQ ([docs/index.html](docs/index.html)) and its rule in [docs/AGENTS.md](docs/AGENTS.md).
-  - **What it solves:** Backup, restore, reset and data deletion live in one place.
-  - **Expected result:**
-    - [settings.backup.render.test.tsx](src/app/__tests__/settings.backup.render.test.tsx) shows the new title, the reset button and dialog working there, and the link opening the right URL per language.
-    - The Device section has no reset.
-    - Search "איפוס" opens the new section.
-    - The FAQ wording matches.
-
-- [ ] Turn "Contact us" into "About and contact"
-  - **Flag:** `OTA`.
-  - **What it is:** The `settings.contact` section's title becomes "אודות ויצירת קשר" / "About and contact". Its content, top to bottom:
-    - the version line `settings.version` (`appVersionLabel()`, moved from Device);
-    - the existing contact hint, form, privacy line and email;
-    - a `Card divided` of link rows:
-      - the support page `https://jew-365.github.io/jew-365/`;
-      - the privacy policy (`…/privacy/` in Hebrew, `…/privacy/en/` in English);
-      - the store page for the device: Android `https://play.google.com/store/apps/details?id=com.jew365.app`, iOS `https://apps.apple.com/app/id6825802248`;
-      - the Chok LeYisrael text credit and licence `…/chok/LICENSE.txt`.
-    - The tester page and the taharah review page are not linked.
-    - The URLs live in one constant `PRODUCT_LINKS` in [ContactService.ts](src/services/ContactService.ts), beside `CONTACT_EMAIL`.
-    - The section's search item gains "אודות", "גרסה" and "קישורים" terms, and the `version` item points here.
-  - **What it solves:** One place for what the app is, its version, every product page, and how to reach the team.
-  - **Expected result:**
-    - [settings.contact.render.test.tsx](src/app/__tests__/settings.contact.render.test.tsx) shows the title, the version and each link opening its URL per platform and language, and the contact form unchanged.
-    - Search "גרסה" opens this section.
-
 - [ ] Add a user guide that stays current with every change
   - **Flag:** `OTA` — bundled content; the web copy ships with a push to `main`.
   - **What it is:**
@@ -610,33 +302,6 @@ The user's batch of fifteen requests, all decisions taken in the session of 2026
     - [docs/AGENTS.md](docs/AGENTS.md) lists the pages.
 
 ### Low — Requests of 2026-10-24
-
-- [ ] Rework the five non-default palettes to the default's quality
-  - **Flag:** `OTA`.
-  - **What it is:** First, a preview board `design/palettes-2026-10-24/index.html`: for gold and each of pink, purple, blue, dark and plum, it shows current against proposed tokens on a mock home card, the tab bar, a `Banner`, a primary `Button` and the siddur toolbar. The user approves it before any code changes.
-    - **Rules carried from `gold`** (see `T_LIGHT` in [colors.ts](src/theme/colors.ts)):
-      - the surface is a white warmed toward the palette's hue, never pure `#FFFFFF`, and the same card-to-page step as gold;
-      - a separate darker `goldText` reaching 4.5:1 on `surface`;
-      - dark ink `onGold` wherever the accent allows 4.5:1, else white;
-      - hue-tinted soft shadows at gold's .08 / .18;
-      - a `surface2` and `border` one step from the surface.
-    - Hues stay: pink, purple, blue, dark navy and plum. `ThemeSwatchRow` shows the palette's surface as a ring inside its `bg`, so gold and pink no longer look alike.
-  - **What it solves:** The other palettes look plainer than the default.
-  - **Expected result:**
-    - The approved board is committed.
-    - [colors.ts](src/theme/colors.ts) is updated to it.
-    - The theme tests pass, with a new contrast test that every palette's `text`, `textSub` and `goldText` on `surface`, and `onGold` on `gold`, meet 4.5:1.
-    - Web-preview screenshots of home in all six palettes.
-
-- [ ] Upgrade bottom-tabs to the version with the detach fix
-  - **Flag:** `OTA` only if the lockfile diff changes no native package (`react-native-screens` stays 4.16.0, `react-native-safe-area-context` unchanged); otherwise `Build`.
-  - **What it is:** Raise `@react-navigation/bottom-tabs` to ≥ 7.18.8, which no longer derives detach state from an animated value (upstream commit 9bfc8d0). That requires `@react-navigation/native` ^7.3.8 and `@react-navigation/elements` ≥ 2.9.30, all pure JS, and it must still resolve to the single copy expo-router 6.0.24 uses. Keep `detachInactiveScreens={false}` from the iOS fix.
-  - **What it solves:** The root cause of the blank tabs, not only the workaround.
-  - **Expected result:**
-    - `pnpm why @react-navigation/bottom-tabs` shows one version.
-    - The full test suite passes.
-    - A smoke run of every route on the Android emulator via [android-native-verify](.claude/skills/android-native-verify/SKILL.md).
-    - The lockfile diff is reviewed for native packages, and the flag is confirmed in the change.
 
 - [ ] Move Selichot out of the bundle into a downloadable add-on per nusach
   - **Flag:** `OTA` for the behaviour. The space comes back only with the next `Build`, because a binary keeps the assets it was built with until it is replaced.
@@ -691,9 +356,24 @@ Chok LeYisrael shipped as a downloadable add-on on 2026-10-23 (production update
 Standing constraint: the app stays non-commercial (no ads, no paid tier) while it carries this text.
 
 - [ ] Add Chok LeYisrael to the store listings
-  - **What it is:** Once the add-on is live, mention it in the feature lists of [release/](release) (Hebrew and English, Play and App Store) and re-enter the copy in both consoles, with a [release/RELEASE_LOG.md](release/RELEASE_LOG.md) entry.
+  - **What it is:** Once the add-on is live, mention it in the feature lists of [release/](release) (Hebrew and English, Play and App Store) and re-enter the copy in both consoles, with a [release/RELEASE_LOG.md](release/RELEASE_LOG.md) entry. The same pass brings in the mitzvot the 2026-10-24 batch added (bedtime Shema, Kiddush Levana, Selichot, Chanukah candles, Ushpizin) and the batch's other user-visible features: the listings and [docs/index.html](docs/index.html) still say "תשע מצוות תלויות זמן".
   - **What it solves:** The listings describe what the app does.
   - **Expected result:** Both consoles carry the new copy.
+  - **Status 2026-10-25:** the copy in [release/](release) and [docs/index.html](docs/index.html) is rewritten to name kinds of features, so the batch's additions are covered; left: re-enter it in both consoles (the owner's approval) and a [RELEASE_LOG](release/RELEASE_LOG.md) entry.
+
+- [ ] Restore Chok LeYisrael's learning-day window and let ליל שישי count for Thursday or Friday
+  - **Flag:** `OTA`.
+  - **What it is:** The user's call on 2026-10-25, replacing the same day's sunrise-to-sunset change (already merged in the working tree):
+    - (1) **Window:** `CHOK_LEYISRAEL.computeWindow` in [src/data/mitzvot.ts](src/data/mitzvot.ts) goes back to the learning day: from alot to the next day's alot, or to candle lighting when a holy block opens that evening, `null` on Shabbat, Yom Tov, the Friday of a Vezot Haberakhah week and until the add-on is installed, exactly as before the sunrise-to-sunset change. Restore the tests and docs that change pinned (root [AGENTS.md](AGENTS.md) Mitzvah Data Model, [src/data/AGENTS.md](src/data/AGENTS.md), [src/utils/AGENTS.md](src/utils/AGENTS.md), [src/services/notifications/AGENTS.md](src/services/notifications/AGENTS.md)), keeping what the other tasks of the batch added since. The "פתח נוסח" of the Chok LeYisrael mitzvah opens the reader on its own learning day (no `date`), from the mitzvah screen and from home's card alike, so on Thursday night it opens ליל שישי.
+    - (2) **ליל שישי can be marked:** today the ליל שישי portion has no "סיימתי" (`chokDoneDay()` in [src/utils/chok.ts](src/utils/chok.ts) returns `null` for `thuNight`). It gets one, and its mark files under the day the user learns it for: a new `useUserStore.chokThuNightDay: 'thu' | 'fri' | null`, `null` until the first "סיימתי" on ליל שישי, which opens a [BottomSheet](src/components/BottomSheet.tsx) asking `chok.thuNight.ask` "לאיזה יום לרשום את ליל שישי?" / "Which day does ליל שישי count for?" with `chok.thuNight.thu` "יום חמישי" / "Thursday" and `chok.thuNight.fri` "יום שישי" / "Friday"; the answer is saved and the mark filed. The same choice is a `ChipRow` in Settings → Prayer → reading (`settings.chokThuNightDay` "ליל שישי נרשם ל־", anchor and search item, the way `chokDoubleChoice` is offered). With `thu`, ליל שישי marks Thursday (as the Thursday portion does); with `fri`, it marks Friday ahead of Friday's window, so Friday's reminders are dropped as for any completed day. The Thursday and Friday portions themselves keep their own "סיימתי". The choice is in the backup file with the rest of the user store and reset with it.
+  - **What it solves:** Chok LeYisrael tracks the learning day as before, and a user who learns ליל שישי on Thursday night gets it counted for the day they learn it for.
+  - **Expected result:** Window tests under `pnpm test:tz` (Jerusalem and Los Angeles): a weekday runs alot to the next alot, a Friday alot to candle lighting, Shabbat none. Reader render tests: on Thursday 21:00 the reader opens ליל שישי with "סיימתי"; the first press asks the day; with "יום חמישי" the mark files under Thursday's key, with "יום שישי" under Friday's and no Friday reminder is planned; the second press asks nothing; changing the Settings chips changes where the next mark goes. Home's card "פתח נוסח" on Thursday night opens ליל שישי. The emulator check is the orchestrator's.
+
+- [ ] Ask to turn on Chok LeYisrael right after its download
+  - **Flag:** `OTA`.
+  - **What it is:** The user's call on 2026-10-25: when a download of the Chok LeYisrael add-on ends in an install and the `chok_leyisrael` mitzvah is off, a [ConfirmDialog](src/components/ConfirmDialog.tsx) asks whether to turn it on. Title `chok.enablePrompt.title` "חק לישראל הותקן" / "Chok LeYisrael is installed"; body `chok.enablePrompt.body` "האם להפעיל התראות ומעקב אחרי המצווה?" / "Turn on reminders and tracking for this mitzvah?"; confirm `common.yes` "כן" / "Yes" (reuse the key if it exists, else add it); cancel `common.no` "לא" / "No". "כן" switches the mitzvah on through the store's guarded path (`setEnabled` / `canEnable` in [useMitzvotStore.ts](src/stores/useMitzvotStore.ts)), so it gets its default 09:00 reminder and `enabledAt` now; "לא" only closes. The dialog shows wherever the download was started (the mitzvah screen's add-on card, the More tab's Chok row, the library row if it starts one), even when the user moved to another screen meanwhile, so the prompt lives in one home: a pending flag the download action raises in [useChokStore.ts](src/stores/useChokStore.ts) (memory only, not persisted) and one prompt component mounted once by the root layout. It is not shown after a content-update download, after a download that fails, or when the mitzvah is already on.
+  - **What it solves:** A user who downloads the text is offered tracking at once, instead of finding the switch.
+  - **Expected result:** Render tests: a finished first download with the mitzvah off shows the dialog; "כן" turns it on with its default reminder and `enabledAt`; "לא" leaves it off and the dialog does not come back; no dialog after an update download, a failed download, or with the mitzvah already on; the dialog appears when the download finishes after navigating away. On the Android emulator: download from the More tab, answer "כן", the mitzvah screen shows it on with the 09:00 reminder scheduled.
 
 ### Medium — Chok LeYisrael source defects
 
@@ -705,11 +385,137 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
 ### Low — Chok LeYisrael follow-ups
 
 - [ ] Watch for an App Review note on the add-on's storage
-  - **What it is:** The add-on keeps about 19 MB of re-downloadable text in the app's Documents folder, which rides the iCloud device backup; Apple's storage guidelines prefer such data outside it, and expo-file-system 19 has no exclude-from-backup flag. If App Review objects, move it to `Paths.cache` (the launch reconcile already turns a purge into "download again").
+  - **What it is:** The add-on keeps about 5 MB of re-downloadable text in the app's Documents folder (stored gzipped since the 2026-10-24 batch; an install made before it holds 18.6 MB until the next content version), which rides the iCloud device backup; Apple's storage guidelines prefer such data outside it, and expo-file-system 19 has no exclude-from-backup flag. If App Review objects, move it to `Paths.cache` (the launch reconcile already turns a purge into "download again").
   - **What it solves:** Keeps the iOS submission from stalling on storage.
   - **Expected result:** Either no objection, or the folder moved in one change.
 
 ## Bugs
+
+- [ ] Apply the gender defaults in a headless launch too
+  - **Flag:** `OTA`.
+  - **What it is:** Found by the phase-2 verifier on 2026-10-25. `applyGenderDefaultsToNew()` ([taharahOptIn.ts](src/stores/taharahOptIn.ts)) switches off, for a user whose gender is `female`, the ids in `MENS_MITZVOT` that the mitzvot store's hydrate just added (`addedOnHydrate`). Only the root layout calls it. On Android the first start after an OTA can be a headless background task (the hourly rebuild or a notification action), which loads [index.js](index.js) and [NotificationScheduler.ts](src/services/NotificationScheduler.ts) but never the layout, so a newly registered men's mitzvah (Kiddush Levana) is on in memory, gets scheduled for a woman, and, when the persisted payload's version differs, is persisted on, so the next foreground hydrate no longer counts it as added. Change: call it from a module loaded on every launch, after both the user store and the mitzvot store have hydrated (MMKV hydrates synchronously; confirm), once per process; the layout call stays harmless or goes.
+  - **What it solves:** A woman never gets a men's mitzvah switched on by an update, whichever way the app starts.
+  - **Expected result:** A test that loads the scheduler module the way a headless launch does (no layout) with a saved female profile and a mitzvot map lacking a men's default-on id leaves that id off and schedules nothing for it; the foreground path still passes.
+
+- [ ] Word Rosh Chodesh and hilula notices by when they actually fire
+  - **Flag:** `OTA`.
+  - **What it is:** Found by the phase-2 verifier on 2026-10-25. Each notice kind's time is now configurable ("Make every Rosh Chodesh and hilula notice configurable"), but its text still assumes the default time: a Rosh Chodesh `before` notice set to 1 day at 20:00 fires after the month has begun at shkia and still says "מחר"; a hilula `evening` notice set to 22:00 fires after the date opened and still says it "enters tonight at sunset"; a one-day Rosh Chodesh `day` notice at 23:00 is fine. Change: [planners/roshChodesh.ts](src/services/notifications/planners/roshChodesh.ts) and [planners/hilulot.ts](src/services/notifications/planners/hilulot.ts) choose each notice's body from where its trigger falls against the event: before the opening shkia, the coming wording (tomorrow, tonight, on a weekday); at or after it, the present wording ("היום ראש חודש …", "הלילה ההילולא של …"); add the keys both dictionaries need. Also fix the English date phrase "begins Tuesday, Oct 13 evening" to read "begins on the evening of Tuesday, Oct 13", and make root [AGENTS.md](AGENTS.md) (Notification Engine) say that `roshChodeshOn` carries the date when the month enters seven or more days after the erev.
+  - **What it solves:** A notice never tells the user something that is already past.
+  - **Expected result:** Planner tests for each kind at a time before and after its event's opening, in Hebrew and English, under `pnpm test:tz`.
+
+- [ ] Keep an ended streak's count on a save that does not change it
+  - **Flag:** `OTA`.
+  - **What it is:** Found by the phase-2 verifier on 2026-10-25. Saving the custom form on an ended `streak` mitzvah restarts the streak from today even when only the name, hours or reminders changed. The rule ("Add schedule modes to the custom mitzvah model", now shipped) is that a streak's count restarts only when `days` or the mode changes; editing anything else keeps the schedule entry as it is. Change [src/app/custom-mitzvah.tsx](src/app/custom-mitzvah.tsx) and its helper so a save appends a new schedule entry only when the schedule itself changed; an ended streak saved unchanged stays ended (and off), and the form's summary line says so.
+  - **What it solves:** A rename never silently restarts a finished streak.
+  - **Expected result:** Render tests: an ended streak renamed stays ended with its old dates; changing its `days` restarts it from today; a running streak renamed keeps its start.
+
+- [ ] A custom mitzvah whose hours lie between midnight and alot is counted on two different days
+  - **Flag:** `OTA`.
+  - **What it is:** Found on the Android emulator on 2026-10-25. The custom adapter puts a custom mitzvah's hours on the civil date it is asked for ([customMitzvotAdapter.ts](src/data/customMitzvotAdapter.ts)), so hours of 03:29–03:31 asked for Sunday give a window early on Sunday, before Sunday's alot. The app's day turns at alot (the night belongs to the evening before, the user's call of 2026-10-12), so that window shows on Saturday's home and its mark is filed under `2026-10-25`, while the day view and history read `2026-10-25` as Sunday's: Saturday's day view lists it "לא בוצע", Sunday's lists it done, and Sunday's home counts it as still to come (it shows Monday's 03:29 window). Change: for app day D, a custom mitzvah whose window would start before alot of its civil date takes its hours on civil date D + 1 and is keyed under D, so a night window always belongs to the evening before and every surface reads one day for it; `activeDays` and schedules apply to D.
+  - **What it solves:** A night custom mitzvah is done or missed on one day everywhere: home, the day view, history, the streak and its notifications.
+  - **Expected result:** A test with hours 03:29–03:31 in Jerusalem, at an instant before and after alot, shows the same day key on home, the day view, `computeStats()` and the planner's ids, under `pnpm test:tz`; a mark between midnight and alot counts for the previous day in history.
+
+- [ ] Typing a time by hand inside a bottom sheet does nothing on Android
+  - **Flag:** `OTA`.
+  - **What it is:** Found on the Android emulator on 2026-10-25, older than the 2026-10-24 batch. In the manual-entry box of [TimeField.tsx](src/components/TimeField.tsx) inside a [BottomSheet](src/components/BottomSheet.tsx), neither typing nor backspace changes the time (the IME is connected; the wheels work). It hits the Rosh Chodesh and hilula notice sheets and the custom form's start and end times. The same field outside a sheet, and every field on web, types normally.
+  - **What it solves:** A time can be typed, not only scrolled, in every sheet.
+  - **Expected result:** On the emulator, typing 21:15 into the notice sheet and the custom form's start time saves 21:15; a render test pins whatever caused it (for example a controlled value reset or a responder that steals the touch).
+
+- [ ] A mitzvah added today reads 0% in history
+  - **Flag:** `OTA`.
+  - **What it is:** Found on 2026-10-25. History's per-mitzvah row shows "0%" with an empty bar for a mitzvah switched on (by hand or by an update) today, while its only item is still open. Nothing is counted as missed, but the row reads like a failure. Change: a row with no decided item shows no percent and no bar, and a caption that it is new (an i18n key in both dictionaries), in [history.tsx](<src/app/(tabs)/history.tsx>) through the existing stats.
+  - **What it solves:** A new mitzvah does not look failed on its first day.
+  - **Expected result:** A render test on a pinned day: a mitzvah enabled today shows the caption and no 0%; the next day, after one done and one missed, it shows 50%.
+
+- [ ] Schedule a mitzvah that an update switches on, without relying on a format raise
+  - **Flag:** `OTA`.
+  - **What it is:** Found on 2026-10-25. A new default-on mitzvah reaches an install through the mitzvot store's hydrate `merge` (`addedOnHydrate`), which runs before the scheduler subscribes to the store, so its reminders exist only because the same update raises `SCHEDULE_FORMAT`. A later default-on mitzvah shipped without a raise gets no reminders until the nightly rebuild. Change: `refreshSchedulingOnForeground()` in [NotificationScheduler.ts](src/services/NotificationScheduler.ts) also rebuilds once when the hydrate added any id.
+  - **What it solves:** Every newly added mitzvah is scheduled on the first foreground after the update.
+  - **Expected result:** A scheduler test: a hydrate that adds an id, with the stored format already current, leads to one rebuild that schedules it.
+
+- [ ] The calendar range shading is barely visible
+  - **Flag:** `OTA`.
+  - **What it is:** Found on 2026-10-25. [CalendarRangePicker.tsx](src/components/CalendarRangePicker.tsx) shades the days inside a range with `goldWash` (0.04 alpha on the gold palette), which barely shows on the sheet. Use `goldWashStrong` there, and check every palette.
+  - **What it solves:** The chosen range is visible.
+  - **Expected result:** Web screenshots of a picked range in all six palettes.
+
+- [ ] Keep a typed reminder label on Chanukah candles
+  - **Flag:** `OTA`.
+  - **What it is:** Found by the phase-3 verifier on 2026-10-25. For a mitzvah with `bodyKey` and `bodyParams` (Chanukah candles, and Ushpizin once it lands), `bodyForReminder()` in [planners/mitzvot.ts](src/services/notifications/planners/mitzvot.ts) replaces a Hebrew reminder text that has no placeholder with the keyed line ("זמן נרות חנוכה: הנר ה־N"), so a label the user typed on an added reminder is lost. Change: the keyed line stands in only for the registry's own default label and variants; a label the user typed is sent as typed (its `%{n}` filled when present).
+  - **What it solves:** A reminder says what the user wrote.
+  - **Expected result:** Planner tests: the default reminder names the night; an added reminder labelled "להכין חנוכייה" sends exactly that; one labelled "נר %{n}" sends the night's number.
+
+- [ ] Open the Chanukah text in the siddur tab from the mitzvah's own start
+  - **Flag:** `OTA`.
+  - **What it is:** Found by the phase-3 verifier on 2026-10-25. The siddur tab's now card lists the Chanukah candle-lighting text only from nightfall (`TONIGHT_TO_DAWN` in [src/data/siddur.ts](src/data/siddur.ts)), while the mitzvah's window starts earlier on Friday (plag hamincha) and for Chabad (shkia). The batch rule is that the siddur tab and the mitzvah agree. Change: the text's hours read the mitzvah's window for that night (one home), so the now card shows it whenever the mitzvah is open.
+  - **What it solves:** On Friday afternoon and for Chabad at shkia, the text is in the now card when the reminder fires.
+  - **Expected result:** Tests on a Chanukah Friday at plag + 10 min and a Chabad weekday at shkia + 5 min: the now card lists the text; at 13:00 it does not.
+
+- [ ] Show a night custom text's Hebrew date by the night, not the evening's day
+  - **Flag:** `OTA`.
+  - **What it is:** Found by the phase-3 verifier on 2026-10-25. Since a custom mitzvah whose hours lie between midnight and alot belongs to the evening before (fixed in the same batch), the reader opened from its notification or mitzvah screen at night shows the Hebrew date of that evening's daytime (9 Sivan at 00:45 on the night of 10 Sivan). Change: the reader takes the Hebrew date of the instant it shows a night window for (sunset turns the date), through the existing Hebrew date helpers.
+  - **What it solves:** The header names the right Hebrew date at night.
+  - **Expected result:** A reader render test at 00:45 on a night custom window shows the night's Hebrew date.
+
+- [ ] Show a number pad for minutes and offsets on Android
+  - **Flag:** `OTA`.
+  - **What it is:** Found on 2026-10-25. The reminder editor's offset field ([ReminderEditor.tsx](src/components/ReminderEditor.tsx)) and a field of the taharah log ([src/app/taharah/log.tsx](src/app/taharah/log.tsx)) use `keyboardType="numbers-and-punctuation"`, which exists only on iOS, so Android shows a letter keyboard. Change: on Android use `numeric` (it keeps the minus key, which negative offsets need), iOS unchanged.
+  - **What it solves:** Typing minutes on Android opens the number pad.
+  - **Expected result:** Render tests pin the keyboard type per platform; on the emulator the offset field opens the number pad and a −60 offset saves.
+
+- [ ] Grey Kiddush Levana in Settings search after its period ends
+  - **Flag:** `OTA`.
+  - **What it is:** Found on 2026-10-25. [settingsSearch.ts](src/utils/settingsSearch.ts) decides whether a standalone text is open with `hasStandaloneText()` alone, so between the end of the Kiddush Levana period and alot the search shows the text as open while the siddur tab greys it and the reader refuses it. Change: the search uses `standalonePeriodEnded()` ([src/data/siddur.ts](src/data/siddur.ts)) the same way the siddur tab and the reader do.
+  - **What it solves:** The three surfaces agree on when the text can be opened.
+  - **Expected result:** A settingsSearch test at 04:00 on the last night of a period (Ashkenaz, Jerusalem) shows the text closed with its caption; at 03:00 it is open.
+
+- [ ] Stamp the default mitzvot of a fresh install with its first launch
+  - **Flag:** `OTA`.
+  - **What it is:** Found on the Android emulator on 2026-10-25 (older than the 2026-10-24 batch). A fresh install's five original default-on mitzvot carry no `enabledAt`, and `wasEnabledBy()` ([checkIn.ts](src/utils/checkIn.ts)) reads a missing value as "always enabled", so a user who installs on a Sunday is sent straight to "מה עשית בשבת?" for the Shabbat before the install, and history can count days before it. Change: the mitzvot store stamps `enabledAt` with the first launch on every default-on id of a fresh install (no persisted map), in the one place the hydrate already stamps ids it adds ([useMitzvotStore.ts](src/stores/useMitzvotStore.ts)); an existing install's saved map is untouched.
+  - **What it solves:** A new user is never asked about days before the app existed on the phone.
+  - **Expected result:** A store test: a fresh hydrate stamps all default-on ids with now; a saved map without `enabledAt` keeps it missing. A check-in test: a fresh install on Sunday after Shabbat has no check-in for that Shabbat.
+
+- [ ] Withdraw reminders of a day that has ended
+  - **Flag:** `OTA`.
+  - **What it is:** Found on the Android emulator on 2026-10-25. A presented reminder of a window that closed unmarked stays in the tray for good, and Android caps an app at about 50 notifications in the tray: after a few days of unmarked reminders, new reminders are dropped with no sign ("Package has already posted or enqueued 51 notifications"). Change: on every foreground and every background rebuild, the scheduler dismisses presented mitzvah reminders whose window's app day has ended (its `dateKey` day is over by the alot that ends it, `appDayEnd()`); a mark-done from the tray before that keeps working as today. Non-mitzvah notices (update, check-in, report, hilula, Rosh Chodesh, taharah) keep their own rules.
+  - **What it solves:** The tray never fills up with stale reminders, so new ones always arrive.
+  - **Expected result:** A scheduler test with presented reminders of yesterday and today: after a foreground refresh past yesterday's app day end, yesterday's are dismissed and today's stay. Documented in [src/services/notifications/AGENTS.md](src/services/notifications/AGENTS.md).
+
+- [ ] Keep the bookmark's delete button outside its row's button
+  - **Flag:** `OTA`.
+  - **What it is:** Found on 2026-10-25. In the reader's bookmarks sheet, each row's delete control is a pressable nested inside the row's pressable: on web React warns that a `<button>` sits inside a `<button>`, and on iOS VoiceOver the nested button may not be reachable (the row takes its label). Change: the row and its delete control are siblings in one row container (the shared `ListRow` trailing slot, if it fits), each with its own role and label.
+  - **What it solves:** Screen readers reach the delete button, and the web build has no invalid nesting.
+  - **Expected result:** A reader render test finds the row and its delete button as separate buttons with their own labels; the web console warning is gone.
+
+- [ ] Close the custom mitzvah form after save even when it was opened by a link
+  - **Flag:** `OTA`.
+  - **What it is:** Found on 2026-10-25. [custom-mitzvah.tsx](src/app/custom-mitzvah.tsx) calls `router.back()` after save without `canGoBack()`, so a form opened by a deep link (or as the first screen) stays open and the router logs "GO_BACK was not handled". Change: go back when possible, else replace to the library (`/mitzvot`).
+  - **What it solves:** Saving always leaves the form.
+  - **Expected result:** A render test with `canGoBack()` false: saving replaces to `/mitzvot`.
+
+- [ ] Name the right Chanukah night in the reader's header
+  - **Flag:** `OTA`.
+  - **What it is:** Found on the Android emulator on 2026-10-25 (the same line exists before the 2026-10-24 batch). The reader's header takes the holiday line from `getHolidays()` for the night's Hebrew day ([src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>)), and hebcal labels each Chanukah day by the candles lit at its end, so on the first night (Friday 2026-12-04, the eve of 25 Kislev) the header says "חֲנוּכָּה: ב׳ נֵרוֹת" while the reminder says "הנר ה־1". Change: the header names the candles of the evening the text is read for (the civil day whose evening it is, the same night count `bodyParams` gives the reminder), one home for the count.
+  - **What it solves:** The header and the reminder agree on the night.
+  - **Expected result:** A reader render test on the evening of 2026-12-04 and of 2026-12-07 names the 1st and the 4th candle.
+
+- [ ] Refuse a malformed reminder offset instead of saving zero
+  - **Flag:** `OTA`.
+  - **What it is:** Found on the Android emulator on 2026-10-25. [ReminderEditor.tsx](src/components/ReminderEditor.tsx) reads the offset with `Number(x) || 0`, so a typo such as "-60-600" saves silently as +0. Change: a value that is not a whole number shows the existing range error (or a new `reminder.errors.offsetInvalid` in both dictionaries) and does not save.
+  - **What it solves:** A typo never turns into a reminder at the window's start.
+  - **Expected result:** A render test: "-60-600" shows the error and saves nothing; "-60" saves −60.
+
+- [ ] Keep a list row's switch reachable by screen readers
+  - **Flag:** `OTA`.
+  - **What it is:** Found in review on 2026-10-25. [ListRow.tsx](src/components/ListRow.tsx) draws its `trailing` element inside its own `Pressable`, which is accessible by default and so takes the whole row as one element. The mitzvah switches of [MitzvahLibraryList.tsx](src/components/MitzvahLibraryList.tsx), the notice switches of [NoticeSettingsCard.tsx](src/components/NoticeSettingsCard.tsx) and the master switches of [hilulot.tsx](src/app/hilulot.tsx) and [rosh-chodesh.tsx](src/app/rosh-chodesh.tsx) sit there, so iOS VoiceOver may never reach them, and on web a form control sits inside a `<button>`. Change: when `trailing` is given, the row is a plain container holding the pressable part (icon, title, caption) and the trailing element as siblings, each its own accessible element; a row without `trailing` keeps today's single `Pressable`. The web click guard (`keepClickOffRow`) goes away with the nesting.
+  - **What it solves:** Every switch in a list row is reachable and named for VoiceOver and TalkBack, and the web build holds no control inside a button.
+  - **Expected result:** A `ListRow` render test: with an `onPress` and a `Switch` as `trailing`, the row button and the switch are separate accessible elements, pressing the switch does not call `onPress`, and pressing the row does not toggle the switch; without `trailing` the row is one button as today. The library, notice-settings, hilulot and Rosh Chodesh suites stay green. A VoiceOver pass on TestFlight is the owner's.
+
+- [ ] Make the Chok LeYisrael enable-prompt case of the download suite deterministic
+  - **Flag:** `OTA` (test only).
+  - **What it is:** Found on 2026-10-25: the `ChokEnablePrompt` case of [ChokContentService.test.ts](src/services/__tests__/ChokContentService.test.ts) failed once in a full parallel `pnpm test` run and passed alone and on the re-run. Find what it waits on (a timer, a store subscription or a promise not awaited) and make it wait for the state it asserts. Run it after the Selichot add-on task, which moves that download code into the shared add-on core.
+  - **What it solves:** The gate never fails at random on that case.
+  - **Expected result:** The suite passes 20 runs in a row under `pnpm test -- --runInBand` and under the default parallel run.
 
 ## Open Questions
 
@@ -719,7 +525,7 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
 
 - **R1 — Kiddush Levana period.**
   - **Question:** When does Kiddush Levana start and end?
-  - **Assumption:** It starts 3 days after the molad (Ashkenaz) or 7 days after it (Sefard, Edot HaMizrach, Chabad). It ends 14 days 18 h 22 m after the molad (Ashkenaz, Sefard, Chabad) or 15 days after it (Edot HaMizrach). Nights only, not on Shabbat or Yom Tov nights. In Tishrei after Yom Kippur, in Av after Tisha B'Av. Women do not say it.
+  - **Assumption:** It starts 3 days after the molad (Ashkenaz) or 7 days after it (Sefard, Edot HaMizrach, Chabad). It ends 14 days 18 h 22 m after the molad (Ashkenaz, Sefard, Chabad) or 15 days after it (Edot HaMizrach). Said at night, not on Shabbat or Yom Tov nights (the app keeps one window from the first such night to the period's end, so the mitzvah stays on home by day too until it is marked, and its reminders fire only at nightfall and after a holy block's exit). In Tishrei after Yom Kippur, in Av after Tisha B'Av. Women do not say it.
   - **Lives in:** `kiddushLevanaPeriod()` in [src/utils/siddur.ts](src/utils/siddur.ts).
 - **R2 — Selichot.**
   - **Question:** Are the seasons and the hours right?
@@ -759,8 +565,23 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
   - **Question:** What does a man read when he lights?
   - **Assumption:** He reads the woman-voiced text in the masculine: הריני נותן, "על אשתי".
   - **Lives in:** the same voice patches.
+- **R10 — Ushpizin text and who is offered it.**
+  - **Question:** Are the text, its hours and its audience right?
+  - **Assumption:**
+    - An evening text, from the afternoon before each night through that night, so a day meal of day N shows night N+1's guest and Hoshana Rabba day has it closed (Daat and Torat Emet print "ובכל יום קודם סעודתו").
+    - In the Yehi Ratzon "לְעַבְדֶּךָ (פב"פ) אֲמָתֶךָ" names the mother; a woman reads "שֶׁאֲנִי מְקַיֵּם" and "לְעַבְדֶּךָ" as printed.
+    - Women are offered it, on by default.
+    - Sefard is Torat Emet, Hebrew only, without the "עולו אושפיזין … ליעול" passage that Metsudah Shabbat and Edot HaMizrach print; the prayers on leaving the sukkah and Edot's Zohar for the sukkah meal are left out.
+    - The Ashkenaz and Sefard texts say "תיבו אושפיזין", not "עולו", so R5's reason for leaving Chabad out wants checking against the Chabad custom itself.
+  - **Lives in:** `ushpizin` in `STANDALONE_TEXTS` ([src/data/siddur.ts](src/data/siddur.ts)), `ashkenazUshpizin()`, `sefardUshpizin()` and `edotUshpizin()` in [scripts/siddur/manifest.js](scripts/siddur/manifest.js), and `MENS_MITZVOT` in [src/stores/taharahOptIn.ts](src/stores/taharahOptIn.ts).
 
 ## Other Open Items
+
+- **Release order for the 2026-10-24 batch.** Push `docs/` to `main` and confirm it is live before the OTA: the new bundle refuses a Chok manifest without `gz` (`curl -s https://jew-365.github.io/jew-365/chok/manifest.json` must show `gz` and `gzipBytes`, and `curl -sI` on one `.json.gz` must show `application/gzip` with no `Content-Encoding`), and the "Delete your data" link opens the privacy policy, whose Settings path changed with the batch. The About and contact store row opens the Play and App Store pages, which answer 404 until the app is public.
+
+- **A fresh install's first session runs the build's own bundle.** The fix that stamps a fresh install's default mitzvot with its first launch (so a new user is never asked about the Shabbat before the install) is in the JavaScript bundle, but `updates` in [app.json](app.json) sets no `fallbackToCacheTimeout`, so a new install of build 1.0.21 first launches the bundle embedded in the build, which stamps nothing, and a user who onboards in that first session keeps an unstamped map. The fix reaches every new user only once a native build carries it. Until then, a user installing on a Sunday may still see the check-in for the Shabbat before the install. The emulator check of that fix runs a dev-client bundle from Metro, not the EAS APK plus an update.
+
+- **Send the rav the review page.** After the push to `main` publishes [docs/halacha-review.html](docs/halacha-review.html), confirm `curl -sI https://jew-365.github.io/jew-365/halacha-review.html` answers 200, then send the rav its link (the owner's step; no real submit was tried, because a submit emails 365jew through Formspree `xwlvgagp`). Each answer that is not "נכון" becomes a change to that one rule and a new `RULES_VERSION`.
 
 - **Every project account moves to 365jew@gmail.com** (the user's call, 2026-10-20). Done in the repo: `CONTACT_EMAIL` in [ContactService.ts](src/services/ContactService.ts), the support page, both privacy policies and the taharah review page; `CONTACT_FORM_ID` is the new Formspree form `mrpevdbk` on 365jew; this repo's local `git config user.email`; `owner` in [app.json](app.json) is `jew-365-org`; `credentials.json`, `credentials/` and `*.keystore` gitignored; `origin` and every Pages URL moved to the GitHub organization `jew-365` (`https://jew-365.github.io/jew-365/`, all four pages answer 200; the old address is dead). The 88 earlier commits keep avi6190i@gmail.com (no history rewrite, the user's call). Done by the user: the Formspree account and form on 365jew, and the old form `xyekordk` retargeted to 365jew as a linked email (kept alive until no install of the previous app remains, because its update 1.0.19-2 posts to it); the GitHub organization `jew-365` with 365jew as its email, 365jew verified on the personal account, `jew-365` transferred to it; 2-Step Verification, a passkey, a verified recovery email and offline backup codes on 365jew; the Expo user `jew-365` on 365jew, Owner of the organization `jew-365-org`, which owns the project now (`@jew-365-org/jew-365`, same project ID, so updates still reach build 1.0.20, which moved with it), its stored keystore read again after the move with the same SHA-256, `avraham-sason` removed from the organization and 2FA on the Expo user `jew-365`; 365jew an admin of the Play Console, which stays owned by avi6190i (the user's call: moving the ownership would repeat the identity verification); a backup of the Android keystore from `eas credentials -p android`, encrypted into `jew365-keystore.tar.gz.enc` (AES-256-CBC, PBKDF2 600000 iterations, SHA-256; the plain folder deleted only after a decrypted copy matched it) and uploaded to the Google Drive of 365jew, its passphrase kept outside that account; the key's SHA-256 is `DC:62:0E:28:E9:67:30:98:E8:90:88:B7:09:FB:6D:B8:F9:C0:B1:E6:80:D9:52:60:3B:A8:9C:F4:3B:AE:00:B4`; 365jew as the contact email of the Play store listing and the owner of the testers group (2026-10-20). Left for the user: `com.jew365.app` registered in the Play Console with the SHA-256 above for Android developer verification, which from 2027 covers the direct APK too; Sentry and the Apple Developer account opened on 365jew; the empty `@avraham-sason/jew-360` Expo project deleted.
 - **iOS 1.0.21 is in App Store review, manual release.** EAS build `72c51b1e` (buildNumber 4) was submitted on 2026-10-23 with every App Store Connect page filled ([release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md), [release/RELEASE_LOG.md](release/RELEASE_LOG.md)); after approval it waits for the owner's Release. Before releasing: the TestFlight checks on a real iPhone (public link https://testflight.apple.com/join/cZeSqPzG, live since the Beta App Review passed on 2026-10-23). Still open: the EU trader status. Trader chosen, email and phone verified; the identification documents (no Hebrew accepted) wait for the owner's passport, and until they are in, the app is not offered in the EU storefronts. iOS builds and submissions run as `npx eas-cli@latest …`, because the project's eas-cli failed the Apple login.

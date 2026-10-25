@@ -11,6 +11,7 @@ import { ChipRow } from '@/components/ChipRow';
 import { DayStepper, formatDayLine } from '@/components/DayStepper';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
+import { normalizeTimeInput, timeInputKeyboard } from '@/components/TimeField';
 import { useNow } from '@/hooks/useNow';
 import { HebcalService } from '@/services/HebcalService';
 import { ZmanimService } from '@/services/ZmanimService';
@@ -195,11 +196,12 @@ export default function TaharahLog() {
             ) : (
               <>
                 <TextInput
+                  accessibilityLabel={t('taharah.log.time')}
                   value={time}
-                  onChangeText={setTime}
+                  onChangeText={(raw) => setTime(normalizeTimeInput(raw))}
                   placeholder="HH:mm"
                   placeholderTextColor={colors.textMuted}
-                  keyboardType="numbers-and-punctuation"
+                  keyboardType={timeInputKeyboard()}
                   maxLength={5}
                   style={[
                     styles.input,

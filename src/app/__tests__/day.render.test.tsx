@@ -25,11 +25,15 @@ import { DateTime } from 'luxon';
 import DayRoute from '../day/[date]';
 import { MitzvahCard } from '@/components/MitzvahCard';
 import { CITIES } from '@/data/cities';
+import { formatDate } from '@/i18n';
 import { RETENTION_DAYS, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
+import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useUserStore } from '@/stores/useUserStore';
+import { HIDDEN_INTL_NAMES, hideIntlDateNames } from '@/testing/intl';
 import { renderWithTheme } from '@/testing/render';
-import { at } from '@/testing/zmanim';
+import { installSelichotFixture } from '@/testing/selichot';
+import { at, zmanimFor } from '@/testing/zmanim';
 
 const JERUSALEM = CITIES[0];
 const ONLY_DATE = [
@@ -43,9 +47,9 @@ const ONLY_DATE = [
   'clearTimeout',
 ] as const;
 
-const october = (day: number) => DateTime.fromObject({ year: 2026, month: 10, day }).setLocale('he');
-const title = (day: number) => october(day).toFormat('cccc d LLLL yyyy');
-const label = (day: number) => october(day).toFormat('cccc d LLLL');
+const october = (day: number) => DateTime.fromObject({ year: 2026, month: 10, day });
+const title = (day: number) => formatDate(october(day), 'cccc d LLLL yyyy', 'he');
+const label = (day: number) => formatDate(october(day), 'cccc d LLLL', 'he');
 
 describe('day view', () => {
   beforeEach(() => {
@@ -65,6 +69,7 @@ describe('day view', () => {
       locationStatus: 'ready',
     });
     useCompletionsStore.getState().reset();
+    useSelichotStore.getState().reset();
     useMitzvotStore.setState({ activeMitzvot: { tefillin: { enabled: true }, shacharit: { enabled: true } } });
   });
 
@@ -145,5 +150,94 @@ describe('day view', () => {
     renderWithTheme(<DayRoute />);
     const icons = screen.UNSAFE_getAllByType(MitzvahCard).map((card) => card.props.icon);
     expect(icons.sort()).toEqual(['shacharit', 'tefillin']);
+  });
+
+  it("does not call a past day's item missed while its window is open", () => {
+    useMitzvotStore.setState({ activeMitzvot: { kiddush_levana: { enabled: true } } });
+    mockParams.date = '2026-10-14';
+    jest.setSystemTime(at(JERUSALEM, '2026-10-18T20:00'));
+    const open = renderWithTheme(<DayRoute />);
+    expect(screen.getByText('קידוש לבנה')).toBeOnTheScreen();
+    expect(screen.queryByText('לא בוצע')).toBeNull();
+    open.unmount();
+    jest.setSystemTime(at(JERUSALEM, '2026-10-27T12:00'));
+    renderWithTheme(<DayRoute />);
+    expect(screen.getByText('לא בוצע')).toBeOnTheScreen();
+  });
+
+  it('leaves out of a past day the mitzvot switched on after it ended, as history does', () => {
+    const switchedOn = at(JERUSALEM, '2026-10-28T09:00').getTime();
+    useMitzvotStore.setState({
+      activeMitzvot: {
+        tefillin: { enabled: true, enabledAt: switchedOn },
+        shacharit: { enabled: true, enabledAt: switchedOn },
+      },
+    });
+    mockParams.date = '2026-10-27';
+    const past = renderWithTheme(<DayRoute />);
+    expect(screen.UNSAFE_queryAllByType(MitzvahCard)).toHaveLength(0);
+    expect(screen.queryByText('לא בוצע')).toBeNull();
+    expect(screen.getByText('אין מצוות ליום זה.')).toBeOnTheScreen();
+    past.unmount();
+
+    mockParams.date = '2026-10-28';
+    renderWithTheme(<DayRoute />);
+    expect(screen.UNSAFE_getAllByType(MitzvahCard)).toHaveLength(2);
+  });
+
+  it('shows a done mark made before the mitzvah was switched on again, and no miss beside it', () => {
+    const switchedOnAgain = at(JERUSALEM, '2026-10-28T09:00').getTime();
+    useMitzvotStore.setState({
+      activeMitzvot: {
+        tefillin: { enabled: true, enabledAt: switchedOnAgain },
+        shacharit: { enabled: true, enabledAt: switchedOnAgain },
+      },
+    });
+    useCompletionsStore.setState({
+      completions: { '2026-10-27': { tefillin: at(JERUSALEM, '2026-10-27T07:30').getTime() } },
+    });
+    mockParams.date = '2026-10-27';
+    renderWithTheme(<DayRoute />);
+    const cards = screen.UNSAFE_getAllByType(MitzvahCard);
+    expect(cards.map((card) => [card.props.icon, card.props.done])).toEqual([['tefillin', true]]);
+    expect(screen.getByText('1/1')).toBeOnTheScreen();
+    expect(screen.queryByText('לא בוצע')).toBeNull();
+  });
+
+  it("prints a future day's Selichot window on the location's clock, both ends the next day", () => {
+    installSelichotFixture();
+    jest.setSystemTime(at(JERUSALEM, '2025-09-14T10:00'));
+    useMitzvotStore.setState({ activeMitzvot: { selichot: { enabled: true } } });
+    const clock = (instant: Date) => DateTime.fromJSDate(instant, { zone: JERUSALEM.tz }).toFormat('HH:mm');
+    const start = clock(zmanimFor(at(JERUSALEM, '2025-09-15T12:00'), JERUSALEM).chatzotLayla);
+    const end = clock(zmanimFor(at(JERUSALEM, '2025-09-16T12:00'), JERUSALEM).sofZmanTfilaGra);
+    mockParams.date = '2025-09-15';
+    renderWithTheme(<DayRoute />);
+    expect(screen.getByText(`${start} עד ${end} למחרת`)).toBeOnTheScreen();
+  });
+
+  describe.each(HIDDEN_INTL_NAMES)('without Intl weekday and month names (%s, Hermes on iOS)', (mode) => {
+    let restore: () => void;
+    beforeAll(() => {
+      restore = hideIntlDateNames(mode);
+    });
+    afterAll(() => restore());
+
+    it('titles the day and names both arrows in Hebrew and English, never "null"', () => {
+      mockParams.date = '2026-10-28';
+      const hebrew = renderWithTheme(<DayRoute />);
+      expect(screen.getByText('יום רביעי 28 אוקטובר 2026')).toBeOnTheScreen();
+      expect(screen.getByRole('button', { name: 'היום הקודם, יום שלישי 27 אוקטובר' })).toBeOnTheScreen();
+      expect(screen.getByRole('button', { name: 'היום הבא, יום חמישי 29 אוקטובר' })).toBeOnTheScreen();
+      expect(screen.queryByText(/null/)).toBeNull();
+      hebrew.unmount();
+
+      useUserStore.setState({ language: 'en' });
+      renderWithTheme(<DayRoute />);
+      expect(screen.getByText('Wednesday, Oct 28 2026')).toBeOnTheScreen();
+      expect(screen.getByRole('button', { name: 'Previous day, Tuesday, Oct 27' })).toBeOnTheScreen();
+      expect(screen.getByRole('button', { name: 'Next day, Thursday, Oct 29' })).toBeOnTheScreen();
+      expect(screen.queryByText(/null/)).toBeNull();
+    });
   });
 });

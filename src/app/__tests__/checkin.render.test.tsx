@@ -14,7 +14,7 @@ jest.mock('@/services/NotificationScheduler', () => ({
   },
 }));
 
-import { fireEvent, screen } from '@testing-library/react-native';
+import { act, fireEvent, screen } from '@testing-library/react-native';
 import CheckInRoute from '../checkin';
 import { MitzvahCard } from '@/components/MitzvahCard';
 import { CITIES } from '@/data/cities';
@@ -73,5 +73,14 @@ describe('check-in', () => {
     const cards = screen.UNSAFE_getAllByType(MitzvahCard);
     expect(cards.length).toBeGreaterThan(0);
     expect(cards.some((card) => card.props.icon === 'custom')).toBe(false);
+  });
+
+  it("lists Friday night's bedtime Shema with the night icon and files its mark under Friday", async () => {
+    renderWithTheme(<CheckInRoute />);
+    await screen.findByText(/מה עשית בשבת/);
+    const card = screen.UNSAFE_getAllByType(MitzvahCard).find((node) => node.props.name === 'קריאת שמע על המיטה');
+    expect(card?.props.icon).toBe('night');
+    act(() => card!.props.onComplete());
+    expect(useCompletionsStore.getState().completions['2026-11-13']?.krias_shma_al_hamita).toBeTruthy();
   });
 });

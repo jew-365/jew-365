@@ -17,6 +17,7 @@ import { DateTime } from 'luxon';
 import ScheduleScreen from '../schedule';
 import { Card } from '@/components/Card';
 import { CITIES } from '@/data/cities';
+import { formatDate } from '@/i18n';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
@@ -37,7 +38,7 @@ const ONLY_DATE = [
 ] as const;
 
 const cursorLabel = (day: number) =>
-  DateTime.fromObject({ year: 2026, month: 10, day }).setLocale('he').toFormat('cccc d LLL');
+  formatDate(DateTime.fromObject({ year: 2026, month: 10, day }), 'cccc d LLL', 'he');
 
 describe('schedule', () => {
   beforeEach(() => {
@@ -70,5 +71,11 @@ describe('schedule', () => {
     renderWithTheme(<ScheduleScreen />);
     fireEvent.press(screen.getByRole('button', { name: 'הבא' }));
     expect(screen.getByText(cursorLabel(29))).toBeOnTheScreen();
+  });
+
+  it('names the month in the month view header', () => {
+    renderWithTheme(<ScheduleScreen />);
+    fireEvent.press(screen.getByRole('radio', { name: 'חודש' }));
+    expect(screen.getByText('אוקטובר')).toBeOnTheScreen();
   });
 });

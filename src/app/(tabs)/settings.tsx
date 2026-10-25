@@ -37,8 +37,11 @@ import {
   contactFailureKey,
   contactMailUrl,
   contactProblem,
+  dataDeletionUrl,
   isContactConfigured,
+  PRODUCT_LINKS,
   sendContactMessage,
+  storePageUrl,
 } from '@/services/ContactService';
 import { reportError } from '@/services/errors';
 import { openBatteryOptimizationSettings, supportsBatteryOptimizationSettings } from '@/services/deviceSettings';
@@ -49,6 +52,8 @@ import {
   setTaharahTracking,
   taharahOffered,
 } from '@/stores/taharahOptIn';
+import { useChokStore } from '@/stores/useChokStore';
+import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { useMitzvotStore, type ActiveMitzvahState } from '@/stores/useMitzvotStore';
 import { useUserStore, type Gender, type PrayerMode } from '@/stores/useUserStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -69,10 +74,16 @@ import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { translate, useI18n } from '@/i18n';
 import { CITIES, cityOf, getLocationName } from '@/data/cities';
+import { getAllMitzvot } from '@/data/customMitzvotAdapter';
+import type { ChokThuNightDay } from '@/types/chok';
+import { findMitzvah } from '@/data/mitzvot';
 import { Nusach } from '@/types/mitzvah';
+import type { SiddurVoice } from '@/types/siddur';
 import {
+  SETTINGS_SEARCH_ITEMS,
   buildSettingsSearchIndex,
   searchSettings,
+  settingsContentItems,
   type SettingsSearchItem,
   type SettingsSectionKey,
 } from '@/utils/settingsSearch';
@@ -83,13 +94,20 @@ const OPINIONS = ['GRA', 'MA'] as const;
 const GENDERS = ['male', 'female'] as const;
 const MARITAL_STATUSES = ['married', 'single'] as const;
 const PRAYER_MODES: readonly PrayerMode[] = ['minyan', 'alone'];
+const SIDDUR_VOICES: readonly SiddurVoice[] = ['male', 'female'];
+const CHOK_THU_NIGHT_DAYS: readonly ChokThuNightDay[] = ['thu', 'fri'];
 const CITY_INDEXES = CITIES.map((_, index) => index);
 
 const FOCUS_HIGHLIGHT_MS = 2500;
 
-// Returns a number, so the subscription re-renders only when the count itself changes.
-const selectEnabledCount = (state: { activeMitzvot: Record<string, ActiveMitzvahState> }): number =>
-  Object.values(state.activeMitzvot).filter((active) => active.enabled).length;
+// Returns a number, so the subscription re-renders only when the count itself changes. A registry
+// mitzvah the nusach does not offer (Ushpizin for Chabad) is not counted, as the library does not show it.
+const selectEnabledCount =
+  (nusach: Nusach) =>
+  (state: { activeMitzvot: Record<string, ActiveMitzvahState> }): number =>
+    Object.entries(state.activeMitzvot).filter(
+      ([id, active]) => active.enabled && (findMitzvah(id)?.nuschaotSupported.includes(nusach) ?? true),
+    ).length;
 
 export default function SettingsScreen() {
   const { colors } = useTheme();
@@ -109,9 +127,13 @@ export default function SettingsScreen() {
       siddurAutoScroll: s.siddurAutoScroll,
       siddurScrollSpeed: s.siddurScrollSpeed,
       prayerMode: s.prayerMode,
+      siddurVoice: s.siddurVoice,
+      chokCommentaryOpen: s.chokCommentaryOpen,
+      chokThuNightDay: s.chokThuNightDay,
       taharahEnabled: s.taharahEnabled,
       weeklyReportEnabled: s.weeklyReportEnabled,
       location: s.location,
+      inIsrael: s.inIsrael,
       locationStatus: s.locationStatus,
       theme: s.theme,
       language: s.language,
@@ -124,13 +146,18 @@ export default function SettingsScreen() {
       setSiddurAutoScroll: s.setSiddurAutoScroll,
       setSiddurScrollSpeed: s.setSiddurScrollSpeed,
       setPrayerMode: s.setPrayerMode,
+      setSiddurVoice: s.setSiddurVoice,
+      setChokCommentaryOpen: s.setChokCommentaryOpen,
+      setChokThuNightDay: s.setChokThuNightDay,
       setWeeklyReportEnabled: s.setWeeklyReportEnabled,
       setTheme: s.setTheme,
       setLanguage: s.setLanguage,
       setKsOpinion: s.setKsOpinion,
     })),
   );
-  const enabledMitzvotCount = useMitzvotStore(selectEnabledCount);
+  const enabledMitzvotCount = useMitzvotStore(selectEnabledCount(user.nusach));
+  const customMitzvot = useCustomMitzvotStore((s) => s.items);
+  const chokInstalled = useChokStore((s) => s.installed !== null);
   const savedCityId = cityOf(user.location)?.cityId;
   // Held locally and committed on blur. Bound straight to the store, every keystroke serialised
   // the whole user store to MMKV and re-rendered the entire settings tree.
@@ -149,6 +176,7 @@ export default function SettingsScreen() {
   const [contactStatus, setContactStatus] = useState<{ text: string; failed: boolean } | null>(null);
   const [open, setOpen] = useState<ReadonlySet<SettingsSectionKey>>(() => new Set());
   const [query, setQuery] = useState('');
+  const [searchNow, setSearchNow] = useState(() => new Date());
   const [focusTarget, setFocusTarget] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const contentRef = useRef<View>(null);
@@ -157,6 +185,7 @@ export default function SettingsScreen() {
     useCallback(() => {
       setOpen(new Set());
       setQuery('');
+      setSearchNow(new Date());
       setFocusTarget(null);
       syncNotificationPermissionStatus().catch((error) => reportError('schedule', error));
     }, []),
@@ -169,13 +198,37 @@ export default function SettingsScreen() {
   }, [focusTarget]);
 
   const taharahVisible = taharahOffered(user);
+  const storeUrl = storePageUrl();
   const searchIndex = useMemo(
     () =>
-      buildSettingsSearchIndex((key) => [
-        translate(key, undefined, 'he', user.gender),
-        translate(key, undefined, 'en', user.gender),
-      ]),
-    [user.gender],
+      buildSettingsSearchIndex(
+        (key) => [translate(key, undefined, 'he', user.gender), translate(key, undefined, 'en', user.gender)],
+        [
+          ...SETTINGS_SEARCH_ITEMS,
+          ...settingsContentItems({
+            mitzvot: getAllMitzvot(user.nusach),
+            nusach: user.nusach,
+            voice: user.siddurVoice,
+            maritalStatus: user.maritalStatus,
+            chokInstalled,
+            now: searchNow,
+            location: user.location,
+            inIsrael: user.inIsrael,
+          }),
+        ],
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- customMitzvot re-runs the memo on purpose; getAllMitzvot() reads it from the store
+    [
+      user.gender,
+      user.nusach,
+      user.siddurVoice,
+      user.maritalStatus,
+      user.location,
+      user.inIsrael,
+      chokInstalled,
+      customMitzvot,
+      searchNow,
+    ],
   );
   const results = useMemo(
     () =>
@@ -221,9 +274,16 @@ export default function SettingsScreen() {
     setQuery(next);
   };
 
+  const closedOf = (item: SettingsSearchItem) => (item.kind ? item.closed : undefined);
+
   const chooseResult = (item: SettingsSearchItem) => {
+    if (closedOf(item)) return;
     Keyboard.dismiss();
     setQuery('');
+    if (item.kind) {
+      router.push(item.href);
+      return;
+    }
     if (item.route) {
       router.push(item.route);
       return;
@@ -232,6 +292,18 @@ export default function SettingsScreen() {
       openSection(item.section);
       setFocusTarget(item.id);
     }
+  };
+
+  const inLanguage = (name: { he: string; en: string }) => (language === 'en' ? name.en : name.he);
+  const resultCaption = (item: SettingsSearchItem) => {
+    const closed = closedOf(item);
+    const closedCaption = closed ? (closed.label ? inLanguage(closed.label) : t('siddur.catalog.notToday')) : null;
+    if (item.kind === 'chapter') {
+      const caption = t('settings.search.kind.chapter', { text: inLanguage(item.textName) });
+      return closedCaption ? `${caption} · ${closedCaption}` : caption;
+    }
+    if (item.kind) return closedCaption ?? t(`settings.search.kind.${item.kind}`);
+    return item.section ? t(`settings.${item.section}`) : t('settings.searchScreen');
   };
 
   const reveal = useCallback((target: View) => {
@@ -384,7 +456,10 @@ export default function SettingsScreen() {
               <TextInput
                 value={query}
                 onChangeText={changeQuery}
-                onSubmitEditing={() => (results[0] ? chooseResult(results[0]) : undefined)}
+                onSubmitEditing={() => {
+                  const target = results.find((item) => !closedOf(item));
+                  if (target) chooseResult(target);
+                }}
                 placeholder={t('settings.searchPlaceholder')}
                 placeholderTextColor={colors.textMuted}
                 accessibilityLabel={t('settings.search')}
@@ -413,10 +488,12 @@ export default function SettingsScreen() {
                   <ListRow
                     key={item.id}
                     icon={item.icon}
-                    title={t(item.titleKey)}
-                    caption={item.section ? t(`settings.${item.section}`) : t('settings.searchScreen')}
+                    iconTone={closedOf(item) ? 'muted' : 'accent'}
+                    title={item.kind ? inLanguage(item.title) : t(item.titleKey)}
+                    caption={resultCaption(item)}
                     onPress={() => chooseResult(item)}
-                    chevron
+                    chevron={!closedOf(item)}
+                    disabled={Boolean(closedOf(item))}
                   />
                 ))}
               </Card>
@@ -537,6 +614,15 @@ export default function SettingsScreen() {
                     {t('settings.prayerModeHint')}
                   </Text>
                 </Anchor>
+                <Anchor {...anchor('siddurVoice')}>
+                  <SectionLabel variant="field" text={t('settings.siddurVoice')} style={styles.fieldLabel} />
+                  <ChipRow
+                    values={SIDDUR_VOICES}
+                    selected={user.siddurVoice}
+                    onSelect={user.setSiddurVoice}
+                    renderLabel={(value) => t(`settings.siddurVoice.${value}`)}
+                  />
+                </Anchor>
                 <Anchor {...anchor('reading')}>
                   <SectionLabel variant="field" text={t('settings.reading')} style={styles.fieldLabel} />
                   <SwitchRow
@@ -549,6 +635,24 @@ export default function SettingsScreen() {
                     <Text style={[typography.bodyBold, { color: colors.text }]}>{t('settings.autoScrollSpeed')}</Text>
                     <ScrollSpeedStepper level={user.siddurScrollSpeed} onChange={user.setSiddurScrollSpeed} />
                   </View>
+                </Anchor>
+                <Anchor {...anchor('chokCommentary')}>
+                  <SwitchRow
+                    label={t('settings.chokCommentaryOpen')}
+                    hint={t('settings.chokCommentaryOpenHint')}
+                    value={user.chokCommentaryOpen}
+                    onValueChange={user.setChokCommentaryOpen}
+                    style={styles.groupGap}
+                  />
+                </Anchor>
+                <Anchor {...anchor('chokThuNightDay')}>
+                  <SectionLabel variant="field" text={t('settings.chokThuNightDay')} style={styles.fieldLabel} />
+                  <ChipRow
+                    values={CHOK_THU_NIGHT_DAYS}
+                    selected={user.chokThuNightDay}
+                    onSelect={user.setChokThuNightDay}
+                    renderLabel={(value) => t(`chok.thuNight.${value}`)}
+                  />
                 </Anchor>
               </SettingsSection>
 
@@ -660,54 +764,55 @@ export default function SettingsScreen() {
                     renderLabel={(value) => t(`settings.language.${value}`)}
                   />
                 </Anchor>
-
-                <SectionLabel text={t('settings.app')} style={[styles.subHeading, subHeadingTone]} />
-                <Anchor {...anchor('reset')}>
-                  <Button variant="danger" label={t('settings.logout')} onPress={() => setResetVisible(true)} />
-                </Anchor>
-
-                <Anchor {...anchor('version')}>
-                  <Text style={[typography.small, styles.versionText, { color: colors.textMuted }]}>
-                    {t('settings.version', { version: appVersionLabel() })}
-                  </Text>
-                </Anchor>
               </SettingsSection>
 
-              {Platform.OS !== 'web' ? (
-                <SettingsSection
-                  title={t('settings.backup')}
-                  subtitle={t('settings.backupSummary')}
-                  icon="cloud"
-                  {...collapsible('backup')}
-                >
-                  <Text style={[typography.small, { color: colors.textMuted }]}>
-                    {t(Platform.OS === 'ios' ? 'settings.backupHint.ios' : 'settings.backupHint.android')}
-                  </Text>
-                  {user.taharahEnabled ? (
-                    <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>
-                      {t('settings.backupTaharah')}
+              <SettingsSection
+                title={t('settings.backup')}
+                subtitle={t(Platform.OS !== 'web' ? 'settings.backupSummary' : 'settings.backupSummaryWeb')}
+                icon="cloud"
+                {...collapsible('backup')}
+              >
+                {Platform.OS !== 'web' ? (
+                  <View style={styles.backupFiles}>
+                    <Text style={[typography.small, { color: colors.textMuted }]}>
+                      {t(Platform.OS === 'ios' ? 'settings.backupHint.ios' : 'settings.backupHint.android')}
                     </Text>
-                  ) : null}
-                  <Anchor {...anchor('backupExport')}>
-                    <Button label={t('settings.backupExport')} onPress={exportBackupFile} style={styles.buttonGap} />
-                  </Anchor>
-                  <Anchor {...anchor('backupImport')}>
-                    <Button label={t('settings.backupImport')} onPress={chooseBackupFile} style={styles.buttonGap} />
-                  </Anchor>
-                  {backupStatus ? (
-                    <Text
-                      accessibilityLiveRegion="polite"
-                      style={[
-                        typography.small,
-                        styles.note,
-                        { color: backupStatus.failed ? colors.urgent : colors.textMuted },
-                      ]}
-                    >
-                      {backupStatus.text}
-                    </Text>
-                  ) : null}
-                </SettingsSection>
-              ) : null}
+                    {user.taharahEnabled ? (
+                      <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>
+                        {t('settings.backupTaharah')}
+                      </Text>
+                    ) : null}
+                    <Anchor {...anchor('backupExport')}>
+                      <Button label={t('settings.backupExport')} onPress={exportBackupFile} style={styles.buttonGap} />
+                    </Anchor>
+                    <Anchor {...anchor('backupImport')}>
+                      <Button label={t('settings.backupImport')} onPress={chooseBackupFile} style={styles.buttonGap} />
+                    </Anchor>
+                    {backupStatus ? (
+                      <Text
+                        accessibilityLiveRegion="polite"
+                        style={[
+                          typography.small,
+                          styles.note,
+                          { color: backupStatus.failed ? colors.urgent : colors.textMuted },
+                        ]}
+                      >
+                        {backupStatus.text}
+                      </Text>
+                    ) : null}
+                  </View>
+                ) : null}
+                <Anchor {...anchor('reset')}>
+                  <Button variant="danger" label={t('settings.logout')} onPress={() => setResetVisible(true)} />
+                  <Pressable
+                    onPress={() => openLink(dataDeletionUrl(language))}
+                    accessibilityRole="link"
+                    style={[styles.link, styles.buttonGap]}
+                  >
+                    <Text style={[typography.bodyBold, { color: colors.goldText }]}>{t('settings.deleteData')}</Text>
+                  </Pressable>
+                </Anchor>
+              </SettingsSection>
 
               <SettingsSection
                 title={t('settings.contact')}
@@ -715,6 +820,11 @@ export default function SettingsScreen() {
                 icon="chat"
                 {...collapsible('contact')}
               >
+                <Anchor {...anchor('version')}>
+                  <Text style={[typography.small, styles.versionText, { color: colors.textMuted }]}>
+                    {t('settings.version', { version: appVersionLabel() })}
+                  </Text>
+                </Anchor>
                 <Anchor {...anchor('contact')}>
                   <Text style={[typography.small, { color: colors.textMuted }]}>{t('settings.contactHint')}</Text>
                   {isContactConfigured() ? (
@@ -777,13 +887,51 @@ export default function SettingsScreen() {
                   <Text style={[typography.small, styles.groupGap, { color: colors.textMuted }]}>
                     {t('settings.contactEmail')}
                   </Text>
-                  <Pressable
-                    onPress={() => Linking.openURL(contactMailUrl()).catch(() => {})}
-                    accessibilityRole="link"
-                    style={styles.emailLink}
-                  >
+                  <Pressable onPress={() => openLink(contactMailUrl())} accessibilityRole="link" style={styles.link}>
                     <Text style={[typography.bodyBold, { color: colors.goldText }]}>{CONTACT_EMAIL}</Text>
                   </Pressable>
+                </Anchor>
+                <Anchor {...anchor('links')}>
+                  <SectionLabel variant="field" text={t('settings.links')} style={styles.fieldLabel} />
+                  <Card divided>
+                    <ListRow
+                      icon="guide"
+                      title={t('guide.title')}
+                      caption={t('settings.linkGuideCaption')}
+                      onPress={() => router.push('/guide')}
+                      chevron
+                    />
+                    <ListRow
+                      icon="chat"
+                      title={t('settings.linkSupport')}
+                      caption={t('settings.linkSupportCaption')}
+                      onPress={() => openLink(PRODUCT_LINKS.support)}
+                      chevron
+                    />
+                    <ListRow
+                      icon="user"
+                      title={t('settings.linkPrivacy')}
+                      caption={t('settings.linkPrivacyCaption')}
+                      onPress={() => openLink(PRODUCT_LINKS.privacy[language])}
+                      chevron
+                    />
+                    {storeUrl ? (
+                      <ListRow
+                        icon="star"
+                        title={t(Platform.OS === 'ios' ? 'settings.linkStore.ios' : 'settings.linkStore.android')}
+                        caption={t('settings.linkStoreCaption')}
+                        onPress={() => openLink(storeUrl)}
+                        chevron
+                      />
+                    ) : null}
+                    <ListRow
+                      icon="chok"
+                      title={t('settings.linkChok')}
+                      caption={t('settings.linkChokCaption')}
+                      onPress={() => openLink(PRODUCT_LINKS.chokLicense)}
+                      chevron
+                    />
+                  </Card>
                 </Anchor>
               </SettingsSection>
             </>
@@ -898,6 +1046,10 @@ function SwitchRow({ label, hint, value, onValueChange, style }: SwitchRowProps)
   );
 }
 
+function openLink(url: string) {
+  Linking.openURL(url).catch(() => {});
+}
+
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
@@ -992,12 +1144,14 @@ const styles = StyleSheet.create({
   messageInput: {
     minHeight: 120,
   },
-  emailLink: {
+  link: {
     alignSelf: 'flex-start',
     paddingVertical: spacing.sm,
   },
+  backupFiles: {
+    marginBottom: spacing.lg,
+  },
   versionText: {
-    textAlign: 'center',
-    marginTop: spacing.lg,
+    marginBottom: spacing.md,
   },
 });

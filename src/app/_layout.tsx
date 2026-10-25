@@ -35,9 +35,12 @@ import { BRAND, T_LIGHT } from '@/theme/colors';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies } from '@/theme/typography';
 import { useUserStore } from '@/stores/useUserStore';
+import { applyGenderDefaultsToNew } from '@/stores/taharahOptIn';
 import { initNotificationHandlers } from '@/services/NotificationScheduler';
 import { captureException } from '@/services/crashReporting';
 import { reconcileChokInstall } from '@/services/ChokContentService';
+import { reconcileSelichotInstall } from '@/services/SelichotContentService';
+import { reconcileEndedCustomMitzvot } from '@/stores/customMitzvahLifecycle';
 import {
   initNotificationResponseHandler,
   consumePendingNotificationRoute,
@@ -48,6 +51,7 @@ import { StorageService } from '@/services/StorageService';
 import { HebcalService } from '@/services/HebcalService';
 import { QuietBlockContext, ShabbatScreen } from '@/components/ShabbatScreen';
 import { UpdateBanner } from '@/components/UpdateBanner';
+import { ChokEnablePrompt } from '@/components/ChokEnablePrompt';
 import { nextQuietBoundary, quietBlockAt } from '@/utils/skipRules';
 import { CHECK_IN_PROMPTED_KEY, latestCheckIn } from '@/utils/checkIn';
 import { getAllMitzvot } from '@/data/customMitzvotAdapter';
@@ -103,6 +107,7 @@ const needsRtlBootstrap =
   !StorageService.get<boolean>(RTL_BOOTSTRAP_KEY);
 if (needsRtlBootstrap) StorageService.set(RTL_BOOTSTRAP_KEY, true);
 syncLayoutDirection(initialLanguage, needsRtlBootstrap);
+applyGenderDefaultsToNew();
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -165,6 +170,10 @@ function RootInner() {
     if (!checkIn?.open || StorageService.get<string>(CHECK_IN_PROMPTED_KEY) === checkIn.id) return;
     router.push('/checkin');
   }, [quiet, isOnboarded, now, router, firstSegment]);
+
+  useEffect(() => {
+    reconcileEndedCustomMitzvot(new Date(now));
+  }, [now]);
 
   // Unwind everything stacked under the Shabbat screen — when the block starts, and again after any
   // navigation inside it — so nothing stale stays mounted for a day, above all the reader, which
@@ -235,10 +244,12 @@ function RootInner() {
             <Stack.Screen name="report" options={{ presentation: 'card' }} />
             <Stack.Screen name="schedule" options={{ presentation: 'card' }} />
             <Stack.Screen name="mitzvot" options={{ presentation: 'card' }} />
+            <Stack.Screen name="guide" options={{ presentation: 'card' }} />
             <Stack.Screen name="taharah" options={{ presentation: 'card' }} />
           </Stack>
         </View>
         {isOnboarded ? <UpdateBanner /> : null}
+        {isOnboarded ? <ChokEnablePrompt /> : null}
         <ShabbatScreen
           block={quietBlock}
           subtitle={quietBlock ? HebcalService.getHebrewDateAt(new Date(), location).hebrewDateStr : undefined}
@@ -313,6 +324,7 @@ function RootLayout() {
     if (!ready) return undefined;
     SplashScreen.hideAsync().catch(() => {});
     reconcileChokInstall();
+    reconcileSelichotInstall();
     return initNotificationHandlers();
   }, [ready]);
 

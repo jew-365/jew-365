@@ -1,37 +1,27 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { Button } from '@/components/Button';
 import { IconTile } from '@/components/IconTile';
 import { ONBOARDING_STEPS, OnboardingDots } from '@/components/OnboardingDots';
-import { MITZVOT } from '@/data/mitzvot';
+import { useDayModel } from '@/hooks/useDayModel';
 import { NotificationScheduler } from '@/services/NotificationScheduler';
 import { reportError } from '@/services/errors';
-import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
-import { mitzvahName } from '@/utils/mitzvahName';
 import { useI18n } from '@/i18n';
 
 export default function ReadyScreen() {
   const { colors } = useTheme();
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const router = useRouter();
   const setOnboarded = useUserStore((s) => s.setOnboarded);
-  const active = useMitzvotStore((s) => s.activeMitzvot);
-
-  const enabledNames = useMemo(
-    () =>
-      MITZVOT.filter((mitzvah) => active[mitzvah.id]?.enabled)
-        .map((mitzvah) => mitzvahName(mitzvah, language))
-        .join(' · '),
-    [active, language],
-  );
-
-  const editMitzvot = () => router.push('/mitzvot');
+  const { enabled, nameFor } = useDayModel();
+  const enabledNames = enabled.map((mitzvah) => nameFor(mitzvah)).join(' · ');
+  const editMitzvot = () => router.push({ pathname: '/onboarding/mitzvot', params: { from: 'ready' } });
 
   const finish = async () => {
     setOnboarded(true);
@@ -59,7 +49,7 @@ export default function ReadyScreen() {
         <Pressable onPress={editMitzvot} accessibilityRole="link" hitSlop={8} style={styles.editLink}>
           <Text style={[typography.bodyBold, { color: colors.goldText }]}>{t('onboarding.readyEdit')}</Text>
         </Pressable>
-        <OnboardingDots step={4} total={ONBOARDING_STEPS} style={styles.dots} />
+        <OnboardingDots step={5} total={ONBOARDING_STEPS} style={styles.dots} />
       </ScrollView>
       <Button label={t('onboarding.finish')} onPress={finish} />
     </SafeAreaView>

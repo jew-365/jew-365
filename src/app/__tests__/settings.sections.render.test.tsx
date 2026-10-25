@@ -19,6 +19,8 @@ import { IconTile } from '@/components/IconTile';
 import { ListRow } from '@/components/ListRow';
 import { translate } from '@/i18n';
 import { renderWithTheme } from '@/testing/render';
+import { findMitzvah } from '@/data/mitzvot';
+import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { THEMES } from '@/theme/colors';
 
@@ -56,6 +58,20 @@ describe('Settings cards, icons and actions', () => {
     ]);
   });
 
+  it('counts on the mitzvot row only the switched-on mitzvot the nusach offers', async () => {
+    useMitzvotStore.getState().reset();
+    const registered = Object.entries(useMitzvotStore.getState().activeMitzvot).filter(
+      ([id, active]) => active.enabled && findMitzvah(id),
+    ).length;
+    useUserStore.setState({ nusach: 'ashkenaz' });
+    await renderSettings();
+    expect(screen.getByText(he('settings.mitzvotCaption', { count: registered }))).toBeOnTheScreen();
+    screen.unmount();
+    useUserStore.setState({ nusach: 'chabad' });
+    await renderSettings();
+    expect(screen.getByText(he('settings.mitzvotCaption', { count: registered - 1 }))).toBeOnTheScreen();
+  });
+
   it('draws the search field on a card', async () => {
     await renderSettings();
     const cards = screen.UNSAFE_getAllByType(Card);
@@ -64,7 +80,7 @@ describe('Settings cards, icons and actions', () => {
 
   it('draws the reset as a danger button', async () => {
     await renderSettings();
-    openSection('settings.device');
+    openSection('settings.backup');
     expect(screen.getByRole('button', { name: he('settings.logout') })).toHaveStyle({
       backgroundColor: THEMES.gold.urgentBg,
       borderColor: THEMES.gold.urgent,

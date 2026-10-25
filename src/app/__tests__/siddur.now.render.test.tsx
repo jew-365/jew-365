@@ -5,11 +5,15 @@ import SiddurScreen from '../(tabs)/siddur';
 import { Card } from '@/components/Card';
 import { ListRow } from '@/components/ListRow';
 import { CITIES } from '@/data/cities';
+import { HebcalService } from '@/services/HebcalService';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
+import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { renderWithTheme } from '@/testing/render';
-import { at } from '@/testing/zmanim';
+import { installSelichotFixture } from '@/testing/selichot';
+import { at, zmanimFor } from '@/testing/zmanim';
 import type { Nusach } from '@/types/mitzvah';
+import { clockOf } from '@/utils/clock';
 
 const JERUSALEM = CITIES[0];
 const ONLY_DATE = [
@@ -51,9 +55,10 @@ const EXCLUSIVE: [string, string][] = [
   [SHACHARIT, BEDTIME],
 ];
 
-function nowCard(wallClock: string, nusach: Nusach = 'ashkenaz'): string[] {
+function nowCard(wallClock: string | Date, nusach: Nusach = 'ashkenaz'): string[] {
   useUserStore.setState({ nusach });
-  jest.useFakeTimers({ now: at(JERUSALEM, wallClock), doNotFake: [...ONLY_DATE] });
+  const now = typeof wallClock === 'string' ? at(JERUSALEM, wallClock) : wallClock;
+  jest.useFakeTimers({ now, doNotFake: [...ONLY_DATE] });
   const view = renderWithTheme(<SiddurScreen />);
   const card = screen.queryByTestId('siddur-now');
   const names = card ? NAMES.filter((name) => within(card).queryByText(name)) : [];
@@ -83,12 +88,21 @@ describe('the siddur tab’s "now" card', () => {
     expect(nowCard('2027-06-15T07:30')).toEqual([BIRCHOT, 'הנחת תפילין', 'קריאת שמע שחרית', SHACHARIT]);
     expect(nowCard('2027-06-15T14:00')).toEqual(['הנחת תפילין', MINCHA]);
     expect(nowCard('2027-06-15T21:30')).toEqual([MAARIV, BEDTIME, LEVANA]);
-    expect(nowCard('2027-06-16T02:00')).toEqual([BEDTIME, LEVANA]);
+    expect(nowCard('2027-06-16T02:00')).toEqual([MAARIV, BEDTIME, LEVANA]);
     jest.useFakeTimers({ now: at(JERUSALEM, '2027-06-15T07:30'), doNotFake: [...ONLY_DATE] });
     renderWithTheme(<SiddurScreen />);
     expect(screen.getByText('עכשיו')).toBeOnTheScreen();
     expect(screen.queryByText('היום')).toBeNull();
     expect(within(screen.getByTestId('siddur-now')).queryByText(/^מ-/)).toBeNull();
+  });
+
+  it('leaves the tefillin text out of the tab for a female siddur voice only', () => {
+    useUserStore.setState({ siddurVoice: 'female' });
+    expect(nowCard('2027-06-15T05:00')).toEqual([BIRCHOT]);
+    for (const siddurVoice of ['male', null] as const) {
+      useUserStore.setState({ siddurVoice });
+      expect(nowCard('2027-06-15T05:00')).toEqual([BIRCHOT, 'הנחת תפילין']);
+    }
   });
 
   it('drops a mitzvah already marked done for its window, and keeps the texts that have no mark', () => {
@@ -116,15 +130,17 @@ describe('the siddur tab’s "now" card', () => {
   });
 
   it('offers Selichot from midnight through the morning prayer in its season, by each nusach’s first day', () => {
-    expect(nowCard('2027-09-08T01:30', 'edot_hamizrach')).toEqual([BEDTIME, LEVANA, SELICHOT]);
+    installSelichotFixture();
+    expect(nowCard('2027-09-08T01:30', 'edot_hamizrach')).toEqual([MAARIV, BEDTIME, SELICHOT]);
     expect(nowCard('2027-09-08T07:00', 'edot_hamizrach')).toEqual(
       expect.arrayContaining([BIRCHOT, SHACHARIT, SELICHOT]),
     );
     expect(nowCard('2027-09-08T23:00', 'edot_hamizrach')).not.toContain(SELICHOT);
     expect(nowCard('2027-09-08T01:30', 'ashkenaz')).not.toContain(SELICHOT);
-    expect(nowCard('2027-09-27T01:30', 'ashkenaz')).toEqual([BEDTIME, SELICHOT]);
+    expect(nowCard('2027-09-27T01:30', 'ashkenaz')).toEqual([MAARIV, BEDTIME, SELICHOT]);
     expect(nowCard('2027-09-27T05:30', 'ashkenaz')).toEqual(expect.arrayContaining([BIRCHOT, SELICHOT]));
     expect(nowCard('2027-09-27T05:30', 'ashkenaz')).not.toContain(BEDTIME);
+    useSelichotStore.getState().reset();
   });
 
   it('never shows two prayers that cannot both be said, at any hour of a week', () => {
@@ -145,5 +161,174 @@ describe('the siddur tab’s "now" card', () => {
         }
       }
     }
+  });
+});
+
+describe('the Ushpizin row', () => {
+  const USHPIZIN = 'אושפיזין';
+
+  beforeEach(() => {
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, isOnboarded: true });
+    useCompletionsStore.setState({ completions: {}, skipped: {} });
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  function rows(wallClock: string, nusach: Nusach) {
+    useUserStore.setState({ nusach });
+    jest.useFakeTimers({ now: at(JERUSALEM, wallClock), doNotFake: [...ONLY_DATE] });
+    const view = renderWithTheme(<SiddurScreen />);
+    const card = screen.queryByTestId('siddur-now');
+    const result = {
+      listed: screen.queryAllByText(USHPIZIN).length > 0,
+      now: card !== null && within(card).queryByText(USHPIZIN) !== null,
+      offSeason: screen.queryByText('בלילות סוכות') !== null,
+    };
+    view.unmount();
+    jest.useRealTimers();
+    return result;
+  }
+
+  it('lists Ushpizin under the occasions in every nusach but Chabad, greyed out off season', () => {
+    for (const nusach of ['ashkenaz', 'sefard', 'edot_hamizrach'] as const) {
+      expect(rows('2026-10-28T15:00', nusach)).toEqual({ listed: true, now: false, offSeason: true });
+    }
+    expect(rows('2026-10-28T15:00', 'chabad')).toEqual({ listed: false, now: false, offSeason: false });
+  });
+
+  it('joins the now card from nightfall on a night of Sukkot, and never for Chabad', () => {
+    expect(rows('2026-09-28T21:00', 'ashkenaz')).toEqual({ listed: true, now: true, offSeason: false });
+    expect(rows('2026-09-28T14:00', 'ashkenaz').now).toBe(false);
+    expect(rows('2026-09-28T21:00', 'chabad')).toEqual({ listed: false, now: false, offSeason: false });
+  });
+});
+
+describe('the Chanukah candle-lighting text in the now card', () => {
+  const CANDLES = 'הדלקת נרות חנוכה';
+  const FRIDAY = '2026-12-04';
+  const WEEKDAY = '2026-12-08';
+  const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+  const zmanimOn = (iso: string) => zmanimFor(at(JERUSALEM, `${iso}T12:00`), JERUSALEM);
+  const plus = (instant: Date, minutes: number) => new Date(instant.getTime() + minutes * 60_000);
+
+  beforeEach(() => {
+    useUserStore.getState().reset();
+    useUserStore.setState({
+      language: 'he',
+      location: JERUSALEM,
+      inIsrael: true,
+      isOnboarded: true,
+      locationStatus: 'ready',
+      locationSource: 'manual',
+    });
+    useCompletionsStore.setState({ completions: {}, skipped: {} });
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  it.each(NUSCHAOT)('%s: lists it on a Chanukah Friday at plag hamincha + 10 min, and not at 13:00', (nusach) => {
+    expect(nowCard(plus(zmanimOn(FRIDAY).plagHaMincha, 10), nusach)).toContain(CANDLES);
+    expect(nowCard(`${FRIDAY}T13:00`, nusach)).not.toContain(CANDLES);
+  });
+
+  it('lists it for Chabad on a Chanukah weekday at shkia + 5 min, and not at 13:00', () => {
+    expect(nowCard(plus(zmanimOn(WEEKDAY).shkia, 5), 'chabad')).toContain(CANDLES);
+    expect(nowCard(`${WEEKDAY}T13:00`, 'chabad')).not.toContain(CANDLES);
+  });
+
+  it('waits for tzeit on a weekday for the other nuschaot, as their mitzvah does', () => {
+    for (const nusach of ['ashkenaz', 'sefard', 'edot_hamizrach'] as const) {
+      expect(nowCard(plus(zmanimOn(WEEKDAY).shkia, 5), nusach)).not.toContain(CANDLES);
+      expect(nowCard(plus(zmanimOn(WEEKDAY).tzeitHakochavim, 5), nusach)).toContain(CANDLES);
+    }
+  });
+
+  it('captions it until candle lighting on Friday', () => {
+    const lighting = HebcalService.holyBlockOn(at(JERUSALEM, '2026-12-05T12:00'), JERUSALEM)!.start;
+    useUserStore.setState({ nusach: 'ashkenaz' });
+    jest.useFakeTimers({ now: plus(zmanimOn(FRIDAY).plagHaMincha, 10), doNotFake: [...ONLY_DATE] });
+    renderWithTheme(<SiddurScreen />);
+    const row = within(screen.getByTestId('siddur-now'))
+      .UNSAFE_getAllByType(ListRow)
+      .find((entry) => entry.props.title === CANDLES)!;
+    expect(row.props.caption).toBe(`עד ${clockOf(lighting)}`);
+  });
+
+  it('leaves it out after candle lighting on Friday, though the night runs on to alot', () => {
+    expect(nowCard(plus(zmanimOn(FRIDAY).tzeitHakochavim, 5))).not.toContain(CANDLES);
+  });
+});
+
+describe('the Kiddush Levana row', () => {
+  const FROM_THREE = 'משלושה ימים אחרי המולד עד חצי החודש';
+  const FROM_SEVEN = 'משבעה ימים אחרי המולד עד חצי החודש';
+  const FROM_SEVEN_TO_FIFTEEN = 'משבעה עד חמישה עשר ימים אחרי המולד';
+
+  beforeEach(() => {
+    useUserStore.getState().reset();
+    useUserStore.setState({
+      language: 'he',
+      location: JERUSALEM,
+      inIsrael: true,
+      isOnboarded: true,
+      locationStatus: 'ready',
+      locationSource: 'manual',
+    });
+    useCompletionsStore.setState({ completions: {}, skipped: {} });
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  function levanaRow(wallClock: string, nusach: Nusach) {
+    useUserStore.setState({ nusach });
+    jest.useFakeTimers({ now: at(JERUSALEM, wallClock), doNotFake: [...ONLY_DATE] });
+    const view = renderWithTheme(<SiddurScreen />);
+    const rows = screen.UNSAFE_getAllByType(ListRow).filter((row) => row.props.title === LEVANA);
+    const { caption, disabled } = rows[rows.length - 1].props;
+    view.unmount();
+    jest.useRealTimers();
+    return { caption, disabled };
+  }
+
+  it.each([
+    ['2026-10-13T20:00', 'ashkenaz', { caption: FROM_THREE, disabled: true }],
+    ['2026-10-14T20:00', 'ashkenaz', { caption: undefined, disabled: false }],
+    ['2026-10-14T20:00', 'sefard', { caption: FROM_SEVEN, disabled: true }],
+    ['2026-10-14T20:00', 'chabad', { caption: FROM_SEVEN, disabled: true }],
+    ['2026-10-14T20:00', 'edot_hamizrach', { caption: FROM_SEVEN_TO_FIFTEEN, disabled: true }],
+    ['2026-10-18T20:00', 'sefard', { caption: undefined, disabled: false }],
+    ['2026-10-18T20:00', 'edot_hamizrach', { caption: undefined, disabled: false }],
+    ['2026-10-18T20:00', 'chabad', { caption: undefined, disabled: false }],
+    ['2026-10-16T12:00', 'ashkenaz', { caption: FROM_THREE, disabled: true }],
+    ['2026-10-26T03:00', 'ashkenaz', { caption: undefined, disabled: false }],
+    ['2026-10-26T04:00', 'ashkenaz', { caption: FROM_THREE, disabled: true }],
+    ['2026-10-26T04:00', 'sefard', { caption: FROM_SEVEN, disabled: true }],
+    ['2026-10-26T04:00', 'chabad', { caption: FROM_SEVEN, disabled: true }],
+    ['2026-10-26T04:00', 'edot_hamizrach', { caption: undefined, disabled: false }],
+  ] as const)('at %s in %s the row reads %j', (wallClock, nusach, expected) => {
+    expect(levanaRow(wallClock, nusach)).toEqual(expected);
+  });
+
+  it('joins the now card on the first night for the nusach whose period is open, and only then', () => {
+    expect(nowCard('2026-10-14T21:00', 'ashkenaz')).toContain(LEVANA);
+    expect(nowCard('2026-10-14T21:00', 'sefard')).not.toContain(LEVANA);
+  });
+
+  it('leaves the now card when the period ends, though the night runs on to alot', () => {
+    expect(nowCard('2026-10-26T03:00', 'ashkenaz')).toContain(LEVANA);
+    expect(nowCard('2026-10-26T04:00', 'ashkenaz')).not.toContain(LEVANA);
+    expect(nowCard('2026-10-26T04:00', 'sefard')).not.toContain(LEVANA);
+    expect(nowCard('2026-10-26T04:00', 'edot_hamizrach')).toContain(LEVANA);
+  });
+
+  it("names the period's end on the last night's now card, not the next alot", () => {
+    useUserStore.setState({ nusach: 'ashkenaz' });
+    jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-25T22:00'), doNotFake: [...ONLY_DATE] });
+    renderWithTheme(<SiddurScreen />);
+    const row = within(screen.getByTestId('siddur-now'))
+      .UNSAFE_getAllByType(ListRow)
+      .find((entry) => entry.props.title === LEVANA)!;
+    expect(row.props.caption).toBe(`עד ${clockOf(new Date('2026-10-26T01:44:10.171Z'))}`);
   });
 });

@@ -133,7 +133,7 @@ export default function OnboardingLocationScreen() {
         </Animated.View>
       )}
 
-      <OnboardingDots step={3} total={ONBOARDING_STEPS} style={styles.dots} />
+      <OnboardingDots step={4} total={ONBOARDING_STEPS} style={styles.dots} />
       <Button label={t('common.continue')} onPress={() => router.push('/onboarding/ready')} disabled={!locationReady} />
       {locationReady ? null : (
         <Text style={[typography.small, styles.locationHint, { color: colors.textMuted }]}>

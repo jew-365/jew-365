@@ -17,7 +17,7 @@ import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { computeStats, HistoryStats, isTrackedInRange } from '@/utils/historyStats';
 import { nextStreakGoal } from '@/utils/streakGoal';
-import { useI18n } from '@/i18n';
+import { formatDate, useI18n } from '@/i18n';
 
 const HISTORY_DAYS = 30;
 const GRID_COLUMNS = 5;
@@ -34,6 +34,11 @@ const EMPTY_STATS: HistoryStats = {
 };
 
 type DayStat = HistoryStats['daily'][number];
+type MitzvahStat = HistoryStats['perMitzvah'][string];
+
+function isUndecided(stat: MitzvahStat): boolean {
+  return stat.eligible === 0;
+}
 
 export default function HistoryScreen() {
   const { colors } = useTheme();
@@ -76,7 +81,7 @@ export default function HistoryScreen() {
           const stat = stats.perMitzvah[mitzvah.id];
           return stat && isTrackedInRange(stat) ? [{ mitzvah, stat }] : [];
         })
-        .sort((a, b) => a.stat.percent - b.stat.percent),
+        .sort((a, b) => Number(isUndecided(a.stat)) - Number(isUndecided(b.stat)) || a.stat.percent - b.stat.percent),
     [enabled, stats.perMitzvah],
   );
 
@@ -105,7 +110,7 @@ export default function HistoryScreen() {
     const decided = day.totalCount - day.pendingCount;
     const percent = decided > 0 ? Math.round((day.doneCount / decided) * 100) : 0;
     const date = DateTime.fromISO(day.date);
-    const dateLabel = date.setLocale(language).toFormat(language === 'he' ? 'cccc d LLLL' : 'cccc, LLL d');
+    const dateLabel = formatDate(date, language === 'he' ? 'cccc d LLLL' : 'cccc, LLL d', language);
     const level = decided <= 0 || day.doneCount <= 0 ? 'none' : day.doneCount >= decided ? 'full' : 'partial';
     const fill = level === 'full' ? colors.gold : level === 'partial' ? colors.goldLight : colors.surface2;
     const ink = level === 'full' ? colors.onGold : level === 'partial' ? colors.goldText : colors.textSub;
@@ -162,30 +167,40 @@ export default function HistoryScreen() {
 
           <SectionLabel text={t('history.perMitzvah')} />
           <Card divided>
-            {byMitzvah.map(({ mitzvah, stat }) => (
-              <Pressable
-                key={mitzvah.id}
-                accessibilityRole="button"
-                accessibilityLabel={`${nameFor(mitzvah)}, ${t('history.percent', { percent: stat.percent })}`}
-                onPress={() => router.push({ pathname: '/mitzvah/[id]', params: { id: mitzvah.id } })}
-                style={styles.statRow}
-              >
-                <View style={styles.statTop}>
-                  <Text style={[typography.bodyBold, styles.statName, { color: colors.text }]} numberOfLines={1}>
-                    {nameFor(mitzvah)}
-                  </Text>
-                  <Text style={[typography.captionBold, { color: colors.goldText }]}>
-                    {t('history.percent', { percent: stat.percent })}
-                  </Text>
-                </View>
-                <View style={[styles.barTrack, { backgroundColor: colors.surface2 }]}>
-                  <View
-                    testID={`history-bar-${mitzvah.id}`}
-                    style={[styles.barFill, { width: `${stat.percent}%`, backgroundColor: colors.gold }]}
-                  />
-                </View>
-              </Pressable>
-            ))}
+            {byMitzvah.map(({ mitzvah, stat }) => {
+              const undecided = isUndecided(stat);
+              const summary = undecided ? t('history.newMitzvah') : t('history.percent', { percent: stat.percent });
+              return (
+                <Pressable
+                  key={mitzvah.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${nameFor(mitzvah)}, ${summary}`}
+                  onPress={() => router.push({ pathname: '/mitzvah/[id]', params: { id: mitzvah.id } })}
+                  style={styles.statRow}
+                >
+                  <View style={styles.statTop}>
+                    <Text style={[typography.bodyBold, styles.statName, { color: colors.text }]} numberOfLines={1}>
+                      {nameFor(mitzvah)}
+                    </Text>
+                    {undecided ? null : (
+                      <Text style={[typography.captionBold, { color: colors.goldText }]}>{summary}</Text>
+                    )}
+                  </View>
+                  {undecided ? (
+                    <Text testID={`history-new-${mitzvah.id}`} style={[typography.caption, { color: colors.textSub }]}>
+                      {summary}
+                    </Text>
+                  ) : (
+                    <View style={[styles.barTrack, { backgroundColor: colors.surface2 }]}>
+                      <View
+                        testID={`history-bar-${mitzvah.id}`}
+                        style={[styles.barFill, { width: `${stat.percent}%`, backgroundColor: colors.gold }]}
+                      />
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
             {statsReady && !byMitzvah.length ? (
               <Text style={[typography.body, styles.emptyText, { color: colors.textMuted }]}>{t('history.empty')}</Text>
             ) : null}
