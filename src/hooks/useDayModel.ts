@@ -6,6 +6,7 @@ import { useChokStore } from '@/stores/useChokStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { ActiveMitzvahState, enabledSinceOf, useMitzvotStore } from '@/stores/useMitzvotStore';
+import { selectSelichotInstalledFor, useSelichotStore } from '@/stores/useSelichotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { CustomMitzvah, Mitzvah, Nusach, UserSettings } from '@/types/mitzvah';
 import { Location } from '@/types/zmanim';
@@ -21,6 +22,7 @@ export type DayModelState = {
   activeMitzvot: Record<string, ActiveMitzvahState>;
   customItems: Record<string, CustomMitzvah>;
   chokInstalled: boolean;
+  selichotInstalled: boolean;
 };
 
 export type DayModel = {
@@ -31,19 +33,32 @@ export type DayModel = {
   inIsrael: boolean;
   language: 'he' | 'en';
   chokInstalled: boolean;
+  selichotInstalled: boolean;
   settings: UserSettings;
   nameFor: (mitzvah: Pick<Mitzvah, 'name'>) => string;
+  enabledSince: Record<string, number>;
   checkInInput: () => CheckInInput;
 };
 
 export function dayModelFrom(state: DayModelState): DayModel {
-  const { location, nusach, inIsrael, language, halachicOpinions, activeMitzvot, customItems, chokInstalled } = state;
+  const {
+    location,
+    nusach,
+    inIsrael,
+    language,
+    halachicOpinions,
+    activeMitzvot,
+    customItems,
+    chokInstalled,
+    selichotInstalled,
+  } = state;
   const customs = Object.values(customItems)
     .sort((a, b) => a.createdAt - b.createdAt)
     .map(customToMitzvah);
   const allMitzvot = [...MITZVOT, ...customs].filter((mitzvah) => mitzvah.nuschaotSupported.includes(nusach));
   const enabled = allMitzvot.filter((mitzvah) => activeMitzvot[mitzvah.id]?.enabled);
   const settings: UserSettings = { nusach, halachicOpinions, inIsrael };
+  const enabledSince = enabledSinceOf(activeMitzvot);
   return {
     allMitzvot,
     enabled,
@@ -52,8 +67,10 @@ export function dayModelFrom(state: DayModelState): DayModel {
     inIsrael,
     language,
     chokInstalled,
+    selichotInstalled,
     settings,
     nameFor: (mitzvah) => mitzvahName(mitzvah, language),
+    enabledSince,
     checkInInput: () => {
       const { completions, skipped, checkIns } = useCompletionsStore.getState();
       return {
@@ -61,7 +78,7 @@ export function dayModelFrom(state: DayModelState): DayModel {
         completions,
         skipped,
         checkIns,
-        enabledSince: enabledSinceOf(activeMitzvot),
+        enabledSince,
         location,
         settings,
       };
@@ -84,8 +101,9 @@ export function useDayModel(): DayModel {
   const activeMitzvot = useMitzvotStore((s) => s.activeMitzvot);
   const customItems = useCustomMitzvotStore((s) => s.items);
   const chokInstalled = useChokStore((s) => s.installed !== null);
+  const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(user.nusach));
   return useMemo(
-    () => dayModelFrom({ ...user, activeMitzvot, customItems, chokInstalled }),
-    [user, activeMitzvot, customItems, chokInstalled],
+    () => dayModelFrom({ ...user, activeMitzvot, customItems, chokInstalled, selichotInstalled }),
+    [user, activeMitzvot, customItems, chokInstalled, selichotInstalled],
   );
 }

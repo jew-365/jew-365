@@ -23,10 +23,12 @@ import { buildPlan } from '@/services/notifications/plan';
 import type { ReminderScope } from '@/services/notifications/planners/mitzvot';
 import type { PlanInput } from '@/services/notifications/types';
 import { CITIES } from '@/data/cities';
+import { customToMitzvah } from '@/data/customMitzvotAdapter';
 import { MITZVOT } from '@/data/mitzvot';
 import { rulesFor } from '@/data/taharahPresets';
 import { HebcalService } from '@/services/HebcalService';
 import { useChokStore } from '@/stores/useChokStore';
+import { DEFAULT_HILULA_NOTICES, DEFAULT_ROSH_CHODESH_NOTICES } from '@/stores/useUserStore';
 import { installChokFixture } from '@/testing/chok';
 import { at, zmanimFor } from '@/testing/zmanim';
 import type { Mitzvah, Reminder, UserSettings } from '@/types/mitzvah';
@@ -68,6 +70,8 @@ function planInput(mitzvah: Mitzvah, now: Date, overrides: Partial<PlanInput> = 
     enabledSince: {},
     hilulotEnabled: false,
     roshChodeshEnabled: false,
+    hilulaNotices: DEFAULT_HILULA_NOTICES,
+    roshChodeshNotices: DEFAULT_ROSH_CHODESH_NOTICES,
     weeklyReportEnabled: false,
     taharahEnabled: false,
     taharah: {
@@ -186,6 +190,89 @@ describe('nextReminderAt', () => {
     );
   });
 
+  describe('heads-up reminders and clock reminders before the window', () => {
+    const HEADS_UP: Reminder[] = [{ anchor: 'start', offsetMin: -60, label: 'הקדמה' }];
+
+    it('fires a start reminder at -60 an hour before the window opens, as the plan does', () => {
+      const now = at(JERUSALEM, `${TUESDAY}T03:00`);
+      const expected = minutes(zmanimOn(TUESDAY).netzHaChama, -60).getTime();
+      const planned = plannedNext(
+        buildPlan(planInput(shacharit, now, { reminderOverrides: { shacharit: HEADS_UP } })),
+        'shacharit',
+      );
+      expect(nextReminderAt(shacharit, HEADS_UP, scopeAt(now))?.getTime()).toBe(expected);
+      expect(planned?.getTime()).toBe(expected);
+    });
+
+    it('accepts a heads-up of exactly 180 minutes and drops 181, or one past the end', () => {
+      const now = at(JERUSALEM, `${TUESDAY}T00:30`);
+      const only = (anchor: Reminder['anchor'], offsetMin: number): Reminder[] => [{ anchor, offsetMin, label: 'x' }];
+      expect(nextReminderAt(shacharit, only('start', -180), scopeAt(now))?.getTime()).toBe(
+        minutes(zmanimOn(TUESDAY).netzHaChama, -180).getTime(),
+      );
+      expect(nextReminderAt(shacharit, only('start', -181), scopeAt(now))).toBeNull();
+      expect(nextReminderAt(shacharit, only('end', 1), scopeAt(now))).toBeNull();
+    });
+
+    it('never fires a heads-up inside a holy block', () => {
+      const havdalah = byId('havdalah');
+      const now = at(JERUSALEM, `${FRIDAY}T08:00`);
+      const block = HebcalService.holyBlockOn(at(JERUSALEM, `${SATURDAY}T12:00`), JERUSALEM)!;
+      expect(nextReminderAt(havdalah, [{ anchor: 'start', offsetMin: -60, label: 'x' }], scopeAt(now))).toBeNull();
+      const atExit = nextReminderAt(havdalah, [{ anchor: 'start', offsetMin: 0, label: 'x' }], scopeAt(now))!;
+      expect(atExit).not.toBeNull();
+      expect(isQuietAt(atExit, JERUSALEM)).toBe(false);
+      expect(atExit.getTime()).toBeGreaterThanOrEqual(block.end.getTime());
+    });
+
+    it('schedules a 10:00 birchot hashachar clock reminder at 10:00 on the location clock, past sof zman Shema', () => {
+      const birchot = byId('birchot_hashachar');
+      const ten: Reminder = { anchor: 'clock', offsetMin: 600, label: 'עשר' };
+      const now = at(JERUSALEM, '2026-12-16T07:00');
+      const plan = buildPlan(planInput(birchot, now, { reminderOverrides: { birchot_hashachar: [ten] } }));
+      const first = plan.find((candidate) => candidate.id.startsWith('birchot_hashachar__'))!;
+      const tenOClock = at(JERUSALEM, '2026-12-16T10:00');
+      expect(first.id).toBe('birchot_hashachar__2026-12-16__0');
+      expect(first.trigger.getTime()).toBe(tenOClock.getTime());
+      expect(tenOClock.getTime()).toBeGreaterThan(zmanimOn('2026-12-16').sofZmanShmaGra.getTime());
+      expect(nextReminderAt(birchot, [ten], scopeAt(now))?.getTime()).toBe(tenOClock.getTime());
+    });
+  });
+
+  describe('a follow-up after the window', () => {
+    const followUp = (offsetMin: number): Reminder => ({ anchor: 'followUp', offsetMin, label: 'עוד לא סימנת' });
+    const custom = (reminder: Reminder, startHHMM = '10:00', endHHMM = '11:00') =>
+      customToMitzvah({
+        id: 'custom_follow',
+        name: 'לימוד',
+        startHHMM,
+        endHHMM,
+        reminders: [reminder],
+        skipOn: [],
+        createdAt: 1,
+      });
+
+    it('fires after the window, as the plan does, and moves to the next day once today is marked done or skipped', () => {
+      const mitzvah = custom(followUp(60));
+      const now = at(JERUSALEM, '2026-11-11T10:30');
+      const today = at(JERUSALEM, '2026-11-11T12:00').getTime();
+      const tomorrow = at(JERUSALEM, '2026-11-12T12:00').getTime();
+      expect(nextFor(mitzvah, now)?.getTime()).toBe(today);
+      expect(plannedNext(buildPlan(planInput(mitzvah, now)), 'custom_follow')?.getTime()).toBe(today);
+      const marks = { '2026-11-11': { custom_follow: MARK } };
+      expect(nextFor(mitzvah, now, { completions: marks })?.getTime()).toBe(tomorrow);
+      expect(nextFor(mitzvah, now, { skipped: marks })?.getTime()).toBe(tomorrow);
+    });
+
+    it('reaches a follow-up of a full-day window that opened two days earlier', () => {
+      const mitzvah = custom(followUp(720), '20:00', '20:00');
+      const now = at(JERUSALEM, '2026-11-13T00:15');
+      const expected = at(JERUSALEM, '2026-11-13T08:00').getTime();
+      expect(nextFor(mitzvah, now)?.getTime()).toBe(expected);
+      expect(plannedNext(buildPlan(planInput(mitzvah, now)), 'custom_follow')?.getTime()).toBe(expected);
+    });
+  });
+
   describe('against the scheduler', () => {
     const nows = [
       ['Tuesday before dawn', at(JERUSALEM, `${TUESDAY}T03:00`)],
@@ -207,6 +294,16 @@ describe('nextReminderAt', () => {
         expect(planned).not.toBeNull();
         expect(nextFor(mitzvah, now)?.getTime()).toBe(planned!.getTime());
       }
+    });
+
+    it.each(nows)('names the first heads-up reminder the plan schedules, %s', (_label, now) => {
+      const headsUp: Reminder[] = [{ anchor: 'start', offsetMin: -60, label: 'הקדמה' }];
+      const planned = plannedNext(
+        buildPlan(planInput(shacharit, now, { reminderOverrides: { shacharit: headsUp } })),
+        'shacharit',
+      );
+      expect(planned).not.toBeNull();
+      expect(nextReminderAt(shacharit, headsUp, scopeAt(now))?.getTime()).toBe(planned!.getTime());
     });
 
     it('agrees once today is marked done', () => {
@@ -274,6 +371,51 @@ describe('nextReminderAt for Chok LeYisrael', () => {
       const planned = plannedNext(buildPlan(planInput(CHOK, now, london)), 'chok_leyisrael');
       expect(nextChok(now, london)?.getTime()).toBe(planned!.getTime());
     }
+  });
+
+  it("is the earliest trigger across windows: tomorrow's heads-up before tonight's last reminder", () => {
+    const reminders: Reminder[] = [
+      { anchor: 'end', offsetMin: -30, label: 'אחרון' },
+      { anchor: 'start', offsetMin: -60, label: 'הקדמה' },
+    ];
+    const now = at(JERUSALEM, '2026-12-14T12:00');
+    const expected = minutes(zmanimOn('2026-12-15').alotHaShachar, -60).getTime();
+    const planned = plannedNext(
+      buildPlan(planInput(CHOK, now, { reminderOverrides: { chok_leyisrael: reminders } })),
+      'chok_leyisrael',
+    );
+    expect(nextReminderAt(CHOK, reminders, scopeAt(now))?.getTime()).toBe(expected);
+    expect(planned?.getTime()).toBe(expected);
+  });
+
+  it('files a 03:00 clock reminder under the window still open at 03:00, not the one that has not opened', () => {
+    const night: Reminder[] = [{ anchor: 'clock', offsetMin: 180, label: 'לילה' }];
+    const now = at(JERUSALEM, '2026-12-14T12:00');
+    const first = buildPlan(planInput(CHOK, now, { reminderOverrides: { chok_leyisrael: night } })).find((candidate) =>
+      candidate.id.startsWith('chok_leyisrael__'),
+    )!;
+    expect(first.id).toBe('chok_leyisrael__2026-12-14__0');
+    expect(first.trigger.getTime()).toBe(at(JERUSALEM, '2026-12-15T03:00').getTime());
+    expect(nextReminderAt(CHOK, night, scopeAt(now))?.getTime()).toBe(first.trigger.getTime());
+  });
+
+  describe('a 03:00 clock reminder on the Friday short window', () => {
+    const night: Reminder[] = [{ anchor: 'clock', offsetMin: 180, label: 'לילה' }];
+    const now = at(JERUSALEM, '2026-12-17T12:00');
+    const fridayThreeAm = at(JERUSALEM, '2026-12-18T03:00').getTime();
+    const chokAtFridayThreeAm = (overrides: Partial<PlanInput> = {}) =>
+      buildPlan(planInput(CHOK, now, { reminderOverrides: { chok_leyisrael: night }, ...overrides })).filter(
+        (candidate) => candidate.id.startsWith('chok_leyisrael__') && candidate.trigger.getTime() === fridayThreeAm,
+      );
+
+    it("is one notification, filed under Thursday's window that is still open at 03:00", () => {
+      expect(chokAtFridayThreeAm().map((candidate) => candidate.id)).toEqual(['chok_leyisrael__2026-12-17__0']);
+    });
+
+    it("moves to Friday's own window once Thursday is marked done", () => {
+      const done = { completions: { '2026-12-17': { chok_leyisrael: MARK } } };
+      expect(chokAtFridayThreeAm(done).map((candidate) => candidate.id)).toEqual(['chok_leyisrael__2026-12-18__0']);
+    });
   });
 
   it('agrees with the plan', () => {

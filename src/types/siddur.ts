@@ -1,6 +1,11 @@
 import { Nusach } from './mitzvah';
+import type { Location } from './zmanim';
+
+export type KiddushLevanaFlag = `kiddushLevana${'Ashkenaz' | 'Sefard' | 'EdotHamizrach' | 'Chabad'}`;
 
 export type SukkotOfferingFlag = `sukkotOffering${2 | 3 | 4 | 5 | 6 | 7}`;
+
+export type UshpizinNightFlag = `ushpizinNight${1 | 2 | 3 | 4 | 5 | 6 | 7}`;
 
 // The Ashkenazi selichot days that carry a selichot of their own: the Nth weekday from Leil Selichot,
 // and the Nth weekday of the Ten Days, Tzom Gedaliah (`tzomGedaliah`) being the first.
@@ -60,19 +65,18 @@ export type DayFlag =
   | 'chanukahYesterday'
   | 'purimYesterday'
   | 'chanukahFirstNight'
-  | 'kiddushLevana'
+  | KiddushLevanaFlag
   | 'avBeforeTishaBav'
   | 'erevRoshHashana'
   | 'selichotAshkenazi'
   | 'selichotSephardi'
   | SelichotDayFlag
   | SelichotTeshuvaFlag
-  | SukkotOfferingFlag;
+  | SukkotOfferingFlag
+  | 'sukkotNight'
+  | UshpizinNightFlag;
 
-export type Place = {
-  inIsrael: boolean;
-  jerusalem: boolean;
-};
+export type Place = { inIsrael: boolean; jerusalem: boolean; location?: Location };
 
 export type DayFeatures = {
   flags: ReadonlySet<DayFlag>;
@@ -86,11 +90,23 @@ export type Condition = {
   omerDay?: number;
 };
 
-export type Run = { t: string; s?: 'b' | 'n' | 't'; when?: Condition };
+export type SiddurVoice = 'male' | 'female';
+export type VoiceAudience = SiddurVoice | 'unset';
 
-export type PassageLabel = { he: string; en: string; when?: Condition; alone?: boolean; marriedOnly?: boolean };
+export type Run = { t: string; s?: 'b' | 'n' | 't'; when?: Condition; voice?: VoiceAudience[]; marriedOnly?: true };
+
+export type PassageLabel = {
+  he: string;
+  en: string;
+  when?: Condition;
+  alone?: boolean;
+  marriedOnly?: boolean;
+  voice?: SiddurVoice;
+  foldsFor?: SiddurVoice;
+};
 
 export type SiddurSegment = {
+  key?: string;
   he: Run[][];
   en?: string;
   when?: Condition;
@@ -159,8 +175,25 @@ export type StandaloneTextId =
   | 'tikkun_haklali'
   | 'tehillim'
   | 'nishmat'
-  | 'selichot';
+  | 'selichot'
+  | 'ushpizin';
 
 export type SiddurTextId = MitzvahTextId | StandaloneTextId;
 
 export type SiddurGroup = 'meals' | 'general' | 'occasions';
+
+export type SiddurChapterTitle = { he: string; en: string; voices?: VoiceAudience[]; marriedOnly?: true };
+
+export type SiddurChapterIndex = Partial<Record<SiddurTextId, Partial<Record<Nusach, SiddurChapterTitle[]>>>>;
+
+export type SiddurPlace = { sectionTitle: string; segmentKey: string };
+
+export type SiddurBookmark = SiddurPlace & {
+  id: string;
+  textId: string;
+  nusach: Nusach | null;
+  label: string;
+  createdAt: number;
+};
+
+export type SiddurLastPosition = SiddurPlace & { nusach: Nusach | null; appDay: string; savedAt: number };

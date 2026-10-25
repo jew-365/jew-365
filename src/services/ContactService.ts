@@ -1,11 +1,25 @@
 import { Platform } from 'react-native';
 import { appVersionLabel } from '@/services/appUpdates';
 import { captureException } from '@/services/crashReporting';
+import type { AppLanguage } from '@/i18n';
 
 // Formspree form id (https://formspree.io/f/<id>). It is public by design: it only lets a client
 // post into the form. Empty hides the contact form and leaves the email link.
 export const CONTACT_FORM_ID = 'mrpevdbk';
 export const CONTACT_EMAIL = '365jew@gmail.com';
+const SITE_URL = 'https://jew-365.github.io/jew-365/';
+export const PRODUCT_LINKS = {
+  support: SITE_URL,
+  privacy: {
+    he: `${SITE_URL}privacy/`,
+    en: `${SITE_URL}privacy/en/`,
+  },
+  store: {
+    android: 'https://play.google.com/store/apps/details?id=com.jew365.app',
+    ios: 'https://apps.apple.com/app/id6825802248',
+  },
+  chokLicense: `${SITE_URL}chok/LICENSE.txt`,
+} as const;
 export const CONTACT_MESSAGE_MAX = 2000;
 export const CONTACT_TIMEOUT_MS = 15_000;
 
@@ -35,6 +49,16 @@ export function contactProblem({ name, phone, message }: ContactMessage): Contac
 
 export function contactMailUrl(): string {
   return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Jew 365')}`;
+}
+
+export function dataDeletionUrl(language: AppLanguage): string {
+  return `${PRODUCT_LINKS.privacy[language]}#delete`;
+}
+
+export function storePageUrl(os: typeof Platform.OS = Platform.OS): string | null {
+  if (os === 'android') return PRODUCT_LINKS.store.android;
+  if (os === 'ios') return PRODUCT_LINKS.store.ios;
+  return null;
 }
 
 export async function sendContactMessage(

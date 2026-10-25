@@ -75,13 +75,18 @@ describe('buildTriggerTime', () => {
   it('16.6 the web shim exports the very same function', () => {
     expect(web.buildTriggerTime).toBe(buildTriggerTime);
   });
+
+  it('16.7 a follow-up counts forward from the window end', () => {
+    const r: Reminder = { anchor: 'followUp', offsetMin: 60, label: 'x' };
+    expect(buildTriggerTime(r, window, JERUSALEM).getTime()).toBe(window.end.getTime() + 60 * 60_000);
+  });
 });
 
 describe('buildTriggerTime with a clock anchor', () => {
   const clockAt = (offsetMin: number): Reminder => ({ anchor: 'clock', offsetMin, label: 'x' });
-  const windowFrom = (location: Location, start: string) => ({
+  const windowFrom = (location: Location, start: string, hours = 24) => ({
     start: at(location, start),
-    end: new Date(at(location, start).getTime() + 24 * 60 * 60_000),
+    end: new Date(at(location, start).getTime() + hours * 60 * 60_000),
   });
 
   it.each([
@@ -107,13 +112,36 @@ describe('buildTriggerTime with a clock anchor', () => {
     ]);
   });
 
-  it('moves to the next day when the clock time is before the window start', () => {
-    const start = '2026-12-14T21:00';
-    expect(buildTriggerTime(clockAt(EVENING_CLOCK), windowFrom(LONDON, start), LONDON).getTime()).toBe(
-      at(LONDON, '2026-12-15T20:30').getTime(),
+  it('moves to the next day when the clock time is more than 180 minutes before the window start', () => {
+    expect(buildTriggerTime(clockAt(1079), windowFrom(LONDON, '2026-12-14T21:00'), LONDON).getTime()).toBe(
+      at(LONDON, '2026-12-15T17:59').getTime(),
     );
     expect(buildTriggerTime(clockAt(30), windowFrom(NEW_YORK, '2026-12-14T05:00'), NEW_YORK).getTime()).toBe(
       at(NEW_YORK, '2026-12-15T00:30').getTime(),
+    );
+  });
+
+  it('keeps the start day for a clock time up to 180 minutes before the window start', () => {
+    expect(buildTriggerTime(clockAt(1230), windowFrom(LONDON, '2026-12-14T21:00', 4), LONDON).getTime()).toBe(
+      at(LONDON, '2026-12-14T20:30').getTime(),
+    );
+    expect(buildTriggerTime(clockAt(1230), windowFrom(JERUSALEM, '2026-12-14T23:30', 4), JERUSALEM).getTime()).toBe(
+      at(JERUSALEM, '2026-12-14T20:30').getTime(),
+    );
+    expect(buildTriggerTime(clockAt(1230), windowFrom(JERUSALEM, '2026-12-14T23:31', 4), JERUSALEM).getTime()).toBe(
+      at(JERUSALEM, '2026-12-15T20:30').getTime(),
+    );
+  });
+
+  it('prefers the occurrence inside a window long enough to hold the time over the heads-up before it', () => {
+    expect(buildTriggerTime(clockAt(1230), windowFrom(LONDON, '2026-12-14T21:00', 24), LONDON).getTime()).toBe(
+      at(LONDON, '2026-12-15T20:30').getTime(),
+    );
+    expect(buildTriggerTime(clockAt(1230), windowFrom(LONDON, '2026-12-14T21:00', 23.5), LONDON).getTime()).toBe(
+      at(LONDON, '2026-12-15T20:30').getTime(),
+    );
+    expect(buildTriggerTime(clockAt(1230), windowFrom(LONDON, '2026-12-14T21:00', 23), LONDON).getTime()).toBe(
+      at(LONDON, '2026-12-14T20:30').getTime(),
     );
   });
 
@@ -125,7 +153,7 @@ describe('buildTriggerTime with a clock anchor', () => {
   });
 
   it('keeps the wall clock across the day it moves on over a DST change', () => {
-    const trigger = buildTriggerTime(clockAt(EVENING_CLOCK), windowFrom(LONDON, '2027-03-27T21:00'), LONDON);
+    const trigger = buildTriggerTime(clockAt(EVENING_CLOCK), windowFrom(LONDON, '2027-03-27T23:45'), LONDON);
     expect(trigger.toISOString()).toBe('2027-03-28T19:30:00.000Z');
   });
 

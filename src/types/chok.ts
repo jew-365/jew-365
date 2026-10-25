@@ -1,3 +1,4 @@
+import { AddonDownload, AddonFailureReason, AddonInstall, AddonManifest, AddonManifestFile } from './addon';
 import { SiddurCredit, SiddurSegment } from './siddur';
 
 export type ChokSlot = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'thuNight' | 'fri';
@@ -8,6 +9,8 @@ export type ChokSectionKind =
 export type HaftarahVariant = 'sephardi' | 'ashkenazi';
 
 export type ChokDoubleChoice = 'first' | 'second' | 'both';
+
+export type ChokThuNightDay = 'thu' | 'fri';
 
 export type ChokSection = {
   kind: ChokSectionKind;
@@ -23,22 +26,17 @@ export type ChokAsset = {
   slots: Partial<Record<ChokSlot, ChokSection[]>>;
 };
 
-export type ChokManifestFile = { path: string; sha256: string; bytes: number };
+export type ChokManifestFile = AddonManifestFile;
 
-export type ChokManifest = {
-  format: number;
-  version: number;
+export type ChokManifest = AddonManifest & {
   credit: { he: string; en: string };
   license: { name: string; url: string; urlHe: string };
-  bytes: number;
-  files: Record<string, ChokManifestFile>;
+  bytes?: number;
+  files?: Record<string, ChokManifestFile>;
 };
 
-export type ChokInstall = { version: number; bytes: number; installedAt: number; files: Record<string, string> };
+export type ChokInstall = AddonInstall;
 
-export type ChokFailureReason = 'offline' | 'unavailable' | 'integrity' | 'space' | 'storage';
+export type ChokFailureReason = AddonFailureReason;
 
-export type ChokDownload =
-  | { status: 'idle' }
-  | { status: 'downloading'; done: number; total: number; bytes: number; totalBytes: number }
-  | { status: 'failed'; reason: ChokFailureReason };
+export type ChokDownload = AddonDownload;

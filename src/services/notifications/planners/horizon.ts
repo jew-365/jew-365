@@ -1,9 +1,14 @@
 import { DateTime } from 'luxon';
 import type { HolyBlock, Location } from '@/types/zmanim';
 import { HebcalService } from '@/services/HebcalService';
+import { ZmanimService } from '@/services/ZmanimService';
+import { formatDate, type AppLanguage } from '@/i18n';
+import type { NoticeTiming } from '@/stores/useUserStore';
 import { locationNoon } from '@/utils/locationDay';
 
 export type Horizon = { days: Date[]; recentDays: Date[] };
+
+export type NoticePhase = 'ahead' | 'opening' | 'open';
 
 // The location's calendar days from the one `fromDate` falls on: today and tomorrow, then on through
 // any Shabbat / Yom Tov block that is reached or starts the next day, up to the first weekday after
@@ -41,6 +46,33 @@ export function recentDaysBefore(days: Date[]): Date[] {
 export function horizonFor(fromDate: Date, location: Location): Horizon {
   const days = horizonDays(fromDate, location);
   return { days, recentDays: recentDaysBefore(days) };
+}
+
+export function noticeTriggerAt(noon: Date, timing: NoticeTiming, location: Location): Date | null {
+  if (timing.anchor === 'clock') {
+    return DateTime.fromJSDate(noon)
+      .setZone(location.tz)
+      .set({ hour: Math.floor(timing.minutes / 60), minute: timing.minutes % 60, second: 0, millisecond: 0 })
+      .toJSDate();
+  }
+  const shkia = ZmanimService.getZmanim(noon, location)?.shkia;
+  return shkia ? new Date(shkia.getTime() + timing.offsetMin * 60_000) : null;
+}
+
+export function noticePhase(trigger: Date, opens: DateTime, location: Location): NoticePhase {
+  const noon = locationNoon(new Date(opens.year, opens.month - 1, opens.day), location);
+  const shkia = noticeTriggerAt(noon, { anchor: 'shkia', offsetMin: 0 }, location);
+  if (!shkia || trigger.getTime() < shkia.getTime()) return 'ahead';
+  return trigger.getTime() === shkia.getTime() ? 'opening' : 'open';
+}
+
+const NOTICE_WEEKDAY_RANGE_DAYS = 7;
+
+const civilDay = (day: DateTime) => DateTime.utc(day.year, day.month, day.day);
+
+export function noticeDayLabel(opens: DateTime, from: DateTime, language: AppLanguage): string {
+  const far = civilDay(opens).diff(civilDay(from), 'days').days >= NOTICE_WEEKDAY_RANGE_DAYS;
+  return formatDate(opens, far ? (language === 'he' ? 'cccc d LLLL' : 'cccc, LLL d') : 'cccc', language);
 }
 
 export function formatClock(instant: Date): string {

@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { HDate, gematriya, months } from '@hebcal/core';
 import {
+  MITZVAH_STANDALONE_TEXT,
   SIDDUR_GROUPS,
   SIDDUR_TEXTS,
   SIDDUR_TEXT_IDS,
@@ -16,13 +17,15 @@ import {
   hasStandaloneText,
   isSiddurTextId,
   mitzvahTextId,
+  siddurPlace,
   standaloneAvailability,
   standaloneTextId,
   standaloneTextDay,
   standaloneTextsIn,
 } from '../siddur';
+import { CITIES } from '@/data/cities';
 import { HebcalService } from '@/services/HebcalService';
-import { SHARED_SIDDUR_TEXT_IDS, SIDDUR_ASSETS } from '../siddurAssets.generated';
+import { DOWNLOADED_SIDDUR_TEXT_IDS, SHARED_SIDDUR_TEXT_IDS, SIDDUR_ASSETS } from '../siddurAssets.generated';
 import { findMitzvah } from '../mitzvot';
 import { Mitzvah, Nusach } from '@/types/mitzvah';
 import {
@@ -34,12 +37,15 @@ import {
   SiddurSegment,
   SiddurText,
   SiddurTextId,
+  SiddurVoice,
   StandaloneTextId,
 } from '@/types/siddur';
 import {
+  KIDDUSH_LEVANA_FLAGS,
   aloneFolds,
   dayFeatures,
   forMaritalStatus,
+  forVoice,
   liturgicalDay,
   matchesCondition,
   pickerEntries,
@@ -47,7 +53,10 @@ import {
   segmentBlocks,
 } from '@/utils/siddur';
 import { keepsCholHamoed } from '@/utils/skipRules';
-import { readSiddurText, siddurAssetFolder } from '@/testing/siddur';
+import type { MaritalStatus } from '@/stores/useUserStore';
+import { useSelichotStore } from '@/stores/useSelichotStore';
+import { installSelichotFixture } from '@/testing/selichot';
+import { TEXTS_NOT_SHIPPED, readSiddurText, shippedTextIds, shipsText, siddurAssetFolder } from '@/testing/siddur';
 
 const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
 const TEXT_IDS = SIDDUR_TEXT_IDS;
@@ -69,7 +78,7 @@ function letters(text: string): string {
 
 function textOn(nusach: Nusach, id: SiddurTextId, day: DayFeatures, keep: (run: Run) => boolean): string {
   return letters(
-    resolveSiddurText(load(nusach, id), day)
+    forVoice(resolveSiddurText(load(nusach, id), day), null)
       .flatMap((section) =>
         section.segments.flatMap((segment) =>
           segment.he.map((runs) =>
@@ -116,10 +125,20 @@ function erev(day: number, month: number, year: number): Date {
 }
 
 describe('siddur content', () => {
-  it('ships every registered text for every nusach, in step with the generated asset map', () => {
+  it('ships every registered text for every nusach but the named exceptions, in step with the generated asset map', () => {
+    expect(TEXTS_NOT_SHIPPED).toEqual({ ushpizin: ['chabad'] });
     for (const nusach of NUSCHAOT) {
-      for (const id of TEXT_IDS) {
-        expect((SIDDUR_ASSETS[nusach] as Record<string, unknown>)[id]).toBeDefined();
+      for (const id of TEXT_IDS.filter((candidate) => !shipsText(nusach, candidate))) {
+        expect((SIDDUR_ASSETS[nusach] as Record<string, unknown>)[id]).toBeUndefined();
+        expect(fs.existsSync(path.join(ASSET_DIR, nusach, `${id}.siddur`))).toBe(false);
+        expect(
+          hasStandaloneText(id as StandaloneTextId, nusach, dayFeatures(new HDate(15, months.TISHREI, 5787), ISRAEL)),
+        ).toBe(false);
+      }
+      for (const id of shippedTextIds(nusach, TEXT_IDS)) {
+        const downloaded = (DOWNLOADED_SIDDUR_TEXT_IDS as readonly string[]).includes(id);
+        expect((SIDDUR_ASSETS[nusach] as Record<string, unknown>)[id] !== undefined).toBe(!downloaded);
+        if (downloaded) expect(fs.existsSync(path.join(ASSET_DIR, nusach, `${id}.siddur`))).toBe(false);
         const text = load(nusach, id);
         if (siddurAssetFolder(nusach, id) === 'shared') expect(text.nusach).toBeUndefined();
         else expect(text.nusach).toBe(nusach);
@@ -141,6 +160,7 @@ describe('siddur content', () => {
 
   it('keeps a text that every nusach shares in one shared asset, which the map gives every nusach', () => {
     expect([...SHARED_SIDDUR_TEXT_IDS]).toEqual(['tikkun_haklali', 'tehillim']);
+    expect([...DOWNLOADED_SIDDUR_TEXT_IDS]).toEqual(['selichot']);
     const map = fs.readFileSync(path.join(__dirname, '..', 'siddurAssets.generated.ts'), 'utf8');
     for (const id of SHARED_SIDDUR_TEXT_IDS) {
       expect(fs.existsSync(path.join(ASSET_DIR, 'shared', `${id}.siddur`))).toBe(true);
@@ -152,9 +172,11 @@ describe('siddur content', () => {
     }
   });
 
-  it('registers mitzvah texts only for real mitzvot, and standalone texts for none', () => {
+  it('registers mitzvah texts only for real mitzvot, and a standalone text for a mitzvah only through MITZVAH_STANDALONE_TEXT', () => {
     for (const id of MITZVAH_TEXT_IDS) expect(findMitzvah(id)).toBeDefined();
-    for (const id of STANDALONE_IDS) expect(findMitzvah(id)).toBeUndefined();
+    const shared = STANDALONE_IDS.filter((id) => findMitzvah(id) !== undefined);
+    expect(shared).toEqual(['kiddush_levana', 'chanukah_candles', 'selichot', 'ushpizin']);
+    for (const id of shared) expect(MITZVAH_STANDALONE_TEXT[id]).toBe(id);
     expect(MITZVAH_TEXT_IDS.filter((id) => STANDALONE_IDS.includes(id as string as StandaloneTextId))).toEqual([]);
   });
 
@@ -1357,7 +1379,7 @@ describe('passages only some say', () => {
     ];
     const unfolded: string[] = [];
     for (const nusach of NUSCHAOT) {
-      for (const id of TEXT_IDS) {
+      for (const id of shippedTextIds(nusach, TEXT_IDS)) {
         for (const section of load(nusach, id).sections) {
           for (const segment of section.segments) {
             if (section.optional || segment.optional) continue;
@@ -1406,7 +1428,7 @@ describe('passages said only with a minyan', () => {
     ];
     const unlabeled: string[] = [];
     for (const nusach of NUSCHAOT) {
-      for (const id of TEXT_IDS) {
+      for (const id of shippedTextIds(nusach, TEXT_IDS)) {
         for (const section of load(nusach, id).sections) {
           for (const segment of section.segments) {
             const paragraphs = segment.he.map((runs) => said({ he: [runs] }));
@@ -1422,7 +1444,7 @@ describe('passages said only with a minyan', () => {
 
   it('tells the chazzan’s Kaddish from the mourners’ Kaddish', () => {
     for (const nusach of NUSCHAOT) {
-      for (const id of TEXT_IDS) {
+      for (const id of shippedTextIds(nusach, TEXT_IDS)) {
         for (const segment of load(nusach, id).sections.flatMap((section) => section.segments)) {
           const text = said(segment);
           if (/תתקבל צלות/.test(text))
@@ -1498,7 +1520,9 @@ describe('sections and passages that depend on praying with or without a minyan'
   const tzomTammuz = day(17, months.TAMUZ, 5786);
   const everySection = () =>
     NUSCHAOT.flatMap((nusach) =>
-      TEXT_IDS.flatMap((id) => load(nusach, id).sections.map((section) => ({ nusach, id, section }))),
+      shippedTextIds(nusach, TEXT_IDS).flatMap((id) =>
+        load(nusach, id).sections.map((section) => ({ nusach, id, section })),
+      ),
     );
   const VAYAAVOR = /ויעבר \S+ על ?פניו ויקרא/;
   const saidText = (segment: { he: Run[][] }) =>
@@ -1618,7 +1642,7 @@ describe('section titles', () => {
 
   it('are unique among the sections shown on any one day, because the reader keys and scrolls by them', () => {
     for (const nusach of NUSCHAOT) {
-      for (const id of TEXT_IDS) {
+      for (const id of shippedTextIds(nusach, TEXT_IDS)) {
         const text = load(nusach, id);
         for (const features of sampleDays) {
           const sections = resolveSiddurText(text, features);
@@ -1817,7 +1841,7 @@ describe('standalone texts', () => {
       'kiddush_levana',
     ]);
     expect(standaloneTextsIn('meals')).toEqual(['birkat_hamazon', 'al_hamichya', 'borei_nefashot']);
-    expect(standaloneTextsIn('occasions')).toEqual(['sheva_berachot', 'chanukah_candles', 'selichot']);
+    expect(standaloneTextsIn('occasions')).toEqual(['sheva_berachot', 'chanukah_candles', 'selichot', 'ushpizin']);
   });
 
   it('offers every standalone text in every nusach on the days its condition allows', () => {
@@ -2122,7 +2146,9 @@ describe('standalone texts', () => {
     }
     expect(letters(saidOn('edot_hamizrach', 'al_hamichya', weekday))).toMatch(/מחיתה ועל כלכלתה/);
     const fold = (nusach: Nusach) =>
-      resolveSiddurText(load(nusach, 'al_hamichya'), weekday).find((section) => section.optional)!.segments;
+      resolveSiddurText(load(nusach, 'al_hamichya'), weekday)
+        .find((section) => section.optional)!
+        .segments.map(({ key, ...segment }) => segment);
     expect(fold('chabad')).toEqual(fold('sefard'));
   });
 
@@ -2689,7 +2715,7 @@ describe('kriat_shema_al_hamita', () => {
   it('flags the passage before marital relations as married-only, on that one label in every text', () => {
     const flagged: string[] = [];
     for (const nusach of NUSCHAOT) {
-      for (const id of TEXT_IDS) {
+      for (const id of shippedTextIds(nusach, TEXT_IDS)) {
         for (const candidate of load(nusach, id).sections) {
           if (candidate.optional?.marriedOnly)
             flagged.push(`${nusach}/${id}/${candidate.title.he}/${candidate.optional.he}`);
@@ -3035,10 +3061,9 @@ describe('birchot_hareiya', () => {
 });
 
 describe('kiddush_levana', () => {
+  const IL_PLACE = siddurPlace(CITIES[0], true);
   const thirdOfMonth = day(3, months.CHESHVAN, 5787);
   const fifteenthOfMonth = day(15, months.CHESHVAN, 5787);
-  const secondOfMonth = day(2, months.CHESHVAN, 5787);
-  const sixteenthOfMonth = day(16, months.CHESHVAN, 5787);
   const saturdayNight = day(7, months.CHESHVAN, 5787);
   const tenDays = day(5, months.TISHREI, 5787);
   const avBeforeTishaBav = day(5, months.AV, 5786);
@@ -3066,43 +3091,45 @@ describe('kiddush_levana', () => {
       .normalize('NFC');
 
   it('falls on the days its fixtures claim', () => {
-    for (const features of [
-      thirdOfMonth,
-      fifteenthOfMonth,
-      saturdayNight,
-      tenDays,
-      avBeforeTishaBav,
-      avAfterTishaBav,
-    ]) {
-      expect(features.flags.has('kiddushLevana')).toBe(true);
-    }
-    for (const features of [secondOfMonth, sixteenthOfMonth]) expect(features.flags.has('kiddushLevana')).toBe(false);
     expect(saturdayNight.flags.has('motzaeiShabbat')).toBe(true);
     expect(tenDays.flags.has('aseretYemeiTeshuva')).toBe(true);
     expect(avBeforeTishaBav.flags.has('avBeforeTishaBav')).toBe(true);
     expect(avAfterTishaBav.flags.has('avBeforeTishaBav')).toBe(false);
   });
 
-  it('is offered from the 3rd to the 15th of the month, in every nusach', () => {
+  it("is offered on its nusach's nights in Cheshvan 5787", () => {
+    const offered = (nusach: Nusach, date: number) =>
+      hasStandaloneText('kiddush_levana', nusach, day(date, months.CHESHVAN, 5787, IL_PLACE));
+    const nights = [3, 4, 8, 15, 16];
+    expect(nights.map((date) => offered('ashkenaz', date))).toEqual([false, true, true, true, false]);
+    for (const nusach of ['sefard', 'edot_hamizrach', 'chabad'] as const) {
+      expect(nights.map((date) => offered(nusach, date))).toEqual([false, false, true, true, false]);
+    }
+    const labels = {
+      ashkenaz: 'משלושה ימים אחרי המולד עד חצי החודש',
+      sefard: 'משבעה ימים אחרי המולד עד חצי החודש',
+      edot_hamizrach: 'משבעה עד חמישה עשר ימים אחרי המולד',
+      chabad: 'משבעה ימים אחרי המולד עד חצי החודש',
+    };
     for (const nusach of NUSCHAOT) {
-      expect(hasStandaloneText('kiddush_levana', nusach, thirdOfMonth)).toBe(true);
-      expect(hasStandaloneText('kiddush_levana', nusach, fifteenthOfMonth)).toBe(true);
-      expect(hasStandaloneText('kiddush_levana', nusach, secondOfMonth)).toBe(false);
-      expect(hasStandaloneText('kiddush_levana', nusach, sixteenthOfMonth)).toBe(false);
+      expect(standaloneAvailability('kiddush_levana', nusach).availableLabel?.he).toBe(labels[nusach]);
     }
   });
 
   it('is not offered for the night of Shabbat, Yom Tov or Yom Kippur, though it falls in the window', () => {
-    const shabbat = day(6, months.CHESHVAN, 5787);
-    const sukkot = day(15, months.TISHREI, 5787);
-    const yomKippur = day(10, months.TISHREI, 5787);
+    const shabbat = day(13, months.CHESHVAN, 5787, IL_PLACE);
+    const sukkot = day(15, months.TISHREI, 5787, IL_PLACE);
+    const yomKippur = day(10, months.TISHREI, 5787, IL_PLACE);
     expect(shabbat.flags.has('shabbat')).toBe(true);
     expect(sukkot.flags.has('yomTov')).toBe(true);
     expect(yomKippur.flags.has('yomKippur')).toBe(true);
-    for (const features of [shabbat, sukkot, yomKippur]) expect(features.flags.has('kiddushLevana')).toBe(true);
     for (const nusach of NUSCHAOT) {
-      for (const features of [shabbat, sukkot, yomKippur])
+      for (const features of [shabbat, sukkot]) {
+        expect(features.flags.has(KIDDUSH_LEVANA_FLAGS[nusach])).toBe(true);
         expect(hasStandaloneText('kiddush_levana', nusach, features)).toBe(false);
+      }
+      expect(yomKippur.flags.has(KIDDUSH_LEVANA_FLAGS[nusach])).toBe(false);
+      expect(hasStandaloneText('kiddush_levana', nusach, yomKippur)).toBe(false);
     }
   });
 
@@ -3605,6 +3632,152 @@ describe('sheva_berachot', () => {
   });
 });
 
+describe('ushpizin', () => {
+  const ID = 'ushpizin';
+  const SAID_IN: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach'];
+  const GUESTS = ['אברהם', 'יצחק', 'יעקב', 'משה', 'אהרן', 'יוסף', 'דוד'];
+  const sevenNights = GUESTS.map((_, index) => day(15 + index, months.TISHREI, 5787));
+  const [firstNight, , , , , , lastNight] = sevenNights;
+  const erevSukkot = day(14, months.TISHREI, 5787);
+  const sheminiAtzeret = day(22, months.TISHREI, 5787);
+  const jerusalem = { name: 'Jerusalem', lat: 31.7683, lng: 35.2137, tz: 'Asia/Jerusalem', inIsrael: true };
+  const nightIn = (iso: string) => dayFeatures(standaloneTextDay(ID, new Date(iso), jerusalem), ISRAEL);
+  const guestLine = (nusach: Nusach, guest: string) =>
+    nusach === 'edot_hamizrach' ? new RegExp(`(^| )ליעול ${guest} `) : new RegExp(`במטי מינך ${guest} אושפיזי עילאי`);
+  const guestsInvited = (nusach: Nusach, features: DayFeatures) =>
+    GUESTS.filter((guest) => guestLine(nusach, guest).test(saidOn(nusach, ID, features)));
+  const segmentsOn = (nusach: Nusach, features: DayFeatures) =>
+    resolveSiddurText(load(nusach, ID), features).flatMap((section) => section.segments);
+  const TITLES: Partial<Record<Nusach, string[]>> = {
+    ashkenaz: ['הכניסה לסוכה', 'אושפיזין'],
+    sefard: ['הכניסה לסוכה', 'אושפיזין'],
+    edot_hamizrach: ['הכניסה לסוכה', 'אושפיזין', 'בישיבה בסוכה', 'פסוקי היום בסוכה', 'כסא האושפיזין'],
+  };
+
+  it('falls on the nights its fixtures claim, in Israel and abroad', () => {
+    sevenNights.forEach((night, index) => {
+      expect(night.flags.has('sukkotNight')).toBe(true);
+      const own = `ushpizinNight${index + 1}` as DayFlag;
+      expect([...night.flags].filter((flag) => flag.startsWith('ushpizinNight'))).toEqual([own]);
+      expect(day(15 + index, months.TISHREI, 5787, DIASPORA).flags.has(own)).toBe(true);
+    });
+    expect(firstNight.flags.has('yomTov')).toBe(true);
+    expect(lastNight.flags.has('hoshanaRabba')).toBe(true);
+    for (const features of [erevSukkot, sheminiAtzeret, day(22, months.TISHREI, 5787, DIASPORA)]) {
+      expect([...features.flags].filter((flag) => /^(sukkotNight|ushpizinNight)/.test(flag))).toEqual([]);
+    }
+  });
+
+  it('is filed under the occasions, said at night, offered on the seven nights, and never in Chabad', () => {
+    expect(STANDALONE_TEXTS[ID]).toMatchObject({
+      name: { he: 'אושפיזין', en: 'Ushpizin' },
+      group: 'occasions',
+      evening: true,
+      available: { all: ['sukkotNight'] },
+    });
+    expect(standaloneTextsIn('occasions')).toContain(ID);
+    for (const nusach of SAID_IN) {
+      for (const night of sevenNights) expect(hasStandaloneText(ID, nusach, night)).toBe(true);
+      for (const features of [erevSukkot, sheminiAtzeret]) expect(hasStandaloneText(ID, nusach, features)).toBe(false);
+    }
+    for (const night of sevenNights) expect(hasStandaloneText(ID, 'chabad', night)).toBe(false);
+  });
+
+  it('opens on the afternoon of Erev Sukkot and closes on the afternoon of Hoshana Rabba', () => {
+    expect(nightIn('2026-09-24T10:00:00Z').flags.has('sukkotNight')).toBe(false);
+    expect(nightIn('2026-09-25T10:00:00Z').flags.has('ushpizinNight1')).toBe(true);
+    expect(nightIn('2026-10-01T10:00:00Z').flags.has('ushpizinNight7')).toBe(true);
+    expect(nightIn('2026-10-02T10:00:00Z').flags.has('sukkotNight')).toBe(false);
+  });
+
+  it.each(SAID_IN)('invites Avraham on the first night and David on the seventh in %s', (nusach) => {
+    expect(resolveSiddurText(load(nusach, ID), firstNight).map((section) => section.title.he)).toEqual(TITLES[nusach]);
+    expect(guestsInvited(nusach, firstNight)).toEqual(['אברהם']);
+    expect(guestsInvited(nusach, lastNight)).toEqual(['דוד']);
+  });
+
+  it.each(SAID_IN)('invites each night’s own guest alone, in R5’s order, in %s', (nusach) => {
+    expect(sevenNights.map((night) => guestsInvited(nusach, night))).toEqual(GUESTS.map((guest) => [guest]));
+  });
+
+  it('opens with the invitation of all seven every night in Ashkenaz and Sefard', () => {
+    for (const nusach of ['ashkenaz', 'sefard'] as const) {
+      for (const night of [firstNight, lastNight]) {
+        const said = saidOn(nusach, ID, night);
+        expect(said).toMatch(/הריני מוכן ומזומן לקיים מצות סכה/);
+        expect(said).toMatch(/תיבו תיבו אושפיזין עילאין/);
+        expect(said).toMatch(/אזמין לסעודתי אושפיזין עילאין אברהם יצחק יעקב משה אהרן יוסף ודוד/);
+      }
+      expect(shownOn(nusach, ID, firstNight)).toMatch(/ביום הראשון אומר/);
+      expect(shownOn(nusach, ID, firstNight)).not.toMatch(/ביום השביעי אומר/);
+      expect(shownOn(nusach, ID, lastNight)).toMatch(/ביום השביעי אומר/);
+    }
+  });
+
+  it('says "לעבדך … אמתך" with "פב״פ" a note between them, never read aloud, in Ashkenaz and Sefard', () => {
+    for (const nusach of ['ashkenaz', 'sefard'] as const) {
+      expect(shownOn(nusach, ID, firstNight)).toMatch(/לעבדך פבפ אמתך/);
+      expect(saidOn(nusach, ID, firstNight)).toMatch(/לעבדך אמתך/);
+      expect(saidOn(nusach, ID, firstNight)).not.toMatch(/פבפ/);
+    }
+  });
+
+  it('says the Edot HaMizrach order: each night’s Leshem Yichud, guest and verses, the qere, and the folded day verses', () => {
+    const nusach = 'edot_hamizrach';
+    const first = saidOn(nusach, ID, firstNight);
+    const last = saidOn(nusach, ID, lastNight);
+    expect(first).toMatch(/הנקרא יומם/);
+    expect(first).toMatch(/ואברהם זקן בא בימים/);
+    expect(first).not.toMatch(/ויהי דוד לכל דרכו משכיל/);
+    expect(last).toMatch(/שבמלכות מאמא עלאה/);
+    expect(last).toMatch(/ויהי דוד לכל דרכו משכיל/);
+    expect(last).toMatch(/מגדול ישועות מלכו/);
+    expect(last).not.toMatch(/מגדיל|ואברהם זקן/);
+    expect(first).toMatch(/ובלילה שירו עמי/);
+    expect(first).not.toMatch(/שירה/);
+    for (const text of [first, last]) {
+      expect(text).toMatch(/עולו אושפיזין עלאין קדישין/);
+      expect(text).toMatch(/תיבו אושפיזין עלאין קדישין/);
+      expect(text).toMatch(/זה הכסה של שבעה אושפיזין/);
+    }
+    const dayVerses = (features: DayFeatures) =>
+      resolveSiddurText(load(nusach, ID), features).find((section) => section.title.he === 'פסוקי היום בסוכה')!;
+    expect(dayVerses(firstNight).optional?.he).toBe('יש נוהגים לומר פסוקים אלה בסוכה');
+    expect(dayVerses(firstNight).segments).toHaveLength(1);
+    expect(
+      letters(
+        dayVerses(firstNight)
+          .segments[0].he.flat()
+          .map((run) => run.t)
+          .join(''),
+      ),
+    ).toMatch(/שובה יהוה חלצה נפשי/);
+    expect(
+      letters(
+        dayVerses(lastNight)
+          .segments[0].he.flat()
+          .map((run) => run.t)
+          .join(''),
+      ),
+    ).toMatch(/כי אתה אדני טוב וסלח/);
+    expect(shownOn(nusach, ID, firstNight)).not.toMatch(/יש נוהגים לומר פסוקים אלה בסוכה/);
+  });
+
+  it('takes English from the pinned translations where they exist, and ships Sefard in Hebrew only', () => {
+    const englishOf = (nusach: Nusach, features: DayFeatures) =>
+      segmentsOn(nusach, features)
+        .map((segment) => segment.en ?? '')
+        .join(' ');
+    expect(englishOf('ashkenaz', firstNight)).toMatch(/If you please, Abraham, my lofty guest/);
+    expect(englishOf('ashkenaz', lastNight)).toMatch(/If you please, David, my lofty guest/);
+    expect(englishOf('ashkenaz', firstNight)).not.toMatch(/If you please, David/);
+    expect(segmentsOn('ashkenaz', firstNight).every((segment) => segment.en)).toBe(true);
+    expect(englishOf('edot_hamizrach', firstNight).trim()).toMatch(/^The first night: /);
+    expect(englishOf('edot_hamizrach', lastNight).trim()).toMatch(/^The seventh night: /);
+    expect(segmentsOn('sefard', firstNight).some((segment) => segment.en)).toBe(false);
+  });
+});
+
 describe('chanukah_candles', () => {
   const ID = 'chanukah_candles';
   const first = new HDate(25, months.KISLEV, 5787);
@@ -3938,7 +4111,8 @@ describe('tikkun_haklali', () => {
     { title: 'מזמור קלז', verses: 9, begins: 'על נהרות בבל שם ישבנו', ends: 'ונפץ את עלליך אל הסלע' },
     { title: 'מזמור קנ', verses: 6, begins: 'הללו יה הללו אל בקדשו', ends: 'כל הנשמה תהלל יה הללו יה' },
   ];
-  const sections = (nusach: Nusach, features: DayFeatures) => resolveSiddurText(load(nusach, ID), features);
+  const sections = (nusach: Nusach, features: DayFeatures) =>
+    forVoice(resolveSiddurText(load(nusach, ID), features), null);
   const section = (nusach: Nusach, title: string, features = weekday) =>
     sections(nusach, features).find((candidate) => candidate.title.he === title)!;
 
@@ -4155,6 +4329,7 @@ describe('selichot', () => {
   const ALL = { ashkenaz: true, sefard: true, edot_hamizrach: true, chabad: true };
 
   it('is filed with the occasions, by each nusach’s season: Edot HaMizrach from 2 Elul, the others from Leil Selichot, through Erev Yom Kippur', () => {
+    installSelichotFixture();
     expect(STANDALONE_TEXTS[ID]).toMatchObject({ name: { he: 'סליחות', en: 'Selichot' }, group: 'occasions' });
     expect(STANDALONE_TEXTS[ID].evening).toBeUndefined();
     const cases: [DayFeatures, Record<Nusach, boolean>][] = [
@@ -4182,9 +4357,14 @@ describe('selichot', () => {
     for (const nusach of ['ashkenaz', 'sefard', 'chabad'] as const) {
       expect(standaloneAvailability(ID, nusach).availableLabel?.he).toBe('ממוצאי שבת הסליחות עד ערב יום הכיפורים');
     }
+    useSelichotStore.getState().reset();
+    for (const nusach of NUSCHAOT) {
+      expect(hasStandaloneText(ID, nusach, civilDay(new Date(2025, 8, 14)))).toBe(false);
+    }
   });
 
   it('gives each Ashkenazi selichot day its own selichot, every selichah of the book once in order, on the day it is said', () => {
+    installSelichotFixture();
     for (const [nusach, last] of [
       ['ashkenaz', 100],
       ['sefard', 87],
@@ -4220,9 +4400,11 @@ describe('selichot', () => {
       'צט. אדון דין אם',
       'ק. ירצה צום עמך',
     ]);
+    useSelichotStore.getState().reset();
   });
 
   it('gives Chabad its own selichot through Tzom Gedaliah, and the Lita selichot for the Ten Days and Erev Yom Kippur', () => {
+    installSelichotFixture();
     const said = season5786().filter((features) => hasStandaloneText(ID, 'chabad', features));
     expect(said).toHaveLength(14);
     const numbers = said
@@ -4235,6 +4417,7 @@ describe('selichot', () => {
     for (const features of said.slice(0, 9)) {
       expect(saidOn('chabad', ID, features)).not.toBe(saidOn('ashkenaz', ID, features));
     }
+    useSelichotStore.getState().reset();
   });
 
   it('labels the chazzan’s Kaddish, the 13 Middot and the Aramaic passages the source says only a minyan says', () => {
@@ -4710,7 +4893,9 @@ describe('shacharit chapters', () => {
 
   it('no text but Shacharit and Tehillim carries chapters, so the other pickers keep listing every section', () => {
     for (const nusach of NUSCHAOT) {
-      for (const id of TEXT_IDS.filter((candidate) => candidate !== 'shacharit' && candidate !== 'tehillim')) {
+      for (const id of shippedTextIds(nusach, TEXT_IDS).filter(
+        (candidate) => candidate !== 'shacharit' && candidate !== 'tehillim',
+      )) {
         expect(load(nusach, id).sections.some((section) => section.chapter)).toBe(false);
       }
     }
@@ -4718,7 +4903,7 @@ describe('shacharit chapters', () => {
 
   it('no text but Tehillim carries headings above its sections', () => {
     for (const nusach of NUSCHAOT) {
-      for (const id of TEXT_IDS.filter((candidate) => candidate !== 'tehillim')) {
+      for (const id of shippedTextIds(nusach, TEXT_IDS).filter((candidate) => candidate !== 'tehillim')) {
         expect(load(nusach, id).sections.some((section) => section.headings)).toBe(false);
       }
     }
@@ -4787,7 +4972,7 @@ describe('English stays aligned with its Hebrew', () => {
   it('carries none of the source defects the alignment audit found', () => {
     const found: string[] = [];
     for (const nusach of NUSCHAOT) {
-      for (const id of TEXT_IDS) {
+      for (const id of shippedTextIds(nusach, TEXT_IDS)) {
         const defects = id === 'maariv' ? [...SOURCE_DEFECTS, ...MAARIV_DEFECTS] : SOURCE_DEFECTS;
         for (const segment of segmentsOf(nusach, id)) {
           for (const defect of defects) {
@@ -4898,4 +5083,346 @@ describe('English stays aligned with its Hebrew', () => {
       expect(startingWith(segmentsOf(nusach, 'shacharit'), 'אמר רבי אלעזר')[0].en).toMatch(/Rabbi Elazar said/);
     }
   });
+});
+
+describe('the women’s liturgy by siddur voice (R8, R9)', () => {
+  const WEEKDAY = day(9, months.CHESHVAN, 5787);
+  const SHABBAT = day(13, months.CHESHVAN, 5787);
+  const OMER_DAY = day(25, months.NISAN, 5787);
+  const HALLEL_DAY = day(1, months.TEVET, 5787);
+  const CHANUKAH_DAY = day(27, months.KISLEV, 5787);
+  const READERS: (SiddurVoice | null)[] = [null, 'male', 'female'];
+  const STATION = 'עטיפת טלית והנחת תפילין';
+  const readFor = (
+    nusach: Nusach,
+    id: SiddurTextId,
+    features: DayFeatures,
+    voice: SiddurVoice | null,
+    status: MaritalStatus | null = null,
+  ) => forVoice(forMaritalStatus(resolveSiddurText(load(nusach, id), features), status), voice);
+  const hebrewOf = (sections: SiddurSection[]) =>
+    sections
+      .flatMap((s) => s.segments.flatMap((g) => g.he.map((runs) => runs.map((run) => run.t).join(''))))
+      .join('\n')
+      .normalize('NFC');
+  const occurrences = (text: string, word: string) => text.split(word.normalize('NFC')).length - 1;
+  const lettersOf = (segment: SiddurSegment) =>
+    letters(segment.he.map((runs) => runs.map((run) => run.t).join('')).join(' ')).trim();
+  const findSegment = (sections: SiddurSection[], said: RegExp) =>
+    sections.flatMap((s) => s.segments).find((segment) => said.test(lettersOf(segment)));
+  const lettersAll = (sections: SiddurSection[]) => letters(hebrewOf(sections).replace(/\n/g, ' '));
+
+  it('reads מוֹדָה in Modeh Ani and Elokai Neshama for a woman and the printed wording otherwise, in every nusach', () => {
+    for (const nusach of NUSCHAOT) {
+      const edot = nusach === 'edot_hamizrach';
+      const counts = (voice: SiddurVoice | null) => {
+        const text = hebrewOf(readFor(nusach, 'birchot_hashachar', WEEKDAY, voice));
+        return [occurrences(text, 'מוֹדָה'), occurrences(text, 'מוֹדֶה')];
+      };
+      expect(counts('female')).toEqual([2, 0]);
+      expect(counts('male')).toEqual([0, 2]);
+      expect(counts(null)).toEqual([edot ? 2 : 0, 2]);
+    }
+    const notes = READERS.map((voice) =>
+      occurrences(hebrewOf(readFor('edot_hamizrach', 'birchot_hashachar', WEEKDAY, voice)), 'האשה אומרת'),
+    );
+    expect(notes).toEqual([4, 0, 0]);
+  }, 60000);
+
+  it('hides "she-lo asani isha" from a woman and shows her "she-asani kirtzono" open, with the Name and kingship except in Edot HaMizrach, and hides that blessing from a man', () => {
+    for (const nusach of NUSCHAOT) {
+      const female = readFor(nusach, 'birchot_hashachar', WEEKDAY, 'female');
+      const male = readFor(nusach, 'birchot_hashachar', WEEKDAY, 'male');
+      const unset = readFor(nusach, 'birchot_hashachar', WEEKDAY, null);
+      expect(findSegment(female, /שלא עשני אשה/)).toBeUndefined();
+      expect(findSegment(male, /שלא עשני אשה/)).toBeDefined();
+      expect(findSegment(unset, /שלא עשני אשה/)).toBeDefined();
+
+      const kirtzono = findSegment(female, /שעשני כרצונו/)!;
+      expect(kirtzono).toBeDefined();
+      expect(kirtzono.optional).toBeUndefined();
+      if (nusach === 'edot_hamizrach') expect(lettersOf(kirtzono)).toBe('ברוך שעשני כרצונו');
+      else expect(lettersOf(kirtzono)).toMatch(/^ברוך אתה \S+ אלהינו מלך העולם שעשני כרצונו$/);
+      expect(findSegment(male, /שעשני כרצונו/)).toBeUndefined();
+
+      const printed = findSegment(unset, /שעשני כרצונו/);
+      if (nusach === 'ashkenaz' || nusach === 'sefard') expect(printed?.optional?.he).toBe('נשים אומרות');
+      else if (nusach === 'edot_hamizrach') {
+        expect(printed).toBeDefined();
+        expect(printed?.optional).toBeUndefined();
+      } else expect(printed).toBeUndefined();
+      if (nusach === 'chabad') expect(kirtzono.en).toBeUndefined();
+    }
+    const edot = (voice: SiddurVoice | null) =>
+      lettersAll(readFor('edot_hamizrach', 'birchot_hashachar', WEEKDAY, voice));
+    expect(edot('female')).toMatch(/האשה מברכת בלי שם ומלכות/);
+    expect(edot('female')).not.toMatch(/האיש מברך/);
+    expect(edot('male')).toMatch(/האיש מברך/);
+    expect(edot('male')).not.toMatch(/האשה מברכת/);
+    expect(edot(null)).toMatch(/האיש מברך/);
+    expect(edot(null)).toMatch(/האשה מברכת בלי שם ומלכות/);
+  }, 60000);
+
+  it('reads "goyah" and "shifchah" for a woman in Edot HaMizrach only, and "goy" and "eved" in the other nuschaot', () => {
+    const edot = (voice: SiddurVoice | null) =>
+      lettersAll(readFor('edot_hamizrach', 'birchot_hashachar', WEEKDAY, voice));
+    expect(edot('female')).toMatch(/שלא עשני גויה/);
+    expect(edot('female')).toMatch(/שלא עשני שפחה/);
+    expect(edot('female')).not.toMatch(/שלא עשני גוי(?=\s|$)/);
+    expect(edot('male')).toMatch(/שלא עשני גוי(?=\s|$)/);
+    expect(edot('male')).toMatch(/שלא עשני עבד(?=\s|$)/);
+    expect(edot('male')).not.toMatch(/גויה|שפחה/);
+    expect(edot(null)).toMatch(/שלא עשני גוי האשה אומרת גויה/);
+    expect(edot(null)).toMatch(/שלא עשני עבד האשה אומרת שפחה/);
+    for (const nusach of ['ashkenaz', 'sefard', 'chabad'] as const) {
+      const female = lettersAll(readFor(nusach, 'birchot_hashachar', WEEKDAY, 'female'));
+      expect(female).toMatch(/שלא עשני גוי(?=\s|$)/);
+      expect(female).toMatch(/שלא עשני עבד(?=\s|$)/);
+      expect(female).not.toMatch(/גויה|שפחה/);
+    }
+  }, 60000);
+
+  it('reads Shacharit’s morning blessings exactly as the birchot hashachar text, for every voice', () => {
+    const byTitle = (sections: SiddurSection[]) =>
+      Object.fromEntries(sections.map((section) => [section.title.he, hebrewOf([section])]));
+    for (const nusach of NUSCHAOT) {
+      for (const voice of READERS) {
+        const birchot = readFor(nusach, 'birchot_hashachar', WEEKDAY, voice);
+        const titles = new Set(birchot.map((section) => section.title.he));
+        const shacharit = readFor(nusach, 'shacharit', WEEKDAY, voice).filter((section) =>
+          titles.has(section.title.he),
+        );
+        expect(byTitle(shacharit)).toEqual(byTitle(birchot));
+      }
+    }
+  }, 60000);
+
+  it('hides the tallit and tefillin from a woman: Shacharit’s station and its chapter, and the tefillin text but its Shema', () => {
+    for (const nusach of NUSCHAOT) {
+      const titlesOf = (voice: SiddurVoice | null) => {
+        const sections = readFor(nusach, 'shacharit', WEEKDAY, voice);
+        return [sections.map((s) => s.title.he), pickerEntries(sections).map((entry) => entry.title.he)];
+      };
+      for (const titles of titlesOf('female')) expect(titles).not.toContain(STATION);
+      for (const voice of ['male', null] as const) {
+        for (const titles of titlesOf(voice)) expect(titles).toContain(STATION);
+      }
+      const tefillin = (voice: SiddurVoice | null) => readFor(nusach, 'tefillin', WEEKDAY, voice);
+      const full = nusach === 'chabad' ? ['הנחת תפילין', 'קריאת שמע', 'תפילין דרבנו תם'] : ['הנחת תפילין', 'קריאת שמע'];
+      expect(tefillin('female').map((s) => s.title.he)).toEqual(['קריאת שמע']);
+      expect(tefillin('male').map((s) => s.title.he)).toEqual(full);
+      expect(tefillin(null).map((s) => s.title.he)).toEqual(full);
+      const shema = tefillin(null).filter((s) => s.title.he === 'קריאת שמע');
+      expect(hebrewOf(tefillin('female'))).toBe(hebrewOf(shema));
+    }
+  }, 60000);
+
+  it('reads the feminine first-person forms, pointed, for a woman, and the printed forms for a man and with no voice', () => {
+    const rows: [Nusach[], SiddurTextId[], DayFeatures, [string, string][]][] = [
+      [
+        ['ashkenaz', 'sefard', 'edot_hamizrach'],
+        ['sefirat_haomer', 'maariv'],
+        OMER_DAY,
+        [['מוּכָן וּמְזֻמָּן', 'מוּכָנָה וּמְזֻמֶּנֶת']],
+      ],
+      [
+        ['sefard'],
+        ['chanukah_candles'],
+        CHANUKAH_DAY,
+        [
+          ['הִנְנִי מְכַוֵּן', 'הִנְנִי מְכַוֶּנֶת'],
+          ['וְהִנְנִי עוֹשֶׂה', 'וְהִנְנִי עוֹשָׂה'],
+        ],
+      ],
+      [['sefard', 'chabad'], ['shacharit'], WEEKDAY, [['הֲרֵינִי מְקַבֵּל', 'הֲרֵינִי מְקַבֶּלֶת']]],
+      [
+        ['edot_hamizrach'],
+        ['shacharit'],
+        WEEKDAY,
+        [
+          ['וַהֲרֵינִי מְקַבֵּל', 'וַהֲרֵינִי מְקַבֶּלֶת'],
+          ['וַהֲרֵינִי אוֹהֵב', 'וַהֲרֵינִי אוֹהֶבֶת'],
+          ['וַהֲרֵינִי מְזַמֵּן', 'וַהֲרֵינִי מְזַמֶּנֶת'],
+        ],
+      ],
+      [
+        ['edot_hamizrach'],
+        ['kriat_shema_al_hamita'],
+        WEEKDAY,
+        [
+          ['הֲרֵֽינִי מְקַבֵּל', 'הֲרֵֽינִי מְקַבֶּלֶת'],
+          ['וַהֲרֵֽינִי יָרֵא', 'וַהֲרֵֽינִי יְרֵאָה'],
+          ['וַהֲרֵֽינִי מַמְלִיכוֹ', 'וַהֲרֵֽינִי מַמְלִיכָתוֹ'],
+          ['הֲרֵֽינִי מוֹחֵל וְסוֹלֵֽחַ', 'הֲרֵֽינִי מוֹחֶלֶת וְסוֹלַחַת'],
+        ],
+      ],
+      [
+        ['ashkenaz', 'sefard', 'chabad'],
+        ['kriat_shema_al_hamita'],
+        WEEKDAY,
+        [['הֲרֵינִי מוֹחֵל', 'הֲרֵינִי מוֹחֶלֶת']],
+      ],
+      [
+        ['ashkenaz'],
+        ['tikkun_haklali'],
+        WEEKDAY,
+        [
+          ['הֲרֵינִי מְזַמֵּן', 'הֲרֵינִי מְזַמֶּנֶת'],
+          ['הֲרֵינִי מְקַשֵׁר', 'הֲרֵינִי מְקַשֶּׁרֶת'],
+          ['אני אומר כל', 'אני אומרת כל'],
+        ],
+      ],
+      [
+        ['edot_hamizrach'],
+        ['birchot_hanehenin', 'mezuzah'],
+        WEEKDAY,
+        [['הֲרֵֽינִי בָּא לְקַיֵּם', 'הֲרֵֽינִי בָּאָה לְקַיֵּם']],
+      ],
+    ];
+    for (const [nuschaot, ids, features, forms] of rows) {
+      for (const nusach of nuschaot) {
+        for (const id of ids) {
+          for (const [printed, feminine] of forms) {
+            const reads = (voice: SiddurVoice | null) => hebrewOf(readFor(nusach, id, features, voice));
+            const where = `${nusach}/${id}: ${printed}`;
+            expect({ where, feminine: occurrences(reads('female'), feminine) >= 1 }).toEqual({ where, feminine: true });
+            expect({ where, printed: occurrences(reads('female'), printed) }).toEqual({ where, printed: 0 });
+            for (const voice of ['male', null] as const) {
+              expect({ where, printed: occurrences(reads(voice), printed) >= 1 }).toEqual({ where, printed: true });
+              expect({ where, feminine: occurrences(reads(voice), feminine) }).toEqual({ where, feminine: 0 });
+            }
+          }
+        }
+      }
+    }
+    const chabad = (voice: SiddurVoice | null) => hebrewOf(readFor('chabad', 'kriat_shema_al_hamita', WEEKDAY, voice));
+    expect(occurrences(chabad('female'), 'מקבלת עלי')).toBe(4);
+    expect(occurrences(chabad('female'), 'מקבל עלי')).toBe(0);
+    for (const voice of ['male', null] as const) {
+      expect(occurrences(chabad(voice), 'מקבל עלי')).toBe(4);
+      expect(occurrences(chabad(voice), 'מקבלת')).toBe(0);
+    }
+  }, 60000);
+
+  it('leaves every verse as printed for every voice', () => {
+    for (const nusach of NUSCHAOT) {
+      for (const voice of READERS) {
+        expect(lettersAll(readFor(nusach, 'shacharit', HALLEL_DAY, voice))).toMatch(/עבדך בן ?אמתך/);
+      }
+    }
+  }, 60000);
+
+  it('reads the Edot HaMizrach candle lighting in a man’s voice for a man, and as printed for a woman and with no voice', () => {
+    const edot = (voice: SiddurVoice | null) => hebrewOf(readFor('edot_hamizrach', 'candle_lighting', SHABBAT, voice));
+    const male = edot('male');
+    expect(occurrences(male, 'הֲרֵֽינִי נוֹתֵן')).toBe(2);
+    expect(occurrences(male, 'נוֹתֶנֶת')).toBe(0);
+    expect(occurrences(male, 'בַּעֲלִי')).toBe(0);
+    expect(male).toContain('עַל אִשְׁתִּי (פלונית בת פלוני) וְתִתֶּן לָהּ'.normalize('NFC'));
+    expect(male).toContain('וּתְסַיְּעֶהָ'.normalize('NFC'));
+    for (const voice of ['female', null] as const) {
+      const printed = edot(voice);
+      expect(occurrences(printed, 'נוֹתֶנֶת')).toBe(2);
+      expect(printed).toContain('עַל בַּעֲלִי (פלוני בן פלוני) וְתִתֶּן לוֹ'.normalize('NFC'));
+      expect(printed).toContain('וּתְסַיְּעֵהוּ'.normalize('NFC'));
+    }
+    expect(edot('female')).toBe(edot(null));
+    for (const nusach of ['ashkenaz', 'sefard', 'chabad'] as const) {
+      const printed = hebrewOf(readFor(nusach, 'candle_lighting', SHABBAT, null));
+      for (const voice of ['male', 'female'] as const) {
+        expect(hebrewOf(readFor(nusach, 'candle_lighting', SHABBAT, voice))).toBe(printed);
+      }
+    }
+  }, 60000);
+
+  it('names the spouse in the Ashkenaz and Sefard Harachaman by voice and marital status, and keeps the printed line with no voice', () => {
+    const read = (nusach: Nusach, voice: SiddurVoice | null, status: MaritalStatus | null) =>
+      hebrewOf(readFor(nusach, 'birkat_hamazon', WEEKDAY, voice, status));
+    for (const nusach of ['ashkenaz', 'sefard'] as const) {
+      for (const status of ['married', 'single', null] as const) {
+        expect(read(nusach, null, status)).toContain(
+          'אוֹתִי (וְאֶת־אִשְׁתִּי/בַּעֲלִי וְאֶת־זַרְעִי) וְאֶת־כָּל־אֲשֶׁר לִי.',
+        );
+      }
+      for (const status of ['married', null] as const) {
+        expect(read(nusach, 'male', status)).toContain('אוֹתִי וְאֶת־אִשְׁתִּי וְאֶת־זַרְעִי וְאֶת־כָּל־אֲשֶׁר לִי.');
+        expect(read(nusach, 'female', status)).toContain('אוֹתִי וְאֶת־בַּעֲלִי וְאֶת־זַרְעִי וְאֶת־כָּל־אֲשֶׁר לִי.');
+      }
+      for (const voice of ['male', 'female'] as const) {
+        const single = read(nusach, voice, 'single');
+        expect(single).toContain('אוֹתִי וְאֶת־זַרְעִי וְאֶת־כָּל־אֲשֶׁר לִי.');
+        expect(occurrences(single, 'וְאֶת־אִשְׁתִּי')).toBe(0);
+        expect(occurrences(single, 'וְאֶת־בַּעֲלִי')).toBe(0);
+      }
+    }
+    for (const nusach of ['edot_hamizrach', 'chabad'] as const) {
+      const printed = read(nusach, null, null);
+      for (const voice of READERS) {
+        for (const status of ['married', 'single', null] as const) expect(read(nusach, voice, status)).toBe(printed);
+      }
+    }
+  }, 60000);
+
+  it('folds the Edot HaMizrach Omer blessing and Hallel’s blessings for a woman only, under the note that she says them without a blessing', () => {
+    const blessing = /וצונו על ספירת העמר/;
+    for (const id of ['sefirat_haomer', 'maariv'] as const) {
+      const edot = (voice: SiddurVoice | null) => findSegment(readFor('edot_hamizrach', id, OMER_DAY, voice), blessing);
+      expect(edot('female')?.optional?.he).toBe('נשים סופרות בלי ברכה');
+      for (const voice of ['male', null] as const) {
+        expect(edot(voice)).toBeDefined();
+        expect(edot(voice)?.optional).toBeUndefined();
+      }
+      for (const nusach of ['ashkenaz', 'sefard', 'chabad'] as const) {
+        for (const voice of READERS) {
+          const segment = findSegment(readFor(nusach, id, OMER_DAY, voice), blessing);
+          expect(segment).toBeDefined();
+          expect(segment?.optional).toBeUndefined();
+        }
+      }
+    }
+    for (const said of [/וצונו לגמור את ההלל/, /^יהללוך/]) {
+      const edot = (voice: SiddurVoice | null) =>
+        findSegment(readFor('edot_hamizrach', 'shacharit', HALLEL_DAY, voice), said);
+      expect(edot('female')?.optional?.he).toBe('נשים אומרות בלי ברכה');
+      for (const voice of ['male', null] as const) {
+        expect(edot(voice)).toBeDefined();
+        expect(edot(voice)?.optional).toBeUndefined();
+      }
+    }
+    for (const nusach of ['ashkenaz', 'sefard', 'chabad'] as const) {
+      const hallel = (voice: SiddurVoice | null) =>
+        readFor(nusach, 'shacharit', HALLEL_DAY, voice).filter((section) => section.title.he === 'הלל');
+      expect(hallel('female')).toEqual(hallel(null));
+      expect(hallel('male')).toEqual(hallel(null));
+    }
+  }, 60000);
+
+  it('keeps "ve’al britcha… ve’al toratcha" in Birkat HaMazon for every voice', () => {
+    for (const nusach of NUSCHAOT) {
+      for (const voice of READERS) {
+        expect(lettersAll(readFor(nusach, 'birkat_hamazon', WEEKDAY, voice))).toMatch(
+          /ועל ?בריתך שחתמת בבשרנו ועל תורתך שלמדתנו/,
+        );
+      }
+    }
+  }, 60000);
+
+  it('keeps the English of a segment whose Hebrew changes form, and hides it with a hidden segment', () => {
+    const modeh = /אני לפניך מלך חי וקים/;
+    for (const nusach of NUSCHAOT) {
+      const printed = findSegment(readFor(nusach, 'birchot_hashachar', WEEKDAY, null), modeh)!;
+      expect(printed.en).toBeTruthy();
+      for (const voice of ['female', 'male'] as const) {
+        expect(findSegment(readFor(nusach, 'birchot_hashachar', WEEKDAY, voice), modeh)!.en).toBe(printed.en);
+      }
+    }
+    const english = (voice: SiddurVoice | null) =>
+      readFor('edot_hamizrach', 'birchot_hashachar', WEEKDAY, voice)
+        .flatMap((section) => section.segments.map((segment) => segment.en ?? ''))
+        .join(' ');
+    expect(english(null)).toMatch(/did not make me a woman/);
+    expect(english(null)).toMatch(/A man blesses/);
+    expect(english('female')).not.toMatch(/did not make me a woman/);
+    expect(english('female')).not.toMatch(/A man blesses/);
+  }, 60000);
 });

@@ -1,11 +1,16 @@
-import { HDate, HebrewCalendar, Location as HebcalLocation, flags } from '@hebcal/core';
+import { HDate, HebrewCalendar, Location as HebcalLocation, flags, holidayDesc } from '@hebcal/core';
 import { DateTime } from 'luxon';
 import { CalendarInfo, HebrewDate, HolyBlock, HolyBlockKind, Location, Zmanim } from '@/types/zmanim';
 import { ZmanimService, candleLightingMinutes, holyBlockExit } from '@/services/ZmanimService';
 
 export type CalendarLocale = 'he' | 'en' | 'he-x-NoNikud';
 
-export type HolidayExtras = { cholHamoed?: boolean; erev?: boolean };
+export type HolidayExtras = {
+  cholHamoed?: boolean;
+  erev?: boolean;
+  omitChanukahCandles?: boolean;
+  omitChanukahDay?: boolean;
+};
 
 const HOLIDAY_FLAGS =
   flags.CHAG | flags.MAJOR_FAST | flags.MINOR_FAST | flags.ROSH_CHODESH | flags.MINOR_HOLIDAY | flags.MODERN_HOLIDAY;
@@ -188,7 +193,11 @@ export const HebcalService = {
       il: loc.inIsrael,
     });
     const mask = HOLIDAY_FLAGS | (extras.cholHamoed ? flags.CHOL_HAMOED : 0) | (extras.erev ? flags.EREV : 0);
-    return events.filter((e) => e.getFlags() & mask).map((e) => e.render(locale));
+    const omitted = extras.omitChanukahCandles ? flags.CHANUKAH_CANDLES : 0;
+    const eighthDay = extras.omitChanukahDay ? holidayDesc.CHANUKAH_8TH_DAY : null;
+    return events
+      .filter((e) => Boolean(e.getFlags() & mask) && !(e.getFlags() & omitted) && e.getDesc() !== eighthDay)
+      .map((e) => e.render(locale));
   },
 
   isShabbat(date: Date, loc?: Location): boolean {

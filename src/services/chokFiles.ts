@@ -1,15 +1,25 @@
-import { Platform } from 'react-native';
-import { Directory, File, Paths } from 'expo-file-system';
-import { ChokInstall } from '@/types/chok';
+import { Directory, File } from 'expo-file-system';
+import {
+  ADDON_GZIP_SUFFIX,
+  AddonFileCorruptError,
+  addonInstallDirectory,
+  addonInstallPresent,
+  addonRootDirectory,
+  deleteAddonFiles,
+  readAddonJson,
+} from '@/services/addons/addonFiles';
+import { ChokAsset, ChokInstall } from '@/types/chok';
 
 export const CHOK_DIRECTORY = 'chok';
 
+export const chokDirName = (version: number): string => `v${version}`;
+
 export function chokRootDirectory(): Directory {
-  return new Directory(Paths.document, CHOK_DIRECTORY);
+  return addonRootDirectory(CHOK_DIRECTORY);
 }
 
 export function chokVersionDirectory(version: number): Directory {
-  return new Directory(Paths.document, CHOK_DIRECTORY, `v${version}`);
+  return addonInstallDirectory(CHOK_DIRECTORY, chokDirName(version));
 }
 
 export function chokParashaFile(install: ChokInstall, parasha: string): File | null {
@@ -17,19 +27,18 @@ export function chokParashaFile(install: ChokInstall, parasha: string): File | n
   return path ? new File(chokVersionDirectory(install.version), path) : null;
 }
 
+export const CHOK_GZIP_SUFFIX = ADDON_GZIP_SUFFIX;
+
+export { AddonFileCorruptError as ChokFileCorruptError };
+
+export function readChokAsset(file: File): Promise<ChokAsset> {
+  return readAddonJson<ChokAsset>(file);
+}
+
 export function chokInstallPresent(install: ChokInstall): boolean {
-  if (Platform.OS === 'web') return false;
-  try {
-    const paths = Object.values(install.files);
-    if (paths.length === 0) return false;
-    const directory = chokVersionDirectory(install.version);
-    return directory.exists && paths.every((path) => new File(directory, path).exists);
-  } catch {
-    return false;
-  }
+  return addonInstallPresent(CHOK_DIRECTORY, chokDirName(install.version), install);
 }
 
 export function deleteChokFiles(): void {
-  const root = chokRootDirectory();
-  if (root.exists) root.delete();
+  deleteAddonFiles(CHOK_DIRECTORY);
 }

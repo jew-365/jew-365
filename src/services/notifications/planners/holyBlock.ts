@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
 import type { HolyBlock, Location } from '@/types/zmanim';
-import { omerDayFor } from '@/data/mitzvot';
+import { omerDayFor, ushpizOfEvening } from '@/data/mitzvot';
 import { holyBlockLabelKeys } from '@/utils/skipRules';
-import { t } from '@/i18n';
+import { formatDate, t } from '@/i18n';
 import { BLOCK_NOTICE_KIND } from '@/services/notifications/ids';
 import type { PlanInput, ScheduleCandidate } from '@/services/notifications/types';
 import { formatClock, holyBlocksWithin, type Horizon } from '@/services/notifications/planners/horizon';
@@ -13,16 +13,31 @@ const BLOCK_NOTICE_LEAD_MIN = 60;
 
 type OmerNight = { evening: DateTime; count: number };
 
-// The Omer counts due on the nights inside the block, when no reminder can fire, each with the
-// evening it is counted on. The erev's night may have none (the first Seder), so a count is never
-// assumed to be tonight's. The last day's night opens at the block's own tzeit, where the regular
-// Omer reminder fires as usual.
-function omerNightsWithin(block: HolyBlock, location: Location): OmerNight[] {
+// The evenings whose nights lie inside the block, when no reminder can fire: the erev's and every
+// day's but the last, whose night opens at the block's own exit, where the regular reminders fire.
+function eveningsWithin(block: HolyBlock, location: Location): DateTime[] {
   const evenings = [DateTime.fromISO(block.days[0], { zone: location.tz }).minus({ days: 1 })];
   for (const day of block.days.slice(0, -1)) evenings.push(DateTime.fromISO(day, { zone: location.tz }));
-  return evenings.flatMap((evening) => {
+  return evenings;
+}
+
+// The erev's night may have no count (the first Seder), so a count is never assumed to be tonight's.
+function omerNightsWithin(block: HolyBlock, location: Location): OmerNight[] {
+  return eveningsWithin(block, location).flatMap((evening) => {
     const count = omerDayFor(evening.set({ hour: 12 }).toJSDate(), location.tz);
     return count === null ? [] : [{ evening, count }];
+  });
+}
+
+function ushpizinLines(block: HolyBlock, input: PlanInput): string[] {
+  const english = input.language === 'en';
+  const erev = DateTime.fromISO(block.days[0]).minus({ days: 1 }).toISODate();
+  return eveningsWithin(block, input.location).flatMap((evening) => {
+    const guest = ushpizOfEvening(new Date(evening.year, evening.month - 1, evening.day));
+    if (!guest) return [];
+    const name = english ? guest.en : guest.he;
+    if (evening.toISODate() === erev) return [t('holyBlock.notice.ushpizinTonight', { name })];
+    return [t('holyBlock.notice.ushpizinOn', { name, day: formatDate(evening, 'cccc', english ? 'en' : 'he') })];
   });
 }
 
@@ -34,7 +49,7 @@ function omerLine(block: HolyBlock, nights: OmerNight[], english: boolean): stri
   }
   const locale = english ? 'en' : 'he';
   const counts = nights.map(({ evening, count }) =>
-    t('holyBlock.notice.omerOn', { count, day: evening.setLocale(locale).toFormat('cccc') }),
+    t('holyBlock.notice.omerOn', { count, day: formatDate(evening, 'cccc', locale) }),
   );
   return t('holyBlock.notice.omerNights', { counts: counts.join(', ') });
 }
@@ -48,6 +63,7 @@ function blockNoticeCandidate(block: HolyBlock, input: PlanInput, countsOmer: bo
   ];
   const omer = countsOmer ? omerLine(block, omerNightsWithin(block, input.location), input.language === 'en') : null;
   if (omer) lines.push(omer);
+  if (input.mitzvot.some((m) => m.id === 'ushpizin')) lines.push(...ushpizinLines(block, input));
   if (input.hilulotEnabled) lines.push(...hilulaLines(block, input));
   if (input.roshChodeshEnabled) lines.push(...roshChodeshLines(block, input));
   return {

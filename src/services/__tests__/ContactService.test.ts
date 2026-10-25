@@ -6,13 +6,18 @@ import {
   CONTACT_MESSAGE_MAX,
   CONTACT_TIMEOUT_MS,
   ContactError,
+  PRODUCT_LINKS,
   contactFailureKey,
   contactMailUrl,
   contactProblem,
+  dataDeletionUrl,
   isContactConfigured,
   sendContactMessage,
+  storePageUrl,
 } from '../ContactService';
 import { captureException } from '@/services/crashReporting';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const FORM = 'xyzabcd';
 const VALID = { name: ' Avraham ', phone: ' 050-123-4567 ', message: ' The siddur font is small ' };
@@ -35,6 +40,70 @@ describe('ContactService', () => {
 
     it('reads the one shipped form id by default', () => {
       expect(isContactConfigured()).toBe(CONTACT_FORM_ID.trim() !== '');
+    });
+  });
+
+  describe('product links', () => {
+    it('holds the privacy policy of each UI language', () => {
+      expect(PRODUCT_LINKS.privacy).toEqual({
+        he: 'https://jew-365.github.io/jew-365/privacy/',
+        en: 'https://jew-365.github.io/jew-365/privacy/en/',
+      });
+    });
+
+    it('holds every page Settings links', () => {
+      expect(PRODUCT_LINKS).toEqual({
+        support: 'https://jew-365.github.io/jew-365/',
+        privacy: {
+          he: 'https://jew-365.github.io/jew-365/privacy/',
+          en: 'https://jew-365.github.io/jew-365/privacy/en/',
+        },
+        store: {
+          android: 'https://play.google.com/store/apps/details?id=com.jew365.app',
+          ios: 'https://apps.apple.com/app/id6825802248',
+        },
+        chokLicense: 'https://jew-365.github.io/jew-365/chok/LICENSE.txt',
+      });
+    });
+
+    it('points every site link at a page in docs/', () => {
+      const site = 'https://jew-365.github.io/jew-365/';
+      const urls = [
+        PRODUCT_LINKS.support,
+        PRODUCT_LINKS.privacy.he,
+        PRODUCT_LINKS.privacy.en,
+        PRODUCT_LINKS.chokLicense,
+      ];
+      const missing = urls.filter((url) => {
+        if (!url.startsWith(site)) return true;
+        const rest = url.slice(site.length);
+        const file = rest === '' || rest.endsWith('/') ? `${rest}index.html` : rest;
+        return !fs.existsSync(path.join(__dirname, '..', '..', '..', 'docs', file));
+      });
+      expect(missing).toEqual([]);
+    });
+
+    it('never links the testers page or a review page', () => {
+      expect(JSON.stringify(PRODUCT_LINKS)).not.toMatch(/testers|taharah-review|halacha-review/);
+    });
+
+    it.each([
+      ['android', 'https://play.google.com/store/apps/details?id=com.jew365.app'],
+      ['ios', 'https://apps.apple.com/app/id6825802248'],
+      ['web', null],
+    ] as const)('gives %s its store page', (os, url) => {
+      expect(storePageUrl(os)).toBe(url);
+    });
+
+    it('reads the running platform by default', () => {
+      expect(storePageUrl()).toBe('https://apps.apple.com/app/id6825802248');
+    });
+
+    it.each([
+      ['he', 'https://jew-365.github.io/jew-365/privacy/#delete'],
+      ['en', 'https://jew-365.github.io/jew-365/privacy/en/#delete'],
+    ] as const)('opens the %s policy at its deletion section', (language, url) => {
+      expect(dataDeletionUrl(language)).toBe(url);
     });
   });
 

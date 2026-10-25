@@ -27,6 +27,10 @@ jest.mock('@/services/chokFiles', () => ({
   ...jest.requireActual('@/services/chokFiles'),
   deleteChokFiles: jest.fn(),
 }));
+jest.mock('@/services/selichotFiles', () => ({
+  ...jest.requireActual('@/services/selichotFiles'),
+  deleteSelichotFiles: jest.fn(),
+}));
 jest.mock('expo-background-task', () => ({
   registerTaskAsync: jest.fn(),
   unregisterTaskAsync: jest.fn(),

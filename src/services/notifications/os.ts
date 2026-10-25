@@ -18,7 +18,7 @@ export type NotificationTaskPayload = Notifications.NotificationTaskPayload;
 export type NotificationResponse = Notifications.NotificationResponse;
 
 // A notification as the scheduler reasons about it, scheduled or in the tray.
-export type TrayNotification = { identifier: string; data: PendingNotificationMeta };
+export type TrayNotification = { identifier: string; data: PendingNotificationMeta; presentedAt?: Date };
 
 export async function ensureChannels(): Promise<void> {
   if (Platform.OS !== 'android') return;
@@ -157,10 +157,20 @@ export async function cancelScheduled(ids: string[]): Promise<void> {
   for (const id of ids) await Notifications.cancelScheduledNotificationAsync(id);
 }
 
+const EPOCH_SECONDS_MAX = 1e11;
+
+function deliveryDate(value: unknown): Date | undefined {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return undefined;
+  return new Date(value < EPOCH_SECONDS_MAX ? value * 1000 : value);
+}
+
 export async function getPresented(): Promise<TrayNotification[]> {
   if (typeof Notifications.getPresentedNotificationsAsync !== 'function') return [];
   try {
-    return (await Notifications.getPresentedNotificationsAsync()).map(({ request }) => trayNotification(request));
+    return (await Notifications.getPresentedNotificationsAsync()).map(({ request, date }) => ({
+      ...trayNotification(request),
+      presentedAt: deliveryDate(date),
+    }));
   } catch {
     return [];
   }

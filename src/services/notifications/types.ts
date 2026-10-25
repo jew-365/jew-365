@@ -4,6 +4,7 @@ import type { Mitzvah, Reminder, UserSettings } from '@/types/mitzvah';
 import type { TaharahEvent, TaharahSettings } from '@/types/taharah';
 import type { Location } from '@/types/zmanim';
 import type { CheckIns, Completions } from '@/stores/useCompletionsStore';
+import type { HilulaNotices, RoshChodeshNotices } from '@/stores/useUserStore';
 import type { TaharahLeads } from '@/stores/useTaharahStore';
 import type { ANDROID_CHANNELS, PendingNotificationMeta } from '@/services/notifications/ids';
 
@@ -41,6 +42,8 @@ export type PlanInput = {
   enabledSince: Record<string, number>;
   hilulotEnabled: boolean;
   roshChodeshEnabled: boolean;
+  hilulaNotices: HilulaNotices;
+  roshChodeshNotices: RoshChodeshNotices;
   weeklyReportEnabled: boolean;
   taharahEnabled: boolean;
   taharah: {

@@ -6,6 +6,7 @@ import { StorageService } from '@/services/StorageService';
 import { downloadNewUpdate, isUpdateApplied } from '@/services/appUpdates';
 import { clearLastError, getLastError, reportError } from '@/services/errors';
 import { isQuietAt } from '@/utils/skipRules';
+import { appDay, appDayEnd } from '@/utils/locationDay';
 import { blockForDay, blockOfCheckIn, checkInFor } from '@/utils/checkIn';
 import { deriveCycle } from '@/utils/taharah/cycle';
 import { hebrewDay } from '@/utils/taharah/onot';
@@ -17,6 +18,8 @@ import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { useCompletionsStore, dateKey } from '@/stores/useCompletionsStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useChokStore } from '@/stores/useChokStore';
+import { selectSelichotNusach, useSelichotStore } from '@/stores/useSelichotStore';
+import { applyGenderDefaultsToNew } from '@/stores/taharahOptIn';
 import {
   ANDROID_CHANNELS,
   CHECK_IN_KIND,
@@ -151,6 +154,15 @@ function isStaleUpdateNotice(data: PendingNotificationMeta): boolean {
   return data.kind === UPDATE_KIND && isUpdateApplied(data);
 }
 
+function reminderDayEnded({ identifier, data, presentedAt }: os.TrayNotification, now: Date): boolean {
+  if (data.kind !== undefined) return false;
+  const target = notificationTargetFromData(data, identifier);
+  if (!target) return false;
+  const { location } = useUserStore.getState();
+  if (now.getTime() < appDayEnd(target.date, location).getTime()) return false;
+  return !presentedAt || now.getTime() >= appDayEnd(appDay(presentedAt, location), location).getTime();
+}
+
 function shouldSuppressForCompletion(data: PendingNotificationMeta, notificationId?: string): boolean {
   if (isFinishedCheckIn(data)) return true;
   if (isStaleUpdateNotice(data)) return true;
@@ -162,10 +174,11 @@ function shouldSuppressForCompletion(data: PendingNotificationMeta, notification
   return completions.isDone(target.mitzvahId, target.date) || completions.isSkipped(target.mitzvahId, target.date);
 }
 
-export async function dismissCompletedPresentedNotifications(): Promise<void> {
+export async function dismissCompletedPresentedNotifications(now: Date = new Date()): Promise<void> {
   const ids: string[] = [];
   const completions = useCompletionsStore.getState();
-  for (const { identifier, data } of await os.getPresented()) {
+  for (const tray of await os.getPresented()) {
+    const { identifier, data } = tray;
     const target = notificationTargetFromData(data, identifier);
     // Skipped counts as resolved, exactly like the schedule and shouldSuppressForCompletion treat
     // it — otherwise a mitzvah the user deliberately skipped keeps nagging from the tray.
@@ -175,9 +188,20 @@ export async function dismissCompletedPresentedNotifications(): Promise<void> {
     ) {
       ids.push(identifier);
     }
-    if (isFinishedCheckIn(data) || taharahNotificationSettled(data) || isStaleUpdateNotice(data)) ids.push(identifier);
+    if (
+      reminderDayEnded(tray, now) ||
+      isFinishedCheckIn(data) ||
+      taharahNotificationSettled(data) ||
+      isStaleUpdateNotice(data)
+    )
+      ids.push(identifier);
   }
   await os.dismiss(ids);
+}
+
+async function dismissEndedDayReminders(now: Date): Promise<void> {
+  const presented = await os.getPresented();
+  await os.dismiss(presented.filter((tray) => reminderDayEnded(tray, now)).map(({ identifier }) => identifier));
 }
 
 export async function notifyIfUpdateReady(now: Date = new Date()): Promise<boolean> {
@@ -369,8 +393,11 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   return granted;
 }
 
+if (applyGenderDefaultsToNew().length) StorageService.delete(SCHEDULE_FORMAT_KEY);
+
 TaskManager.defineTask(DAILY_REBUILD_TASK, async () => {
   try {
+    await dismissEndedDayReminders(new Date()).catch(() => {});
     if (shouldRunDailyRebuild()) {
       await NotificationScheduler.rebuildForNewDay();
     }
@@ -446,6 +473,8 @@ export function initNotificationHandlers(): () => void {
         state.taharahEnabled !== prev.taharahEnabled ||
         state.hilulotEnabled !== prev.hilulotEnabled ||
         state.roshChodeshEnabled !== prev.roshChodeshEnabled ||
+        state.hilulaNotices !== prev.hilulaNotices ||
+        state.roshChodeshNotices !== prev.roshChodeshNotices ||
         state.weeklyReportEnabled !== prev.weeklyReportEnabled
       ) {
         NotificationScheduler.rebuild().catch(reportScheduleError);
@@ -477,6 +506,10 @@ export function initNotificationHandlers(): () => void {
     }),
     useChokStore.subscribe((state, prev) => {
       if ((state.installed === null) !== (prev.installed === null))
+        NotificationScheduler.rebuild().catch(reportScheduleError);
+    }),
+    useSelichotStore.subscribe((state, prev) => {
+      if (selectSelichotNusach(state) !== selectSelichotNusach(prev))
         NotificationScheduler.rebuild().catch(reportScheduleError);
     }),
   ];

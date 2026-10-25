@@ -99,13 +99,14 @@ import { HebcalService } from '@/services/HebcalService';
 import { useUserStore } from '@/stores/useUserStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useChokStore } from '@/stores/useChokStore';
+import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useCompletionsStore, dateKey } from '@/stores/useCompletionsStore';
 import { CITIES } from '@/data/cities';
 import { customToMitzvah } from '@/data/customMitzvotAdapter';
 import { installChokFixture } from '@/testing/chok';
 import { at } from '@/testing/zmanim';
 import { t } from '@/i18n';
-import type { Mitzvah } from '@/types/mitzvah';
+import type { Mitzvah, Reminder } from '@/types/mitzvah';
 import type { HolyBlock } from '@/types/zmanim';
 
 // Nothing fires inside a Shabbat / Yom Tov block, so a suite running on the real clock would turn
@@ -239,6 +240,24 @@ describe('NotificationScheduler', () => {
     expect(mockCancelOne).toHaveBeenCalledWith(`shacharit__${key}__2`);
   });
 
+  it('6.2e cancelForMitzvah removes every trigger of a multi-day window', async () => {
+    const pending = (identifier: string, key: string, reminderIndex: number) => ({
+      identifier,
+      content: { data: { mitzvahId: 'kiddush_levana', dateKey: key, reminderIndex } },
+    });
+    mockState.pending = [
+      pending('kiddush_levana__2026-10-14__0', '2026-10-14', 0),
+      pending('kiddush_levana__2026-10-14__1', '2026-10-14', 1),
+      pending('kiddush_levana__2026-10-14__1.1', '2026-10-14', 1),
+      pending('kiddush_levana__2026-11-14__0', '2026-11-14', 0),
+    ];
+
+    await NotificationScheduler.cancelForMitzvah('kiddush_levana', new Date(2026, 9, 14));
+
+    expect(mockState.pending.map((p) => p.identifier)).toEqual(['kiddush_levana__2026-11-14__0']);
+    expect(mockCancelOne).toHaveBeenCalledWith('kiddush_levana__2026-10-14__1.1');
+  });
+
   it('6.2b cancelForMitzvah also clears that mitzvah and date from the notification tray', async () => {
     const date = new Date(2026, 4, 6);
     mockState.presented = [
@@ -295,7 +314,7 @@ describe('NotificationScheduler', () => {
     const running = NotificationScheduler.rebuild();
     expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBeUndefined();
     await running;
-    expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(8);
+    expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(9);
   });
 
   it('6.3 cancelAll empties pending', async () => {
@@ -361,6 +380,37 @@ describe('NotificationScheduler', () => {
     rebuild.mockRestore();
   });
 
+  it('6.4c installing, switching or deleting the Selichot nusach drives a rebuild, and only that', () => {
+    const rebuild = jest.spyOn(NotificationScheduler, 'rebuild').mockResolvedValue();
+    const teardown = initNotificationHandlers();
+    useSelichotStore.getState().reset();
+    rebuild.mockClear();
+    const install = (files: Record<string, string>, version = 1) => ({ version, bytes: 1, installedAt: 0, files });
+
+    useSelichotStore.getState().setInstalled(install({ ashkenaz: 'a.0000000a.siddur.gz' }));
+    expect(rebuild).toHaveBeenCalledTimes(1);
+
+    useSelichotStore.getState().setInstalled(install({ ashkenaz: 'a.0000000b.siddur.gz' }, 2));
+    expect(rebuild).toHaveBeenCalledTimes(1);
+
+    useSelichotStore.getState().setChecked(2, 1);
+    expect(rebuild).toHaveBeenCalledTimes(1);
+
+    useSelichotStore.getState().setInstalled(install({ sefard: 's.0000000a.siddur.gz' }, 2));
+    expect(rebuild).toHaveBeenCalledTimes(2);
+
+    useSelichotStore.getState().clearInstalled();
+    expect(rebuild).toHaveBeenCalledTimes(3);
+
+    teardown();
+    rebuild.mockClear();
+    useSelichotStore.getState().setInstalled(install({ ashkenaz: 'a.0000000a.siddur.gz' }));
+    expect(rebuild).not.toHaveBeenCalled();
+
+    useSelichotStore.getState().reset();
+    rebuild.mockRestore();
+  });
+
   it('6.5 granting permission after a denial triggers a rebuild', async () => {
     useUserStore.getState().setNotificationPermission('denied');
     const rebuild = jest.spyOn(NotificationScheduler, 'rebuild').mockResolvedValue();
@@ -405,6 +455,7 @@ describe('NotificationScheduler', () => {
       icon: 'custom',
       timeType: 'range-within-day',
       category: 'daily-morning',
+      group: 'daily',
       skipOn: [],
       nuschaotSupported: ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'],
       defaultReminders: [
@@ -606,6 +657,7 @@ describe('NotificationScheduler', () => {
       icon: 'custom',
       timeType: 'range-within-day',
       category: 'daily-morning',
+      group: 'daily',
       skipOn: [],
       nuschaotSupported: ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'],
       defaultReminders: [
@@ -638,6 +690,7 @@ describe('NotificationScheduler', () => {
       icon: 'custom',
       timeType: 'range-within-day',
       category: 'daily-morning',
+      group: 'daily',
       skipOn: [],
       nuschaotSupported: ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'],
       defaultReminders: [
@@ -963,6 +1016,7 @@ describe('NotificationScheduler', () => {
       icon: 'custom',
       timeType: 'range-within-day',
       category: 'daily-morning',
+      group: 'daily',
       skipOn: [],
       nuschaotSupported: ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'],
       defaultReminders: reminders,
@@ -1087,6 +1141,144 @@ describe('NotificationScheduler', () => {
     expect(mockState.pending[0].content.body).toBe('טקסט עברי');
   });
 
+  describe('6.17 follow-up reminders', () => {
+    const jerusalem = CITIES[0];
+    const settled = async () => {
+      await new Promise((resolve) => setImmediate(resolve));
+      while (NotificationScheduler.inFlight) await NotificationScheduler.inFlight;
+      await new Promise((resolve) => setImmediate(resolve));
+    };
+    const custom = (reminders: Reminder[], startHHMM = '10:00', endHHMM = '11:00', name = 'לימוד') =>
+      customToMitzvah({ id: 'custom_follow', name, startHHMM, endHHMM, reminders, skipOn: [], createdAt: 1 });
+    const scheduled = (key: string) => idsFor('custom_follow', key).map((p) => [p.identifier, triggerOf(p)]);
+    const followUp = (offsetMin: number, label = 'עוד לא סימנת: לימוד'): Reminder => ({
+      anchor: 'followUp',
+      offsetMin,
+      label,
+    });
+
+    it('schedules a follow-up 60 minutes after a 10:00-11:00 window at 12:00, skipping once done', async () => {
+      await NotificationScheduler.scheduleAll(PINNED_NOW, [custom([followUp(60)])]);
+
+      expect(scheduled('2026-11-11')).toEqual([
+        ['custom_follow__2026-11-11__0', at(jerusalem, '2026-11-11T12:00').getTime()],
+      ]);
+      const [pending] = idsFor('custom_follow', '2026-11-11');
+      expect(pending.content.body).toBe('עוד לא סימנת: לימוד');
+      expect(pending.content.categoryIdentifier).toBe(MITZVAH_REMINDER_CATEGORY);
+      expect(pending.content.data).toMatchObject({
+        mitzvahId: 'custom_follow',
+        dateKey: '2026-11-11',
+        skipIfDone: true,
+        windowEnd: at(jerusalem, '2026-11-11T11:00').toISOString(),
+      });
+    });
+
+    it('marking it done at 11:30 cancels the 12:00 notification and the next day keeps its own', async () => {
+      await NotificationScheduler.scheduleAll(PINNED_NOW, [custom([followUp(60)])]);
+      expect(idsFor('custom_follow', '2026-11-11')).toHaveLength(1);
+
+      const markedAt = at(jerusalem, '2026-11-11T11:30');
+      jest.setSystemTime(markedAt);
+      useCompletionsStore.getState().markDone('custom_follow', new Date(2026, 10, 11));
+      await settled();
+
+      expect(idsFor('custom_follow', '2026-11-11')).toHaveLength(0);
+      expect(scheduled('2026-11-12')).toEqual([
+        ['custom_follow__2026-11-12__0', at(jerusalem, '2026-11-12T12:00').getTime()],
+      ]);
+      expect(
+        shouldSuppressForCompletion(
+          { mitzvahId: 'custom_follow', dateKey: '2026-11-11', skipIfDone: true },
+          'custom_follow__2026-11-11__0',
+        ),
+      ).toBe(true);
+
+      mockState.pending = [];
+      await NotificationScheduler.scheduleAll(markedAt, [custom([followUp(60)])]);
+      expect(idsFor('custom_follow', '2026-11-11')).toHaveLength(0);
+      expect(idsFor('custom_follow', '2026-11-12')).toHaveLength(1);
+    });
+
+    it('a skipped day plans no follow-up', async () => {
+      useCompletionsStore.setState({ skipped: { '2026-11-11': { custom_follow: 1 } } });
+      await NotificationScheduler.scheduleAll(PINNED_NOW, [custom([followUp(60)])]);
+
+      expect(idsFor('custom_follow', '2026-11-11')).toHaveLength(0);
+      expect(idsFor('custom_follow', '2026-11-12')).toHaveLength(1);
+    });
+
+    it('drops a follow-up that lands inside Shabbat and keeps one before candle lighting', async () => {
+      const thursday = at(jerusalem, '2026-11-12T06:00');
+      jest.setSystemTime(thursday);
+      await NotificationScheduler.scheduleAll(thursday, [custom([followUp(60, 'a'), followUp(600, 'b')])]);
+
+      const block = HebcalService.holyBlockAt(at(jerusalem, '2026-11-14T12:00'), jerusalem)!;
+      expect(at(jerusalem, '2026-11-13T12:00').getTime()).toBeLessThan(block.start.getTime());
+      expect(at(jerusalem, '2026-11-13T21:00').getTime()).toBeGreaterThan(block.start.getTime());
+      expect(scheduled('2026-11-13')).toEqual([
+        ['custom_follow__2026-11-13__0', at(jerusalem, '2026-11-13T12:00').getTime()],
+      ]);
+      expect(
+        idsFor('custom_follow', '2026-11-12')
+          .map((p) => p.identifier)
+          .sort(),
+      ).toEqual(['custom_follow__2026-11-12__0', 'custom_follow__2026-11-12__1']);
+      expectNothingInside(block);
+    });
+
+    it('keeps the follow-up of a full-day window opened two days earlier when a rebuild runs after midnight', async () => {
+      const rebuildAt = at(jerusalem, '2026-11-13T00:15');
+      jest.setSystemTime(rebuildAt);
+      await NotificationScheduler.scheduleAll(rebuildAt, [custom([followUp(720)], '20:00', '20:00')]);
+
+      expect(scheduled('2026-11-11')).toEqual([
+        ['custom_follow__2026-11-11__0', at(jerusalem, '2026-11-13T08:00').getTime()],
+      ]);
+    });
+
+    it('builds the default body of a follow-up with no label from the current name, in the UI language', async () => {
+      const blank = followUp(60, '');
+      const bodyAfter = async (name: string) => {
+        mockState.pending = [];
+        await NotificationScheduler.scheduleAll(PINNED_NOW, [custom([blank], '10:00', '11:00', name)]);
+        return idsFor('custom_follow', '2026-11-11')[0].content.body;
+      };
+
+      expect(await bodyAfter('לימוד')).toBe('עוד לא סימנת: לימוד');
+      expect(await bodyAfter('שיעור')).toBe('עוד לא סימנת: שיעור');
+
+      useUserStore.getState().setLanguage('en');
+      expect(await bodyAfter('שיעור')).toBe('Not marked yet: שיעור');
+    });
+
+    it('keeps a typed follow-up label verbatim', async () => {
+      await NotificationScheduler.scheduleAll(PINNED_NOW, [
+        custom([followUp(60, 'חזור ללמוד')], '10:00', '11:00', 'שיעור'),
+      ]);
+      expect(idsFor('custom_follow', '2026-11-11')[0].content.body).toBe('חזור ללמוד');
+
+      mockState.pending = [];
+      useUserStore.getState().setLanguage('en');
+      await NotificationScheduler.scheduleAll(PINNED_NOW, [
+        custom([followUp(60, 'חזור ללמוד')], '10:00', '11:00', 'שיעור'),
+      ]);
+      expect(idsFor('custom_follow', '2026-11-11')[0].content.body).toBe('חזור ללמוד');
+    });
+
+    it('words a follow-up of a mitzvah with an English name in English', async () => {
+      const window = { start: new Date(Date.now() + 30 * 60_000), end: new Date(Date.now() + 90 * 60_000) };
+      const mitzvah = bulkMitzvah('follow_lang', [{ anchor: 'followUp', offsetMin: 30, label: 'עברית' }], window);
+
+      useUserStore.getState().setLanguage('en');
+      await NotificationScheduler.scheduleAll(new Date(Date.now() + 1000), [mitzvah]);
+
+      const pending = mockState.pending.find((p) => p.identifier.startsWith('follow_lang__'))!;
+      expect(pending.content.body).toBe('Not marked yet: Test');
+      expect(triggerOf(pending)).toBe(window.end.getTime() + 30 * 60_000);
+    });
+  });
+
   it('6.12 one mitzvah throwing does not abort scheduling for the rest', async () => {
     const future = new Date(Date.now() + 1000);
     const window = { start: new Date(Date.now() + 60_000), end: new Date(Date.now() + 20 * 60_000) };
@@ -1095,6 +1287,7 @@ describe('NotificationScheduler', () => {
       icon: 'custom',
       timeType: 'range-within-day' as const,
       category: 'daily-morning' as const,
+      group: 'daily' as const,
       skipOn: [],
       nuschaotSupported: ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'] as Mitzvah['nuschaotSupported'],
       defaultReminders: [{ anchor: 'start' as const, offsetMin: 1, label: 'x' }],

@@ -77,6 +77,41 @@ describe('HebcalService', () => {
     ]);
   });
 
+  it("2.3d leaves hebcal's Chanukah candle labels out when asked, and keeps every other occasion", () => {
+    const firstCandle = new Date(2026, 11, 4);
+    expect(HebcalService.getHolidays(firstCandle, JERUSALEM, 'he-x-NoNikud')).toEqual(['חנוכה: א׳ נר']);
+    expect(HebcalService.getHolidays(firstCandle, JERUSALEM, 'he-x-NoNikud', { omitChanukahCandles: true })).toEqual(
+      [],
+    );
+    expect(HebcalService.getHolidays(firstCandle, JERUSALEM, 'en', { erev: true, omitChanukahCandles: true })).toEqual(
+      [],
+    );
+    const roshChodesh = new Date(2026, 11, 10);
+    expect(HebcalService.getHolidays(roshChodesh, JERUSALEM, 'en')).toEqual([
+      'Chag HaBanot',
+      'Chanukah: 7 Candles',
+      'Rosh Chodesh Tevet',
+    ]);
+    expect(HebcalService.getHolidays(roshChodesh, JERUSALEM, 'en', { omitChanukahCandles: true })).toEqual([
+      'Chag HaBanot',
+      'Rosh Chodesh Tevet',
+    ]);
+    expect(HebcalService.getHolidays(new Date(2026, 11, 12), JERUSALEM, 'en', { omitChanukahCandles: true })).toEqual([
+      'Chanukah: 8th Day',
+    ]);
+  });
+
+  it("2.3e leaves hebcal's Chanukah eighth day out only when asked", () => {
+    const eighthDay = new Date(2026, 11, 12);
+    expect(HebcalService.getHolidays(eighthDay, JERUSALEM, 'he-x-NoNikud', { omitChanukahDay: true })).toEqual([]);
+    expect(HebcalService.getHolidays(eighthDay, JERUSALEM, 'he-x-NoNikud')).toEqual(['חנוכה: יום ח׳']);
+    const roshChodesh = new Date(2026, 11, 11);
+    expect(HebcalService.getHolidays(roshChodesh, JERUSALEM, 'en', { omitChanukahDay: true })).toEqual([
+      'Chanukah: 8 Candles',
+      'Rosh Chodesh Tevet',
+    ]);
+  });
+
   it('2.4 isShabbat true on Saturday', () => {
     // Without a location the fallback is the device's Gregorian Saturday.
     const sat = new Date(2026, 3, 25, 12);

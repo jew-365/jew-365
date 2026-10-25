@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { DateTime } from 'luxon';
 import { useUserStore, type Gender } from '@/stores/useUserStore';
 import heTable from './he.json';
 import enTable from './en.json';
@@ -26,7 +27,7 @@ useUserStore.subscribe((state) => {
   currentGender = state.gender;
 });
 
-function interpolate(str: string, options?: Record<string, unknown>): string {
+export function interpolate(str: string, options?: Record<string, unknown>): string {
   if (!options) return str;
   return str.replace(/%\{(\w+)\}/g, (_, key) => (options[key] !== undefined ? String(options[key]) : `%{${key}}`));
 }
@@ -53,6 +54,34 @@ export function translate(
 
 export function t(scope: string, options?: Record<string, unknown>): string {
   return translate(scope, options, currentLocale, currentGender);
+}
+
+const DATE_TOKEN = /([A-Za-z])\1*/g;
+
+export function formatDate(date: Date | DateTime, pattern: string, language: AppLanguage): string {
+  const value = date instanceof Date ? DateTime.fromJSDate(date) : date;
+  if (!value.isValid) return '';
+  const name = (scope: string) => translate(scope, undefined, language, null);
+  return pattern.replace(DATE_TOKEN, (token) => {
+    switch (token) {
+      case 'cccc':
+        return name(`weekday.long.${value.weekday % 7}`);
+      case 'ccc':
+        return name(`weekday.short.${value.weekday % 7}`);
+      case 'LLLL':
+        return name(`month.long.${value.month}`);
+      case 'LLL':
+        return name(`month.short.${value.month}`);
+      case 'd':
+        return String(value.day);
+      case 'M':
+        return String(value.month);
+      case 'yyyy':
+        return String(value.year);
+      default:
+        throw new Error(`Unsupported date token "${token}"`);
+    }
+  });
 }
 
 export function useI18n() {

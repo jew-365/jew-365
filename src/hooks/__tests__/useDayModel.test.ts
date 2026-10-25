@@ -34,6 +34,7 @@ const state = (overrides: Partial<DayModelState> = {}): DayModelState => ({
   activeMitzvot: {},
   customItems: {},
   chokInstalled: false,
+  selichotInstalled: false,
   ...overrides,
 });
 
@@ -56,12 +57,19 @@ describe('dayModelFrom', () => {
     expect(dayModelFrom(state({ chokInstalled: true })).chokInstalled).toBe(true);
   });
 
+  it('passes the Selichot install through', () => {
+    expect(dayModelFrom(state()).selichotInstalled).toBe(false);
+    expect(dayModelFrom(state({ selichotInstalled: true })).selichotInstalled).toBe(true);
+  });
+
   it('keeps only the mitzvot the nusach supports', () => {
     const ashkenaz = dayModelFrom(state({ nusach: 'ashkenaz' })).allMitzvot.map((mitzvah) => mitzvah.id);
     const chabad = dayModelFrom(state({ nusach: 'chabad' })).allMitzvot.map((mitzvah) => mitzvah.id);
     expect(ashkenaz).not.toContain('chabad_only');
     expect(chabad).toContain('chabad_only');
-    expect(chabad).toHaveLength(ashkenaz.length + 1);
+    expect(ashkenaz).toContain('ushpizin');
+    expect(chabad).not.toContain('ushpizin');
+    expect(chabad.filter((id) => id !== 'chabad_only')).toEqual(ashkenaz.filter((id) => id !== 'ushpizin'));
   });
 
   it('enables exactly the mitzvot whose active state says so, customs included', () => {

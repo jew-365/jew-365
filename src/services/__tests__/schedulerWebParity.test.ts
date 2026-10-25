@@ -41,6 +41,13 @@ describe('NotificationScheduler web shim parity', () => {
     expect(missing).toEqual([]);
   });
 
+  it('words an empty follow-up label like the native planner', () => {
+    const reminder = { anchor: 'followUp' as const, label: '' };
+    const mitzvah = { name: { he: 'שיעור' } };
+    expect(web.pickBodyForReminder(reminder, mitzvah)).toBe('עוד לא סימנת: שיעור');
+    expect(web.pickBodyForReminder({ anchor: 'start', label: 'התחלה' }, mitzvah)).toBe('התחלה');
+  });
+
   it('is inert: scheduling on web resolves without touching anything', async () => {
     await expect(web.NotificationScheduler.rebuild()).resolves.toBeUndefined();
     await expect(web.NotificationScheduler.scheduleAll()).resolves.toBeUndefined();

@@ -26,8 +26,12 @@ jest.mock('expo-background-task', () => ({
 }));
 
 import { pickBodyForReminder } from '../NotificationScheduler';
+import { bodyForReminder } from '@/services/notifications/planners/mitzvot';
 import { MITZVOT } from '@/data/mitzvot';
+import { setLocale } from '@/i18n';
 import { Mitzvah, Reminder } from '@/types/mitzvah';
+
+const MAQAF = '־';
 
 const baseMitzvah: Mitzvah = {
   id: 'test',
@@ -35,6 +39,7 @@ const baseMitzvah: Mitzvah = {
   icon: 'test',
   timeType: 'range-within-day',
   category: 'daily-morning',
+  group: 'daily',
   computeWindow: () => null,
   defaultReminders: [],
   skipOn: [],
@@ -99,9 +104,19 @@ describe('registry body variants', () => {
     mitzvah.defaultReminders.filter((r) => r.bodyVariants).map((reminder) => ({ mitzvah, reminder })),
   );
 
-  it('keeps variants on the opening reminder of every daily mitzvah and the Omer', () => {
+  it('keeps variants on the opening reminder of every daily mitzvah, the Omer, Selichot and the Chanukah candles', () => {
     const ids = withVariants.map(({ mitzvah }) => mitzvah.id);
-    for (const id of ['tefillin', 'krias_shma_shacharit', 'shacharit', 'mincha', 'maariv', 'sefirat_haomer']) {
+    for (const id of [
+      'tefillin',
+      'krias_shma_shacharit',
+      'shacharit',
+      'mincha',
+      'maariv',
+      'krias_shma_al_hamita',
+      'sefirat_haomer',
+      'selichot',
+      'chanukah_candles',
+    ]) {
       expect(ids).toContain(id);
     }
   });
@@ -119,4 +134,103 @@ describe('registry body variants', () => {
       expect(new Set(bodies)).toEqual(new Set(variants));
     },
   );
+});
+
+describe('bodyForReminder with bodyParams', () => {
+  const nightly: Mitzvah = {
+    ...baseMitzvah,
+    name: { he: 'בדיקה', en: 'Test' },
+    bodyKey: 'notifications.chanukahNight',
+    defaultReminders: [
+      {
+        anchor: 'start',
+        offsetMin: 0,
+        label: 'זמן הדלקה',
+        bodyVariants: ['זמן הדלקה: %{n}', 'הלילה %{n}', 'נר %{n} הלילה'],
+      },
+    ],
+  };
+  const days = [0, 1, 2].map((offset) => new Date(Date.UTC(2026, 4, 6 + offset)));
+
+  it('fills the params into every rotating variant', () => {
+    const reminder: Reminder = {
+      anchor: 'start',
+      offsetMin: 0,
+      label: 'א',
+      bodyVariants: ['א %{n}', 'ב %{n}', 'ג %{n}'],
+    };
+    const bodies = days.map((day) => bodyForReminder(reminder, nightly, day, false, { n: 4 }));
+    expect(new Set(bodies)).toEqual(new Set(['א 4', 'ב 4', 'ג 4']));
+  });
+
+  it('fills the params into the label when there are no variants, and leaves the placeholder without them', () => {
+    const reminder: Reminder = { anchor: 'start', offsetMin: 0, label: 'נר %{n}' };
+    expect(bodyForReminder(reminder, nightly, days[0], false, { n: 5 })).toBe('נר 5');
+    expect(bodyForReminder(reminder, nightly, days[0], false)).toBe('נר %{n}');
+  });
+
+  it('reads the English body of the mitzvah with the params, or the plain one without a key', () => {
+    const reminder: Reminder = { anchor: 'start', offsetMin: 0, label: 'נר %{n}' };
+    try {
+      setLocale('en');
+      expect(bodyForReminder(reminder, nightly, days[0], true, { n: 6 })).toBe('Time for Test: night 6');
+      expect(bodyForReminder(reminder, { ...nightly, bodyKey: undefined }, days[0], true, { n: 6 })).toBe(
+        'Time for Test',
+      );
+    } finally {
+      setLocale('he');
+    }
+  });
+
+  describe('a reminder whose text holds no placeholder', () => {
+    const registry: Reminder = { anchor: 'start', offsetMin: 15, label: 'זמן הדלקה' };
+    const typed: Reminder = { anchor: 'start', offsetMin: 15, label: 'להכין חנוכייה' };
+    const keyed = `זמן בדיקה: הנר ה${MAQAF}5`;
+
+    it('reads the keyed Hebrew body for the registry label of an edited default reminder', () => {
+      expect(bodyForReminder(registry, nightly, days[0], false, { n: 5 })).toBe(keyed);
+    });
+
+    it('reads the keyed Hebrew body for a registry variant without a placeholder', () => {
+      const plain: Mitzvah = {
+        ...nightly,
+        defaultReminders: [{ anchor: 'start', offsetMin: 0, label: 'א', bodyVariants: ['א', 'ב', 'ג'] }],
+      };
+      const bodies = days.map((day) => bodyForReminder(plain.defaultReminders[0], plain, day, false, { n: 5 }));
+      expect(bodies).toEqual([keyed, keyed, keyed]);
+    });
+
+    it('reads the keyed Hebrew body for the mitzvah name the editor saves for an empty label, and for an empty label', () => {
+      for (const label of ['בדיקה', 'Test', '']) {
+        expect(bodyForReminder({ ...typed, label }, nightly, days[0], false, { n: 5 })).toBe(keyed);
+      }
+    });
+
+    it('sends a label the user typed exactly as typed', () => {
+      expect(bodyForReminder(typed, nightly, days[0], false, { n: 5 })).toBe('להכין חנוכייה');
+    });
+
+    it('reads Hebrew when the English UI has no English name to use, and still sends a typed label as typed', () => {
+      const hebrewOnly: Mitzvah = { ...nightly, name: { he: 'בדיקה' } };
+      try {
+        setLocale('en');
+        expect(bodyForReminder(registry, hebrewOnly, days[0], true, { n: 5 })).toBe(keyed);
+        expect(bodyForReminder(typed, hebrewOnly, days[0], true, { n: 5 })).toBe('להכין חנוכייה');
+      } finally {
+        setLocale('he');
+      }
+    });
+
+    it('keeps the label without params, without a body key, and on a follow-up reminder', () => {
+      expect(bodyForReminder(registry, nightly, days[0], false)).toBe('זמן הדלקה');
+      expect(bodyForReminder(registry, { ...nightly, bodyKey: undefined }, days[0], false, { n: 5 })).toBe('זמן הדלקה');
+      const followUp: Reminder = { anchor: 'followUp', offsetMin: 30, label: '' };
+      expect(bodyForReminder(followUp, nightly, days[0], false, { n: 5 })).toBe('עוד לא סימנת: בדיקה');
+    });
+
+    it('leaves a text that holds a placeholder to the plain fill', () => {
+      const withPlaceholder: Reminder = { ...typed, label: 'הנר ה%{n}' };
+      expect(bodyForReminder(withPlaceholder, nightly, days[0], false, { n: 5 })).toBe('הנר ה5');
+    });
+  });
 });

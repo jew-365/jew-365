@@ -46,6 +46,11 @@ jest.mock('expo-file-system', () => ({
 const mockReconcile = jest.fn();
 jest.mock('@/services/ChokContentService', () => ({ reconcileChokInstall: () => mockReconcile() }));
 
+const mockReconcileSelichot = jest.fn();
+jest.mock('@/services/SelichotContentService', () => ({
+  reconcileSelichotInstall: () => mockReconcileSelichot(),
+}));
+
 const mockShareAsync = jest.fn(async (..._args: unknown[]) => {});
 jest.mock('expo-sharing', () => ({ shareAsync: (...args: unknown[]) => mockShareAsync(...args) }));
 
@@ -72,6 +77,7 @@ import { useUserStore } from '@/stores/useUserStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
+import { useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { CITIES } from '@/data/cities';
 import type { CustomMitzvah } from '@/types/mitzvah';
@@ -79,12 +85,20 @@ import type { CustomMitzvah } from '@/types/mitzvah';
 const MARK_DAY = new Date(2026, 9, 12, 12);
 const CREATED = new Date('2026-10-14T09:30:00Z');
 const custom = { id: 'custom_1_ab', name: 'לימוד', start: '08:00', end: '09:00' } as unknown as CustomMitzvah;
+const ENTRY = {
+  textId: 'tehillim',
+  nusach: null,
+  sectionTitle: 'ליום ראשון',
+  segmentKey: 'abcdefghij',
+  label: 'ליום ראשון · אַשְׁרֵי הָאִישׁ',
+};
 
 function resetAll() {
   useUserStore.getState().reset();
   useMitzvotStore.getState().reset();
   useCompletionsStore.getState().reset();
   useCustomMitzvotStore.getState().reset();
+  useSiddurBookmarksStore.getState().reset();
   useTaharahStore.getState().reset();
   for (const name of BACKUP_STORES) storage.delete(name);
 }
@@ -99,10 +113,19 @@ function fillSource() {
   user.setLocationState(haifa, 'ready', 'manual');
   user.setOnboarded(true);
   user.setSiddurFontSize(28);
+  user.setChokThuNightDay('fri');
   useMitzvotStore.getState().setEnabled('havdalah', true);
   useCompletionsStore.getState().markDone('shacharit', MARK_DAY);
   useCompletionsStore.getState().markSkipped('mincha', MARK_DAY);
   useCustomMitzvotStore.getState().add(custom);
+  useSiddurBookmarksStore.getState().addBookmark(ENTRY, 1792000000000);
+  useSiddurBookmarksStore.getState().saveLastPosition('shacharit', {
+    nusach: 'sefard',
+    sectionTitle: 'אשרי',
+    segmentKey: 'klmnopqrst',
+    appDay: '2026-10-12',
+    savedAt: 1792000000000,
+  });
   return haifa;
 }
 
@@ -115,7 +138,7 @@ describe('BackupService', () => {
   afterEach(() => jest.restoreAllMocks());
 
   describe('createBackup', () => {
-    it('carries the four plain stores as their persisted strings and nothing else', () => {
+    it('carries the five plain stores as their persisted strings and nothing else', () => {
       fillSource();
       const backup = createBackup(CREATED);
 
@@ -126,6 +149,7 @@ describe('BackupService', () => {
         'completions-store',
         'custom-mitzvot-store',
         'mitzvot-store',
+        'siddur-bookmarks-store',
         'user-store',
       ]);
       for (const name of BACKUP_STORES) expect(backup.stores[name]).toBe(storage.getString(name));
@@ -227,6 +251,7 @@ describe('BackupService', () => {
       expect(user.profileName).toBe('Avi');
       expect(user.isOnboarded).toBe(true);
       expect(user.siddurFontSize).toBe(28);
+      expect(user.chokThuNightDay).toBe('fri');
       expect(user.location.cityId).toBe(haifa.cityId);
       expect(user.inIsrael).toBe(haifa.inIsrael);
       expect(useMitzvotStore.getState().activeMitzvot.havdalah.enabled).toBe(true);
@@ -234,6 +259,8 @@ describe('BackupService', () => {
       expect(useCompletionsStore.getState().isSkipped('mincha', MARK_DAY)).toBe(true);
       expect(useCompletionsStore.getState().isDone('maariv', MARK_DAY)).toBe(false);
       expect(useCustomMitzvotStore.getState().items[custom.id]).toEqual(custom);
+      expect(useSiddurBookmarksStore.getState().bookmarks[0].label).toBe(ENTRY.label);
+      expect(useSiddurBookmarksStore.getState().lastPositions.shacharit.segmentKey).toBe('klmnopqrst');
       expect(cancelAll).toHaveBeenCalledTimes(1);
     });
 
@@ -249,6 +276,22 @@ describe('BackupService', () => {
       await restoreBackup(backup);
 
       expect(mockReconcile).toHaveBeenCalledTimes(1);
+      expect(order[0]).toBe('reconcile');
+      expect(order).toContain('rebuild');
+    });
+
+    it('reconciles the Selichot install once, before the schedule is rebuilt', async () => {
+      fillSource();
+      const backup = createBackup(CREATED);
+      const order: string[] = [];
+      mockReconcileSelichot.mockImplementation(() => order.push('reconcile'));
+      jest.spyOn(NotificationScheduler, 'rebuild').mockImplementation(async () => {
+        order.push('rebuild');
+      });
+
+      await restoreBackup(backup);
+
+      expect(mockReconcileSelichot).toHaveBeenCalledTimes(1);
       expect(order[0]).toBe('reconcile');
       expect(order).toContain('rebuild');
     });
@@ -269,11 +312,65 @@ describe('BackupService', () => {
       const backup = createBackup(CREATED);
       delete backup.stores['custom-mitzvot-store'];
       delete backup.stores['completions-store'];
+      delete backup.stores['siddur-bookmarks-store'];
 
       await restoreBackup(backup);
 
       expect(useCustomMitzvotStore.getState().items).toEqual({});
       expect(useCompletionsStore.getState().completions).toEqual({});
+      expect(useSiddurBookmarksStore.getState().bookmarks).toEqual([]);
+      expect(useSiddurBookmarksStore.getState().lastPositions).toEqual({});
+    });
+
+    it.each([
+      ['female', false],
+      ['male', true],
+    ] as const)(
+      'adds the default-on mitzvot a file lacks, stamped at the restore, with tefillin on for a %s: %s',
+      async (gender, tefillinOn) => {
+        fillSource();
+        useUserStore.getState().setGender(gender);
+        const backup = createBackup(CREATED);
+        const file = JSON.parse(backup.stores['mitzvot-store']!);
+        delete file.state.activeMitzvot.tefillin;
+        delete file.state.activeMitzvot.shacharit;
+        backup.stores['mitzvot-store'] = JSON.stringify(file);
+        resetAll();
+
+        const before = Date.now();
+        await restoreBackup(backup);
+        const after = Date.now();
+
+        const { activeMitzvot } = useMitzvotStore.getState();
+        expect(activeMitzvot.shacharit.enabled).toBe(true);
+        expect(activeMitzvot.shacharit.enabledAt).toBeGreaterThanOrEqual(before);
+        expect(activeMitzvot.shacharit.enabledAt).toBeLessThanOrEqual(after);
+        expect(activeMitzvot.tefillin.enabled).toBe(tefillinOn);
+        expect(activeMitzvot.havdalah.enabled).toBe(true);
+        expect(JSON.parse(storage.getString('mitzvot-store')!).state.activeMitzvot.shacharit.enabledAt).toBe(
+          activeMitzvot.shacharit.enabledAt,
+        );
+      },
+    );
+
+    it('stamps the newer default-on mitzvot at the restore when the file carries no mitzvot store', async () => {
+      fillSource();
+      const backup = createBackup(CREATED);
+      delete backup.stores['mitzvot-store'];
+      resetAll();
+
+      const before = Date.now();
+      await restoreBackup(backup);
+      const after = Date.now();
+
+      const { activeMitzvot } = useMitzvotStore.getState();
+      const stamped = activeMitzvot.krias_shma_al_hamita;
+      expect(stamped.enabled).toBe(true);
+      expect(stamped.enabledAt).toBeGreaterThanOrEqual(before);
+      expect(stamped.enabledAt).toBeLessThanOrEqual(after);
+      expect(activeMitzvot.shacharit).toEqual({ enabled: true });
+      expect(activeMitzvot.havdalah).toEqual({ enabled: false });
+      expect(JSON.parse(storage.getString('mitzvot-store')!).state.activeMitzvot.krias_shma_al_hamita).toEqual(stamped);
     });
 
     it('keeps the taharah log on the phone untouched', async () => {

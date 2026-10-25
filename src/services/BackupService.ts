@@ -9,12 +9,15 @@ import {
   syncNotificationPermissionStatus,
 } from '@/services/NotificationScheduler';
 import { reconcileChokInstall } from '@/services/ChokContentService';
+import { reconcileSelichotInstall } from '@/services/SelichotContentService';
 import { reportError } from '@/services/errors';
-import type { AppLanguage } from '@/i18n';
+import { formatDate, type AppLanguage } from '@/i18n';
 import { useUserStore } from '@/stores/useUserStore';
+import { applyGenderDefaultsToNew } from '@/stores/taharahOptIn';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
+import { useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
 
 export const BACKUP_APP = 'jew-365';
 export const RESTORABLE_APPS: readonly string[] = [BACKUP_APP, 'jew-in-time'];
@@ -28,6 +31,7 @@ const STORES = {
   'mitzvot-store': useMitzvotStore,
   'completions-store': useCompletionsStore,
   'custom-mitzvot-store': useCustomMitzvotStore,
+  'siddur-bookmarks-store': useSiddurBookmarksStore,
 } as const;
 
 export type BackupStoreName = keyof typeof STORES;
@@ -103,9 +107,11 @@ export function parseBackup(text: string): Backup {
 }
 
 // Replaces, never merges: every store in the file takes the file's state through the store's own
-// migrate and merge, and a store the file lacks goes back to its defaults. Scheduling is held for
-// the whole swap and rebuilt once, and the schedule stamp is dropped first, so a reload part-way
-// (a language change reloads the app for RTL) still rebuilds on the next launch.
+// migrate and merge, and a store the file lacks hydrates from nothing. The user store, which every file
+// carries, goes first, so a file without the mitzvot store hydrates it as the onboarded install it came
+// from: the five original defaults unstamped and the newer default-on mitzvot stamped at the restore.
+// Scheduling is held for the whole swap and rebuilt once, and the schedule stamp is dropped first, so a
+// reload part-way (a language change reloads the app for RTL) still rebuilds on the next launch.
 export async function restoreBackup(backup: Backup): Promise<void> {
   setSchedulingSuspended(true);
   try {
@@ -115,12 +121,15 @@ export async function restoreBackup(backup: Backup): Promise<void> {
       const store = STORES[name];
       if (raw === undefined) {
         store.getState().reset();
-        continue;
+        storage.delete(name);
+      } else {
+        storage.set(name, raw);
       }
-      storage.set(name, raw);
       await store.persist.rehydrate();
     }
+    applyGenderDefaultsToNew();
     reconcileChokInstall();
+    reconcileSelichotInstall();
     await syncNotificationPermissionStatus().catch((error) => reportError('schedule', error));
   } finally {
     setSchedulingSuspended(false);
@@ -160,9 +169,7 @@ export async function pickBackup(): Promise<Backup | null> {
 }
 
 export function backupDateLabel(backup: Backup, language: AppLanguage): string {
-  return DateTime.fromISO(backup.createdAt)
-    .setLocale(language)
-    .toFormat(language === 'he' ? 'd LLLL yyyy' : 'LLL d, yyyy');
+  return formatDate(DateTime.fromISO(backup.createdAt), language === 'he' ? 'd LLLL yyyy' : 'LLL d, yyyy', language);
 }
 
 // The i18n key that explains a failed export, pick or restore. Anything but a rejected file is

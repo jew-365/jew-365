@@ -15,11 +15,15 @@ import {
 } from '../ids';
 import type { PlanInput } from '../types';
 import { CITIES } from '@/data/cities';
+import { customToMitzvah } from '@/data/customMitzvotAdapter';
 import { MITZVOT } from '@/data/mitzvot';
 import { rulesFor } from '@/data/taharahPresets';
 import { HebcalService } from '@/services/HebcalService';
+import { useSelichotStore } from '@/stores/useSelichotStore';
+import { DEFAULT_HILULA_NOTICES, DEFAULT_ROSH_CHODESH_NOTICES } from '@/stores/useUserStore';
+import { installSelichotFixture } from '@/testing/selichot';
 import { at, zmanimFor } from '@/testing/zmanim';
-import { t } from '@/i18n';
+import { setLocale, t } from '@/i18n';
 import type { Mitzvah } from '@/types/mitzvah';
 import { checkInDeadline } from '@/utils/checkIn';
 
@@ -43,6 +47,7 @@ const STUDY: Mitzvah = {
   isCustom: true,
   timeType: 'range-within-day',
   category: 'daily-morning',
+  group: 'mine',
   skipOn: [],
   nuschaotSupported: ALL_NUSCHAOT,
   defaultReminders: [{ anchor: 'start', offsetMin: 15, label: 'להתיישב ללמוד' }],
@@ -68,6 +73,8 @@ function planInput(overrides: Partial<PlanInput> = {}): PlanInput {
     enabledSince: {},
     hilulotEnabled: false,
     roshChodeshEnabled: false,
+    hilulaNotices: DEFAULT_HILULA_NOTICES,
+    roshChodeshNotices: DEFAULT_ROSH_CHODESH_NOTICES,
     weeklyReportEnabled: false,
     taharahEnabled: false,
     taharah: {
@@ -198,6 +205,51 @@ describe('buildPlan', () => {
       'shacharit__2026-10-14__1',
     ]);
     expect(ids.filter((id) => id.startsWith('mincha__'))).toEqual(['mincha__2026-10-13__0', 'mincha__2026-10-13__1']);
+  });
+
+  it('plans a date-range custom mitzvah only on the days of its range', () => {
+    const ranged = (id: string, start: string, end: string) =>
+      customToMitzvah({
+        id,
+        name: 'לימוד',
+        startHHMM: '08:00',
+        endHHMM: '09:00',
+        reminders: [{ anchor: 'start', offsetMin: 0, label: 'התחלה' }],
+        skipOn: [],
+        createdAt: 1,
+        schedules: [{ from: '2026-10-01', schedule: { mode: 'range', start, end } }],
+      });
+    const mitzvot = [
+      ranged('custom_3_ending', '2026-10-01', '2026-10-13'),
+      ranged('custom_4_starting', '2026-10-14', '2026-10-30'),
+      ranged('custom_5_later', '2026-10-15', '2026-10-30'),
+    ];
+
+    expect(summary(buildPlan(planInput({ mitzvot })))).toEqual([
+      ['custom_3_ending__2026-10-13__0', at(JERUSALEM, '2026-10-13T08:00').getTime()],
+      ['custom_4_starting__2026-10-14__0', at(JERUSALEM, '2026-10-14T08:00').getTime()],
+    ]);
+  });
+
+  it('keys a custom window between midnight and alot by the evening it belongs to', () => {
+    const night = customToMitzvah({
+      id: 'custom_6_night',
+      name: 'לימוד לילה',
+      startHHMM: '03:29',
+      endHHMM: '03:31',
+      reminders: [{ anchor: 'start', offsetMin: 0, label: 'לימוד לילה' }],
+      skipOn: [],
+      createdAt: 1,
+    });
+    expect(summary(buildPlan(planInput({ now: at(JERUSALEM, '2026-10-27T20:00'), mitzvot: [night] })))).toEqual([
+      ['custom_6_night__2026-10-27__0', at(JERUSALEM, '2026-10-28T03:29').getTime()],
+      ['custom_6_night__2026-10-28__0', at(JERUSALEM, '2026-10-29T03:29').getTime()],
+    ]);
+    expect(summary(buildPlan(planInput({ now: at(JERUSALEM, '2026-10-28T03:00'), mitzvot: [night] })))).toEqual([
+      ['custom_6_night__2026-10-27__0', at(JERUSALEM, '2026-10-28T03:29').getTime()],
+      ['custom_6_night__2026-10-28__0', at(JERUSALEM, '2026-10-29T03:29').getTime()],
+      ['custom_6_night__2026-10-29__0', at(JERUSALEM, '2026-10-30T03:29').getTime()],
+    ]);
   });
 
   it("uses a mitzvah's own reminders when the user edited them", () => {
@@ -346,6 +398,395 @@ describe('buildPlan', () => {
         (candidate) => candidate.trigger.getTime() > start.getTime() && candidate.trigger.getTime() < end.getTime(),
       );
       expect(inside.map((candidate) => candidate.id)).toEqual([]);
+    });
+
+    it('keeps maariv out of the block and leaves the pre-block notice as it was', () => {
+      const { start, end } = shabbat();
+      const withMaariv = buildPlan(
+        planInput({ now: FRIDAY, mitzvot: [byId('shacharit'), byId('mincha'), byId('maariv')] }),
+      );
+      const maariv = withMaariv.filter((candidate) => candidate.id.startsWith('maariv__'));
+      expect(maariv.filter((candidate) => candidate.id.startsWith('maariv__2026-11-13__'))).toEqual([]);
+      expect(
+        maariv.filter(
+          (candidate) => candidate.trigger.getTime() > start.getTime() && candidate.trigger.getTime() < end.getTime(),
+        ),
+      ).toEqual([]);
+      const saturdayNight = maariv.find((candidate) => candidate.id === 'maariv__2026-11-14__0')!;
+      expect(saturdayNight.trigger.getTime()).toBe(end.getTime());
+      expect(saturdayNight.data.windowEnd).toBe(zmanimOn('2026-11-15').alotHaShachar.toISOString());
+      const notice = (candidates: ReturnType<typeof buildPlan>) =>
+        candidates.find((candidate) => candidate.id === 'blockNotice:2026-11-14');
+      expect(notice(withMaariv)).toEqual(notice(plan()));
+    });
+  });
+
+  describe('the bedtime Shema (R3)', () => {
+    const bedtime = () => byId('krias_shma_al_hamita');
+    const bedtimeOf = (candidates: ReturnType<typeof buildPlan>) =>
+      candidates.filter((candidate) => candidate.id.startsWith('krias_shma_al_hamita__'));
+
+    it('reminds at 22:30 on a weeknight with the open-text category', () => {
+      const plan = bedtimeOf(buildPlan(planInput({ now: WEDNESDAY, mitzvot: [bedtime()] })));
+      expect(summary(plan)).toEqual([
+        ['krias_shma_al_hamita__2026-11-11__0', at(JERUSALEM, '2026-11-11T22:30').getTime()],
+        ['krias_shma_al_hamita__2026-11-12__0', at(JERUSALEM, '2026-11-12T22:30').getTime()],
+      ]);
+      const [first] = plan;
+      expect(first.channel).toBe('mitzvot');
+      expect(first.categoryIdentifier).toBe(MITZVAH_TEXT_CATEGORY);
+      expect(first.title).toBe('קריאת שמע על המיטה');
+      expect(bedtime().defaultReminders[0].bodyVariants).toContain(first.body);
+      expect(first.data).toEqual({
+        mitzvahId: 'krias_shma_al_hamita',
+        windowEnd: zmanimOn('2026-11-12').alotHaShachar.toISOString(),
+        dateKey: '2026-11-11',
+        reminderIndex: 0,
+        customId: 'krias_shma_al_hamita__2026-11-11__0',
+        skipIfDone: false,
+        hasText: true,
+        fullContent: null,
+      });
+    });
+
+    it('reminds at 22:30 on the clock of the location abroad', () => {
+      const losAngeles = CITIES.find((city) => city.nameEn === 'Los Angeles')!;
+      const plan = bedtimeOf(
+        buildPlan(
+          planInput({
+            now: at(losAngeles, '2026-11-11T09:00'),
+            location: losAngeles,
+            settings: { nusach: 'ashkenaz', halachicOpinions: { ksSofZman: 'GRA' }, inIsrael: false },
+            mitzvot: [bedtime()],
+          }),
+        ),
+      );
+      expect(summary(plan)).toEqual([
+        ['krias_shma_al_hamita__2026-11-11__0', at(losAngeles, '2026-11-11T22:30').getTime()],
+        ['krias_shma_al_hamita__2026-11-12__0', at(losAngeles, '2026-11-12T22:30').getTime()],
+      ]);
+    });
+
+    it('sends nothing on Friday night, inside Shabbat, and reminds again from motzaei Shabbat', () => {
+      const { start, end } = HebcalService.holyBlockAt(at(JERUSALEM, '2026-11-14T12:00'), JERUSALEM)!;
+      const weekdayMitzvot = [byId('shacharit'), byId('mincha')];
+      const withBedtime = buildPlan(planInput({ now: FRIDAY, mitzvot: [...weekdayMitzvot, bedtime()] }));
+      const plan = bedtimeOf(withBedtime);
+      expect(summary(plan)).toEqual([
+        ['krias_shma_al_hamita__2026-11-14__0', at(JERUSALEM, '2026-11-14T22:30').getTime()],
+        ['krias_shma_al_hamita__2026-11-15__0', at(JERUSALEM, '2026-11-15T22:30').getTime()],
+      ]);
+      expect(
+        plan.filter(
+          (candidate) => candidate.trigger.getTime() > start.getTime() && candidate.trigger.getTime() < end.getTime(),
+        ),
+      ).toEqual([]);
+      expect(plan[0].categoryIdentifier).toBe(MITZVAH_TEXT_CATEGORY);
+      const notice = (candidates: ReturnType<typeof buildPlan>) =>
+        candidates.find((candidate) => candidate.id === 'blockNotice:2026-11-14');
+      expect(notice(withBedtime)).toEqual(notice(buildPlan(planInput({ now: FRIDAY, mitzvot: weekdayMitzvot }))));
+    });
+
+    describe('where nightfall is after 22:30, Antwerp in June', () => {
+      const antwerp = CITIES.find((city) => city.nameEn === 'Antwerp')!;
+      const settings = { nusach: 'ashkenaz', halachicOpinions: { ksSofZman: 'GRA' }, inIsrael: false } as const;
+      const nightfallOn = (iso: string) =>
+        HebcalService.nightfall(zmanimFor(at(antwerp, `${iso}T12:00`), antwerp), antwerp);
+      const planFrom = (iso: string) =>
+        bedtimeOf(buildPlan(planInput({ now: at(antwerp, iso), location: antwerp, settings, mitzvot: [bedtime()] })));
+
+      it('fires at 22:30 before the window opens, as a heads-up', () => {
+        const plan = planFrom('2027-06-21T05:00');
+        expect(summary(plan)).toEqual([
+          ['krias_shma_al_hamita__2027-06-21__0', at(antwerp, '2027-06-21T22:30').getTime()],
+          ['krias_shma_al_hamita__2027-06-22__0', at(antwerp, '2027-06-22T22:30').getTime()],
+        ]);
+        expect(plan[0].trigger.getTime()).toBeLessThan(nightfallOn('2027-06-21').getTime());
+      });
+
+      it('sends nothing on a motzaei Shabbat whose exit is after 22:30, when 22:30 falls inside the block', () => {
+        const { start, end } = HebcalService.holyBlockAt(at(antwerp, '2027-06-19T12:00'), antwerp)!;
+        const plan = planFrom('2027-06-18T06:00');
+        expect(at(antwerp, '2027-06-19T22:30').getTime()).toBeGreaterThan(start.getTime());
+        expect(at(antwerp, '2027-06-19T22:30').getTime()).toBeLessThan(end.getTime());
+        expect(summary(plan)).toEqual([
+          ['krias_shma_al_hamita__2027-06-20__0', at(antwerp, '2027-06-20T22:30').getTime()],
+        ]);
+      });
+    });
+  });
+
+  describe('Selichot (R2)', () => {
+    const selichot = () => byId('selichot');
+    const selichotOf = (candidates: ReturnType<typeof buildPlan>) =>
+      candidates.filter((candidate) => candidate.id.startsWith('selichot__'));
+    const nusachSettings = (nusach: PlanInput['settings']['nusach']): PlanInput['settings'] => ({
+      nusach,
+      halachicOpinions: { ksSofZman: 'GRA' },
+      inIsrael: true,
+    });
+    const planFor = (now: Date, nusach: PlanInput['settings']['nusach'] = 'ashkenaz') =>
+      selichotOf(buildPlan(planInput({ now, settings: nusachSettings(nusach), mitzvot: [selichot()] })));
+
+    beforeEach(() => {
+      installSelichotFixture();
+    });
+
+    afterEach(() => {
+      useSelichotStore.getState().reset();
+    });
+
+    it('reminds at chatzot halayla each night of the season, with the open-text category', () => {
+      const now = at(JERUSALEM, '2025-09-15T14:00');
+      const plan = planFor(now);
+      expect(summary(plan)).toEqual([
+        ['selichot__2025-09-15__0', zmanimOn('2025-09-15').chatzotLayla.getTime()],
+        ['selichot__2025-09-16__0', zmanimOn('2025-09-16').chatzotLayla.getTime()],
+      ]);
+      const [first] = plan;
+      expect(first.channel).toBe('mitzvot');
+      expect(first.categoryIdentifier).toBe(MITZVAH_TEXT_CATEGORY);
+      expect(first.title).toBe('סליחות');
+      expect(selichot().defaultReminders[0].bodyVariants).toContain(first.body);
+      expect(first.data).toEqual({
+        mitzvahId: 'selichot',
+        windowEnd: zmanimOn('2025-09-16').sofZmanTfilaGra.toISOString(),
+        dateKey: '2025-09-15',
+        reminderIndex: 0,
+        customId: 'selichot__2025-09-15__0',
+        skipIfDone: false,
+        hasText: true,
+        fullContent: null,
+      });
+      try {
+        setLocale('en');
+        const [english] = selichotOf(buildPlan(planInput({ now, language: 'en', mitzvot: [selichot()] })));
+        expect([english.title, english.body]).toEqual(['Selichot', 'Time for Selichot']);
+      } finally {
+        setLocale('he');
+      }
+    });
+
+    it('starts Edot HaMizrach on the night of 2 Elul and the other nuschaot only from Leil Selichot', () => {
+      const now = at(JERUSALEM, '2025-08-25T14:00');
+      expect(summary(planFor(now, 'edot_hamizrach'))).toEqual([
+        ['selichot__2025-08-25__0', zmanimOn('2025-08-25').chatzotLayla.getTime()],
+        ['selichot__2025-08-26__0', zmanimOn('2025-08-26').chatzotLayla.getTime()],
+      ]);
+      for (const nusach of ['ashkenaz', 'sefard', 'chabad'] as const) {
+        expect(planFor(now, nusach)).toEqual([]);
+      }
+    });
+
+    it('sends nothing on the night that opens Shabbat and reminds again at chatzot of motzaei Shabbat', () => {
+      const block = HebcalService.holyBlockAt(at(JERUSALEM, '2025-09-20T12:00'), JERUSALEM)!;
+      const plan = planFor(at(JERUSALEM, '2025-09-19T06:00'));
+      expect(plan.map((candidate) => candidate.id)).toEqual(['selichot__2025-09-20__0', 'selichot__2025-09-21__0']);
+      expect(
+        plan.filter(
+          (candidate) =>
+            candidate.trigger.getTime() > block.start.getTime() && candidate.trigger.getTime() < block.end.getTime(),
+        ),
+      ).toEqual([]);
+      expect(plan[0].trigger.getTime()).toBeGreaterThan(block.end.getTime());
+    });
+
+    it('reminds at chatzot on the clock of the location abroad', () => {
+      const losAngeles = CITIES.find((city) => city.nameEn === 'Los Angeles')!;
+      const plan = selichotOf(
+        buildPlan(
+          planInput({
+            now: at(losAngeles, '2025-09-15T14:00'),
+            location: losAngeles,
+            settings: { ...nusachSettings('ashkenaz'), inIsrael: false },
+            mitzvot: [selichot()],
+          }),
+        ),
+      );
+      expect(summary(plan)).toEqual(
+        ['2025-09-15', '2025-09-16'].map((day) => [
+          `selichot__${day}__0`,
+          zmanimFor(at(losAngeles, `${day}T12:00`), losAngeles).chatzotLayla.getTime(),
+        ]),
+      );
+    });
+
+    it('ends the season on the night before Erev Yom Kippur', () => {
+      expect(summary(planFor(at(JERUSALEM, '2025-09-30T14:00')))).toEqual([
+        ['selichot__2025-09-30__0', zmanimOn('2025-09-30').chatzotLayla.getTime()],
+      ]);
+    });
+
+    it('plans nothing for a nusach whose file is missing', () => {
+      installSelichotFixture(['sefard']);
+      const now = at(JERUSALEM, '2025-09-15T14:00');
+      expect(planFor(now, 'ashkenaz')).toEqual([]);
+      expect(planFor(now, 'sefard').length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Chanukah candles (R4)', () => {
+    const candles = () => byId('chanukah_candles');
+    const candlesOf = (candidates: ReturnType<typeof buildPlan>) =>
+      candidates.filter((candidate) => candidate.id.startsWith('chanukah_candles__'));
+    const nightBodies = (night: number) =>
+      candles().defaultReminders[0].bodyVariants!.map((variant) => variant.replace('%{n}', String(night)));
+    const nusachSettings = (nusach: PlanInput['settings']['nusach']): PlanInput['settings'] => ({
+      nusach,
+      halachicOpinions: { ksSofZman: 'GRA' },
+      inIsrael: true,
+    });
+    const planFor = (now: Date, nusach: PlanInput['settings']['nusach'] = 'ashkenaz') =>
+      candlesOf(buildPlan(planInput({ now, settings: nusachSettings(nusach), mitzvot: [candles()] })));
+
+    it('reminds at tzeit and names the night, with the open-text category', () => {
+      const now = at(JERUSALEM, '2025-12-15T06:00');
+      const plan = planFor(now);
+      expect(summary(plan)).toEqual([
+        ['chanukah_candles__2025-12-15__0', zmanimOn('2025-12-15').tzeitHakochavim.getTime()],
+        ['chanukah_candles__2025-12-16__0', zmanimOn('2025-12-16').tzeitHakochavim.getTime()],
+      ]);
+      expect(nightBodies(2)).toContain(plan[0].body);
+      expect(nightBodies(3)).toContain(plan[1].body);
+      expect(plan[0].body).toContain('הנר ה־2');
+      expect(plan[0]).toMatchObject({
+        channel: 'mitzvot',
+        categoryIdentifier: MITZVAH_TEXT_CATEGORY,
+        title: 'נרות חנוכה',
+      });
+      expect(plan[0].data).toEqual({
+        mitzvahId: 'chanukah_candles',
+        windowEnd: zmanimOn('2025-12-16').alotHaShachar.toISOString(),
+        dateKey: '2025-12-15',
+        reminderIndex: 0,
+        customId: 'chanukah_candles__2025-12-15__0',
+        skipIfDone: false,
+        hasText: true,
+        fullContent: null,
+      });
+      try {
+        setLocale('en');
+        const english = candlesOf(buildPlan(planInput({ now, language: 'en', mitzvot: [candles()] })));
+        expect(english.map((candidate) => [candidate.title, candidate.body])).toEqual([
+          ['Chanukah candles', 'Time for Chanukah candles: night 2'],
+          ['Chanukah candles', 'Time for Chanukah candles: night 3'],
+        ]);
+      } finally {
+        setLocale('he');
+      }
+    });
+
+    it('reminds at plag hamincha on Friday and at the exit on motzaei Shabbat, and nothing inside Shabbat', () => {
+      const block = HebcalService.holyBlockAt(at(JERUSALEM, '2026-12-05T12:00'), JERUSALEM)!;
+      const plan = planFor(at(JERUSALEM, '2026-12-04T06:00'));
+      expect(summary(plan)).toEqual([
+        ['chanukah_candles__2026-12-04__0', zmanimOn('2026-12-04').plagHaMincha.getTime()],
+        ['chanukah_candles__2026-12-05__0', block.end.getTime()],
+        ['chanukah_candles__2026-12-06__0', zmanimOn('2026-12-06').tzeitHakochavim.getTime()],
+      ]);
+      expect(plan.map((candidate) => candidate.data.windowEnd)).toEqual([
+        block.start.toISOString(),
+        zmanimOn('2026-12-06').alotHaShachar.toISOString(),
+        zmanimOn('2026-12-07').alotHaShachar.toISOString(),
+      ]);
+      expect(plan.map((candidate, index) => nightBodies(index + 1).includes(candidate.body))).toEqual([
+        true,
+        true,
+        true,
+      ]);
+      expect(
+        plan.filter(
+          (candidate) =>
+            candidate.trigger.getTime() > block.start.getTime() && candidate.trigger.getTime() < block.end.getTime(),
+        ),
+      ).toEqual([]);
+      expect(plan.map((candidate) => candidate.categoryIdentifier)).toEqual([
+        MITZVAH_TEXT_CATEGORY,
+        MITZVAH_TEXT_CATEGORY,
+        MITZVAH_TEXT_CATEGORY,
+      ]);
+    });
+
+    it('lights Chabad from shkia on weeknights, and still from plag and the exit around Shabbat', () => {
+      const block = HebcalService.holyBlockAt(at(JERUSALEM, '2026-12-05T12:00'), JERUSALEM)!;
+      expect(summary(planFor(at(JERUSALEM, '2026-12-04T06:00'), 'chabad'))).toEqual([
+        ['chanukah_candles__2026-12-04__0', zmanimOn('2026-12-04').plagHaMincha.getTime()],
+        ['chanukah_candles__2026-12-05__0', block.end.getTime()],
+        ['chanukah_candles__2026-12-06__0', zmanimOn('2026-12-06').shkia.getTime()],
+      ]);
+    });
+
+    it('reminds at tzeit on the clock of the location abroad', () => {
+      const newYork = CITIES.find((city) => city.cityId === 'new-york')!;
+      const plan = candlesOf(
+        buildPlan(
+          planInput({
+            now: at(newYork, '2025-12-15T06:00'),
+            location: newYork,
+            settings: { ...nusachSettings('ashkenaz'), inIsrael: false },
+            mitzvot: [candles()],
+          }),
+        ),
+      );
+      expect(summary(plan)).toEqual(
+        ['2025-12-15', '2025-12-16'].map((day) => [
+          `chanukah_candles__${day}__0`,
+          zmanimFor(at(newYork, `${day}T12:00`), newYork).tzeitHakochavim.getTime(),
+        ]),
+      );
+    });
+
+    it('names the night in an edited reminder too, in both languages', () => {
+      const now = at(JERUSALEM, '2025-12-15T06:00');
+      const reminderOverrides = {
+        chanukah_candles: [{ anchor: 'start' as const, offsetMin: 15, label: 'זמן הדלקת נרות חנוכה' }],
+      };
+      const edited = candlesOf(buildPlan(planInput({ now, reminderOverrides, mitzvot: [candles()] })));
+      expect(edited.map((candidate) => candidate.body)).toEqual(['זמן נרות חנוכה: הנר ה־2', 'זמן נרות חנוכה: הנר ה־3']);
+      expect(edited.map((candidate) => candidate.trigger.getTime())).toEqual(
+        ['2025-12-15', '2025-12-16'].map((day) => zmanimOn(day).tzeitHakochavim.getTime() + 15 * 60_000),
+      );
+      try {
+        setLocale('en');
+        const english = candlesOf(
+          buildPlan(planInput({ now, reminderOverrides, language: 'en', mitzvot: [candles()] })),
+        );
+        expect(english.map((candidate) => candidate.body)).toEqual([
+          'Time for Chanukah candles: night 2',
+          'Time for Chanukah candles: night 3',
+        ]);
+      } finally {
+        setLocale('he');
+      }
+    });
+
+    it('sends a label the user typed on an added reminder as typed, and fills its %{n}', () => {
+      const now = at(JERUSALEM, '2025-12-15T06:00');
+      const reminderOverrides: PlanInput['reminderOverrides'] = {
+        chanukah_candles: [
+          candles().defaultReminders[0],
+          { anchor: 'start', offsetMin: 30, label: 'להכין חנוכייה' },
+          { anchor: 'start', offsetMin: 45, label: 'נר %{n}' },
+          { anchor: 'start', offsetMin: 60, label: 'נרות חנוכה' },
+        ],
+      };
+      const plan = candlesOf(buildPlan(planInput({ now, reminderOverrides, mitzvot: [candles()] })));
+      const bodiesOf = (index: number) =>
+        ['2025-12-15', '2025-12-16'].map(
+          (day) => plan.find((candidate) => candidate.id === `chanukah_candles__${day}__${index}`)?.body,
+        );
+      expect(plan).toHaveLength(8);
+      const [second, third] = bodiesOf(0);
+      expect(nightBodies(2)).toContain(second);
+      expect(nightBodies(3)).toContain(third);
+      expect(bodiesOf(1)).toEqual(['להכין חנוכייה', 'להכין חנוכייה']);
+      expect(bodiesOf(2)).toEqual(['נר 2', 'נר 3']);
+      expect(bodiesOf(3)).toEqual(['זמן נרות חנוכה: הנר ה־2', 'זמן נרות חנוכה: הנר ה־3']);
+    });
+
+    it('plans nothing outside Chanukah', () => {
+      expect(planFor(at(JERUSALEM, '2026-12-02T06:00'))).toEqual([]);
+      expect(planFor(at(JERUSALEM, '2026-12-13T06:00'))).toEqual([]);
     });
   });
 

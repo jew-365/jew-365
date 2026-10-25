@@ -23,7 +23,7 @@ export const IOS_MAX = 64;
 export const IOS_HEADROOM = 4;
 export const LAST_REBUILD_KEY = 'notifications:last-rebuild-date';
 export const SCHEDULE_FORMAT_KEY = 'notifications:schedule-format';
-export const SCHEDULE_FORMAT = 8;
+export const SCHEDULE_FORMAT = 9;
 export const BLOCK_NOTICE_KIND = 'blockNotice';
 export const CHECK_IN_KIND = 'checkin';
 export const UPDATE_KIND = 'update';
@@ -67,14 +67,14 @@ export type NotificationContentLike = {
   dataString?: unknown;
 };
 
-export function buildId(mitzvahId: string, date: Date, idx: number): string {
-  return `${mitzvahId}__${dateKey(date)}__${idx}`;
+export function buildId(mitzvahId: string, date: Date, idx: number, occurrence = 0): string {
+  return `${mitzvahId}__${dateKey(date)}__${occurrence ? `${idx}.${occurrence}` : idx}`;
 }
 
 export function parseId(id: string): { mitzvahId: string; date: string; idx: number } | null {
   const parts = id.split('__');
   if (parts.length !== 3) return null;
-  return { mitzvahId: parts[0], date: parts[1], idx: Number(parts[2]) };
+  return { mitzvahId: parts[0], date: parts[1], idx: Number.parseInt(parts[2], 10) };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

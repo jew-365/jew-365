@@ -1,5 +1,7 @@
+import type { Mitzvah, Reminder } from '@/types/mitzvah';
 import type { OnahKind, TaharahTaskKind } from '@/types/taharah';
 import { useUserStore } from '@/stores/useUserStore';
+import { mitzvahName, reminderLabel } from '@/utils/mitzvahName';
 
 const DAILY_REBUILD_TASK = 'jew-365-daily-rebuild';
 const NOTIFICATION_ACTION_TASK = 'jew-365-notification-actions';
@@ -75,7 +77,7 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   return false;
 }
 
-export async function dismissCompletedPresentedNotifications(): Promise<void> {}
+export async function dismissCompletedPresentedNotifications(_now?: Date): Promise<void> {}
 
 export async function registerDailyRebuildTask(): Promise<void> {}
 
@@ -87,8 +89,11 @@ export async function notifyIfUpdateReady(_now?: Date): Promise<boolean> {
   return false;
 }
 
-export function pickBodyForReminder(reminder: { label: string }): string {
-  return reminder.label;
+export function pickBodyForReminder(
+  reminder: Pick<Reminder, 'anchor' | 'label'>,
+  mitzvah: Pick<Mitzvah, 'name'>,
+): string {
+  return reminderLabel(reminder, mitzvahName(mitzvah, useUserStore.getState().language));
 }
 
 export function notificationTargetFromData(

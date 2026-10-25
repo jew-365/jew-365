@@ -4,10 +4,13 @@ const mockText = jest.fn();
 jest.mock('expo-asset', () => ({ Asset: { fromModule: (id: number) => mockFromModule(id) } }));
 jest.mock('expo-file-system', () => ({ File: jest.fn().mockImplementation(() => ({ text: () => mockText() })) }));
 jest.mock('@/services/chokFiles', () => ({
-  chokParashaFile: (_install: unknown, parasha: string) => (parasha === 'Noach' ? { text: () => mockText() } : null),
+  ...jest.requireActual('@/services/chokFiles'),
+  chokParashaFile: (_install: unknown, parasha: string) =>
+    parasha === 'Noach' ? { uri: 'file:///doc/chok/v2/noach.0a0b0c0d.json', text: () => mockText() } : null,
 }));
 
 import { clearChokCache, loadChokParasha } from '../SiddurService';
+import { ChokFileCorruptError } from '@/services/chokFiles';
 import { installChokFixture } from '@/testing/chok';
 import type { ChokAsset } from '@/types/chok';
 import { useChokStore } from '@/stores/useChokStore';
@@ -61,6 +64,13 @@ describe('loadChokParasha', () => {
   it('forgets a failed read, so the next open reads again', async () => {
     mockText.mockRejectedValueOnce(new Error('disk'));
     await expect(loadChokParasha('Noach')).rejects.toThrow('disk');
+    await expect(loadChokParasha('Noach')).resolves.toEqual(ASSET);
+    expect(mockText).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects a file that does not parse as corrupt, and reads it again next time', async () => {
+    mockText.mockResolvedValueOnce('{"parasha":');
+    await expect(loadChokParasha('Noach')).rejects.toBeInstanceOf(ChokFileCorruptError);
     await expect(loadChokParasha('Noach')).resolves.toEqual(ASSET);
     expect(mockText).toHaveBeenCalledTimes(2);
   });

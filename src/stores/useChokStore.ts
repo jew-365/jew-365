@@ -2,37 +2,32 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from './zustandMiddleware';
 import { createZustandStorage } from '@/services/StorageService';
 import { chokInstallPresent } from '@/services/chokFiles';
+import { IDLE_DOWNLOAD, mergeSavedAddonState, selectAddonUpdateAvailable } from './addonState';
 import { STORE_VERSION, migrate, onRehydrateStorage } from './persistOptions';
 import { ChokDownload, ChokInstall } from '@/types/chok';
+
+export { IDLE_DOWNLOAD };
 
 type ChokState = {
   installed: ChokInstall | null;
   latestVersion: number | null;
   checkedAt: number | null;
   download: ChokDownload;
+  enablePrompt: boolean;
   setInstalled: (install: ChokInstall) => void;
   clearInstalled: () => void;
   setChecked: (version: number, at: number) => void;
   setDownload: (download: ChokDownload) => void;
+  setEnablePrompt: (pending: boolean) => void;
   reset: () => void;
 };
 
-export const IDLE_DOWNLOAD: ChokDownload = Object.freeze({ status: 'idle' });
+export const selectChokUpdateAvailable = selectAddonUpdateAvailable;
 
-export const selectChokUpdateAvailable = (s: Pick<ChokState, 'installed' | 'latestVersion'>): boolean =>
-  s.installed !== null && s.latestVersion !== null && s.latestVersion > s.installed.version;
-
-// An Android restore carries this store in the main MMKV file but not the files under files/chok, so
-// an install whose files are gone is dropped on hydrate.
-export function mergeSavedChokState(persisted: unknown, current: ChokState): ChokState {
-  const saved = persisted as Partial<ChokState> | undefined;
-  return {
-    ...current,
-    ...saved,
-    installed: saved?.installed && chokInstallPresent(saved.installed) ? saved.installed : null,
-    download: IDLE_DOWNLOAD,
-  };
-}
+export const mergeSavedChokState = (persisted: unknown, current: ChokState): ChokState => ({
+  ...mergeSavedAddonState(persisted, current, chokInstallPresent),
+  enablePrompt: false,
+});
 
 export const useChokStore = create<ChokState>()(
   persist(
@@ -41,11 +36,14 @@ export const useChokStore = create<ChokState>()(
       latestVersion: null,
       checkedAt: null,
       download: IDLE_DOWNLOAD,
+      enablePrompt: false,
       setInstalled: (installed) => set({ installed }),
-      clearInstalled: () => set({ installed: null }),
+      clearInstalled: () => set({ installed: null, enablePrompt: false }),
       setChecked: (latestVersion, checkedAt) => set({ latestVersion, checkedAt }),
       setDownload: (download) => set({ download }),
-      reset: () => set({ installed: null, latestVersion: null, checkedAt: null, download: IDLE_DOWNLOAD }),
+      setEnablePrompt: (enablePrompt) => set({ enablePrompt }),
+      reset: () =>
+        set({ installed: null, latestVersion: null, checkedAt: null, download: IDLE_DOWNLOAD, enablePrompt: false }),
     }),
     {
       name: 'chok-store',

@@ -58,7 +58,7 @@ import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { CITIES } from '@/data/cities';
 import { at, zmanimFor } from '@/testing/zmanim';
-import { t } from '@/i18n';
+import { formatDate, t } from '@/i18n';
 
 const JERUSALEM = CITIES[0];
 const PINNED_NOW = at(JERUSALEM, '2026-10-12T06:00'); // Monday, 1 Cheshvan 5787
@@ -90,7 +90,7 @@ afterEach(() => jest.setSystemTime(PINNED_NOW));
 const shkiaOn = (iso: string) => zmanimFor(at(JERUSALEM, `${iso}T12:00`), JERUSALEM).shkia;
 const hilulaPending = () => mockState.pending.filter((p) => p.identifier.startsWith('hilula:'));
 const pendingOf = (identifier: string) => mockState.pending.find((p) => p.identifier === identifier);
-const weekday = (iso: string) => DateTime.fromISO(iso).setLocale('he').toFormat('cccc');
+const weekday = (iso: string) => formatDate(DateTime.fromISO(iso), 'cccc', 'he');
 
 const CHESHVAN_3 = new HDate(3, months.CHESHVAN, 5787).abs(); // Wednesday 2026-10-14
 const RUZHIN_AND_OVADIA = 'רבי ישראל מרוז׳ין, הרב עובדיה יוסף';
@@ -222,5 +222,25 @@ describe('NotificationScheduler hilula notices', () => {
     useUserStore.getState().setHilulotEnabled(false);
     expect(rebuild).toHaveBeenCalledTimes(2);
     rebuild.mockRestore();
+  });
+
+  it('10 rebuilds when a notice kind changes', () => {
+    const rebuild = jest.spyOn(NotificationScheduler, 'rebuild').mockResolvedValue();
+    const teardown = initNotificationHandlers();
+    rebuild.mockClear();
+
+    const { evening } = useUserStore.getState().hilulaNotices;
+    useUserStore.getState().setHilulaNotice('evening', { ...evening, timing: { anchor: 'clock', minutes: 1140 } });
+    expect(rebuild).toHaveBeenCalledTimes(1);
+
+    teardown();
+    rebuild.mockRestore();
+  });
+
+  it('11 leaves out a kind switched off', async () => {
+    const { before } = useUserStore.getState().hilulaNotices;
+    useUserStore.getState().setHilulaNotice('before', { ...before, enabled: false });
+    await NotificationScheduler.rebuild();
+    expect(hilulaPending().map((p) => p.identifier)).toEqual([`hilula:${CHESHVAN_3}:evening`]);
   });
 });

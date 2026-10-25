@@ -40,12 +40,14 @@ describe('useChokStore', () => {
   it('restores the defaults on reset', () => {
     const { useChokStore } = hydrate(true);
     useChokStore.getState().setDownload({ status: 'failed', reason: 'offline' });
+    useChokStore.getState().setEnablePrompt(true);
     useChokStore.getState().reset();
     expect(useChokStore.getState()).toMatchObject({
       installed: null,
       latestVersion: null,
       checkedAt: null,
       download: { status: 'idle' },
+      enablePrompt: false,
     });
   });
 
@@ -56,12 +58,29 @@ describe('useChokStore', () => {
     expect(selectChokUpdateAvailable({ installed: INSTALL, latestVersion: 2 })).toBe(true);
   });
 
-  it('persists the install and the check, never the download', () => {
+  it('persists the install and the check, never the download or the enable prompt', () => {
     const { useChokStore } = hydrate(true);
     useChokStore.getState().setDownload({ status: 'downloading', done: 1, total: 54, bytes: 1, totalBytes: 2 });
+    useChokStore.getState().setEnablePrompt(true);
     const partialize = useChokStore.persist.getOptions().partialize!;
     const saved = partialize(useChokStore.getState());
     expect(saved).not.toHaveProperty('download');
+    expect(saved).not.toHaveProperty('enablePrompt');
     expect(Object.keys(saved as object).sort()).toEqual(['checkedAt', 'installed', 'latestVersion']);
+  });
+
+  it('starts with no enable prompt, even from a payload that carries one', () => {
+    const { mergeSavedChokState, useChokStore } = hydrate(true);
+    expect(useChokStore.getState().enablePrompt).toBe(false);
+    expect(mergeSavedChokState({ installed: null, enablePrompt: true }, useChokStore.getState()).enablePrompt).toBe(
+      false,
+    );
+  });
+
+  it('drops the enable prompt with the install', () => {
+    const { useChokStore } = hydrate(true);
+    useChokStore.getState().setEnablePrompt(true);
+    useChokStore.getState().clearInstalled();
+    expect(useChokStore.getState()).toMatchObject({ installed: null, enablePrompt: false });
   });
 });

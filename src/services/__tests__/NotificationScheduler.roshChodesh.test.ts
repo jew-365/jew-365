@@ -57,8 +57,9 @@ import { useUserStore } from '@/stores/useUserStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { CITIES } from '@/data/cities';
+import { HIDDEN_INTL_NAMES, hideIntlDateNames } from '@/testing/intl';
 import { at, zmanimFor } from '@/testing/zmanim';
-import { t } from '@/i18n';
+import { formatDate, t } from '@/i18n';
 
 const JERUSALEM = CITIES[0];
 const THURSDAY = at(JERUSALEM, '2026-10-08T12:00'); // 27 Tishrei 5787
@@ -91,7 +92,7 @@ const shkiaOn = (iso: string) => zmanimFor(at(JERUSALEM, `${iso}T12:00`), JERUSA
 const noticeIds = () =>
   mockState.pending.filter((p) => p.identifier.startsWith('roshChodesh:')).map((p) => p.identifier);
 const pendingOf = (identifier: string) => mockState.pending.find((p) => p.identifier === identifier)!;
-const weekday = (iso: string, locale: 'he' | 'en' = 'he') => DateTime.fromISO(iso).setLocale(locale).toFormat('cccc');
+const weekday = (iso: string, locale: 'he' | 'en' = 'he') => formatDate(DateTime.fromISO(iso), 'cccc', locale);
 const dayAbs = (day: number, month: number, year = 5787) => new HDate(day, month, year).abs();
 const idOf = (abs: number, when: 'before' | 'evening' | 'day') => `roshChodesh:${abs}:${when}`;
 const blockLines = (identifier: string) => pendingOf(identifier).content.body!.split('\n');
@@ -287,5 +288,54 @@ describe('NotificationScheduler Rosh Chodesh notices', () => {
     useUserStore.getState().setRoshChodeshEnabled(false);
     expect(rebuild).toHaveBeenCalledTimes(2);
     rebuild.mockRestore();
+  });
+
+  describe.each(HIDDEN_INTL_NAMES)('without Intl weekday and month names (%s, Hermes on iOS)', (mode) => {
+    let restore: () => void;
+    beforeAll(() => {
+      restore = hideIntlDateNames(mode);
+    });
+    afterAll(() => restore());
+
+    it('14 names the weekday in the lead notice and the pre-block line in Hebrew and English, never "null"', async () => {
+      await NotificationScheduler.rebuild();
+      expect(pendingOf(idOf(CHESHVAN_1, 'before')).content.body).toBe('נכנס ביום שבת בשקיעה.');
+      expect(blockLines('blockNotice:2026-10-10')).toContain('ראש חודש חשון נכנס ביום שבת בשקיעה');
+
+      useUserStore.getState().setLanguage('en');
+      await NotificationScheduler.rebuild();
+      expect(pendingOf(idOf(CHESHVAN_1, 'before')).content.body).toBe('It begins on Saturday at sunset.');
+      expect(blockLines('blockNotice:2026-10-10')).toContain('Rosh Chodesh Cheshvan begins on Saturday at sunset');
+      expect(
+        mockState.pending.filter((p) => /null/.test(`${p.content.title} ${p.content.body}`)).map((p) => p.identifier),
+      ).toEqual([]);
+    });
+  });
+
+  it('15 rebuilds when a notice kind changes', () => {
+    const rebuild = jest.spyOn(NotificationScheduler, 'rebuild').mockResolvedValue();
+    const teardown = initNotificationHandlers();
+    rebuild.mockClear();
+
+    const { day } = useUserStore.getState().roshChodeshNotices;
+    useUserStore.getState().setRoshChodeshNotice('day', { ...day, enabled: false });
+    expect(rebuild).toHaveBeenCalledTimes(1);
+
+    teardown();
+    rebuild.mockRestore();
+  });
+
+  it('16 schedules the notice before at its days and time', async () => {
+    useUserStore.getState().setRoshChodeshNotice('before', {
+      enabled: true,
+      daysBefore: 2,
+      timing: { anchor: 'clock', minutes: 570 },
+    });
+    await NotificationScheduler.rebuild();
+
+    expect(noticeIds()).toEqual([idOf(CHESHVAN_1, 'before'), idOf(TISHREI_30, 'day')]);
+    const before = pendingOf(idOf(CHESHVAN_1, 'before'));
+    expect(before.trigger!.date.getTime()).toBe(at(JERUSALEM, '2026-10-09T09:30').getTime());
+    expect(before.content.title).toBe('ראש חודש חשון בעוד יומיים');
   });
 });

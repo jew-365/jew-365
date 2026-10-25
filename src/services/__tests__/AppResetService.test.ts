@@ -30,14 +30,29 @@ jest.mock('@/services/chokFiles', () => ({
   deleteChokFiles: () => mockDeleteChokFiles(),
 }));
 
+const mockDeleteSelichotFiles = jest.fn();
+jest.mock('@/services/selichotFiles', () => ({
+  ...jest.requireActual('@/services/selichotFiles'),
+  deleteSelichotFiles: () => mockDeleteSelichotFiles(),
+}));
+
 import { AppResetService } from '../AppResetService';
 import { taharahStorage } from '../TaharahStorage';
 import { useUserStore } from '@/stores/useUserStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useChokStore } from '@/stores/useChokStore';
+import { useSelichotStore } from '@/stores/useSelichotStore';
+import { useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
+import { DEFAULT_ON_MITZVOT, enabledSinceOf, useMitzvotStore } from '@/stores/useMitzvotStore';
+import { findCityById } from '@/data/cities';
+import { findMitzvah } from '@/data/mitzvot';
 import { installChokFixture } from '@/testing/chok';
+import { at } from '@/testing/zmanim';
+import { latestCheckIn } from '@/utils/checkIn';
+import { installSelichotFixture } from '@/testing/selichot';
 
 const SecureStore = require('expo-secure-store');
+const JERUSALEM = findCityById('jerusalem')!;
 
 describe('AppResetService.reset', () => {
   beforeEach(() => {
@@ -79,5 +94,72 @@ describe('AppResetService.reset', () => {
 
     expect(useChokStore.getState().installed).toBeNull();
     expect(mockDeleteChokFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('hydrates the mitzvot store as a fresh install: default-on mitzvot stamped with the reset, no check-in for the Shabbat before it', async () => {
+    const SUNDAY = at(JERUSALEM, '2026-11-15T09:00');
+    const defaultOn = DEFAULT_ON_MITZVOT.filter((id) => findMitzvah(id) !== undefined);
+    useUserStore.setState({ isOnboarded: true });
+    useMitzvotStore.setState({
+      activeMitzvot: {
+        ...useMitzvotStore.getState().activeMitzvot,
+        tefillin: { enabled: false },
+        havdalah: { enabled: true, enabledAt: 1 },
+        custom_1_ab: { enabled: true },
+      },
+    });
+    jest.spyOn(Date, 'now').mockReturnValue(SUNDAY.getTime());
+
+    await AppResetService.reset();
+
+    const active = useMitzvotStore.getState().activeMitzvot;
+    defaultOn.forEach((id) => expect(active[id]).toEqual({ enabled: true, enabledAt: SUNDAY.getTime() }));
+    expect(active.havdalah).toEqual({ enabled: false });
+    expect(active).not.toHaveProperty('custom_1_ab');
+    expect(
+      latestCheckIn(
+        {
+          mitzvot: defaultOn.map((id) => findMitzvah(id)!),
+          completions: {},
+          checkIns: {},
+          location: JERUSALEM,
+          settings: { nusach: 'ashkenaz', halachicOpinions: { ksSofZman: 'GRA' }, inIsrael: true },
+          enabledSince: enabledSinceOf(active),
+        },
+        SUNDAY,
+      ),
+    ).toBeNull();
+  });
+
+  it('forgets the Selichot add-on and deletes its files', async () => {
+    installSelichotFixture();
+    mockDeleteSelichotFiles.mockClear();
+
+    await AppResetService.reset();
+
+    expect(useSelichotStore.getState().installed).toBeNull();
+    expect(mockDeleteSelichotFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears the siddur bookmarks and last positions', async () => {
+    useSiddurBookmarksStore.getState().addBookmark({
+      textId: 'tehillim',
+      nusach: null,
+      sectionTitle: 'ליום ראשון',
+      segmentKey: 'abcdefghij',
+      label: 'ליום ראשון · אַשְׁרֵי הָאִישׁ',
+    });
+    useSiddurBookmarksStore.getState().saveLastPosition('tehillim', {
+      nusach: null,
+      sectionTitle: 'ליום ראשון',
+      segmentKey: 'abcdefghij',
+      appDay: '2026-10-28',
+      savedAt: 1,
+    });
+
+    await AppResetService.reset();
+
+    expect(useSiddurBookmarksStore.getState().bookmarks).toEqual([]);
+    expect(useSiddurBookmarksStore.getState().lastPositions).toEqual({});
   });
 });

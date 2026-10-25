@@ -15,6 +15,7 @@ import {
 import { useMitzvotStore } from '../useMitzvotStore';
 import { useTaharahStore } from '../useTaharahStore';
 import { useUserStore } from '../useUserStore';
+import { findMitzvah } from '@/data/mitzvot';
 import { rulesFor } from '@/data/taharahPresets';
 import { taharahStorage } from '@/services/TaharahStorage';
 
@@ -51,10 +52,13 @@ describe('taharahOptIn', () => {
       expect(taharah().settings.role).toBe('husband');
     });
 
-    it('switches tefillin off for a woman and leaves the prayers on', () => {
-      expect(MENS_MITZVOT).toEqual(['tefillin']);
+    it("switches the registered men's mitzvot off for a woman and leaves the prayers on", () => {
+      expect(MENS_MITZVOT).toEqual(['tefillin', 'kiddush_levana']);
+      const mens = MENS_MITZVOT.filter((id) => findMitzvah(id));
+      expect(mens).toEqual(['tefillin', 'kiddush_levana']);
+      expect(mens.map(enabled)).toEqual(mens.map(() => true));
       chooseGender('female');
-      expect(MENS_MITZVOT.map(enabled)).toEqual([false]);
+      expect(mens.map(enabled)).toEqual(mens.map(() => false));
       expect(['shacharit', 'mincha', 'maariv', 'krias_shma_shacharit'].map(enabled)).toEqual([true, true, true, true]);
     });
 
@@ -65,10 +69,25 @@ describe('taharahOptIn', () => {
       expect(enabled('shacharit')).toBe(true);
     });
 
-    it('restores tefillin when the answer changes from woman to man', () => {
+    it("restores the registered men's mitzvot when the answer changes from woman to man", () => {
+      const mens = MENS_MITZVOT.filter((id) => findMitzvah(id));
+      expect(mens).toEqual(['tefillin', 'kiddush_levana']);
       chooseGender('female');
       chooseGender('male');
-      expect(MENS_MITZVOT.map(enabled)).toEqual([true]);
+      expect(mens.map(enabled)).toEqual(mens.map(() => true));
+    });
+
+    it("never writes a men's mitzvah the registry lacks", () => {
+      chooseGender('female');
+      chooseGender('male');
+      expect(Object.keys(useMitzvotStore.getState().activeMitzvot).filter((id) => !findMitzvah(id))).toEqual([]);
+    });
+
+    it('leaves tefillin off on the way back to man when its reminders were emptied', () => {
+      chooseGender('female');
+      useMitzvotStore.getState().setReminders('tefillin', []);
+      chooseGender('male');
+      expect(enabled('tefillin')).toBe(false);
     });
 
     it('re-choosing the same gender never touches the library', () => {
@@ -247,6 +266,33 @@ describe('taharahOptIn', () => {
   });
 
   describe('chooseNusach', () => {
+    const ushpizin = () => useMitzvotStore.getState().activeMitzvot.ushpizin;
+
+    it('stamps Ushpizin when a Chabad user moves to a nusach that offers it, so earlier nights are no misses', () => {
+      const now = jest.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-11-02T10:00:00Z'));
+      try {
+        chooseNusach('chabad');
+        expect(ushpizin()).toEqual({ enabled: true });
+
+        chooseNusach('ashkenaz');
+        expect(ushpizin()).toEqual({ enabled: true, enabledAt: Date.parse('2026-11-02T10:00:00Z') });
+
+        now.mockReturnValue(Date.parse('2026-11-09T10:00:00Z'));
+        chooseNusach('sefard');
+        expect(ushpizin()?.enabledAt).toBe(Date.parse('2026-11-02T10:00:00Z'));
+      } finally {
+        now.mockRestore();
+      }
+    });
+
+    it('leaves a switched-off Ushpizin off and unstamped after a move from Chabad', () => {
+      chooseNusach('chabad');
+      useMitzvotStore.getState().setEnabled('ushpizin', false);
+      chooseNusach('edot_hamizrach');
+      expect(ushpizin()?.enabled).toBe(false);
+      expect(ushpizin()?.enabledAt).toBeUndefined();
+    });
+
     it('adopts the matching preset while tracking is on and the store is untouched', () => {
       user().setTaharahEnabled(true);
 

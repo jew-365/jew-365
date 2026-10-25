@@ -24,13 +24,37 @@ jest.mock('expo-background-task', () => ({
 }));
 
 import { STORE_VERSION } from '../persistOptions';
-import { SIDDUR_SCROLL_SPEEDS, scrollSpeedLevel, useUserStore } from '../useUserStore';
-import { INACTIVE, selectActive, useMitzvotStore } from '../useMitzvotStore';
+import {
+  DEFAULT_HILULA_NOTICES,
+  DEFAULT_ROSH_CHODESH_NOTICES,
+  SIDDUR_SCROLL_SPEEDS,
+  anyNoticeOn,
+  canEnableNotices,
+  noticeDaysBefore,
+  noticeTimingOf,
+  scrollSpeedLevel,
+  useUserStore,
+  type NoticeSetting,
+} from '../useUserStore';
+import {
+  DEFAULT_ON_MITZVOT,
+  INACTIVE,
+  canEnable,
+  effectiveReminders,
+  remindersOf,
+  selectActive,
+  useMitzvotStore,
+} from '../useMitzvotStore';
 import { useCompletionsStore, dateKey } from '../useCompletionsStore';
 import { useCustomMitzvotStore } from '../useCustomMitzvotStore';
 import { useChokStore } from '../useChokStore';
+import { useSiddurBookmarksStore } from '../useSiddurBookmarksStore';
 import { CITIES } from '@/data/cities';
+import { MITZVOT } from '@/data/mitzvot';
 import { Location } from '@/types/zmanim';
+import { Reminder } from '@/types/mitzvah';
+
+const ONE: Reminder = { anchor: 'start', offsetMin: 0, label: 'א' };
 
 describe('stores', () => {
   beforeEach(() => {
@@ -43,6 +67,7 @@ describe('stores', () => {
     ['mitzvot-store', useMitzvotStore],
     ['completions-store', useCompletionsStore],
     ['custom-mitzvot-store', useCustomMitzvotStore],
+    ['siddur-bookmarks-store', useSiddurBookmarksStore],
     ['chok-store', useChokStore],
   ])('%s keeps a persisted state across a version bump (identity migrate)', (name, store) => {
     const options = store.persist.getOptions();
@@ -164,6 +189,140 @@ describe('useUserStore auto-scroll', () => {
     expect(useUserStore.getState().roshChodeshEnabled).toBe(false);
   });
 
+  describe('notice kinds', () => {
+    const user = () => useUserStore.getState();
+    const off = (setting: NoticeSetting): NoticeSetting => ({ ...setting, enabled: false });
+    const ROSH_CHODESH_DEFAULTS = {
+      before: { enabled: true, daysBefore: 3, timing: { anchor: 'clock', minutes: 1200 } },
+      evening: { enabled: true, timing: { anchor: 'shkia', offsetMin: 0 } },
+      day: { enabled: true, timing: { anchor: 'clock', minutes: 420 } },
+    };
+    const HILULA_DEFAULTS = {
+      before: { enabled: true, daysBefore: 1, timing: { anchor: 'shkia', offsetMin: 0 } },
+      evening: { enabled: true, timing: { anchor: 'shkia', offsetMin: 0 } },
+    };
+
+    it('starts with every kind on, and reset restores them after a change', () => {
+      expect(user().roshChodeshNotices).toEqual(ROSH_CHODESH_DEFAULTS);
+      expect(user().hilulaNotices).toEqual(HILULA_DEFAULTS);
+      user().setRoshChodeshNotice('day', { enabled: true, timing: { anchor: 'clock', minutes: 360 } });
+      user().setHilulaNotice('before', { enabled: false, daysBefore: 5, timing: { anchor: 'clock', minutes: 600 } });
+      expect(user().roshChodeshNotices.day.timing).toEqual({ anchor: 'clock', minutes: 360 });
+      expect(user().hilulaNotices.before.daysBefore).toBe(5);
+      user().reset();
+      expect(user().roshChodeshNotices).toEqual(ROSH_CHODESH_DEFAULTS);
+      expect(user().hilulaNotices).toEqual(HILULA_DEFAULTS);
+    });
+
+    it('keeps at least one Rosh Chodesh kind on while the switch is on, and refuses the switch with none', () => {
+      const { roshChodeshNotices: kinds } = user();
+      user().setRoshChodeshNotice('before', off(kinds.before));
+      user().setRoshChodeshNotice('evening', off(kinds.evening));
+      user().setRoshChodeshNotice('day', off(kinds.day));
+      expect(anyNoticeOn(user().roshChodeshNotices)).toBe(false);
+
+      user().setRoshChodeshEnabled(true);
+      expect(user().roshChodeshEnabled).toBe(false);
+      expect(canEnableNotices('roshChodesh')).toBe(false);
+
+      user().setRoshChodeshNotice('day', kinds.day);
+      expect(canEnableNotices('roshChodesh')).toBe(true);
+      user().setRoshChodeshEnabled(true);
+      expect(user().roshChodeshEnabled).toBe(true);
+
+      user().setRoshChodeshNotice('day', off(kinds.day));
+      expect(user().roshChodeshNotices.day.enabled).toBe(true);
+
+      user().setRoshChodeshEnabled(false);
+      expect(user().roshChodeshEnabled).toBe(false);
+    });
+
+    it('keeps at least one hilula kind on while the switch is on, and refuses the switch with none', () => {
+      const { hilulaNotices: kinds } = user();
+      user().setHilulaNotice('before', off(kinds.before));
+      user().setHilulaNotice('evening', off(kinds.evening));
+      expect(anyNoticeOn(user().hilulaNotices)).toBe(false);
+
+      user().setHilulotEnabled(true);
+      expect(user().hilulotEnabled).toBe(false);
+      expect(canEnableNotices('hilulot')).toBe(false);
+
+      user().setHilulaNotice('before', kinds.before);
+      expect(canEnableNotices('hilulot')).toBe(true);
+      user().setHilulotEnabled(true);
+      expect(user().hilulotEnabled).toBe(true);
+
+      user().setHilulaNotice('before', off(kinds.before));
+      expect(user().hilulaNotices.before.enabled).toBe(true);
+
+      user().setHilulotEnabled(false);
+      expect(user().hilulotEnabled).toBe(false);
+    });
+
+    it('merge fills a missing map or kind from the defaults and drops a kind this build does not know', () => {
+      const { merge } = useUserStore.persist.getOptions();
+      const current = user();
+      const saved: NoticeSetting = { enabled: true, daysBefore: 4, timing: { anchor: 'clock', minutes: 600 } };
+
+      expect(merge!({ nusach: 'sefard' }, current).roshChodeshNotices).toEqual(DEFAULT_ROSH_CHODESH_NOTICES);
+      expect(merge!({ nusach: 'sefard' }, current).hilulaNotices).toEqual(DEFAULT_HILULA_NOTICES);
+      expect(merge!({ hilulaNotices: { before: saved } }, current).hilulaNotices).toEqual({
+        before: saved,
+        evening: DEFAULT_HILULA_NOTICES.evening,
+      });
+      const withExtra = merge!({ roshChodeshNotices: { ...DEFAULT_ROSH_CHODESH_NOTICES, week: saved } }, current);
+      expect(Object.keys(withExtra.roshChodeshNotices)).toEqual(['before', 'evening', 'day']);
+    });
+
+    it('merge restores the defaults of a switch that is on with every kind off', () => {
+      const { merge } = useUserStore.persist.getOptions();
+      const current = user();
+      const merged = merge!(
+        {
+          hilulotEnabled: true,
+          hilulaNotices: { before: off(DEFAULT_HILULA_NOTICES.before), evening: off(DEFAULT_HILULA_NOTICES.evening) },
+        },
+        current,
+      );
+      expect(merged.hilulotEnabled).toBe(true);
+      expect(merged.hilulaNotices).toEqual(DEFAULT_HILULA_NOTICES);
+    });
+
+    it('keeps a saved topic with every kind off while its switch is off', () => {
+      const { merge } = useUserStore.persist.getOptions();
+      const allOff = { before: off(DEFAULT_HILULA_NOTICES.before), evening: off(DEFAULT_HILULA_NOTICES.evening) };
+      expect(merge!({ hilulaNotices: allOff }, user()).hilulaNotices).toEqual(allOff);
+    });
+
+    it('reads a saved number of days ahead as a whole day from one to seven', () => {
+      const days = (daysBefore?: number) =>
+        noticeDaysBefore({ enabled: true, daysBefore, timing: { anchor: 'shkia', offsetMin: 0 } }, 3);
+      expect(days(0)).toBe(1);
+      expect(days(9)).toBe(7);
+      expect(days(2.6)).toBe(3);
+      expect(days(5)).toBe(5);
+      expect(days(undefined)).toBe(3);
+      expect(days(Number.NaN)).toBe(3);
+    });
+
+    it('reads a saved timing as a lead of at most 180 minutes before the shkia or a minute of the day', () => {
+      const shkia = (offsetMin: number): NoticeSetting => ({ enabled: true, timing: { anchor: 'shkia', offsetMin } });
+      const onClock = (minutes: number): NoticeSetting => ({ enabled: true, timing: { anchor: 'clock', minutes } });
+      expect(noticeTimingOf(shkia(30))).toEqual({ anchor: 'shkia', offsetMin: 0 });
+      expect(noticeTimingOf(shkia(-0))).toEqual({ anchor: 'shkia', offsetMin: 0 });
+      expect(noticeTimingOf(shkia(-45))).toEqual({ anchor: 'shkia', offsetMin: -45 });
+      expect(noticeTimingOf(shkia(-500))).toEqual({ anchor: 'shkia', offsetMin: -180 });
+      expect(noticeTimingOf(shkia(Number.NaN))).toEqual({ anchor: 'shkia', offsetMin: 0 });
+      expect(noticeTimingOf(onClock(1500))).toEqual({ anchor: 'clock', minutes: 1439 });
+      expect(noticeTimingOf(onClock(-5))).toEqual({ anchor: 'clock', minutes: 0 });
+      expect(noticeTimingOf(onClock(Number.NaN))).toEqual({ anchor: 'clock', minutes: 0 });
+      expect(noticeTimingOf({ enabled: true, timing: undefined } as unknown as NoticeSetting)).toEqual({
+        anchor: 'shkia',
+        offsetMin: 0,
+      });
+    });
+  });
+
   it('keeps the weekly report on until switched off, and reset turns it back on', () => {
     expect(useUserStore.getState().weeklyReportEnabled).toBe(true);
     useUserStore.getState().setWeeklyReportEnabled(false);
@@ -238,6 +397,44 @@ describe('useUserStore double-week choice', () => {
   });
 });
 
+describe('useUserStore Chok commentary', () => {
+  beforeEach(() => useUserStore.getState().reset());
+
+  it('starts folded, opens and resets to folded', () => {
+    expect(useUserStore.getState().chokCommentaryOpen).toBe(false);
+    useUserStore.getState().setChokCommentaryOpen(true);
+    expect(useUserStore.getState().chokCommentaryOpen).toBe(true);
+    useUserStore.getState().reset();
+    expect(useUserStore.getState().chokCommentaryOpen).toBe(false);
+  });
+
+  it('stays folded for a payload saved before the field existed and keeps a saved choice', () => {
+    const { merge } = useUserStore.persist.getOptions();
+    const current = useUserStore.getState();
+    expect(merge!({ nusach: 'sefard' }, current).chokCommentaryOpen).toBe(false);
+    expect(merge!({ chokCommentaryOpen: true }, current).chokCommentaryOpen).toBe(true);
+  });
+});
+
+describe('useUserStore Thursday-night day', () => {
+  beforeEach(() => useUserStore.getState().reset());
+
+  it('starts unanswered, takes a day and resets to unanswered', () => {
+    expect(useUserStore.getState().chokThuNightDay).toBeNull();
+    useUserStore.getState().setChokThuNightDay('fri');
+    expect(useUserStore.getState().chokThuNightDay).toBe('fri');
+    useUserStore.getState().reset();
+    expect(useUserStore.getState().chokThuNightDay).toBeNull();
+  });
+
+  it('stays unanswered for a payload saved before the field existed and keeps a saved day', () => {
+    const { merge } = useUserStore.persist.getOptions();
+    const current = useUserStore.getState();
+    expect(merge!({ nusach: 'sefard' }, current).chokThuNightDay).toBeNull();
+    expect(merge!({ chokThuNightDay: 'thu' }, current).chokThuNightDay).toBe('thu');
+  });
+});
+
 describe('useMitzvotStore merge', () => {
   it('prunes a retired mitzvah from a persisted map and keeps every other entry, custom ones included', () => {
     const { merge } = useMitzvotStore.persist.getOptions();
@@ -250,24 +447,153 @@ describe('useMitzvotStore merge', () => {
       },
     };
 
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(1_800_000_000_000);
     const merged = merge!(saved, current).activeMitzvot;
+    clock.mockRestore();
 
     expect(merged).not.toHaveProperty('tzitzit');
     expect(merged.tefillin).toEqual({ enabled: false });
     expect(merged.custom_1_a).toEqual({ enabled: true });
-    expect(merged.shacharit).toEqual({ enabled: true });
+    expect(merged.shacharit).toEqual({ enabled: true, enabledAt: 1_800_000_000_000 });
+    expect(merged.havdalah).toEqual({ enabled: false });
   });
 
-  it('starts a fresh install without tzitzit', () => {
+  it('turns a persisted empty reminder list into the defaults and keeps a non-empty one', () => {
+    const { merge } = useMitzvotStore.persist.getOptions();
+    const current = useMitzvotStore.getState();
+    const saved = {
+      activeMitzvot: {
+        tefillin: { enabled: true, customReminders: [], enabledAt: 5 },
+        havdalah: { enabled: false, customReminders: [ONE] },
+        custom_1_a: { enabled: true, customReminders: [] },
+      },
+    };
+
+    const merged = merge!(saved, current).activeMitzvot;
+
+    expect(merged.tefillin).toEqual({ enabled: true, enabledAt: 5 });
+    expect(merged.tefillin).not.toHaveProperty('customReminders');
+    expect(merged.havdalah.customReminders).toEqual([ONE]);
+    expect(merged.custom_1_a).not.toHaveProperty('customReminders');
+
+    useMitzvotStore.setState({ activeMitzvot: merged });
+    expect(effectiveReminders('tefillin')).toBe(MITZVOT.find((m) => m.id === 'tefillin')!.defaultReminders);
+    useMitzvotStore.getState().reset();
+  });
+
+  it('resets to the registered default-on mitzvot, unstamped and without tzitzit', () => {
     useMitzvotStore.getState().reset();
     expect(useMitzvotStore.getState().activeMitzvot).not.toHaveProperty('tzitzit');
-    expect(useMitzvotStore.getState().getEnabledIds().sort()).toEqual([
-      'krias_shma_shacharit',
-      'maariv',
-      'mincha',
-      'shacharit',
+    expect(DEFAULT_ON_MITZVOT).toEqual([
       'tefillin',
+      'krias_shma_shacharit',
+      'shacharit',
+      'mincha',
+      'maariv',
+      'krias_shma_al_hamita',
+      'kiddush_levana',
+      'selichot',
+      'chanukah_candles',
+      'ushpizin',
     ]);
+    const registered = DEFAULT_ON_MITZVOT.filter((id) => MITZVOT.some((m) => m.id === id));
+    expect(registered).toEqual(
+      expect.arrayContaining([
+        'tefillin',
+        'krias_shma_shacharit',
+        'shacharit',
+        'mincha',
+        'maariv',
+        'krias_shma_al_hamita',
+        'kiddush_levana',
+        'selichot',
+        'chanukah_candles',
+        'ushpizin',
+      ]),
+    );
+    expect(useMitzvotStore.getState().getEnabledIds().sort()).toEqual([...registered].sort());
+    Object.values(useMitzvotStore.getState().activeMitzvot).forEach((state) => expect(state.enabledAt).toBeUndefined());
+  });
+});
+
+describe('useMitzvotStore at least one reminder', () => {
+  const havdalah = MITZVOT.find((m) => m.id === 'havdalah')!;
+  const stored = (id: string) => useMitzvotStore.getState().activeMitzvot[id];
+  const addCustom = (id: string, reminders: Reminder[]) =>
+    useCustomMitzvotStore.getState().add({
+      id,
+      name: 'שיעור קבוע',
+      startHHMM: '08:00',
+      endHHMM: '09:00',
+      reminders,
+      skipOn: [],
+      createdAt: 1800000000000,
+    });
+
+  beforeEach(() => {
+    useMitzvotStore.getState().reset();
+    useCustomMitzvotStore.getState().reset();
+  });
+
+  it('remindersOf prefers the override, then the defaults, then none', () => {
+    expect(remindersOf(undefined, havdalah)).toBe(havdalah.defaultReminders);
+    expect(remindersOf({ enabled: true }, havdalah)).toBe(havdalah.defaultReminders);
+    expect(remindersOf({ enabled: true, customReminders: [ONE] }, havdalah)).toEqual([ONE]);
+    expect(remindersOf({ enabled: true, customReminders: [] }, havdalah)).toEqual([]);
+    expect(remindersOf(undefined, undefined)).toEqual([]);
+  });
+
+  it('effectiveReminders reads a registry mitzvah, its override and a custom mitzvah', () => {
+    expect(effectiveReminders('havdalah')).toBe(havdalah.defaultReminders);
+    expect(canEnable('havdalah')).toBe(true);
+
+    useMitzvotStore.getState().setReminders('havdalah', [ONE]);
+    expect(effectiveReminders('havdalah')).toEqual([ONE]);
+
+    addCustom('custom_1800000000000_abc', [ONE]);
+    expect(effectiveReminders('custom_1800000000000_abc')).toEqual([ONE]);
+    expect(canEnable('custom_1800000000000_abc')).toBe(true);
+
+    expect(effectiveReminders('custom_missing')).toEqual([]);
+    expect(canEnable('custom_missing')).toBe(false);
+  });
+
+  it('setEnabled and toggleEnabled refuse to switch on a mitzvah whose reminders were emptied', () => {
+    useMitzvotStore.getState().setReminders('havdalah', []);
+
+    useMitzvotStore.getState().setEnabled('havdalah', true);
+    expect(stored('havdalah')).toEqual({ enabled: false, customReminders: [] });
+
+    useMitzvotStore.getState().toggleEnabled('havdalah');
+    expect(stored('havdalah')).toEqual({ enabled: false, customReminders: [] });
+  });
+
+  it('a custom mitzvah switches on only with a reminder', () => {
+    addCustom('custom_1800000000000_none', []);
+    useMitzvotStore.getState().setEnabled('custom_1800000000000_none', true);
+    expect(stored('custom_1800000000000_none')).toBeUndefined();
+
+    addCustom('custom_1800000000000_one', [ONE]);
+    useMitzvotStore.getState().setEnabled('custom_1800000000000_one', true);
+    expect(stored('custom_1800000000000_one').enabled).toBe(true);
+  });
+
+  it('setReminders refuses an empty list while the mitzvah is on and takes it while it is off', () => {
+    useMitzvotStore.getState().setReminders('tefillin', []);
+    expect(stored('tefillin').enabled).toBe(true);
+    expect(stored('tefillin').customReminders).toBeUndefined();
+
+    useMitzvotStore.getState().setEnabled('tefillin', false);
+    useMitzvotStore.getState().setReminders('tefillin', []);
+    expect(stored('tefillin').customReminders).toEqual([]);
+  });
+
+  it('switching off is never refused', () => {
+    useMitzvotStore.setState({
+      activeMitzvot: { ...useMitzvotStore.getState().activeMitzvot, tefillin: { enabled: true, customReminders: [] } },
+    });
+    useMitzvotStore.getState().setEnabled('tefillin', false);
+    expect(stored('tefillin').enabled).toBe(false);
   });
 });
 
