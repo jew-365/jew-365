@@ -39,6 +39,7 @@ module.exports = defineConfig([
       '.claude/*',
       '.agents/*',
       'src/data/siddurAssets.generated.ts',
+      'src/data/siddurChapters.generated.ts',
     ],
   },
   {

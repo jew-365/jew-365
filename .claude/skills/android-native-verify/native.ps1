@@ -465,6 +465,12 @@ function Invoke-Teardown {
     $listener = Get-MetroListener
     if ($listener) { Fail "port $Port is held by PID $($listener.OwningProcess), which is not a Metro this skill started: left running, ask the user" }
     Say "Metro stopped, port $Port free"
+    $state = Read-State
+    if ($state -and $state.serial -and (Get-AvdName $state.serial) -eq $Avd) {
+        $script:Serial = $state.serial
+        Invoke-Adb @('reverse', '--remove', "tcp:$Port") 10 -AllowFailure | Out-Null
+        Say "adb reverse tcp:$Port removed (a dev client polling a reverse with no Metro hangs the Windows adb server)"
+    }
     if ($StopEmulator) {
         $state = Read-State
         if ($state -and $state.startedByUs -and $state.serial) {

@@ -81,7 +81,7 @@ Decide this before verifying, because it sets what the emulator run proves:
 ## 4. Teardown (always, at the end of the check)
 
 ```
-native.ps1 teardown                 # gradlew --stop, stop the Metro this skill started, free the port
+native.ps1 teardown                 # gradlew --stop, stop the Metro this skill started, free the port, remove adb reverse tcp:8083
 native.ps1 teardown -Delete         # also delete C:\work\kjn (only a folder with .kjn-manifest)
 native.ps1 teardown -StopEmulator   # also close the emulator, only one this skill started
 ```
@@ -109,4 +109,6 @@ Report the printed path, version, versionCode, and that the build is signed with
 - The Sentry plugin keeps placeholders in `app.json`; the dev build runs with Sentry off, as intended.
 - `.env` is not copied (it is gitignored), so `EXPO_PUBLIC_*` variables are unset in the dev build.
 - The emulator may be held by another session (an install or build in progress, `adb shell` not answering). The script bounds every adb call and fails with "the emulator does not answer", and `run` refuses an emulator it did not start; never kill an emulator you did not start, ask the user.
+- When the machine's screen is off or locked, the windowed emulator `run` starts can hang at boot and never reach adb. Start it headless instead, `emulator -avd test_phone -no-window -gpu swiftshader_indirect -no-boot-anim -no-audio -no-snapshot-load` from `%LOCALAPPDATA%\Android\Sdk\emulator`, then `run -UseRunning`; `shot` still works. The image boots in GMT: `adb shell service call alarm 3 s16 Asia/Jerusalem` sets the zone without root.
+- A dev client that polls an `adb reverse` with no Metro behind it can hang the Windows adb server; `teardown` removes the reverse for that reason.
 - Port 8083 is the project's native-test Metro port. If something else holds it, `run` fails instead of killing it.

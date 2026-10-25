@@ -554,4 +554,5 @@ module.exports = {
   expandLine,
   parseBook,
   gematria,
+  COMMENTARIES,
 };

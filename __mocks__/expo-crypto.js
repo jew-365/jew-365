@@ -11,4 +11,11 @@ module.exports = {
     if (algorithm !== 'SHA-256') throw new Error(`unsupported ${algorithm}`);
     return require('crypto').createHash('sha256').update(data, 'utf8').digest('hex');
   },
+  digest: async (algorithm, data) => {
+    if (algorithm !== 'SHA-256') throw new Error(`unsupported ${algorithm}`);
+    const bytes = ArrayBuffer.isView(data)
+      ? new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
+      : new Uint8Array(data);
+    return Uint8Array.from(require('crypto').createHash('sha256').update(bytes).digest()).buffer;
+  },
 };

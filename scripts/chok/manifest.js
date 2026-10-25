@@ -103,6 +103,8 @@ const assetSlug = (parasha) =>
 
 const assetFileName = (parasha, sha8) => `${assetSlug(parasha)}.${sha8}.json`;
 
+const assetGzFileName = (parasha, sha8) => `${assetFileName(parasha, sha8)}.gz`;
+
 module.exports = {
   TEAMIM,
   SOURCE_DIR,
@@ -115,6 +117,7 @@ module.exports = {
   SITE_DIR,
   assetSlug,
   assetFileName,
+  assetGzFileName,
   VERSE_COUNTS,
   VERSE_COUNT_EXCEPTIONS,
   HAFTARAH_VARIANT_PARASHIYOT,

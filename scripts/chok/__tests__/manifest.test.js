@@ -8,6 +8,7 @@ const {
   sourceFiles,
   assetSlug,
   assetFileName,
+  assetGzFileName,
 } = require('../manifest');
 
 describe('chok manifest', () => {
@@ -26,6 +27,7 @@ describe('chok manifest', () => {
     expect(assetSlug("Beha'alotcha")).toBe('beha-alotcha');
     expect(assetSlug('Lech-Lecha')).toBe('lech-lecha');
     expect(assetFileName('Vezot Haberakhah', 'a1b2c3d4')).toBe('vezot-haberakhah.a1b2c3d4.json');
+    expect(assetGzFileName('Vezot Haberakhah', 'a1b2c3d4')).toBe('vezot-haberakhah.a1b2c3d4.json.gz');
   });
 
   it('lists the five nikud files, and the te amim ones on request', () => {

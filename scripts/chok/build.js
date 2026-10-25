@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const zlib = require('zlib');
 const { Buffer } = require('buffer');
 const { createHash } = require('crypto');
+const { gzipSync } = require('fflate');
 const {
   TEAMIM,
   SOURCE_DIR,
@@ -15,6 +15,7 @@ const {
   DEDICATION,
   sourceFiles,
   assetFileName,
+  assetGzFileName,
 } = require('./manifest');
 const { decodeSource, sourceRules, parseBook } = require('./parse');
 const { validateParasha } = require('./validate');
@@ -22,6 +23,10 @@ const { validateParasha } = require('./validate');
 const ROOT = path.resolve(__dirname, '..', '..');
 const MANIFEST_FILE = path.join(SITE_DIR, 'manifest.json');
 const LICENSE_FILE = path.join(SITE_DIR, 'LICENSE.txt');
+const GZIP_OPTIONS = { level: 9, mtime: 0 };
+
+const totalBytes = (entries) => Object.values(entries).reduce((sum, entry) => sum + entry.bytes, 0);
+const sameOutput = (a, b) => (Buffer.isBuffer(a) && Buffer.isBuffer(b) ? a.equals(b) : a === b);
 
 function readSources(teamim = TEAMIM, dir = SOURCE_DIR) {
   const names = sourceFiles(teamim);
@@ -84,12 +89,12 @@ function licenseText(teamim = TEAMIM) {
   return [
     'חק לישראל, מתוך מאגר תורת אמת',
     `${MANIFEST_CREDIT.he}.`,
-    `קובצי ה-JSON בתיקייה זו הם עיבוד של יהודי 365 לטקסט של חק לישראל ממאגר תורת אמת (${marksHe}), ומפורסמים תחת אותו רישיון: ${LICENSE.name} (ייחוס, שימוש לא מסחרי, שיתוף זהה).`,
+    `קובצי ה-JSON בתיקייה זו, הרגילים והדחוסים ב-gzip, הם עיבוד של יהודי 365 לטקסט של חק לישראל ממאגר תורת אמת (${marksHe}), ומפורסמים תחת אותו רישיון: ${LICENSE.name} (ייחוס, שימוש לא מסחרי, שיתוף זהה).`,
     `נוסח הרישיון: ${LICENSE.urlHe}`,
     '',
     'Chok LeYisrael, from the Torat Emet database',
     `${MANIFEST_CREDIT.en}.`,
-    `The JSON files in this folder are Jew 365's processing of the Chok LeYisrael text of the Torat Emet database (${marksEn}), published under the same license: ${LICENSE.name} (Attribution, NonCommercial, ShareAlike).`,
+    `The JSON files in this folder, plain and gzipped, are Jew 365's processing of the Chok LeYisrael text of the Torat Emet database (${marksEn}), published under the same license: ${LICENSE.name} (Attribution, NonCommercial, ShareAlike).`,
     `License: ${LICENSE.url}`,
     '',
   ].join('\n');
@@ -98,6 +103,7 @@ function licenseText(teamim = TEAMIM) {
 function buildOutputs() {
   const outputs = new Map();
   const files = {};
+  const gz = {};
   const parashiyot = readParashiyot();
   for (const { parasha, slots } of parashiyot) {
     const content = JSON.stringify({ parasha, credit: CREDIT, dedication: DEDICATION, slots: withoutVerses(slots) });
@@ -106,6 +112,11 @@ function buildOutputs() {
     const bytes = Buffer.byteLength(content);
     outputs.set(path.join(SITE_DIR, file), content);
     files[parasha] = { path: file, sha256, bytes };
+    const packed = Buffer.from(gzipSync(Buffer.from(content, 'utf8'), GZIP_OPTIONS));
+    const packedSha256 = createHash('sha256').update(packed).digest('hex');
+    const packedFile = assetGzFileName(parasha, packedSha256.slice(0, 8));
+    outputs.set(path.join(SITE_DIR, packedFile), packed);
+    gz[parasha] = { path: packedFile, sha256: packedSha256, bytes: packed.length };
   }
   const previous = fs.existsSync(MANIFEST_FILE) ? JSON.parse(fs.readFileSync(MANIFEST_FILE, 'utf8')) : null;
   const manifest = {
@@ -113,8 +124,10 @@ function buildOutputs() {
     version: nextContentVersion(previous, files),
     credit: MANIFEST_CREDIT,
     license: LICENSE,
-    bytes: Object.values(files).reduce((sum, file) => sum + file.bytes, 0),
+    bytes: totalBytes(files),
+    gzipBytes: totalBytes(gz),
     files,
+    gz,
   };
   outputs.set(LICENSE_FILE, licenseText());
   outputs.set(MANIFEST_FILE, `${JSON.stringify(manifest, null, 2)}\n`);
@@ -125,13 +138,20 @@ function writeOutputs(outputs) {
   let written = 0;
   fs.mkdirSync(SITE_DIR, { recursive: true });
   for (const [file, content] of outputs) {
-    if (fs.existsSync(file) && fs.readFileSync(file, 'utf8') === content) continue;
+    if (
+      fs.existsSync(file) &&
+      sameOutput(Buffer.isBuffer(content) ? fs.readFileSync(file) : fs.readFileSync(file, 'utf8'), content)
+    ) {
+      continue;
+    }
     fs.writeFileSync(file, content);
     written++;
   }
   for (const name of fs.readdirSync(SITE_DIR)) {
     const file = path.join(SITE_DIR, name);
-    if (name.endsWith('.json') && file !== MANIFEST_FILE && !outputs.has(file)) fs.rmSync(file);
+    if ((name.endsWith('.json') || name.endsWith('.json.gz')) && file !== MANIFEST_FILE && !outputs.has(file)) {
+      fs.rmSync(file);
+    }
   }
   return written;
 }
@@ -140,17 +160,15 @@ function main() {
   const outputs = buildOutputs();
   const again = buildOutputs();
   for (const [file, content] of outputs) {
-    if (again.get(file) !== content) throw new Error(`the build is not deterministic: ${path.relative(ROOT, file)}`);
+    if (!sameOutput(again.get(file), content)) {
+      throw new Error(`the build is not deterministic: ${path.relative(ROOT, file)}`);
+    }
   }
-  const assets = [...outputs].filter(([file]) => file !== MANIFEST_FILE && file !== LICENSE_FILE);
-  const raw = assets.reduce((sum, [, content]) => sum + Buffer.byteLength(content), 0);
-  const gzipped = assets.reduce(
-    (sum, [, content]) => sum + zlib.gzipSync(Buffer.from(content), { level: 9 }).length,
-    0,
-  );
-  const { version } = JSON.parse(outputs.get(MANIFEST_FILE));
+  const { version, bytes, gzipBytes, files } = JSON.parse(outputs.get(MANIFEST_FILE));
   const written = writeOutputs(outputs);
-  console.log(`${assets.length} files, ${raw} bytes, ${gzipped} bytes gzipped, content version ${version}`);
+  console.log(
+    `${Object.keys(files).length} parashiyot, ${bytes} bytes, ${gzipBytes} bytes gzipped, content version ${version}`,
+  );
   console.log(`wrote ${written} files`);
 }
 

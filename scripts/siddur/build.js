@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+const { Buffer } = require('buffer');
+const { gzipSync } = require('fflate');
 const { HDate, OmerEvent } = require('@hebcal/core');
 const {
   SOURCES,
@@ -16,7 +19,24 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const CACHE_DIR = path.join(__dirname, '.cache');
 const OUT_DIR = path.join(ROOT, 'assets', 'siddur');
 const ASSET_MAP = path.join(ROOT, 'src', 'data', 'siddurAssets.generated.ts');
+const CHAPTER_INDEX = path.join(ROOT, 'src', 'data', 'siddurChapters.generated.ts');
 const NUSCHAOT = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const DOWNLOADED_TEXTS = { selichot: path.join(ROOT, 'docs', 'selichot') };
+const GZIP_OPTIONS = { level: 9, mtime: 0 };
+const SEGMENT_KEY_LENGTH = 10;
+
+function segmentKey(parts) {
+  return crypto.createHash('sha256').update(JSON.stringify(parts)).digest('base64url').slice(0, SEGMENT_KEY_LENGTH);
+}
+
+function uniqueSegmentKeys(sections) {
+  const seen = new Map();
+  for (const segment of sections.flatMap((section) => section.segments)) {
+    const count = seen.get(segment.key) ?? 0;
+    seen.set(segment.key, count + 1);
+    if (count) segment.key = `${segment.key}.${count}`;
+  }
+}
 
 function sourceUrl(source) {
   if (source.wikisource) {
@@ -330,6 +350,62 @@ function parseCondition(tag) {
   return condition;
 }
 
+const VOICES = ['male', 'female'];
+const VOICE_AUDIENCES = [...VOICES, 'unset'];
+
+function parseVoice(tag) {
+  const listed = /voice="([^"]*)"/.exec(tag)?.[1];
+  if (listed === undefined) return undefined;
+  const voices = listed.split(',').filter(Boolean);
+  if (
+    !voices.length ||
+    voices.some((voice) => !VOICE_AUDIENCES.includes(voice)) ||
+    new Set(voices).size !== voices.length
+  )
+    throw new Error(`<if voice="${listed}">: list male, female or unset, each at most once`);
+  return VOICE_AUDIENCES.filter((voice) => voices.includes(voice));
+}
+
+const VOICE_TAG = /<if voice="([^"]*)"(?: marriedOnly="true")?>((?:(?!<\/?if\b)[\s\S])*?)<\/if>/g;
+
+function printedOf(html) {
+  return html.replace(VOICE_TAG, (tag, listed, inner) => (listed.split(',').includes('unset') ? inner : ''));
+}
+
+function checkVoiceEdit(edit, where) {
+  if (!edit.to.includes('voice=')) return;
+  if (printedOf(edit.to).normalize('NFC') !== edit.from.normalize('NFC'))
+    throw new Error(`${where}: a voice edit must read "${edit.from}" for a reader with no voice`);
+}
+
+function checkInsertVoice(insert, where) {
+  for (const [, listed] of insert.he.matchAll(/voice="([^"]*)"/g))
+    if (listed.split(',').includes('unset'))
+      throw new Error(`${where}: an insert is new text, so its voice cannot include unset`);
+}
+
+function checkAudience(list, where) {
+  if (
+    !Array.isArray(list) ||
+    !list.length ||
+    list.some((voice) => !VOICE_AUDIENCES.includes(voice)) ||
+    new Set(list).size !== list.length
+  )
+    throw new Error(`${where}: a voice list names male, female or unset, each at most once`);
+  if (!list.includes('unset')) throw new Error(`${where}: a voice on printed text keeps unset; new text is an insert`);
+  if (list.length === VOICE_AUDIENCES.length)
+    throw new Error(`${where}: a voice list naming every reader marks nothing`);
+  return VOICE_AUDIENCES.filter((voice) => list.includes(voice));
+}
+
+function parseMarriedOnly(tag, voice) {
+  const listed = /marriedOnly="([^"]*)"/.exec(tag)?.[1];
+  if (listed === undefined) return false;
+  if (listed !== 'true') throw new Error(`<if marriedOnly="${listed}">: write marriedOnly="true"`);
+  if (!voice || voice.includes('unset')) throw new Error('<if marriedOnly>: needs a voice that leaves out unset');
+  return true;
+}
+
 const POINTED_LETTER = /[א-ת][֑-֯]*[ְ-ׇּׁׂ]/g;
 
 function isVocalized(text) {
@@ -433,7 +509,12 @@ function classifySmall(html) {
 }
 
 function sameRunStyle(a, b) {
-  return a.s === b.s && sameCondition(a.when, b.when);
+  return (
+    a.s === b.s &&
+    sameCondition(a.when, b.when) &&
+    JSON.stringify(a.voice ?? null) === JSON.stringify(b.voice ?? null) &&
+    Boolean(a.marriedOnly) === Boolean(b.marriedOnly)
+  );
 }
 
 function parseHebrew(html) {
@@ -447,7 +528,11 @@ function parseHebrew(html) {
     const run = { t: clean };
     if (small) run.s = 'n';
     else if (bold) run.s = 'b';
-    if (conditions.length) run.when = conditions[conditions.length - 1];
+    const when = conditions.findLast((entry) => !entry.voiceOnly)?.when;
+    if (when) run.when = when;
+    const voice = conditions.findLast((entry) => entry.voice)?.voice;
+    if (voice) run.voice = voice;
+    if (conditions.some((entry) => entry.marriedOnly)) run.marriedOnly = true;
     const runs = paragraphs[paragraphs.length - 1];
     const last = runs[runs.length - 1];
     if (last && sameRunStyle(last, run)) last.t += clean;
@@ -467,7 +552,12 @@ function parseHebrew(html) {
     else if (name === 'b' || name === 'strong' || name === 'big') bold += closing ? -1 : 1;
     else if (name === 'if') {
       if (closing) conditions.pop();
-      else conditions.push(parseCondition(token));
+      else {
+        const when = parseCondition(token);
+        const voice = parseVoice(token);
+        const marriedOnly = parseMarriedOnly(token, voice);
+        conditions.push({ when, voice, marriedOnly, voiceOnly: Boolean(voice) && Object.keys(when).length === 0 });
+      }
     }
   }
   return paragraphs.map(tidyRuns).filter((runs) => runs.length > 0);
@@ -489,7 +579,7 @@ function tidyRuns(runs) {
   for (const run of runs) {
     const last = merged[merged.length - 1];
     if (last && sameRunStyle(last, run)) last.t += run.t;
-    else if (last && !run.t.trim() && !run.when && !last.when) last.t += run.t;
+    else if (last && !run.t.trim() && !run.when && !last.when && !run.voice && !last.voice) last.t += run.t;
     else merged.push({ ...run });
   }
   const tidy = merged.map((run) => ({ ...run, t: run.t.replace(/\s+/g, ' ') }));
@@ -524,6 +614,10 @@ function plain(runs) {
     .flat()
     .map((run) => run.t)
     .join(' ');
+}
+
+function asPrinted(paragraphs) {
+  return paragraphs.map((runs) => runs.filter((run) => !run.voice || run.voice.includes('unset')));
 }
 
 function normalizeHebrew(text) {
@@ -657,6 +751,21 @@ function checkLabel(label, where) {
   if (!label?.he?.trim() || !label?.en?.trim()) throw new Error(`${where}: a passage label needs Hebrew and English`);
 }
 
+function checkVoice(label, field, where) {
+  if (label?.foldsFor !== undefined) {
+    if (field !== 'optional') throw new Error(`${where}: only an optional label folds for a voice`);
+    if (!VOICES.includes(label.foldsFor))
+      throw new Error(`${where}: a label's foldsFor is male or female, not "${label.foldsFor}"`);
+    if (label.voice !== undefined || label.when !== undefined || label.alone || label.marriedOnly)
+      throw new Error(`${where}: a foldsFor label carries no voice, when, alone or marriedOnly`);
+  }
+  if (label?.voice === undefined) return;
+  if (field !== 'optional') throw new Error(`${where}: only an optional label carries a voice`);
+  if (!VOICES.includes(label.voice))
+    throw new Error(`${where}: a label's voice is male or female, not "${label.voice}"`);
+  if (label.when !== undefined) throw new Error(`${where}: a voiced label cannot also carry "when"`);
+}
+
 function labeledPartsOf(spec, label) {
   if (spec.minyan && spec.minyanParts) throw new Error(`${label}: both "minyan" and "minyanParts"`);
   const parts = [];
@@ -665,6 +774,7 @@ function labeledPartsOf(spec, label) {
     for (const part of spec[key] ?? []) {
       const to = part.to ?? part.from;
       checkLabel(part.label, `${label} ${field} part #${part.from}`);
+      checkVoice(part.label, field, `${label} ${field} part #${part.from}`);
       if (part.en !== undefined && part.englishInPart)
         throw new Error(`${label}: a part carries both "en" and "englishInPart"`);
       if (part.englishInPart && part.englishOutside)
@@ -762,14 +872,30 @@ async function buildSection(spec, ctx) {
   const matchedParts = new Set();
   if (spec.optional) checkLabel(spec.optional, label);
   if (spec.minyan) checkLabel(spec.minyan, label);
+  checkVoice(spec.optional, 'optional', label);
+  checkVoice(spec.minyan, 'minyan', label);
   if (spec.chapter) checkLabel(spec.chapter, label);
   for (const heading of spec.headings ?? []) {
     checkLabel(heading, label);
     if (heading.level !== 1 && heading.level !== 2) throw new Error(`${label}: a heading's level is 1 or 2`);
   }
+  for (const edit of spec.edits ?? []) checkVoiceEdit(edit, `${label} #${edit.seg}`);
+  for (const insert of spec.insert ?? []) checkInsertVoice(insert, `${label} insert at #${insert.at}`);
+  if (spec.voice && spec.voiceAt) throw new Error(`${label}: both "voice" and "voiceAt"`);
+  const specVoice = spec.voice ? checkAudience(spec.voice, `${label} voice`) : undefined;
+  const voiceAt = new Map(
+    Object.entries(spec.voiceAt ?? {}).map(([index, list]) => [
+      Number(index),
+      checkAudience(list, `${label} voiceAt #${index}`),
+    ]),
+  );
+  for (const index of voiceAt.keys())
+    if ((spec.groups ?? []).some(([start, end]) => index >= start && index <= end))
+      throw new Error(`${label} #${index}: voiceAt cannot mark a grouped segment`);
   const selected = (i) => i >= from && i <= to && !spec.drop?.includes(i);
   const targets = [
     ...editsBySeg.keys(),
+    ...voiceAt.keys(),
     ...enEditsBySeg.keys(),
     ...memoryEditsBySeg.keys(),
     ...(spec.enMoves ?? []).flatMap((move) => [move.seg, move.to]),
@@ -796,6 +922,7 @@ async function buildSection(spec, ctx) {
     if (spec.drop?.includes(i)) continue;
     for (const insert of (spec.insert ?? []).filter((item) => item.at === i)) {
       drafts.push({
+        key: segmentKey([spec.he, spec.path, 'insert', spec.insert.indexOf(insert)]),
         index: i - 0.5,
         he: parseHebrew(insert.he),
         en: insert.en ?? '',
@@ -834,6 +961,9 @@ async function buildSection(spec, ctx) {
     );
     if (memoryEdits && (pieces.length !== 1 || groupOf.has(i)))
       throw new Error(`${label} #${i}: a memory edit needs a segment that is neither cut by a part nor grouped`);
+    pieces.forEach((piece, n) => {
+      piece.key = segmentKey([spec.he, spec.path, i, n]);
+    });
     drafts.push(...pieces);
   }
   const unmatched = parts.filter((part) => !matchedParts.has(part));
@@ -841,6 +971,7 @@ async function buildSection(spec, ctx) {
     throw new Error(`${label}: labeled parts with no text at ${unmatched.map((part) => part.from)}`);
   for (const insert of (spec.insert ?? []).filter((item) => item.at > to)) {
     drafts.push({
+      key: segmentKey([spec.he, spec.path, 'insert', spec.insert.indexOf(insert)]),
       index: insert.at - 0.5,
       he: parseHebrew(insert.he),
       en: insert.en ?? '',
@@ -871,6 +1002,14 @@ async function buildSection(spec, ctx) {
 
   for (const segment of segments) {
     segment.he = segment.he.map((runs) => tidyRuns(spec.linear ? linearPunctuation(runs) : runs));
+  }
+
+  for (const segment of segments) {
+    const voice = segment.authored ? specVoice : (voiceAt.get(segment.index) ?? specVoice);
+    if (!voice) continue;
+    if (segment.he.some((runs) => runs.some((run) => run.voice)))
+      throw new Error(`${label} #${segment.index}: a segment voiced whole cannot hold an <if voice> run`);
+    segment.he = segment.he.map((runs) => runs.map((run) => ({ ...run, voice })));
   }
 
   if (spec.omer) {
@@ -913,7 +1052,8 @@ async function buildSection(spec, ctx) {
     ...(spec.chapter ? { chapter: spec.chapter } : {}),
     ...(spec.optional ? { optional: spec.optional } : {}),
     ...(minyanOnly ? { minyanOnly } : {}),
-    segments: segments.map(({ he, en, enDropped, memoryEdits, when, optional, minyan }) => ({
+    segments: segments.map(({ key, he, en, enDropped, memoryEdits, when, optional, minyan }) => ({
+      key,
       he,
       ...(en ? { en } : {}),
       ...(enDropped ? { enDropped } : {}),
@@ -957,7 +1097,7 @@ function fillTranslations(sections, memory, credits) {
   for (const section of sections) {
     for (const segment of section.segments) {
       if (segment.en || segment.enDropped) continue;
-      const hit = memory.get(normalizeHebrew(plain(segment.he)));
+      const hit = memory.get(normalizeHebrew(plain(asPrinted(segment.he))));
       if (!hit) continue;
       segment.en = hit.en;
       segment.fromMemory = true;
@@ -993,19 +1133,78 @@ function assetMapSource(built, shared) {
     lines.push('  },');
   }
   lines.push('} as const;', '');
-  lines.push(`export const SHARED_SIDDUR_TEXT_IDS = [${shared.map((id) => `'${id}'`).join(', ')}] as const;`, '');
+  lines.push(`export const SHARED_SIDDUR_TEXT_IDS = [${shared.map((id) => `'${id}'`).join(', ')}] as const;`);
+  lines.push(
+    `export const DOWNLOADED_SIDDUR_TEXT_IDS = [${Object.keys(DOWNLOADED_TEXTS)
+      .map((id) => `'${id}'`)
+      .join(', ')}] as const;`,
+    '',
+  );
+  return lines.join('\n');
+}
+
+function readsSection(section, audience) {
+  const otherVoice = (label) => Boolean(label?.voice) && audience !== 'unset' && label.voice !== audience;
+  if (otherVoice(section.optional)) return false;
+  return section.segments.some(
+    (segment) =>
+      !otherVoice(segment.optional) &&
+      segment.he.some((runs) => runs.some((run) => !run.voice || run.voice.includes(audience))),
+  );
+}
+
+function chapterEntries(sections, label) {
+  const openers = sections.some((section) => section.chapter)
+    ? sections.filter((section) => section.chapter).map((section) => ({ title: section.chapter, section }))
+    : sections.map((section) => ({ title: section.title, section }));
+  const byTitle = new Map();
+  for (const { title, section } of openers) {
+    const voices = VOICE_AUDIENCES.filter((audience) => readsSection(section, audience));
+    if (!voices.length) throw new Error(`${label}: "${title.he}" is read by no voice`);
+    const marriedOnly = section.optional?.marriedOnly === true;
+    const seen = byTitle.get(title.he);
+    if (!seen) {
+      byTitle.set(title.he, { he: title.he, en: title.en, voices, marriedOnly });
+      continue;
+    }
+    seen.voices = VOICE_AUDIENCES.filter((audience) => seen.voices.includes(audience) || voices.includes(audience));
+    seen.marriedOnly = seen.marriedOnly && marriedOnly;
+  }
+  return [...byTitle.values()].map(({ he, en, voices, marriedOnly }) => ({
+    he,
+    en,
+    ...(voices.length < VOICE_AUDIENCES.length ? { voices } : {}),
+    ...(marriedOnly ? { marriedOnly: true } : {}),
+  }));
+}
+
+function chapterIndexSource(chapters) {
+  const lines = [
+    "import type { SiddurChapterIndex } from '@/types/siddur';",
+    '',
+    'export const SIDDUR_CHAPTERS: SiddurChapterIndex = {',
+  ];
+  for (const textId of Object.keys(TEXTS)) {
+    lines.push(`  ${textId}: {`);
+    for (const nusach of NUSCHAOT) {
+      if (chapters[textId]?.[nusach]) lines.push(`    ${nusach}: ${JSON.stringify(chapters[textId][nusach])},`);
+    }
+    lines.push('  },');
+  }
+  lines.push('};', '');
   return lines.join('\n');
 }
 
 // A text whose manifest entry is `shared` is the same in every nusach: it is built once, into the
 // shared folder, and carries no nusach.
 async function buildText(textId, specs, nusach, run) {
-  const { memory, report, outputs, unreviewed, minyanOnlyTitles } = run;
+  const { memory, report, outputs, unreviewed, minyanOnlyTitles, chapters } = run;
   const credits = new Set();
   const ctx = { nusach: nusach ?? SHARED_DIR, textId, credits, unreviewed, minyanOnlyTitles };
   const parts = [];
   for (const spec of specs) parts.push(await buildSection(spec, ctx));
   const sections = mergeSameTitledSections(parts);
+  uniqueSegmentKeys(sections);
   const filled = HEBREW_ONLY_TEXTS.includes(textId) ? 0 : fillTranslations(sections, memory, credits);
   applyMemoryEdits(sections);
   const segments = sections.flatMap((s) => s.segments);
@@ -1014,6 +1213,9 @@ async function buildText(textId, specs, nusach, run) {
     delete segment.fromMemory;
     delete segment.memoryEdits;
   }
+  const entries = chapterEntries(sections, `${ctx.nusach}/${textId}`);
+  chapters[textId] ??= {};
+  for (const target of nusach ? [nusach] : NUSCHAOT) chapters[textId][target] = entries;
   const translated = segments.filter((s) => s.en).length;
   report.push(
     `${ctx.nusach}/${textId}: ${segments.length} segments, ${translated} translated (${filled} via exact match)`,
@@ -1024,7 +1226,39 @@ async function buildText(textId, specs, nusach, run) {
     sections,
     credits: [...new Map([...credits].map((key) => [SOURCES[key].credit.title, SOURCES[key].credit])).values()],
   };
-  outputs.set(path.join(OUT_DIR, ctx.nusach, `${textId}.siddur`), JSON.stringify(text));
+  const content = JSON.stringify(text);
+  if (textId in DOWNLOADED_TEXTS) {
+    if (!nusach) throw new Error(`${textId}: a downloaded text is built per nusach, never shared`);
+    (run.downloaded[textId] ??= {})[nusach] = content;
+    return;
+  }
+  outputs.set(path.join(OUT_DIR, ctx.nusach, `${textId}.siddur`), content);
+}
+
+function addonOutputs(textId, dir, byNusach, outputs) {
+  const missing = NUSCHAOT.filter((nusach) => !(nusach in byNusach));
+  if (missing.length) throw new Error(`${textId}: not built for ${missing.join(', ')}`);
+  const gz = {};
+  for (const nusach of NUSCHAOT) {
+    const packed = Buffer.from(gzipSync(Buffer.from(byNusach[nusach], 'utf8'), GZIP_OPTIONS));
+    const sha256 = crypto.createHash('sha256').update(packed).digest('hex');
+    const file = `${nusach}.${sha256.slice(0, 8)}.siddur.gz`;
+    outputs.set(path.join(dir, file), packed);
+    gz[nusach] = { path: file, sha256, bytes: packed.length };
+  }
+  const manifestFile = path.join(dir, 'manifest.json');
+  const previous = fs.existsSync(manifestFile) ? JSON.parse(fs.readFileSync(manifestFile, 'utf8')) : null;
+  const unchanged =
+    previous !== null &&
+    Object.keys(previous.gz).length === NUSCHAOT.length &&
+    NUSCHAOT.every((nusach) => previous.gz[nusach]?.sha256 === gz[nusach].sha256);
+  const manifest = {
+    format: 1,
+    version: previous === null ? 1 : unchanged ? previous.version : previous.version + 1,
+    gzipBytes: Object.values(gz).reduce((sum, entry) => sum + entry.bytes, 0),
+    gz,
+  };
+  outputs.set(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
 async function main() {
@@ -1034,7 +1268,7 @@ async function main() {
   const built = {};
   const report = [];
   const outputs = new Map();
-  const run = { memory, report, outputs, unreviewed, minyanOnlyTitles };
+  const run = { memory, report, outputs, unreviewed, minyanOnlyTitles, chapters: {}, downloaded: {} };
   const shared = Object.keys(TEXTS).filter((textId) => TEXTS[textId].shared);
   for (const nusach of NUSCHAOT) {
     built[nusach] = [];
@@ -1046,7 +1280,7 @@ async function main() {
       const specs = byNusach[nusach];
       if (!specs) continue;
       await buildText(textId, specs, nusach, run);
-      built[nusach].push(textId);
+      if (!(textId in DOWNLOADED_TEXTS)) built[nusach].push(textId);
     }
   }
   for (const textId of shared) await buildText(textId, TEXTS[textId].shared, null, run);
@@ -1057,21 +1291,36 @@ async function main() {
   if (unused.length) throw new Error(`manifest rules that never matched:\n${unused.join('\n')}`);
   const missing = MINYAN_ONLY_TITLES.filter((title) => !minyanOnlyTitles.has(title));
   if (missing.length) throw new Error(`minyan-only titles that no section carries:\n${missing.join('\n')}`);
+  for (const [textId, dir] of Object.entries(DOWNLOADED_TEXTS)) {
+    addonOutputs(textId, dir, run.downloaded[textId] ?? {}, outputs);
+  }
   outputs.set(ASSET_MAP, assetMapSource(built, shared));
+  outputs.set(CHAPTER_INDEX, chapterIndexSource(run.chapters));
   writeOutputs(outputs);
   console.log(report.join('\n'));
 }
 
 function writeOutputs(outputs) {
-  const existing = fs.existsSync(OUT_DIR)
+  const bundled = fs.existsSync(OUT_DIR)
     ? fs
         .readdirSync(OUT_DIR, { recursive: true })
         .map((file) => path.join(OUT_DIR, String(file)))
         .filter((file) => file.endsWith('.siddur'))
     : [];
-  for (const stale of existing.filter((file) => !outputs.has(file))) fs.rmSync(stale);
+  const published = Object.values(DOWNLOADED_TEXTS).flatMap((dir) =>
+    fs.existsSync(dir)
+      ? fs
+          .readdirSync(dir)
+          .filter((name) => name.endsWith('.siddur.gz'))
+          .map((name) => path.join(dir, name))
+      : [],
+  );
+  for (const stale of [...bundled, ...published].filter((file) => !outputs.has(file))) fs.rmSync(stale);
   for (const [file, content] of outputs) {
-    if (fs.existsSync(file) && fs.readFileSync(file, 'utf8') === content) continue;
+    if (fs.existsSync(file)) {
+      const current = Buffer.isBuffer(content) ? fs.readFileSync(file) : fs.readFileSync(file, 'utf8');
+      if (Buffer.isBuffer(content) ? current.equals(content) : current === content) continue;
+    }
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, content);
   }

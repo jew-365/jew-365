@@ -32,6 +32,7 @@
     "check:dox": "node scripts/check-dox.js",
     "siddur:build": "node scripts/siddur/build.js",
     "chok:build": "node scripts/chok/build.js",
+    "guide:build": "node scripts/guide/build.js",
     "logo:build": "node design/jew365-concepts/vector/build.mjs && node scripts/logo/export.mjs",
     "prepare": "husky"
   },
@@ -39,7 +40,7 @@
     "@expo-google-fonts/heebo": "^0.2.3",
     "@expo-google-fonts/noto-serif-hebrew": "^0.4.2",
     "@hebcal/core": "^5.4.0",
-    "@react-navigation/bottom-tabs": "^7.4.0",
+    "@react-navigation/bottom-tabs": "7.18.8",
     "@sentry/react-native": "~7.2.0",
     "expo": "~54.0.37",
     "expo-asset": "~12.0.12",
@@ -63,6 +64,7 @@
     "expo-system-ui": "~6.0.9",
     "expo-task-manager": "~14.0.9",
     "expo-updates": "~29.0.20",
+    "fflate": "0.8.3",
     "kosher-zmanim": "^0.9.0",
     "luxon": "^3.5.0",
     "react": "19.1.0",
@@ -101,6 +103,7 @@
   },
   "jest": {
     "preset": "jest-expo",
+    "testTimeout": 30000,
     "testPathIgnorePatterns": [
       "/node_modules/",
       "<rootDir>/.claude/"
@@ -123,7 +126,15 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@sentry/cli"
-    ]
+    ],
+    "overrides": {
+      "@react-navigation/bottom-tabs": "7.18.8",
+      "@react-navigation/core": "7.21.5",
+      "@react-navigation/elements": "2.9.30",
+      "@react-navigation/native": "7.3.8",
+      "@react-navigation/native-stack": "7.14.12",
+      "@react-navigation/routers": "7.6.0"
+    }
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs,cjs}": [

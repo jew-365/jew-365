@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const fs = require('fs');
 const { spawnSync } = require('child_process');
 const path = require('path');
 const { expo } = require('../app.json');
@@ -6,6 +7,10 @@ const { expo } = require('../app.json');
 const PAGE = 50;
 const NUMBERED = /^"?\d+\.\d+\.\d+-(\d+):/;
 const MESSAGE_FLAGS = ['--message', '-m'];
+const WHATS_NEW_SOURCE = path.join(__dirname, '..', 'src', 'data', 'guide.ts');
+const WHATS_NEW_LABEL = /\blabel:\s*'(\d+\.\d+\.\d+-\d+)'/g;
+const SKIP_WHATS_NEW = '--skip-whats-new';
+const ROLLBACK = /^Rollback to /;
 
 function nextUpdateNumber(messages) {
   const numbers = messages
@@ -15,8 +20,38 @@ function nextUpdateNumber(messages) {
   return (numbers.length ? Math.max(...numbers) : messages.length) + 1;
 }
 
+function messageAt(args) {
+  return args.findIndex((arg) => MESSAGE_FLAGS.includes(arg) || arg.startsWith('--message='));
+}
+
+function messageOf(args) {
+  const at = messageAt(args);
+  if (at === -1) return null;
+  return args[at].includes('=') ? args[at].slice('--message='.length) : (args[at + 1] ?? null);
+}
+
+function whatsNewLabels(source) {
+  return [...source.matchAll(WHATS_NEW_LABEL)].map((match) => match[1]);
+}
+
+function requireWhatsNew(channel, label, args, labels) {
+  const rest = args.filter((arg) => arg !== SKIP_WHATS_NEW);
+  if (rest.length !== args.length) {
+    if (!ROLLBACK.test(messageOf(rest) ?? '')) {
+      throw new Error(`${SKIP_WHATS_NEW} is only for a rollback: its --message must start with "Rollback to ".`);
+    }
+    return rest;
+  }
+  if (channel === 'production' && !labels.includes(label)) {
+    throw new Error(
+      `WHATS_NEW in src/data/guide.ts has no entry for ${label}. Add { label: '${label}', date, items } at the top of WHATS_NEW, run pnpm guide:build, and publish again.`,
+    );
+  }
+  return rest;
+}
+
 function labelMessage(args, label) {
-  const at = args.findIndex((arg) => MESSAGE_FLAGS.includes(arg) || arg.startsWith('--message='));
+  const at = messageAt(args);
   if (at === -1 || (!args[at].includes('=') && args[at + 1] === undefined)) {
     throw new Error('Pass --message "<what changed>"; it is stored after the update number.');
   }
@@ -59,28 +94,29 @@ function publishedMessages(branch, runtimeVersion) {
   }
 }
 
-function main() {
-  const [channel, ...rest] = process.argv.slice(2).filter((arg) => arg !== '--');
+function main(argv = process.argv.slice(2)) {
+  const [channel, ...rest] = argv.filter((arg) => arg !== '--');
   if (!channel)
     throw new Error('Usage: node scripts/publish-update.js <channel> --message "<what changed>" [eas update flags]');
   const number = nextUpdateNumber(publishedMessages(channel, expo.version));
   const label = `${expo.version}-${number}`;
-  const args = labelMessage(rest, label);
+  const publishArgs = requireWhatsNew(channel, label, rest, whatsNewLabels(fs.readFileSync(WHATS_NEW_SOURCE, 'utf8')));
+  const args = labelMessage(publishArgs, label);
   process.stdout.write(`Publishing ${label} to ${channel}\n`);
   const update = eas(['update', '--channel', channel, '--clear-cache', ...args], {
     stdio: 'inherit',
     env: { ...process.env, EXPO_PUBLIC_UPDATE_NUMBER: String(number) },
   });
-  process.exit(update.status ?? 1);
+  return update.status ?? 1;
 }
 
 if (require.main === module) {
   try {
-    main();
+    process.exit(main());
   } catch (error) {
     process.stderr.write(`${error.message}\n`);
     process.exit(1);
   }
 }
 
-module.exports = { nextUpdateNumber, labelMessage };
+module.exports = { nextUpdateNumber, labelMessage, whatsNewLabels, requireWhatsNew, main };

@@ -6,6 +6,7 @@
   ],
   "mirrors": [
     ["release/APP_STORE_METADATA_HE.md", "release/APP_STORE_METADATA_EN.md"],
-    ["docs/privacy/index.html", "docs/privacy/en/index.html"]
+    ["docs/privacy/index.html", "docs/privacy/en/index.html"],
+    ["docs/guide/index.html", "docs/guide/en/index.html"]
   ]
 }

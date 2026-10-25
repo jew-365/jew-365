@@ -1,8 +1,11 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const zlib = require('zlib');
+const { Buffer } = require('buffer');
+const { createHash } = require('crypto');
 const { readSources, readParashiyot, buildOutputs, nextContentVersion, licenseText } = require('../build');
-const { PARASHIYOT } = require('../manifest');
+const { PARASHIYOT, SITE_DIR, assetGzFileName } = require('../manifest');
 const { SLOTS } = require('../validate');
 
 jest.setTimeout(120000);
@@ -24,6 +27,8 @@ describe('licenseText', () => {
     const text = licenseText();
     expect(text).toContain('בניקוד, בלי טעמים');
     expect(text).toContain('CC BY-NC-SA 2.5');
+    expect(text).toContain('קובצי ה-JSON בתיקייה זו, הרגילים והדחוסים ב-gzip,');
+    expect(text).toContain('The JSON files in this folder, plain and gzipped, are');
     expect(text).toContain('נוסח הרישיון: https://creativecommons.org/licenses/by-nc-sa/2.5/\n');
     expect(text.endsWith('License: https://creativecommons.org/licenses/by-nc-sa/2.5/\n')).toBe(true);
   });
@@ -48,6 +53,12 @@ describe('readSources', () => {
 });
 
 describe('the committed source', () => {
+  let outputs;
+
+  beforeAll(() => {
+    outputs = buildOutputs();
+  });
+
   it('parses into the 54 parashiyot with all seven days in the first', () => {
     const parashiyot = readParashiyot();
     expect(parashiyot).toHaveLength(54);
@@ -57,6 +68,32 @@ describe('the committed source', () => {
   });
 
   it('is what docs/chok holds', () => {
-    for (const [file, content] of buildOutputs()) expect(fs.readFileSync(file, 'utf8')).toBe(content);
+    for (const [file, content] of outputs) {
+      if (Buffer.isBuffer(content)) expect(fs.readFileSync(file).equals(content)).toBe(true);
+      else expect(fs.readFileSync(file, 'utf8')).toBe(content);
+    }
+  });
+
+  it('gzips every asset reproducibly, under its own hash, beside the plain file', () => {
+    const manifest = JSON.parse(outputs.get(path.join(SITE_DIR, 'manifest.json')));
+    expect(Object.keys(manifest.gz)).toEqual(Object.keys(manifest.files));
+    let sum = 0;
+    for (const [parasha, entry] of Object.entries(manifest.gz)) {
+      const gz = outputs.get(path.join(SITE_DIR, entry.path));
+      expect(Buffer.isBuffer(gz)).toBe(true);
+      expect(entry.path).toBe(assetGzFileName(parasha, entry.sha256.slice(0, 8)));
+      expect(createHash('sha256').update(gz).digest('hex')).toBe(entry.sha256);
+      expect(entry.bytes).toBe(gz.length);
+      expect([...gz.subarray(0, 10)]).toEqual([0x1f, 0x8b, 8, 0, 0, 0, 0, 0, 2, 3]);
+      expect(zlib.gunzipSync(gz).toString('utf8')).toBe(outputs.get(path.join(SITE_DIR, manifest.files[parasha].path)));
+      sum += entry.bytes;
+    }
+    expect(manifest.gzipBytes).toBe(sum);
+    const published = fs.readdirSync(SITE_DIR).filter((name) => name.endsWith('.gz'));
+    expect(published.sort()).toEqual(
+      Object.values(manifest.gz)
+        .map((entry) => entry.path)
+        .sort(),
+    );
   });
 });

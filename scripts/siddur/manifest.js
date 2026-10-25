@@ -477,6 +477,11 @@ const T = {
   tikkunAfter: { he: 'תפילה אחרי התיקון', en: 'Prayer After the Tikkun' },
   tehillimBefore: { he: 'תפילה לפני אמירת תהלים', en: 'Prayer Before Tehillim' },
   tehillimAfter: { he: 'תפילה לאחר אמירת תהלים', en: 'Prayer After Tehillim' },
+  enteringSukkah: { he: 'הכניסה לסוכה', en: 'Entering the Sukkah' },
+  ushpizin: { he: 'אושפיזין', en: 'Ushpizin' },
+  sittingInSukkah: { he: 'בישיבה בסוכה', en: 'Sitting in the Sukkah' },
+  sukkahDayVerses: { he: 'פסוקי היום בסוכה', en: "The Day's Verses in the Sukkah" },
+  ushpizinChair: { he: 'כסא האושפיזין', en: "The Ushpizin's Chair" },
 };
 
 const NOT_TISHA_BAV = { none: ['tishaBav'] };
@@ -787,7 +792,9 @@ const WHEN_SAID = {
     en: "Said by a bar mitzvah boy's father at his son's first aliyah",
   },
   alone: { he: 'המתפלל ביחיד אומר', en: 'Said when praying without a minyan', alone: true },
-  women: { he: 'נשים אומרות', en: 'Said by women' },
+  women: { he: 'נשים אומרות', en: 'Said by women', voice: 'female' },
+  womenCountOmer: { he: 'נשים סופרות בלי ברכה', en: 'Women count without a blessing', foldsFor: 'female' },
+  womenHallel: { he: 'נשים אומרות בלי ברכה', en: 'Women say Hallel without a blessing', foldsFor: 'female' },
   noKohanim: {
     he: 'כשאין כהנים נושאים כפיים, שליח הציבור אומר',
     en: 'When no kohanim bless the congregation, the chazzan says',
@@ -798,6 +805,48 @@ const WHEN_SAID = {
     en: 'For one who did not recite the Shema on time, and by some custom every night: also the paragraph "Vehaya Im Shamoa"',
   },
   maritalRelations: { he: 'בלילה שיש בו תשמיש המטה', en: 'On a night of marital relations', marriedOnly: true },
+};
+
+// Women's liturgy (R8, R9): every patch is listed in AGENTS.md.
+const NOT_FOR_WOMEN = ['male', 'unset'];
+const NOT_FOR_MEN = ['female', 'unset'];
+function womenSay(seg, printed, feminine, count) {
+  return {
+    seg,
+    from: printed,
+    to: `<if voice="male,unset">${printed}</if><if voice="female">${feminine}</if>`,
+    ...(count ? { count } : {}),
+  };
+}
+function menSay(seg, printed, masculine, count) {
+  return {
+    seg,
+    from: printed,
+    to: `<if voice="female,unset">${printed}</if><if voice="male">${masculine}</if>`,
+    ...(count ? { count } : {}),
+  };
+}
+function notForWomen(byNusach) {
+  return Object.fromEntries(
+    Object.entries(byNusach).map(([nusach, spec]) => [nusach, { ...spec, voice: NOT_FOR_WOMEN }]),
+  );
+}
+const modeh = (seg) => womenSay(seg, 'מוֹדֶה', 'מוֹדָה');
+const omerReady = (seg) => womenSay(seg, 'מוּכָן וּמְזֻמָּן', 'מוּכָנָה וּמְזֻמֶּנֶת');
+const comeToFulfil = (seg) => womenSay(seg, 'בָּא לְקַיֵּם', 'בָּאָה לְקַיֵּם');
+const forgives = (seg) => womenSay(seg, 'מוֹחֵל', 'מוֹחֶלֶת');
+const SPOUSE_AND_CHILDREN = '(וְאֶת־אִשְׁתִּי/בַּעֲלִי וְאֶת־זַרְעִי) ';
+function spouseBlessing(seg) {
+  return {
+    seg,
+    from: SPOUSE_AND_CHILDREN,
+    to: `<if voice="unset">${SPOUSE_AND_CHILDREN}</if><if voice="male" marriedOnly="true">וְאֶת־אִשְׁתִּי </if><if voice="female" marriedOnly="true">וְאֶת־בַּעֲלִי </if><if voice="male,female">וְאֶת־זַרְעִי </if>`,
+  };
+}
+// Chabad women's text (R8): no pinned Chabad source prints it.
+const CHABAD_WOMEN_KIRTZONO = {
+  at: 21,
+  he: '<if voice="female"><b>בָּרוּךְ</b> אַתָּה יְיָ אֱלֹהֵֽינוּ מֶלֶךְ הָעוֹלָם, שֶׁעָשַׂנִי כִּרְצוֹנוֹ:</if>',
 };
 const NO_KOHANIM_IN_ISRAEL = { ...WHEN_SAID.noKohanim, when: IN_ISRAEL };
 const SEFARD_SHOMEA_TEFILLAH_CLOSING =
@@ -864,6 +913,7 @@ const SOME_SAY = {
     he: 'יש אומרים אחר הקדיש "והיה אור הלבנה"',
     en: 'After the Kaddish, some say "Vehaya Or HaLevana"',
   },
+  sukkahDayVerses: { he: 'יש נוהגים לומר פסוקים אלה בסוכה', en: 'Some say these verses in the sukkah' },
 };
 
 const SEFARD_OMER_NIGHT_NOTE = { seg: 64, from: '(השייכת לאותו הלילה)', to: '(<small>השייכת לאותו הלילה</small>)' };
@@ -1382,15 +1432,15 @@ const edotNetzorMove = (seg) => ({
 });
 const CHABAD = { he: 'chabadHe', en: 'chabadEn' };
 
-const TALLIT_GADOL = {
+const TALLIT_GADOL = notForWomen({
   ashkenaz: { ...ASHKENAZ, path: ashkenazPrep('Tallit') },
   sefard: { ...SEFARD, path: 'Upon Arising > Tallit' },
   edot_hamizrach: { ...EDOT, path: 'Weekday Shacharit > Order of Talit', from: 1 },
   chabad: { ...CHABAD, path: 'Shacharit > Tzitzit and Tallit', from: 3, to: 9 },
-};
+});
 // The tefillin leaves of each nusach, shared by the standalone text and by the section Shacharit
 // prints them in, so the two never drift apart.
-const TEFILLIN = {
+const TEFILLIN = notForWomen({
   ashkenaz: { ...ASHKENAZ, path: ashkenazPrep('Tefillin') },
   sefard: { ...SEFARD, path: 'Upon Arising > Tefilin' },
   edot_hamizrach: {
@@ -1406,13 +1456,13 @@ const TEFILLIN = {
     from: 4,
     optionalParts: [{ from: 7, label: WHEN_SAID.tefillinInterruption }],
   },
-};
+});
 const ASHKENAZ_TEFILLIN_CHOL_HAMOED = { at: 0, ...NOTES.tefillinCholHamoed };
 
 // The tallit katan blessing, ahead of the tefillin in the standalone text and ahead of the tallit gadol
 // in Shacharit, under an authored line that names who says it. Edot HaMizrach prints none. Sefard
 // starts after its own "before putting on the tallit katan" instruction, which the line replaces.
-const TALLIT_KATAN = {
+const TALLIT_KATAN = notForWomen({
   ashkenaz: { ...ASHKENAZ, path: ashkenazPrep('Tzitzit'), insert: [{ at: 0, ...NOTES.tallitKatan }] },
   sefard: {
     ...SEFARD,
@@ -1428,7 +1478,7 @@ const TALLIT_KATAN = {
     to: 1,
     insert: [{ at: 1, ...NOTES.tallitKatan }],
   },
-};
+});
 
 const SHEMA = {
   ashkenaz: { ...ASHKENAZ, path: 'Weekday > Shacharit > Blessings of the Shema > Shema' },
@@ -2177,6 +2227,7 @@ const TEXTS = {
         ...CHABAD,
         title: T.rabbenuTam,
         path: 'Shacharit > Rabbenu Tam',
+        voice: NOT_FOR_WOMEN,
         transform: chabadName,
         edits: [{ seg: 0, from: ' ויש נוהגין לומר גם כן פרשת קדש והיה כי יביאך:', to: ':' }],
         optionalParts: [{ from: 6, label: SOME_SAY.kadeshVehaya }],
@@ -2232,6 +2283,11 @@ const TEXTS = {
         from: 1,
         to: 2,
         when: { all: ['shabbat'], none: ['yomTov', 'yomKippur'] },
+        edits: [
+          menSay(1, 'נוֹתֶנֶת', 'נוֹתֵן', 2),
+          menSay(2, 'עַל בַּעֲלִי (פלוני בן פלוני) וְתִתֶּן לוֹ', 'עַל אִשְׁתִּי (פלונית בת פלוני) וְתִתֶּן לָהּ'),
+          menSay(2, 'וּתְסַיְּעֵהוּ', 'וּתְסַיְּעֶהָ'),
+        ],
       },
       {
         ...EDOT,
@@ -2301,6 +2357,7 @@ const TEXTS = {
         from: 1,
         omer: { first: 5, stride: 1 },
         transform: withoutOmerNumber,
+        edits: [omerReady(2)],
         enEdits: [OMER_HINENI_BLESSING_EN],
       },
     ],
@@ -2312,7 +2369,7 @@ const TEXTS = {
         from: 1,
         omer: { first: 4, stride: 1 },
         transform: withoutOmerNumber,
-        edits: [SEFARD_OMER_NIGHT_NOTE],
+        edits: [SEFARD_OMER_NIGHT_NOTE, omerReady(2)],
         enEdits: [OMER_HINENI_BLESSING_EN],
       },
     ],
@@ -2517,6 +2574,7 @@ const TEXTS = {
         path: 'Assorted Blessings and Prayers > Mezuza',
         from: 1,
         reviewed: [2],
+        edits: [comeToFulfil(2)],
         enEdits: [
           { seg: 2, from: 'Deuteronomy 6:19', to: 'Deuteronomy 6:9' },
           { seg: 2, from: 'the name the Name of', to: 'the Name of' },
@@ -2543,6 +2601,11 @@ const TEXTS = {
     sefard: sefardChanukahCandles(),
     edot_hamizrach: edotChanukahCandles(),
     chabad: chabadChanukahCandles(),
+  },
+  ushpizin: {
+    ashkenaz: ashkenazUshpizin(),
+    sefard: sefardUshpizin(),
+    edot_hamizrach: edotUshpizin(),
   },
   tikkun_haklali: { shared: tikkunHaklali() },
   tehillim: { shared: tehillim() },
@@ -2695,7 +2758,7 @@ function chabadMaariv() {
 
 function chabadBirchot() {
   return [
-    { ...CHABAD, title: T.modehAni, path: 'Shacharit > Upon Arising', from: 1 },
+    { ...CHABAD, title: T.modehAni, path: 'Shacharit > Upon Arising', from: 1, edits: [modeh(1)] },
     {
       ...CHABAD,
       title: T.morningBlessings,
@@ -2704,6 +2767,9 @@ function chabadBirchot() {
       to: 23,
       drop: [2, 5, 14],
       at: { 15: NOT_FASTING_BAREFOOT },
+      edits: [modeh(4)],
+      voiceAt: { 20: NOT_FOR_WOMEN },
+      insert: [CHABAD_WOMEN_KIRTZONO],
     },
     { ...CHABAD, title: T.torahBlessings, path: 'Shacharit > Morning Blessings', from: 25 },
   ];
@@ -2760,7 +2826,13 @@ function chabadShacharit() {
       when: CHOL_HAMOED_SUKKOT,
       at: each(7, 8, { all: ['lulavShehecheyanu'] }),
     },
-    chapter(T.maTovu, { ...base, title: T.maTovu, path: at('Morning Prayer'), to: 2 }),
+    chapter(T.maTovu, {
+      ...base,
+      title: T.maTovu,
+      path: at('Morning Prayer'),
+      to: 2,
+      edits: [womenSay(1, 'מְקַבֵּל', 'מְקַבֶּלֶת')],
+    }),
     { ...base, title: T.adonOlam, path: at('Morning Prayer'), from: 3, to: 3 },
     chapter(T.korbanot, {
       ...heOnly,
@@ -3235,8 +3307,8 @@ function ashkenazShacharit() {
 
 function sefardBirchot() {
   return [
-    { ...SEFARD, title: T.modehAni, path: 'Upon Arising > Modeh Ani', from: 0, to: 3 },
-    { ...SEFARD, title: T.upon, path: 'Weekday Shacharit > Morning Blessings' },
+    { ...SEFARD, title: T.modehAni, path: 'Upon Arising > Modeh Ani', from: 0, to: 3, edits: [modeh(1)] },
+    { ...SEFARD, title: T.upon, path: 'Weekday Shacharit > Morning Blessings', edits: [modeh(2)] },
     { ...SEFARD, title: T.torahBlessings, path: 'Weekday Shacharit > Blessings on Torah', to: 6 },
     {
       ...SEFARD,
@@ -3245,6 +3317,7 @@ function sefardBirchot() {
       from: 7,
       drop: [11, 19],
       at: { 20: NOT_FASTING_BAREFOOT },
+      voiceAt: { 10: NOT_FOR_WOMEN },
       optionalParts: [{ from: 12, label: WHEN_SAID.women }],
     },
   ];
@@ -3430,7 +3503,12 @@ function sefardShacharit() {
   return [
     ...chapter(T.modehAni, birchot),
     ...chapter(T.tallitAndTefillin, tallitAndTefillin('sefard')),
-    chapter(T.maTovu, { ...enteringSynagogue, title: T.maTovu, to: 3 }),
+    chapter(T.maTovu, {
+      ...enteringSynagogue,
+      title: T.maTovu,
+      to: 3,
+      edits: [womenSay(1, 'מְקַבֵּל', 'מְקַבֶּלֶת')],
+    }),
     { ...enteringSynagogue, title: T.adonOlam, from: 4, to: 14, groups: [[5, 14]] },
     {
       ...enteringSynagogue,
@@ -3660,16 +3738,17 @@ function sefardShacharit() {
 
 function ashkenazBirchot() {
   return [
-    { ...ASHKENAZ, title: T.modehAni, path: ashkenazPrep('Modeh Ani') },
+    { ...ASHKENAZ, title: T.modehAni, path: ashkenazPrep('Modeh Ani'), edits: [modeh(0)] },
     { ...ASHKENAZ, title: T.netilatYadayim, path: ashkenazPrep('Netilat Yadayim') },
     { ...ASHKENAZ, title: T.asherYatzar, path: ashkenazPrep('Asher Yatzar') },
-    { ...ASHKENAZ, title: T.elokaiNeshama, path: ashkenazPrep('Elokai Neshama') },
+    { ...ASHKENAZ, title: T.elokaiNeshama, path: ashkenazPrep('Elokai Neshama'), edits: [modeh(0)] },
     { ...ASHKENAZ, title: T.torahBlessings, path: ashkenazPrep('Torah Blessings') },
     { ...ASHKENAZ, title: T.torahBlessings, path: ashkenazPrep('Torah Study') },
     {
       ...ASHKENAZ,
       title: T.morningBlessings,
       path: ashkenazPrep('Morning Blessings'),
+      voiceAt: { 3: NOT_FOR_WOMEN },
       edits: [
         { seg: 4, from: '(<small>נשים אומרות:</small> ', to: '' },
         { seg: 4, from: 'כִּרְצוֹנוֹ:)', to: 'כִּרְצוֹנוֹ:' },
@@ -3681,13 +3760,43 @@ function ashkenazBirchot() {
 
 function edotBirchot() {
   return [
-    { ...EDOT, title: T.modehAni, path: 'Preparatory Prayers > Modeh Ani', from: 2 },
+    {
+      ...EDOT,
+      title: T.modehAni,
+      path: 'Preparatory Prayers > Modeh Ani',
+      from: 2,
+      edits: [
+        {
+          seg: 3,
+          from: '<b>מוֹדֶה</b> <small>האשה אומרת: מוֹדָה</small>',
+          to: '<b><if voice="male,unset">מוֹדֶה</if><if voice="female">מוֹדָה</if></b><if voice="unset"> <small>האשה אומרת: מוֹדָה</small></if>',
+        },
+      ],
+    },
     {
       ...EDOT,
       title: T.morningBlessings,
       path: 'Preparatory Prayers > Morning Blessings',
       from: 1,
       at: each(15, 16, NOT_FASTING_BAREFOOT),
+      voiceAt: { 21: NOT_FOR_WOMEN, 22: NOT_FOR_WOMEN, 23: NOT_FOR_MEN, 24: NOT_FOR_MEN },
+      edits: [
+        {
+          seg: 6,
+          from: 'מוֹדֶה <small>(<small>האשה אומרת</small> מוֹדָה)</small>',
+          to: '<if voice="male,unset">מוֹדֶה</if><if voice="female">מוֹדָה</if><if voice="unset"> <small>(<small>האשה אומרת</small> מוֹדָה)</small></if>',
+        },
+        {
+          seg: 19,
+          from: 'גוֹי: <small>האשה אומרת: <b>גּוֹיָה</b></small>',
+          to: '<if voice="male,unset">גוֹי:</if><if voice="female">גּוֹיָה:</if><if voice="unset"> <small>האשה אומרת: <b>גּוֹיָה</b></small></if>',
+        },
+        {
+          seg: 20,
+          from: 'עָבֶד: <small>האשה אומרת: <b>שִׁפְחָה</b></small>',
+          to: '<if voice="male,unset">עָבֶד:</if><if voice="female">שִׁפְחָה:</if><if voice="unset"> <small>האשה אומרת: <b>שִׁפְחָה</b></small></if>',
+        },
+      ],
       reviewed: [6],
       enEdits: [
         EDOT_ASHER_YATZAR_NOTE_EN,
@@ -3717,7 +3826,11 @@ function edotHallel() {
       26: { none: ['hallelDisputed'] },
       ...each(27, 29, MUSAF),
     },
-    optionalParts: [{ from: 30, to: 33, label: SOME_SAY.afterHallel }],
+    optionalParts: [
+      { from: 30, to: 33, label: SOME_SAY.afterHallel },
+      { from: 4, label: WHEN_SAID.womenHallel },
+      { from: 24, label: WHEN_SAID.womenHallel },
+    ],
     minyanParts: [
       { from: 1, to: 2, label: SAID_BY.chazzanAndCongregation },
       { from: 26, to: 29, label: SAID_BY.chazzan },
@@ -3856,6 +3969,9 @@ function edotShacharit() {
       edits: [
         { seg: 2, from: '<br><br><small>וַהֲרֵינִי', to: '<br><br>וַהֲרֵינִי' },
         { seg: 2, from: 'הַקָּדוֹשׁ בָּרוּךְ הוּא:</small></small>', to: 'הַקָּדוֹשׁ בָּרוּךְ הוּא:</small>' },
+        womenSay(2, 'מְקַבֵּל', 'מְקַבֶּלֶת'),
+        womenSay(2, 'אוֹהֵב', 'אוֹהֶבֶת'),
+        womenSay(2, 'מְזַמֵּן', 'מְזַמֶּנֶת'),
       ],
       optionalParts: [{ from: 6, label: SOME_SAY.akedahVerse }],
     }),
@@ -4193,8 +4309,12 @@ function edotOmer(extra = {}) {
     edits: [
       { seg: 1, from: 'יש אומרים נוסך קצרה<br>', to: '' },
       { seg: 3, from: 'הָעֹֽמֶר: הַיּוֹם', to: 'הָעֹֽמֶר:' },
+      omerReady(1),
     ],
-    optionalParts: [{ from: 1, paragraph: 6, label: SOME_SAY.shortLeshemYichud, englishInPart: true }],
+    optionalParts: [
+      { from: 1, paragraph: 6, label: SOME_SAY.shortLeshemYichud, englishInPart: true },
+      { from: 3, label: WHEN_SAID.womenCountOmer },
+    ],
     minyanParts: [{ from: 2, label: SAID_BY.chazzanAndCongregation }],
     transform: (html, index) =>
       index >= 5 && index <= 149 && (index - 5) % 3 === 0 ? `הַיּוֹם ${html.trimStart()}` : html,
@@ -4648,7 +4768,7 @@ function sefardMaariv() {
       when: OMER,
       omer: { first: 4, stride: 1 },
       transform: compose(SEFARD_VARIANTS, withoutOmerNumber),
-      edits: [SEFARD_OMER_NIGHT_NOTE],
+      edits: [SEFARD_OMER_NIGHT_NOTE, omerReady(2)],
       enEdits: [OMER_HINENI_BLESSING_EN],
     },
     {
@@ -4877,6 +4997,7 @@ function ashkenazMaariv() {
       when: OMER,
       omer: { first: 5, stride: 1 },
       transform: compose(ASHKENAZ_VARIANTS, withoutOmerNumber),
+      edits: [omerReady(2)],
       enEdits: [OMER_HINENI_BLESSING_EN],
     },
     { ...base, title: T.aleinu, path: at('Alenu') },
@@ -5006,7 +5127,7 @@ function ashkenazBirkatHamazon() {
       to: 75,
       drop: [64, 65, 68, 69, 70, 71],
       at: { ...each(66, 67, ROSH_CHODESH_OR_YESTERDAY), ...each(72, 73, CHOL_HAMOED_SUKKOT_OR_YESTERDAY) },
-      edits: [{ seg: 74, from: ` ${MIGDOL_NOTE}`, to: '' }],
+      edits: [{ seg: 74, from: ` ${MIGDOL_NOTE}`, to: '' }, spouseBlessing(59)],
       enEdits: [{ seg: 74, from: MIGDOL_NOTE_EN, to: '' }],
       optionalParts: [
         { from: 61, to: 62, label: WHEN_SAID.guest },
@@ -5115,7 +5236,7 @@ function sefardBirkatHamazon() {
         { at: 74, he: '<small>ואם סמוך על שלחן עצמו יאמר:</small>', en: 'When eating at your own table, say:' },
       ],
       at: { ...each(81, 82, ROSH_CHODESH_OR_YESTERDAY), ...each(87, 88, CHOL_HAMOED_SUKKOT_OR_YESTERDAY) },
-      edits: [{ seg: 89, from: ` ${MIGDOL_NOTE}`, to: '' }],
+      edits: [{ seg: 89, from: ` ${MIGDOL_NOTE}`, to: '' }, spouseBlessing(74)],
       enEdits: [{ seg: 89, from: MIGDOL_NOTE_EN, to: '' }],
       optionalParts: [
         { from: 77, label: WHEN_SAID.guest },
@@ -5533,10 +5654,7 @@ function edotBirchotHanehenin() {
       title: T.handWashing,
       from: 2,
       to: 4,
-      edits: [
-        { seg: 3, from: 'וישתחו [', to: '' },
-        { seg: 3, from: ']', to: '' },
-      ],
+      edits: [{ seg: 3, from: 'וישתחו [', to: '' }, { seg: 3, from: ']', to: '' }, comeToFulfil(2)],
       reviewed: [2, 3],
       optionalParts: [{ from: 2, to: 3, label: SOME_SAY.handWashingIntention }],
     },
@@ -5588,7 +5706,7 @@ function chabadBirchotHanehenin() {
 function ashkenazBedtimeShema() {
   const base = { ...ASHKENAZ, path: "Weekday > Maariv > Keri'at Shema al Hamita" };
   return [
-    { ...base, title: T.ribbonoShelOlam, to: 0 },
+    { ...base, title: T.ribbonoShelOlam, to: 0, edits: [forgives(0)] },
     { ...base, title: T.hamapil, from: 1, to: 1 },
     { ...base, title: T.shema, from: 2, to: 8 },
     { ...base, title: T.bedtimePsalms, from: 9, to: 11 },
@@ -5608,7 +5726,7 @@ function sefardBedtimeShema() {
   const base = { ...SEFARD, path: 'Bedtime Shema' };
   const maariv = { ...SEFARD, path: 'Weekday Maariv > The Shema' };
   return [
-    { ...base, title: T.ribbonoShelOlam, to: 0 },
+    { ...base, title: T.ribbonoShelOlam, to: 0, edits: [forgives(0)] },
     { ...base, title: T.hamapil, from: 1, to: 1 },
     { ...base, title: T.shema, from: 3, to: 7 },
     {
@@ -5644,6 +5762,11 @@ function edotBedtimeShema() {
       from: 1,
       to: 2,
       reviewed: [2],
+      edits: [
+        womenSay(2, 'מְקַבֵּל', 'מְקַבֶּלֶת'),
+        womenSay(2, 'יָרֵא', 'יְרֵאָה'),
+        womenSay(2, 'מַמְלִיכוֹ', 'מַמְלִיכָתוֹ'),
+      ],
       enEdits: [
         {
           seg: 2,
@@ -5652,7 +5775,13 @@ function edotBedtimeShema() {
         },
       ],
     },
-    { ...base, title: T.ribbonoShelOlam, from: 4, to: 4 },
+    {
+      ...base,
+      title: T.ribbonoShelOlam,
+      from: 4,
+      to: 4,
+      edits: [womenSay(4, 'מוֹחֵל וְסוֹלֵֽחַ', 'מוֹחֶלֶת וְסוֹלַחַת')],
+    },
     { ...hebrewOnly, title: T.hamapil, from: 5, to: 5 },
     { ...base, title: T.hamapil, from: 6, to: 6, reviewed: [6] },
     { ...hebrewOnly, title: T.shema, from: 7, to: 7 },
@@ -5686,7 +5815,7 @@ function edotBedtimeShema() {
 function chabadBedtimeShema() {
   const base = { he: 'chabadHe', path: 'Bedtime Shema' };
   return [
-    { ...base, title: T.ribbonoShelOlam, to: 0, when: BEDTIME_NOT_HOLY_NIGHT },
+    { ...base, title: T.ribbonoShelOlam, to: 0, when: BEDTIME_NOT_HOLY_NIGHT, edits: [forgives(0)] },
     {
       ...base,
       title: T.hashkivenu,
@@ -5722,6 +5851,10 @@ function chabadBedtimeShema() {
         { seg: 15, from: '(יהוה)', to: '(יהו״ה)' },
         { seg: 16, from: '(יהוה)', to: '(יהו״ה)' },
         { seg: 17, from: '(יהוה)', to: '(יהו״ה)' },
+        womenSay(14, 'מקבל', 'מקבלת'),
+        womenSay(15, 'מקבל', 'מקבלת'),
+        womenSay(16, 'מקבל', 'מקבלת'),
+        womenSay(17, 'מקבל', 'מקבלת'),
       ],
     },
     { ...base, title: T.anaBekoach, from: 18, to: 18 },
@@ -6249,7 +6382,15 @@ function tikkunHaklali() {
   return [
     { ...opening, to: 1, drop: [0], at: { 1: NOT_SHABBAT_YOM_TOV } },
     psalmVerses(T.tikkunBefore, 95, { from: 0, to: 2 }),
-    { ...opening, from: 2 },
+    {
+      ...opening,
+      from: 2,
+      edits: [
+        womenSay(3, 'מְזַמֵּן', 'מְזַמֶּנֶת'),
+        womenSay(5, 'מְקַשֵׁר', 'מְקַשֶּׁרֶת'),
+        womenSay(6, 'אני אומר', 'אני אומרת'),
+      ],
+    },
     ...TIKKUN_PSALMS.map(([number, numeral]) => psalmVerses({ he: `מזמור ${numeral}`, en: `Psalm ${number}` }, number)),
     psalmVerses(T.tikkunAfter, 14, { from: 6, to: 6 }),
     psalmVerses(T.tikkunAfter, 37, { from: 38, to: 39 }),
@@ -6432,7 +6573,11 @@ function sefardChanukahCandles() {
       title: T.leshemYichud,
       from: 3,
       to: 4,
-      edits: [{ seg: 4, from: 'ובני"ו)</small> </small>.', to: 'ובני"ו)</small></small>.' }],
+      edits: [
+        { seg: 4, from: 'ובני"ו)</small> </small>.', to: 'ובני"ו)</small></small>.' },
+        womenSay(4, 'מְכַוֵּן', 'מְכַוֶּנֶת'),
+        womenSay(4, 'עוֹשֶׂה', 'עוֹשָׂה'),
+      ],
     },
     {
       ...lighting,
@@ -6502,6 +6647,95 @@ function chabadChanukahCandles() {
       at: { 3: CHANUKAH_FIRST_NIGHT },
     },
     { he: 'chabadHe', path: 'Chanukah', title: T.hanerotHallalu, from: 4, to: 4 },
+  ];
+}
+
+function onUshpizinNights(...nights) {
+  return Object.fromEntries(
+    nights.flatMap((segments, n) => segments.map((seg) => [seg, { all: [`ushpizinNight${n + 1}`] }])),
+  );
+}
+
+function ashkenazUshpizin() {
+  const sukkah = 'Festivals > Sukkot > Prayers in the Sukkah';
+  const instruction = (seg, text) => ({ seg, from: text, to: `<small>${text}</small>` });
+  const days = ['הראשון', 'השני', 'השלישי', 'הרביעי', 'החמישי', 'הששי', 'השביעי'];
+  return [
+    { ...DAAT, title: T.enteringSukkah, path: `${sukkah} > Entering the Sukkah` },
+    {
+      ...DAAT,
+      title: T.ushpizin,
+      path: `${sukkah} > Ushpizin`,
+      edits: [
+        { seg: 2, from: '<em><small>פב"פ ', to: '<small><small>(פב"פ)</small></small> ' },
+        { seg: 2, from: '</small></em>', to: '' },
+        instruction(4, 'בלילה ראשון כשנכנס לסוכה קודם שישב לאכול ובכל יום קודם סעודתו יאמר זה:'),
+        ...days.map((day, n) => instruction(7 + 2 * n, `ביום ${day} אומר:`)),
+      ],
+      at: onUshpizinNights(...days.map((_, n) => [7 + 2 * n, 8 + 2 * n])),
+    },
+  ];
+}
+
+function sefardUshpizin() {
+  const entering = { ...TORAT_EMET, path: 'Holidays > Prayer Upon Entering Sukkah' };
+  return [
+    { ...entering, title: T.enteringSukkah, from: 2, to: 2, reviewed: [2] },
+    {
+      ...entering,
+      title: T.ushpizin,
+      from: 3,
+      to: 20,
+      reviewed: [3, 4, 6],
+      edits: [
+        { seg: 4, from: '(פב"פ <b>', to: '(פב"פ)</small></small> ' },
+        { seg: 4, from: '</b>)</small> </small>', to: '' },
+      ],
+      at: onUshpizinNights([7, 8], [9, 10], [11, 12], [13, 14], [15, 16], [17, 18], [19, 20]),
+    },
+  ];
+}
+
+function edotUshpizin() {
+  const order = { ...EDOT, path: 'Prayers for Three Festivals > Mussaf' };
+  const qere = (seg, ketiv) => [
+    { seg, from: `${ketiv} [`, to: '' },
+    { seg, from: ']', to: '' },
+  ];
+  return [
+    {
+      ...order,
+      title: T.enteringSukkah,
+      from: 159,
+      to: 184,
+      edits: qere(171, 'שירה'),
+      at: onUshpizinNights([161], [162], [163], [164], [165], [166], [167]),
+    },
+    {
+      ...order,
+      title: T.ushpizin,
+      from: 185,
+      to: 193,
+      at: onUshpizinNights([186], [187], [188], [189], [190], [191], [192]),
+    },
+    {
+      ...order,
+      title: T.sittingInSukkah,
+      from: 194,
+      to: 206,
+      edits: qere(206, 'מגדיל'),
+      at: onUshpizinNights([195], [196], [197], [198, 199, 200], [201], [202, 203, 204], [205, 206]),
+    },
+    {
+      ...order,
+      title: T.sukkahDayVerses,
+      from: 208,
+      to: 214,
+      optional: SOME_SAY.sukkahDayVerses,
+      edits: qere(210, 'תרים'),
+      at: onUshpizinNights([208], [209], [210], [211], [212], [213], [214]),
+    },
+    { ...order, title: T.ushpizinChair, from: 215, to: 216 },
   ];
 }
 
