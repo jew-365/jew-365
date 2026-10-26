@@ -208,7 +208,8 @@ Invitation to testers, Android (the Google Play closed test) and iPhone (the Tes
 (את כל השלבים עושים עם חשבון ה-Google שמחובר ל-Play בטלפון)
 
 *1️⃣ מצטרפים לקבוצה*
-לוחצים על "Join group":
+👆 לוחצים על הכפתור *"הצטרפות לקבוצה"* (Join group) בראש הדף, ליד שם הקבוצה, ובחלון שנפתח שוב *"הצטרפות לקבוצה"*.
+(ההודעה "אין לך הרשאה גישה לתוכן הזה" באמצע הדף תקינה, מתעלמים ממנה)
 https://groups.google.com/g/jew365-testers
 
 *2️⃣ מאשרים השתתפות בבדיקה*

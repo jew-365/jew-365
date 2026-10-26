@@ -223,6 +223,15 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
   - **What it solves:** English visitors see Hebrew screens today, and no screenshot shows the reminder buttons, the app's own feature.
   - **Expected result:** after a reload, the English pages of both consoles show the English set and both languages show the reminder shot; the Screenshot Plan sections and the Store Graphics section of [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md) list the new files.
 
+- [ ] Point the testers at the join button of the Google Group
+  - **Ships as:** the [docs/](docs) site on Pages, and the WhatsApp invitation text; no build or update.
+  - **Requested:** the owner, 2026-10-26: the group link lands on a page that says "אין לך הרשאה גישה לתוכן הזה", which reads as a dead end.
+  - **What it is:** step 1 of [docs/testers/index.html](docs/testers/index.html) gains a highlighted box: press the "הצטרפות לקבוצה" (Join group) button at the top of the page beside the group's name, press it again in the dialog, and ignore the permission message in the middle of the page; the invitation in [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md) says the same. Opening the group's conversations to the web was tried first and is not available for this group ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-10-26).
+  - **What it solves:** testers stop at the permission message or take the small in-page link instead of the join button.
+  - **Expected result:** the page at 375 px, light and dark, shows the box under step 1 with no horizontal scroll, and the live page at https://jew-365.github.io/jew-365/testers/ shows it after the push.
+  - **Done:** 2026-10-26. Verified: screenshots of the `docs-site` preview in the browser pane at 375 px, light and dark; scroll width equal to the viewport.
+  - **Status:** Version: Pages · Committed: no · Pushed: no · Live: no · Channel: none
+
 ### Low — Store listings of 2026-10-26
 
 - [ ] Ask for a store rating inside the app

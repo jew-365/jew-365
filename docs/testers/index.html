@@ -221,6 +221,44 @@
   font-weight: 700;
 }
 
+.tip {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border-inline-start: 4px solid var(--gold);
+  background: var(--note-bg);
+}
+
+.tip p {
+  margin: 0;
+}
+
+.tip p + p {
+  margin-top: 8px;
+}
+
+.tip .tip-sub {
+  margin-top: 10px;
+  color: var(--text-sub);
+  font-size: 14px;
+}
+
+.btn-en {
+  color: var(--text-sub);
+  font-size: 14px;
+}
+
+.btn-mock {
+  display: inline-block;
+  padding: 2px 10px;
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--gold-text);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 details {
   border-bottom: 1px solid var(--border);
   padding: 10px 0;
@@ -322,7 +360,13 @@ details p {
   <ol class="steps">
     <li>
       <h3>מצטרפים לקבוצת הבודקים</h3>
-      <p>ב-Google Play אפשר להתקין גרסת בדיקה רק מחשבון שנמצא ברשימת הבודקים, והקבוצה הזאת היא הרשימה. בדף שנפתח לוחצים על <span class="btn-label">Join group</span>.</p>
+      <p>ב-Google Play אפשר להתקין גרסת בדיקה רק מחשבון שנמצא ברשימת הבודקים, והקבוצה הזאת היא הרשימה.</p>
+      <div class="tip">
+        <p><strong>בדף שנפתח לוחצים על הכפתור שבראש הדף, ליד שם הקבוצה:</strong></p>
+        <p class="btn-row"><span class="btn-mock">הצטרפות לקבוצה</span> <span class="btn-en">(באנגלית: <span class="btn-label">Join group</span>)</span></p>
+        <p>בחלון שנפתח לוחצים שוב על <span class="btn-label">הצטרפות לקבוצה</span>.</p>
+        <p class="tip-sub">באמצע הדף מופיעה ההודעה ״אין לך הרשאה גישה לתוכן הזה״. זה תקין, מתעלמים ממנה ולא לוחצים על הקישורים שמתחתיה.</p>
+      </div>
       <a class="cta" href="https://groups.google.com/g/jew365-testers">לקבוצת הבודקים</a>
       <span class="url">groups.google.com/g/jew365-testers</span>
     </li>
