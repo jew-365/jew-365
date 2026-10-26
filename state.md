@@ -54,9 +54,10 @@ Every other EAS build is superseded, and no other AAB was uploaded to Play ([act
 
 ## Next steps
 
-1. The owner, or a rav, reviews the tzaddik content (Other Open Items in [not-close.md](not-close.md)); the choices of the tzaddik pages and the display size (D1–D8) were approved on 2026-10-26 ([action-log.md](action-log.md)).
-2. Check production `1.0.21-2` on a phone with the production app (Settings shows `1.0.21-2`), and its launches with `npx eas-cli update:insights 7f18981c-709b-475b-a0ce-19ae67b87c94`.
-3. Keep 12 or more testers opted in until about 2026-11-06, then apply for production in the Play Console.
-4. Watch the App Store review; after approval, the TestFlight checks on an iPhone, then the owner's Release. The EU trader documents are the owner's.
-5. Enter the App Store subtitle and keywords and the English (U.K.) localization while 1.0.21 waits for review, then re-enter the store copy in both consoles with the Play short description before the production application, and send the rav the review page link ([not-close.md](not-close.md), Store listings of 2026-10-26).
-6. The next native build when the user asks: the arm-only direct APK and R8 ([not-close.md](not-close.md)).
+1. The app requests of 2026-10-26, when the user asks: the longer reminder horizon and the performance measurement first; every owner question of the batch is answered ([not-close.md](not-close.md)).
+2. The owner, or a rav, reviews the tzaddik content (Other Open Items in [not-close.md](not-close.md)); the choices of the tzaddik pages and the display size (D1–D8) were approved on 2026-10-26 ([action-log.md](action-log.md)).
+3. Check production `1.0.21-2` on a phone with the production app (Settings shows `1.0.21-2`), and its launches with `npx eas-cli update:insights 7f18981c-709b-475b-a0ce-19ae67b87c94`.
+4. Keep 12 or more testers opted in until about 2026-11-06, then apply for production in the Play Console.
+5. Watch the App Store review; after approval, the TestFlight checks on an iPhone, then the owner's Release. The EU trader documents are the owner's.
+6. Enter the App Store subtitle and keywords and the English (U.K.) localization while 1.0.21 waits for review, then re-enter the store copy in both consoles with the Play short description before the production application, and send the rav the review page link ([not-close.md](not-close.md), Store listings of 2026-10-26).
+7. The next native build when the user asks: the arm-only direct APK, R8, the store rating prompt and the permissions step of the app requests of 2026-10-26 ([not-close.md](not-close.md)).

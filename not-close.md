@@ -242,6 +242,184 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
     - On a device: on Android, an install from Play's internal test track or internal app sharing shows the sheet after that mark; on iOS a development build always shows it and TestFlight never does (Apple's rule), so the iPhone check runs on a development build.
     - The gate passes: `typecheck`, `lint`, `check:dox`, `test:tz`.
 
+### App requests of 2026-10-26 — batch rules
+
+- **Requested:** the user, 2026-10-26, in a Claude Code session: thirteen requests in one message, with a screenshot of the Mincha reader whose controls fill the top quarter of the screen.
+- **Flag:** as in the 2026-10-24 batch, every task carries `OTA` or `Build`, and an `OTA` task adds no native module and touches no native field of [app.json](app.json). Read from [pnpm-lock.yaml](pnpm-lock.yaml) on 2026-10-26: `expo-location` 19.0.8 (with `watchHeadingAsync`), `expo-haptics` 15.0.8, `react-native-reanimated` 4.1.7 and `expo-background-task` 1.0.10 are in the shipped binary; `expo-sensors`, `expo-battery`, `expo-intent-launcher` and `expo-device` are not in the lockfile at all, so any of them means a build.
+- **Decisions taken** (Claude's, cheap to reverse, the owner may overrule):
+  - The collapsing controls cover the siddur reader, every text and Chok LeYisrael included: no other screen has a control block (the hilula page, the guide and the report have none).
+  - The compass points at the Kotel, as asked; whether it should point at the Kodesh HaKodashim is R11 for the rav.
+  - The battery exemption stays the system settings screen, never the direct dialog: `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` is restricted by Google Play to apps whose core function Doze breaks ([Android, Doze and App Standby](https://developer.android.com/training/monitoring-device-state/doze-standby)), and the app's exact alarms already fire in Doze ([src/services/AGENTS.md](src/services/AGENTS.md)).
+- **Answered by the owner, 2026-10-26** (each written into its task): past the cap the far days are thinned from the third day, with an end notice on both platforms (Q3); the history tab starts with sketches carrying a greeting, a line per number, the best streak, badges and each mitzvah's streak (Q5); the siddur tab opens with "now" open and every other group closed, on every visit (Q6); about 30 tzaddik candidates, balanced across the communities (Q7); the performance measurement starts without the phone's details; the permissions step and card wait whole for the next native build, so every row shows its real status (Q4).
+- **Waiting for the owner:** nothing in this batch.
+- **Done means:** both dictionaries updated, a DOX pass on every touched AGENTS.md, the guide topic and a `WHATS_NEW` item with `pnpm guide:build` for every user-visible change, `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green, and the screen checked in the `expo-web` preview at 375 points in Hebrew and English, or on the Android emulator through [android-native-verify](.claude/skills/android-native-verify/SKILL.md) for a native path. No commit and no OTA without the user's per-action approval.
+
+### High — App requests of 2026-10-26
+
+- [ ] Plan reminders as far ahead as the pending cap allows
+  - **Flag:** `OTA`.
+  - **What it is:**
+    - **Cause (read 2026-10-26):** `horizonDays()` in [src/services/notifications/planners/horizon.ts](src/services/notifications/planners/horizon.ts) plans today and tomorrow, stretched only through a holy block. A default man has about 12 reminders on a weekday and a woman about 9, so a rebuild leaves about 24 pending while the cap is 60. Nothing plans further except a launch, a return to the foreground and the hourly `jew-365-daily-rebuild` task, and the OS may not run that task: iOS never runs it for an app the user swiped away, and Samsung puts an app unused for about 3 days to sleep, restricting its jobs and alarms ([Samsung, app management](https://developer.samsung.com/mobile/app-management.html)). So reminders stop one or two days after the last open, three or four after a Thursday or Friday open.
+    - **Change:** the horizon keeps adding whole days, with the holy-block rule as it is, until the plan's candidates reach the platform cap or `HORIZON_MAX_DAYS` (30) days. The cap still drops the furthest triggers first. The check-in, weekly report, hilula, Rosh Chodesh and taharah planners take the longer horizon as they are. What happens past the cap is the task "Thin the far days and warn before the reminders run out".
+    - **Cost:** time `buildPlan()` for a 30-day horizon on the emulator and write the number into this item's Done line; if it passes 300 ms, the plan for days beyond the second runs after the first two are scheduled.
+    - **Docs:** the horizon lines of the root [AGENTS.md](AGENTS.md) (Notification Engine), [src/services/AGENTS.md](src/services/AGENTS.md) and [src/services/notifications/AGENTS.md](src/services/notifications/AGENTS.md).
+  - **What it solves:** the user's report that a user who does not open the app for a few days stops getting reminders.
+  - **Expected result:** plan tests with `now` pinned on a Sunday at `at(Jerusalem, …)`: a man's default set fills the 60 iOS slots and reaches about the fifth day; with the Android cap of the next task it reaches 30 days; a holy block inside the horizon stays silent; the scheduler suites pass under `pnpm test:tz`.
+
+- [ ] Raise the Android pending cap and schedule only the difference
+  - **Flag:** `OTA`.
+  - **What it is:**
+    - Android's cap goes from `PENDING_LIMIT` (60) to 400 in [src/services/notifications/ids.ts](src/services/notifications/ids.ts). Android refuses more than 500 alarms per app (`max_alarms_per_uid`), every notification expo-notifications schedules is one alarm, and WorkManager and the update notice need a few more. iOS keeps `IOS_MAX - IOS_HEADROOM` (60); the web shim stays as it is.
+    - `rebuild()` stops cancelling everything. It reads the pending notifications once (`getAllScheduledNotificationsAsync()`), cancels the ids the new plan lacks or whose content changed, and schedules only the new and the changed ones. Each candidate carries a content hash in `data` (title, body, trigger, category, channel), so a language or wording change counts as a change. `SCHEDULE_FORMAT` and its stamp keep their meaning: a stale stamp still means a full rebuild.
+    - Time a rebuild after one mark on the emulator before and after the change, and write both numbers into this item's Done line.
+  - **What it solves:** 400 reminders cover about a month for a default user on Android, and scheduling only the difference keeps a mark or a setting change from re-sending hundreds of alarms on the JS thread.
+  - **Expected result:** tests of the plan and of [src/services/notifications/os.ts](src/services/notifications/os.ts): an unchanged plan schedules and cancels nothing; one changed reminder cancels and schedules exactly that id; a language change reschedules everything; an Android plan holds at most 400. On the emulator, `adb shell dumpsys alarm` lists the app's alarms after a rebuild, and a reminder three weeks ahead is pending.
+
+- [ ] Thin the far days and warn before the reminders run out
+  - **Flag:** `OTA`.
+  - **Decided:** the owner, 2026-10-26 (Q3, "מאשר: דילול מהיום השלישי, והודעת סיום בשתי המערכות").
+  - **What it is:**
+    - **Thinning:** when the full plan holds more candidates than the platform cap, every horizon day from the third on keeps one trigger per mitzvah window: the latest one at or before the window's end (a `followUp` and a `blockExit` trigger are dropped there). Today and tomorrow keep every reminder. On iOS (60 slots) this reaches about 8 to 9 days for a man's default set; on Android (400) it acts only when 30 full days do not fit. The check-in, weekly report, hilula, Rosh Chodesh and taharah notices are never thinned.
+    - **End notice:** one notification on the last fully planned day, at 20:00 on the location's clock, or at the exit of a holy block that covers that hour, with the title `notifications.horizonEnd.title` ("התזכורות עומדות להיגמר") and the body `notifications.horizonEnd.body` ("כדי שהתזכורות ימשיכו, פתחו את האפליקציה"). Every rebuild moves it, so it fires only if the app stays closed until then. It takes one slot of the cap.
+    - **Shape** (root [AGENTS.md](AGENTS.md), New notification not tied to a mitzvah): id `horizonEnd:<YYYY-MM-DD>` (no `__`), `data.kind = 'horizonEnd'`, no category, the `system` channel, the kind in `PendingNotificationMeta` ([src/services/notifications/ids.ts](src/services/notifications/ids.ts) and the web shim), a planner candidate, and a tap that opens home in [src/services/notificationResponseHandler.ts](src/services/notificationResponseHandler.ts) (the open itself rebuilds).
+    - **Docs:** the notification kinds in the root [AGENTS.md](AGENTS.md), the channel table of [src/services/AGENTS.md](src/services/AGENTS.md), [src/services/notifications/AGENTS.md](src/services/notifications/AGENTS.md), and the user guide's notifications topic.
+  - **What it solves:** an iPhone user who does not open the app keeps a reminder for each mitzvah for about a week and a half instead of five days, and on both platforms the user hears before the reminders stop instead of finding out from their absence.
+  - **Expected result:** plan tests at `at(Jerusalem, …)` on a Sunday: iOS keeps every reminder on days one and two and one per window from day three, about 8 to 9 days for a man; a plan that fits the cap is not thinned; the end notice lands at 20:00 of the last full day, and at a block's exit when that hour is inside the block; a response test: a tap opens home; on the emulator the notice is pending at the end of the plan.
+
+- [ ] Add a permissions step to onboarding and a permissions card to Settings
+  - **Flag:** `Build`, with the next native build and its version decision ([state.md](state.md)); the whole step and card ship together, with every row's real status.
+  - **Decided:** the owner, 2026-10-26 (Q4, "ב. לחכות עם כל הדף לבנייה הבאה"): nothing of this task ships over the air before that build.
+  - **What it is:**
+    - **Native module:** a small Android-only module of the repo (a local Expo module, or Kotlin written by a config plugin like [scripts/withMitzvahNotificationAction.js](scripts/withMitzvahNotificationAction.js)) exposing `isIgnoringBatteryOptimizations()` (`PowerManager`), `openSamsungNeverSleeping()` (action `com.samsung.android.sm.ACTION_OPEN_CHECKABLE_LISTACTIVITY`, package `com.samsung.android.lool`, the integer extra `activity_type` 2, per [Samsung, app management](https://developer.samsung.com/mobile/app-management.html)), `unusedAppRestrictionsStatus()` (`PackageManagerCompat.getUnusedAppRestrictionsStatus()`) and `openUnusedAppRestrictions()` (`IntentCompat.createManageUnusedAppRestrictionsIntent()`, started for a result, per [Android, app hibernation](https://developer.android.com/topic/performance/app-hibernation)). One module covers all four, so `expo-battery`, which answers only the first, is not added. Web and iOS get a shim that reports nothing.
+    - **One component:** `PermissionsList` in [src/components/](src/components), used by both screens. Each row has an icon, a title, one line on why the app needs it, a status pill (`פעיל` when granted) and, while not granted, an action button. Statuses are read on mount and again on every `AppState 'active'`, so a return from the system settings updates them.
+    - **Rows:**
+      1. Notifications, every platform: the status of expo-notifications; the button asks, or opens the app's settings once refused.
+      2. Location, every platform: `getForegroundPermissionsAsync()`; the button asks through [src/services/LocationService.ts](src/services/LocationService.ts). Optional: it serves the GPS city and the compass.
+      3. Battery, Android: the button opens `openBatteryOptimizationSettings()` of [src/services/deviceSettings.ts](src/services/deviceSettings.ts), with the line "בחרו 'ללא הגבלה'"; active while `isIgnoringBatteryOptimizations()` is true.
+      4. Samsung sleep, Android when `Platform.constants.Manufacturer` is `samsung`: explains Background usage limits → Never sleeping apps, and the button opens that list through `openSamsungNeverSleeping()` (`Linking.sendIntent` cannot: it passes every number as a double), falling back to `Linking.openSettings()`. No API reports this list, so the row shows no status; if the check on the owner's Samsung finds that "ללא הגבלה" of row 3 also takes the app off Samsung's sleeping lists, this row is dropped and row 3 names Samsung.
+      5. Pause when unused, Android 11 and later: Android hibernates an app unused for a few months, resetting its permissions and stopping its alarms; the button opens `openUnusedAppRestrictions()`, and the row is active while `unusedAppRestrictionsStatus()` reports the restrictions off.
+      6. Background refresh, iOS: `BackgroundTask.getStatusAsync()` (Available or Restricted); the button opens the app's settings.
+    - **Onboarding:** a new step, `src/app/onboarding/permissions.tsx`, after the location step and before ready, shown on every onboarding even when everything is granted (each granted row marked active). Continue is never blocked. The location step keeps the city and the GPS button and drops its notifications card. `ONBOARDING_STEPS` becomes 7.
+    - **Settings:** the device section's permission rows, the OS status row and the battery block, become this card; the settings search entries for the battery and the notification permission open it.
+  - **What it solves:** the user asked for one place, in onboarding and in Settings, that shows each permission the app needs, marks what is granted, and grants the rest, the battery exemption included.
+  - **Expected result:** render tests of `PermissionsList` over a mocked native module for each row granted, not granted and refused, the Samsung row only for that manufacturer, the iOS row only on iOS, the hibernation row only on Android 11 and later, and a status that updates on `AppState 'active'`; the onboarding tests take 7 dots and the new step; [routes.test.ts](src/app/__tests__/routes.test.ts), the smoke suite and the guide test cover the new route; on the emulator (a build with the module), granting each permission from the step marks its row active after the return; on the owner's Samsung, the Never sleeping apps link opens that list, and whether "ללא הגבלה" alone takes the app off it is recorded here.
+
+### High — Performance, App requests of 2026-10-26
+
+The user reports that screens sometimes stick, navigation sometimes does nothing and some animations do not play. A read of the code on 2026-10-26 found no single loop but bursts that block the JS thread: at every :00 and :30, at launch, on a return to the app and after a mark. Every animation in the app is reanimated, so a blocked commit delays its start, and a tap held up past 500 ms on a home card opens the quick sheet instead of the mitzvah. The tasks below run in order; each one's numbers come from the first.
+
+- [ ] Measure the JS-thread stalls before any change
+  - **Flag:** none: measurement.
+  - **What it is:** on the Android emulator, with a release-like build of the current `main` ([android-native-verify](.claude/skills/android-native-verify/SKILL.md)), record with the Hermes sampling profiler (React Native DevTools → Performance): 60 seconds idle on home, one return from the background, one mark and one undo on home, one open of Settings, one open of Shacharit and of Tehillim in the reader. Temporary `performance.now()` logs (never committed) time the home memo, the siddur tab's memos, `selichotOfferOn`, the settings search index, `computeStats`, `buildPlan` and `refreshSchedulingOnForeground`, and count `dayFeatures()` calls and zmanim cache misses per tick. The owner chose on 2026-10-26 to start without the phone's details.
+  - **What it solves:** every later fix is judged against numbers, not guesses.
+  - **Expected result:** a table under this item: each scenario's longest JS-thread block in ms and the top functions in it, and a target per scenario (no block over 100 ms while idle or on a tap).
+
+- [ ] Tick the clock only on the screen in front
+  - **Flag:** `OTA`.
+  - **What it is:** `useNow()` ([src/hooks/useNow.ts](src/hooks/useNow.ts)) ticks every 30 s in home, the siddur tab, the More tab and the reader at once, and the tab navigator keeps all five tabs mounted (`lazy: false`, `detachInactiveScreens={false}` in [src/app/(tabs)/_layout.tsx](<src/app/(tabs)/_layout.tsx>)), so each tick recomputes home's windows (about 100 `dayWindow`s, 18 of them for Kiddush Levana) and the siddur tab's (`currentOrNextWindow()` up to 11 days for each text) behind the visible screen. The hook stops ticking while its screen is not focused (`useIsFocused()`) and ticks once on focus. `freezeOnBlur` stays off, as [src/app/AGENTS.md](src/app/AGENTS.md) requires. The siddur tab's `dayKey` and `standaloneTextDay()` calls move into a memo. A list row that receives the same props skips its render (`React.memo` on the row components of home and the siddur tab).
+  - **What it solves:** the stall at every half minute, whichever tab is open.
+  - **Expected result:** a hook test: no tick while unfocused, one on focus; the measurement repeated: no block over 100 ms at :00 or :30 idle on any tab; the tabs suite ([tabsLayout.render.test.tsx](src/app/__tests__/tabsLayout.render.test.tsx)) unchanged.
+
+- [ ] Cache the calendar math under every screen
+  - **Flag:** `OTA`.
+  - **What it is:**
+    - `dayFeatures()` ([src/utils/siddur.ts](src/utils/siddur.ts)) runs up to eight hebcal calendar calls and four Kiddush Levana checks (each with a Luxon zone conversion and a zmanim read) on every call, with no cache, and the home cards, the siddur tab, Selichot's window, the plan and the settings search call it. Memoize it by Hebrew day and place (`inIsrael`, Jerusalem, the location), with a bounded map.
+    - The zmanim cache ([src/services/ZmanimService.ts](src/services/ZmanimService.ts)) is first-in-first-out at 90 entries, and one launch reads more than 90 dates (home's Selichot offer about 40, history 31, Kiddush Levana 18, the siddur tab 9), so today's own entries are evicted and rebuilt. It becomes least-recently-used at 400 entries, and a hit skips the Luxon `setZone`/`toISODate` key work through a per-location key cache.
+  - **What it solves:** the cost of each window, which every burst above multiplies.
+  - **Expected result:** tests: a second `dayFeatures()` for the same day and place returns the cached value and calls hebcal no more; a cached zmanim entry read last survives 400 newer ones; `pnpm test:tz` passes (the caches must key on the location's day, never the device's); the measurement shows the tick, launch and mark scenarios faster, with numbers.
+
+- [ ] Spread out the work at launch, on return and on a mark
+  - **Flag:** `OTA`.
+  - **What it is:**
+    - **Settings:** the search index is rebuilt on every focus of the tab (`setSearchNow` in [src/app/(tabs)/settings.tsx](<src/app/(tabs)/settings.tsx>)) while the tab fades in. It is built on the first keystroke of a search and reused until the app day or its inputs change.
+    - **Return to the app:** home's `AppState` handler, the root layout and the scheduler refresh all run on the same frame; the refresh and the tray clean-up move behind `InteractionManager.runAfterInteractions()`, after the first frame the user sees.
+    - **A mark:** the home memo recomputes three times (the completion, the stamp's start, its end 1.3 s later); the stamp state moves into `MitzvahCard` so only the card re-renders, and the scheduler's queued `cancelForMitzvah()` / `settleCheckIn()` run after interactions. History's `computeStats()` runs only while its tab is focused, and once per change of completions.
+  - **What it solves:** the stalls the user hits right after opening the app or tapping done, when animations and taps are lost.
+  - **Expected result:** render tests: one home memo run per mark; the settings index built once across two focuses on the same day; the measurement: a mark and a return to the app block the thread under 100 ms, and a home card tap opens the mitzvah within 500 ms in 20 of 20 tries on the emulator.
+
+- [ ] Open long texts in the reader without a stall
+  - **Flag:** `OTA`.
+  - **What it is:** opening the reader parses its whole asset synchronously (`JSON.parse` in [src/services/SiddurService.ts](src/services/SiddurService.ts), up to 668 KB for Edot HaMizrach's Shacharit and 458 KB for Tehillim) and resolves it by voice and marital status in one pass; a picker jump renders every section at once (`windowSize` Infinity in [src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>), 178 sections for Tehillim); and the header calls `getHolidays()` on every render. The screen shows its header first and the text after the parse (behind `InteractionManager`), the resolved text is cached per text, nusach, day, voice and status, a jump renders the target section and its neighbours only (the jump math of [src/app/siddur/AGENTS.md](src/app/siddur/AGENTS.md) kept), and the header's holidays go into a memo by day.
+  - **What it solves:** the reader's open and its section jumps stick on long texts.
+  - **Expected result:** the reader suite passes (jumps, bookmarks, the resume offer); the measurement: opening Tehillim and Edot HaMizrach's Shacharit shows the header within 100 ms and the text within 500 ms on the emulator, and a jump to Tehillim's last chapter lands on it.
+
+### Medium — App requests of 2026-10-26
+
+- [ ] Collapse the reader's controls while the user reads
+  - **Flag:** `OTA`.
+  - **What it is:**
+    - **Behaviour:** the reader ([src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>)) opens as today, every control showing. A scroll down past a small threshold (about 12 points) folds everything above the text (the actions, the subtitle, the Chok LeYisrael rows, the picker row, the toolbar, the notices) into one compact bar: the back pill and the text's name on one line. A scroll up from any point unfolds it all; so does a tap on the compact bar. Within the height of the full block from the top it stays unfolded. Auto-scroll folds it like a scroll down; a jump to a section or a bookmark leaves it as it is.
+    - **Mechanics:** the direction is read in the reader's one `useAnimatedScrollHandler` (`useAutoScroll`), since reanimated overrides a plain scroll prop ([src/app/siddur/AGENTS.md](src/app/siddur/AGENTS.md)). The fold animates on the UI thread with reanimated. The text must not jump when the bar folds: the header overlays the list, which keeps a top padding equal to the full header, or the spec proves another way. The last reading position, the resume offer, bookmarks (`placeAt()` in [src/utils/siddur.ts](src/utils/siddur.ts) and `LIST_PADDING`) and the auto-scroll's end must stay correct in both states.
+    - **Docs:** the reader's contract in [src/app/siddur/AGENTS.md](src/app/siddur/AGENTS.md) ("Every reading control sits in the header's body…") and `ScreenHeader` in [src/components/AGENTS.md](src/components/AGENTS.md).
+  - **What it solves:** the controls take a quarter of the screen for the whole reading (the user's screenshot of Mincha); folded, the text gets about 90% of it.
+  - **Expected result:** [siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx) cases: a scroll down folds to the bar with the name and back, a scroll up and a tap unfold, near the top it stays open, a bookmark saved folded and opened unfolded lands on the same segment, and the resume offer still shows; on the emulator, Shacharit and a Chok LeYisrael day folded and unfolded with no jump of the text, with auto-scroll on and off.
+
+- [ ] Put the meals group right under "now" in the siddur tab
+  - **Flag:** `OTA`.
+  - **What it is:** the siddur tab ([src/app/(tabs)/siddur.tsx](<src/app/(tabs)/siddur.tsx>)) draws now, meals, prayers, the mitzvot group, general, then festivals and celebrations. Today meals comes after the mitzvot group, through `SIDDUR_GROUPS` in [src/data/siddur.ts](src/data/siddur.ts). The order is updated where [src/app/(tabs)/AGENTS.md](<src/app/(tabs)/AGENTS.md>) and the root [AGENTS.md](AGENTS.md) describe the tab.
+  - **What it solves:** the user's order: the meal blessings are reached right after what is open now.
+  - **Expected result:** a render test of the tab reads the group labels in that order, with and without a "now" group.
+
+- [ ] Let each siddur tab group open and close
+  - **Flag:** `OTA`.
+  - **What it is:** every group of the siddur tab becomes a `SettingsSection` with `collapsible`, as Settings and the guide do ([src/components/SettingsSection.tsx](src/components/SettingsSection.tsx)): the screen owns an open set, a header tap toggles its group, several may be open at once, children mount only while open. On every visit the set is reset by `useFocusEffect`, as in Settings: "now" starts open, every other group closed (the owner, 2026-10-26, Q6). The tab's description in [src/app/(tabs)/AGENTS.md](<src/app/(tabs)/AGENTS.md>) says so.
+  - **What it solves:** the user opens the siddur and sees every group at once, so the wanted text is one tap into its group.
+  - **Expected result:** render tests: on open every group header shows and the closed ones hold no rows; a tap opens and closes a group; two groups open together; after a group is opened and the tab left and focused again, "now" is open and every other group closed; the smoke suite stays green.
+
+- [ ] Find tzaddikim in the settings search
+  - **Flag:** `OTA`.
+  - **What it is:**
+    - A content kind `hilula` in `settingsContentItems()` ([src/utils/settingsSearch.ts](src/utils/settingsSearch.ts)): one item per entry of `HILULOT` ([src/data/hilulot.ts](src/data/hilulot.ts)), id `hilula:<id>`, title the Hebrew and English names, href `/hilula/[id]` with `id`, icon `hilula`, and the hilula's date (`hilulaDateLabel()`) as the result's caption. It is indexed whether the hilula notices are on or off.
+    - Aliases: an optional `aliases: { he: string[]; en: string[] }` on `Hilula` for the names people type that the registry name lacks (`רשב"י`, `בבא סאלי`, `חפץ חיים`, `רבי נחמן`, `Ari`, `Rambam`, …), filled for the entries that have them, each checked against the tzaddik's page.
+    - The kind joins the `kind` and href unions, `KIND_RANK` (after `chapter`), the key `settings.search.kind.hilula` in both dictionaries, and the href test of [settingsSearch.test.ts](src/utils/__tests__/settingsSearch.test.ts).
+  - **What it solves:** the search finds a tzaddik of the hilulot list and opens his page.
+  - **Expected result:** search tests: `בבא סאלי`, `רשבי`, `baal shem tov` and a typo of one name each return that tzaddik's item; a press and a submit open `/hilula/[id]`; `הילולות` still returns the hilulot setting first; [settings.search.render.test.tsx](src/app/__tests__/settings.search.render.test.tsx) shows the item with its date caption.
+
+- [ ] Add the hilulot row to the More tab
+  - **Flag:** `OTA`.
+  - **What it is:** a `ListRow` in the More tab's card ([src/app/(tabs)/more.tsx](<src/app/(tabs)/more.tsx>)) after Tehillim, icon `hilula`, title `hilulot.title`, opening `/hilulot` (the switch, the notice kinds and the coming hilulot). The row list in [src/app/(tabs)/AGENTS.md](<src/app/(tabs)/AGENTS.md>) and its suite `more.render.test.tsx` gain it.
+  - **What it solves:** the hilula notice settings are reachable from the navigation hub, not only from the mitzvot library.
+  - **Expected result:** `more.render.test.tsx` finds the row in its place and a press pushes `/hilulot`.
+
+- [ ] Add a prayer compass to the More tab
+  - **Flag:** `OTA`: `watchHeadingAsync` of the installed `expo-location` gives the heading, and the location permissions are already declared.
+  - **What it is:**
+    - **Route:** `src/app/compass.tsx`, a stack screen with `ScreenHeader`, opened from a More tab row after the hilulot row (icon `compass`, a new name in `ICON_NAMES` of [src/components/MitzvahIcon.tsx](src/components/MitzvahIcon.tsx)).
+    - **Math:** a pure `src/utils/compass.ts`: `KOTEL = { lat: 31.7767, lng: 35.2345 }`, the initial great-circle bearing and the distance from a point to it, and the angle to draw (`bearing - heading`, normalized to 0-360).
+    - **Where the user is:** with location permission, one GPS fix when the screen opens (no tracking) through [src/services/LocationService.ts](src/services/LocationService.ts); otherwise the saved location, with a line naming its city (for example "לפי ירושלים") and the location permission button.
+    - **Heading:** `watchHeadingAsync`, subscribed while the screen is focused and removed on blur; `trueHeading` when it is not -1, else `magHeading` with a line that the reading is less exact without the location permission. Accuracy 0 or 1 shows a calibration hint (a figure-eight motion).
+    - **Screen:** a dial that turns with the device, north marked, an arrow to the Kotel, the bearing in degrees and the distance in km, and a light haptic (`expo-haptics`) once the device faces within 5° of it. Web and a device with no heading sensor show a notice instead.
+  - **What it solves:** the user asked for a compass that shows north and, always, the direction of the Kotel from where the user stands and faces.
+  - **Expected result:** `compass.test.ts`: bearings from Tel Aviv (32.0853, 34.7818: 128.7°), New York (40.7128, -74.006: 54.1°) and Jerusalem's city centre (31.7833, 35.2167: 113.6°) within 0.5°, checked against an online great-circle calculator, the wrap at 0/360, the distance within 1%; render tests over a mocked heading: the arrow angle, the true/magnetic line, the calibration hint, the web notice; on the emulator, the screen with its virtual sensors; the More test, routes, smoke and guide tests cover it; R11 logged.
+
+- [ ] Sketch two directions for the history tab
+  - **Flag:** none: design, for the owner's pick.
+  - **Decided:** the owner, 2026-10-26 (Q5, "מאשר: סקיצות קודם, עם סעיפים 1 עד 5").
+  - **What it is:**
+    - **Today:** the tab ([src/app/(tabs)/history.tsx](<src/app/(tabs)/history.tsx>)) shows a ring with the current streak and "עוד N ימים ליעד M" (the goals 7, 30, 100, 365 of [src/utils/streakGoal.ts](src/utils/streakGoal.ts)), a grid of the last 30 days, each mitzvah's percent over them and yesterday's misses. No word says what a streak counts (a day with at least one mark; a day with misses and no mark breaks it) or what a percent means. Nothing computes a best streak, a total or an achievement ([src/utils/historyStats.ts](src/utils/historyStats.ts)).
+    - **Content of both sketches:** (1) a greeting by first name, the first word of `profileName`, with a neutral greeting when it is empty; (2) a line under each number saying what it counts; (3) the best streak ever; (4) badges at milestones, kept once earned: a 7, 30, 100 and 365-day streak, a first full week, a full month, 100 marks of one mitzvah (the set is settled at the review); (5) each mitzvah's own streak beside its percent.
+    - **How:** two directions that differ in layout and emphasis, drawn in the app's own components and palette under the commitments of [PRODUCT.md](PRODUCT.md), shown in the `expo-web` preview in Hebrew at 375 points, light and dark, with realistic fixture data (a 12-day streak, a best of 31, three badges). Screenshots of both go to the owner.
+  - **What it solves:** the user finds the statistics, the streak and the achievements unclear and impersonal.
+  - **Expected result:** the owner picks one direction, or a mix, and the badge set; the pick is written into the task "Build the chosen history design".
+
+- [ ] Build the chosen history design
+  - **Flag:** `OTA`.
+  - **What it is:** the tab per the sketch the owner picks, with items 1 to 5 above. The data it needs:
+    - **Best streak:** the store keeps per-mitzvah detail for 400 days (`RETENTION_DAYS` in [src/stores/useCompletionsStore.ts](src/stores/useCompletionsStore.ts)), so a best streak cannot be recomputed after pruning. A persisted `bestStreak: { days, endedOn }` in the completions store keeps the maximum, raised whenever the current streak passes it, and seeded at the first hydrate from `computeStreak()` over the kept history.
+    - **Badges:** a persisted `badges: Record<BadgeId, number>` (the time each was earned) in the completions store, filled by a pure `earnedBadges()` in a new `src/utils/badges.ts`; an earned badge is never taken away by a later unmark.
+    - Both fields are optional (no `STORE_VERSION` raise), ride the backup file with the store, and are cleared by the reset.
+    - **Per-mitzvah streak:** a pure helper beside `computeStats()`, by the same day rules as `computeStreak()`.
+  - **What it solves:** the same request; the sketch fixes the layout first.
+  - **Expected result:** `badges.test.ts` and best-streak tests (raised, kept after the history is pruned, seeded from the kept days, unchanged by an unmark), also under `pnpm test:tz`; [history.render.test.tsx](src/app/__tests__/history.render.test.tsx) pins the greeting, each explaining line, the best streak, the badges and the per-mitzvah streak; the backup and reset suites cover the two fields.
+
+### Low — App requests of 2026-10-26
+
+- [ ] Research more tzaddikim for the hilulot list
+  - **Flag:** none: research, then a later task per the owner's picks.
+  - **What it is:** a list of candidates beyond the 57 of [src/data/hilulot.ts](src/data/hilulot.ts), each with the Hebrew date of passing from two independent sources, the grave and whether visitors can reach it, the community, and the sign that people mark the date (a gathering at the grave, a known hilula). Scope (the owner, 2026-10-26, Q7): about 30 candidates, balanced across Sephardi and Mizrachi, Chassidic, Lithuanian and the gedolim of the last generations in Israel, only ones whose date people mark at the grave. The owner picks; each pick then becomes an entry with a full page in [src/data/hilulaPages.ts](src/data/hilulaPages.ts), researched and fact-checked like the 57.
+  - **What it solves:** the user asked which more tzaddikim can be added.
+  - **Expected result:** the list, under this item or in a file committed with it, with every date's two sources, handed to the owner for a pick.
+
 ## Bugs
 
 - [ ] A Hebrew Android phone shows the app's English name
@@ -311,9 +489,14 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
     - The Ashkenaz and Sefard texts say "תיבו אושפיזין", not "עולו", so R5's reason for leaving Chabad out wants checking against the Chabad custom itself.
   - **Lives in:** `ushpizin` in `STANDALONE_TEXTS` ([src/data/siddur.ts](src/data/siddur.ts)), `ashkenazUshpizin()`, `sefardUshpizin()` and `edotUshpizin()` in [scripts/siddur/manifest.js](scripts/siddur/manifest.js), and `MENS_MITZVOT` in [src/stores/taharahOptIn.ts](src/stores/taharahOptIn.ts).
 
+- **R11 — The prayer compass's target.**
+  - **Question:** Should a prayer compass point at the Kotel, or at the place of the Kodesh HaKodashim on the Temple Mount?
+  - **Assumption:** The Kotel (31.7767, 35.2345), as the owner asked. Far from Jerusalem the two differ by a fraction of a degree; inside the Old City by much more.
+  - **Lives in:** `KOTEL` in `src/utils/compass.ts` (not built yet: task "Add a prayer compass to the More tab").
+
 ### For the owner
 
-None recorded. Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were answered by the owner on 2026-10-26 and became the tasks "Add an English (U.K.) localization on the App Store" and "Ask for a store rating inside the app".
+Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were answered by the owner on 2026-10-26 and became the tasks "Add an English (U.K.) localization on the App Store" and "Ask for a store rating inside the app". Q3 to Q7, from the app requests of 2026-10-26, were answered the same day and are written into their tasks (App requests of 2026-10-26 — batch rules). None is open.
 
 ## Other Open Items
 
