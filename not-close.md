@@ -171,7 +171,7 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
 - [ ] Set the App Store subtitle and keywords for search
   - **Ships as:** a console change in App Store Connect, no build.
   - **What it is:**
-    - Hebrew localization: subtitle `סידור, תהילים, חק לישראל` (24 of 30); keywords `jew,תיקון,הכללי,התיקון,חוק,תהלים,זמני הלכה,מצוות,תפילין,ברכת המזון,קריאת שמע,לוח עברי,טהרה,סליחות` (97 of 100). `jew` with the `365` of the name answers "jew 365" in Israel without an English (U.K.) localization (Q1); `חוק` and `תהלים` are the spellings people type; no word repeats one of the name or the subtitle, which Apple counts as waste.
+    - Hebrew localization: subtitle `סידור, תהילים, חק לישראל` (24 of 30); keywords `jew,תיקון,הכללי,התיקון,חוק,תהלים,זמני הלכה,מצוות,תפילין,ברכת המזון,קריאת שמע,לוח עברי,טהרה,סליחות` (97 of 100). `jew` with the `365` of the name answers "jew 365" in Israel until the English (U.K.) localization carries the name `Jew 365` there: once that localization is saved, the Hebrew field drops `jew,` (93 of 100) in the same pass (task "Add an English (U.K.) localization on the App Store"); `חוק` and `תהלים` are the spellings people type; no word repeats one of the name or the subtitle, which Apple counts as waste.
     - English (U.S.) localization: subtitle `Siddur, Tehillim & Zmanim` (25 of 30); keywords `psalms,tehilim,sidur,chok,hok,leyisrael,leisrael,tikkun,tikun,haklali,klali,mitzvah,tefillin,jewish` (99 of 100).
     - Promotional text, which search does not read, opens with the tagline: `כל מצווה בזמנה: זמני הלכה מדויקים, תזכורות בחלון הזמן של כל מצווה, סידור בארבעה נוסחים, ואפליקציה שנחה בשבת ובחג. בלי חשבון.` (124 of 170) and `Every mitzvah in its time: accurate zmanim, reminders inside each mitzvah's window, a siddur in four nusachim, and an app that rests on Shabbat and Yom Tov. No account.` (168 of 170).
     - When: while 1.0.21 waits for review. On 2026-10-26 the name, subtitle, keyword and description fields were open in that state, and App Information says its changes go out with the next app version, which is 1.0.21. Once 1.0.21 is released, the subtitle and the keywords change only with a new version, that is a new build that raises `version` (root [AGENTS.md](AGENTS.md), Never raise `version` for a JS change).
@@ -187,6 +187,18 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
     - Before the production application on Play (about 2026-11-06), so the first public listing carries them.
   - **What it solves:** today no listing names תיקון הכללי or the spelling חוק לישראל, and the Play short description names none of the four terms.
   - **Expected result:** the Play listing, reloaded, shows both short descriptions within 80 and the full descriptions with each term once; the copy files match what the consoles show. The console re-entry runs with the task "Add Chok LeYisrael to the store listings", so each console is filled once.
+
+- [ ] Add an English (U.K.) localization on the App Store
+  - **Ships as:** a console change in App Store Connect, no build.
+  - **Decided:** the owner, 2026-10-26 (Q1, "מאשר"). The Israel storefront reads only the Hebrew and English (U.K.) localizations, so an English (U.K.) page puts the English name and a second keyword field in front of Israeli searches.
+  - **What it is:**
+    - App Information → Localizations: add English (U.K.) with the name `Jew 365`, the subtitle `Siddur, Tehillim & Zmanim` (the English (U.S.) subtitle of the task "Set the App Store subtitle and keywords for search") and the Privacy Policy URL `https://jew-365.github.io/jew-365/privacy/en/`.
+    - Version page 1.0.21 → English (U.K.): the description, promotional text, support URL and marketing URL of the English (U.S.) page as they stand when this runs (the fields of [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md)); keywords `psalms,tehilim,sidur,chok,hok,leyisrael,leisrael,tikkun,tikun,haklali,klali,mitzvah,tefillin,jewish` (99 of 100), the English (U.S.) set, which Israel does not read on the U.S. page; screenshots: the ones the English (U.S.) page uses ("Using Existing Assets"), replaced by the English set when the task "Make English screenshots and a screenshot of a reminder" lands.
+    - In the same pass, the Hebrew keyword field drops `jew,`: the U.K. name carries it in Israel.
+    - When: with the subtitle and keywords task, while 1.0.21 waits for review, because after the release the U.K. name, subtitle and keywords reach the store only with a new version. First check that App Store Connect lets a language be added in the Waiting for Review state (not checked on 2026-10-26); if it does not, stop and ask the owner whether to withdraw the submission to add it (the review starts over) or to add it with the next version.
+    - Record the localization in the App Record and Version Page sections of [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md), and the step in [release/RELEASE_LOG.md](release/RELEASE_LOG.md).
+  - **What it solves:** today no English copy or English keyword is read in Israel, and the Hebrew field spends a keyword on `jew`.
+  - **Expected result:** after a reload, App Information lists English (U.K.) with the name `Jew 365` and the subtitle within 30, and its version page shows the keywords within 100; within days of the release, the iTunes Search API with `country=il` returns the app for `jew 365`, `tehillim` and `siddur`, and its rank for each is recorded.
 
 ### Medium — Store listings of 2026-10-26
 
@@ -205,7 +217,7 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
 - [ ] Make English screenshots and a screenshot of a reminder
   - **Ships as:** a console change in both consoles, no build.
   - **What it is:**
-    - An English set in the order of the Hebrew one (Home, Siddur tab, Reader, History, Settings): 1206x2622 for the English (U.S.) App Store page and 1080x1920 for the Play English translation, made the way the Hebrew set was (Screenshot Plan in [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md)).
+    - An English set in the order of the Hebrew one (Home, Siddur tab, Reader, History, Settings): 1206x2622 for the English (U.S.) and English (U.K.) App Store pages and 1080x1920 for the Play English translation, made the way the Hebrew set was (Screenshot Plan in [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md)).
     - One screenshot per language of a mitzvah reminder in the notification shade with its two buttons ("עשיתי" / "פתח נוסח", "Done" / "Open text"), taken on the Android emulator ([android-native-verify](.claude/skills/android-native-verify/SKILL.md)), since the web build shows no notification; it goes second in each set.
     - Uploads go through Chrome, each file under 10 MB.
   - **What it solves:** English visitors see Hebrew screens today, and no screenshot shows the reminder buttons, the app's own feature.
@@ -214,10 +226,21 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
 ### Low — Store listings of 2026-10-26
 
 - [ ] Ask for a store rating inside the app
-  - **Ships as:** a native build (`expo-store-review` is a native module), with the next build and its version decision ([state.md](state.md)).
-  - **What it is:** the app asks the OS for its rating prompt (`StoreReview.requestReview()`) at the moment Q2 settles, never on the first launch and never inside a holy block (`quietBlockAt()` in [src/utils/skipRules.ts](src/utils/skipRules.ts)); the OS caps how often the prompt shows.
+  - **Flag:** `Build` (`expo-store-review` is a native module), with the next build and its version decision ([state.md](state.md)).
+  - **Decided:** the owner, 2026-10-26 (Q2, "מאשר את ההצעה שלך"): the app asks right after a mark made in the app, on the seventh app day that holds a mark; never for a mark from a notification, on the install's first app day, or inside a holy block. It asks once per install; the OS decides whether the sheet shows (Apple at most three times a year).
+  - **What it is:**
+    - Dependency: `npx expo install expo-store-review`, the version Expo SDK 54 pins.
+    - Rule: `shouldAskForRating({ completions, askedAt, firstOpenedAt, now, location, appActive })` in a new `src/utils/rating.ts`, true only when every condition holds: `askedAt` is null; `appActive`; `quietBlockAt(now, location)` ([src/utils/skipRules.ts](src/utils/skipRules.ts)) is null; `firstOpenedAt` is set and `appDayKey(firstOpenedAt)` differs from `appDayKey(now)` ([src/utils/locationDay.ts](src/utils/locationDay.ts)); and `completions` holds at least `RATING_MARKED_DAYS` (7) day keys with at least one mark (a day with only a skip does not count).
+    - Store: `ratingAskedAt` and `firstOpenedAt` in `useUserStore` ([src/stores/useUserStore.ts](src/stores/useUserStore.ts)), `number | null`, null by default and after a reset; optional fields, so no `STORE_VERSION` raise. Both ride the backup file with the user store, so a restored install is not a new user. The root layout sets `firstOpenedAt` at its first mount that finds it null, an existing install included, so an existing user can be asked from the day after the build is installed.
+    - Service: `watchForRatingMoment(): () => void` in a new `src/services/storeReview.ts` subscribes to `useCompletionsStore`. When the number of marks grows it waits `RATING_DELAY_MS` (1,500 ms, so the card's stamp plays first), evaluates the rule with `appActive` from `AppState.currentState === 'active'` and the user's location, and when it holds and `StoreReview.isAvailableAsync()` resolves true, stamps `ratingAskedAt` and then calls `StoreReview.requestReview()`. Unavailable stamps nothing. It never throws (a failure is logged with `console.warn`) and does nothing on web.
+    - The root layout ([src/app/_layout.tsx](src/app/_layout.tsx)) starts it after onboarding, beside `initNotificationHandlers()`, and runs its teardown on unmount. A `MARK_DONE` from a notification runs headless or with the app in the background, so `AppState` keeps it out.
+    - Docs: the two fields in the root [AGENTS.md](AGENTS.md) (State and Persistence), the service in [src/services/AGENTS.md](src/services/AGENTS.md), the rule in [src/utils/AGENTS.md](src/utils/AGENTS.md).
   - **What it solves:** ratings and downloads decide the rank for תהילים and סידור, where over 30 apps compete.
-  - **Expected result:** a test that the request runs once at the chosen moment and never on the first launch or inside a holy block; on a device, the store's rating sheet opens from a store-installed build.
+  - **Expected result:**
+    - `src/utils/__tests__/rating.test.ts`, also under `pnpm test:tz`: false at six marked days and true at the seventh; false once `askedAt` is set; false while not active; false inside a holy block (`at(Jerusalem, …)` on a Shabbat afternoon); false on the app day of `firstOpenedAt` and while it is null; a day with only a skip does not count.
+    - `src/services/__tests__/storeReview.test.ts`, over a mocked `expo-store-review`: a mark while active on the seventh marked day calls `requestReview` once after the delay and stamps `ratingAskedAt`; a later mark calls nothing; `isAvailableAsync` false calls nothing and stamps nothing; a mark while `AppState` is `background` calls nothing; the teardown unsubscribes.
+    - On a device: on Android, an install from Play's internal test track or internal app sharing shows the sheet after that mark; on iOS a development build always shows it and TestFlight never does (Apple's rule), so the iPhone check runs on a development build.
+    - The gate passes: `typecheck`, `lint`, `check:dox`, `test:tz`.
 
 ## Bugs
 
@@ -229,12 +252,6 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
   - **What it is:** Expo writes `locales.he` to `values-b+he`, which Android never reads for Hebrew (it resolves `iw`); [scripts/withAndroidLegacyHebrewLocale.js](scripts/withAndroidLegacyHebrewLocale.js) writes the same strings to `values-b+iw`, Android only.
   - **What it solves:** a Hebrew Android phone shows "Jew 365" instead of `יהודי 365` on the launcher, in Settings and in system dialogs.
   - **Expected result:** a phone set to Hebrew shows `יהודי 365 P` for the preview build, and the store production build shows `יהודי 365`.
-
-- [ ] Make the Chok LeYisrael enable-prompt case of the download suite deterministic
-  - **Flag:** `OTA` (test only).
-  - **What it is:** Found on 2026-10-25: the `ChokEnablePrompt` case of [ChokContentService.test.ts](src/services/__tests__/ChokContentService.test.ts) failed once in a full parallel `pnpm test` run and passed alone and on the re-run. Find what it waits on (a timer, a store subscription or a promise not awaited) and make it wait for the state it asserts. Run it after the Selichot add-on task, which moves that download code into the shared add-on core.
-  - **What it solves:** The gate never fails at random on that case.
-  - **Expected result:** The suite passes 20 runs in a row under `pnpm test -- --runInBand` and under the default parallel run.
 
 ## Open Questions
 
@@ -296,29 +313,10 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
 
 ### For the owner
 
-- **Q1 — An English (U.K.) localization on the App Store**
-  - **Question:** add an English (U.K.) localization (name `Jew 365`, the English subtitle and a keyword field of its own), so the Israel storefront, which reads English (U.K.) and Hebrew only, reads English copy and a second 100-character keyword field?
-  - **Assumption:** none is added; `jew` in the Hebrew keywords answers "jew 365" in Israel, and the English (U.S.) copy is read only in storefronts that list English (U.S.).
-  - **Lives in:** the App Store Connect localizations; not built yet: task "Set the App Store subtitle and keywords for search". Whether a language can be added while 1.0.21 waits for review is not checked.
-  - **What it affects:** English searches on the Israel storefront and the room for keywords there; which page an Israeli device set to English shows is not checked.
-- **Q2 — When the app asks for a store rating**
-  - **Question:** at which moment does the app ask for a store rating?
-  - **Assumption:** right after a mark, on the seventh day that has at least one mark, never on the first launch or inside a holy block.
-  - **Lives in:** not built yet: task "Ask for a store rating inside the app".
-  - **What it affects:** every user once, and the ratings that rank the app.
+None recorded. Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were answered by the owner on 2026-10-26 and became the tasks "Add an English (U.K.) localization on the App Store" and "Ask for a store rating inside the app".
 
 ## Other Open Items
 
-- **Approve the tzaddik page choices D1–D4.** The pages are in production since `1.0.21-2` ([action-log.md](action-log.md), 2026-10-26); the choices taken while building them wait for the owner, who approves or changes each:
-  - D1: Hebrew and English, like the rest of the app.
-  - D2: The content is researched by agents with web search. Every fact rests on two independent sources, kept per entry in a `sources` list that the app does not show. Stories are only ones told in published sources, retold in the app's own words. An adversarial fact-check runs before the content lands, and the content waits for the owner's (or a rav's) review under Other Open Items.
-  - D3: Waze opens with the grave's coordinates (`https://waze.com/ul?ll=<lat>,<lng>&navigate=yes`) only when the burial place is known, visitors can reach it, and two sources agree on the spot, in Israel or abroad. Otherwise the page says why there is no link (unknown, disputed or closed to visitors).
-  - D4: A notice that names two or more tzaddikim opens one page with a switch between them (a `SegmentedControl` of their names), on the first one named.
-- **Approve the display size choices D5–D8.** The setting is in production since `1.0.21-2` ([action-log.md](action-log.md), 2026-10-26); the choices taken while building it wait for the owner, who approves or changes each:
-  - D5: Seven steps: 80%, 85%, 90%, 95%, 100% (today's size, the default), 110% and 120%. They are chosen in Settings → Display with a − / + stepper and a live sample.
-  - D6: The siddur reader's text scales with the app, and its A+ / A− still works relative to that. The phone's own font size keeps applying on top, as today, so accessibility settings still work.
-  - D7: Sizes are read once at launch, because every screen builds its styles at load. A change therefore asks once and then reloads the app (about a second). The same reload already happens when the language changes direction.
-  - D8: This session, after the hilula pages. A separate session would start from the last commit, without the 140 files of uncommitted work, and would collide with them.
 - **Review the content of the 57 tzaddik pages** ([src/data/hilulaPages.ts](src/data/hilulaPages.ts)). Agents researched it and an adversarial pass fact-checked it on 2026-10-26: 124 corrections and 45 doubts. The points that need the owner or a rav:
   - King David's link goes to the traditional site on Mount Zion, which historians do not take as the real grave.
   - Kever Rachel and Nabi Samwil are reached through secured routes.

@@ -1,6 +1,6 @@
 # Project State
 
-Where Jew 365 stands now, on one page. Last updated 2026-10-26 at commit `495468d`, after production update `1.0.21-2` (built from `c1989c4`, pushed, CI green) and the move of the records to the production rule (action-log.md holds only work in production; finished work waits in not-close.md with its stage); the EAS and Pages facts below were read that day (`eas update:list`, `eas branch:list`, `eas channel:list`, `eas build:list`, `curl`), the store facts were read from both consoles the same day ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-10-26). This page points to the documents that own the details:
+Where Jew 365 stands now, on one page. Last updated 2026-10-26 at commit `d4c250e`, after production update `1.0.21-2` (built from `c1989c4`, pushed, CI green) and the move of the records to the production rule (action-log.md holds only work in production; finished work waits in not-close.md with its stage); the EAS and Pages facts below were read that day (`eas update:list`, `eas branch:list`, `eas channel:list`, `eas build:list`, `curl`), the store facts were read from both consoles the same day ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-10-26). This page points to the documents that own the details:
 
 - Everything open: [not-close.md](not-close.md).
 - Everything in production, with its version, commit and production id: [action-log.md](action-log.md).
@@ -19,7 +19,7 @@ Where Jew 365 stands now, on one page. Last updated 2026-10-26 at commit `495468
 
 - Identity: `Jew 365` / `יהודי 365`, Android package and iOS bundle `com.jew365.app`, EAS project `@jew-365-org/jew-365` (`681ad224-93cc-4094-81cd-f70c48087485`).
 - Version: `1.0.21` in [app.json](app.json) and [package.json](package.json); `runtimeVersion` follows it (`appVersion` policy), so updates reach only 1.0.21 builds.
-- `main` is at `495468d` and `origin/main` at `a3058a4` (2026-10-26); both hold `c1989c4`, the commit of production `1.0.21-2`.
+- `main` and `origin/main` are at `d4c250e` (2026-10-26, CI green); both hold `c1989c4`, the commit of production `1.0.21-2`.
 
 ## Over-the-air updates
 
@@ -54,9 +54,9 @@ Every other EAS build is superseded, and no other AAB was uploaded to Play ([act
 
 ## Next steps
 
-1. The owner approves or changes the choices taken on 2026-10-26 (D1–D8, Other Open Items in [not-close.md](not-close.md)) and reviews the tzaddik content (Other Open Items there).
+1. The owner, or a rav, reviews the tzaddik content (Other Open Items in [not-close.md](not-close.md)); the choices of the tzaddik pages and the display size (D1–D8) were approved on 2026-10-26 ([action-log.md](action-log.md)).
 2. Check production `1.0.21-2` on a phone with the production app (Settings shows `1.0.21-2`), and its launches with `npx eas-cli update:insights 7f18981c-709b-475b-a0ce-19ae67b87c94`.
 3. Keep 12 or more testers opted in until about 2026-11-06, then apply for production in the Play Console.
 4. Watch the App Store review; after approval, the TestFlight checks on an iPhone, then the owner's Release. The EU trader documents are the owner's.
-5. Enter the App Store subtitle and keywords while 1.0.21 waits for review, then re-enter the store copy in both consoles with the Play short description before the production application, and send the rav the review page link ([not-close.md](not-close.md), Store listings of 2026-10-26).
+5. Enter the App Store subtitle and keywords and the English (U.K.) localization while 1.0.21 waits for review, then re-enter the store copy in both consoles with the Play short description before the production application, and send the rav the review page link ([not-close.md](not-close.md), Store listings of 2026-10-26).
 6. The next native build when the user asks: the arm-only direct APK and R8 ([not-close.md](not-close.md)).

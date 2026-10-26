@@ -85,11 +85,21 @@ Every task, bug fix and code action of the project that was done and verified, n
   - Version: OTA `1.0.21-2` · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: preview `1.0.21-1` (group `59dbbc4c-cf6b-483f-9a46-ab7a81c304d5`, 2026-10-26); production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, 2026-10-26) · Channel: production, preview
 
 - **A page for every tzaddik of the hilulot list** — `/hilula/[id]` ([src/app/hilula/[id].tsx](<src/app/hilula/[id].tsx>)) for the 57 tzaddikim of `HILULOT`, opened from the hilulot list and from the hilula notice (`data.hilula.ids`; a notice that names two shows a switch between them). The page shows a biography (at most 80 words), two lessons, books and works (none for a biblical figure), one or two stories (at most 80 words), and the burial place with a Waze link where the grave is known and reachable. The content in [src/data/hilulaPages.ts](src/data/hilulaPages.ts) is in Hebrew and English, researched by five agents and fact-checked by five more: 124 corrections, 45 doubts. 48 graves link to Waze (9 of them through a search for the cemetery), and 9 explain why they do not.
-  - Requested: the user, 2026-10-26, after the phone-check batch; the planner's choices D1 to D4 in [not-close.md](not-close.md) await the owner's approval, and the content awaits review there.
+  - Requested: the user, 2026-10-26, after the phone-check batch; the content awaits review in [not-close.md](not-close.md).
+  - Choices approved by the owner on 2026-10-26 ("מאשר"):
+    - D1: Hebrew and English, like the rest of the app.
+    - D2: the content is researched by agents with web search; every fact rests on two independent sources, kept per entry in a `sources` list the app does not show; stories are only ones told in published sources, retold in the app's own words; an adversarial fact-check runs before the content lands, and the content waits for the owner's or a rav's review.
+    - D3: Waze opens with the grave's coordinates (`https://waze.com/ul?ll=<lat>,<lng>&navigate=yes`) only when the burial place is known, visitors can reach it, and two sources agree on the spot; otherwise the page says why there is no link.
+    - D4: a notice that names two or more tzaddikim opens one page with a switch between them (a `SegmentedControl` of their names), on the first one named.
   - Verified: [src/app/__tests__/hilula.render.test.tsx](src/app/__tests__/hilula.render.test.tsx), [src/data/__tests__/hilulaPages.test.ts](src/data/__tests__/hilulaPages.test.ts) (every entry: word limits, no nikud, two sources, coordinates or a search), the tap-routing and planner suites, and the Android emulator (the Rambam page, its stories and its Waze button).
   - Version: OTA `1.0.21-2` · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: preview `1.0.21-1` (group `59dbbc4c-cf6b-483f-9a46-ab7a81c304d5`, 2026-10-26); production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, 2026-10-26) · Channel: production, preview
 - **A display size for the whole app** — Settings → Device and notifications → Display: seven steps from 80% to 120%, with a sample of the pending size. Applying a step reloads the app, because the theme reads the factor once at launch ([src/theme/scale.ts](src/theme/scale.ts)). Tokens, fixed sizes, icons and the reader's text all scale; the reader's A+ / A− stays relative to it. A restore or reset that changes the size reloads too, and the onboarding restore does so only after its permission step.
-  - Requested: the user, 2026-10-26 ("כרגע זה מוגדל יחסית"); the planner's choices D5 to D8 await the owner's approval.
+  - Requested: the user, 2026-10-26 ("כרגע זה מוגדל יחסית").
+  - Choices approved by the owner on 2026-10-26 ("מאשר הכל"):
+    - D5: seven steps, 80%, 85%, 90%, 95%, 100% (the default), 110% and 120%, chosen in Settings → Display with a − / + stepper and a live sample.
+    - D6: the siddur reader's text scales with the app, its A+ / A− stays relative to that, and the phone's own font size still applies on top.
+    - D7: sizes are read once at launch, so a change asks once and reloads the app.
+    - D8: built in the same session, after the tzaddik pages.
   - Verified:
     - the scale, store, Settings and sweep suites, with tests at 0.8 and 1.2;
     - the web preview at 120% on 360 dp: no content wider than the screen on settings, home, the siddur tab, a mitzvah screen, the custom form or the reader;
@@ -352,6 +362,7 @@ Every task, bug fix and code action of the project that was done and verified, n
 
 - **Jest `testTimeout` 30 s** — the first render of a heavy screen passed 5 s under `pnpm test:tz` ([package.json](package.json)).
   - Found: `test:tz` runs, 2026-10-25. Verified: the final gate.
+  - It also closes the open item "Make the Chok LeYisrael enable-prompt case of the download suite deterministic": "the enable prompt › on screen › asks when a first download ends…" of [ChokContentService.test.ts](src/services/__tests__/ChokContentService.test.ts) failed in a full parallel run on 2026-10-25, and that session's log records the failure as the 5 s timeout. The case's logic is synchronous; its first render takes about 0.6 s alone and up to 4.5 s with 16 runs of the suite at once. Verified 2026-10-26: 20 `--runInBand` runs in a row, 48 runs 16 at a time, 32 runs 16 at a time under `--testTimeout=5000`, and a full parallel `pnpm test` (4,727 passed), all green.
   - Version: none (tests only) · Committed: yes, `0ddc971` · Pushed: yes · Live: n/a, with production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, from `c1989c4`) · Channel: —
 - **The emulator skill tears down its `adb reverse`** ([.claude/skills/android-native-verify/SKILL.md](.claude/skills/android-native-verify/SKILL.md)).
   - Found: an adb server hang during phase 2, 2026-10-25. Verified: phase 6 teardown left `reverse --list` empty.
