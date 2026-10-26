@@ -11,7 +11,8 @@
       "Bash(git commit *)",
       "Bash(node -e \"const e=require\\('./eas.json'\\);for\\(const [k,v] of Object.entries\\(e.build\\)\\)console.log\\(k,JSON.stringify\\({channel:v.channel,extends:v.extends,dist:v.distribution,ios:v.ios}\\)\\)\")",
       "Bash(node -e \"const a=require\\('./app.json'\\).expo;console.log\\(JSON.stringify\\({version:a.version,runtimeVersion:a.runtimeVersion,updates:a.updates,iosRV:a.ios&&a.ios.runtimeVersion}\\)\\)\")",
-      "Bash(node -e \"let s='';process.stdin.on\\('data',d=>s+=d\\).on\\('end',\\(\\)=>{const j=JSON.parse\\(s.slice\\(s.indexOf\\('['\\)\\)\\);for\\(const b of j\\)console.log\\(b.id.slice\\(0,8\\),b.status,b.buildProfile,'ch='+b.channel,'rv='+b.runtimeVersion,'v='+b.appVersion,'#'+b.appBuildVersion,b.gitCommitHash&&b.gitCommitHash.slice\\(0,7\\),b.createdAt\\)}\\)\")"
+      "Bash(node -e \"let s='';process.stdin.on\\('data',d=>s+=d\\).on\\('end',\\(\\)=>{const j=JSON.parse\\(s.slice\\(s.indexOf\\('['\\)\\)\\);for\\(const b of j\\)console.log\\(b.id.slice\\(0,8\\),b.status,b.buildProfile,'ch='+b.channel,'rv='+b.runtimeVersion,'v='+b.appVersion,'#'+b.appBuildVersion,b.gitCommitHash&&b.gitCommitHash.slice\\(0,7\\),b.createdAt\\)}\\)\")",
+      "Bash(node -e \"let s='';process.stdin.on\\('data',d=>s+=d\\).on\\('end',\\(\\)=>{const j=JSON.parse\\(s\\);for\\(const u of \\(j.currentPage||j\\)\\){console.log\\(u.group, u.message, u.createdAt||'', u.platforms||''\\)}}\\)\")"
     ]
   }
 }
