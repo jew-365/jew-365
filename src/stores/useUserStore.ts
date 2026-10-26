@@ -11,6 +11,7 @@ import { CITIES, refreshSavedLocation } from '@/data/cities';
 import type { LocationSource, LocationStatus } from '@/services/LocationService';
 import type { HilulaWhen, RoshChodeshWhen } from '@/services/notifications/ids';
 import { THEME_NAMES, ThemeName } from '@/theme/colors';
+import { DEFAULT_UI_SCALE, isUiScale } from '@/theme/scale';
 
 export type Language = 'he' | 'en';
 export type NotificationPermissionStatus = 'unknown' | 'granted' | 'denied';
@@ -98,6 +99,7 @@ type UserState = {
   locationStatus: LocationStatus;
   locationSource: LocationSource;
   theme: ThemeName;
+  uiScale: number;
   language: Language;
   notificationPermission: NotificationPermissionStatus;
   notificationsEnabled: boolean;
@@ -127,6 +129,7 @@ type UserState = {
   setLocationState: (l: Location, status: LocationStatus, source: LocationSource) => void;
   setLocationStatus: (status: LocationStatus) => void;
   setTheme: (t: ThemeName) => void;
+  setUiScale: (scale: number) => void;
   setLanguage: (l: Language) => void;
   setNotificationPermission: (status: NotificationPermissionStatus) => void;
   setNotificationsEnabled: (v: boolean) => void;
@@ -171,6 +174,7 @@ const mergeSavedUserState = (persisted: unknown, current: UserState): UserState 
   const { theme, ...saved } = (persisted ?? {}) as PersistedUserState;
   const merged = { ...current, ...saved, theme: theme === undefined ? current.theme : savedThemeName(theme) };
   if (merged.taharahEnabled && merged.maritalStatus == null) merged.maritalStatus = 'married';
+  if (!isUiScale(merged.uiScale)) merged.uiScale = DEFAULT_UI_SCALE;
   merged.location = refreshSavedLocation(merged.location, merged.locationSource);
   merged.inIsrael = merged.location.inIsrael;
   merged.hilulaNotices = savedNotices(DEFAULT_HILULA_NOTICES, saved.hilulaNotices);
@@ -190,6 +194,7 @@ export const useUserStore = create<UserState>()(
       locationStatus: 'missing',
       locationSource: 'manual',
       theme: DEFAULT_THEME,
+      uiScale: DEFAULT_UI_SCALE,
       language: 'he',
       notificationPermission: 'unknown',
       notificationsEnabled: true,
@@ -221,6 +226,7 @@ export const useUserStore = create<UserState>()(
       // Records that a lookup failed without touching the chosen location.
       setLocationStatus: (status) => set({ locationStatus: status }),
       setTheme: (t) => set({ theme: t }),
+      setUiScale: (scale) => set((s) => (isUiScale(scale) ? { uiScale: scale } : s)),
       setLanguage: (l) => set({ language: l }),
       setNotificationPermission: (status) => set({ notificationPermission: status }),
       setNotificationsEnabled: (v) => set({ notificationsEnabled: v }),
@@ -263,6 +269,7 @@ export const useUserStore = create<UserState>()(
           locationStatus: 'missing',
           locationSource: 'manual',
           theme: DEFAULT_THEME,
+          uiScale: DEFAULT_UI_SCALE,
           language: 'he',
           notificationPermission: 'unknown',
           notificationsEnabled: true,

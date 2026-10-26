@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { reloadApp } from '@/services/appReload';
 import { storage } from '@/services/StorageService';
 import { clearTaharahStorage } from '@/services/TaharahStorage';
 import { clearLastError, reportError } from '@/services/errors';
@@ -15,6 +16,7 @@ import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useChokStore } from '@/stores/useChokStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
 import { NotificationScheduler, setSchedulingSuspended } from '@/services/NotificationScheduler';
+import { DEFAULT_UI_SCALE, UI_SCALE } from '@/theme/scale';
 
 export const AppResetService = {
   // Order matters. Resetting the stores fires the scheduler's subscriptions, so scheduling is
@@ -67,5 +69,6 @@ export const AppResetService = {
     } finally {
       setSchedulingSuspended(false);
     }
+    if (UI_SCALE !== DEFAULT_UI_SCALE) reloadApp();
   },
 };

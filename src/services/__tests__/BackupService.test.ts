@@ -54,6 +54,9 @@ jest.mock('@/services/SelichotContentService', () => ({
 const mockShareAsync = jest.fn(async (..._args: unknown[]) => {});
 jest.mock('expo-sharing', () => ({ shareAsync: (...args: unknown[]) => mockShareAsync(...args) }));
 
+const mockReload = jest.fn();
+jest.mock('@/services/appReload', () => ({ reloadApp: () => mockReload() }));
+
 import {
   BACKUP_APP,
   BACKUP_FORMAT,
@@ -67,6 +70,7 @@ import {
   parseBackup,
   pickBackup,
   RESTORABLE_APPS,
+  reloadIfScaleChanged,
   restoreBackup,
   type Backup,
 } from '../BackupService';
@@ -79,6 +83,7 @@ import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
+import { DEFAULT_UI_SCALE, __setUiScaleForTests } from '@/theme/scale';
 import { CITIES } from '@/data/cities';
 import type { CustomMitzvah } from '@/types/mitzvah';
 
@@ -114,6 +119,7 @@ function fillSource() {
   user.setOnboarded(true);
   user.setSiddurFontSize(28);
   user.setChokThuNightDay('fri');
+  user.setUiScale(1.1);
   useMitzvotStore.getState().setEnabled('havdalah', true);
   useCompletionsStore.getState().markDone('shacharit', MARK_DAY);
   useCompletionsStore.getState().markSkipped('mincha', MARK_DAY);
@@ -233,6 +239,8 @@ describe('BackupService', () => {
   });
 
   describe('restoreBackup', () => {
+    afterEach(() => __setUiScaleForTests(DEFAULT_UI_SCALE));
+
     it('replaces every store with the file and rebuilds the schedule once', async () => {
       const haifa = fillSource();
       const backup = createBackup(CREATED);
@@ -252,6 +260,7 @@ describe('BackupService', () => {
       expect(user.isOnboarded).toBe(true);
       expect(user.siddurFontSize).toBe(28);
       expect(user.chokThuNightDay).toBe('fri');
+      expect(user.uiScale).toBe(1.1);
       expect(user.location.cityId).toBe(haifa.cityId);
       expect(user.inIsrael).toBe(haifa.inIsrael);
       expect(useMitzvotStore.getState().activeMitzvot.havdalah.enabled).toBe(true);
@@ -381,6 +390,95 @@ describe('BackupService', () => {
       await restoreBackup(backup);
 
       expect(useTaharahStore.getState().events).toHaveLength(1);
+    });
+
+    it('reloads the app once the schedule is rebuilt when the file carries another display size', async () => {
+      fillSource();
+      const backup = createBackup(CREATED);
+      resetAll();
+      const order: string[] = [];
+      jest.spyOn(NotificationScheduler, 'rebuild').mockImplementation(async () => {
+        order.push('rebuild');
+      });
+      mockReload.mockImplementationOnce(() => order.push('reload'));
+
+      await restoreBackup(backup);
+
+      expect(useUserStore.getState().uiScale).toBe(1.1);
+      expect(order).toContain('rebuild');
+      expect(order.filter((step) => step === 'reload')).toHaveLength(1);
+      expect(order[order.length - 1]).toBe('reload');
+    });
+
+    it('reloads when the file carries no display size while another one is running', async () => {
+      useUserStore.getState().setOnboarded(true);
+      const backup = createBackup(CREATED);
+      __setUiScaleForTests(1.2);
+
+      await restoreBackup(backup);
+
+      expect(useUserStore.getState().uiScale).toBe(DEFAULT_UI_SCALE);
+      expect(mockReload).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves the reload to the caller when asked, and still rebuilds the schedule', async () => {
+      fillSource();
+      const backup = createBackup(CREATED);
+      resetAll();
+      const rebuild = jest.spyOn(NotificationScheduler, 'rebuild').mockResolvedValue();
+
+      await restoreBackup(backup, { reload: false });
+
+      expect(useUserStore.getState().uiScale).toBe(1.1);
+      expect(rebuild).toHaveBeenCalled();
+      expect(mockReload).not.toHaveBeenCalled();
+
+      reloadIfScaleChanged();
+
+      expect(mockReload).toHaveBeenCalledTimes(1);
+    });
+
+    it('reloads by default and when the option leaves the reload on', async () => {
+      fillSource();
+      const backup = createBackup(CREATED);
+
+      await restoreBackup(backup, { reload: true });
+      await restoreBackup(backup, {});
+
+      expect(mockReload).toHaveBeenCalledTimes(2);
+    });
+
+    it('reloadIfScaleChanged reloads only while the stored display size is not the running one', () => {
+      reloadIfScaleChanged();
+      expect(mockReload).not.toHaveBeenCalled();
+
+      useUserStore.getState().setUiScale(1.2);
+      reloadIfScaleChanged();
+      expect(mockReload).toHaveBeenCalledTimes(1);
+
+      __setUiScaleForTests(1.2);
+      reloadIfScaleChanged();
+      expect(mockReload).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not reload when the file carries the display size that is running', async () => {
+      fillSource();
+      const backup = createBackup(CREATED);
+      __setUiScaleForTests(1.1);
+
+      await restoreBackup(backup);
+
+      expect(useUserStore.getState().uiScale).toBe(1.1);
+      expect(mockReload).not.toHaveBeenCalled();
+    });
+
+    it('does not reload when the file and the running app are both at the default size', async () => {
+      useUserStore.getState().setOnboarded(true);
+      const backup = createBackup(CREATED);
+
+      await restoreBackup(backup);
+
+      expect(mockReload).not.toHaveBeenCalled();
     });
 
     it('holds scheduling while the stores are swapped', async () => {

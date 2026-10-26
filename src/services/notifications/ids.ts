@@ -46,7 +46,7 @@ export type PendingNotificationMeta = {
     | typeof ROSH_CHODESH_KIND
     | typeof REPORT_KIND;
   taharah?: { task: TaharahTaskKind | 'tevilaPrep' | 'postBlock' | 'preBlock'; day: number; onah?: OnahKind };
-  hilula?: { day: number; when: HilulaWhen };
+  hilula?: { day: number; when: HilulaWhen; ids?: string[] };
   roshChodesh?: { day: number; when: RoshChodeshWhen };
   report?: { week: string };
   blockId?: string;

@@ -1,4 +1,4 @@
-import { TIME_PATTERN, clockOf, clockRange, formatRemaining, timeToMinutes } from '../clock';
+import { TIME_PATTERN, clockOf, clockRange, fireTimeText, formatRemaining, timeToMinutes } from '../clock';
 import { translate } from '@/i18n';
 
 const he = (scope: string) => translate(scope, undefined, 'he');
@@ -75,6 +75,40 @@ describe('clockOf', () => {
 
   it('pads single digits on both parts', () => {
     expect(clockOf(new Date('2026-05-06T00:05:00Z'), 'UTC')).toBe('00:05');
+  });
+});
+
+describe('fireTimeText', () => {
+  const instant = new Date('2026-05-06T08:30:00Z');
+
+  it.each([
+    ['UTC', '06/05 08:30'],
+    ['Asia/Jerusalem', '06/05 11:30'],
+    ['America/Los_Angeles', '06/05 01:30'],
+    ['Pacific/Kiritimati', '06/05 22:30'],
+  ])('writes the day and the clock of %s as %s', (zone, expected) => {
+    expect(fireTimeText(instant, zone)).toBe(expected);
+  });
+
+  it('moves to the previous date in a zone behind UTC when the clock has not reached midnight there', () => {
+    const earlyMorning = new Date('2026-05-06T02:00:00Z');
+    expect(fireTimeText(earlyMorning, 'UTC')).toBe('06/05 02:00');
+    expect(fireTimeText(earlyMorning, 'America/Los_Angeles')).toBe('05/05 19:00');
+  });
+
+  it('agrees with the clock of the same zone', () => {
+    expect(fireTimeText(instant, 'Asia/Jerusalem')).toBe(`06/05 ${clockOf(instant, 'Asia/Jerusalem')}`);
+  });
+
+  it('moves to the next date in a zone ahead of the device when the clock passes midnight there', () => {
+    const lateEvening = new Date('2026-05-06T21:30:00Z');
+    expect(fireTimeText(lateEvening, 'UTC')).toBe('06/05 21:30');
+    expect(fireTimeText(lateEvening, 'Asia/Jerusalem')).toBe('07/05 00:30');
+    expect(fireTimeText(lateEvening, 'America/Los_Angeles')).toBe('06/05 14:30');
+  });
+
+  it('pads single digits on the day, the month and the clock', () => {
+    expect(fireTimeText(new Date('2026-01-02T03:04:00Z'), 'UTC')).toBe('02/01 03:04');
   });
 });
 

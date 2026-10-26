@@ -2,6 +2,7 @@ import {
   CHOK_COMMENTARY_LABELS,
   HAFTARAH_VARIANT,
   chokParashaName,
+  chokPlaceOf,
   chokReaderPortion,
   chokSlotSections,
   chokText,
@@ -311,6 +312,28 @@ describe('chokText', () => {
       'Pekudei:sun:נביאים - מלכים א - פרק ז:0',
     ]);
     expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it('gives a place to every key of a parasha and none to a make-up heading', () => {
+    const text = chokText([VAYAKHEL, PEKUDEI], {
+      ...options,
+      makeUps: [{ dateKey: '2028-03-24', slot: 'fri', label: { he: 'השלמה: יום שישי', en: 'Make-up: Friday' } }],
+    });
+    const keys = text.sections.flatMap((s) => s.segments.map((segment) => segment.key ?? ''));
+    const places = keys.map((key) => chokPlaceOf(key));
+    expect(places.filter((place) => place !== null)).toEqual([
+      { parasha: 'Vayakhel', slot: 'fri' },
+      { parasha: 'Vayakhel', slot: 'fri' },
+      { parasha: 'Vayakhel', slot: 'fri' },
+      { parasha: 'Pekudei', slot: 'fri' },
+      { parasha: 'Pekudei', slot: 'fri' },
+      { parasha: 'Pekudei', slot: 'fri' },
+      { parasha: 'Vayakhel', slot: 'sun' },
+      { parasha: 'Vayakhel', slot: 'sun' },
+      { parasha: 'Pekudei', slot: 'sun' },
+      { parasha: 'Pekudei', slot: 'sun' },
+    ]);
+    expect(keys.filter((key) => key.startsWith('makeUp:')).every((key) => chokPlaceOf(key) === null)).toBe(true);
   });
 });
 

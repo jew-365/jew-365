@@ -2,11 +2,14 @@ import { HDate } from '@hebcal/core';
 import {
   CHOK_SLOTS,
   VEZOT_HABERACHA,
+  chokBrowsePortion,
+  chokChosen,
   chokDayHasText,
   chokDoneDay,
   chokMakeUpsBefore,
   chokOpenMakeUps,
   chokParashiyot,
+  chokPlaceOf,
   chokPortionAt,
   chokPortionOn,
   chokSlotDay,
@@ -520,5 +523,76 @@ describe('where the sun neither rises nor sets: Longyearbyen, June 2026', () => 
       slot: 'sun',
       shabbat: '2026-06-27',
     });
+  });
+});
+
+describe('chokBrowsePortion', () => {
+  const week: ChokPortion = { parashiyot: ['Vayakhel', 'Pekudei'], slot: 'wed', shabbat: shabbatOfWeek(2028, 3, 20) };
+  const shown = (parasha: string, slot: ChokPortion['slot'] | null, from = week) =>
+    view(chokBrowsePortion(parasha, from, slot))!;
+
+  it('reads one parasha in the week of the one it replaces, keeping the Shabbat', () => {
+    expect(shown('Bereshit', null)).toEqual({ parashiyot: ['Bereshit'], slot: 'wed', shabbat: '2028-03-25' });
+  });
+
+  it('takes the requested slot when the parasha has it', () => {
+    expect(shown('Noach', 'mon')).toEqual({ parashiyot: ['Noach'], slot: 'mon', shabbat: '2028-03-25' });
+    expect(shown('Noach', 'thuNight').slot).toBe('thuNight');
+    expect(shown('Noach', 'fri').slot).toBe('fri');
+  });
+
+  it("falls back to the week's slot when the request is none", () => {
+    expect(shown('Noach', null).slot).toBe('wed');
+  });
+
+  it('gives Vezot Haberakhah no Friday: the requested Friday falls back to the week slot', () => {
+    expect(chokSlotsOf(VEZOT_HABERACHA)).not.toContain('fri');
+    expect(shown(VEZOT_HABERACHA, 'fri').slot).toBe('wed');
+  });
+
+  it("falls back to Vezot Haberakhah's last slot when neither the request nor the week's slot is there", () => {
+    const friday: ChokPortion = { ...week, slot: 'fri' };
+    expect(shown(VEZOT_HABERACHA, 'fri', friday).slot).toBe('thuNight');
+    expect(shown(VEZOT_HABERACHA, null, friday).slot).toBe('thuNight');
+  });
+
+  it('does not change the portion it was given', () => {
+    const before = view(week);
+    shown('Bereshit', 'sun');
+    expect(view(week)).toEqual(before);
+  });
+});
+
+describe('chokPlaceOf', () => {
+  it('reads the parasha and the slot of a segment key', () => {
+    expect(chokPlaceOf('Bereshit:mon:תורה:3')).toEqual({ parasha: 'Bereshit', slot: 'mon' });
+    expect(chokPlaceOf('Vayakhel:thuNight:משנה שבת: פרק כב:0')).toEqual({ parasha: 'Vayakhel', slot: 'thuNight' });
+  });
+
+  it('keeps the slot of a Friday in a regular parasha and refuses it in Vezot Haberakhah', () => {
+    expect(chokPlaceOf('Noach:fri:תורה:0')).toEqual({ parasha: 'Noach', slot: 'fri' });
+    expect(chokPlaceOf(`${VEZOT_HABERACHA}:thu:תורה:0`)).toEqual({ parasha: VEZOT_HABERACHA, slot: 'thu' });
+    expect(chokPlaceOf(`${VEZOT_HABERACHA}:fri:תורה:0`)).toBeNull();
+  });
+
+  it('gives null for a make-up heading key, an unknown parasha, an unknown slot and a bare string', () => {
+    expect(chokPlaceOf('makeUp:mon:תורה')).toBeNull();
+    expect(chokPlaceOf('Atlantis:mon:תורה:0')).toBeNull();
+    expect(chokPlaceOf('Noach:saturday:תורה:0')).toBeNull();
+    expect(chokPlaceOf('Noach')).toBeNull();
+    expect(chokPlaceOf('')).toBeNull();
+  });
+});
+
+describe('chokChosen', () => {
+  it('keeps one parasha as it is, whatever the choice', () => {
+    expect(chokChosen(['Noach'], 'second')).toEqual(['Noach']);
+  });
+
+  it('picks the first, the second or both of a double week', () => {
+    const week = ['Vayakhel', 'Pekudei'];
+    expect(chokChosen(week, 'first')).toEqual(['Vayakhel']);
+    expect(chokChosen(week, 'second')).toEqual(['Pekudei']);
+    expect(chokChosen(week, 'both')).toEqual(week);
   });
 });

@@ -94,6 +94,7 @@ const weekday = (iso: string) => formatDate(DateTime.fromISO(iso), 'cccc', 'he')
 
 const CHESHVAN_3 = new HDate(3, months.CHESHVAN, 5787).abs(); // Wednesday 2026-10-14
 const RUZHIN_AND_OVADIA = 'רבי ישראל מרוז׳ין, הרב עובדיה יוסף';
+const RUZHIN_AND_OVADIA_IDS = ['yisrael_of_ruzhin', 'ovadia_yosef'];
 
 describe('NotificationScheduler hilula notices', () => {
   beforeEach(() => {
@@ -130,7 +131,10 @@ describe('NotificationScheduler hilula notices', () => {
     expect(before.content.title).toBe(t('hilulot.notice.before.title', { names: RUZHIN_AND_OVADIA }));
     expect(before.content.body).toBe(t('hilulot.notice.before.body', { date: 'ג׳ חשון' }));
     expect(before.content.categoryIdentifier).toBeUndefined();
-    expect(before.content.data).toEqual({ kind: 'hilula', hilula: { day: CHESHVAN_3, when: 'before' } });
+    expect(before.content.data).toEqual({
+      kind: 'hilula',
+      hilula: { day: CHESHVAN_3, when: 'before', ids: RUZHIN_AND_OVADIA_IDS },
+    });
 
     const evening = pendingOf(`hilula:${CHESHVAN_3}:evening`)!;
     expect(evening.trigger!.date.getTime()).toBe(shkiaOn('2026-10-13').getTime());
@@ -138,6 +142,37 @@ describe('NotificationScheduler hilula notices', () => {
     expect(evening.content.body).toBe(t('hilulot.notice.evening.body', { date: 'ג׳ חשון' }));
     expect(evening.content.categoryIdentifier).toBeUndefined();
     expect(evening.trigger!.channelId).toBe('hilulot');
+    expect(evening.content.data).toEqual({
+      kind: 'hilula',
+      hilula: { day: CHESHVAN_3, when: 'evening', ids: RUZHIN_AND_OVADIA_IDS },
+    });
+  });
+
+  describe('the ids a tap opens a page for', () => {
+    // 18 Iyar 5787 is Tuesday 2027-05-25, Lag BaOmer, the day of two tzaddikim; 17 Iyar has one.
+    const IYAR_18 = new HDate(18, months.IYYAR, 5787).abs();
+    const IYAR_17 = new HDate(17, months.IYYAR, 5787).abs();
+    beforeEach(() => jest.setSystemTime(at(JERUSALEM, '2027-05-23T06:00')));
+
+    it('12 lists the tzaddikim of the day in the order of the list, on both kinds of notice', async () => {
+      await NotificationScheduler.rebuild();
+
+      for (const when of ['before', 'evening']) {
+        expect(pendingOf(`hilula:${IYAR_18}:${when}`)!.content.data).toEqual({
+          kind: 'hilula',
+          hilula: { day: IYAR_18, when, ids: ['rashbi', 'rema'] },
+        });
+      }
+    });
+
+    it('13 lists the one tzaddik of a day that has one', async () => {
+      await NotificationScheduler.rebuild();
+
+      expect(pendingOf(`hilula:${IYAR_17}:evening`)!.content.data).toEqual({
+        kind: 'hilula',
+        hilula: { day: IYAR_17, when: 'evening', ids: ['noda_biyehuda'] },
+      });
+    });
   });
 
   it('3 drops a notice whose shkia has passed', async () => {

@@ -1,5 +1,5 @@
 import { HDate, months } from '@hebcal/core';
-import { ContentBlock, Mitzvah, Nusach } from '@/types/mitzvah';
+import { ContentBlock, Mitzvah, Nusach, UserSettings } from '@/types/mitzvah';
 import { Location, Zmanim } from '@/types/zmanim';
 import { HebcalService } from '@/services/HebcalService';
 import { ZmanimService, isJerusalem } from '@/services/ZmanimService';
@@ -16,7 +16,7 @@ import {
   StandaloneTextId,
 } from '@/types/siddur';
 import { CHOK_TEXT_ID } from './chok';
-import { dayWindow } from '@/utils/buildDayTimeline';
+import { DayWindow, dayWindow } from '@/utils/buildDayTimeline';
 import { SELICHOT_NUSCHAOT, SELICHOT_TEXT_ID, hasSelichotContent } from './selichot';
 import { chokDayHasText } from '@/utils/chok';
 import { appDay, locationNoon } from '@/utils/locationDay';
@@ -29,7 +29,17 @@ import {
 } from '@/utils/siddur';
 import { SIDDUR_ASSETS } from './siddurAssets.generated';
 
-type SiddurEntry = { evening: boolean; available?: Condition };
+// The first Hebrew day on which a text's season can open in a Hebrew year: it only narrows the search for the
+// next day the text is said, never decides whether a day has it.
+type SeasonStart = (year: number) => HDate;
+
+// `availableLabel` tells the catalog when a text with no window today can be said.
+type SiddurEntry = {
+  evening: boolean;
+  available?: Condition;
+  availableLabel?: { he: string; en: string };
+  season?: SeasonStart;
+};
 
 export const SIDDUR_TEXTS: Record<MitzvahTextId, SiddurEntry> = {
   tefillin: { evening: false },
@@ -37,7 +47,11 @@ export const SIDDUR_TEXTS: Record<MitzvahTextId, SiddurEntry> = {
   krias_shma_shacharit: { evening: false },
   candle_lighting: { evening: true },
   havdalah: { evening: true, available: { none: ['yomTov'] } },
-  sefirat_haomer: { evening: true },
+  sefirat_haomer: {
+    evening: true,
+    availableLabel: { he: 'מליל שני של פסח עד ערב שבועות', en: 'From the second night of Pesach to Erev Shavuot' },
+    season: (year) => new HDate(15, months.NISAN, year),
+  },
   shacharit: { evening: false, available: { none: ['shabbat', 'yomTov', 'yomKippur'] } },
   mincha: { evening: false, available: { none: ['shabbat', 'yomTov', 'yomKippur'] } },
   maariv: { evening: true, available: { none: ['shabbat', 'yomTov', 'yomKippur'] } },
@@ -61,6 +75,7 @@ export type StandaloneEntry = Availability & {
   availableIn?: Partial<Record<Nusach, Availability>>;
   hours?: TextHours | 'mitzvah';
   periodEnd?: (night: HDate, nusach: Nusach, location: Location) => Date;
+  season?: SeasonStart;
 };
 
 const TONIGHT_TO_DAWN: TextHours = (day, next, location) => ({
@@ -134,6 +149,7 @@ export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
     available: { all: ['chanukah'] },
     availableLabel: { he: 'בחנוכה', en: 'On Chanukah' },
     hours: 'mitzvah',
+    season: (year) => new HDate(25, months.KISLEV, year),
   },
   selichot: {
     name: { he: 'סליחות', en: 'Selichot' },
@@ -147,6 +163,7 @@ export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
         availableLabel: { he: 'מב׳ באלול עד ערב יום הכיפורים', en: 'From 2 Elul to Erev Yom Kippur' },
       },
     },
+    season: (year) => new HDate(1, months.ELUL, year),
   },
   ushpizin: {
     name: { he: 'אושפיזין', en: 'Ushpizin' },
@@ -155,6 +172,7 @@ export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
     available: { all: ['sukkotNight'] },
     availableLabel: { he: 'בלילות סוכות', en: 'On the nights of Sukkot' },
     hours: TONIGHT_TO_DAWN,
+    season: (year) => new HDate(15, months.TISHREI, year),
   },
 };
 
@@ -236,6 +254,35 @@ export function standalonePeriodEnded(
 ): boolean {
   const end = periodEndAt(id, nusach, instant, location);
   return end !== null && instant.getTime() >= end;
+}
+
+export const NEXT_TEXT_SCAN_DAYS = 45;
+
+export type ReadingDay = { day: HDate; offSeason: boolean };
+
+// The Hebrew day a standalone text opens for: `today` (from standaloneTextDay()) when the text is said on it
+// and its period has not ended, else the first later day it is said, found by scanning windows of
+// NEXT_TEXT_SCAN_DAYS days (those a `season` names, else the days right after today); null when no day has it.
+export function standaloneReadingDay(
+  id: StandaloneTextId,
+  nusach: Nusach,
+  today: HDate,
+  periodEnded: boolean,
+  place: Place,
+): ReadingDay | null {
+  if (!siddurTextPresent(nusach, id)) return null;
+  const has = (day: HDate) => hasStandaloneText(id, nusach, dayFeatures(day, place));
+  if (!periodEnded && has(today)) return { day: today, offSeason: false };
+  const from = today.abs() + 1;
+  const { season } = STANDALONE_TEXTS[id];
+  const windows = season ? [-1, 0, 1].map((shift) => season(today.getFullYear() + shift).abs()) : [from];
+  for (const start of windows) {
+    for (let abs = Math.max(start, from); abs < start + NEXT_TEXT_SCAN_DAYS; abs++) {
+      const day = new HDate(abs);
+      if (has(day)) return { day, offSeason: true };
+    }
+  }
+  return null;
 }
 
 function linkedMitzvahWindow(
@@ -332,6 +379,49 @@ export function hasSiddurText(mitzvah: Mitzvah, nusach: Nusach, windowDate: Date
   if (!id || siddurAsset(nusach, id) === undefined) return false;
   const { evening, available } = SIDDUR_TEXTS[id];
   return matchesCondition(available, dayFeatures(liturgicalDay(windowDate, evening), place));
+}
+
+// The first window of a registry mitzvah with a text that has not ended at `now` and carries the text: over the
+// NEXT_TEXT_SCAN_DAYS app days from today (a `multiDay` mitzvah also looks back its `maxDays`, for the window
+// still open), else over those its `season` names, the text's own or the linked text's; null for a custom
+// mitzvah, Chok LeYisrael, or when no such window is found.
+export function nextMitzvahTextWindow(
+  mitzvah: Mitzvah,
+  nusach: Nusach,
+  location: Location,
+  settings: UserSettings,
+  place: Place,
+  now: Date,
+): DayWindow | null {
+  const own = mitzvahTextId(mitzvah.id);
+  const linked = MITZVAH_STANDALONE_TEXT[mitzvah.id];
+  if (mitzvah.isCustom || mitzvah.id === CHOK_TEXT_ID || !(own || linked)) return null;
+  const dayFrom = (base: Date, offset: number) =>
+    new Date(base.getFullYear(), base.getMonth(), base.getDate() + offset);
+  const today = appDay(now, location);
+  const back = mitzvah.multiDay?.maxDays ?? 0;
+  const earliest = dayFrom(today, -back).getTime();
+  const firstFrom = (start: Date, days: number): DayWindow | null => {
+    for (let k = 0; k < days; k++) {
+      const date = dayFrom(start, k);
+      if (date.getTime() < earliest) continue;
+      const window = dayWindow(mitzvah, date, location, settings);
+      if (window && window.end.getTime() > now.getTime() && hasSiddurText(mitzvah, nusach, window.date, place)) {
+        return window;
+      }
+    }
+    return null;
+  };
+  const found = firstFrom(dayFrom(today, -back), back + NEXT_TEXT_SCAN_DAYS);
+  const season = own ? SIDDUR_TEXTS[own].season : linked && STANDALONE_TEXTS[linked].season;
+  if (found || !season) return found;
+  const lead = own ? 0 : -1;
+  const year = new HDate(today).getFullYear();
+  for (const shift of [-1, 0, 1]) {
+    const window = firstFrom(dayFrom(season(year + shift).greg(), lead), NEXT_TEXT_SCAN_DAYS);
+    if (window) return window;
+  }
+  return null;
 }
 
 export function siddurTextBuiltFor(nusach: Nusach, id: SiddurTextId): boolean {

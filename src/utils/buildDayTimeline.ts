@@ -3,7 +3,7 @@ import { Location, Zmanim } from '@/types/zmanim';
 import { ZmanimService } from '@/services/ZmanimService';
 import { isSkippedAt } from '@/utils/skipRules';
 import { trackedOn } from '@/utils/checkIn';
-import { appDay, appDayKey, locationNoon } from '@/utils/locationDay';
+import { appDay, appDayEnd, appDayKey, locationNoon } from '@/utils/locationDay';
 import { addDays } from '@/utils/historyStats';
 import { mitzvahName } from '@/utils/mitzvahName';
 import { Completions, dateKey } from '@/stores/useCompletionsStore';
@@ -65,6 +65,14 @@ export function currentOrNextWindow(
     if (window && window.end.getTime() > now.getTime()) return window;
   }
   return null;
+}
+
+// A window the reader treats as today's: open now, or opening before the current app day ends.
+export function windowDueToday(window: DayWindow, location: Location, now: Date = new Date()): boolean {
+  return (
+    window.end.getTime() > now.getTime() &&
+    window.start.getTime() <= appDayEnd(appDay(now, location), location).getTime()
+  );
 }
 
 const isWindow = (window: DayWindow | null): window is DayWindow => window !== null;

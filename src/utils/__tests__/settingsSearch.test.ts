@@ -86,6 +86,7 @@ const SETTING_QUERIES: [string, string][] = [
   ['עיר', 'location'],
   ['צבע', 'theme'],
   ['מצב כהה', 'theme'],
+  ['גודל', 'uiScale'],
   ['אנגלית', 'language'],
   ['איפוס', 'reset'],
   ['reset', 'reset'],
@@ -408,7 +409,7 @@ describe('content search', () => {
     expect(searchSettings('בדיקה', probe, ALL).map((item) => item.id)).toEqual(['probe-setting', 'probe-chapter']);
   });
 
-  it('lists a seasonal text and its chapters every day, closed outside the days the reader opens it', () => {
+  it('lists a seasonal text and its chapters every day, marked not today outside the days it is said', () => {
     installSelichotFixture();
     const states = (id: string, overrides: Partial<SettingsContentInput> = {}) => {
       const items = content(overrides).filter(
@@ -416,38 +417,42 @@ describe('content search', () => {
       );
       expect(items.some((item) => item.kind === 'siddur')).toBe(true);
       expect(items.some((item) => item.kind === 'chapter')).toBe(true);
-      return [...new Set(items.map((item) => (item.closed ? 'closed' : 'open')))];
+      return [...new Set(items.map((item) => (item.notToday ? 'notToday' : 'today')))];
     };
     const seasonal = (overrides: Partial<SettingsContentInput>) =>
       ['selichot', 'chanukah_candles', 'kiddush_levana'].map((id) => states(id, overrides));
-    expect(seasonal({})).toEqual([['closed'], ['closed'], ['closed']]);
-    expect(seasonal({ now: at(JERUSALEM, '2026-09-08T12:00') })).toEqual([['open'], ['closed'], ['closed']]);
-    expect(seasonal({ now: at(JERUSALEM, '2026-12-07T12:00') })).toEqual([['closed'], ['open'], ['closed']]);
-    expect(seasonal({ now: at(JERUSALEM, '2026-10-20T12:00') })).toEqual([['closed'], ['closed'], ['open']]);
+    expect(seasonal({})).toEqual([['notToday'], ['notToday'], ['notToday']]);
+    expect(seasonal({ now: at(JERUSALEM, '2026-09-08T12:00') })).toEqual([['today'], ['notToday'], ['notToday']]);
+    expect(seasonal({ now: at(JERUSALEM, '2026-12-07T12:00') })).toEqual([['notToday'], ['today'], ['notToday']]);
+    expect(seasonal({ now: at(JERUSALEM, '2026-10-20T12:00') })).toEqual([['notToday'], ['notToday'], ['today']]);
     const early = at(JERUSALEM, '2026-08-31T12:00');
-    expect(seasonal({ now: early })).toEqual([['closed'], ['closed'], ['closed']]);
-    expect(seasonal({ now: early, nusach: 'edot_hamizrach' })).toEqual([['open'], ['closed'], ['closed']]);
+    expect(seasonal({ now: early })).toEqual([['notToday'], ['notToday'], ['notToday']]);
+    expect(seasonal({ now: early, nusach: 'edot_hamizrach' })).toEqual([['today'], ['notToday'], ['notToday']]);
   });
 
-  it("gives a closed text the siddur tab's availability caption in both languages, and an open one none", () => {
+  it("gives a text not said today the siddur tab's availability caption in both languages, and one said today none", () => {
     installSelichotFixture();
     expect(itemOf('siddur:selichot')).toMatchObject({
-      closed: { label: { he: 'ממוצאי שבת הסליחות עד ערב יום הכיפורים', en: 'From Leil Selichot to Erev Yom Kippur' } },
+      notToday: {
+        label: { he: 'ממוצאי שבת הסליחות עד ערב יום הכיפורים', en: 'From Leil Selichot to Erev Yom Kippur' },
+      },
     });
-    expect(itemOf('siddur:selichot', { nusach: 'edot_hamizrach' })?.closed?.label?.en).toBe(
+    expect(itemOf('siddur:selichot', { nusach: 'edot_hamizrach' })?.notToday?.label?.en).toBe(
       'From 2 Elul to Erev Yom Kippur',
     );
-    expect(itemOf('siddur:chanukah_candles')?.closed).toEqual({ label: { he: 'בחנוכה', en: 'On Chanukah' } });
-    expect(itemOf('siddur:kiddush_levana')?.closed?.label?.en).toBe('From three days after the molad to mid-month');
-    expect(itemOf('chapter:chanukah_candles:מעוז צור')?.closed).toEqual({ label: { he: 'בחנוכה', en: 'On Chanukah' } });
+    expect(itemOf('siddur:chanukah_candles')?.notToday).toEqual({ label: { he: 'בחנוכה', en: 'On Chanukah' } });
+    expect(itemOf('siddur:kiddush_levana')?.notToday?.label?.en).toBe('From three days after the molad to mid-month');
+    expect(itemOf('chapter:chanukah_candles:מעוז צור')?.notToday).toEqual({
+      label: { he: 'בחנוכה', en: 'On Chanukah' },
+    });
     const season = { now: at(JERUSALEM, '2026-12-07T12:00') };
-    expect(itemOf('siddur:chanukah_candles', season)?.closed).toBeUndefined();
-    expect(itemOf('chapter:chanukah_candles:מעוז צור', season)?.closed).toBeUndefined();
-    expect(itemOf('siddur:birkat_hamazon')?.closed).toBeUndefined();
-    expect(itemOf('siddur:maariv')?.closed).toBeUndefined();
+    expect(itemOf('siddur:chanukah_candles', season)?.notToday).toBeUndefined();
+    expect(itemOf('chapter:chanukah_candles:מעוז צור', season)?.notToday).toBeUndefined();
+    expect(itemOf('siddur:birkat_hamazon')?.notToday).toBeUndefined();
+    expect(itemOf('siddur:maariv')?.notToday).toBeUndefined();
   });
 
-  it("closes Kiddush Levana and its chapters from its period's end to alot, as the siddur tab and the reader do", () => {
+  it("marks Kiddush Levana and its chapters not today from its period's end to alot, as the siddur tab and the reader do", () => {
     const kiddushLevana = (clock: string, nusach: Nusach = 'ashkenaz') =>
       content({ now: at(JERUSALEM, `2026-10-26T${clock}`), nusach }).filter(
         (item) => item.id === 'siddur:kiddush_levana' || item.id.startsWith('chapter:kiddush_levana:'),
@@ -456,17 +461,17 @@ describe('content search', () => {
     expect(beforeEnd.map((item) => item.id)).toEqual(
       expect.arrayContaining(['siddur:kiddush_levana', 'chapter:kiddush_levana:ברכת הלבנה']),
     );
-    for (const item of beforeEnd) expect(item.closed).toBeUndefined();
+    for (const item of beforeEnd) expect(item.notToday).toBeUndefined();
     const afterEnd = kiddushLevana('04:00');
     expect(afterEnd.map((item) => item.id)).toEqual(beforeEnd.map((item) => item.id));
     for (const item of afterEnd) {
-      expect(item.closed).toEqual({
+      expect(item.notToday).toEqual({
         label: { he: 'משלושה ימים אחרי המולד עד חצי החודש', en: 'From three days after the molad to mid-month' },
       });
     }
     const edotHamizrach = kiddushLevana('04:00', 'edot_hamizrach');
     expect(edotHamizrach.map((item) => item.id)).toContain('siddur:kiddush_levana');
-    for (const item of edotHamizrach) expect(item.closed).toBeUndefined();
+    for (const item of edotHamizrach) expect(item.notToday).toBeUndefined();
   });
 
   it('lists Selichot as a text and by chapter only while the nusach of the user is installed', () => {
@@ -494,12 +499,12 @@ describe('content search', () => {
     expect(find('מעוז צור')).toContain('chapter:chanukah_candles:מעוז צור');
   });
 
-  it('finds Ushpizin, its mitzvah and its text, closed off season and open on a night of Sukkot, and nothing in Chabad', () => {
+  it('finds Ushpizin, its mitzvah and its text, not today off season and today on a night of Sukkot, and nothing in Chabad', () => {
     expect(find('אושפיזין')).toEqual(expect.arrayContaining(['mitzvah:ushpizin', 'siddur:ushpizin']));
-    expect(itemOf('siddur:ushpizin')?.closed).toEqual({
+    expect(itemOf('siddur:ushpizin')?.notToday).toEqual({
       label: { he: 'בלילות סוכות', en: 'On the nights of Sukkot' },
     });
-    expect(itemOf('siddur:ushpizin', { now: at(JERUSALEM, '2026-09-28T21:00') })?.closed).toBeUndefined();
+    expect(itemOf('siddur:ushpizin', { now: at(JERUSALEM, '2026-09-28T21:00') })?.notToday).toBeUndefined();
     const chabad = { nusach: 'chabad' as const, mitzvot: getAllMitzvot('chabad') };
     expect(content(chabad).filter((item) => item.id.includes('ushpizin'))).toEqual([]);
     expect(find('אושפיזין', chabad).filter((id) => id.includes('ushpizin'))).toEqual([]);

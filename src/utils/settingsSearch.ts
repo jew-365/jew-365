@@ -47,12 +47,12 @@ export type SettingsSearchHref =
   | { pathname: '/mitzvah/[id]'; params: { id: string } }
   | { pathname: '/siddur/[id]'; params: { id: string; section?: string } };
 
-export type SettingsSearchClosed = { label: SettingsSearchName | null };
+export type SettingsSearchNotToday = { label: SettingsSearchName | null };
 
 export type SettingsSearchContentItem = SearchItemBase & {
   title: SettingsSearchName;
   href: SettingsSearchHref;
-  closed?: SettingsSearchClosed;
+  notToday?: SettingsSearchNotToday;
 } & ({ kind: 'mitzvah' | 'siddur' } | { kind: 'chapter'; textName: SettingsSearchName });
 
 export type SettingsSearchItem = SettingsSearchSettingItem | SettingsSearchContentItem;
@@ -396,6 +396,33 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
     ],
   },
   {
+    id: 'uiScale',
+    icon: 'sliders',
+    titleKey: 'settings.uiScale',
+    labelKeys: ['settings.display', 'settings.uiScaleHint'],
+    section: 'device',
+    terms: [
+      'גודל',
+      'גודל תצוגה',
+      'גודל הטקסט',
+      'גודל טקסט',
+      'גופן',
+      'הגדלה',
+      'הקטנה',
+      'זום',
+      'כפתורים',
+      'מרווחים',
+      'display size',
+      'size',
+      'text size',
+      'font size',
+      'zoom',
+      'larger',
+      'smaller',
+      'scale',
+    ],
+  },
+  {
     id: 'language',
     icon: 'sliders',
     titleKey: 'settings.language',
@@ -581,7 +608,7 @@ type ContentText = {
   title: SettingsSearchName;
   icon: IconName;
   chapters: readonly SiddurChapterTitle[];
-  closed?: SettingsSearchClosed;
+  notToday?: SettingsSearchNotToday;
 };
 
 const nameOf = (mitzvah: Mitzvah): SettingsSearchName => ({ he: mitzvah.name.he, en: mitzvahName(mitzvah, 'en') });
@@ -633,7 +660,7 @@ export function settingsContentItems({
       title: name,
       icon: group,
       chapters: SIDDUR_CHAPTERS[id]?.[nusach] ?? [],
-      closed: open ? undefined : { label: standaloneAvailability(id, nusach).availableLabel ?? null },
+      notToday: open ? undefined : { label: standaloneAvailability(id, nusach).availableLabel ?? null },
     });
   }
   const textItems = texts.map((text): SettingsSearchContentItem => ({
@@ -643,7 +670,7 @@ export function settingsContentItems({
     title: text.title,
     terms: [],
     href: { pathname: '/siddur/[id]', params: { id: text.id } },
-    closed: text.closed,
+    notToday: text.notToday,
   }));
   const chapterItems = texts.flatMap((text) => {
     const shown = text.chapters.filter((chapter) => chapterVisible(chapter, voice, maritalStatus));
@@ -656,7 +683,7 @@ export function settingsContentItems({
       textName: text.title,
       terms: [text.title.he, text.title.en],
       href: { pathname: '/siddur/[id]', params: { id: text.id, section: chapter.he } },
-      closed: text.closed,
+      notToday: text.notToday,
     }));
   });
   return [...mitzvahItems, ...textItems, ...chapterItems];

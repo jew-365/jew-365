@@ -3,10 +3,11 @@ import {
   buildDayTimeline,
   currentOrNextWindow,
   DayWindow,
+  windowDueToday,
   windowStillOpen,
   ZMAN_KEYS,
 } from '../buildDayTimeline';
-import { locationNoon } from '../locationDay';
+import { appDay, appDayEnd, locationNoon } from '../locationDay';
 import { Mitzvah, UserSettings, Weekday } from '@/types/mitzvah';
 import type { Zmanim } from '@/types/zmanim';
 import { CITIES } from '@/data/cities';
@@ -245,6 +246,69 @@ describe('a window that outlasts a day', () => {
     const now = at(jerusalem, '2026-10-27T12:00');
     expect(dateKey(currentOrNextWindow(second(MULTI), jerusalem, settings, now)!.date)).toBe('2026-11-14');
     expect(currentOrNextWindow(second(), jerusalem, settings, now)).toBeNull();
+  });
+});
+
+describe('windowDueToday', () => {
+  const now = at(jerusalem, '2027-06-16T14:00');
+  const dayEnd = appDayEnd(appDay(now, jerusalem), jerusalem);
+  const windowFrom = (start: Date, end: Date): DayWindow => ({ start, end, date: appDay(now, jerusalem) });
+  const after = (from: Date, ms: number) => new Date(from.getTime() + ms);
+  const HOUR = 60 * 60_000;
+
+  it('holds for a window open now', () => {
+    expect(windowDueToday(windowFrom(after(now, -HOUR), after(now, HOUR)), jerusalem, now)).toBe(true);
+  });
+
+  it('holds for a window that starts later today', () => {
+    expect(windowDueToday(windowFrom(after(now, 3 * HOUR), after(now, 4 * HOUR)), jerusalem, now)).toBe(true);
+  });
+
+  it('holds for a window that starts exactly where the app day ends', () => {
+    expect(windowDueToday(windowFrom(dayEnd, after(dayEnd, HOUR)), jerusalem, now)).toBe(true);
+  });
+
+  it('fails for a window that starts after the app day ends', () => {
+    expect(windowDueToday(windowFrom(after(dayEnd, 1), after(dayEnd, HOUR)), jerusalem, now)).toBe(false);
+  });
+
+  it('fails for a window that has ended, also at the very instant it ends', () => {
+    expect(windowDueToday(windowFrom(after(now, -2 * HOUR), after(now, -HOUR)), jerusalem, now)).toBe(false);
+    expect(windowDueToday(windowFrom(after(now, -HOUR), now), jerusalem, now)).toBe(false);
+  });
+
+  describe('on the real registry', () => {
+    const windowAt = (id: string, wallClock: string) => {
+      const instant = at(jerusalem, wallClock);
+      return { instant, window: currentOrNextWindow(findMitzvah(id)!, jerusalem, settings, instant)! };
+    };
+
+    it('does not hold for the coming Shabbat’s candle lighting on a Wednesday', () => {
+      const { instant, window } = windowAt('candle_lighting', '2027-06-16T14:00');
+      expect(dateKey(window.date)).toBe('2027-06-18');
+      expect(windowDueToday(window, jerusalem, instant)).toBe(false);
+    });
+
+    it('holds for tonight’s maariv at midday and for the evening’s maariv still open at 00:20', () => {
+      const midday = windowAt('maariv', '2027-06-16T12:00');
+      expect(windowDueToday(midday.window, jerusalem, midday.instant)).toBe(true);
+      const night = windowAt('maariv', '2027-06-16T00:20');
+      expect(night.window.start.getTime()).toBeLessThan(night.instant.getTime());
+      expect(windowDueToday(night.window, jerusalem, night.instant)).toBe(true);
+    });
+
+    it('holds for the morning’s Shacharit once alot has turned the app day, and not at 01:00, before it', () => {
+      const beforeAlot = windowAt('shacharit', '2027-06-16T01:00');
+      expect(windowDueToday(beforeAlot.window, jerusalem, beforeAlot.instant)).toBe(false);
+      const afterAlot = windowAt('shacharit', '2027-06-16T04:30');
+      expect(afterAlot.window.start.getTime()).toBeGreaterThan(afterAlot.instant.getTime());
+      expect(windowDueToday(afterAlot.window, jerusalem, afterAlot.instant)).toBe(true);
+    });
+
+    it('does not hold for tomorrow’s Mincha at 21:00', () => {
+      const { instant, window } = windowAt('mincha', '2026-10-28T21:00');
+      expect(windowDueToday(window, jerusalem, instant)).toBe(false);
+    });
   });
 });
 

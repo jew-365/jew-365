@@ -29,6 +29,10 @@ export function clockOf(date: Date, zone?: string): string {
   return DateTime.fromJSDate(date, { zone }).toFormat('HH:mm');
 }
 
+export function fireTimeText(date: Date, zone: string): string {
+  return DateTime.fromJSDate(date, { zone }).toFormat('dd/MM HH:mm');
+}
+
 export function clockRange(start: Date, end: Date, t: Translate, zone?: string, day?: Date): string {
   const endDay = DateTime.fromJSDate(end, { zone }).startOf('day');
   const startDay = DateTime.fromJSDate(start, { zone }).startOf('day');

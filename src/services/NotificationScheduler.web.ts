@@ -28,7 +28,7 @@ const SCHEDULE_FORMAT_KEY = 'notifications:schedule-format';
 export type PendingNotificationMeta = {
   kind?: 'blockNotice' | 'checkin' | typeof TAHARAH_KIND | typeof UPDATE_KIND | 'hilula' | 'roshChodesh' | 'report';
   taharah?: { task: TaharahTaskKind | 'tevilaPrep' | 'postBlock' | 'preBlock'; day: number; onah?: OnahKind };
-  hilula?: { day: number; when: 'before' | 'evening' };
+  hilula?: { day: number; when: 'before' | 'evening'; ids?: string[] };
   roshChodesh?: { day: number; when: 'before' | 'evening' | 'day' };
   report?: { week: string };
   blockId?: string;

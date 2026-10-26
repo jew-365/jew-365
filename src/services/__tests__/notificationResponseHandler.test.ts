@@ -357,21 +357,86 @@ describe('notificationResponseHandler', () => {
     expect(mockMarkDoneFromNotificationData).not.toHaveBeenCalled();
   });
 
-  it('opens the hilulot screen from a hilula notice, never a mitzvah lookup', () => {
-    initNotificationResponseHandler();
-    const listener = mockAddNotificationResponseReceivedListener.mock.calls[0][0];
+  describe('a hilula notice', () => {
+    const tap = (hilula: Record<string, unknown>, dataString?: string) => {
+      initNotificationResponseHandler();
+      const listener = mockAddNotificationResponseReceivedListener.mock.calls[0][0];
+      listener(response(DEFAULT_NOTIFICATION_ACTION, { kind: 'hilula', hilula }, 'hilula:739900:evening', dataString));
+    };
 
-    listener(
-      response(
-        DEFAULT_NOTIFICATION_ACTION,
-        { kind: 'hilula', hilula: { day: 739900, when: 'evening' } },
-        'hilula:739900:evening',
-      ),
-    );
+    it('opens the page of the one tzaddik it names, never a mitzvah lookup', () => {
+      tap({ day: 739900, when: 'evening', ids: ['rashbi'] });
 
-    expect(mockRouterNavigate).toHaveBeenCalledWith('/hilulot');
-    expect(mockRouterPush).not.toHaveBeenCalled();
-    expect(mockMarkDoneFromNotificationData).not.toHaveBeenCalled();
+      expect(mockRouterNavigate).toHaveBeenCalledTimes(1);
+      expect(mockRouterNavigate).toHaveBeenCalledWith({ pathname: '/hilula/[id]', params: { id: 'rashbi' } });
+      expect(mockRouterPush).not.toHaveBeenCalled();
+      expect(mockMarkDoneFromNotificationData).not.toHaveBeenCalled();
+    });
+
+    it('opens one page on the first of the tzaddikim it names, with the whole list for the switch', () => {
+      tap({ day: 739900, when: 'before', ids: ['rashbi', 'rema'] });
+
+      expect(mockRouterNavigate).toHaveBeenCalledTimes(1);
+      expect(mockRouterNavigate).toHaveBeenCalledWith({
+        pathname: '/hilula/[id]',
+        params: { id: 'rashbi', ids: 'rashbi,rema' },
+      });
+    });
+
+    it('reads the ids from a native dataString payload', () => {
+      initNotificationResponseHandler();
+      const listener = mockAddNotificationResponseReceivedListener.mock.calls[0][0];
+      listener(
+        response(
+          DEFAULT_NOTIFICATION_ACTION,
+          {},
+          'hilula:739900:evening',
+          JSON.stringify({ kind: 'hilula', hilula: { day: 739900, when: 'evening', ids: ['rema', 'rashbi'] } }),
+        ),
+      );
+
+      expect(mockRouterNavigate).toHaveBeenCalledWith({
+        pathname: '/hilula/[id]',
+        params: { id: 'rema', ids: 'rema,rashbi' },
+      });
+    });
+
+    it('opens the hilulot screen for a notice scheduled before the pages, which carries no ids', () => {
+      tap({ day: 739900, when: 'evening' });
+
+      expect(mockRouterNavigate).toHaveBeenCalledTimes(1);
+      expect(mockRouterNavigate).toHaveBeenCalledWith('/hilulot');
+      expect(mockRouterPush).not.toHaveBeenCalled();
+      expect(mockMarkDoneFromNotificationData).not.toHaveBeenCalled();
+    });
+
+    it('opens the hilulot screen when the ids are empty or name nobody listed', () => {
+      tap({ day: 739900, when: 'evening', ids: [] });
+      tap({ day: 739900, when: 'evening', ids: ['no_such_tzaddik'] });
+
+      expect(mockRouterNavigate).toHaveBeenNthCalledWith(1, '/hilulot');
+      expect(mockRouterNavigate).toHaveBeenNthCalledWith(2, '/hilulot');
+    });
+
+    it('leaves out an id nobody lists and opens the first one that is', () => {
+      tap({ day: 739900, when: 'evening', ids: ['no_such_tzaddik', 'rema'] });
+
+      expect(mockRouterNavigate).toHaveBeenCalledWith({ pathname: '/hilula/[id]', params: { id: 'rema' } });
+    });
+
+    it('replays a tap that arrived before the router was mounted', () => {
+      mockRouterNavigate.mockImplementationOnce(() => {
+        throw new Error('navigator not mounted');
+      });
+      tap({ day: 739900, when: 'evening', ids: ['rashbi', 'rema'] });
+      consumePendingNotificationRoute();
+
+      expect(mockRouterNavigate).toHaveBeenCalledTimes(2);
+      expect(mockRouterNavigate).toHaveBeenLastCalledWith({
+        pathname: '/hilula/[id]',
+        params: { id: 'rashbi', ids: 'rashbi,rema' },
+      });
+    });
   });
 
   it('opens the Rosh Chodesh screen from a Rosh Chodesh notice, never a mitzvah lookup', () => {
@@ -581,6 +646,13 @@ describe('notificationResponseHandler', () => {
         response(
           DEFAULT_NOTIFICATION_ACTION,
           { kind: 'hilula', hilula: { day: 739900, when: 'before' } },
+          'hilula:739900:before',
+        ),
+      );
+      listener(
+        response(
+          DEFAULT_NOTIFICATION_ACTION,
+          { kind: 'hilula', hilula: { day: 739900, when: 'before', ids: ['rashbi', 'rema'] } },
           'hilula:739900:before',
         ),
       );

@@ -24,6 +24,9 @@ jest.mock('expo-background-task', () => ({
   BackgroundTaskStatus: { Restricted: 1, Available: 2 },
 }));
 
+const mockReload = jest.fn();
+jest.mock('@/services/appReload', () => ({ reloadApp: () => mockReload() }));
+
 const mockDeleteChokFiles = jest.fn();
 jest.mock('@/services/chokFiles', () => ({
   ...jest.requireActual('@/services/chokFiles'),
@@ -39,6 +42,7 @@ jest.mock('@/services/selichotFiles', () => ({
 import { AppResetService } from '../AppResetService';
 import { taharahStorage } from '../TaharahStorage';
 import { useUserStore } from '@/stores/useUserStore';
+import { DEFAULT_UI_SCALE, __setUiScaleForTests } from '@/theme/scale';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useChokStore } from '@/stores/useChokStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
@@ -59,7 +63,28 @@ describe('AppResetService.reset', () => {
     // The stock MMKV mock warns that it cannot recrypt.
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => {
+    jest.restoreAllMocks();
+    mockReload.mockReset();
+    __setUiScaleForTests(DEFAULT_UI_SCALE);
+  });
+
+  it('reloads the app when the running display size is not the default, after the stores are reset', async () => {
+    useUserStore.getState().setUiScale(1.2);
+    __setUiScaleForTests(1.2);
+    mockReload.mockImplementationOnce(() => expect(useUserStore.getState().uiScale).toBe(DEFAULT_UI_SCALE));
+
+    await AppResetService.reset();
+
+    expect(mockReload).toHaveBeenCalledTimes(1);
+    expect(mockReload.mock.results[0].type).toBe('return');
+  });
+
+  it('does not reload when the running display size is the default', async () => {
+    await AppResetService.reset();
+
+    expect(mockReload).not.toHaveBeenCalled();
+  });
 
   it('wipes the taharah log, settings and persisted bytes, and replaces the key', async () => {
     useUserStore.getState().setNusach('chabad');

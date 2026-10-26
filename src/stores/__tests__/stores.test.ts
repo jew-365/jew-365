@@ -51,6 +51,8 @@ import { useChokStore } from '../useChokStore';
 import { useSiddurBookmarksStore } from '../useSiddurBookmarksStore';
 import { CITIES } from '@/data/cities';
 import { MITZVOT } from '@/data/mitzvot';
+import { storage } from '@/services/StorageService';
+import { DEFAULT_UI_SCALE, UI_SCALES, readStoredUiScale } from '@/theme/scale';
 import { Location } from '@/types/zmanim';
 import { Reminder } from '@/types/mitzvah';
 
@@ -356,6 +358,58 @@ describe('useUserStore auto-scroll', () => {
     expect(useUserStore.getState().siddurScrollSpeed).toBe(15);
     useUserStore.getState().setSiddurScrollSpeed(16);
     expect(useUserStore.getState().siddurScrollSpeed).toBe(15);
+  });
+});
+
+describe('useUserStore display size', () => {
+  beforeEach(() => useUserStore.getState().reset());
+
+  it('starts at the default step', () => {
+    expect(useUserStore.getState().uiScale).toBe(DEFAULT_UI_SCALE);
+    expect(useUserStore.getState().uiScale).toBe(1);
+  });
+
+  it('takes every step of the scale', () => {
+    for (const step of UI_SCALES) {
+      useUserStore.getState().setUiScale(step);
+      expect(useUserStore.getState().uiScale).toBe(step);
+    }
+  });
+
+  it('refuses a value that is not a step and keeps the one it had', () => {
+    useUserStore.getState().setUiScale(1.1);
+    for (const value of [1.05, 0.5, 2, 0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      useUserStore.getState().setUiScale(value);
+      expect(useUserStore.getState().uiScale).toBe(1.1);
+    }
+  });
+
+  it('goes back to the default on reset', () => {
+    useUserStore.getState().setUiScale(0.8);
+    useUserStore.getState().reset();
+    expect(useUserStore.getState().uiScale).toBe(DEFAULT_UI_SCALE);
+  });
+
+  it('merge gives an install saved before the field existed the default, and keeps a saved step', () => {
+    const { merge } = useUserStore.persist.getOptions();
+    const current = useUserStore.getState();
+    expect((merge!({ nusach: 'sefard' }, current) as typeof current).uiScale).toBe(DEFAULT_UI_SCALE);
+    expect((merge!({ uiScale: 0.9 }, current) as typeof current).uiScale).toBe(0.9);
+  });
+
+  it('merge repairs a saved value that is not a step', () => {
+    const { merge } = useUserStore.persist.getOptions();
+    const current = useUserStore.getState();
+    for (const uiScale of [1.05, 3, 'big', null]) {
+      expect((merge!({ uiScale }, current) as typeof current).uiScale).toBe(DEFAULT_UI_SCALE);
+    }
+  });
+
+  it('writes the step into the persisted user store, where the launch scale reads it', () => {
+    useUserStore.getState().setUiScale(1.2);
+    const raw = JSON.parse(storage.getString('user-store')!);
+    expect(raw.state.uiScale).toBe(1.2);
+    expect(readStoredUiScale(() => storage.getString('user-store'))).toBe(1.2);
   });
 });
 

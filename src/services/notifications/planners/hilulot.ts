@@ -91,13 +91,13 @@ function hilulaTexts(notice: HilulaNotice, english: boolean): { title: string; b
 }
 
 function hilulaCandidate(notice: HilulaNotice, english: boolean): ScheduleCandidate {
-  const { day, when } = notice;
+  const { day, when, hilulot } = notice;
   return {
     id: `${HILULA_KIND}:${day.abs()}:${when}`,
     trigger: notice.trigger,
     channel: 'hilulot',
     ...hilulaTexts(notice, english),
-    data: { kind: HILULA_KIND, hilula: { day: day.abs(), when } },
+    data: { kind: HILULA_KIND, hilula: { day: day.abs(), when, ids: hilulot.map((hilula) => hilula.id) } },
   };
 }
 

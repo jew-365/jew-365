@@ -10,10 +10,12 @@ import {
 } from '@/services/NotificationScheduler';
 import { reconcileChokInstall } from '@/services/ChokContentService';
 import { reconcileSelichotInstall } from '@/services/SelichotContentService';
+import { reloadApp } from '@/services/appReload';
 import { reportError } from '@/services/errors';
 import { formatDate, type AppLanguage } from '@/i18n';
 import { useUserStore } from '@/stores/useUserStore';
 import { applyGenderDefaultsToNew } from '@/stores/taharahOptIn';
+import { UI_SCALE } from '@/theme/scale';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
@@ -112,7 +114,7 @@ export function parseBackup(text: string): Backup {
 // from: the five original defaults unstamped and the newer default-on mitzvot stamped at the restore.
 // Scheduling is held for the whole swap and rebuilt once, and the schedule stamp is dropped first, so a
 // reload part-way (a language change reloads the app for RTL) still rebuilds on the next launch.
-export async function restoreBackup(backup: Backup): Promise<void> {
+export async function restoreBackup(backup: Backup, options?: { reload?: boolean }): Promise<void> {
   setSchedulingSuspended(true);
   try {
     StorageService.delete(SCHEDULE_FORMAT_KEY);
@@ -135,6 +137,11 @@ export async function restoreBackup(backup: Backup): Promise<void> {
     setSchedulingSuspended(false);
   }
   await NotificationScheduler.rebuild().catch((error) => reportError('schedule', error));
+  if (options?.reload !== false) reloadIfScaleChanged();
+}
+
+export function reloadIfScaleChanged(): void {
+  if (useUserStore.getState().uiScale !== UI_SCALE) reloadApp();
 }
 
 export function backupFileName(now: Date = new Date()): string {

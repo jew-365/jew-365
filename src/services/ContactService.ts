@@ -18,7 +18,6 @@ export const PRODUCT_LINKS = {
     android: 'https://play.google.com/store/apps/details?id=com.jew365.app',
     ios: 'https://apps.apple.com/app/id6825802248',
   },
-  chokLicense: `${SITE_URL}chok/LICENSE.txt`,
 } as const;
 export const CONTACT_MESSAGE_MAX = 2000;
 export const CONTACT_TIMEOUT_MS = 15_000;

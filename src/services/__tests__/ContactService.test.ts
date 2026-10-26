@@ -62,18 +62,12 @@ describe('ContactService', () => {
           android: 'https://play.google.com/store/apps/details?id=com.jew365.app',
           ios: 'https://apps.apple.com/app/id6825802248',
         },
-        chokLicense: 'https://jew-365.github.io/jew-365/chok/LICENSE.txt',
       });
     });
 
     it('points every site link at a page in docs/', () => {
       const site = 'https://jew-365.github.io/jew-365/';
-      const urls = [
-        PRODUCT_LINKS.support,
-        PRODUCT_LINKS.privacy.he,
-        PRODUCT_LINKS.privacy.en,
-        PRODUCT_LINKS.chokLicense,
-      ];
+      const urls = [PRODUCT_LINKS.support, PRODUCT_LINKS.privacy.he, PRODUCT_LINKS.privacy.en];
       const missing = urls.filter((url) => {
         if (!url.startsWith(site)) return true;
         const rest = url.slice(site.length);

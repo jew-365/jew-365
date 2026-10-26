@@ -8,6 +8,7 @@ import {
   pendingNotificationMetaFromContent,
   PendingNotificationMeta,
 } from '@/services/NotificationScheduler';
+import { HILULOT } from '@/data/hilulot';
 import { isUpdateApplied, reloadIntoUpdate } from '@/services/appUpdates';
 import { useUserStore } from '@/stores/useUserStore';
 import { isQuietAt } from '@/utils/skipRules';
@@ -73,6 +74,21 @@ function openSiddur(data: PendingNotificationMeta, notificationId: string) {
   );
 }
 
+// A notice scheduled before the page existed carries no ids and opens the list.
+function openHilula(data: PendingNotificationMeta) {
+  const ids = (data.hilula?.ids ?? []).filter((id) => HILULOT.some((hilula) => hilula.id === id));
+  if (!ids.length) {
+    navigate(() => router.navigate('/hilulot'));
+    return;
+  }
+  navigate(() =>
+    router.navigate({
+      pathname: '/hilula/[id]',
+      params: { id: ids[0], ...(ids.length > 1 ? { ids: ids.join(',') } : {}) },
+    }),
+  );
+}
+
 // A response can reach the app twice: through the listener and, after a launch, through
 // getLastNotificationResponse(). The replay skips the one the listener already handled.
 let lastHandled: string | null = null;
@@ -114,7 +130,7 @@ export function handleNotificationResponse(response: Notifications.NotificationR
   }
 
   if (data.kind === 'hilula') {
-    if (response.actionIdentifier === DEFAULT_NOTIFICATION_ACTION) navigate(() => router.navigate('/hilulot'));
+    if (response.actionIdentifier === DEFAULT_NOTIFICATION_ACTION) openHilula(data);
     return;
   }
 

@@ -1,5 +1,5 @@
 import { HDate, Locale, getSedra, months } from '@hebcal/core';
-import { CHOK_TEXT_ID, chokAsset, hasChokContent } from '@/data/chok';
+import { CHOK_PARASHIYOT, CHOK_TEXT_ID, chokAsset, hasChokContent } from '@/data/chok';
 import { HebcalService } from '@/services/HebcalService';
 import { ZmanimService } from '@/services/ZmanimService';
 import { Completions, dateKey } from '@/stores/useCompletionsStore';
@@ -217,6 +217,23 @@ export function chokReaderPortion(request: ChokReaderRequest, location: Location
   return slot && chokSlotsOf(portion.parashiyot[0]).includes(slot) ? { ...portion, slot } : portion;
 }
 
+export function chokBrowsePortion(parasha: string, week: ChokPortion, slot: ChokSlot | null): ChokPortion {
+  const slots = chokSlotsOf(parasha);
+  const shown =
+    [slot, week.slot].find((candidate) => candidate && slots.includes(candidate)) ?? slots[slots.length - 1];
+  return { parashiyot: [parasha], slot: shown, shabbat: week.shabbat };
+}
+
+export function chokPlaceOf(segmentKey: string): { parasha: string; slot: ChokSlot } | null {
+  const [parasha, slotName] = segmentKey.split(':');
+  const slot = CHOK_SLOTS.find((candidate) => candidate === slotName);
+  return slot && CHOK_PARASHIYOT.includes(parasha) && chokSlotsOf(parasha).includes(slot) ? { parasha, slot } : null;
+}
+
+export function chokChosen<T>(parashiyot: readonly T[], choice: ChokDoubleChoice): readonly T[] {
+  return parashiyot.length < 2 || choice === 'both' ? parashiyot : [parashiyot[choice === 'first' ? 0 : 1]];
+}
+
 export function chokParashaName(parasha: string, language: 'he' | 'en'): string {
   return language === 'en' ? parasha : Locale.gettext(parasha, 'he-x-NoNikud');
 }
@@ -267,7 +284,7 @@ function makeUpSection(sections: readonly SiddurSection[], makeUp: ChokMakeUpFol
 
 export function chokText(assets: readonly ChokAsset[], options: ChokTextOptions): SiddurText {
   const { slot, choice, makeUps = [], ...titles } = options;
-  const chosen = assets.length < 2 || choice === 'both' ? assets : [assets[choice === 'first' ? 0 : 1]];
+  const chosen = chokChosen(assets, choice);
   const sections = [
     ...makeUps.map((makeUp) => makeUpSection(slotText(chosen, makeUp.slot, titles), makeUp)),
     ...slotText(chosen, slot, titles),
