@@ -18,119 +18,7 @@ The user's batch of fifteen requests, all decisions taken in the session of 2026
 - **Declined on 2026-10-24:** offering Tehillim as a download (0.4 MB, not worth the step), and installing only the user's nusach (it would make the first launch depend on the network).
 - **Done means:** both dictionaries updated, a DOX pass on every touched AGENTS.md, once the user guide exists its topic and a `WHATS_NEW` item updated and `pnpm guide:build` run, and `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, `pnpm test:tz` green. No commit and no OTA without the user's per-action approval.
 
-### High — Requests of 2026-10-24
-
-- [ ] Add Kiddush Levana as a monthly mitzvah
-  - **Flag:** `OTA`.
-  - **What it is:** A registry entry `kiddush_levana`:
-    - he "קידוש לבנה", en "Kiddush Levana";
-    - icon `moon`, `category: 'seasonal'`, `group: 'other'`, `timeType: 'monthly-window'`, all nuschaot;
-    - linked to the standalone text `kiddush_levana`;
-    - in `MENS_MITZVOT`.
-    - **The period (R1):** computed from the molad, through `@hebcal/core`'s `Molad` for the Hebrew month:
-      - it starts 3 days after the molad for Ashkenaz, and 7 days after it for Sefard, Edot HaMizrach and Chabad;
-      - it ends 14 days 18 hours 22 minutes after the molad for Ashkenaz, Sefard and Chabad, and 15 days after it for Edot HaMizrach;
-      - in Tishrei it starts no earlier than the exit of Yom Kippur, and in Av no earlier than the night after Tisha B'Av.
-    - **One multi-day window per month:**
-      - It belongs to the day of the first night it can be said: nightfall on or after the period start that is not a Shabbat or Yom Tov night. It is keyed on that day, and every other day returns `null`.
-      - It runs from that nightfall to the period end.
-      - Shabbat and Yom Tov nights inside it are quiet as usual.
-    - **Engine support for a window longer than a day.** Add `multiDay?: { maxDays: number }` to `Mitzvah` (16 here), and honour it in:
-      - `appDayWindow()` / `currentOrNextWindow()` ([buildDayTimeline.ts](src/utils/buildDayTimeline.ts)), which look back up to `maxDays` for a window still open, so home shows it every night of the period until done;
-      - `planMitzvot()`, which plans the triggers of a window that started up to `maxDays` back;
-      - `judgeDay()` ([historyStats.ts](src/utils/historyStats.ts)), where the item is open until `window.end`, done when marked, and missed after the period ends unmarked;
-      - the check-in, which skips a multi-day window whose end is after the block.
-    - **A new reminder anchor `blockExit`:** it fires `offsetMin` minutes after the exit of every holy block that ends inside the window. The editor offers it only for a `multiDay` mitzvah, labelled `reminder.anchor.blockExit` "במוצאי שבת וחג".
-    - **Default reminders:** `start/0` (the first night) and `blockExit/15` (motzaei Shabbat within the period), each with three `bodyVariants`.
-    - Retire the plain `kiddushLevana` day-3-to-15 flag in [src/utils/siddur.ts](src/utils/siddur.ts) in favour of the same period function, so the siddur tab and the mitzvah agree on which nights are open. The function lives in one home: `kiddushLevanaPeriod(hebrewMonth, nusach)` in [src/utils/siddur.ts](src/utils/siddur.ts).
-  - **What it solves:** Kiddush Levana in its time, with reminders, as one monthly mitzvah instead of a nightly one.
-  - **Expected result:**
-    - Period tests against published molad times for three months, per nusach, including Tishrei and Av.
-    - On a pinned month, home shows it from the first night through the period end until it is marked.
-    - Marking it on the fifth night files it under the first night's key, clears it from home and cancels its later reminders.
-    - History shows one item for the month, done or missed.
-    - No reminder inside a Shabbat, and one at block exit + 15.
-    - The siddur tab greys the text outside the period.
-    - Root [AGENTS.md](AGENTS.md) documents `multiDay` and `blockExit`.
-
-- [ ] Add Selichot as a seasonal mitzvah
-  - **Flag:** `OTA`.
-  - **What it is:** A registry entry `selichot`:
-    - he "סליחות", en "Selichot";
-    - icon `shofar`, `category: 'seasonal'`, `group: 'seasonal'`, `timeType: 'annual-seasonal'`, all nuschaot;
-    - linked to the standalone text `selichot`.
-    - **Window (R2):** on each day of the user's nusach season, the same flags the siddur tab uses (`selichotFlags()` in [src/utils/siddur.ts](src/utils/siddur.ts): Edot HaMizrach from 2 Elul, the others from leil Selichot, both through 9 Tishrei, none on Shabbat, Yom Tov or Yom Kippur), it runs from `chatzotLayla` to the next morning's `sofZmanTfilaGra`. That is the existing `MIDNIGHT_TO_MORNING_PRAYER` hours, keyed on the civil day whose night it opens.
-    - **One default reminder:** `start/0` at chatzot halayla (the user's call), with three `bodyVariants`, editable like every reminder.
-  - **What it solves:** Selichot reminders through the season, by nusach.
-  - **Expected result:**
-    - Window tests per nusach for the first and last day of the season and for a Shabbat in between (no window).
-    - The reminder schedules at chatzot.
-    - The siddur tab and the mitzvah agree on the days.
-
-- [ ] Add Chanukah candles as a seasonal mitzvah
-  - **Flag:** `OTA`.
-  - **What it is:** A registry entry `chanukah_candles`:
-    - he "נרות חנוכה", en "Chanukah candles";
-    - icon `chanukiah`, `category: 'seasonal'`, `group: 'seasonal'`, `timeType: 'annual-seasonal'`, all nuschaot;
-    - linked to the standalone text `chanukah_candles`.
-    - **Window per night (R4),** for each of the eight nights (the evenings that open 25 Kislev through 2 Tevet):
-      - a weekday starts at nightfall (tzeit) for Ashkenaz, Sefard and Edot HaMizrach, and at shkia for Chabad;
-      - Friday runs from `plagHaMincha` to the Shabbat candle lighting time;
-      - motzaei Shabbat starts at the block exit;
-      - every night ends at the next alot;
-      - a night is keyed on the civil day whose evening it is.
-    - **Default reminder:** `start/0`, with three `bodyVariants` that name the night ("הנר ה־%{n}"). The body carries the night's count through a new optional `bodyParams(ctx)` on `Mitzvah`, which the planner fills when building the body.
-  - **What it solves:** Chanukah candle reminders, with the Friday and motzaei Shabbat timing right.
-  - **Expected result:**
-    - Window tests for a weekday night, a Friday (ends at candle lighting, before the block) and a motzaei Shabbat (starts at the exit) in Jerusalem and abroad, under `pnpm test:tz`.
-    - Each reminder's body names the right night.
-    - No window outside Chanukah.
-
-- [ ] Add Ushpizin as a seasonal mitzvah with its text
-  - **Flag:** `OTA` — the text is a bundled asset.
-  - **What it is:**
-    - (1) **Text:** a new standalone text `ushpizin` in the occasions group, he "אושפיזין", en "Ushpizin", available on the nights of Sukkot (a new day flag `sukkotNight` for 15–21 Tishrei nights). It is built by `pnpm siddur:build` from pinned sources already cached in [scripts/siddur/.cache/](scripts/siddur/.cache):
-      - Ashkenaz: the `Ushpizin` section of the Metsudah or Torat Emet Ashkenaz source;
-      - Sefard: "Prayer Upon Entering Sukkah" in `toratEmetSefardHe.json`, which carries "תיבו תיבו אושפיזין";
-      - Edot HaMizrach: "סדר שבעה אושפיזין" in `edotHe.json`;
-      - English: the pinned translations where they exist, Hebrew only otherwise, per the siddur contract.
-      - Each night's ushpiz paragraph is conditioned on its night (flags `ushpizinNight1..7`).
-    - (2) **Chabad:** Chabad custom is not to recite the "עולו אושפיזין" formula (R5). So the mitzvah's `nuschaotSupported` excludes `chabad`, and the text is not shipped for Chabad. This is a deliberate exception to "every text ships for all four nuschaot". Record it in the test that enforces that rule as a named allowlist entry (`ushpizin: ['chabad']`) and in [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md). If the rav answers that Chabad does say it, the exception is removed and a Chabad source is added.
-    - (3) **Mitzvah:**
-      - registry entry `ushpizin`: icon `sukkah`, `category: 'seasonal'`, `group: 'seasonal'`, `timeType: 'annual-seasonal'`, linked to the text;
-      - window per night: nightfall → next alot on the seven nights;
-      - default reminder `start/0`, whose body names that night's ushpiz (Avraham, Yitzchak, Yaakov, Moshe, Aharon, Yosef, David, in that order; R5), with three `bodyVariants` through `bodyParams`.
-    - (4) **Nights inside a holy block** (Yom Tov, and Shabbat of chol hamoed):
-      - no reminder fires;
-      - the pre-block notice ([planners/holyBlock.ts](src/services/notifications/planners/holyBlock.ts)) gets one line per such night while the mitzvah is on: `holyBlock.notice.ushpizinTonight` "הלילה אושפיזין: %{name}", or `ushpizinOn` with the weekday;
-      - after the block, the check-in lists each of those nights as done or not, through the existing check-in.
-  - **What it solves:** The Ushpizin invitation each night of Sukkot, with the night's guest named, and its tracking on Shabbat and Yom Tov.
-  - **Expected result:**
-    - [siddur.test.ts](src/data/__tests__/siddur.test.ts) dated cases for nights 1 and 7 in three nuschaot.
-    - A Chabad user sees neither the text nor the mitzvah.
-    - The planner schedules chol hamoed nights with the right name, and puts the Yom Tov nights' lines in the pre-block notice.
-    - The check-in after the first Yom Tov lists the Yom Tov nights.
-    - [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md) records the sources and the Chabad exception.
-
 ### Medium — Requests of 2026-10-24
-
-- [ ] Ask which mitzvot to track during onboarding
-  - **Flag:** `OTA`.
-  - **What it is:**
-    - **New step:** a new onboarding route `src/app/onboarding/mitzvot.tsx`, between nusach and location. In [nusach.tsx](src/app/onboarding/nusach.tsx), Continue pushes `/onboarding/mitzvot`, and the new step's Continue pushes `/onboarding/location`. It comes after profile and nusach, so the list is already filtered by nusach and shows the gender defaults (`MENS_MITZVOT` off for a woman).
-    - **Copy:** title `onboarding.mitzvot.title` "אילו מצוות לעקוב?" / "Which mitzvot to track?"; hint `onboarding.mitzvot.hint` "אפשר לשנות את זה בכל עת במסך המצוות" / "You can change this any time in the mitzvot screen".
-    - **The list:** a shared component `MitzvahLibraryList` in [src/components/](src/components), extracted from [src/app/mitzvot.tsx](src/app/mitzvot.tsx) so both screens render the same grouped sections, switches, hilulot and Rosh Chodesh rows, and the at-least-one-reminder rule.
-      - Onboarding passes `showMine={false}` and shows no floating add button.
-      - The library screen keeps both.
-    - **Layout and dots:** the step uses the same layout, `OnboardingDots` and Continue `Button` as its siblings, and the dot count grows by one.
-    - **Ready step:** [ready.tsx](src/app/onboarding/ready.tsx) keeps its "edit mitzvot" link.
-    - **Existing users:** they are onboarded already, so they never see the step.
-  - **What it solves:** A new user chooses what to track the first time they open the app.
-  - **Expected result:**
-    - [routes.test.ts](src/app/__tests__/routes.test.ts) and [screens.smoke.render.test.tsx](src/app/__tests__/screens.smoke.render.test.tsx) gain the route.
-    - An onboarding render test: the step lists the groups, a toggle changes `useMitzvotStore`, and Continue goes to location.
-    - The library's render test still passes on the extracted component.
-    - [src/app/onboarding/AGENTS.md](src/app/onboarding/AGENTS.md) lists the step.
 
 - [ ] Build the direct APK for phone processors only
   - **Flag:** `Build`.
@@ -164,169 +52,7 @@ The user's batch of fifteen requests, all decisions taken in the session of 2026
 
     The dex size before and after is logged in [release/RELEASE_LOG.md](release/RELEASE_LOG.md). Any keep rule added is commented with the crash it fixed.
 
-- [ ] Add the siddur voice setting that follows gender
-  - **Flag:** `OTA`.
-  - **What it is:**
-    - **The field:** `useUserStore` gains `siddurVoice: 'male' | 'female' | null`, default `null`, which keeps today's text.
-    - **Following gender:** `chooseGender()` sets `siddurVoice` to the new gender on every gender change, overwriting any manual choice.
-    - **Settings:** in the Prayer section, `ChipRow` "נוסח הסידור" (`settings.siddurVoice`) with `settings.siddurVoice.male` "גבר" and `.female` "אישה", anchor `siddurVoice`, plus a settings-search item.
-    - **The reader:** [src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>) passes the voice into `resolveSiddurText()` through a new `forVoice()` step beside `forMaritalStatus()`.
-    - **The asset mechanism:**
-      - `PassageLabel` gains `voice?: 'male' | 'female'`, which shows a passage only to that voice. A null voice shows both, folded as today.
-      - `Run` gains `voice?` for inline alternatives such as מוֹדֶה / מוֹדָה.
-      - [scripts/siddur/build.js](scripts/siddur/build.js) and the tests guard the new flag exactly as they guard `marriedOnly`.
-  - **What it solves:** A woman reads the siddur in her own voice, and the gender in Settings drives it.
-  - **Expected result:**
-    - Store tests: a gender change sets the voice; a manual change sticks until the next gender change.
-    - A settings render test shows the chips.
-    - Siddur tests show that a `voice: 'female'` passage shows only for `female`, and that a null voice keeps today's resolved text byte for byte.
-    - [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md) documents the flag.
-
-- [ ] Apply the women's liturgy in every siddur text
-  - **Flag:** `OTA` — bundled assets rebuilt by `pnpm siddur:build`.
-  - **What it is:** Through the voice mechanism above, and by manifest patches in [scripts/siddur/manifest.js](scripts/siddur/manifest.js), each with a source note:
-    - (1) **Modeh Ani and Elokai Neshama** in all four nuschaot: `female` reads מוֹדָה for מוֹדֶה. In Edot HaMizrach the inline note "האשה אומרת: מודה" is resolved by voice.
-    - (2) **Birchot hashachar**, in `birchot_hashachar` and `shacharit`, all four nuschaot. For `female`:
-      - "שלא עשני אשה" is hidden;
-      - "שעשני כרצונו" is shown open: with shem umalchut in Ashkenaz and Sefard (the existing segment, its `WHEN_SAID.women` fold dropped for `female`), without shem umalchut in Edot HaMizrach (the existing segment), and in Chabad a new segment with shem umalchut, as a manifest patch noted as the Chabad women's text (R8);
-      - Edot HaMizrach's "גוי / גויה" and "עבד / שפחה" read the feminine word;
-      - the other nuschaot keep "גוי" and "עבד" (R8).
-      - For `male`, "שעשני כרצונו" is hidden in all four.
-    - (3) **Tallit and tefillin:** for `female`, Shacharit's tallit-and-tefillin station is hidden entirely; the `tefillin` text's tallit-katan and tefillin blessings and kavanot (Rabbeinu Tam included) are hidden; and the siddur tab does not list the `tefillin` text.
-    - (4) **Feminine first-person forms** for `female`, with correct nikud:
-      - הריני / הנני מוּכָן וּמְזֻמָּן → מוּכָנָה וּמְזֻמֶּנֶת: Omer in `sefirat_haomer` and `maariv`, Edot shacharit, Sefard chanukah_candles;
-      - הנני מְכַוֵּן → מְכַוֶּנֶת: Sefard chanukah_candles;
-      - הריני מְקַבֵּל → מְקַבֶּלֶת: the Shacharit "מה טובו" and "פרשת העקדה" kabbalah lines, and the bedtime Shema in Edot HaMizrach and Chabad;
-      - הריני מוֹחֵל → מוֹחֶלֶת: the bedtime Shema, all four;
-      - הריני מְזַמֵּן / מְקַשֵּׁר → מְזַמֶּנֶת / מְקַשֶּׁרֶת: Tikkun HaKlali, Edot shacharit;
-      - הריני בָּא → בָּאָה: Edot birchot_hanehenin and mezuzah.
-      - Verses (e.g. "עבדך בן אמתך") never change.
-    - (5) **Edot HaMizrach candle lighting** is written in a woman's voice. For `male` it reads הריני נוֹתֵן and "על אשתי"; `female` and null keep it as is.
-    - (6) **Birkat HaMazon Harachaman** "(ואת אשתי / בעלי ואת זרעי)" in Ashkenaz and Sefard: a married `male` reads "ואת אשתי", a married `female` "ואת בעלי", and a single user neither.
-    - (7) **Edot HaMizrach, `female`:**
-      - Sefirat HaOmer shows the note "נשים סופרות בלי ברכה" and folds the blessing (R8);
-      - Hallel shows the note "נשים אומרות בלי ברכה" and folds its opening and closing blessings (R8).
-    - (8) **Unchanged:** Birkat HaMazon's "ועל בריתך שחתמת בבשרנו ועל תורתך שלמדתנו" stays as printed (R8).
-    - (9) **English:** follows its pinned translation. Where a segment is hidden its English is hidden with it, and where the Hebrew changes form the English stays (it is gender-neutral).
-  - **What it solves:** The research the user asked for: every place in the app's texts that differs for a woman, applied in one pass.
-  - **Expected result:**
-    - [siddur.test.ts](src/data/__tests__/siddur.test.ts) has a dated case per item above, per nusach, for `female`, `male` and null.
-    - Null output is identical to today's.
-    - The `tefillin` text is absent from the siddur tab for `female`.
-    - `pnpm siddur:build` is clean.
-    - [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md) lists the voice patches and adds the R8 items to its halachic review list.
-
-- [ ] Search mitzvot and siddur texts from Settings
-  - **Flag:** `OTA`.
-  - **What it is:** [settingsSearch.ts](src/utils/settingsSearch.ts) indexes 26 settings items today.
-    - **New result kinds:**
-      - every mitzvah the user's nusach supports, static and custom, opening `/mitzvah/[id]`, caption `settings.search.kind.mitzvah` "מצווה";
-      - every siddur text, the mitzvah texts and the `STANDALONE_TEXTS` (Chok LeYisrael only once installed), opening `/siddur/[id]`, caption `settings.search.kind.siddur` "סידור";
-      - every chapter or station of a text, opening `/siddur/[id]?section=<title>`, caption "סידור · %{text}".
-    - **Chapter index:** `pnpm siddur:build` writes a new generated file `src/data/siddurChapters.generated.ts` (text id → nusach → chapter titles, he and en), so the search never loads an asset.
-    - **Type changes:** the item type takes a literal `title: { he, en }` beside `titleKey`, and a `href` of `{ pathname, params }` beside `route`. `chooseResult()` pushes it.
-    - **Reader:** it accepts `section` and runs its existing `jumpTo` on open.
-    - **Ranking:** the existing score. Ties order settings, mitzvot, texts, then chapters. `SETTINGS_SEARCH_LIMIT` goes from 8 to 12.
-    - **Mitzvah icons:** results use `iconFor()`, and texts their group icon.
-  - **What it solves:** Typing a mitzvah or prayer name in the search finds it.
-  - **Expected result:**
-    - [settingsSearch.test.ts](src/utils/__tests__/settingsSearch.test.ts): "ערבית" finds the maariv mitzvah and text; "אשרי" finds the Shacharit and Mincha stations; a custom mitzvah's name finds it; the other keyboard layout and typos work for these too; Chok is absent before install.
-    - [settings.search.render.test.tsx](src/app/__tests__/settings.search.render.test.tsx) opens a mitzvah, a text and a chapter (the reader lands on that section).
-
-- [ ] Add bookmarks and the last reading position to the siddur reader
-  - **Flag:** `OTA`.
-  - **What it is:**
-    - (1) **Stable segment keys:** [scripts/siddur/build.js](scripts/siddur/build.js) writes `key` on every `SiddurSegment`, a short hash of source id, source path and source segment index. The key survives day-dependent drops and rebuilds that keep the source. Chok sections get `parasha:day:heading` keys in [src/utils/chok.ts](src/utils/chok.ts).
-    - (2) **Store:** a new store `useSiddurBookmarksStore` (`siddur-bookmarks-store`, MMKV, in `STORES` of [BackupService.ts](src/services/BackupService.ts), reset by [AppResetService.ts](src/services/AppResetService.ts)) holds:
-      - `bookmarks: { id; textId; nusach; sectionTitle; segmentKey; label; createdAt }[]`, where `label` is the section title plus the segment's first three words;
-      - `lastPositions: Record<textId, { nusach; sectionTitle; segmentKey; appDay: 'YYYY-MM-DD'; savedAt }>`.
-    - (3) **Saving the last position:** the reader saves it 1 s after scrolling stops and on blur or background. Its anchor is the top visible segment, tracked by measuring each segment's `onLayout` inside its section item.
-    - (4) **Toolbar:** a bookmark button that adds a bookmark at the current segment, with a toast "נוספה סימנייה", and a "סימניות" button that opens a `BottomSheet`:
-      - its first row is always "המקום האחרון" (the place the user asked for, present whenever a last position exists for this text);
-      - then this text's bookmarks, newest first, each with a delete action;
-      - tapping a row jumps there: `scrollToIndex` to the section, then `scrollToOffset` by the segment's measured offset; when the key is gone, it falls back to the section top.
-    - (5) **Resume banner:** opening a text with a last position shows a `Banner` "להמשיך מהמקום שבו עצרת?" with "המשך" and "מההתחלה":
-      - for the daily texts (the mitzvah texts in `SIDDUR_TEXTS`), only when `appDay` equals today's app day;
-      - for every other text (Tehillim, Tikkun HaKlali, Chok LeYisrael, the standalone texts), always.
-      - Opening with a `section` param (search) skips the banner.
-  - **What it solves:** Jumping straight to a chosen place in Tehillim, a prayer, Tikkun HaKlali or any text, and returning to where the user stopped.
-  - **Expected result:**
-    - Reader render tests: add a bookmark, list it, jump to it, delete it.
-    - "המקום האחרון" appears after scrolling and returns to that segment.
-    - The banner shows for Tehillim the next day but not for Shacharit the next day.
-    - A key missing after a day change falls back to the section top.
-    - The store is in the backup file.
-    - A build test asserts every segment of every asset has a unique `key` within its text.
-    - [src/app/AGENTS.md](src/app/AGENTS.md), [src/stores/AGENTS.md](src/stores/AGENTS.md) and [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md) are updated.
-
-- [ ] Add a user guide that stays current with every change
-  - **Flag:** `OTA` — bundled content; the web copy ships with a push to `main`.
-  - **What it is:**
-    - (1) **One source:** `src/data/guide.ts`, an ordered list of topics. Each topic has `{ id, title: {he, en}, body: {he, en}[] (paragraphs), routes: string[], action?: { label: {he, en}, href } }`. `routes` names the screens it explains (e.g. `/mitzvot`, `/siddur/[id]`), and `action` adds an "open" button that takes the user there.
-      - **Topics, in this order:**
-        - getting started;
-        - home and marking a mitzvah;
-        - reminders and the reminder editor;
-        - the mitzvot library and custom mitzvot;
-        - Shabbat and Yom Tov (the quiet block and the check-in);
-        - the siddur, with prayer mode, folds, auto-scroll, bookmarks and the last position;
-        - Tehillim and Tikkun HaKlali;
-        - Chok LeYisrael and its download;
-        - history, the streak and the weekly report;
-        - the schedule;
-        - Rosh Chodesh and hilulot;
-        - taharah, shown only when `taharahOffered()` holds;
-        - settings: search, backup, restore and reset;
-        - updates;
-        - about and contact.
-      - **Derived content:** lists that change with the app are read from their own homes at render, so they can never go stale: the mitzvot by group from `MITZVOT`, the siddur texts from `STANDALONE_TEXTS`, and the palettes from `THEME_NAMES`.
-    - (2) **What's new:** `src/data/guide.ts` also exports `WHATS_NEW: { label: '<version>-<n>', date, items: {he, en}[] }[]`, newest first. The guide screen shows the latest three entries at its top.
-    - (3) **The screen:** a new stack route `src/app/guide.tsx`, using `ScreenHeader`, with a `SettingsSection`-style collapsible `Card` per topic and the action as a `Button`. It opens from:
-      - a More tab row "מדריך למשתמש" / "User guide" (icon `siddur`, or a new `guide` icon);
-      - a link row in Settings › About and contact;
-      - a settings-search route item.
-    - (4) **Web copy:** `pnpm guide:build` (a new script under [scripts/](scripts)) renders the same source into `docs/guide/index.html` (Hebrew) and `docs/guide/en/index.html` (English), in the style of [docs/index.html](docs/index.html). The support page links to it. Add the pair to `mirrors` in [.claude/done-gate.json](.claude/done-gate.json).
-    - (5) **Keeping it current, enforced rather than remembered:**
-      - (a) [scripts/publish-update.js](scripts/publish-update.js) refuses to publish a production update unless `WHATS_NEW` has an entry whose label is the `<version>-<n>` it is about to publish. The message names the missing label. `--skip-whats-new` is allowed only for a rollback republish.
-      - (b) A Jest test `guide.test.ts` fails when any screen file under [src/app/](src/app) (excluding layouts, redirects and onboarding) is named by no topic's `routes`. A new screen therefore cannot ship undocumented.
-      - (c) The test also checks that every topic has non-empty Hebrew and English text and a unique id, and that `docs/guide/` matches what `pnpm guide:build` produces now (a stale web copy fails).
-      - (d) Root [AGENTS.md](AGENTS.md) Common Change Checklist gains "User-visible change: update its topic in `src/data/guide.ts`, add the `WHATS_NEW` item, run `pnpm guide:build`". The batch rules above gain the same line under "Done means".
-  - **What it solves:** Users get one place that explains every feature, and it cannot fall behind the app.
-  - **Expected result:**
-    - The guide opens from the More tab, from Settings and from search, in Hebrew and English.
-    - Its mitzvot list matches the library.
-    - The live page is at `https://jew-365.github.io/jew-365/guide/`.
-    - `pnpm update:production` without a `WHATS_NEW` entry stops with a clear message.
-    - Adding a dummy route without a topic fails `guide.test.ts`.
-    - [routes.test.ts](src/app/__tests__/routes.test.ts) and [screens.smoke.render.test.tsx](src/app/__tests__/screens.smoke.render.test.tsx) gain `/guide`.
-    - [docs/AGENTS.md](docs/AGENTS.md) lists the pages.
-
 ### Low — Requests of 2026-10-24
-
-- [ ] Move Selichot out of the bundle into a downloadable add-on per nusach
-  - **Flag:** `OTA` for the behaviour. The space comes back only with the next `Build`, because a binary keeps the assets it was built with until it is replaced.
-  - **When:** after the direct-APK, R8 and Chok-compression tasks, and after the Selichot mitzvah task.
-  - **What it is:**
-    - **Why:** the four `selichot.siddur` assets are 5.5 MB of the 10 MB siddur (Ashkenaz 2.4, Chabad 1.6, Sefard 1.4, Edot HaMizrach 0.16), and they are read about 40 days a year.
-    - (1) **Shared add-on code:** extract what [ChokContentService.ts](src/services/ChokContentService.ts), [chokFiles.ts](src/services/chokFiles.ts), [useChokStore.ts](src/stores/useChokStore.ts) and [ChokAddonCard.tsx](src/components/ChokAddonCard.tsx) do generically into one shared add-on core under `src/services/addons/`, plus a shared `AddonCard`, used by both add-ons:
-      - manifest fetch, hash-verified download of `.gz` files, install and delete;
-      - the launch reconcile and the version check;
-      - the card itself.
-
-      No second copy of the download code.
-    - (2) **Build:** `pnpm siddur:build` writes the Selichot of each nusach to `docs/selichot/<nusach>.<hash>.siddur.gz` with a `docs/selichot/manifest.json`, and leaves them out of `assets/siddur` and `siddurAssets.generated.ts`.
-    - (3) **The app:**
-      - The `selichot` standalone text and mitzvah need the user's nusach file. Until it is installed, the mitzvah's window is `null` (as Chok's is), and the siddur tab row, the mitzvah screen and the More tab offer the download of that nusach only.
-      - A nusach change offers the new nusach's file and deletes the old one after the new one installs.
-      - From 7 days before the user's season starts (the same `selichotFlags()` dates), home shows a `Banner` "הסליחות מתחילות ב־%{date} · להוריד את הנוסח?" with a download button, until it is installed or dismissed for that season.
-    - (4) **Store:** a new device-only store `useSelichotStore`, out of the backup file like `useChokStore`.
-  - **What it solves:** The app stops carrying four nuschaot of Selichot for a text read a few weeks a year.
-  - **Expected result:**
-    - The bundle has no `selichot.siddur`, and the next build's APK and iOS app are about 5.5 MB smaller.
-    - Tests for the shared core run against both add-ons.
-    - Selichot appears and reads offline once downloaded, and is offered before the season.
-    - The Chok add-on behaves exactly as before.
-    - [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md), [docs/AGENTS.md](docs/AGENTS.md) and [src/services/AGENTS.md](src/services/AGENTS.md) are updated.
 
 - [ ] Push an update notice to closed apps (not urgent)
   - **Flag:** `Build`.
@@ -343,11 +69,66 @@ The user's batch of fifteen requests, all decisions taken in the session of 2026
     - Nothing is sent during Shabbat or Yom Tov.
     - The policy and the store forms are updated.
 
-- [ ] Publish the rav questions as a review page
-  - **Flag:** no app release — a push to `main` publishes it on GitHub Pages.
-  - **What it is:** `docs/halacha-review.html`, on the model of [docs/taharah-review.html](docs/taharah-review.html) (noindex, the same Formspree answer form with נכון / לא נכון and a note per item). It lists R1–R9 of [For the rav](#for-the-rav) with each rule as implemented and its source.
-  - **What it solves:** The rav answers the batch's halachic choices in one place, as with the taharah rules.
-  - **Expected result:** The page is live at `https://jew-365.github.io/jew-365/halacha-review.html` and listed in [docs/AGENTS.md](docs/AGENTS.md). Each answer comes back as a change to its one rule.
+### High — the 1.0.21 store release
+
+Finished, committed and pushed, and native or store-side: each reaches users only with the store production release of 1.0.21, on Google Play's production track (the application opens around 2026-11-06, after 14 days of 12 testers) or on the App Store after review and the owner's Release. They moved back from action-log.md on 2026-10-26, when the log began to hold only work in production ([AGENTS.md](AGENTS.md), Project records). Their What it solves and Expected result were written from the log entries that day, `unknown` where an entry gave no basis; the priority is provisional, the owner's to confirm.
+
+- [ ] Move the app to the Jew 365 identity as a new app
+  - **Done:** 2026-10-19. Verified: unknown beyond the build.
+  - **Status:** Version: Build, expected on the store production tracks · Committed: yes, `8f5e419` feat: rename the app to Jew 360; `2a7b721` feat!: move the app to the Jew 365 identity · Pushed: yes · Live: APK `5d9a512f` (1.0.20, versionCode 2), direct install; the 1.0.21 builds on Play closed testing and TestFlight; store production not yet · Channel: closed testing
+  - **Flag:** `Build`.
+  - **What it is:** `com.jew365.app`, scheme `jew365`, a new EAS project; the previous app's backup file restores here ([app.json](app.json), [src/services/BackupService.ts](src/services/BackupService.ts)).
+  - **What it solves:** unknown (the log entry names no reason).
+  - **Expected result:** the store production release installs `com.jew365.app` as Jew 365 / יהודי 365, and a backup file of the previous app restores in it.
+  - **Requested:** the user, 2026-10-19 (after `8f5e419` named it Jew 360 the same day).
+- [ ] The redesign: warm palette, premium UI, the Jew 365 logo; Expo SDK 54 patches
+  - **Done:** 2026-10-21. Verified: typecheck, lint, DOX and 2,710 tests in four zones; the Android emulator (debug build): the launcher icon, the light and dark splash, the in-app SVG logo's gradient and outline mask. Not checked: the 1.0.21 icon on a real launcher, iOS, and Android 13 themed icons.
+  - **Status:** Version: Build, expected on the store production tracks (the JS half ships over the air) · Committed: yes, `73c50ad` feat: redesign with the warm palette, premium UI and the Jew 365 logo; `a10e790` chore(deps): Expo SDK 54 patch upgrades; merged in `93f2af4` · Pushed: yes · Live: the JS half in production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, from `c1989c4`); the native half in the 1.0.21 builds on Play closed testing and TestFlight, store production not yet · Channel: production (OTA); closed testing (build)
+  - **Flag:** `Build` for the native half; the palettes, screens and in-app logo ship over the air.
+  - **What it is:** the warm palette, premium UI and the Jew 365 logo ([src/theme/colors.ts](src/theme/colors.ts), [design/references/2026-10-21/](design/references/2026-10-21)). The launcher icon (`icon.png`, `adaptive-icon.png`, the Android 13 monochrome layer `adaptive-monochrome.png`), the notification icon and its colour `#012B97` (the owner's call, 2026-10-22), and the splash (the `expo-splash-screen` plugin with a light and a dark image) are native. Build 1.0.20 showed the launcher icon cropped on the user's Samsung phone; [scripts/logo/export.mjs](scripts/logo/export.mjs) now draws it to a 0.255-width radius, and that build was never uploaded.
+  - **What it solves:** unknown (the log entry names no reason).
+  - **Expected result:** the store production builds show the redesigned launcher icon whole on a Samsung launcher, the light and dark splash, and the notification colour `#012B97`.
+  - **Requested:** the owner, 2026-10-21.
+- [ ] The four symbols in every icon; the blue notification colour
+  - **Done:** 2026-10-22. Verified: the APK checked for the symbols and the colour; the owner installed and approved it.
+  - **Status:** Version: Build, expected on the store production tracks · Committed: yes, `11be1c8` feat(logo): the four symbols in every icon; blue notification colour; `3a7b177` fix(android): keep the launcher icon clear of Samsung's mask; 1.0.21 · Pushed: yes · Live: AAB `cc56fee1` on Play `Closed testing - Alpha` (release `8 (1.0.21)`, approved 2026-10-22); APK `d54afeab` for direct installs; store production not yet · Channel: closed testing
+  - **Flag:** `Build`.
+  - **What it is:** the four symbols in every icon and the blue notification colour ([scripts/logo/export.mjs](scripts/logo/export.mjs), [assets/](assets)), with the Samsung mask fix of `3a7b177`, whose own builds were never uploaded.
+  - **What it solves:** the icon follows the owner's rule of 2026-10-22.
+  - **Expected result:** the store production builds show the four symbols in the launcher icon and the blue notification colour.
+  - **Requested:** the owner's rule, 2026-10-22.
+- [ ] iOS build 1.0.21 (4)
+  - **Done:** 2026-10-22. Verified: build `72c51b1e` FINISHED after `052c2db2` and `1b4f562b` errored ([release/RELEASE_LOG.md](release/RELEASE_LOG.md)).
+  - **Status:** Version: Build `1.0.21` (4), expected on the App Store · Committed: yes, `42e961d` fix(ios): give expo.name Latin letters so EAS finds the Xcode target; `a035ab3` feat(ios): keep the taharah fallback out of iCloud, ship iPhone only; `04500e7` fix(ios): add @sentry/cli as a direct dev dependency · Pushed: yes · Live: `72c51b1e` on TestFlight (public link), in App Store review since 2026-10-23; App Store release not yet · Channel: TestFlight
+  - **Flag:** `Build` (iOS).
+  - **What it is:** `expo.name` in Latin letters so EAS finds the Xcode target, `@sentry/cli` as a direct dev dependency, the taharah fallback file out of iCloud, iPhone only ([app.json](app.json), [package.json](package.json)).
+  - **What it solves:** the iOS builds `052c2db2` and `1b4f562b` errored before these changes.
+  - **Expected result:** the App Store releases 1.0.21 (4) after review and the owner's Release, and it installs on an iPhone.
+  - **Requested:** the owner, 2026-10-22 (iOS via TestFlight).
+- [ ] Store copy names kinds of features, never counts
+  - **Done:** 2026-10-25. Verified: read against the rule; the site answers 200.
+  - **Status:** Version: store copy, expected with the store production release (the site part is on Pages) · Committed: yes, `1e12449` · Pushed: yes · Live: the site at https://jew-365.github.io/jew-365/; the Play and App Store listings not yet re-entered · Channel: production (Pages); consoles not yet
+  - **Flag:** the store consoles; the site part ships on Pages.
+  - **What it is:** the listings and the site's feature list rewritten to the owner's rule ([release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md), [release/APP_STORE_METADATA_HE.md](release/APP_STORE_METADATA_HE.md), [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md), [docs/index.html](docs/index.html)). The copy is entered in both consoles together with "Add Chok LeYisrael to the store listings".
+  - **What it solves:** the store copy follows the owner's rule of 2026-10-25 ([release/AGENTS.md](release/AGENTS.md)): kinds of features, never counts.
+  - **Expected result:** both consoles show the rewritten copy after a reload, and the store production release carries it.
+  - **Requested:** the owner's rule of 2026-10-25.
+- [ ] No promise of no server, no database or offline only, anywhere
+  - **Done:** 2026-10-21. Verified: the Play descriptions edited to match.
+  - **Status:** Version: store copy and the 1.0.21 builds, expected with the store production release (the site part is on Pages) · Committed: yes, `dcf802a` docs: drop every promise of no server, no database or offline only · Pushed: yes · Live: the site; both listings, public only from the store production release, not yet · Channel: production (Pages); closed testing (listings)
+  - **Flag:** the store consoles and `Build`; the site part ships on Pages.
+  - **What it is:** every promise of no server, no database or offline only dropped from the site, the listings and the 1.0.21 builds ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-10-21).
+  - **What it solves:** unknown (the log entry names no reason).
+  - **Expected result:** the listings and the builds of the store production release hold no such promise; the site already holds none.
+  - **Requested:** the owner, 2026-10-21.
+- [ ] China mainland removed from the App Store availability
+  - **Done:** 2026-10-26. Verified: App Store Connect after a reload: Availability (174 Countries or Regions), China mainland Not Available, Hong Kong, Macau and Taiwan Available on App Release.
+  - **Status:** Version: App Store availability, expected with the App Store release of 1.0.21 · Committed: n/a (its records are in `c1989c4`) · Pushed: n/a · Live: saved in App Store Connect on 2026-10-26; in effect from the App Store release, not yet · Channel: App Store review
+  - **Flag:** App Store Connect.
+  - **What it is:** the App Store availability set to 174 countries or regions, every storefront but China mainland ([release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md)).
+  - **What it solves:** China mainland's law requires a permit for apps with religious content.
+  - **Expected result:** after the App Store release the app is offered in 174 storefronts and not in China mainland.
+  - **Requested:** the owner, 2026-10-26, in a Claude Code session.
 
 ### High — Chok LeYisrael
 
@@ -360,20 +141,7 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
   - **What it solves:** The listings describe what the app does.
   - **Expected result:** Both consoles carry the new copy.
   - **Status 2026-10-25:** the copy in [release/](release) and [docs/index.html](docs/index.html) is rewritten to name kinds of features, so the batch's additions are covered; left: re-enter it in both consoles (the owner's approval) and a [RELEASE_LOG](release/RELEASE_LOG.md) entry.
-
-- [ ] Restore Chok LeYisrael's learning-day window and let ליל שישי count for Thursday or Friday
-  - **Flag:** `OTA`.
-  - **What it is:** The user's call on 2026-10-25, replacing the same day's sunrise-to-sunset change (already merged in the working tree):
-    - (1) **Window:** `CHOK_LEYISRAEL.computeWindow` in [src/data/mitzvot.ts](src/data/mitzvot.ts) goes back to the learning day: from alot to the next day's alot, or to candle lighting when a holy block opens that evening, `null` on Shabbat, Yom Tov, the Friday of a Vezot Haberakhah week and until the add-on is installed, exactly as before the sunrise-to-sunset change. Restore the tests and docs that change pinned (root [AGENTS.md](AGENTS.md) Mitzvah Data Model, [src/data/AGENTS.md](src/data/AGENTS.md), [src/utils/AGENTS.md](src/utils/AGENTS.md), [src/services/notifications/AGENTS.md](src/services/notifications/AGENTS.md)), keeping what the other tasks of the batch added since. The "פתח נוסח" of the Chok LeYisrael mitzvah opens the reader on its own learning day (no `date`), from the mitzvah screen and from home's card alike, so on Thursday night it opens ליל שישי.
-    - (2) **ליל שישי can be marked:** today the ליל שישי portion has no "סיימתי" (`chokDoneDay()` in [src/utils/chok.ts](src/utils/chok.ts) returns `null` for `thuNight`). It gets one, and its mark files under the day the user learns it for: a new `useUserStore.chokThuNightDay: 'thu' | 'fri' | null`, `null` until the first "סיימתי" on ליל שישי, which opens a [BottomSheet](src/components/BottomSheet.tsx) asking `chok.thuNight.ask` "לאיזה יום לרשום את ליל שישי?" / "Which day does ליל שישי count for?" with `chok.thuNight.thu` "יום חמישי" / "Thursday" and `chok.thuNight.fri` "יום שישי" / "Friday"; the answer is saved and the mark filed. The same choice is a `ChipRow` in Settings → Prayer → reading (`settings.chokThuNightDay` "ליל שישי נרשם ל־", anchor and search item, the way `chokDoubleChoice` is offered). With `thu`, ליל שישי marks Thursday (as the Thursday portion does); with `fri`, it marks Friday ahead of Friday's window, so Friday's reminders are dropped as for any completed day. The Thursday and Friday portions themselves keep their own "סיימתי". The choice is in the backup file with the rest of the user store and reset with it.
-  - **What it solves:** Chok LeYisrael tracks the learning day as before, and a user who learns ליל שישי on Thursday night gets it counted for the day they learn it for.
-  - **Expected result:** Window tests under `pnpm test:tz` (Jerusalem and Los Angeles): a weekday runs alot to the next alot, a Friday alot to candle lighting, Shabbat none. Reader render tests: on Thursday 21:00 the reader opens ליל שישי with "סיימתי"; the first press asks the day; with "יום חמישי" the mark files under Thursday's key, with "יום שישי" under Friday's and no Friday reminder is planned; the second press asks nothing; changing the Settings chips changes where the next mark goes. Home's card "פתח נוסח" on Thursday night opens ליל שישי. The emulator check is the orchestrator's.
-
-- [ ] Ask to turn on Chok LeYisrael right after its download
-  - **Flag:** `OTA`.
-  - **What it is:** The user's call on 2026-10-25: when a download of the Chok LeYisrael add-on ends in an install and the `chok_leyisrael` mitzvah is off, a [ConfirmDialog](src/components/ConfirmDialog.tsx) asks whether to turn it on. Title `chok.enablePrompt.title` "חק לישראל הותקן" / "Chok LeYisrael is installed"; body `chok.enablePrompt.body` "האם להפעיל התראות ומעקב אחרי המצווה?" / "Turn on reminders and tracking for this mitzvah?"; confirm `common.yes` "כן" / "Yes" (reuse the key if it exists, else add it); cancel `common.no` "לא" / "No". "כן" switches the mitzvah on through the store's guarded path (`setEnabled` / `canEnable` in [useMitzvotStore.ts](src/stores/useMitzvotStore.ts)), so it gets its default 09:00 reminder and `enabledAt` now; "לא" only closes. The dialog shows wherever the download was started (the mitzvah screen's add-on card, the More tab's Chok row, the library row if it starts one), even when the user moved to another screen meanwhile, so the prompt lives in one home: a pending flag the download action raises in [useChokStore.ts](src/stores/useChokStore.ts) (memory only, not persisted) and one prompt component mounted once by the root layout. It is not shown after a content-update download, after a download that fails, or when the mitzvah is already on.
-  - **What it solves:** A user who downloads the text is offered tracking at once, instead of finding the switch.
-  - **Expected result:** Render tests: a finished first download with the mitzvah off shows the dialog; "כן" turns it on with its default reminder and `enabledAt`; "לא" leaves it off and the dialog does not come back; no dialog after an update download, a failed download, or with the mitzvah already on; the dialog appears when the download finishes after navigating away. On the Android emulator: download from the More tab, answer "כן", the mitzvah screen shows it on with the 09:00 reminder scheduled.
+  - **Status 2026-10-26:** the description submitted with App Store 1.0.21 still reads "תשע מצוות תלויות זמן" (read in App Store Connect). The re-entry also takes the copy of the task "Add the search terms to the Play listing and the store copy", so each console is filled once.
 
 ### Medium — Chok LeYisrael source defects
 
@@ -382,42 +150,6 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
   - **What it solves:** A reader of those verses sees the correct text.
   - **Expected result:** The user's decision, and either a sent report or a patch list with tests.
 
-### High — Requests of 2026-10-26
-
-The user's two requests of 2026-10-26, to be specified, recorded here and carried out after the phone-check batch of the same day (in [action-log.md](action-log.md)). The open choices of each are numbered `D<n>`. The owner asked on 2026-10-26 that the work go ahead on the planner's recommendations and that every choice be listed at the end for approval; each `D<n>` below states the recommendation taken, awaiting that approval.
-
-- [x] A page for every tzaddik of the hilulot list — **Closed, awaiting move** (built and verified on 2026-10-26, see [action-log.md](action-log.md); the owner approves the choices below and the content review under Other Open Items)
-  - **Flag:** `OTA` (bundled text and screens; no native module).
-  - **What it is:**
-    - A new stack screen `/hilula/[id]` for each entry of `HILULOT` ([src/data/hilulot.ts](src/data/hilulot.ts)). A row of the coming hilulot on [src/app/hilulot.tsx](src/app/hilulot.tsx) opens it.
-    - A hilula notice (`hilula:<abs>:<before|evening>`, today it opens `/hilulot`) opens the page of its tzaddik ([src/services/notificationResponseHandler.ts](src/services/notificationResponseHandler.ts)). The notice's `data` carries the ids of the tzaddikim it names.
-    - The page shows, in the UI language:
-      1. a biography of at most 80 words: who he was and what he did;
-      2. two things he is identified with that one can learn from;
-      3. his books or works, unless he is a biblical figure;
-      4. one story about him of at most 80 words, two when there are two good ones;
-      5. a Waze link to his grave, when the place is known and visitors can reach it.
-    - The content lives in a bundled registry beside `HILULOT`, one entry per id. A test makes every `HILULOT` id have one and checks the word limits.
-  - **Choices taken (awaiting the owner's approval):**
-    - D1: Hebrew and English, like the rest of the app.
-    - D2: The content is researched by agents with web search. Every fact rests on two independent sources, kept per entry in a `sources` list that the app does not show. Stories are only ones told in published sources, retold in the app's own words. An adversarial fact-check runs before the content lands, and the content waits for the owner's (or a rav's) review under Other Open Items.
-    - D3: Waze opens with the grave's coordinates (`https://waze.com/ul?ll=<lat>,<lng>&navigate=yes`) only when the burial place is known, visitors can reach it, and two sources agree on the spot, in Israel or abroad. Otherwise the page says why there is no link (unknown, disputed or closed to visitors).
-    - D4: A notice that names two or more tzaddikim opens one page with a switch between them (a `SegmentedControl` of their names), on the first one named.
-  - **What it solves:** The hilulot list names a tzaddik and a date and nothing else. The page turns the notice into a reason to learn.
-  - **Expected result:** Every tzaddik of the list has a page with the five parts (or the stated reason one is absent), opened from the list and from the notice. Done also means the guide topic, a `WHATS_NEW` item and the gate.
-- [x] A display size setting for the whole app — **Closed, awaiting move** (built and verified on 2026-10-26, see [action-log.md](action-log.md); the owner approves the choices below)
-  - **Flag:** `OTA`, if it needs no native module (checked first).
-  - **What it is:**
-    - A Settings choice that makes everything in the app smaller or larger: text, buttons, spacing and icons. Today's size is the default.
-    - The theme tokens ([src/theme/typography.ts](src/theme/typography.ts), [src/theme/tokens.ts](src/theme/tokens.ts)) and the fixed sizes in components scale by one factor that the app reads at launch.
-  - **Choices taken (awaiting the owner's approval):**
-    - D5: Seven steps: 80%, 85%, 90%, 95%, 100% (today's size, the default), 110% and 120%. They are chosen in Settings → Display with a − / + stepper and a live sample.
-    - D6: The siddur reader's text scales with the app, and its A+ / A− still works relative to that. The phone's own font size keeps applying on top, as today, so accessibility settings still work.
-    - D7: Sizes are read once at launch, because every screen builds its styles at load. A change therefore asks once and then reloads the app (about a second). The same reload already happens when the language changes direction.
-    - D8: This session, after the hilula pages. A separate session would start from the last commit, without the 140 files of uncommitted work, and would collide with them.
-  - **What it solves:** The owner finds the app large on the phone, and users differ in what they need.
-  - **Expected result:** One setting scales every screen consistently, with no clipped or overlapping layout at the smallest and largest step, at 360 dp, in Hebrew and English.
-
 ### Low — Chok LeYisrael follow-ups
 
 - [ ] Watch for an App Review note on the add-on's storage
@@ -425,127 +157,78 @@ The user's two requests of 2026-10-26, to be specified, recorded here and carrie
   - **What it solves:** Keeps the iOS submission from stalling on storage.
   - **Expected result:** Either no objection, or the folder moved in one change.
 
+### Store listings of 2026-10-26 — batch rules
+
+- **Requested:** the user, 2026-10-26, in a Claude Code session, after a status read of both consoles: anyone who searches יהודי 365 or Jew 365 reaches the app, and so does anyone who searches תהילים, סידור, חק לישראל or תיקון הכללי, in Hebrew and in English; the improvements listed the same day went in as tasks ("תכתוב משימות ב not-close").
+- **How search reads a listing (checked 2026-10-26):** App Store search reads the name, the subtitle, the keyword field and the categories, never the description or the promotional text ([Apple, App Store search](https://developer.apple.com/app-store/search/)). Each localization is read only in the storefronts that list its language, and Israel lists English (U.K.) and Hebrew ([Apple, App Store localizations](https://developer.apple.com/help/app-store-connect/reference/app-store-localizations/)), so today's English (U.S.) copy is not read in Israel. Google Play reads the title, the short description and the full description, and forbids repeated or unrelated keywords ([Play metadata policy](https://support.google.com/googleplay/android-developer/answer/9898842)).
+- **Competition (iTunes Search API with `country=il`, and Play web search with `gl=IL`, 2026-10-26):** חק לישראל: the App Store leader has 8 ratings; on Play one strong app (over 50K installs), then unrelated results. תיקון הכללי: the App Store leader has 210 ratings; four or five dedicated apps on Play. תהילים and סידור: over 30 Play apps carry the word in their title, and the App Store leaders have 130 to 170 ratings (Neshama 2.7K). Jew 365: no result yet, the app is not released.
+- **Decisions taken:** the store name stays `יהודי 365` / `Jew 365` (the owner, 2026-10-26). The subtitle's content was left to Claude (the owner, 2026-10-26: "תכניס מה שהכי חזק והכי צריך"): the two most searched terms the owner named and the least contested one, `סידור, תהילים, חק לישראל`, since the subtitle weighs most after the name and the low-competition terms rank from the keyword field; the tagline moves to the promotional text.
+- **Declined:** renaming the app in the stores to carry keywords (the owner, 2026-10-26: "לא רוצה לשנות שם").
+- **Done means:** the value saved in the console and read back after a reload, recorded in [release/APP_STORE_METADATA_HE.md](release/APP_STORE_METADATA_HE.md), [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md) or [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md), and in [release/RELEASE_LOG.md](release/RELEASE_LOG.md), in the same pass ([store-console skill](.claude/skills/store-console/SKILL.md)); each console step runs only after the owner's go-ahead for it.
+
+### High — Store listings of 2026-10-26
+
+- [ ] Set the App Store subtitle and keywords for search
+  - **Ships as:** a console change in App Store Connect, no build.
+  - **What it is:**
+    - Hebrew localization: subtitle `סידור, תהילים, חק לישראל` (24 of 30); keywords `jew,תיקון,הכללי,התיקון,חוק,תהלים,זמני הלכה,מצוות,תפילין,ברכת המזון,קריאת שמע,לוח עברי,טהרה,סליחות` (97 of 100). `jew` with the `365` of the name answers "jew 365" in Israel without an English (U.K.) localization (Q1); `חוק` and `תהלים` are the spellings people type; no word repeats one of the name or the subtitle, which Apple counts as waste.
+    - English (U.S.) localization: subtitle `Siddur, Tehillim & Zmanim` (25 of 30); keywords `psalms,tehilim,sidur,chok,hok,leyisrael,leisrael,tikkun,tikun,haklali,klali,mitzvah,tefillin,jewish` (99 of 100).
+    - Promotional text, which search does not read, opens with the tagline: `כל מצווה בזמנה: זמני הלכה מדויקים, תזכורות בחלון הזמן של כל מצווה, סידור בארבעה נוסחים, ואפליקציה שנחה בשבת ובחג. בלי חשבון.` (124 of 170) and `Every mitzvah in its time: accurate zmanim, reminders inside each mitzvah's window, a siddur in four nusachim, and an app that rests on Shabbat and Yom Tov. No account.` (168 of 170).
+    - When: while 1.0.21 waits for review. On 2026-10-26 the name, subtitle, keyword and description fields were open in that state, and App Information says its changes go out with the next app version, which is 1.0.21. Once 1.0.21 is released, the subtitle and the keywords change only with a new version, that is a new build that raises `version` (root [AGENTS.md](AGENTS.md), Never raise `version` for a JS change).
+    - The names-and-tagline rule of [release/AGENTS.md](release/AGENTS.md) changes in the same edit: the subtitles become the ones above.
+  - **What it solves:** today's subtitle and keywords carry none of תהילים, חק לישראל or תיקון הכללי, and the English name is not read in Israel.
+  - **Expected result:** after a reload, App Store Connect shows each value with its counter within the limit; within days of the release, the iTunes Search API (`https://itunes.apple.com/search?country=il&entity=software&term=<term>`) returns the app for `jew 365`, `יהודי 365`, `חק לישראל` and `תיקון הכללי`, and its rank for `תהילים` and `סידור` is recorded.
+
+- [ ] Add the search terms to the Play listing and the store copy
+  - **Ships as:** a console change in the Play Console (Google reviews a listing change), no build.
+  - **What it is:**
+    - Play short description: Hebrew `סידור, תהילים, חק לישראל, תיקון הכללי וזמני הלכה: כל מצווה בזמנה` (64 of 80), English `Siddur, Tehillim, Chok LeYisrael, Tikkun HaKlali and reminders for every mitzvah` (80 of 80). The title stays `יהודי 365` / `Jew 365`.
+    - The full descriptions of both stores, Hebrew and English, in [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md) and both App Store files: התיקון הכללי joins the examples of the siddur paragraph (`Tikkun HaKlali` in English), and the Chok LeYisrael heading names the other spelling once: `חק לישראל (חוק לישראל)`, `Chok LeYisrael (Hok LeIsrael)`. Each term appears once, as the Play policy asks, and the copy rules of [release/AGENTS.md](release/AGENTS.md) hold (kinds of features with examples, no counts). Play reads the full description; the App Store shows it to the reader only.
+    - Before the production application on Play (about 2026-11-06), so the first public listing carries them.
+  - **What it solves:** today no listing names תיקון הכללי or the spelling חוק לישראל, and the Play short description names none of the four terms.
+  - **Expected result:** the Play listing, reloaded, shows both short descriptions within 80 and the full descriptions with each term once; the copy files match what the consoles show. The console re-entry runs with the task "Add Chok LeYisrael to the store listings", so each console is filled once.
+
+### Medium — Store listings of 2026-10-26
+
+- [ ] Set the App Store secondary category to Reference
+  - **Ships as:** a console change in App Store Connect, no build.
+  - **What it is:** App Information → Category → Secondary: Reference; the primary stays Lifestyle. Apple's search reads both categories.
+  - **What it solves:** the secondary category is empty, and Reference fits a siddur and a halachic-times tool.
+  - **Expected result:** App Information shows Lifestyle and Reference after a reload, and the App Information line of [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md) says so.
+
+- [ ] Choose the Play tags
+  - **Ships as:** a console change in the Play Console, no build.
+  - **What it is:** Store presence → Store settings → Tags: read what is set (nothing is recorded), and choose up to five of Play's own tags that describe a siddur, Tehillim and halachic times, shown to the owner before saving.
+  - **What it solves:** tags place the app among similar apps on Play, and none is recorded today.
+  - **Expected result:** Store settings shows the tags after a reload, and [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md) lists them.
+
+- [ ] Make English screenshots and a screenshot of a reminder
+  - **Ships as:** a console change in both consoles, no build.
+  - **What it is:**
+    - An English set in the order of the Hebrew one (Home, Siddur tab, Reader, History, Settings): 1206x2622 for the English (U.S.) App Store page and 1080x1920 for the Play English translation, made the way the Hebrew set was (Screenshot Plan in [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md)).
+    - One screenshot per language of a mitzvah reminder in the notification shade with its two buttons ("עשיתי" / "פתח נוסח", "Done" / "Open text"), taken on the Android emulator ([android-native-verify](.claude/skills/android-native-verify/SKILL.md)), since the web build shows no notification; it goes second in each set.
+    - Uploads go through Chrome, each file under 10 MB.
+  - **What it solves:** English visitors see Hebrew screens today, and no screenshot shows the reminder buttons, the app's own feature.
+  - **Expected result:** after a reload, the English pages of both consoles show the English set and both languages show the reminder shot; the Screenshot Plan sections and the Store Graphics section of [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md) list the new files.
+
+### Low — Store listings of 2026-10-26
+
+- [ ] Ask for a store rating inside the app
+  - **Ships as:** a native build (`expo-store-review` is a native module), with the next build and its version decision ([state.md](state.md)).
+  - **What it is:** the app asks the OS for its rating prompt (`StoreReview.requestReview()`) at the moment Q2 settles, never on the first launch and never inside a holy block (`quietBlockAt()` in [src/utils/skipRules.ts](src/utils/skipRules.ts)); the OS caps how often the prompt shows.
+  - **What it solves:** ratings and downloads decide the rank for תהילים and סידור, where over 30 apps compete.
+  - **Expected result:** a test that the request runs once at the chosen moment and never on the first launch or inside a holy block; on a device, the store's rating sheet opens from a store-installed build.
+
 ## Bugs
 
-- [ ] Apply the gender defaults in a headless launch too
-  - **Flag:** `OTA`.
-  - **What it is:** Found by the phase-2 verifier on 2026-10-25. `applyGenderDefaultsToNew()` ([taharahOptIn.ts](src/stores/taharahOptIn.ts)) switches off, for a user whose gender is `female`, the ids in `MENS_MITZVOT` that the mitzvot store's hydrate just added (`addedOnHydrate`). Only the root layout calls it. On Android the first start after an OTA can be a headless background task (the hourly rebuild or a notification action), which loads [index.js](index.js) and [NotificationScheduler.ts](src/services/NotificationScheduler.ts) but never the layout, so a newly registered men's mitzvah (Kiddush Levana) is on in memory, gets scheduled for a woman, and, when the persisted payload's version differs, is persisted on, so the next foreground hydrate no longer counts it as added. Change: call it from a module loaded on every launch, after both the user store and the mitzvot store have hydrated (MMKV hydrates synchronously; confirm), once per process; the layout call stays harmless or goes.
-  - **What it solves:** A woman never gets a men's mitzvah switched on by an update, whichever way the app starts.
-  - **Expected result:** A test that loads the scheduler module the way a headless launch does (no layout) with a saved female profile and a mitzvot map lacking a men's default-on id leaves that id off and schedules nothing for it; the foreground path still passes.
-
-- [ ] Word Rosh Chodesh and hilula notices by when they actually fire
-  - **Flag:** `OTA`.
-  - **What it is:** Found by the phase-2 verifier on 2026-10-25. Each notice kind's time is now configurable ("Make every Rosh Chodesh and hilula notice configurable"), but its text still assumes the default time: a Rosh Chodesh `before` notice set to 1 day at 20:00 fires after the month has begun at shkia and still says "מחר"; a hilula `evening` notice set to 22:00 fires after the date opened and still says it "enters tonight at sunset"; a one-day Rosh Chodesh `day` notice at 23:00 is fine. Change: [planners/roshChodesh.ts](src/services/notifications/planners/roshChodesh.ts) and [planners/hilulot.ts](src/services/notifications/planners/hilulot.ts) choose each notice's body from where its trigger falls against the event: before the opening shkia, the coming wording (tomorrow, tonight, on a weekday); at or after it, the present wording ("היום ראש חודש …", "הלילה ההילולא של …"); add the keys both dictionaries need. Also fix the English date phrase "begins Tuesday, Oct 13 evening" to read "begins on the evening of Tuesday, Oct 13", and make root [AGENTS.md](AGENTS.md) (Notification Engine) say that `roshChodeshOn` carries the date when the month enters seven or more days after the erev.
-  - **What it solves:** A notice never tells the user something that is already past.
-  - **Expected result:** Planner tests for each kind at a time before and after its event's opening, in Hebrew and English, under `pnpm test:tz`.
-
-- [ ] Keep an ended streak's count on a save that does not change it
-  - **Flag:** `OTA`.
-  - **What it is:** Found by the phase-2 verifier on 2026-10-25. Saving the custom form on an ended `streak` mitzvah restarts the streak from today even when only the name, hours or reminders changed. The rule ("Add schedule modes to the custom mitzvah model", now shipped) is that a streak's count restarts only when `days` or the mode changes; editing anything else keeps the schedule entry as it is. Change [src/app/custom-mitzvah.tsx](src/app/custom-mitzvah.tsx) and its helper so a save appends a new schedule entry only when the schedule itself changed; an ended streak saved unchanged stays ended (and off), and the form's summary line says so.
-  - **What it solves:** A rename never silently restarts a finished streak.
-  - **Expected result:** Render tests: an ended streak renamed stays ended with its old dates; changing its `days` restarts it from today; a running streak renamed keeps its start.
-
-- [ ] A custom mitzvah whose hours lie between midnight and alot is counted on two different days
-  - **Flag:** `OTA`.
-  - **What it is:** Found on the Android emulator on 2026-10-25. The custom adapter puts a custom mitzvah's hours on the civil date it is asked for ([customMitzvotAdapter.ts](src/data/customMitzvotAdapter.ts)), so hours of 03:29–03:31 asked for Sunday give a window early on Sunday, before Sunday's alot. The app's day turns at alot (the night belongs to the evening before, the user's call of 2026-10-12), so that window shows on Saturday's home and its mark is filed under `2026-10-25`, while the day view and history read `2026-10-25` as Sunday's: Saturday's day view lists it "לא בוצע", Sunday's lists it done, and Sunday's home counts it as still to come (it shows Monday's 03:29 window). Change: for app day D, a custom mitzvah whose window would start before alot of its civil date takes its hours on civil date D + 1 and is keyed under D, so a night window always belongs to the evening before and every surface reads one day for it; `activeDays` and schedules apply to D.
-  - **What it solves:** A night custom mitzvah is done or missed on one day everywhere: home, the day view, history, the streak and its notifications.
-  - **Expected result:** A test with hours 03:29–03:31 in Jerusalem, at an instant before and after alot, shows the same day key on home, the day view, `computeStats()` and the planner's ids, under `pnpm test:tz`; a mark between midnight and alot counts for the previous day in history.
-
-- [ ] Typing a time by hand inside a bottom sheet does nothing on Android
-  - **Flag:** `OTA`.
-  - **What it is:** Found on the Android emulator on 2026-10-25, older than the 2026-10-24 batch. In the manual-entry box of [TimeField.tsx](src/components/TimeField.tsx) inside a [BottomSheet](src/components/BottomSheet.tsx), neither typing nor backspace changes the time (the IME is connected; the wheels work). It hits the Rosh Chodesh and hilula notice sheets and the custom form's start and end times. The same field outside a sheet, and every field on web, types normally.
-  - **What it solves:** A time can be typed, not only scrolled, in every sheet.
-  - **Expected result:** On the emulator, typing 21:15 into the notice sheet and the custom form's start time saves 21:15; a render test pins whatever caused it (for example a controlled value reset or a responder that steals the touch).
-
-- [ ] A mitzvah added today reads 0% in history
-  - **Flag:** `OTA`.
-  - **What it is:** Found on 2026-10-25. History's per-mitzvah row shows "0%" with an empty bar for a mitzvah switched on (by hand or by an update) today, while its only item is still open. Nothing is counted as missed, but the row reads like a failure. Change: a row with no decided item shows no percent and no bar, and a caption that it is new (an i18n key in both dictionaries), in [history.tsx](<src/app/(tabs)/history.tsx>) through the existing stats.
-  - **What it solves:** A new mitzvah does not look failed on its first day.
-  - **Expected result:** A render test on a pinned day: a mitzvah enabled today shows the caption and no 0%; the next day, after one done and one missed, it shows 50%.
-
-- [ ] Schedule a mitzvah that an update switches on, without relying on a format raise
-  - **Flag:** `OTA`.
-  - **What it is:** Found on 2026-10-25. A new default-on mitzvah reaches an install through the mitzvot store's hydrate `merge` (`addedOnHydrate`), which runs before the scheduler subscribes to the store, so its reminders exist only because the same update raises `SCHEDULE_FORMAT`. A later default-on mitzvah shipped without a raise gets no reminders until the nightly rebuild. Change: `refreshSchedulingOnForeground()` in [NotificationScheduler.ts](src/services/NotificationScheduler.ts) also rebuilds once when the hydrate added any id.
-  - **What it solves:** Every newly added mitzvah is scheduled on the first foreground after the update.
-  - **Expected result:** A scheduler test: a hydrate that adds an id, with the stored format already current, leads to one rebuild that schedules it.
-
-- [ ] The calendar range shading is barely visible
-  - **Flag:** `OTA`.
-  - **What it is:** Found on 2026-10-25. [CalendarRangePicker.tsx](src/components/CalendarRangePicker.tsx) shades the days inside a range with `goldWash` (0.04 alpha on the gold palette), which barely shows on the sheet. Use `goldWashStrong` there, and check every palette.
-  - **What it solves:** The chosen range is visible.
-  - **Expected result:** Web screenshots of a picked range in all six palettes.
-
-- [ ] Keep a typed reminder label on Chanukah candles
-  - **Flag:** `OTA`.
-  - **What it is:** Found by the phase-3 verifier on 2026-10-25. For a mitzvah with `bodyKey` and `bodyParams` (Chanukah candles, and Ushpizin once it lands), `bodyForReminder()` in [planners/mitzvot.ts](src/services/notifications/planners/mitzvot.ts) replaces a Hebrew reminder text that has no placeholder with the keyed line ("זמן נרות חנוכה: הנר ה־N"), so a label the user typed on an added reminder is lost. Change: the keyed line stands in only for the registry's own default label and variants; a label the user typed is sent as typed (its `%{n}` filled when present).
-  - **What it solves:** A reminder says what the user wrote.
-  - **Expected result:** Planner tests: the default reminder names the night; an added reminder labelled "להכין חנוכייה" sends exactly that; one labelled "נר %{n}" sends the night's number.
-
-- [ ] Open the Chanukah text in the siddur tab from the mitzvah's own start
-  - **Flag:** `OTA`.
-  - **What it is:** Found by the phase-3 verifier on 2026-10-25. The siddur tab's now card lists the Chanukah candle-lighting text only from nightfall (`TONIGHT_TO_DAWN` in [src/data/siddur.ts](src/data/siddur.ts)), while the mitzvah's window starts earlier on Friday (plag hamincha) and for Chabad (shkia). The batch rule is that the siddur tab and the mitzvah agree. Change: the text's hours read the mitzvah's window for that night (one home), so the now card shows it whenever the mitzvah is open.
-  - **What it solves:** On Friday afternoon and for Chabad at shkia, the text is in the now card when the reminder fires.
-  - **Expected result:** Tests on a Chanukah Friday at plag + 10 min and a Chabad weekday at shkia + 5 min: the now card lists the text; at 13:00 it does not.
-
-- [ ] Show a night custom text's Hebrew date by the night, not the evening's day
-  - **Flag:** `OTA`.
-  - **What it is:** Found by the phase-3 verifier on 2026-10-25. Since a custom mitzvah whose hours lie between midnight and alot belongs to the evening before (fixed in the same batch), the reader opened from its notification or mitzvah screen at night shows the Hebrew date of that evening's daytime (9 Sivan at 00:45 on the night of 10 Sivan). Change: the reader takes the Hebrew date of the instant it shows a night window for (sunset turns the date), through the existing Hebrew date helpers.
-  - **What it solves:** The header names the right Hebrew date at night.
-  - **Expected result:** A reader render test at 00:45 on a night custom window shows the night's Hebrew date.
-
-- [ ] Show a number pad for minutes and offsets on Android
-  - **Flag:** `OTA`.
-  - **What it is:** Found on 2026-10-25. The reminder editor's offset field ([ReminderEditor.tsx](src/components/ReminderEditor.tsx)) and a field of the taharah log ([src/app/taharah/log.tsx](src/app/taharah/log.tsx)) use `keyboardType="numbers-and-punctuation"`, which exists only on iOS, so Android shows a letter keyboard. Change: on Android use `numeric` (it keeps the minus key, which negative offsets need), iOS unchanged.
-  - **What it solves:** Typing minutes on Android opens the number pad.
-  - **Expected result:** Render tests pin the keyboard type per platform; on the emulator the offset field opens the number pad and a −60 offset saves.
-
-- [ ] Grey Kiddush Levana in Settings search after its period ends
-  - **Flag:** `OTA`.
-  - **What it is:** Found on 2026-10-25. [settingsSearch.ts](src/utils/settingsSearch.ts) decides whether a standalone text is open with `hasStandaloneText()` alone, so between the end of the Kiddush Levana period and alot the search shows the text as open while the siddur tab greys it and the reader refuses it. Change: the search uses `standalonePeriodEnded()` ([src/data/siddur.ts](src/data/siddur.ts)) the same way the siddur tab and the reader do.
-  - **What it solves:** The three surfaces agree on when the text can be opened.
-  - **Expected result:** A settingsSearch test at 04:00 on the last night of a period (Ashkenaz, Jerusalem) shows the text closed with its caption; at 03:00 it is open.
-
-- [ ] Stamp the default mitzvot of a fresh install with its first launch
-  - **Flag:** `OTA`.
-  - **What it is:** Found on the Android emulator on 2026-10-25 (older than the 2026-10-24 batch). A fresh install's five original default-on mitzvot carry no `enabledAt`, and `wasEnabledBy()` ([checkIn.ts](src/utils/checkIn.ts)) reads a missing value as "always enabled", so a user who installs on a Sunday is sent straight to "מה עשית בשבת?" for the Shabbat before the install, and history can count days before it. Change: the mitzvot store stamps `enabledAt` with the first launch on every default-on id of a fresh install (no persisted map), in the one place the hydrate already stamps ids it adds ([useMitzvotStore.ts](src/stores/useMitzvotStore.ts)); an existing install's saved map is untouched.
-  - **What it solves:** A new user is never asked about days before the app existed on the phone.
-  - **Expected result:** A store test: a fresh hydrate stamps all default-on ids with now; a saved map without `enabledAt` keeps it missing. A check-in test: a fresh install on Sunday after Shabbat has no check-in for that Shabbat.
-
-- [ ] Withdraw reminders of a day that has ended
-  - **Flag:** `OTA`.
-  - **What it is:** Found on the Android emulator on 2026-10-25. A presented reminder of a window that closed unmarked stays in the tray for good, and Android caps an app at about 50 notifications in the tray: after a few days of unmarked reminders, new reminders are dropped with no sign ("Package has already posted or enqueued 51 notifications"). Change: on every foreground and every background rebuild, the scheduler dismisses presented mitzvah reminders whose window's app day has ended (its `dateKey` day is over by the alot that ends it, `appDayEnd()`); a mark-done from the tray before that keeps working as today. Non-mitzvah notices (update, check-in, report, hilula, Rosh Chodesh, taharah) keep their own rules.
-  - **What it solves:** The tray never fills up with stale reminders, so new ones always arrive.
-  - **Expected result:** A scheduler test with presented reminders of yesterday and today: after a foreground refresh past yesterday's app day end, yesterday's are dismissed and today's stay. Documented in [src/services/notifications/AGENTS.md](src/services/notifications/AGENTS.md).
-
-- [ ] Keep the bookmark's delete button outside its row's button
-  - **Flag:** `OTA`.
-  - **What it is:** Found on 2026-10-25. In the reader's bookmarks sheet, each row's delete control is a pressable nested inside the row's pressable: on web React warns that a `<button>` sits inside a `<button>`, and on iOS VoiceOver the nested button may not be reachable (the row takes its label). Change: the row and its delete control are siblings in one row container (the shared `ListRow` trailing slot, if it fits), each with its own role and label.
-  - **What it solves:** Screen readers reach the delete button, and the web build has no invalid nesting.
-  - **Expected result:** A reader render test finds the row and its delete button as separate buttons with their own labels; the web console warning is gone.
-
-- [ ] Close the custom mitzvah form after save even when it was opened by a link
-  - **Flag:** `OTA`.
-  - **What it is:** Found on 2026-10-25. [custom-mitzvah.tsx](src/app/custom-mitzvah.tsx) calls `router.back()` after save without `canGoBack()`, so a form opened by a deep link (or as the first screen) stays open and the router logs "GO_BACK was not handled". Change: go back when possible, else replace to the library (`/mitzvot`).
-  - **What it solves:** Saving always leaves the form.
-  - **Expected result:** A render test with `canGoBack()` false: saving replaces to `/mitzvot`.
-
-- [ ] Name the right Chanukah night in the reader's header
-  - **Flag:** `OTA`.
-  - **What it is:** Found on the Android emulator on 2026-10-25 (the same line exists before the 2026-10-24 batch). The reader's header takes the holiday line from `getHolidays()` for the night's Hebrew day ([src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>)), and hebcal labels each Chanukah day by the candles lit at its end, so on the first night (Friday 2026-12-04, the eve of 25 Kislev) the header says "חֲנוּכָּה: ב׳ נֵרוֹת" while the reminder says "הנר ה־1". Change: the header names the candles of the evening the text is read for (the civil day whose evening it is, the same night count `bodyParams` gives the reminder), one home for the count.
-  - **What it solves:** The header and the reminder agree on the night.
-  - **Expected result:** A reader render test on the evening of 2026-12-04 and of 2026-12-07 names the 1st and the 4th candle.
-
-- [ ] Refuse a malformed reminder offset instead of saving zero
-  - **Flag:** `OTA`.
-  - **What it is:** Found on the Android emulator on 2026-10-25. [ReminderEditor.tsx](src/components/ReminderEditor.tsx) reads the offset with `Number(x) || 0`, so a typo such as "-60-600" saves silently as +0. Change: a value that is not a whole number shows the existing range error (or a new `reminder.errors.offsetInvalid` in both dictionaries) and does not save.
-  - **What it solves:** A typo never turns into a reminder at the window's start.
-  - **Expected result:** A render test: "-60-600" shows the error and saves nothing; "-60" saves −60.
-
-- [ ] Keep a list row's switch reachable by screen readers
-  - **Flag:** `OTA`.
-  - **What it is:** Found in review on 2026-10-25. [ListRow.tsx](src/components/ListRow.tsx) draws its `trailing` element inside its own `Pressable`, which is accessible by default and so takes the whole row as one element. The mitzvah switches of [MitzvahLibraryList.tsx](src/components/MitzvahLibraryList.tsx), the notice switches of [NoticeSettingsCard.tsx](src/components/NoticeSettingsCard.tsx) and the master switches of [hilulot.tsx](src/app/hilulot.tsx) and [rosh-chodesh.tsx](src/app/rosh-chodesh.tsx) sit there, so iOS VoiceOver may never reach them, and on web a form control sits inside a `<button>`. Change: when `trailing` is given, the row is a plain container holding the pressable part (icon, title, caption) and the trailing element as siblings, each its own accessible element; a row without `trailing` keeps today's single `Pressable`. The web click guard (`keepClickOffRow`) goes away with the nesting.
-  - **What it solves:** Every switch in a list row is reachable and named for VoiceOver and TalkBack, and the web build holds no control inside a button.
-  - **Expected result:** A `ListRow` render test: with an `onPress` and a `Switch` as `trailing`, the row button and the switch are separate accessible elements, pressing the switch does not call `onPress`, and pressing the row does not toggle the switch; without `trailing` the row is one button as today. The library, notice-settings, hilulot and Rosh Chodesh suites stay green. A VoiceOver pass on TestFlight is the owner's.
+- [ ] A Hebrew Android phone shows the app's English name
+  - **Done:** 2026-10-25. Verified: [scripts/__tests__/androidLegacyHebrewLocale.test.js](scripts/__tests__/androidLegacyHebrewLocale.test.js) (the file equals Expo's `values-b+he`), prebuild of both variants, `aapt2 compile` of `values-b+iw`, and `application-label-iw:'יהודי 365 P'` in build `c625eaa5`. Not checked: a phone set to Hebrew (the emulator went into a boot loop when its language was switched to Hebrew).
+  - **Status:** Version: Build, expected with the next store production build · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: preview build `c625eaa5` only; production builds `cc56fee1` (Play) and `d54afeab` (direct APK) still show the English name · Channel: preview
+  - **Flag:** `Build`.
+  - **Found:** the emulator side-by-side check, 2026-10-25 (launcher, Settings and a system dialog in Hebrew showed "Jew 365" and "Jew 365 P").
+  - **What it is:** Expo writes `locales.he` to `values-b+he`, which Android never reads for Hebrew (it resolves `iw`); [scripts/withAndroidLegacyHebrewLocale.js](scripts/withAndroidLegacyHebrewLocale.js) writes the same strings to `values-b+iw`, Android only.
+  - **What it solves:** a Hebrew Android phone shows "Jew 365" instead of `יהודי 365` on the launcher, in Settings and in system dialogs.
+  - **Expected result:** a phone set to Hebrew shows `יהודי 365 P` for the preview build, and the store production build shows `יהודי 365`.
 
 - [ ] Make the Chok LeYisrael enable-prompt case of the download suite deterministic
   - **Flag:** `OTA` (test only).
@@ -611,8 +294,31 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
     - The Ashkenaz and Sefard texts say "תיבו אושפיזין", not "עולו", so R5's reason for leaving Chabad out wants checking against the Chabad custom itself.
   - **Lives in:** `ushpizin` in `STANDALONE_TEXTS` ([src/data/siddur.ts](src/data/siddur.ts)), `ashkenazUshpizin()`, `sefardUshpizin()` and `edotUshpizin()` in [scripts/siddur/manifest.js](scripts/siddur/manifest.js), and `MENS_MITZVOT` in [src/stores/taharahOptIn.ts](src/stores/taharahOptIn.ts).
 
+### For the owner
+
+- **Q1 — An English (U.K.) localization on the App Store**
+  - **Question:** add an English (U.K.) localization (name `Jew 365`, the English subtitle and a keyword field of its own), so the Israel storefront, which reads English (U.K.) and Hebrew only, reads English copy and a second 100-character keyword field?
+  - **Assumption:** none is added; `jew` in the Hebrew keywords answers "jew 365" in Israel, and the English (U.S.) copy is read only in storefronts that list English (U.S.).
+  - **Lives in:** the App Store Connect localizations; not built yet: task "Set the App Store subtitle and keywords for search". Whether a language can be added while 1.0.21 waits for review is not checked.
+  - **What it affects:** English searches on the Israel storefront and the room for keywords there; which page an Israeli device set to English shows is not checked.
+- **Q2 — When the app asks for a store rating**
+  - **Question:** at which moment does the app ask for a store rating?
+  - **Assumption:** right after a mark, on the seventh day that has at least one mark, never on the first launch or inside a holy block.
+  - **Lives in:** not built yet: task "Ask for a store rating inside the app".
+  - **What it affects:** every user once, and the ratings that rank the app.
+
 ## Other Open Items
 
+- **Approve the tzaddik page choices D1–D4.** The pages are in production since `1.0.21-2` ([action-log.md](action-log.md), 2026-10-26); the choices taken while building them wait for the owner, who approves or changes each:
+  - D1: Hebrew and English, like the rest of the app.
+  - D2: The content is researched by agents with web search. Every fact rests on two independent sources, kept per entry in a `sources` list that the app does not show. Stories are only ones told in published sources, retold in the app's own words. An adversarial fact-check runs before the content lands, and the content waits for the owner's (or a rav's) review under Other Open Items.
+  - D3: Waze opens with the grave's coordinates (`https://waze.com/ul?ll=<lat>,<lng>&navigate=yes`) only when the burial place is known, visitors can reach it, and two sources agree on the spot, in Israel or abroad. Otherwise the page says why there is no link (unknown, disputed or closed to visitors).
+  - D4: A notice that names two or more tzaddikim opens one page with a switch between them (a `SegmentedControl` of their names), on the first one named.
+- **Approve the display size choices D5–D8.** The setting is in production since `1.0.21-2` ([action-log.md](action-log.md), 2026-10-26); the choices taken while building it wait for the owner, who approves or changes each:
+  - D5: Seven steps: 80%, 85%, 90%, 95%, 100% (today's size, the default), 110% and 120%. They are chosen in Settings → Display with a − / + stepper and a live sample.
+  - D6: The siddur reader's text scales with the app, and its A+ / A− still works relative to that. The phone's own font size keeps applying on top, as today, so accessibility settings still work.
+  - D7: Sizes are read once at launch, because every screen builds its styles at load. A change therefore asks once and then reloads the app (about a second). The same reload already happens when the language changes direction.
+  - D8: This session, after the hilula pages. A separate session would start from the last commit, without the 140 files of uncommitted work, and would collide with them.
 - **Review the content of the 57 tzaddik pages** ([src/data/hilulaPages.ts](src/data/hilulaPages.ts)). Agents researched it and an adversarial pass fact-checked it on 2026-10-26: 124 corrections and 45 doubts. The points that need the owner or a rav:
   - King David's link goes to the traditional site on Mount Zion, which historians do not take as the real grave.
   - Kever Rachel and Nabi Samwil are reached through secured routes.
@@ -633,11 +339,9 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
 - **Every project account moves to 365jew@gmail.com** (the user's call, 2026-10-20). Done in the repo: `CONTACT_EMAIL` in [ContactService.ts](src/services/ContactService.ts), the support page, both privacy policies and the taharah review page; `CONTACT_FORM_ID` is the new Formspree form `mrpevdbk` on 365jew; this repo's local `git config user.email`; `owner` in [app.json](app.json) is `jew-365-org`; `credentials.json`, `credentials/` and `*.keystore` gitignored; `origin` and every Pages URL moved to the GitHub organization `jew-365` (`https://jew-365.github.io/jew-365/`, all four pages answer 200; the old address is dead). The 88 earlier commits keep avi6190i@gmail.com (no history rewrite, the user's call). Done by the user: the Formspree account and form on 365jew, and the old form `xyekordk` retargeted to 365jew as a linked email (kept alive until no install of the previous app remains, because its update 1.0.19-2 posts to it); the GitHub organization `jew-365` with 365jew as its email, 365jew verified on the personal account, `jew-365` transferred to it; 2-Step Verification, a passkey, a verified recovery email and offline backup codes on 365jew; the Expo user `jew-365` on 365jew, Owner of the organization `jew-365-org`, which owns the project now (`@jew-365-org/jew-365`, same project ID, so updates still reach build 1.0.20, which moved with it), its stored keystore read again after the move with the same SHA-256, `avraham-sason` removed from the organization and 2FA on the Expo user `jew-365`; 365jew an admin of the Play Console, which stays owned by avi6190i (the user's call: moving the ownership would repeat the identity verification); a backup of the Android keystore from `eas credentials -p android`, encrypted into `jew365-keystore.tar.gz.enc` (AES-256-CBC, PBKDF2 600000 iterations, SHA-256; the plain folder deleted only after a decrypted copy matched it) and uploaded to the Google Drive of 365jew, its passphrase kept outside that account; the key's SHA-256 is `DC:62:0E:28:E9:67:30:98:E8:90:88:B7:09:FB:6D:B8:F9:C0:B1:E6:80:D9:52:60:3B:A8:9C:F4:3B:AE:00:B4`; 365jew as the contact email of the Play store listing and the owner of the testers group (2026-10-20). Left for the user: `com.jew365.app` registered in the Play Console with the SHA-256 above for Android developer verification, which from 2027 covers the direct APK too; Sentry and the Apple Developer account opened on 365jew; the empty `@avraham-sason/jew-360` Expo project deleted.
 - **iOS 1.0.21 is in App Store review, manual release.** EAS build `72c51b1e` (buildNumber 4) was submitted on 2026-10-23 with every App Store Connect page filled ([release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md), [release/RELEASE_LOG.md](release/RELEASE_LOG.md)); after approval it waits for the owner's Release. Before releasing: the TestFlight checks on a real iPhone (public link https://testflight.apple.com/join/cZeSqPzG, live since the Beta App Review passed on 2026-10-23). Still open: the EU trader status. Trader chosen, email and phone verified; the identification documents (no Hebrew accepted) wait for the owner's passport, and until they are in, the app is not offered in the EU storefronts. iOS builds and submissions run as `npx eas-cli@latest …`, because the project's eas-cli failed the Apple login.
 - **iOS preview build.** The preview variant ("Jew 365 P", `com.jew365.app.preview`, the red icon; root [AGENTS.md](AGENTS.md), Release and Updates) is wired for iOS (the `preview-ios` profile of [eas.json](eas.json), `pnpm build:ios:preview`), but no Apple step has been taken. The owner's steps: register the iPhone with `npx eas-cli device:create` (EAS prints a link to open on the phone), then run `pnpm build:ios:preview` once and answer its credentials prompts for the new bundle id (Apple account sign-in, the distribution certificate and an ad hoc provisioning profile that includes the registered iPhone). Install the build from its page on expo.dev. The Android side is done: build `c625eaa5` ([action-log.md](action-log.md)).
-- **The Hebrew Android app name reaches production only in its next build.** [scripts/withAndroidLegacyHebrewLocale.js](scripts/withAndroidLegacyHebrewLocale.js) makes a Hebrew Android phone show `יהודי 365` instead of "Jew 365"; it is native, so production builds `cc56fee1` (Play) and `d54afeab` (direct APK) still show the English name on a Hebrew phone until the next production build. In the preview build `c625eaa5`, `aapt dump badging` prints `application-label-iw:'יהודי 365 P'`, but no phone set to Hebrew has shown it yet: the emulator went into a boot loop when its language was switched to Hebrew. Close this item when a Hebrew phone shows `יהודי 365 P` for the preview build and a production build carries the plugin.
 - **Moving the previous app's users.** The previous app is a different package, so its installs get nothing from this project. Each user exports a backup file in Settings there (only the previous app's 1.0.19 build can export), installs this app, restores the file on the welcome step, checks the data, and uninstalls the previous app: while both are installed, both send reminders. The taharah data does not move, by design. The previous EAS project stays until no install depends on it; deleting it on expo.dev is the user's step.
 - **Families policy for the 13-15 audience.** Play's target audience is 13-15, 16-17 and 18+ (the user's call, 2026-10-20, because tefillin start at 13), so wherever 13-15 count as children (parts of the EU under GDPR) the Families policy applies: content fit for children and COPPA / GDPR rules for any data a child sends. The Contact us form sends a name and phone number through Formspree; before production, either confirm that flow complies or add a neutral age question before the form, and keep Sentry free of personal data. The 18+ alone answer removed the Families notice, which the user weighed and declined.
 - **Google Play closed test, then production** (the user's call, 2026-10-20: upload now, with the icon and UI redesign arriving during the test). The Play Console stays owned by avi6190i, so it is a personal account and needs a closed test with at least 12 testers opted in for 14 days in a row before production; a new build does not restart the count, dropping under 12 testers does. Play App Signing uses the EAS keystore itself, so a direct APK and a Play install are signed alike and replace each other: Play had generated its own key (SHA-256 `47:2D:E3:57…`) when the app was created, and on 2026-10-21, before any release, it was replaced through PEPK by the EAS key `DC:62…00:B4`, which is also the upload key. EAS build `3753424b` (1.0.20, versionCode 3, the old icon) was never uploaded: on 2026-10-21 the user chose to ship the redesign first, so the first AAB is EAS build `cc56fee1` (1.0.21, versionCode 8) from a clean worktree of `11be1c8`, with the APK `d54afeab` (versionCode 9) beside it for direct installs. Never uploaded: the 1.0.20 pair (`a0d84bad`, `811bbbb9`), which cropped the launcher icon, and the first 1.0.21 pair (`0b2ddd8f`, `e2682ebc`), whose icon lacked the four symbols. Done on 2026-10-20: the app `com.jew365.app` in the Play Console, all ten App content declarations, the Hebrew default listing with its English translation, temporary store graphics, and the track `Closed testing - Alpha` with the testers group, all countries and the feedback address; every answer is recorded in [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md). Done on 2026-10-21: the redesigned store graphics, the privacy policy with its `#delete` section pushed, and the signing key. Done on 2026-10-22: the AAB uploaded with its release notes, the store listing saved past draft, the exact-alarm declaration (Calendar), the AI asset labels, and all sixteen changes sent for Google's review; Google approved it the same night, and the release is available to the testers group. Left: the invitation to 15 to 20 testers so at least 12 stay opted in for 14 days in a row (2 opted in on 2026-10-22, the owner's own account among them), then the production application from the Dashboard. Then the App Store name and listing at the first iOS submission, from [release/](release), with the support and privacy URLs under `https://jew-365.github.io/jew-365/`.
-- **The redesign's native half ships in 1.0.21.** The palettes, screens and in-app logo of the redesign (2026-10-21) can ship over the air, but the launcher icon (`icon.png`, `adaptive-icon.png`, the Android 13 monochrome layer `adaptive-monochrome.png`), the notification icon and its colour `#012B97` (the logo's dark blue, the owner's call, 2026-10-22), and the splash (the `expo-splash-screen` plugin with a light and a dark image) are native. The first build with them, 1.0.20 (AAB `a0d84bad`, APK `811bbbb9`), showed the launcher icon cropped on the user's Samsung phone: the mark filled the whole 66/108 safe circle and the launcher cut its crown, check and bell. [scripts/logo/export.mjs](scripts/logo/export.mjs) now draws it to a 0.255-width radius, and that build was never uploaded; the next one raises `version` to 1.0.21 (the user's call, 2026-10-21), so installs of 1.0.20 get no updates until they install it. Verified on the Android emulator (debug build): launcher icon, light and dark splash, the in-app SVG logo's gradient and outline mask. Unverified: the 1.0.21 icon on a real launcher, iOS (no iOS build exists), and Android 13 themed icons.
 - **No Sentry account yet** (the user's call, 2026-10-09), so crash reporting stays off: `organization` and `project` of the `@sentry/react-native/expo` entry in [app.json](app.json) are placeholders, no `EXPO_PUBLIC_SENTRY_DSN` is set, and every profile in [eas.json](eas.json) sets `SENTRY_DISABLE_AUTO_UPLOAD`. To close: open the account, set the DSN (Metro inlines it, so it ships over the air), add `SENTRY_AUTH_TOKEN` as an EAS secret, fill `organization` / `project` (native config, so the next build), and drop the two production `env` lines.
 - **Rav review of the taharah rules.** [docs/taharah-review.html](docs/taharah-review.html) holds 14 "לאימות" items awaiting a rav's answers, now as an answer form (נכון / לא נכון and a note per item) that emails the answers to 365jew@gmail.com through Formspree; send the rav the page link: https://jew-365.github.io/jew-365/taharah-review.html. The rule table ships as initial. Each correction comes back as one preset edit in [src/data/taharahPresets.ts](src/data/taharahPresets.ts) that raises `TAHARAH_RULES_VERSION` and edits the same cell of the page.
 - **Halachic review of the siddur texts.** The open items are listed in [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md) (Work Guidance): meals, bedtime Shema, sights and food, Kiddush Levana, Sheva Berachot, Chanukah, Tehillim's Yehi Ratzon placement, and Shacharit's tallit and tefillin section.

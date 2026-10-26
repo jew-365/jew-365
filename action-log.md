@@ -17,14 +17,11 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
-## 2026-10-26 — store status, China mainland out of the App Store
+## 2026-10-26 — store status
 
 - **Store status of 2026-10-26** recorded in [release/RELEASE_LOG.md](release/RELEASE_LOG.md) and [state.md](state.md).
   - Requested: the owner, 2026-10-26. Verified: read from both consoles.
-  - Version: none (docs) · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: n/a · Channel: —
-- **China mainland removed from the App Store availability** — 174 countries or regions, every storefront but China mainland, whose law requires a permit for apps with religious content ([release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md)).
-  - Requested: the owner, 2026-10-26, in a Claude Code session. Verified: App Store Connect after a reload: Availability (174 Countries or Regions), China mainland Not Available, Hong Kong, Macau and Taiwan Available on App Release.
-  - Version: none (a console setting, no build) · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: saved in App Store Connect on 2026-10-26; the store applies it within 24 hours, and the app is not released yet · Channel: —
+  - Version: none (docs) · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: n/a, with production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, from `c1989c4`) · Channel: —
 
 ## 2026-10-26 — the owner's phone check of the preview app
 
@@ -107,19 +104,16 @@ Every task, bug fix and code action of the project that was done and verified, n
 
 - **A preview app variant beside production** — [app.config.js](app.config.js) turns the [app.json](app.json) config into "Jew 365 P" / "יהודי 365 P" with `com.jew365.app.preview`, scheme `jew365preview`, the red icon and splash ([assets/preview/](assets/preview), [locales/preview/](locales/preview)) when `APP_VARIANT=preview`, which the `preview`, `preview-device` and `preview-ios` profiles of [eas.json](eas.json) set; production's config is unchanged.
   - Requested: the user, 2026-10-25. Verified: an executor and two adversarial verifier rounds, `npx expo config` with and without the variable, the full gate (4254 tests in four zones), a local release build beside production on the emulator (9 of 10 checks; the tenth is the Hebrew name below), and the EAS APK: aapt package, labels, scheme and channel, then installed beside production and launched to the welcome step.
-  - Version: Build 1.0.21, versionCode 1 of `com.jew365.app.preview` · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: build `c625eaa5`, a direct APK from its EAS page; on the emulator only · Channel: preview
-- **Bug: a Hebrew Android phone showed the app's English name** — Expo writes `locales.he` to `values-b+he`, which Android never reads for Hebrew (it resolves `iw`); [scripts/withAndroidLegacyHebrewLocale.js](scripts/withAndroidLegacyHebrewLocale.js) writes the same strings to `values-b+iw`, Android only. Production has the same bug until its next build ([not-close.md](not-close.md)).
-  - Found: the emulator side-by-side check, 2026-10-25 (launcher, Settings and a system dialog in Hebrew showed "Jew 365" and "Jew 365 P"). Verified: [scripts/__tests__/androidLegacyHebrewLocale.test.js](scripts/__tests__/androidLegacyHebrewLocale.test.js) (the file equals Expo's `values-b+he`), prebuild of both variants, `aapt2 compile` of `values-b+iw`, and `application-label-iw:'יהודי 365 P'` in build `c625eaa5`; not yet on a phone set to Hebrew.
-  - Version: Build; in the preview build `c625eaa5`, production in its next build · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: preview build `c625eaa5` only · Channel: preview
+  - Version: none (release tooling: the preview app `com.jew365.app.preview`, build `c625eaa5`, versionCode 1, never reaches users) · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: n/a, with production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, from `c1989c4`); its build `c625eaa5` installs as a direct APK from its EAS page · Channel: —
 - **A preview update carries the preview identity** — [scripts/publish-update.js](scripts/publish-update.js) sets `APP_VARIANT=preview` for an update to the `preview` channel and removes it for every other channel, because `eas update` ignores a build profile's `env`.
   - Found: the adversarial verifier, 2026-10-25. Verified: [scripts/__tests__/publishUpdate.test.js](scripts/__tests__/publishUpdate.test.js) for the three channels, and a mutation check.
-  - Version: none (release tooling) · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: n/a · Channel: —
+  - Version: none (release tooling) · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: n/a, with production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, from `c1989c4`) · Channel: —
 - **Build commands named by platform, profile and artifact** — `build:android:production:aab`, `build:android:production:apk`, `build:android:preview:apk`, `build:ios:production`, `build:ios:preview`; the ambiguous `build:android` and `update`, both aimed at preview, are gone ([package.json](package.json), root [AGENTS.md](AGENTS.md) Commands).
   - Requested: the user, 2026-10-25. Verified: `pnpm check:dox`; no reference to an old name left in the repo or the skills; `pnpm build:android:preview:apk` ran the preview build above.
-  - Version: none (scripts) · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: n/a · Channel: —
+  - Version: none (scripts) · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: n/a, with production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, from `c1989c4`) · Channel: —
 - **The emulator skill knows the preview app** — `apk -BuildProfile preview` expects `com.jew365.app.preview` and saves `jew365-preview-<version>-<build>.apk`; `prepare` deletes an `android/` generated for another application id; `run` drops any `APP_VARIANT` of the calling shell ([.claude/skills/android-native-verify/native.ps1](.claude/skills/android-native-verify/native.ps1), [SKILL.md](.claude/skills/android-native-verify/SKILL.md)).
   - Found: the adversarial verifier and the device check, 2026-10-25. Verified: the package helpers per profile, the application-id check on a preview and a production `build.gradle`, and the download of build `c625eaa5`.
-  - Version: none · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: n/a · Channel: —
+  - Version: none · Committed: yes, `bf8e8f4` `9edff4b` `cdde147` `d2c206e` `c1989c4` · Pushed: yes · Live: n/a, with production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, from `c1989c4`) · Channel: —
 
 ## 2026-10-25 — the request batch of 2026-10-24
 
@@ -153,12 +147,9 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **A compact Chok LeYisrael credit line** — the add-on card shows "© תורת אמת · CC BY-NC-SA 2.5", which opens the full credit in a sheet; the reader keeps the full credit beside the text ([src/components/ChokLicenseNotice.tsx](src/components/ChokLicenseNotice.tsx)).
   - Requested: the user's call of 2026-10-25. Verified: render tests; web end-to-end phase 3.
   - Version: OTA `1.0.21-2` · Committed: yes, `c3227e0` · Pushed: yes · Live: preview `1.0.21-1` (group `59dbbc4c-cf6b-483f-9a46-ab7a81c304d5`, 2026-10-26); production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, 2026-10-26) · Channel: production, preview
-- **Store copy names kinds of features, never counts** — the listings and the site's feature list rewritten to the owner's rule ([release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md), [release/APP_STORE_METADATA_HE.md](release/APP_STORE_METADATA_HE.md), [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md), [docs/index.html](docs/index.html)). The task "Add Chok LeYisrael to the store listings" stays open in not-close.md: the copy is not yet re-entered in either console.
-  - Requested: the owner's rule of 2026-10-25 ([release/AGENTS.md](release/AGENTS.md)). Verified: read against the rule; the site answers 200.
-  - Version: Pages for the site; the consoles are a manual step · Committed: yes, `1e12449` · Pushed: yes · Live: the site at https://jew-365.github.io/jew-365/; Play and App Store: no · Channel: —
 - **Publish the rav questions as a review page (T35)** — R1 to R10 with each rule as implemented, its source and an answer form ([docs/halacha-review.html](docs/halacha-review.html)).
   - Requested: the user's request of 2026-10-24, not-close.md Requests of 2026-10-24. Verified: web end-to-end phase 4 check 1 (375 and 1280, light and dark, form validation, draft restore, stubbed send); 200 on Pages, 2026-10-25.
-  - Version: Pages · Committed: yes, `1e12449` · Pushed: yes · Live: https://jew-365.github.io/jew-365/halacha-review.html · Channel: —
+  - Version: Pages · Committed: yes, `1e12449` · Pushed: yes · Live: https://jew-365.github.io/jew-365/halacha-review.html · Channel: production (Pages)
 - **Move Selichot out of the bundle into a downloadable add-on per nusach (T33)** — one add-on core for Chok LeYisrael and Selichot, one gzip per nusach on Pages, the download offered from the siddur tab, the More tab, the mitzvah screen and a pre-season home banner ([src/services/addons/addonContent.ts](src/services/addons/addonContent.ts), [src/services/SelichotContentService.ts](src/services/SelichotContentService.ts), [src/components/SelichotAddonCard.tsx](src/components/SelichotAddonCard.tsx), [docs/selichot/manifest.json](docs/selichot/manifest.json)). The app shrinks by about 5.5 MB only with the next build.
   - Requested: the user's request of 2026-10-24. Verified: the add-on core's suite against both add-ons; Android emulator, phase 4 check 20 and phase 6 check 2 (live site, offline read); lane reports `kjw-ush*.report.md`.
   - Version: OTA `1.0.21-2`; the files on Pages; the size gain in the next build · Committed: yes, `1e12449` `0ddc971` `196471c` `c3227e0` `aba8897` · Pushed: yes · Live: files on Pages; app production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, 2026-10-26) · Channel: production
@@ -295,9 +286,7 @@ Every task, bug fix and code action of the project that was done and verified, n
   - Found: phase-3 verifier, 2026-10-25. Verified: [NotificationScheduler.bodyVariants.test.ts](src/services/__tests__/NotificationScheduler.bodyVariants.test.ts).
   - Version: OTA `1.0.21-2` · Committed: yes, `196471c` · Pushed: yes · Live: preview `1.0.21-1` (group `59dbbc4c-cf6b-483f-9a46-ab7a81c304d5`, 2026-10-26); production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, 2026-10-26) · Channel: production, preview
 - **B10** — see "Ask to turn on Chok LeYisrael right after its download" under Tasks.
-- **B9: Chok LeYisrael's window from sunrise to shkia — superseded** — built and verified on 2026-10-25 (web end-to-end phase 3), then reverted the same day by the user's call to "Restore Chok LeYisrael's learning-day window" (Tasks). No commit holds it.
-  - Requested: the user, 2026-10-25. Verified: n/a, reverted.
-  - Version: none · Committed: no · Pushed: no · Live: no · Channel: —
+- **B9** — Chok LeYisrael's window from sunrise to shkia, built and verified on 2026-10-25 and reverted the same day by the user's call; no commit holds it. See "Restore Chok LeYisrael's learning-day window and let ליל שישי count for Thursday or Friday" under Tasks.
 - **B8: make the calendar range shading visible** — `goldWashStrong` between the ends, `textSub` for the Hebrew day ([src/components/CalendarRangePicker.tsx](src/components/CalendarRangePicker.tsx)).
   - Found: web end-to-end phase 2, 2026-10-25. Verified: contrast tests in six palettes; web end-to-end phase 3.
   - Version: OTA `1.0.21-2` · Committed: yes, `c3227e0` · Pushed: yes · Live: preview `1.0.21-1` (group `59dbbc4c-cf6b-483f-9a46-ab7a81c304d5`, 2026-10-26); production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, 2026-10-26) · Channel: production, preview
@@ -327,7 +316,7 @@ Every task, bug fix and code action of the project that was done and verified, n
 
 - **The rav page's intro counted 16 items for 17** ([docs/halacha-review.html](docs/halacha-review.html)).
   - Found: web end-to-end phase 4 check 1, 2026-10-25. Verified: the committed page says 17.
-  - Version: Pages · Committed: yes, `1e12449` · Pushed: yes · Live: https://jew-365.github.io/jew-365/halacha-review.html · Channel: —
+  - Version: Pages · Committed: yes, `1e12449` · Pushed: yes · Live: https://jew-365.github.io/jew-365/halacha-review.html · Channel: production (Pages)
 - **FIX-D: on web, a library switch also pressed its row** — fixed in phase 1, later replaced by the list-row fix (Bugs above).
   - Found: web end-to-end phase 1, 2026-10-25. Verified: Playwright before and after.
   - Version: OTA `1.0.21-2` · Committed: yes, `c3227e0` · Pushed: yes · Live: preview `1.0.21-1` (group `59dbbc4c-cf6b-483f-9a46-ab7a81c304d5`, 2026-10-26); production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, 2026-10-26) · Channel: production, preview
@@ -363,22 +352,22 @@ Every task, bug fix and code action of the project that was done and verified, n
 
 - **Jest `testTimeout` 30 s** — the first render of a heavy screen passed 5 s under `pnpm test:tz` ([package.json](package.json)).
   - Found: `test:tz` runs, 2026-10-25. Verified: the final gate.
-  - Version: none (tests only) · Committed: yes, `0ddc971` · Pushed: yes · Live: n/a · Channel: —
+  - Version: none (tests only) · Committed: yes, `0ddc971` · Pushed: yes · Live: n/a, with production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, from `c1989c4`) · Channel: —
 - **The emulator skill tears down its `adb reverse`** ([.claude/skills/android-native-verify/SKILL.md](.claude/skills/android-native-verify/SKILL.md)).
   - Found: an adb server hang during phase 2, 2026-10-25. Verified: phase 6 teardown left `reverse --list` empty.
-  - Version: none · Committed: yes, `0ddc971` · Pushed: yes · Live: n/a · Channel: —
+  - Version: none · Committed: yes, `0ddc971` · Pushed: yes · Live: n/a, with production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, from `c1989c4`) · Channel: —
 
 ## 2026-10-24 — the batch specified, store status
 
 - **Specify the 2026-10-24 request batch and the user guide task** — closed tasks with flags and the rav questions R1 to R9 in [not-close.md](not-close.md).
   - Requested: the user, 2026-10-24. Verified: `pnpm check:dox`.
-  - Version: none (docs) · Committed: yes, `f4a798f` docs(not-close): specify the 2026-10-24 request batch; `76b2fb1` docs(not-close): add the user guide task · Pushed: yes · Live: n/a · Channel: —
+  - Version: none (docs) · Committed: yes, `f4a798f` docs(not-close): specify the 2026-10-24 request batch; `76b2fb1` docs(not-close): add the user guide task · Pushed: yes · Live: n/a, with production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, from `c1989c4`) · Channel: —
 - **Store status of 2026-10-24** recorded in [release/RELEASE_LOG.md](release/RELEASE_LOG.md).
   - Requested: the owner, 2026-10-24. Verified: read from both consoles.
-  - Version: none (docs) · Committed: yes, `562937f` docs(release): store status on 2026-10-24 · Pushed: yes · Live: n/a · Channel: —
+  - Version: none (docs) · Committed: yes, `562937f` docs(release): store status on 2026-10-24 · Pushed: yes · Live: n/a, with production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, from `c1989c4`) · Channel: —
 - **Emulator display ids fixed in the emulator skill, its task lock untracked** ([.claude/skills/android-native-verify/SKILL.md](.claude/skills/android-native-verify/SKILL.md)).
   - Requested: unknown. Verified: unknown.
-  - Version: none · Committed: yes, `6e32cc0` chore(claude): fix emulator display ids, untrack the task lock · Pushed: yes · Live: n/a · Channel: —
+  - Version: none · Committed: yes, `6e32cc0` chore(claude): fix emulator display ids, untrack the task lock · Pushed: yes · Live: n/a, with production `1.0.21-2` (group `7f18981c-709b-475b-a0ce-19ae67b87c94`, from `c1989c4`) · Channel: —
 
 ## 2026-10-23 — Chok LeYisrael as a downloadable add-on (OTA 1.0.21-1)
 
@@ -387,42 +376,25 @@ Every task, bug fix and code action of the project that was done and verified, n
   - Version: OTA `1.0.21-1` · Committed: yes, `e2694e6` feat(chok): Chok LeYisrael as a downloadable Torat Emet add-on; `356d847` fix(chok): credit line that reads right in RTL, content v2 · Pushed: yes · Live: `1.0.21-1`, group `59a089c2-7147-415b-b22c-6dc970f39eba`, published 2026-10-23 for Android and iOS (9 Android and 4 iOS launches, no failures, on 2026-10-24); content v2 on Pages · Channel: production
 - **Store records aligned with both consoles; the iPhone TestFlight link for testers** ([release/](release)).
   - Requested: the owner, 2026-10-23. Verified: read back from both consoles ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-10-23).
-  - Version: none (docs) · Committed: yes, `a476324` docs(release): iPhone TestFlight link for testers, App Store records; `b590c16` docs(release): align store records with both consoles · Pushed: yes · Live: n/a · Channel: —
+  - Version: none (docs) · Committed: yes, `a476324` docs(release): iPhone TestFlight link for testers, App Store records; `b590c16` docs(release): align store records with both consoles · Pushed: yes · Live: n/a, with production `1.0.21-1` (group `59a089c2-7147-415b-b22c-6dc970f39eba`, from `b590c16`) · Channel: —
 
-## 2026-10-19 to 2026-10-22 — the Jew 365 identity, the redesign, build 1.0.21
+## 2026-10-19 to 2026-10-22 — the public site, the accounts and housekeeping
 
-The new app `com.jew365.app` (EAS `@jew-365-org/jew-365`). Every build below is read from `eas build:list` (2026-10-25).
+The new app `com.jew365.app` (EAS `@jew-365-org/jew-365`). The identity, the redesign, the icons and the iOS build of this period are native: they wait in [not-close.md](not-close.md), High — the 1.0.21 store release, for the store production release. The builds were read from `eas build:list` (2026-10-25).
 
-- **iOS build 1.0.21 (4)** — `expo.name` in Latin letters so EAS finds the Xcode target, `@sentry/cli` as a direct dev dependency, the taharah fallback file out of iCloud, iPhone only ([app.json](app.json), [package.json](package.json)).
-  - Requested: the owner, 2026-10-22 (iOS via TestFlight). Verified: build `72c51b1e` FINISHED after `052c2db2` and `1b4f562b` errored ([release/RELEASE_LOG.md](release/RELEASE_LOG.md)).
-  - Version: Build `1.0.21`, buildNumber 4 · Committed: yes, `42e961d` fix(ios): give expo.name Latin letters so EAS finds the Xcode target; `a035ab3` feat(ios): keep the taharah fallback out of iCloud, ship iPhone only; `04500e7` fix(ios): add @sentry/cli as a direct dev dependency · Pushed: yes · Live: `72c51b1e` on TestFlight (public link), in App Store review since 2026-10-23 · Channel: production
-- **The four symbols in every icon; the blue notification colour** ([scripts/logo/export.mjs](scripts/logo/export.mjs), [assets/](assets)).
-  - Requested: the owner's rule, 2026-10-22. Verified: the APK checked for the symbols and the colour; the owner installed and approved it.
-  - Version: Build `1.0.21`, AAB versionCode 8, APK versionCode 9 · Committed: yes, `11be1c8` feat(logo): the four symbols in every icon; blue notification colour · Pushed: yes · Live: AAB `cc56fee1` on Play `Closed testing - Alpha` (release `8 (1.0.21)`, approved 2026-10-22); APK `d54afeab` for direct installs · Channel: production
-- **Keep the launcher icon clear of Samsung's mask; version 1.0.21** ([scripts/logo/export.mjs](scripts/logo/export.mjs)).
-  - Found: the owner's Samsung phone, 2026-10-21 (1.0.20 icon cropped). Verified: the extracted foreground.
-  - Version: Build `1.0.21`, AAB `0b2ddd8f` versionCode 6, APK `e2682ebc` versionCode 7, never uploaded (superseded by versionCode 8 and 9) · Committed: yes, `3a7b177` fix(android): keep the launcher icon clear of Samsung's mask; 1.0.21 · Pushed: yes · Live: superseded · Channel: —
-- **The redesign: warm palette, premium UI, the Jew 365 logo; Expo SDK 54 patches** ([src/theme/colors.ts](src/theme/colors.ts), [design/references/2026-10-21/](design/references/2026-10-21)).
-  - Requested: the owner, 2026-10-21. Verified: typecheck, lint, DOX and 2,710 tests in four zones; Android emulator.
-  - Version: Build `1.0.20` (AAB `a0d84bad` versionCode 4, APK `811bbbb9` versionCode 5, never uploaded); in every 1.0.21 build since · Committed: yes, `73c50ad` feat: redesign with the warm palette, premium UI and the Jew 365 logo; `a10e790` chore(deps): Expo SDK 54 patch upgrades; merged in `93f2af4` · Pushed: yes · Live: in the 1.0.21 builds above · Channel: production
-- **No promise of no server, no database or offline only, anywhere** ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-10-21).
-  - Requested: the owner, 2026-10-21. Verified: the Play descriptions edited to match.
-  - Version: Pages and store copy; in the 1.0.21 builds · Committed: yes, `dcf802a` docs: drop every promise of no server, no database or offline only · Pushed: yes · Live: the site; both listings · Channel: —
+- **Keep the launcher icon clear of Samsung's mask** — builds 1.0.21 versionCode 6 and 7 (AAB `0b2ddd8f`, APK `e2682ebc`) were never uploaded, superseded by versionCode 8 and 9; the fix (`3a7b177`) rides in every later build and waits in not-close.md with "The four symbols in every icon; the blue notification colour" for the store production release.
 - **The public site in the 2026-10-21 palette, the testers page, the rav's taharah answer form** ([docs/index.html](docs/index.html), [docs/testers/](docs/testers), [docs/taharah-review.html](docs/taharah-review.html)).
   - Requested: the owner, 2026-10-22. Verified: the pages answer 200 (2026-10-25).
-  - Version: Pages · Committed: yes, `a9bcd3d` style(docs): the public site in the 2026-10-21 palette; `d882c4f` fix(logo): the site favicon comes from the logo export too; `adec680` feat(docs): an answer form for the rav's taharah review; `3f569b3` feat(docs): tester invitation page for the closed test; `5a069b6` fix(docs): sharp logo and a tab icon that survives dark themes · Pushed: yes · Live: https://jew-365.github.io/jew-365/ · Channel: —
+  - Version: Pages · Committed: yes, `a9bcd3d` style(docs): the public site in the 2026-10-21 palette; `d882c4f` fix(logo): the site favicon comes from the logo export too; `adec680` feat(docs): an answer form for the rav's taharah review; `3f569b3` feat(docs): tester invitation page for the closed test; `5a069b6` fix(docs): sharp logo and a tab icon that survives dark themes · Pushed: yes · Live: https://jew-365.github.io/jew-365/ · Channel: production (Pages)
 - **Move project accounts to 365jew@gmail.com** — Expo organization, GitHub organization, Formspree, contact email ([src/services/ContactService.ts](src/services/ContactService.ts), [app.json](app.json)).
   - Requested: the user, 2026-10-20. Verified: keystore SHA-256 identical after the Expo move; Pages URLs 200.
-  - Version: Build `1.0.20`, AAB `3753424b` versionCode 3 (never uploaded) · Committed: yes, `3f0ab1f` chore: move project accounts to 365jew@gmail.com · Pushed: yes · Live: in every later build · Channel: production
-- **Move the app to the Jew 365 identity as a new app** — `com.jew365.app`, scheme `jew365`, a new EAS project; the previous app's backup file restores here ([app.json](app.json), [src/services/BackupService.ts](src/services/BackupService.ts)).
-  - Requested: the user, 2026-10-19 (after `8f5e419` named it Jew 360 the same day). Verified: unknown beyond the build.
-  - Version: Build `1.0.20`, APK `5d9a512f` versionCode 2 · Committed: yes, `8f5e419` feat: rename the app to Jew 360; `2a7b721` feat!: move the app to the Jew 365 identity · Pushed: yes · Live: APK `5d9a512f`, direct install; whether any install remains: unknown · Channel: production
+  - Version: OTA `1.0.21-1` (first built into Build `1.0.20`, AAB `3753424b` versionCode 3, never uploaded) · Committed: yes, `3f0ab1f` chore: move project accounts to 365jew@gmail.com · Pushed: yes · Live: production `1.0.21-1` (group `59a089c2-7147-415b-b22c-6dc970f39eba`, from `b590c16`) carries the contact email and Formspree, and every production update since · Channel: production
 
 - **Store steps, site notes, tooling and design housekeeping of 2026-10-20 to 2026-10-22** — the Play listing, submission, closed-test approval and site restyle recorded in [release/RELEASE_LOG.md](release/RELEASE_LOG.md) and [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md); the repo skills and the done-gate config in [.claude/](.claude); the vendored Expo agent skills in [.agents/skills/](.agents/skills); rejected logo rounds dropped and the redesign directions board kept in [design/](design); the push-notification prompt turned off in [eas.json](eas.json).
   - Requested: the owner, 2026-10-20 to 2026-10-22 (the release-log rule and the store work). Verified: unknown.
-  - Version: none (docs and tooling) · Committed: yes, `689879d` `96f6f52` `952959e` `791347a` `0e9e7c4` `245f21b` `ba1b2ad` `9dfe337` `d081d8c` `6f482ff` `442f304` `6216940` `8ad02c4` · Pushed: yes · Live: n/a · Channel: —
+  - Version: none (docs and tooling) · Committed: yes, `689879d` `96f6f52` `952959e` `791347a` `0e9e7c4` `245f21b` `ba1b2ad` `9dfe337` `d081d8c` `6f482ff` `442f304` `6216940` `8ad02c4` · Pushed: yes · Live: n/a, with production `1.0.21-1` (group `59a089c2-7147-415b-b22c-6dc970f39eba`, from `b590c16`) · Channel: —
 
-## Before 2026-10-19 — the previous app
+## Before 2026-10-19 — the previous app, backfill
 
 The work below shipped in the previous app (its own package and EAS project, both since replaced; its installs get nothing from this project). Its builds and updates come from the project memory, so ids are as recorded there and anything unrecorded is `unknown`. Every commit is in `main` and pushed.
 
