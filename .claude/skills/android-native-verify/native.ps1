@@ -35,6 +35,30 @@ function Get-AppConfig {
     (Get-Content -Raw -Encoding UTF8 (Join-Path $Repo 'app.json') | ConvertFrom-Json).expo
 }
 
+function Get-ProfileVariant([string]$Profile) {
+    $profiles = (Get-Content -Raw -Encoding UTF8 (Join-Path $Repo 'eas.json') | ConvertFrom-Json).build
+    for ($name = $Profile; $name; $name = $entry.extends) {
+        $entry = $profiles.$name
+        if (-not $entry) { return $null }
+        if ($entry.env.APP_VARIANT) { return $entry.env.APP_VARIANT }
+    }
+    return $null
+}
+
+function Get-ExpectedPackage([string]$Variant) {
+    $saved = $env:APP_VARIANT
+    $env:APP_VARIANT = $Variant
+    Push-Location $Repo
+    try {
+        $package = & node -p "require('./app.config.js')({ config: require('./app.json').expo }).android.package"
+        if ($LASTEXITCODE -ne 0 -or -not $package) { Fail 'app.config.js did not give an android.package' }
+        return "$package".Trim()
+    } finally {
+        Pop-Location
+        $env:APP_VARIANT = $saved
+    }
+}
+
 function Get-Sdk {
     foreach ($candidate in @($env:ANDROID_HOME, $env:ANDROID_SDK_ROOT, (Join-Path $env:LOCALAPPDATA 'Android\Sdk'))) {
         if ($candidate -and (Test-Path $candidate)) { return $candidate }
@@ -280,6 +304,16 @@ function Invoke-Prepare {
     Say "synced $($files.Count) files to $Copy ($($result.Copied) copied, $($result.Removed) removed)"
     Ensure-HoistedNpmrc $Copy
 
+    $gradle = Join-Path $Copy 'android\app\build.gradle'
+    if (-not $needsInstall -and (Test-Path $gradle)) {
+        $expected = Get-ExpectedPackage ''
+        if (-not (Select-String -LiteralPath $gradle -SimpleMatch "applicationId '$expected'" -Quiet)) {
+            Say "android/ was generated for another application id than $expected (a preview prebuild?): removing it so prebuild runs again"
+            Stop-Gradle
+            Remove-Tree (Join-Path $Copy 'android')
+        }
+    }
+
     if (-not $needsInstall) {
         Say 'lockfile and native config unchanged since the last prepare: reusing node_modules and the android project'
         return
@@ -379,7 +413,13 @@ function Invoke-Run {
         Remove-Item $RunLog -ErrorAction SilentlyContinue
         $commandLine = "/c pnpm exec expo run:android --device $Avd --port $Port > `"$RunLog`" 2>&1"
         Say "starting the dev build: pnpm exec expo run:android --device $Avd --port $Port (log: $RunLog)"
-        $process = Start-Process -FilePath 'cmd.exe' -ArgumentList $commandLine -WorkingDirectory $Copy -WindowStyle Hidden -PassThru
+        $savedVariant = $env:APP_VARIANT
+        Remove-Item Env:\APP_VARIANT -ErrorAction SilentlyContinue
+        try {
+            $process = Start-Process -FilePath 'cmd.exe' -ArgumentList $commandLine -WorkingDirectory $Copy -WindowStyle Hidden -PassThru
+        } finally {
+            if ($null -ne $savedVariant) { $env:APP_VARIANT = $savedVariant }
+        }
         Update-State @{ pid = $process.Id; pidStart = $process.StartTime.ToFileTimeUtc(); port = $Port; log = $RunLog }
         $deadline = (Get-Date).AddMinutes($TimeoutMin)
         $ready = $false
@@ -524,6 +564,8 @@ function Get-ApkBadging([string]$Path) {
 }
 
 function Invoke-Apk {
+    $variant = Get-ProfileVariant $BuildProfile
+    $expectedPackage = Get-ExpectedPackage $variant
     Say "listing the latest EAS Android builds (profile $BuildProfile)"
     Push-Location $Repo
     try {
@@ -543,7 +585,8 @@ function Invoke-Apk {
     if (-not $extension) { $extension = '.apk' }
     $downloads = Join-Path $HOME 'Downloads'
     New-Item -ItemType Directory -Force -Path $downloads | Out-Null
-    $target = Join-Path $downloads "jew365-$($build.appVersion)-$($build.appBuildVersion)$extension"
+    $variantTag = if ($variant) { "-$variant" } else { '' }
+    $target = Join-Path $downloads "jew365$variantTag-$($build.appVersion)-$($build.appBuildVersion)$extension"
     Say "latest build $($build.id): version $($build.appVersion), build number $($build.appBuildVersion), finished $($build.completedAt)"
     if ((Test-Path $target) -and (Get-Item $target).Length -gt 0) {
         Say "already downloaded: $target"
@@ -556,7 +599,6 @@ function Invoke-Apk {
         Move-Item -Force -LiteralPath $part -Destination $target
     }
 
-    $expectedPackage = (Get-AppConfig).android.package
     $badging = $null
     if ($extension -eq '.apk') { $badging = Get-ApkBadging $target }
     if ($badging) {
@@ -589,7 +631,8 @@ native.ps1 <command> [options]   (PowerShell 7: pwsh -NoProfile -File native.ps1
                           gradlew --stop, stop the Metro this skill started, optionally delete the copy
                           (only a folder this skill created) / close the emulator (only one this skill started)
   apk [-BuildProfile p]   download the latest finished EAS Android build of profile p (default
-                          production-apk) to ~\Downloads\jew365-<version>-<buildNumber>.apk and verify it
+                          production-apk) to ~\Downloads\jew365-<version>-<buildNumber>.apk (jew365-preview-<version>-<buildNumber>.apk
+                          for a profile that sets APP_VARIANT=preview) and verify it
   help                    this text
 
 Options: -Copy <dir under C:\work\> -Avd <name> -Port <n> -Limit <n> -TimeoutMin <n> -UseRunning -Force

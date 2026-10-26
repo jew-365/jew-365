@@ -105,9 +105,16 @@ function main(argv = process.argv.slice(2)) {
   process.stdout.write(`Publishing ${label} to ${channel}\n`);
   const update = eas(['update', '--channel', channel, '--clear-cache', ...args], {
     stdio: 'inherit',
-    env: { ...process.env, EXPO_PUBLIC_UPDATE_NUMBER: String(number) },
+    env: updateEnv(channel, number),
   });
   return update.status ?? 1;
+}
+
+function updateEnv(channel, number, env = process.env) {
+  const next = { ...env, EXPO_PUBLIC_UPDATE_NUMBER: String(number) };
+  if (channel === 'preview') next.APP_VARIANT = 'preview';
+  else delete next.APP_VARIANT;
+  return next;
 }
 
 if (require.main === module) {

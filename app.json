@@ -89,6 +89,7 @@
         }
       ],
       "./scripts/withAndroidBackupRules",
+      "./scripts/withAndroidLegacyHebrewLocale",
       [
         "expo-local-authentication",
         {

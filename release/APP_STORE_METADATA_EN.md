@@ -32,7 +32,7 @@ By design the app rests on Shabbat and Jewish holidays at the chosen city: from 
 - Release option: Manually release this version (saved 2026-10-23), so an approved version waits for the owner's Release.
 - TestFlight: internal group Team (Expo) (365jew@gmail.com); external group Beta testers with build 1.0.21 (4), public link https://testflight.apple.com/join/cZeSqPzG (open to anyone, no limit), Test Information: feedback 365jew@gmail.com, beta review contact Avraham Sason, +972546559314, 365jew@gmail.com, sign-in not required. The Beta App Review passed on 2026-10-23; that day the group listed 7 testers: moshechaim22@gmail.com invited, and 6 anonymous public-link installs of 1.0.21 (4) on iOS 26 and 27.
 - App Information: primary category Lifestyle, no secondary category. Content Rights: yes, third-party content with the necessary rights (the siddur texts, under Public Domain, CC0, CC-BY and CC-BY-SA, credited in the reader).
-- Pricing and Availability: free ($0.00, base country United States) in all 175 countries or regions and future ones. iPhone only on the App Store: Apple Silicon Mac and Apple Vision Pro availability off.
+- Pricing and Availability: free ($0.00, base country United States), available in 174 countries or regions and future ones: every storefront but China mainland, removed on 2026-10-26 (the owner's call: Chinese law requires apps with religious content to hold a permit). iPhone only on the App Store: Apple Silicon Mac and Apple Vision Pro availability off.
 
 ## App Name
 

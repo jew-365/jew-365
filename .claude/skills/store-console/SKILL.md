@@ -25,6 +25,7 @@ Fills store consoles for `com.jew365.app` through a real browser, with the user'
 ## 3. How to click and type
 
 - Click by element reference from `find` or `read_page`, never by coordinates. Play Console dialogs scroll between actions and a coordinate click lands on the next checkbox (it ticked wrong boxes once). Re-run `find` after each dialog opens or scrolls.
+- A checkbox whose accessible name says nothing (App Store Connect's country list names each one "on") can get the wrong reference from `find`: on 2026-10-26 the reference returned for China mainland unticked Fiji. After every such click, zoom on the row and check the dialog's count; if the reference missed, scroll the dialog still, take a screenshot and click by the coordinates it shows.
 - Take a screenshot before every Save, Next, Submit and Confirm, and compare it with the value list. Do not click the control until the screenshot shows the right state.
 - Enter text with `form_input` on the field's ref, Hebrew included; it handles long Hebrew text and the character counters update. Verify the counter against the limits: Play short description 80, full description 4000; Apple subtitle 30, promotional text 170, keywords 100 with no space after the commas, description 4000.
 - Material dropdowns and radio groups: click the ref, then re-read the page to confirm the selected value, not only the screenshot.

@@ -20,6 +20,12 @@ check and a bell). Cream is `#F6F1E8`, night is `#0E1626`. Every asset carries t
   `app.json` sets the cream background.
 - splash-dark.png (1024×1024, transparent): the same with the on-dark colours, on the night background.
 - favicon.png (48×48, transparent): the web build's icon, the full mark.
+- preview/icon.png, preview/adaptive-icon.png, preview/splash.png and preview/splash-dark.png: the four files of
+  the preview variant "Jew 365 P", each the same mark, size and colour type as its namesake above, with every blue
+  of the palette turned to red at the same lightness and saturation (the `RED_ORANGE` palette, drawn from
+  `mark-o-preview.svg` and `mark-o-preview-dark.svg`) and the orange symbols unchanged. Only `app.config.js` names
+  them, when `APP_VARIANT=preview`; the monochrome layer, the notification silhouette and the favicon are
+  production's.
 
 The in-app logo is not a PNG: `src/components/logo.generated.ts` holds the SVG strings that `AppLogo` draws, and
 the same export writes it.

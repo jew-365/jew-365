@@ -559,11 +559,51 @@ const BLUE_ORANGE = {
   ],
   heroHalo: null,
 };
+const hexToHsl = (hex) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  if (d === 0) return [0, 0, l];
+  const s = d / (1 - Math.abs(2 * l - 1));
+  const h = max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [h * 60, s, l];
+};
+const hslToHex = (h, s, l) => {
+  const a = s * Math.min(l, 1 - l);
+  const channel = (n) => {
+    const k = (n + h / 30) % 12;
+    return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+  };
+  return `#${[0, 8, 4].map((n) => Math.round(channel(n) * 255).toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+};
+const RED_ROTATION = 140;
+const toRed = (hex) => {
+  const [h, s, l] = hexToHsl(hex);
+  return hslToHex((h + RED_ROTATION) % 360, s, l);
+};
+const toRedStops = (stops) => stops.map(([offset, hex]) => [offset, toRed(hex)]);
+
+const RED_ORANGE = {
+  ...BLUE_ORANGE,
+  id: 'red-orange',
+  label: 'אדום הדרגתי וכתום',
+  ink: toRed(BLUE_ORANGE.ink),
+  ring: toRedStops(BLUE_ORANGE.ring),
+  ticks: toRedStops(BLUE_ORANGE.ticks),
+  halo: toRed(BLUE_ORANGE.halo),
+  heroRing: toRedStops(BLUE_ORANGE.heroRing),
+  heroTicks: toRedStops(BLUE_ORANGE.heroTicks),
+};
+
 const lightColors = (p) => ({ ink: p.ink, sun: p.sun, ring: p.ring, ticks: p.ticks, halo: p.halo });
 const darkColors = (p) => ({ ink: p.heroInk, sun: p.heroSun, ring: p.heroRing, ticks: p.heroTicks, halo: p.heroHalo });
 
 const O_LIGHT = lightColors(BLUE_ORANGE);
 const O_DARK = darkColors(BLUE_ORANGE);
+const P_LIGHT = lightColors(RED_ORANGE);
+const P_DARK = darkColors(RED_ORANGE);
 const O_ICON_LIGHT = { ...O_LIGHT, halo: null };
 const O_SILHOUETTE = { ink: '#000000', sun: '#000000' };
 const oOut = Object.fromEntries(Object.entries(O_OUTPUTS).map(([k, f]) => [k, f()]));
@@ -723,4 +763,10 @@ const html = `<!doctype html>
 `;
 
 writeFileSync(join(OUT, 'index.html'), html);
-console.log('wrote', Object.keys(oSvgs).join(', '), 'mark-o-meta.json index.html');
+
+const previewSvgs = {
+  'mark-o-preview.svg': markSvg(markO, P_LIGHT, { pad: 24, title: 'Jew 365 P mark o' }),
+  'mark-o-preview-dark.svg': markSvg(markO, P_DARK, { pad: 24, title: 'Jew 365 P mark o on dark' }),
+};
+for (const [name, svg] of Object.entries(previewSvgs)) writeFileSync(join(OUT, name), svg + '\n');
+console.log('wrote', [...Object.keys(oSvgs), ...Object.keys(previewSvgs)].join(', '), 'mark-o-meta.json index.html');

@@ -7,6 +7,7 @@
 ## Ownership
 
 - [icon.png](icon.png), [adaptive-icon.png](adaptive-icon.png), [adaptive-monochrome.png](adaptive-monochrome.png), [splash.png](splash.png), [splash-dark.png](splash-dark.png), [favicon.png](favicon.png), and [notification-icon.png](notification-icon.png) are release-facing assets, all generated. The logo pipeline owns them: [../design/jew365-concepts/vector/build.mjs](../design/jew365-concepts/vector/build.mjs) draws mark `o` (the logo of 2026-10-21) and [../scripts/logo/export.mjs](../scripts/logo/export.mjs) turns its SVGs into these PNGs and into [../src/components/logo.generated.ts](../src/components/logo.generated.ts), which [AppLogo](../src/components/AppLogo.tsx) draws; `pnpm logo:build` runs both.
+- [preview/](preview) holds the four PNGs of the red preview variant ("Jew 365 P"): [preview/icon.png](preview/icon.png), [preview/adaptive-icon.png](preview/adaptive-icon.png), [preview/splash.png](preview/splash.png) and [preview/splash-dark.png](preview/splash-dark.png), each the size and colour type of its namesake here, drawn from `mark-o-preview.svg` and `mark-o-preview-dark.svg` beside [../design/jew365-concepts/vector/build.mjs](../design/jew365-concepts/vector/build.mjs) (the `RED_ORANGE` palette). `pnpm logo:build` writes them with the others, and only [../app.config.js](../app.config.js) names them, when `APP_VARIANT=preview`. The variant shares the monochrome layer, the notification silhouette and the favicon with production.
 - [README.md](README.md) records every asset, its size and what it shows. They are native assets: a change reaches users only with the next build.
 - [siddur/](siddur) holds the generated nusach texts, one JSON file per nusach and text. The build in [../scripts/siddur/AGENTS.md](../scripts/siddur/AGENTS.md) owns them; never edit them here.
 - A chok folder beside siddur holds the generated Chok LeYisrael texts, built by [../scripts/chok/AGENTS.md](../scripts/chok/AGENTS.md). It is gitignored until the source's owner gives written permission, so a clean checkout has none; never commit it before then.
@@ -25,7 +26,8 @@
 
 ## Verification
 
-- Run `pnpm test -- scripts/__tests__/logoAssets.test.js` after an export: it pins every file's size and colour type and the [../app.json](../app.json) wiring.
+- Run `pnpm test -- scripts/__tests__/logoAssets.test.js` after an export: it pins every file's size and colour type and the [../app.json](../app.json) wiring. Run `pnpm test -- scripts/__tests__/appConfig.test.js` too: it pins each [preview/](preview) PNG to the size and colour type of its production file.
+- After `pnpm logo:build`, `git status --short assets src/components docs` must show no production file changed, only [preview/](preview) when it is new or its palette changed.
 - Run `pnpm doctor` after asset path, plugin, or app config changes.
 - For visual asset changes, verify on the relevant platform or web build because Jest does not cover raster appearance.
 

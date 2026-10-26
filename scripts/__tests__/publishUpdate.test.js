@@ -130,4 +130,45 @@ describe('main', () => {
     expect(args).toContain(`${expo.version}-1000: Rollback to x`);
     expect(args).not.toContain('--skip-whats-new');
   });
+
+  describe('the app variant of the update', () => {
+    const originalVariant = process.env.APP_VARIANT;
+
+    afterEach(() => {
+      if (originalVariant === undefined) delete process.env.APP_VARIANT;
+      else process.env.APP_VARIANT = originalVariant;
+    });
+
+    function publishedEnv(channel, ...rest) {
+      spawnSync.mockReturnValueOnce(listing(`${expo.version}-999: last`)).mockReturnValueOnce({ status: 0 });
+      const write = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      try {
+        expect(main([channel, '--message', 'Rollback to x', '--skip-whats-new', ...rest])).toBe(0);
+      } finally {
+        write.mockRestore();
+      }
+      expect(spawnSync.mock.calls[1][1]).toContain('update');
+      return spawnSync.mock.calls[1][2].env;
+    }
+
+    it('builds the preview channel with the preview variant, so the update carries the preview identity', () => {
+      delete process.env.APP_VARIANT;
+      const env = publishedEnv('preview');
+      expect(env.APP_VARIANT).toBe('preview');
+      expect(env.EXPO_PUBLIC_UPDATE_NUMBER).toBe('1000');
+    });
+
+    it.each(['production', 'development'])('leaves APP_VARIANT unset for the %s channel', (channel) => {
+      delete process.env.APP_VARIANT;
+      expect(publishedEnv(channel).APP_VARIANT).toBeUndefined();
+    });
+
+    it.each(['production', 'development'])(
+      'drops an APP_VARIANT left in the shell for the %s channel, so it never ships the preview identity',
+      (channel) => {
+        process.env.APP_VARIANT = 'preview';
+        expect(publishedEnv(channel).APP_VARIANT).toBeUndefined();
+      },
+    );
+  });
 });

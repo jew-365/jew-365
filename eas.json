@@ -22,7 +22,7 @@
     "preview": {
       "distribution": "internal",
       "channel": "preview",
-      "env": { "SENTRY_DISABLE_AUTO_UPLOAD": "true" },
+      "env": { "SENTRY_DISABLE_AUTO_UPLOAD": "true", "APP_VARIANT": "preview" },
       "android": {
         "buildType": "apk"
       },
@@ -31,11 +31,15 @@
     "preview-device": {
       "distribution": "internal",
       "channel": "preview",
-      "env": { "SENTRY_DISABLE_AUTO_UPLOAD": "true" },
+      "env": { "SENTRY_DISABLE_AUTO_UPLOAD": "true", "APP_VARIANT": "preview" },
       "android": {
         "gradleCommand": ":app:assembleRelease -PreactNativeArchitectures=arm64-v8a"
       },
       "ios": { "simulator": true }
+    },
+    "preview-ios": {
+      "extends": "preview",
+      "ios": { "simulator": false }
     },
     "production": {
       "channel": "production",

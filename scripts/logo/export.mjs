@@ -1,12 +1,22 @@
 #!/usr/bin/env node
 // Exports the Jew 365 logo SVGs of design/jew365-concepts/vector (built by build.mjs) to the PNG assets
-// of assets/ and to src/components/logo.generated.ts. Plain Node plus any Chromium-based browser.
+// of assets/, the red preview variant's PNGs to assets/preview/ and to src/components/logo.generated.ts.
+// Plain Node plus any Chromium-based browser.
 import { Buffer } from 'node:buffer';
 import console from 'node:console';
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { delimiter, dirname, join, resolve } from 'node:path';
+import { basename, delimiter, dirname, join, relative, resolve } from 'node:path';
 import process from 'node:process';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -15,6 +25,7 @@ import { deflateSync, inflateSync } from 'node:zlib';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const VECTOR = join(ROOT, 'design', 'jew365-concepts', 'vector');
 const ASSETS = join(ROOT, 'assets');
+const PREVIEW = join(ASSETS, 'preview');
 const GENERATED = join(ROOT, 'src', 'components', 'logo.generated.ts');
 
 const CREAM = '#F6F1E8';
@@ -275,9 +286,14 @@ function main() {
   const centre = [SIZE / 2, SIZE / 2];
   const report = [];
   try {
-    const write = (name, svgHtml, size, { background = 'transparent', opaque = false, maxRadius = null } = {}) => {
+    const write = (
+      name,
+      svgHtml,
+      size,
+      { background = 'transparent', opaque = false, maxRadius = null, outDir = ASSETS } = {},
+    ) => {
       const image = cropToTopLeft(
-        screenshot(browser, page(svgHtml, size, background), size, size, dir, name),
+        screenshot(browser, page(svgHtml, size, background), size, size, dir, `${basename(outDir)}-${name}`),
         size,
         size,
       );
@@ -293,11 +309,11 @@ function main() {
           throw new Error(`${name}: ink reaches ${reached.toFixed(1)} px, the limit is ${maxRadius}`);
         radius = `ink radius ${reached.toFixed(1)} of ${maxRadius.toFixed(1)}`;
       }
-      const target = join(ASSETS, `${name}.png`);
+      const target = join(outDir, `${name}.png`);
       writeFileSync(target, encodePng(image, opaque));
       const header = readHeader(readFileSync(target));
       report.push(
-        `${name}.png ${header.width}x${header.height} colour type ${header.colorType} (${header.colorType === 2 ? 'RGB, opaque' : 'RGBA'}) ${radius}`.trim(),
+        `${relative(ASSETS, target).replaceAll('\\', '/')} ${header.width}x${header.height} colour type ${header.colorType} (${header.colorType === 2 ? 'RGB, opaque' : 'RGBA'}) ${radius}`.trim(),
       );
     };
 
@@ -307,33 +323,43 @@ function main() {
     const adaptiveFill = 0.255 * SIZE;
     const splashRadius = 0.48 * SIZE;
 
-    write('icon', place(mark, meta.mark.center, meta.mark.reach, centre, 0.78 * SIZE), SIZE, {
-      background: CREAM,
-      opaque: true,
-    });
-    write('adaptive-icon', place(mark, meta.mark.center, meta.mark.reach, centre, 2 * adaptiveFill), SIZE, {
-      maxRadius: adaptiveRadius,
-    });
+    const writeMarks = (outDir, light, dark) => {
+      write('icon', place(light, meta.mark.center, meta.mark.reach, centre, 0.78 * SIZE), SIZE, {
+        background: CREAM,
+        opaque: true,
+        outDir,
+      });
+      write('adaptive-icon', place(light, meta.mark.center, meta.mark.reach, centre, 2 * adaptiveFill), SIZE, {
+        maxRadius: adaptiveRadius,
+        outDir,
+      });
+      write('splash', place(light, meta.mark.center, meta.mark.reach, centre, 2 * (splashRadius - EDGE_INSET)), SIZE, {
+        maxRadius: splashRadius,
+        outDir,
+      });
+      write(
+        'splash-dark',
+        place(dark, meta.mark.center, meta.mark.reach, centre, 2 * (splashRadius - EDGE_INSET)),
+        SIZE,
+        {
+          maxRadius: splashRadius,
+          outDir,
+        },
+      );
+    };
+
+    writeMarks(ASSETS, mark, readSvg('mark-o-dark.svg'));
     write('adaptive-monochrome', place(markMono, meta.mark.center, meta.mark.reach, centre, 2 * adaptiveFill), SIZE, {
       maxRadius: adaptiveRadius,
     });
-    write('splash', place(mark, meta.mark.center, meta.mark.reach, centre, 2 * (splashRadius - EDGE_INSET)), SIZE, {
-      maxRadius: splashRadius,
-    });
-    write(
-      'splash-dark',
-      place(readSvg('mark-o-dark.svg'), meta.mark.center, meta.mark.reach, centre, 2 * (splashRadius - EDGE_INSET)),
-      SIZE,
-      {
-        maxRadius: splashRadius,
-      },
-    );
     write('notification-icon', fitBox(markMono.replaceAll('#000000', '#FFFFFF'), meta.mark.box, 96, 6), 96);
     write('favicon', fitBox(mark, meta.mark.box, 48, 2), 48);
     copyFileSync(join(ASSETS, 'favicon.png'), join(ROOT, 'docs', 'favicon.png'));
     copyFileSync(join(VECTOR, 'mark-o.svg'), join(ROOT, 'docs', 'logo.svg'));
     copyFileSync(join(VECTOR, 'mark-o-dark.svg'), join(ROOT, 'docs', 'logo-dark.svg'));
     writeFileSync(join(ROOT, 'docs', 'favicon.svg'), schemeAwareSvg(mark, readSvg('mark-o-dark.svg')));
+    mkdirSync(PREVIEW, { recursive: true });
+    writeMarks(PREVIEW, readSvg('mark-o-preview.svg'), readSvg('mark-o-preview-dark.svg'));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
