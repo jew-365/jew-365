@@ -12,6 +12,7 @@ import { StreakRing } from '@/components/StreakRing';
 import { useDayModel } from '@/hooks/useDayModel';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { enabledSinceOf, useMitzvotStore } from '@/stores/useMitzvotStore';
+import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -21,10 +22,10 @@ import { formatDate, useI18n } from '@/i18n';
 
 const HISTORY_DAYS = 30;
 const GRID_COLUMNS = 5;
-const GRID_CELL_HEIGHT = 40;
-const HERO_HEIGHT = 320;
-const RING_SIZE = 220;
-const BAR_HEIGHT = 6;
+const GRID_CELL_HEIGHT = scaled(40);
+const HERO_HEIGHT = scaled(320);
+const RING_SIZE = scaled(220);
+const BAR_HEIGHT = scaled(6);
 
 const EMPTY_STATS: HistoryStats = {
   streak: 0,
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
   },
   missRow: {
-    minHeight: 48,
+    minHeight: scaled(48),
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     justifyContent: 'center',

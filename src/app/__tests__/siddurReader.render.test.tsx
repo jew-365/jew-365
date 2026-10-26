@@ -172,7 +172,7 @@ describe('the siddur reader toolbar and section cards', () => {
   it('draws the toolbar on light surfaces', async () => {
     await openShacharit();
     const picker = screen.getByRole('button', { name: /^בחר חלק: / });
-    expect(picker).toHaveStyle({ backgroundColor: THEMES.gold.surface, borderRadius: 20 });
+    expect(picker).toHaveStyle({ backgroundColor: THEMES.gold.surface, borderRadius: 20, flexGrow: 1 });
     expect(within(picker).UNSAFE_getByType(MitzvahIcon).props.name).toBe('chevronDown');
     expect(screen.getByRole('switch', { name: 'גלילה אוטומטית' })).toHaveStyle({
       backgroundColor: THEMES.gold.surface2,
@@ -198,6 +198,18 @@ describe('the siddur reader toolbar and section cards', () => {
     expect(indexes).toEqual([...indexes].sort((a, b) => a - b));
     expect(new Set(indexes).size).toBe(indexes.length);
     expect(screen.queryByRole('radio', { name: 'מקופלים' })).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'עם פירושים' })).toBeNull();
+  });
+
+  it('lets the second toolbar row wrap onto a second line when the controls do not fit', async () => {
+    await openShacharit();
+    let row = screen.getByRole('button', { name: 'הגדל טקסט' }).parent;
+    while (row && (typeof row.type !== 'string' || StyleSheet.flatten(row.props.style)?.flexDirection !== 'row')) {
+      row = row.parent;
+    }
+    expect(row).not.toBeNull();
+    expect(row).toHaveStyle({ flexDirection: 'row', flexWrap: 'wrap', columnGap: 8, rowGap: 8 });
+    expect(screen.getByLabelText('תפילה')).toHaveStyle({ flex: 1 });
   });
 
   it('titles each section in goldText at the title size', async () => {
@@ -212,6 +224,62 @@ describe('the siddur reader toolbar and section cards', () => {
     fireEvent.press(screen.getByRole('switch', { name: 'גלילה אוטומטית' }));
     expect(useUserStore.getState().siddurAutoScroll).toBe(true);
     expect(screen.getByRole('switch', { name: 'גלילה אוטומטית' })).toHaveStyle({ backgroundColor: THEMES.gold.gold });
+  });
+});
+
+describe('the siddur reader mitzvah settings pill', () => {
+  const SETTINGS = 'הגדרות המצווה';
+
+  beforeEach(() => {
+    mockRouter.push.mockClear();
+    mockRouter.back.mockClear();
+  });
+  afterEach(() => jest.useRealTimers());
+
+  it("opens the mitzvah's screen from a mitzvah text", async () => {
+    await openShacharit();
+    fireEvent.press(screen.getByRole('button', { name: SETTINGS }));
+    expect(mockRouter.push).toHaveBeenCalledTimes(1);
+    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/mitzvah/[id]', params: { id: 'shacharit' } });
+    expect(mockRouter.back).not.toHaveBeenCalled();
+  });
+
+  it('sits first in the header actions, before the star and the bookmarks', async () => {
+    await openShacharit();
+    const all = screen.getAllByRole('button');
+    const indexes = [
+      screen.getByRole('button', { name: SETTINGS }),
+      screen.getByRole('button', { name: 'הוסף סימנייה' }),
+      screen.getByRole('button', { name: 'סימניות' }),
+    ].map((control) => all.indexOf(control));
+    expect(indexes[0]).toBeGreaterThanOrEqual(0);
+    expect(indexes).toEqual([...indexes].sort((a, b) => a - b));
+    expect(new Set(indexes).size).toBe(3);
+  });
+
+  it('goes back to the mitzvah screen that opened the reader, and pushes it for any other opener', async () => {
+    await openShacharit();
+    mockParams.from = 'shacharit';
+    screen.rerender(<SiddurReaderScreen />);
+    fireEvent.press(screen.getByRole('button', { name: SETTINGS }));
+    expect(mockRouter.back).toHaveBeenCalledTimes(1);
+    expect(mockRouter.push).not.toHaveBeenCalled();
+
+    mockParams.from = 'mincha';
+    screen.rerender(<SiddurReaderScreen />);
+    fireEvent.press(screen.getByRole('button', { name: SETTINGS }));
+    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/mitzvah/[id]', params: { id: 'shacharit' } });
+  });
+
+  it('has none for a text no mitzvah links to', async () => {
+    jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T13:00'), doNotFake: [...ONLY_DATE] });
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+    for (const key of Object.keys(mockParams)) delete mockParams[key];
+    Object.assign(mockParams, { id: 'birkat_hamazon' });
+    renderWithTheme(<SiddurReaderScreen />);
+    await screen.findByRole('button', { name: 'הוסף סימנייה' });
+    expect(screen.queryByRole('button', { name: SETTINGS })).toBeNull();
   });
 });
 
@@ -708,6 +776,14 @@ describe('the siddur reader header for a custom mitzvah', () => {
     await openCustom(['10:00', '11:00'], '2027-06-14T10:15', '2027-06-14');
     expect(screen.getByText(DAY_OF_9_SIVAN)).toBeOnTheScreen();
     expect(screen.queryByText(NIGHT_OF_10_SIVAN)).toBeNull();
+  });
+
+  it("opens the custom mitzvah's own screen from its text, which draws no bookmark pills", async () => {
+    mockRouter.push.mockClear();
+    await openCustom(['10:00', '11:00'], '2027-06-14T10:15', '2027-06-14');
+    expect(screen.queryByRole('button', { name: 'הוסף סימנייה' })).toBeNull();
+    fireEvent.press(screen.getByRole('button', { name: 'הגדרות המצווה' }));
+    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/mitzvah/[id]', params: { id: CUSTOM_ID } });
   });
 
   it("still files סיימתי under the evening's date", async () => {

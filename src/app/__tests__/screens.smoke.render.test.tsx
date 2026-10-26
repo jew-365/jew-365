@@ -153,6 +153,7 @@ import CheckInScreen from '../checkin';
 import CustomMitzvahScreen from '../custom-mitzvah';
 import DayScreen from '../day/[date]';
 import GuideScreen from '../guide';
+import HilulaScreen from '../hilula/[id]';
 import HilulotScreen from '../hilulot';
 import MitzvahScreen from '../mitzvah/[id]';
 import MitzvotScreen from '../mitzvot';
@@ -473,6 +474,34 @@ const CASES: SmokeCase[] = [
     label: 'default',
     Screen: GuideScreen,
     check: both(text('מדריך למשתמש', 'User guide'), text(WHATS_NEW[0].items[0].he, WHATS_NEW[0].items[0].en)),
+  },
+  {
+    file: 'hilula/[id]',
+    label: 'a known tzaddik',
+    Screen: HilulaScreen,
+    params: { id: 'rashbi' },
+    check: both(
+      text('רבי שמעון בר יוחאי', 'Rabbi Shimon bar Yochai'),
+      both(text('קורות חיים', 'Life'), text('מקום הקבורה', 'Burial place')),
+    ),
+  },
+  {
+    file: 'hilula/[id]',
+    label: 'a notice that names two tzaddikim',
+    Screen: HilulaScreen,
+    params: { id: 'rashbi', ids: 'rashbi,rema' },
+    check: async (language) => {
+      const pick = language === 'he' ? 'בחירת צדיק' : 'Choose a tzaddik';
+      expect((await screen.findByLabelText(pick)).props.accessibilityRole).toBe('radiogroup');
+      expect(await screen.findAllByRole('radio')).toHaveLength(2);
+    },
+  },
+  {
+    file: 'hilula/[id]',
+    label: 'an unknown id',
+    Screen: HilulaScreen,
+    params: { id: 'no_such_tzaddik' },
+    check: text('משהו השתבש. נסה שוב.', 'Something went wrong. Try again.'),
   },
   { file: 'hilulot', label: 'default', Screen: HilulotScreen, check: text('הילולות צדיקים', 'Hilulot of tzaddikim') },
   {

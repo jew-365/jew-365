@@ -18,6 +18,7 @@ import { ZmanimService } from '@/services/ZmanimService';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { BRAND } from '@/theme/colors';
+import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -351,7 +352,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    fontSize: 16,
+    fontSize: scaled(16),
     textAlign: 'center',
   },
   switchRow: {

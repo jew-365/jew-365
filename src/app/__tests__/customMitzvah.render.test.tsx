@@ -9,6 +9,7 @@ jest.mock('expo-router', () => ({
   useLocalSearchParams: () => mockParams,
 }));
 
+import { Modal } from 'react-native';
 import { fireEvent, screen, within } from '@testing-library/react-native';
 import CustomMitzvahScreen from '../custom-mitzvah';
 import { MitzvahIcon } from '@/components/MitzvahIcon';
@@ -19,9 +20,11 @@ import { at } from '@/testing/zmanim';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
+import { t } from '@/i18n';
 import { THEMES } from '@/theme/colors';
 import { CustomMitzvah, Reminder, ScheduleEntry } from '@/types/mitzvah';
 import { SCHEDULE_ORIGIN } from '@/utils/customMitzvah';
+import type { ReminderTiming } from '@/utils/reminderTiming';
 
 const J = CITIES[0];
 const ONLY_DATE = [
@@ -40,11 +43,9 @@ const ADD_REMINDER = 'הוסף התראה';
 const SAVE = 'שמור';
 const DELETE = 'מחק מצווה';
 const STORED_ID = 'custom_1800000000000_abc';
-const SET_TIME = 'בשעה קבועה';
 const TIME_BUTTON = 'שעה';
-const FOLLOW_UP = 'אחרי הסוף, אם לא בוצע';
-const BEFORE_END = 'לפני סוף הזמן';
-const FOLLOW_UP_HINT = 'הדקות נספרות מסוף הזמן, עד 720. ההתראה נשלחת רק אם המצווה לא סומנה';
+const TIMING_SELECT = /^מתי לשלוח: /;
+const LABEL_PLACEHOLDER = 'לדוגמה: הגיע הזמן';
 const OUTSIDE_NOTE = 'התזכורת מוקדמת ביותר מ־3 שעות לפני תחילת השעות, או אחרי סופן, ולכן לא תישלח';
 const OUTSIDE_ERROR = 'יש תזכורת מוקדמת ביותר מ־3 שעות לפני תחילת השעות, או אחרי סופן';
 const FOLLOW_UP_RANGE = 'בתזכורת אחרי הסוף יש לבחור בין 1 ל-720 דקות';
@@ -67,6 +68,22 @@ function renderForm(params: Record<string, string> = {}) {
   mockParams = params;
   return renderWithTheme(<CustomMitzvahScreen />);
 }
+
+const openSheet = () => within(screen.UNSAFE_getAllByType(Modal).find((modal) => modal.props.visible)!);
+const timingTitle = (timing: ReminderTiming) => t(`reminder.timing.${timing}`);
+const timingSelect = (index = 0) => screen.getAllByRole('button', { name: TIMING_SELECT })[index];
+const chooseTiming = (timing: ReminderTiming, index = 0) => {
+  fireEvent.press(timingSelect(index));
+  fireEvent.press(openSheet().getByText(timingTitle(timing)));
+};
+const scheduleSelect = () => screen.getByRole('button', { name: new RegExp(`^${t('custom.schedule')}: `) });
+const chooseMode = (title: string) => {
+  fireEvent.press(scheduleSelect());
+  fireEvent.press(openSheet().getByText(title));
+};
+const minutesInput = (timing: Exclude<ReminderTiming, 'clock'>, index = 0) =>
+  screen.getAllByLabelText(t(`reminder.minutes.${timing}`))[index];
+const timingNamed = (timing: ReminderTiming) => ({ name: `${t('reminder.timing')}: ${timingTitle(timing)}` });
 
 describe('Custom mitzvah form', () => {
   beforeEach(() => {
@@ -136,12 +153,13 @@ describe('Custom mitzvah form', () => {
     expect(screen.getByDisplayValue('ב')).toBeOnTheScreen();
   });
 
-  it('offers a set time beside start and end, and saves a clock reminder', () => {
+  it('offers a set time beside the start and end timings, and saves a clock reminder', () => {
     renderForm();
     fireEvent.changeText(screen.getByPlaceholderText('לדוגמה: לימוד יומי'), 'לימוד');
-    fireEvent.changeText(screen.getByPlaceholderText('לדוגמה: הגיע הזמן'), 'עשר');
-    fireEvent.press(screen.getByRole('radio', { name: SET_TIME }));
-    expect(screen.queryByLabelText('דקות')).toBeNull();
+    fireEvent.changeText(screen.getByPlaceholderText(LABEL_PLACEHOLDER), 'עשר');
+    chooseTiming('clock');
+    expect(screen.getByRole('button', timingNamed('clock'))).toBeOnTheScreen();
+    expect(screen.queryByLabelText(t('reminder.minutes.fromStart'))).toBeNull();
 
     const time = screen.getByRole('button', { name: TIME_BUTTON });
     expect(time).toHaveAccessibilityValue({ text: '08:00' });
@@ -166,11 +184,11 @@ describe('Custom mitzvah form', () => {
     useMitzvotStore.getState().setReminders(STORED_ID, kept);
     renderForm({ id: STORED_ID });
 
-    const setTimeRadios = screen.getAllByRole('radio', { name: SET_TIME });
-    expect(setTimeRadios[0]).toBeSelected();
-    expect(setTimeRadios[1]).not.toBeSelected();
+    const [first, second] = screen.getAllByRole('button', { name: TIMING_SELECT });
+    expect(first.props.accessibilityLabel).toBe(timingNamed('clock').name);
+    expect(second.props.accessibilityLabel).toBe(timingNamed('beforeStart').name);
     expect(screen.getByRole('button', { name: TIME_BUTTON })).toHaveAccessibilityValue({ text: '07:00' });
-    expect(screen.getByDisplayValue('-60')).toBeOnTheScreen();
+    expect(minutesInput('beforeStart')).toHaveDisplayValue('60');
     expect(screen.getAllByText('תישלח בשעה 07:00')).toHaveLength(2);
     expect(screen.queryByText(OUTSIDE_NOTE)).toBeNull();
 
@@ -185,12 +203,12 @@ describe('Custom mitzvah form', () => {
     storeCustom([{ anchor: 'start', offsetMin: -60, label: 'ג' }]);
     renderForm({ id: STORED_ID });
 
-    fireEvent.changeText(screen.getByDisplayValue('-60'), '90');
-    expect(screen.getByDisplayValue('-90')).toBeOnTheScreen();
+    fireEvent.changeText(minutesInput('beforeStart'), '90');
+    expect(minutesInput('beforeStart')).toHaveDisplayValue('90');
     expect(screen.getByText('תישלח בשעה 06:30')).toBeOnTheScreen();
 
-    fireEvent.changeText(screen.getByDisplayValue('-90'), '500');
-    expect(screen.getByDisplayValue('-180')).toBeOnTheScreen();
+    fireEvent.changeText(minutesInput('beforeStart'), '500');
+    expect(minutesInput('beforeStart')).toHaveDisplayValue('180');
     fireEvent.press(screen.getByRole('button', { name: SAVE }));
 
     expect(useCustomMitzvotStore.getState().items[STORED_ID].reminders).toEqual([
@@ -206,8 +224,8 @@ describe('Custom mitzvah form', () => {
     ]);
     renderForm({ id: STORED_ID });
 
-    fireEvent.changeText(screen.getByDisplayValue('15'), '40');
-    fireEvent.changeText(screen.getByDisplayValue('30'), '45');
+    fireEvent.changeText(minutesInput('fromStart'), '40');
+    fireEvent.changeText(minutesInput('beforeEnd'), '45');
     fireEvent.press(screen.getByRole('button', { name: SAVE }));
 
     expect(useCustomMitzvotStore.getState().items[STORED_ID].reminders).toEqual([
@@ -216,16 +234,16 @@ describe('Custom mitzvah form', () => {
     ]);
   });
 
-  it('offers a follow-up after the end as a fourth anchor and saves it', () => {
+  it('offers a follow-up after the end as a fifth timing and saves it', () => {
     storeCustom([ONE]);
     renderForm({ id: STORED_ID });
 
-    fireEvent.press(screen.getByRole('radio', { name: FOLLOW_UP }));
+    chooseTiming('followUp');
 
-    expect(screen.getByRole('radio', { name: FOLLOW_UP })).toBeSelected();
-    expect(screen.getByDisplayValue('60')).toBeOnTheScreen();
+    expect(screen.getByRole('button', timingNamed('followUp'))).toBeOnTheScreen();
+    expect(minutesInput('followUp')).toHaveDisplayValue('60');
     expect(screen.getByText('תישלח בשעה 13:00')).toBeOnTheScreen();
-    expect(screen.getByText(FOLLOW_UP_HINT)).toBeOnTheScreen();
+    expect(screen.getByText(t('reminder.timing.followUp.caption'))).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole('button', { name: SAVE }));
 
@@ -242,7 +260,7 @@ describe('Custom mitzvah form', () => {
     expect(screen.getByText('לכל התראה צריך טקסט')).toBeOnTheScreen();
     expect(list()).toHaveLength(0);
 
-    fireEvent.press(screen.getByRole('radio', { name: FOLLOW_UP }));
+    chooseTiming('followUp');
     expect(screen.getByPlaceholderText('עוד לא סימנת: לימוד')).toBeOnTheScreen();
     fireEvent.press(screen.getByRole('button', { name: SAVE }));
 
@@ -253,7 +271,7 @@ describe('Custom mitzvah form', () => {
   it('follows the mitzvah name in the follow-up placeholder, and keeps a typed label verbatim', () => {
     renderForm();
     fireEvent.changeText(screen.getByPlaceholderText('לדוגמה: לימוד יומי'), 'לימוד');
-    fireEvent.press(screen.getByRole('radio', { name: FOLLOW_UP }));
+    chooseTiming('followUp');
     expect(screen.getByPlaceholderText('עוד לא סימנת: לימוד')).toBeOnTheScreen();
 
     fireEvent.changeText(screen.getByPlaceholderText('לדוגמה: לימוד יומי'), 'שיעור');
@@ -269,11 +287,11 @@ describe('Custom mitzvah form', () => {
     storeCustom([{ anchor: 'followUp', offsetMin: 60, label: 'ה' }]);
     renderForm({ id: STORED_ID });
 
-    fireEvent.changeText(screen.getByDisplayValue('60'), '900');
-    expect(screen.getByDisplayValue('720')).toBeOnTheScreen();
+    fireEvent.changeText(minutesInput('followUp'), '900');
+    expect(minutesInput('followUp')).toHaveDisplayValue('720');
     expect(screen.getByText('תישלח בשעה 00:00')).toBeOnTheScreen();
 
-    fireEvent.changeText(screen.getByDisplayValue('720'), '0');
+    fireEvent.changeText(minutesInput('followUp'), '0');
     expect(screen.getAllByText(FOLLOW_UP_RANGE)).toHaveLength(1);
     expect(screen.queryByText(OUTSIDE_NOTE)).toBeNull();
     fireEvent.press(screen.getByRole('button', { name: SAVE }));
@@ -287,14 +305,14 @@ describe('Custom mitzvah form', () => {
     storeCustom([{ anchor: 'followUp', offsetMin: 60, label: 'ה' }]);
     renderForm({ id: STORED_ID });
 
-    fireEvent.press(screen.getByRole('radio', { name: BEFORE_END }));
-    expect(screen.getByDisplayValue('0')).toBeOnTheScreen();
+    chooseTiming('beforeEnd');
+    expect(minutesInput('beforeEnd')).toHaveDisplayValue('0');
     expect(screen.getByText('תישלח בשעה 12:00')).toBeOnTheScreen();
 
-    fireEvent.press(screen.getByRole('radio', { name: FOLLOW_UP }));
-    expect(screen.getByDisplayValue('60')).toBeOnTheScreen();
+    chooseTiming('followUp');
+    expect(minutesInput('followUp')).toHaveDisplayValue('60');
 
-    fireEvent.press(screen.getByRole('radio', { name: SET_TIME }));
+    chooseTiming('clock');
     expect(screen.getByRole('button', { name: TIME_BUTTON })).toHaveAccessibilityValue({ text: '08:00' });
   });
 
@@ -348,15 +366,290 @@ describe('Custom mitzvah form', () => {
   });
 });
 
+describe('the reminder timing', () => {
+  const NAME_PLACEHOLDER = 'לדוגמה: לימוד יומי';
+  const more = () => fireEvent.press(screen.getByLabelText(t('reminder.minutes.more')));
+  const less = () => fireEvent.press(screen.getByLabelText(t('reminder.minutes.less')));
+  const fillNewMitzvah = () => {
+    renderForm();
+    fireEvent.changeText(screen.getByPlaceholderText(NAME_PLACEHOLDER), 'לימוד');
+    fireEvent.changeText(screen.getByPlaceholderText(LABEL_PLACEHOLDER), 'עכשיו');
+  };
+
+  beforeEach(() => {
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he' });
+    useCustomMitzvotStore.getState().reset();
+    useMitzvotStore.getState().reset();
+    mockBack.mockReset();
+    mockReplace.mockReset();
+    mockCanGoBack = true;
+  });
+
+  it('opens a new reminder on from the start, with one field labelled by what is counted', () => {
+    renderForm();
+
+    expect(screen.getByRole('button', timingNamed('fromStart'))).toBeOnTheScreen();
+    expect(screen.getAllByText(t('reminder.minutes.fromStart'))).toHaveLength(1);
+    expect(minutesInput('fromStart')).toHaveDisplayValue('0');
+    expect(screen.getByText(t('reminder.timing.fromStart.caption'))).toBeOnTheScreen();
+    expect(screen.getByText('תישלח בשעה 08:00')).toBeOnTheScreen();
+  });
+
+  it.each([
+    ['beforeStart', 30, 'כמה דקות לפני תחילת הזמן', 'תישלח בשעה 07:30', { anchor: 'start', offsetMin: -30 }],
+    ['fromStart', 15, 'כמה דקות אחרי תחילת הזמן', 'תישלח בשעה 08:15', { anchor: 'start', offsetMin: 15 }],
+    ['beforeEnd', 20, 'כמה דקות לפני סוף הזמן', 'תישלח בשעה 11:40', { anchor: 'end', offsetMin: -20 }],
+  ] as const)(
+    '%s at %d minutes shows %s then its fire time and saves what is shown',
+    (timing, minutes, field, preview, saved) => {
+      fillNewMitzvah();
+      chooseTiming(timing);
+      expect(screen.getAllByText(field)).toHaveLength(1);
+      fireEvent.changeText(minutesInput(timing), String(minutes));
+      expect(screen.getByText(preview)).toBeOnTheScreen();
+      fireEvent.press(screen.getByRole('button', { name: SAVE }));
+
+      expect(list()[0].reminders).toEqual([{ ...saved, label: 'עכשיו' }]);
+      expect(mockBack).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('saves a set time as the minutes after midnight shown in its time field', () => {
+    fillNewMitzvah();
+    chooseTiming('clock');
+    fireEvent.press(screen.getByRole('button', { name: TIME_BUTTON }));
+    fireEvent.changeText(screen.getByLabelText('הקלדה ידנית'), '0930');
+    fireEvent.press(screen.getByRole('button', { name: 'סגור' }));
+    expect(screen.getByText('תישלח בשעה 09:30')).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+
+    expect(list()[0].reminders).toEqual([{ anchor: 'clock', offsetMin: 570, label: 'עכשיו' }]);
+  });
+
+  it('starts a follow-up on 60 minutes and keeps its empty label', () => {
+    renderForm();
+    fireEvent.changeText(screen.getByPlaceholderText(NAME_PLACEHOLDER), 'לימוד');
+    chooseTiming('followUp');
+    expect(minutesInput('followUp')).toHaveDisplayValue('60');
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+
+    expect(list()[0].reminders).toEqual([{ anchor: 'followUp', offsetMin: 60, label: '' }]);
+  });
+
+  it('refuses a follow-up of 0 minutes and saves one of a single minute', () => {
+    renderForm();
+    fireEvent.changeText(screen.getByPlaceholderText(NAME_PLACEHOLDER), 'לימוד');
+    chooseTiming('followUp');
+    fireEvent.changeText(minutesInput('followUp'), '0');
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+    expect(screen.getAllByText(FOLLOW_UP_RANGE)).toHaveLength(2);
+    expect(list()).toHaveLength(0);
+
+    fireEvent.changeText(minutesInput('followUp'), '1');
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+    expect(list()[0].reminders).toEqual([{ anchor: 'followUp', offsetMin: 1, label: '' }]);
+  });
+
+  it('keeps the select on before the start while 0 is typed in, and saves it as a start offset of 0', () => {
+    fillNewMitzvah();
+    chooseTiming('beforeStart');
+    expect(minutesInput('beforeStart')).toHaveDisplayValue('10');
+    expect(screen.getByText('תישלח בשעה 07:50')).toBeOnTheScreen();
+
+    fireEvent.changeText(minutesInput('beforeStart'), '0');
+
+    expect(screen.getByRole('button', timingNamed('beforeStart'))).toBeOnTheScreen();
+    expect(screen.queryByRole('button', timingNamed('fromStart'))).toBeNull();
+    expect(minutesInput('beforeStart')).toHaveDisplayValue('0');
+    expect(screen.getByText('תישלח בשעה 08:00')).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+
+    expect(list()[0].reminders).toEqual([{ anchor: 'start', offsetMin: 0, label: 'עכשיו' }]);
+  });
+
+  it('keeps the select on before the end while 0 is typed in', () => {
+    fillNewMitzvah();
+    chooseTiming('beforeEnd');
+    fireEvent.changeText(minutesInput('beforeEnd'), '0');
+
+    expect(screen.getByRole('button', timingNamed('beforeEnd'))).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+    expect(list()[0].reminders).toEqual([{ anchor: 'end', offsetMin: 0, label: 'עכשיו' }]);
+  });
+
+  it('holds a typed value that is out of range at the top of its timing', () => {
+    fillNewMitzvah();
+    chooseTiming('beforeStart');
+    fireEvent.changeText(minutesInput('beforeStart'), '999');
+    expect(minutesInput('beforeStart')).toHaveDisplayValue('180');
+    chooseTiming('fromStart');
+    fireEvent.changeText(minutesInput('fromStart'), '999');
+    expect(minutesInput('fromStart')).toHaveDisplayValue('720');
+  });
+
+  it('never lets a character that is not a digit into the minutes field', () => {
+    fillNewMitzvah();
+    fireEvent.changeText(minutesInput('fromStart'), '-1a5.');
+    expect(minutesInput('fromStart')).toHaveDisplayValue('15');
+  });
+
+  it('steps by five and stops at 0 and at the top of before the start', () => {
+    fillNewMitzvah();
+    chooseTiming('beforeStart');
+    fireEvent.changeText(minutesInput('beforeStart'), '178');
+    more();
+    expect(minutesInput('beforeStart')).toHaveDisplayValue('180');
+    more();
+    expect(minutesInput('beforeStart')).toHaveDisplayValue('180');
+    fireEvent.changeText(minutesInput('beforeStart'), '3');
+    less();
+    expect(minutesInput('beforeStart')).toHaveDisplayValue('0');
+    less();
+    expect(minutesInput('beforeStart')).toHaveDisplayValue('0');
+    more();
+    expect(minutesInput('beforeStart')).toHaveDisplayValue('5');
+    expect(screen.getByText('תישלח בשעה 07:55')).toBeOnTheScreen();
+  });
+
+  it.each([
+    ['fromStart', 718],
+    ['beforeEnd', 719],
+  ] as const)('steps %s up to 720 and no further, and down to 0', (timing, from) => {
+    fillNewMitzvah();
+    chooseTiming(timing);
+    fireEvent.changeText(minutesInput(timing), String(from));
+    more();
+    expect(minutesInput(timing)).toHaveDisplayValue('720');
+    more();
+    expect(minutesInput(timing)).toHaveDisplayValue('720');
+    fireEvent.changeText(minutesInput(timing), '2');
+    less();
+    expect(minutesInput(timing)).toHaveDisplayValue('0');
+  });
+
+  it('steps a follow-up between 1 and 720', () => {
+    fillNewMitzvah();
+    chooseTiming('followUp');
+    fireEvent.changeText(minutesInput('followUp'), '3');
+    less();
+    expect(minutesInput('followUp')).toHaveDisplayValue('1');
+    fireEvent.changeText(minutesInput('followUp'), '718');
+    more();
+    expect(minutesInput('followUp')).toHaveDisplayValue('720');
+  });
+
+  it('types the minutes on the number pad', () => {
+    renderForm();
+    expect(minutesInput('fromStart').props.keyboardType).toBe('number-pad');
+  });
+
+  it('heads each reminder by its number, and numbers the rest again when one is deleted', () => {
+    renderForm();
+    expect(screen.getByText('התראה 1')).toBeOnTheScreen();
+    expect(screen.queryByText('התראה 2')).toBeNull();
+
+    fireEvent.press(screen.getByRole('button', { name: ADD_REMINDER }));
+    expect(screen.getByText('התראה 1')).toBeOnTheScreen();
+    expect(screen.getByText('התראה 2')).toBeOnTheScreen();
+
+    fireEvent.press(screen.getAllByRole('button', { name: DELETE_REMINDER })[0]);
+    expect(screen.getByText('התראה 1')).toBeOnTheScreen();
+    expect(screen.queryByText('התראה 2')).toBeNull();
+  });
+
+  it('heads the reminders in English', () => {
+    useUserStore.setState({ language: 'en' });
+    renderForm();
+    fireEvent.press(screen.getByRole('button', { name: 'Add reminder' }));
+    expect(screen.getByText('Reminder 1')).toBeOnTheScreen();
+    expect(screen.getByText('Reminder 2')).toBeOnTheScreen();
+    expect(screen.getAllByRole('button', { name: /^When to send: At the start or after it$/ })).toHaveLength(2);
+  });
+
+  it('labels the text input of each reminder with a field label above it', () => {
+    renderForm();
+    expect(screen.getByText(t('custom.reminderText'))).toBeOnTheScreen();
+    expect(screen.queryByText(t('reminder.label'))).toBeNull();
+    expect(screen.getByPlaceholderText(LABEL_PLACEHOLDER)).toBeOnTheScreen();
+  });
+
+  it('keeps each reminder on its own timing while another is added, changed and deleted', () => {
+    renderForm();
+    chooseTiming('beforeEnd');
+    fireEvent.press(screen.getByRole('button', { name: ADD_REMINDER }));
+    chooseTiming('followUp', 1);
+
+    const [first, second] = screen.getAllByRole('button', { name: TIMING_SELECT });
+    expect(first.props.accessibilityLabel).toBe(timingNamed('beforeEnd').name);
+    expect(second.props.accessibilityLabel).toBe(timingNamed('followUp').name);
+
+    fireEvent.press(screen.getAllByRole('button', { name: DELETE_REMINDER })[0]);
+    expect(screen.getAllByRole('button', { name: TIMING_SELECT })).toHaveLength(1);
+    expect(screen.getByRole('button', timingNamed('followUp'))).toBeOnTheScreen();
+    expect(minutesInput('followUp')).toHaveDisplayValue('60');
+
+    fireEvent.press(screen.getByRole('button', { name: ADD_REMINDER }));
+    expect(screen.getByRole('button', timingNamed('fromStart'))).toBeOnTheScreen();
+  });
+
+  it('seeds each stored reminder with the timing its anchor and sign stand for', () => {
+    storeCustom([
+      { anchor: 'start', offsetMin: -30, label: 'א' },
+      { anchor: 'start', offsetMin: 15, label: 'ב' },
+      { anchor: 'end', offsetMin: -20, label: 'ג' },
+      { anchor: 'followUp', offsetMin: 90, label: 'ד' },
+    ]);
+    renderForm({ id: STORED_ID });
+
+    const selects = screen.getAllByRole('button', { name: TIMING_SELECT });
+    expect(selects.map((select) => select.props.accessibilityLabel)).toEqual(
+      (['beforeStart', 'fromStart', 'beforeEnd', 'followUp'] as const).map((timing) => timingNamed(timing).name),
+    );
+    expect(minutesInput('beforeStart')).toHaveDisplayValue('30');
+    expect(minutesInput('fromStart')).toHaveDisplayValue('15');
+    expect(minutesInput('beforeEnd')).toHaveDisplayValue('20');
+    expect(minutesInput('followUp')).toHaveDisplayValue('90');
+  });
+
+  it('saves a stored reminder back unchanged, with no timing in its shape', () => {
+    const stored: Reminder[] = [
+      { anchor: 'start', offsetMin: -30, label: 'א' },
+      { anchor: 'end', offsetMin: -20, label: 'ב' },
+    ];
+    storeCustom(stored);
+    renderForm({ id: STORED_ID });
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+
+    expect(useCustomMitzvotStore.getState().items[STORED_ID].reminders).toEqual(stored);
+  });
+
+  it('keeps the reminders hint above the cards and drops the hints under each one', () => {
+    renderForm();
+    expect(screen.getByText(t('custom.hint.reminders'))).toBeOnTheScreen();
+    expect(screen.queryByText(/הדקות נספרות/)).toBeNull();
+  });
+
+  it('lists a custom mitzvah the five timings and no exit of Shabbat and Yom Tov', () => {
+    renderForm();
+    fireEvent.press(timingSelect());
+    const sheet = openSheet();
+    (['beforeStart', 'fromStart', 'beforeEnd', 'clock', 'followUp'] as const).forEach((timing) => {
+      expect(sheet.getByText(timingTitle(timing))).toBeOnTheScreen();
+    });
+    expect(sheet.queryByText(timingTitle('blockExit'))).toBeNull();
+  });
+});
+
 describe('the schedule it saves', () => {
   const SATURDAY = 'ש׳';
   const FRIDAY = 'ו׳';
   const SUNDAY = 'א׳';
   const MONDAY = 'ב׳';
   const WEDNESDAY = 'ד׳';
-  const WEEKDAYS_MODE = 'הגדר לפי ימי פעילות';
-  const RANGE_MODE = 'בחירה ביומן';
-  const STREAK_MODE = 'בחירת ימים ברצף';
+  const WEEKDAYS_MODE = 'ימים קבועים בשבוע';
+  const RANGE_MODE = 'מתאריך עד תאריך';
+  const STREAK_MODE = 'מספר ימים ברצף';
   const PICK_DATES = 'בחירת תאריכים';
   const STREAK_WHEEL = 'מספר ימים';
   const RANGE_FROM_29_TO_31 = 'מ־29 אוקטובר 2026 עד 31 אוקטובר 2026';
@@ -501,7 +794,7 @@ describe('the schedule it saves', () => {
     storeWithSchedule({ schedules: [range] });
     renderForm({ id: STORED_ID });
 
-    fireEvent.press(screen.getByRole('radio', { name: WEEKDAYS_MODE }));
+    chooseMode(WEEKDAYS_MODE);
     fireEvent.press(screen.getByRole('checkbox', { name: SATURDAY }));
     fireEvent.press(screen.getByRole('button', { name: SAVE }));
 
@@ -511,24 +804,49 @@ describe('the schedule it saves', () => {
     ]);
   });
 
-  it('offers weekdays, a calendar range and a streak, weekdays first', () => {
+  it('offers weekdays, a calendar range and a streak in a select, weekdays first and picked', () => {
     renderForm();
 
     expect(screen.getByText('תזמון המצווה')).toBeOnTheScreen();
-    const [first, second, third] = screen.getAllByRole('radio');
-    expect(first).toHaveTextContent(WEEKDAYS_MODE);
-    expect(second).toHaveTextContent(RANGE_MODE);
-    expect(third).toHaveTextContent(STREAK_MODE);
-    expect(screen.getByRole('radio', { name: WEEKDAYS_MODE })).toBeSelected();
-    expect(screen.getByRole('radio', { name: RANGE_MODE })).not.toBeSelected();
-    expect(screen.getByRole('radio', { name: STREAK_MODE })).not.toBeSelected();
+    expect(screen.getByRole('button', { name: `תזמון המצווה: ${WEEKDAYS_MODE}` })).toBeOnTheScreen();
+    expect(screen.queryAllByRole('radio')).toHaveLength(0);
     expect(screen.getAllByRole('checkbox')).toHaveLength(7);
     expect(screen.queryByText('ימי פעילות')).toBeNull();
+
+    fireEvent.press(scheduleSelect());
+    const [first, second, third] = openSheet().getAllByRole('button');
+    expect(first).toHaveTextContent(WEEKDAYS_MODE, { exact: false });
+    expect(second).toHaveTextContent(RANGE_MODE, { exact: false });
+    expect(third).toHaveTextContent(STREAK_MODE, { exact: false });
+    expect(first).toBeSelected();
+    expect(second).not.toBeSelected();
+    expect(third).not.toBeSelected();
+  });
+
+  it('shows the caption of each mode in the select and in its sheet', () => {
+    const CAPTIONS = {
+      [WEEKDAYS_MODE]: 'המצווה חוזרת בימים שבוחרים, בכל שבוע',
+      [RANGE_MODE]: 'טווח תאריכים שבוחרים בלוח שנה',
+      [STREAK_MODE]: 'מהיום והלאה, למשל 40 יום',
+    };
+    renderForm();
+
+    expect(screen.getByText(CAPTIONS[WEEKDAYS_MODE])).toBeOnTheScreen();
+    fireEvent.press(scheduleSelect());
+    Object.entries(CAPTIONS).forEach(([title, caption]) => {
+      expect(openSheet().getByText(title)).toBeOnTheScreen();
+      expect(openSheet().getByText(caption)).toBeOnTheScreen();
+    });
+    fireEvent.press(openSheet().getByText(STREAK_MODE));
+
+    expect(screen.getByRole('button', { name: `תזמון המצווה: ${STREAK_MODE}` })).toBeOnTheScreen();
+    expect(screen.getByText(CAPTIONS[STREAK_MODE])).toBeOnTheScreen();
+    expect(screen.queryByText(CAPTIONS[WEEKDAYS_MODE])).toBeNull();
   });
 
   it('saves a range picked on the calendar', () => {
     fillNewMitzvah();
-    fireEvent.press(screen.getByRole('radio', { name: RANGE_MODE }));
+    chooseMode(RANGE_MODE);
     expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
 
     pickRange('2026-10-29', '2026-10-31');
@@ -543,7 +861,7 @@ describe('the schedule it saves', () => {
 
   it('refuses a range without both ends', () => {
     fillNewMitzvah();
-    fireEvent.press(screen.getByRole('radio', { name: RANGE_MODE }));
+    chooseMode(RANGE_MODE);
     fireEvent.press(screen.getByRole('button', { name: SAVE }));
     expect(screen.getByText('יש לבחור יום התחלה ויום סיום')).toBeOnTheScreen();
     expect(list()).toHaveLength(0);
@@ -561,7 +879,7 @@ describe('the schedule it saves', () => {
 
   it('saves a streak from today with its summary line', () => {
     fillNewMitzvah();
-    fireEvent.press(screen.getByRole('radio', { name: STREAK_MODE }));
+    chooseMode(STREAK_MODE);
     expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
 
     expect(screen.getByLabelText(STREAK_WHEEL)).toHaveAccessibilityValue({ text: '40' });
@@ -585,7 +903,7 @@ describe('the schedule it saves', () => {
     storeWithSchedule({ schedules: [stored] });
     renderForm({ id: STORED_ID });
 
-    expect(screen.getByRole('radio', { name: STREAK_MODE })).toBeSelected();
+    expect(screen.getByRole('button', { name: `תזמון המצווה: ${STREAK_MODE}` })).toBeOnTheScreen();
     expect(screen.getByText('פעילה מ־20 אוקטובר 2026 עד 18 נובמבר 2026')).toBeOnTheScreen();
 
     settleWheel(31);
@@ -603,7 +921,7 @@ describe('the schedule it saves', () => {
     useMitzvotStore.getState().setEnabled(STORED_ID, false);
     renderForm({ id: STORED_ID });
 
-    expect(screen.getByRole('radio', { name: STREAK_MODE })).toBeSelected();
+    expect(screen.getByRole('button', { name: `תזמון המצווה: ${STREAK_MODE}` })).toBeOnTheScreen();
     expect(screen.getByText(ENDED_LINE)).toBeOnTheScreen();
 
     fireEvent.changeText(screen.getByDisplayValue('לימוד'), 'שיעור');
@@ -655,7 +973,7 @@ describe('the schedule it saves', () => {
     });
     renderForm({ id: STORED_ID });
 
-    expect(screen.getByRole('radio', { name: RANGE_MODE })).toBeSelected();
+    expect(screen.getByRole('button', { name: `תזמון המצווה: ${RANGE_MODE}` })).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: 'מ־20 נובמבר 2026 עד 25 נובמבר 2026' })).toBeOnTheScreen();
   });
 
@@ -672,11 +990,11 @@ describe('the schedule it saves', () => {
 
   it("keeps each mode's draft while another is shown", () => {
     fillNewMitzvah();
-    fireEvent.press(screen.getByRole('radio', { name: RANGE_MODE }));
+    chooseMode(RANGE_MODE);
     pickRange('2026-10-29', '2026-10-31');
 
-    fireEvent.press(screen.getByRole('radio', { name: WEEKDAYS_MODE }));
-    fireEvent.press(screen.getByRole('radio', { name: RANGE_MODE }));
+    chooseMode(WEEKDAYS_MODE);
+    chooseMode(RANGE_MODE);
 
     expect(screen.getByRole('button', { name: RANGE_FROM_29_TO_31 })).toBeOnTheScreen();
   });
@@ -685,10 +1003,10 @@ describe('the schedule it saves', () => {
     useUserStore.setState({ language: 'en' });
     renderForm();
 
-    fireEvent.press(screen.getByRole('radio', { name: 'Days in a row' }));
+    chooseMode('A run of days');
     expect(screen.getByText('Active from today (Oct 28, 2026) to Dec 6, 2026')).toBeOnTheScreen();
 
-    fireEvent.press(screen.getByRole('radio', { name: 'Pick on a calendar' }));
+    chooseMode('From date to date');
     expect(screen.getByRole('button', { name: 'Pick dates' })).toBeOnTheScreen();
   });
 

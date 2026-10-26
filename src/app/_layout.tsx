@@ -2,20 +2,9 @@ import 'expo-dev-client';
 // eslint-disable-next-line import/no-duplicates -- must run before anything else; the named import below is the second use
 import 'react-native-gesture-handler';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  AppState,
-  DevSettings,
-  I18nManager,
-  View,
-  ActivityIndicator,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-} from 'react-native';
+import { AppState, I18nManager, View, ActivityIndicator, Platform, Pressable, StyleSheet, Text } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import * as Updates from 'expo-updates';
 import * as Sentry from '@sentry/react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -32,12 +21,14 @@ import {
 import { NotoSerifHebrew_400Regular, NotoSerifHebrew_700Bold } from '@expo-google-fonts/noto-serif-hebrew';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { BRAND, T_LIGHT } from '@/theme/colors';
+import { scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies } from '@/theme/typography';
 import { useUserStore } from '@/stores/useUserStore';
 import { applyGenderDefaultsToNew } from '@/stores/taharahOptIn';
 import { initNotificationHandlers } from '@/services/NotificationScheduler';
 import { captureException } from '@/services/crashReporting';
+import { reloadApp } from '@/services/appReload';
 import { reconcileChokInstall } from '@/services/ChokContentService';
 import { reconcileSelichotInstall } from '@/services/SelichotContentService';
 import { reconcileEndedCustomMitzvot } from '@/stores/customMitzvahLifecycle';
@@ -65,20 +56,6 @@ function syncDocumentDirection(language: 'he' | 'en') {
   document.documentElement.setAttribute('dir', dir);
   document.documentElement.setAttribute('lang', language);
   document.body?.setAttribute('dir', dir);
-}
-
-async function reloadApp() {
-  if (Platform.OS === 'web') {
-    if (typeof window !== 'undefined') window.location.reload();
-    return;
-  }
-  try {
-    await Updates.reloadAsync();
-  } catch {
-    if (__DEV__ && DevSettings && typeof DevSettings.reload === 'function') {
-      DevSettings.reload();
-    }
-  }
 }
 
 const RTL_BOOTSTRAP_KEY = 'layout:rtl-bootstrapped';
@@ -287,15 +264,15 @@ const errorStyles = StyleSheet.create({
     padding: spacing.xxl,
     backgroundColor: BRAND.parchment,
   },
-  title: { fontFamily: fontFamilies.heebo.bold, fontSize: 20, color: BRAND.navy, textAlign: 'center' },
+  title: { fontFamily: fontFamilies.heebo.bold, fontSize: scaled(20), color: BRAND.navy, textAlign: 'center' },
   body: {
-    fontSize: 15,
+    fontSize: scaled(15),
     color: T_LIGHT.textSub,
     textAlign: 'center',
     marginTop: spacing.md,
-    lineHeight: 22,
+    lineHeight: scaled(22),
   },
-  detail: { fontSize: 12, color: T_LIGHT.textMuted, textAlign: 'center', marginTop: spacing.lg },
+  detail: { fontSize: scaled(12), color: T_LIGHT.textMuted, textAlign: 'center', marginTop: spacing.lg },
   button: {
     marginTop: spacing.xxl,
     borderRadius: radius.lg,
@@ -303,7 +280,7 @@ const errorStyles = StyleSheet.create({
     paddingHorizontal: spacing.xxxl,
     backgroundColor: BRAND.gold,
   },
-  buttonLabel: { fontFamily: fontFamilies.heebo.bold, fontSize: 16, color: BRAND.onGold },
+  buttonLabel: { fontFamily: fontFamilies.heebo.bold, fontSize: scaled(16), color: BRAND.onGold },
 });
 
 function RootLayout() {

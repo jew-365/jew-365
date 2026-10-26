@@ -85,17 +85,22 @@ export default function HilulotScreen() {
         />
         <SectionLabel text={t('hilulot.upcoming')} />
         <Card divided>
-          {upcoming.map(({ hilula, day }) => (
-            <ListRow
-              key={hilula.id}
-              icon="hilula"
-              title={language === 'en' ? hilula.name.en : hilula.name.he}
-              caption={`${hilulaDateLabel(day, locale)} · ${formatDate(day.greg(), 'ccc d.M', locale)}`}
-              trailing={
-                <Text style={[typography.captionBold, { color: colors.goldText }]}>{whenLabel(day.abs())}</Text>
-              }
-            />
-          ))}
+          {upcoming.map(({ hilula, day }) => {
+            const name = language === 'en' ? hilula.name.en : hilula.name.he;
+            return (
+              <ListRow
+                key={hilula.id}
+                icon="hilula"
+                title={name}
+                caption={`${hilulaDateLabel(day, locale)} · ${formatDate(day.greg(), 'ccc d.M', locale)}`}
+                trailing={
+                  <Text style={[typography.captionBold, { color: colors.goldText }]}>{whenLabel(day.abs())}</Text>
+                }
+                accessibilityLabel={t('hilula.page.open', { name })}
+                onPress={() => router.push({ pathname: '/hilula/[id]', params: { id: hilula.id } })}
+              />
+            );
+          })}
         </Card>
       </ScrollView>
       {needsReminder.dialog}

@@ -44,6 +44,7 @@ import {
   storePageUrl,
 } from '@/services/ContactService';
 import { reportError } from '@/services/errors';
+import { reloadApp } from '@/services/appReload';
 import { openBatteryOptimizationSettings, supportsBatteryOptimizationSettings } from '@/services/deviceSettings';
 import {
   chooseGender,
@@ -62,14 +63,16 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChipRow } from '@/components/ChipRow';
+import { ChokCreditSheet } from '@/components/ChokLicenseNotice';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { ListRow } from '@/components/ListRow';
-import { MitzvahIcon } from '@/components/MitzvahIcon';
+import { MitzvahIcon, type IconName } from '@/components/MitzvahIcon';
 import { NavBar } from '@/components/NavBar';
 import { SectionLabel } from '@/components/SectionLabel';
 import { ThemeSwatchRow } from '@/components/ThemeSwatchRow';
 import { SettingsSection } from '@/components/SettingsSection';
 import { ScrollSpeedStepper } from '@/components/ScrollSpeedStepper';
+import { UI_SCALES, rescaled, scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { translate, useI18n } from '@/i18n';
@@ -136,6 +139,7 @@ export default function SettingsScreen() {
       inIsrael: s.inIsrael,
       locationStatus: s.locationStatus,
       theme: s.theme,
+      uiScale: s.uiScale,
       language: s.language,
       halachicOpinions: s.halachicOpinions,
       setLocationState: s.setLocationState,
@@ -151,6 +155,7 @@ export default function SettingsScreen() {
       setChokThuNightDay: s.setChokThuNightDay,
       setWeeklyReportEnabled: s.setWeeklyReportEnabled,
       setTheme: s.setTheme,
+      setUiScale: s.setUiScale,
       setLanguage: s.setLanguage,
       setKsOpinion: s.setKsOpinion,
     })),
@@ -178,6 +183,7 @@ export default function SettingsScreen() {
   const [query, setQuery] = useState('');
   const [searchNow, setSearchNow] = useState(() => new Date());
   const [focusTarget, setFocusTarget] = useState<string | null>(null);
+  const [creditOpen, setCreditOpen] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const contentRef = useRef<View>(null);
 
@@ -274,10 +280,9 @@ export default function SettingsScreen() {
     setQuery(next);
   };
 
-  const closedOf = (item: SettingsSearchItem) => (item.kind ? item.closed : undefined);
+  const notTodayOf = (item: SettingsSearchItem) => (item.kind ? item.notToday : undefined);
 
   const chooseResult = (item: SettingsSearchItem) => {
-    if (closedOf(item)) return;
     Keyboard.dismiss();
     setQuery('');
     if (item.kind) {
@@ -296,13 +301,17 @@ export default function SettingsScreen() {
 
   const inLanguage = (name: { he: string; en: string }) => (language === 'en' ? name.en : name.he);
   const resultCaption = (item: SettingsSearchItem) => {
-    const closed = closedOf(item);
-    const closedCaption = closed ? (closed.label ? inLanguage(closed.label) : t('siddur.catalog.notToday')) : null;
+    const notToday = notTodayOf(item);
+    const notTodayCaption = notToday
+      ? notToday.label
+        ? inLanguage(notToday.label)
+        : t('siddur.catalog.notToday')
+      : null;
     if (item.kind === 'chapter') {
       const caption = t('settings.search.kind.chapter', { text: inLanguage(item.textName) });
-      return closedCaption ? `${caption} · ${closedCaption}` : caption;
+      return notTodayCaption ? `${caption} · ${notTodayCaption}` : caption;
     }
-    if (item.kind) return closedCaption ?? t(`settings.search.kind.${item.kind}`);
+    if (item.kind) return notTodayCaption ?? t(`settings.search.kind.${item.kind}`);
     return item.section ? t(`settings.${item.section}`) : t('settings.searchScreen');
   };
 
@@ -452,13 +461,12 @@ export default function SettingsScreen() {
         <View ref={contentRef}>
           <Card style={styles.searchCard}>
             <View style={styles.searchRow}>
-              <MitzvahIcon name="search" size={18} color={colors.textMuted} />
+              <MitzvahIcon name="search" size={scaled(18)} color={colors.textMuted} />
               <TextInput
                 value={query}
                 onChangeText={changeQuery}
                 onSubmitEditing={() => {
-                  const target = results.find((item) => !closedOf(item));
-                  if (target) chooseResult(target);
+                  if (results[0]) chooseResult(results[0]);
                 }}
                 placeholder={t('settings.searchPlaceholder')}
                 placeholderTextColor={colors.textMuted}
@@ -473,9 +481,9 @@ export default function SettingsScreen() {
                   onPress={() => setQuery('')}
                   accessibilityRole="button"
                   accessibilityLabel={t('settings.searchClear')}
-                  hitSlop={8}
+                  hitSlop={scaled(8)}
                 >
-                  <MitzvahIcon name="close" size={16} color={colors.textMuted} />
+                  <MitzvahIcon name="close" size={scaled(16)} color={colors.textMuted} />
                 </Pressable>
               ) : null}
             </View>
@@ -488,12 +496,11 @@ export default function SettingsScreen() {
                   <ListRow
                     key={item.id}
                     icon={item.icon}
-                    iconTone={closedOf(item) ? 'muted' : 'accent'}
+                    iconTone={notTodayOf(item) ? 'muted' : 'accent'}
                     title={item.kind ? inLanguage(item.title) : t(item.titleKey)}
                     caption={resultCaption(item)}
                     onPress={() => chooseResult(item)}
-                    chevron={!closedOf(item)}
-                    disabled={Boolean(closedOf(item))}
+                    chevron
                   />
                 ))}
               </Card>
@@ -755,6 +762,9 @@ export default function SettingsScreen() {
                     labelFor={(value) => t(`settings.theme.${value}`)}
                   />
                 </Anchor>
+                <Anchor {...anchor('uiScale')}>
+                  <DisplaySizeBlock stored={user.uiScale} onApply={user.setUiScale} />
+                </Anchor>
                 <Anchor {...anchor('language')}>
                   <SectionLabel variant="field" text={t('settings.language')} style={styles.fieldLabel} />
                   <ChipRow
@@ -928,7 +938,7 @@ export default function SettingsScreen() {
                       icon="chok"
                       title={t('settings.linkChok')}
                       caption={t('settings.linkChokCaption')}
-                      onPress={() => openLink(PRODUCT_LINKS.chokLicense)}
+                      onPress={() => setCreditOpen(true)}
                       chevron
                     />
                   </Card>
@@ -960,6 +970,8 @@ export default function SettingsScreen() {
         onConfirm={confirmRestore}
         onCancel={() => setPendingBackup(null)}
       />
+
+      <ChokCreditSheet visible={creditOpen} onClose={() => setCreditOpen(false)} />
     </SafeAreaView>
   );
 }
@@ -980,6 +992,79 @@ function TaharahBlock({ enabled, gender, onOpen }: TaharahBlockProps) {
       />
       {enabled ? <Button label={t('settings.taharahOpen')} onPress={onOpen} style={styles.buttonGap} /> : null}
       <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>{t('taharah.disclaimer')}</Text>
+    </>
+  );
+}
+
+type DisplaySizeBlockProps = { stored: number; onApply: (scale: number) => void };
+
+function DisplaySizeBlock({ stored, onApply }: DisplaySizeBlockProps) {
+  const { colors } = useTheme();
+  const { t } = useI18n();
+  const [pending, setPending] = useState(stored);
+  const [confirming, setConfirming] = useState(false);
+  const index = UI_SCALES.findIndex((value) => value === pending);
+  const percent = `${Math.round(pending * 100)}%`;
+
+  const step = (icon: IconName, accessibilityLabel: string, next: number | undefined) => {
+    const disabled = next === undefined;
+    return (
+      <Pressable
+        onPress={() => {
+          if (next !== undefined) setPending(next);
+        }}
+        disabled={disabled}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityState={{ disabled }}
+        hitSlop={scaled(6)}
+        style={({ pressed }) => [styles.sizeStep, { opacity: disabled ? 0.4 : pressed ? 0.6 : 1 }]}
+      >
+        <MitzvahIcon name={icon} size={scaled(16)} color={colors.text} strokeWidth={2.8} />
+      </Pressable>
+    );
+  };
+
+  const apply = () => {
+    onApply(pending);
+    setConfirming(false);
+    reloadApp();
+  };
+
+  return (
+    <>
+      <SectionLabel variant="field" text={t('settings.uiScale')} style={styles.fieldLabel} />
+      <Text style={[typography.small, styles.hint, { color: colors.textMuted }]}>{t('settings.uiScaleHint')}</Text>
+      <View style={[styles.sizeGroup, { backgroundColor: colors.surface2 }]}>
+        {step('minus', t('settings.uiScaleSmaller'), UI_SCALES[index - 1])}
+        <Text style={[typography.bodyBold, styles.sizeValue, { color: colors.text }]}>{percent}</Text>
+        {step('plus', t('settings.uiScaleLarger'), UI_SCALES[index + 1])}
+      </View>
+      <Card padded style={[styles.sizeSample, { backgroundColor: colors.surface2 }]}>
+        <Text
+          style={[
+            typography.body,
+            {
+              color: colors.text,
+              fontSize: rescaled(typography.body.fontSize!, pending),
+              lineHeight: rescaled(typography.body.lineHeight!, pending),
+            },
+          ]}
+        >
+          {t('settings.uiScaleSample')}
+        </Text>
+      </Card>
+      {pending !== stored ? (
+        <Button label={t('settings.uiScaleApply')} onPress={() => setConfirming(true)} style={styles.buttonGap} />
+      ) : null}
+      <ConfirmDialog
+        visible={confirming}
+        title={t('settings.uiScaleConfirmTitle')}
+        body={t('settings.uiScaleConfirmBody')}
+        confirmLabel={t('settings.uiScaleConfirmAction')}
+        onConfirm={apply}
+        onCancel={() => setConfirming(false)}
+      />
     </>
   );
 }
@@ -1105,6 +1190,26 @@ const styles = StyleSheet.create({
     paddingTop: 0,
     borderTopWidth: 0,
   },
+  sizeGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginTop: spacing.md,
+    borderRadius: radius.full,
+  },
+  sizeStep: {
+    minWidth: scaled(44),
+    minHeight: scaled(40),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sizeValue: {
+    minWidth: scaled(56),
+    textAlign: 'center',
+  },
+  sizeSample: {
+    marginTop: spacing.md,
+  },
   searchCard: {
     marginBottom: spacing.md,
   },
@@ -1123,7 +1228,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     paddingVertical: spacing.md,
-    fontSize: 16,
+    fontSize: scaled(16),
   },
   searchEmpty: {
     paddingVertical: spacing.xl,
@@ -1139,10 +1244,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    fontSize: 16,
+    fontSize: scaled(16),
   },
   messageInput: {
-    minHeight: 120,
+    minHeight: scaled(120),
   },
   link: {
     alignSelf: 'flex-start',

@@ -8,11 +8,13 @@ import { MITZVOT } from '@/data/mitzvot';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import {
   SIDDUR_GROUPS,
+  SIDDUR_TEXTS,
   STANDALONE_TEXTS,
   standaloneAvailability,
   hasSiddurText,
   hasStandaloneText,
   mitzvahTextId,
+  siddurAsset,
   siddurPlace,
   standaloneHoursAt,
   standalonePeriodEnded,
@@ -34,7 +36,7 @@ import { useUserStore } from '@/stores/useUserStore';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { SiddurGroup, StandaloneTextId } from '@/types/siddur';
-import { currentOrNextWindow } from '@/utils/buildDayTimeline';
+import { currentOrNextWindow, windowDueToday } from '@/utils/buildDayTimeline';
 import { clockOf } from '@/utils/clock';
 import { catalogListsText, dayFeatures } from '@/utils/siddur';
 import { formatDate, useI18n } from '@/i18n';
@@ -92,13 +94,16 @@ export default function SiddurScreen() {
       );
   }, [nusach, settings, inIsrael, location, now, siddurVoice]);
   const label = (entry: { he: string; en: string }) => (language === 'en' ? entry.en : entry.he);
-  // The day belongs to the instant whose clock is printed, so it is read off `start`, not off the window's date.
+  // The day belongs to the instant whose clock is printed, so it is read off `start`, not off the window's
+  // date, and both are read on the location's clock, never the device's.
   const laterCaption = (start: Date) => {
-    const startKey = dateKey(start);
-    if (startKey === dateKey(now)) return t('siddur.today.later', { time: clockOf(start) });
-    const isTomorrow = startKey === dateKey(DateTime.fromJSDate(now).plus({ days: 1 }).toJSDate());
-    const day = isTomorrow ? t('common.tomorrow') : formatDate(start, 'cccc', language);
-    return t('siddur.today.laterOn', { day, time: clockOf(start) });
+    const zone = location.tz;
+    const startDay = DateTime.fromJSDate(start, { zone });
+    const today = DateTime.fromJSDate(now, { zone });
+    if (startDay.toISODate() === today.toISODate()) return t('siddur.today.later', { time: clockOf(start, zone) });
+    const isTomorrow = startDay.toISODate() === today.plus({ days: 1 }).toISODate();
+    const day = isTomorrow ? t('common.tomorrow') : formatDate(startDay, 'cccc', language);
+    return t('siddur.today.laterOn', { day, time: clockOf(start, zone) });
   };
   const standaloneNow = useMemo(() => {
     const place = siddurPlace(location, inIsrael);
@@ -122,28 +127,48 @@ export default function SiddurScreen() {
     ...standaloneNow.map((entry) => ({ start: entry.hours.start, standalone: entry })),
   ].sort((a, b) => a.start.getTime() - b.start.getTime());
   const prayers = PRAYER_IDS.flatMap((id) => today.filter(({ mitzvah }) => mitzvah.id === id));
-
-  const mitzvahRow = ({ mitzvah, window, hasText, openNow }: (typeof today)[number]) => (
-    <Card key={mitzvah.id}>
-      <ListRow
-        icon={iconFor(mitzvah.icon)}
-        iconTone={hasText ? 'accent' : 'muted'}
-        title={nameFor(mitzvah)}
-        caption={
-          openNow
-            ? t('siddur.today.open')
-            : hasText && window
-              ? laterCaption(window.start)
-              : t('siddur.catalog.notToday')
-        }
-        chevron={hasText}
-        onPress={() =>
-          window && router.push({ pathname: '/siddur/[id]', params: { id: mitzvah.id, date: dateKey(window.date) } })
-        }
-        disabled={!hasText}
-      />
-    </Card>
+  const mitzvotTexts = MITZVAH_TEXTS.filter(({ id }) => !PRAYER_IDS.includes(id)).flatMap(({ id }) =>
+    today.filter(
+      ({ mitzvah }) =>
+        mitzvah.id === id &&
+        mitzvah.nuschaotSupported.includes(nusach) &&
+        siddurAsset(nusach, mitzvahTextId(id)!) !== undefined,
+    ),
   );
+
+  const mitzvahRow = ({ mitzvah, window, hasText, openNow }: (typeof today)[number]) => {
+    const { availableLabel } = SIDDUR_TEXTS[mitzvahTextId(mitzvah.id)!];
+    return (
+      <View key={mitzvah.id} testID={`siddur-row-${mitzvah.id}`}>
+        <Card>
+          <ListRow
+            icon={iconFor(mitzvah.icon)}
+            iconTone={hasText ? 'accent' : 'muted'}
+            title={nameFor(mitzvah)}
+            caption={
+              openNow
+                ? t('siddur.today.open')
+                : hasText && window
+                  ? laterCaption(window.start)
+                  : availableLabel
+                    ? label(availableLabel)
+                    : t('siddur.catalog.notToday')
+            }
+            chevron
+            onPress={() =>
+              router.push({
+                pathname: '/siddur/[id]',
+                params:
+                  hasText && window && windowDueToday(window, location, now)
+                    ? { id: mitzvah.id, date: dateKey(window.date) }
+                    : { id: mitzvah.id },
+              })
+            }
+          />
+        </Card>
+      </View>
+    );
+  };
 
   const nowRow = (entry: NowEntry) => {
     if (entry.mitzvah) {
@@ -204,19 +229,20 @@ export default function SiddurScreen() {
       );
     }
     const { availableLabel } = standaloneAvailability(id, nusach);
-    const open = (available.get(id) ?? false) && !standalonePeriodEnded(id, nusach, now, location);
+    const saidToday = (available.get(id) ?? false) && !standalonePeriodEnded(id, nusach, now, location);
     return (
-      <Card key={id}>
-        <ListRow
-          icon={group}
-          iconTone={open ? 'accent' : 'muted'}
-          title={label(name)}
-          caption={open ? undefined : availableLabel ? label(availableLabel) : t('siddur.catalog.notToday')}
-          chevron={open}
-          onPress={() => router.push({ pathname: '/siddur/[id]', params: { id } })}
-          disabled={!open}
-        />
-      </Card>
+      <View key={id} testID={`siddur-row-${id}`}>
+        <Card>
+          <ListRow
+            icon={group}
+            iconTone={saidToday ? 'accent' : 'muted'}
+            title={label(name)}
+            caption={saidToday ? undefined : availableLabel ? label(availableLabel) : t('siddur.catalog.notToday')}
+            chevron
+            onPress={() => router.push({ pathname: '/siddur/[id]', params: { id } })}
+          />
+        </Card>
+      </View>
     );
   };
 
@@ -233,6 +259,11 @@ export default function SiddurScreen() {
           </CatalogSection>
         )}
         <CatalogSection title={t('siddur.group.prayers')}>{prayers.map(mitzvahRow)}</CatalogSection>
+        {mitzvotTexts.length > 0 && (
+          <CatalogSection title={t('siddur.group.mitzvot')} testID="siddur-mitzvot">
+            {mitzvotTexts.map(mitzvahRow)}
+          </CatalogSection>
+        )}
         {groups.map(({ group, ids }) => (
           <CatalogSection key={group} title={t(`siddur.group.${group}`)}>
             {ids.map((id) => row(id, group))}

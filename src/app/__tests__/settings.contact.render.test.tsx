@@ -255,8 +255,6 @@ describe('Settings about and contact links', () => {
     ['en', 'settings.linkSupport', SITE],
     ['he', 'settings.linkPrivacy', `${SITE}privacy/`],
     ['en', 'settings.linkPrivacy', `${SITE}privacy/en/`],
-    ['he', 'settings.linkChok', `${SITE}chok/LICENSE.txt`],
-    ['en', 'settings.linkChok', `${SITE}chok/LICENSE.txt`],
     ['he', 'settings.linkStore.ios', APP_STORE],
     ['en', 'settings.linkStore.ios', APP_STORE],
   ] as const)('in %s, %s opens %s', async (language, key, url) => {
@@ -265,6 +263,39 @@ describe('Settings about and contact links', () => {
 
     expect(openURL).toHaveBeenCalledTimes(1);
     expect(openURL).toHaveBeenCalledWith(url);
+  });
+
+  it.each(['he', 'en'] as const)(
+    'in %s, the Chok LeYisrael row opens the credit sheet and no link until the license link is pressed',
+    async (language) => {
+      const tr = (key: string) => translate(key, undefined, language, null);
+      await openAbout(language);
+      expect(screen.queryByText(tr('chok.creditTitle'))).toBeNull();
+
+      fireEvent.press(screen.getByText(tr('settings.linkChok')));
+
+      expect(openURL).not.toHaveBeenCalled();
+      expect(screen.getByText(tr('chok.creditTitle'))).toBeOnTheScreen();
+      expect(screen.getByText(tr('chok.credit'))).toBeOnTheScreen();
+      expect(screen.getByText(tr('chok.shareAlike'))).toBeOnTheScreen();
+      expect(screen.getByRole('link', { name: tr('chok.license') })).toBeOnTheScreen();
+
+      fireEvent.press(screen.getByRole('link', { name: tr('chok.license') }));
+
+      expect(openURL).toHaveBeenCalledTimes(1);
+      expect(openURL).toHaveBeenCalledWith(tr('chok.licenseUrl'));
+    },
+  );
+
+  it('closes the credit sheet from its own button', async () => {
+    await openAbout('he');
+    fireEvent.press(screen.getByText(he('settings.linkChok')));
+    expect(screen.getByText(he('chok.creditTitle'))).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByText(he('common.close')));
+
+    expect(screen.queryByText(he('chok.creditTitle'))).toBeNull();
+    expect(openURL).not.toHaveBeenCalled();
   });
 
   it('opens Google Play on Android', async () => {

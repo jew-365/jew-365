@@ -28,9 +28,9 @@ jest.mock('expo-keep-awake', () => ({
   activateKeepAwakeAsync: () => Promise.resolve(),
   deactivateKeepAwake: () => Promise.resolve(),
 }));
-const mockLoadText = jest.fn((nusach: string, id: string) =>
+const mockLoadText = jest.fn((nusach: string, id: string): Promise<SiddurText> =>
   Promise.resolve({
-    nusach,
+    nusach: nusach as Nusach,
     id,
     sections: [{ title: { he: 'קטע', en: 'Part' }, segments: [{ he: [[{ t: `נוסח ${id}` }]] }] }],
     credits: [],
@@ -81,6 +81,7 @@ import { HDate, months } from '@hebcal/core';
 import { screen, fireEvent } from '@testing-library/react-native';
 import SiddurReaderScreen from '../siddur/[id]';
 import { CITIES } from '@/data/cities';
+import { siddurPlace } from '@/data/siddur';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
@@ -88,6 +89,9 @@ import { useUserStore } from '@/stores/useUserStore';
 import { renderWithTheme } from '@/testing/render';
 import { installSelichotFixture } from '@/testing/selichot';
 import { at } from '@/testing/zmanim';
+import type { Nusach } from '@/types/mitzvah';
+import type { SiddurSegment, SiddurText } from '@/types/siddur';
+import { kiddushLevanaFirstNight } from '@/utils/siddur';
 
 jest.setTimeout(30000);
 
@@ -113,6 +117,9 @@ afterEach(() => {
   useSelichotStore.getState().reset();
 });
 
+const TIME_PASSED = 'הזמן של היום עבר. מוצג הנוסח של היום';
+const OFF_SEASON = 'הנוסח הזה לא נאמר עכשיו. מוצג הנוסח של הפעם הבאה שבה אומרים אותו';
+
 function resetReader() {
   useUserStore.getState().reset();
   useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
@@ -120,6 +127,8 @@ function resetReader() {
   useMitzvotStore.getState().reset();
   for (const key of Object.keys(mockParams)) delete mockParams[key];
   mockLoadText.mockClear();
+  mockRouter.push.mockClear();
+  mockRouter.back.mockClear();
 }
 
 describe('the reader for a mitzvah linked to a standalone text', () => {
@@ -168,6 +177,7 @@ describe('the reader for a mitzvah linked to a standalone text', () => {
     expect(screen.getByText('הדלקת נרות חנוכה')).toBeOnTheScreen();
     expect(screen.queryByText('סיימתי')).toBeNull();
     expect(screen.queryByText('נרות חנוכה')).toBeNull();
+    expect(screen.queryByText(OFF_SEASON)).toBeNull();
   });
 
   it('opens the mitzvah of the same id with a date, under the mitzvah name and with its done button', async () => {
@@ -185,11 +195,23 @@ describe('the reader for a mitzvah linked to a standalone text', () => {
     expect(mockLoadText).toHaveBeenCalledWith('ashkenaz', 'kiddush_levana');
   });
 
-  it("opens no Kiddush Levana text on the night after the period's end, as the siddur tab greys it", async () => {
+  it("opens the next period's first night with the off-season notice on the night after the period's end", async () => {
     open({ id: 'kiddush_levana' }, '2026-10-26T04:00');
 
-    expect(await screen.findByText('אין נוסח לתאריך הזה.')).toBeOnTheScreen();
-    expect(mockLoadText).not.toHaveBeenCalled();
+    expect(await screen.findByText('נוסח kiddush_levana')).toBeOnTheScreen();
+    expect(screen.getByText(OFF_SEASON)).toBeOnTheScreen();
+    expect(screen.queryByText('אין נוסח לתאריך הזה.')).toBeNull();
+    const place = siddurPlace(JERUSALEM, true);
+    const night = kiddushLevanaFirstNight(new HDate(1, months.KISLEV, 5787), 'ashkenaz', place)!;
+    expect(screen.getByText(header(night))).toBeOnTheScreen();
+    expect(night.getMonth()).toBe(months.KISLEV);
+  });
+
+  it('opens no off-season notice while the period is open', async () => {
+    open({ id: 'kiddush_levana' }, '2026-10-26T03:00');
+
+    expect(await screen.findByText('נוסח kiddush_levana')).toBeOnTheScreen();
+    expect(screen.queryByText(OFF_SEASON)).toBeNull();
   });
 
   it("still opens Kiddush Levana's text after that moment for the nusach whose period runs on", async () => {
@@ -213,6 +235,255 @@ const header = (hebrewDate: HDate, ...occasions: string[]) =>
 const englishHeader = (hebrewDate: HDate, ...occasions: string[]) =>
   ['Ashkenaz', hebrewDate.render('en'), ...occasions].join(' · ');
 const kislev = (day: number) => new HDate(day, months.KISLEV, 5787);
+
+describe('the reader for a text out of its day', () => {
+  beforeEach(resetReader);
+  afterEach(() => jest.useRealTimers());
+
+  it('opens the Chanukah candles in Cheshvan on their first night, with the notice and no done button', async () => {
+    open({ id: 'chanukah_candles' }, '2026-11-05T12:00');
+
+    expect(await screen.findByText('נוסח chanukah_candles')).toBeOnTheScreen();
+    expect(screen.getByText(OFF_SEASON)).toBeOnTheScreen();
+    expect(screen.getByText(header(kislev(25), 'חנוכה: הנר ה־1'))).toBeOnTheScreen();
+    expect(screen.queryByText('סיימתי')).toBeNull();
+    expect(mockLoadText).toHaveBeenCalledWith('ashkenaz', 'chanukah_candles');
+  });
+
+  it('names the first night in English too', async () => {
+    useUserStore.setState({ language: 'en' });
+    open({ id: 'chanukah_candles' }, '2026-11-05T12:00');
+
+    expect(await screen.findByText('נוסח chanukah_candles')).toBeOnTheScreen();
+    expect(screen.getByText(englishHeader(kislev(25), 'Chanukah: night 1'))).toBeOnTheScreen();
+    expect(
+      screen.getByText('This text is not said now. It shows the text of the next time it is said'),
+    ).toBeOnTheScreen();
+  });
+
+  it('shows no notice on a night of Chanukah, and the evening candle as before', async () => {
+    open({ id: 'chanukah_candles' }, '2026-12-07T19:00');
+
+    expect(await screen.findByText('נוסח chanukah_candles')).toBeOnTheScreen();
+    expect(screen.queryByText(OFF_SEASON)).toBeNull();
+    expect(screen.getByText(header(kislev(28), 'חנוכה: הנר ה־4'))).toBeOnTheScreen();
+  });
+
+  it('opens the Omer count in Tammuz for the next season, with the notice and no done button', async () => {
+    open({ id: 'sefirat_haomer' }, '2027-07-05T12:00');
+
+    expect(await screen.findByText('נוסח sefirat_haomer')).toBeOnTheScreen();
+    expect(screen.getByText(OFF_SEASON)).toBeOnTheScreen();
+    expect(screen.queryByText('סיימתי')).toBeNull();
+  });
+
+  it('keeps the Omer count of a date in the Omer as the day itself, with its done button', async () => {
+    open({ id: 'sefirat_haomer', date: '2027-04-25' }, '2027-04-25T21:00');
+
+    expect(await screen.findByText('נוסח sefirat_haomer')).toBeOnTheScreen();
+    expect(screen.queryByText(OFF_SEASON)).toBeNull();
+    expect(screen.getByText('סיימתי')).toBeOnTheScreen();
+  });
+
+  it('opens the weekday prayer of the next weekday on Shabbat, with the notice and no done button', async () => {
+    open({ id: 'shacharit' }, '2026-10-31T09:00');
+
+    expect(await screen.findByText('נוסח shacharit')).toBeOnTheScreen();
+    expect(screen.getByText(OFF_SEASON)).toBeOnTheScreen();
+    expect(screen.getByText(header(new HDate(new Date(2026, 10, 1))))).toBeOnTheScreen();
+    expect(screen.queryByText('סיימתי')).toBeNull();
+  });
+
+  it('keeps a text that is said today as it was', async () => {
+    open({ id: 'shacharit' }, '2026-10-28T07:00');
+
+    expect(await screen.findByText('נוסח shacharit')).toBeOnTheScreen();
+    expect(screen.queryByText(OFF_SEASON)).toBeNull();
+    expect(screen.getByText('סיימתי')).toBeOnTheScreen();
+  });
+
+  it('opens a dated text that is not said that day as unavailable, with no notice', async () => {
+    open({ id: 'shacharit', date: '2026-10-31' }, '2026-10-31T09:00');
+
+    expect(await screen.findByText('אין נוסח לתאריך הזה.')).toBeOnTheScreen();
+    expect(screen.queryByText(OFF_SEASON)).toBeNull();
+  });
+});
+
+describe('the reader for a mitzvah text opened with no date', () => {
+  beforeEach(resetReader);
+  afterEach(() => jest.useRealTimers());
+
+  const section = (segments: SiddurSegment[]): SiddurText => ({
+    nusach: 'ashkenaz',
+    id: 'chanukah_candles',
+    sections: [{ title: { he: 'קטע', en: 'Part' }, segments }],
+    credits: [],
+  });
+  const flagged = (flag: 'chanukah' | 'chanukahFirstNight'): SiddurSegment[] => [
+    { he: [[{ t: 'פתיחה' }]] },
+    { he: [[{ t: 'תוספת' }]], when: { all: [flag] } },
+  ];
+
+  it('opens the candle lighting of a Wednesday for the coming Friday: off season, no done button, Friday’s date', async () => {
+    open({ id: 'candle_lighting' }, '2027-06-16T14:00');
+
+    expect(await screen.findByText('נוסח candle_lighting')).toBeOnTheScreen();
+    expect(screen.getByText(OFF_SEASON)).toBeOnTheScreen();
+    expect(screen.queryByText('סיימתי')).toBeNull();
+    const shabbat = new HDate(new Date(2027, 5, 19));
+    expect(screen.getByText(new RegExp(`^אשכנז · ${shabbat.renderGematriya(true)}`))).toBeOnTheScreen();
+  });
+
+  it('opens the candle lighting of a Friday afternoon as the day’s own, with its done button', async () => {
+    open({ id: 'candle_lighting' }, '2027-06-18T14:00');
+
+    expect(await screen.findByText('נוסח candle_lighting')).toBeOnTheScreen();
+    expect(screen.queryByText(OFF_SEASON)).toBeNull();
+    expect(screen.getByText('סיימתי')).toBeOnTheScreen();
+  });
+
+  it('opens Shacharit at 01:00 for the coming morning, which opens at sunrise after the app day ends at alot', async () => {
+    open({ id: 'shacharit' }, '2027-06-16T01:00');
+
+    expect(await screen.findByText('נוסח shacharit')).toBeOnTheScreen();
+    expect(screen.getByText(OFF_SEASON)).toBeOnTheScreen();
+    expect(screen.queryByText('סיימתי')).toBeNull();
+    expect(screen.getByText(header(new HDate(new Date(2027, 5, 16))))).toBeOnTheScreen();
+  });
+
+  it('opens Shacharit once its morning is the app day’s own, with its done button', async () => {
+    open({ id: 'shacharit' }, '2027-06-16T04:30');
+
+    expect(await screen.findByText('נוסח shacharit')).toBeOnTheScreen();
+    expect(screen.queryByText(OFF_SEASON)).toBeNull();
+    expect(screen.getByText('סיימתי')).toBeOnTheScreen();
+  });
+
+  it('opens the Mincha of 21:00 for today, its time passed, with its done button', async () => {
+    open({ id: 'mincha' }, '2026-10-28T21:00');
+
+    expect(await screen.findByText('נוסח mincha')).toBeOnTheScreen();
+    expect(screen.getByText(TIME_PASSED)).toBeOnTheScreen();
+    expect(screen.queryByText(OFF_SEASON)).toBeNull();
+    expect(screen.getByText('סיימתי')).toBeOnTheScreen();
+    expect(screen.getByText(header(new HDate(new Date(2026, 9, 28))))).toBeOnTheScreen();
+  });
+
+  it('opens Shacharit after sof zman tefila for today, its time passed, and files the mark under today', async () => {
+    open({ id: 'shacharit' }, '2026-10-26T09:55');
+
+    expect(await screen.findByText('נוסח shacharit')).toBeOnTheScreen();
+    expect(screen.getByText(TIME_PASSED)).toBeOnTheScreen();
+    expect(screen.queryByText(OFF_SEASON)).toBeNull();
+    expect(screen.getByText(header(new HDate(new Date(2026, 9, 26))))).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByText('סיימתי'));
+    expect(useCompletionsStore.getState().completions['2026-10-26'].shacharit).toBeTruthy();
+  });
+
+  it('opens Shacharit while its window is open with no notice', async () => {
+    open({ id: 'shacharit' }, '2026-10-26T09:00');
+
+    expect(await screen.findByText('נוסח shacharit')).toBeOnTheScreen();
+    expect(screen.queryByText(TIME_PASSED)).toBeNull();
+    expect(screen.queryByText(OFF_SEASON)).toBeNull();
+  });
+
+  it('keeps the evening that is still open at 00:20 as Maariv’s own, with its done button', async () => {
+    open({ id: 'maariv' }, '2027-06-15T00:20');
+
+    expect(await screen.findByText('נוסח maariv')).toBeOnTheScreen();
+    expect(screen.queryByText(OFF_SEASON)).toBeNull();
+    expect(screen.getByText('סיימתי')).toBeOnTheScreen();
+  });
+
+  it('labels the frame of an insert added today in season, and the one of a day it is not today off season', async () => {
+    mockLoadText.mockResolvedValueOnce(section(flagged('chanukah')));
+    open({ id: 'chanukah_candles' }, '2026-12-07T19:00');
+    expect(await screen.findByText('תוספת')).toBeOnTheScreen();
+    expect(screen.getByText('נוסף היום')).toBeOnTheScreen();
+    expect(screen.queryByText('נוסף ביום הזה')).toBeNull();
+    screen.unmount();
+
+    resetReader();
+    mockLoadText.mockResolvedValueOnce(section(flagged('chanukahFirstNight')));
+    open({ id: 'chanukah_candles' }, '2026-11-05T12:00');
+    expect(await screen.findByText('תוספת')).toBeOnTheScreen();
+    expect(screen.getByText(OFF_SEASON)).toBeOnTheScreen();
+    expect(screen.getByText('נוסף ביום הזה')).toBeOnTheScreen();
+    expect(screen.queryByText('נוסף היום')).toBeNull();
+  });
+});
+
+describe('the reader header pill for a text linked to a mitzvah', () => {
+  beforeEach(resetReader);
+  afterEach(() => jest.useRealTimers());
+
+  const SETTINGS = 'הגדרות המצווה';
+
+  it("opens the bedtime Shema's mitzvah from its standalone text", async () => {
+    open({ id: 'kriat_shema_al_hamita' }, '2026-10-28T21:00');
+
+    await screen.findByText('נוסח kriat_shema_al_hamita');
+    fireEvent.press(screen.getByRole('button', { name: SETTINGS }));
+    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/mitzvah/[id]', params: { id: 'krias_shma_al_hamita' } });
+  });
+
+  it('opens the mitzvah of the same id from the standalone text of Chanukah', async () => {
+    open({ id: 'chanukah_candles' }, '2026-12-07T19:00');
+
+    await screen.findByText('נוסח chanukah_candles');
+    fireEvent.press(screen.getByRole('button', { name: SETTINGS }));
+    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/mitzvah/[id]', params: { id: 'chanukah_candles' } });
+  });
+
+  it('opens the mitzvah from the reader of its dated text', async () => {
+    open({ id: 'krias_shma_al_hamita', date: '2026-10-28' }, '2026-10-28T21:00');
+
+    await screen.findByText('נוסח kriat_shema_al_hamita');
+    fireEvent.press(screen.getByRole('button', { name: SETTINGS }));
+    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/mitzvah/[id]', params: { id: 'krias_shma_al_hamita' } });
+  });
+
+  it('goes back to the mitzvah screen that opened the reader instead of pushing it again', async () => {
+    open({ id: 'kriat_shema_al_hamita', from: 'krias_shma_al_hamita' }, '2026-10-28T21:00');
+
+    await screen.findByText('נוסח kriat_shema_al_hamita');
+    fireEvent.press(screen.getByRole('button', { name: SETTINGS }));
+    expect(mockRouter.back).toHaveBeenCalledTimes(1);
+    expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  it('has none for a text no mitzvah links to', async () => {
+    open({ id: 'birkat_hamazon' }, '2026-10-28T13:00');
+
+    expect(await screen.findByText('נוסח birkat_hamazon')).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: SETTINGS })).toBeNull();
+    expect(screen.getByRole('button', { name: 'הוסף סימנייה' })).toBeOnTheScreen();
+  });
+
+  it('has none for Ushpizin where the nusach does not say it, and has it where it does', async () => {
+    useUserStore.setState({ nusach: 'chabad' });
+    open({ id: 'ushpizin' }, '2026-09-29T21:00');
+    expect(await screen.findByText('אין נוסח לתאריך הזה.')).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: SETTINGS })).toBeNull();
+    screen.unmount();
+
+    resetReader();
+    open({ id: 'ushpizin' }, '2026-09-29T21:00');
+    await screen.findByText('נוסח ushpizin');
+    fireEvent.press(screen.getByRole('button', { name: SETTINGS }));
+    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/mitzvah/[id]', params: { id: 'ushpizin' } });
+  });
+
+  it('stays while the text is not available', async () => {
+    open({ id: 'chanukah_candles', date: '2026-10-28' }, '2026-10-28T19:00');
+
+    expect(await screen.findByText('אין נוסח לתאריך הזה.')).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: SETTINGS })).toBeOnTheScreen();
+  });
+});
 
 describe("the reader header's Chanukah candle", () => {
   beforeEach(resetReader);

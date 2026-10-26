@@ -285,30 +285,33 @@ describe('the Kiddush Levana row', () => {
     jest.useFakeTimers({ now: at(JERUSALEM, wallClock), doNotFake: [...ONLY_DATE] });
     const view = renderWithTheme(<SiddurScreen />);
     const rows = screen.UNSAFE_getAllByType(ListRow).filter((row) => row.props.title === LEVANA);
-    const { caption, disabled } = rows[rows.length - 1].props;
+    const { caption, disabled, chevron } = rows[rows.length - 1].props;
     view.unmount();
     jest.useRealTimers();
-    return { caption, disabled };
+    return { caption, disabled: Boolean(disabled), chevron };
   }
 
   it.each([
-    ['2026-10-13T20:00', 'ashkenaz', { caption: FROM_THREE, disabled: true }],
-    ['2026-10-14T20:00', 'ashkenaz', { caption: undefined, disabled: false }],
-    ['2026-10-14T20:00', 'sefard', { caption: FROM_SEVEN, disabled: true }],
-    ['2026-10-14T20:00', 'chabad', { caption: FROM_SEVEN, disabled: true }],
-    ['2026-10-14T20:00', 'edot_hamizrach', { caption: FROM_SEVEN_TO_FIFTEEN, disabled: true }],
-    ['2026-10-18T20:00', 'sefard', { caption: undefined, disabled: false }],
-    ['2026-10-18T20:00', 'edot_hamizrach', { caption: undefined, disabled: false }],
-    ['2026-10-18T20:00', 'chabad', { caption: undefined, disabled: false }],
-    ['2026-10-16T12:00', 'ashkenaz', { caption: FROM_THREE, disabled: true }],
-    ['2026-10-26T03:00', 'ashkenaz', { caption: undefined, disabled: false }],
-    ['2026-10-26T04:00', 'ashkenaz', { caption: FROM_THREE, disabled: true }],
-    ['2026-10-26T04:00', 'sefard', { caption: FROM_SEVEN, disabled: true }],
-    ['2026-10-26T04:00', 'chabad', { caption: FROM_SEVEN, disabled: true }],
-    ['2026-10-26T04:00', 'edot_hamizrach', { caption: undefined, disabled: false }],
-  ] as const)('at %s in %s the row reads %j', (wallClock, nusach, expected) => {
-    expect(levanaRow(wallClock, nusach)).toEqual(expected);
-  });
+    ['2026-10-13T20:00', 'ashkenaz', { caption: FROM_THREE, disabled: false, chevron: true }],
+    ['2026-10-14T20:00', 'ashkenaz', { caption: undefined, disabled: false, chevron: true }],
+    ['2026-10-14T20:00', 'sefard', { caption: FROM_SEVEN, disabled: false, chevron: true }],
+    ['2026-10-14T20:00', 'chabad', { caption: FROM_SEVEN, disabled: false, chevron: true }],
+    ['2026-10-14T20:00', 'edot_hamizrach', { caption: FROM_SEVEN_TO_FIFTEEN, disabled: false, chevron: true }],
+    ['2026-10-18T20:00', 'sefard', { caption: undefined, disabled: false, chevron: true }],
+    ['2026-10-18T20:00', 'edot_hamizrach', { caption: undefined, disabled: false, chevron: true }],
+    ['2026-10-18T20:00', 'chabad', { caption: undefined, disabled: false, chevron: true }],
+    ['2026-10-16T12:00', 'ashkenaz', { caption: FROM_THREE, disabled: false, chevron: true }],
+    ['2026-10-26T03:00', 'ashkenaz', { caption: undefined, disabled: false, chevron: true }],
+    ['2026-10-26T04:00', 'ashkenaz', { caption: FROM_THREE, disabled: false, chevron: true }],
+    ['2026-10-26T04:00', 'sefard', { caption: FROM_SEVEN, disabled: false, chevron: true }],
+    ['2026-10-26T04:00', 'chabad', { caption: FROM_SEVEN, disabled: false, chevron: true }],
+    ['2026-10-26T04:00', 'edot_hamizrach', { caption: undefined, disabled: false, chevron: true }],
+  ] as const)(
+    'at %s in %s the row reads %j, never disabled and always with a chevron',
+    (wallClock, nusach, expected) => {
+      expect(levanaRow(wallClock, nusach)).toEqual(expected);
+    },
+  );
 
   it('joins the now card on the first night for the nusach whose period is open, and only then', () => {
     expect(nowCard('2026-10-14T21:00', 'ashkenaz')).toContain(LEVANA);

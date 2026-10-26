@@ -16,6 +16,7 @@ import { useNow } from '@/hooks/useNow';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { ThemeColors } from '@/theme/colors';
+import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies, typography } from '@/theme/typography';
@@ -34,7 +35,7 @@ type BedikaTarget = { day: number; slot: BedikaSlot };
 
 const UPCOMING_LIMIT = 6;
 const RECENT_LIMIT = 8;
-const TASK_DONE_ICON_SIZE = 18;
+const TASK_DONE_ICON_SIZE = scaled(18);
 const BEDIKA_SLOTS: BedikaSlot[] = ['morning', 'evening'];
 const BEDIKA_RESULTS: BedikaResult[] = ['clean', 'notClean', 'doubtful'];
 
@@ -273,7 +274,7 @@ export default function TaharahDashboard() {
                   {index === 0 ? (
                     <Pressable
                       onPress={() => removeEvent(event.id)}
-                      hitSlop={8}
+                      hitSlop={scaled(8)}
                       accessibilityRole="button"
                       style={[styles.undoBtn, { backgroundColor: colors.goldLight }]}
                     >
@@ -537,7 +538,7 @@ const styles = StyleSheet.create({
   },
   rowMain: {
     flex: 1,
-    gap: 2,
+    gap: scaled(2),
   },
   empty: {
     padding: spacing.lg,
@@ -547,7 +548,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     borderWidth: 1,
     paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
+    paddingVertical: scaled(3),
   },
   doneMark: {
     flexDirection: 'row',
@@ -566,20 +567,20 @@ const styles = StyleSheet.create({
   },
   cleanCell: {
     flexGrow: 1,
-    flexBasis: 38,
+    flexBasis: scaled(38),
     alignItems: 'center',
-    gap: 2,
+    gap: scaled(2),
     borderRadius: radius.lg,
     paddingVertical: spacing.sm,
   },
   dots: {
     flexDirection: 'row',
     gap: spacing.xs,
-    marginTop: 2,
+    marginTop: scaled(2),
   },
   dot: {
-    width: 8,
-    height: 8,
+    width: scaled(8),
+    height: scaled(8),
     borderRadius: radius.sm,
     borderWidth: 1.5,
   },

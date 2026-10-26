@@ -19,6 +19,7 @@ import { checkSelichotUpdate, selichotDownloadSupported } from '@/services/Selic
 import { useChokStore } from '@/stores/useChokStore';
 import { selectSelichotInstalledFor, useSelichotStore } from '@/stores/useSelichotStore';
 import { useUserStore } from '@/stores/useUserStore';
+import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -168,7 +169,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxxl,
   },
   lines: {
-    maxHeight: 420,
+    maxHeight: scaled(420),
   },
   line: {
     marginBottom: spacing.md,

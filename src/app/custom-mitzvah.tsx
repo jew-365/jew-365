@@ -9,9 +9,10 @@ import { Card } from '@/components/Card';
 import { ChipRow } from '@/components/ChipRow';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { ListRow } from '@/components/ListRow';
+import { OptionSelect } from '@/components/OptionSelect';
+import { ReminderTimingFields } from '@/components/ReminderTimingFields';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
-import { SegmentedControl } from '@/components/SegmentedControl';
 import { TimeField } from '@/components/TimeField';
 import { WeekdayPicker } from '@/components/WeekdayPicker';
 import { WheelPicker } from '@/components/WheelPicker';
@@ -20,6 +21,7 @@ import { useCustomMitzvotStore, makeCustomMitzvahId } from '@/stores/useCustomMi
 import { effectiveReminders, useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { BRAND } from '@/theme/colors';
+import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -44,13 +46,24 @@ import {
 } from '@/utils/customMitzvah';
 import { appDayKey } from '@/utils/locationDay';
 import { reminderLabel } from '@/utils/mitzvahName';
-import { FOLLOW_UP_DEFAULT_MIN, FOLLOW_UP_MAX_MIN, HEADS_UP_MAX_MIN } from '@/utils/skipRules';
-import { CustomSchedule, Nusach, Reminder, ReminderAnchor, SkipContext, Weekday } from '@/types/mitzvah';
+import {
+  ReminderTiming,
+  TIMING_MINUTES,
+  parseMinutes,
+  switchTiming,
+  timingKinds,
+  timingMinutes,
+  timingOf,
+  withTiming,
+} from '@/utils/reminderTiming';
+import { FOLLOW_UP_MAX_MIN, HEADS_UP_MAX_MIN } from '@/utils/skipRules';
+import { CustomSchedule, Nusach, Reminder, SkipContext, Weekday } from '@/types/mitzvah';
 import { MitzvahTextId, SiddurTextId } from '@/types/siddur';
 
 type ScheduleMode = CustomSchedule['mode'];
 
 const CONTENT_TYPES: DraftBlock['type'][] = ['text', 'blessing', 'link', 'siddur'];
+const REMINDER_TIMINGS = timingKinds({ custom: true, multiDay: false });
 const STREAK_CHOICES: readonly number[] = Array.from({ length: STREAK_MAX_DAYS }, (_, index) => index + 1);
 function siddurChoices(nusach: Nusach): SiddurTextId[] {
   return [
@@ -121,9 +134,11 @@ export default function CustomMitzvahScreen() {
   const [rangeOpen, setRangeOpen] = useState(false);
   const [skipShabbat, setSkipShabbat] = useState(existing?.skipOn.includes('shabbat') ?? false);
   const [skipYomtov, setSkipYomtov] = useState(existing?.skipOn.includes('yomtov') ?? false);
-  const [reminders, setReminders] = useState<Reminder[]>(() =>
+  const [initialReminders] = useState<Reminder[]>(() =>
     existing ? effectiveReminders(existing.id) : [emptyReminder()],
   );
+  const [reminders, setReminders] = useState<Reminder[]>(initialReminders);
+  const [timings, setTimings] = useState<ReminderTiming[]>(() => initialReminders.map(timingOf));
   const [contentBlocks, setContentBlocks] = useState<DraftBlock[]>(existing?.contentBlocks ?? []);
   const [pickingBlockIndex, setPickingBlockIndex] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -265,25 +280,27 @@ export default function CustomMitzvahScreen() {
   const updateReminder = (idx: number, patch: Partial<Reminder>) => {
     setReminders((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
   };
-  const changeAnchor = (idx: number, anchor: ReminderAnchor) => {
-    setReminders((prev) =>
-      prev.map((r, i) => {
-        if (i !== idx || r.anchor === anchor) return r;
-        if (anchor === 'followUp') return { ...r, anchor, offsetMin: FOLLOW_UP_DEFAULT_MIN };
-        if (anchor === 'clock') {
-          const fires = r.anchor === 'followUp' ? null : reminderClock(startTime, endTime, r);
-          return { ...r, anchor, offsetMin: fires ? timeToMinutes(fires) : timesValid ? timeToMinutes(startTime) : 0 };
-        }
-        if (r.anchor === 'clock' || r.anchor === 'followUp') return { ...r, anchor, offsetMin: 0 };
-        return { ...r, anchor, offsetMin: anchor === 'end' ? -Math.abs(r.offsetMin) : Math.abs(r.offsetMin) };
-      }),
-    );
+  const changeTiming = (idx: number, next: ReminderTiming) => {
+    const current = timings[idx];
+    if (next === current) return;
+    const reminder = reminders[idx];
+    const fires = current === 'followUp' ? null : reminderClock(startTime, endTime, reminder);
+    const clockDefault = fires ? timeToMinutes(fires) : timesValid ? timeToMinutes(startTime) : 0;
+    updateReminder(idx, withTiming(next, switchTiming(current, timingMinutes(reminder), next, clockDefault)));
+    setTimings((prev) => prev.map((timing, i) => (i === idx ? next : timing)));
+  };
+  const changeMinutes = (idx: number, digits: string) => {
+    const timing = timings[idx];
+    if (timing === 'clock') return;
+    updateReminder(idx, withTiming(timing, Math.min(TIMING_MINUTES[timing].max, parseMinutes(digits) ?? 0)));
   };
   const removeReminder = (idx: number) => {
     setReminders((prev) => prev.filter((_, i) => i !== idx));
+    setTimings((prev) => prev.filter((_, i) => i !== idx));
   };
   const addReminder = () => {
     setReminders((prev) => [...prev, emptyReminder()]);
+    setTimings((prev) => [...prev, timingOf(emptyReminder())]);
   };
   const addContentBlock = () => {
     setContentBlocks((prev) => [...prev, { type: 'text', he: '' }]);
@@ -317,16 +334,10 @@ export default function CustomMitzvahScreen() {
   };
 
   const inputDir = language === 'he' ? 'rtl' : 'ltr';
-  const anchorOptions: { value: ReminderAnchor; label: string }[] = [
-    { value: 'start', label: t('custom.anchor.fromStart') },
-    { value: 'end', label: t('custom.anchor.beforeEnd') },
-    { value: 'clock', label: t('reminder.anchor.clock') },
-    { value: 'followUp', label: t('reminder.anchor.followUp') },
-  ];
-  const scheduleOptions: { value: ScheduleMode; label: string }[] = [
-    { value: 'weekdays', label: t('custom.schedule.weekdays') },
-    { value: 'range', label: t('custom.schedule.range') },
-    { value: 'streak', label: t('custom.schedule.streak') },
+  const scheduleOptions: { value: ScheduleMode; title: string; caption: string }[] = [
+    { value: 'weekdays', title: t('custom.schedule.weekdays'), caption: t('custom.schedule.weekdaysCaption') },
+    { value: 'range', title: t('custom.schedule.range'), caption: t('custom.schedule.rangeCaption') },
+    { value: 'streak', title: t('custom.schedule.streak'), caption: t('custom.schedule.streakCaption') },
   ];
   const categoryLabel = timesValid ? t(`library.category.${categoryForWindow(startTime, endTime)}`) : null;
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
@@ -379,8 +390,8 @@ export default function CustomMitzvahScreen() {
         </View>
 
         <View style={styles.section}>
-          <SectionLabel variant="field" text={t('custom.schedule')} />
-          <SegmentedControl
+          <OptionSelect
+            label={t('custom.schedule')}
             options={scheduleOptions}
             value={scheduleMode}
             onChange={setScheduleMode}
@@ -447,8 +458,13 @@ export default function CustomMitzvahScreen() {
         <Affects surfaces={REMINDER_SURFACES} style={styles.headingAffects} />
         {reminders.map((r, idx) => {
           const clock = reminderClock(startTime, endTime, r);
+          const timing = timings[idx];
           return (
             <Card key={idx} padded style={styles.itemCard}>
+              <Text style={[typography.subheading, styles.reminderHeading, { color: colors.text }]}>
+                {t('custom.reminderN', { n: idx + 1 })}
+              </Text>
+              <SectionLabel variant="field" text={t('custom.reminderText')} />
               <TextInput
                 value={r.label}
                 onChangeText={(v) => updateReminder(idx, { label: v })}
@@ -469,46 +485,15 @@ export default function CustomMitzvahScreen() {
                   },
                 ]}
               />
-              <SegmentedControl
-                options={anchorOptions}
-                value={r.anchor}
-                onChange={(v) => changeAnchor(idx, v)}
-                style={styles.anchor}
+              <ReminderTimingFields
+                timing={timing}
+                kinds={REMINDER_TIMINGS}
+                onTiming={(next) => changeTiming(idx, next)}
+                minutes={String(timingMinutes(r))}
+                onMinutes={(digits) => changeMinutes(idx, digits)}
+                time={timing === 'clock' ? minutesToTime(r.offsetMin) : ''}
+                onTime={(value) => updateReminder(idx, withTiming('clock', timeToMinutes(value)))}
               />
-              {r.anchor === 'clock' ? (
-                <TimeField
-                  label={t('reminder.time')}
-                  value={minutesToTime(r.offsetMin)}
-                  onChange={(value) => updateReminder(idx, { offsetMin: timeToMinutes(value) })}
-                />
-              ) : (
-                <View style={styles.reminderRow}>
-                  <TextInput
-                    value={String(r.anchor === 'end' ? Math.abs(r.offsetMin) : r.offsetMin)}
-                    onChangeText={(v) => {
-                      const early = r.anchor === 'end' || r.offsetMin < 0;
-                      const max = r.anchor === 'start' && early ? HEADS_UP_MAX_MIN : 720;
-                      const num = Math.min(max, Number(v.replace(/[^0-9]/g, '')) || 0);
-                      updateReminder(idx, { offsetMin: early ? -num : num });
-                    }}
-                    accessibilityLabel={t('custom.offsetMinutes')}
-                    keyboardType="number-pad"
-                    style={[
-                      styles.input,
-                      styles.offsetInput,
-                      {
-                        backgroundColor: colors.surface2,
-                        color: colors.text,
-                        borderColor: colors.border,
-                      },
-                    ]}
-                    maxLength={4}
-                  />
-                  <Text style={[typography.caption, styles.offsetWord, { color: colors.textSub }]}>
-                    {t('custom.offsetMinutes')}
-                  </Text>
-                </View>
-              )}
               {clock ? (
                 <Text style={[typography.small, styles.note, { color: colors.goldText }]}>
                   {t('custom.reminderPreview', { time: clock })}
@@ -518,14 +503,6 @@ export default function CustomMitzvahScreen() {
                   {outsideCopy(r, 'custom.reminderOutsideWindow')}
                 </Text>
               ) : null}
-              <Hint
-                text={
-                  r.anchor === 'followUp'
-                    ? t('reminder.followUp.hint', { max: FOLLOW_UP_MAX_MIN })
-                    : t('custom.hint.reminderAnchor', { max: HEADS_UP_MAX_MIN })
-                }
-                style={styles.tightHint}
-              />
               <Button
                 variant="danger"
                 size="compact"
@@ -667,7 +644,7 @@ export default function CustomMitzvahScreen() {
                   selected
                     ? (event) =>
                         pickerRef.current?.scrollTo({
-                          y: Math.max(0, event.nativeEvent.layout.y - 96),
+                          y: Math.max(0, event.nativeEvent.layout.y - scaled(96)),
                           animated: false,
                         })
                     : undefined
@@ -712,10 +689,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    fontSize: 16,
+    fontSize: scaled(16),
   },
   multiInput: {
-    minHeight: 86,
+    minHeight: scaled(86),
     textAlignVertical: 'top',
   },
   row: { flexDirection: 'row', gap: spacing.md, alignItems: 'flex-end' },
@@ -726,9 +703,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
   },
-  anchor: { marginBottom: spacing.md },
   scheduleMode: { marginBottom: spacing.md },
-  streakWheel: { width: 96, alignSelf: 'center' },
+  reminderHeading: { marginBottom: spacing.md },
+  streakWheel: { width: scaled(96), alignSelf: 'center' },
   switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -739,9 +716,6 @@ const styles = StyleSheet.create({
   itemAction: { marginTop: spacing.md },
   addAction: { marginTop: spacing.sm },
   saveAction: { marginTop: spacing.xl },
-  reminderRow: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center' },
-  offsetInput: { width: 72, textAlign: 'center' },
-  offsetWord: { flexShrink: 0 },
   note: { marginTop: spacing.sm },
   editorSection: {
     borderTopWidth: 1,
@@ -749,6 +723,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
   },
   sheetList: {
-    maxHeight: 420,
+    maxHeight: scaled(420),
   },
 });

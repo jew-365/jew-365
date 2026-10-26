@@ -12,6 +12,7 @@ import { LocationService } from '@/services/LocationService';
 import { reportError } from '@/services/errors';
 import { requestNotificationPermissions, syncNotificationPermissionStatus } from '@/services/NotificationScheduler';
 import { useUserStore } from '@/stores/useUserStore';
+import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   notifyBtn: {
-    minHeight: 48,
+    minHeight: scaled(48),
     borderRadius: radius.lg,
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,

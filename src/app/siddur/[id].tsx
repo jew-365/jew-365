@@ -36,7 +36,8 @@ import * as Haptics from 'expo-haptics';
 import { DateTime } from 'luxon';
 import Svg, { Path } from 'react-native-svg';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
-import { CHOK_TEXT_ID } from '@/data/chok';
+import { CHOK_PARASHIYOT, CHOK_TEXT_ID } from '@/data/chok';
+import { findMitzvah } from '@/data/mitzvot';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import {
   MITZVAH_STANDALONE_TEXT,
@@ -46,8 +47,10 @@ import {
   hasStandaloneText,
   mitzvahTextEvening,
   mitzvahTextId,
+  nextMitzvahTextWindow,
   siddurPlace,
   standalonePeriodEnded,
+  standaloneReadingDay,
   standaloneTextDay,
   standaloneTextId,
 } from '@/data/siddur';
@@ -70,6 +73,7 @@ import {
   scrollSpeedLevel,
   useUserStore,
 } from '@/stores/useUserStore';
+import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { Banner } from '@/components/Banner';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
@@ -79,6 +83,7 @@ import { ChokLicenseNotice } from '@/components/ChokLicenseNotice';
 import { ChokWeekControls } from '@/components/ChokWeekControls';
 import { ListRow } from '@/components/ListRow';
 import { MitzvahIcon } from '@/components/MitzvahIcon';
+import { PickerCard } from '@/components/PickerCard';
 import { HeaderPill, ScreenHeader } from '@/components/ScreenHeader';
 import { ScrollSpeedStepper } from '@/components/ScrollSpeedStepper';
 import { SegmentedControl } from '@/components/SegmentedControl';
@@ -121,18 +126,20 @@ import {
   CHOK_SLOTS,
   ChokMakeUpFold,
   HAFTARAH_VARIANT,
+  chokBrowsePortion,
+  chokChosen,
   chokDoneDay,
   chokOpenMakeUps,
   chokParashaName,
+  chokPlaceOf,
   chokReaderPortion,
   chokSlotDay,
   chokSlotsOf,
   chokText,
   chokToday,
-  chokWeekName,
   isChokCommentary,
 } from '@/utils/chok';
-import { currentOrNextWindow, dayWindow } from '@/utils/buildDayTimeline';
+import { currentOrNextWindow, dayWindow, windowDueToday } from '@/utils/buildDayTimeline';
 import { calendarDay } from '@/utils/checkIn';
 import { appDay } from '@/utils/locationDay';
 import { calendarLocale } from '@/utils/weeklyReport';
@@ -150,25 +157,28 @@ const SCROLL_REPORT_MS = 250;
 const LAST_POSITION_DELAY_MS = 1000;
 const SEGMENT_SETTLE_MS = 1000;
 const TOAST_MS = 2000;
-const DELETE_ICON_SIZE = 16;
+const DELETE_ICON_SIZE = scaled(16);
 const DELETE_ICON_STROKE = 2.4;
 const AUTO_SCROLL_START_MS = 1000;
 const AUTO_SCROLL_RESUME_MS = 700;
 const AUTO_SCROLL_DRIFT_PX = 24;
 const AUTO_SCROLL_MAX_FRAME_MS = 100;
-const DONE_ICON_SIZE = 18;
+const DONE_ICON_SIZE = scaled(18);
 const PIXEL_RATIO = PixelRatio.get();
-const CONTROL_SIZE = 34;
-const CHEVRON_SIZE = 16;
+const CONTROL_SIZE = scaled(34);
+const PLAY_ICON_SIZE = scaled(14);
+const CHEVRON_SIZE = scaled(14);
 const CHEVRON_STROKE = 2.5;
 const PLAY_PATH = 'M8 5v14l11-7z';
 const PAUSE_PATH = 'M6.5 5h4v14h-4zM13.5 5h4v14h-4z';
 const PRAYER_MODES = ['minyan', 'alone'] as const;
-const COMMENTARY_STATES = ['folded', 'open'] as const;
+const COMMENTARY_STATES = ['open', 'folded'] as const;
 const COMMENTARY_KEY = 'commentary:';
 const CHOK_KIND_NAMES = Object.fromEntries(
   CHOK_SECTION_KINDS.map((kind) => [kind, translate(`chok.kind.${kind}`, undefined, 'en')]),
 ) as Record<ChokSectionKind, string>;
+// A Chok LeYisrael section's English title is its kind, so the picker names it by the kind alone.
+const CHOK_KIND_BY_NAME = new Map(CHOK_SECTION_KINDS.map((kind) => [CHOK_KIND_NAMES[kind], kind]));
 const CHOK_VARIANT_NAMES: Record<HaftarahVariant, string> = {
   sephardi: translate('chok.haftarahVariant.sephardi', undefined, 'en'),
   ashkenazi: translate('chok.haftarahVariant.ashkenazi', undefined, 'en'),
@@ -346,6 +356,14 @@ function useAutoScroll(
     pressed.value = false;
     holdMs.value = AUTO_SCROLL_RESUME_MS;
   };
+  // A list that mounts again starts at the top and sends no scroll event, so nothing else clears these.
+  const reset = useCallback(() => {
+    offset.value = 0;
+    position.value = -1;
+    sentPixel.value = -1;
+    propOffset.value = -1;
+    holdMs.value = AUTO_SCROLL_RESUME_MS;
+  }, [offset, position, sentPixel, propOffset, holdMs]);
   // react-native-web sends no drag or momentum events, so a touch or a wheel pauses it instead.
   const webInput =
     Platform.OS === 'web'
@@ -364,6 +382,7 @@ function useAutoScroll(
   return {
     scrollHandler,
     offset,
+    reset,
     animatedProps: SCROLLS_BY_PROP ? animatedProps : undefined,
     webInput,
     hold: (ms: number) => {
@@ -385,7 +404,13 @@ export default function SiddurScreen() {
   const quiet = useQuietBlock() !== null;
   const { language, t } = useI18n();
   const router = useRouter();
-  const params = useLocalSearchParams<{ id: string; date?: string; slot?: string; section?: string }>();
+  const params = useLocalSearchParams<{
+    id: string;
+    date?: string;
+    slot?: string;
+    section?: string;
+    from?: string;
+  }>();
   const chok = params.id === CHOK_TEXT_ID;
   const textOnly = !chok && !params.date && standaloneTextId(params.id) !== null;
   const mitzvah = useMemo(
@@ -396,6 +421,7 @@ export default function SiddurScreen() {
   const location = useUserStore((s) => s.location);
   const inIsrael = useUserStore((s) => s.inIsrael);
   const fontSize = useUserStore((s) => s.siddurFontSize);
+  const textSize = scaled(fontSize);
   const setFontSize = useUserStore((s) => s.setSiddurFontSize);
   const autoScrollOn = useUserStore((s) => s.siddurAutoScroll);
   const setAutoScroll = useUserStore((s) => s.setSiddurAutoScroll);
@@ -421,15 +447,42 @@ export default function SiddurScreen() {
   const saveLastPosition = useSiddurBookmarksStore((s) => s.saveLastPosition);
   const clearLastPosition = useSiddurBookmarksStore((s) => s.clearLastPosition);
   const standalone = mitzvah || chok ? null : standaloneTextId(params.id);
+  const linkedMitzvah = standalone
+    ? Object.keys(MITZVAH_STANDALONE_TEXT).find((id) => MITZVAH_STANDALONE_TEXT[id] === standalone)
+    : undefined;
+  const settingsTarget = chok
+    ? CHOK_TEXT_ID
+    : mitzvah
+      ? mitzvah.id
+      : linkedMitzvah && findMitzvah(linkedMitzvah)?.nuschaotSupported.includes(nusach)
+        ? linkedMitzvah
+        : null;
   const requestedDate = useMemo(() => parseDateParam(params.date), [params.date]);
   const { settings } = useDayModel();
-  const windowDate = useMemo(
-    () =>
-      requestedDate ??
-      (mitzvah && currentOrNextWindow(mitzvah, location, settings)?.date) ??
-      appDay(new Date(), location),
-    [requestedDate, mitzvah, location, settings],
-  );
+  const place = useMemo(() => siddurPlace(location, inIsrael), [location, inIsrael]);
+  const windowChoice = useMemo(() => {
+    if (requestedDate) return { date: requestedDate, offSeason: false, passed: false };
+    const opened = new Date();
+    const current = mitzvah ? currentOrNextWindow(mitzvah, location, settings, opened) : null;
+    if (mitzvah && !mitzvah.isCustom) {
+      const dueToday =
+        current !== null &&
+        hasSiddurText(mitzvah, nusach, current.date, place) &&
+        windowDueToday(current, location, opened);
+      if (!dueToday) {
+        // Today by the location's calendar, not the app day, so the night before alot still opens the coming morning.
+        const civil = DateTime.fromJSDate(opened, { zone: location.tz });
+        const today = dayWindow(mitzvah, new Date(civil.year, civil.month - 1, civil.day), location, settings);
+        if (today && today.end.getTime() <= opened.getTime() && hasSiddurText(mitzvah, nusach, today.date, place)) {
+          return { date: today.date, offSeason: false, passed: true };
+        }
+      }
+      const next = dueToday ? null : nextMitzvahTextWindow(mitzvah, nusach, location, settings, place, opened);
+      if (next) return { date: next.date, offSeason: true, passed: false };
+    }
+    return { date: current?.date ?? appDay(opened, location), offSeason: false, passed: false };
+  }, [requestedDate, mitzvah, location, settings, nusach, place]);
+  const windowDate = windowChoice.date;
   const mitzvahText = mitzvah && !mitzvah.isCustom ? mitzvahTextId(mitzvah.id) : null;
   const linkedText = mitzvah && !mitzvah.isCustom ? (MITZVAH_STANDALONE_TEXT[mitzvah.id] ?? null) : null;
   const textId = mitzvahText ?? linkedText ?? standalone;
@@ -441,23 +494,44 @@ export default function SiddurScreen() {
   // number so the 30-second tick re-resolves the text only when the day turns.
   const now = useNow();
   const todayAbs = standalone && !requestedDate ? standaloneTextDay(standalone, now, location).abs() : null;
+  const periodEnded = standalone && !requestedDate ? standalonePeriodEnded(standalone, nusach, now, location) : false;
+  const reading = useMemo(
+    () =>
+      standalone && todayAbs !== null
+        ? standaloneReadingDay(standalone, nusach, new HDate(todayAbs), periodEnded, place)
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- a Selichot file that arrives decides whether that text is present
+    [todayAbs, periodEnded, standalone, nusach, place, selichotInstalled],
+  );
+  const offSeason = reading?.offSeason === true || windowChoice.offSeason;
   const customWindowStart = useMemo(
     () => (mitzvah?.isCustom ? (dayWindow(mitzvah, windowDate, location, settings)?.start ?? null) : null),
     [mitzvah, windowDate, location, settings],
   );
   const hebrewDay = useMemo(
     () =>
-      todayAbs !== null
-        ? new HDate(todayAbs)
-        : customWindowStart
-          ? HebcalService.hebrewDayAt(customWindowStart, location)
-          : liturgicalDay(windowDate, evening),
-    [todayAbs, customWindowStart, location, windowDate, evening],
+      reading
+        ? reading.day
+        : todayAbs !== null
+          ? new HDate(todayAbs)
+          : customWindowStart
+            ? HebcalService.hebrewDayAt(customWindowStart, location)
+            : liturgicalDay(windowDate, evening),
+    [reading, todayAbs, customWindowStart, location, windowDate, evening],
   );
   const [chokSlot, setChokSlot] = useState<ChokSlot | null>(() => parseSlotParam(params.slot));
-  const chokPortion = useMemo(
+  const [browsing, setBrowsing] = useState<string | null>(null);
+  const browse = (parasha: string | null) => {
+    if (parasha === null && browsing !== null) setChokSlot(null);
+    setBrowsing(parasha);
+  };
+  const weekPortion = useMemo(
     () => (chok ? chokReaderPortion({ now, date: requestedDate, slot: chokSlot }, location, inIsrael) : null),
     [chok, now, requestedDate, chokSlot, location, inIsrael],
+  );
+  const chokPortion = useMemo(
+    () => (weekPortion && browsing ? chokBrowsePortion(browsing, weekPortion, chokSlot) : weekPortion),
+    [weekPortion, browsing, chokSlot],
   );
   const chokWeekKey = chokPortion ? chokPortion.parashiyot.join('|') : '';
   const chokWeek = useMemo(() => (chokWeekKey ? chokWeekKey.split('|') : []), [chokWeekKey]);
@@ -465,15 +539,15 @@ export default function SiddurScreen() {
   const [asking, setAsking] = useState(false);
   const [askingThuNight, setAskingThuNight] = useState(false);
   const asked = useRef(false);
-  const place = useMemo(() => siddurPlace(location, inIsrael), [location, inIsrael]);
   const features = useMemo(() => dayFeatures(hebrewDay, place), [hebrewDay, place]);
   const available = chok
     ? chokInstall !== null &&
       chokWeek.length > 0 &&
       chokWeek.every((parasha) => chokInstall.files[parasha] !== undefined)
     : standalone
-      ? hasStandaloneText(standalone, nusach, features) &&
-        (requestedDate !== null || !standalonePeriodEnded(standalone, nusach, now, location))
+      ? requestedDate
+        ? hasStandaloneText(standalone, nusach, features)
+        : reading !== null
       : Boolean(mitzvah && hasSiddurText(mitzvah, nusach, windowDate, place));
   const done = useCompletionsStore((s) => Boolean(mitzvah && s.completions[dateKey(windowDate)]?.[mitzvah.id]));
   const markDone = useCompletionsStore((s) => s.markDone);
@@ -485,11 +559,15 @@ export default function SiddurScreen() {
   );
   const chokTodayDate = useMemo(() => (chokTodayKey ? calendarDay(chokTodayKey) : null), [chokTodayKey]);
   const chokDoneDate =
-    chokPortion && chokTodayDate && chokActive.enabled
+    chokPortion && chokTodayDate && chokActive.enabled && browsing === null
       ? chokDoneDay(chokPortion, chokTodayDate, thuNightDay ?? 'thu')
       : null;
   const thuNightUnanswered = chokPortion?.slot === 'thuNight' && thuNightDay === null;
-  const showMakeUps = chokActive.enabled && chokPortion !== null && dateKey(chokSlotDay(chokPortion)) === chokTodayKey;
+  const showMakeUps =
+    chokActive.enabled &&
+    browsing === null &&
+    chokPortion !== null &&
+    dateKey(chokSlotDay(chokPortion)) === chokTodayKey;
   const makeUpFolds = useMemo(
     (): ChokMakeUpFold[] =>
       showMakeUps && chokTodayDate && chokMarks
@@ -513,6 +591,7 @@ export default function SiddurScreen() {
   const [renderingAll, setRenderingAll] = useState(false);
   const [bookmarksOpen, setBookmarksOpen] = useState(false);
   const [resumeOffer, setResumeOffer] = useState<SiddurLastPosition | null>(null);
+  const [pendingPlace, setPendingPlace] = useState<SiddurPlace | null>(null);
   const [toastShown, setToastShown] = useState(false);
   const jumpMissed = useRef(false);
   const jumpTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -645,9 +724,11 @@ export default function SiddurScreen() {
     setAsking(true);
   }, [chokWeek, doubleChoice]);
 
+  const loadStale = load.status === 'chok' && load.assets.map((asset) => asset.parasha).join('|') !== chokWeekKey;
+  const loadStatus = loadStale ? 'loading' : load.status;
   const readyText = useMemo(() => {
     if (load.status === 'ready') return load.text;
-    if (load.status !== 'chok' || !shownSlot) return null;
+    if (load.status !== 'chok' || loadStale || !shownSlot) return null;
     return chokText(load.assets, {
       slot: shownSlot,
       choice: doubleChoice ?? 'first',
@@ -656,7 +737,7 @@ export default function SiddurScreen() {
       variantNames: CHOK_VARIANT_NAMES,
       makeUps: makeUpFolds,
     });
-  }, [load, shownSlot, doubleChoice, nusach, makeUpFolds]);
+  }, [load, loadStale, shownSlot, doubleChoice, nusach, makeUpFolds]);
 
   const sections = useMemo(
     () =>
@@ -671,23 +752,32 @@ export default function SiddurScreen() {
     [allBookmarks, bookmarkTextId, readyText, placeNusach],
   );
   const lastPlace = bookmarkTextId && readyText ? textLastPosition(lastPositions, bookmarkTextId, placeNusach) : null;
+  const shownParashiyot = useMemo(() => chokChosen(chokWeek, doubleChoice ?? 'first'), [chokWeek, doubleChoice]);
+  const sectionKeys = useMemo(
+    () => new Set(sections.flatMap((section) => section.segments.map((segment) => segment.key))),
+    [sections],
+  );
+  const placeAway = useCallback(
+    (segmentKey: string) => {
+      const there = chok && !sectionKeys.has(segmentKey) ? chokPlaceOf(segmentKey) : null;
+      return there && !(there.slot === shownSlot && shownParashiyot.includes(there.parasha)) ? there : null;
+    },
+    [chok, sectionKeys, shownSlot, shownParashiyot],
+  );
+  const placeText = (there: { parasha: string; slot: ChokSlot }) =>
+    t('chok.place', { name: chokParashaName(there.parasha, language), day: t(`chok.slot.${there.slot}`) });
 
   useEffect(() => {
     if (offered.current || !bookmarkTextId || !readyText || !sections.length) return;
     offered.current = true;
     if (params.section) return;
     const last = textLastPosition(useSiddurBookmarksStore.getState().lastPositions, bookmarkTextId, placeNusach);
-    if (!last || !placeTarget(sections, last)) return;
+    if (!last) return;
+    const away = placeAway(last.segmentKey);
+    if (away ? chokInstall?.files[away.parasha] === undefined : !placeTarget(sections, last)) return;
     if (dailyText && last.appDay !== dateKey(appDay(new Date(), location))) return;
     setResumeOffer(last);
-  }, [bookmarkTextId, readyText, sections, placeNusach, dailyText, location, params.section]);
-
-  useEffect(() => {
-    if (!chok) return;
-    setToggled(new Set());
-    setShownSection(0);
-    listRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [chok, chokWeekKey, shownSlot, doubleChoice, listRef]);
+  }, [bookmarkTextId, readyText, sections, placeNusach, dailyText, location, params.section, placeAway, chokInstall]);
 
   const hasMinyanPassages = useMemo(
     () => sections.some((section) => section.minyanOnly || section.segments.some((segment) => segment.minyan)),
@@ -699,6 +789,11 @@ export default function SiddurScreen() {
   );
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
+  const openMitzvahSettings = () => {
+    if (!settingsTarget) return;
+    if (params.from === settingsTarget && router.canGoBack()) router.back();
+    else router.push({ pathname: '/mitzvah/[id]', params: { id: settingsTarget } });
+  };
   // Done ends the session with the text: mark it, then land on home whatever opened the reader (a
   // home card, the mitzvah screen, a notification on a cold start).
   const finish = (mitzvahId: string, date: Date = windowDate) => {
@@ -720,7 +815,9 @@ export default function SiddurScreen() {
     markDone(CHOK_TEXT_ID, calendarDay(makeUp.dateKey));
   };
   const doneTarget = mitzvah
-    ? { id: mitzvah.id, date: windowDate, done }
+    ? offSeason
+      ? null
+      : { id: mitzvah.id, date: windowDate, done }
     : chokDoneDate
       ? {
           id: CHOK_TEXT_ID,
@@ -737,7 +834,14 @@ export default function SiddurScreen() {
         ? nameOf(STANDALONE_TEXTS[standalone].name)
         : '';
   const hebrewDateLabel = language === 'he' ? hebrewDay.renderGematriya(true) : hebrewDay.render('en');
-  const candleNight = chanukahNightOn(todayAbs !== null ? appDay(now, location) : windowDate);
+  const candleDay = reading?.offSeason
+    ? evening
+      ? new HDate(reading.day.abs() - 1).greg()
+      : reading.day.greg()
+    : todayAbs !== null
+      ? appDay(now, location)
+      : windowDate;
+  const candleNight = chanukahNightOn(candleDay);
   const occasions = [
     ...HebcalService.getHolidays(hebrewDay.greg(), location, calendarLocale(language), {
       omitChanukahCandles: true,
@@ -745,9 +849,7 @@ export default function SiddurScreen() {
     }),
     ...(candleNight === null ? [] : [t('siddur.chanukahNight', { n: candleNight })]),
   ];
-  const subtitle = chokPortion
-    ? `${t('chok.parashaOf', { name: chokWeekName(chokPortion.parashiyot, language) })} · ${t(`chok.slot.${chokPortion.slot}`)}`
-    : [t(`nusach.${nusach}`), hebrewDateLabel, ...occasions].join(' · ');
+  const subtitle = chokPortion ? undefined : [t(`nusach.${nusach}`), hebrewDateLabel, ...occasions].join(' · ');
   const chooseDouble = (choice: ChokDoubleChoice) => {
     setDoubleChoice(choice);
     setAsking(false);
@@ -759,11 +861,15 @@ export default function SiddurScreen() {
     if (date) finish(CHOK_TEXT_ID, date);
   };
   const listExtraData = useMemo(
-    () => ({ fontSize, language, colors, toggled, prayerMode, commentaryOpen }),
-    [fontSize, language, colors, toggled, prayerMode, commentaryOpen],
+    () => ({ textSize, language, colors, toggled, prayerMode, commentaryOpen }),
+    [textSize, language, colors, toggled, prayerMode, commentaryOpen],
   );
   const titleOf = (titled: { title: { he: string; en: string } }) =>
     language === 'en' ? titled.title.en : titled.title.he;
+  const entryTitle = (entry: { title: { he: string; en: string } }) => {
+    const kind = chok ? CHOK_KIND_BY_NAME.get(entry.title.en) : undefined;
+    return kind ? t(`chok.kind.${kind}`) : titleOf(entry);
+  };
   const labelOf = (label: PassageLabel) => (language === 'en' ? label.en : label.he);
   const labeledEdge = (language === 'he') === I18nManager.isRTL ? styles.labeledLeftEdge : styles.labeledRightEdge;
   const segmentViews = (section: SiddurSection, segments: SiddurSegment[], start: number, color: string) => {
@@ -779,7 +885,7 @@ export default function SiddurScreen() {
         <SegmentView
           key={run.start + offset}
           segment={segment}
-          fontSize={fontSize}
+          fontSize={textSize}
           showEnglish={language === 'en'}
           color={color}
           layouts={segmentLayouts.current}
@@ -792,7 +898,7 @@ export default function SiddurScreen() {
           style={[styles.addedToday, { backgroundColor: colors.goldLight, borderColor: colors.gold }]}
         >
           <Text style={[typography.micro, styles.addedTodayLabel, { color: colors.goldText }]}>
-            {t('siddur.addedToday')}
+            {t(offSeason ? 'siddur.addedOnDay' : 'siddur.addedToday')}
           </Text>
           {views}
         </MeasuredView>,
@@ -994,7 +1100,7 @@ export default function SiddurScreen() {
       );
     }
     if (!available) return <Message text={t('siddur.unavailable')} />;
-    if (load.status === 'loading') {
+    if (loadStatus === 'loading') {
       return (
         <View style={styles.center}>
           <ActivityIndicator color={colors.gold} />
@@ -1002,7 +1108,7 @@ export default function SiddurScreen() {
         </View>
       );
     }
-    if (load.status === 'error') {
+    if (loadStatus === 'error') {
       return (
         <View style={styles.center}>
           <Text style={[typography.body, { color: colors.textSub }]}>{t('siddur.error')}</Text>
@@ -1027,7 +1133,7 @@ export default function SiddurScreen() {
       !quiet &&
       !bookmarksOpen &&
       resumeOffer === null,
-    autoScrollPixelsPerSecond(SIDDUR_SCROLL_SPEEDS[scrollSpeedLevel(scrollSpeed) - 1], fontSize),
+    autoScrollPixelsPerSecond(SIDDUR_SCROLL_SPEEDS[scrollSpeedLevel(scrollSpeed) - 1], textSize),
     onUserScroll,
     onScrollReport,
   );
@@ -1078,6 +1184,16 @@ export default function SiddurScreen() {
   };
   const goToPlace = (target: SiddurPlace) => {
     setBookmarksOpen(false);
+    const away = placeAway(target.segmentKey);
+    if (away) {
+      if (chokInstall?.files[away.parasha] === undefined) return;
+      const inWeek =
+        weekPortion !== null && chokChosen(weekPortion.parashiyot, doubleChoice ?? 'first').includes(away.parasha);
+      setBrowsing(inWeek ? null : away.parasha);
+      setChokSlot(away.slot);
+      setPendingPlace(target);
+      return;
+    }
     const found = placeTarget(sections, target);
     if (found) jumpTo(found.index, Date.now() + JUMP_TIMEOUT_MS, found.segmentKey);
   };
@@ -1086,8 +1202,34 @@ export default function SiddurScreen() {
     setResumeOffer(null);
     goToPlace(resumeOffer);
   };
-  const lastTarget = lastPlace ? placeTarget(sections, lastPlace) : null;
+  const resumePlace = resumeOffer ? placeAway(resumeOffer.segmentKey) : null;
+  const rowOf = (place: SiddurPlace, titled: boolean) => {
+    const there = chok ? chokPlaceOf(place.segmentKey) : null;
+    if (there) return { caption: placeText(there), disabled: chokInstall?.files[there.parasha] === undefined };
+    const target = placeTarget(sections, place);
+    return {
+      caption: target ? (titled ? titleOf(sections[target.index]) : undefined) : t('siddur.bookmarks.notToday'),
+      disabled: !target,
+    };
+  };
+  const lastRow = lastPlace ? rowOf(lastPlace, true) : null;
   const listShown = body === null;
+  const resetScroll = autoScroll.reset;
+  useEffect(() => {
+    if (listShown) return;
+    moved.current = false;
+    resetScroll();
+  }, [listShown, resetScroll]);
+
+  useEffect(() => {
+    if (!chok) return;
+    setToggled(new Set());
+    setShownSection(0);
+    moved.current = false;
+    resetScroll();
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [chok, chokWeekKey, shownSlot, doubleChoice, listRef, resetScroll]);
+
   useEffect(() => {
     if (landedSection.current || !params.section || !listShown) return;
     landedSection.current = true;
@@ -1095,6 +1237,16 @@ export default function SiddurScreen() {
     if (entry) jumpTo(entry.index);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- jumpTo is rebuilt on every render; the ref lands once per open
   }, [params.section, listShown, picker]);
+
+  useEffect(() => {
+    if (!pendingPlace || load.status !== 'chok' || loadStale) return;
+    setPendingPlace(null);
+    const index = sections.findIndex((section) =>
+      section.segments.some((segment) => segment.key === pendingPlace.segmentKey),
+    );
+    if (index >= 0) jumpTo(index, Date.now() + JUMP_TIMEOUT_MS, pendingPlace.segmentKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- jumpTo is rebuilt on every render; the place lands once
+  }, [pendingPlace, load.status, loadStale, sections]);
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
@@ -1104,17 +1256,32 @@ export default function SiddurScreen() {
         subtitle={subtitle}
         onBack={goBack}
         actions={
-          bookmarkable ? (
+          settingsTarget || bookmarkable ? (
             <>
-              <HeaderPill icon="star" accessibilityLabel={t('siddur.bookmarks.add')} onPress={addBookmarkHere} />
-              <HeaderPill label={t('siddur.bookmarks')} onPress={() => setBookmarksOpen(true)} />
+              {settingsTarget ? (
+                <HeaderPill
+                  icon="sliders"
+                  accessibilityLabel={t('siddur.mitzvahSettings')}
+                  onPress={openMitzvahSettings}
+                />
+              ) : null}
+              {bookmarkable ? (
+                <>
+                  <HeaderPill icon="star" accessibilityLabel={t('siddur.bookmarks.add')} onPress={addBookmarkHere} />
+                  <HeaderPill label={t('siddur.bookmarks')} onPress={() => setBookmarksOpen(true)} />
+                </>
+              ) : null}
             </>
           ) : undefined
         }
       >
         <View style={styles.toolbarStack}>
-          {chokPortion && available ? (
+          {weekPortion && chokPortion && available ? (
             <ChokWeekControls
+              week={weekPortion.parashiyot}
+              browsing={browsing}
+              onBrowse={browse}
+              offered={CHOK_PARASHIYOT.filter((parasha) => chokInstall?.files[parasha] !== undefined)}
               slots={chokSlotsOf(chokPortion.parashiyot[0])}
               slot={chokPortion.slot}
               onSlot={setChokSlot}
@@ -1125,38 +1292,34 @@ export default function SiddurScreen() {
               onAskClose={() => setAsking(false)}
             />
           ) : null}
-          {picker.length > 1 && currentEntry ? (
-            <Pressable
-              onPress={() => setPickerOpen(true)}
-              accessibilityRole="button"
-              accessibilityLabel={`${t('siddur.pickSection')}: ${titleOf(currentEntry)}`}
-              style={({ pressed }) => [
-                styles.picker,
-                { backgroundColor: pressed ? colors.surface2 : colors.surface },
-                shadowStyle(colors.shadow, shadowPresets.cardSoft),
-              ]}
-            >
-              <Text style={[typography.bodyBold, styles.pickerLabel, { color: colors.text }]} numberOfLines={1}>
-                {titleOf(currentEntry)}
-              </Text>
-              <MitzvahIcon
-                name="chevronDown"
-                size={CHEVRON_SIZE}
-                color={colors.textMuted}
-                strokeWidth={CHEVRON_STROKE}
-              />
-            </Pressable>
+          {hasCommentaryPassages || (picker.length > 1 && currentEntry) ? (
+            <View style={styles.pickerRow}>
+              {picker.length > 1 && currentEntry ? (
+                <PickerCard
+                  title={entryTitle(currentEntry)}
+                  accessibilityLabel={`${t('siddur.pickSection')}: ${entryTitle(currentEntry)}`}
+                  onPress={() => setPickerOpen(true)}
+                  style={styles.pickerBeside}
+                />
+              ) : null}
+              {hasCommentaryPassages ? (
+                <View
+                  accessibilityRole="radiogroup"
+                  accessibilityLabel={t('chok.commentary')}
+                  style={styles.commentaryBeside}
+                >
+                  <SegmentedControl
+                    options={COMMENTARY_STATES.map((state) => ({ value: state, label: t(`chok.commentary.${state}`) }))}
+                    value={commentaryOpen ? 'open' : 'folded'}
+                    onChange={(state) => changeCommentaryOpen(state === 'open')}
+                    style={styles.commentaryControl}
+                  />
+                </View>
+              ) : null}
+            </View>
           ) : null}
           <View style={styles.toolbar}>
-            {hasCommentaryPassages ? (
-              <View accessibilityRole="radiogroup" accessibilityLabel={t('chok.commentary')} style={styles.prayerMode}>
-                <SegmentedControl
-                  options={COMMENTARY_STATES.map((state) => ({ value: state, label: t(`chok.commentary.${state}`) }))}
-                  value={commentaryOpen ? 'open' : 'folded'}
-                  onChange={(state) => changeCommentaryOpen(state === 'open')}
-                />
-              </View>
-            ) : hasMinyanPassages ? (
+            {hasMinyanPassages ? (
               <View
                 accessibilityRole="radiogroup"
                 accessibilityLabel={t('settings.prayerMode')}
@@ -1187,9 +1350,23 @@ export default function SiddurScreen() {
         </View>
       </ScreenHeader>
 
+      {(offSeason || windowChoice.passed) && !body ? (
+        <View style={styles.resume}>
+          <Banner
+            tone="info"
+            text={t(offSeason ? 'siddur.offSeason' : 'siddur.timePassed')}
+            style={styles.resumeBanner}
+          />
+        </View>
+      ) : null}
+
       {resumeOffer && !body ? (
         <View style={styles.resume}>
-          <Banner tone="accent" text={t('siddur.resume')} style={styles.resumeBanner} />
+          <Banner
+            tone="accent"
+            text={resumePlace ? t('chok.resume', { place: placeText(resumePlace) }) : t('siddur.resume')}
+            style={styles.resumeBanner}
+          />
           <View style={styles.resumeActions}>
             <Button size="compact" label={t('siddur.resume.continue')} onPress={resume} style={styles.resumeAction} />
             <Button
@@ -1263,7 +1440,19 @@ export default function SiddurScreen() {
           )}
           ListFooterComponent={
             <>
-              {doneTarget ? (
+              {browsing ? (
+                <View style={styles.browsingFooter}>
+                  <Text style={[typography.caption, styles.browsingNote, { color: colors.textSub }]}>
+                    {t('chok.browsing.note')}
+                  </Text>
+                  <Button
+                    variant="secondary"
+                    label={t('chok.browsing.back')}
+                    onPress={() => browse(null)}
+                    style={styles.doneAction}
+                  />
+                </View>
+              ) : doneTarget ? (
                 doneTarget.done ? (
                   <View style={styles.doneRow}>
                     <MitzvahIcon name="check" size={DONE_ICON_SIZE} color={colors.safe} />
@@ -1289,7 +1478,7 @@ export default function SiddurScreen() {
               {readyText?.credits.length ? (
                 <View style={styles.credits}>
                   <Text style={[typography.captionBold, { color: colors.textSub }]}>{t('siddur.sources')}</Text>
-                  <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>
+                  <Text style={[typography.caption, { color: colors.textMuted, marginTop: scaled(2) }]}>
                     {t('siddur.adapted')}
                   </Text>
                   {readyText.credits.map((credit) => (
@@ -1317,13 +1506,13 @@ export default function SiddurScreen() {
             return (
               <SheetAction
                 key={entry.index}
-                label={titleOf(entry)}
+                label={entryTitle(entry)}
                 selected={selected}
                 onLayout={
                   selected
                     ? (event) =>
                         pickerRef.current?.scrollTo({
-                          y: Math.max(0, event.nativeEvent.layout.y - 96),
+                          y: Math.max(0, event.nativeEvent.layout.y - scaled(96)),
                           animated: false,
                         })
                     : undefined
@@ -1346,25 +1535,25 @@ export default function SiddurScreen() {
       >
         {lastPlace || shownBookmarks.length ? (
           <ScrollView style={styles.sheetList}>
-            {lastPlace ? (
+            {lastPlace && lastRow ? (
               <ListRow
                 icon="siddur"
                 title={t('siddur.bookmarks.lastPlace')}
-                caption={lastTarget ? titleOf(sections[lastTarget.index]) : t('siddur.bookmarks.notToday')}
-                disabled={!lastTarget}
+                caption={lastRow.caption}
+                disabled={lastRow.disabled}
                 onPress={() => goToPlace(lastPlace)}
                 style={styles.sheetRow}
               />
             ) : null}
             {shownBookmarks.map((bookmark) => {
-              const target = placeTarget(sections, bookmark);
+              const row = rowOf(bookmark, false);
               return (
                 <View key={bookmark.id} testID={`siddur-bookmark-${bookmark.id}`} style={styles.bookmarkRow}>
                   <ListRow
                     icon="star"
                     title={bookmark.label}
-                    caption={target ? undefined : t('siddur.bookmarks.notToday')}
-                    disabled={!target}
+                    caption={row.caption}
+                    disabled={row.disabled}
                     onPress={() => goToPlace(bookmark)}
                     style={[styles.sheetRow, styles.bookmarkMain]}
                   />
@@ -1372,7 +1561,7 @@ export default function SiddurScreen() {
                     onPress={() => removeBookmark(bookmark.id)}
                     accessibilityRole="button"
                     accessibilityLabel={t('siddur.bookmarks.delete')}
-                    hitSlop={10}
+                    hitSlop={scaled(10)}
                     style={[styles.deleteBtn, { backgroundColor: colors.surface2 }]}
                   >
                     <MitzvahIcon
@@ -1439,7 +1628,7 @@ function SizeButton({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled }}
-      hitSlop={6}
+      hitSlop={scaled(6)}
       style={[styles.sizeBtn, { backgroundColor: colors.surface2, opacity: disabled ? 0.4 : 1 }]}
     >
       <Text style={[typography.captionBold, { color: colors.text }]}>{label}</Text>
@@ -1463,14 +1652,14 @@ function PlayToggle({
       accessibilityRole="switch"
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ checked: on }}
-      hitSlop={6}
+      hitSlop={scaled(6)}
       style={({ pressed }) => [
         styles.roundBtn,
         { backgroundColor: on ? colors.gold : colors.surface2 },
         { opacity: pressed ? 0.7 : 1 },
       ]}
     >
-      <Svg width={14} height={14} viewBox="0 0 24 24">
+      <Svg width={PLAY_ICON_SIZE} height={PLAY_ICON_SIZE} viewBox="0 0 24 24">
         <Path d={on ? PAUSE_PATH : PLAY_PATH} fill={on ? colors.onGold : colors.text} />
       </Svg>
     </Pressable>
@@ -1510,7 +1699,7 @@ function OptionalToggle({
       </View>
       <MitzvahIcon
         name={expanded ? 'chevronUp' : 'chevronDown'}
-        size={14}
+        size={CHEVRON_SIZE}
         color={accent}
         strokeWidth={CHEVRON_STROKE}
       />
@@ -1606,27 +1795,32 @@ const styles = StyleSheet.create({
   toolbarStack: {
     gap: spacing.sm,
   },
+  pickerRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  pickerBeside: {
+    flexGrow: 1,
+    flexBasis: scaled(110),
+  },
+  commentaryBeside: {
+    flexGrow: 1.4,
+    flexBasis: scaled(170),
+  },
+  commentaryControl: {
+    flex: 1,
+  },
   toolbar: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
-    gap: spacing.sm,
+    columnGap: spacing.sm,
+    rowGap: spacing.sm,
   },
   prayerMode: {
     flex: 1,
-    minWidth: 104,
-  },
-  picker: {
-    alignSelf: 'stretch',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    minHeight: 48,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: radius.xl,
-  },
-  pickerLabel: {
-    flex: 1,
+    minWidth: scaled(96),
   },
   content: {
     padding: LIST_PADDING,
@@ -1658,7 +1852,7 @@ const styles = StyleSheet.create({
   addedTodayLabel: {
     textAlign: RIGHT_EDGE,
     paddingHorizontal: spacing.sm,
-    marginBottom: 2,
+    marginBottom: scaled(2),
   },
   optionalToggle: {
     flexDirection: 'row',
@@ -1685,7 +1879,7 @@ const styles = StyleSheet.create({
   },
   minyanLabel: {
     paddingHorizontal: spacing.sm,
-    marginBottom: 2,
+    marginBottom: scaled(2),
   },
   hebrew: {
     textAlign: RIGHT_EDGE,
@@ -1714,6 +1908,12 @@ const styles = StyleSheet.create({
   licenseNotice: {
     marginBottom: spacing.md,
   },
+  browsingFooter: {
+    paddingVertical: spacing.lg,
+  },
+  browsingNote: {
+    textAlign: 'center',
+  },
   doneRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1730,7 +1930,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   sheetList: {
-    maxHeight: 420,
+    maxHeight: scaled(420),
   },
   resume: {
     paddingHorizontal: spacing.lg,
@@ -1758,8 +1958,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   deleteBtn: {
-    width: 24,
-    height: 24,
+    width: scaled(24),
+    height: scaled(24),
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',

@@ -413,7 +413,7 @@ describe('Settings search', () => {
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/siddur/[id]', params: { id: 'chok_leyisrael' } });
   });
 
-  it('lists Selichot off season as the siddur tab does: with its availability caption, and no way in', async () => {
+  it('lists Selichot off season as the siddur tab does: with its availability caption, and a way in', async () => {
     installSelichotFixture();
     pinDate('2026-10-28T07:00');
     await renderSettings();
@@ -423,7 +423,10 @@ describe('Settings search', () => {
     expect(screen.getAllByText('סליחות')).toHaveLength(2);
     expect(screen.getByText(he('settings.search.kind.mitzvah'))).toBeOnTheScreen();
     fireEvent.press(caption);
-    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/siddur/[id]', params: { id: 'selichot' } });
+    mockPush.mockClear();
+    await search('סליחות');
     await act(async () => {
       fireEvent(screen.getByLabelText(he('settings.search')), 'submitEditing');
     });
@@ -431,7 +434,7 @@ describe('Settings search', () => {
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/mitzvah/[id]', params: { id: 'selichot' } });
   });
 
-  it('opens the first open match on submit when a closed chapter ranks before it', async () => {
+  it('opens the first match on submit, even when it is not said today', async () => {
     installSelichotFixture();
     pinDate('2026-10-28T07:00');
     await renderSettings();
@@ -440,9 +443,12 @@ describe('Settings search', () => {
     await act(async () => {
       fireEvent(screen.getByLabelText(he('settings.search')), 'submitEditing');
     });
-    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/siddur/[id]',
+      params: { id: 'selichot', section: expect.stringContaining('ירושלים') },
+    });
     expect(screen.getByLabelText(he('settings.search')).props.value).toBe('');
-    expect(screen.getByTestId('settings-anchor-location').props.style).toBeTruthy();
   });
 
   it('lists Kiddush Levana off season under its availability caption', async () => {
@@ -464,7 +470,7 @@ describe('Settings search', () => {
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/mitzvah/[id]', params: { id: 'selichot' } });
   });
 
-  it('captions a closed text in English', async () => {
+  it('captions a text that is not said today in English, and keeps its row enabled', async () => {
     installSelichotFixture();
     pinDate('2026-10-28T07:00');
     useUserStore.setState({ language: 'en' });
@@ -473,6 +479,9 @@ describe('Settings search', () => {
       fireEvent.changeText(screen.getByLabelText('Search settings'), 'Selichot');
     });
     expect(screen.getByText('From Leil Selichot to Erev Yom Kippur')).toBeOnTheScreen();
+    const rows = screen.getAllByRole('button', { name: /From Leil Selichot to Erev Yom Kippur/ });
+    expect(rows.length).toBeGreaterThan(1);
+    for (const row of rows) expect(row).toBeEnabled();
   });
 
   it('opens Selichot from the search in its season', async () => {

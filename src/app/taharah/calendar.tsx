@@ -13,6 +13,7 @@ import { HebcalService } from '@/services/HebcalService';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { BRAND } from '@/theme/colors';
+import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies, typography } from '@/theme/typography';
@@ -42,7 +43,7 @@ type Cell = {
 };
 
 const WEEKS = 6;
-const MARK_ICON_SIZE = 14;
+const MARK_ICON_SIZE = scaled(14);
 
 // A night onah opens at the previous day's shkia, so it is drawn on the evening cell before its own day.
 const cellOf = (onah: Onah) => (onah.kind === 'night' ? onah.abs - 1 : onah.abs);
@@ -312,14 +313,14 @@ const styles = StyleSheet.create({
   },
   indexBadge: {
     position: 'absolute',
-    top: 3,
-    end: 3,
-    minWidth: 15,
-    height: 15,
+    top: scaled(3),
+    end: scaled(3),
+    minWidth: scaled(15),
+    height: scaled(15),
     borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 3,
+    paddingHorizontal: scaled(3),
   },
   badgeText: {
     color: BRAND.white,
@@ -329,20 +330,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 3,
+    gap: scaled(3),
     marginTop: 'auto',
   },
   onsetDot: {
-    width: 7,
-    height: 7,
+    width: scaled(7),
+    height: scaled(7),
     borderRadius: radius.sm,
   },
   perishaBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: radius.sm,
-    paddingHorizontal: 3,
-    paddingVertical: 1,
+    paddingHorizontal: scaled(3),
+    paddingVertical: scaled(1),
   },
   empty: {
     textAlign: 'center',
@@ -361,14 +362,14 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   cleanSample: {
-    width: 14,
-    height: 14,
+    width: scaled(14),
+    height: scaled(14),
     borderRadius: radius.xs,
     borderWidth: 2,
   },
   sheetRow: {
     borderTopWidth: StyleSheet.hairlineWidth,
     paddingVertical: spacing.md,
-    gap: 2,
+    gap: scaled(2),
   },
 });

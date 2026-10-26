@@ -43,9 +43,11 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
     flexGrow: 1,
   },
   dots: {
+    marginTop: spacing.lg,
     marginBottom: spacing.md,
   },
   backBtn: {

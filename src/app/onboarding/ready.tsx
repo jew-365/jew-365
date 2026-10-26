@@ -9,6 +9,7 @@ import { useDayModel } from '@/hooks/useDayModel';
 import { NotificationScheduler } from '@/services/NotificationScheduler';
 import { reportError } from '@/services/errors';
 import { useUserStore } from '@/stores/useUserStore';
+import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -33,7 +34,7 @@ export default function ReadyScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top', 'bottom']}>
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView contentContainerStyle={styles.center}>
-        <IconTile name="check" tone="accent" size={64} />
+        <IconTile name="check" tone="accent" size={scaled(64)} />
         <Text style={[typography.title, { color: colors.text, marginTop: spacing.lg }]}>
           {t('onboarding.readyTitle')}
         </Text>
@@ -46,7 +47,7 @@ export default function ReadyScreen() {
         <Text style={[typography.body, { color: colors.text, textAlign: 'center', marginTop: spacing.xs }]}>
           {enabledNames}
         </Text>
-        <Pressable onPress={editMitzvot} accessibilityRole="link" hitSlop={8} style={styles.editLink}>
+        <Pressable onPress={editMitzvot} accessibilityRole="link" hitSlop={scaled(8)} style={styles.editLink}>
           <Text style={[typography.bodyBold, { color: colors.goldText }]}>{t('onboarding.readyEdit')}</Text>
         </Pressable>
         <OnboardingDots step={5} total={ONBOARDING_STEPS} style={styles.dots} />

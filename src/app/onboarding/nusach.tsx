@@ -55,12 +55,14 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
     flexGrow: 1,
   },
   group: {
     gap: spacing.sm,
   },
   dots: {
+    marginTop: spacing.lg,
     marginBottom: spacing.md,
   },
   backBtn: {

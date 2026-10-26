@@ -33,6 +33,7 @@ import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { useShallow } from 'zustand/react/shallow';
+import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useQuietBlock } from '@/components/ShabbatScreen';
 import { typography } from '@/theme/typography';
@@ -69,7 +70,7 @@ type LiveItem = {
 };
 
 const PROFILE_INTRO_KEY = 'profile:intro-dismissed';
-const WORDMARK_SIZE = 34;
+const WORDMARK_SIZE = scaled(34);
 
 type CompletedItem = {
   id: string;
@@ -520,7 +521,7 @@ export default function HomeScreen() {
             ))
           ) : (
             <View style={styles.emptyWrap}>
-              <IconTile name="sparkle" tone="accent" size={48} style={styles.emptyIcon} />
+              <IconTile name="sparkle" tone="accent" size={scaled(48)} style={styles.emptyIcon} />
               <Text style={[typography.body, { color: colors.textSub, textAlign: 'center' }]}>
                 {doneCount >= totalActive && totalActive > 0 ? t('home.allDone') : t('home.noActive')}
               </Text>

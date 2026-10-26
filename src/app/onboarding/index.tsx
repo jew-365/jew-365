@@ -8,15 +8,16 @@ import { Card } from '@/components/Card';
 import { ONBOARDING_STEPS, OnboardingDots } from '@/components/OnboardingDots';
 import { SectionLabel } from '@/components/SectionLabel';
 import { useUserStore } from '@/stores/useUserStore';
-import { backupFailureKey, pickBackup, restoreBackup } from '@/services/BackupService';
+import { backupFailureKey, pickBackup, reloadIfScaleChanged, restoreBackup } from '@/services/BackupService';
 import { NotificationScheduler, requestNotificationPermissions } from '@/services/NotificationScheduler';
 import { reportError } from '@/services/errors';
+import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
 
-const WELCOME_LOGO_SIZE = 112;
+const WELCOME_LOGO_SIZE = scaled(112);
 
 export default function WelcomeScreen() {
   const { colors } = useTheme();
@@ -49,10 +50,11 @@ export default function WelcomeScreen() {
     try {
       const backup = await pickBackup();
       if (!backup) return;
-      await restoreBackup(backup);
+      await restoreBackup(backup, { reload: false });
       if (await requestNotificationPermissions()) {
         await NotificationScheduler.rebuild().catch((rebuildError) => reportError('schedule', rebuildError));
       }
+      reloadIfScaleChanged();
     } catch (restoreFailure) {
       setRestoreError(t(backupFailureKey(restoreFailure)));
     } finally {
@@ -113,7 +115,7 @@ export default function WelcomeScreen() {
           </Card>
         </ScrollView>
         <View style={styles.footer}>
-          <OnboardingDots step={0} total={ONBOARDING_STEPS} />
+          <OnboardingDots step={0} total={ONBOARDING_STEPS} style={styles.dots} />
           <Button label={t('common.continue')} onPress={submit} />
           {Platform.OS !== 'web' ? (
             <Pressable
@@ -157,7 +159,7 @@ const styles = StyleSheet.create({
   },
   body: {
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: scaled(22),
     marginTop: spacing.sm,
   },
   registerBody: {
@@ -172,10 +174,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    fontSize: 16,
+    fontSize: scaled(16),
   },
   footer: {
     gap: spacing.md,
+  },
+  dots: {
+    marginTop: spacing.lg,
   },
   restore: {
     alignItems: 'center',

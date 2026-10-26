@@ -11,6 +11,7 @@ import { getLocationName } from '@/data/cities';
 import { useDayModel } from '@/hooks/useDayModel';
 import { HebcalService } from '@/services/HebcalService';
 import { Completions, useCompletionsStore } from '@/stores/useCompletionsStore';
+import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { radius, spacing } from '@/theme/tokens';
@@ -26,17 +27,17 @@ type ViewMode = (typeof VIEW_MODES)[number];
 
 const EMPTY_COMPLETIONS = Object.freeze({}) as Completions;
 
-const TIME_COLUMN_WIDTH = 40;
-const DOT_COLUMN_WIDTH = 14;
-const TIMELINE_DOT_SIZE = 9;
-const DONE_BOX_SIZE = 24;
-const DONE_CHECK_SIZE = 12;
-const WEEK_CARD_WIDTH = 120;
-const WEEK_CARD_MIN_HEIGHT = 160;
-const WEEK_DOT_SIZE = 8;
-const MONTH_CELL_MIN_HEIGHT = 64;
-const MONTH_BADGE_SIZE = 16;
-const HOLIDAY_PING_SIZE = 7;
+const TIME_COLUMN_WIDTH = scaled(40);
+const DOT_COLUMN_WIDTH = scaled(14);
+const TIMELINE_DOT_SIZE = scaled(9);
+const DONE_BOX_SIZE = scaled(24);
+const DONE_CHECK_SIZE = scaled(12);
+const WEEK_CARD_WIDTH = scaled(120);
+const WEEK_CARD_MIN_HEIGHT = scaled(160);
+const WEEK_DOT_SIZE = scaled(8);
+const MONTH_CELL_MIN_HEIGHT = scaled(64);
+const MONTH_BADGE_SIZE = scaled(16);
+const HOLIDAY_PING_SIZE = scaled(7);
 
 export default function ScheduleScreen() {
   const { colors } = useTheme();
@@ -424,7 +425,7 @@ const styles = StyleSheet.create({
     top: 0,
     right: 0,
     left: 0,
-    height: 2,
+    height: scaled(2),
   },
   timeCol: {
     width: TIME_COLUMN_WIDTH,
@@ -443,7 +444,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statusText: {
-    marginTop: 2,
+    marginTop: scaled(2),
   },
   emptyText: {
     textAlign: 'center',
@@ -493,7 +494,7 @@ const styles = StyleSheet.create({
   weekPreview: {
     width: '100%',
     marginTop: spacing.md,
-    gap: 2,
+    gap: scaled(2),
   },
   weekPreviewText: {
     textAlign: 'center',

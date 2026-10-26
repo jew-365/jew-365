@@ -100,6 +100,7 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
     gap: spacing.sm,
     flexGrow: 1,
   },
@@ -126,6 +127,7 @@ const styles = StyleSheet.create({
     paddingEnd: spacing.md,
   },
   dots: {
+    marginTop: spacing.lg,
     marginBottom: spacing.md,
   },
   backBtn: {
