@@ -3,7 +3,16 @@ import { ChoiceRow } from '../ChoiceRow';
 import { MitzvahIcon } from '../MitzvahIcon';
 import { renderWithTheme } from '@/testing/render';
 import { THEMES, THEME_NAMES } from '@/theme/colors';
+import { typography } from '@/theme/typography';
 import { useUserStore } from '@/stores/useUserStore';
+
+type Node = ReturnType<typeof screen.getByText>;
+
+const hostParent = (node: Node): Node => {
+  let current = node.parent;
+  while (current && typeof current.type !== 'string') current = current.parent;
+  return current!;
+};
 
 const checkIcons = () => screen.UNSAFE_queryAllByType(MitzvahIcon).filter((icon) => icon.props.name === 'check');
 
@@ -38,6 +47,28 @@ describe('ChoiceRow', () => {
     let node: ReturnType<typeof screen.getByRole> | null = screen.getByRole('radio', { name: 'גבר' });
     while (node && node.props['aria-checked'] === undefined) node = node.parent;
     expect(node?.props['aria-checked']).toBe(selected);
+  });
+
+  it('draws no caption line when it has none', () => {
+    renderWithTheme(<ChoiceRow label="גבר" selected={false} onPress={jest.fn()} />);
+    expect(screen.getAllByText(/./)).toHaveLength(1);
+  });
+
+  it.each(THEME_NAMES)('%s: draws a caption under the label in textSub, with the tick still at the end', (name) => {
+    useUserStore.setState({ theme: name });
+    const onPress = jest.fn();
+    renderWithTheme(<ChoiceRow label="גבר" caption="לפי הגדרת הנוסח" selected onPress={onPress} />);
+    expect(screen.getByText('לפי הגדרת הנוסח')).toHaveStyle({
+      color: THEMES[name].textSub,
+      fontSize: typography.caption.fontSize,
+      marginTop: 2,
+    });
+    expect(screen.getByText('גבר')).toHaveStyle({ color: THEMES[name].goldText });
+    expect(screen.getByRole('radio', { name: 'גבר' })).toBeChecked();
+    expect(checkIcons()).toHaveLength(1);
+    expect(hostParent(screen.getByText('גבר'))).toHaveStyle({ flex: 1 });
+    fireEvent.press(screen.getByText('לפי הגדרת הנוסח'));
+    expect(onPress).toHaveBeenCalledTimes(1);
   });
 
   it.each(THEME_NAMES)(

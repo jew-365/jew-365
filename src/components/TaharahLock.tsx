@@ -11,10 +11,13 @@ import {
 } from '@/services/biometricLock';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
 import { Button } from './Button';
+
+const BACK_HIT_SLOP = scaled(12);
 
 type Props = { children: React.ReactNode; recheck?: number };
 
@@ -69,7 +72,7 @@ export function TaharahLock({ children, recheck = 0 }: Props) {
               {t('taharah.locked.body')}
             </Text>
             <Button label={t('taharah.locked.unlock')} onPress={unlock} style={styles.unlock} />
-            <Pressable onPress={goBack} accessibilityRole="button" hitSlop={12} style={styles.back}>
+            <Pressable onPress={goBack} accessibilityRole="button" hitSlop={BACK_HIT_SLOP} style={styles.back}>
               <Text style={[typography.bodyBold, { color: colors.goldText }]}>{t('common.back')}</Text>
             </Pressable>
           </View>

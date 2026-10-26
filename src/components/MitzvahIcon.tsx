@@ -1,6 +1,7 @@
 import React from 'react';
 import Svg, { Circle, Ellipse, G, Line, Path, Rect } from 'react-native-svg';
 import type { AppLanguage } from '@/i18n';
+import { scaled } from '@/theme/scale';
 
 export const ICON_NAMES = [
   'tefillin',
@@ -351,7 +352,7 @@ type Props = {
   strokeWidth?: number;
 };
 
-export function MitzvahIcon({ name, size = 22, color, tint, variant = ICON_VARIANT, strokeWidth }: Props) {
+export function MitzvahIcon({ name, size = scaled(22), color, tint, variant = ICON_VARIANT, strokeWidth }: Props) {
   const duotone = variant === 'duotone';
   const sw = strokeWidth ?? (duotone ? 1.5 : 1.8);
   return (

@@ -1,20 +1,22 @@
+import { scaled } from './scale';
+
 export const spacing = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 28,
-  xxxl: 40,
+  xs: scaled(4),
+  sm: scaled(8),
+  md: scaled(12),
+  lg: scaled(16),
+  xl: scaled(20),
+  xxl: scaled(28),
+  xxxl: scaled(40),
 } as const;
 
 export const radius = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
+  xs: scaled(4),
+  sm: scaled(8),
+  md: scaled(12),
+  lg: scaled(16),
+  xl: scaled(20),
+  xxl: scaled(24),
   full: 999,
 } as const;
 

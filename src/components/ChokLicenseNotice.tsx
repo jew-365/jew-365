@@ -3,8 +3,11 @@ import { Linking, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from
 import { BottomSheet } from '@/components/BottomSheet';
 import { useI18n } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
+
+const HIT_SLOP = scaled(8);
 
 type Props = {
   style?: StyleProp<ViewStyle>;
@@ -20,7 +23,7 @@ function NoticeLines({ style }: { style?: StyleProp<ViewStyle> }) {
       <Text style={[typography.caption, { color: colors.textMuted }]}>{t('chok.shareAlike')}</Text>
       <Pressable
         accessibilityRole="link"
-        hitSlop={8}
+        hitSlop={HIT_SLOP}
         onPress={() => {
           Linking.openURL(t('chok.licenseUrl')).catch(() => {});
         }}
@@ -28,6 +31,15 @@ function NoticeLines({ style }: { style?: StyleProp<ViewStyle> }) {
         <Text style={[typography.captionBold, { color: colors.goldText }]}>{t('chok.license')}</Text>
       </Pressable>
     </View>
+  );
+}
+
+export function ChokCreditSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { t } = useI18n();
+  return (
+    <BottomSheet visible={visible} title={t('chok.creditTitle')} onClose={onClose}>
+      <NoticeLines />
+    </BottomSheet>
   );
 }
 
@@ -45,15 +57,13 @@ export function ChokLicenseNotice({ style, compact = false }: Props) {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('chok.creditOpen')}
-        hitSlop={8}
+        hitSlop={HIT_SLOP}
         onPress={() => setOpen(true)}
         style={[styles.short, style]}
       >
         <Text style={[typography.captionBold, { color: colors.goldText }]}>{t('chok.creditShort')}</Text>
       </Pressable>
-      <BottomSheet visible={open} title={t('chok.creditTitle')} onClose={() => setOpen(false)}>
-        <NoticeLines />
-      </BottomSheet>
+      <ChokCreditSheet visible={open} onClose={() => setOpen(false)} />
     </>
   );
 }

@@ -13,10 +13,11 @@ import {
   ViewStyle,
 } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { radius } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 
-export const WHEEL_ITEM_HEIGHT = 40;
+export const WHEEL_ITEM_HEIGHT = scaled(40);
 export const WHEEL_VISIBLE_ROWS = 5;
 
 const EDGE_PADDING = ((WHEEL_VISIBLE_ROWS - 1) / 2) * WHEEL_ITEM_HEIGHT;

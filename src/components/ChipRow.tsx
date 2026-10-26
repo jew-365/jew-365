@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 
@@ -11,6 +12,8 @@ type Props<T extends string | number> = {
   renderLabel: (value: T) => string;
   style?: StyleProp<ViewStyle>;
 };
+
+const HIT_SLOP = scaled(6);
 
 export function ChipRow<T extends string | number>({ values, selected, onSelect, renderLabel, style }: Props<T>) {
   const { colors } = useTheme();
@@ -24,7 +27,7 @@ export function ChipRow<T extends string | number>({ values, selected, onSelect,
             onPress={() => onSelect(value)}
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
-            hitSlop={6}
+            hitSlop={HIT_SLOP}
             style={[styles.pill, { backgroundColor: active ? colors.gold : colors.surface2 }]}
           >
             <Text style={[typography.captionBold, { color: active ? colors.onGold : colors.text }]}>

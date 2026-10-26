@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { fontFamilies, typography } from '@/theme/typography';
 import { streakGoalProgress } from '@/utils/streakGoal';
 import { useI18n } from '@/i18n';
@@ -10,7 +11,7 @@ type Props = { streak: number; size?: number };
 
 const DISC_OPACITY = 0.72;
 
-export function StreakRing({ streak, size = 220 }: Props) {
+export function StreakRing({ streak, size = scaled(220) }: Props) {
   const { colors } = useTheme();
   const { t } = useI18n();
   const days = Math.max(0, Math.floor(streak));

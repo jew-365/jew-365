@@ -12,6 +12,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   valueText: {
-    fontSize: 16,
+    fontSize: scaled(16),
     textAlign: 'center',
     writingDirection: 'ltr',
   },
@@ -191,6 +192,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   wheel: {
-    width: 96,
+    width: scaled(96),
   },
 });

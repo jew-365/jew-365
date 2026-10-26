@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { IconName, MitzvahIcon, backIcon } from '@/components/MitzvahIcon';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -16,7 +17,8 @@ type ScreenHeaderProps = {
   children?: React.ReactNode;
 };
 
-const BACK_ICON_SIZE = 14;
+const BACK_ICON_SIZE = scaled(14);
+const BACK_HIT_SLOP = scaled(10);
 const BACK_ICON_STROKE = 2.5;
 
 export function ScreenHeader({ title, subtitle, onBack, actions, leading, children }: ScreenHeaderProps) {
@@ -32,7 +34,7 @@ export function ScreenHeader({ title, subtitle, onBack, actions, leading, childr
               onPress={onBack}
               accessibilityRole="button"
               accessibilityLabel={t('common.back')}
-              hitSlop={10}
+              hitSlop={BACK_HIT_SLOP}
               style={({ pressed }) => [
                 styles.pill,
                 { backgroundColor: pressed ? colors.surface2 : colors.surface },
@@ -80,7 +82,8 @@ type HeaderPillProps = {
   | { label?: undefined; icon: IconName; accessibilityLabel: string }
 );
 
-const PILL_ICON_SIZE = 18;
+const PILL_ICON_SIZE = scaled(18);
+const PILL_HIT_SLOP = scaled(8);
 const PILL_ICON_STROKE = 2.2;
 
 export function HeaderPill({
@@ -100,7 +103,7 @@ export function HeaderPill({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ selected, disabled }}
-      hitSlop={8}
+      hitSlop={PILL_HIT_SLOP}
       style={({ pressed }) => [
         styles.pill,
         {
@@ -160,7 +163,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
-    marginTop: 2,
+    marginTop: scaled(2),
   },
   extra: {
     marginTop: spacing.md,
@@ -175,8 +178,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
   },
   counter: {
-    minWidth: 48,
-    minHeight: 34,
+    minWidth: scaled(48),
+    minHeight: scaled(34),
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,
     alignItems: 'center',

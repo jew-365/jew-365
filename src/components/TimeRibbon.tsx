@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import type { ThemeColors } from '@/theme/colors';
 import { typography } from '@/theme/typography';
 import { radius, spacing } from '@/theme/tokens';
@@ -38,6 +39,6 @@ export function TimeRibbon({ pct, timeLeft, urgent = false }: Props) {
 const styles = StyleSheet.create({
   wrap: { marginTop: spacing.md },
   label: { marginBottom: spacing.sm },
-  track: { height: 6, borderRadius: radius.full, overflow: 'hidden' },
+  track: { height: scaled(6), borderRadius: radius.full, overflow: 'hidden' },
   fill: { height: '100%', borderRadius: radius.full },
 });

@@ -112,8 +112,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "Each mitzvah's screen shows today's time window, the next notification and its reminders in the order they go out, each with when it fires next. Add reminder adds one more, and Reset to default brings back the original reminders.",
       },
       {
-        he: 'תזכורת נשלחת מתחילת הזמן, לפני סוף הזמן או בשעה קבועה, ואפשר להקדים אותה עד שלוש שעות לפני שהזמן נפתח. ״דלג אם כבר סומן״ מוותר עליה כשהמצווה כבר סומנה. במצווה אישית יש גם ״אחרי הסוף, אם לא בוצע״, ובקידוש לבנה ״במוצאי שבת וחג״.',
-        en: 'A reminder goes out from the start of the window, before its end or at a set time, and can come up to three hours before the window opens. Skip if already done drops it once the mitzvah is marked. A custom mitzvah also offers After the end, if not done, and Kiddush Levana offers After Shabbat and Yom Tov.',
+        he: 'ב״מתי לשלוח״ בוחרים מתי התזכורת נשלחת: לפני תחילת הזמן (עד שלוש שעות לפני), בתחילת הזמן או אחריה, לפני סוף הזמן או בשעה קבועה, ומתחת קובעים כמה דקות. ״דלג אם כבר סומן״ מוותר עליה כשהמצווה כבר סומנה. במצווה אישית יש גם ״אחרי סוף הזמן, אם לא סימנת״, ובקידוש לבנה ״אחרי צאת שבת או חג״.',
+        en: 'In When to send you choose when the reminder goes out: before the time starts (up to three hours before), at the start or after it, before the time ends or at a set time, and below it how many minutes. Skip if already done drops it once the mitzvah is marked. A custom mitzvah also offers After the end, if not marked, and Kiddush Levana offers After Shabbat or Yom Tov ends.',
       },
       {
         he: 'מצווה פעילה נשארת תמיד עם תזכורת אחת לפחות: את האחרונה אי אפשר למחוק, והפעלה של מצווה בלי תזכורות מבקשת קודם להגדיר אחת.',
@@ -140,8 +140,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "Seasonal mitzvot appear only in their time: the Omer count, Chanukah candles (the reminder names the night), Selichot in your nusach's season, and Ushpizin on the nights of Sukkot with that night's guest. Kiddush Levana appears once a month, from the first night it is said until the period ends, until it is marked. Some mitzvot depend on the nusach.",
       },
       {
-        he: '״הוסף מצווה חדשה״ בתחתית המסך יוצר מצווה אישית: שם, שעות (שעת סיום מוקדמת משעת ההתחלה נמשכת עד למחרת), ותזמון לפי ימי השבוע, לפי טווח תאריכים ביומן או לכמה ימים ברצף. בוחרים אם לדלג בשבת וביום טוב, ומוסיפים תזכורות ותוכן עשיר: טקסט, ברכה, קישור או טקסט מהסידור. כשהטווח או הרצף מסתיימים המצווה נכבית, וההיסטוריה שלה נשמרת.',
-        en: 'Add custom mitzvah at the bottom of the screen creates your own mitzvah: a name, hours (an end before the start runs into the next day), and a schedule by weekdays, by a date range picked on a calendar or for a number of days in a row. You choose whether to skip it on Shabbat and Yom Tov, and add reminders and rich content: text, a blessing, a link or a text from the siddur. When its range or streak ends it switches off, and its history is kept.',
+        he: '״הוסף מצווה חדשה״ בתחתית המסך יוצר מצווה אישית: שם, שעות (שעת סיום מוקדמת משעת ההתחלה נמשכת עד למחרת), ובתזמון המצווה ימים קבועים בשבוע, טווח מתאריך עד תאריך או מספר ימים ברצף. בוחרים אם לדלג בשבת וביום טוב, ומוסיפים תזכורות ותוכן עשיר: טקסט, ברכה, קישור או טקסט מהסידור. כשהטווח או הרצף מסתיימים המצווה נכבית, וההיסטוריה שלה נשמרת.',
+        en: 'Add custom mitzvah at the bottom of the screen creates your own mitzvah: a name, hours (an end before the start runs into the next day), and a schedule of set weekdays, a range from date to date or a run of days. You choose whether to skip it on Shabbat and Yom Tov, and add reminders and rich content: text, a blessing, a link or a text from the siddur. When its range or streak ends it switches off, and its history is kept.',
       },
     ],
     routes: ['/mitzvot', '/custom-mitzvah'],
@@ -174,16 +174,16 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'הסידור', en: 'The siddur' },
     body: [
       {
-        he: 'בלשונית סידור מופיעים קודם הטקסטים שהזמן שלהם פתוח עכשיו, אחר כך התפילות (שחרית, מנחה וערבית), ואחריהן הברכות והתפילות לפי קבוצות. טקסט שלא נאמר היום מופיע באפור, עם הזמן שבו הוא נאמר. כל טקסט מותאם ליום: הלל, מוסף ותוספות כמו יעלה ויבוא מופיעים בימים שלהם.',
-        en: "The Siddur tab starts with the texts whose time is open now, then the prayers (Shacharit, Mincha and Maariv), then blessings and prayers by group. A text not said today is greyed out, with when it is said. Each text is set for the day: Hallel, Musaf and inserts such as Ya'aleh VeYavo appear on their days.",
+        he: 'בלשונית סידור מופיעים קודם הטקסטים שהזמן שלהם פתוח עכשיו, אחר כך התפילות (שחרית, מנחה וערבית), המצוות (תפילין, קריאת שמע, ברכות השחר, הדלקת נרות, הבדלה וספירת העומר), ואחריהן הברכות והתפילות לפי קבוצות. טקסט שלא נאמר היום מופיע באפור, עם הזמן שבו הוא נאמר, ואפשר לפתוח אותו תמיד: הוא נפתח בנוסח של היום הבא שבו אומרים אותו, בלי ״סיימתי״. כל טקסט מותאם ליום: הלל, מוסף ותוספות כמו יעלה ויבוא מופיעים בימים שלהם.',
+        en: "The Siddur tab starts with the texts whose time is open now, then the prayers (Shacharit, Mincha and Maariv), the mitzvot (tefillin, the morning Shema, the morning blessings, candle lighting, havdalah and the Omer), then blessings and prayers by group. A text not said today is greyed out, with when it is said, and it still opens at any time, in the text of the next day it is said and without Done. Each text is set for the day: Hallel, Musaf and inserts such as Ya'aleh VeYavo appear on their days.",
       },
       {
         he: 'בראש הקורא: ״בחר חלק״ לקפיצה לחלק אחר, במניין או ביחיד בתפילות שיש בהן קטעים למניין (ביחיד, קדיש, ברכו, קדושה וקריאת התורה מקופלים), הגדלה והקטנה של הטקסט, וגלילה אוטומטית במהירות שבוחרים. קטע מקופל נפתח בהקשה. כשהאפליקציה באנגלית, מתחת לעברית מופיע התרגום, כשיש למקור תרגום.',
         en: "At the top of the reader: Jump to section, Minyan or Alone in prayers with minyan passages (Alone folds Kaddish, Barchu, Kedusha and the Torah reading), larger and smaller text, and auto-scroll at the speed you choose. A folded passage opens on tap. When the app is in English, the source's translation appears under the Hebrew where it has one.",
       },
       {
-        he: 'כפתור הכוכב שומר את המקום הנוכחי כסימנייה, ו״סימניות״ מציג את ״המקום האחרון״ ואת הסימניות של הטקסט, לקפיצה או למחיקה. בפתיחה הבאה הקורא מציע להמשיך מהמקום שבו עצרתם: בטקסט של מצווה (התפילות, הדלקת נרות, הבדלה וספירת העומר) רק באותו יום, ובשאר הטקסטים תמיד. ״סיימתי״ בסוף הטקסט מסמן את המצווה.',
-        en: "The star button saves the current place as a bookmark, and Bookmarks shows Where you left off and the text's bookmarks, to jump to or delete. Next time the reader offers to continue where you left off: for a mitzvah's text (the prayers, candle lighting, havdalah, the Omer) on the same day only, for every other text always. Done at the end of the text marks its mitzvah.",
+        he: 'כפתור הכוכב שומר את המקום הנוכחי כסימנייה, ו״סימניות״ מציג את ״המקום האחרון״ ואת הסימניות של הטקסט, לקפיצה או למחיקה. בפתיחה הבאה הקורא מציע להמשיך מהמקום שבו עצרתם: בטקסט של מצווה (התפילות, הדלקת נרות, הבדלה וספירת העומר) רק באותו יום, ובשאר הטקסטים תמיד. ״סיימתי״ בסוף הטקסט מסמן את המצווה, ובטקסט של מצווה כפתור ההגדרות בראש הקורא פותח את מסך המצווה.',
+        en: "The star button saves the current place as a bookmark, and Bookmarks shows Where you left off and the text's bookmarks, to jump to or delete. Next time the reader offers to continue where you left off: for a mitzvah's text (the prayers, candle lighting, havdalah, the Omer) on the same day only, for every other text always. Done at the end of the text marks its mitzvah, and in a mitzvah's text the settings button at the top opens the mitzvah's screen.",
       },
       {
         he: 'בהגדרות ← תפילה וסידור בוחרים נוסח, דעת זמן ק״ש (הגר״א או המגן אברהם, שקובעת מתי נגמר חלון קריאת שמע של שחרית), במניין או ביחיד, ״נוסח הסידור״ לגבר או לאישה, וגלילה. נוסח הסידור מתעדכן לפי המגדר בפרופיל: אישה קוראת את ״מודה אני״, את ברכות השחר ואת שאר הנוסחים בלשון אישה.',
@@ -227,8 +227,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'Chok LeYisrael is an add-on downloaded once, about 5 MB, from its mitzvah screen or the More tab, and after that it is available without an internet connection. When the download ends, the app asks whether to turn on reminders and tracking. When there is a new version of the text, the mitzvah screen offers the update, and the add-on can be deleted there too.',
       },
       {
-        he: 'הקורא מציג את הלימוד של היום מפרשת השבוע, עם שורת ימים לבחירת יום אחר, ובשבוע של פרשות מחוברות בחירה איזו פרשה ללמוד. כשהמצווה פעילה ״סיימתי״ מסמן את היום, וימים קודמים בשבוע שלא סומנו מופיעים כהשלמה מקופלת. רש״י וברטנורה מקופלים או פתוחים לפי ״פירושים״ בראש הקורא או בהגדרות, וכל פירוש נפתח בהקשה.',
-        en: "The reader shows today's portion of the week's parasha, with a row of days to pick another day and, in a double week, a choice of which parasha to learn. While the mitzvah is on, Done marks the day, and earlier unmarked days of the week appear as folded make-ups. Rashi and Bartenura are folded or open by Commentaries at the top of the reader or in Settings, and each one opens on tap.",
+        he: 'הקורא מציג את הלימוד של היום מפרשת השבוע, עם שורת ימים לבחירת יום אחר, ובשבוע של פרשות מחוברות בחירה איזו פרשה ללמוד. כשהמצווה פעילה ״סיימתי״ מסמן את היום, וימים קודמים בשבוע שלא סומנו מופיעים כהשלמה מקופלת. רש״י וברטנורה מוצגים או מקופלים לפי ״עם פירושים״ או ״בלי פירושים״ בראש הקורא או בהגדרות, וכל פירוש נפתח בהקשה. בשורת הפרשה אפשר לבחור כל פרשה אחרת ולקרוא בה, בלי ״סיימתי״, ו״חזרה לפרשת השבוע״ מחזיר; סימנייה או המקום האחרון בפרשה אחרת מחזירים אליה.',
+        en: "The reader shows today's portion of the week's parasha, with a row of days to pick another day and, in a double week, a choice of which parasha to learn. While the mitzvah is on, Done marks the day, and earlier unmarked days of the week appear as folded make-ups. Rashi and Bartenura show or fold by Commentary or Text only at the top of the reader or in Settings, and each one opens on tap. The parasha row picks any other parasha to read, without Done, and Back to this week's parasha returns; a bookmark or the last place in another parasha takes you back there.",
       },
       {
         he: 'המצווה פתוחה ביום הלימוד, מעלות השחר עד עלות השחר שלמחרת, ובערב שבת וחג עד הדלקת הנרות, ותזכורת ברירת המחדל שלה בשעה 09:00. ליל שישי נרשם ליום חמישי או ליום שישי, לפי מה שבוחרים ב״סיימתי״ הראשון או בהגדרות ← תפילה וסידור. הטקסט מתוך מאגר תורת אמת, ברישיון CC BY-NC-SA 2.5; הקרדיט המלא בהגדרות ← אודות ויצירת קשר.',
@@ -289,15 +289,15 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'Rosh Chodesh notices and hilula notices are off by default. Switch them on in Settings → My mitzvot, in the More group, or on their own screens.',
       },
       {
-        he: 'בכל מסך מופיעות ההתראות לבחירה: בראש חודש התראה מוקדמת, בערב שלפני וביום עצמו, ובהילולה התראה מוקדמת ובכניסת ההילולה. כל אחת אפשר לכבות או לתזמן: בשקיעה או לפניה, או בשעה קבועה, ובהתראה המוקדמת גם כמה ימים לפני. כל עוד ההתראות פעילות נשארת לפחות אחת דלוקה. מתחת מופיעים ראשי החודשים וההילולות הקרובים.',
-        en: 'Each screen lists its notices: for Rosh Chodesh an early notice, the evening before and on the day; for a hilula an early notice and as it begins. Each can be turned off or timed: at or before sunset, or at a set time, and the early notice also how many days ahead. While the notices are on, at least one stays on. The coming dates are listed below.',
+        he: 'בכל מסך מופיעות ההתראות לבחירה: בראש חודש התראה מוקדמת, בערב שלפני וביום עצמו, ובהילולה התראה מוקדמת ובכניסת ההילולה. כל אחת אפשר לכבות או לתזמן: בשקיעה או לפניה, או בשעה קבועה, ובהתראה המוקדמת גם כמה ימים לפני. כל עוד ההתראות פעילות נשארת לפחות אחת דלוקה. מתחת מופיעים ראשי החודשים וההילולות הקרובים. הקשה על צדיק ברשימה פותחת דף עליו, וכך גם הקשה על התראת ההילולה.',
+        en: 'Each screen lists its notices: for Rosh Chodesh an early notice, the evening before and on the day; for a hilula an early notice and as it begins. Each can be turned off or timed: at or before sunset, or at a set time, and the early notice also how many days ahead. While the notices are on, at least one stays on. The coming dates are listed below. Tapping a tzaddik in the list opens a page about him, and so does tapping the hilula notice.',
       },
       {
         he: 'התראה שנופלת בשבת או בחג מופיעה בהתראה שלפני כניסתם. אלה התראות ולא מצוות, ולכן הן לא נספרות בהיסטוריה.',
         en: 'A notice that falls on Shabbat or Yom Tov is folded into the notification before it begins. These are notices, not mitzvot, so they do not count in history.',
       },
     ],
-    routes: ['/rosh-chodesh', '/hilulot'],
+    routes: ['/rosh-chodesh', '/hilulot', '/hilula/[id]'],
     action: { label: { he: 'למסך ראש חודש', en: 'Open Rosh Chodesh' }, href: '/rosh-chodesh' },
   },
   {
@@ -331,8 +331,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "Settings opens with a search: type a word such as “notifications”, “nusach” or “backup” to go straight to the setting. It also finds mitzvot, siddur texts and the sections inside them, and forgives typos and typing on the other language's keyboard.",
       },
       {
-        he: 'החלקים: פרופיל (שם, טלפון, מגדר ומצב משפחתי), תפילה וסידור, מכשיר והתראות (עיר או GPS, התראות, הסיכום השבועי, ערכת נושא ושפה), גיבוי, שחזור ואיפוס, ואודות ויצירת קשר. העיר או מיקום ה־GPS קובעים גם אם אתם בישראל או בחוץ לארץ, למשל לעניין יום טוב שני.',
-        en: 'Its sections: Profile (name, phone, gender and marital status), Prayer and siddur, Device and notifications (city or GPS, notifications, the weekly report, theme and language), Backup, restore and reset, and About and contact. The city or GPS location also decides whether you count as in Israel or abroad, for example for the second day of Yom Tov.',
+        he: 'החלקים: פרופיל (שם, טלפון, מגדר ומצב משפחתי), תפילה וסידור, מכשיר והתראות (עיר או GPS, התראות, הסיכום השבועי, ערכת נושא, גודל התצוגה ושפה), גיבוי, שחזור ואיפוס, ואודות ויצירת קשר. העיר או מיקום ה־GPS קובעים גם אם אתם בישראל או בחוץ לארץ, למשל לעניין יום טוב שני.',
+        en: 'Its sections: Profile (name, phone, gender and marital status), Prayer and siddur, Device and notifications (city or GPS, notifications, the weekly report, theme, display size and language), Backup, restore and reset, and About and contact. The city or GPS location also decides whether you count as in Israel or abroad, for example for the second day of Yom Tov.',
       },
       {
         he: 'באנדרואיד ההגדרות, המצוות וההיסטוריה מגובות לחשבון Google, ובאייפון בגיבוי iCloud של המכשיר. בהגדרות ← גיבוי, שחזור ואיפוס אפשר גם לייצא קובץ גיבוי ולשחזר ממנו בכל טלפון; שחזור מחליף את מה שיש בטלפון. ״איפוס האפליקציה״ מוחק הכל, גם את נתוני הטהרה, שאינם נכללים בגיבוי.',
@@ -394,12 +394,12 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: 'Maariv stays open all night until dawn, and Birchot HaShachar until midday.',
       },
       {
-        he: 'תזכורות גמישות: לכל מצווה כמה תזכורות שרוצים, מתחילת הזמן, לפני סופו או בשעה קבועה, ואפילו עד שלוש שעות לפני שהזמן נפתח. מצווה פעילה נשארת תמיד עם תזכורת אחת לפחות.',
-        en: 'Flexible reminders: as many as you like on any mitzvah, from the start, before the end or at a set time, even up to three hours before the window opens. A mitzvah that is on always keeps at least one reminder.',
+        he: 'תזכורות גמישות: לכל מצווה כמה תזכורות שרוצים, לפני תחילת הזמן (עד שלוש שעות), בתחילתו או אחריה, לפני סופו או בשעה קבועה, ובחירה ברורה של ״מתי לשלוח״ וכמה דקות. מצווה פעילה נשארת תמיד עם תזכורת אחת לפחות.',
+        en: 'Flexible reminders: as many as you like on any mitzvah, before the start (up to three hours), at the start or after it, before the end or at a set time, with a clear choice of when to send and how many minutes. A mitzvah that is on always keeps at least one reminder.',
       },
       {
-        he: 'מצוות אישיות: תזמון לפי ימי השבוע, לפי טווח תאריכים ביומן או לכמה ימים ברצף, ותזכורת אחרי סוף הזמן אם המצווה עוד לא סומנה.',
-        en: 'Custom mitzvot: schedule them by weekdays, by a date range on a calendar or for a number of days in a row, with a reminder after the end if the mitzvah is not marked yet.',
+        he: 'מצוות אישיות: תזמון של ימים קבועים בשבוע, טווח מתאריך עד תאריך או מספר ימים ברצף, ותזכורת אחרי סוף הזמן אם המצווה עוד לא סומנה.',
+        en: 'Custom mitzvot: schedule them on set weekdays, from date to date or for a run of days, with a reminder after the end if the mitzvah is not marked yet.',
       },
       {
         he: 'המצוות שלי מסודרות לפי קבוצות, עם כפתור הוספה קבוע בתחתית, ומשתמשים חדשים בוחרים בהרשמה את המצוות שרוצים לעקוב אחריהן.',
@@ -414,12 +414,16 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: 'Bookmarks in the siddur, and the last place you read: the reader offers to continue where you left off.',
       },
       {
+        he: 'כל נוסח בסידור נפתח תמיד: נוסח שלא אומרים היום, כמו נרות חנוכה או סליחות, נפתח בנוסח של היום הבא שבו אומרים אותו, ותפילה שהזמן שלה עבר היום נפתחת בנוסח של היום. בלשונית הסידור נוספה קבוצת מצוות קבועה, ובנוסח של מצווה יש כפתור להגדרות שלה.',
+        en: "Every siddur text opens at any time: a text not said today, such as the Chanukah candles or Selichot, opens in the text of the next day it is said, and a prayer whose time has passed today opens in today's text. The Siddur tab has a fixed Mitzvot group, and a mitzvah's text has a button to its settings.",
+      },
+      {
         he: 'החיפוש בהגדרות מוצא גם מצוות, תפילות ופרקים בסידור.',
         en: 'The search in Settings also finds mitzvot, prayers and sections of the siddur.',
       },
       {
-        he: 'חק לישראל: נשמר דחוס, כ־5 MB במכשיר, רש״י וברטנורה מקופלים או פתוחים לבחירה, ליל שישי נרשם לחמישי או לשישי לבחירתכם, ואחרי ההורדה מוצע להפעיל את המצווה.',
-        en: 'Chok LeYisrael: stored compressed, about 5 MB on the phone, Rashi and Bartenura folded or open as you choose, Thursday night counted for Thursday or Friday as you choose, and right after the download an offer to turn the mitzvah on.',
+        he: 'חק לישראל: נשמר דחוס, כ־5 MB במכשיר, אפשר לקרוא כל פרשה, רש״י וברטנורה עם פירושים או בלי לבחירה, ליל שישי נרשם לחמישי או לשישי לבחירתכם, ואחרי ההורדה מוצע להפעיל את המצווה.',
+        en: 'Chok LeYisrael: stored compressed, about 5 MB on the phone, any parasha can be read, Rashi and Bartenura shown or not as you choose, Thursday night counted for Thursday or Friday as you choose, and right after the download an offer to turn the mitzvah on.',
       },
       {
         he: 'הסליחות יורדות כתוסף בנוסח שלך, ולפני העונה מופיעה בדף הבית הצעה להוריד אותן.',
@@ -430,8 +434,8 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: 'Rosh Chodesh and hilula notices: turn any of them off and choose its day and time, and their wording fits when they arrive.',
       },
       {
-        he: 'בהגדרות: גיבוי, שחזור ואיפוס במקום אחד, ו״אודות ויצירת קשר״ עם הגרסה וקישורים לאתר, למדיניות הפרטיות ולחנות.',
-        en: 'In Settings: backup, restore and reset in one place, and About and contact with the version and links to the site, the privacy policy and the store.',
+        he: 'בהגדרות: גיבוי, שחזור ואיפוס במקום אחד, ו״אודות ויצירת קשר״ עם הגרסה, קישורים לאתר, למדיניות הפרטיות ולחנות, והקרדיט של חק לישראל.',
+        en: 'In Settings: backup, restore and reset in one place, and About and contact with the version, links to the site, the privacy policy and the store, and the Chok LeYisrael credit.',
       },
       {
         he: 'חמש ערכות הנושא הנוספות עוצבו מחדש, עם צבעים קריאים יותר.',
@@ -444,6 +448,14 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: 'תיקונים: מצווה אישית בשעות הלילה נספרת ליום אחד בכל מקום, מצווה שהופעלה היום לא מוצגת כ־0% בהיסטוריה, והיסט שהוקלד בטעות בעורך התזכורות נדחה במקום להישמר כאפס.',
         en: 'Fixes: a custom mitzvah set at night counts on one day everywhere, a mitzvah switched on today no longer reads 0% in history, and a mistyped reminder offset is refused instead of being saved as zero.',
+      },
+      {
+        he: 'דף לכל צדיק ברשימת ההילולות: קורות חיים, מה אפשר ללמוד, ספרים וחיבורים, סיפור וניווט ב־Waze למקום הקבורה. הקשה על הצדיק ברשימה או על ההתראה פותחת אותו.',
+        en: 'A page for every tzaddik of the hilulot list: his life, what we can learn, his books, a story and Waze directions to the burial place. Tap the tzaddik in the list, or the notice, to open it.',
+      },
+      {
+        he: 'גודל התצוגה: בהגדרות ← מכשיר והתראות אפשר להקטין או להגדיל את כל האפליקציה, טקסט, כפתורים ומרווחים, מ־80% עד 120%.',
+        en: 'Display size: in Settings → Device and notifications the whole app can be made smaller or larger, text, buttons and spacing, from 80% to 120%.',
       },
       {
         he: 'המדריך הזה: הסבר על כל חלק באפליקציה, ומה חדש בכל עדכון.',

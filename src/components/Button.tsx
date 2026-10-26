@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, StyleProp, StyleSheet, Text, ViewStyle } from 'react-native';
 import { MitzvahIcon, type IconName } from '@/components/MitzvahIcon';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 
@@ -17,8 +18,9 @@ type Props = {
   style?: StyleProp<ViewStyle>;
 };
 
-const ICON_SIZE = 18;
-const COMPACT_ICON_SIZE = 16;
+const ICON_SIZE = scaled(18);
+const COMPACT_ICON_SIZE = scaled(16);
+const HIT_SLOP = scaled(4);
 const ICON_STROKE = 2.4;
 
 export function Button({
@@ -44,7 +46,7 @@ export function Button({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled: inactive, busy }}
-      hitSlop={4}
+      hitSlop={HIT_SLOP}
       style={({ pressed }) => [
         styles.button,
         compact && styles.compact,
@@ -68,7 +70,7 @@ export function Button({
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 48,
+    minHeight: scaled(48),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -78,7 +80,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   compact: {
-    minHeight: 40,
+    minHeight: scaled(40),
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.sm,
   },

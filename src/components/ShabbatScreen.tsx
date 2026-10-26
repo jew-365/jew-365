@@ -5,12 +5,13 @@ import { HolyBlock } from '@/types/zmanim';
 import { clockOf } from '@/utils/clock';
 import { holyBlockLabelKeys } from '@/utils/skipRules';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { typography } from '@/theme/typography';
 import { radius, spacing } from '@/theme/tokens';
 import { useI18n } from '@/i18n';
 import { IconTile } from './IconTile';
 
-const EMBLEM_SIZE = 72;
+const EMBLEM_SIZE = scaled(72);
 
 // The block the app is quiet inside, provided by the root layout. Every screen-level Modal closes
 // while it holds: a native modal sits above any in-tree view, and on iOS a second one cannot be

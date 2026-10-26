@@ -1,10 +1,13 @@
 import React from 'react';
 import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
 import { WEEKDAYS } from '@/utils/customMitzvah';
+
+const HIT_SLOP = scaled(6);
 
 type Props = {
   selected: readonly number[];
@@ -27,7 +30,7 @@ export function WeekdayPicker({ selected, onToggle, style }: Props) {
             accessibilityRole="checkbox"
             accessibilityState={{ checked }}
             accessibilityLabel={label}
-            hitSlop={6}
+            hitSlop={HIT_SLOP}
             style={[styles.pill, { backgroundColor: checked ? colors.gold : colors.surface2 }]}
           >
             <Text style={[typography.captionBold, { color: checked ? colors.onGold : colors.text }]}>{label}</Text>

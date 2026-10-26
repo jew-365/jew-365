@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { MitzvahIcon, type IconName } from '@/components/MitzvahIcon';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 
 type Props = {
   name: IconName;
@@ -10,7 +11,7 @@ type Props = {
   style?: StyleProp<ViewStyle>;
 };
 
-const DEFAULT_SIZE = 44;
+const DEFAULT_SIZE = scaled(44);
 const RADIUS_SHARE = 0.4;
 const ICON_SHARE = 0.55;
 

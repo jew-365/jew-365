@@ -4,6 +4,7 @@ import type { BottomTabBarProps, BottomTabNavigationOptions } from '@react-navig
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies, typography } from '@/theme/typography';
@@ -11,10 +12,10 @@ import { useI18n } from '@/i18n';
 
 type TabOptionsWithHref = BottomTabNavigationOptions & { href?: string | null };
 
-const TAB_ICON_SIZE = 22;
+const TAB_ICON_SIZE = scaled(22);
 const TAB_ICON_STROKE = 1.8;
-const PILL_WIDTH = 48;
-const PILL_HEIGHT = 32;
+const PILL_WIDTH = scaled(48);
+const PILL_HEIGHT = scaled(32);
 
 const IOS_HOME_INDICATOR_OVERLAP = 20;
 
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
+    gap: scaled(2),
   },
   pill: {
     width: PILL_WIDTH,
@@ -171,8 +172,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   underline: {
-    width: 16,
-    height: 3,
+    width: scaled(16),
+    height: scaled(3),
     borderRadius: radius.full,
   },
 });

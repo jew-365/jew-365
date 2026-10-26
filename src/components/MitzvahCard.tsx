@@ -8,6 +8,7 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { fontFamilies, typography } from '@/theme/typography';
 import { durations, radius, spacing } from '@/theme/tokens';
@@ -17,12 +18,14 @@ import { MitzvahIcon, type IconName } from './MitzvahIcon';
 import { TimeRibbon } from './TimeRibbon';
 import { useI18n } from '@/i18n';
 
-const TILE_SIZE = 40;
-const BUTTON_SIZE = 32;
-const BUTTON_ICON_SIZE = 16;
+const TILE_SIZE = scaled(40);
+const BUTTON_SIZE = scaled(32);
+const BUTTON_ICON_SIZE = scaled(16);
+const BUTTON_HIT_SLOP = scaled(8);
+const LINE_GAP = scaled(2);
 const BUTTON_ICON_STROKE = 2.2;
-const DONE_LINE_ICON_SIZE = 14;
-const URGENT_LINE_ICON_SIZE = 12;
+const DONE_LINE_ICON_SIZE = scaled(14);
+const URGENT_LINE_ICON_SIZE = scaled(12);
 const URGENT_LINE_ICON_STROKE = 2;
 
 type Props = {
@@ -142,7 +145,7 @@ export function MitzvahCard({
               <Text
                 style={[
                   typography.micro,
-                  { color: statusColor, fontFamily: fontFamilies.heebo.semibold, marginTop: 2 },
+                  { color: statusColor, fontFamily: fontFamilies.heebo.semibold, marginTop: LINE_GAP },
                 ]}
               >
                 {statusText}
@@ -165,7 +168,7 @@ export function MitzvahCard({
               <Text
                 style={[
                   typography.micro,
-                  { color: colors.textMuted, fontFamily: fontFamilies.heebo.semibold, marginTop: 2 },
+                  { color: colors.textMuted, fontFamily: fontFamilies.heebo.semibold, marginTop: LINE_GAP },
                 ]}
               >
                 {t('state.readOnly')}
@@ -184,7 +187,7 @@ export function MitzvahCard({
               onPress={onOpenText}
               accessibilityRole="button"
               accessibilityLabel={t('siddur.open')}
-              hitSlop={8}
+              hitSlop={BUTTON_HIT_SLOP}
               style={[styles.circleButton, { borderColor: ringColor }]}
             >
               <MitzvahIcon name="siddur" size={BUTTON_ICON_SIZE} color={buttonTone} />
@@ -196,7 +199,7 @@ export function MitzvahCard({
               onLongPress={onLongPress}
               accessibilityRole="button"
               accessibilityLabel={t('state.completeAction', { name })}
-              hitSlop={8}
+              hitSlop={BUTTON_HIT_SLOP}
               style={[styles.circleButton, { borderColor: ringColor }]}
             >
               <MitzvahIcon name="check" size={BUTTON_ICON_SIZE} color={buttonTone} strokeWidth={BUTTON_ICON_STROKE} />
@@ -240,7 +243,7 @@ const styles = StyleSheet.create({
   body: { padding: spacing.lg },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   meta: { flex: 1, minWidth: 0 },
-  iconLine: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: 2 },
+  iconLine: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: LINE_GAP },
   actions: {
     position: 'absolute',
     top: spacing.lg,
@@ -270,14 +273,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stamp: {
-    borderWidth: 3,
+    borderWidth: scaled(3),
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.xl,
     borderRadius: radius.sm,
   },
   stampText: {
-    fontSize: 21,
+    fontSize: scaled(21),
     fontFamily: fontFamilies.heebo.black,
-    letterSpacing: 3,
+    letterSpacing: scaled(3),
   },
 });

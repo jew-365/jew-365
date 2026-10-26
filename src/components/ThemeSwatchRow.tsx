@@ -2,7 +2,10 @@ import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { THEMES, THEME_NAMES, ThemeName } from '@/theme/colors';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
+
+const HIT_SLOP = scaled(4);
 
 type Props = {
   selected: ThemeName;
@@ -21,7 +24,7 @@ export function ThemeSwatchRow({ selected, onSelect, labelFor }: Props) {
           <Pressable
             key={name}
             onPress={() => onSelect(name)}
-            hitSlop={4}
+            hitSlop={HIT_SLOP}
             accessibilityRole="radio"
             accessibilityState={{ selected: active, checked: active }}
             accessibilityLabel={labelFor(name)}
@@ -51,30 +54,30 @@ const styles = StyleSheet.create({
     padding: 1,
   },
   ring: {
-    width: 40,
-    height: 40,
+    width: scaled(40),
+    height: scaled(40),
     borderRadius: radius.xl,
-    borderWidth: 2.5,
+    borderWidth: scaled(2.5),
     alignItems: 'center',
     justifyContent: 'center',
   },
   swatch: {
-    width: 31,
-    height: 31,
+    width: scaled(31),
+    height: scaled(31),
     borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
   },
   surface: {
-    width: 23,
-    height: 23,
+    width: scaled(23),
+    height: scaled(23),
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
   dot: {
-    width: 15,
-    height: 15,
+    width: scaled(15),
+    height: scaled(15),
     borderRadius: radius.sm,
   },
 });

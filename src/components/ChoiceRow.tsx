@@ -1,20 +1,22 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { MitzvahIcon } from './MitzvahIcon';
 
-const TICK_ICON_SIZE = 14;
+const TICK_ICON_SIZE = scaled(14);
 
 type Props = {
   label: string;
+  caption?: string;
   selected: boolean;
   onPress: () => void;
 };
 
-export function ChoiceRow({ label, selected, onPress }: Props) {
+export function ChoiceRow({ label, caption, selected, onPress }: Props) {
   const { colors } = useTheme();
   return (
     <Pressable
@@ -31,7 +33,12 @@ export function ChoiceRow({ label, selected, onPress }: Props) {
         shadowStyle(colors.shadow, shadowPresets.cardSoft),
       ]}
     >
-      <Text style={[typography.bodyBold, { color: selected ? colors.goldText : colors.text }]}>{label}</Text>
+      <View style={styles.text}>
+        <Text style={[typography.bodyBold, { color: selected ? colors.goldText : colors.text }]}>{label}</Text>
+        {caption ? (
+          <Text style={[typography.caption, styles.caption, { color: colors.textSub }]}>{caption}</Text>
+        ) : null}
+      </View>
       {selected ? (
         <View style={[styles.tick, { backgroundColor: colors.gold }]}>
           <MitzvahIcon name="check" size={TICK_ICON_SIZE} color={colors.onGold} />
@@ -51,9 +58,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  text: {
+    flex: 1,
+  },
+  caption: {
+    marginTop: scaled(2),
+  },
   tick: {
-    width: 22,
-    height: 22,
+    width: scaled(22),
+    height: scaled(22),
     borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',

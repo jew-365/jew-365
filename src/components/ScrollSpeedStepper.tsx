@@ -3,13 +3,15 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MitzvahIcon, type IconName } from '@/components/MitzvahIcon';
 import { SIDDUR_SCROLL_SPEEDS, scrollSpeedLevel } from '@/stores/useUserStore';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { radius } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
 
-const STEP_ICON_SIZE = 16;
+const STEP_ICON_SIZE = scaled(16);
 const STEP_ICON_STROKE = 2.8;
-const STEP_HEIGHT = 30;
+const STEP_HEIGHT = scaled(30);
+const STEP_HIT_SLOP = scaled(4);
 
 type Props = {
   level: number;
@@ -32,7 +34,7 @@ export function ScrollSpeedStepper({ level, onChange, compact = false }: Props) 
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
         accessibilityState={{ disabled }}
-        hitSlop={4}
+        hitSlop={STEP_HIT_SLOP}
         style={({ pressed }) => [
           styles.step,
           compact && styles.stepCompact,
@@ -64,19 +66,19 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
   },
   step: {
-    minWidth: 32,
+    minWidth: scaled(32),
     minHeight: STEP_HEIGHT,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepCompact: {
-    minWidth: 26,
+    minWidth: scaled(26),
   },
   level: {
-    minWidth: 18,
+    minWidth: scaled(18),
     textAlign: 'center',
   },
   levelCompact: {
-    minWidth: 16,
+    minWidth: scaled(16),
   },
 });

@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   subtitle: {
-    marginTop: 2,
+    marginTop: scaled(2),
   },
   actions: {
     flexDirection: 'row',

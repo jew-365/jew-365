@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MitzvahIcon, backIcon, forwardIcon } from '@/components/MitzvahIcon';
 import { HebcalService } from '@/services/HebcalService';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -19,7 +20,7 @@ export function formatDayLine(date: Date, language: AppLanguage): string {
   return formatDate(date, language === 'he' ? 'cccc · d LLLL' : 'cccc · LLL d', language);
 }
 
-const ARROW_SIZE = 20;
+const ARROW_SIZE = scaled(20);
 const ARROW_STROKE = 2.4;
 
 const stepDay = (date: Date, days: number) => new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
@@ -78,8 +79,8 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   arrow: {
-    width: 44,
-    height: 44,
+    width: scaled(44),
+    height: scaled(44),
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',

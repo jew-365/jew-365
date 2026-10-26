@@ -3,6 +3,7 @@ import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-n
 import { DateTime } from 'luxon';
 import { HebcalService } from '@/services/HebcalService';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { formatDate, useI18n } from '@/i18n';
@@ -15,7 +16,7 @@ export type DateRange = { start: string | null; end: string | null };
 export const RANGE_MAX_YEARS = 2;
 
 const WEEKS = 6;
-const TODAY_RING = 2;
+const TODAY_RING = scaled(2);
 const DISABLED_OPACITY = 0.5;
 
 type Cell = { key: string; inMonth: boolean; day: number; hebrewDay: number; date: Date };

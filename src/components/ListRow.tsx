@@ -3,9 +3,12 @@ import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-n
 import { IconTile } from '@/components/IconTile';
 import { MitzvahIcon, forwardIcon, type IconName } from '@/components/MitzvahIcon';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
+
+const CHEVRON_SIZE = scaled(16);
 
 type Props = {
   icon: IconName;
@@ -72,7 +75,7 @@ export function ListRow({
     <Pressable {...pressableProps} style={[styles.row, dim, style]}>
       {content}
       {chevron ? (
-        <MitzvahIcon name={forwardIcon(language)} size={16} color={colors.textMuted} strokeWidth={2.5} />
+        <MitzvahIcon name={forwardIcon(language)} size={CHEVRON_SIZE} color={colors.textMuted} strokeWidth={2.5} />
       ) : null}
     </Pressable>
   );
@@ -109,6 +112,6 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   caption: {
-    marginTop: 2,
+    marginTop: scaled(2),
   },
 });

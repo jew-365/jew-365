@@ -4,6 +4,7 @@ import { Card } from './Card';
 import { IconTile } from './IconTile';
 import { MitzvahIcon, type IconName } from './MitzvahIcon';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 
@@ -17,7 +18,8 @@ type Props = {
   onToggle?: () => void;
 };
 
-const CHEVRON_SIZE = 16;
+const CHEVRON_SIZE = scaled(16);
+const HIT_SLOP = scaled(6);
 const CHEVRON_STROKE = 2.5;
 
 export function SettingsSection({
@@ -49,7 +51,7 @@ export function SettingsSection({
           accessibilityRole="button"
           accessibilityState={{ expanded }}
           aria-expanded={expanded}
-          hitSlop={6}
+          hitSlop={HIT_SLOP}
           style={({ pressed }) => [
             styles.header,
             { marginBottom: expanded ? spacing.md : 0, opacity: pressed ? 0.75 : 1 },
@@ -88,6 +90,6 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   subtitle: {
-    marginTop: 2,
+    marginTop: scaled(2),
   },
 });

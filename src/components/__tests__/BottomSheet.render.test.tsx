@@ -1,10 +1,11 @@
 import { KeyboardAvoidingView, Modal, Platform, Text } from 'react-native';
-import { fireEvent, screen, userEvent } from '@testing-library/react-native';
+import { fireEvent, screen, userEvent, within } from '@testing-library/react-native';
 import { BottomSheet, SheetAction } from '../BottomSheet';
 import { QuietBlockContext } from '../ShabbatScreen';
 import { findBackdrop, renderWithTheme } from '@/testing/render';
 import { THEMES, THEME_NAMES } from '@/theme/colors';
-import { radius } from '@/theme/tokens';
+import { radius, spacing } from '@/theme/tokens';
+import { typography } from '@/theme/typography';
 import { useUserStore } from '@/stores/useUserStore';
 import type { HolyBlock } from '@/types/zmanim';
 
@@ -149,12 +150,25 @@ describe('SheetAction', () => {
     expect(row).toHaveStyle({ borderBottomColor: THEMES.gold.border });
   });
 
-  it.each(THEME_NAMES)('%s: selected carries the selected state and draws on goldLight', (name) => {
+  it.each(THEME_NAMES)('%s: selected carries the selected state and draws a rounded, padded goldLight fill', (name) => {
     useUserStore.setState({ theme: name });
     renderWithTheme(<SheetAction label="Ashkenaz" selected onPress={jest.fn()} />);
     const row = screen.getByRole('button', { name: 'Ashkenaz' });
     expect(row).toBeSelected();
-    expect(row).toHaveStyle({ backgroundColor: THEMES[name].goldLight, borderBottomColor: 'transparent' });
+    expect(row).not.toHaveStyle({ backgroundColor: THEMES[name].goldLight });
+    const fill = screen.getByText('Ashkenaz').parent!.parent!;
+    expect(fill).toHaveStyle({
+      backgroundColor: THEMES[name].goldLight,
+      borderRadius: radius.lg,
+      paddingHorizontal: spacing.md,
+    });
+  });
+
+  it('draws no fill on a row that is not selected', () => {
+    renderWithTheme(<SheetAction label="Sefard" onPress={jest.fn()} />);
+    const fill = screen.getByText('Sefard').parent!.parent!;
+    expect(fill).not.toHaveStyle({ backgroundColor: THEMES.gold.goldLight });
+    expect(fill).toHaveStyle({ paddingHorizontal: spacing.md });
   });
 
   it('draws a destructive label in the urgent colour and a plain one in the text colour', () => {
@@ -177,6 +191,31 @@ describe('SheetAction', () => {
     expect(onLayout).toHaveBeenCalledTimes(1);
     expect(onLayout).toHaveBeenCalledWith(layout);
   });
+
+  it('draws no caption line when it has none', () => {
+    renderWithTheme(<SheetAction label="Ashkenaz" onPress={jest.fn()} />);
+    const row = screen.getByRole('button', { name: 'Ashkenaz' });
+    expect(within(row).getAllByText(/./)).toHaveLength(1);
+  });
+
+  it.each(THEME_NAMES)(
+    '%s: draws a caption under the label in textSub and keeps the button named by the label',
+    (name) => {
+      useUserStore.setState({ theme: name });
+      const onPress = jest.fn();
+      renderWithTheme(<SheetAction label="Ashkenaz" caption="The default nusach" selected onPress={onPress} />);
+      const row = screen.getByRole('button', { name: 'Ashkenaz' });
+      expect(row).toBeSelected();
+      expect(within(row).getByText('The default nusach')).toHaveStyle({
+        color: THEMES[name].textSub,
+        fontSize: typography.caption.fontSize,
+        marginTop: 2,
+      });
+      expect(within(row).getByText('Ashkenaz')).toHaveStyle({ color: THEMES[name].text });
+      fireEvent.press(screen.getByText('The default nusach'));
+      expect(onPress).toHaveBeenCalledTimes(1);
+    },
+  );
 
   it('sits inside a sheet and fires through the sheet tree', async () => {
     const onPress = jest.fn();

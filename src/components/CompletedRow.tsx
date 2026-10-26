@@ -2,15 +2,17 @@ import React, { useEffect } from 'react';
 import { Pressable, View, Text, StyleSheet } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
 import { MitzvahIcon } from './MitzvahIcon';
 
-const TICK_ICON_SIZE = 16;
+const TICK_ICON_SIZE = scaled(16);
 const TICK_ICON_STROKE = 2.2;
-const UNDO_ICON_SIZE = 16;
+const UNDO_ICON_SIZE = scaled(16);
 const UNDO_ICON_STROKE = 2.2;
+const UNDO_HIT_SLOP = scaled(8);
 
 type Props = {
   name: string;
@@ -48,7 +50,7 @@ export function CompletedRow({ name, time, onPress, onUndo, undoLabel }: Props) 
           onPress={onUndo}
           accessibilityRole="button"
           accessibilityLabel={undoLabel ?? t('home.undo')}
-          hitSlop={8}
+          hitSlop={UNDO_HIT_SLOP}
           style={[styles.undoPill, { backgroundColor: colors.goldLight }]}
         >
           {undoLabel ? (
@@ -79,10 +81,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  tick: { width: 28, height: 28, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
+  tick: {
+    width: scaled(28),
+    height: scaled(28),
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   name: { flex: 1 },
   undoPill: {
-    minWidth: 48,
+    minWidth: scaled(48),
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.md,

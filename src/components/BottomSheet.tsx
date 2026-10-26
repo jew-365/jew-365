@@ -1,6 +1,7 @@
 import React from 'react';
 import { KeyboardAvoidingView, Modal, Pressable, StyleSheet, Text, View, ViewProps } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
+import { scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
@@ -50,13 +51,21 @@ export function BottomSheet({ visible, title, caption, onClose, children }: Bott
 
 type SheetActionProps = {
   label: string;
+  caption?: string;
   onPress: () => void;
   destructive?: boolean;
   selected?: boolean;
   onLayout?: ViewProps['onLayout'];
 };
 
-export function SheetAction({ label, onPress, destructive = false, selected = false, onLayout }: SheetActionProps) {
+export function SheetAction({
+  label,
+  caption,
+  onPress,
+  destructive = false,
+  selected = false,
+  onLayout,
+}: SheetActionProps) {
   const { colors } = useTheme();
   return (
     <Pressable
@@ -64,13 +73,14 @@ export function SheetAction({ label, onPress, destructive = false, selected = fa
       onLayout={onLayout}
       accessibilityRole="button"
       accessibilityState={selected ? { selected: true } : undefined}
-      style={[
-        styles.action,
-        { borderBottomColor: selected ? 'transparent' : colors.border },
-        selected ? [styles.actionSelected, { backgroundColor: colors.goldLight }] : null,
-      ]}
+      style={[styles.action, { borderBottomColor: colors.border }]}
     >
-      <Text style={[typography.subheading, { color: destructive ? colors.urgent : colors.text }]}>{label}</Text>
+      <View style={[styles.actionBody, selected ? { backgroundColor: colors.goldLight } : null]}>
+        <Text style={[typography.subheading, { color: destructive ? colors.urgent : colors.text }]}>{label}</Text>
+        {caption ? (
+          <Text style={[typography.caption, styles.actionCaption, { color: colors.textSub }]}>{caption}</Text>
+        ) : null}
+      </View>
     </Pressable>
   );
 }
@@ -104,12 +114,16 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   action: {
-    paddingVertical: spacing.lg,
+    paddingVertical: spacing.xs,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  actionSelected: {
-    marginHorizontal: -spacing.md,
+  // The fill sits on an inner view: Android drops the corner radius of a background whose view has a one-sided border.
+  actionBody: {
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
+  },
+  actionCaption: {
+    marginTop: scaled(2),
   },
 });
