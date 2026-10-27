@@ -18,6 +18,7 @@ jest.mock('@/services/NotificationScheduler', () => ({
 }));
 
 import { act, fireEvent, screen } from '@testing-library/react-native';
+import { ScrollView } from 'react-native';
 import SettingsScreen from '../(tabs)/settings';
 import { translate } from '@/i18n';
 import { CITIES } from '@/data/cities';
@@ -113,5 +114,14 @@ describe('Settings search index', () => {
     act(() => useUserStore.setState({ nusach: 'sefard' }));
     await search('נוסח');
     expect(build).toHaveBeenCalledTimes(2);
+  });
+
+  it('scrolls back to the top on every visit, where the closed sections start', async () => {
+    const scrollTo = jest.spyOn(ScrollView.prototype, 'scrollTo').mockImplementation(() => {});
+    renderWithTheme(<SettingsScreen />);
+    await act(async () => {});
+    scrollTo.mockClear();
+    await focusAgain();
+    expect(scrollTo).toHaveBeenCalledWith({ y: 0, animated: false });
   });
 });

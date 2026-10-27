@@ -12,12 +12,14 @@ jest.mock('react-native-mmkv', () => {
 const mockGetForeground = jest.fn();
 const mockRequestForeground = jest.fn();
 const mockGetCurrentPosition = jest.fn();
+const mockGetLastKnown = jest.fn();
 
 jest.mock('expo-location', () => ({
   getForegroundPermissionsAsync: (...args: unknown[]) => mockGetForeground(...args),
   requestForegroundPermissionsAsync: (...args: unknown[]) => mockRequestForeground(...args),
   getCurrentPositionAsync: (...args: unknown[]) => mockGetCurrentPosition(...args),
-  Accuracy: { Balanced: 3 },
+  getLastKnownPositionAsync: (...args: unknown[]) => mockGetLastKnown(...args),
+  Accuracy: { Balanced: 3, High: 4 },
 }));
 
 jest.mock('expo-notifications', () => ({
@@ -54,6 +56,8 @@ describe('Services', () => {
     mockGetForeground.mockReset();
     mockRequestForeground.mockReset();
     mockGetCurrentPosition.mockReset();
+    mockGetLastKnown.mockReset();
+    mockGetLastKnown.mockResolvedValue(null);
   });
 
   it('5.1 StorageService roundtrip JSON', () => {
@@ -154,5 +158,29 @@ describe('Services', () => {
     const r = await LocationService.getCurrentLocation(50);
     expect(r.status).toBe('timeout');
     expect(r.source).toBe('manual');
+  });
+
+  it('5.6 asks for the fix without the Location Accuracy dialog', async () => {
+    mockGetForeground.mockResolvedValue({ granted: true, canAskAgain: true });
+    mockGetCurrentPosition.mockResolvedValue({ coords: { latitude: 31.7, longitude: 35.2 } });
+    await LocationService.getCurrentLocation();
+    expect(mockGetCurrentPosition).toHaveBeenCalledWith({ accuracy: 4, mayShowUserSettingsDialog: false });
+  });
+
+  it('5.7 a refused fix falls back to the last known position', async () => {
+    mockGetForeground.mockResolvedValue({ granted: true, canAskAgain: true });
+    mockGetCurrentPosition.mockRejectedValue(new Error('LocationSettingsUnsatisfiedException'));
+    mockGetLastKnown.mockResolvedValue({ coords: { latitude: 32.1, longitude: 34.8 } });
+    const r = await LocationService.getCurrentLocation();
+    expect(r).toMatchObject({ status: 'ready', source: 'gps' });
+    expect(r.location!.cityId).toBe('tel-aviv');
+    expect(mockGetLastKnown).toHaveBeenCalledWith({ maxAge: 30 * 60 * 1000 });
+  });
+
+  it('5.8 a refused fix with no last known position reports missing', async () => {
+    mockGetForeground.mockResolvedValue({ granted: true, canAskAgain: true });
+    mockGetCurrentPosition.mockRejectedValue(new Error('refused'));
+    const r = await LocationService.getCurrentLocation();
+    expect(r).toEqual({ location: null, status: 'missing', source: 'manual' });
   });
 });

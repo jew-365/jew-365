@@ -42,6 +42,24 @@ describe('the siddur bookmarks store', () => {
     expect(state().bookmarks).toHaveLength(2);
   });
 
+  it('moves a bookmark to a new place under its id, newest first, absorbing one already there', () => {
+    const moved = state().addBookmark(ENTRY, 1000);
+    const there = state().addBookmark({ ...ENTRY, segmentKey: 'klmnopqrst', label: 'שם' }, 2000);
+    const other = state().addBookmark({ ...ENTRY, segmentKey: 'uvwxyzabcd' }, 3000);
+    state().replaceBookmark(moved.id, { ...ENTRY, segmentKey: 'klmnopqrst', label: 'חדש' }, 4000);
+    expect(state().bookmarks).toEqual([
+      { ...ENTRY, segmentKey: 'klmnopqrst', label: 'חדש', id: moved.id, createdAt: 4000 },
+      other,
+    ]);
+    expect(state().bookmarks.some((b) => b.id === there.id)).toBe(false);
+  });
+
+  it('ignores a move of a bookmark that no longer exists', () => {
+    const kept = state().addBookmark(ENTRY, 1000);
+    state().replaceBookmark('bookmark_gone', { ...ENTRY, segmentKey: 'klmnopqrst' }, 2000);
+    expect(state().bookmarks).toEqual([kept]);
+  });
+
   it('removes only the bookmark named', () => {
     const first = state().addBookmark(ENTRY, 1000);
     const second = state().addBookmark({ ...ENTRY, segmentKey: 'klmnopqrst' }, 2000);

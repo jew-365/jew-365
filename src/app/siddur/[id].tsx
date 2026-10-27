@@ -69,7 +69,12 @@ import { useChokStore } from '@/stores/useChokStore';
 import { useCompletionsStore, dateKey } from '@/stores/useCompletionsStore';
 import { selectActive, useMitzvotStore } from '@/stores/useMitzvotStore';
 import { selectSelichotInstalledFor, useSelichotStore } from '@/stores/useSelichotStore';
-import { textBookmarks, textLastPosition, useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
+import {
+  textBookmarks,
+  textLastPosition,
+  useSiddurBookmarksStore,
+  type NewBookmark,
+} from '@/stores/useSiddurBookmarksStore';
 import {
   MaritalStatus,
   PrayerMode,
@@ -706,6 +711,7 @@ export default function SiddurScreen() {
   const lastPositions = useSiddurBookmarksStore((s) => s.lastPositions);
   const addBookmark = useSiddurBookmarksStore((s) => s.addBookmark);
   const removeBookmark = useSiddurBookmarksStore((s) => s.removeBookmark);
+  const replaceBookmark = useSiddurBookmarksStore((s) => s.replaceBookmark);
   const saveLastPosition = useSiddurBookmarksStore((s) => s.saveLastPosition);
   const clearLastPosition = useSiddurBookmarksStore((s) => s.clearLastPosition);
   const standalone = mitzvah || chok ? null : standaloneTextId(params.id);
@@ -858,7 +864,8 @@ export default function SiddurScreen() {
   const [bookmarksOpen, setBookmarksOpen] = useState(false);
   const [resumeOffer, setResumeOffer] = useState<SiddurLastPosition | null>(null);
   const [pendingPlace, setPendingPlace] = useState<SiddurPlace | null>(null);
-  const [toastShown, setToastShown] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [saving, setSaving] = useState<NewBookmark | null>(null);
   const jumpMissed = useRef(false);
   const jumpTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const landedSection = useRef(false);
@@ -1423,6 +1430,7 @@ export default function SiddurScreen() {
       !pickerOpen &&
       !quiet &&
       !bookmarksOpen &&
+      saving === null &&
       resumeOffer === null,
     autoScrollPixelsPerSecond(SIDDUR_SCROLL_SPEEDS[scrollSpeedLevel(scrollSpeed) - 1], textSize),
     onUserScroll,
@@ -1478,23 +1486,43 @@ export default function SiddurScreen() {
       savedAt: Date.now(),
     });
   };
-  const addBookmarkHere = () => {
+  const showToast = (text: string) => {
+    setToast(text);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), TOAST_MS);
+    AccessibilityInfo.announceForAccessibility(text);
+  };
+  const bookmarkHere = (): NewBookmark | null => {
     const place = bookmarkTextId ? currentPlace() : null;
     const section = place && sections.find((candidate) => candidate.title.he === place.sectionTitle);
     const segment = place && section?.segments.find((candidate) => candidate.key === place.segmentKey);
-    if (!bookmarkTextId || !place || !section || !segment) return;
-    Haptics.selectionAsync().catch(() => {});
-    addBookmark({
+    if (!bookmarkTextId || !place || !section || !segment) return null;
+    return {
       textId: bookmarkTextId,
       nusach: placeNusach,
       sectionTitle: place.sectionTitle,
       segmentKey: place.segmentKey,
       label: [titleOf(section), segmentLead(segment)].filter(Boolean).join(' · '),
-    });
-    setToastShown(true);
-    clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToastShown(false), TOAST_MS);
-    AccessibilityInfo.announceForAccessibility(t('siddur.bookmarks.added'));
+    };
+  };
+  const saveNew = (entry: NewBookmark) => {
+    setSaving(null);
+    Haptics.selectionAsync().catch(() => {});
+    addBookmark(entry);
+    showToast(t('siddur.bookmarks.added'));
+  };
+  const saveOver = (id: string, entry: NewBookmark) => {
+    setSaving(null);
+    Haptics.selectionAsync().catch(() => {});
+    replaceBookmark(id, entry);
+    showToast(t('siddur.bookmarks.replaced'));
+  };
+  // With bookmarks already in this text, the star asks whether to add one or move one of them here.
+  const addBookmarkHere = () => {
+    const entry = bookmarkHere();
+    if (!entry) return;
+    if (shownBookmarks.length) setSaving(entry);
+    else saveNew(entry);
   };
   const goToPlace = (target: SiddurPlace) => {
     setBookmarksOpen(false);
@@ -1938,12 +1966,31 @@ export default function SiddurScreen() {
         ) : null}
       </BottomSheet>
 
+      <BottomSheet
+        visible={saving !== null}
+        title={t('siddur.bookmarks.saveTitle')}
+        caption={t('siddur.bookmarks.saveCaption')}
+        onClose={() => setSaving(null)}
+      >
+        <ScrollView style={styles.sheetList}>
+          <SheetAction label={t('siddur.bookmarks.new')} onPress={() => saving && saveNew(saving)} />
+          {shownBookmarks.map((bookmark) => (
+            <SheetAction
+              key={bookmark.id}
+              label={bookmark.label}
+              caption={t('siddur.bookmarks.replaceCaption')}
+              onPress={() => saving && saveOver(bookmark.id, saving)}
+            />
+          ))}
+        </ScrollView>
+      </BottomSheet>
+
       <BottomSheet visible={askingThuNight} title={t('chok.thuNight.ask')} onClose={() => setAskingThuNight(false)}>
         <SheetAction label={t('chok.thuNight.thu')} onPress={() => chooseThuNightDay('thu')} />
         <SheetAction label={t('chok.thuNight.fri')} onPress={() => chooseThuNightDay('fri')} />
       </BottomSheet>
 
-      {toastShown ? (
+      {toast ? (
         <View pointerEvents="none" accessibilityLiveRegion="polite" style={styles.toast}>
           <View
             style={[
@@ -1952,7 +1999,7 @@ export default function SiddurScreen() {
               shadowStyle(colors.shadowStrong, shadowPresets.raised),
             ]}
           >
-            <Banner tone="safe" text={t('siddur.bookmarks.added')} style={styles.toastBanner} />
+            <Banner tone="safe" text={toast} style={styles.toastBanner} />
           </View>
         </View>
       ) : null}

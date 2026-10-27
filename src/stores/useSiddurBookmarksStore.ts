@@ -5,12 +5,13 @@ import { STORE_VERSION, migrate, onRehydrateStorage } from './persistOptions';
 import { Nusach } from '@/types/mitzvah';
 import { SiddurBookmark, SiddurLastPosition } from '@/types/siddur';
 
-type NewBookmark = Omit<SiddurBookmark, 'id' | 'createdAt'>;
+export type NewBookmark = Omit<SiddurBookmark, 'id' | 'createdAt'>;
 
 type SiddurBookmarksState = {
   bookmarks: SiddurBookmark[];
   lastPositions: Record<string, SiddurLastPosition>;
   addBookmark: (bookmark: NewBookmark, now?: number) => SiddurBookmark;
+  replaceBookmark: (id: string, bookmark: NewBookmark, now?: number) => void;
   removeBookmark: (id: string) => void;
   saveLastPosition: (textId: string, position: SiddurLastPosition) => void;
   clearLastPosition: (textId: string) => void;
@@ -58,6 +59,19 @@ export const useSiddurBookmarksStore = create<SiddurBookmarksState>()(
         }));
         return bookmark;
       },
+      replaceBookmark: (id, entry, now = Date.now()) =>
+        set((s) => {
+          if (!s.bookmarks.some((b) => b.id === id)) return s;
+          const moved: SiddurBookmark = { ...entry, id, createdAt: now };
+          return {
+            bookmarks: [
+              moved,
+              ...s.bookmarks.filter(
+                (b) => b.id !== id && !(sameText(b, entry.textId, entry.nusach) && b.segmentKey === entry.segmentKey),
+              ),
+            ],
+          };
+        }),
       removeBookmark: (id) => set((s) => ({ bookmarks: s.bookmarks.filter((bookmark) => bookmark.id !== id) })),
       saveLastPosition: (textId, position) =>
         set((s) => ({ lastPositions: { ...s.lastPositions, [textId]: position } })),

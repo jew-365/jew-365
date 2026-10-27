@@ -142,18 +142,29 @@ export const LocationService = {
         return { location: null, status: 'denied', source: 'manual' };
       }
 
-      const result = await withTimeout(
-        ExpoLocation.getCurrentPositionAsync({ accuracy: ExpoLocation.Accuracy.Balanced }),
-        timeoutMs,
-      );
-      return {
-        location: resolvedLocation(result.coords.latitude, result.coords.longitude),
-        status: 'ready',
-        source: 'gps',
-      };
-    } catch (error) {
-      const timedOut = error instanceof Error && error.message === 'timeout';
-      return { location: null, status: timedOut ? 'timeout' : 'missing', source: 'manual' };
+      let failure: LocationStatus = 'missing';
+      try {
+        const result = await withTimeout(
+          ExpoLocation.getCurrentPositionAsync({
+            accuracy: ExpoLocation.Accuracy.High,
+            mayShowUserSettingsDialog: false,
+          }),
+          timeoutMs,
+        );
+        return {
+          location: resolvedLocation(result.coords.latitude, result.coords.longitude),
+          status: 'ready',
+          source: 'gps',
+        };
+      } catch (error) {
+        if (error instanceof Error && error.message === 'timeout') failure = 'timeout';
+      }
+      const last = await this.getLastKnownPoint();
+      return last
+        ? { location: resolvedLocation(last.lat, last.lng), status: 'ready', source: 'gps' }
+        : { location: null, status: failure, source: 'manual' };
+    } catch {
+      return { location: null, status: 'missing', source: 'manual' };
     }
   },
 

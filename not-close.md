@@ -396,6 +396,15 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Owner check:** 2026-10-27, on preview `1.0.21-8` (Android): "מעולה סמן כסגור". Moves to [action-log.md](action-log.md) with production `1.0.21-3`.
   - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: yes, `0f82e5a` feat: sonar prayer compass and fixes from the preview check · Pushed: yes · Live: preview `1.0.21-8` (group `d4707151-cf09-4216-b688-7c19b3ed8345`, 2026-10-27); production not yet · Channel: preview
 
+- [ ] Let the bookmark star add a new bookmark or move one already kept
+  - **Flag:** `OTA`.
+  - **Source:** the owner, 2026-10-27: "בסימניות בקורא אם המשתמש לוחץ על הכוכב במקום ישר להוסיף סימניה חדשה אני רוצה להציג לו רשימה של הסימניות שיש לו פלוס אפשרות להוסיף אחת חדשה ... אם הוא בוחר מהרשימה שיש לו אז זה דורס אותה ומשנה לה את השם למיקום החדש".
+  - **What it is:** in the reader ([src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>)) the star opens a sheet when the text has bookmarks: `siddur.bookmarks.new` first, then each bookmark of the text; the first adds one, any other moves that bookmark to the current place and renames it to it (`replaceBookmark()` in [src/stores/useSiddurBookmarksStore.ts](src/stores/useSiddurBookmarksStore.ts)). With no bookmark in the text the star still adds one at once (Claude's default, cheap to flip: the sheet would then hold only one row).
+  - **What it solves:** a reader who keeps a few places moves them along instead of piling up bookmarks.
+  - **Expected result:** render tests of the sheet (new, move, other texts left out) and store tests of the move; on the phone the star offers the list.
+  - **Done:** 2026-10-27. Verified: the two save-sheet cases of [siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx) and the move cases of [siddurBookmarks.test.ts](src/stores/__tests__/siddurBookmarks.test.ts); `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` (4983 tests in each zone) green on 2026-10-27. Not checked: on a phone (the web preview did not load).
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+
 - [ ] Redesign the prayer compass
   - **Flag:** `OTA`.
   - **Source:** the owner, 2026-10-27, on a phone screenshot of [src/app/compass.tsx](src/app/compass.tsx): "המצפן לא נראה טוב בכלל, תן לי כמה דוגמאות אחרות ואבחר מהם".
@@ -523,6 +532,24 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Done:** 2026-10-27. Verified: "pins a switcher of its own past the hero…" in [history.render.test.tsx](src/app/__tests__/history.render.test.tsx); `pnpm typecheck`, `pnpm lint` and `pnpm check:dox` green, and `pnpm test:tz` (4965 tests in each zone) on 2026-10-27. Not checked: on a phone or the emulator.
   - **Owner check:** 2026-10-27, on preview `1.0.21-8` (Android): "מעולה סמן כסגור". Moves to [action-log.md](action-log.md) with production `1.0.21-3`.
   - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: yes, `0f82e5a` feat: sonar prayer compass and fixes from the preview check · Pushed: yes · Live: preview `1.0.21-8` (group `d4707151-cf09-4216-b688-7c19b3ed8345`, 2026-10-27); production not yet · Channel: preview
+
+- [ ] Settings and onboarding opened Android's Location Accuracy dialog and failed once it was declined
+  - **Flag:** `OTA`.
+  - **Found:** the compass session, 2026-10-27, while fixing the compass: `getCurrentLocation()` in [src/services/LocationService.ts](src/services/LocationService.ts), used by Settings' "locate me" and the onboarding location step, asks for a Balanced fix, which opens the dialog when the network provider is off and rejects once it is declined.
+  - **What it is:** the request now asks for a high-accuracy fix with `mayShowUserSettingsDialog: false`, and a failed fix falls back to the last known position (30 minutes at most) before reporting `timeout` or `missing`.
+  - **What it solves:** "locate me" works without the dialog and without failing after it.
+  - **Expected result:** service tests for the request options and both fallbacks; on a phone with the network provider off, "locate me" finds the place.
+  - **Done:** 2026-10-27. Verified: tests 5.6 to 5.8 of [services.test.ts](src/services/__tests__/services.test.ts), `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` (4979 tests in each zone) green on 2026-10-27. Not checked: on the emulator or a phone.
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+
+- [ ] Settings could show a blank screen after coming back from another screen
+  - **Flag:** `OTA`.
+  - **Found:** the compass session on the emulator, 2026-10-27: once, after coming back from the compass, Settings showed an empty screen.
+  - **What it is:** every visit closes all sections, so the list gets much shorter while the scroll offset stays where it was; [src/app/(tabs)/settings.tsx](<src/app/(tabs)/settings.tsx>) now scrolls back to the top, without animation, on every focus.
+  - **What it solves:** Settings always opens on its search and its closed sections.
+  - **Expected result:** a render test that a new visit scrolls to the top; on the phone, Settings opens at its top after another screen.
+  - **Done:** 2026-10-27. Verified: "scrolls back to the top on every visit…" in [settings.searchIndex.render.test.tsx](src/app/__tests__/settings.searchIndex.render.test.tsx), `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` (4979 tests in each zone) green on 2026-10-27. Not checked: on the emulator or a phone.
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
 
 ## Open Questions
 

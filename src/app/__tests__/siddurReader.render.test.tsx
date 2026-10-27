@@ -548,6 +548,49 @@ describe('the siddur reader bookmarks and last place', () => {
     expect(screen.getByText('אין עדיין סימניות בטקסט הזה')).toBeOnTheScreen();
   });
 
+  it('asks, when the text has bookmarks, whether to add a new one or move one here', async () => {
+    useSiddurBookmarksStore.setState({
+      bookmarks: [bookmark('ישנה', 'shacharit', 'ashkenaz', 1, 'k-open-1'), bookmark('מנחה', 'mincha', 'ashkenaz', 2)],
+    });
+    await openKeyed(SHACHARIT, 'ashkenaz');
+    measureKeyed();
+    await scrollList(476);
+    fireEvent.press(screen.getByRole('button', { name: 'הוסף סימנייה' }));
+    expect(screen.getByText('שמירת סימנייה')).toBeOnTheScreen();
+    expect(screen.getByText('סימנייה חדשה')).toBeOnTheScreen();
+    expect(screen.getByText('ישנה')).toBeOnTheScreen();
+    expect(screen.queryByText('מנחה')).toBeNull();
+    expect(useSiddurBookmarksStore.getState().bookmarks).toHaveLength(2);
+
+    fireEvent.press(screen.getByText('ישנה'));
+    expect(useSiddurBookmarksStore.getState().bookmarks).toEqual([
+      {
+        id: 'bookmark_1',
+        textId: 'shacharit',
+        nusach: 'ashkenaz',
+        sectionTitle: 'אמצע',
+        segmentKey: 'k-mid-2',
+        label: 'אמצע · שְׁמַע יִשְׂרָאֵל יְהוָה',
+        createdAt: NOW,
+      },
+      bookmark('מנחה', 'mincha', 'ashkenaz', 2),
+    ]);
+    expect(screen.getByText('הסימנייה הועברה')).toBeOnTheScreen();
+    expect(screen.queryByText('שמירת סימנייה')).toBeNull();
+  });
+
+  it('adds a new bookmark from the save sheet and keeps the others', async () => {
+    useSiddurBookmarksStore.setState({ bookmarks: [bookmark('ישנה', 'shacharit', 'ashkenaz', 1, 'k-open-1')] });
+    await openKeyed(SHACHARIT, 'ashkenaz');
+    measureKeyed();
+    await scrollList(476);
+    fireEvent.press(screen.getByRole('button', { name: 'הוסף סימנייה' }));
+    fireEvent.press(screen.getByText('סימנייה חדשה'));
+    const { bookmarks } = useSiddurBookmarksStore.getState();
+    expect(bookmarks.map((entry) => entry.segmentKey)).toEqual(['k-mid-2', 'k-open-1']);
+    expect(screen.getByText('נוספה סימנייה')).toBeOnTheScreen();
+  });
+
   it('lists only this text and nusach, newest first', async () => {
     useSiddurBookmarksStore.setState({
       bookmarks: [

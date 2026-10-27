@@ -194,6 +194,7 @@ export default function SettingsScreen() {
     useCallback(() => {
       setOpen(new Set());
       setQuery('');
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
       focusCount.current += 1;
       setFocusTarget(null);
       syncNotificationPermissionStatus().catch((error) => reportError('schedule', error));
