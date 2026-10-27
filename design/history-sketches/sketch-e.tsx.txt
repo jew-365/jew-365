@@ -1,0 +1,720 @@
+import React, { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Circle } from 'react-native-svg';
+import { Card } from '@/components/Card';
+import { IconTile } from '@/components/IconTile';
+import { Landscape } from '@/components/Landscape';
+import { ListRow } from '@/components/ListRow';
+import { MitzvahIcon, type IconName } from '@/components/MitzvahIcon';
+import { SectionLabel } from '@/components/SectionLabel';
+import { SegmentedControl } from '@/components/SegmentedControl';
+import { StreakRing } from '@/components/StreakRing';
+import { useUserStore } from '@/stores/useUserStore';
+import { THEME_NAMES, ThemeName } from '@/theme/colors';
+import { scaled } from '@/theme/scale';
+import { useTheme } from '@/theme/ThemeProvider';
+import { radius, spacing } from '@/theme/tokens';
+import { fontFamilies, typography } from '@/theme/typography';
+
+const HERO_HEIGHT = scaled(360);
+const RING_SIZE = scaled(200);
+const PERIOD_RING = scaled(100);
+const BAR_HEIGHT = scaled(6);
+const GRID_CELL_HEIGHT = scaled(36);
+const WEEK_CHART_HEIGHT = scaled(120);
+const WEEKDAY_BAR_HEIGHT = scaled(10);
+const MINI_BAR_WIDTH = scaled(56);
+const PREVIOUS_TICK_WIDTH = scaled(2);
+const PREVIOUS_TICK_HEIGHT = scaled(14);
+const INSIGHT_ICON = scaled(14);
+const CHEVRON = scaled(16);
+const DELTA_ICON = scaled(12);
+const BADGE_TILE = scaled(52);
+const DISC_OPACITY = 0.72;
+const MUTED_BAR_OPACITY = 0.45;
+
+const PROFILE_NAME = 'אברהם כהן';
+const STREAK = 12;
+
+type Tab = 'summary' | 'trends' | 'achievements';
+
+const TABS: readonly { value: Tab; label: string }[] = [
+  { value: 'summary', label: 'סיכום' },
+  { value: 'trends', label: 'מגמות' },
+  { value: 'achievements', label: 'הישגים' },
+];
+
+type Period = { id: string; label: string; done: number; total: number; caption: string };
+
+const PERIODS: Period[] = [
+  { id: 'day', label: 'יומי', done: 4, total: 6, caption: 'מה שזמנו הגיע היום' },
+  { id: 'week', label: 'שבועי', done: 31, total: 38, caption: 'מיום ראשון עד עכשיו' },
+  { id: 'month', label: 'חודשי', done: 209, total: 240, caption: 'ב־30 הימים האחרונים' },
+];
+
+const DAYS: ('full' | 'partial' | 'none')[] = [
+  'full', 'full', 'partial', 'full', 'none',
+  'full', 'full', 'full', 'partial', 'full',
+  'full', 'partial', 'full', 'full', 'full',
+  'partial', 'full', 'none', 'full', 'full',
+  'partial', 'full', 'full', 'full', 'full',
+  'full', 'partial', 'partial', 'partial', 'partial',
+];
+
+type Week = { name: string; range: string; done: number; total: number; current?: boolean; chag?: boolean };
+
+const WEEKS: Week[] = [
+  { name: 'שופטים', range: '9.8–15.8', done: 37, total: 51 },
+  { name: 'כי תצא', range: '16.8–22.8', done: 40, total: 51 },
+  { name: 'כי תבוא', range: '23.8–29.8', done: 44, total: 51 },
+  { name: 'נצבים־וילך', range: '30.8–5.9', done: 41, total: 51 },
+  { name: 'ראש השנה', range: '6.9–12.9', done: 37, total: 50, chag: true },
+  { name: 'האזינו', range: '13.9–19.9', done: 35, total: 50 },
+  { name: 'סוכות', range: '20.9–26.9', done: 34, total: 50, chag: true },
+  { name: 'שמיני עצרת', range: '27.9–3.10', done: 38, total: 51, chag: true },
+  { name: 'בראשית', range: '4.10–10.10', done: 45, total: 56 },
+  { name: 'נח', range: '11.10–17.10', done: 47, total: 56 },
+  { name: 'לך לך', range: '18.10–24.10', done: 49, total: 56 },
+  { name: 'וירא', range: '25.10–31.10', done: 31, total: 38, current: true },
+];
+
+const WEEKDAYS: { day: string; percent: number }[] = [
+  { day: 'ראשון', percent: 89 },
+  { day: 'שני', percent: 86 },
+  { day: 'שלישי', percent: 82 },
+  { day: 'רביעי', percent: 80 },
+  { day: 'חמישי', percent: 79 },
+  { day: 'שישי', percent: 74 },
+];
+const HOLY_DAYS_PERCENT = 71;
+
+const MITZVOT: { id: string; name: string; percent: number; previous: number; streak: number; best: number }[] = [
+  { id: 'krias_shma_al_hamita', name: 'קריאת שמע על המיטה', percent: 60, previous: 64, streak: 0, best: 7 },
+  { id: 'chok_leyisrael', name: 'חק לישראל', percent: 68, previous: 61, streak: 1, best: 9 },
+  { id: 'mincha', name: 'מנחה', percent: 70, previous: 66, streak: 2, best: 11 },
+  { id: 'maariv', name: 'מעריב', percent: 77, previous: 77, streak: 4, best: 16 },
+  { id: 'shacharit', name: 'שחרית', percent: 83, previous: 71, streak: 5, best: 19 },
+  { id: 'krias_shma_shacharit', name: 'קריאת שמע של שחרית', percent: 90, previous: 86, streak: 9, best: 24 },
+  { id: 'birchot_hashachar', name: 'ברכות השחר', percent: 92, previous: 92, streak: 11, best: 28 },
+  { id: 'tefillin', name: 'תפילין', percent: 93, previous: 95, streak: 12, best: 31 },
+];
+
+const MITZVAH_ICONS: Record<string, IconName> = {
+  krias_shma_al_hamita: 'night',
+  chok_leyisrael: 'chok',
+  mincha: 'mincha',
+  maariv: 'maariv',
+  shacharit: 'shacharit',
+  krias_shma_shacharit: 'shema',
+  birchot_hashachar: 'brachot',
+  tefillin: 'tefillin',
+};
+
+const EARNED: { id: string; icon: IconName; title: string; date: string }[] = [
+  { id: 'streak7', icon: 'star', title: '7 ימים ברצף', date: 'ז׳ באלול' },
+  { id: 'fullWeek', icon: 'calendar', title: 'שבוע מלא', date: 'י״ד באלול' },
+  { id: 'streak30', icon: 'sparkle', title: '30 ימים ברצף', date: 'ל׳ באלול' },
+];
+
+const NEXT: { id: string; icon: IconName; title: string; done: number; goal: number; left: string }[] = [
+  { id: 'hundredTefillin', icon: 'tefillin', title: '100 פעמים תפילין', done: 74, goal: 100, left: 'עוד 26 פעמים' },
+  { id: 'thousandMarks', icon: 'check', title: '1,000 סימונים', done: 812, goal: 1000, left: 'עוד 188 סימונים' },
+  { id: 'streak100', icon: 'star', title: '100 ימים ברצף', done: 12, goal: 100, left: 'עוד 88 ימים' },
+];
+
+const pct = (done: number, total: number) => Math.round((done / total) * 100);
+
+function greeting(profileName: string): string {
+  const first = profileName.trim().split(/\s+/)[0];
+  return first ? `שלום, ${first}` : 'שלום וברוכים הבאים';
+}
+
+let initialTab: Tab = 'summary';
+if (typeof window !== 'undefined' && window.location) {
+  const params = new URLSearchParams(window.location.search);
+  const theme = params.get('theme');
+  const tab = params.get('tab');
+  if (tab === 'summary' || tab === 'trends' || tab === 'achievements') initialTab = tab;
+  useUserStore.setState({
+    isOnboarded: true,
+    language: 'he',
+    ...(theme && (THEME_NAMES as readonly string[]).includes(theme) ? { theme: theme as ThemeName } : {}),
+  });
+}
+
+function PercentRing({ done, total, size }: { done: number; total: number; size: number }) {
+  const { colors } = useTheme();
+  const percent = pct(done, total);
+  const stroke = Math.round(size * 0.075);
+  const center = size / 2;
+  const r = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * r;
+  return (
+    <View accessible accessibilityLabel={`${percent}%, ${done} מתוך ${total}`} style={{ width: size, height: size }}>
+      <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
+        <Circle cx={center} cy={center} r={r} fill={colors.surface} fillOpacity={DISC_OPACITY} />
+        <Circle cx={center} cy={center} r={r} fill="none" stroke={colors.surface2} strokeWidth={stroke} />
+        <Circle
+          cx={center}
+          cy={center}
+          r={r}
+          fill="none"
+          stroke={colors.gold}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${circumference} ${circumference}`}
+          strokeDashoffset={circumference * (1 - done / total)}
+          transform={`rotate(-90 ${center} ${center})`}
+        />
+      </Svg>
+      <View style={styles.ringCenter}>
+        <Text
+          style={{
+            fontFamily: fontFamilies.heebo.black,
+            fontSize: Math.round(size * 0.26),
+            lineHeight: Math.round(size * 0.3),
+            color: colors.text,
+          }}
+        >
+          {percent}%
+        </Text>
+        <Text style={[typography.small, { color: colors.textSub }]}>
+          {done}/{total}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function Insight({ text }: { text: string }) {
+  const { colors } = useTheme();
+  return (
+    <View style={styles.insight}>
+      <MitzvahIcon name="sparkle" size={INSIGHT_ICON} color={colors.goldText} />
+      <Text style={[typography.caption, styles.insightText, { color: colors.text }]}>{text}</Text>
+    </View>
+  );
+}
+
+function Bar({ percent, opacity = 1, height = BAR_HEIGHT }: { percent: number; opacity?: number; height?: number }) {
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.barTrack, { height, backgroundColor: colors.surface2 }]}>
+      <View style={{ height, width: `${percent}%`, borderRadius: radius.full, backgroundColor: colors.gold, opacity }} />
+    </View>
+  );
+}
+
+function SummaryTab({ onAchievements }: { onAchievements: () => void }) {
+  const { colors } = useTheme();
+  const rows = Array.from({ length: 6 }, (_, row) => DAYS.slice(row * 5, row * 5 + 5));
+  const marked = DAYS.filter((d) => d !== 'none').length;
+  const leader = MITZVOT.reduce((a, b) => (b.percent > a.percent ? b : a));
+  return (
+    <>
+      <View style={styles.periodRow}>
+        {PERIODS.map((period) => (
+          <View key={period.id} style={styles.period}>
+            <PercentRing done={period.done} total={period.total} size={PERIOD_RING} />
+            <Text style={[typography.bodyBold, { color: colors.text }]}>{period.label}</Text>
+            <Text style={[typography.small, styles.center, { color: colors.textSub }]}>{period.caption}</Text>
+          </View>
+        ))}
+      </View>
+      <Text style={[typography.small, styles.center, styles.periodHint, { color: colors.textSub }]}>
+        כל אחוז: מתוך המצוות שזמנן הגיע, כמה סימנת כבוצעו
+      </Text>
+
+      <Card divided>
+        <ListRow
+          icon="star"
+          title="3 הישגים · השיא שלך 31 ימים"
+          caption="הבא בתור: 100 פעמים תפילין, עוד 26"
+          chevron
+          onPress={onAchievements}
+        />
+      </Card>
+
+      <SectionLabel text="30 הימים האחרונים" />
+      <View style={styles.grid}>
+        {rows.map((row, r) => (
+          <View key={r} style={styles.gridRow}>
+            {row.map((level, c) => {
+              const index = r * 5 + c;
+              const fill = level === 'full' ? colors.gold : level === 'partial' ? colors.goldLight : colors.surface2;
+              const ink = level === 'full' ? colors.onGold : level === 'partial' ? colors.goldText : colors.textSub;
+              return (
+                <View
+                  key={index}
+                  style={[
+                    styles.gridCell,
+                    { backgroundColor: fill },
+                    index === DAYS.length - 1 && { borderWidth: 1.5, borderColor: colors.gold },
+                  ]}
+                >
+                  <Text style={[typography.captionBold, { color: ink }]}>{((index + 29) % 30) + 1}</Text>
+                </View>
+              );
+            })}
+          </View>
+        ))}
+      </View>
+      <View style={styles.legend}>
+        {[
+          { fill: colors.gold, label: 'הכל בוצע' },
+          { fill: colors.goldLight, label: 'חלק' },
+          { fill: colors.surface2, label: 'כלום' },
+        ].map((item) => (
+          <View key={item.label} style={styles.legendItem}>
+            <View style={[styles.legendDot, { backgroundColor: item.fill }]} />
+            <Text style={[typography.small, { color: colors.textSub }]}>{item.label}</Text>
+          </View>
+        ))}
+      </View>
+      <Insight text={`ב־${marked} מתוך 30 הימים האחרונים סימנת לפחות מצווה אחת`} />
+
+      <SectionLabel text="עקביות לפי מצווה" />
+      <Text style={[typography.small, styles.sectionHint, { color: colors.textSub }]}>
+        האחוז: מהימים שזמן המצווה עבר בהם, בכמה סימנת אותה. הרצף: ימים רצופים שסימנת אותה.
+      </Text>
+      <Card divided>
+        {MITZVOT.map((m) => (
+          <View key={m.id} style={styles.statRow}>
+            <View style={styles.statTop}>
+              <Text style={[typography.bodyBold, styles.flex, { color: colors.text }]} numberOfLines={1}>
+                {m.name}
+              </Text>
+              <View style={[styles.chip, { backgroundColor: m.streak ? colors.goldLight : colors.surface2 }]}>
+                <MitzvahIcon name="sparkle" size={DELTA_ICON} color={m.streak ? colors.goldText : colors.textMuted} />
+                <Text style={[typography.small, { color: m.streak ? colors.goldText : colors.textMuted }]}>
+                  {m.streak ? `${m.streak} ברצף` : 'אין רצף'}
+                </Text>
+              </View>
+              <Text style={[typography.captionBold, styles.percent, { color: colors.goldText }]}>{m.percent}%</Text>
+            </View>
+            <Bar percent={m.percent} />
+          </View>
+        ))}
+      </Card>
+      <Insight text={`${leader.name} מובילה: ${leader.percent}% ב־30 הימים האחרונים`} />
+    </>
+  );
+}
+
+function WeeksChart() {
+  const { colors } = useTheme();
+  const finished = WEEKS.filter((w) => !w.current);
+  const best = finished.reduce((a, b) => (pct(b.done, b.total) > pct(a.done, a.total) ? b : a));
+  return (
+    <Card padded>
+      <View
+        accessible
+        accessibilityLabel={WEEKS.map((w) => `${w.name} ${pct(w.done, w.total)}%`).join(', ')}
+        style={styles.weekChart}
+      >
+        <View style={[styles.gridLine, { top: 0, backgroundColor: colors.border }]} />
+        <View style={[styles.gridLine, { top: WEEK_CHART_HEIGHT / 2, backgroundColor: colors.border }]} />
+        <View style={[styles.gridLine, { bottom: 0, backgroundColor: colors.border }]} />
+        {WEEKS.map((w) => {
+          const value = pct(w.done, w.total);
+          const labelled = w.current || w === best;
+          return (
+            <View key={w.name} style={styles.weekColumn}>
+              {labelled ? (
+                <Text style={[typography.micro, { color: w.current ? colors.goldText : colors.textSub }]}>{value}%</Text>
+              ) : null}
+              <View style={[styles.weekBar, { height: (WEEK_CHART_HEIGHT * value) / 100, backgroundColor: colors.surface }]}>
+              <View
+                style={[
+                  styles.weekBar,
+                  styles.flex,
+                  { height: (WEEK_CHART_HEIGHT * value) / 100 },
+                  w.current
+                    ? { backgroundColor: colors.goldLight, borderWidth: 1.5, borderColor: colors.gold, borderStyle: 'dashed' }
+                    : { backgroundColor: colors.gold, opacity: w === best ? 1 : MUTED_BAR_OPACITY },
+                ]}
+              />
+              </View>
+            </View>
+          );
+        })}
+        <Text style={[typography.micro, styles.axisTop, { color: colors.textSub }]}>100%</Text>
+        <Text style={[typography.micro, styles.axisMid, { color: colors.textSub }]}>50%</Text>
+      </View>
+      <View style={styles.axisRow}>
+        <Text style={[typography.small, { color: colors.textSub }]}>שופטים</Text>
+        <Text style={[typography.small, { color: colors.goldText }]}>השבוע, עד עכשיו</Text>
+      </View>
+    </Card>
+  );
+}
+
+function WeekdaysChart() {
+  const { colors } = useTheme();
+  const strongest = WEEKDAYS.reduce((a, b) => (b.percent > a.percent ? b : a));
+  return (
+    <Card padded>
+      <View style={styles.weekdayList}>
+        {WEEKDAYS.map((d) => (
+          <View key={d.day} style={styles.weekdayRow}>
+            <Text style={[typography.caption, styles.weekdayName, { color: colors.text }]}>{d.day}</Text>
+            <View style={styles.flex}>
+              <Bar
+                percent={d.percent}
+                height={WEEKDAY_BAR_HEIGHT}
+                opacity={d === strongest ? 1 : MUTED_BAR_OPACITY}
+              />
+            </View>
+            <Text style={[typography.captionBold, styles.percent, { color: d === strongest ? colors.goldText : colors.textSub }]}>
+              {d.percent}%
+            </Text>
+          </View>
+        ))}
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+        <View style={styles.weekdayRow}>
+          <Text style={[typography.caption, styles.weekdayName, { color: colors.textSub }]}>שבת וחג</Text>
+          <View style={styles.flex}>
+            <View style={[styles.barTrack, { height: WEEKDAY_BAR_HEIGHT, backgroundColor: colors.surface2 }]}>
+              <View
+                style={{
+                  height: WEEKDAY_BAR_HEIGHT,
+                  width: `${HOLY_DAYS_PERCENT}%`,
+                  borderRadius: radius.full,
+                  borderWidth: 1.5,
+                  borderColor: colors.gold,
+                  borderStyle: 'dashed',
+                }}
+              />
+            </View>
+          </View>
+          <Text style={[typography.captionBold, styles.percent, { color: colors.textSub }]}>{HOLY_DAYS_PERCENT}%</Text>
+        </View>
+        <Text style={[typography.small, { color: colors.textSub }]}>
+          שבת וחג נספרים לפי מה שסימנת בצ׳ק־אין אחריהם, ולכן מוצגים בנפרד ולא נכנסים להשוואה
+        </Text>
+      </View>
+    </Card>
+  );
+}
+
+function MitzvahTrends() {
+  const { colors } = useTheme();
+  const sorted = [...MITZVOT].sort((a, b) => b.percent - b.previous - (a.percent - a.previous));
+  return (
+    <Card divided>
+      {sorted.map((m) => {
+        const delta = m.percent - m.previous;
+        const up = delta > 0;
+        return (
+          <View key={m.id} style={styles.statRow}>
+            <View style={styles.statTop}>
+              <Text style={[typography.bodyBold, styles.flex, { color: colors.text }]} numberOfLines={1}>
+                {m.name}
+              </Text>
+              <View style={[styles.chip, { backgroundColor: up ? colors.goldLight : colors.surface2 }]}>
+                {delta !== 0 ? (
+                  <MitzvahIcon
+                    name={up ? 'chevronUp' : 'chevronDown'}
+                    size={DELTA_ICON}
+                    color={up ? colors.goldText : colors.textSub}
+                    strokeWidth={2.5}
+                  />
+                ) : null}
+                <Text style={[typography.small, { color: up ? colors.goldText : colors.textSub }]}>
+                  {delta === 0 ? 'ללא שינוי' : `${Math.abs(delta)} נק׳`}
+                </Text>
+              </View>
+              <Text style={[typography.captionBold, styles.percent, { color: colors.goldText }]}>{m.percent}%</Text>
+            </View>
+            <View>
+              <Bar percent={m.percent} />
+              <View style={styles.tickLayer} pointerEvents="none">
+                <View style={{ width: `${m.previous}%` }} />
+                <View style={[styles.previousTick, { backgroundColor: colors.text }]} />
+              </View>
+            </View>
+          </View>
+        );
+      })}
+    </Card>
+  );
+}
+
+function ReportsList() {
+  const { colors } = useTheme();
+  const recent = [...WEEKS].reverse().slice(0, 6);
+  return (
+    <Card divided>
+      {recent.map((w) => {
+        const value = pct(w.done, w.total);
+        return (
+          <Pressable
+            key={w.name}
+            accessibilityRole="button"
+            accessibilityLabel={`${w.name}, ${value}%`}
+            android_ripple={{ color: colors.border }}
+            style={styles.reportRow}
+          >
+            <View style={styles.flex}>
+              <Text style={[typography.bodyBold, { color: colors.text }]}>
+                {w.current ? 'השבוע (עד עכשיו)' : w.chag ? `שבוע ${w.name}` : `פרשת ${w.name}`}
+              </Text>
+              <Text style={[typography.caption, { color: colors.textSub }]}>
+                {w.current ? `פרשת ${w.name} · ${w.range}` : w.range} · {w.done} מתוך {w.total}
+              </Text>
+            </View>
+            <View style={styles.reportMeter}>
+              <Text style={[typography.captionBold, { color: colors.goldText }]}>{value}%</Text>
+              <View style={{ width: MINI_BAR_WIDTH }}>
+                <Bar percent={value} />
+              </View>
+            </View>
+            <MitzvahIcon name="chevronLeft" size={CHEVRON} color={colors.textMuted} strokeWidth={2.5} />
+          </Pressable>
+        );
+      })}
+      <ListRow icon="calendar" iconTone="muted" title="עוד 6 שבועות" caption="כל דוח נשמר כאן" chevron onPress={() => {}} />
+    </Card>
+  );
+}
+
+function TrendsTab() {
+  const { colors } = useTheme();
+  return (
+    <>
+      <SectionLabel text="12 השבועות האחרונים" />
+      <WeeksChart />
+      <Insight text="88% בשבוע של לך לך: השבוע הטוב ביותר ב־12 השבועות האחרונים" />
+
+      <SectionLabel text="היום החזק שלך בשבוע" />
+      <WeekdaysChart />
+      <Insight text="ראשון הוא היום החזק שלך: 89% ב־12 השבועות האחרונים" />
+
+      <SectionLabel text="מגמה לפי מצווה" />
+      <Text style={[typography.small, styles.sectionHint, { color: colors.textSub }]}>
+        30 הימים האחרונים מול 30 הימים שלפניהם. הקו הדק: איפה המצווה עמדה אז.
+      </Text>
+      <MitzvahTrends />
+      <Insight text="שחרית עלתה ב־12 נקודות לעומת 30 הימים שלפני, והיא עכשיו על 83%" />
+
+      <SectionLabel text="דוחות שבועיים" />
+      <ReportsList />
+    </>
+  );
+}
+
+function AchievementsTab() {
+  const { colors } = useTheme();
+  const records = [...MITZVOT].sort((a, b) => b.best - a.best);
+  return (
+    <>
+      <SectionLabel text="הישגים שהשגת" count={EARNED.length} />
+      <View style={styles.badgeGrid}>
+        {EARNED.map((badge) => (
+          <Card key={badge.id} padded style={styles.flex}>
+            <View style={styles.badgeInner}>
+              <IconTile name={badge.icon} size={BADGE_TILE} />
+              <Text style={[typography.captionBold, styles.center, { color: colors.text }]} numberOfLines={2}>
+                {badge.title}
+              </Text>
+              <Text style={[typography.micro, styles.center, { color: colors.textSub }]}>{badge.date}</Text>
+            </View>
+          </Card>
+        ))}
+      </View>
+
+      <SectionLabel text="בדרך להישג הבא" />
+      <Card divided>
+        {NEXT.map((n) => (
+          <View key={n.id} style={styles.nextRow}>
+            <IconTile name={n.icon} tone="muted" />
+            <View style={[styles.flex, styles.nextText]}>
+              <View style={styles.statTop}>
+                <Text style={[typography.bodyBold, styles.flex, { color: colors.text }]}>{n.title}</Text>
+                <Text style={[typography.caption, { color: colors.textSub }]}>{n.left}</Text>
+              </View>
+              <Bar percent={pct(n.done, n.goal)} />
+              <Text style={[typography.small, { color: colors.textSub }]}>
+                {n.done.toLocaleString('en-US')} מתוך {n.goal.toLocaleString('en-US')}
+              </Text>
+            </View>
+          </View>
+        ))}
+      </Card>
+
+      <SectionLabel text="שיאים אישיים" />
+      <Card divided>
+        <ListRow icon="star" title="31 ימים ברצף" caption="הרצף הארוך ביותר: א׳ באלול עד א׳ בתשרי" />
+        <ListRow icon="calendar" title="88% בשבוע אחד" caption="השבוע הטוב ביותר: פרשת לך לך, ז׳–י״ג בחשוון" />
+      </Card>
+
+      <SectionLabel text="הרצף הארוך לכל מצווה" />
+      <Card divided>
+        {records.map((m) => (
+          <View key={m.id} style={styles.recordRow}>
+            <MitzvahIcon name={MITZVAH_ICONS[m.id]} size={scaled(20)} color={colors.goldText} />
+            <Text style={[typography.body, styles.flex, { color: colors.text }]} numberOfLines={1}>
+              {m.name}
+            </Text>
+            <Text style={[typography.small, { color: colors.textSub }]}>{m.streak ? `עכשיו ${m.streak}` : 'עכשיו 0'}</Text>
+            <Text style={[typography.bodyBold, styles.recordValue, { color: colors.goldText }]}>{m.best} ימים</Text>
+          </View>
+        ))}
+      </Card>
+    </>
+  );
+}
+
+export default function SketchHistoryE() {
+  const { colors } = useTheme();
+  const [tab, setTab] = useState<Tab>(initialTab);
+
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
+      <ScrollView contentContainerStyle={styles.content} stickyHeaderIndices={[1]}>
+        <View style={styles.hero}>
+          <View style={StyleSheet.absoluteFill} pointerEvents="none">
+            <Landscape height={HERO_HEIGHT} />
+          </View>
+          <View style={styles.heroTop}>
+            <Text style={[typography.display, { color: colors.text }]}>{greeting(PROFILE_NAME)}</Text>
+            <Text style={[typography.caption, { color: colors.textSub }]}>יום חמישי, י״ח בחשוון</Text>
+          </View>
+          <StreakRing streak={STREAK} size={RING_SIZE} />
+          <Text style={[typography.subheading, styles.center, { color: colors.text }]}>עוד 18 ימים ליעד 30</Text>
+          <Text style={[typography.small, styles.center, styles.explain, { color: colors.textSub }]}>
+            רצף = ימים רצופים שבכל אחד מהם סימנת לפחות מצווה אחת
+          </Text>
+        </View>
+
+        <View style={[styles.tabs, { backgroundColor: colors.bg }]}>
+          <SegmentedControl options={TABS} value={tab} onChange={setTab} />
+        </View>
+
+        <View style={styles.body}>
+          {tab === 'summary' ? <SummaryTab onAchievements={() => setTab('achievements')} /> : null}
+          {tab === 'trends' ? <TrendsTab /> : null}
+          {tab === 'achievements' ? <AchievementsTab /> : null}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1 },
+  content: { paddingBottom: spacing.xxl },
+  flex: { flex: 1 },
+  hero: { height: HERO_HEIGHT, alignItems: 'center' },
+  heroTop: {
+    alignSelf: 'stretch',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  center: { textAlign: 'center' },
+  explain: { marginTop: spacing.xs, paddingHorizontal: spacing.xxl },
+  tabs: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.sm },
+  body: { paddingHorizontal: spacing.lg },
+  ringCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+  periodRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.sm, marginTop: spacing.md },
+  period: { flex: 1, alignItems: 'center', gap: spacing.xs },
+  periodHint: { marginTop: spacing.md, marginBottom: spacing.lg, paddingHorizontal: spacing.lg },
+  insight: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
+    paddingHorizontal: spacing.xs,
+  },
+  insightText: { flex: 1 },
+  grid: { gap: spacing.sm },
+  gridRow: { flexDirection: 'row', gap: spacing.sm },
+  gridCell: {
+    flex: 1,
+    height: GRID_CELL_HEIGHT,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  legend: { flexDirection: 'row', gap: spacing.lg, marginTop: spacing.sm, paddingHorizontal: spacing.xs },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  legendDot: { width: scaled(10), height: scaled(10), borderRadius: radius.full },
+  sectionHint: { paddingHorizontal: spacing.xs, marginBottom: spacing.sm },
+  statRow: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md, gap: spacing.sm },
+  statTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scaled(3),
+    paddingHorizontal: spacing.sm,
+    paddingVertical: scaled(2),
+    borderRadius: radius.full,
+  },
+  percent: { minWidth: scaled(36), textAlign: 'left' },
+  barTrack: { borderRadius: radius.full, overflow: 'hidden', alignItems: 'flex-start' },
+  tickLayer: {
+    position: 'absolute',
+    top: (BAR_HEIGHT - PREVIOUS_TICK_HEIGHT) / 2,
+    start: 0,
+    end: 0,
+    flexDirection: 'row',
+  },
+  previousTick: {
+    marginStart: -PREVIOUS_TICK_WIDTH / 2,
+    width: PREVIOUS_TICK_WIDTH,
+    height: PREVIOUS_TICK_HEIGHT,
+    borderRadius: radius.full,
+  },
+  weekChart: {
+    height: WEEK_CHART_HEIGHT,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: spacing.xs,
+    paddingEnd: scaled(30),
+    marginTop: spacing.lg,
+  },
+  gridLine: { position: 'absolute', start: 0, end: scaled(30), height: StyleSheet.hairlineWidth },
+  axisTop: { position: 'absolute', end: 0, top: -scaled(7) },
+  axisMid: { position: 'absolute', end: 0, top: WEEK_CHART_HEIGHT / 2 - scaled(7) },
+  weekColumn: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', gap: scaled(2) },
+  weekBar: { alignSelf: 'stretch', borderTopLeftRadius: radius.sm, borderTopRightRadius: radius.sm },
+  axisRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: spacing.sm,
+    paddingEnd: scaled(30),
+  },
+  weekdayList: { gap: spacing.md },
+  weekdayRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  weekdayName: { width: scaled(56) },
+  divider: { height: StyleSheet.hairlineWidth },
+  reportRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  reportMeter: { alignItems: 'flex-end', gap: spacing.xs },
+  badgeGrid: { flexDirection: 'row', gap: spacing.sm },
+  badgeInner: { alignItems: 'center', gap: spacing.xs },
+  nextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  nextText: { gap: spacing.xs },
+  recordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  recordValue: { minWidth: scaled(56), textAlign: 'left' },
+});

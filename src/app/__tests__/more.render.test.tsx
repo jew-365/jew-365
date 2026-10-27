@@ -181,15 +181,17 @@ describe('More tab', () => {
     expect(mockCheck).toHaveBeenCalled();
   });
 
-  it('lists Tehillim before the halacha hotline, with or without Chok LeYisrael, and opens it in the reader', () => {
+  it('lists Tehillim, the hilulot and the compass before the halacha hotline, with or without Chok LeYisrael, and opens it in the reader', () => {
     for (const chok of [true, false]) {
       if (chok) installChokFixture();
       else useChokStore.getState().reset();
       const { unmount } = renderAt('2026-11-16T12:00');
       const rows = screen.getAllByRole('button');
-      expect(rows).toHaveLength(6);
-      expect(within(rows[rows.length - 3]).getByText('תהילים')).toBeOnTheScreen();
-      expect(within(rows[rows.length - 3]).getByText('מחולק לפי ימי השבוע')).toBeOnTheScreen();
+      expect(rows).toHaveLength(8);
+      expect(within(rows[rows.length - 5]).getByText('תהילים')).toBeOnTheScreen();
+      expect(within(rows[rows.length - 5]).getByText('מחולק לפי ימי השבוע')).toBeOnTheScreen();
+      expect(within(rows[rows.length - 4]).getByText('הילולות צדיקים')).toBeOnTheScreen();
+      expect(within(rows[rows.length - 3]).getByText('מצפן תפילה')).toBeOnTheScreen();
       expect(within(rows[rows.length - 2]).getByText('קו ההלכה')).toBeOnTheScreen();
       fireEvent.press(screen.getByText('תהילים'));
       expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/siddur/[id]', params: { id: 'tehillim' } });
@@ -209,7 +211,27 @@ describe('More tab', () => {
     const cards = screen.UNSAFE_getAllByType(Card);
     expect(cards).toHaveLength(1);
     expect(cards[0].props.divided).toBe(true);
-    expect(within(cards[0]).UNSAFE_getAllByType(ListRow)).toHaveLength(6);
+    expect(within(cards[0]).UNSAFE_getAllByType(ListRow)).toHaveLength(8);
+  });
+
+  it('opens the hilulot from its row', () => {
+    renderAt('2026-11-16T12:00');
+    fireEvent.press(screen.getByText('הילולות צדיקים'));
+    expect(mockPush).toHaveBeenLastCalledWith('/hilulot');
+  });
+
+  it('opens the compass from its row', () => {
+    renderAt('2026-11-16T12:00');
+    expect(screen.getByText('הכיוון לכותל מהמקום שלך')).toBeOnTheScreen();
+    fireEvent.press(screen.getByText('מצפן תפילה'));
+    expect(mockPush).toHaveBeenLastCalledWith('/compass');
+  });
+
+  it('names the hilulot and the compass in English', () => {
+    useUserStore.setState({ language: 'en' });
+    renderAt('2026-11-16T12:00');
+    expect(screen.getByText('Hilulot of tzaddikim')).toBeOnTheScreen();
+    expect(screen.getByText('Prayer compass')).toBeOnTheScreen();
   });
 
   it('ends with the user guide, which opens it', () => {

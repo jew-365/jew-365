@@ -1,5 +1,15 @@
 const mockPush = jest.fn();
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
+const mockNavigation = {
+  isFocused: () => true,
+  getState: () => ({ index: 0, routes: [{ key: 'siddur' }] }),
+  addListener: () => () => {},
+};
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: mockPush }),
+  useNavigation: () => mockNavigation,
+  useFocusEffect: (effect: () => void) => require('react').useEffect(effect, [effect]),
+}));
 jest.mock('@/services/SelichotContentService', () => ({
   ...jest.requireActual('@/services/SelichotContentService'),
   prepareSelichotDownload: jest.fn(),
@@ -53,7 +63,9 @@ const nowCardHasSelichot = () => within(screen.getByTestId('siddur-now')).queryB
 
 function open() {
   jest.useFakeTimers({ now: at(JERUSALEM, '2027-09-27T01:30'), doNotFake: [...ONLY_DATE] });
-  return renderWithTheme(<SiddurScreen />);
+  const view = renderWithTheme(<SiddurScreen />);
+  fireEvent.press(screen.getByText('מועדים ושמחות'));
+  return view;
 }
 
 describe('the siddur tab’s Selichot row', () => {

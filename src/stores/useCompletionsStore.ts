@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from './zustandMiddleware';
 import { createZustandStorage } from '@/services/StorageService';
+import { afterPaint } from '@/utils/afterPaint';
 import { STORE_VERSION, migrate, onRehydrateStorage } from './persistOptions';
 
 export type Completions = Record<string, Record<string, number>>;
@@ -10,11 +11,35 @@ export type CheckIns = Record<string, number>;
 // them. The detail is gone, but the streak still knows those days were kept.
 export type ArchivedDays = [string, string][];
 
+export type BadgeId =
+  'streak7' | 'streak30' | 'streak100' | 'streak365' | 'fullWeek' | 'fullMonth' | 'thousandMarks' | `hundred:${string}`;
+export type StreakRun = { days: number; from: string | null; to: string | null };
+export type DayRange = { days: number; from: string; to: string };
+export type BestWeek = { weekStart: string; weekEnd: string; done: number; due: number; percent: number };
+export type AchievementFold = { through: string; run: StreakRun; mitzvahRuns: Record<string, StreakRun> };
+export type Achievements = {
+  badges: Partial<Record<BadgeId, string>>;
+  bestStreak: DayRange | null;
+  bestWeek: BestWeek | null;
+  mitzvahBest: Record<string, DayRange>;
+  fold: AchievementFold | null;
+};
+export type MarkCounts = { lastKey: string | null; total: number; byMitzvah: Record<string, number> };
+
+export const EMPTY_MARK_COUNTS: MarkCounts = Object.freeze({
+  lastKey: null,
+  total: 0,
+  byMitzvah: Object.freeze({}) as Record<string, number>,
+}) as MarkCounts;
+
 type CompletionsState = {
   completions: Completions;
   skipped: Completions;
   checkIns: CheckIns;
   archivedDays: ArchivedDays;
+  achievements: Achievements | null;
+  archivedMarks: MarkCounts;
+  saveAchievements: (next: Achievements) => void;
   markDone: (id: string, date?: Date) => void;
   markSkipped: (id: string, date?: Date) => void;
   unmark: (id: string, date?: Date) => void;
@@ -100,6 +125,51 @@ export function archiveMarkedDays(
   return merged;
 }
 
+function longerRange<T extends { days: number }>(prev: T | null | undefined, next: T | null | undefined): T | null {
+  if (!next) return prev ?? null;
+  if (!prev) return next;
+  return next.days > prev.days ? next : prev;
+}
+
+function betterWeek(prev: BestWeek | null, next: BestWeek | null): BestWeek | null {
+  if (!next) return prev;
+  if (!prev) return next;
+  if (next.percent !== prev.percent) return next.percent > prev.percent ? next : prev;
+  return next.due > prev.due ? next : prev;
+}
+
+export function mergeAchievements(prev: Achievements | null, next: Achievements): Achievements {
+  if (!prev) return next;
+  const mitzvahBest: Record<string, DayRange> = { ...prev.mitzvahBest };
+  for (const [id, range] of Object.entries(next.mitzvahBest)) {
+    mitzvahBest[id] = longerRange(prev.mitzvahBest[id], range) ?? range;
+  }
+  return {
+    badges: { ...next.badges, ...prev.badges },
+    bestStreak: longerRange(prev.bestStreak, next.bestStreak),
+    bestWeek: betterWeek(prev.bestWeek, next.bestWeek),
+    mitzvahBest,
+    fold: next.fold,
+  };
+}
+
+export function archiveMarkCounts(counts: MarkCounts, completions: Completions, today: Date = new Date()): MarkCounts {
+  const cutoffKey = retentionCutoffKey(today);
+  const keys = Object.keys(completions)
+    .filter((key) => key < cutoffKey && (counts.lastKey === null || key > counts.lastKey))
+    .sort();
+  if (!keys.length) return counts;
+  const byMitzvah = { ...counts.byMitzvah };
+  let total = counts.total;
+  for (const key of keys) {
+    for (const id of Object.keys(completions[key])) {
+      total += 1;
+      byMitzvah[id] = (byMitzvah[id] ?? 0) + 1;
+    }
+  }
+  return { lastKey: keys[keys.length - 1], total, byMitzvah };
+}
+
 export function isArchivedDay(archive: ArchivedDays, key: string): boolean {
   return archive.some(([first, last]) => key >= first && key <= last);
 }
@@ -118,13 +188,20 @@ export const useCompletionsStore = create<CompletionsState>()(
       skipped: {},
       checkIns: {},
       archivedDays: [],
+      achievements: null,
+      archivedMarks: EMPTY_MARK_COUNTS,
+      saveAchievements: (next) =>
+        set((s) => {
+          const merged = mergeAchievements(s.achievements, next);
+          return JSON.stringify(merged) === JSON.stringify(s.achievements) ? s : { achievements: merged };
+        }),
       markDone: (id, date = new Date()) => {
         const key = dateKey(date);
         set((s) => ({
           completions: { ...s.completions, [key]: { ...(s.completions[key] ?? {}), [id]: Date.now() } },
           skipped: setDay(s.skipped, key, withoutMark(s.skipped[key], id)),
         }));
-        queueMicrotask(() => {
+        afterPaint(() => {
           try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy: the scheduler imports this store
             const { NotificationScheduler } = require('@/services/NotificationScheduler');
@@ -139,7 +216,7 @@ export const useCompletionsStore = create<CompletionsState>()(
           completions: setDay(s.completions, key, withoutMark(s.completions[key], id)),
           skipped: { ...s.skipped, [key]: { ...(s.skipped[key] ?? {}), [id]: Date.now() } },
         }));
-        queueMicrotask(() => {
+        afterPaint(() => {
           try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy: the scheduler imports this store
             const { NotificationScheduler } = require('@/services/NotificationScheduler');
@@ -193,7 +270,15 @@ export const useCompletionsStore = create<CompletionsState>()(
         const key = dateKey(date);
         return get().skipped[key] ?? {};
       },
-      reset: () => set({ completions: {}, skipped: {}, checkIns: {}, archivedDays: [] }),
+      reset: () =>
+        set({
+          completions: {},
+          skipped: {},
+          checkIns: {},
+          archivedDays: [],
+          achievements: null,
+          archivedMarks: EMPTY_MARK_COUNTS,
+        }),
     }),
     {
       name: 'completions-store',
@@ -207,6 +292,7 @@ export const useCompletionsStore = create<CompletionsState>()(
         return {
           ...current,
           ...saved,
+          archivedMarks: archiveMarkCounts(saved?.archivedMarks ?? EMPTY_MARK_COUNTS, completions),
           archivedDays: archiveMarkedDays(saved?.archivedDays ?? [], completions),
           completions: pruneCompletions(completions),
           skipped: pruneCompletions(saved?.skipped ?? {}),

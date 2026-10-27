@@ -3,6 +3,12 @@ jest.mock('react-native-mmkv', () => {
   return { MMKV: jest.fn(() => createMockMMKV()) };
 });
 
+jest.mock('@/services/notifications/ids', () => ({
+  ...jest.requireActual('@/services/notifications/ids'),
+  HORIZON_MAX_DAYS: 2,
+}));
+jest.mock('@/services/notifications/planners/horizonEnd', () => ({ planHorizonEnd: () => [] }));
+
 import { HDate, months } from '@hebcal/core';
 import { DateTime } from 'luxon';
 import { buildPlan } from '../plan';

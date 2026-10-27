@@ -1,4 +1,12 @@
-import { computeStats, isTrackedInRange, judgeDay, type HistoryInput } from '../historyStats';
+import {
+  computeStats,
+  createDayJudge,
+  isTrackedInRange,
+  judgeDay,
+  judgeDayItems,
+  verdictOf,
+  type HistoryInput,
+} from '../historyStats';
 import { calendarDay } from '../checkIn';
 import { locationNoon } from '../locationDay';
 import { Mitzvah } from '@/types/mitzvah';
@@ -407,5 +415,87 @@ describe('a window that outlasts a Shabbat check-in', () => {
 
   it('is missed once its own end has passed', () => {
     expect(verdictAt(synthetic({ maxDays: 16 }), '2026-10-20T12:01').missed).toEqual(['long']);
+  });
+});
+
+describe('judgeDayItems', () => {
+  const location = CITIES[0];
+  const tefillin = findMitzvah('tefillin')!;
+  const marked = [11, 12, 13, 14, 15, 16, 18, 19, 21, 22, 23, 25, 26, 27];
+  const completions = Object.fromEntries(marked.map((day) => [`2026-10-${day}`, { tefillin: 1 }]));
+  const input: HistoryInput = {
+    mitzvot: [tefillin],
+    completions,
+    location,
+    settings,
+    enabledSince: { tefillin: at(location, '2026-10-11T00:00').getTime() },
+  };
+  const now = at(location, '2026-10-28T10:00');
+  const days = Array.from({ length: 28 }, (_, index) => new Date(2026, 9, index + 1));
+
+  it('judgeDay gives the expected verdicts on the fixture days', () => {
+    const verdict = (day: number) => judgeDay(new Date(2026, 9, day), input, now);
+    expect(verdict(27)).toEqual({ key: '2026-10-27', done: ['tefillin'], missed: [], pending: [] });
+    expect(verdict(20)).toEqual({ key: '2026-10-20', done: [], missed: ['tefillin'], pending: [] });
+    expect(verdict(17)).toEqual({ key: '2026-10-17', done: [], missed: [], pending: [] });
+    expect(verdict(28)).toEqual({ key: '2026-10-28', done: [], missed: [], pending: ['tefillin'] });
+  });
+
+  it('judgeDay keeps a Shabbat item pending in its check-in and misses it at the deadline', () => {
+    const daily = fixtureMitzvah('daily');
+    const shabbat: HistoryInput = { mitzvot: [daily], completions: {}, location, settings };
+    const day = new Date(2026, 10, 14);
+    const waiting = { key: '2026-11-14', done: [], missed: [], pending: ['daily'] };
+    expect(judgeDay(day, shabbat, at(location, '2026-11-15T08:00'))).toEqual(waiting);
+    expect(judgeDay(day, shabbat, at(location, '2026-11-16T08:00'))).toEqual({
+      key: '2026-11-14',
+      done: [],
+      missed: ['daily'],
+      pending: [],
+    });
+  });
+
+  it('flags the Shabbat items that wait in the check-in, done or not', () => {
+    const daily = fixtureMitzvah('daily');
+    const sunday = at(location, '2026-11-15T08:00');
+    const shabbat = new Date(2026, 10, 14);
+    const open: HistoryInput = { mitzvot: [daily], completions: {}, location, settings };
+    const marked: HistoryInput = { ...open, completions: { '2026-11-14': { daily: 5 } } };
+    expect(judgeDayItems(shabbat, open, sunday).items).toMatchObject([{ state: 'waiting', inCheckIn: true }]);
+    expect(judgeDayItems(shabbat, marked, sunday).items[0]).toMatchObject({ state: 'done', inCheckIn: false });
+    expect(judgeDayItems(shabbat, marked, sunday, { checkInFlags: true }).items[0]).toMatchObject({
+      state: 'done',
+      markedAt: 5,
+      inCheckIn: true,
+    });
+    const weekday: HistoryInput = { ...open, completions: { '2026-11-12': { daily: 5 } } };
+    expect(judgeDayItems(new Date(2026, 10, 12), weekday, sunday, { checkInFlags: true }).items[0].inCheckIn).toBe(
+      false,
+    );
+  });
+
+  it('the day judge memoizes by date key', () => {
+    const judge = createDayJudge(input, now);
+    expect(judge(days[10])).toBe(judge(new Date(2026, 9, 11)));
+  });
+
+  it('an unmarked window is open once it starts and later before it', () => {
+    const today = new Date(2026, 9, 28);
+    expect(judgeDayItems(today, input, now).items.map((item) => item.state)).toEqual(['open']);
+    const early = at(location, '2026-10-28T04:00');
+    expect(judgeDayItems(today, input, early).items.map((item) => item.state)).toEqual(['later']);
+  });
+
+  it('a skip is its own state, carries its time and counts as missed', () => {
+    const skippedAt = at(location, '2026-10-27T09:00').getTime();
+    const skipped = { ...input, completions: {}, skipped: { '2026-10-27': { tefillin: skippedAt } } };
+    const judged = judgeDayItems(new Date(2026, 9, 27), skipped, now);
+    expect(judged.items).toMatchObject([{ id: 'tefillin', state: 'skipped', markedAt: skippedAt, inCheckIn: false }]);
+    expect(verdictOf(judged).missed).toEqual(['tefillin']);
+  });
+
+  it('a done item carries its mark time', () => {
+    const [item] = judgeDayItems(new Date(2026, 9, 27), input, now).items;
+    expect(item).toMatchObject({ state: 'done', markedAt: 1, inCheckIn: false });
   });
 });

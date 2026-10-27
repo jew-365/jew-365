@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import { HDate } from '@hebcal/core';
 import { DateTime } from 'luxon';
 import { MITZVOT } from '@/data/mitzvot';
@@ -23,10 +23,10 @@ import {
 } from '@/data/siddur';
 import { Card } from '@/components/Card';
 import { ListRow } from '@/components/ListRow';
-import { iconFor } from '@/components/MitzvahIcon';
+import { iconFor, type IconName } from '@/components/MitzvahIcon';
 import { NavBar } from '@/components/NavBar';
-import { SectionLabel } from '@/components/SectionLabel';
 import { selichotAddonCaption, useSelichotDownloadFlow } from '@/components/SelichotAddonCard';
+import { SettingsSection } from '@/components/SettingsSection';
 import { useDayModel } from '@/hooks/useDayModel';
 import { useNow } from '@/hooks/useNow';
 import { selichotDownloadSupported } from '@/services/SelichotContentService';
@@ -44,12 +44,76 @@ import { formatDate, useI18n } from '@/i18n';
 const MITZVAH_TEXTS = MITZVOT.filter((mitzvah) => mitzvahTextId(mitzvah.id));
 const PRAYER_IDS = ['shacharit', 'mincha', 'maariv'];
 
-function CatalogSection({ title, children, testID }: { title: string; children: React.ReactNode; testID?: string }) {
+type SectionKey = 'now' | 'prayers' | 'mitzvot' | SiddurGroup;
+
+const OPEN_ON_FOCUS: ReadonlySet<SectionKey> = new Set<SectionKey>(['now']);
+const SECTION_ICONS: Record<'now' | 'prayers' | 'mitzvot', IconName> = {
+  now: 'sparkle',
+  prayers: 'siddur',
+  mitzvot: 'tefillin',
+};
+
+type CatalogRowProps = {
+  id: string;
+  icon: IconName;
+  iconTone: 'accent' | 'muted';
+  title: string;
+  caption?: string;
+  date?: string;
+  testID?: string;
+  onOpen: (id: string, date?: string) => void;
+};
+
+const CatalogRow = memo(function CatalogRow({
+  id,
+  icon,
+  iconTone,
+  title,
+  caption,
+  date,
+  testID,
+  onOpen,
+}: CatalogRowProps) {
+  const card = (
+    <Card>
+      <ListRow
+        icon={icon}
+        iconTone={iconTone}
+        title={title}
+        caption={caption}
+        chevron
+        onPress={() => onOpen(id, date)}
+      />
+    </Card>
+  );
+  return testID ? <View testID={testID}>{card}</View> : card;
+});
+
+type CatalogSectionProps = {
+  sectionKey: SectionKey;
+  title: string;
+  icon: IconName;
+  open: ReadonlySet<SectionKey>;
+  onToggle: (key: SectionKey) => void;
+  render: () => React.ReactNode;
+  testID?: string;
+};
+
+function CatalogSection({ sectionKey, title, icon, open, onToggle, render, testID }: CatalogSectionProps) {
   return (
-    <View style={styles.group} testID={testID}>
-      <SectionLabel text={title} />
-      <View style={styles.rows}>{children}</View>
-    </View>
+    <SettingsSection
+      title={title}
+      icon={icon}
+      collapsible
+      expanded={open.has(sectionKey)}
+      onToggle={() => onToggle(sectionKey)}
+    >
+      {open.has(sectionKey) ? (
+        <View style={styles.rows} testID={testID}>
+          {render()}
+        </View>
+      ) : null}
+    </SettingsSection>
   );
 }
 
@@ -63,13 +127,51 @@ export default function SiddurScreen() {
   const now = useNow();
   const completions = useCompletionsStore((state) => state.completions);
   const siddurVoice = useUserStore((state) => state.siddurVoice);
+  const [open, setOpen] = useState<ReadonlySet<SectionKey>>(OPEN_ON_FOCUS);
+
+  const navigation = useNavigation();
+  const tabKey = useRef<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      const state = navigation.getState();
+      tabKey.current = state?.routes[state.index]?.key ?? null;
+    }, [navigation]),
+  );
+
+  useEffect(
+    () =>
+      navigation.addListener('blur', () => {
+        const state = navigation.getState();
+        if (state?.routes[state.index]?.key !== tabKey.current) setOpen(OPEN_ON_FOCUS);
+      }),
+    [navigation],
+  );
+
+  const toggle = useCallback(
+    (key: SectionKey) =>
+      setOpen((current) => {
+        const next = new Set(current);
+        if (!next.delete(key)) next.add(key);
+        return next;
+      }),
+    [],
+  );
+  const openText = useCallback(
+    (id: string, date?: string) => router.push({ pathname: '/siddur/[id]', params: date ? { id, date } : { id } }),
+    [router],
+  );
+
   const groups = useMemo(
     () =>
       SIDDUR_GROUPS.map((group) => ({ group, ids: standaloneTextsIn(group, nusach) })).filter(({ ids }) => ids.length),
     [nusach],
   );
   // Keyed by each text's day number, so the clock tick re-checks availability only when a day turns.
-  const dayKey = groups.flatMap(({ ids }) => ids.map((id) => standaloneTextDay(id, now, location).abs())).join(',');
+  const dayKey = useMemo(
+    () => groups.flatMap(({ ids }) => ids.map((id) => standaloneTextDay(id, now, location).abs())).join(','),
+    [groups, now, location],
+  );
   const available = useMemo(() => {
     const place = siddurPlace(location, inIsrael);
     const days = dayKey.split(',').map(Number);
@@ -139,34 +241,25 @@ export default function SiddurScreen() {
   const mitzvahRow = ({ mitzvah, window, hasText, openNow }: (typeof today)[number]) => {
     const { availableLabel } = SIDDUR_TEXTS[mitzvahTextId(mitzvah.id)!];
     return (
-      <View key={mitzvah.id} testID={`siddur-row-${mitzvah.id}`}>
-        <Card>
-          <ListRow
-            icon={iconFor(mitzvah.icon)}
-            iconTone={hasText ? 'accent' : 'muted'}
-            title={nameFor(mitzvah)}
-            caption={
-              openNow
-                ? t('siddur.today.open')
-                : hasText && window
-                  ? laterCaption(window.start)
-                  : availableLabel
-                    ? label(availableLabel)
-                    : t('siddur.catalog.notToday')
-            }
-            chevron
-            onPress={() =>
-              router.push({
-                pathname: '/siddur/[id]',
-                params:
-                  hasText && window && windowDueToday(window, location, now)
-                    ? { id: mitzvah.id, date: dateKey(window.date) }
-                    : { id: mitzvah.id },
-              })
-            }
-          />
-        </Card>
-      </View>
+      <CatalogRow
+        key={mitzvah.id}
+        testID={`siddur-row-${mitzvah.id}`}
+        id={mitzvah.id}
+        icon={iconFor(mitzvah.icon)}
+        iconTone={hasText ? 'accent' : 'muted'}
+        title={nameFor(mitzvah)}
+        caption={
+          openNow
+            ? t('siddur.today.open')
+            : hasText && window
+              ? laterCaption(window.start)
+              : availableLabel
+                ? label(availableLabel)
+                : t('siddur.catalog.notToday')
+        }
+        date={hasText && window && windowDueToday(window, location, now) ? dateKey(window.date) : undefined}
+        onOpen={openText}
+      />
     );
   };
 
@@ -174,32 +267,29 @@ export default function SiddurScreen() {
     if (entry.mitzvah) {
       const { mitzvah, window } = entry.mitzvah;
       return (
-        <Card key={mitzvah.id}>
-          <ListRow
-            icon={iconFor(mitzvah.icon)}
-            iconTone="accent"
-            title={nameFor(mitzvah)}
-            caption={t('siddur.now.until', { time: clockOf(window!.end) })}
-            chevron
-            onPress={() =>
-              router.push({ pathname: '/siddur/[id]', params: { id: mitzvah.id, date: dateKey(window!.date) } })
-            }
-          />
-        </Card>
+        <CatalogRow
+          key={mitzvah.id}
+          id={mitzvah.id}
+          icon={iconFor(mitzvah.icon)}
+          iconTone="accent"
+          title={nameFor(mitzvah)}
+          caption={t('siddur.now.until', { time: clockOf(window!.end) })}
+          date={dateKey(window!.date)}
+          onOpen={openText}
+        />
       );
     }
     const { id, group, hours } = entry.standalone;
     return (
-      <Card key={id}>
-        <ListRow
-          icon={group}
-          iconTone="accent"
-          title={label(STANDALONE_TEXTS[id].name)}
-          caption={t('siddur.now.until', { time: clockOf(hours.end) })}
-          chevron
-          onPress={() => router.push({ pathname: '/siddur/[id]', params: { id } })}
-        />
-      </Card>
+      <CatalogRow
+        key={id}
+        id={id}
+        icon={group}
+        iconTone="accent"
+        title={label(STANDALONE_TEXTS[id].name)}
+        caption={t('siddur.now.until', { time: clockOf(hours.end) })}
+        onOpen={openText}
+      />
     );
   };
 
@@ -231,20 +321,32 @@ export default function SiddurScreen() {
     const { availableLabel } = standaloneAvailability(id, nusach);
     const saidToday = (available.get(id) ?? false) && !standalonePeriodEnded(id, nusach, now, location);
     return (
-      <View key={id} testID={`siddur-row-${id}`}>
-        <Card>
-          <ListRow
-            icon={group}
-            iconTone={saidToday ? 'accent' : 'muted'}
-            title={label(name)}
-            caption={saidToday ? undefined : availableLabel ? label(availableLabel) : t('siddur.catalog.notToday')}
-            chevron
-            onPress={() => router.push({ pathname: '/siddur/[id]', params: { id } })}
-          />
-        </Card>
-      </View>
+      <CatalogRow
+        key={id}
+        testID={`siddur-row-${id}`}
+        id={id}
+        icon={group}
+        iconTone={saidToday ? 'accent' : 'muted'}
+        title={label(name)}
+        caption={saidToday ? undefined : availableLabel ? label(availableLabel) : t('siddur.catalog.notToday')}
+        onOpen={openText}
+      />
     );
   };
+
+  const standaloneSection = ({ group, ids }: (typeof groups)[number]) => (
+    <CatalogSection
+      key={group}
+      sectionKey={group}
+      title={t(`siddur.group.${group}`)}
+      icon={group}
+      open={open}
+      onToggle={toggle}
+      render={() => ids.map((id) => row(id, group))}
+    />
+  );
+  const mealGroups = groups.filter(({ group }) => group === 'meals');
+  const otherGroups = groups.filter(({ group }) => group !== 'meals');
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
@@ -254,21 +356,37 @@ export default function SiddurScreen() {
       />
       <ScrollView contentContainerStyle={styles.list}>
         {openNow.length > 0 && (
-          <CatalogSection title={t('siddur.group.now')} testID="siddur-now">
-            {openNow.map(nowRow)}
-          </CatalogSection>
+          <CatalogSection
+            sectionKey="now"
+            title={t('siddur.group.now')}
+            icon={SECTION_ICONS.now}
+            open={open}
+            onToggle={toggle}
+            testID="siddur-now"
+            render={() => openNow.map(nowRow)}
+          />
         )}
-        <CatalogSection title={t('siddur.group.prayers')}>{prayers.map(mitzvahRow)}</CatalogSection>
+        {mealGroups.map(standaloneSection)}
+        <CatalogSection
+          sectionKey="prayers"
+          title={t('siddur.group.prayers')}
+          icon={SECTION_ICONS.prayers}
+          open={open}
+          onToggle={toggle}
+          render={() => prayers.map(mitzvahRow)}
+        />
         {mitzvotTexts.length > 0 && (
-          <CatalogSection title={t('siddur.group.mitzvot')} testID="siddur-mitzvot">
-            {mitzvotTexts.map(mitzvahRow)}
-          </CatalogSection>
+          <CatalogSection
+            sectionKey="mitzvot"
+            title={t('siddur.group.mitzvot')}
+            icon={SECTION_ICONS.mitzvot}
+            open={open}
+            onToggle={toggle}
+            testID="siddur-mitzvot"
+            render={() => mitzvotTexts.map(mitzvahRow)}
+          />
         )}
-        {groups.map(({ group, ids }) => (
-          <CatalogSection key={group} title={t(`siddur.group.${group}`)}>
-            {ids.map((id) => row(id, group))}
-          </CatalogSection>
-        ))}
+        {otherGroups.map(standaloneSection)}
       </ScrollView>
       {selichotFlow.dialog}
     </SafeAreaView>
@@ -283,9 +401,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.xxxl,
-  },
-  group: {
-    marginBottom: spacing.xl,
   },
   rows: {
     gap: spacing.sm,

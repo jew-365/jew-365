@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import * as TaskManager from 'expo-task-manager';
 import * as BackgroundTask from 'expo-background-task';
 import type { Mitzvah, Reminder, UserSettings } from '@/types/mitzvah';
@@ -5,6 +6,7 @@ import type { Location } from '@/types/zmanim';
 import { StorageService } from '@/services/StorageService';
 import { downloadNewUpdate, isUpdateApplied } from '@/services/appUpdates';
 import { clearLastError, getLastError, reportError } from '@/services/errors';
+import { afterPaint } from '@/utils/afterPaint';
 import { isQuietAt } from '@/utils/skipRules';
 import { appDay, appDayEnd } from '@/utils/locationDay';
 import { blockForDay, blockOfCheckIn, checkInFor } from '@/utils/checkIn';
@@ -252,21 +254,39 @@ export async function markDoneFromNotificationData(
   useCompletionsStore.getState().markDone(target.mitzvahId, target.date);
   await Promise.all([
     NotificationScheduler.cancelForMitzvah(target.mitzvahId, target.date).catch(() => {}),
+    NotificationScheduler.settleCheckIn(target.date).catch(() => {}),
     dismissPresentedNotificationsForMitzvah(target.mitzvahId, target.key, notificationId),
   ]);
   return true;
 }
 
-async function scheduleAllImpl(scope: PlanScope): Promise<void> {
+async function scheduleAllImpl(scope: PlanScope, onlyDifference = false): Promise<void> {
   if (!hasNotificationPermission()) return;
   await os.ensureCategories();
-  await os.schedule(buildPlan(readPlanInput(new Date(), scope)));
+  const plan = buildPlan(readPlanInput(new Date(), scope));
+  await (onlyDifference ? os.sync(plan) : os.schedule(plan));
+}
+
+let pendingRead: Promise<os.TrayNotification[]> | null = null;
+
+// A mark asks for the pending list twice at once (the cancel and the check-in settle): one read serves both.
+function readScheduled(): Promise<os.TrayNotification[]> {
+  if (!pendingRead) {
+    pendingRead = os.getScheduled().finally(() => {
+      pendingRead = null;
+    });
+  }
+  return pendingRead;
 }
 
 export const NotificationScheduler = {
   inFlight: null as Promise<void> | null,
 
   rerunQueued: false,
+
+  // Android drops every alarm on a force-stop but keeps expo's stored requests, which a diff would
+  // read as still scheduled: the first rebuild of each process replaces everything.
+  replacedInProcess: false,
 
   // Trailing-edge coalescing, not drop-on-conflict. A rebuild reads the store INSIDE the locked
   // task, so a request arriving mid-run reflects state the running task never saw; dropping it
@@ -309,7 +329,7 @@ export const NotificationScheduler = {
 
   async cancelForMitzvah(mitzvahId: string, date: Date = new Date()): Promise<void> {
     const key = dateKey(date);
-    const pending = await os.getScheduled();
+    const pending = await readScheduled();
     const matching = pending.filter(({ identifier, data }) => {
       const parsed = (identifier ? parseId(identifier) : null) ?? (data.customId ? parseId(data.customId) : null);
       return (parsed?.mitzvahId ?? data.mitzvahId) === mitzvahId && (parsed?.date ?? data.dateKey) === key;
@@ -333,16 +353,22 @@ export const NotificationScheduler = {
     const block = blockForDay(date, useUserStore.getState().location);
     if (!block || !checkInSettled(block.days[0])) return;
     const prefix = `${CHECK_IN_KIND}:${block.days[0]}:`;
-    const pending = await os.getScheduled().catch(() => []);
+    const pending = await readScheduled().catch(() => []);
     if (pending.some(({ identifier }) => identifier.startsWith(prefix))) await this.cancelCheckIn(block.days[0]);
   },
 
-  async rebuild(): Promise<void> {
+  async rebuild(replace = false): Promise<void> {
     if (schedulingSuspended) return;
+    let forced = replace;
     return this.withLock(async () => {
+      const staleFormat = StorageService.get<number>(SCHEDULE_FORMAT_KEY) !== SCHEDULE_FORMAT;
       StorageService.delete(SCHEDULE_FORMAT_KEY);
-      await this.cancelAll();
-      await scheduleAllImpl(currentScope());
+      const androidFirst = Platform.OS === 'android' && !this.replacedInProcess;
+      const onlyDifference = !staleFormat && !forced && !androidFirst && hasNotificationPermission();
+      forced = false;
+      if (!onlyDifference) await this.cancelAll();
+      await scheduleAllImpl(currentScope(), onlyDifference);
+      if (!onlyDifference) this.replacedInProcess = true;
       StorageService.set(SCHEDULE_FORMAT_KEY, SCHEDULE_FORMAT);
       clearScheduleError();
     });
@@ -351,7 +377,7 @@ export const NotificationScheduler = {
   // Only the day-rollover path stamps LAST_REBUILD_KEY. A settings-driven rebuild used to stamp it
   // too, which suppressed that night's recovery run for the rest of the day.
   async rebuildForNewDay(): Promise<void> {
-    await this.rebuild();
+    await this.rebuild(true);
     StorageService.set(LAST_REBUILD_KEY, dateKey(new Date()));
   },
 };
@@ -451,9 +477,11 @@ export function initNotificationHandlers(): () => void {
   os.setForegroundHandler(shouldSuppressForCompletion);
   os.ensureCategories().catch(() => {});
   registerNotificationActionTask().catch(() => {});
-  syncNotificationPermissionStatus().catch(reportScheduleError);
-  dismissCompletedPresentedNotifications().catch(() => {});
-  refreshSchedulingOnForeground().catch(reportScheduleError);
+  afterPaint(() => {
+    syncNotificationPermissionStatus().catch(reportScheduleError);
+    dismissCompletedPresentedNotifications().catch(() => {});
+    refreshSchedulingOnForeground().catch(reportScheduleError);
+  });
   const unsubscribers = [
     useUserStore.subscribe((state, prev) => {
       if (state.notificationsEnabled !== prev.notificationsEnabled) {

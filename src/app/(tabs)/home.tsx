@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Banner, BannerTone } from '@/components/Banner';
@@ -19,6 +19,7 @@ import { CounterPill } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
 import { useSelichotDownloadFlow } from '@/components/SelichotAddonCard';
 import { useDayModel } from '@/hooks/useDayModel';
+import { useIsFocused } from '@/hooks/useIsFocused';
 import { useNow } from '@/hooks/useNow';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { getLocationName } from '@/data/cities';
@@ -38,6 +39,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useQuietBlock } from '@/components/ShabbatScreen';
 import { typography } from '@/theme/typography';
 import { durations, spacing } from '@/theme/tokens';
+import { afterPaint } from '@/utils/afterPaint';
 import { clockOf, formatRemaining } from '@/utils/clock';
 import { DayWindow, appDayWindow } from '@/utils/buildDayTimeline';
 import { checkInLastDay, checkInPhraseKey, latestCheckIn, overlapsBlock, trackedOn } from '@/utils/checkIn';
@@ -67,6 +69,7 @@ type LiveItem = {
   urgent: boolean;
   name: string;
   hasText: boolean;
+  marked: boolean;
 };
 
 const PROFILE_INTRO_KEY = 'profile:intro-dismissed';
@@ -111,23 +114,6 @@ function taharahCardFor(
           t,
         ),
   };
-}
-
-function useIsFocused(): boolean {
-  const navigation = useNavigation();
-  const subscribe = useCallback(
-    (onChange: () => void) => {
-      const offFocus = navigation.addListener('focus', onChange);
-      const offBlur = navigation.addListener('blur', onChange);
-      return () => {
-        offFocus();
-        offBlur();
-      };
-    },
-    [navigation],
-  );
-  const isFocused = useCallback(() => navigation.isFocused(), [navigation]);
-  return useSyncExternalStore(subscribe, isFocused, isFocused);
 }
 
 export default function HomeScreen() {
@@ -175,12 +161,11 @@ export default function HomeScreen() {
   const stampTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
-    current,
-    missed,
-    completed,
+    allCurrent,
+    allMissed,
+    allCompleted,
     nextUp,
     totalActive,
-    doneCount,
     hebrewTitle,
     subtitle,
     zmanimUnavailable,
@@ -226,12 +211,8 @@ export default function HomeScreen() {
         urgent: remainingMs <= 45 * 60 * 1000,
         name: nameFor(mitzvah),
         hasText: hasSiddurText(mitzvah, nusach, window.date, place),
+        marked: Boolean(completions[key]?.[mitzvah.id] || skipped[key]?.[mitzvah.id]),
       };
-      // The card being stamped stays put until its animation ends, even though the completion is
-      // already persisted.
-      if ((completions[key]?.[mitzvah.id] || skipped[key]?.[mitzvah.id]) && mitzvah.id !== stampingId) {
-        continue;
-      }
       if (now > window.end) {
         // Waiting in the check-in of the block that just ended, not missed.
         // Judged by the window itself, not by a date key, which differs once the device's zone is not
@@ -240,7 +221,7 @@ export default function HomeScreen() {
       } else if (now >= window.start && now <= window.end) {
         currentItems.push(item);
       } else if (now < window.start) {
-        upcomingItems.push(item);
+        if (!item.marked) upcomingItems.push(item);
       }
     }
 
@@ -251,7 +232,6 @@ export default function HomeScreen() {
     // Done and skipped share the list, so a skip is visible and has the same undo as a completion.
     const completedItems = allMitzvot
       .flatMap((mitzvah): CompletedItem[] => {
-        if (mitzvah.id === stampingId) return [];
         const date = windowDays.get(mitzvah.id) ?? today;
         const key = dateKey(date);
         const done = completions[key]?.[mitzvah.id];
@@ -271,12 +251,11 @@ export default function HomeScreen() {
       .sort((a, b) => b.timestamp - a.timestamp);
 
     return {
-      current: currentItems,
-      missed: missedItems,
-      completed: completedItems,
+      allCurrent: currentItems,
+      allMissed: missedItems,
+      allCompleted: completedItems,
       nextUp: upcomingItems[0] ?? null,
       totalActive: windowDays.size,
-      doneCount: completedItems.filter((item) => !item.wasSkipped).length,
       hebrewTitle: hebrew.hebrewDateStr,
       subtitle: subtitleText,
       zmanimUnavailable: ZmanimService.getZmanim(locationNoon(today, location), location) === null,
@@ -303,7 +282,6 @@ export default function HomeScreen() {
     t,
     location,
     tick,
-    stampingId,
     nusach,
     inIsrael,
     taharahEnabled,
@@ -313,6 +291,17 @@ export default function HomeScreen() {
     quiet,
     tickedAt,
   ]);
+
+  const current = useMemo(
+    () => allCurrent.filter((item) => !item.marked || item.mitzvah.id === stampingId),
+    [allCurrent, stampingId],
+  );
+  const missed = useMemo(
+    () => allMissed.filter((item) => !item.marked || item.mitzvah.id === stampingId),
+    [allMissed, stampingId],
+  );
+  const completed = useMemo(() => allCompleted.filter((item) => item.id !== stampingId), [allCompleted, stampingId]);
+  const doneCount = completed.filter((item) => !item.wasSkipped).length;
 
   const todayTime = today.getTime();
   const selichotOffer = useMemo(
@@ -462,9 +451,11 @@ export default function HomeScreen() {
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
         setTick((value) => value + 1);
-        syncNotificationPermissionStatus().catch((error) => reportError('schedule', error));
-        dismissCompletedPresentedNotifications().catch(() => {});
-        refreshSchedulingOnForeground().catch((error) => reportError('schedule', error));
+        afterPaint(() => {
+          syncNotificationPermissionStatus().catch((error) => reportError('schedule', error));
+          dismissCompletedPresentedNotifications().catch(() => {});
+          refreshSchedulingOnForeground().catch((error) => reportError('schedule', error));
+        });
       }
     });
     return () => sub.remove();

@@ -1,11 +1,42 @@
 ---
 name: store-console
-description: "Fill Google Play Console and App Store Connect forms, listings, declarations, graphics and tester settings for Jew 365 through the browser, and record every answer in the release docs. Use for: תמלא בקונסול, תמלא את הטפסים בפליי קונסול, תעלה את הצילומים לקונסול, תעדכן את הלישטינג, תכין את ה-App Store Connect, store listing, Play Console, App Store Connect, data safety, App content, content rating, closed test testers. Not for building or uploading the AAB itself (that is the user's step) and not for publishing OTA updates."
+description: "Read store status and act on Google Play Console and App Store Connect for Jew 365: command line first (asc for Apple, scripts/store/play.mjs for Play), the browser only for what the APIs lack (forms, declarations, graphics, the Play dashboard), and record every answer in the release docs. Use for: מה המצב בחנויות, סטטוס בדיקה של אפל, בודקים בטסטפלייט, מה יש בטרק הסגור, ביקורות, תמלא בקונסול, תמלא את הטפסים בפליי קונסול, תעלה את הצילומים לקונסול, תעדכן את הלישטינג, store status, review state, TestFlight, Play tracks, testers, reviews, store listing, data safety, content rating. Not for building the AAB or IPA and not for publishing OTA updates."
 ---
 
 # store-console
 
-Fills store consoles for `com.jew365.app` through a real browser, with the user's approval at the gates. The record of every answer lives in the repo: [PLAY_CONSOLE_METADATA.md](../../../release/PLAY_CONSOLE_METADATA.md) for Google Play, [APP_STORE_METADATA_EN.md](../../../release/APP_STORE_METADATA_EN.md) and [APP_STORE_METADATA_HE.md](../../../release/APP_STORE_METADATA_HE.md) for the App Store, [RELEASE_LOG.md](../../../release/RELEASE_LOG.md) for the chronological steps. Read [release/AGENTS.md](../../../release/AGENTS.md) first: it holds the rules every answer must match (no claim of "no server" or "offline only", the Data safety and App Privacy facts, the age-rating facts, field limits).
+Reads and acts on the store consoles for `com.jew365.app`, through the command line where an API covers the task and a real browser where it does not, with the user's approval at the gates. The record of every answer lives in the repo: [PLAY_CONSOLE_METADATA.md](../../../release/PLAY_CONSOLE_METADATA.md) for Google Play, [APP_STORE_METADATA_EN.md](../../../release/APP_STORE_METADATA_EN.md) and [APP_STORE_METADATA_HE.md](../../../release/APP_STORE_METADATA_HE.md) for the App Store, [RELEASE_LOG.md](../../../release/RELEASE_LOG.md) for the chronological steps. Read [release/AGENTS.md](../../../release/AGENTS.md) first: it holds the rules every answer must match (no claim of "no server" or "offline only", the Data safety and App Privacy facts, the age-rating facts, field limits).
+
+## 0. Command line first
+
+Both stores have an API, and a read through it needs no browser, no sign-in and no visible Chrome window. Use it for every status read; open the browser only for what section 0.3 lists.
+
+### 0.1 App Store Connect: `asc`
+
+- [asc](https://github.com/rorkai/App-Store-Connect-CLI) (MIT), installed with `winget install --id Rorkai.ASC --exact`, telemetry switched off (`asc telemetry status` must say `enabled: false`). If `asc` is not on `PATH`, call `%LOCALAPPDATA%\Microsoft\WinGet\Packages\Rorkai.ASC_Microsoft.Winget.Source_8wekyb3d8bbwe\asc.exe`.
+- Auth: a team API key with the App Manager role, profile `jew365`, Key ID `K7387D5H36`, stored by `asc auth login` in the Windows Credential Manager. The `.p8` lives in `C:\Users\avrah\.store-keys\`, which agents may not read. Only the owner creates, rotates or registers a key; `asc auth status` shows which profile is in use without the key.
+- App id `6825802248`. Reads:
+  - `asc status --app 6825802248 --output table` - one-screen overview: review state, latest build, TestFlight, next action.
+  - `asc review status --app 6825802248` - the version's review state and the latest submission.
+  - `asc versions list --app 6825802248 --output table`
+  - `asc builds list --app 6825802248 --output table` - builds with processing state and expiry.
+  - `asc testflight groups list --app 6825802248 --output table` and `asc testflight testers list --app 6825802248 --output table` - groups, public link, each tester's state (mask the emails when quoting them).
+  - `asc reviews list --app 6825802248 --output table` - customer reviews.
+  - `asc search "<what you want to do>"` finds any other command; `--help` on any command shows its flags.
+
+### 0.2 Google Play: `scripts/store/play.mjs`
+
+- [../../../scripts/store/play.mjs](../../../scripts/store/play.mjs), plain Node, the Android Publisher API with a service account (`play-cli` in the owner's Google Cloud project `jew365-store`, invited in Play Console › Users and permissions with View app information, Manage testing tracks and edit tester lists, Release to testing tracks, Reply to reviews; no production release permission until production access is granted). Its JSON key is `C:\Users\avrah\.store-keys\play-service-account.json`, read by the script itself; never name it in a command, never read it.
+- Reads (each opens a Play edit and deletes it): `node scripts/store/play.mjs tracks`, `track alpha`, `testers alpha`, `listing iw-IL`, `details`, `bundles`, `reviews`. The closed test is the `alpha` track; the API returns only the last 7 days of text reviews.
+- `node scripts/store/play.mjs --help` lists the write commands. Every one is a dry run that Play validates and discards; only `--commit` applies it.
+
+### 0.3 What stays in the browser (sections 1 to 6)
+
+The Play Dashboard and its tester count toward production access, Publishing overview, Statistics, Crashes and ANRs, testing feedback, every App content declaration (Data safety, content rating, target audience), graphics, and anything `asc` or `play.mjs` cannot reach. Prefer the command when both can do it.
+
+### 0.4 Writes need the owner's yes, every time
+
+A read runs without asking. Every state-changing command - an upload, a release or promotion, a rollout change, `testers-set`, a review reply, a metadata or screenshot change, a submission or its cancellation, any `asc` command that creates, updates, deletes or submits - needs the owner's explicit yes in chat for that exact command, after showing them the command and, for `play.mjs`, the dry run's output. A yes covers that one command only. Log each write in [RELEASE_LOG.md](../../../release/RELEASE_LOG.md).
 
 ## 1. Before touching the console
 
@@ -18,6 +49,7 @@ Fills store consoles for `com.jew365.app` through a real browser, with the user'
 ## 2. Which browser
 
 - Use Claude in Chrome (`mcp__claude-in-chrome__*`; load its tools with ToolSearch in one call: tabs_context_mcp, navigate, computer, read_page, find, form_input, file_upload, upload_image, get_page_text, tabs_create_mcp) for every logged-in console and for every file upload. It is the user's own signed-in Chrome.
+- Two Chromes may be connected, one signed in to the work account. Before the first console page, `list_connected_browsers` and pick the one whose Google account is 365jew (check the account button on the page); never type a password into a sign-in page.
 - The built-in browser has no file upload, so graphics and every other file go through Chrome. It can fill the forms when the user signs in there (Play Console was filled that way as 365jew on 2026-10-20), but prefer Chrome for consoles: it is already signed in.
 - Uploads read only files inside the session folders and cap at 10 MB. Copy graphics to the session scratchpad first. An AAB is above the cap: the user uploads every AAB, you do the rest of the release.
 - Play Console URL shape: `https://play.google.com/console/u/0/developers/6395219355356380365/app/4975091190006669419/<page>` (developer id and app id of `com.jew365.app`).

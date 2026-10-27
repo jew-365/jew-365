@@ -27,6 +27,33 @@ describe('ScreenHeader', () => {
     expect(screen.getByText('Coming soon')).toBeOnTheScreen();
   });
 
+  it('compact: draws the back pill and the title on one line, with no subtitle, actions or body', () => {
+    const onBack = jest.fn();
+    const onCompactPress = jest.fn();
+    renderWithTheme(
+      <ScreenHeader
+        compact
+        title="Hilulot"
+        subtitle="Coming soon"
+        onBack={onBack}
+        onCompactPress={onCompactPress}
+        compactLabel="Expand"
+        actions={<Text>Action</Text>}
+      >
+        <Text>Body</Text>
+      </ScreenHeader>,
+    );
+    expect(screen.getByText('Hilulot')).toHaveProp('numberOfLines', 1);
+    expect(screen.queryByText('Coming soon')).toBeNull();
+    expect(screen.queryByText('Action')).toBeNull();
+    expect(screen.queryByText('Body')).toBeNull();
+    fireEvent.press(screen.getByRole('button', { name: 'Hilulot' }));
+    expect(screen.getByHintText('Expand')).toBeOnTheScreen();
+    expect(onCompactPress).toHaveBeenCalledTimes(1);
+    fireEvent.press(screen.getByRole('button', { name: 'חזור' }));
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
   it.each(THEME_NAMES)('%s: the title reads text and the subtitle textSub', (name) => {
     useUserStore.setState({ theme: name });
     renderWithTheme(<ScreenHeader title="Hilulot" subtitle="Coming soon" />);

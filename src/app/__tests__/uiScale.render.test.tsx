@@ -22,6 +22,12 @@ jest.mock('expo-keep-awake', () => ({
   activateKeepAwakeAsync: () => Promise.resolve(),
   deactivateKeepAwake: () => Promise.resolve(),
 }));
+jest.mock('@/utils/afterPaint', () => ({
+  afterPaint: (task: () => void) => {
+    task();
+    return { cancel: () => {} };
+  },
+}));
 jest.mock('@/services/SiddurService', () => ({
   loadSiddurText: () => ({
     then: (resolve: (text: unknown) => void) => {

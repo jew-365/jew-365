@@ -14,6 +14,13 @@
       "runtimeArgs": ["-m", "http.server", "8095", "--directory", "docs", "--bind", "127.0.0.1"],
       "port": 8095,
       "autoPort": true
+    },
+    {
+      "name": "design-site",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8096", "--directory", "design", "--bind", "127.0.0.1"],
+      "port": 8096,
+      "autoPort": true
     }
   ]
 }

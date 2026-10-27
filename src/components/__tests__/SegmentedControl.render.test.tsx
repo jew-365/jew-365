@@ -143,3 +143,39 @@ describe('SegmentedControl accessibility label', () => {
     expect(onChange).toHaveBeenCalledWith('b');
   });
 });
+
+describe('SegmentedControl animated', () => {
+  const THREE = [
+    { value: 'a', label: 'א' },
+    { value: 'b', label: 'ב' },
+    { value: 'c', label: 'ג' },
+  ] as const;
+
+  beforeEach(() => {
+    useUserStore.getState().reset();
+  });
+
+  it('draws a gold indicator one segment wide once the track is measured', () => {
+    renderWithTheme(<SegmentedControl options={THREE} value="b" onChange={jest.fn()} animated />);
+    expect(screen.queryByTestId('segmented-indicator')).toBeNull();
+    const track = hostParent(screen.getAllByRole('radio')[0]);
+    fireEvent(track, 'layout', { nativeEvent: { layout: { width: 300, height: 40, x: 0, y: 0 } } });
+    const indicator = screen.getByTestId('segmented-indicator');
+    expect(StyleSheet.flatten(indicator.props.style).width).toBeCloseTo((300 - 2 * spacing.xs) / 3);
+    expect(indicator).toHaveStyle({ backgroundColor: THEMES.gold.gold });
+    screen.getAllByRole('radio').forEach((radio) => {
+      expect(StyleSheet.flatten(radio.props.style).backgroundColor).not.toBe(THEMES.gold.gold);
+    });
+  });
+
+  it('keeps the selected, checked and aria-checked state', () => {
+    renderWithTheme(<SegmentedControl options={THREE} value="b" onChange={jest.fn()} animated />);
+    expect(screen.getByRole('radio', { name: 'ב' })).toBeSelected();
+    expect(screen.getByRole('radio', { name: 'ב' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'א' })).not.toBeChecked();
+    expect(screen.getByRole('radio', { name: 'ב' }).props.accessibilityState).toMatchObject({
+      selected: true,
+      checked: true,
+    });
+  });
+});

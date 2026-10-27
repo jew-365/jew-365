@@ -3,6 +3,12 @@ jest.mock('react-native-mmkv', () => {
   return { MMKV: jest.fn(() => createMockMMKV()) };
 });
 
+jest.mock('@/services/notifications/ids', () => ({
+  ...jest.requireActual('@/services/notifications/ids'),
+  HORIZON_MAX_DAYS: 2,
+}));
+jest.mock('@/services/notifications/planners/horizonEnd', () => ({ planHorizonEnd: () => [] }));
+
 type ScheduleInput = {
   identifier: string;
   content: {
@@ -15,6 +21,13 @@ type ScheduleInput = {
 };
 
 const mockState: { pending: ScheduleInput[] } = { pending: [] };
+const mockWithoutHash = (input: ScheduleInput): ScheduleInput => ({
+  ...input,
+  content: {
+    ...input.content,
+    data: Object.fromEntries(Object.entries(input.content.data).filter(([key]) => key !== 'contentHash')),
+  },
+});
 const mockSchedule = jest.fn(async (input: ScheduleInput) => {
   mockState.pending = mockState.pending.filter((p) => p.identifier !== input.identifier);
   mockState.pending.push(input);
@@ -22,11 +35,13 @@ const mockSchedule = jest.fn(async (input: ScheduleInput) => {
 });
 
 jest.mock('expo-notifications', () => ({
-  scheduleNotificationAsync: (i: unknown) => mockSchedule(i as ScheduleInput),
+  scheduleNotificationAsync: (i: unknown) => mockSchedule(mockWithoutHash(i as ScheduleInput)),
   cancelAllScheduledNotificationsAsync: jest.fn(async () => {
     mockState.pending = [];
   }),
-  cancelScheduledNotificationAsync: jest.fn(async () => {}),
+  cancelScheduledNotificationAsync: jest.fn(async (id: string) => {
+    mockState.pending = mockState.pending.filter((p) => p.identifier !== id);
+  }),
   getAllScheduledNotificationsAsync: jest.fn(async () => mockState.pending),
   getPresentedNotificationsAsync: jest.fn(async () => []),
   dismissNotificationAsync: jest.fn(async () => {}),

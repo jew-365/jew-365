@@ -1836,6 +1836,135 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://www.openstreetmap.org/node/3466304208',
     ],
   },
+  ramchal: {
+    bio: {
+      he: 'רבי משה חיים לוצאטו, הרמח״ל, נולד בשנת ה׳תס״ז בפדובה שבאיטליה. כבר בצעירותו נודע כגאון בתורה ובקבלה וכמשורר. לאחר שעזב את איטליה ישב באמסטרדם, התפרנס מליטוש יהלומים וכתב את ״מסילת ישרים״ ו״דרך ה׳״. בשנת ה׳תק״ג עלה לארץ ישראל והתיישב בעכו, ושם נפטר במגפה עם בני ביתו בכ״ו באייר. שנת פטירתו שנויה במחלוקת: ה׳תק״ד, ה׳תק״ו או ה׳תק״ז.',
+      en: 'Rabbi Moshe Chaim Luzzatto, the Ramchal, was born in Padua, Italy, in 1707. Known from his youth as a master of Torah, Kabbalah and poetry, he later lived in Amsterdam, earned his living polishing diamonds, and wrote Mesillat Yesharim and Derech Hashem there. In 1743 he settled in Acre in the Land of Israel, where he and his family died in a plague on 26 Iyar. The year is disputed: 5504, 5506 or 5507.',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'להזכיר את הידוע',
+          en: 'Remembering what we know',
+        },
+        text: {
+          he: 'בפתיחת ״מסילת ישרים״ כתב הרמח״ל שלא חיבר את ספרו ללמד את מה שאין בני האדם יודעים, אלא להזכיר להם את הידוע להם כבר. העבודה היא לחזור ולהתבונן במה שכבר ידוע.',
+          en: 'In the introduction to Mesillat Yesharim, the Ramchal wrote that he did not compose it to teach people what they do not know, but to remind them of what they already know. The task is to return and reflect.',
+        },
+      },
+      {
+        title: {
+          he: 'תכלית האדם',
+          en: 'Why we were created',
+        },
+        text: {
+          he: 'בפרק הראשון של ״מסילת ישרים״ כתב, בשם חכמינו, שהאדם לא נברא אלא להתענג על ה׳ וליהנות מזיו שכינתו. מי שזוכר את התכלית רואה בכל מצווה צעד בדרך אליה.',
+          en: 'In its first chapter he wrote, citing the Sages, that a person was created only to delight in God and enjoy the radiance of His Presence. Whoever remembers this goal sees each mitzvah as a step toward it.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'מסילת ישרים',
+          en: 'Mesillat Yesharim',
+        },
+        about: {
+          he: 'ספר מוסר המתווה דרך הדרגתית לתיקון המידות ולשלמות רוחנית, ונלמד עד היום.',
+          en: 'A work of mussar that lays out a step-by-step path to refining character and spiritual perfection, studied to this day.',
+        },
+      },
+      {
+        title: {
+          he: 'דרך ה׳',
+          en: 'Derech Hashem',
+        },
+        about: {
+          he: 'הצגה מסודרת של יסודות האמונה ושל תפקיד המצוות בעולם.',
+          en: 'An orderly account of the foundations of faith and the role of the mitzvot in the world.',
+        },
+      },
+      {
+        title: {
+          he: 'דעת תבונות',
+          en: "Da'at Tevunot",
+        },
+        about: {
+          he: 'עיון ביסודות האמונה ובהנהגת העולם, הכתוב כשיח בין הנשמה לשכל.',
+          en: 'A study of the foundations of faith and of how God guides the world, written as a dialogue between the soul and the intellect.',
+        },
+      },
+      {
+        title: {
+          he: 'קל״ח פתחי חכמה',
+          en: 'Kelach Pitchei Chochmah',
+        },
+        about: {
+          he: 'ביאור שיטתי של קבלת האר״י ב-138 פתחים.',
+          en: 'A systematic explanation of the Kabbalah of the Arizal in 138 openings.',
+        },
+      },
+      {
+        title: {
+          he: 'דרך תבונות',
+          en: 'Derech Tevunot',
+        },
+        about: {
+          he: 'מדריך מסודר לדרכי העיון והלימוד בתלמוד.',
+          en: 'A structured guide to the methods of Talmud study.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'ללכת ברגל מווילנא',
+          en: 'Walking from Vilna',
+        },
+        text: {
+          he: 'מסופר שהגאון מווילנא אמר, אחרי שקרא את ״מסילת ישרים״, שאילו היה הרמח״ל בחיים, היה הולך אליו ברגל מווילנא כדי ללמוד לפניו. עוד מובא בשמו שבעשרת הפרקים הראשונים של הספר אין אפילו מילה אחת מיותרת.',
+          en: 'It is told that the Vilna Gaon, after reading Mesillat Yesharim, said that were the Ramchal still alive he would walk on foot from Vilna to learn at his feet. It is also reported in his name that the first ten chapters of the book contain not a single superfluous word.',
+        },
+        source:
+          'D.A.F., Mesilas Yesharim (https://dafyomi.co.il/general/info/ref/mesilat.php); en.wikipedia, Moshe Chaim Luzzatto (https://en.wikipedia.org/wiki/Moshe_Chaim_Luzzatto)',
+      },
+      {
+        title: {
+          he: 'מלטש היהלומים מאמסטרדם',
+          en: 'The diamond polisher of Amsterdam',
+        },
+        text: {
+          he: 'כשהגיע הרמח״ל לאמסטרדם הצטרף לקהילה הפורטוגזית והתפרנס מליטוש יהלומים, לימד בבית המדרש ״עץ חיים״ וכתב. שם הוציא לאור את ״מסילת ישרים״, שנעשה לאחד מספרי המוסר הנלמדים ביותר בעם ישראל.',
+          en: 'When the Ramchal reached Amsterdam he joined the Portuguese community and earned his living polishing diamonds, taught at the Etz Chaim study hall and wrote. There he published Mesillat Yesharim, which became one of the most widely studied works of mussar among the Jewish people.',
+        },
+        source:
+          'he.wikipedia, משה חיים לוצאטו (https://he.wikipedia.org/wiki/משה_חיים_לוצאטו); en.wikipedia, Moshe Chaim Luzzatto (https://en.wikipedia.org/wiki/Moshe_Chaim_Luzzatto)',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'ציון הרמח״ל, ליד קבר רבי עקיבא, טבריה, שם נערכות ההילולות; לפי מסורת אחרת קבור בכפר יאסיף',
+        en: "Ramchal's tomb beside the tomb of Rabbi Akiva, Tiberias, where the gatherings are held; another tradition places his grave in Kfar Yasif",
+      },
+      lat: 32.7886,
+      lng: 35.5286,
+      link: true,
+      noLinkReason: null,
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/משה_חיים_לוצאטו',
+      'https://en.wikipedia.org/wiki/Moshe_Chaim_Luzzatto',
+      'https://www.jdn.co.il/j_world/2412208/',
+      'https://dafyomi.co.il/general/info/ref/mesilat.php',
+      'https://www.sefaria.org/Mesillat_Yesharim,_Introduction.1',
+      'https://www.sefaria.org/Mesillat_Yesharim_1.2',
+      'https://dannythedigger.com/tomb-of-rabbi-akiva/',
+      'https://www.openstreetmap.org/node/14056724868',
+      'https://holy.org.il/epicenter/רמחל/',
+      'https://etshaimmanuscripts.nl/?p=1848',
+    ],
+  },
   baal_shem_tov: {
     bio: {
       he: 'רבי ישראל בן אליעזר, הבעל שם טוב, נולד בסביבות שנת ה׳ת״ס, לפי המסורת בעיירה אוקופ שבפודוליה. התייתם בילדותו, ועבד כעוזר מלמד, כשמש בבית המדרש וכמלמד. בסביבות שנת ה׳ת״ק השתקע במז׳יבוז׳, ומשם משך אליו תלמידים רבים, וכך נוסדה תנועת החסידות. לימד שאפשר לעבוד את ה׳ בכל מעשה, בשמחה ובתפילה מכל הלב, והעמיד במרכז את ערכו של היהודי הפשוט. נפטר בחג השבועות, ו׳ בסיון ה׳תק״ך.',
@@ -2147,6 +2276,83 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://web.archive.org/web/2020/http://mountofolives.co.il/he/deceased_card/רבי-שלום-שרעבי-הרשש-הילולת-הרשש-י-שבט',
     ],
   },
+  amram_ben_diwan: {
+    bio: {
+      he: 'רבי עמרם בן דיוואן נולד בירושלים למשפחת רבנים שמוצאה במרוקו. בשנת ה׳תקכ״ג שלחה אותו קהילת חברון למרוקו כשד״ר, שליח שאוסף כספים לעניי הארץ, והוא ייסד ישיבה באסז׳ן שליד וזאן. אחרי ששב לארץ יצא בשנת ה׳תקל״ד לשליחות שנייה, וישב בעיקר במכנאס. בדרכו חזרה לארץ ישראל נפטר בערב שבת, ט״ו באב ה׳תקמ״ב, ונקבר באסז׳ן. ההילולא ההמונית על קברו נערכת בל״ג בעומר, ולא ביום פטירתו.',
+      en: 'Rabbi Amram ben Diwan was born in Jerusalem to a rabbinic family of Moroccan origin. In 1763 the Hebron community sent him to Morocco as a fundraising emissary, and he founded a yeshiva in Azjen near Ouazzane. In 1774 he left on a second mission, living mostly in Meknes. Heading home, he died on Friday, 15 Av 5542 (1782), and was buried in Azjen. The great pilgrimage to his grave is on Lag BaOmer, not this date.',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'שליחות למען הציבור',
+          en: 'A mission for the public',
+        },
+        text: {
+          he: 'רבי עמרם עזב את ביתו לשנים ארוכות כדי לפרנס את עניי חברון, ובדרכים לא הסתפק באיסוף כספים: פתח ישיבה ולימד תורה. מי שיוצא לשליחות למען הכלל יכול להוסיף טוב בכל מקום שאליו הוא מגיע.',
+          en: 'Rabbi Amram left home for years to support the poor of Hebron, and on the road he did more than collect funds: he opened a yeshiva and taught Torah. One who serves the public can add good wherever he goes.',
+        },
+      },
+      {
+        title: {
+          he: 'גדולה בפשטות',
+          en: 'Greatness in simplicity',
+        },
+        text: {
+          he: 'חכמי חברון כינו אותו ״סיני ועוקר הרים״, ובכל זאת נודע בענוותנותו ובהליכותיו הצנועות. גדולה בתורה אינה צריכה להרחיק אדם מאנשים פשוטים, אלא לקרב אותו אליהם.',
+          en: "Hebron's sages called him 'Sinai and uprooter of mountains,' yet he was known for his humility and modest ways. Greatness in Torah need not set a person apart from simple people; it should draw him closer to them.",
+        },
+      },
+    ],
+    biblical: false,
+    works: [],
+    stories: [
+      {
+        title: {
+          he: 'הגלימה שניתנה לעני',
+          en: 'The cloak given away',
+        },
+        text: {
+          he: 'מסופר שבפאס כיבדו אותו רבנים ועשירים, ועני אחד ביקש ממנו עזרה כדי לפרנס את בנותיו. לרבי עמרם לא היה כסף לתת, והוא נתן לו את גלימתו ואמר שיש בה ברכה לרפואה. לפי המסופר, חולים שהתעטפו בה החלימו. כששאלו את הרב היכן גלימתו, השיב בשם האר״י שלבושו האמיתי של אדם הוא המצוות ומעשי החסד שצבר.',
+          en: "It is told that in Fez he was honored by rabbis and the wealthy, and a poor man asked him for help to support his daughters. Having no money to give, Rabbi Amram gave him his cloak, saying it carried a blessing for healing. According to the story, the sick who wrapped themselves in it recovered. Asked where his cloak was, he answered, citing the Arizal, that a person's true garment is the mitzvot and kindness he has gathered.",
+        },
+        source: 'Told by Rabbi Herzl Hodar, tv2000 (https://www.tv2000.co.il/article/55190)',
+      },
+      {
+        title: {
+          he: 'חייו תחת חיי בנו',
+          en: 'His life for his son',
+        },
+        text: {
+          he: 'מסופר שבנו רבי חיים, שליווה אותו בשליחות, חלה במחלה קשה. רבי עמרם התפלל שייקחו את חייו שלו במקום חיי בנו. לפי המסופר, הבן החלים, ורבי עמרם נפטר זמן קצר אחר כך. רבי חיים המשיך את שליחות אביו בערי מרוקו ונקבר שם.',
+          en: "It is told that his son, Rabbi Chaim, who travelled with him on the mission, fell gravely ill. Rabbi Amram prayed that his own life be taken instead of his son's. According to the story, the son recovered, and Rabbi Amram died soon afterwards. Rabbi Chaim carried on his father's mission among the towns of Morocco and is buried there.",
+        },
+        source:
+          "Hevrat Pinto, Rabbi Amram Ben Diwan (https://hevratpinto.org/tzadikim_eng/034_rabbi_amram_ben_diwan.html); Jewish Press, How a Rabbi's Grave in Morocco Attracted Jews on Lag BaOmer (https://jewishpress.com/how-a-rabbis-grave-in-morocco-attracted-jews-on-lag-baomer/)",
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית העלמין היהודי בכפר אסז׳ן, סמוך לוזאן, מרוקו; העלייה לרגל הגדולה בל״ג בעומר',
+        en: 'Jewish cemetery of Azjen (Asjen), near Ouazzane, Morocco; the great pilgrimage is on Lag BaOmer',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      query: 'Rabbi Amram Ben Diwan Asjen',
+      noLinkReason: null,
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/עמרם_בן_דיוואן',
+      'https://en.wikipedia.org/wiki/Amram_ben_Diwan',
+      'https://www.tv2000.co.il/article/55190',
+      'https://tzadikim.dailyzohar.com/rabbi-amram-ben-diwan-172',
+      'https://nertzaddik.com/tzadik-info?id=2849',
+      'https://hevratpinto.org/tzadikim_eng/034_rabbi_amram_ben_diwan.html',
+      'https://jewishpress.com/how-a-rabbis-grave-in-morocco-attracted-jews-on-lag-baomer/',
+      'https://cdp.jewishgen.org/wwd',
+      'https://www.openstreetmap.org/relation/2563396',
+    ],
+  },
   elimelech_of_lizhensk: {
     bio: {
       he: 'רבי אלימלך מליז׳נסק נולד בפולין בשנת ה׳תע״ז, ואחיו הוא רבי זושא מאניפולי. השניים למדו אצל המגיד ממזריטש, ויחד יצאו לשנים של גלות מרצון, נדודים בין העיירות כדי לעורר יהודים לתשובה. אחרי פטירת המגיד השתקע בליז׳נסק שבגליציה והיה למנהיג החסידות בגליציה ובפולין. פיתח את תורת הצדיק, ותלמידיו, ובהם החוזה מלובלין והמגיד מקוז׳ניץ, הנהיגו את הדור הבא. נפטר בכ״א באדר ה׳תקמ״ז.',
@@ -2238,6 +2444,105 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://jewishpress.com/judaism/jewish-columns/chodesh-tov/reb-elimelech-m%e2%80%99lizhensk-part-ii/2011/11/24',
       'https://pl.wikipedia.org/wiki/Cmentarz_żydowski_w_Leżajsku',
       'https://www.openstreetmap.org/node/1303959621',
+    ],
+  },
+  menachem_mendel_of_vitebsk: {
+    bio: {
+      he: 'רבי מנחם מנדל מוויטבסק, בעל ״פרי הארץ״, נולד בשנת ה׳ת״צ בוויטבסק. בילדותו הובא אל הבעל שם טוב, ולמד אצל המגיד ממזריטש, שבשליחותו הפיץ חסידות ברוסיה הלבנה. אחרי פטירת המגיד הנהיג את חסידיה מוויטבסק ומהורודוק. באדר ה׳תקל״ז עלה לארץ ישראל בראש כשלוש מאות איש, ישב בצפת ואחר כך בטבריה, ויסד בה את הקהילה החסידית. הוציא את כל ממונו על היישוב, ונפטר בעוני בא׳ באייר ה׳תקמ״ח בטבריה.',
+      en: "Born in Vitebsk in 1730, Rabbi Menachem Mendel wrote Pri HaAretz. Brought as a boy to the Baal Shem Tov, he studied under the Maggid of Mezeritch, spread Chassidism in White Russia, and after the Maggid's death led its Chassidim from Vitebsk and Horodok. In 1777 he led some three hundred people to the Holy Land, settling in Safed, then Tiberias, where he founded the Chassidic community. He spent everything on it and died poor on 1 Iyar 5548 (1788).",
+    },
+    lessons: [
+      {
+        title: {
+          he: 'השפל באמת',
+          en: 'Truly lowly',
+        },
+        text: {
+          he: 'רבי מנחם מנדל חתם על מכתביו ״השפל באמת״, ולא הסכים שיכתבו על מצבתו דברי שבח, אלא רק את שמו. גדולה אמיתית אינה צריכה תארים, ומי שמקטין את עצמו מפנה מקום לאחרים.',
+          en: "Rabbi Menachem Mendel signed his letters 'the truly lowly' and would not allow words of praise on his tombstone, only his name. True greatness needs no titles, and one who makes himself small leaves room for others.",
+        },
+      },
+      {
+        title: {
+          he: 'בניין הארץ באחדות',
+          en: 'Building the Land in unity',
+        },
+        text: {
+          he: 'הוא הוציא את כל ממונו על היישוב בארץ ישראל, ופעל לאחדות בין הספרדים לאשכנזים, ואף השיא את בנו לבת משפחה ספרדית מכובדת בטבריה. בניין הארץ מתחיל בנתינה ובאהבת ישראל.',
+          en: 'He spent everything on the settlement in the Land and worked for unity between Sephardim and Ashkenazim, marrying his son into a respected Sephardi family of Tiberias. Building the Land begins with giving and love of Israel.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'פרי הארץ',
+          en: 'Pri HaAretz',
+        },
+        about: {
+          he: 'פירוש חסידי על חמישה חומשי תורה, ובסופו מכתביו מטבריה לחסידיו בחו״ל על יישוב הארץ ותמיכה בו.',
+          en: 'A Chassidic commentary on the Five Books of Moses, ending with his letters from Tiberias urging his followers abroad to support the settlement of the Land.',
+        },
+      },
+      {
+        title: {
+          he: 'פרי העץ',
+          en: 'Pri HaEtz',
+        },
+        about: {
+          he: 'ספר נוסף מדברי תורתו, שנדפס בז׳יטומיר בשנת ה׳תרל״ד.',
+          en: 'A further book of his teachings, printed in Zhitomir in 1874.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'ריח המשיח',
+          en: 'The scent of the Messiah',
+        },
+        text: {
+          he: 'מסופר שזמן קצר אחרי שהגיע רבי מנחם מנדל לארץ ישראל, עלה אדם על הר הזיתים ותקע בשופר, ושמועה פשטה שהמשיח בא. כשנודע לו הדבר, פתח את חלונו והריח את האוויר, ואחר כך סגר אותו בצער ואמר שאינו מריח את המשיח. חסידים הסבירו שבחדרו שלו שרר תמיד ריח הגאולה, ולכן חיפש אותו בחוץ.',
+          en: "It is told that soon after Rabbi Menachem Mendel reached the Land of Israel, a man climbed the Mount of Olives and blew a shofar, and word spread that the Messiah had come. When he heard, he opened his window and sniffed the air, then sadly closed it and said, 'I do not smell the Messiah.' Chassidim explained that his own room always held the scent of redemption, so he looked for it outside.",
+        },
+        source:
+          'Chabad.org, The Inside Out House (https://www.chabad.org/parshah/article_cdo/aid/346432/jewish/The-Inside-Out-House.htm); Kikar HaShabbat (https://www.kikar.co.il/actualy/svgumn)',
+      },
+      {
+        title: {
+          he: 'בגדים קרועים ולבבות שלמים',
+          en: 'Torn clothes and whole hearts',
+        },
+        text: {
+          he: 'בשמו מובא שאמר על חסידי רייסין, היא רוסיה הלבנה: ״ברייסין מצאתי לבבות שלמים ובגדים קרועים, הפכתי אותם ללבבות קרועים ובגדים שלמים״. כלומר, מצא שם יהודים עניים ותמימים, דאג לפרנסתם ולמצבם החומרי, ובד בבד עורר אותם ללב נשבר לפני הבורא.',
+          en: "A saying is told in his name about the Chassidim of Reisin, White Russia: 'In Reisin I found whole hearts and torn clothes; I turned them into torn hearts and whole clothes.' He found poor, simple Jews there, cared for their livelihood and material needs, and at the same time stirred them to a heart humbled before the Creator.",
+        },
+        source:
+          'he.wikipedia, מנחם מנדל מוויטבסק (https://he.wikipedia.org/wiki/מנחם_מנדל_מוויטבסק); Kikar HaShabbat (https://www.kikar.co.il/actualy/svgumn)',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'חלקת תלמידי הבעל שם טוב, בית העלמין הישן, טבריה',
+        en: "Plot of the Baal Shem Tov's disciples, Old Cemetery, Tiberias",
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      query: 'בית העלמין הישן טבריה',
+      noLinkReason: null,
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/מנחם_מנדל_מוויטבסק',
+      'https://www.kikar.co.il/actualy/svgumn',
+      'https://www.jdn.co.il/j_world/2396833/',
+      'https://www.chabad.org/parshah/article_cdo/aid/346432/jewish/The-Inside-Out-House.htm',
+      'https://www.chabad.org/article.asp?aid=150190',
+      'https://he.wikipedia.org/wiki/בית_הקברות_היהודי_העתיק_בטבריה',
+      'https://commons.wikimedia.org/wiki/Category:Menachem_Mendel_of_Vitebsk_grave',
+      'https://www.openstreetmap.org/way/619206997',
+      'https://www.wikidata.org/wiki/Q7047088',
     ],
   },
   noda_biyehuda: {
@@ -2636,6 +2941,93 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://he.wikipedia.org/wiki/לוי_יצחק_מברדיצ%27ב',
       'https://www.esjf-cemeteries.org/survey/berdychiv-new-jewish-cemetery/',
       'https://www.jewishgen.org/Ukraine/OTW_Berdichev_cem.asp',
+    ],
+  },
+  avraham_of_kalisk: {
+    bio: {
+      he: 'רבי אברהם הכהן מקאליסק נולד בשנת ה׳תק״א בקאליסק שברוסיה הלבנה. בצעירותו למד עם הגאון מווילנא, ואחר כך היה לתלמיד המגיד ממזריטש, וחסידיו נודעו בהתלהבותם בעבודת ה׳. בשנת ה׳תקל״ז עלה לארץ ישראל עם רבי מנחם מנדל מוויטבסק וסייע לו בהנהגת העולים. אחרי פטירתו עמד בראש העדה החסידית בארץ, מטבריה, כעשרים ושתיים שנה. נפטר בד׳ בשבט ה׳תק״ע ונקבר בבית העלמין הישן בטבריה.',
+      en: 'Rabbi Avraham HaKohen of Kalisk was born in 1741 in Kalisk, White Russia. He studied in his youth with the Vilna Gaon, then became a disciple of the Maggid of Mezeritch; his followers were known for their fervour. In 1777 he went up to the Land of Israel with Rabbi Menachem Mendel of Vitebsk, helping him lead the group, and after his death led the Chassidic community from Tiberias for some twenty-two years. He died on 4 Shevat 5570 (1810).',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'אמונה פשוטה',
+          en: 'Simple faith',
+        },
+        text: {
+          he: 'רבי אברהם סבר שאת רוב החסידים יש להדריך ביראת שמים פשוטה ובאמונת חכמים, ואת רזי התורה לשמור ליחידים. היסוד הוא אמונה תמימה, שכל אדם יכול להגיע אליה.',
+          en: "Rabbi Avraham held that most Chassidim should be guided by simple fear of Heaven and faith in the Sages, keeping the Torah's hidden depths for the few. The foundation is wholehearted faith, open to every person.",
+        },
+      },
+      {
+        title: {
+          he: 'אחריות לציבור',
+          en: 'Responsibility for a community',
+        },
+        text: {
+          he: 'כעשרים ושתיים שנה החזיק את העדה החסידית בארץ ישראל, ובמכתביו לחו״ל עודד את יישוב הארץ וביקש תמיכה בו. אחריות לציבור פירושה לדאוג לו גם בשנים הקשות.',
+          en: 'For some twenty-two years he held the Chassidic community in the Land together, and his letters abroad encouraged settling the Land and asked for support. Responsibility for a community means caring for it in hard years too.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'חסד לאברהם',
+          en: 'Chesed LeAvraham',
+        },
+        about: {
+          he: 'חידושים בדרך הסוד על התורה, שנדפסו יחד עם ספרו של רבי אברהם המלאך באותו שם.',
+          en: 'Mystical insights on the Torah, printed together with the book of the same name by Rabbi Avraham HaMalach.',
+        },
+      },
+      {
+        title: {
+          he: 'אגרותיו',
+          en: 'His letters',
+        },
+        about: {
+          he: 'מכתביו מטבריה, שחלקם נדפסו בסוף ״פרי הארץ״, ומתעדים את חיי העדה החסידית בארץ.',
+          en: 'His letters from Tiberias, some printed at the end of Pri HaAretz, which record the life of the Chassidic community in the Land.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'רבי נחמן מברסלב בטבריה',
+          en: 'Rebbe Nachman in Tiberias',
+        },
+        text: {
+          he: 'לפי ״שבחי הר״ן״, כשהגיע רבי נחמן מברסלב לטבריה בשנת ה׳תקנ״ט, הזמין אותו רבי אברהם לשבת פרשת נח. בליל שבת כפף רבי נחמן את ראשו שיברך אותו, אך רבי אברהם קפץ לאחוריו ברעדה גדולה, אמר ״איך אנו מתביישים בפני זרע הבעל שם טוב״, ולא רצה לברך אותו. רבי נחמן אמר עליו לימים שראה צדיקים רבים, אך שלמות ראה רק באיש קדוש זה.',
+          en: 'According to Shivchei HaRan, when Rebbe Nachman of Breslov came to Tiberias in 1798, Rabbi Avraham invited him for Shabbat Noach. On Friday night Rebbe Nachman bowed his head to receive his blessing, but Rabbi Avraham drew back trembling, said how abashed they were before a descendant of the holy Baal Shem Tov, and would not bless him. Rebbe Nachman later said he had seen many tzaddikim, but perfection only in this holy man.',
+        },
+        source:
+          "Shivchei HaRan, An Account of His Pilgrimage to the Holy Land 18, Hebrew original and Rabbi Nachman's Wisdom, trans. Aryeh Kaplan (https://www.sefaria.org/Shivchei_HaRan,_An_Account_of_His_Pilgrimage_to_the_Holy_Land.18)",
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית העלמין הישן, טבריה',
+        en: 'Old Cemetery, Tiberias',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      query: 'בית העלמין הישן טבריה',
+      noLinkReason: null,
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/אברהם_מקאליסק',
+      'https://en.wikipedia.org/wiki/Abraham_Kalisker',
+      'https://www.chabad.org/article.asp?aid=150190',
+      'https://www.jewishencyclopedia.com/articles/9160',
+      'https://www.jdn.co.il/j_world/2122121/',
+      'https://www.sefaria.org/Shivchei_HaRan,_An_Account_of_His_Pilgrimage_to_the_Holy_Land.18',
+      'https://he.wikipedia.org/wiki/בית_הקברות_היהודי_העתיק_בטבריה',
+      'https://www.openstreetmap.org/way/619206997',
+      'https://www.wikidata.org/wiki/Q7047088',
     ],
   },
   nachman_of_breslov: {
@@ -3274,6 +3666,240 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://spectator.sme.sk/politics-and-society/c/chatam-sofer-jewish-scholar-died-175-years-ago',
     ],
   },
+  bnei_yissaschar: {
+    bio: {
+      he: 'רבי צבי אלימלך שפירא מדינוב נולד ביאבורניק שבגליציה, ונקרא על שם קרוב משפחתו, רבי אלימלך מליז׳נסק. היה מתלמידי החוזה מלובלין, רבי מנחם מנדל מרימנוב והמגיד מקוז׳ניץ. כיהן ברבנות בכמה קהילות, ובהן סטריז׳וב ומונקאץ׳, ועיקר מושבו היה בדינוב. נודע כמקובל וכמחבר פורה, ובעיקר בזכות ספרו בני יששכר. נפטר בדינוב בי״ח בטבת ה׳תר״א.',
+      en: 'Rabbi Tzvi Elimelech Spira of Dinov was born in Jawornik, Galicia, and named after his relative, Rabbi Elimelech of Lizhensk. A disciple of the Seer of Lublin, Rabbi Menachem Mendel of Rimanov and the Maggid of Kozhnitz, he served as rabbi of several towns, among them Strzyżów and Munkács, but his seat was Dinov. A kabbalist and prolific author, he is best known for his book Bnei Yissaschar. He died in Dinov on 18 Tevet 5601 (1841).',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'אוהב נאמן לכל ישראל',
+          en: 'A faithful lover of every Jew',
+        },
+        text: {
+          he: 'במכתביו נהג לחתום ״האוהב הנאמן לכל ישראל, דורש טוב לעמו״. גדול בתורה ובקבלה ראה את עצמו קודם כול כמי שדואג לטובתו של כל יהודי.',
+          en: "He used to sign his letters 'the faithful lover of all Israel, seeking good for his people.' A master of Torah and Kabbalah saw himself first of all as one who cares for the good of every Jew.",
+        },
+      },
+      {
+        title: {
+          he: 'לכל זמן אור משלו',
+          en: 'Every season has its light',
+        },
+        text: {
+          he: 'בספרו בני יששכר, הערוך לפי חודשי השנה, ביאר את פנימיותם של השבתות והמועדים. ממנו לומדים שכל חודש וכל חג מביאים עמם הזדמנות מיוחדת לעבודת ה׳.',
+          en: 'In Bnei Yissaschar, arranged by the months of the year, he explained the inner meaning of Shabbat and the festivals. Every month and every holiday brings its own opportunity to serve God.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'בני יששכר',
+          en: 'Bnei Yissaschar',
+        },
+        about: {
+          he: 'מאמרים על השבתות והמועדים לפי חודשי השנה, מספרי היסוד של החסידות.',
+          en: 'Discourses on Shabbat and the festivals, arranged by the months of the year; a classic of Chassidic literature.',
+        },
+      },
+      {
+        title: {
+          he: 'דרך פקודיך',
+          en: 'Derech Pikudecha',
+        },
+        about: {
+          he: 'חיבור על מצוות התורה.',
+          en: 'A work on the commandments of the Torah.',
+        },
+      },
+      {
+        title: {
+          he: 'אגרא דכלה',
+          en: 'Agra DeKallah',
+        },
+        about: {
+          he: 'פירוש על התורה.',
+          en: 'A commentary on the Torah.',
+        },
+      },
+      {
+        title: {
+          he: 'אגרא דפרקא',
+          en: 'Agra DePirka',
+        },
+        about: {
+          he: 'אמרות וסגולות בנושאים שונים.',
+          en: 'Sayings and segulot on a range of subjects.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'ארבעים ושלושה רובל',
+          en: 'Forty-three rubles',
+        },
+        text: {
+          he: 'מסופר שכשהיה בן עשר, שילם אביו, מלמד עני, על לינתם של שלושה איכרים קפואים שבעל האכסניה סירב לארח. בערב פסח קיזז בעל האכסניה את שכרו, והאב נותר חייב ובלי פרוטה לחג. בדרך הביתה נפל מכרכרה חולפת צרור בלי סימן, ובו בדיוק ארבעים ושלושה רובל. בליל הסדר פתח הנער את הדלת לאליהו וקרא: ״אבא, העגלון כאן!״ לפי המסופר, גילה זאת רק ביום מותו.',
+          en: "It is told that when he was ten, his father, a poor teacher, paid to lodge three frozen peasants an innkeeper had turned away. Before Pesach the innkeeper set the cost against his wages, leaving him with nothing for the holiday. On the way home a passing coach dropped an unmarked bag holding exactly forty-three rubles. At the Seder the boy opened the door for Elijah and cried: 'Father, the coachman is here!' He told it only when dying.",
+        },
+        source:
+          'Rabbi Hershel Finman, Forty Three Rubles, Chabad.org (https://www.chabad.org/library/article_cdo/aid/3005/jewish/Forty-Three-Rubles.htm)',
+      },
+      {
+        title: {
+          he: 'שמו של הספר',
+          en: 'The name of the book',
+        },
+        text: {
+          he: 'לפי המסורת, אמר לו רבו החוזה מלובלין ששורשו בשבט יששכר, שעליו נאמר ״יודעי בינה לעתים״, כלומר בקיאים בחשבון זמני השנה. משום כך קרא לספרו על חודשי השנה ומועדיה בשם בני יששכר, ובשם זה הוא נקרא עד היום.',
+          en: "According to tradition, his teacher the Seer of Lublin told him that he descended from the tribe of Yissaschar, of whom it is said that they 'had understanding of the times,' expert in the reckoning of the calendar. He therefore named his book on the months and festivals Bnei Yissaschar, the name he is known by to this day.",
+        },
+        source:
+          'he.wikipedia, צבי אלימלך שפירא (https://he.wikipedia.org/wiki/צבי_אלימלך_שפירא_מדינוב); Chabad.org biographical note (https://www.chabad.org/library/article_cdo/aid/3005/jewish/Forty-Three-Rubles.htm)',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'אוהל צדיקי דינוב בבית העלמין היהודי הישן ברחוב פילסודסקי, דינוב, פולין',
+        en: 'Ohel of the Dinov tzaddikim in the old Jewish cemetery on Piłsudskiego Street, Dynów, Poland',
+      },
+      lat: 49.8089,
+      lng: 22.2345,
+      link: true,
+      noLinkReason: null,
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/צבי_אלימלך_שפירא_מדינוב',
+      'https://en.wikipedia.org/wiki/Tzvi_Elimelech_Spira_of_Dinov',
+      'https://www.kikar.co.il/scoop-news/33324',
+      'https://www.chabad.org/library/article_cdo/aid/3005/jewish/Forty-Three-Rubles.htm',
+      'https://jewishgen.org/yizkor/dynow/dyn004.html',
+      'https://www.esjf-cemeteries.org/survey/dynow-old-jewish-cemetery/',
+      'https://cdp.jewishgen.org/eastern-europe/poland/dynow',
+      'https://www.openstreetmap.org/way/319097325',
+    ],
+  },
+  yismach_moshe: {
+    bio: {
+      he: 'רבי משה טייטלבוים, הישמח משה, נולד בפשמישל שבגליציה בשנת ה׳תקי״ט. בצעירותו התנגד לחסידות, אך התקרב אליה דרך חתנו ונעשה תלמידו של החוזה מלובלין. כיהן כרב בשיניאווא, ובשנת ה׳תקס״ח נתמנה לרבה של אוהל, היא שאטוראליאויהיי שבהונגריה, ושם הנהיג קהילה חסידית יותר משלושים שנה. נחשב לאבי שושלות החסידות בהונגריה, ומצאצאיו באו שושלות סיגט וסאטמר. נפטר בכ״ח בתמוז תר״א.',
+      en: "Rabbi Moshe Teitelbaum, the Yismach Moshe, was born in Przemysl, Galicia, in 1759. At first he opposed Chassidism, but his son-in-law drew him to it and he became a disciple of the Chozeh of Lublin. He served as rabbi of Sieniawa, and in 1808 became rabbi of Ujhely (Satoraljaujhely), Hungary, leading a Chassidic community there over thirty years. He is seen as the patriarch of Hungary's Chassidic dynasties, Sighet and Satmar among them. He died on 28 Tammuz 5601 (1841).",
+    },
+    lessons: [
+      {
+        title: {
+          he: 'פתוח לאמת',
+          en: 'Open to the truth',
+        },
+        text: {
+          he: 'בתחילה התנגד לחסידות, אך כשהכיר את החוזה מלובלין נעשה לחסיד ולאחד ממפיציה הגדולים בהונגריה. אדם גדול יודע לשנות את דעתו כשהוא פוגש אמת.',
+          en: 'At first he opposed Chassidism, but once he came to know the Chozeh of Lublin he became a Chassid and one of its great spreaders in Hungary. A great person can change his mind when he meets the truth.',
+        },
+      },
+      {
+        title: {
+          he: 'על אותו דף',
+          en: 'On the same page',
+        },
+        text: {
+          he: 'חלק גדול מפירושו לתהלים, ״תפילה למשה״, כתב על גבי הפתקאות שהביאו אליו הפונים. בקשות האנשים ולימוד התורה שלו היו מונחים זה לצד זה, על אותו דף.',
+          en: 'He wrote much of his Psalms commentary, Tefillah LeMoshe, on the backs of the petition notes people brought him. Their requests and his Torah lay side by side, on the same page.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'ישמח משה',
+          en: 'Yismach Moshe',
+        },
+        about: {
+          he: 'דרשות על התורה ועל הנביאים, שעל שמו הוא מכונה.',
+          en: 'Homilies on the Torah and the Prophets, after which he is called.',
+        },
+      },
+      {
+        title: {
+          he: 'השיב משה',
+          en: 'Hashiv Moshe',
+        },
+        about: {
+          he: 'שאלות ותשובות בהלכה.',
+          en: 'Responsa on Jewish law.',
+        },
+      },
+      {
+        title: {
+          he: 'תפילה למשה',
+          en: 'Tefillah LeMoshe',
+        },
+        about: {
+          he: 'פירוש על ספר תהלים, שנדפס לראשונה בקרקוב בשנת 1880.',
+          en: 'A commentary on Psalms, first printed in Krakow in 1880.',
+        },
+      },
+      {
+        title: {
+          he: 'יין הרקח',
+          en: 'Yayin HaRokeach',
+        },
+        about: {
+          he: 'על פרקי אבות ועל אגדות וסוגיות בתלמוד.',
+          en: 'On Pirkei Avot and on aggadot and passages of the Talmud.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'הבגדים ליד המיטה',
+          en: 'Clothes by the bed',
+        },
+        text: {
+          he: 'מסופר שבכל שעה ציפה לביאת המשיח. ליד מיטתו הניח את בגדי החג ואת מקלו, כדי לצאת בלי שהות, וכשנשמע רעש מבחוץ שלח לבדוק אם הגיע מבשר לעיר. לפי המסופר, בשנותיו האחרונות לבש בגדי שבת גם בימי החול.',
+          en: 'It is told that he awaited the Messiah every hour. He kept his festive clothes and walking stick beside his bed so he could go out without delay, and at any noise outside he sent someone to see whether a herald had come to the town. In his last years, it is said, he wore Shabbat clothes on weekdays too.',
+        },
+        source:
+          'Sefer HaHasidut (Tel Aviv, 1961), freely translated at Jewish Renewal Hasidus, Anticipating the Messianic Age (https://www.jewishrenewalhasidus.org/anticipating-the-messianic-age/); Wikipedia, Moshe Teitelbaum (Ujhel) (https://en.wikipedia.org/wiki/Moshe_Teitelbaum_(Ujhel))',
+      },
+      {
+        title: {
+          he: 'בית בארץ אחרת',
+          en: 'A house in another land',
+        },
+        text: {
+          he: 'תלמידיו הפצירו בו לקנות בית נאה ליד בית המדרש, כי גר בבית צר. הוא סירב ושאל: למה לקנות בית בארץ אחרת, כשבקרוב יבוא משיח צדקנו ואשוב לנחלת אבותי בהר הקודש?',
+          en: 'His students urged him to buy a fine house near the study hall, since his home was cramped. He refused, asking why he should buy a house in a foreign land when the Messiah would soon come and he would return to his ancestral inheritance on the holy mountain.',
+        },
+        source:
+          'Sefer HaHasidut (Tel Aviv, 1961), freely translated at Jewish Renewal Hasidus, Anticipating the Messianic Age (https://www.jewishrenewalhasidus.org/anticipating-the-messianic-age/)',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'אוהל הישמח משה, בית העלמין היהודי העתיק, שאטוראליאויהיי, הונגריה; נדרש רישום מראש לביקור',
+        en: 'Ohel of the Yismach Moshe, old Jewish cemetery, Satoraljaujhely, Hungary; visits need advance registration',
+      },
+      lat: 48.3891,
+      lng: 21.6551,
+      link: true,
+      noLinkReason: null,
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/משה_טייטלבוים_(ישמח_משה)',
+      'https://en.wikipedia.org/wiki/Moshe_Teitelbaum_(Ujhel)',
+      'https://www.chabad.org/calendar/view/day.asp?aid=297583',
+      'https://www.kikar.co.il/hasidism/205453',
+      'https://www.jewishrenewalhasidus.org/anticipating-the-messianic-age/',
+      'https://ujhelyizsidosag.hu/?p=3480',
+      'https://www.openstreetmap.org/node/4924834442',
+      'https://commons.wikimedia.org/wiki/File:Alte_jüdische_Friedhof,_Gebäude_und_Grab,_2021_Sátoraljaújhely.jpg',
+    ],
+  },
   chaim_pinto: {
     bio: {
       he: 'רבי חיים פינטו ״הגדול״ היה מגדולי רבני מרוקו, דיין ומקובל בעיר מוגדור (אסואירה). נולד באגדיר למשפחת רבנים מצאצאי רבי יאשיהו פינטו, התייתם מאביו בילדותו ועבר למוגדור. שם למד בישיבת רבי יעקב ביבאס, ובשנת ה׳תקכ״ט (1769), צעיר מאוד, מונה לממלא מקומו כדיין יחד עם רבי דוד חזן. עמד בראש בית הדין והישיבה בעירו יותר משבעים שנה. נפטר בכ״ו באלול ה׳תר״ה (1845).',
@@ -3657,6 +4283,112 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://www.esjf-cemeteries.org/fenced/lyubavichi-jewish-cemetery',
     ],
   },
+  divrei_chaim: {
+    bio: {
+      he: 'רבי חיים הלברשטאם, הדברי חיים, נולד בטרנוגרוד שבגליציה. היה מתלמידי רבי נפתלי צבי מרופשיץ, וכיהן ברבנות ברודניק ואחר כך בצאנז, נובי סונץ׳ של היום, עד יום מותו. בצאנז נהג באדמו״רות ויסד את חסידות צאנז, שממנה יצאו חצרות רבות. נודע כגאון בהלכה, בהתלהבות בתפילה ובצדקה עצומה לעניים. נפטר בכ״ה בניסן ה׳תרל״ו ונקבר בצאנז.',
+      en: 'Rabbi Chaim Halberstam, the Divrei Chaim, was born in Tarnogród, Galicia. A disciple of Rabbi Naftali Tzvi of Ropshitz, he served as rabbi of Rudnik and then of Sanz, today Nowy Sącz, Poland, until his death. There he founded the Sanz Chassidic dynasty, from which many courts descend. He was known for his mastery of halacha, his fiery prayer and his boundless charity to the poor. He died on 25 Nisan 5636 (1876).',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'צדקה בלי חשדנות',
+          en: 'Giving without suspicion',
+        },
+        text: {
+          he: 'רבי חיים אמר שהוא נותן בשמחה למאה קבצנים, גם אם רק אחד מהם עני באמת, משום שזכות הצדקה גדולה כל כך. החשש מרמאים לא עצר אותו מלתת.',
+          en: 'Rabbi Chaim said he would gladly give to a hundred beggars even if only one was truly poor, because the merit of charity is so great. Fear of being cheated never stopped him from giving.',
+        },
+      },
+      {
+        title: {
+          he: 'לאהוב את העני',
+          en: 'Loving the poor',
+        },
+        text: {
+          he: 'אלפי זהובים עברו בידיו בכל חודש, אך ביתו היה כמעט ריק מרהיטים, והוא הסתפק בזהובים ספורים. הוא אמר שהוא אוהב את העניים משום שהקב״ה אוהב אותם.',
+          en: 'Thousands of gulden passed through his hands each month, yet his home was nearly bare and he lived on a few gulden. He said he loved the poor because the Holy One loves them.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'שו״ת דברי חיים',
+          en: 'Divrei Chaim, responsa',
+        },
+        about: {
+          he: 'תשובות בהלכה, בעיקר בענייני יורה דעה, מקוואות וטהרת המשפחה.',
+          en: "Halachic responsa, chiefly on Yoreh De'ah, mikvaot and family purity.",
+        },
+      },
+      {
+        title: {
+          he: 'דברי חיים על התורה ומועדים',
+          en: 'Divrei Chaim on the Torah and festivals',
+        },
+        about: {
+          he: 'דברי תורה וחסידות על פרשות התורה ועל המועדים.',
+          en: 'Chassidic teachings on the Torah portions and the festivals.',
+        },
+      },
+      {
+        title: {
+          he: 'דרכי חיים',
+          en: 'Darkei Chaim',
+        },
+        about: {
+          he: 'ליקוט של הנהגותיו ומנהגיו.',
+          en: 'A collection of his customs and conduct.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'מנורת הכסף',
+          en: 'The silver menorah',
+        },
+        text: {
+          he: 'מסופר שרבי חיים כבר משכן כמעט כל חפץ בביתו לטובת נצרכים, כשבא אליו אדם שלא היה לו במה לחתן את בתו. לא נשאר בבית דבר מלבד מנורת החנוכה מכסף, והוא עטף אותה ונתן לו. בערב החנוכה עמד הבית בלי מנורה, עד שבאו זוג אורחים לבקש עצה והשאירו מתנה: מנורת כסף נאה. רבי חיים הדליק בה בלי להתפלא.',
+          en: "It is told that Rabbi Chaim had already pawned nearly everything in his home for the needy when a man came who could not pay for his daughter's wedding. Nothing was left but his silver Chanukah menorah, so he wrapped it and gave it away. On the first night the house stood without one, until a couple came for his counsel and left a gift: a fine silver menorah. He lit it without surprise.",
+        },
+        source: 'Asharon Baltazar, The Miracle of the Missing Menorah, Chabad.org (https://www.chabad.org/4588766)',
+      },
+      {
+        title: {
+          he: 'הנוי של הסוכה',
+          en: 'The finest sukkah decoration',
+        },
+        text: {
+          he: 'בערב סוכות שלח רבי חיים את בניו ללוות כמה אלפי זהובים, ועוד באותו יום חילק את כל הסכום לנצרכים. כשנכנס בערב לסוכה, אמר לבניו שהצדקה היא הנוי היפה ביותר של הסוכה.',
+          en: 'On the eve of Sukkot Rabbi Chaim sent his sons to borrow several thousand gulden, and that same day he gave the whole sum to the needy. Entering his sukkah that evening, he told his sons that charity is the most magnificent adornment of the sukkah.',
+        },
+        source:
+          'Rabbi Avrohom Chaim Feuer, The Tzedakah Treasury, adapted by Shema Yisrael (https://shemayisrael.com/publicat/hazon/tzedaka/sanzer_rebbe.htm)',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'אוהל הדברי חיים בבית העלמין היהודי ברחוב ריבצקה, נובי סונץ׳ (צאנז), פולין',
+        en: 'Ohel of the Divrei Chaim in the Jewish cemetery on Rybacka Street, Nowy Sącz (Sanz), Poland',
+      },
+      lat: 49.6337,
+      lng: 20.6899,
+      link: true,
+      noLinkReason: null,
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/חיים_הלברשטאם',
+      'https://en.wikipedia.org/wiki/Chaim_Halberstam',
+      'https://jewishpress.com/my-machberes-13/',
+      'https://www.chabad.org/4588766',
+      'https://shemayisrael.com/publicat/hazon/tzedaka/sanzer_rebbe.htm',
+      'https://cdp.jewishgen.org/k9yy',
+      'https://www.openstreetmap.org/way/330144262',
+      'https://www.wikidata.org/wiki/Q9194381',
+    ],
+  },
   abir_yaakov: {
     bio: {
       he: 'רבי יעקב אבוחצירא (1806–1880), המכונה ׳אביר יעקב׳, רבה של קהילת תאפילאלת שבמזרח מרוקו: מקובל, פוסק, דרשן ופייטן, וסבו של הבבא סאלי. עשרות שנים שימש כרב ומנהיג הקהילה, ורבני מרוקו שלחו אליו שאלות בהלכה. רוב לימודו היה בתורת הקבלה, ולפי המסורת נודע כבעל מופת. בשנת תר״ם יצא לעלות לארץ ישראל, חלה בדרך בעיר דמנהור שבמצרים ונפטר שם בכ׳ בטבת.',
@@ -3901,6 +4633,101 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'Immanuel Etkes, Rabbi Israel Salanter and the Musar Movement (Jewish Publication Society, 1993)',
     ],
   },
+  maharil_diskin: {
+    bio: {
+      he: 'הרב משה יהושע יהודה לייב דיסקין, המהרי״ל דיסקין, מגדולי רבני ליטא, נולד בגרודנא בשנת תקע״ט (1818). כיהן כרב בלומז׳ה, בקובנה, בשקלוב ובבריסק, ולכן כונה ״הרב מבריסק״. בשנת תרל״ז עלה לירושלים והיה מראשי העדה האשכנזית בעיר. ייסד את בית היתומים דיסקין, עמד בראש ישיבת אהל משה ומסר שיעורים עמוקים לתלמידי חכמים. נפטר במוצאי שבת, בכ״ט בטבת תרנ״ח, ונקבר בהר הזיתים.',
+      en: 'Rabbi Moshe Yehoshua Yehuda Leib Diskin, the Maharil Diskin, a leading Lithuanian rabbi, was born in Grodno in 1818. He served as rabbi of Lomza, Kovno, Shklov and Brisk, and so was called the Rav of Brisk. In 1877 he settled in Jerusalem and became a leader of its Ashkenazi community. He founded the Diskin orphanage and headed the Ohel Moshe yeshiva. He died on Saturday night, 29 Tevet 5658 (1898), and was buried on the Mount of Olives.',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'חסד שמתחיל היום',
+          en: 'Kindness that starts today',
+        },
+        text: {
+          he: 'כשראה יתומים חסרי בית בירושלים, לא חיכה להקמת מוסד: הכניס אותם לביתו, ומשם צמח בית היתומים דיסקין. חסד אמיתי מתחיל במה שאפשר לעשות כבר היום.',
+          en: 'When he saw homeless orphans in Jerusalem, he did not wait for an institution: he took them into his own home, and the Diskin orphanage grew from there. True kindness starts with what one can do today.',
+        },
+      },
+      {
+        title: {
+          he: 'זמן למי שמבקש ללמוד',
+          en: 'Time for those who ask to learn',
+        },
+        text: {
+          he: 'אף שנחשב מגדולי הדור, נענה לבקשת קבוצת אברכים ומסר להם שיעור יומי בגמרא, ובמוצאי שבתות לימד את פרשת השבוע. גדול בתורה מוצא זמן ללמד את מי שמבקש ללמוד.',
+          en: 'Though among the greatest of his generation, he agreed when a group of young scholars asked for a daily Gemara shiur, and on Saturday nights he taught the weekly portion. A great scholar makes time for those who ask.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'שו״ת מהרי״ל דיסקין',
+          en: 'Responsa of the Maharil Diskin',
+        },
+        about: {
+          he: 'קובץ תשובותיו בהלכה, שנדפס לאחר פטירתו.',
+          en: 'A collection of his halachic responsa, printed after his death.',
+        },
+      },
+      {
+        title: {
+          he: 'חידושי מהרי״ל דיסקין על מסכת חולין',
+          en: 'Chiddushei HaMaharil Diskin on Chullin',
+        },
+        about: {
+          he: 'הערותיו שנכתבו בשולי הגמרא שלו על מסכת חולין, שיצאו לאור בשנת תשפ״ד.',
+          en: 'His notes from the margins of his own Gemara on tractate Chullin, published in 5784 (2024).',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'היתומים ביער',
+          en: 'The orphans in the forest',
+        },
+        text: {
+          he: 'לפי עדות תלמידו הרב יעקב אורנשטיין, בקיץ תרל״ט חלה הרב דיסקין בדלקת ריאות ויצא לנשום אוויר צח ביער שמחוץ לעיר. שם ראה ילדים יחפים ולבושי בלואים בין ערמות האשפה, ושמע שהם יתומים שאין להם בית. הוא הכניס אותם לביתו, ויחד עם רעייתו גידל אותם בו. בי״א בשבט תרמ״א נשכר הבניין הראשון, ונוסד בית היתומים דיסקין.',
+          en: 'According to his disciple Rabbi Yaakov Orenstein, in the summer of 1879 Rabbi Diskin fell ill with pneumonia and went out to a forest outside the city for fresh air. There he saw barefoot children in rags among the rubbish heaps, and learned they were homeless orphans. He took them into his own home and raised them there with his wife. On 11 Shevat 5641 (1881) the first building was rented, and the Diskin orphanage was founded.',
+        },
+        source:
+          "Diskin Orphanage, 'The way it all began', after the account of his disciple Rabbi Yaakov Orenstein: https://www.diskin.org.il/history; Hebrew Wikipedia 'יהושע לייב דיסקין' (the orphanage founded in his courtyard in 1881): https://he.wikipedia.org/wiki/יהושע_לייב_דיסקין",
+      },
+      {
+        title: {
+          he: 'חלונות אל הר הבית',
+          en: 'Windows toward the Temple Mount',
+        },
+        text: {
+          he: 'לפי מסורת שנשתמרה בירושלים, הקפיד המהרי״ל דיסקין שחלונות דירתו בעיר העתיקה יפנו אל הר הבית, כדי שלא יעברו עליו שלושים יום בלי שיראה את מקום המקדש.',
+          en: 'According to a Jerusalem tradition, the Maharil Diskin made sure the windows of his Old City home faced the Temple Mount, so that thirty days would never pass without his seeing the place of the Temple.',
+        },
+        source:
+          "Hebrew Wikipedia 'יהושע לייב דיסקין', citing Eli Schiller and Gideon Bigger, Jerusalem, the Old City (Ariel, 1988), p. 196: https://he.wikipedia.org/wiki/יהושע_לייב_דיסקין; Israel Ministry of Education, Haredi education, 'Dmuyot hod beEretz Yisrael: Maharil Diskin': https://meyda.education.gov.il/files/Mazkirut_Pedagogit/MikzootAzmaeem/Beshvili_morshet_dmuyot_hud_bartz_yisral_meharile_diskin.pdf",
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית הקברות בהר הזיתים, ירושלים; הביקור דורש תיאום ביטחוני או ליווי',
+        en: 'Mount of Olives cemetery, Jerusalem; a visit needs security coordination or an escort',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      noLinkReason: null,
+      query: 'בית הקברות הר הזיתים',
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/יהושע_לייב_דיסקין',
+      'https://en.wikipedia.org/wiki/Yehoshua_Leib_Diskin',
+      'https://www.diskin.org.il/history',
+      'https://www.jdn.co.il/j_world/2558545/',
+      'https://meyda.education.gov.il/files/Mazkirut_Pedagogit/MikzootAzmaeem/Beshvili_morshet_dmuyot_hud_bartz_yisral_meharile_diskin.pdf',
+    ],
+  },
   sfas_emes: {
     bio: {
       he: 'רבי יהודה אריה ליב אלתר (1847–1905), האדמו״ר השלישי של חסידות גור, המכונה על שם ספריו ׳שפת אמת׳. התייתם בילדותו וגדל אצל סבו, החידושי הרי״ם. לאחר פטירת סבו מונה לרב העיירה גור, אך סירב להנהיג את החסידים, וקיבל את ההנהגה רק בשנת 1870, בגיל 23, לאחר פטירת רבי חנוך העניך מאלכסנדר. בימיו הייתה גור לחסידות המרכזית בפולין. נפטר בה׳ בשבט תרס״ה ונקבר לצד סבו.',
@@ -4121,6 +4948,183 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://www.chabad.org/975828',
       'https://ou.org/judaism-101/bios/leaders-in-the-diaspora/the-ben-ish-chai',
       'https://seforimblog.com/?p=4845',
+    ],
+  },
+  chaim_of_brisk: {
+    bio: {
+      he: 'רבי חיים הלוי סולובייצ׳יק, ר׳ חיים מבריסק, נולד בוולוז׳ין בשנת תרי״ג, בנו של בעל ״בית הלוי״. שימש משנה לראש ישיבת וולוז׳ין לצד הנצי״ב, ואחרי סגירת הישיבה ופטירת אביו בשנת תרנ״ב נעשה רבה של בריסק. הוא אבי ״דרך בריסק״, שיטת לימוד מדויקת ומושגית שקנתה לה מקום בישיבות ליטא, והעמיד תלמידים גדולים. נפטר באוטבוצק בכ״א באב תרע״ח ונקבר בוורשה, ובנו רבי יצחק זאב מילא את מקומו.',
+      en: 'Rabbi Chaim Soloveitchik, Reb Chaim of Brisk, was born in Volozhin in 1853, son of the Beis HaLevi. He taught at the Volozhin yeshiva beside the Netziv; after it closed and his father died in 1892, he became rabbi of Brisk. He founded the Brisker method, a precise, conceptual approach to Talmud study adopted across Lithuanian yeshivas. He died in Otwock on 21 Av 5678 (1918) and was buried in Warsaw; his son Rabbi Yitzchak Zev succeeded him.',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'רב שמגן על החלש',
+          en: 'A rabbi for the defenseless',
+        },
+        text: {
+          he: 'לפי עדות נכדו, הרב יוסף דב סולובייצ׳יק, ראה רבי חיים את תפקיד הרב לא רק בפסיקת שאלות, אלא בתיקון עוולות שנעשו לחלשים ובהגנה על מי שאין לו מגן.',
+          en: "As his grandson Rabbi Joseph B. Soloveitchik recorded, Reb Chaim saw a rabbi's task not only in ruling on questions but in righting wrongs done to the weak and defending those with no one to defend them.",
+        },
+      },
+      {
+        title: {
+          he: 'מחמיר בפיקוח נפש',
+          en: 'Stringent about saving life',
+        },
+        text: {
+          he: 'רבי חיים התיר לחולים לאכול ביום הכיפורים. כשטענו שהוא מקל בדיני הצום, ענה שאינו מקל ביום הכיפורים, אלא מחמיר בפיקוח נפש. שמירת החיים היא חומרה, לא קולא.',
+          en: 'He permitted the sick to eat on Yom Kippur. When told he was lenient about the fast, he answered that he was not lenient about Yom Kippur but stringent about saving life. Protecting life is a stringency, not a leniency.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'חידושי רבנו חיים הלוי',
+          en: 'Chiddushei Rabbeinu Chaim HaLevi',
+        },
+        about: {
+          he: 'חידושיו על משנה תורה לרמב״ם, שכתב והגיה בעצמו, ובניו הדפיסו אחרי פטירתו.',
+          en: "His insights on Maimonides' Mishneh Torah, written and corrected in his own hand and printed by his sons after his death.",
+        },
+      },
+      {
+        title: {
+          he: 'חידושי הגר״ח (סטנסיל)',
+          en: 'Chiddushei HaGrach (the stencil)',
+        },
+        about: {
+          he: 'חידושיו על הש״ס, שהועתקו מכתביו שלא הוגהו בידיו, ותלמידי בנו הדפיסו אותם במכונת כתיבה כסטנסיל.',
+          en: "His insights on the Talmud, copied from writings he never edited and typed as a stencil edition by his son's students.",
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'המחסן הנעול',
+          en: 'The locked woodshed',
+        },
+        text: {
+          he: 'בתחילת החורף מילאו גבאי הקהילה מחסן עצים לחימום בית הרב. רבי חיים הודיע שכל מי שצריך עצים ואין לו כסף יבוא ויקח בחינם, והעצים אזלו מהר. הגבאים נעלו את המחסן ומסרו את המפתח לרבנית, אך רבי חיים לא הניח לה להשתמש בעצים, אף שהבית קפא מקור. ״אם הוא נעול לעניים,״ אמר, ״הוא נעול גם לנו.״',
+          en: "At the start of winter the trustees filled a woodshed to heat the rabbi's home. Reb Chaim announced that anyone who needed firewood and could not pay could take it free, and the wood ran out. The trustees padlocked the shed and gave the key to the Rebbetzin, but Reb Chaim would not let her use the wood, though the house was freezing. 'If it is locked to the poor,' he said, 'it is locked to us too.'",
+        },
+        source:
+          "R' B. Yisraeli, Four Hundred Years Postmortem, Dei'ah veDibur, Vayechi 5764 (https://www.chareidi.org/archives5764/vayechi/ovaychi.htm); his open home and wood used by strangers also in VIN News, 4 August 2026 (https://vinnews.com/2026/08/04/659539/)",
+      },
+      {
+        title: {
+          he: 'מזרן מתחת למדרגות',
+          en: 'A mattress under the stairs',
+        },
+        text: {
+          he: 'אחרי השריפות בבריסק, כשמשפחות רבות נותרו בלי קורת גג, לא שכב רבי חיים לישון במיטתו אף לילה אחד. בכל תקופת הבנייה מחדש ישן על מזרן מתחת למדרגות העולות לעזרת הנשים בבית הכנסת הגדול, וביתו שלו שימש מעון לעניים רבים, קבועים ועוברי אורח.',
+          en: "After the fires in Brisk, when many families were left without a roof, Reb Chaim did not sleep in his own bed a single night. Through the whole time of rebuilding he slept on a mattress under the stairs to the women's gallery of the main synagogue, while his own home housed many poor people, some passing through and some staying on.",
+        },
+        source:
+          "R' B. Yisraeli, Four Hundred Years Postmortem, Dei'ah veDibur, Vayechi 5764 (https://www.chareidi.org/archives5764/vayechi/ovaychi.htm)",
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית העלמין היהודי ברחוב אוקופובה, ורשה, פולין, באוהל המשותף לו ולנצי״ב בחלקה 49; הנקודה במפה היא שער הכניסה',
+        en: 'Okopowa Street Jewish Cemetery, Warsaw, Poland, in the ohel he shares with the Netziv in section 49; the map point is the entrance gate',
+      },
+      lat: 52.2446,
+      lng: 20.9769,
+      link: true,
+      noLinkReason: null,
+    },
+    sources: [
+      "https://he.wikipedia.org/wiki/חיים_סולובייצ'יק",
+      'https://en.wikipedia.org/wiki/Chaim_Soloveitchik',
+      'https://vinnews.com/2026/08/04/659539/',
+      'https://www.chareidi.org/archives5764/vayechi/ovaychi.htm',
+      'https://en.wikipedia.org/wiki/Chiddushei_Rabbeinu_Chaim',
+      'https://en.wikipedia.org/wiki/Jewish_Cemetery,_Warsaw',
+      'https://www.wikidata.org/wiki/Q1716786',
+      'https://www.openstreetmap.org/way/35487661',
+      'https://www.openstreetmap.org/node/416163273',
+      'https://commons.wikimedia.org/wiki/File:POL_Warsaw_JCP_cemetery_gate1.jpg',
+      'https://commons.wikimedia.org/wiki/Category:Ohel_of_Chaim_So%C5%82owiejczyk_and_Cwi_Naftali_Berlin',
+      'https://www.wikidata.org/wiki/Q2637350',
+    ],
+  },
+  shayele_of_kerestir: {
+    bio: {
+      he: 'רבי ישעיה שטיינר, ר׳ ישעיה׳לה מקרעסטיר, נולד בזבורוב שבצפון הונגריה, כיום בסלובקיה, והתייתם מאביו בגיל שלוש. בנערותו היה משמשו של רבי צבי הירש מליסקא, ולמד גם אצל רבי חיים מצאנז ורבי מרדכי מנדבורנה. בעצת רבי מרדכי עבר לקרעסטיר שבהונגריה, ושם נהג באדמו״רות ונודע בהכנסת אורחים עצומה ובצדקה רבה. רבים באו אליו לבקש ברכה. נפטר בג׳ באייר ה׳תרפ״ה, ונקבר בקרעסטיר.',
+      en: "Rabbi Yeshaya Steiner, Reb Shayele of Kerestir, was born in Zborov in northern Hungary, today Slovakia, and lost his father at three. As a youth he served Rabbi Tzvi Hirsh of Liska, and he also learned from Rabbi Chaim of Sanz and Rabbi Mordechai of Nadvorna. On Rabbi Mordechai's advice he settled in Bodrogkeresztúr (Kerestir), Hungary, where he led a Chassidic court famed for vast hospitality and charity. He died on 3 Iyar 5685 (1925).",
+    },
+    lessons: [
+      {
+        title: {
+          he: 'ארוחה חמה לכל אורח',
+          en: 'A warm meal for every guest',
+        },
+        text: {
+          he: 'בביתו בקרעסטיר דאג שכל אורח יאכל לשובע ויישן בנוחות. הוא הבין שמי שאינו דואג ללחמו יכול לפנות לתורה, לתפילה ולתיקון המידות. כך הפכה ארוחה חמה לפתח לעבודת ה׳.',
+          en: 'In Kerestir he made sure every guest ate well and slept comfortably. He understood that a person free of worry about bread can turn to Torah, prayer and refining his character. A warm meal became a doorway to serving God.',
+        },
+      },
+      {
+        title: {
+          he: 'נתינה גם בשעת דוחק',
+          en: 'Giving even when short',
+        },
+        text: {
+          he: 'כותבי תולדותיו מספרים שכאשר לא נותר בידו כסף לצדקה, לווה כדי להמשיך לתת. הצדקה לא הייתה אצלו מותרות של עת רווחה, אלא חובה של כל יום.',
+          en: 'His biographers relate that when he had no money left for charity, he borrowed so he could keep giving. For him charity was not a luxury for good times but a duty of every day.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [],
+    stories: [
+      {
+        title: {
+          he: 'פנחס׳ל האורח',
+          en: "Pinchas'l the guest",
+        },
+        text: {
+          he: 'בין אורחיו הקבועים היה נווד מוטרד בשם פנחס׳ל, שהתנהג לעתים בגסות. הגבאים חששו לכבוד השבת ולכבוד הרבי, וביקשו שימצא לינה במקום אחר. ר׳ ישעיה׳לה השתומם: ״אשלח יהודי מביתי?!״ והוסיף שיוותר על מעמדו ועל כל רכושו ובלבד שלא ירחיק יהודי מקרעסטיר.',
+          en: "Among his regular guests was Pinchas'l, a troubled wanderer who was often rude and unkempt. The gabbaim, concerned for the honor of Shabbat and of the Rebbe, asked that he lodge elsewhere. Reb Shayele was astonished: 'Should I send a Jew away from my home?!' He said he would give up his position and all he owned before sending a Jew away from Kerestir.",
+        },
+        source: 'Jewish Link, Ahavas Yisrael, 2021 (https://jewishlink.news/?p=48140)',
+      },
+      {
+        title: {
+          he: 'ארוחה לבאים להלוויה',
+          en: 'A meal for the mourners',
+        },
+        text: {
+          he: 'מסופר שגם על ערש דווי ביקש ר׳ ישעיה׳לה מבני ביתו לדאוג שהבאים להלווייתו לא יישארו רעבים. ברוח זו נוהגים עד היום בג׳ באייר, יום פטירתו, לחלק ארוחות חינם לזכרו בקהילות רבות.',
+          en: 'It is told that even on his deathbed Reb Shayele asked his family to make sure that those coming to his funeral would not go hungry. In that spirit, on 3 Iyar, his yahrzeit, free meals are handed out in his memory in many communities.',
+        },
+        source:
+          'Daniel Pesin, A 21st-century Hasidic pilgrimage, Times of Israel blogs, 2023 (https://blogs.timesofisrael.com/a-21st-century-hasidic-pilgrimage/); Chaya Sara Oppenheim, The Hasidic Rabbi Who Inspired a Day of Free Lunch, Mosaic, 2023 (https://ideas.tikvah.org/mosaic/picks/the-hasidic-rabbi-who-inspired-a-day-of-free-lunch)',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'אוהל ר׳ ישעיה׳לה בבית העלמין היהודי בבודרוגקרסטור (קרעסטיר), הונגריה',
+        en: 'Ohel of Reb Shayele in the Jewish cemetery of Bodrogkeresztúr (Kerestir), Hungary',
+      },
+      lat: 48.1661,
+      lng: 21.3593,
+      link: true,
+      noLinkReason: null,
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/ישעיה_שטיינר',
+      'https://en.wikipedia.org/wiki/Yeshaya_Steiner',
+      'https://www.jdn.co.il/j_world/2631786/',
+      'https://mishpacha.com/?p=14477',
+      'https://jewishlink.news/?p=48140',
+      'https://blogs.timesofisrael.com/a-21st-century-hasidic-pilgrimage/',
+      'https://ideas.tikvah.org/mosaic/picks/the-hasidic-rabbi-who-inspired-a-day-of-free-lunch',
+      'https://www.openstreetmap.org/node/4927283880',
+      'https://iwalk-dev.usc.edu/hu/bodrogkeresztur-jewish-community/map/6',
     ],
   },
   chafetz_chaim: {
@@ -4650,6 +5654,410 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       "Avraham Yeshayahu Karelitz, Emunah u'Bitachon",
     ],
   },
+  isser_zalman_meltzer: {
+    bio: {
+      he: 'רבי איסר זלמן מלצר, מגדולי ראשי הישיבות בליטא ובירושלים, נולד במיר בשנת תר״ל (1870) ולמד בוולוז׳ין אצל הנצי״ב ורבי חיים מבריסק. עמד בראש ישיבת סלבודקה ואחר כך בראש הישיבה בסלוצק, וכיהן כרבה של העיר כעשרים שנה. בשנת תרפ״ה (1925) עלה לירושלים ועמד בראש ישיבת עץ חיים עד יום פטירתו. חיבורו ״אבן האזל״ על הרמב״ם נלמד בכל עולם הישיבות. נפטר בי׳ בכסלו תשי״ד ונקבר בהר המנוחות.',
+      en: 'Rabbi Isser Zalman Meltzer, born in Mir in 1870, a leading rosh yeshiva, studied at Volozhin under the Netziv and Rabbi Chaim of Brisk. He headed the Slobodka yeshiva, then the Slutsk yeshiva, where he was also town rabbi for about twenty years. From 1925 until his death he headed the Etz Chaim yeshiva in Jerusalem. His Even HaEzel on the Rambam is studied in every yeshiva. He died on 10 Kislev 5714 (1953) and was buried on Har HaMenuchot.',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'עין טובה',
+          en: 'A good eye',
+        },
+        text: {
+          he: 'המשגיח רבי מאיר חדש סיפר שהייתה לו ״עין טובה״ יוצאת דופן: תמיד ראה את הטוב שבזולתו והחשיב אותו כטוב ממנו. מי שמחפש את מעלות האחר לומד ממנו ומכבד אותו.',
+          en: "The mashgiach Rabbi Meir Chodosh said he had an unusual 'good eye': he always saw the best in others and considered them better than himself. Looking for the virtues of others lets us learn from them and honor them.",
+        },
+      },
+      {
+        title: {
+          he: 'כל תלמיד כבן יחיד',
+          en: 'Every student an only child',
+        },
+        text: {
+          he: 'תלמידיו סיפרו שכל אחד מהם הרגיש אצלו כבן יחיד. ארבעים שנה אחרי שהרחיק תלמיד מהישיבה בסלוצק, עוד דאג שמא סטה מן הדרך. מחנך אמיתי נושא את תלמידיו בלבו.',
+          en: 'His students said each of them felt like an only child to him. Forty years after expelling a student in Slutsk, he still worried that the young man had strayed. A true teacher carries his students in his heart.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'אבן האזל',
+          en: 'Even HaEzel',
+        },
+        about: {
+          he: 'חיבורו המרכזי על משנה תורה לרמב״ם, בשבעה כרכים; הראשון יצא בשנת 1935 והאחרון לאחר פטירתו.',
+          en: "His main work, a seven-volume commentary on Maimonides' Mishneh Torah; the first volume appeared in 1935 and the last after his death.",
+        },
+      },
+      {
+        title: {
+          he: 'הגהות וביאורים על חידושי הרמב״ן',
+          en: "Notes and Explanations on the Ramban's Novellae",
+        },
+        about: {
+          he: 'הערות וביאורים על חידושי הרמב״ן לתלמוד הבבלי.',
+          en: "Notes and explanations on the Ramban's novellae on the Babylonian Talmud.",
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'החדר בבית הקצב',
+          en: "The room at the butcher's",
+        },
+        text: {
+          he: 'בימי אירוסיו, כשלמד בראדין, שכר איסר זלמן חדר אצל קצב שפרש את עורות הבהמות ליד חלונו. הריח פגע בבריאותו, אך הוא סירב לעזוב, כדי שלא לפגוע בפרנסת הקצב. לבסוף חלה בשחפת וחזר לבית הוריו במיר. משפחת הכלה לחצה עליה לבטל את השידוך, אך הכלה, בילה הינדה, סירבה, והשניים נישאו לאחר שהחלים.',
+          en: "During his engagement, while studying in Radin, Isser Zalman rented a room from a butcher who spread animal hides by his window. The smell harmed his health, yet he refused to leave, so as not to hurt the butcher's livelihood. He finally fell ill with tuberculosis and went home to his parents in Mir. The bride's family pressed her to cancel the match, but the bride, Beila Hinda, refused, and they married after he recovered.",
+        },
+        source:
+          "Hebrew Wikipedia 'איסר זלמן מלצר': https://he.wikipedia.org/wiki/איסר_זלמן_מלצר; English Wikipedia 'Isser Zalman Meltzer': https://en.wikipedia.org/wiki/Isser_Zalman_Meltzer; Kikar HaShabbat, 10 Kislev 5785 (the engagement): https://www.kikar.co.il/judaism/soblsa",
+      },
+      {
+        title: {
+          he: 'ניירות עטיפה בקיץ תש״ח',
+          en: 'Wrapping paper in the summer of 1948',
+        },
+        text: {
+          he: 'במצור על ירושלים במלחמת העצמאות נפצע הרב מלצר ברגלו, והחלים בבית חתנו בפתח תקווה. הרב טוביה פרשל, שביקר אותו שם בקיץ תש״ח, מצא אותו שוכב על ספה ומשוחח בחביבות. רעייתו ישבה ליד השולחן והעתיקה את חידושיו לכרך נוסף של ״אבן האזל״, על ניירות עטיפה שיישרה, כי נייר הכתיבה אזל.',
+          en: "Wounded in the leg during the siege of Jerusalem in 1948, Rabbi Meltzer recovered at his son-in-law's home in Petah Tikva. Rabbi Tovia Preschel, who visited him there that summer, found him on a couch, warm and lively. His wife sat at the table copying his Torah for another volume of Even HaEzel, on used wrapping paper she had smoothed out, since writing paper had run out.",
+        },
+        source:
+          "Tovia Preschel, 'A Visit to Rav Isser Zalman Meltzer': https://toviapreschel.com/?p=10423; English Wikipedia 'Isser Zalman Meltzer' (the paper shortage): https://en.wikipedia.org/wiki/Isser_Zalman_Meltzer",
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית העלמין הר המנוחות, ירושלים',
+        en: 'Har HaMenuchot cemetery, Jerusalem',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      noLinkReason: null,
+      query: 'בית העלמין הר המנוחות',
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/איסר_זלמן_מלצר',
+      'https://en.wikipedia.org/wiki/Isser_Zalman_Meltzer',
+      'https://www.kikar.co.il/judaism/soblsa',
+      'https://chareidi.org/archives5765/toldos/omeltzer.htm',
+      'https://toviapreschel.com/?p=10423',
+      'https://www.jdn.co.il/beit_hamidrash/1866537/',
+    ],
+  },
+  chaim_chouri: {
+    bio: {
+      he: 'רבי חיים חורי נולד בשנת תרמ״ה (1885) ברובע חארה צגירה שבאי ג׳רבה בתוניסיה, ולמד אצל הרב משה זקן מאזוז ורבי פראג׳י עלוש. בגיל 18 הוסמך לרבנות, ומשנת 1926 כיהן כרב העיר גאבס. הקים בה את ישיבת ״תורה וחיים״ ומוסדות צדקה, הדפיס ספרים ותרגם חלקם לערבית יהודית. בגיל שבעים עלה לארץ והשתקע בבאר שבע. נפטר בכ״ה באייר תשי״ז, וקברו נעשה מקום תפילה לאלפים.',
+      en: 'Rabbi Chaim Chouri was born in 1885 in the Hara Sghira quarter of Djerba, Tunisia, and studied with Rabbi Moshe Zaken Mazuz and Rabbi Fraji Allouche. Ordained at 18, he became rabbi of Gabes in 1926. There he founded the Torah VeChaim yeshiva and charitable institutions, and printed books, translating some into Judeo-Arabic. At seventy he made aliyah and settled in Beersheba. He died on 25 Iyar 5717 (1957), and his grave became a place of prayer for thousands.',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'בית פתוח',
+          en: 'An open home',
+        },
+        text: {
+          he: 'ביתו היה פתוח לכל נזקק, ולפי המסופר כל אורח שהגיע לעיר ידע שימצא אצלו ארוחה חמה ומיטה, בלי תשלום. הכנסת אורחים מתחילה בדלת פתוחה.',
+          en: 'His home was open to anyone in need. It is told that every visitor to the town knew a hot meal and a bed awaited him there, free of charge. Hospitality begins with an open door.',
+        },
+      },
+      {
+        title: {
+          he: 'אהבת ארץ ישראל במעשים',
+          en: 'Love of the Land in deeds',
+        },
+        text: {
+          he: 'בשנת 1917 היה ממייסדי אגודת ״עטרת ציון״, שלימדה עברית ועבודת אדמה כהכנה לעלייה, ועודד את יהודי תוניסיה לעלות. בגיל שבעים עלה בעצמו. אהבה אמיתית הופכת למעשים.',
+          en: 'In 1917 he helped found the Atarat Tzion society, which taught Hebrew and farming to prepare for aliyah, and he urged the Jews of Tunisia to go. At seventy he went himself. True love turns into deeds.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'דרך חיים',
+          en: 'Derech Chaim',
+        },
+        about: {
+          he: 'חיבור על התורה ועל הש״ס.',
+          en: 'A work on the Torah and the Talmud.',
+        },
+      },
+      {
+        title: {
+          he: 'חסד ואמת',
+          en: 'Chesed VeEmet',
+        },
+        about: {
+          he: 'דרושים וביאורים לזכר חכמים שונים.',
+          en: 'Sermons and explanations in memory of various sages.',
+        },
+      },
+      {
+        title: {
+          he: 'מצא חיים',
+          en: 'Matza Chaim',
+        },
+        about: {
+          he: 'דרשות, חידושים על התלמוד ושאלות ותשובות.',
+          en: 'Sermons, insights on the Talmud and responsa.',
+        },
+      },
+      {
+        title: {
+          he: 'נפלאות גדולות',
+          en: "Nifla'ot Gedolot",
+        },
+        about: {
+          he: 'דרשות שהודפסו בג׳רבה בשנת 1940.',
+          en: 'Sermons printed in Djerba in 1940.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'שמיכות לעניי העיר',
+          en: 'Blankets for the poor',
+        },
+        text: {
+          he: 'מסופר שבלילה קר אחד לא מצא רבי חיים מנוחה, כי ידע שלעניי העיר אין שמיכות. למחרת בבוקר כינס את עשירי הקהילה, וכל אחד מהם תרם כדי לקנות שמיכות לנזקקים.',
+          en: 'It is told that on one cold night Rabbi Chaim could find no rest, knowing that the poor of the town had no blankets. The next morning he gathered the wealthy members of the community, and each of them gave money to buy blankets for the needy.',
+        },
+        source: 'Naama Green, Hidabroot, 4 May 2021 (https://www.hidabroot.org/article/1153742)',
+      },
+      {
+        title: {
+          he: 'הקדוש של באר שבע',
+          en: 'The Saint of Beersheba',
+        },
+        text: {
+          he: 'רבי חיים חי בבאר שבע שנים ספורות בלבד, אך אחרי פטירתו נבנה אוהל על קברו, והילולתו השנתית מושכת אלפים, רבים מהם עולים מתוניסיה וממרוקו. האנתרופולוג אלכס וינגרוד חקר אותה בשנות השבעים והשמונים, וכתב עליה את הספר ״הקדוש של באר שבע״.',
+          en: 'Rabbi Chaim lived in Beersheba only a few years, yet after his death an ohel was built over his grave, and his yearly hilula draws thousands, many of them immigrants from Tunisia and Morocco. The anthropologist Alex Weingrod studied it in the 1970s and 1980s and wrote a book about it, The Saint of Beersheba.',
+        },
+        source:
+          'Alex Weingrod, The Saint of Beersheba (SUNY Press, 1990), summarized by eHRAF World Cultures (https://ehrafworldcultures.yale.edu/cultures/mf01/documents/015); Hebrew Wikipedia, חיים חורי (https://he.wikipedia.org/wiki/חיים_חורי); BR7 News, 69th hilula (https://br7news.co.il/he/news/news-1777801934)',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'אוהל רבי חיים חורי בחלקת הרבנים, בית העלמין הישן, באר שבע',
+        en: "Ohel of Rabbi Chaim Chouri in the rabbis' section, Old Cemetery, Beersheba",
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      noLinkReason: null,
+      query: 'בית העלמין הישן באר שבע',
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/חיים_חורי',
+      'https://fr.wikipedia.org/wiki/Haïm_Houri',
+      'https://br7news.co.il/he/news/news-1777801934',
+      'https://www.hidabroot.org/article/1153742',
+      'https://breslevcity.co.il/רבי-חיים-חורי/',
+      'https://ehrafworldcultures.yale.edu/cultures/mf01/documents/015',
+      'https://he.wikipedia.org/wiki/בית_העלמין_הישן_בבאר_שבע',
+      'https://openlibrary.org/works/OL20020044M',
+    ],
+  },
+  aharon_of_belz: {
+    bio: {
+      he: 'רבי אהרן רוקח, המהר״א מבעלזא, נולד בבעלזא שבגליציה בשנת 1880, בנו של רבי יששכר דב מבעלזא. בשנת ה׳תרפ״ז, אחרי פטירת אביו, נעשה לרבה של בעלזא ולאדמו״ר הרביעי של חסידות בעלזא. בשואה נרצחו רוב בני משפחתו, והוא נמלט דרך הונגריה ועלה לארץ ישראל בשנת ה׳תש״ד. התיישב תחילה בתל אביב ואחר כך בירושלים, ושם בנה מחדש את חסידות בעלזא. נודע בצדקותו, באכילתו המועטת ובאהבתו לכל יהודי. נפטר במוצאי שבת, בכ״א באב תשי״ז.',
+      en: 'Rabbi Aharon Rokeach was born in Belz, Galicia, in 1880, son of Rabbi Yissachar Dov. In 1926 he succeeded his father as the fourth Belzer Rebbe. Most of his family was murdered in the Holocaust; he escaped through Hungary and reached the Land of Israel in 1944. Settling in Tel Aviv, then Jerusalem, he rebuilt Belz Chassidism. He was known for piety, sparse eating and love for every Jew. He died on motzaei Shabbat, 21 Av 5717 (1957).',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'ללמד זכות על כל יהודי',
+          en: 'Defending every Jew',
+        },
+        text: {
+          he: 'נהג לומר שכשם שמתייגעים ליישב דברי רמב״ם קשים, כך מצווה להתייגע וליישב יהודי שמעשיו נראים קשים. מי שמחפש את הצד הטוב בכל אדם, מוצא אותו.',
+          en: 'He used to say that just as one toils to resolve a difficult Rambam, it is a mitzvah to toil to explain favorably a Jew whose conduct seems difficult. Whoever looks for the good in people finds it.',
+        },
+      },
+      {
+        title: {
+          he: 'מילים רכות',
+          en: 'Gentle words',
+        },
+        text: {
+          he: 'לא היה מכנה שום יהודי ״מחלל שבת״, אלא אומר שהוא שכח את חשיבות השבת או חשב שהיום יום שישי. גם כשמדברים על חטא, אפשר לבחור מילים שאינן פוגעות באדם.',
+          en: 'He would not call any Jew a Shabbat desecrator; instead he said the person had forgotten the importance of Shabbat or thought it was Friday. Even when speaking of a wrong, one can choose words that do not wound.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'לקט אמרי קודש',
+          en: 'Leket Imrei Kodesh',
+        },
+        about: {
+          he: 'דברי תורתו, שרשמו חסידיו וליקט רבי אהרן רינגל, בשישה כרכים.',
+          en: 'His Torah teachings, recorded by his Chassidim and collected by Rabbi Aharon Ringel, in six volumes.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'הילד הבוכה',
+          en: 'The crying child',
+        },
+        text: {
+          he: 'מסופר שבימים הנוראים בבעלזא עמד ילד קטן בתוך הקהל ובכה. אחד המתפללים חשש שנדחק, ושאל אותו מדוע הוא בוכה. הילד, אהרן הצעיר, ענה שהוא בוכה מפני שכולם בוכים. האיש אמר לו שאין לו עוונות לבכות עליהם, והילד השיב: גם סבי בוכה, ואין לו עוונות.',
+          en: 'It is told that during the Days of Awe in Belz a small boy stood crying in the crowd. A worshipper feared he had been crushed and asked why he was crying. The boy, young Aharon, said he was crying because everyone was crying. The man told him he had no sins to weep for, and the boy replied: my grandfather is crying too, and he has no sins.',
+        },
+        source:
+          'Vos Iz Neias, Rav Aharon Rokeach of Belz on His Yahrtzeit, 4 August 2026 (https://vinnews.com/2026/08/04/rav-aharon-rokeach-of-belz-ztl-on-his-yahrtzeit-21-av/)',
+      },
+      {
+        title: {
+          he: 'על מה חשב הרבי',
+          en: 'What the Rebbe was thinking',
+        },
+        text: {
+          he: 'רבי משה וועבער, מחסידי בעלזא, סיפר שפעם חלה הרבי והוזעק אליו רופא. הרופא ראה שהרבי שקוע כל העת במחשבות, ושאל אותו על מה הוא חושב. הרבי השיב: ״אני חושב טוב על יהודים״.',
+          en: "Rabbi Moshe Weber, a Belz Chassid, recounted that once, when the Rebbe fell ill, a doctor was called to him. Seeing the Rebbe constantly deep in thought, the doctor asked what he was thinking about. The Rebbe answered: 'I am thinking good thoughts about Jews.'",
+        },
+        source: 'JDN, Hilula Kadisha: Rabbi Aharon of Belz, 21 Av 5786 (https://www.jdn.co.il/beit_hamidrash/1809363/)',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית העלמין הר המנוחות, ירושלים, בחלקת גדולי הרבנים, סמוך לקבר רבי משה פיינשטיין',
+        en: 'Har HaMenuchot cemetery, Jerusalem, in the section of leading rabbis, beside the grave of Rabbi Moshe Feinstein',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      noLinkReason: null,
+      query: 'בית העלמין הר המנוחות',
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/אהרן_רוקח',
+      'https://en.wikipedia.org/wiki/Aharon_Rokeach',
+      'https://www.jdn.co.il/beit_hamidrash/1809363/',
+      'https://vinnews.com/2026/08/04/rav-aharon-rokeach-of-belz-ztl-on-his-yahrtzeit-21-av/',
+      'https://www.kikar.co.il/hasidism/121871',
+    ],
+  },
+  brisker_rav: {
+    bio: {
+      he: 'רבי יצחק זאב הלוי סולובייצ׳יק, הגרי״ז או הבריסקר רב, נולד בוולוז׳ין בשנת תרמ״ז, בנו של רבי חיים מבריסק. אחרי פטירת אביו בשנת תרע״ח נעשה רבה של בריסק. בפרוץ מלחמת העולם השנייה נמלט לווילנה, ובשנת תש״א הגיע לירושלים; רעייתו ושלושה מילדיו נרצחו בשואה. בירושלים לימד תלמידים בביתו והעמיד מחדש את ישיבת בריסק, ונודע בדקדוקו במצוות. נפטר בערב יום הכיפורים, ט׳ בתשרי תש״ך, ונקבר בהר המנוחות.',
+      en: 'Rabbi Yitzchak Zev Soloveitchik, the Brisker Rav, was born in Volozhin in 1886, son of Reb Chaim of Brisk, whom he succeeded as its rabbi in 1918. In World War II he fled to Vilna, reaching Jerusalem in 1941; his wife and three of his children were murdered in the Holocaust. There he re-established the Brisk yeshiva and was known for exactness in mitzvot. He died on erev Yom Kippur, 9 Tishrei 5720 (1959), and is buried on Har HaMenuchot.',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'מצווה בשלמותה',
+          en: 'A mitzvah done completely',
+        },
+        text: {
+          he: 'הגרי״ז נודע בהקפדתו לקיים מצוות כך שיצא ידי כל הדעות במחלוקת הפוסקים. מכאן שמצווה ראויה להיעשות בשלמות, בזהירות ובדקדוק בכל פרט.',
+          en: 'The Brisker Rav was known for performing mitzvot so as to satisfy every opinion in a halachic dispute. A mitzvah deserves to be done completely, with care for every detail.',
+        },
+      },
+      {
+        title: {
+          he: 'ללמוד מתוך הספר',
+          en: 'Reading from the book itself',
+        },
+        text: {
+          he: 'כשאמר דברי תורה לא ציטט מזיכרונו, אלא קרא כל מקור מתוך הספר עצמו. דיוק בלשון המקור הוא חלק מהנאמנות לתורה.',
+          en: "When he taught, he did not quote from memory but read every source from the original book. Precision in a source's wording is part of faithfulness to the Torah.",
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'חדושי מרן רי״ז הלוי',
+          en: 'Chiddushei Maran Riz HaLevi',
+        },
+        about: {
+          he: 'חידושיו לפי סדר משנה תורה לרמב״ם, שבניו הדפיסו בירושלים אחרי פטירתו.',
+          en: "His insights arranged by the order of Maimonides' Mishneh Torah, printed by his sons in Jerusalem after his death.",
+        },
+      },
+      {
+        title: {
+          he: 'חדושי מרן רי״ז הלוי על התורה',
+          en: 'Chiddushei Maran Riz HaLevi on the Torah',
+        },
+        about: {
+          he: 'חידושיו על חמשת חומשי התורה.',
+          en: 'His insights on the Five Books of the Torah.',
+        },
+      },
+      {
+        title: {
+          he: 'חידושי הגרי״ז (סטנסיל)',
+          en: 'Chiddushei HaGriz (the stencil)',
+        },
+        about: {
+          he: 'חידושיו על מסכתות סדר קדשים, שתלמידיו הדפיסו במכונת כתיבה והפיצו כסטנסיל.',
+          en: 'His insights on tractates of Seder Kodashim, typed by his students and circulated as a stencil.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'דג במים ובמלח',
+          en: 'Fish in water and salt',
+        },
+        text: {
+          he: 'את ימיו הראשונים בארץ ישראל עשה הבריסקר רב בחיפה. שק הקמח שהביא עמו מטורקיה אזל, וכשמארחיו שאלו מה להגיש לו, ביקש דג מבושל במים ובמלח בלבד. ״שמן צריך תרומות ומעשרות,״ הסביר, ולכן אין להוסיף דבר מלבד מלח ומים.',
+          en: "The Brisker Rav spent his first days in the Land of Israel in Haifa. The sack of flour he had brought from Turkey ran out, and when his hosts asked what to serve him, he asked only for fish cooked in water and salt. 'Oil requires terumot and maasrot,' he explained, so nothing should be added but salt and water.",
+        },
+        source:
+          "Yated Ne'eman staff, Stories about the Brisker Rov, Sixty Years Since his Petiroh, Dei'ah veDibur, Succos 5780 (https://chareidi.org/archives5780/succos/abriskerrovscs80.htm)",
+      },
+      {
+        title: {
+          he: 'בשעת כל נדרי',
+          en: 'As Kol Nidrei began',
+        },
+        text: {
+          he: 'לפני ראש השנה תש״ך אמר הבריסקר רב לתלמידיו שלהיות כאן ביום הכיפורים הוא מותרות. בערב יום הכיפורים, סמוך לשקיעה, כשהמניין בחדר הסמוך החל לומר כל נדרי, נפטר. הידיעה עברה בבתי הכנסת של ירושלים במהלך היום הקדוש, ואחרי יום הכיפורים נקבר בהר המנוחות.',
+          en: 'Before Rosh Hashanah 5720 the Brisker Rav told his students that being here for Yom Kippur would be a luxury. On erev Yom Kippur, just before sunset, as the minyan in the next room began Kol Nidrei, he passed away. The news spread through the synagogues of Jerusalem during the holy day, and after Yom Kippur he was buried on Har HaMenuchot.',
+        },
+        source:
+          "Mishpacha, For the Record, issue 1032, 9 October 2024 (https://mishpacha.com/?p=185118); the date and erev Yom Kippur also in Hebrew Wikipedia, 'יצחק זאב סולובייצ׳יק' (https://he.wikipedia.org/wiki/יצחק_זאב_סולובייצ'יק)",
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית העלמין הר המנוחות, ירושלים',
+        en: 'Har HaMenuchot cemetery, Jerusalem',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      noLinkReason: null,
+      query: 'בית העלמין הר המנוחות',
+    },
+    sources: [
+      "https://he.wikipedia.org/wiki/יצחק_זאב_סולובייצ'יק",
+      'https://en.wikipedia.org/wiki/Yitzchok_Zev_Soloveitchik',
+      'https://chareidi.org/archives5780/succos/abriskerrovscs80.htm',
+      'https://mishpacha.com/?p=185118',
+      'https://tzadikim.dailyzohar.com/rabbi-yitzchok-zev-halevi-soloveitchik-1180',
+      'https://he.wikipedia.org/wiki/חדושי_מרן_רי%22ז_הלוי',
+      'https://amimagazine.org/2019/10/10/an-astounding-relationship/',
+    ],
+  },
   satmar_rebbe: {
     bio: {
       he: 'רבי יואל טייטלבוים (תרמ״ז–תשל״ט, 1887–1979) נולד בעיר סיגט, אז בממלכת הונגריה וכיום ברומניה. כיהן כרב בכמה קהילות בהונגריה, ומשנת 1934 כרבה של העיר סאטמר. בשואה ניצל דרך מחנה ברגן-בלזן לשווייץ, ובשנת 1946 השתקע בשכונת ויליאמסבורג בברוקלין. שם בנה מחדש את חסידות סאטמר מקבוצה קטנה של פליטים לאחת הקהילות החסידיות הגדולות בעולם, עם מוסדות חינוך וצדקה ועם הכפר קרית יואל, שנקרא על שמו. נפטר בכ״ו באב תשל״ט.',
@@ -4743,6 +6151,197 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://shemayisrael.com/publicat/hazon/tzedaka/Tales_of_Tzedakah-6.html',
       'https://www.theyeshivaworld.com/news/general/1570521/tombstones-knocked-over-in-kiryas-yoel-as-thousands-visit-kever-of-satmar-rebbe-zatzal-on-yartzheit.html',
       'https://www.openstreetmap.org/node/10025875343',
+    ],
+  },
+  tzvi_yehuda_kook: {
+    bio: {
+      he: 'הרב צבי יהודה הכהן קוק, הרצי״ה (תרנ״א–תשמ״ב, 1891–1982), בנו של הרב אברהם יצחק הכהן קוק, נולד בליטא ועלה לארץ עם משפחתו בשנת 1904. משנת 1923 לימד אמונה ותנ״ך בישיבת מרכז הרב בירושלים, ומשנת 1952 עמד בראשה כשלושים שנה. שנים רבות ערך והוציא לאור את כתבי אביו, ובהם ״אורות״ ו״אורות התשובה״. אחרי פטירת רעייתו חי בגפו כארבעים שנה. נפטר בפורים, י״ד באדר תשמ״ב.',
+      en: "Rabbi Tzvi Yehuda HaKohen Kook, the Ratziyah (1891–1982), son of Rabbi Avraham Yitzchak Kook, was born in Lithuania and came to the Land of Israel with his family in 1904. From 1923 he taught faith and Tanach at Merkaz HaRav in Jerusalem, and from 1952 headed the yeshiva for some thirty years. For decades he edited and published his father's writings, including Orot and Orot HaTeshuvah. Widowed, he lived alone about forty years. He died on Purim, 14 Adar 5742.",
+    },
+    lessons: [
+      {
+        title: {
+          he: 'אהבת כל יהודי',
+          en: 'Love for every Jew',
+        },
+        text: {
+          he: 'לימד את תלמידיו לאהוב כל יהודי, חילוני או חרדי. אהבת הבריות, אמר, יש לה ערך בפני עצמה, ולא רק כאמצעי לקרב אנשים לתורה.',
+          en: 'He taught his students to love every Jew, secular or Haredi. Love of people, he said, has worth of its own, not only as a means of drawing them closer to Torah.',
+        },
+      },
+      {
+        title: {
+          he: 'כבוד לתורת רבו',
+          en: "Reverence for his teacher's words",
+        },
+        text: {
+          he: 'מתוך יראת כבוד לכתבי אביו ורבו, נהג לעתים קרובות לקרוא אותם לפני תלמידיו בלי להוסיף פירוש משלו, והקדיש שנים רבות לעריכתם ולהוצאתם לאור.',
+          en: 'Out of awe for the writings of his father and teacher, he often simply read them aloud to his students without adding a commentary of his own, and gave many years to editing and publishing them.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'לנתיבות ישראל',
+          en: 'LeNetivot Yisrael',
+        },
+        about: {
+          he: 'מאמריו, בשני כרכים.',
+          en: 'His essays, in two volumes.',
+        },
+      },
+      {
+        title: {
+          he: 'שיחות הרב צבי יהודה',
+          en: 'Sichot HaRav Tzvi Yehuda',
+        },
+        about: {
+          he: 'שיחותיו, כפי שנרשמו בידי תלמידיו.',
+          en: 'His talks, as recorded by his students.',
+        },
+      },
+      {
+        title: {
+          he: 'מתוך התורה הגואלת',
+          en: 'MiToch HaTorah HaGoelet',
+        },
+        about: {
+          he: 'סדרה של שיחותיו, שכתב מפיו תלמידו הרב חיים אביהו שוורץ.',
+          en: 'A series of his talks, written down from his words by his student Rabbi Chaim Avihu Schwartz.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'שיעור לתלמיד אחד',
+          en: 'A lesson for one student',
+        },
+        text: {
+          he: 'הרב דוד סמסון, מתלמידיו, חלה ביומו הראשון בישיבה ולא הגיע לשיעור הפתיחה. כשחזר ושאל על השיעור אחרי תפילת שחרית, שאל אותו ראש הישיבה קודם כול לשלומו, ואחר כך ישב עמו לבדו כשעה וחזר על השיעור כולו, בזמן שתלמידים אחרים חיכו.',
+          en: 'Rabbi David Samson, one of his students, fell ill on his first day at the yeshiva and missed the opening lecture. When he returned and asked about it after the morning prayers, the rosh yeshiva first asked about his health, then sat with him alone for nearly an hour and went over the whole lesson while other students waited.',
+        },
+        source:
+          'Israel National News, interview with Rabbi David Samson by Tzvi Fishman (https://www.israelnationalnews.com/news/385643)',
+      },
+      {
+        title: {
+          he: 'ספרים בלי שער',
+          en: 'Books without title pages',
+        },
+        text: {
+          he: 'הרב צבי יהודה נודע בזיכרונו: כששאלו אותו על מקור, ציין אותו במדויק ותיקן ציטוטים שגויים. לפי תלמידו הרב אליעזר מלמד, אחרי מלחמת העולם השנייה הביאו לו ספרנים ספרים ששעריהם חסרו, ופעמים רבות זיהה מזיכרונו את שם הספר ואת מחברו.',
+          en: 'Rabbi Tzvi Yehuda was known for his memory: asked for a source, he gave it exactly and corrected misquotations. According to his student Rabbi Eliezer Melamed, after World War II librarians brought him books whose title pages were missing, and many times he identified the title and the author from memory.',
+        },
+        source:
+          "Rabbi Eliezer Melamed, Revivim, 'Rabbi Tzvi Yehuda – The Generation's Educator' (https://en.yhb.org.il/revivim982/)",
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית הקברות בהר הזיתים, ירושלים, לצד קבר אביו; הביקור דורש תיאום ביטחוני או ליווי',
+        en: 'Mount of Olives cemetery, Jerusalem, beside his father; a visit needs security coordination or an escort',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      noLinkReason: null,
+      query: 'בית הקברות הר הזיתים',
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/צבי_יהודה_קוק',
+      'https://www.inn.co.il/news/539279',
+      'https://machonmeir.net/?p=213856',
+      'https://www.israelnationalnews.com/news/385643',
+      'https://en.yhb.org.il/revivim982/',
+      'https://www.inn.co.il/news/602560',
+    ],
+  },
+  baba_meir: {
+    bio: {
+      he: 'רבי מאיר אבוחצירא, המכונה ״בבא מאיר״ (תרע״ז–תשמ״ג, 1917–1983), בנו הבכור של הבבא סאלי ונינו של רבי יעקב אבוחצירא, נולד בחבל תאפילאלת שבמרוקו. נודע כעילוי, ולפי המסופר שלט בתלמוד הבבלי כולו בעל פה. כיהן כרב העיר מידלת ועמד בראש ישיבה בה, ולאחר מכן כרב העיר ארפוד. בשנת תשכ״ה עלה לארץ ישראל, ואחרי תקופה ביבנה התיישב באשדוד, ורבים באו לבקש את ברכתו ועצתו. נפטר בחול המועד פסח, בי״ז בניסן תשמ״ג, פחות משנה לפני אביו.',
+      en: 'Rabbi Meir Abuhatzeira, Baba Meir (1917–1983), eldest son of the Baba Sali and great-grandson of Rabbi Yaakov Abuhatzeira, was born in Tafilalt, Morocco. A prodigy, he reportedly knew the whole Babylonian Talmud by heart. He was rabbi of Midelt, heading a yeshiva there, then of Erfoud. In 1965 he moved to Israel: Yavne, then Ashdod, where many sought his blessing and counsel. He died on Chol HaMoed Pesach, 17 Nisan 5743 (1983), less than a year before his father.',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'שמירת העיניים והפה',
+          en: 'Guarding eyes and mouth',
+        },
+        text: {
+          he: 'כשנשאל איך מגיעים למדרגה גבוהה, הצביע על עינו ואחר כך על פיו ואמר: ״עין, פה, צדיק״. מי ששומר את עיניו ממראות אסורים ואת פיו מדיבור רע, מתעלה.',
+          en: "Asked how one reaches a high level, he pointed to his eye, then to his mouth, and said: 'Eye, mouth, tzaddik.' One who guards his eyes from forbidden sights and his mouth from bad speech rises higher.",
+        },
+      },
+      {
+        title: {
+          he: 'ענווה פותחת ברכה',
+          en: 'Humility opens blessing',
+        },
+        text: {
+          he: 'לאדם שהיה נשוי ארבע עשרה שנה בלי ילדים אמר לעבוד על מידת הענווה, ורמז לפסוק ״שבשפלנו זכר לנו״. לפי המסופר, כעבור תשעה חודשים נולד לו בן. מי שמקטין את עצמו מפנה מקום לברכה.',
+          en: "He told a man childless after fourteen years of marriage to work on humility, citing 'who remembered us in our lowliness.' As the story goes, a son was born nine months later. Making oneself small leaves room for blessing.",
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'יגל יעקב',
+          en: 'Yagel Yaakov',
+        },
+        about: {
+          he: 'קובץ פיוטי משפחת אבוחצירא, ובו עשרות שירים שחיבר, שחלקם נפוצים בקהילות יוצאי מרוקו.',
+          en: 'The Abuhatzeira family collection of liturgical poems, including dozens he wrote, some popular among Moroccan communities.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: '״יהיו לו ילדים״',
+          en: '"He will have children"',
+        },
+        text: {
+          he: 'מסופר שבחור ישיבה מירושלים שמע מהרופאים שלא יוכל להוליד ילדים, ולכן סירב לכל הצעת שידוך. רבו, הרב יהודה צדקה, שלח אותו אל רבי מאיר. עוד לפני שהספיק הבחור לומר מדוע בא, ברך אותו רבי מאיר שיזכה לילדים. למחרת אמר רבי מאיר לרב צדקה בקצרה: ״יהיו לו ילדים״. לפי המסופר, הבחור נישא וזכה לצאצאים.',
+          en: "It is told that a Jerusalem yeshiva student, told by doctors he could never have children, turned down every match. His teacher, Rabbi Yehuda Tzadka, sent him to Rabbi Meir. Before the young man could say why he had come, Rabbi Meir blessed him with children. The next day Rabbi Meir told Rabbi Tzadka briefly: 'He will have children.' As the story goes, the student married and had a family.",
+        },
+        source:
+          'Abir Yaakov institutions, https://abir-yaakov.org.il/rabbi-meir-abuchatzira/ ; JDN, Hilula Kadisha, 16 Nisan 5786, https://www.jdn.co.il/beit_hamidrash/1942164/',
+      },
+      {
+        title: {
+          he: 'הנבחן שנמצא בוחן',
+          en: 'The examinee who examined',
+        },
+        text: {
+          he: 'בהיותו כבן עשרים נסע רבי מאיר לבית הדין הגדול ברבאט כדי להיבחן לדיינות. אחרי המבחן כתב אב בית הדין לאביו, הבבא סאלי, שבנו הצעיר ״בא להיבחן ונמצא בוחן״. המכתב שמור עד היום בידי המשפחה.',
+          en: "At about twenty Rabbi Meir travelled to the Great Rabbinical Court in Rabat to be examined as a judge. Afterwards the head of the court wrote to his father, the Baba Sali, that his young son 'came to be examined and was found an examiner.' The family keeps the letter to this day.",
+        },
+        source: 'Hebrew Wikipedia, https://he.wikipedia.org/wiki/מאיר_אבוחצירא',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית הקברות בהר הזיתים, ירושלים; הביקור דורש תיאום ביטחוני או ליווי. סעודת ההילולה נערכת בבית המדרש ״משכיל לדוד״ שייסד באשדוד',
+        en: 'Mount of Olives cemetery, Jerusalem; a visit needs security coordination or an escort. A hilula meal is held at the Maskil LeDavid study hall he founded in Ashdod',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      noLinkReason: null,
+      query: 'בית הקברות הר הזיתים',
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/מאיר_אבוחצירא',
+      'https://abir-yaakov.org.il/rabbi-meir-abuchatzira/',
+      'https://www.jdn.co.il/beit_hamidrash/1942164/',
+      'https://www.jdn.co.il/gallery/2391595/',
+      'https://www.torah-box.net/jewish-ethics-and-learning/our-sages/yahrzeit-of-rabbi-meir-abihssira-his-life_1526.html',
+      'https://en.wikipedia.org/wiki/Abuhatzeira',
     ],
   },
   baba_sali: {
@@ -5046,6 +6645,90 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       "https://www.chareidi.org/archives5786/zav/fr'mosh4zav86.htm",
     ],
   },
+  yehuda_tzadka: {
+    bio: {
+      he: 'הרב יהודה צדקה נולד בירושלים בשנת תר״ע (1910), נכד לאחותו של הבן איש חי, ולמד בתלמוד תורה בני ציון ובישיבת פורת יוסף אצל רבי עזרא עטיה. בשנת 1937 החל למסור בה שיעורים, ומשנת 1970 עמד בראשה עשרים ואחת שנה, לצד הרב בן ציון אבא שאול. בין תלמידיו הרבים היה בן אחותו, הרב מרדכי אליהו. היה ממייסדי רשת מעיין החינוך התורני, וחיבר את ״קול יהודה״. נפטר בי״ב בחשוון תשנ״ב.',
+      en: "Rabbi Yehuda Tzadka was born in Jerusalem in 1910, a grandson of the Ben Ish Chai's sister, and studied at Talmud Torah Bnei Zion and at the Porat Yosef yeshiva under Rabbi Ezra Attia. He taught there from 1937 and headed it from 1970 for twenty-one years, alongside Rabbi Ben Zion Abba Shaul. His many students included his nephew, Rabbi Mordechai Eliyahu. He co-founded the Maayan HaChinuch HaTorani network and wrote Kol Yehuda. He died on 12 Cheshvan 5752 (1991).",
+    },
+    lessons: [
+      {
+        title: {
+          he: 'השיעור קודם',
+          en: 'The lesson comes first',
+        },
+        text: {
+          he: 'בשיעוריו בישיבה נטה לקצר במילים, וגם כשחלה ונזקק ללכת לרופא, חזר לישיבה כדי למסור את השיעור. מחויבות של מורה לתלמידיו אינה נדחית מפני הנוחות.',
+          en: "His classes at the yeshiva were sparing in words, and even when ill and needing a doctor, he returned to give his class. A teacher's commitment to his students does not yield to comfort.",
+        },
+      },
+      {
+        title: {
+          he: 'לצאת אל הציבור',
+          en: 'Going out to the public',
+        },
+        text: {
+          he: 'בצעירותו סייר עם חבריו במעברות העולים החדשים ודיבר אל לבם לשמור על המצוות והמסורת. בכל נסיעה, בעיקר לפריפריה, חיפש מראש בית כנסת שבו יוכל לדרוש ולחזק.',
+          en: 'As a young man he toured the immigrant transit camps with colleagues, urging residents to keep the mitzvot and their traditions. Whenever he traveled, especially to outlying towns, he first looked for a synagogue where he could speak and encourage.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'קול יהודה',
+          en: 'Kol Yehuda',
+        },
+        about: {
+          he: 'דרושים על פרשיות השבוע, חידושים על הש״ס ומאמרים.',
+          en: 'Sermons on the weekly Torah portions, insights on the Talmud and essays.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'מבחן בגיל שבעים',
+          en: 'An exam at seventy',
+        },
+        text: {
+          he: 'כשהיה כבן שבעים החליט הרב צדקה להיבחן על לימודו במסגרת מפעל הש״ס, שהקים האדמו״ר מצאנז. לתלמידו הרב יעקב תופיק אביעזרי אמר אז, שללמוד שבעים דף גמרא בחודש אינו גדלות, אך להיבחן עליהם זו מעלה מיוחדת.',
+          en: 'At about seventy, Rabbi Tzadka decided to sit for exams in the Mifal HaShas program founded by the Rebbe of Sanz. He told his student, Rabbi Yaakov Tufik Aviezri, that learning seventy pages of Gemara a month is no great feat, but being tested on them is a special merit.',
+        },
+        source:
+          'Rabbi Yaakov Tufik Aviezri, interview in Magazin HaKehilot 26 (5782), p. 4, as cited by Hebrew Wikipedia, יהודה צדקה (https://he.wikipedia.org/wiki/יהודה_צדקה)',
+      },
+      {
+        title: {
+          he: 'משל הרגל השבורה',
+          en: 'The parable of the broken leg',
+        },
+        text: {
+          he: 'אדם שאל את הרב צדקה מדוע מי שחילל שבת בשוגג צריך להתענות, הרי לא התכוון. השיב לו הרב במשל: מי שנפל מגג ושבר את רגלו, והרופא שם לו גבס וציווה עליו לנוח חודשיים, אינו יכול לטעון שהרופא אכזר כלפיו, אף שלא שבר את רגלו בכוונה.',
+          en: 'A man asked Rabbi Tzadka why someone who broke Shabbat by accident must fast, when he meant no wrong. The rabbi answered with a parable: a man who fell from a roof and broke his leg is put in a cast and told to rest for two months. He cannot call the doctor cruel, even though he did not break his leg on purpose.',
+        },
+        source:
+          'Betzalel Chaim and Kobi Rozen, Kikar HaShabbat, 20 October 2018 (https://www.kikar.co.il/yeshiva-world/294008)',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית הקברות סנהדריה, ירושלים',
+        en: 'Sanhedria cemetery, Jerusalem',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      noLinkReason: null,
+      query: 'בית הקברות סנהדריה',
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/יהודה_צדקה',
+      'https://www.kikar.co.il/yeshiva-world/294008',
+      'https://www.jdn.co.il/beit_hamidrash/1852084/',
+      'https://he.wikipedia.org/wiki/בית_הקברות_סנהדריה',
+    ],
+  },
   lubavitcher_rebbe: {
     bio: {
       he: 'רבי מנחם מנדל שניאורסון (תרס״ב–תשנ״ד, 1902–1994), הרבי השביעי של חסידות חב״ד, נולד בניקולאייב שבאוקראינה. למד באוניברסיטאות בברלין ובפריז, ובשנת 1941 הגיע לניו יורק. אחרי פטירת חותנו, הרבי הקודם, קיבל עליו בשנת 1951 את הנהגת החסידות. שלח שלוחים לקהילות ברחבי העולם, יזם ״מבצעי מצוות״ כמו הנחת תפילין והדלקת נרות שבת, ונודע באהבתו לכל יהודי. נפטר בג׳ בתמוז תשנ״ד ונקבר בקווינס שבניו יורק, ליד חותנו.',
@@ -5162,6 +6845,103 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://www.openstreetmap.org/node/2301631125',
     ],
   },
+  klausenberger_rebbe: {
+    bio: {
+      he: 'רבי יקותיאל יהודה הלברשטאם, האדמו״ר מצאנז-קלויזנבורג, נולד ברודניק שבגליציה בשנת ה׳תרס״ה, מצאצאי רבי חיים מצאנז. כיהן כרב הקהילה החסידית בקלויזנבורג ועמד בראש ישיבתה. בשואה איבד את אשתו ואת אחד עשר ילדיו, והוא שרד את אושוויץ ואת צעדת המוות. אחרי המלחמה הקים ישיבות במחנות העקורים ובארצות הברית, ייסד את קריית צאנז בנתניה ואת בית החולים לניאדו. נפטר בט׳ בתמוז תשנ״ד.',
+      en: 'Rabbi Yekusiel Yehuda Halberstam, the Klausenberger Rebbe, was born in Rudnik, Galicia, in 1905, a descendant of Rabbi Chaim of Sanz. He served as rabbi of the Chassidic community of Klausenburg and headed its yeshiva. In the Holocaust he lost his wife and eleven children, and survived Auschwitz and a death march. After the war he founded yeshivas in the DP camps and in America, then Kiryat Sanz in Netanya and Laniado Hospital. He died on 9 Tammuz 5754 (1994).',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'לבנות אחרי החורבן',
+          en: 'Rebuilding after destruction',
+        },
+        text: {
+          he: 'מיד אחרי השחרור, כשנודע לו שמשפחתו נרצחה, חיזק את הניצולים במחנה העקורים והקים בו ישיבות ומוסדות. גם אחרי אובדן נורא אפשר לקום ולבנות למען אחרים.',
+          en: 'Right after liberation, having learned that his family was murdered, he encouraged fellow survivors in the DP camp and founded yeshivas and institutions there. Even after terrible loss, one can rise and build for others.',
+        },
+      },
+      {
+        title: {
+          he: 'בלי תארים',
+          en: 'Without titles',
+        },
+        text: {
+          he: 'לפי בקשתו, לא נחקקו תארי כבוד על מצבתו. מי שבנה קהילות, ישיבות ובית חולים לא ביקש שבח באבן, ומעשיו מדברים בעדו.',
+          en: 'At his request, no titles of honor were carved on his tombstone. A man who built communities, yeshivas and a hospital asked for no praise in stone; his deeds speak for him.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'שפע חיים',
+          en: 'Shefa Chaim',
+        },
+        about: {
+          he: 'סדרת ספרים ובה דברי תורתו ושיחותיו, שעל שמה הוא מכונה.',
+          en: 'A series of volumes of his Torah teachings and talks, after which he is called.',
+        },
+      },
+      {
+        title: {
+          he: 'דברי יציב',
+          en: 'Divrei Yatziv',
+        },
+        about: {
+          he: 'שאלות ותשובות בהלכה.',
+          en: 'Responsa on Jewish law.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'הנדר בצעדת המוות',
+          en: 'The vow on the death march',
+        },
+        text: {
+          he: 'מסופר שבצעדת המוות נפצע מירייה, ועצר את הדימום בתחבושת שאילתר מעלים וענפים. אז נדר שאם ינצל, יקים בית חולים. בשנת תשל״ה נפתח הבניין הראשון של בית החולים לניאדו בקריית צאנז בנתניה, בית חולים הפועל על פי ההלכה.',
+          en: 'It is told that on the death march he was shot, and stopped the bleeding with a bandage improvised from leaves and branches. He then vowed that if he survived, he would build a hospital. In 1975 the first building of Laniado Hospital opened in Kiryat Sanz, Netanya, a hospital run according to Jewish law.',
+        },
+        source:
+          'Accidental Talmudist, He Rose from the Ashes to Build a House of Healing, 2017 (https://www.accidentaltalmudist.org/heroes/2017/12/06/he-rose-from-the-ashes-to-build-a-house-of-healing/); Laniado Hospital UK, About (https://laniado.co.uk/about); Wikipedia, Yekusiel Yehudah Halberstam (https://en.wikipedia.org/wiki/Yekusiel_Yehudah_Halberstam)',
+      },
+      {
+        title: {
+          he: 'המזרק היקר',
+          en: 'The costlier syringe',
+        },
+        text: {
+          he: 'מסופר שבבית החולים התלבטו אם לקנות מזרקים זולים או מזרקים יקרים יותר, הגורמים פחות כאב. הרבי הורה לקנות את היקרים, ואמר שאין מחיר יקר מדי כדי להקל על סבלו של יהודי.',
+          en: "It is told that the hospital's staff debated whether to buy cheap syringes or costlier ones that cause less pain. The Rebbe told them to buy the costlier ones, saying that no price is too high to ease a Jew's suffering.",
+        },
+        source:
+          'JDN, Hilula of the Rebbe of Sanz-Klausenburg, 8 Tammuz 5785 (https://www.jdn.co.il/beit_hamidrash/1990165/)',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית העלמין שיכון ותיקים, נתניה',
+        en: 'Shikun Vatikim cemetery, Netanya',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      noLinkReason: null,
+      query: 'בית עלמין נתניה שיכון ותיקים',
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/יקותיאל_יהודה_הלברשטאם',
+      'https://en.wikipedia.org/wiki/Yekusiel_Yehudah_Halberstam',
+      'https://www.jdn.co.il/beit_hamidrash/1990165/',
+      'https://www.jdn.co.il/?p=2235628',
+      'https://www.accidentaltalmudist.org/heroes/2017/12/06/he-rose-from-the-ashes-to-build-a-house-of-healing/',
+      'https://laniado.co.uk/about',
+      'https://www.openstreetmap.org/way/26629454',
+    ],
+  },
   shlomo_zalman_auerbach: {
     bio: {
       he: 'רבי שלמה זלמן אויערבך (תר״ע–תשנ״ה, 1910–1995) נולד בשכונת שערי חסד בירושלים. כבר בצעירותו חיבר את ״מאורי אש״, מהספרים הראשונים שעסקו בשימוש בחשמל בשבת. במשך עשרות שנים עמד בראש ישיבת ״קול תורה״ בירושלים, ונחשב לאחד מגדולי פוסקי ההלכה בדורו, בייחוד בשאלות של רפואה וטכנולוגיה. נודע בענוותנותו ובמאור פניו לכל אדם. נפטר בכ׳ באדר א׳ תשנ״ה, ובהלווייתו השתתפו מאות אלפים.',
@@ -5267,6 +7047,118 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://he.wikipedia.org/wiki/הר_המנוחות',
     ],
   },
+  ben_zion_abba_shaul: {
+    bio: {
+      he: 'הרב בן ציון אבא שאול נולד בירושלים בכ״ט בתמוז תרפ״ד (1924), לאב שעלה מהעיר לאר שבפרס. מגיל 11 למד בישיבת פורת יוסף אצל רבי עזרא עטיה, ונודע כעילוי עמקן. לימים עמד בראש הישיבה לצד הרב יהודה צדקה, מסר בה שיעורים יומיים ארוכים ופסק הלכה לרבים. בסוף ימיו ייסד עם בנו את ישיבת אור לציון. חיבר את ספרי ״אור לציון״. נפטר בי״ט בתמוז תשנ״ח.',
+      en: 'Rabbi Ben Zion Abba Shaul was born in Jerusalem in 1924 to a father from Lar in Persia. From age 11 he studied at the Porat Yosef yeshiva under Rabbi Ezra Attia and was known as a profound prodigy. He later headed it with Rabbi Yehuda Tzadka, giving long daily lessons and ruling for many. Late in life he and his son founded the Ohr LeTzion yeshiva; his books share its name. He died on 19 Tammuz 5758 (1998).',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'להבין כל מילה',
+          en: 'Understanding every word',
+        },
+        text: {
+          he: 'לימודו היה עמקני: התעכב להבין כל מילה בסוגיית הגמרא שלמד, דרך שקיבל מרבו רבי עזרא עטיה. לימוד אמיתי נמדד בעומק ההבנה, לא במספר הדפים.',
+          en: 'His learning was deep: he paused to understand every word of the Gemara passage before him, a method he received from his teacher, Rabbi Ezra Attia. True learning is measured by depth of understanding, not by pages covered.',
+        },
+      },
+      {
+        title: {
+          he: 'שמחה בתוך הייסורים',
+          en: 'Joy amid suffering',
+        },
+        text: {
+          he: 'רוב ימיו סבל ממחלות קשות, ובשנת תשמ״ג לקה באירוע מוחי, ובכל זאת קיבל כל אדם בסבר פנים יפות ונודע בשמחתו. מצבו של אדם אינו חייב לקבוע את יחסו לאחרים.',
+          en: "He suffered serious illnesses for much of his life and had a stroke in 1983, yet he greeted everyone warmly and was known for his cheerfulness. A person's condition need not decide how he treats others.",
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'שו״ת אור לציון',
+          en: 'Ohr LeTzion Responsa',
+        },
+        about: {
+          he: 'שאלות ותשובות בהלכה בכמה כרכים: הראשון על ארבעת חלקי השולחן ערוך, והבאים בעיקר באורח חיים.',
+          en: 'Halachic responsa in several volumes: the first on all four parts of the Shulchan Aruch, the later ones mostly on Orach Chaim.',
+        },
+      },
+      {
+        title: {
+          he: 'אור לציון על הש״ס',
+          en: 'Ohr LeTzion on the Talmud',
+        },
+        about: {
+          he: 'חידושים על מסכתות יבמות, כתובות, קידושין ומכות.',
+          en: 'Insights on the tractates Yevamot, Ketubot, Kiddushin and Makkot.',
+        },
+      },
+      {
+        title: {
+          he: 'אור לציון שביעית',
+          en: "Ohr LeTzion Shevi'it",
+        },
+        about: {
+          he: 'שאלות ותשובות בענייני שמיטה וביאורים למשניות מסכת שביעית.',
+          en: "Responsa on the Sabbatical year and explanations of the Mishnah of tractate Shevi'it.",
+        },
+      },
+      {
+        title: {
+          he: 'אור לציון חכמה ומוסר',
+          en: 'Ohr LeTzion Chochmah UMussar',
+        },
+        about: {
+          he: 'דברי מוסר והשקפה לבחורי הישיבה.',
+          en: 'Words of ethics and outlook for yeshiva students.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'שיעור שאינו למכירה',
+          en: 'A lesson not for sale',
+        },
+        text: {
+          he: 'תלמידיו הציעו לו פעם לשבות עמם במירון, אך הוא סירב, משום שבשבת מסר שיעור קבוע. כשהציעו שימנה מישהו במקומו, השיב במשל: אדם שזכה במיליון דולר בפיס אינו שולח שליח לקבל את הזכייה. כך הרגיש במסירת השיעור, ולא היה מוכן למסור אותה לאחר.',
+          en: 'His students once suggested he spend Shabbat with them in Meron, but he declined, because he gave a fixed lesson on Shabbat. When they proposed a substitute, he answered with a parable: a man who wins a million dollars in the lottery does not send a messenger to collect it. Giving the lesson felt to him like that prize, and he would not hand it to another.',
+        },
+        source: 'JDN, 3 July 2026 (https://www.jdn.co.il/beit_hamidrash/1996448/)',
+      },
+      {
+        title: {
+          he: 'רש״י יקבל את פניו',
+          en: 'Rashi will greet him',
+        },
+        text: {
+          he: 'הרב אבא שאול נולד בכ״ט בתמוז, יום פטירתו של רש״י, ועמל רבות בהבנת דבריו. לתלמידיו אמר שרש״י יקבל את פניו בעולם האמת, משום שטרח כל כך בדבריו.',
+          en: "Rabbi Abba Shaul was born on 29 Tammuz, the day of Rashi's death, and labored greatly over Rashi's words. He told his students that Rashi would greet him in the World of Truth, because he had toiled so much over his words.",
+        },
+        source: 'JDN, 3 July 2026 (https://www.jdn.co.il/beit_hamidrash/1996448/)',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית הקברות סנהדריה, ירושלים, ליד קבר רעייתו הדסה',
+        en: 'Sanhedria cemetery, Jerusalem, beside the grave of his wife Hadassah',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      noLinkReason: null,
+      query: 'בית הקברות סנהדריה',
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/בן_ציון_אבא_שאול',
+      'https://www.jdn.co.il/beit_hamidrash/1996448/',
+      'https://he.wikipedia.org/wiki/בית_הקברות_סנהדריה',
+      'https://en.wikipedia.org/wiki/Ben_Zion_Abba_Shaul',
+    ],
+  },
   rav_shach: {
     bio: {
       he: 'הרב אלעזר מנחם מן שך (נפטר בתשס״ב, 2001, בגיל יותר ממאה) נולד בליטא ולמד בישיבות פוניבז׳, סלבודקה וסלוצק. לימד בישיבת קלצק ועמד בראש ישיבות באירופה, ובשנת 1941 עלה לארץ ישראל. אחרי שלימד בירושלים, בפתח תקווה וברחובות, עמד מתחילת שנות החמישים ועד פטירתו, כחמישים שנה, בראש ישיבת פוניבז׳ בבני ברק. נחשב למנהיג היהדות החרדית הליטאית בדורו. נפטר בט״ז בחשוון תשס״ב ונקבר בבני ברק.',
@@ -5368,6 +7260,93 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://ohr.edu/3800',
       'https://www.shemayisrael.com/parsha/sobel/archives/vayera64.htm',
       "https://he.wikipedia.org/wiki/בית_הקברות_של_נציבי_ישיבת_פוניבז'",
+    ],
+  },
+  yitzchak_kaduri: {
+    bio: {
+      he: 'הרב יצחק כדורי, ״זקן המקובלים״, נולד בבגדאד, לפי המקובל בשנת 1898, ולמד בצעירותו בבית המדרש זילכה, שם הכיר את הבן איש חי. בשנת 1922 עלה לירושלים, למד בישיבות שושנים לדוד ופורת יוסף, והתפרנס מכריכת ספרים. לימים עמד בראש ישיבת המקובלים נחלת יצחק, ואלפים מכל העדות באו לביתו לבקש ברכה ועצה. נפטר במוצאי שבת, כ״ט בטבת תשס״ו, ומאות אלפים ליוו אותו להר המנוחות.',
+      en: "Rabbi Yitzchak Kaduri, 'the elder of the kabbalists', was born in Baghdad around 1898, and as a youth studied at the Zilkha study hall, where he knew the Ben Ish Chai. In 1922 he came to Jerusalem, studied at Shoshanim LeDavid and Porat Yosef, and earned his living as a bookbinder. He later headed the Nachalat Yitzchak kabbalists' yeshiva, and thousands from every community sought his blessing and advice. He died on motzaei Shabbat, 29 Tevet 5766 (2006).",
+    },
+    lessons: [
+      {
+        title: {
+          he: 'לימוד בכל הזדמנות',
+          en: 'Learning at every chance',
+        },
+        text: {
+          he: 'ככורך ספרים לא כרך ספר לפני שלמד אותו. גם פרנסה פשוטה יכולה להפוך לשעות של לימוד, כשמחפשים בה את התורה.',
+          en: 'As a bookbinder he would not bind a book before he had studied it. Even a simple livelihood can become hours of learning when one looks for the Torah in it.',
+        },
+      },
+      {
+        title: {
+          he: 'סבלנות בלי כעס',
+          en: 'Patience without anger',
+        },
+        text: {
+          he: 'פעם, כשכתב קמע, קראה לו רעייתו לאכול והכתה על השולחן, והדיו נשפך על הכתב. הוא לא כעס, וישב שעות לכתוב הכול מחדש. שלוות הנפש יקרה מן הטורח שאבד.',
+          en: 'Once, as he wrote an amulet, his wife called him to eat and struck the table, spilling ink over his work. He did not get angry and spent hours writing it again. Calm is worth more than lost effort.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'קדושת יצחק',
+          en: 'Kedushat Yitzchak',
+        },
+        about: {
+          he: 'תורתו בענייני קמעות, סגולות ותפילות, שיצאה לאור אחרי פטירתו בשישה כרכים, עם הערות וביאורים של הרב יעקב עדס.',
+          en: 'His teachings on amulets, segulot and prayers, published after his death in six volumes with notes by Rabbi Yaakov Edess.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'הספרים שהתעכבו',
+          en: 'The books that came back late',
+        },
+        text: {
+          he: 'הרב כדורי נהג ללמוד כל ספר שהגיע אליו לכריכה, והרב יוסף עדס, מרבני ישיבת פורת יוסף, אמר שהוא ״כרך ובלע״ את הספרים. פעם הביא לו הרב הראשי יצחק נסים ספרים לכריכה, וכשעברו שבועות שאל מדוע הדבר מתעכב. הרב כדורי השיב בפשטות שעדיין לא סיים ללמוד אותם.',
+          en: "Rabbi Kaduri used to study every book that came to him for binding; Rabbi Yosef Ades of the Porat Yosef yeshiva said he 'bound and devoured' them. Once Chief Rabbi Yitzchak Nissim brought him books to bind, and when weeks passed he asked what was taking so long. Rabbi Kaduri simply answered that he had not yet finished learning them.",
+        },
+        source:
+          "Torah-Box, 'Yartzeit of Rav Yitzchak Kaduri' (https://www.torah-box.net/jewish-ethics-and-learning/our-sages/yartzeit-of-rav-yitzchak-kaduri_1091.html)",
+      },
+      {
+        title: {
+          he: 'כתבי היד של פורת יוסף',
+          en: 'The Porat Yosef manuscripts',
+        },
+        text: {
+          he: 'בשנת 1934 נתנה לו ישיבת פורת יוסף דירה סמוך לישיבה בעיר העתיקה, בתמורה לכריכת ספריה ולהעתקת כתבי יד נדירים. במלחמת העצמאות העביר כתבי יד אל ישיבת המקובלים בית אל, ומה שלא הספיק להעביר נשרף כשהישיבה הועלתה באש.',
+          en: "In 1934 the Porat Yosef yeshiva in the Old City gave him an apartment beside it in return for binding its books and copying rare manuscripts. In the 1948 war he took manuscripts to the Beit El kabbalists' yeshiva; what he could not move burned when the yeshiva was set on fire.",
+        },
+        source:
+          "English Wikipedia, 'Yitzhak Kaduri' (https://en.wikipedia.org/wiki/Yitzhak_Kaduri); The Jewish Press, 'Rav Kaduri's diary of amulets and tikkunim', on his binding and copying work at Porat Yosef (https://jewishpress.com/rav-kaduris-diary-of-amulets-and-tikkunim/)",
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית העלמין הר המנוחות, ירושלים',
+        en: 'Har HaMenuchot cemetery, Jerusalem',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      noLinkReason: null,
+      query: 'בית העלמין הר המנוחות',
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/יצחק_כדורי',
+      'https://en.wikipedia.org/wiki/Yitzhak_Kaduri',
+      'https://www.jdn.co.il/beit_hamidrash/2345738/',
+      'https://www.chabad.org/article.asp?aid=150186',
+      'https://www.torah-box.net/jewish-ethics-and-learning/our-sages/yartzeit-of-rav-yitzchak-kaduri_1091.html',
+      'https://www.kikar.co.il/actualy/squl6p',
+      'https://jewishpress.com/rav-kaduris-diary-of-amulets-and-tikkunim/',
     ],
   },
   mordechai_eliyahu: {
@@ -5678,6 +7657,257 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://meshiv.co.il/?p=27321',
     ],
   },
+  shmuel_wosner: {
+    bio: {
+      he: 'הרב שמואל הלוי וואזנר (תרע״ג–תשע״ה, 1913–2015), המכונה ״שבט הלוי״ על שם ספרו, נולד בווינה ולמד בישיבת חכמי לובלין אצל רבי מאיר שפירא. בשנת 1938 עלה לארץ ישראל, ובשנת 1947, בעצת החזון איש, עבר לבני ברק ונעשה רבה של שכונת זכרון מאיר. שם הקים מחדש את ישיבת חכמי לובלין ובית הוראה, ורבים ראו בו פוסק הדור. נפטר בליל הסדר, בט״ו בניסן תשע״ה, בגיל 101. יום ההילולא חל תמיד ביום טוב, ובשנת תשפ״ב נערכה העלייה לקברו בערב ראש חודש ניסן.',
+      en: "Rabbi Shmuel HaLevi Wosner (1913–2015), the Shevet HaLevi, born in Vienna, studied under Rabbi Meir Shapiro at Chachmei Lublin. He came to Eretz Yisrael in 1938; in 1947, advised by the Chazon Ish, he became rabbi of Zichron Meir in Bnei Brak, founding Chachmei Lublin anew and a beit hora'ah. Many called him posek hador. He died on Seder night, 15 Nisan 5775 (2015), aged 101; always Yom Tov; in 5782 his grave was visited on erev Rosh Chodesh Nisan.",
+    },
+    lessons: [
+      {
+        title: {
+          he: 'הכרת הטוב על ההצלה',
+          en: 'Gratitude for a rescue',
+        },
+        text: {
+          he: 'בדרכו לארץ ישראל בשנת 1938 עברה ספינתו מסע קשה וסכנה בים. מדי שנה כינס את צאצאיו ותלמידיו כדי להודות לה׳ על ההצלה. חסד שקיבלנו ראוי לזכור ולהודות עליו גם שנים רבות אחר כך.',
+          en: 'Sailing to the Land of Israel in 1938, his ship faced danger at sea. Every year he gathered his descendants and students to thank God for the rescue. A kindness received deserves thanks for years after.',
+        },
+      },
+      {
+        title: {
+          he: 'זמין לכל שואל',
+          en: 'Available to every questioner',
+        },
+        text: {
+          he: 'לפי בני משפחתו השיב בדרך כלל על כשלושת אלפים שאלות הלכה בחודש, כמאה ביום, ועד יומו האחרון המשיך ללמוד וללמד. גדול בתורה אינו מתרחק מן הציבור, אלא משרת אותו בכל יום.',
+          en: 'According to his family, he usually answered some three thousand halachic questions a month, about a hundred a day, and kept learning and teaching to his last day. A great scholar does not withdraw from people but serves them daily.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'שו״ת שבט הלוי',
+          en: 'Shevet HaLevi',
+        },
+        about: {
+          he: 'שאלות ותשובות בהלכה, באחד עשר כרכים ומפתח, ובהן שאלות רבות שהעלתה הטכנולוגיה החדשה.',
+          en: 'Halachic responsa in eleven volumes and an index, including many questions raised by modern technology.',
+        },
+      },
+      {
+        title: {
+          he: 'שיעורי שבט הלוי',
+          en: 'Shiurei Shevet HaLevi',
+        },
+        about: {
+          he: 'שיעוריו בהלכות נדה, שערך תלמידו הרב מרדכי גרוס.',
+          en: 'His lectures on the laws of niddah, edited by his student Rabbi Mordechai Gross.',
+        },
+      },
+      {
+        title: {
+          he: 'דרשות שבט הלוי',
+          en: 'Derashot Shevet HaLevi',
+        },
+        about: {
+          he: 'קובץ דרשותיו.',
+          en: 'A collection of his sermons.',
+        },
+      },
+      {
+        title: {
+          he: 'חידושי שבט הלוי על הש״ס',
+          en: 'Chiddushei Shevet HaLevi al HaShas',
+        },
+        about: {
+          he: 'חידושיו על התלמוד, ובהם על מסכתות שבת ופסחים.',
+          en: 'His Talmudic novellae, including on tractates Shabbat and Pesachim.',
+        },
+      },
+      {
+        title: {
+          he: 'ספר הלקט על הרמב״ם',
+          en: 'Sefer HaLeket al HaRambam',
+        },
+        about: {
+          he: 'ספרו הראשון, על משנה תורה לרמב״ם, שיצא לאור בשנת תש״ד.',
+          en: "His first book, on Maimonides' Mishneh Torah, published in 1944.",
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'בהמתנה לרכבת',
+          en: 'Waiting for the train',
+        },
+        text: {
+          he: 'כשבא הצעיר להתקבל לישיבת חכמי לובלין, נאמר לו שהוא צעיר מדי. בזמן שהמתין לרכבת שתחזיר אותו הביתה, ישב ולמד בבית המדרש. רבי מאיר שפירא ראה אותו לומד, התרשם, וקיבל אותו לתקופת ניסיון של שלושה חודשים, שנמשכה בסוף חמש שנים. לדבריו, במשך שנה וחצי כמעט לא יצא מן הישיבה.',
+          en: 'When the young Shmuel came to be admitted to Yeshivat Chachmei Lublin, he was told he was too young. While waiting for the train home, he sat and learned in the study hall. Rabbi Meir Shapiro saw him learning, was impressed, and accepted him for a three-month trial that lasted five years. He later said that for a year and a half he hardly saw the outside of the yeshiva.',
+        },
+        source:
+          "Dei'ah veDibur, 'HaRav Shmuel Halevi Wosner zt\"l', Tazria 5775 (https://www.chareidi.org/archives5775/tazria/arwosnertzr75.htm)",
+      },
+      {
+        title: {
+          he: 'ליווי של החזון איש',
+          en: "The Chazon Ish's escort",
+        },
+        text: {
+          he: 'כשהתלבט אם לקבל את רבנות זכרון מאיר, בא להתייעץ עם החזון איש, שלא השיב לו דבר. כשקם ללכת, הציע החזון איש ללוות אותו, ואמר שאין ראוי שרב ילך לבדו ברחובות העיר. הרב וואזנר הבין מכך שעליו לקבל את המשרה, ואכן נעשה רבה של השכונה.',
+          en: 'Unsure whether to accept the rabbinate of Zichron Meir, he went to consult the Chazon Ish, who gave him no answer. When he rose to leave, the Chazon Ish offered to walk with him, saying a rabbi should not walk alone through the city. Rabbi Wosner took this as a sign to accept the post, and he became the rabbi of the neighborhood.',
+        },
+        source:
+          "Dei'ah veDibur, 'HaRav Shmuel Halevi Wosner zt\"l', Tazria 5775 (https://www.chareidi.org/archives5775/tazria/arwosnertzr75.htm)",
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית העלמין שומרי שבת (זכרון מאיר), בני ברק',
+        en: 'Shomrei Shabbat (Zichron Meir) cemetery, Bnei Brak',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      query: 'בית העלמין שומרי שבת בני ברק',
+      noLinkReason: null,
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/שמואל_הלוי_וואזנר',
+      'https://en.wikipedia.org/wiki/Shmuel_Wosner',
+      'https://www.toraland.org.il/%D7%9E%D7%90%D7%9E%D7%A8%D7%99%D7%9D/%D7%AA%D7%95%D7%A8%D7%AA-%D7%97%D7%9B%D7%9E%D7%99-%D7%99%D7%A9%D7%A8%D7%90%D7%9C/%D7%98%D7%95-%D7%A0%D7%99%D7%A1%D7%9F-%D7%94%D7%A8%D7%91-%D7%A9%D7%9E%D7%95%D7%90%D7%9C-%D7%94%D7%9C%D7%95%D7%99-%D7%95%D7%95%D7%90%D7%96%D7%A0%D7%A8-%D7%A1%D7%A4%D7%99%D7%A8%D7%AA-%D7%94%D7%A2%D7%95%D7%9E%D7%A8/',
+      'https://www.kikar.co.il/haredim-news/166773',
+      'https://www.kikar.co.il/hasidism/rebbe-shmuel-wosner-memorial',
+      'https://he.mishpacha.com/%D7%9C%D7%90-%D7%99%D7%A1%D7%95%D7%A8-%D7%A9%D7%91%D7%98/',
+      'https://www.chareidi.org/archives5775/tazria/arwosnertzr75.htm',
+      'https://www.jdn.co.il/flashes/1725891/',
+      'https://www.ynet.co.il/articles/0,7340,L-4639784,00.html',
+      'https://www.genazym.com/?p=3646',
+      'https://breslevcity.co.il/%D7%A8%D7%91%D7%99-%D7%97%D7%99%D7%99%D7%9D-%D7%9E%D7%90%D7%99%D7%A8-%D7%94%D7%9C%D7%95%D7%99-%D7%95%D7%95%D7%90%D7%96%D7%A0%D7%A8/',
+    ],
+  },
+  aharon_leib_shteinman: {
+    bio: {
+      he: 'הרב אהרן יהודה לייב שטיינמן (תרע״ה–תשע״ח, 1914–2017) נולד בקמניץ וגדל בבריסק. בשנת 1937 עבר לשווייץ ללמוד בישיבה במונטרה, ובמלחמת העולם השנייה הוחזק במחנה עבודה ליד באזל. אחרי המלחמה עלה לארץ, עמד בראש ישיבת פוניבז׳ לצעירים וכולל פוניבז׳ בבני ברק, וייסד את ישיבות גאון יעקב ואורחות תורה. רבים ראו בו את מנהיג הציבור הליטאי, והוא חי כל ימיו בצניעות רבה. נפטר בערב חנוכה, כ״ד בכסלו תשע״ח.',
+      en: "Rabbi Aharon Yehuda Leib Shteinman (1914–2017), born in Kamenets and raised in Brisk, went in 1937 to a yeshiva in Montreux, Switzerland, and in World War II was held in a labor camp near Basel. After the war he came to Israel, headed the Ponevezh yeshiva for younger students and kollel in Bnei Brak, and founded the Gaon Yaakov and Orchot Torah yeshivot. Many saw him as the Lithuanian community's leader. He died on erev Chanukah, 24 Kislev 5778.",
+    },
+    lessons: [
+      {
+        title: {
+          he: 'פשטות בחיי היום יום',
+          en: 'Simplicity in daily life',
+        },
+        text: {
+          he: 'בצעירותו, בישיבה בקלצק, אכל לעתים קרובות רק תפוחי אדמה מבושלים במים, ועשרות שנים גר בדירה קטנה ודלה ברחוב חזון איש בבני ברק. מי שמסתפק במועט פנוי ללימוד ולזולת.',
+          en: 'As a student in Kletsk he often ate only boiled potatoes, and for decades he lived in a small, bare flat on Chazon Ish Street, Bnei Brak. One content with little is free for learning and for others.',
+        },
+      },
+      {
+        title: {
+          he: 'ללכת אל הרחוקים',
+          en: 'Going to those far away',
+        },
+        text: {
+          he: 'אחרי גיל תשעים יצא לנסיעות רבות לקהילות יהודיות בצפון אמריקה, בדרום אמריקה ובאירופה, גם רחוקות ממרכזי התורה, כדי לחזק בהן לימוד וחינוך. גיל ומרחק אינם פוטרים מדאגה לכל יהודי.',
+          en: 'Past ninety he travelled to Jewish communities in North and South America and Europe, including ones far from the centres of Torah, to strengthen learning and education. Age and distance excuse no one from caring for every Jew.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'אילת השחר',
+          en: 'Ayelet HaShachar',
+        },
+        about: {
+          he: 'סדרת חידושיו על התורה ועל מסכתות רבות בש״ס, הידועה בספריו.',
+          en: 'His best-known series, novellae on the Torah and on many tractates of the Talmud.',
+        },
+      },
+      {
+        title: {
+          he: 'חסד ומשפט',
+          en: 'Chesed UMishpat',
+        },
+        about: {
+          he: 'חידושים על מסכת סנהדרין.',
+          en: 'Novellae on Tractate Sanhedrin.',
+        },
+      },
+      {
+        title: {
+          he: 'ימלא פי תהלתך',
+          en: 'Yimalei Pi Tehilatecha',
+        },
+        about: {
+          he: 'שיחות מוסר, ביאור על התפילה ומכתבים לציבור וליחידים, בכמה כרכים.',
+          en: 'Ethical talks, a commentary on the prayers and letters to the public and to individuals, in several volumes.',
+        },
+      },
+      {
+        title: {
+          he: 'מפקודיך אתבונן',
+          en: 'Mipkudecha Etbonan',
+        },
+        about: {
+          he: 'שיחות לימים הנוראים.',
+          en: 'Talks for the High Holy Days.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'המזרן מהסוכנות',
+          en: 'The Jewish Agency mattress',
+        },
+        text: {
+          he: 'כשהגיע לארץ כפליט קיבל הרב שטיינמן מהסוכנות היהודית מזרן דק. על אותו מזרן ישן עשרות שנים, עד שנת 2014, בדירה הצנועה ברחוב חזון איש 5 בבני ברק, שאליה באו רבים לבקש את עצתו בענייני בית ופרנסה.',
+          en: 'When he reached Israel as a refugee, the Jewish Agency gave Rabbi Shteinman a thin mattress. He slept on that same mattress for decades, until 2014, in the modest flat at 5 Chazon Ish Street in Bnei Brak, where many came to seek his advice on family and livelihood.',
+        },
+        source:
+          "English Wikipedia, 'Aharon Leib Shteinman' (https://en.wikipedia.org/wiki/Aharon_Leib_Shteinman); The Jewish Chronicle obituary (https://www.thejc.com/news/obituaries/obituary-aharon-shteinman-uh08z2yy); JDN, 23 Kislev 5786 (https://www.jdn.co.il/j_world/2534911/)",
+      },
+      {
+        title: {
+          he: 'הצוואה',
+          en: 'His will',
+        },
+        text: {
+          he: 'בצוואתו ביקש הרב שטיינמן מאוד שלא יספידו אותו, לא בפניו ולא שלא בפניו, שהמצבה תהיה ״הכי זולה ופשוטה״, ושלא יוציאו כסף על קניית מקום יקר בבית הקברות. כבקשתו, נקבר כשש שעות אחרי פטירתו, ורבבות ליוו אותו.',
+          en: "In his will Rabbi Shteinman asked that no one eulogize him, in his presence or not, that his tombstone be 'the cheapest and simplest', and that no money be spent on an expensive cemetery plot. As he asked, he was buried about six hours after his death, and tens of thousands followed his coffin.",
+        },
+        source:
+          'Kikar HaShabbat (https://www.kikar.co.il/html/259699); JTA, 12 December 2017 (https://www.jta.org/?p=1492412); The Yeshiva World, 12 December 2017 (https://www.theyeshivaworld.com/news/featured/1424673/boruch-dayan-haemmes-gadol-hador-maran-hagaon-harav-shteinman-zatzal-updated-1019am-il.html)',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית הקברות של נציבי ישיבת פוניבז׳, בני ברק',
+        en: 'Ponevezh Yeshiva cemetery, Bnei Brak',
+      },
+      lat: 32.0720413,
+      lng: 34.8349327,
+      link: true,
+      noLinkReason: null,
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/אהרן_יהודה_לייב_שטיינמן',
+      'https://en.wikipedia.org/wiki/Aharon_Leib_Shteinman',
+      'https://www.jdn.co.il/j_world/2534911/',
+      'https://chareidi.org/archives5778/mikeitz/araylsbiomkz78.htm',
+      'https://www.thejc.com/news/obituaries/obituary-aharon-shteinman-uh08z2yy',
+      'https://www.jta.org/?p=1492412',
+      'https://www.kikar.co.il/html/259699',
+      'https://www.theyeshivaworld.com/news/featured/1424673/boruch-dayan-haemmes-gadol-hador-maran-hagaon-harav-shteinman-zatzal-updated-1019am-il.html',
+      "https://he.wikipedia.org/wiki/בית_הקברות_של_נציבי_ישיבת_פוניבז'",
+      'https://www.openstreetmap.org/way/62356402',
+      'https://www.ynet.co.il/news/article/ry0h9ixu3',
+    ],
+  },
   chaim_kanievsky: {
     bio: {
       he: 'הרב שמריהו יוסף חיים קניבסקי (תרפ״ח–תשפ״ב, 1928–2022), בנו של הסטייפלר ואחיינו של החזון איש, נולד בפינסק ועלה עם משפחתו לבני ברק בשנת 1934. למד בישיבת לומז׳ה בפתח תקווה, ונשא את בתו של הרב יוסף שלום אלישיב. בבני ברק למד שעות רבות בכל יום, וחיבר עשרות ספרים בכל תחומי התורה. רבים ראו בו את גדול הדור, ואלפים פנו אליו בשאלות ובבקשת ברכה. נפטר בט״ו באדר ב׳ תשפ״ב.',
@@ -5802,6 +8032,138 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://www.jta.org/2022/03/18/obituaries/chaim-kanievsky-haredi-rabbi-known-as-prince-of-torah-dies-at-94',
       'https://www.theyeshivaworld.com/news/israel-news/2070981/thousands-pay-shiva-calls-dozens-of-babies-named-shmaryahu-yosef-chaim.html',
       'https://he.wikipedia.org/wiki/בית_הקברות_שומרי_שבת',
+    ],
+  },
+  gershon_edelstein: {
+    bio: {
+      he: 'הרב ירחמיאל גרשון אדלשטיין (תרפ״ג–תשפ״ג, 1923–2023) נולד בשומיאץ שבברית המועצות, בנו של רב העיירה, ובשנת 1934 עלה עם משפחתו לרמת השרון. למד בישיבת לומז׳ה בפתח תקווה, והיה מששת התלמידים הראשונים של ישיבת פוניבז׳ בבני ברק. בה לימד יותר משבעים וחמש שנה, ומשנת תש״ס כיהן כאחד מראשי הישיבה. היה ממנהיגי היהדות החרדית הליטאית ונשיא ועד הישיבות, ונודע בדרכו הרכה בחינוך. נפטר בי׳ בסיוון תשפ״ג, בן מאה.',
+      en: 'Rabbi Yerachmiel Gershon Edelstein (1923–2023), son of the rabbi of Shumyachi, USSR, came to Ramat HaSharon in 1934. After the Lomza yeshiva in Petah Tikva, he was among the first six students of the Ponevezh Yeshiva in Bnei Brak, taught there over 75 years and from 2000 was a rosh yeshiva. A Lithuanian Haredi leader and president of the Vaad HaYeshivot, he was known for gentleness in education. He died on 10 Sivan 5783 (2023), aged 100.',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'בדרכי נועם, בלי כפייה',
+          en: 'Gently, without coercion',
+        },
+        text: {
+          he: 'כשנשאל על הורים הלוחצים על נער שמאחר לתפילה, השיב: ״בדרכי נועם! בלי כפיה!״. הוא הורה גם לנהוג בנושרים, שעזבו את הדרך, מנהג כבוד וידידות.',
+          en: "Asked about parents pressing a teenager who came late to prayer, he answered: 'Gently! Without coercion!' He also taught that young people who left the path be treated with respect and friendship.",
+        },
+      },
+      {
+        title: {
+          he: 'לשתוק ולכבד',
+          en: 'Stay silent and show respect',
+        },
+        text: {
+          he: 'לבעלים שהתקשו בשלום הבית נתן עצה קצרה: ״לשתוק ולכבד״. ויתור על המילה האחרונה וכבוד לבן הזוג בונים בית יותר מכל ויכוח.',
+          en: "To husbands struggling with harmony at home he gave short advice: 'stay silent and show respect.' Giving up the last word and honoring one's spouse builds a home more than any argument.",
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'ממגד גרש ירחים',
+          en: 'Mimeged Geresh Yerachim',
+        },
+        about: {
+          he: 'חידושים על התלמוד הבבלי, מתוך שיעוריו בישיבת פוניבז׳.',
+          en: 'Insights on the Babylonian Talmud, drawn from his lectures at the Ponevezh Yeshiva.',
+        },
+      },
+      {
+        title: {
+          he: 'הערות וביאורים על הש״ס',
+          en: "He'arot UBiurim on Shas",
+        },
+        about: {
+          he: 'הערות וביאורים על מסכתות התלמוד, שראו אור משנת תשפ״א.',
+          en: 'Notes and explanations on the tractates of the Talmud, published from 5781 (2020).',
+        },
+      },
+      {
+        title: {
+          he: 'הערות וביאורים על סדר הרמב״ם',
+          en: "He'arot UBiurim on the Rambam",
+        },
+        about: {
+          he: 'הערות על משנה תורה לרמב״ם, שערכו תלמידיו ויצאו לאור בשנת 2012.',
+          en: "Notes on Maimonides' Mishneh Torah, edited by his students and published in 2012.",
+        },
+      },
+      {
+        title: {
+          he: 'שיעורי רבי גרשון',
+          en: 'Shiurei Rabbi Gershon',
+        },
+        about: {
+          he: 'סדרת שיעוריו על המסכתות הנלמדות בישיבת פוניבז׳.',
+          en: 'A series of his lectures on the tractates studied at the Ponevezh Yeshiva.',
+        },
+      },
+      {
+        title: {
+          he: 'אסיפת שמועות',
+          en: 'Asifat Shemuot',
+        },
+        about: {
+          he: 'מאמרים ושיחות על המועדים.',
+          en: 'Essays and talks on the festivals.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'שיעור בחדר בבית החולים',
+          en: 'A lesson in the hospital room',
+        },
+        text: {
+          he: 'בערב חג השבועות תשפ״ג אושפז הרב אדלשטיין, בן מאה, בבית החולים מעייני הישועה בבני ברק בשל קשיי נשימה. גם שם עסק בהכנת שיעור, ויום לפני פטירתו מסר שיעור לתלמידיו בחדרו בבית החולים. כך לימד תורה כמעט עד נשימתו האחרונה.',
+          en: 'On the eve of Shavuot 5783, Rabbi Edelstein, aged 100, was admitted to Maayanei HaYeshua hospital in Bnei Brak with breathing difficulties. Even there he worked on preparing a lesson, and the day before he died he gave a lesson to his students in his hospital room. He taught Torah almost to his last breath.',
+        },
+        source:
+          'Hidabroot (https://www.hidabroot.org/article/1196187); Chief Rabbi of South Africa, "The end of an era", June 2023 (https://chiefrabbi.co.za/2023/06/the-end-of-an-era/)',
+      },
+      {
+        title: {
+          he: 'השופר שחזר לבעליו',
+          en: 'The shofar returned to its owner',
+        },
+        text: {
+          he: 'משנת תש״ו ועד שנתו האחרונה תקע הרב אדלשטיין בשופר בראש השנה בישיבת פוניבז׳. כשנפטר בעליו של השופר שבו תקע, החזיר אותו ליורשים, ובחר שופר אחר מאוסף של חסיד, שסירב לקבל תשלום. לנינו אמר שמיד אחרי פטירתו, עוד לפני ההלוויה, יוחזר השופר לבעליו. וכך היה: כשעה אחרי פטירתו יצא אחד ממקורביו מביתו עם השופר, להשיבו לבעליו.',
+          en: "From 1946 until his last year, Rabbi Edelstein blew the shofar on Rosh Hashanah at the Ponevezh Yeshiva. When the owner of the shofar he used died, he returned it to the heirs and chose another from a Chassid's collection; the owner refused payment. He told his great-grandson that right after his death, before the funeral, the shofar must go back to its owner. About an hour after he died, a close aide carried it out.",
+        },
+        source:
+          "English Wikipedia, 'Gershon Edelstein' (shofar blower from 1946, https://en.wikipedia.org/wiki/Gershon_Edelstein); Shuki Lerer, JDN, 20 Sivan 5783 (eyewitness account of the shofar's return, https://www.jdn.co.il/articles-and-opinions/1980425/)",
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית הקברות של נציבי ישיבת פוניבז׳, בני ברק',
+        en: 'Ponevezh Yeshiva cemetery, Bnei Brak',
+      },
+      lat: 32.0720413,
+      lng: 34.8349327,
+      link: true,
+      noLinkReason: null,
+    },
+    sources: [
+      'https://he.wikipedia.org/wiki/גרשון_אדלשטיין',
+      'https://en.wikipedia.org/wiki/Gershon_Edelstein',
+      'https://www.inn.co.il/news/603023',
+      'https://www.hidabroot.org/article/1196187',
+      'https://www.ynet.co.il/judaism/article/rkterz7un',
+      'https://jewishlink.news/200-000-gather-for-funeral-of-harav-gershon-edelstein-zt-l/',
+      'https://chiefrabbi.co.za/2023/06/the-end-of-an-era/',
+      'https://www.jdn.co.il/articles-and-opinions/1980425/',
+      'https://www.wikidata.org/wiki/Q6608024',
+      'https://www.openstreetmap.org/way/157513479',
+      'https://breslev.com/?p=3966631',
+      "https://he.wikipedia.org/wiki/בית_הקברות_של_נציבי_ישיבת_פוניבז'",
+      'https://www.openstreetmap.org/way/62356402',
     ],
   },
 };

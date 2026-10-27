@@ -214,7 +214,25 @@ export function nextReminderAt(mitzvah: Mitzvah, reminders: Reminder[], scope: R
   return earliest === null ? null : new Date(earliest);
 }
 
-function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput): ScheduleCandidate[] {
+function thinned(planned: WindowTriggers): WindowTrigger[] {
+  const end = planned.window.end.getTime();
+  const eligible = planned.triggers.filter(
+    ({ reminder, trigger }) =>
+      reminder.anchor !== 'followUp' && reminder.anchor !== 'blockExit' && trigger.getTime() <= end,
+  );
+  if (!eligible.length) {
+    return planned.triggers.length
+      ? [
+          planned.triggers.reduce((earliest, entry) =>
+            entry.trigger.getTime() < earliest.trigger.getTime() ? entry : earliest,
+          ),
+        ]
+      : [];
+  }
+  return [eligible.reduce((latest, entry) => (entry.trigger.getTime() > latest.trigger.getTime() ? entry : latest))];
+}
+
+function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: boolean): ScheduleCandidate[] {
   const { location, settings } = input;
   const reminders = input.reminderOverrides[mitzvah.id] ?? mitzvah.defaultReminders;
   const planned = windowTriggers(mitzvah, reminders, date, input);
@@ -223,7 +241,7 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput): Schedule
   const english = input.language === 'en';
   const hasText = hasSiddurText(mitzvah, settings.nusach, date, siddurPlace(location, settings.inIsrael));
   const params = bodyParamsOn(mitzvah, date, location, settings);
-  return planned.triggers.map(({ index, occurrence, reminder, trigger }) => {
+  return (thin ? thinned(planned) : planned.triggers).map(({ index, occurrence, reminder, trigger }) => {
     // Candle lighting fires on the block's opening edge: its text would open only the Shabbat screen.
     const offersText = hasText && !opensQuietBlock(trigger, location);
     const id = buildId(mitzvah.id, date, index, occurrence);
@@ -248,7 +266,8 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput): Schedule
   });
 }
 
-export function planMitzvot(input: PlanInput, horizon: Horizon): ScheduleCandidate[] {
+// With `thinFrom`, every day from that one on keeps one trigger per window (see `thinned()`).
+export function planMitzvot(input: PlanInput, horizon: Horizon, thinFrom?: Date): ScheduleCandidate[] {
   const candidates: ScheduleCandidate[] = [];
   const back = Math.max(PAST_WINDOW_DAYS, ...input.mitzvot.map(plannedDaysBack));
   [...pastDays(horizon.days[0], back), ...horizon.days].forEach((day, position) => {
@@ -257,7 +276,8 @@ export function planMitzvot(input: PlanInput, horizon: Horizon): ScheduleCandida
       // Isolate per mitzvah: one failure must never abort the rest of the batch, or a single
       // bad computation leaves the user with an empty schedule (cancelAll already ran).
       try {
-        candidates.push(...candidatesFor(mitzvah, day, input));
+        const thin = thinFrom !== undefined && day.getTime() >= thinFrom.getTime();
+        candidates.push(...candidatesFor(mitzvah, day, input, thin));
       } catch (err) {
         if (__DEV__) console.warn('[notifications] scheduling failed', mitzvah.id, err);
       }

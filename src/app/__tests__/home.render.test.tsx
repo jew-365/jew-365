@@ -14,6 +14,12 @@ const mockNavigation = {
   },
 };
 
+jest.mock('@/utils/afterPaint', () => ({
+  afterPaint: (task: () => void) => {
+    queueMicrotask(task);
+    return { cancel: () => undefined };
+  },
+}));
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }), useNavigation: () => mockNavigation }));
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(async () => {}),
@@ -423,7 +429,7 @@ describe('home between midnight and alot', () => {
 
     it('follows blur and focus and unsubscribes on unmount', () => {
       const view = renderAt(NIGHT_OF_THE_14TH);
-      expect(mockListeners.map((entry) => entry.event).sort()).toEqual(['blur', 'focus']);
+      expect(mockListeners.map((entry) => entry.event).sort()).toEqual(['blur', 'blur', 'focus', 'focus']);
       emitNavigation('blur');
       expect(cardWrappers()[0].props.entering).toBeUndefined();
       emitNavigation('focus');

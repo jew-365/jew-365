@@ -1,8 +1,22 @@
 const mockPush = jest.fn();
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
+const mockTabs = { index: 0 };
+const mockBlurListeners = new Set<() => void>();
+const mockNavigation = {
+  isFocused: () => true,
+  getState: () => ({ index: mockTabs.index, routes: [{ key: 'siddur' }, { key: 'home' }] }),
+  addListener: (_event: string, listener: () => void) => {
+    mockBlurListeners.add(listener);
+    return () => mockBlurListeners.delete(listener);
+  },
+};
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: mockPush }),
+  useNavigation: () => mockNavigation,
+  useFocusEffect: (effect: () => void) => require('react').useEffect(effect, [effect]),
+}));
 
 import { DateTime } from 'luxon';
-import { fireEvent, screen, within } from '@testing-library/react-native';
+import { act, fireEvent, screen, within } from '@testing-library/react-native';
 import SiddurScreen from '../(tabs)/siddur';
 import { ListRow } from '@/components/ListRow';
 import { CITIES } from '@/data/cities';
@@ -37,10 +51,20 @@ const MITZVOT_ROWS = [
   'sefirat_haomer',
 ];
 
-function open(wallClock: string, nusach: Nusach = 'ashkenaz') {
+function openAllGroups() {
+  for (const header of screen.queryAllByRole('button', { expanded: false })) fireEvent.press(header);
+}
+
+function openClosed(wallClock: string, nusach: Nusach = 'ashkenaz') {
   useUserStore.setState({ nusach });
   jest.useFakeTimers({ now: at(JERUSALEM, wallClock), doNotFake: [...ONLY_DATE] });
   return renderWithTheme(<SiddurScreen />);
+}
+
+function open(wallClock: string, nusach: Nusach = 'ashkenaz') {
+  const view = openClosed(wallClock, nusach);
+  openAllGroups();
+  return view;
 }
 
 const rowOf = (id: string) => screen.getByTestId(`siddur-row-${id}`);
@@ -53,6 +77,7 @@ const idsIn = (testID: string) =>
 describe('the siddur tab’s catalog', () => {
   beforeEach(() => {
     mockPush.mockClear();
+    mockTabs.index = 0;
     useUserStore.getState().reset();
     useUserStore.setState({
       language: 'he',
@@ -68,17 +93,101 @@ describe('the siddur tab’s catalog', () => {
 
   afterEach(() => jest.useRealTimers());
 
+  describe('the groups', () => {
+    const TITLES = ['עכשיו', 'סעודה', 'תפילות', 'מצוות', 'כללי', 'מועדים ושמחות'];
+    const headersInOrder = () => {
+      const tree = JSON.stringify(screen.toJSON());
+      return TITLES.filter((title) => tree.includes(`"${title}"`)).sort(
+        (a, b) => tree.indexOf(`"${a}"`) - tree.indexOf(`"${b}"`),
+      );
+    };
+
+    it('lists meals right under now, then the prayers, the mitzvot, general and the occasions', () => {
+      openClosed('2027-06-16T09:00');
+      expect(headersInOrder()).toEqual(TITLES);
+    });
+
+    it('lists meals first when nothing is said now', () => {
+      openClosed('2027-06-23T20:05');
+      expect(screen.queryByText('עכשיו')).toBeNull();
+      expect(headersInOrder()).toEqual(TITLES.slice(1));
+    });
+
+    it('opens only the now group, and holds no row of a closed group', () => {
+      openClosed('2027-06-16T09:00');
+      expect(screen.getByTestId('siddur-now')).toBeOnTheScreen();
+      expect(screen.queryByTestId('siddur-mitzvot')).toBeNull();
+      expect(screen.queryByTestId('siddur-row-shacharit')).toBeNull();
+      expect(screen.queryByTestId('siddur-row-birkat_hamazon')).toBeNull();
+      expect(screen.queryByTestId('siddur-row-tikkun_haklali')).toBeNull();
+    });
+
+    it('opens and closes a group on a tap of its header', () => {
+      openClosed(WEDNESDAY);
+      fireEvent.press(screen.getByText('תפילות'));
+      expect(rowOf('shacharit')).toBeOnTheScreen();
+      fireEvent.press(screen.getByText('תפילות'));
+      expect(screen.queryByTestId('siddur-row-shacharit')).toBeNull();
+    });
+
+    it('keeps several groups open together', () => {
+      openClosed(WEDNESDAY);
+      fireEvent.press(screen.getByText('תפילות'));
+      fireEvent.press(screen.getByText('סעודה'));
+      fireEvent.press(screen.getByText('מצוות'));
+      expect(rowOf('shacharit')).toBeOnTheScreen();
+      expect(rowOf('birkat_hamazon')).toBeOnTheScreen();
+      expect(screen.getByTestId('siddur-mitzvot')).toBeOnTheScreen();
+    });
+
+    it('opens the row of an open group like before', () => {
+      openClosed('2027-06-16T09:00');
+      fireEvent.press(screen.getByText('תפילות'));
+      fireEvent.press(within(rowOf('shacharit')).getByText('תפילת שחרית'));
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/siddur/[id]',
+        params: { id: 'shacharit', date: '2027-06-16' },
+      });
+    });
+
+    const blur = (tabIndex: number) => {
+      mockTabs.index = tabIndex;
+      act(() => mockBlurListeners.forEach((listener) => listener()));
+      mockTabs.index = 0;
+    };
+
+    it('keeps the open groups when a screen pushed over the tab is left', () => {
+      openClosed('2027-06-16T09:00');
+      fireEvent.press(screen.getByText('תפילות'));
+      blur(0);
+      expect(rowOf('shacharit')).toBeOnTheScreen();
+      expect(screen.getByTestId('siddur-now')).toBeOnTheScreen();
+    });
+
+    it('resets to now alone when the user moves to another tab', () => {
+      openClosed('2027-06-16T09:00');
+      fireEvent.press(screen.getByText('תפילות'));
+      fireEvent.press(screen.getByText('עכשיו'));
+      expect(screen.queryByTestId('siddur-now')).toBeNull();
+      expect(rowOf('shacharit')).toBeOnTheScreen();
+      blur(1);
+      expect(screen.getByTestId('siddur-now')).toBeOnTheScreen();
+      expect(screen.queryByTestId('siddur-row-shacharit')).toBeNull();
+    });
+  });
+
   describe('the mitzvot group', () => {
     it('lists the mitzvah texts that are not prayers, in registry order, right after the prayers', () => {
       open(WEDNESDAY);
       const group = screen.getByTestId('siddur-mitzvot');
-      expect(within(group).getByText('מצוות')).toBeOnTheScreen();
+      expect(group).toBeOnTheScreen();
+      expect(screen.getByText('מצוות')).toBeOnTheScreen();
       expect(idsIn('siddur-mitzvot')).toEqual(MITZVOT_ROWS);
       const tree = JSON.stringify(screen.toJSON());
       const position = (testID: string) => tree.indexOf(`"testID":"${testID}"`);
       expect(position('siddur-row-maariv')).toBeGreaterThan(-1);
       expect(position('siddur-mitzvot')).toBeGreaterThan(position('siddur-row-maariv'));
-      expect(position('siddur-row-birkat_hamazon')).toBeGreaterThan(position('siddur-mitzvot'));
+      expect(position('siddur-row-tikkun_haklali')).toBeGreaterThan(position('siddur-mitzvot'));
     });
 
     it('keeps the prayers out of it', () => {

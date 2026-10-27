@@ -10,6 +10,7 @@ const mockRouter = {
   canDismiss: () => false,
 };
 let mockLoadedText: SiddurText | null = null;
+let mockLoadGate: Promise<void> | null = null;
 
 jest.mock('expo-router', () => {
   const React = require('react');
@@ -25,6 +26,12 @@ jest.mock('expo-router', () => {
     useFocusEffect: (effect: () => void) => React.useEffect(effect, [effect]),
   };
 });
+jest.mock('@/utils/afterPaint', () => ({
+  afterPaint: (task: () => void) => {
+    queueMicrotask(task);
+    return { cancel: () => undefined };
+  },
+}));
 jest.mock('expo-keep-awake', () => ({
   activateKeepAwakeAsync: () => Promise.resolve(),
   deactivateKeepAwake: () => Promise.resolve(),
@@ -32,7 +39,8 @@ jest.mock('expo-keep-awake', () => ({
 jest.mock('@/services/SiddurService', () => {
   const { readSiddurText } = require('@/testing/siddur');
   return {
-    loadSiddurText: (nusach: string, id: string) => Promise.resolve(mockLoadedText ?? readSiddurText(nusach, id)),
+    loadSiddurText: (nusach: string, id: string) =>
+      (mockLoadGate ?? Promise.resolve()).then(() => mockLoadedText ?? readSiddurText(nusach, id)),
     loadChokParasha: () => Promise.reject(new Error('no chok text in a reader render')),
   };
 });
@@ -112,6 +120,7 @@ async function openShacharit() {
   Object.assign(mockParams, { id: 'shacharit', date: '2026-10-28' });
   renderWithTheme(<SiddurReaderScreen />);
   await screen.findAllByText(FIRST_LINE);
+  await act(async () => {});
 }
 
 async function openAt(section?: string) {
@@ -122,6 +131,7 @@ async function openAt(section?: string) {
   Object.assign(mockParams, { id: 'shacharit', ...(section ? { section } : {}) });
   renderWithTheme(<SiddurReaderScreen />);
   await screen.findAllByText(FIRST_LINE);
+  await act(async () => {});
 }
 
 const VOICED: SiddurText = {
@@ -224,6 +234,45 @@ describe('the siddur reader toolbar and section cards', () => {
     fireEvent.press(screen.getByRole('switch', { name: 'גלילה אוטומטית' }));
     expect(useUserStore.getState().siddurAutoScroll).toBe(true);
     expect(screen.getByRole('switch', { name: 'גלילה אוטומטית' })).toHaveStyle({ backgroundColor: THEMES.gold.gold });
+  });
+});
+
+describe('the siddur reader header while the text loads', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+    mockLoadGate = null;
+  });
+
+  it('draws every control row before the text arrives, so nothing moves when it does', async () => {
+    jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+    for (const key of Object.keys(mockParams)) delete mockParams[key];
+    Object.assign(mockParams, { id: 'shacharit', date: '2026-10-28' });
+    let release: () => void = () => {};
+    mockLoadGate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    renderWithTheme(<SiddurReaderScreen />);
+    await act(async () => {});
+
+    expect(screen.queryByText(FIRST_LINE)).toBeNull();
+    expect(screen.getByText('טוען את הנוסח…')).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'בחר חלק: …' })).toBeOnTheScreen();
+    expect(screen.getByRole('radio', { name: 'במניין' })).toBeOnTheScreen();
+    expect(screen.getByRole('radio', { name: 'ביחיד' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'הוסף סימנייה' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'סימניות' })).toBeDisabled();
+    expect(screen.getByRole('switch', { name: 'גלילה אוטומטית' })).toBeOnTheScreen();
+
+    await act(async () => release());
+    await screen.findAllByText(FIRST_LINE);
+    await act(async () => {});
+    expect(screen.queryByRole('button', { name: 'בחר חלק: …' })).toBeNull();
+    expect(screen.getByRole('button', { name: /^בחר חלק: / })).toBeOnTheScreen();
+    expect(screen.getByRole('radio', { name: 'במניין' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'הוסף סימנייה' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'סימניות' })).toBeEnabled();
   });
 });
 
@@ -338,7 +387,7 @@ describe('the siddur reader opened at a section', () => {
     expect(scrollToIndex).toHaveBeenCalledWith({ index, animated: false });
     expect(index).toBeGreaterThan(0);
     expect(screen.UNSAFE_getByType(FlatList).props.data[index].chapter.he).toBe(CHAPTER);
-    expect(screen.getByRole('button', { name: `בחר חלק: ${CHAPTER}` })).toBeOnTheScreen();
+    expect(await screen.findByRole('button', { name: `בחר חלק: ${CHAPTER}` })).toBeOnTheScreen();
   });
 
   it('opens at the top without a section', async () => {
@@ -398,6 +447,7 @@ describe('the siddur reader bookmarks and last place', () => {
     Object.assign(mockParams, params);
     renderWithTheme(<SiddurReaderScreen />);
     await screen.findByText(MID_2);
+    await act(async () => {});
   }
 
   const layout = (testID: string, y: number, height: number) =>
@@ -747,6 +797,7 @@ describe('the siddur reader header for a custom mitzvah', () => {
     Object.assign(mockParams, { id: CUSTOM_ID, ...(date ? { date } : {}) });
     renderWithTheme(<SiddurReaderScreen />);
     await screen.findByText(CUSTOM_TEXT);
+    await act(async () => {});
   }
 
   afterEach(() => {
@@ -792,5 +843,267 @@ describe('the siddur reader header for a custom mitzvah', () => {
     const { completions } = useCompletionsStore.getState();
     expect(completions['2027-06-14'][CUSTOM_ID]).toBeGreaterThan(0);
     expect(completions['2027-06-15']).toBeUndefined();
+  });
+});
+
+describe('the siddur reader folds its controls while the user reads', () => {
+  const FULL = 300;
+  const COMPACT = 56;
+  const MID_2 = 'שְׁמַע יִשְׂרָאֵל יְהוָה אֱלֹהֵינוּ';
+  const EXPAND = 'הצג את כלי הקריאה';
+  const RESUME = 'להמשיך מהמקום שבו עצרת?';
+  const KEYED: SiddurSection[] = [
+    {
+      title: { he: 'פתיחה', en: 'Opening' },
+      segments: [
+        { key: 'k-open-1', he: [[{ t: 'אֶחָד שְׁנַיִם שְׁלֹשָׁה אַרְבַּע' }]] },
+        { key: 'k-open-2', he: [[{ t: 'חֲמִשָּׁה שִׁשָּׁה שִׁבְעָה' }]] },
+      ],
+    },
+    {
+      title: { he: 'אמצע', en: 'Middle' },
+      segments: [
+        { key: 'k-mid-1', he: [[{ t: 'בָּרוּךְ אַתָּה יְהוָה אֱלֹהֵינוּ' }]] },
+        { key: 'k-mid-2', he: [[{ t: MID_2 }]] },
+      ],
+    },
+  ];
+  let scrollSpy: jest.SpyInstance;
+  let offsetSpy: jest.SpyInstance;
+
+  const layout = (testID: string, y: number, height: number) =>
+    fireEvent(screen.getByTestId(testID, { hidden: true }), 'layout', {
+      nativeEvent: { layout: { x: 0, y, width: 360, height } },
+    });
+  const scrollEvent = (y: number) => ({
+    nativeEvent: {
+      contentOffset: { x: 0, y },
+      contentSize: { width: 360, height: 2000 },
+      layoutMeasurement: { width: 360, height: 640 },
+    },
+  });
+  async function scrollList(y: number) {
+    fireEvent.scroll(screen.getByTestId('siddur-list'), scrollEvent(y));
+    await act(async () => {});
+  }
+  async function dragTo(y: number) {
+    fireEvent(screen.getByTestId('siddur-list'), 'scrollBeginDrag', scrollEvent(y));
+    await scrollList(y);
+    fireEvent(screen.getByTestId('siddur-list'), 'scrollEndDrag', scrollEvent(y));
+  }
+  const folded = () => screen.getByTestId('siddur-header-compact', { hidden: true }).props.pointerEvents === 'auto';
+  const pause = (ms: number) => act(() => new Promise((resolve) => setTimeout(resolve, ms)));
+  const later = (ms: number) => act(() => jest.setSystemTime(Date.now() + ms));
+  const saved = () => useSiddurBookmarksStore.getState().lastPositions;
+  const seed = () =>
+    useSiddurBookmarksStore.setState({
+      lastPositions: {
+        shacharit: {
+          nusach: 'ashkenaz',
+          sectionTitle: 'אמצע',
+          segmentKey: 'k-mid-2',
+          appDay: '2026-10-28',
+          savedAt: 0,
+        },
+      },
+    });
+
+  async function open() {
+    jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+    mockLoadedText = { nusach: 'ashkenaz', id: 'shacharit', credits: [], sections: KEYED };
+    for (const key of Object.keys(mockParams)) delete mockParams[key];
+    Object.assign(mockParams, { id: 'shacharit', date: '2026-10-28' });
+    renderWithTheme(<SiddurReaderScreen />);
+    await screen.findByText(MID_2);
+    await act(async () => {});
+    layout('siddur-header-full', 0, FULL);
+    layout('siddur-header-compact', 0, COMPACT);
+    layout('siddur-section-פתיחה', 0, 300);
+    layout('siddur-section-אמצע', 0, 400);
+    layout('siddur-segment-k-mid-1', 60, 80);
+    layout('siddur-segment-k-mid-2', 150, 80);
+  }
+
+  beforeEach(() => {
+    useSiddurBookmarksStore.getState().reset();
+    scrollSpy = jest.spyOn(FlatList.prototype, 'scrollToIndex').mockImplementation(() => {});
+    offsetSpy = jest.spyOn(FlatList.prototype, 'scrollToOffset').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+    mockLoadedText = null;
+  });
+
+  it('opens with every control and no compact bar', async () => {
+    await open();
+    expect(folded()).toBe(false);
+    expect(screen.getByTestId('siddur-header-full').props.pointerEvents).toBe('auto');
+    expect(screen.getByRole('switch', { name: 'גלילה אוטומטית' })).toBeOnTheScreen();
+    expect(screen.queryByHintText(EXPAND)).toBeNull();
+  });
+
+  it('draws the overlay inside the safe area, not on its border', async () => {
+    await open();
+    const hostParent = (node: ReturnType<typeof screen.getByTestId>) => {
+      let current = node.parent;
+      while (current && typeof current.type !== 'string') current = current.parent;
+      return current!;
+    };
+    const stage = hostParent(screen.getByTestId('siddur-header-overlay'));
+    expect(stage.type).not.toBe('RNCSafeAreaView');
+    expect(hostParent(stage).type).toBe('RNCSafeAreaView');
+    expect(hostParent(screen.getByTestId('siddur-list'))).toBe(stage);
+    expect(StyleSheet.flatten(screen.getByTestId('siddur-header-overlay').props.style)).toMatchObject({
+      position: 'absolute',
+      top: 0,
+    });
+  });
+
+  it('stays open within the height of the full block, however far the text scrolls', async () => {
+    await open();
+    await scrollList(100);
+    await scrollList(200);
+    await scrollList(FULL - 1);
+    expect(folded()).toBe(false);
+  });
+
+  it('folds once the text scrolls down past 12 points beyond the full block', async () => {
+    await open();
+    await scrollList(FULL - 1);
+    await scrollList(FULL + 5);
+    expect(folded()).toBe(false);
+    await scrollList(FULL + 10);
+    expect(folded()).toBe(false);
+    await scrollList(FULL + 13);
+    expect(folded()).toBe(true);
+    expect(screen.getByTestId('siddur-header-full', { hidden: true }).props.pointerEvents).toBe('none');
+    const bar = screen.getByHintText(EXPAND);
+    expect(bar).toBeOnTheScreen();
+    expect(bar).toHaveProp('accessibilityLabel', 'תפילת שחרית');
+    expect(
+      within(screen.getByTestId('siddur-header-compact', { hidden: true })).getByRole('button', { name: 'חזור' }),
+    ).toBeOnTheScreen();
+  });
+
+  it('unfolds on a drag up from any point', async () => {
+    await open();
+    await scrollList(600);
+    expect(folded()).toBe(true);
+    await dragTo(598);
+    expect(folded()).toBe(true);
+    await dragTo(594);
+    expect(folded()).toBe(false);
+  });
+
+  it('does not unfold on an upward move nobody dragged', async () => {
+    await open();
+    await scrollList(600);
+    await scrollList(560);
+    expect(folded()).toBe(true);
+  });
+
+  it('does not unfold on the bounce back from the end of the text', async () => {
+    await open();
+    await scrollList(600);
+    fireEvent(screen.getByTestId('siddur-list'), 'momentumScrollBegin', scrollEvent(1300));
+    await scrollList(1400);
+    await scrollList(1360);
+    await scrollList(1361);
+    await scrollList(1360);
+    expect(folded()).toBe(true);
+    await dragTo(1340);
+    expect(folded()).toBe(false);
+  });
+
+  it('unfolds on a tap on the compact bar', async () => {
+    await open();
+    await scrollList(600);
+    fireEvent.press(screen.getByHintText(EXPAND));
+    await act(async () => {});
+    expect(folded()).toBe(false);
+  });
+
+  it('unfolds when the text scrolls back into the height of the full block', async () => {
+    await open();
+    await scrollList(600);
+    await scrollList(FULL - 10);
+    expect(folded()).toBe(false);
+  });
+
+  it('keeps its state through a jump to a place until the freeze ends', async () => {
+    seed();
+    await open();
+    fireEvent.press(screen.getByText('המשך'));
+    expect(scrollSpy).toHaveBeenCalledWith({ index: 1, animated: false, viewOffset: FULL - 150 });
+    await scrollList(900);
+    expect(folded()).toBe(false);
+    await scrollList(FULL + 100);
+    expect(folded()).toBe(false);
+    await later(700);
+    await scrollList(FULL + 150);
+    expect(folded()).toBe(true);
+  });
+
+  it('lands a place under the full block when unfolded and under the bar when folded', async () => {
+    await open();
+    await scrollList(766 - COMPACT);
+    expect(folded()).toBe(true);
+    await pause(1100);
+    expect(saved().shacharit.segmentKey).toBe('k-mid-2');
+    await dragTo(766 - FULL);
+    await dragTo(766 - FULL - 6);
+    await dragTo(766 - FULL);
+    expect(folded()).toBe(false);
+    await pause(1100);
+    expect(saved().shacharit.segmentKey).toBe('k-mid-2');
+  });
+
+  it('names the section under the cover in the picker once the controls come back', async () => {
+    await open();
+    await scrollList(400);
+    expect(folded()).toBe(true);
+    await later(300);
+    await dragTo(390);
+    expect(folded()).toBe(false);
+    expect(screen.getByRole('button', { name: 'בחר חלק: אמצע' })).toBeOnTheScreen();
+  });
+
+  it('keeps the text where it is when the full block grows or shrinks while scrolled', async () => {
+    await open();
+    await scrollList(600);
+    layout('siddur-header-full', 0, FULL + 40);
+    await act(async () => {});
+    expect(offsetSpy).toHaveBeenCalledWith({ offset: 640, animated: false });
+    offsetSpy.mockClear();
+    await scrollList(640);
+    layout('siddur-header-full', 0, FULL);
+    await act(async () => {});
+    expect(offsetSpy).toHaveBeenCalledWith({ offset: 600, animated: false });
+  });
+
+  it('leaves the offset alone when the full block changes near the top', async () => {
+    await open();
+    await scrollList(100);
+    layout('siddur-header-full', 0, FULL + 40);
+    await act(async () => {});
+    expect(offsetSpy).not.toHaveBeenCalled();
+  });
+
+  it('shows the resume offer under the full block, hides it when folded and brings it back', async () => {
+    seed();
+    await open();
+    expect(within(screen.getByTestId('siddur-header-full')).getByText(RESUME)).toBeOnTheScreen();
+    await scrollList(600);
+    expect(folded()).toBe(true);
+    expect(screen.getByTestId('siddur-header-full', { hidden: true }).props.pointerEvents).toBe('none');
+    expect(screen.queryByText(RESUME)).toBeNull();
+    fireEvent.press(screen.getByHintText(EXPAND));
+    await act(async () => {});
+    expect(folded()).toBe(false);
+    expect(screen.getByText(RESUME)).toBeOnTheScreen();
   });
 });

@@ -1,6 +1,7 @@
 import { CITIES } from '@/data/cities';
 import { iconFor, type IconName } from '@/components/MitzvahIcon';
 import { CHOK_TEXT_ID } from '@/data/chok';
+import { HILULOT, hilulaDateLabel, upcomingHilulot } from '@/data/hilulot';
 import {
   SIDDUR_GROUPS,
   STANDALONE_TEXTS,
@@ -15,6 +16,7 @@ import {
   standaloneTextsIn,
 } from '@/data/siddur';
 import { SIDDUR_CHAPTERS } from '@/data/siddurChapters.generated';
+import { HebcalService } from '@/services/HebcalService';
 import type { MaritalStatus } from '@/stores/useUserStore';
 import type { Mitzvah, Nusach } from '@/types/mitzvah';
 import type { SiddurChapterTitle, SiddurTextId, SiddurVoice } from '@/types/siddur';
@@ -45,7 +47,8 @@ export type SettingsSearchName = { he: string; en: string };
 
 export type SettingsSearchHref =
   | { pathname: '/mitzvah/[id]'; params: { id: string } }
-  | { pathname: '/siddur/[id]'; params: { id: string; section?: string } };
+  | { pathname: '/siddur/[id]'; params: { id: string; section?: string } }
+  | { pathname: '/hilula/[id]'; params: { id: string } };
 
 export type SettingsSearchNotToday = { label: SettingsSearchName | null };
 
@@ -53,7 +56,11 @@ export type SettingsSearchContentItem = SearchItemBase & {
   title: SettingsSearchName;
   href: SettingsSearchHref;
   notToday?: SettingsSearchNotToday;
-} & ({ kind: 'mitzvah' | 'siddur' } | { kind: 'chapter'; textName: SettingsSearchName });
+} & (
+    | { kind: 'mitzvah' | 'siddur' }
+    | { kind: 'chapter'; textName: SettingsSearchName }
+    | { kind: 'hilula'; caption: SettingsSearchName }
+  );
 
 export type SettingsSearchItem = SettingsSearchSettingItem | SettingsSearchContentItem;
 export type SettingsSearchKind = SettingsSearchContentItem['kind'];
@@ -686,7 +693,25 @@ export function settingsContentItems({
       notToday: text.notToday,
     }));
   });
-  return [...mitzvahItems, ...textItems, ...chapterItems];
+  const days = new Map(
+    upcomingHilulot(HebcalService.hebrewDayAt(now, location), inIsrael).map(({ hilula, day }) => [hilula.id, day]),
+  );
+  const hilulaItems = HILULOT.flatMap((hilula): SettingsSearchContentItem[] => {
+    const day = days.get(hilula.id);
+    if (!day) return [];
+    return [
+      {
+        id: `hilula:${hilula.id}`,
+        kind: 'hilula',
+        icon: 'hilula',
+        title: hilula.name,
+        caption: { he: hilulaDateLabel(day, 'he'), en: hilulaDateLabel(day, 'en') },
+        terms: [...(hilula.aliases?.he ?? []), ...(hilula.aliases?.en ?? [])],
+        href: { pathname: '/hilula/[id]', params: { id: hilula.id } },
+      },
+    ];
+  });
+  return [...mitzvahItems, ...textItems, ...chapterItems, ...hilulaItems];
 }
 
 export function typedInOtherLayout(query: string): string | null {
@@ -780,7 +805,7 @@ function queryScore(query: string, entry: SettingsSearchEntry, fuzzy: boolean): 
 
 export const SETTINGS_SEARCH_LIMIT = 12;
 
-const KIND_RANK: Record<SettingsSearchKind, number> = { mitzvah: 1, siddur: 2, chapter: 3 };
+const KIND_RANK: Record<SettingsSearchKind, number> = { mitzvah: 1, siddur: 2, chapter: 3, hilula: 4 };
 const kindRank = (item: SettingsSearchItem): number => (item.kind ? KIND_RANK[item.kind] : 0);
 
 // Exact, prefix and substring matches first; typo tolerance only when they find nothing,

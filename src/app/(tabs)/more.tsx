@@ -107,6 +107,20 @@ export default function MoreScreen() {
             onPress={() => router.push({ pathname: '/siddur/[id]', params: { id: 'tehillim' } })}
           />
           <ListRow
+            icon="hilula"
+            title={t('hilulot.title')}
+            caption={t('hilulot.subtitle')}
+            chevron
+            onPress={() => router.push('/hilulot')}
+          />
+          <ListRow
+            icon="compass"
+            title={t('compass.title')}
+            caption={t('compass.caption')}
+            chevron
+            onPress={() => router.push('/compass')}
+          />
+          <ListRow
             icon="phone"
             title={t('more.halacha.title')}
             caption={t(`more.halacha.caption.${ruling}`)}

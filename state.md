@@ -48,13 +48,13 @@ Every other EAS build is superseded, and no other AAB was uploaded to Play ([act
 
 ## Not in production yet
 
-- **Over the air:** nothing; every committed JS change is in production `1.0.21-2` (`c1989c4`).
+- **Over the air:** every committed JS change is in production `1.0.21-2` (`c1989c4`); the app requests of 2026-10-26 are finished in the working tree and not committed.
 - **Waits for the store production release** (finished, committed and pushed; [not-close.md](not-close.md), High — the 1.0.21 store release, and Bugs): the Jew 365 identity, the native half of the redesign, the four-symbol icons, the iOS build fixes, the store copy, the no-promise copy, the China mainland availability, and the Hebrew Android app name.
 - **Waits for the next native build:** the Selichot space saving (about 5.5 MB), the fresh-install stamps in the embedded bundle, the Hebrew Android app name in production, and the Build tasks (arm-only direct APK, R8). A build that raises `version` cuts installs off from updates until they install it, so it also needs a version decision.
 
 ## Next steps
 
-1. The app requests of 2026-10-26, when the user asks: the longer reminder horizon and the performance measurement first; every owner question of the batch is answered ([not-close.md](not-close.md)).
+1. The app requests of 2026-10-26: the thirteen OTA tasks are built and reviewed in the working tree, uncommitted, with `typecheck`, `lint`, `check:dox` and `test:tz` green on 2026-10-26 and the `1.0.21-3` user guide entry written; they wait for the emulator checks their Done lines name, the owner's commit approval and a production update. The history redesign waits for the owner's pick of the sketches, the extra tzaddikim for the owner's pick of the candidates, and the performance measurement on the emulator is still to run ([not-close.md](not-close.md)).
 2. The owner, or a rav, reviews the tzaddik content (Other Open Items in [not-close.md](not-close.md)); the choices of the tzaddik pages and the display size (D1–D8) were approved on 2026-10-26 ([action-log.md](action-log.md)).
 3. Check production `1.0.21-2` on a phone with the production app (Settings shows `1.0.21-2`), and its launches with `npx eas-cli update:insights 7f18981c-709b-475b-a0ce-19ae67b87c94`.
 4. Keep 12 or more testers opted in until about 2026-11-06, then apply for production in the Play Console.

@@ -119,6 +119,11 @@ export function handleNotificationResponse(response: Notifications.NotificationR
     return;
   }
 
+  if (data.kind === 'horizonEnd') {
+    if (response.actionIdentifier === DEFAULT_NOTIFICATION_ACTION) navigate(() => router.navigate('/(tabs)/home'));
+    return;
+  }
+
   if (data.kind === 'checkin') {
     if (response.actionIdentifier === DEFAULT_NOTIFICATION_ACTION) navigate(() => router.navigate('/checkin'));
     return;

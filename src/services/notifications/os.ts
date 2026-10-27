@@ -84,13 +84,31 @@ export async function ensureCategories(): Promise<void> {
   }
 }
 
+// FNV-1a over everything a user can see or a tap reads, so a changed reminder is told from an
+// unchanged one without comparing the OS's copy field by field.
+export function contentHash(candidate: ScheduleCandidate): string {
+  const text = JSON.stringify([
+    candidate.title,
+    candidate.body,
+    candidate.trigger.getTime(),
+    candidate.categoryIdentifier ?? null,
+    candidate.channel,
+    candidate.data,
+  ]);
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < text.length; index++) {
+    hash = Math.imul(hash ^ text.charCodeAt(index), 0x01000193) >>> 0;
+  }
+  return hash.toString(16);
+}
+
 function requestFor(candidate: ScheduleCandidate): Notifications.NotificationRequestInput {
   return {
     identifier: candidate.id,
     content: {
       title: candidate.title,
       body: candidate.body,
-      data: candidate.data,
+      data: { ...candidate.data, contentHash: contentHash(candidate) },
       ...(candidate.categoryIdentifier && { categoryIdentifier: candidate.categoryIdentifier }),
       autoDismiss: true,
       sticky: false,
@@ -115,6 +133,26 @@ export async function schedule(candidates: ScheduleCandidate[]): Promise<void> {
       if (__DEV__) console.warn('[notifications] schedule failed', candidate.id, err);
     }
   }
+}
+
+// Makes the pending set equal `candidates` touching only the difference: ids the plan lacks and
+// reminders whose content changed are cancelled, and only the new and the changed are scheduled.
+// If the pending set cannot be read, everything is replaced.
+export async function sync(candidates: ScheduleCandidate[]): Promise<void> {
+  let pending: TrayNotification[];
+  try {
+    pending = await getScheduled();
+  } catch {
+    await cancelAll();
+    await schedule(candidates);
+    return;
+  }
+  const hashes = new Map(pending.map(({ identifier, data }) => [identifier, data.contentHash]));
+  const wanted = new Set(candidates.map(({ id }) => id));
+  const changed = candidates.filter((candidate) => hashes.get(candidate.id) !== contentHash(candidate));
+  const stale = [...hashes.keys()].filter((id) => !wanted.has(id));
+  await cancelScheduled([...stale, ...changed.filter(({ id }) => hashes.has(id)).map(({ id }) => id)]);
+  await schedule(changed);
 }
 
 // Shown at once, on the system channel on Android.

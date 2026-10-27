@@ -34,6 +34,7 @@ describe('expo-router routes', () => {
     expect(routes).toContain('mitzvot');
     expect(routes).toContain('schedule');
     expect(routes).toContain('guide');
+    expect(routes).toContain('compass');
   });
 
   it('discovers taharah routes', () => {

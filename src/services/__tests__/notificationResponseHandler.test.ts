@@ -480,6 +480,18 @@ describe('notificationResponseHandler', () => {
     expect(mockRouterNavigate).toHaveBeenCalledWith({ pathname: '/report', params: { week: undefined } });
   });
 
+  it('opens home from the end-of-reminders notice, never a mitzvah lookup', () => {
+    initNotificationResponseHandler();
+    const listener = mockAddNotificationResponseReceivedListener.mock.calls[0][0];
+
+    listener(response(DEFAULT_NOTIFICATION_ACTION, { kind: 'horizonEnd' }, 'horizonEnd:2026-11-20'));
+
+    expect(mockRouterNavigate).toHaveBeenCalledWith('/(tabs)/home');
+    expect(mockRouterNavigate).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).not.toHaveBeenCalled();
+    expect(mockMarkDoneFromNotificationData).not.toHaveBeenCalled();
+  });
+
   it('hands the mark-done button of a bedika reminder to the scheduler with its taharah payload', () => {
     initNotificationResponseHandler();
     const listener = mockAddNotificationResponseReceivedListener.mock.calls[0][0];

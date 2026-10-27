@@ -24,12 +24,15 @@ export function holyBlockExit(zmanim: Pick<Zmanim, 'tzeitHakochavim'>): Date {
   return new Date(zmanim.tzeitHakochavim.getTime() + HOLY_BLOCK_EXIT_MIN * 60_000);
 }
 
-const ZMANIM_CACHE_LIMIT = 90;
+const ZMANIM_CACHE_LIMIT = 400;
+const DAY_KEY_BUCKET_MS = 15 * 60_000;
+const DAY_KEY_BUCKET_LIMIT = 4000;
 const ALOT_FALLBACK_MIN = 72;
 const MISHEYAKIR_FALLBACK_MIN = 52;
 const TZEIT_FALLBACK_MIN = 30;
 const MGA_OFFSET_MIN = 72;
 const zmanimCache = new Map<string, Zmanim>();
+const dayKeysByZone = new Map<string, Map<number, string>>();
 
 function toDateOrNull(value: unknown): Date | null {
   if (!value) return null;
@@ -69,10 +72,29 @@ function buildCalendar(date: Date, loc: Location): ComplexZmanimCalendar {
   return cal;
 }
 
+// Every zone offset and every transition is a whole number of 15-minute steps, so a 15-minute bucket
+// never straddles a local midnight and its civil date is the same for all of it.
+function civilDayKey(date: Date, tz: string): string {
+  let keys = dayKeysByZone.get(tz);
+  if (!keys) {
+    keys = new Map();
+    dayKeysByZone.set(tz, keys);
+  }
+  const bucket = Math.floor(date.getTime() / DAY_KEY_BUCKET_MS);
+  let day = keys.get(bucket);
+  if (day === undefined) {
+    day =
+      DateTime.fromMillis(bucket * DAY_KEY_BUCKET_MS)
+        .setZone(tz)
+        .toISODate() ?? '';
+    if (keys.size >= DAY_KEY_BUCKET_LIMIT) keys.clear();
+    keys.set(bucket, day);
+  }
+  return day;
+}
+
 function cacheKey(date: Date, loc: Location): string {
-  return [DateTime.fromJSDate(date).setZone(loc.tz).toISODate(), loc.lat, loc.lng, loc.elevation ?? 0, loc.tz].join(
-    '|',
-  );
+  return [civilDayKey(date, loc.tz), loc.lat, loc.lng, loc.elevation ?? 0, loc.tz].join('|');
 }
 
 function cloneZmanim(zmanim: Zmanim): Zmanim {
@@ -115,7 +137,11 @@ export const ZmanimService = {
   getZmanim(date: Date, loc: Location): Zmanim | null {
     const key = cacheKey(date, loc);
     const cached = zmanimCache.get(key);
-    if (cached) return cloneZmanim(cached);
+    if (cached) {
+      zmanimCache.delete(key);
+      zmanimCache.set(key, cached);
+      return cloneZmanim(cached);
+    }
 
     const cal = buildCalendar(date, loc);
     const sunrise = cal.getSeaLevelSunrise();

@@ -1,0 +1,219 @@
+import React from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Card } from '@/components/Card';
+import { IconTile } from '@/components/IconTile';
+import { ListRow } from '@/components/ListRow';
+import { type IconName } from '@/components/MitzvahIcon';
+import { NavBar } from '@/components/NavBar';
+import { HeaderPill } from '@/components/ScreenHeader';
+import { SectionLabel } from '@/components/SectionLabel';
+import { useUserStore } from '@/stores/useUserStore';
+import { THEME_NAMES, ThemeName } from '@/theme/colors';
+import { scaled } from '@/theme/scale';
+import { useTheme } from '@/theme/ThemeProvider';
+import { radius, spacing } from '@/theme/tokens';
+import { fontFamilies, typography } from '@/theme/typography';
+
+const NUMBER_SIZE = scaled(34);
+const NUMBER_LINE = scaled(40);
+const BAR_HEIGHT = scaled(8);
+const THIN_BAR = scaled(4);
+const BADGE_TILE = scaled(48);
+
+const PROFILE_NAME = 'אברהם כהן';
+const STREAK = 12;
+const BEST = 31;
+const PERCENT = 87;
+const GOAL = 30;
+
+const DAYS: ('full' | 'partial' | 'none')[] = [
+  'full', 'full', 'partial', 'full', 'none', 'full', 'full', 'full', 'partial', 'full',
+  'full', 'partial', 'full', 'full', 'full', 'none', 'partial', 'full', 'full', 'full',
+  'partial', 'full', 'full', 'full', 'full', 'full', 'partial', 'full', 'full', 'partial',
+];
+
+type Badge = { id: string; icon: IconName; title: string; caption: string; progress?: number };
+
+const EARNED: Badge[] = [
+  { id: 'streak7', icon: 'star', title: '7 ימים ברצף', caption: 'ז׳ באלול' },
+  { id: 'fullWeek', icon: 'calendar', title: 'שבוע מלא', caption: 'י״ד באלול' },
+  { id: 'streak30', icon: 'sparkle', title: '30 ימים ברצף', caption: 'ל׳ באלול' },
+];
+
+const NEXT: Badge[] = [
+  { id: 'hundredOne', icon: 'tefillin', title: '100 פעמים תפילין', caption: '74 מתוך 100 סימונים', progress: 0.74 },
+  { id: 'fullMonth', icon: 'moon', title: 'חודש מלא', caption: 'כל המצוות בכל יום של חודש עברי', progress: 0.4 },
+  { id: 'streak100', icon: 'star', title: '100 ימים ברצף', caption: '12 מתוך 100 ימים', progress: 0.12 },
+  { id: 'streak365', icon: 'sun', title: '365 ימים ברצף', caption: '12 מתוך 365 ימים', progress: 0.03 },
+];
+
+const MITZVOT: { id: string; icon: IconName; name: string; percent: number; streak: number; best: number }[] = [
+  { id: 'tefillin', icon: 'tefillin', name: 'תפילין', percent: 93, streak: 12, best: 31 },
+  { id: 'krias_shma_shacharit', icon: 'shema', name: 'קריאת שמע של שחרית', percent: 90, streak: 9, best: 24 },
+  { id: 'shacharit', icon: 'shacharit', name: 'שחרית', percent: 83, streak: 5, best: 18 },
+  { id: 'maariv', icon: 'maariv', name: 'מעריב', percent: 77, streak: 4, best: 11 },
+  { id: 'mincha', icon: 'mincha', name: 'מנחה', percent: 70, streak: 2, best: 9 },
+  { id: 'krias_shma_al_hamita', icon: 'night', name: 'קריאת שמע על המיטה', percent: 60, streak: 0, best: 6 },
+];
+
+function greeting(profileName: string): string {
+  const first = profileName.trim().split(/\s+/)[0];
+  return first ? `שלום, ${first}` : 'שלום וברוכים הבאים';
+}
+
+if (typeof window !== "undefined" && window.location) {
+  const theme = new URLSearchParams(window.location.search).get("theme");
+  useUserStore.setState({
+    isOnboarded: true,
+    language: "he",
+    ...(theme && (THEME_NAMES as readonly string[]).includes(theme) ? { theme: theme as ThemeName } : {}),
+  });
+}
+
+export default function SketchHistoryB() {
+  const { colors } = useTheme();
+
+  const numbers = [
+    { value: `${STREAK}`, label: 'ימים ברצף', explain: 'ימים רצופים עם סימון אחד לפחות' },
+    { value: `${BEST}`, label: 'השיא שלך', explain: 'הרצף הארוך ביותר אי פעם' },
+    { value: `${PERCENT}%`, label: 'ב־30 יום', explain: 'מהמצוות שזמנן עבר, סומנו' },
+  ];
+
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
+      <NavBar
+        title={greeting(PROFILE_NAME)}
+        subtitle="ההתמדה שלך במבט אחד"
+        actions={<HeaderPill label="דוחות" accessibilityLabel="דוחות" onPress={() => {}} />}
+      />
+      <ScrollView contentContainerStyle={styles.content}>
+        <Card padded>
+          <View style={styles.numbers}>
+            {numbers.map((n, index) => (
+              <React.Fragment key={n.label}>
+                {index > 0 ? <View style={[styles.vDivider, { backgroundColor: colors.border }]} /> : null}
+                <View style={styles.numberCol}>
+                  <Text style={[styles.number, { color: index === 0 ? colors.goldText : colors.text }]}>{n.value}</Text>
+                  <Text style={[typography.captionBold, styles.center, { color: colors.text }]}>{n.label}</Text>
+                  <Text style={[typography.micro, styles.center, { color: colors.textSub }]}>{n.explain}</Text>
+                </View>
+              </React.Fragment>
+            ))}
+          </View>
+          <View style={[styles.hDivider, { backgroundColor: colors.border }]} />
+          <View style={styles.goalTop}>
+            <Text style={[typography.subheading, { color: colors.text }]}>היעד הבא: 30 ימים ברצף</Text>
+            <Text style={[typography.captionBold, { color: colors.goldText }]}>עוד 18</Text>
+          </View>
+          <View style={[styles.barTrack, { backgroundColor: colors.surface2 }]}>
+            <View style={[styles.barFill, { width: `${(STREAK / GOAL) * 100}%`, backgroundColor: colors.gold }]} />
+          </View>
+          <View style={styles.dots}>
+            {[0, 1, 2].map((row) => (
+              <View key={row} style={styles.dotRow}>
+                {DAYS.slice(row * 10, row * 10 + 10).map((level, col) => (
+                  <View
+                    key={col}
+                    style={[
+                      styles.dot,
+                      {
+                        backgroundColor:
+                          level === 'full' ? colors.gold : level === 'partial' ? colors.goldLight : colors.surface2,
+                      },
+                      row * 10 + col === DAYS.length - 1 && { borderWidth: 1.5, borderColor: colors.goldText },
+                    ]}
+                  />
+                ))}
+              </View>
+            ))}
+          </View>
+          <Text style={[typography.small, { color: colors.textSub }]}>
+            30 הימים האחרונים · מלא: הכל בוצע · בהיר: חלק · אפור: כלום
+          </Text>
+        </Card>
+
+        <SectionLabel text="ההישגים שלך" count={EARNED.length} />
+        <View style={styles.earnedRow}>
+          {EARNED.map((badge) => (
+            <Card key={badge.id} padded style={styles.earned}>
+              <View style={styles.earnedInner}>
+                <IconTile name={badge.icon} size={BADGE_TILE} />
+                <Text style={[typography.captionBold, styles.center, { color: colors.text }]}>{badge.title}</Text>
+                <Text style={[typography.micro, styles.center, { color: colors.textSub }]}>{badge.caption}</Text>
+              </View>
+            </Card>
+          ))}
+        </View>
+
+        <SectionLabel text="בדרך להישג הבא" />
+        <Card divided>
+          {NEXT.map((badge) => (
+            <View key={badge.id}>
+              <ListRow icon={badge.icon} iconTone="muted" title={badge.title} caption={badge.caption} />
+              <View style={[styles.thinTrack, { backgroundColor: colors.surface2 }]}>
+                <View
+                  style={[styles.thinFill, { width: `${(badge.progress ?? 0) * 100}%`, backgroundColor: colors.gold }]}
+                />
+              </View>
+            </View>
+          ))}
+        </Card>
+
+        <SectionLabel text="לפי מצווה" />
+        <Text style={[typography.small, styles.sectionHint, { color: colors.textSub }]}>
+          רצף: ימים רצופים שסימנת את המצווה. אחוז: מהימים שזמנה עבר ב־30 הימים האחרונים, בכמה סימנת.
+        </Text>
+        <Card divided>
+          {MITZVOT.map((m) => (
+            <ListRow
+              key={m.id}
+              icon={m.icon}
+              title={m.name}
+              caption={m.streak ? `רצף ${m.streak} ימים · שיא ${m.best}` : `אין רצף כרגע · שיא ${m.best}`}
+              onPress={() => {}}
+              trailing={
+                <View style={styles.trailing}>
+                  <Text style={[typography.heading, { color: colors.goldText }]}>{m.percent}%</Text>
+                  <Text style={[typography.micro, { color: colors.textSub }]}>ב־30 יום</Text>
+                </View>
+              }
+            />
+          ))}
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1 },
+  content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, paddingTop: spacing.sm },
+  center: { textAlign: 'center' },
+  numbers: { flexDirection: 'row', alignItems: 'stretch' },
+  numberCol: { flex: 1, alignItems: 'center', gap: scaled(2), paddingHorizontal: spacing.xs },
+  number: { fontFamily: fontFamilies.heebo.black, fontSize: NUMBER_SIZE, lineHeight: NUMBER_LINE },
+  vDivider: { width: StyleSheet.hairlineWidth },
+  hDivider: { height: StyleSheet.hairlineWidth, marginVertical: spacing.md },
+  goalTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
+  barTrack: { height: BAR_HEIGHT, borderRadius: radius.full, overflow: 'hidden', alignItems: 'flex-start' },
+  barFill: { height: BAR_HEIGHT, borderRadius: radius.full },
+  dots: { gap: scaled(5), marginTop: spacing.md, marginBottom: spacing.sm },
+  dotRow: { flexDirection: 'row', gap: scaled(5) },
+  dot: { flex: 1, aspectRatio: 1, borderRadius: radius.sm },
+  earnedRow: { flexDirection: 'row', gap: spacing.sm },
+  earned: { flex: 1 },
+  earnedInner: { alignItems: 'center', gap: spacing.xs },
+  thinTrack: {
+    height: THIN_BAR,
+    borderRadius: radius.full,
+    overflow: 'hidden',
+    alignItems: 'flex-start',
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    marginTop: -spacing.sm,
+  },
+  thinFill: { height: THIN_BAR, borderRadius: radius.full },
+  sectionHint: { paddingHorizontal: spacing.xs, marginBottom: spacing.sm },
+  trailing: { alignItems: 'center', paddingHorizontal: spacing.sm },
+});

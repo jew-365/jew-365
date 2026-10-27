@@ -1,3 +1,9 @@
+jest.mock('@/utils/afterPaint', () => ({
+  afterPaint: (task: () => void) => {
+    queueMicrotask(task);
+    return { cancel: () => undefined };
+  },
+}));
 jest.mock('react-native-mmkv', () => {
   const { createMockMMKV } = require('react-native-mmkv/lib/commonjs/createMMKV.mock');
   return { MMKV: jest.fn(() => createMockMMKV()) };

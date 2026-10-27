@@ -15,41 +15,76 @@ type ScreenHeaderProps = {
   actions?: React.ReactNode;
   leading?: React.ReactNode;
   children?: React.ReactNode;
+  compact?: boolean;
+  onCompactPress?: () => void;
+  compactLabel?: string;
 };
 
 const BACK_ICON_SIZE = scaled(14);
 const BACK_HIT_SLOP = scaled(10);
 const BACK_ICON_STROKE = 2.5;
 
-export function ScreenHeader({ title, subtitle, onBack, actions, leading, children }: ScreenHeaderProps) {
+export function ScreenHeader({
+  title,
+  subtitle,
+  onBack,
+  actions,
+  leading,
+  children,
+  compact = false,
+  onCompactPress,
+  compactLabel,
+}: ScreenHeaderProps) {
   const { colors } = useTheme();
   const { language, t } = useI18n();
+
+  const backPill = onBack ? (
+    <Pressable
+      onPress={onBack}
+      accessibilityRole="button"
+      accessibilityLabel={t('common.back')}
+      hitSlop={BACK_HIT_SLOP}
+      style={({ pressed }) => [
+        styles.pill,
+        { backgroundColor: pressed ? colors.surface2 : colors.surface },
+        shadowStyle(colors.shadow, shadowPresets.cardSoft),
+      ]}
+    >
+      <MitzvahIcon
+        name={backIcon(language)}
+        size={BACK_ICON_SIZE}
+        color={colors.textSub}
+        strokeWidth={BACK_ICON_STROKE}
+      />
+      <Text style={[typography.captionBold, { color: colors.text }]}>{t('common.back')}</Text>
+    </Pressable>
+  ) : null;
+
+  if (compact) {
+    return (
+      <View style={styles.compactWrap}>
+        {backPill}
+        <Pressable
+          onPress={onCompactPress}
+          disabled={!onCompactPress}
+          accessibilityRole="button"
+          accessibilityLabel={title}
+          accessibilityHint={compactLabel}
+          style={styles.compactTitle}
+        >
+          <Text style={[typography.heading, styles.centered, { color: colors.text }]} numberOfLines={1}>
+            {title}
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.wrap}>
       {onBack || actions ? (
         <View style={styles.topRow}>
-          {onBack ? (
-            <Pressable
-              onPress={onBack}
-              accessibilityRole="button"
-              accessibilityLabel={t('common.back')}
-              hitSlop={BACK_HIT_SLOP}
-              style={({ pressed }) => [
-                styles.pill,
-                { backgroundColor: pressed ? colors.surface2 : colors.surface },
-                shadowStyle(colors.shadow, shadowPresets.cardSoft),
-              ]}
-            >
-              <MitzvahIcon
-                name={backIcon(language)}
-                size={BACK_ICON_SIZE}
-                color={colors.textSub}
-                strokeWidth={BACK_ICON_STROKE}
-              />
-              <Text style={[typography.captionBold, { color: colors.text }]}>{t('common.back')}</Text>
-            </Pressable>
-          ) : null}
+          {backPill}
           {actions ? <View style={styles.actions}>{actions}</View> : null}
         </View>
       ) : null}
@@ -139,6 +174,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.md,
+  },
+  compactWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  compactTitle: {
+    flex: 1,
+    minHeight: scaled(36),
+    justifyContent: 'center',
   },
   topRow: {
     flexDirection: 'row',

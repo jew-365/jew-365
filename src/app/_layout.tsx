@@ -7,7 +7,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Sentry from '@sentry/react-native';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 // eslint-disable-next-line import/no-duplicates
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
@@ -31,6 +31,7 @@ import { captureException } from '@/services/crashReporting';
 import { reloadApp } from '@/services/appReload';
 import { reconcileChokInstall } from '@/services/ChokContentService';
 import { reconcileSelichotInstall } from '@/services/SelichotContentService';
+import { afterPaint } from '@/utils/afterPaint';
 import { reconcileEndedCustomMitzvot } from '@/stores/customMitzvahLifecycle';
 import {
   initNotificationResponseHandler,
@@ -132,24 +133,28 @@ function RootInner() {
   const firstSegment = segments[0];
   useEffect(() => {
     if (quiet || !isOnboarded || firstSegment === 'checkin' || firstSegment === 'onboarding') return;
-    const user = useUserStore.getState();
-    const active = useMitzvotStore.getState().activeMitzvot;
-    const { completions, skipped, checkIns } = useCompletionsStore.getState();
-    const checkIn = latestCheckIn({
-      mitzvot: getAllMitzvot(user.nusach).filter((mitzvah) => active[mitzvah.id]?.enabled),
-      completions,
-      skipped,
-      checkIns,
-      enabledSince: enabledSinceOf(active),
-      location: user.location,
-      settings: { nusach: user.nusach, halachicOpinions: user.halachicOpinions, inIsrael: user.inIsrael },
+    const task = afterPaint(() => {
+      const user = useUserStore.getState();
+      const active = useMitzvotStore.getState().activeMitzvot;
+      const { completions, skipped, checkIns } = useCompletionsStore.getState();
+      const checkIn = latestCheckIn({
+        mitzvot: getAllMitzvot(user.nusach).filter((mitzvah) => active[mitzvah.id]?.enabled),
+        completions,
+        skipped,
+        checkIns,
+        enabledSince: enabledSinceOf(active),
+        location: user.location,
+        settings: { nusach: user.nusach, halachicOpinions: user.halachicOpinions, inIsrael: user.inIsrael },
+      });
+      if (!checkIn?.open || StorageService.get<string>(CHECK_IN_PROMPTED_KEY) === checkIn.id) return;
+      router.push('/checkin');
     });
-    if (!checkIn?.open || StorageService.get<string>(CHECK_IN_PROMPTED_KEY) === checkIn.id) return;
-    router.push('/checkin');
+    return () => task.cancel();
   }, [quiet, isOnboarded, now, router, firstSegment]);
 
   useEffect(() => {
-    reconcileEndedCustomMitzvot(new Date(now));
+    const task = afterPaint(() => reconcileEndedCustomMitzvot(new Date(now)));
+    return () => task.cancel();
   }, [now]);
 
   // Unwind everything stacked under the Shabbat screen — when the block starts, and again after any
@@ -315,7 +320,7 @@ function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <ThemeProvider>
           <RootInner />
         </ThemeProvider>

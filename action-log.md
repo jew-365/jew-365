@@ -17,6 +17,12 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-10-26 — the testers page
+
+- **Testers page: step 1 points at the group's join button** — a highlighted box under step 1 of [docs/testers/index.html](docs/testers/index.html) names the "הצטרפות לקבוצה" (Join group) button at the top of the Google Group page and says to ignore its permission message; the WhatsApp invitation in [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md) says the same. Opening the group's conversations to the web was tried first and is disabled for this group ([release/RELEASE_LOG.md](release/RELEASE_LOG.md)).
+  - Requested: the owner, 2026-10-26: the group link landed on a page that read as a dead end. Verified: the `docs-site` preview at 375 px in light and dark, no horizontal scroll; the live page serves the box (`curl`), CI and the Pages deploy of `52289d5` green.
+  - Version: Pages · Committed: yes, `52289d5` docs(testers): point step 1 at the group's join button · Pushed: yes · Live: https://jew-365.github.io/jew-365/testers/ · Channel: production (Pages)
+
 ## 2026-10-26 — store status
 
 - **Store status of 2026-10-26** recorded in [release/RELEASE_LOG.md](release/RELEASE_LOG.md) and [state.md](state.md).

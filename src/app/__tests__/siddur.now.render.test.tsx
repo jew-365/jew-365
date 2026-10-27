@@ -1,9 +1,20 @@
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+const mockNavigation = {
+  isFocused: () => true,
+  getState: () => ({ index: 0, routes: [{ key: 'siddur' }] }),
+  addListener: () => () => {},
+};
 
-import { screen, within } from '@testing-library/react-native';
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+  useNavigation: () => mockNavigation,
+  useFocusEffect: (effect: () => void) => require('react').useEffect(effect, [effect]),
+}));
+
+import { fireEvent, screen, within } from '@testing-library/react-native';
 import SiddurScreen from '../(tabs)/siddur';
 import { Card } from '@/components/Card';
 import { ListRow } from '@/components/ListRow';
+import { SettingsSection } from '@/components/SettingsSection';
 import { CITIES } from '@/data/cities';
 import { HebcalService } from '@/services/HebcalService';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
@@ -54,6 +65,10 @@ const EXCLUSIVE: [string, string][] = [
   [BIRCHOT, MAARIV],
   [SHACHARIT, BEDTIME],
 ];
+
+function openAllGroups() {
+  for (const header of screen.queryAllByRole('button', { expanded: false })) fireEvent.press(header);
+}
 
 function nowCard(wallClock: string | Date, nusach: Nusach = 'ashkenaz'): string[] {
   useUserStore.setState({ nusach });
@@ -116,9 +131,12 @@ describe('the siddur tab’s "now" card', () => {
   it('draws every row of the tab as its own card', () => {
     jest.useFakeTimers({ now: at(JERUSALEM, '2027-06-15T07:30'), doNotFake: [...ONLY_DATE] });
     renderWithTheme(<SiddurScreen />);
+    openAllGroups();
     const rows = screen.UNSAFE_getAllByType(ListRow);
     expect(rows.length).toBeGreaterThan(0);
-    expect(screen.UNSAFE_getAllByType(Card)).toHaveLength(rows.length);
+    expect(screen.UNSAFE_getAllByType(Card)).toHaveLength(
+      rows.length + screen.UNSAFE_getAllByType(SettingsSection).length,
+    );
   });
 
   it('is absent while nothing is said', () => {
@@ -179,6 +197,7 @@ describe('the Ushpizin row', () => {
     useUserStore.setState({ nusach });
     jest.useFakeTimers({ now: at(JERUSALEM, wallClock), doNotFake: [...ONLY_DATE] });
     const view = renderWithTheme(<SiddurScreen />);
+    openAllGroups();
     const card = screen.queryByTestId('siddur-now');
     const result = {
       listed: screen.queryAllByText(USHPIZIN).length > 0,
@@ -284,6 +303,7 @@ describe('the Kiddush Levana row', () => {
     useUserStore.setState({ nusach });
     jest.useFakeTimers({ now: at(JERUSALEM, wallClock), doNotFake: [...ONLY_DATE] });
     const view = renderWithTheme(<SiddurScreen />);
+    openAllGroups();
     const rows = screen.UNSAFE_getAllByType(ListRow).filter((row) => row.props.title === LEVANA);
     const { caption, disabled, chevron } = rows[rows.length - 1].props;
     view.unmount();

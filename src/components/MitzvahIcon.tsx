@@ -48,6 +48,7 @@ export const ICON_NAMES = [
   'cloud',
   'chat',
   'guide',
+  'compass',
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];
@@ -339,6 +340,12 @@ const DRAWINGS: Record<IconName, (p: Drawing) => React.ReactElement> = {
       <Circle cx={12} cy={12} r={8.5} fill={fill} />
       <Path d="M9.6,9.6A2.4,2.4 0 1 1 12,12V13.6" />
       <Line x1={12} y1={16.6} x2={12} y2={16.7} />
+    </>
+  ),
+  compass: ({ fill }) => (
+    <>
+      <Circle cx={12} cy={12} r={8.5} />
+      <Path d="M15.6,8.4L13.4,13.4L8.4,15.6L10.6,10.6Z" fill={fill} />
     </>
   ),
 };

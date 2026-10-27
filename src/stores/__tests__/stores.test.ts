@@ -23,6 +23,13 @@ jest.mock('expo-background-task', () => ({
   BackgroundTaskStatus: { Restricted: 1, Available: 2 },
 }));
 
+jest.mock('@/utils/afterPaint', () => ({
+  afterPaint: (task: () => void) => {
+    queueMicrotask(task);
+    return { cancel: () => undefined };
+  },
+}));
+
 import { STORE_VERSION } from '../persistOptions';
 import {
   DEFAULT_HILULA_NOTICES,

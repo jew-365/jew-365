@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
   AccessibilityInfo,
   ActivityIndicator,
@@ -20,14 +20,18 @@ import {
 } from 'react-native';
 import Animated, {
   AnimatedRef,
+  Extrapolation,
   FrameInfo,
+  interpolate,
   runOnJS,
   scrollTo,
   useAnimatedProps,
   useAnimatedRef,
   useAnimatedScrollHandler,
+  useAnimatedStyle,
   useFrameCallback,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -67,6 +71,7 @@ import { selectActive, useMitzvotStore } from '@/stores/useMitzvotStore';
 import { selectSelichotInstalledFor, useSelichotStore } from '@/stores/useSelichotStore';
 import { textBookmarks, textLastPosition, useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
 import {
+  MaritalStatus,
   PrayerMode,
   SIDDUR_FONT_SIZES,
   SIDDUR_SCROLL_SPEEDS,
@@ -100,6 +105,8 @@ import {
   SiddurSection,
   SiddurSegment,
   SiddurText,
+  SiddurVoice,
+  DayFeatures,
 } from '@/types/siddur';
 import {
   OptionalBlock,
@@ -140,6 +147,7 @@ import {
   isChokCommentary,
 } from '@/utils/chok';
 import { currentOrNextWindow, dayWindow, windowDueToday } from '@/utils/buildDayTimeline';
+import { afterPaint } from '@/utils/afterPaint';
 import { calendarDay } from '@/utils/checkIn';
 import { appDay } from '@/utils/locationDay';
 import { calendarLocale } from '@/utils/weeklyReport';
@@ -186,6 +194,202 @@ const CHOK_VARIANT_NAMES: Record<HaftarahVariant, string> = {
 // iOS reports every non-animated scrollTo as the end of a fling, and the JS ScrollView then counts
 // itself as animating and swallows the next tap. Moving the contentOffset prop scrolls without that.
 const SCROLLS_BY_PROP = Platform.OS === 'ios';
+const FOLD_DOWN_PX = 12;
+const FOLD_UP_PX = 4;
+const FOLD_MS = 180;
+const JUMP_FREEZE_MS = 600;
+const UNFOLD_HOLD_MS = 4000;
+const JUMP_NEIGHBOURS = 2;
+const PLACEHOLDER_TITLE = '…';
+
+const resolvedSections = new WeakMap<SiddurText, Map<string, SiddurSection[]>>();
+
+// The day's resolution of one loaded text, per day, marital status and voice: a reopened text, or one
+// resolved ahead while it loads, is not resolved again.
+function resolveForReader(
+  text: SiddurText,
+  features: DayFeatures,
+  maritalStatus: MaritalStatus | null,
+  voice: SiddurVoice | null,
+): SiddurSection[] {
+  let perText = resolvedSections.get(text);
+  if (!perText) {
+    perText = new Map();
+    resolvedSections.set(text, perText);
+  }
+  const key = `${[...features.flags].sort().join(',')}|${features.omerDay}|${maritalStatus}|${voice}`;
+  let sections = perText.get(key);
+  if (!sections) {
+    sections = forVoice(forMaritalStatus(resolveSiddurText(text, features), maritalStatus), voice);
+    perText.set(key, sections);
+  }
+  return sections;
+}
+
+// Folds everything above the text into a compact bar. The bar and the full block overlay the list, which
+// keeps a top padding of the full block, so folding moves no text.
+type ReaderFold = ReturnType<typeof useReaderFold>;
+
+function useReaderFold() {
+  const progress = useSharedValue(0);
+  const folded = useSharedValue(false);
+  const fullHeight = useSharedValue(0);
+  const compactHeight = useSharedValue(0);
+  const lastY = useSharedValue(0);
+  const travel = useSharedValue(0);
+  const frozenUntil = useSharedValue(0);
+  const holdUntil = useSharedValue(0);
+  const [space, setSpace] = useState(0);
+  const foldedRef = useRef(false);
+  const listeners = useRef(new Set<() => void>());
+  const sizes = useRef({ full: 0, compact: 0 });
+
+  const mirror = useCallback((next: boolean) => {
+    foldedRef.current = next;
+    listeners.current.forEach((listener) => listener());
+  }, []);
+  const subscribe = useCallback((listener: () => void) => {
+    listeners.current.add(listener);
+    return () => {
+      listeners.current.delete(listener);
+    };
+  }, []);
+  const getFolded = useCallback(() => foldedRef.current, []);
+  const setTarget = useCallback(
+    (next: boolean) => {
+      'worklet';
+      if (folded.value === next) return;
+      folded.value = next;
+      travel.value = 0;
+      if (!next) holdUntil.value = Date.now() + UNFOLD_HOLD_MS;
+      progress.value = withTiming(next ? 1 : 0, { duration: FOLD_MS });
+      runOnJS(mirror)(next);
+    },
+    [folded, travel, holdUntil, progress, mirror],
+  );
+  const track = useCallback(
+    (y: number, autoDriven: boolean, userDriven: boolean, end: number) => {
+      'worklet';
+      const delta = y - lastY.value;
+      lastY.value = y;
+      if (Date.now() < frozenUntil.value) {
+        travel.value = 0;
+        return;
+      }
+      if (fullHeight.value <= 0 || y < fullHeight.value) {
+        if (folded.value) setTarget(false);
+        travel.value = 0;
+        return;
+      }
+      if (delta === 0) return;
+      if (autoDriven && Date.now() < holdUntil.value) {
+        travel.value = 0;
+        return;
+      }
+      travel.value = delta * travel.value < 0 ? delta : travel.value + delta;
+      if (!folded.value && travel.value >= FOLD_DOWN_PX) setTarget(true);
+      else if (folded.value && travel.value <= -FOLD_UP_PX && userDriven && y < end - 1) setTarget(false);
+    },
+    [lastY, frozenUntil, fullHeight, folded, travel, holdUntil, setTarget],
+  );
+  const open = useCallback(() => {
+    folded.value = false;
+    progress.value = 0;
+    lastY.value = 0;
+    travel.value = 0;
+    mirror(false);
+  }, [folded, progress, lastY, travel, mirror]);
+  const unfold = useCallback(() => setTarget(false), [setTarget]);
+  const freeze = useCallback(() => {
+    frozenUntil.value = Date.now() + JUMP_FREEZE_MS;
+  }, [frozenUntil]);
+  const setFull = useCallback(
+    (height: number) => {
+      const previous = sizes.current.full;
+      sizes.current.full = height;
+      fullHeight.value = height;
+      setSpace(height);
+      return previous > 0 ? height - previous : 0;
+    },
+    [fullHeight],
+  );
+  const onCompactLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      sizes.current.compact = event.nativeEvent.layout.height;
+      compactHeight.value = sizes.current.compact;
+    },
+    [compactHeight],
+  );
+  const overlayStyle = useAnimatedStyle(() =>
+    fullHeight.value > 0 && compactHeight.value > 0
+      ? { height: interpolate(progress.value, [0, 1], [fullHeight.value, compactHeight.value]) }
+      : {},
+  );
+  const fullStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0, 0.6], [1, 0], Extrapolation.CLAMP),
+  }));
+  const compactStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0.4, 1], [0, 1], Extrapolation.CLAMP),
+  }));
+  return {
+    track,
+    open,
+    unfold,
+    freeze,
+    subscribe,
+    getFolded,
+    space,
+    fullHeight: () => sizes.current.full,
+    inset: () => (foldedRef.current ? sizes.current.compact : sizes.current.full),
+    setFull,
+    onCompactLayout,
+    overlayStyle,
+    fullStyle,
+    compactStyle,
+  };
+}
+
+function ReaderOverlay({
+  fold,
+  compact,
+  onFullLayout,
+  children,
+}: {
+  fold: ReaderFold;
+  compact: React.ReactNode;
+  onFullLayout: (event: LayoutChangeEvent) => void;
+  children: React.ReactNode;
+}) {
+  const { colors } = useTheme();
+  const isFolded = useSyncExternalStore(fold.subscribe, fold.getFolded);
+  return (
+    <Animated.View
+      testID="siddur-header-overlay"
+      style={[styles.overlay, { backgroundColor: colors.bg }, fold.overlayStyle]}
+    >
+      <Animated.View
+        testID="siddur-header-full"
+        onLayout={onFullLayout}
+        style={fold.fullStyle}
+        pointerEvents={isFolded ? 'none' : 'auto'}
+        accessibilityElementsHidden={isFolded}
+        importantForAccessibility={isFolded ? 'no-hide-descendants' : 'auto'}
+      >
+        {children}
+      </Animated.View>
+      <Animated.View
+        testID="siddur-header-compact"
+        onLayout={fold.onCompactLayout}
+        style={[styles.compactBar, fold.compactStyle]}
+        pointerEvents={isFolded ? 'auto' : 'none'}
+        accessibilityElementsHidden={!isFolded}
+        importantForAccessibility={isFolded ? 'auto' : 'no-hide-descendants'}
+      >
+        {compact}
+      </Animated.View>
+    </Animated.View>
+  );
+}
 
 type LoadState =
   | { status: 'loading' }
@@ -246,7 +450,9 @@ function useAutoScroll(
   pixelsPerSecond: number,
   onDragStart: () => void,
   onScrollReport: (offsetY: number) => void,
+  fold: ReaderFold,
 ) {
+  const { track: trackFold, open: openFold } = fold;
   const speed = useSharedValue(pixelsPerSecond);
   const offset = useSharedValue(0);
   const reportedAt = useSharedValue(0);
@@ -258,6 +464,7 @@ function useAutoScroll(
   const pressed = useSharedValue(false);
   const dragging = useSharedValue(false);
   const flinging = useSharedValue(false);
+  const userUntil = useSharedValue(0);
   const sizes = useRef({ content: 0, viewport: 0 });
 
   const advance = useCallback(
@@ -322,6 +529,8 @@ function useAutoScroll(
       onScroll: (event) => {
         offset.value = event.contentOffset.y;
         end.value = Math.max(0, event.contentSize.height - event.layoutMeasurement.height);
+        const userDriven = pressed.value || dragging.value || flinging.value || Date.now() < userUntil.value;
+        trackFold(event.contentOffset.y, !userDriven, userDriven, end.value);
         const now = Date.now();
         if (now - reportedAt.value >= SCROLL_REPORT_MS) {
           reportedAt.value = now;
@@ -347,7 +556,7 @@ function useAutoScroll(
         holdMs.value = AUTO_SCROLL_RESUME_MS;
       },
     },
-    [onDragStart, onScrollReport],
+    [onDragStart, onScrollReport, trackFold],
   );
   const updateEnd = () => {
     end.value = Math.max(0, sizes.current.content - sizes.current.viewport);
@@ -363,13 +572,15 @@ function useAutoScroll(
     sentPixel.value = -1;
     propOffset.value = -1;
     holdMs.value = AUTO_SCROLL_RESUME_MS;
-  }, [offset, position, sentPixel, propOffset, holdMs]);
+    openFold();
+  }, [offset, position, sentPixel, propOffset, holdMs, openFold]);
   // react-native-web sends no drag or momentum events, so a touch or a wheel pauses it instead.
   const webInput =
     Platform.OS === 'web'
       ? {
           onWheel: () => {
             holdMs.value = AUTO_SCROLL_RESUME_MS;
+            userUntil.value = Date.now() + AUTO_SCROLL_RESUME_MS;
           },
           onTouchStart: () => {
             pressed.value = true;
@@ -540,6 +751,8 @@ export default function SiddurScreen() {
   const [askingThuNight, setAskingThuNight] = useState(false);
   const asked = useRef(false);
   const features = useMemo(() => dayFeatures(hebrewDay, place), [hebrewDay, place]);
+  const resolveInput = useRef({ features, maritalStatus, siddurVoice });
+  resolveInput.current = { features, maritalStatus, siddurVoice };
   const available = chok
     ? chokInstall !== null &&
       chokWeek.length > 0 &&
@@ -588,7 +801,9 @@ export default function SiddurScreen() {
   const pickerRef = useRef<ScrollView>(null);
   const [shownSection, setShownSection] = useState(0);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [renderingAll, setRenderingAll] = useState(false);
+  const [renderUpTo, setRenderUpTo] = useState<number | null>(null);
+  const fold = useReaderFold();
+  const topSectionRef = useRef<(fallback: number) => number>((fallback) => fallback);
   const [bookmarksOpen, setBookmarksOpen] = useState(false);
   const [resumeOffer, setResumeOffer] = useState<SiddurLastPosition | null>(null);
   const [pendingPlace, setPendingPlace] = useState<SiddurPlace | null>(null);
@@ -625,7 +840,7 @@ export default function SiddurScreen() {
   };
   const cancelJump = useCallback(() => {
     clearTimeout(jumpTimer.current);
-    setRenderingAll(false);
+    setRenderUpTo(null);
   }, []);
   const onUserScroll = useCallback(() => {
     cancelJump();
@@ -633,12 +848,13 @@ export default function SiddurScreen() {
   }, [cancelJump]);
   const onScrollReport = useCallback((y: number) => {
     if (y > 0) moved.current = true;
+    setShownSection((previous) => topSectionRef.current(previous));
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => persistRef.current(), LAST_POSITION_DELAY_MS);
   }, []);
   const onViewableSectionsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken<SiddurSection>[] }) => {
     const top = viewableItems[0]?.index;
-    if (top != null) setShownSection(top);
+    if (top != null) setShownSection(topSectionRef.current(top));
   }).current;
 
   const [focused, setFocused] = useState(true);
@@ -687,15 +903,18 @@ export default function SiddurScreen() {
     if (chok) {
       let active = true;
       setLoad({ status: 'loading' });
-      Promise.all(chokWeek.map(loadChokParasha))
-        .then((assets) => active && setLoad({ status: 'chok', assets }))
-        .catch((error: unknown) => {
-          if (!active) return;
-          verifyChokInstall(error);
-          setLoad({ status: 'error' });
-        });
+      const task = afterPaint(() => {
+        Promise.all(chokWeek.map(loadChokParasha))
+          .then((assets) => active && setLoad({ status: 'chok', assets }))
+          .catch((error: unknown) => {
+            if (!active) return;
+            verifyChokInstall(error);
+            setLoad({ status: 'error' });
+          });
+      });
       return () => {
         active = false;
+        task.cancel();
       };
     }
     if (mitzvah?.isCustom) {
@@ -706,15 +925,23 @@ export default function SiddurScreen() {
     if (!textId) return undefined;
     let active = true;
     setLoad({ status: 'loading' });
-    loadSiddurText(nusach, textId)
-      .then((text) => active && setLoad({ status: 'ready', text }))
-      .catch((error: unknown) => {
-        if (!active) return;
-        if (textId === SELICHOT_TEXT_ID) verifySelichotInstall(error);
-        setLoad({ status: 'error' });
-      });
+    const task = afterPaint(() => {
+      loadSiddurText(nusach, textId)
+        .then((text) => {
+          if (!active) return;
+          const { features: day, maritalStatus: status, siddurVoice: voice } = resolveInput.current;
+          resolveForReader(text, day, status, voice);
+          setLoad({ status: 'ready', text });
+        })
+        .catch((error: unknown) => {
+          if (!active) return;
+          if (textId === SELICHOT_TEXT_ID) verifySelichotInstall(error);
+          setLoad({ status: 'error' });
+        });
+    });
     return () => {
       active = false;
+      task.cancel();
     };
   }, [mitzvah, available, nusach, textId, attempt, chok, chokWeek, chokInstall?.version, selichotVersion]);
 
@@ -740,8 +967,7 @@ export default function SiddurScreen() {
   }, [load, loadStale, shownSlot, doubleChoice, nusach, makeUpFolds]);
 
   const sections = useMemo(
-    () =>
-      readyText ? forVoice(forMaritalStatus(resolveSiddurText(readyText, features), maritalStatus), siddurVoice) : [],
+    () => (readyText ? resolveForReader(readyText, features, maritalStatus, siddurVoice) : []),
     [readyText, features, maritalStatus, siddurVoice],
   );
   const bookmarkTextId: string | null = chok ? CHOK_TEXT_ID : textId;
@@ -842,14 +1068,17 @@ export default function SiddurScreen() {
       ? appDay(now, location)
       : windowDate;
   const candleNight = chanukahNightOn(candleDay);
-  const occasions = [
-    ...HebcalService.getHolidays(hebrewDay.greg(), location, calendarLocale(language), {
-      omitChanukahCandles: true,
-      omitChanukahDay: candleNight !== null,
-    }),
-    ...(candleNight === null ? [] : [t('siddur.chanukahNight', { n: candleNight })]),
-  ];
-  const subtitle = chokPortion ? undefined : [t(`nusach.${nusach}`), hebrewDateLabel, ...occasions].join(' · ');
+  const subtitle = useMemo(() => {
+    if (chokPortion) return undefined;
+    const occasions = [
+      ...HebcalService.getHolidays(hebrewDay.greg(), location, calendarLocale(language), {
+        omitChanukahCandles: true,
+        omitChanukahDay: candleNight !== null,
+      }),
+      ...(candleNight === null ? [] : [translate('siddur.chanukahNight', { n: candleNight }, language)]),
+    ];
+    return [translate(`nusach.${nusach}`, undefined, language), hebrewDateLabel, ...occasions].join(' · ');
+  }, [chokPortion, hebrewDay, location, language, candleNight, nusach, hebrewDateLabel]);
   const chooseDouble = (choice: ChokDoubleChoice) => {
     setDoubleChoice(choice);
     setAsking(false);
@@ -1025,6 +1254,7 @@ export default function SiddurScreen() {
       </>
     );
   };
+  const contentStyle = useMemo(() => [styles.content, { paddingTop: LIST_PADDING + fold.space }], [fold.space]);
   const picker = useMemo(() => pickerEntries(sections), [sections]);
   const currentEntry = pickerEntryAt(picker, sections, Math.min(shownSection, sections.length - 1));
   const segmentOffset = (key: string) => {
@@ -1034,12 +1264,22 @@ export default function SiddurScreen() {
     for (let node = entry.parent; node; node = node.parent) y += node.y;
     return y;
   };
+  const holdForJump = () => {
+    autoScroll.hold(AUTO_SCROLL_RESUME_MS);
+    fold.freeze();
+  };
+  // The target lands just under whatever covers the top of the list, the full block or the compact bar.
+  const landing = (offset: number | undefined) => {
+    const inset = fold.inset();
+    if (offset === undefined) return inset === 0 ? {} : { viewOffset: inset };
+    return { viewOffset: inset === 0 ? -offset : inset - offset };
+  };
   const settleOnSegment = (index: number, segmentKey: string, deadline: number) => {
     jumpTimer.current = setTimeout(() => {
       const offset = segmentOffset(segmentKey);
       if (offset !== undefined) {
-        autoScroll.hold(AUTO_SCROLL_RESUME_MS);
-        listRef.current?.scrollToIndex({ index, animated: false, viewOffset: -offset });
+        holdForJump();
+        listRef.current?.scrollToIndex({ index, animated: false, ...landing(offset) });
       } else if (Date.now() < deadline) {
         settleOnSegment(index, segmentKey, deadline);
       }
@@ -1049,19 +1289,19 @@ export default function SiddurScreen() {
     const list = listRef.current;
     clearTimeout(jumpTimer.current);
     if (!list) return;
-    autoScroll.hold(AUTO_SCROLL_RESUME_MS);
+    holdForJump();
     jumpMissed.current = false;
     const offset = segmentKey ? segmentOffset(segmentKey) : undefined;
-    list.scrollToIndex({ index, animated: false, ...(offset !== undefined ? { viewOffset: -offset } : {}) });
+    list.scrollToIndex({ index, animated: false, ...landing(offset) });
     if (!jumpMissed.current) {
       setShownSection(index);
-      setRenderingAll(false);
+      setRenderUpTo(null);
       if (segmentKey && offset === undefined) settleOnSegment(index, segmentKey, Date.now() + SEGMENT_SETTLE_MS);
     } else if (Date.now() < deadline) {
-      setRenderingAll(true);
+      setRenderUpTo(index);
       jumpTimer.current = setTimeout(() => jumpTo(index, deadline, segmentKey), JUMP_RETRY_MS);
     } else {
-      setRenderingAll(false);
+      setRenderUpTo(null);
     }
   };
   const toggleAutoScroll = () => {
@@ -1136,16 +1376,39 @@ export default function SiddurScreen() {
     autoScrollPixelsPerSecond(SIDDUR_SCROLL_SPEEDS[scrollSpeedLevel(scrollSpeed) - 1], textSize),
     onUserScroll,
     onScrollReport,
+    fold,
   );
-  const bookmarkable = bookmarkTextId !== null && !body;
-  const currentPlace = () =>
+  const pendingShift = useRef(0);
+  const onFullLayout = (event: LayoutChangeEvent) => {
+    const previous = fold.fullHeight();
+    const delta = fold.setFull(event.nativeEvent.layout.height);
+    if (delta !== 0 && autoScroll.offset.value > previous) pendingShift.current = delta;
+  };
+  useEffect(() => {
+    if (pendingShift.current === 0) return;
+    const offset = autoScroll.offset.value + pendingShift.current;
+    pendingShift.current = 0;
+    fold.freeze();
+    listRef.current?.scrollToOffset({ offset, animated: false });
+  }, [fold, autoScroll.offset, listRef]);
+  const placeholder = body !== null && loadStatus === 'loading' && available;
+  const bookmarkable = bookmarkTextId !== null && (!body || placeholder);
+  const placeInView = () =>
     placeAt(
       sections,
       (title) => sectionHeights.current.get(title),
       segmentOffset,
-      LIST_PADDING + headerHeight.current,
-      autoScroll.offset.value,
-    ) ?? (sections.length ? firstPlace(sections[Math.min(shownSection, sections.length - 1)]) : null);
+      LIST_PADDING + fold.fullHeight() + headerHeight.current,
+      autoScroll.offset.value + fold.inset(),
+    );
+  const currentPlace = () =>
+    placeInView() ?? (sections.length ? firstPlace(sections[Math.min(shownSection, sections.length - 1)]) : null);
+  topSectionRef.current = (fallback) => {
+    if (fold.inset() === 0) return fallback;
+    const title = placeInView()?.sectionTitle;
+    const index = title === undefined ? -1 : sections.findIndex((section) => section.title.he === title);
+    return index >= 0 ? index : fallback;
+  };
   persistRef.current = () => {
     clearTimeout(saveTimer.current);
     if (!bookmarkTextId || finished.current || !sections.length) return;
@@ -1251,253 +1514,299 @@ export default function SiddurScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScreenHeader
-        title={name}
-        subtitle={subtitle}
-        onBack={goBack}
-        actions={
-          settingsTarget || bookmarkable ? (
-            <>
-              {settingsTarget ? (
-                <HeaderPill
-                  icon="sliders"
-                  accessibilityLabel={t('siddur.mitzvahSettings')}
-                  onPress={openMitzvahSettings}
-                />
-              ) : null}
-              {bookmarkable ? (
+      <View style={styles.stage}>
+        <ReaderOverlay
+          fold={fold}
+          onFullLayout={onFullLayout}
+          compact={
+            <ScreenHeader
+              compact
+              title={name}
+              onBack={goBack}
+              onCompactPress={fold.unfold}
+              compactLabel={t('siddur.compact.expand')}
+            />
+          }
+        >
+          <ScreenHeader
+            title={name}
+            subtitle={subtitle}
+            onBack={goBack}
+            actions={
+              settingsTarget || bookmarkable ? (
                 <>
-                  <HeaderPill icon="star" accessibilityLabel={t('siddur.bookmarks.add')} onPress={addBookmarkHere} />
-                  <HeaderPill label={t('siddur.bookmarks')} onPress={() => setBookmarksOpen(true)} />
+                  {settingsTarget ? (
+                    <HeaderPill
+                      icon="sliders"
+                      accessibilityLabel={t('siddur.mitzvahSettings')}
+                      onPress={openMitzvahSettings}
+                    />
+                  ) : null}
+                  {bookmarkable ? (
+                    <>
+                      <HeaderPill
+                        icon="star"
+                        accessibilityLabel={t('siddur.bookmarks.add')}
+                        onPress={addBookmarkHere}
+                        disabled={placeholder}
+                      />
+                      <HeaderPill
+                        label={t('siddur.bookmarks')}
+                        onPress={() => setBookmarksOpen(true)}
+                        disabled={placeholder}
+                      />
+                    </>
+                  ) : null}
                 </>
-              ) : null}
-            </>
-          ) : undefined
-        }
-      >
-        <View style={styles.toolbarStack}>
-          {weekPortion && chokPortion && available ? (
-            <ChokWeekControls
-              week={weekPortion.parashiyot}
-              browsing={browsing}
-              onBrowse={browse}
-              offered={CHOK_PARASHIYOT.filter((parasha) => chokInstall?.files[parasha] !== undefined)}
-              slots={chokSlotsOf(chokPortion.parashiyot[0])}
-              slot={chokPortion.slot}
-              onSlot={setChokSlot}
-              names={chokPortion.parashiyot.map((parasha) => chokParashaName(parasha, language))}
-              choice={doubleChoice ?? 'first'}
-              onChoice={chooseDouble}
-              asking={asking}
-              onAskClose={() => setAsking(false)}
-            />
-          ) : null}
-          {hasCommentaryPassages || (picker.length > 1 && currentEntry) ? (
-            <View style={styles.pickerRow}>
-              {picker.length > 1 && currentEntry ? (
-                <PickerCard
-                  title={entryTitle(currentEntry)}
-                  accessibilityLabel={`${t('siddur.pickSection')}: ${entryTitle(currentEntry)}`}
-                  onPress={() => setPickerOpen(true)}
-                  style={styles.pickerBeside}
+              ) : undefined
+            }
+          >
+            <View style={styles.toolbarStack}>
+              {weekPortion && chokPortion && available ? (
+                <ChokWeekControls
+                  week={weekPortion.parashiyot}
+                  browsing={browsing}
+                  onBrowse={browse}
+                  offered={CHOK_PARASHIYOT.filter((parasha) => chokInstall?.files[parasha] !== undefined)}
+                  slots={chokSlotsOf(chokPortion.parashiyot[0])}
+                  slot={chokPortion.slot}
+                  onSlot={setChokSlot}
+                  names={chokPortion.parashiyot.map((parasha) => chokParashaName(parasha, language))}
+                  choice={doubleChoice ?? 'first'}
+                  onChoice={chooseDouble}
+                  asking={asking}
+                  onAskClose={() => setAsking(false)}
                 />
               ) : null}
-              {hasCommentaryPassages ? (
-                <View
-                  accessibilityRole="radiogroup"
-                  accessibilityLabel={t('chok.commentary')}
-                  style={styles.commentaryBeside}
-                >
-                  <SegmentedControl
-                    options={COMMENTARY_STATES.map((state) => ({ value: state, label: t(`chok.commentary.${state}`) }))}
-                    value={commentaryOpen ? 'open' : 'folded'}
-                    onChange={(state) => changeCommentaryOpen(state === 'open')}
-                    style={styles.commentaryControl}
-                  />
-                </View>
-              ) : null}
-            </View>
-          ) : null}
-          <View style={styles.toolbar}>
-            {hasMinyanPassages ? (
-              <View
-                accessibilityRole="radiogroup"
-                accessibilityLabel={t('settings.prayerMode')}
-                style={styles.prayerMode}
-              >
-                <SegmentedControl
-                  options={PRAYER_MODES.map((mode) => ({ value: mode, label: t(`prayerMode.${mode}`) }))}
-                  value={prayerMode}
-                  onChange={changePrayerMode}
-                />
-              </View>
-            ) : null}
-            <SizeButton
-              label="A+"
-              accessibilityLabel={t('siddur.larger')}
-              disabled={currentIndex === SIDDUR_FONT_SIZES.length - 1}
-              onPress={() => setFontSize(SIDDUR_FONT_SIZES[Math.min(SIDDUR_FONT_SIZES.length - 1, currentIndex + 1)])}
-            />
-            <SizeButton
-              label="A−"
-              accessibilityLabel={t('siddur.smaller')}
-              disabled={currentIndex === 0}
-              onPress={() => setFontSize(SIDDUR_FONT_SIZES[Math.max(0, currentIndex - 1)])}
-            />
-            <ScrollSpeedStepper compact level={scrollSpeed} onChange={setScrollSpeed} />
-            <PlayToggle on={autoScrollOn} onPress={toggleAutoScroll} accessibilityLabel={t('siddur.autoScroll')} />
-          </View>
-        </View>
-      </ScreenHeader>
-
-      {(offSeason || windowChoice.passed) && !body ? (
-        <View style={styles.resume}>
-          <Banner
-            tone="info"
-            text={t(offSeason ? 'siddur.offSeason' : 'siddur.timePassed')}
-            style={styles.resumeBanner}
-          />
-        </View>
-      ) : null}
-
-      {resumeOffer && !body ? (
-        <View style={styles.resume}>
-          <Banner
-            tone="accent"
-            text={resumePlace ? t('chok.resume', { place: placeText(resumePlace) }) : t('siddur.resume')}
-            style={styles.resumeBanner}
-          />
-          <View style={styles.resumeActions}>
-            <Button size="compact" label={t('siddur.resume.continue')} onPress={resume} style={styles.resumeAction} />
-            <Button
-              size="compact"
-              variant="secondary"
-              label={t('siddur.resume.fromStart')}
-              onPress={() => setResumeOffer(null)}
-              style={styles.resumeAction}
-            />
-          </View>
-        </View>
-      ) : null}
-
-      {body ?? (
-        <Animated.FlatList
-          ref={listRef}
-          testID="siddur-list"
-          data={sections}
-          extraData={listExtraData}
-          keyExtractor={(section) => section.title.he}
-          initialNumToRender={4}
-          windowSize={renderingAll ? Number.POSITIVE_INFINITY : undefined}
-          maxToRenderPerBatch={renderingAll ? sections.length : undefined}
-          viewabilityConfig={SECTION_VIEWABILITY}
-          onViewableItemsChanged={onViewableSectionsChanged}
-          contentContainerStyle={styles.content}
-          ListHeaderComponent={
-            chok ? (
-              <View
-                onLayout={(event) => {
-                  headerHeight.current = event.nativeEvent.layout.height;
-                }}
-              >
-                <ChokLicenseNotice style={styles.licenseNotice} />
-              </View>
-            ) : null
-          }
-          onScrollToIndexFailed={() => {
-            jumpMissed.current = true;
-          }}
-          onScroll={autoScroll.scrollHandler}
-          animatedProps={autoScroll.animatedProps}
-          {...autoScroll.webInput}
-          scrollEventThrottle={16}
-          onLayout={autoScroll.onLayout}
-          onContentSizeChange={autoScroll.onContentSizeChange}
-          renderItem={({ item: section }) => (
-            <View
-              testID={`siddur-section-${section.title.he}`}
-              onLayout={(event) => sectionHeights.current.set(section.title.he, event.nativeEvent.layout.height)}
-            >
-              {section.headings?.map((heading) => (
-                <Text
-                  key={heading.he}
-                  accessibilityRole="header"
-                  style={[
-                    heading.level === 1 ? typography.title : typography.heading,
-                    styles.sectionHeading,
-                    { color: colors.goldText },
-                  ]}
-                >
-                  {nameOf(heading)}
-                </Text>
-              ))}
-              <MeasuredView>
-                <Card padded style={styles.sectionCard}>
-                  {sectionCard(section)}
-                </Card>
-              </MeasuredView>
-            </View>
-          )}
-          ListFooterComponent={
-            <>
-              {browsing ? (
-                <View style={styles.browsingFooter}>
-                  <Text style={[typography.caption, styles.browsingNote, { color: colors.textSub }]}>
-                    {t('chok.browsing.note')}
-                  </Text>
-                  <Button
-                    variant="secondary"
-                    label={t('chok.browsing.back')}
-                    onPress={() => browse(null)}
-                    style={styles.doneAction}
-                  />
-                </View>
-              ) : doneTarget ? (
-                doneTarget.done ? (
-                  <View style={styles.doneRow}>
-                    <MitzvahIcon name="check" size={DONE_ICON_SIZE} color={colors.safe} />
-                    <Text style={[typography.bodyBold, { color: colors.safe }]}>{t('siddur.doneAlready')}</Text>
-                  </View>
-                ) : (
-                  <Button
-                    label={t('siddur.done')}
-                    onPress={() =>
-                      thuNightUnanswered ? setAskingThuNight(true) : finish(doneTarget.id, doneTarget.date)
-                    }
-                    style={styles.doneAction}
-                  />
-                )
-              ) : null}
-
-              {readyText?.dedication ? (
-                <Text style={[typography.caption, styles.dedication, { color: colors.textSub }]}>
-                  {readyText.dedication}
-                </Text>
-              ) : null}
-
-              {readyText?.credits.length ? (
-                <View style={styles.credits}>
-                  <Text style={[typography.captionBold, { color: colors.textSub }]}>{t('siddur.sources')}</Text>
-                  <Text style={[typography.caption, { color: colors.textMuted, marginTop: scaled(2) }]}>
-                    {t('siddur.adapted')}
-                  </Text>
-                  {readyText.credits.map((credit) => (
-                    <Pressable
-                      key={credit.title}
-                      onPress={() => Linking.openURL(credit.url).catch(() => {})}
-                      accessibilityRole="link"
+              {placeholder || hasCommentaryPassages || (picker.length > 1 && currentEntry) ? (
+                <View style={styles.pickerRow}>
+                  {placeholder ? (
+                    <PickerCard
+                      title={PLACEHOLDER_TITLE}
+                      accessibilityLabel={`${t('siddur.pickSection')}: ${PLACEHOLDER_TITLE}`}
+                      onPress={() => {}}
+                      style={styles.pickerBeside}
+                    />
+                  ) : picker.length > 1 && currentEntry ? (
+                    <PickerCard
+                      title={entryTitle(currentEntry)}
+                      accessibilityLabel={`${t('siddur.pickSection')}: ${entryTitle(currentEntry)}`}
+                      onPress={() => setPickerOpen(true)}
+                      style={styles.pickerBeside}
+                    />
+                  ) : null}
+                  {hasCommentaryPassages ? (
+                    <View
+                      accessibilityRole="radiogroup"
+                      accessibilityLabel={t('chok.commentary')}
+                      style={styles.commentaryBeside}
                     >
-                      <Text style={[typography.caption, { color: colors.textMuted, marginTop: spacing.xs }]}>
-                        {credit.title} · {credit.license}
-                      </Text>
-                    </Pressable>
-                  ))}
+                      <SegmentedControl
+                        options={COMMENTARY_STATES.map((state) => ({
+                          value: state,
+                          label: t(`chok.commentary.${state}`),
+                        }))}
+                        value={commentaryOpen ? 'open' : 'folded'}
+                        onChange={(state) => changeCommentaryOpen(state === 'open')}
+                        style={styles.commentaryControl}
+                      />
+                    </View>
+                  ) : null}
                 </View>
               ) : null}
-            </>
-          }
-        />
-      )}
+              <View style={styles.toolbar}>
+                {hasMinyanPassages || (placeholder && mitzvah?.group === 'prayers') ? (
+                  <View
+                    accessibilityRole="radiogroup"
+                    accessibilityLabel={t('settings.prayerMode')}
+                    style={styles.prayerMode}
+                  >
+                    <SegmentedControl
+                      options={PRAYER_MODES.map((mode) => ({ value: mode, label: t(`prayerMode.${mode}`) }))}
+                      value={prayerMode}
+                      onChange={changePrayerMode}
+                    />
+                  </View>
+                ) : null}
+                <SizeButton
+                  label="A+"
+                  accessibilityLabel={t('siddur.larger')}
+                  disabled={currentIndex === SIDDUR_FONT_SIZES.length - 1}
+                  onPress={() =>
+                    setFontSize(SIDDUR_FONT_SIZES[Math.min(SIDDUR_FONT_SIZES.length - 1, currentIndex + 1)])
+                  }
+                />
+                <SizeButton
+                  label="A−"
+                  accessibilityLabel={t('siddur.smaller')}
+                  disabled={currentIndex === 0}
+                  onPress={() => setFontSize(SIDDUR_FONT_SIZES[Math.max(0, currentIndex - 1)])}
+                />
+                <ScrollSpeedStepper compact level={scrollSpeed} onChange={setScrollSpeed} />
+                <PlayToggle on={autoScrollOn} onPress={toggleAutoScroll} accessibilityLabel={t('siddur.autoScroll')} />
+              </View>
+            </View>
+          </ScreenHeader>
+
+          {(offSeason || windowChoice.passed) && !body ? (
+            <View style={styles.resume}>
+              <Banner
+                tone="info"
+                text={t(offSeason ? 'siddur.offSeason' : 'siddur.timePassed')}
+                style={styles.resumeBanner}
+              />
+            </View>
+          ) : null}
+
+          {resumeOffer && !body ? (
+            <View style={styles.resume}>
+              <Banner
+                tone="accent"
+                text={resumePlace ? t('chok.resume', { place: placeText(resumePlace) }) : t('siddur.resume')}
+                style={styles.resumeBanner}
+              />
+              <View style={styles.resumeActions}>
+                <Button
+                  size="compact"
+                  label={t('siddur.resume.continue')}
+                  onPress={resume}
+                  style={styles.resumeAction}
+                />
+                <Button
+                  size="compact"
+                  variant="secondary"
+                  label={t('siddur.resume.fromStart')}
+                  onPress={() => setResumeOffer(null)}
+                  style={styles.resumeAction}
+                />
+              </View>
+            </View>
+          ) : null}
+        </ReaderOverlay>
+
+        {body ? (
+          <View style={[styles.bodyWrap, { paddingTop: fold.space }]}>{body}</View>
+        ) : (
+          <Animated.FlatList
+            ref={listRef}
+            testID="siddur-list"
+            data={sections}
+            extraData={listExtraData}
+            keyExtractor={(section) => section.title.he}
+            initialNumToRender={4}
+            windowSize={renderUpTo !== null ? Number.POSITIVE_INFINITY : undefined}
+            maxToRenderPerBatch={
+              renderUpTo !== null ? Math.min(sections.length, renderUpTo + JUMP_NEIGHBOURS) : undefined
+            }
+            viewabilityConfig={SECTION_VIEWABILITY}
+            onViewableItemsChanged={onViewableSectionsChanged}
+            contentContainerStyle={contentStyle}
+            ListHeaderComponent={
+              chok ? (
+                <View
+                  onLayout={(event) => {
+                    headerHeight.current = event.nativeEvent.layout.height;
+                  }}
+                >
+                  <ChokLicenseNotice style={styles.licenseNotice} />
+                </View>
+              ) : null
+            }
+            onScrollToIndexFailed={() => {
+              jumpMissed.current = true;
+            }}
+            onScroll={autoScroll.scrollHandler}
+            animatedProps={autoScroll.animatedProps}
+            {...autoScroll.webInput}
+            scrollEventThrottle={16}
+            onLayout={autoScroll.onLayout}
+            onContentSizeChange={autoScroll.onContentSizeChange}
+            renderItem={({ item: section }) => (
+              <View
+                testID={`siddur-section-${section.title.he}`}
+                onLayout={(event) => sectionHeights.current.set(section.title.he, event.nativeEvent.layout.height)}
+              >
+                {section.headings?.map((heading) => (
+                  <Text
+                    key={heading.he}
+                    accessibilityRole="header"
+                    style={[
+                      heading.level === 1 ? typography.title : typography.heading,
+                      styles.sectionHeading,
+                      { color: colors.goldText },
+                    ]}
+                  >
+                    {nameOf(heading)}
+                  </Text>
+                ))}
+                <MeasuredView>
+                  <Card padded style={styles.sectionCard}>
+                    {sectionCard(section)}
+                  </Card>
+                </MeasuredView>
+              </View>
+            )}
+            ListFooterComponent={
+              <>
+                {browsing ? (
+                  <View style={styles.browsingFooter}>
+                    <Text style={[typography.caption, styles.browsingNote, { color: colors.textSub }]}>
+                      {t('chok.browsing.note')}
+                    </Text>
+                    <Button
+                      variant="secondary"
+                      label={t('chok.browsing.back')}
+                      onPress={() => browse(null)}
+                      style={styles.doneAction}
+                    />
+                  </View>
+                ) : doneTarget ? (
+                  doneTarget.done ? (
+                    <View style={styles.doneRow}>
+                      <MitzvahIcon name="check" size={DONE_ICON_SIZE} color={colors.safe} />
+                      <Text style={[typography.bodyBold, { color: colors.safe }]}>{t('siddur.doneAlready')}</Text>
+                    </View>
+                  ) : (
+                    <Button
+                      label={t('siddur.done')}
+                      onPress={() =>
+                        thuNightUnanswered ? setAskingThuNight(true) : finish(doneTarget.id, doneTarget.date)
+                      }
+                      style={styles.doneAction}
+                    />
+                  )
+                ) : null}
+
+                {readyText?.dedication ? (
+                  <Text style={[typography.caption, styles.dedication, { color: colors.textSub }]}>
+                    {readyText.dedication}
+                  </Text>
+                ) : null}
+
+                {readyText?.credits.length ? (
+                  <View style={styles.credits}>
+                    <Text style={[typography.captionBold, { color: colors.textSub }]}>{t('siddur.sources')}</Text>
+                    <Text style={[typography.caption, { color: colors.textMuted, marginTop: scaled(2) }]}>
+                      {t('siddur.adapted')}
+                    </Text>
+                    {readyText.credits.map((credit) => (
+                      <Pressable
+                        key={credit.title}
+                        onPress={() => Linking.openURL(credit.url).catch(() => {})}
+                        accessibilityRole="link"
+                      >
+                        <Text style={[typography.caption, { color: colors.textMuted, marginTop: spacing.xs }]}>
+                          {credit.title} · {credit.license}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                ) : null}
+              </>
+            }
+          />
+        )}
+      </View>
 
       <BottomSheet visible={pickerOpen} title={t('siddur.pickSection')} onClose={() => setPickerOpen(false)}>
         <ScrollView ref={pickerRef} style={styles.sheetList}>
@@ -1825,6 +2134,26 @@ const styles = StyleSheet.create({
   content: {
     padding: LIST_PADDING,
     paddingBottom: spacing.xxxl,
+  },
+  stage: {
+    flex: 1,
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    start: 0,
+    end: 0,
+    zIndex: 10,
+    overflow: 'hidden',
+  },
+  compactBar: {
+    position: 'absolute',
+    top: 0,
+    start: 0,
+    end: 0,
+  },
+  bodyWrap: {
+    flex: 1,
   },
   sectionCard: {
     marginBottom: spacing.md,

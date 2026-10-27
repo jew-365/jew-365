@@ -3,6 +3,12 @@ jest.mock('react-native-mmkv', () => {
   return { MMKV: jest.fn(() => createMockMMKV()) };
 });
 
+jest.mock('@/services/notifications/ids', () => ({
+  ...jest.requireActual('@/services/notifications/ids'),
+  HORIZON_MAX_DAYS: 2,
+}));
+jest.mock('@/services/notifications/planners/horizonEnd', () => ({ planHorizonEnd: () => [] }));
+
 import { HDate, months } from '@hebcal/core';
 import { buildPlan } from '../plan';
 import {
@@ -297,7 +303,8 @@ describe('buildPlan', () => {
   });
 
   describe('the slot cap', () => {
-    // Seventy mitzvot whose single reminder falls one minute apart, on each of the two horizon days.
+    // 250 mitzvot whose single reminder falls one minute apart, on each of the two horizon days; the
+    // end notice, which these suites leave out, takes the last slot.
     const bulk = (index: number): Mitzvah => ({
       ...STUDY,
       id: `bulk_${index}`,
@@ -308,21 +315,25 @@ describe('buildPlan', () => {
         end: new Date(minutes(zmanim.netzHaChama, 600)),
       }),
     });
-    const many = Array.from({ length: 70 }, (_, index) => bulk(index));
-    const earliest = Array.from({ length: PENDING_LIMIT }, (_, index) => `bulk_${index}__2026-10-13__0`);
+    const many = Array.from({ length: 250 }, (_, index) => bulk(index));
+    const room = PENDING_LIMIT - 1;
+    const earliest = [
+      ...Array.from({ length: 250 }, (_, index) => `bulk_${index}__2026-10-13__0`),
+      ...Array.from({ length: room - 250 }, (_, index) => `bulk_${index}__2026-10-14__0`),
+    ];
 
     it('keeps the soonest reminders and warns about the rest', () => {
       const plan = buildPlan(planInput({ mitzvot: many }));
 
       expect(plan.map((candidate) => candidate.id)).toEqual(earliest);
       expect(warn).toHaveBeenCalledWith(
-        `[notifications] ${140 - PENDING_LIMIT} reminder(s) beyond the ${PENDING_LIMIT} slot cap were not scheduled`,
+        `[notifications] ${500 - room} reminder(s) beyond the ${room} slot cap were not scheduled`,
       );
     });
 
     it('leaves iOS the headroom its 64 pending requests need, and caps elsewhere at the pending limit', () => {
-      expect(buildPlan(planInput({ mitzvot: many, platform: 'ios' }))).toHaveLength(IOS_MAX - IOS_HEADROOM);
-      expect(buildPlan(planInput({ mitzvot: many, platform: 'android' }))).toHaveLength(PENDING_LIMIT);
+      expect(buildPlan(planInput({ mitzvot: many, platform: 'ios' }))).toHaveLength(IOS_MAX - IOS_HEADROOM - 1);
+      expect(buildPlan(planInput({ mitzvot: many, platform: 'android' }))).toHaveLength(room);
     });
   });
 

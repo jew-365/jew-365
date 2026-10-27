@@ -1,21 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  I18nManager,
-  Keyboard,
-  Platform,
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { Keyboard, Platform, Pressable, StyleProp, StyleSheet, Text, TextInput, View, ViewStyle } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
 import { scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
+import { useRowMirrored } from '@/hooks/useRowMirrored';
 import { TIME_PATTERN } from '@/utils/clock';
 import { BottomSheet } from './BottomSheet';
 import { WheelPicker } from './WheelPicker';
@@ -49,14 +39,13 @@ type Props = PickerProps & {
 
 function TimePicker({ value, onChange }: PickerProps) {
   const { colors } = useTheme();
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const [draft, setDraft] = useState(value);
   const inputRef = useRef<TextInput>(null);
   const valid = TIME_PATTERN.test(value);
   const hour = valid ? Number(value.slice(0, 2)) : null;
   const minute = valid ? Number(value.slice(3)) : null;
-  // react-native-web has no I18nManager.isRTL: its rows mirror through the document dir, which follows the language.
-  const rowMirrored = Platform.OS === 'web' ? language === 'he' : I18nManager.isRTL;
+  const rowMirrored = useRowMirrored();
   const android = Platform.OS === 'android';
 
   useEffect(() => {

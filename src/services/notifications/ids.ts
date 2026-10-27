@@ -18,12 +18,13 @@ export const ANDROID_CHANNELS = {
   taharah: 'taharah',
   system: 'system',
 } as const;
-export const PENDING_LIMIT = 60;
+export const PENDING_LIMIT = 400;
 export const IOS_MAX = 64;
 export const IOS_HEADROOM = 4;
+export const HORIZON_MAX_DAYS = 30;
 export const LAST_REBUILD_KEY = 'notifications:last-rebuild-date';
 export const SCHEDULE_FORMAT_KEY = 'notifications:schedule-format';
-export const SCHEDULE_FORMAT = 9;
+export const SCHEDULE_FORMAT = 10;
 export const BLOCK_NOTICE_KIND = 'blockNotice';
 export const CHECK_IN_KIND = 'checkin';
 export const UPDATE_KIND = 'update';
@@ -32,6 +33,11 @@ export const TAHARAH_KIND = 'taharah';
 export const HILULA_KIND = 'hilula';
 export const ROSH_CHODESH_KIND = 'roshChodesh';
 export const REPORT_KIND = 'report';
+export const HORIZON_END_KIND = 'horizonEnd';
+
+export function planCap(platform: string): number {
+  return platform === 'ios' ? IOS_MAX - IOS_HEADROOM : PENDING_LIMIT;
+}
 
 export type HilulaWhen = 'before' | 'evening';
 export type RoshChodeshWhen = 'before' | 'evening' | 'day';
@@ -44,11 +50,13 @@ export type PendingNotificationMeta = {
     | typeof UPDATE_KIND
     | typeof HILULA_KIND
     | typeof ROSH_CHODESH_KIND
-    | typeof REPORT_KIND;
+    | typeof REPORT_KIND
+    | typeof HORIZON_END_KIND;
   taharah?: { task: TaharahTaskKind | 'tevilaPrep' | 'postBlock' | 'preBlock'; day: number; onah?: OnahKind };
   hilula?: { day: number; when: HilulaWhen; ids?: string[] };
   roshChodesh?: { day: number; when: RoshChodeshWhen };
   report?: { week: string };
+  contentHash?: string;
   blockId?: string;
   updateId?: string;
   updateCreatedAt?: string;

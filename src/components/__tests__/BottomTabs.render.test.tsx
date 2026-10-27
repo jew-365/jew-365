@@ -60,7 +60,7 @@ describe('BottomTabs', () => {
     renderWithTheme(<BottomTabs {...tabBarProps('home').props} />);
     const tabs = screen.getAllByRole('tab');
     expect(tabs).toHaveLength(5);
-    ['עוד', 'סידור', 'בית', 'היסטוריה', 'הגדרות'].forEach((name, index) => {
+    ['עוד', 'סידור', 'בית', 'מעקב', 'הגדרות'].forEach((name, index) => {
       expect(tabs[index]).toHaveAccessibleName(name);
     });
   });

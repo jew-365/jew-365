@@ -3,6 +3,12 @@ jest.mock('react-native-mmkv', () => {
   return { MMKV: jest.fn(() => createMockMMKV()) };
 });
 
+jest.mock('@/services/notifications/ids', () => ({
+  ...jest.requireActual('@/services/notifications/ids'),
+  HORIZON_MAX_DAYS: 2,
+}));
+jest.mock('@/services/notifications/planners/horizonEnd', () => ({ planHorizonEnd: () => [] }));
+
 // The trigger is the one thing a reminder app must get right, so the mock records it (and the
 // user-visible text) rather than only identifiers, and it replaces on duplicate identifier the way
 // the real expo-notifications API does.
@@ -73,6 +79,7 @@ jest.mock('expo-background-task', () => ({
 }));
 
 import { Platform } from 'react-native';
+import { waitFor } from '@testing-library/react-native';
 import { DateTime } from 'luxon';
 import {
   ANDROID_CHANNELS,
@@ -314,7 +321,7 @@ describe('NotificationScheduler', () => {
     const running = NotificationScheduler.rebuild();
     expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBeUndefined();
     await running;
-    expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(9);
+    expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(10);
   });
 
   it('6.3 cancelAll empties pending', async () => {
@@ -447,9 +454,9 @@ describe('NotificationScheduler', () => {
   // never fire in production (rebuild cancels everything first, so pending was always 0) and the
   // test picked tefillin, whose skipOn made it vacuous whenever the suite ran on a Friday.
   it('6.7 caps the schedule and drops the furthest-out reminders, not tomorrow wholesale', async () => {
-    expect(PENDING_LIMIT).toBe(60);
+    expect(PENDING_LIMIT).toBe(400);
     const window = { start: new Date(Date.now() + 60_000), end: new Date(Date.now() + 40 * 60_000) };
-    const many: Mitzvah[] = Array.from({ length: 40 }, (_, index) => ({
+    const many: Mitzvah[] = Array.from({ length: 250 }, (_, index) => ({
       id: `bulk_${index}`,
       name: { he: `בדיקה ${index}` },
       icon: 'custom',
@@ -1183,7 +1190,8 @@ describe('NotificationScheduler', () => {
       useCompletionsStore.getState().markDone('custom_follow', new Date(2026, 10, 11));
       await settled();
 
-      expect(idsFor('custom_follow', '2026-11-11')).toHaveLength(0);
+      await waitFor(() => expect(idsFor('custom_follow', '2026-11-11')).toHaveLength(0));
+      await settled();
       expect(scheduled('2026-11-12')).toEqual([
         ['custom_follow__2026-11-12__0', at(jerusalem, '2026-11-12T12:00').getTime()],
       ]);
@@ -1311,11 +1319,136 @@ describe('NotificationScheduler', () => {
   // one trailing re-run instead.
   it('6.11 a rebuild requested mid-run is re-run once, not dropped', async () => {
     setupEnabled(['tefillin']);
+    StorageService.delete(SCHEDULE_FORMAT_KEY);
     await Promise.all([NotificationScheduler.rebuild(), NotificationScheduler.rebuild()]);
 
-    expect(mockCancelAll).toHaveBeenCalledTimes(2);
+    expect(mockCancelAll).toHaveBeenCalledTimes(1);
+    expect(mockGetAll).toHaveBeenCalledTimes(1);
     const tefillinIds = mockState.pending.filter((p) => p.identifier.startsWith('tefillin__')).map((p) => p.identifier);
     expect(new Set(tefillinIds).size).toBe(tefillinIds.length);
+  });
+
+  describe('a rebuild schedules only the difference', () => {
+    const rebuiltOnce = async () => {
+      setupEnabled(['shacharit', 'mincha']);
+      await NotificationScheduler.rebuild();
+      mockSchedule.mockClear();
+      mockCancelOne.mockClear();
+      mockCancelAll.mockClear();
+    };
+
+    it('schedules and cancels nothing when the plan is unchanged', async () => {
+      await rebuiltOnce();
+      const before = mockState.pending.map((p) => p.identifier);
+      expect(before.length).toBeGreaterThan(0);
+
+      await NotificationScheduler.rebuild();
+
+      expect(mockSchedule).not.toHaveBeenCalled();
+      expect(mockCancelOne).not.toHaveBeenCalled();
+      expect(mockCancelAll).not.toHaveBeenCalled();
+      expect(mockState.pending.map((p) => p.identifier)).toEqual(before);
+    });
+
+    it('cancels and schedules exactly the one reminder whose content changed', async () => {
+      await rebuiltOnce();
+      const target = mockState.pending.find((p) => p.identifier.startsWith('shacharit__'))!;
+      target.content.data = { ...target.content.data, contentHash: 'stale' };
+
+      await NotificationScheduler.rebuild();
+
+      expect(mockCancelOne.mock.calls).toEqual([[target.identifier]]);
+      expect(mockSchedule.mock.calls.map((call) => call[0].identifier)).toEqual([target.identifier]);
+    });
+
+    it('cancels a pending reminder the plan no longer holds', async () => {
+      await rebuiltOnce();
+      mockState.pending.push({
+        identifier: 'mincha__2026-01-01__0',
+        content: { data: { mitzvahId: 'mincha', dateKey: '2026-01-01', contentHash: 'old' } },
+      });
+
+      await NotificationScheduler.rebuild();
+
+      expect(mockCancelOne.mock.calls).toEqual([['mincha__2026-01-01__0']]);
+      expect(mockSchedule).not.toHaveBeenCalled();
+    });
+
+    it('reschedules every reminder when the language changes', async () => {
+      await rebuiltOnce();
+      const count = mockState.pending.length;
+      useUserStore.getState().setLanguage('en');
+
+      await NotificationScheduler.rebuild();
+
+      expect(mockSchedule).toHaveBeenCalledTimes(count);
+      expect(mockCancelOne).toHaveBeenCalledTimes(count);
+      useUserStore.getState().setLanguage('he');
+    });
+
+    it('replaces everything when the stored format is stale', async () => {
+      await rebuiltOnce();
+      StorageService.delete(SCHEDULE_FORMAT_KEY);
+
+      await NotificationScheduler.rebuild();
+
+      expect(mockCancelAll).toHaveBeenCalledTimes(1);
+      expect(mockSchedule.mock.calls.length).toBeGreaterThan(0);
+    });
+
+    describe('on Android', () => {
+      const realOS = Platform.OS;
+      beforeEach(() => {
+        Platform.OS = 'android';
+        NotificationScheduler.replacedInProcess = false;
+      });
+      afterEach(() => {
+        Platform.OS = realOS;
+        NotificationScheduler.replacedInProcess = false;
+      });
+
+      it('replaces everything on the first rebuild of the process and syncs the difference after', async () => {
+        setupEnabled(['shacharit', 'mincha']);
+        await NotificationScheduler.rebuild();
+        mockSchedule.mockClear();
+        mockCancelOne.mockClear();
+        mockCancelAll.mockClear();
+        NotificationScheduler.replacedInProcess = false;
+        const count = mockState.pending.length;
+
+        await NotificationScheduler.rebuild();
+
+        expect(mockCancelAll).toHaveBeenCalledTimes(1);
+        expect(mockSchedule).toHaveBeenCalledTimes(count);
+
+        mockSchedule.mockClear();
+        mockCancelAll.mockClear();
+        await NotificationScheduler.rebuild();
+
+        expect(mockCancelAll).not.toHaveBeenCalled();
+        expect(mockSchedule).not.toHaveBeenCalled();
+      });
+
+      it('replaces everything again on the rebuild of a new day', async () => {
+        setupEnabled(['shacharit', 'mincha']);
+        await NotificationScheduler.rebuild();
+        mockCancelAll.mockClear();
+
+        await NotificationScheduler.rebuildForNewDay();
+
+        expect(mockCancelAll).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('clears the schedule when the permission is gone', async () => {
+      await rebuiltOnce();
+      useUserStore.getState().setNotificationPermission('denied');
+
+      await NotificationScheduler.rebuild();
+
+      expect(mockCancelAll).toHaveBeenCalledTimes(1);
+      expect(mockState.pending).toEqual([]);
+    });
   });
 
   it('6.11b the trailing re-run observes state changed during the in-flight run', async () => {
@@ -1381,7 +1514,7 @@ describe('NotificationScheduler', () => {
       jest.setSystemTime(at(jerusalem, '2026-11-14T20:00'));
       useCompletionsStore.getState().markDone('shacharit', new Date(2026, 10, 14));
       await settled();
-      expect(checkInsOf()).toHaveLength(0);
+      await waitFor(() => expect(checkInsOf()).toHaveLength(0));
       expect(shouldSuppressForCompletion({ kind: 'checkin', blockId: '2026-11-14' }, 'checkin:2026-11-14:1')).toBe(
         true,
       );

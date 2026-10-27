@@ -39,7 +39,7 @@ jest.mock('@/services/notificationResponseHandler', () => ({
   openLaunchNotificationResponse: () => {},
 }));
 
-import { act, fireEvent, screen } from '@testing-library/react-native';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { AppState } from 'react-native';
 import RootLayout from '../_layout';
 import { CITIES } from '@/data/cities';
@@ -111,7 +111,7 @@ describe('the root layout and the ended custom mitzvot', () => {
     renderWithTheme(<RootLayout />);
     await screen.findByTestId('stack');
 
-    expect(enabled(ENDED)).toBe(false);
+    await waitFor(() => expect(enabled(ENDED)).toBe(false));
     expect(enabled(ENDING_TODAY)).toBe(true);
     expect(useCustomMitzvotStore.getState().items[ENDED]).toBeDefined();
   });
@@ -125,7 +125,7 @@ describe('the root layout and the ended custom mitzvot', () => {
     jest.setSystemTime(at(J, '2026-10-29T07:00'));
     act(() => listeners.forEach((listener) => listener('active')));
 
-    expect(enabled(ENDING_TODAY)).toBe(false);
+    await waitFor(() => expect(enabled(ENDING_TODAY)).toBe(false));
   });
 });
 

@@ -81,12 +81,15 @@ import { getAllMitzvot } from '@/data/customMitzvotAdapter';
 import type { ChokThuNightDay } from '@/types/chok';
 import { findMitzvah } from '@/data/mitzvot';
 import { Nusach } from '@/types/mitzvah';
+import { appDayKey } from '@/utils/locationDay';
+import { HebcalService } from '@/services/HebcalService';
 import type { SiddurVoice } from '@/types/siddur';
 import {
   SETTINGS_SEARCH_ITEMS,
   buildSettingsSearchIndex,
   searchSettings,
   settingsContentItems,
+  type SettingsSearchEntry,
   type SettingsSearchItem,
   type SettingsSectionKey,
 } from '@/utils/settingsSearch';
@@ -181,9 +184,9 @@ export default function SettingsScreen() {
   const [contactStatus, setContactStatus] = useState<{ text: string; failed: boolean } | null>(null);
   const [open, setOpen] = useState<ReadonlySet<SettingsSectionKey>>(() => new Set());
   const [query, setQuery] = useState('');
-  const [searchNow, setSearchNow] = useState(() => new Date());
   const [focusTarget, setFocusTarget] = useState<string | null>(null);
   const [creditOpen, setCreditOpen] = useState(false);
+  const focusCount = useRef(0);
   const scrollRef = useRef<ScrollView>(null);
   const contentRef = useRef<View>(null);
 
@@ -191,7 +194,7 @@ export default function SettingsScreen() {
     useCallback(() => {
       setOpen(new Set());
       setQuery('');
-      setSearchNow(new Date());
+      focusCount.current += 1;
       setFocusTarget(null);
       syncNotificationPermissionStatus().catch((error) => reportError('schedule', error));
     }, []),
@@ -205,26 +208,11 @@ export default function SettingsScreen() {
 
   const taharahVisible = taharahOffered(user);
   const storeUrl = storePageUrl();
-  const searchIndex = useMemo(
-    () =>
-      buildSettingsSearchIndex(
-        (key) => [translate(key, undefined, 'he', user.gender), translate(key, undefined, 'en', user.gender)],
-        [
-          ...SETTINGS_SEARCH_ITEMS,
-          ...settingsContentItems({
-            mitzvot: getAllMitzvot(user.nusach),
-            nusach: user.nusach,
-            voice: user.siddurVoice,
-            maritalStatus: user.maritalStatus,
-            chokInstalled,
-            now: searchNow,
-            location: user.location,
-            inIsrael: user.inIsrael,
-          }),
-        ],
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- customMitzvot re-runs the memo on purpose; getAllMitzvot() reads it from the store
-    [
+  const searching = query.trim().length > 0;
+  const searchIndexCache = useRef<{ inputs: readonly unknown[]; index: SettingsSearchEntry[] } | null>(null);
+  const searchIndexFor = () => {
+    const now = new Date();
+    const inputs = [
       user.gender,
       user.nusach,
       user.siddurVoice,
@@ -233,19 +221,55 @@ export default function SettingsScreen() {
       user.inIsrael,
       chokInstalled,
       customMitzvot,
-      searchNow,
-    ],
-  );
+      appDayKey(now, user.location),
+      HebcalService.hebrewDayAt(now, user.location).abs(),
+      focusCount.current,
+    ];
+    const cached = searchIndexCache.current;
+    if (cached && inputs.every((input, index) => Object.is(input, cached.inputs[index]))) return cached.index;
+    const index = buildSettingsSearchIndex(
+      (key) => [translate(key, undefined, 'he', user.gender), translate(key, undefined, 'en', user.gender)],
+      [
+        ...SETTINGS_SEARCH_ITEMS,
+        ...settingsContentItems({
+          mitzvot: getAllMitzvot(user.nusach),
+          nusach: user.nusach,
+          voice: user.siddurVoice,
+          maritalStatus: user.maritalStatus,
+          chokInstalled,
+          now,
+          location: user.location,
+          inIsrael: user.inIsrael,
+        }),
+      ],
+    );
+    searchIndexCache.current = { inputs, index };
+    return index;
+  };
   const results = useMemo(
     () =>
-      searchSettings(query, searchIndex, {
-        taharah: taharahVisible,
-        backup: Platform.OS !== 'web',
-        battery: supportsBatteryOptimizationSettings(),
-      }),
-    [query, searchIndex, taharahVisible],
+      searching
+        ? searchSettings(query, searchIndexFor(), {
+            taharah: taharahVisible,
+            backup: Platform.OS !== 'web',
+            battery: supportsBatteryOptimizationSettings(),
+          })
+        : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- searchIndexFor reads the profile and custom mitzvot; its own cache decides when to rebuild
+    [
+      query,
+      searching,
+      taharahVisible,
+      user.gender,
+      user.nusach,
+      user.siddurVoice,
+      user.maritalStatus,
+      user.location,
+      user.inIsrael,
+      chokInstalled,
+      customMitzvot,
+    ],
   );
-  const searching = query.trim().length > 0;
 
   const commitProfileDrafts = () => {
     user.setProfileName(nameDraft.trim());
@@ -311,6 +335,7 @@ export default function SettingsScreen() {
       const caption = t('settings.search.kind.chapter', { text: inLanguage(item.textName) });
       return notTodayCaption ? `${caption} · ${notTodayCaption}` : caption;
     }
+    if (item.kind === 'hilula') return `${t('settings.search.kind.hilula')} · ${inLanguage(item.caption)}`;
     if (item.kind) return notTodayCaption ?? t(`settings.search.kind.${item.kind}`);
     return item.section ? t(`settings.${item.section}`) : t('settings.searchScreen');
   };

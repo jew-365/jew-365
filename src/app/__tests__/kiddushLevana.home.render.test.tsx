@@ -5,6 +5,12 @@ const mockNavigation = {
   addListener: () => () => {},
 };
 
+jest.mock('@/utils/afterPaint', () => ({
+  afterPaint: (task: () => void) => {
+    queueMicrotask(task);
+    return { cancel: () => undefined };
+  },
+}));
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }), useNavigation: () => mockNavigation }));
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(async () => {}),

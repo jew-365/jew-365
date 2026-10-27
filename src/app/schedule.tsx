@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { InteractionManager, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { DateTime } from 'luxon';
@@ -21,6 +21,7 @@ import { latestCheckIn, pendingCheckInIds } from '@/utils/checkIn';
 import { clockOf } from '@/utils/clock';
 import { appDay } from '@/utils/locationDay';
 import { formatDate, useI18n } from '@/i18n';
+import { afterPaint } from '@/utils/afterPaint';
 
 const VIEW_MODES = ['day', 'week', 'month'] as const;
 type ViewMode = (typeof VIEW_MODES)[number];
@@ -91,16 +92,16 @@ export default function ScheduleScreen() {
     });
   }, [view, enabled, completions, cursor, location, settings, language, t, enabledSince]);
 
-  // 42 cells × (hebcal calendar + zmanim + every window) on the render thread. Deferred behind
-  // InteractionManager the way the history screen already does, so switching to the month is not a freeze.
+  // 42 cells × (hebcal calendar + zmanim + every window) on the render thread. Deferred past the
+  // next paint the way the history screen already does, so switching to the month is not a freeze.
   const [monthReady, setMonthReady] = useState(false);
   useEffect(() => {
     if (view !== 'month') {
       setMonthReady(false);
       return undefined;
     }
-    const task = InteractionManager.runAfterInteractions(() => setMonthReady(true));
-    return () => task.cancel?.();
+    const task = afterPaint(() => setMonthReady(true));
+    return () => task.cancel();
   }, [view]);
 
   const monthGrid = useMemo(() => {

@@ -1,3 +1,4 @@
+import { HILULOT } from '@/data/hilulot';
 import { translate } from '@/i18n';
 import heTable from '@/i18n/he.json';
 import enTable from '@/i18n/en.json';
@@ -265,6 +266,8 @@ describe('content search', () => {
         expect(item.href).toEqual({ pathname: '/mitzvah/[id]', params: { id: item.id.slice('mitzvah:'.length) } });
       } else if (item.kind === 'siddur') {
         expect(item.href).toEqual({ pathname: '/siddur/[id]', params: { id: item.id.slice('siddur:'.length) } });
+      } else if (item.kind === 'hilula') {
+        expect(item.href).toEqual({ pathname: '/hilula/[id]', params: { id: item.id.slice('hilula:'.length) } });
       } else {
         expect(item.href).toEqual({
           pathname: '/siddur/[id]',
@@ -290,6 +293,44 @@ describe('content search', () => {
     expect(itemOf('siddur:birkat_hamazon')?.icon).toBe('meals');
     expect(itemOf('chapter:tehillim:ליום ראשון')?.icon).toBe('general');
     expect(content().some((item) => item.id.startsWith('chapter:asher_yatzar:'))).toBe(false);
+  });
+
+  it('lists every tzaddik of the hilulot list with both names, his icon and his next date, notices on or off', () => {
+    const items = content().filter((item) => item.kind === 'hilula');
+    expect(items).toHaveLength(HILULOT.length);
+    expect(itemOf('hilula:baba_sali')).toMatchObject({
+      kind: 'hilula',
+      icon: 'hilula',
+      title: { he: 'הבבא סאלי', en: 'Baba Sali' },
+      caption: { he: 'ד׳ שבט', en: '4th of Sh’vat' },
+      href: { pathname: '/hilula/[id]', params: { id: 'baba_sali' } },
+    });
+    expect(itemOf('hilula:rashbi')).toMatchObject({ caption: { he: 'י״ח אייר', en: '18th of Iyyar' } });
+  });
+
+  it.each([
+    ['בבא סאלי', 'hilula:baba_sali'],
+    ['הבבא סאלי', 'hilula:baba_sali'],
+    ['רשבי', 'hilula:rashbi'],
+    ['רשב"י', 'hilula:rashbi'],
+    ['baal shem tov', 'hilula:baal_shem_tov'],
+    ['בעש"ט', 'hilula:baal_shem_tov'],
+    ['חפץ חיים', 'hilula:chafetz_chaim'],
+    ['רבי נחמן', 'hilula:nachman_of_breslov'],
+    ['Ari', 'hilula:arizal'],
+    ['Maimonides', 'hilula:rambam'],
+    ['Rambam', 'hilula:rambam'],
+  ])('finds the tzaddik for "%s"', (query, id) => {
+    expect(find(query)[0]).toBe(id);
+  });
+
+  it('forgives a typo in a tzaddik name', () => {
+    expect(find('Vilna Gaonn')).toContain('hilula:vilna_gaon');
+    expect(find('בבא סלאי')).toContain('hilula:baba_sali');
+  });
+
+  it('keeps the hilulot setting first for הילולות', () => {
+    expect(find('הילולות')[0]).toBe('hilulot');
   });
 
   it('ranks a mitzvah before its text for the name of a prayer', () => {
@@ -347,10 +388,10 @@ describe('content search', () => {
     expect(ids(null)).toContain(id);
   });
 
-  const OUTRANKED_BY_CONTENT = ['קריאת שמע', 'ירושלים'];
+  const OUTRANKED_BY_CONTENT = ['קריאת שמע', 'ירושלים', 'רש"י'];
 
   it.each<Nusach>(['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'])(
-    'keeps every setting query on its setting, bar two a content title matches better, with mitzvot, texts and chapters indexed for %s',
+    'keeps every setting query on its setting, bar the ones a content title matches better, with mitzvot, texts and chapters indexed for %s',
     (nusach) => {
       const combined = buildSettingsSearchIndex(
         (key) => [translate(key, undefined, 'he', null), translate(key, undefined, 'en', null)],

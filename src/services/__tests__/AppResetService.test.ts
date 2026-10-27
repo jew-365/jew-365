@@ -47,6 +47,7 @@ import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useChokStore } from '@/stores/useChokStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
+import { EMPTY_MARK_COUNTS, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { DEFAULT_ON_MITZVOT, enabledSinceOf, useMitzvotStore } from '@/stores/useMitzvotStore';
 import { findCityById } from '@/data/cities';
 import { findMitzvah } from '@/data/mitzvot';
@@ -164,6 +165,24 @@ describe('AppResetService.reset', () => {
 
     expect(useSelichotStore.getState().installed).toBeNull();
     expect(mockDeleteSelichotFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears the achievements and archived mark counts', async () => {
+    useCompletionsStore.setState({
+      achievements: {
+        badges: { streak7: '2026-10-18' },
+        bestStreak: null,
+        bestWeek: null,
+        mitzvahBest: {},
+        fold: null,
+      },
+      archivedMarks: { lastKey: '2025-01-02', total: 3, byMitzvah: { a: 3 } },
+    });
+
+    await AppResetService.reset();
+
+    expect(useCompletionsStore.getState().achievements).toBeNull();
+    expect(useCompletionsStore.getState().archivedMarks).toEqual(EMPTY_MARK_COUNTS);
   });
 
   it('clears the siddur bookmarks and last positions', async () => {

@@ -275,7 +275,32 @@ export function chanukahNightOn(day: Date): number | null {
   return chanukahDay(liturgicalDay(day, true));
 }
 
+const DAY_FEATURES_CACHE_LIMIT = 400;
+const dayFeaturesCache = new Map<string, DayFeatures>();
+
+function placeKey(place: Place): string {
+  const location = place.location;
+  return [
+    place.inIsrael,
+    place.jerusalem,
+    location ? [location.lat, location.lng, location.tz, location.elevation ?? '', location.inIsrael].join(',') : '',
+  ].join('|');
+}
+
 export function dayFeatures(hd: HDate, place: Place): DayFeatures {
+  const key = `${hd.abs()}|${placeKey(place)}`;
+  const cached = dayFeaturesCache.get(key);
+  if (cached) return cached;
+  const features = computeDayFeatures(hd, place);
+  if (dayFeaturesCache.size >= DAY_FEATURES_CACHE_LIMIT) {
+    const oldest = dayFeaturesCache.keys().next().value;
+    if (oldest !== undefined) dayFeaturesCache.delete(oldest);
+  }
+  dayFeaturesCache.set(key, features);
+  return features;
+}
+
+function computeDayFeatures(hd: HDate, place: Place): DayFeatures {
   const today = observances(hd, place.inIsrael);
   const year = hd.getFullYear();
   const month = hd.getMonth();

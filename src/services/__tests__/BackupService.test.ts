@@ -21,6 +21,12 @@ jest.mock('expo-notifications', () => ({
   AndroidNotificationVisibility: { PUBLIC: 1, PRIVATE: 0 },
 }));
 
+jest.mock('@/utils/afterPaint', () => ({
+  afterPaint: (task: () => void) => {
+    queueMicrotask(task);
+    return { cancel: () => undefined };
+  },
+}));
 jest.mock('expo-task-manager', () => ({ defineTask: jest.fn() }));
 jest.mock('expo-background-task', () => ({
   registerTaskAsync: jest.fn(),
@@ -240,6 +246,27 @@ describe('BackupService', () => {
 
   describe('restoreBackup', () => {
     afterEach(() => __setUiScaleForTests(DEFAULT_UI_SCALE));
+
+    it('carries the achievements and the archived mark counts', async () => {
+      fillSource();
+      const achievements = {
+        badges: { streak7: '2026-10-18' as const, fullWeek: '2026-10-17' as const },
+        bestStreak: { days: 8, from: '2026-10-11', to: '2026-10-19' },
+        bestWeek: { weekStart: '2026-10-11', weekEnd: '2026-10-17', done: 6, due: 6, percent: 100 },
+        mitzvahBest: { tefillin: { days: 8, from: '2026-10-11', to: '2026-10-19' } },
+        fold: { through: '2026-10-21', run: { days: 1, from: '2026-10-21', to: '2026-10-21' }, mitzvahRuns: {} },
+      };
+      const archivedMarks = { lastKey: '2025-01-02', total: 3, byMitzvah: { a: 2, b: 1 } };
+      useCompletionsStore.setState({ achievements, archivedMarks });
+      const backup = createBackup(CREATED);
+      resetAll();
+      expect(useCompletionsStore.getState().achievements).toBeNull();
+
+      await restoreBackup(parseBackup(JSON.stringify(backup)));
+
+      expect(useCompletionsStore.getState().achievements).toEqual(achievements);
+      expect(useCompletionsStore.getState().archivedMarks).toEqual(archivedMarks);
+    });
 
     it('replaces every store with the file and rebuilds the schedule once', async () => {
       const haifa = fillSource();

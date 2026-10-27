@@ -1,0 +1,320 @@
+import React from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Circle } from 'react-native-svg';
+import { Card } from '@/components/Card';
+import { IconTile } from '@/components/IconTile';
+import { Landscape } from '@/components/Landscape';
+import { MitzvahIcon, type IconName } from '@/components/MitzvahIcon';
+import { HeaderPill } from '@/components/ScreenHeader';
+import { SectionLabel } from '@/components/SectionLabel';
+import { StreakRing } from '@/components/StreakRing';
+import { useUserStore } from '@/stores/useUserStore';
+import { THEME_NAMES, ThemeName } from '@/theme/colors';
+import { scaled } from '@/theme/scale';
+import { useTheme } from '@/theme/ThemeProvider';
+import { radius, spacing } from '@/theme/tokens';
+import { fontFamilies, typography } from '@/theme/typography';
+
+const HERO_HEIGHT = scaled(360);
+const RING_SIZE = scaled(200);
+const PERIOD_RING = scaled(100);
+const BAR_HEIGHT = scaled(6);
+const GRID_CELL_HEIGHT = scaled(36);
+const BADGE_WIDTH = scaled(104);
+const BADGE_TILE = scaled(52);
+const DISC_OPACITY = 0.72;
+
+const PROFILE_NAME = 'אברהם כהן';
+const STREAK = 12;
+const BEST_ENDED = 'אלול תשפ״ו';
+
+type Period = { id: string; label: string; done: number; total: number; caption: string };
+
+const PERIODS: Period[] = [
+  { id: 'day', label: 'יומי', done: 4, total: 6, caption: 'מה שזמנו הגיע היום' },
+  { id: 'week', label: 'שבועי', done: 31, total: 38, caption: 'מיום ראשון עד עכשיו' },
+  { id: 'month', label: 'חודשי', done: 209, total: 240, caption: 'ב־30 הימים האחרונים' },
+];
+
+const DAYS: ('full' | 'partial' | 'none')[] = [
+  'full', 'full', 'partial', 'full', 'none',
+  'full', 'full', 'full', 'partial', 'full',
+  'full', 'partial', 'full', 'full', 'full',
+  'partial', 'full', 'none', 'full', 'full',
+  'partial', 'full', 'full', 'full', 'full',
+  'full', 'partial', 'partial', 'partial', 'partial',
+];
+
+type Badge = { id: string; icon: IconName; title: string; caption: string; earned: boolean };
+
+const BADGES: Badge[] = [
+  { id: 'streak7', icon: 'star', title: '7 ימים ברצף', caption: 'ז׳ באלול', earned: true },
+  { id: 'fullWeek', icon: 'calendar', title: 'שבוע מלא', caption: 'י״ד באלול', earned: true },
+  { id: 'streak30', icon: 'sparkle', title: '30 ימים ברצף', caption: 'ל׳ באלול', earned: true },
+  { id: 'hundredOne', icon: 'tefillin', title: '100 פעמים תפילין', caption: 'עוד 26', earned: false },
+  { id: 'fullMonth', icon: 'moon', title: 'חודש מלא', caption: 'כל יום בחודש', earned: false },
+  { id: 'streak100', icon: 'star', title: '100 ימים ברצף', caption: 'עוד 88 ימים', earned: false },
+];
+
+const MITZVOT: { id: string; name: string; percent: number; streak: number }[] = [
+  { id: 'krias_shma_al_hamita', name: 'קריאת שמע על המיטה', percent: 60, streak: 0 },
+  { id: 'chok_leyisrael', name: 'חק לישראל', percent: 68, streak: 1 },
+  { id: 'mincha', name: 'מנחה', percent: 70, streak: 2 },
+  { id: 'maariv', name: 'מעריב', percent: 77, streak: 4 },
+  { id: 'shacharit', name: 'שחרית', percent: 83, streak: 5 },
+  { id: 'krias_shma_shacharit', name: 'קריאת שמע של שחרית', percent: 90, streak: 9 },
+  { id: 'birchot_hashachar', name: 'ברכות השחר', percent: 92, streak: 11 },
+  { id: 'tefillin', name: 'תפילין', percent: 93, streak: 12 },
+];
+
+function greeting(profileName: string): string {
+  const first = profileName.trim().split(/\s+/)[0];
+  return first ? `שלום, ${first}` : 'שלום וברוכים הבאים';
+}
+
+if (typeof window !== 'undefined' && window.location) {
+  const theme = new URLSearchParams(window.location.search).get('theme');
+  useUserStore.setState({
+    isOnboarded: true,
+    language: 'he',
+    ...(theme && (THEME_NAMES as readonly string[]).includes(theme) ? { theme: theme as ThemeName } : {}),
+  });
+}
+
+function PercentRing({ done, total, size }: { done: number; total: number; size: number }) {
+  const { colors } = useTheme();
+  const percent = Math.round((done / total) * 100);
+  const stroke = Math.round(size * 0.075);
+  const center = size / 2;
+  const r = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * r;
+  return (
+    <View accessible accessibilityLabel={`${percent}%, ${done} מתוך ${total}`} style={{ width: size, height: size }}>
+      <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
+        <Circle cx={center} cy={center} r={r} fill={colors.surface} fillOpacity={DISC_OPACITY} />
+        <Circle cx={center} cy={center} r={r} fill="none" stroke={colors.surface2} strokeWidth={stroke} />
+        <Circle
+          cx={center}
+          cy={center}
+          r={r}
+          fill="none"
+          stroke={colors.gold}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${circumference} ${circumference}`}
+          strokeDashoffset={circumference * (1 - done / total)}
+          transform={`rotate(-90 ${center} ${center})`}
+        />
+      </Svg>
+      <View style={styles.ringCenter}>
+        <Text
+          style={{
+            fontFamily: fontFamilies.heebo.black,
+            fontSize: Math.round(size * 0.26),
+            lineHeight: Math.round(size * 0.3),
+            color: colors.text,
+          }}
+        >
+          {percent}%
+        </Text>
+        <Text style={[typography.small, { color: colors.textSub }]}>
+          {done}/{total}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+export default function SketchHistoryC() {
+  const { colors } = useTheme();
+  const rows = Array.from({ length: 6 }, (_, row) => DAYS.slice(row * 5, row * 5 + 5));
+
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.hero}>
+          <View style={StyleSheet.absoluteFill} pointerEvents="none">
+            <Landscape height={HERO_HEIGHT} />
+          </View>
+          <View style={styles.heroTop}>
+            <View style={styles.greetingBlock}>
+              <Text style={[typography.display, { color: colors.text }]}>{greeting(PROFILE_NAME)}</Text>
+              <Text style={[typography.caption, { color: colors.textSub }]}>יום חמישי, י״ח בחשוון</Text>
+            </View>
+            <HeaderPill label="דוחות" accessibilityLabel="דוחות" onPress={() => {}} />
+          </View>
+          <StreakRing streak={STREAK} size={RING_SIZE} />
+          <Text style={[typography.subheading, styles.center, { color: colors.text }]}>עוד 18 ימים ליעד 30</Text>
+          <Text style={[typography.small, styles.center, styles.explain, { color: colors.textSub }]}>
+            רצף = ימים רצופים שבכל אחד מהם סימנת לפחות מצווה אחת
+          </Text>
+        </View>
+
+        <View style={styles.body}>
+          <View style={styles.periodRow}>
+            {PERIODS.map((period) => (
+              <View key={period.id} style={styles.period}>
+                <PercentRing done={period.done} total={period.total} size={PERIOD_RING} />
+                <Text style={[typography.bodyBold, { color: colors.text }]}>{period.label}</Text>
+                <Text style={[typography.small, styles.center, { color: colors.textSub }]}>{period.caption}</Text>
+              </View>
+            ))}
+          </View>
+          <Text style={[typography.small, styles.center, styles.periodHint, { color: colors.textSub }]}>
+            כל אחוז: מתוך המצוות שזמנן הגיע, כמה סימנת כבוצעו
+          </Text>
+
+          <Card padded>
+            <View style={styles.bestCard}>
+              <IconTile name="star" />
+              <View style={styles.bestText}>
+                <Text style={[typography.caption, { color: colors.textSub }]}>השיא שלך</Text>
+                <Text style={[typography.title, { color: colors.goldText }]}>31 ימים ברצף</Text>
+                <Text style={[typography.small, { color: colors.textSub }]}>הרצף הארוך ביותר אי פעם, ב{BEST_ENDED}</Text>
+              </View>
+            </View>
+          </Card>
+
+          <SectionLabel text="הישגים" count={3} />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badgeRow}>
+            {BADGES.map((badge) => (
+              <Card key={badge.id} padded style={styles.badge}>
+                <View style={styles.badgeInner}>
+                  <IconTile name={badge.icon} tone={badge.earned ? 'accent' : 'muted'} size={BADGE_TILE} />
+                  <Text
+                    style={[typography.captionBold, styles.center, { color: badge.earned ? colors.text : colors.textMuted }]}
+                    numberOfLines={2}
+                  >
+                    {badge.title}
+                  </Text>
+                  <Text style={[typography.micro, styles.center, { color: colors.textSub }]} numberOfLines={1}>
+                    {badge.caption}
+                  </Text>
+                </View>
+              </Card>
+            ))}
+          </ScrollView>
+
+          <SectionLabel text="30 הימים האחרונים" />
+          <View style={styles.grid}>
+            {rows.map((row, r) => (
+              <View key={r} style={styles.gridRow}>
+                {row.map((level, c) => {
+                  const index = r * 5 + c;
+                  const fill = level === 'full' ? colors.gold : level === 'partial' ? colors.goldLight : colors.surface2;
+                  const ink = level === 'full' ? colors.onGold : level === 'partial' ? colors.goldText : colors.textSub;
+                  return (
+                    <View
+                      key={index}
+                      style={[
+                        styles.gridCell,
+                        { backgroundColor: fill },
+                        index === DAYS.length - 1 && { borderWidth: 1.5, borderColor: colors.gold },
+                      ]}
+                    >
+                      <Text style={[typography.captionBold, { color: ink }]}>{((index + 29) % 30) + 1}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+          <View style={styles.legend}>
+            {[
+              { fill: colors.gold, label: 'הכל בוצע' },
+              { fill: colors.goldLight, label: 'חלק' },
+              { fill: colors.surface2, label: 'כלום' },
+            ].map((item) => (
+              <View key={item.label} style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: item.fill }]} />
+                <Text style={[typography.small, { color: colors.textSub }]}>{item.label}</Text>
+              </View>
+            ))}
+          </View>
+
+          <SectionLabel text="עקביות לפי מצווה" />
+          <Text style={[typography.small, styles.sectionHint, { color: colors.textSub }]}>
+            האחוז: מהימים שזמן המצווה עבר בהם, בכמה סימנת אותה. הרצף: ימים רצופים שסימנת אותה.
+          </Text>
+          <Card divided>
+            {MITZVOT.map((m) => (
+              <View key={m.id} style={styles.statRow}>
+                <View style={styles.statTop}>
+                  <Text style={[typography.bodyBold, styles.statName, { color: colors.text }]} numberOfLines={1}>
+                    {m.name}
+                  </Text>
+                  <View style={[styles.streakChip, { backgroundColor: m.streak ? colors.goldLight : colors.surface2 }]}>
+                    <MitzvahIcon name="sparkle" size={scaled(12)} color={m.streak ? colors.goldText : colors.textMuted} />
+                    <Text style={[typography.small, { color: m.streak ? colors.goldText : colors.textMuted }]}>
+                      {m.streak ? `${m.streak} ברצף` : 'אין רצף'}
+                    </Text>
+                  </View>
+                  <Text style={[typography.captionBold, styles.percent, { color: colors.goldText }]}>{m.percent}%</Text>
+                </View>
+                <View style={[styles.barTrack, { backgroundColor: colors.surface2 }]}>
+                  <View style={[styles.barFill, { width: `${m.percent}%`, backgroundColor: colors.gold }]} />
+                </View>
+              </View>
+            ))}
+          </Card>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1 },
+  content: { paddingBottom: spacing.xxl },
+  hero: { height: HERO_HEIGHT, alignItems: 'center' },
+  heroTop: {
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+    gap: spacing.md,
+  },
+  greetingBlock: { flex: 1 },
+  center: { textAlign: 'center' },
+  explain: { marginTop: spacing.xs, paddingHorizontal: spacing.xxl },
+  body: { paddingHorizontal: spacing.lg },
+  ringCenter: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+  periodRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.sm, marginTop: spacing.sm },
+  period: { flex: 1, alignItems: 'center', gap: spacing.xs },
+  periodHint: { marginTop: spacing.md, marginBottom: spacing.lg, paddingHorizontal: spacing.lg },
+  bestCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  bestText: { flex: 1 },
+  badgeRow: { gap: spacing.sm, paddingVertical: spacing.xs, paddingHorizontal: spacing.xs },
+  badge: { width: BADGE_WIDTH },
+  badgeInner: { alignItems: 'center', gap: spacing.xs },
+  grid: { gap: spacing.sm },
+  gridRow: { flexDirection: 'row', gap: spacing.sm },
+  gridCell: {
+    flex: 1,
+    height: GRID_CELL_HEIGHT,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  legend: { flexDirection: 'row', gap: spacing.lg, marginTop: spacing.sm, paddingHorizontal: spacing.xs },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  legendDot: { width: scaled(10), height: scaled(10), borderRadius: radius.full },
+  sectionHint: { paddingHorizontal: spacing.xs, marginBottom: spacing.sm },
+  statRow: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md, gap: spacing.sm },
+  statTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  statName: { flex: 1 },
+  streakChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scaled(3),
+    paddingHorizontal: spacing.sm,
+    paddingVertical: scaled(2),
+    borderRadius: radius.full,
+  },
+  percent: { minWidth: scaled(36), textAlign: 'left' },
+  barTrack: { height: BAR_HEIGHT, borderRadius: radius.full, overflow: 'hidden', alignItems: 'flex-start' },
+  barFill: { height: BAR_HEIGHT, borderRadius: radius.full },
+});

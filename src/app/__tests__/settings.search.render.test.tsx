@@ -17,6 +17,8 @@ import SettingsScreen from '../(tabs)/settings';
 import { appVersionLabel } from '@/services/appUpdates';
 import { translate } from '@/i18n';
 import { CITIES } from '@/data/cities';
+import { hilulaDateLabel, upcomingHilulot } from '@/data/hilulot';
+import { HebcalService } from '@/services/HebcalService';
 import { installChokFixture } from '@/testing/chok';
 import { renderWithTheme } from '@/testing/render';
 import { installSelichotFixture } from '@/testing/selichot';
@@ -390,6 +392,29 @@ describe('Settings search', () => {
       pathname: '/siddur/[id]',
       params: { id: 'shacharit', section: 'אשרי ובא לציון' },
     });
+  });
+
+  it('finds a tzaddik by an alias, shows his date, and opens his page', async () => {
+    pinDate('2026-10-28T10:00');
+    await renderSettings();
+    await search('בבא סאלי');
+    const caption = screen.getByText(new RegExp(`^${he('settings.search.kind.hilula')} · `));
+    expect(caption).toBeOnTheScreen();
+    expect(caption.props.children).toBe(
+      `${he('settings.search.kind.hilula')} · ${hilulaDateLabel(upcomingHilulot(HebcalService.hebrewDayAt(at(CITIES[0], '2026-10-28T10:00'), CITIES[0]), true).find((entry) => entry.hilula.id === 'baba_sali')!.day, 'he')}`,
+    );
+    fireEvent.press(screen.getByText('הבבא סאלי'));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/hilula/[id]', params: { id: 'baba_sali' } });
+  });
+
+  it('opens the page of the first tzaddik on submit', async () => {
+    pinDate('2026-10-28T10:00');
+    await renderSettings();
+    await search('baal shem tov');
+    await act(async () => {
+      fireEvent(screen.getByLabelText(he('settings.search')), 'submitEditing');
+    });
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/hilula/[id]', params: { id: 'baal_shem_tov' } });
   });
 
   it('finds a custom mitzvah added while Settings is open', async () => {

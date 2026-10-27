@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { InteractionManager, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { DateTime } from 'luxon';
@@ -23,6 +23,7 @@ import { locationNoon } from '@/utils/locationDay';
 import { deriveCycle } from '@/utils/taharah/cycle';
 import { civilHebrewDayAt } from '@/utils/taharah/onot';
 import { perishaOnot } from '@/utils/taharah/vestot';
+import { afterPaint } from '@/utils/afterPaint';
 
 type Translate = (scope: string, options?: Record<string, unknown>) => string;
 
@@ -101,8 +102,8 @@ export default function TaharahCalendar() {
   const [selected, setSelected] = useState<Cell | null>(null);
 
   useEffect(() => {
-    const task = InteractionManager.runAfterInteractions(() => setReady(true));
-    return () => task.cancel?.();
+    const task = afterPaint(() => setReady(true));
+    return () => task.cancel();
   }, []);
 
   const marksByDay = useMemo(() => {

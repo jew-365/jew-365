@@ -231,3 +231,39 @@ export function paletteForGender(gender: 'male' | 'female', current: ThemeName):
   if (isDarkTheme(current)) return gender === 'female' ? 'plum' : 'dark';
   return gender === 'female' ? 'pink' : 'gold';
 }
+
+function hexChannels(hex: string): [number, number, number] {
+  const body = hex.slice(1);
+  const full = body.length === 3 ? [...body].map((c) => c + c).join('') : body;
+  return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16)) as [number, number, number];
+}
+
+export function blendHex(top: string, bottom: string, share: number): string {
+  const clamped = Math.min(1, Math.max(0, share));
+  const a = hexChannels(top);
+  const b = hexChannels(bottom);
+  return `#${a
+    .map((value, i) => Math.round(value * clamped + b[i] * (1 - clamped)))
+    .map((value) => value.toString(16).padStart(2, '0'))
+    .join('')}`;
+}
+
+function relativeLuminance(hex: string): number {
+  const [r, g, b] = hexChannels(hex).map((value) => {
+    const c = value / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+export function contrastRatio(a: string, b: string): number {
+  const [hi, lo] = [relativeLuminance(a), relativeLuminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+export function readableOn(fill: string, candidates: string[]): string {
+  if (candidates.length === 0) throw new Error('readableOn needs at least one candidate');
+  return candidates.reduce((best, ink) => (contrastRatio(fill, ink) > contrastRatio(fill, best) ? ink : best));
+}
+
+export const CALENDAR_PARTIAL_SHARES = { p1: 0.22, p2: 0.4, p3: 0.55 } as const;

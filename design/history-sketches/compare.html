@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>History Tab Sketches</title>
+<style>
+  :root { --bg: #f6f1e8; --card: #fffdf9; --text: #1d2240; --sub: #69645d; --accent: #f08a3c; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0e1626; --card: #172238; --text: #eef1f7; --sub: #9da9bf; } }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, "Segoe UI", Arial, sans-serif; }
+  header { padding: 20px 16px 8px; }
+  h1 { margin: 0 0 6px; font-size: 22px; }
+  p { margin: 0; color: var(--sub); }
+  .toggle { margin: 12px 0 0; display: flex; gap: 8px; flex-wrap: wrap; }
+  .toggle button { border: 1px solid var(--accent); background: var(--card); color: var(--text); padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 14px; }
+  .toggle button.on { background: var(--accent); color: #1d2240; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; padding: 16px; align-items: start; }
+  .col { background: var(--card); border-radius: 16px; padding: 14px; }
+  .col h2 { margin: 0 0 4px; font-size: 18px; }
+  .col p { font-size: 14px; margin-bottom: 10px; }
+  .col img { width: 100%; max-width: 380px; display: block; margin: 0 auto; border-radius: 12px; }
+  .note { font-size: 13px; margin-top: 8px; }
+  h3 { margin: 8px 16px 0; font-size: 18px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>טאב ההיסטוריה: סבב 3, E</h1>
+  <p>אותם נתונים בכל הסבבים: יום חמישי י״ח בחשוון, רצף 12, שיא 31, היום 4 מתוך 6 (67%), השבוע 31 מתוך 38 (82%), 30 יום 87%, שלושה הישגים.</p>
+  <div class="toggle">
+    <button id="light" class="on">בהיר</button>
+    <button id="dark">כהה</button>
+  </div>
+</header>
+<div class="cols">
+  <div class="col">
+    <h2>סיכום</h2>
+    <p>הנוף והטבעת נשארים מעל שלוש הלשוניות, והמתג נדבק לראש המסך בגלילה. התוכן של C: שלוש טבעות, שורה אחת להישגים, רשת 30 יום, עקביות לפי מצווה.</p>
+    <img id="e1" src="e-summary-light.png" alt="E סיכום">
+  </div>
+  <div class="col">
+    <h2>מגמות</h2>
+    <p>12 שבועות (הזמן זורם מימין לשמאל, השבוע הנוכחי מקווקו), היום החזק בשבוע (שבת וחג בנפרד), מגמה לפי מצווה מול 30 הימים שלפני, ודוחות שבועיים. שורת תובנה מתחת לכל גרף.</p>
+    <img id="e2" src="e-trends-light.png" alt="E מגמות">
+  </div>
+  <div class="col">
+    <h2>הישגים</h2>
+    <p>הישגים שהושגו עם התאריך, בדרך להישג הבא עם התקדמות, שיאים אישיים, והרצף הארוך לכל מצווה.</p>
+    <img id="e3" src="e-achievements-light.png" alt="E הישגים">
+  </div>
+</div>
+<h3>סבב 2: A מול C ו־D</h3>
+<div class="cols">
+  <div class="col">
+    <h2>A: הבסיס שנבחר</h2>
+    <p>הנוף והטבעת, כרטיסי שיא ואחוז 30 יום, הישגים, רשת 30 יום, רצף לכל מצווה.</p>
+    <img id="a" src="a-light.png" alt="כיוון A">
+  </div>
+  <div class="col">
+    <h2>C: שלוש טבעות במסך אחד</h2>
+    <p>מתחת לטבעת הרצף שורה של שלוש טבעות: יומי, שבועי, חודשי (30 יום), ולכל אחת שורה שאומרת מה היא סופרת. השאר כמו A.</p>
+    <img id="c" src="c-light.png" alt="כיוון C">
+  </div>
+  <div class="col">
+    <h2>D: שלוש לשוניות (שבוע כברירת מחדל)</h2>
+    <p>הרצף והשיא למעלה, מתחתם יום / שבוע / חודש: לכל לשונית טבעת אחוז גדולה והתוכן של התקופה.</p>
+    <img id="d" src="d-week-light.png" alt="כיוון D, לשונית שבוע">
+    <p class="note">בכהה מוצגת לשונית השבוע בלבד.</p>
+  </div>
+</div>
+<h3>D: שלוש הלשוניות (בהיר)</h3>
+<div class="cols">
+  <div class="col"><h2>יום</h2><p>מה שזמנו הגיע היום: סומן, עוד פתוח, ומה בהמשך הערב.</p><img src="d-day-light.png" alt="D יום"></div>
+  <div class="col"><h2>שבוע</h2><p>פס לכל יום מראשון עד שבת, והשבוע לפי מצווה.</p><img src="d-week-light.png" alt="D שבוע"></div>
+  <div class="col"><h2>חודש</h2><p>רשת 30 הימים ועקביות לפי מצווה עם רצף.</p><img src="d-month-light.png" alt="D חודש"></div>
+</div>
+<script>
+  function show(mode) {
+    document.getElementById('e1').src = 'e-summary-' + mode + '.png';
+    document.getElementById('e2').src = 'e-trends-' + mode + '.png';
+    document.getElementById('e3').src = 'e-achievements-' + mode + '.png';
+    document.getElementById('a').src = 'a-' + mode + '.png';
+    document.getElementById('c').src = 'c-' + mode + '.png';
+    document.getElementById('d').src = 'd-week-' + mode + '.png';
+    document.getElementById('light').classList.toggle('on', mode === 'light');
+    document.getElementById('dark').classList.toggle('on', mode === 'dark');
+  }
+  document.getElementById('light').onclick = () => show('light');
+  document.getElementById('dark').onclick = () => show('dark');
+</script>
+</body>
+</html>

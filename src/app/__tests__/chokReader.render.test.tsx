@@ -6,6 +6,12 @@ let mockCanGoBack = false;
 const loadAsset = (parasha: string) => Promise.resolve(mockAsset(parasha));
 const mockLoad = jest.fn(loadAsset);
 
+jest.mock('@/utils/afterPaint', () => ({
+  afterPaint: (task: () => void) => {
+    queueMicrotask(task);
+    return { cancel: () => undefined };
+  },
+}));
 jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
   useFocusEffect: () => {},
@@ -188,6 +194,7 @@ async function openAt(wallClock: string) {
   jest.useFakeTimers({ now: at(JERUSALEM, wallClock), doNotFake: [...ONLY_DATE] });
   renderWithTheme(<SiddurScreen />);
   await screen.findByText(/^פסוק /);
+  await act(async () => {});
 }
 
 describe('the Chok LeYisrael reader with the mitzvah switched on', () => {
@@ -793,7 +800,7 @@ describe('the Chok LeYisrael reader places in another parasha', () => {
     fireEvent.press(screen.getByRole('button', { name: 'פקודי · השבוע' }));
     await shows('פרשת פקודי');
     expect(mockLoad).toHaveBeenCalledWith('Pekudei');
-    expect(screen.getByText(NOTE)).toBeOnTheScreen();
+    expect(await screen.findByText(NOTE)).toBeOnTheScreen();
   });
 
   it('stays on the week for the second parasha of a double week when the choice is both', async () => {

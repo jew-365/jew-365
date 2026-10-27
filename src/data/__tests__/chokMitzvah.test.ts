@@ -1,3 +1,9 @@
+jest.mock('@/services/notifications/ids', () => ({
+  ...jest.requireActual('@/services/notifications/ids'),
+  HORIZON_MAX_DAYS: 2,
+}));
+jest.mock('@/services/notifications/planners/horizonEnd', () => ({ planHorizonEnd: () => [] }));
+
 import { DateTime } from 'luxon';
 import { iconFor } from '@/components/MitzvahIcon';
 import { CITIES } from '@/data/cities';

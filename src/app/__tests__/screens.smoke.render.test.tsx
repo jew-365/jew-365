@@ -11,7 +11,11 @@ const mockRouter = {
   canGoBack: () => true,
   canDismiss: () => false,
 };
-const mockNavigation = { isFocused: () => true, addListener: () => () => {} };
+const mockNavigation = {
+  isFocused: () => true,
+  addListener: () => () => {},
+  getState: () => ({ index: 0, routes: [{ key: 'tab' }] }),
+};
 
 jest.mock('expo-router', () => {
   const React = require('react');
@@ -57,6 +61,18 @@ jest.mock('expo-router', () => {
     useFocusEffect: (effect: () => void) => React.useEffect(effect, [effect]),
   };
 });
+jest.mock('expo-location', () => ({
+  Accuracy: { Balanced: 3 },
+  watchHeadingAsync: jest.fn(async () => ({ remove: () => {} })),
+  getForegroundPermissionsAsync: jest.fn(async () => ({ granted: false, canAskAgain: true })),
+  requestForegroundPermissionsAsync: jest.fn(async () => ({ granted: false, canAskAgain: true })),
+  getCurrentPositionAsync: jest.fn(),
+}));
+jest.mock('expo-haptics', () => ({
+  impactAsync: jest.fn(async () => {}),
+  selectionAsync: jest.fn(async () => {}),
+  ImpactFeedbackStyle: { Light: 'light', Medium: 'medium' },
+}));
 jest.mock('expo-keep-awake', () => ({
   activateKeepAwakeAsync: () => Promise.resolve(),
   deactivateKeepAwake: () => Promise.resolve(),
@@ -150,6 +166,7 @@ import { DateTime } from 'luxon';
 import RootLayout from '../_layout';
 import RootIndex from '../index';
 import CheckInScreen from '../checkin';
+import CompassScreen from '../compass';
 import CustomMitzvahScreen from '../custom-mitzvah';
 import DayScreen from '../day/[date]';
 import GuideScreen from '../guide';
@@ -503,6 +520,7 @@ const CASES: SmokeCase[] = [
     params: { id: 'no_such_tzaddik' },
     check: text('משהו השתבש. נסה שוב.', 'Something went wrong. Try again.'),
   },
+  { file: 'compass', label: 'default', Screen: CompassScreen, check: text('מצפן תפילה', 'Prayer compass') },
   { file: 'hilulot', label: 'default', Screen: HilulotScreen, check: text('הילולות צדיקים', 'Hilulot of tzaddikim') },
   {
     file: 'mitzvah/[id]',
@@ -673,14 +691,14 @@ const CASES: SmokeCase[] = [
       const tabs = await screen.findAllByRole('tab');
       const names =
         language === 'he'
-          ? ['עוד', 'סידור', 'בית', 'היסטוריה', 'הגדרות']
-          : ['More', 'Siddur', 'Home', 'History', 'Settings'];
+          ? ['עוד', 'סידור', 'בית', 'מעקב', 'הגדרות']
+          : ['More', 'Siddur', 'Home', 'Tracking', 'Settings'];
       expect(tabs).toHaveLength(5);
       names.forEach((name, index) => expect(tabs[index]).toHaveAccessibleName(name));
       expect(tabs[2]).toBeSelected();
     },
   },
-  { file: '(tabs)/history', label: 'default', Screen: HistoryScreen, check: text('היסטוריה', 'History') },
+  { file: '(tabs)/history', label: 'default', Screen: HistoryScreen, check: text('סיכום', 'Summary') },
   { file: '(tabs)/home', label: 'default', Screen: HomeScreen, check: text('עכשיו — לפי דחיפות', 'Now by urgency') },
   { file: '(tabs)/index', label: 'redirects to home', Screen: TabsIndexScreen, check: redirectsTo('/(tabs)/home') },
   { file: '(tabs)/more', label: 'default', Screen: MoreScreen, check: text('עוד', 'More') },

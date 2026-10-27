@@ -3,6 +3,12 @@ jest.mock('react-native-mmkv', () => {
   return { MMKV: jest.fn(() => createMockMMKV()) };
 });
 
+jest.mock('@/services/notifications/ids', () => ({
+  ...jest.requireActual('@/services/notifications/ids'),
+  HORIZON_MAX_DAYS: 2,
+}));
+jest.mock('@/services/notifications/planners/horizonEnd', () => ({ planHorizonEnd: () => [] }));
+
 type ScheduleInput = {
   identifier: string;
   content: {
@@ -21,6 +27,13 @@ const mockState: {
   pending: ScheduleInput[];
   presented: { request: { identifier: string; content: { data?: Record<string, unknown> } } }[];
 } = { pending: [], presented: [] };
+const mockWithoutHash = (input: ScheduleInput): ScheduleInput => ({
+  ...input,
+  content: {
+    ...input.content,
+    data: Object.fromEntries(Object.entries(input.content.data).filter(([key]) => key !== 'contentHash')),
+  },
+});
 const mockSchedule = jest.fn(async (input: ScheduleInput) => {
   mockState.pending = mockState.pending.filter((p) => p.identifier !== input.identifier);
   mockState.pending.push(input);
@@ -33,9 +46,11 @@ const mockDismiss = jest.fn(async (_id: string) => {});
 const mockSetCategory = jest.fn<Promise<unknown>, [string, unknown[]]>(async () => ({}));
 
 jest.mock('expo-notifications', () => ({
-  scheduleNotificationAsync: (i: unknown) => mockSchedule(i as ScheduleInput),
+  scheduleNotificationAsync: (i: unknown) => mockSchedule(mockWithoutHash(i as ScheduleInput)),
   cancelAllScheduledNotificationsAsync: () => mockCancelAll(),
-  cancelScheduledNotificationAsync: jest.fn(async () => {}),
+  cancelScheduledNotificationAsync: jest.fn(async (id: string) => {
+    mockState.pending = mockState.pending.filter((p) => p.identifier !== id);
+  }),
   getAllScheduledNotificationsAsync: jest.fn(async () => mockState.pending),
   getPresentedNotificationsAsync: jest.fn(async () => mockState.presented),
   dismissNotificationAsync: (id: string) => mockDismiss(id),
@@ -872,7 +887,7 @@ ${t('taharah.disputed')}`,
   describe('rebuilds', () => {
     it('12 raises the schedule format stamp so an update rebuilds once', async () => {
       await NotificationScheduler.rebuild();
-      expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(9);
+      expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(10);
     });
 
     it('13 the taharah store and the opt-in drive a rebuild, and the teardown unsubscribes them', () => {

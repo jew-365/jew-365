@@ -5,19 +5,21 @@ import { ZmanimService } from '@/services/ZmanimService';
 import { formatDate, type AppLanguage } from '@/i18n';
 import type { NoticeTiming } from '@/stores/useUserStore';
 import { locationNoon } from '@/utils/locationDay';
+import { HORIZON_MAX_DAYS } from '@/services/notifications/ids';
 
-export type Horizon = { days: Date[]; recentDays: Date[] };
+export type Horizon = { days: Date[]; recentDays: Date[]; thinFromIndex: number };
 
 export type NoticePhase = 'ahead' | 'opening' | 'open';
 
-// The location's calendar days from the one `fromDate` falls on: today and tomorrow, then on through
-// any Shabbat / Yom Tov block that is reached or starts the next day, up to the first weekday after
+// The location's calendar days from the one `fromDate` falls on, `HORIZON_MAX_DAYS` of them: the
+// plan is cut at the platform's cap, furthest first. The first two days stretch through any
+// Shabbat / Yom Tov block that is reached or starts the next day, up to the first weekday after
 // it. Nothing reopens the app inside a block — the user does not touch the phone — so a schedule
 // that stopped at the block left Sunday morning with no reminders whenever background fetch did not
 // run. Stepping by the location's dates, never by 24-hour device steps, keeps a DST change in
 // either zone from skipping or repeating a day, and keys every reminder by the date its window
 // belongs to — the same day the reader's liturgical flags and the history read.
-export function horizonDays(fromDate: Date, location: Location): Date[] {
+function stretchedDays(fromDate: Date, location: Location): Date[] {
   const first = DateTime.fromJSDate(fromDate).setZone(location.tz).startOf('day');
   const dayAt = (offset: number) => {
     const day = first.plus({ days: offset });
@@ -26,6 +28,15 @@ export function horizonDays(fromDate: Date, location: Location): Date[] {
   const isHoly = (day: Date) => HebcalService.isHolyDay(locationNoon(day, location), location);
   const days = [dayAt(0), dayAt(1)];
   while (isHoly(days[days.length - 1]) || isHoly(dayAt(days.length))) days.push(dayAt(days.length));
+  return days;
+}
+
+export function horizonDays(fromDate: Date, location: Location): Date[] {
+  const days = stretchedDays(fromDate, location);
+  const first = days[0];
+  while (days.length < HORIZON_MAX_DAYS) {
+    days.push(new Date(first.getFullYear(), first.getMonth(), first.getDate() + days.length));
+  }
   return days;
 }
 
@@ -45,7 +56,8 @@ export function recentDaysBefore(days: Date[]): Date[] {
 
 export function horizonFor(fromDate: Date, location: Location): Horizon {
   const days = horizonDays(fromDate, location);
-  return { days, recentDays: recentDaysBefore(days) };
+  const thinFromIndex = stretchedDays(fromDate, location).length;
+  return { days, recentDays: recentDaysBefore(days), thinFromIndex };
 }
 
 export function noticeTriggerAt(noon: Date, timing: NoticeTiming, location: Location): Date | null {
