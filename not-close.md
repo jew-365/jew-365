@@ -393,7 +393,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** a closed group says what it holds, so the user finds a text without opening every group.
   - **Expected result:** a render test reads the prayers, meals and general subtitles.
   - **Done:** 2026-10-27. Verified: "says under each closed group what it holds" in [siddur.catalog.render.test.tsx](src/app/__tests__/siddur.catalog.render.test.tsx); `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green on 2026-10-27. Not checked: on a phone.
-  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: yes, `0f82e5a` feat: sonar prayer compass and fixes from the preview check · Pushed: yes · Live: preview `1.0.21-8` (group `d4707151-cf09-4216-b688-7c19b3ed8345`, 2026-10-27); production not yet · Channel: preview
 
 - [ ] Redesign the prayer compass
   - **Flag:** `OTA`.
@@ -403,7 +403,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Expected result:** the owner's pick; then the rebuilt screen with [compass.render.test.tsx](src/app/__tests__/compass.render.test.tsx) green and an emulator check with the virtual sensors.
   - **Decided:** 2026-10-27, the owner: direction D, then D2 (סונאר) of the variants on [design/compass-sketches/radar.html](design/compass-sketches/radar.html): "אוקיי בוא נלך על D2 גש לביצוע".
   - **Done:** 2026-10-27. [src/app/compass.tsx](src/app/compass.tsx) rebuilt on D2: a sonar card with km rings on a log scale, a sweep turning on the UI thread, the Kotel blip lit by the sweep, a north pill, a turn line with degrees and side, the distance and the bearing with its wind. Verified: [compass.render.test.tsx](src/app/__tests__/compass.render.test.tsx) (the turn line both ways, the target and north layers, the ring scale, permission, haptic and facing cases) and the smoke suite; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` (4965 tests in each zone) green on 2026-10-27. Not checked: on the emulator or a phone (the web build shows no compass).
-  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: yes, `0f82e5a` feat: sonar prayer compass and fixes from the preview check · Pushed: yes · Live: preview `1.0.21-8` (group `d4707151-cf09-4216-b688-7c19b3ed8345`, 2026-10-27); production not yet · Channel: preview
 
 - [ ] Find tzaddikim in the settings search
   - **Flag:** `OTA`.
@@ -499,7 +499,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** the controls leave as soon as the user reads on, and no empty band ever shows.
   - **Expected result:** the fold cases of [siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx), and on a phone no delay and no band.
   - **Done:** 2026-10-27. Verified: the fold cases of [siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx), among them the block scrolling with the text from 40 points, the fold at the block's height, no fold at the top during a freeze, and a pinned block attached again at the top (animated styles read through reanimated's `getAnimatedStyle`); `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green on 2026-10-27. Not checked: on a phone or the emulator.
-  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: yes, `0f82e5a` feat: sonar prayer compass and fixes from the preview check · Pushed: yes · Live: preview `1.0.21-8` (group `d4707151-cf09-4216-b688-7c19b3ed8345`, 2026-10-27); production not yet · Channel: preview
 
 - [ ] The Tracking tab's switcher could not be pressed after a scroll
   - **Flag:** `OTA`.
@@ -508,7 +508,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** the tabs switch from any scroll position.
   - **Expected result:** a render test scrolls past the hero, presses a tab in the pinned switcher and scrolls back; on the phone the tabs switch after a scroll.
   - **Done:** 2026-10-27. Verified: "pins a switcher of its own past the hero…" in [history.render.test.tsx](src/app/__tests__/history.render.test.tsx); `pnpm typecheck`, `pnpm lint` and `pnpm check:dox` green, and `pnpm test:tz` (4965 tests in each zone) on 2026-10-27. Not checked: on a phone or the emulator.
-  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: yes, `0f82e5a` feat: sonar prayer compass and fixes from the preview check · Pushed: yes · Live: preview `1.0.21-8` (group `d4707151-cf09-4216-b688-7c19b3ed8345`, 2026-10-27); production not yet · Channel: preview
 
 ## Open Questions
 
