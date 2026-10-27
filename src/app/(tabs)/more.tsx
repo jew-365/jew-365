@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
@@ -8,6 +8,7 @@ import { chokAddonCaption, useChokDownloadFlow } from '@/components/ChokAddonCar
 import { ListRow } from '@/components/ListRow';
 import { NavBar } from '@/components/NavBar';
 import { SectionLabel } from '@/components/SectionLabel';
+import { SettingsSearchBox, SettingsSearchResults, useSettingsSearch } from '@/components/SettingsSearch';
 import { selichotAddonCaption, useSelichotDownloadFlow } from '@/components/SelichotAddonCard';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
@@ -24,6 +25,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { chokPortionAt, chokWeekName } from '@/utils/chok';
+import type { SettingsSearchItem } from '@/utils/settingsSearch';
 import { useI18n } from '@/i18n';
 
 export default function MoreScreen() {
@@ -42,12 +44,24 @@ export default function MoreScreen() {
   const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(nusach));
   const selichotDownload = useSelichotStore((s) => s.download);
   const selichotFlow = useSelichotDownloadFlow();
+  const [visit, setVisit] = useState(0);
+  const { query, setQuery, searching, results } = useSettingsSearch(visit);
   useFocusEffect(
     useCallback(() => {
+      setVisit((count) => count + 1);
+      setQuery('');
       void checkChokUpdate();
       void checkSelichotUpdate();
-    }, []),
+    }, [setQuery]),
   );
+  // A setting opens Settings on its section; everything else opens where the Settings search sends it.
+  const chooseResult = (item: SettingsSearchItem) => {
+    Keyboard.dismiss();
+    setQuery('');
+    if (item.kind) router.push(item.href);
+    else if (item.route) router.push(item.route);
+    else router.push({ pathname: '/(tabs)/settings', params: { focus: item.id } });
+  };
   const openChok = () => {
     if (chokInstall) router.push({ pathname: '/siddur/[id]', params: { id: CHOK_TEXT_ID } });
     else if (!chokDownloadSupported() || chokDownload.status === 'downloading') router.push(`/mitzvah/${CHOK_TEXT_ID}`);
@@ -68,8 +82,18 @@ export default function MoreScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
       <NavBar title={t('more.title')} />
-      <ScrollView contentContainerStyle={styles.list}>
-        <Card divided>
+      <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
+        <SettingsSearchBox
+          query={query}
+          onChangeQuery={setQuery}
+          labelKey="more.search"
+          placeholderKey="more.searchPlaceholder"
+          onSubmit={() => {
+            if (results[0]) chooseResult(results[0]);
+          }}
+        />
+        {searching ? <SettingsSearchResults query={query} results={results} onChoose={chooseResult} /> : null}
+        <Card divided style={searching ? styles.hidden : undefined}>
           <ListRow
             icon="calendar"
             title={t('schedule.title')}
@@ -184,6 +208,9 @@ const styles = StyleSheet.create({
   },
   lines: {
     maxHeight: scaled(420),
+  },
+  hidden: {
+    display: 'none',
   },
   line: {
     marginBottom: spacing.md,

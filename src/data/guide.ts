@@ -339,8 +339,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'הגדרות, חיפוש, גיבוי ואיפוס', en: 'Settings: search, backup and reset' },
     body: [
       {
-        he: 'בראש ההגדרות יש חיפוש: מקלידים מילה כמו ״התראות״, ״נוסח״ או ״גיבוי״ ומגיעים ישר להגדרה. החיפוש מוצא גם מצוות, טקסטים בסידור ופרקים בתוכם, וצדיקים מרשימת ההילולות עם תאריך ההילולה, וסולח על שגיאות הקלדה ועל הקלדה במקלדת של השפה השנייה.',
-        en: "Settings opens with a search: type a word such as “notifications”, “nusach” or “backup” to go straight to the setting. It also finds mitzvot, siddur texts and the sections inside them, and the tzaddikim of the hilulot list with their hilula date, and forgives typos and typing on the other language's keyboard.",
+        he: 'בראש ההגדרות יש חיפוש: מקלידים מילה כמו ״התראות״, ״נוסח״ או ״גיבוי״ ומגיעים ישר להגדרה. החיפוש מוצא גם מצוות, טקסטים בסידור ופרקים בתוכם, וצדיקים מרשימת ההילולות עם תאריך ההילולה, וסולח על שגיאות הקלדה ועל הקלדה במקלדת של השפה השנייה. אותו חיפוש נמצא גם בראש לשונית עוד, ומשם הגדרה נפתחת בהגדרות במקום שלה.',
+        en: "Settings opens with a search: type a word such as “notifications”, “nusach” or “backup” to go straight to the setting. It also finds mitzvot, siddur texts and the sections inside them, and the tzaddikim of the hilulot list with their hilula date, and forgives typos and typing on the other language's keyboard. The same search sits at the top of the More tab, and a setting found there opens in Settings at its place.",
       },
       {
         he: 'החלקים: פרופיל (שם, טלפון, מגדר ומצב משפחתי), תפילה וסידור, מכשיר והתראות (עיר או GPS, התראות, הסיכום השבועי, ערכת נושא, גודל התצוגה ושפה), גיבוי, שחזור ואיפוס, ואודות ויצירת קשר. העיר או מיקום ה־GPS קובעים גם אם אתם בישראל או בחוץ לארץ, למשל לעניין יום טוב שני.',
@@ -414,8 +414,8 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: 'In the siddur: the controls fold while you read and leave almost the whole screen to the text, and each group of the Siddur tab opens and closes, with the meal blessings right after Now.',
       },
       {
-        he: 'החיפוש בהגדרות מוצא צדיקים מרשימת ההילולות, וההילולות נמצאות גם בלשונית עוד.',
-        en: 'The search in Settings finds the tzaddikim of the hilulot list, and the hilulot are in the More tab too.',
+        he: 'החיפוש מוצא צדיקים מרשימת ההילולות, וגם הוא וגם ההילולות נמצאים עכשיו בלשונית עוד, בנוסף להגדרות.',
+        en: 'The search finds the tzaddikim of the hilulot list, and both the search and the hilulot are in the More tab too, besides Settings.',
       },
       {
         he: '23 צדיקים חדשים ברשימת ההילולות, כל אחד עם דף משלו: ספרדים, חסידים, גדולי ליטא וגדולי הדורות האחרונים, ובהם רבי חיים חורי, בבא מאיר, הבני יששכר, ר׳ ישעיה׳לה מקרעסטיר, הרמח״ל, רבי חיים מבריסק, הרב כדורי והרב שטיינמן.',

@@ -1,9 +1,14 @@
 const mockPush = jest.fn();
+const mockSetParams = jest.fn((next: { focus?: string }) => {
+  if (next.focus === undefined) delete mockParams.focus;
+});
+const mockParams: { focus?: string } = {};
 const mockFocusEffects: (() => void)[] = [];
 jest.mock('expo-router', () => {
   const React = require('react');
   return {
-    useRouter: () => ({ push: mockPush, replace: jest.fn() }),
+    useRouter: () => ({ push: mockPush, replace: jest.fn(), setParams: mockSetParams }),
+    useLocalSearchParams: () => mockParams,
     useFocusEffect: (effect: () => void) =>
       React.useEffect(() => {
         mockFocusEffects.push(effect);
@@ -51,6 +56,8 @@ const focusAgain = () => act(() => mockFocusEffects.forEach((effect) => effect()
 describe('Settings search index', () => {
   beforeEach(() => {
     mockFocusEffects.length = 0;
+    delete mockParams.focus;
+    mockSetParams.mockClear();
     jest.useFakeTimers({ now: at(CITIES[0], '2026-10-28T10:00'), doNotFake: [...ONLY_DATE] });
     useUserStore.getState().reset();
     useUserStore.setState({ isOnboarded: true, gender: 'male', maritalStatus: 'single' });
@@ -123,5 +130,17 @@ describe('Settings search index', () => {
     scrollTo.mockClear();
     await focusAgain();
     expect(scrollTo).toHaveBeenCalledWith({ y: 0, animated: false });
+  });
+
+  it('opens the section of a setting the More tab sends as focus, highlights it and clears the param', async () => {
+    mockParams.focus = 'language';
+    renderWithTheme(<SettingsScreen />);
+    await act(async () => {});
+    expect(screen.getByTestId('settings-anchor-language')).toBeOnTheScreen();
+    expect(mockSetParams).toHaveBeenCalledWith({ focus: undefined });
+    expect(mockParams.focus).toBeUndefined();
+    await act(async () => {});
+    await focusAgain();
+    expect(screen.queryByTestId('settings-anchor-language')).toBeNull();
   });
 });

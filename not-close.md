@@ -396,6 +396,15 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Owner check:** 2026-10-27, on preview `1.0.21-8` (Android): "מעולה סמן כסגור". Moves to [action-log.md](action-log.md) with production `1.0.21-3`.
   - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: yes, `0f82e5a` feat: sonar prayer compass and fixes from the preview check · Pushed: yes · Live: preview `1.0.21-8` (group `d4707151-cf09-4216-b688-7c19b3ed8345`, 2026-10-27); production not yet · Channel: preview
 
+- [ ] Put the settings search at the top of the More tab too
+  - **Flag:** `OTA`.
+  - **Source:** the owner, 2026-10-27: "אני רוצה להוסיף את החיפוש לניווט עוד בנוסף להגדרות"; asked how, the owner picked a search box at the top of More over a row that opens Settings.
+  - **What it is:** [src/components/SettingsSearch.tsx](src/components/SettingsSearch.tsx) holds the box, the results and the index, used by Settings and by [src/app/(tabs)/more.tsx](<src/app/(tabs)/more.tsx>); in More a mitzvah, text, chapter, tzaddik or screen opens directly, and a setting opens Settings with `focus` set to it, which opens its section and highlights it ([src/app/(tabs)/settings.tsx](<src/app/(tabs)/settings.tsx>)).
+  - **What it solves:** the search is one tap from the tab of destinations, not only inside Settings.
+  - **Expected result:** render tests of the More search (a setting, a text by submit, no match) and of Settings opening a sent setting; the Settings suites unchanged.
+  - **Done:** 2026-10-27. Verified: the "the search" cases of [more.render.test.tsx](src/app/__tests__/more.render.test.tsx), "opens the section of a setting the More tab sends as focus…" in [settings.searchIndex.render.test.tsx](src/app/__tests__/settings.searchIndex.render.test.tsx) and every Settings suite; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` (4987 tests in each zone) green on 2026-10-27. Not checked: on a phone.
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+
 - [ ] Let the bookmark star add a new bookmark or move one already kept
   - **Flag:** `OTA`.
   - **Source:** the owner, 2026-10-27: "בסימניות בקורא אם המשתמש לוחץ על הכוכב במקום ישר להוסיף סימניה חדשה אני רוצה להציג לו רשימה של הסימניות שיש לו פלוס אפשרות להוסיף אחת חדשה ... אם הוא בוחר מהרשימה שיש לו אז זה דורס אותה ומשנה לה את השם למיקום החדש".

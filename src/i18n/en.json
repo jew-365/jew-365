@@ -45,6 +45,8 @@
   "home.nextAt": "%{name} · %{time}",
   "more.title": "More",
   "more.scheduleCaption": "Day, week and month",
+  "more.search": "Search",
+  "more.searchPlaceholder": "Search: mitzvot, prayers, tzaddikim, settings…",
   "more.tehillimCaption": "Divided by the days of the week",
   "more.halacha.title": "Halacha hotline",
   "more.halacha.caption.ashkenazi": "Ask a rav, following Ashkenazi rulings",

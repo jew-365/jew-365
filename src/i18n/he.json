@@ -45,6 +45,8 @@
   "home.nextAt": "%{name} · %{time}",
   "more.title": "עוד",
   "more.scheduleCaption": "יום, שבוע וחודש",
+  "more.search": "חיפוש",
+  "more.searchPlaceholder": "חיפוש: מצוות, תפילות, צדיקים, הגדרות…",
   "more.tehillimCaption": "מחולק לפי ימי השבוע",
   "more.halacha.title": "קו ההלכה",
   "more.halacha.caption.ashkenazi": "שאלה לרב, לפי פסקי אשכנז",

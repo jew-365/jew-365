@@ -206,12 +206,13 @@ describe('More tab', () => {
     expect(screen.getByText('Divided by the days of the week')).toBeOnTheScreen();
   });
 
-  it('lists every destination on one divided card', () => {
+  it('opens with the search card, then every destination on one divided card', () => {
     renderAt('2026-11-16T08:00');
     const cards = screen.UNSAFE_getAllByType(Card);
-    expect(cards).toHaveLength(1);
-    expect(cards[0].props.divided).toBe(true);
-    expect(within(cards[0]).UNSAFE_getAllByType(ListRow)).toHaveLength(8);
+    expect(cards).toHaveLength(2);
+    expect(within(cards[0]).getByLabelText('חיפוש')).toBeOnTheScreen();
+    expect(cards[1].props.divided).toBe(true);
+    expect(within(cards[1]).UNSAFE_getAllByType(ListRow)).toHaveLength(8);
   });
 
   it('opens the hilulot from its row', () => {
@@ -364,5 +365,31 @@ describe('Halacha hotline', () => {
     renderAt('2026-11-16T12:00');
     fireEvent.press(screen.getByText('Halacha hotline'));
     expect(screen.getByText('WhatsApp 073-786-0860')).toBeOnTheScreen();
+  });
+
+  describe('the search', () => {
+    const type = (text: string) => fireEvent.changeText(screen.getByLabelText('חיפוש'), text);
+
+    it('opens a setting on its section in Settings', () => {
+      renderAt('2026-11-16T12:00');
+      type('שפה');
+      expect(screen.queryByText('לוח זמנים')).toBeNull();
+      fireEvent.press(screen.getAllByText('שפה')[0]);
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/(tabs)/settings', params: { focus: 'language' } });
+      expect(screen.getByLabelText('חיפוש').props.value).toBe('');
+    });
+
+    it('opens a text where the Settings search would', () => {
+      renderAt('2026-11-16T12:00');
+      type('תהילים');
+      fireEvent(screen.getByLabelText('חיפוש'), 'submitEditing');
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/siddur/[id]', params: { id: 'tehillim' } });
+    });
+
+    it('says when nothing matches', () => {
+      renderAt('2026-11-16T12:00');
+      type('קקקקקקקקק');
+      expect(screen.getByText(/^לא נמצא/)).toBeOnTheScreen();
+    });
   });
 });

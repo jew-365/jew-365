@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Keyboard,
   Linking,
@@ -14,7 +14,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { appVersionLabel } from '@/services/appUpdates';
 import { LocationService } from '@/services/LocationService';
 import {
@@ -53,8 +53,6 @@ import {
   setTaharahTracking,
   taharahOffered,
 } from '@/stores/taharahOptIn';
-import { useChokStore } from '@/stores/useChokStore';
-import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { useMitzvotStore, type ActiveMitzvahState } from '@/stores/useMitzvotStore';
 import { useUserStore, type Gender, type PrayerMode } from '@/stores/useUserStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -70,29 +68,19 @@ import { MitzvahIcon, type IconName } from '@/components/MitzvahIcon';
 import { NavBar } from '@/components/NavBar';
 import { SectionLabel } from '@/components/SectionLabel';
 import { ThemeSwatchRow } from '@/components/ThemeSwatchRow';
+import { SettingsSearchBox, SettingsSearchResults, useSettingsSearch } from '@/components/SettingsSearch';
 import { SettingsSection } from '@/components/SettingsSection';
 import { ScrollSpeedStepper } from '@/components/ScrollSpeedStepper';
 import { UI_SCALES, rescaled, scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
-import { translate, useI18n } from '@/i18n';
+import { useI18n } from '@/i18n';
 import { CITIES, cityOf, getLocationName } from '@/data/cities';
-import { getAllMitzvot } from '@/data/customMitzvotAdapter';
 import type { ChokThuNightDay } from '@/types/chok';
 import { findMitzvah } from '@/data/mitzvot';
 import { Nusach } from '@/types/mitzvah';
-import { appDayKey } from '@/utils/locationDay';
-import { HebcalService } from '@/services/HebcalService';
 import type { SiddurVoice } from '@/types/siddur';
-import {
-  SETTINGS_SEARCH_ITEMS,
-  buildSettingsSearchIndex,
-  searchSettings,
-  settingsContentItems,
-  type SettingsSearchEntry,
-  type SettingsSearchItem,
-  type SettingsSectionKey,
-} from '@/utils/settingsSearch';
+import { SETTINGS_SEARCH_ITEMS, type SettingsSearchItem, type SettingsSectionKey } from '@/utils/settingsSearch';
 
 const NUSACHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
 const LANGS = ['he', 'en'] as const;
@@ -164,8 +152,6 @@ export default function SettingsScreen() {
     })),
   );
   const enabledMitzvotCount = useMitzvotStore(selectEnabledCount(user.nusach));
-  const customMitzvot = useCustomMitzvotStore((s) => s.items);
-  const chokInstalled = useChokStore((s) => s.installed !== null);
   const savedCityId = cityOf(user.location)?.cityId;
   // Held locally and committed on blur. Bound straight to the store, every keystroke serialised
   // the whole user store to MMKV and re-rendered the entire settings tree.
@@ -183,12 +169,18 @@ export default function SettingsScreen() {
   const [contactBusy, setContactBusy] = useState(false);
   const [contactStatus, setContactStatus] = useState<{ text: string; failed: boolean } | null>(null);
   const [open, setOpen] = useState<ReadonlySet<SettingsSectionKey>>(() => new Set());
-  const [query, setQuery] = useState('');
   const [focusTarget, setFocusTarget] = useState<string | null>(null);
   const [creditOpen, setCreditOpen] = useState(false);
   const focusCount = useRef(0);
+  const { query, setQuery, searching, results } = useSettingsSearch(focusCount.current);
+  const params = useLocalSearchParams<{ focus?: string }>();
+  const focusParam = useRef<string | undefined>(undefined);
+  const routerRef = useRef(router);
+  routerRef.current = router;
+  focusParam.current = typeof params.focus === 'string' ? params.focus : undefined;
   const scrollRef = useRef<ScrollView>(null);
   const contentRef = useRef<View>(null);
+  const seedContactRef = useRef<() => void>(() => {});
 
   useFocusEffect(
     useCallback(() => {
@@ -197,8 +189,17 @@ export default function SettingsScreen() {
       scrollRef.current?.scrollTo({ y: 0, animated: false });
       focusCount.current += 1;
       setFocusTarget(null);
+      // The More tab's search sends a setting here as `focus`: open its section and land on it.
+      const target = focusParam.current;
+      const section = target ? SETTINGS_SEARCH_ITEMS.find((item) => item.id === target)?.section : undefined;
+      if (target) {
+        if (section) setOpen(new Set([section]));
+        if (section === 'contact') seedContactRef.current();
+        setFocusTarget(target);
+        routerRef.current.setParams({ focus: undefined });
+      }
       syncNotificationPermissionStatus().catch((error) => reportError('schedule', error));
-    }, []),
+    }, [setQuery]),
   );
 
   useEffect(() => {
@@ -209,81 +210,21 @@ export default function SettingsScreen() {
 
   const taharahVisible = taharahOffered(user);
   const storeUrl = storePageUrl();
-  const searching = query.trim().length > 0;
-  const searchIndexCache = useRef<{ inputs: readonly unknown[]; index: SettingsSearchEntry[] } | null>(null);
-  const searchIndexFor = () => {
-    const now = new Date();
-    const inputs = [
-      user.gender,
-      user.nusach,
-      user.siddurVoice,
-      user.maritalStatus,
-      user.location,
-      user.inIsrael,
-      chokInstalled,
-      customMitzvot,
-      appDayKey(now, user.location),
-      HebcalService.hebrewDayAt(now, user.location).abs(),
-      focusCount.current,
-    ];
-    const cached = searchIndexCache.current;
-    if (cached && inputs.every((input, index) => Object.is(input, cached.inputs[index]))) return cached.index;
-    const index = buildSettingsSearchIndex(
-      (key) => [translate(key, undefined, 'he', user.gender), translate(key, undefined, 'en', user.gender)],
-      [
-        ...SETTINGS_SEARCH_ITEMS,
-        ...settingsContentItems({
-          mitzvot: getAllMitzvot(user.nusach),
-          nusach: user.nusach,
-          voice: user.siddurVoice,
-          maritalStatus: user.maritalStatus,
-          chokInstalled,
-          now,
-          location: user.location,
-          inIsrael: user.inIsrael,
-        }),
-      ],
-    );
-    searchIndexCache.current = { inputs, index };
-    return index;
-  };
-  const results = useMemo(
-    () =>
-      searching
-        ? searchSettings(query, searchIndexFor(), {
-            taharah: taharahVisible,
-            backup: Platform.OS !== 'web',
-            battery: supportsBatteryOptimizationSettings(),
-          })
-        : [],
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- searchIndexFor reads the profile and custom mitzvot; its own cache decides when to rebuild
-    [
-      query,
-      searching,
-      taharahVisible,
-      user.gender,
-      user.nusach,
-      user.siddurVoice,
-      user.maritalStatus,
-      user.location,
-      user.inIsrael,
-      chokInstalled,
-      customMitzvot,
-    ],
-  );
-
   const commitProfileDrafts = () => {
     user.setProfileName(nameDraft.trim());
     user.setProfilePhone(phoneDraft.trim());
   };
 
+  const seedContact = () => {
+    setContactName((current) => current.trim() || nameDraft.trim());
+    setContactPhone((current) => current.trim() || phoneDraft.trim());
+    setContactStatus(null);
+  };
+  seedContactRef.current = seedContact;
+
   const openSection = (key: SettingsSectionKey) => {
     if (open.has(key)) return;
-    if (key === 'contact') {
-      setContactName((current) => current.trim() || nameDraft.trim());
-      setContactPhone((current) => current.trim() || phoneDraft.trim());
-      setContactStatus(null);
-    }
+    if (key === 'contact') seedContact();
     setOpen((current) => new Set(current).add(key));
   };
 
@@ -305,8 +246,6 @@ export default function SettingsScreen() {
     setQuery(next);
   };
 
-  const notTodayOf = (item: SettingsSearchItem) => (item.kind ? item.notToday : undefined);
-
   const chooseResult = (item: SettingsSearchItem) => {
     Keyboard.dismiss();
     setQuery('');
@@ -322,23 +261,6 @@ export default function SettingsScreen() {
       openSection(item.section);
       setFocusTarget(item.id);
     }
-  };
-
-  const inLanguage = (name: { he: string; en: string }) => (language === 'en' ? name.en : name.he);
-  const resultCaption = (item: SettingsSearchItem) => {
-    const notToday = notTodayOf(item);
-    const notTodayCaption = notToday
-      ? notToday.label
-        ? inLanguage(notToday.label)
-        : t('siddur.catalog.notToday')
-      : null;
-    if (item.kind === 'chapter') {
-      const caption = t('settings.search.kind.chapter', { text: inLanguage(item.textName) });
-      return notTodayCaption ? `${caption} · ${notTodayCaption}` : caption;
-    }
-    if (item.kind === 'hilula') return `${t('settings.search.kind.hilula')} · ${inLanguage(item.caption)}`;
-    if (item.kind) return notTodayCaption ?? t(`settings.search.kind.${item.kind}`);
-    return item.section ? t(`settings.${item.section}`) : t('settings.searchScreen');
   };
 
   const reveal = useCallback((target: View) => {
@@ -485,61 +407,16 @@ export default function SettingsScreen() {
       <NavBar title={t('settings.title')} />
       <ScrollView ref={scrollRef} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View ref={contentRef}>
-          <Card style={styles.searchCard}>
-            <View style={styles.searchRow}>
-              <MitzvahIcon name="search" size={scaled(18)} color={colors.textMuted} />
-              <TextInput
-                value={query}
-                onChangeText={changeQuery}
-                onSubmitEditing={() => {
-                  if (results[0]) chooseResult(results[0]);
-                }}
-                placeholder={t('settings.searchPlaceholder')}
-                placeholderTextColor={colors.textMuted}
-                accessibilityLabel={t('settings.search')}
-                returnKeyType="search"
-                autoCorrect={false}
-                autoCapitalize="none"
-                style={[styles.searchInput, { color: colors.text, writingDirection: inputTone.writingDirection }]}
-              />
-              {query ? (
-                <Pressable
-                  onPress={() => setQuery('')}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('settings.searchClear')}
-                  hitSlop={scaled(8)}
-                >
-                  <MitzvahIcon name="close" size={scaled(16)} color={colors.textMuted} />
-                </Pressable>
-              ) : null}
-            </View>
-          </Card>
+          <SettingsSearchBox
+            query={query}
+            onChangeQuery={changeQuery}
+            onSubmit={() => {
+              if (results[0]) chooseResult(results[0]);
+            }}
+          />
 
           {searching ? (
-            results.length > 0 ? (
-              <Card divided style={styles.resultsGap}>
-                {results.map((item) => (
-                  <ListRow
-                    key={item.id}
-                    icon={item.icon}
-                    iconTone={notTodayOf(item) ? 'muted' : 'accent'}
-                    title={item.kind ? inLanguage(item.title) : t(item.titleKey)}
-                    caption={resultCaption(item)}
-                    onPress={() => chooseResult(item)}
-                    chevron
-                  />
-                ))}
-              </Card>
-            ) : (
-              <View style={styles.searchEmpty} accessibilityLiveRegion="polite">
-                <Text style={[typography.bodyBold, { color: colors.text }]}>
-                  {t('settings.searchEmpty', { query: query.trim() })}
-                </Text>
-                <Text style={[typography.small, styles.hint, { color: colors.textMuted }]}>
-                  {t('settings.searchEmptyHint')}
-                </Text>
-              </View>
-            )
+            <SettingsSearchResults query={query} results={results} onChoose={chooseResult} />
           ) : (
             <>
               <Card style={styles.mitzvotGap}>
@@ -1236,29 +1113,8 @@ const styles = StyleSheet.create({
   sizeSample: {
     marginTop: spacing.md,
   },
-  searchCard: {
-    marginBottom: spacing.md,
-  },
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-  },
-  resultsGap: {
-    marginBottom: spacing.md,
-  },
   mitzvotGap: {
     marginBottom: spacing.md,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: spacing.md,
-    fontSize: scaled(16),
-  },
-  searchEmpty: {
-    paddingVertical: spacing.xl,
-    alignItems: 'center',
   },
   focused: {
     marginHorizontal: -spacing.sm,
