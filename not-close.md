@@ -403,7 +403,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** the search is one tap from the tab of destinations, not only inside Settings.
   - **Expected result:** render tests of the More search (a setting, a text by submit, no match) and of Settings opening a sent setting; the Settings suites unchanged.
   - **Done:** 2026-10-27. Verified: the "the search" cases of [more.render.test.tsx](src/app/__tests__/more.render.test.tsx), "opens the section of a setting the More tab sends as focus…" in [settings.searchIndex.render.test.tsx](src/app/__tests__/settings.searchIndex.render.test.tsx) and every Settings suite; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` (4987 tests in each zone) green on 2026-10-27. Not checked: on a phone.
-  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: yes, `36ef073` feat: settings search at the top of the More tab · Pushed: no (the owner asked for a commit and a preview update only) · Live: preview `1.0.21-11` (group `8f70dfd2-97dd-42ed-a1f6-630d38fc2d5c`, 2026-10-27); production not yet · Channel: preview
 
 - [ ] Let the bookmark star add a new bookmark or move one already kept
   - **Flag:** `OTA`.
