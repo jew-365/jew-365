@@ -277,6 +277,7 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
       - "אשרי יושבי" listed Shacharit, Mincha and Tehillim, and a press opened the reader on that passage;
       - `tab`, `topic`, `open=halacha` and a siddur group from a result each opened their place.
     - Not checked: on a phone.
+  - **Owner check:** 2026-10-28, the owner on preview `1.0.21-12`: "תתעד כענין סגור". Moves to [action-log.md](action-log.md) with the next production update.
   - **Status:** Version: OTA, expected with the next production update `1.0.21-4` · Committed: yes, `d5b7fdc` feat(search): find everything, close results first, deep pass in prayers · Pushed: yes · Live: preview `1.0.21-12` (group `06457b91-6051-47a6-b1ee-b1a62a24fe48`, 2026-10-27); production not yet · Channel: preview
 
 - [ ] Add a permissions step to onboarding and a permissions card to Settings
