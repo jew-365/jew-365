@@ -17,6 +17,20 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-10-28 — production update 1.0.21-4: the search that finds everything
+
+- **Requested:** the owner, 2026-10-27 (the search) and 2026-10-28 (the design lab). The production update was approved by the owner on 2026-10-28: "תעשה OTA לפרודקשן ותסנכרן תיעוד".
+- **Commits:** `d5b7fdc` feat(search): find everything, close results first, deep pass in prayers, and `d7f98b7` feat(design): add design lab with the home screen study, with their records commits up to `82136c0`; pushed to `main` on 2026-10-27 and 2026-10-28.
+- **Version:** all JS, production update `1.0.21-4` (group `61520fca-c1f2-4fc2-82dd-e128c0f491eb`, 2026-10-28, Android and iOS, from `82136c0`, the working tree differing only in [release/RELEASE_LOG.md](release/RELEASE_LOG.md), which Metro does not bundle), the same app code as preview `1.0.21-12`.
+- **Verification:** per entry. Production itself is not yet checked on a phone.
+
+- **Make the search find everything in the app** — the user finds any item of the app from one box, close results first and quickly, and future additions cannot silently fall out of the search.
+  - Requested: the owner, 2026-10-27, in this conversation. Verified: by [searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) (16 cases), "lands on the passage a search result names by its segment key" in [siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx), and the updated empty-state cases of the Settings and More suites. `pnpm typecheck`, `pnpm lint` and `pnpm check:dox` green, and `pnpm test:tz` green with 5004 tests in each zone, all on 2026-10-27. In the `expo-web` preview at 375 points in Hebrew: - "קרליץ" found the beit hora'ah and the Chazon Ish; - "תפלין" showed the mitzvah, its 54 marks and the badge 46 marks away under "אולי התכוונת" at once, then the blessing's own spelling from the deep pass; - "אשרי יושבי" listed Shacharit, Mincha and Tehillim, and a press opened the reader on that passage; - `tab`, `topic`, `open=halacha` and a siddur group from a result each opened their place. Not checked: on a phone. Owner check: 2026-10-28, the owner on preview `1.0.21-12`: "תתעד כענין סגור".
+  - Version: OTA `1.0.21-4` · Committed: yes, `d5b7fdc` · Pushed: yes · Live: preview `1.0.21-12` (group `06457b91-6051-47a6-b1ee-b1a62a24fe48`); production `1.0.21-4` (group `61520fca-c1f2-4fc2-82dd-e128c0f491eb`, 2026-10-28) · Channel: production, preview
+- **The design lab and the home screen study** — every design request is built as a study in [design/lab/](design/lab) and shown as Artifacts; the home screen study moved there from a temp scratchpad.
+  - Requested: the owner, 2026-10-28. Verified: the study builds from the repo byte-identical to the published Artifacts, `data.json` regenerates identical, `tools/shot.mjs` works through the `design-site` server, and `check:dox` and `lint` pass (2026-10-28). The owner's pick of a direction stays open in [not-close.md](not-close.md).
+  - Version: none (tooling) · Committed: yes, `d7f98b7` · Pushed: yes · Live: n/a, moved with production `1.0.21-4` (group `61520fca-c1f2-4fc2-82dd-e128c0f491eb`, from `82136c0`) · Channel: —
+
 ## 2026-10-27 — production update 1.0.21-3: the app requests of 2026-10-26 and the preview fixes
 
 - **Requested:** the user, 2026-10-26 (thirteen app requests, the Tracking tab, the tzaddikim) and 2026-10-27 (the fixes from the check of preview `1.0.21-7` and `1.0.21-8`, the sonar compass, the bookmark sheet, the More search). The production update was approved by the owner on 2026-10-27: "יש אישור ל ota לפרודקשן".

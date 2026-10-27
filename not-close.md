@@ -256,30 +256,6 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
 
 ### High — App requests of 2026-10-26
 
-- [ ] Make the search find everything in the app
-  - **Flag:** `OTA`.
-  - **Source:** the owner, 2026-10-27: "אני רוצה שהחיפוש יהיה חיפוש חכם שיודע למצוא כל מה שיש באפליקציה... אפילו משהו דומה או אפילו עם שגיאת כתיב", plus a binding rule in the agents' instructions so every addition updates the search. Then: "תעשה את זה חכם שזה יציג קודם את התוצאות הכי מהירות ואז חיפוש עמוק שלא יהיה איטי מידי", and "קודם מראה את התוצאות הכי קרובות ורק אחרי את מה שאולי דומה". Choices asked that day: every siddur section by name (and, with the deep pass, passages by phrase), figures shown with the user's value, and tzaddikim found by works and grave.
-  - **What it is:** [src/utils/settingsSearch.ts](src/utils/settingsSearch.ts) gains:
-    - `SEARCH_SCREENS` and `appContentItems()`: screens, tracking tabs, cards, figures and badges with the user's value, library and siddur categories, guide topics, and halacha lines by rav;
-    - tzaddik works and graves;
-    - `searchTiers()`, close results and then "אולי התכוונת";
-    - `deepTextOf()` / `searchDeep()`, siddur sections and passages.
-    
-    [src/components/SettingsSearch.tsx](src/components/SettingsSearch.tsx) runs the deep pass in the background 250 ms after typing stops. Route params land each result in place: `tab` on history, `topic` on the guide, `group` on the siddur tab, `open=halacha` on More, and `segment` on the reader. The binding rule is the root [AGENTS.md](AGENTS.md#search-finds-everything) section "Search Finds Everything", mirrored in [src/utils/AGENTS.md](src/utils/AGENTS.md). [src/utils/__tests__/searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) fails when a screen, a Settings anchor or a kind of content cannot be found.
-  - **What it solves:** the user finds any item of the app from one box, close results first and quickly, and future additions cannot silently fall out of the search.
-  - **Expected result:** the coverage and result suites green; the existing Settings, More, guide and reader suites green; the gate green; checked in the preview.
-  - **Done:** 2026-10-27. Verified:
-    - by [searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) (16 cases), "lands on the passage a search result names by its segment key" in [siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx), and the updated empty-state cases of the Settings and More suites.
-    - `pnpm typecheck`, `pnpm lint` and `pnpm check:dox` green, and `pnpm test:tz` green with 5004 tests in each zone, all on 2026-10-27.
-    - In the `expo-web` preview at 375 points in Hebrew:
-      - "קרליץ" found the beit hora'ah and the Chazon Ish;
-      - "תפלין" showed the mitzvah, its 54 marks and the badge 46 marks away under "אולי התכוונת" at once, then the blessing's own spelling from the deep pass;
-      - "אשרי יושבי" listed Shacharit, Mincha and Tehillim, and a press opened the reader on that passage;
-      - `tab`, `topic`, `open=halacha` and a siddur group from a result each opened their place.
-    - Not checked: on a phone.
-  - **Owner check:** 2026-10-28, the owner on preview `1.0.21-12`: "תתעד כענין סגור". Moves to [action-log.md](action-log.md) with the next production update.
-  - **Status:** Version: OTA, expected with the next production update `1.0.21-4` · Committed: yes, `d5b7fdc` feat(search): find everything, close results first, deep pass in prayers · Pushed: yes · Live: preview `1.0.21-12` (group `06457b91-6051-47a6-b1ee-b1a62a24fe48`, 2026-10-27); production not yet · Channel: preview
-
 - [ ] Add a permissions step to onboarding and a permissions card to Settings
   - **Flag:** `Build`, with the next native build and its version decision ([state.md](state.md)); the whole step and card ship together, with every row's real status.
   - **Decided:** the owner, 2026-10-26 (Q4, "ב. לחכות עם כל הדף לבנייה הבאה"): nothing of this task ships over the air before that build.
@@ -401,9 +377,7 @@ Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were
 
 ## Other Open Items
 
-- **The design lab and the home screen study** ([design/lab/](design/lab)). The owner asked on 2026-10-28 for a side project inside the repo where every design request is built and shown as Artifacts. The home screen study of 2026-10-27 moved there from a temp scratchpad: ten live directions, real data, and its canvas and gallery links. It waits for the owner's pick of a direction.
-  - Done: 2026-10-28. The study builds from the repo byte-identical to the published Artifacts, `data.json` regenerates identical, `tools/shot.mjs` works through the `design-site` server, and `check:dox` and `lint` pass.
-  - Status: Version — · Committed: `d7f98b7` feat(design): add design lab with the home screen study · Pushed: 2026-10-28 · Live: Artifacts (tooling, never in the app; moves with the next production release) · Channel: —
+- **The owner's pick of a home screen direction** ([design/lab/](design/lab)). The home screen study of 2026-10-27 (ten live directions with real data, its canvas and gallery links in the study's AGENTS.md) waits for the owner to pick a direction; building the pick in the app is a separate task.
 
 - **Review the content of the 57 tzaddik pages** ([src/data/hilulaPages.ts](src/data/hilulaPages.ts)). Agents researched it and an adversarial pass fact-checked it on 2026-10-26: 124 corrections and 45 doubts. The points that need the owner or a rav:
   - King David's link goes to the traditional site on Mount Zion, which historians do not take as the real grave.
