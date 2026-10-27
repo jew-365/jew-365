@@ -83,6 +83,7 @@ jest.mock('react-native-safe-area-context', () => ({
 
 import { AppState, FlatList, StyleSheet } from 'react-native';
 import { act, fireEvent, screen, within } from '@testing-library/react-native';
+import { getAnimatedStyle } from 'react-native-reanimated';
 import SiddurReaderScreen from '../siddur/[id]';
 import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { CITIES } from '@/data/cities';
@@ -891,6 +892,7 @@ describe('the siddur reader folds its controls while the user reads', () => {
     await scrollList(y);
     fireEvent(screen.getByTestId('siddur-list'), 'scrollEndDrag', scrollEvent(y));
   }
+  const animated = (testID: string) => getAnimatedStyle(screen.getByTestId(testID, { hidden: true }));
   const folded = () => screen.getByTestId('siddur-header-compact', { hidden: true }).props.pointerEvents === 'auto';
   const pause = (ms: number) => act(() => new Promise((resolve) => setTimeout(resolve, ms)));
   const later = (ms: number) => act(() => jest.setSystemTime(Date.now() + ms));
@@ -971,14 +973,24 @@ describe('the siddur reader folds its controls while the user reads', () => {
     expect(folded()).toBe(false);
   });
 
-  it('folds once the text scrolls down past 12 points beyond the full block', async () => {
+  it('scrolls the full block away with the text from the first point', async () => {
+    await open();
+    await scrollList(40);
+    expect(folded()).toBe(false);
+    expect(animated('siddur-header-full')).toMatchObject({
+      opacity: 1,
+      transform: [{ translateY: -40 }],
+    });
+    expect(animated('siddur-header-overlay')).toMatchObject({ height: FULL - 40 });
+    await scrollList(FULL - 20);
+    expect(animated('siddur-header-overlay')).toMatchObject({ height: COMPACT });
+  });
+
+  it('folds as soon as the text scrolls past the full block', async () => {
     await open();
     await scrollList(FULL - 1);
-    await scrollList(FULL + 5);
     expect(folded()).toBe(false);
-    await scrollList(FULL + 10);
-    expect(folded()).toBe(false);
-    await scrollList(FULL + 13);
+    await scrollList(FULL);
     expect(folded()).toBe(true);
     expect(screen.getByTestId('siddur-header-full', { hidden: true }).props.pointerEvents).toBe('none');
     const bar = screen.getByHintText(EXPAND);
@@ -1032,6 +1044,34 @@ describe('the siddur reader folds its controls while the user reads', () => {
     await scrollList(600);
     await scrollList(FULL - 10);
     expect(folded()).toBe(false);
+  });
+
+  it('never stays folded at the top, even during a freeze', async () => {
+    await open();
+    await scrollList(600);
+    layout('siddur-header-full', 0, FULL + 40);
+    await act(async () => {});
+    expect(folded()).toBe(true);
+    await scrollList(0);
+    expect(folded()).toBe(false);
+    expect(animated('siddur-header-overlay')).toMatchObject({ height: FULL + 40 });
+  });
+
+  it('keeps a full block brought back mid-text over the text until the top', async () => {
+    await open();
+    await scrollList(600);
+    await dragTo(590);
+    expect(folded()).toBe(false);
+    await dragTo(100);
+    expect(folded()).toBe(false);
+    expect(animated('siddur-header-full')).toMatchObject({
+      transform: [{ translateY: 0 }],
+    });
+    await dragTo(0);
+    await dragTo(60);
+    expect(animated('siddur-header-full')).toMatchObject({
+      transform: [{ translateY: -60 }],
+    });
   });
 
   it('keeps its state through a jump to a place until the freeze ends', async () => {

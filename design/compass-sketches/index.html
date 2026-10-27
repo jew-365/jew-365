@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="he" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מצפן תפילה · כיוונים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root, [data-theme="light"] {
+  --bg: #F6F1E8; --surface: #FFFDF9; --surface2: #F1EADF; --text: #1D2240; --textSub: #69645D; --textMuted: #6A655E;
+  --border: #EBE3D6; --gold: #F08A3C; --onGold: #2B1608; --goldLight: #FDE9D5; --goldText: #A04A0C;
+  --safe: #0F9060; --safeWash: #0F906016; --warning: #B7791F; --shadow: rgba(94,62,28,0.08); --shadowStrong: rgba(94,62,28,0.18);
+  --page: #EAE2D4; --frame: #1D2240;
+  --radar-bg: #1D2240; --radar-line: rgba(246,241,232,0.13); --radar-ink: #C9C3D6; --radar-glow: #F59A4A;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  --bg: #0E1626; --surface: #172238; --surface2: #222F4A; --text: #EEF1F7; --textSub: #9DA9BF; --textMuted: #A3AEC3;
+  --border: #28354F; --gold: #F59A4A; --onGold: #1E1006; --goldLight: #3A2D26; --goldText: #F7A65E;
+  --safe: #10B981; --safeWash: #10B98122; --warning: #FBBF24; --shadow: rgba(0,1,10,0.25); --shadowStrong: rgba(0,1,10,0.45);
+  --page: #070C16; --frame: #000000;
+  --radar-bg: #080E1A; --radar-line: rgba(238,241,247,0.10); --radar-ink: #9DA9BF; --radar-glow: #F59A4A;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--page); }
+body { font-family: 'Heebo', system-ui, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; transition: background-color 240ms ease; }
+::selection { background: var(--goldLight); color: var(--text); }
+button { font: inherit; color: inherit; }
+button:focus-visible { outline: 2px solid var(--goldText); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- board chrome ---------- */
+.board-head { max-width: 1680px; margin: 0 auto; padding: 40px 24px 8px; display: flex; flex-wrap: wrap; gap: 20px 40px; align-items: end; justify-content: space-between; }
+.board-head h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+.board-head p { color: var(--textSub); font-size: 15px; line-height: 1.6; max-width: 62ch; margin-top: 6px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.seg { display: inline-flex; background: var(--surface2); border-radius: 999px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: transparent; padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--textSub); cursor: pointer; transition: background-color 160ms ease, color 160ms ease; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px var(--shadowStrong); }
+.seg button:active { transform: scale(0.97); }
+.ctl-label { font-size: 12px; color: var(--textSub); margin-inline-end: 4px; }
+.board { max-width: 1680px; margin: 0 auto; padding: 24px 24px 64px; display: flex; flex-wrap: wrap; gap: 36px 28px; justify-content: center; }
+.col { width: calc(375px * var(--z)); display: flex; flex-direction: column; gap: 14px; }
+:root { --z: 0.8; }
+.cap { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: baseline; }
+.cap .letter { grid-row: span 2; width: 30px; height: 30px; border-radius: 10px; background: var(--gold); color: var(--onGold); font-weight: 800; font-size: 16px; display: grid; place-items: center; align-self: start; }
+.cap h2 { font-size: 17px; font-weight: 700; }
+.cap p { font-size: 13px; line-height: 1.55; color: var(--textSub); }
+.buzz-tag { font-size: 11px; color: var(--textSub); display: inline-flex; align-items: center; gap: 6px; opacity: 0.35; transition: opacity 400ms ease; margin-top: 2px; }
+.buzz-tag i { width: 6px; height: 6px; border-radius: 50%; background: var(--safe); }
+.col.buzzing .buzz-tag { opacity: 1; transition-duration: 80ms; }
+
+/* ---------- phone ---------- */
+.phone { zoom: var(--z); width: 375px; height: 812px; border-radius: 48px; padding: 10px; background: var(--frame); box-shadow: 0 30px 60px -20px rgba(29,34,64,0.35), 0 2px 6px rgba(29,34,64,0.2); }
+.col.buzzing .phone { animation: buzz 220ms linear; }
+@keyframes buzz { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 50% { transform: translateX(2px); } 75% { transform: translateX(-1px); } }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 38px; overflow: hidden; background: var(--bg); display: flex; flex-direction: column; }
+.status { height: 46px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 28px 0; font-size: 15px; font-weight: 700; direction: ltr; }
+.status svg { height: 12px; }
+.hdr { flex: none; display: flex; align-items: center; gap: 12px; padding: 8px 16px 6px; }
+.back { width: 38px; height: 38px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 4px var(--shadow); display: grid; place-items: center; flex: none; }
+.back svg { width: 18px; height: 18px; color: var(--text); }
+.hdr-t { flex: 1; min-width: 0; }
+.hdr-t b { display: block; font-size: 22px; font-weight: 700; line-height: 1.2; }
+.hdr-t span { display: block; font-size: 13px; color: var(--textSub); }
+.body { position: relative; flex: 1; display: flex; flex-direction: column; padding: 0 16px 22px; min-height: 0; }
+.note { display: none; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 14px; font-size: 13px; line-height: 1.45; margin: 4px 0 6px; }
+.note svg { width: 18px; height: 18px; flex: none; margin-top: 1px; }
+.note.cal { background: color-mix(in srgb, var(--warning) 14%, var(--surface)); color: var(--text); }
+.note.cal svg { color: var(--warning); }
+.note.perm { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px var(--shadow); flex-direction: column; }
+.note.perm .row { display: flex; gap: 10px; }
+.note.perm svg { color: var(--goldText); }
+.note.perm .btn { align-self: stretch; border: 0; border-radius: 12px; background: var(--gold); color: var(--onGold); font-weight: 700; padding: 9px; font-size: 14px; }
+body[data-mode="calibrate"] .note.cal { display: flex; }
+body[data-mode="perm"] .note.perm { display: flex; }
+body[data-mode="perm"] .live-only { opacity: 0.4; filter: saturate(0.4); }
+.src { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--textSub); }
+.src svg { width: 14px; height: 14px; color: var(--goldText); flex: none; }
+.layer { position: absolute; inset: 0; will-change: transform; }
+.kotel { color: currentColor; }
+
+.nav { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 7px 14px; border-radius: 999px; background: var(--surface); color: var(--goldText); font-size: 13px; font-weight: 700; text-decoration: none; box-shadow: 0 1px 3px var(--shadow); }
+.nav:hover { background: var(--goldLight); }
+.nav:focus-visible { outline: 2px solid var(--goldText); outline-offset: 2px; }
+
+/* ---------- A: one arrow ---------- */
+.a-stage { position: relative; width: 300px; height: 300px; margin: 18px auto 0; }
+.a-ring { position: absolute; inset: 22px; border-radius: 50%; border: 1.5px solid var(--border); }
+.a-n { position: absolute; top: -2px; left: 50%; width: 20px; margin-left: -10px; text-align: center; font-size: 13px; font-weight: 700; color: var(--goldText); }
+.a-dot { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--textMuted); opacity: 0.5; }
+.a-glow { position: absolute; top: 22px; left: 150px; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--gold) 55%, transparent) 0%, color-mix(in srgb, var(--gold) 0%, transparent) 70%); transition: background 300ms ease; }
+.a-core { position: absolute; top: 22px; left: 150px; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px var(--surface); transition: background-color 200ms ease; }
+.a-kot { position: absolute; top: 40px; left: 150px; width: 26px; margin-left: -13px; color: var(--goldText); transition: color 200ms ease; }
+.a-arrow svg { position: absolute; width: 112px; height: 134px; left: 94px; top: 72px; filter: drop-shadow(0 10px 14px var(--shadowStrong)); }
+.a-arrow .f1 { fill: var(--gold); transition: fill 200ms ease; }
+.a-arrow .f2 { fill: #000; opacity: 0.14; }
+.facing .a-arrow .f1, .facing .a-core { fill: var(--safe); background: var(--safe); }
+.facing .a-glow { background: radial-gradient(circle, color-mix(in srgb, var(--safe) 55%, transparent) 0%, transparent 70%); }
+.facing .a-kot { color: var(--safe); }
+.a-read { text-align: center; margin-top: 10px; height: 118px; display: grid; place-items: center; align-content: center; }
+.a-big { font-size: 76px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.a-sub { font-size: 17px; color: var(--textSub); margin-top: 6px; font-weight: 500; }
+.a-ok { display: none; align-items: center; gap: 10px; color: var(--safe); font-size: 30px; font-weight: 800; }
+.a-ok svg { width: 34px; height: 34px; }
+.facing .a-ok { display: flex; }
+.facing .a-big, .facing .a-sub { display: none; }
+.a-facts { margin-top: auto; display: grid; grid-template-columns: 1fr 1px 1fr; gap: 0 14px; align-items: center; padding: 14px 0 12px; border-top: 1px solid var(--border); }
+.a-facts .sep { background: var(--border); height: 36px; }
+.fact b { display: block; font-size: 22px; font-weight: 700; }
+.fact span { font-size: 13px; color: var(--textSub); }
+
+/* ---------- B: Kotel on the arc ---------- */
+.b-arc { position: relative; width: 343px; height: 200px; margin-top: 14px; }
+.b-arc svg.track { position: absolute; inset: 0; overflow: visible; }
+.b-notch { position: absolute; top: 2px; left: 50%; width: 2px; margin-left: -1px; height: 44px; background: var(--text); border-radius: 2px; transition: background-color 200ms ease; }
+.b-notch::before { content: ""; position: absolute; top: -2px; left: -6px; border: 7px solid transparent; border-top: 9px solid var(--text); border-bottom: 0; transition: border-color 200ms ease; }
+.facing .b-notch { background: var(--safe); }
+.facing .b-notch::before { border-top-color: var(--safe); }
+.b-chip { position: absolute; left: 0; top: 0; width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%; background: var(--surface); border: 2px solid var(--gold); box-shadow: 0 6px 16px var(--shadowStrong); display: grid; place-items: center; color: var(--goldText); will-change: transform; transition: border-color 200ms ease, background-color 200ms ease, color 200ms ease; }
+.b-chip svg { width: 30px; }
+.b-chip.edge { opacity: 0.55; }
+.facing .b-chip { border-color: var(--safe); background: var(--safeWash); color: var(--safe); }
+.b-read { text-align: center; margin-top: 4px; }
+.b-read .k { font-size: 13px; color: var(--textSub); font-weight: 500; }
+.b-read .v { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin-top: 4px; }
+.b-read .v em { font-style: normal; color: var(--goldText); }
+.facing .b-read .v { color: var(--safe); }
+.b-wall { margin: 22px auto 0; width: 168px; color: var(--goldText); opacity: 0.18; transition: opacity 300ms ease, color 300ms ease, transform 300ms var(--ease-out); }
+.facing .b-wall { opacity: 1; color: var(--safe); transform: translateY(-4px); }
+.b-list { margin-top: auto; background: var(--surface); border-radius: 18px; box-shadow: 0 2px 10px var(--shadow); padding: 4px 16px; }
+.b-list .r { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; font-size: 15px; }
+.b-list .r + .r { border-top: 1px solid var(--border); }
+.b-list .r span { color: var(--textSub); }
+.b-list .r b { font-weight: 700; }
+
+/* ---------- C: classic compass ---------- */
+.c-dial { position: relative; width: 304px; height: 304px; margin: 22px auto 0; }
+.c-dial svg { position: absolute; inset: 0; overflow: visible; }
+.c-lubber { position: absolute; top: -12px; left: 50%; width: 2px; height: 30px; margin-left: -1px; background: var(--text); border-radius: 2px; transition: background-color 200ms ease; }
+.c-hit { opacity: 0; transition: opacity 240ms ease; }
+.facing .c-hit { opacity: 1; }
+.facing .c-lubber { background: var(--safe); }
+.c-needle line.n { stroke: var(--text); transition: stroke 200ms ease; }
+.facing .c-needle line.n { stroke: var(--safe); }
+.c-badge { position: absolute; left: 152px; top: 152px; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; background: var(--surface); border: 2px solid var(--gold); display: grid; place-items: center; color: var(--goldText); box-shadow: 0 4px 10px var(--shadowStrong); will-change: transform; transition: border-color 200ms ease, color 200ms ease; }
+.c-badge svg { width: 22px; }
+.facing .c-badge { border-color: var(--safe); color: var(--safe); }
+.c-read { text-align: center; margin-top: 26px; }
+.c-read .deg { font-size: 44px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+.c-read .dir { font-size: 15px; color: var(--textSub); margin-top: 6px; }
+.c-hint { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; padding: 7px 14px; border-radius: 999px; background: var(--goldLight); color: var(--goldText); font-size: 14px; font-weight: 700; transition: background-color 200ms ease, color 200ms ease; }
+.c-hint svg { width: 16px; height: 16px; }
+.facing .c-hint { background: var(--safeWash); color: var(--safe); }
+.c-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); }
+.c-foot b { font-size: 17px; font-weight: 700; }
+
+/* ---------- D: radar ---------- */
+.d-card { position: relative; width: 343px; height: 343px; margin-top: 10px; border-radius: 28px; background: var(--radar-bg); overflow: hidden; box-shadow: 0 12px 30px -12px var(--shadowStrong); }
+.d-card svg { position: absolute; inset: 0; }
+[data-theme="dark"] .d-card { box-shadow: inset 0 0 0 1px var(--border), 0 12px 30px -12px var(--shadowStrong); }
+.d-tgt { position: absolute; left: 171.5px; top: 171.5px; width: 0; height: 0; will-change: transform; }
+.d-tgt .glow { position: absolute; width: 110px; height: 110px; left: -55px; top: -55px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--radar-glow) 60%, transparent) 0%, transparent 68%); transition: background 300ms ease; }
+.d-tgt .core { position: absolute; width: 14px; height: 14px; left: -7px; top: -7px; border-radius: 50%; background: #FFF4E8; box-shadow: 0 0 0 3px var(--radar-glow), 0 0 18px 4px var(--radar-glow); transition: box-shadow 200ms ease; }
+.d-tgt .pulse { position: absolute; width: 14px; height: 14px; left: -7px; top: -7px; border-radius: 50%; border: 1.5px solid var(--radar-glow); animation: dpulse 2.4s var(--ease-out) infinite; }
+@keyframes dpulse { from { transform: scale(1); opacity: 0.8; } to { transform: scale(5); opacity: 0; } }
+.d-tgt .lbl { position: absolute; top: 14px; left: -40px; width: 80px; text-align: center; color: #FFF4E8; font-size: 12px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.d-tgt .lbl svg { width: 22px; color: var(--radar-glow); }
+.facing .d-tgt .core { box-shadow: 0 0 0 3px var(--safe), 0 0 22px 6px var(--safe); }
+.facing .d-tgt .glow { background: radial-gradient(circle, color-mix(in srgb, var(--safe) 60%, transparent) 0%, transparent 68%); }
+.facing .d-tgt .pulse { border-color: var(--safe); }
+.facing .d-tgt .lbl svg { color: var(--safe); }
+.d-wave { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px; border-radius: 50%; border: 2px solid var(--safe); opacity: 0; pointer-events: none; }
+.col.buzzing .d-wave { animation: dwave 900ms var(--ease-out); }
+.col.buzzing .d-wave.w2 { animation-delay: 140ms; }
+@keyframes dwave { from { transform: scale(1); opacity: 0.9; } to { transform: scale(9); opacity: 0; } }
+.d-n { position: absolute; left: 171.5px; top: 171.5px; width: 0; height: 0; will-change: transform; }
+.d-n span { position: absolute; left: -10px; top: -10px; width: 20px; height: 20px; border-radius: 50%; background: var(--radar-bg); color: var(--radar-ink); font-size: 12px; font-weight: 700; display: grid; place-items: center; border: 1px solid var(--radar-line); }
+.d-read { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 18px; }
+.d-read .km { font-size: 52px; font-weight: 800; letter-spacing: -0.03em; line-height: 0.95; }
+.d-read .km small { font-size: 20px; font-weight: 700; color: var(--textSub); margin-inline-start: 4px; letter-spacing: 0; }
+.d-read .lbl { font-size: 13px; color: var(--textSub); margin-top: 6px; }
+.d-turn { text-align: start; font-size: 15px; font-weight: 700; color: var(--goldText); }
+.d-turn small { display: block; font-size: 13px; font-weight: 400; color: var(--textSub); margin-top: 2px; }
+.facing .d-turn { color: var(--safe); }
+.d-foot { margin-top: auto; padding-top: 12px; }
+
+/* ---------- E: colour leads ---------- */
+.e-screen .hdr .rose { width: 38px; height: 38px; border-radius: 50%; background: color-mix(in srgb, var(--surface) 70%, transparent); display: grid; place-items: center; flex: none; position: relative; }
+.e-rose { width: 26px; height: 26px; will-change: transform; }
+.e-mid { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-bottom: 20px; }
+.e-icon { width: 120px; height: 86px; position: relative; margin-bottom: 18px; }
+.e-chev, .e-kot { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transition: opacity 260ms ease, transform 260ms var(--ease-out); }
+.e-chev { direction: ltr; gap: 0; color: var(--goldText); }
+.e-chev svg { width: 34px; height: 34px; margin: 0 -6px; animation: chev 1.2s ease-in-out infinite; }
+.e-chev svg:nth-child(2) { animation-delay: 0.15s; }
+.e-chev svg:nth-child(3) { animation-delay: 0.3s; }
+.e-chev.left svg { transform: scaleX(-1); }
+.e-chev.left { flex-direction: row-reverse; }
+@keyframes chev { 0%,100% { opacity: 0.25; } 40% { opacity: 1; } }
+.e-kot { opacity: 0; transform: scale(0.92); color: var(--safe); }
+.e-kot svg { width: 110px; }
+.facing .e-chev { opacity: 0; transform: scale(0.92); }
+.facing .e-kot { opacity: 1; transform: scale(1); }
+.e-say { font-size: 46px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; }
+.e-more { font-size: 18px; color: var(--textSub); margin-top: 10px; font-weight: 500; }
+.e-level { position: relative; width: 280px; height: 34px; margin-top: 34px; direction: ltr; }
+.e-level .track { position: absolute; top: 14px; left: 0; right: 0; height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--text) 10%, transparent); }
+.e-level .mid { position: absolute; top: 4px; left: 139px; width: 2px; height: 26px; border-radius: 1px; background: var(--text); }
+.e-level .bub { position: absolute; top: 5px; left: 128px; width: 24px; height: 24px; border-radius: 50%; background: var(--gold); box-shadow: 0 4px 10px var(--shadowStrong); will-change: transform; transition: background-color 200ms ease; }
+.facing .e-level .bub { background: var(--safe); }
+.e-sheet { background: var(--surface); border-radius: 22px; padding: 16px; box-shadow: 0 6px 20px var(--shadow); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.e-sheet .src { grid-column: 1 / -1; border-top: 1px solid var(--border); padding-top: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .col.buzzing .phone, .col.buzzing .d-wave, .d-tgt .pulse, .e-chev svg { animation: none !important; }
+  .e-chev svg { opacity: 1; }
+}
+@media (max-width: 700px) { :root { --z: 0.86; } .board-head { padding-top: 24px; } }
+</style>
+</head>
+<body data-mode="sweep">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-kotel" viewBox="0 0 28 20">
+    <g fill="currentColor">
+      <rect x="0" y="15.2" width="8.6" height="4.8" rx="0.7"/><rect x="9.6" y="15.2" width="9" height="4.8" rx="0.7"/><rect x="19.6" y="15.2" width="8.4" height="4.8" rx="0.7"/>
+      <rect x="0" y="10.2" width="4.6" height="4.2" rx="0.6"/><rect x="5.6" y="10.2" width="9" height="4.2" rx="0.6"/><rect x="15.6" y="10.2" width="7.4" height="4.2" rx="0.6"/><rect x="24" y="10.2" width="4" height="4.2" rx="0.6"/>
+      <rect x="0" y="6" width="7.6" height="3.4" rx="0.5"/><rect x="8.6" y="6" width="5.4" height="3.4" rx="0.5"/><rect x="15" y="6" width="7.4" height="3.4" rx="0.5"/><rect x="23.4" y="6" width="4.6" height="3.4" rx="0.5"/>
+      <rect x="0" y="2.6" width="3.8" height="2.6" rx="0.4"/><rect x="4.8" y="2.6" width="6.2" height="2.6" rx="0.4"/><rect x="12" y="2.6" width="5.6" height="2.6" rx="0.4"/><rect x="18.6" y="2.6" width="5.6" height="2.6" rx="0.4"/><rect x="25.2" y="2.6" width="2.8" height="2.6" rx="0.4"/>
+      <rect x="6" y="0" width="4" height="1.8" rx="0.4" opacity="0.6"/><rect x="17" y="0" width="5" height="1.8" rx="0.4" opacity="0.6"/>
+    </g>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.4l3.2 3.2L17.2 8.6" fill="none" stroke="var(--surface)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.6 7-12.2A7 7 0 0 0 5 9.8C5 15.4 12 22 12 22z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9.8" r="2.6" fill="currentColor"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3l10 18H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></symbol>
+  <symbol id="i-loc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+</svg>
+
+<header class="board-head">
+  <div>
+    <h1>מצפן תפילה · חמישה כיוונים</h1>
+    <p>אותו מידע בכל מסך: לאן הכותל, כמה רחוק, מאיזה מקום מחושב, והצפון. הטלפון מסתובב לאט; כשהוא מכוון לכותל בטווח 5° המסך עובר למצב הצלחה ומסמן רטט. הנתונים אמיתיים: מתל אביב, לפי חישוב המצפן של האפליקציה.</p>
+    <a class="nav" href="radar.html">וריאציות הרדאר (D1–D5) ←</a>
+  </div>
+  <div class="controls">
+    <span class="ctl-label">ערכה</span>
+    <div class="seg" id="theme"><button aria-pressed="true" data-v="light">בהירה</button><button aria-pressed="false" data-v="dark">כהה</button></div>
+    <span class="ctl-label">מצב</span>
+    <div class="seg" id="mode"><button aria-pressed="true" data-v="sweep">סיבוב</button><button aria-pressed="false" data-v="facing">מול הכותל</button><button aria-pressed="false" data-v="calibrate">צריך כיול</button><button aria-pressed="false" data-v="perm">בלי הרשאה</button></div>
+    <div class="seg"><button id="pause" aria-pressed="false">השהה</button></div>
+  </div>
+</header>
+<main class="board" id="board"></main>
+
+<script>
+(() => {
+  const KOTEL = { lat: 31.7767, lng: 35.2345 };
+  const FROM = { lat: 32.0853, lng: 34.7818 };
+  const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+  const norm = d => ((d % 360) + 360) % 360;
+  const BEARING = (() => { const dL = rad(KOTEL.lng - FROM.lng), y = Math.sin(dL) * Math.cos(rad(KOTEL.lat)), x = Math.cos(rad(FROM.lat)) * Math.sin(rad(KOTEL.lat)) - Math.sin(rad(FROM.lat)) * Math.cos(rad(KOTEL.lat)) * Math.cos(dL); return norm(deg(Math.atan2(y, x))); })();
+  const KM = (() => { const dLa = rad(KOTEL.lat - FROM.lat), dLo = rad(KOTEL.lng - FROM.lng); const a = Math.sin(dLa / 2) ** 2 + Math.cos(rad(FROM.lat)) * Math.cos(rad(KOTEL.lat)) * Math.sin(dLo / 2) ** 2; return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); })();
+  const KM_TXT = KM >= 100 ? String(Math.round(KM)) : KM.toFixed(1);
+  const BDEG = Math.round(BEARING);
+  const WINDS = ['צפון', 'צפון־מזרח', 'מזרח', 'דרום־מזרח', 'דרום', 'דרום־מערב', 'מערב', 'צפון־מערב'];
+  const WIND = WINDS[Math.round(BEARING / 45) % 8];
+  const TOKENS = { light: { bg: '#F6F1E8', goldLight: '#FDE9D5', safe: '#0F9060', okShare: 0.16 }, dark: { bg: '#0E1626', goldLight: '#3A2D26', safe: '#10B981', okShare: 0.2 } };
+  const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const blend = (a, b, s) => { const x = hex(a), y = hex(b); return `rgb(${x.map((v, i) => Math.round(v * (1 - s) + y[i] * s)).join(',')})`; };
+  const use = (id, cls = '') => `<svg class="${cls}" viewBox="0 0 ${id === 'kotel' ? '28 20' : '24 24'}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
+  const srcLine = () => `<div class="src">${use('pin')}<span data-src></span></div>`;
+  const notes = `
+    <div class="note cal">${use('warn')}<span>המצפן לא מדויק כרגע. הזיזו את הטלפון באוויר בתנועת 8 עד שההודעה תיעלם.</span></div>
+    <div class="note perm"><div class="row">${use('loc')}<span>בלי הרשאת מיקום הטלפון לא מדווח לאן הוא פונה. הכיוון מחושב מהעיר שבחרת: כוונו את ראש הטלפון לצפון.</span></div><button class="btn" type="button">לאפשר מיקום</button></div>`;
+  const turnWord = off => off > 0 ? 'ימינה' : 'שמאלה';
+
+  const statusBar = `<div class="status"><span class="num">9:41</span><svg viewBox="0 0 64 12" aria-hidden="true"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0.5" width="3" height="11.5" rx="1"/><path d="M28 3.5a9 9 0 0 1 12 0l-1.6 1.7a6.6 6.6 0 0 0-8.8 0zM30.6 6.3a5.4 5.4 0 0 1 6.8 0L34 10z"/><rect x="45" y="1" width="16" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="47" y="3" width="11" height="6" rx="1.5"/><rect x="62" y="4" width="1.5" height="4" rx="0.7"/></g></svg></div>`;
+  const header = (extra = '') => `<div class="hdr"><div class="back">${use('back')}</div><div class="hdr-t"><b>מצפן תפילה</b><span>לכיוון הכותל המערבי</span></div>${extra}</div>`;
+
+  /* ---------- directions ---------- */
+  const D = [];
+
+  D.push({
+    letter: 'A', title: 'חץ אחד', desc: 'חץ ניווט גדול ונקי שמצביע לכותל, נקודה זוהרת על הטבעת, ומספר אחד: כמה מעלות נשארו לסובב.',
+    html: () => `${notes}
+      <div class="a-stage live-only">
+        <div class="a-ring"></div>
+        <div class="layer" data-north><span class="a-n">צ</span><i class="a-dot" style="top:20px;right:2px"></i><i class="a-dot" style="bottom:2px;left:147px"></i><i class="a-dot" style="top:20px;left:2px"></i></div>
+        <div class="layer" data-target><div class="a-glow"></div><div class="a-core"></div><svg class="a-kot" viewBox="0 0 28 20"><use href="#i-kotel"/></svg></div>
+        <div class="layer a-arrow" data-arrow><svg viewBox="0 0 100 120" aria-hidden="true"><path class="f1" d="M50 4 L89 103 Q92 112 83 108 L50 90 L17 108 Q8 112 11 103 Z" stroke-linejoin="round"/><path class="f2" d="M50 4 L89 103 Q92 112 83 108 L50 90 Z"/></svg></div>
+      </div>
+      <div class="a-read"><div class="a-big num" data-big></div><div class="a-sub" data-sub></div><div class="a-ok">${use('check')}מול הכותל</div></div>
+      <div class="a-facts"><div class="fact"><b class="num">${KM_TXT} ק״מ</b><span>עד הכותל</span></div><div class="sep"></div><div class="fact"><b class="num">${BDEG}°</b><span>מהצפון, ${WIND}</span></div></div>
+      ${srcLine()}`,
+    update(el, s) {
+      el.q('[data-north]').style.transform = `rotate(${-s.heading}deg)`;
+      el.q('[data-target]').style.transform = `rotate(${s.angle}deg)`;
+      el.q('[data-arrow]').style.transform = `rotate(${s.angle}deg)`;
+      if (s.perm) { el.q('[data-big]').textContent = `${BDEG}°`; el.q('[data-sub]').textContent = 'מהצפון, בכיוון השעון'; return; }
+      el.q('[data-big]').textContent = `${Math.round(Math.abs(s.off))}°`;
+      el.q('[data-sub]').textContent = `סובבו ${turnWord(s.off)}`;
+    }
+  });
+
+  D.push({
+    letter: 'B', title: 'הכותל על הקשת', desc: 'סרגל כיוונים בקשת למעלה, כמו אופק. סמל הכותל נע לאורכו, וצריך להכניס אותו לחריץ שבמרכז.',
+    html: () => `${notes}
+      <div class="b-arc live-only">
+        <svg class="track" viewBox="0 0 343 200" aria-hidden="true"><path data-base fill="none" stroke="var(--border)" stroke-width="1.5"/><g data-ticks></g></svg>
+        <div class="b-notch"></div>
+        <div class="b-chip" data-chip>${use('kotel')}</div>
+      </div>
+      <div class="b-read"><div class="k" data-k>הכותל נמצא</div><div class="v" data-v></div></div>
+      <svg class="b-wall" viewBox="0 0 28 20" aria-hidden="true"><use href="#i-kotel"/></svg>
+      <div class="b-list"><div class="r"><span>מרחק</span><b class="num">${KM_TXT} ק״מ</b></div><div class="r"><span>כיוון מהצפון</span><b class="num">${BDEG}° · ${WIND}</b></div><div class="r">${srcLine()}</div></div>`,
+    init(el) {
+      const cx = 171.5, cy = 205, R = 172;
+      el.b = { cx, cy, R, lines: [], labels: [] };
+      const g = el.q('[data-ticks]'), ns = 'http://www.w3.org/2000/svg';
+      for (let i = 0; i < 40; i++) { const l = document.createElementNS(ns, 'line'); l.setAttribute('stroke-linecap', 'round'); g.appendChild(l); el.b.lines.push(l); }
+      for (let i = 0; i < 8; i++) { const t = document.createElementNS(ns, 'text'); t.setAttribute('text-anchor', 'middle'); t.setAttribute('dominant-baseline', 'central'); t.setAttribute('font-family', 'Heebo'); g.appendChild(t); el.b.labels.push(t); }
+      const p = a => [cx + R * Math.sin(rad(a)), cy - R * Math.cos(rad(a))];
+      const [x1, y1] = p(-80), [x2, y2] = p(80);
+      el.q('[data-base]').setAttribute('d', `M${x1} ${y1} A${R} ${R} 0 0 1 ${x2} ${y2}`);
+    },
+    update(el, s) {
+      const { cx, cy, R, lines, labels } = el.b;
+      const pt = (a, r) => [cx + r * Math.sin(rad(a)), cy - r * Math.cos(rad(a))];
+      const first = Math.ceil((s.heading - 95) / 5) * 5;
+      let li = 0, ti = 0;
+      for (let a = first; a <= s.heading + 95 && li < lines.length; a += 5) {
+        const rel = a - s.heading, abs = norm(a), op = Math.max(0, 1 - Math.pow(Math.abs(rel) / 82, 3));
+        const major = abs % 30 === 0, mid = abs % 10 === 0;
+        const len = major ? 14 : mid ? 9 : 5;
+        const [xa, ya] = pt(rel, R), [xb, yb] = pt(rel, R - len);
+        const l = lines[li++];
+        l.setAttribute('x1', xa); l.setAttribute('y1', ya); l.setAttribute('x2', xb); l.setAttribute('y2', yb);
+        l.setAttribute('stroke', major ? 'var(--text)' : 'var(--textMuted)'); l.setAttribute('stroke-width', major ? 1.6 : 1); l.setAttribute('opacity', op * (major ? 1 : 0.6));
+        if (major && ti < labels.length) {
+          const t = labels[ti++], [xt, yt] = pt(rel, R - 30), card = { 0: 'צ', 90: 'מז', 180: 'ד', 270: 'מע' }[abs];
+          t.textContent = card || `${abs}`; t.setAttribute('x', xt); t.setAttribute('y', yt); t.setAttribute('opacity', op);
+          t.setAttribute('font-size', card ? 15 : 11); t.setAttribute('font-weight', card ? 800 : 500);
+          t.setAttribute('fill', abs === 0 ? 'var(--goldText)' : card ? 'var(--text)' : 'var(--textMuted)');
+        }
+      }
+      for (; li < lines.length; li++) lines[li].setAttribute('opacity', 0);
+      for (; ti < labels.length; ti++) labels[ti].setAttribute('opacity', 0);
+      const off = s.off, edge = Math.abs(off) > 74, rel = Math.max(-74, Math.min(74, off));
+      const [x, y] = pt(rel, R);
+      const chip = el.q('[data-chip]');
+      chip.style.transform = `translate(${x}px, ${y}px)`;
+      chip.classList.toggle('edge', edge);
+      if (s.perm) { el.q('[data-k]').textContent = 'כשהטלפון מכוון לצפון'; el.q('[data-v]').innerHTML = `<em class="num">${BDEG}°</em> ימינה`; return; }
+      el.q('[data-k]').textContent = s.facing ? 'הכותל בחריץ' : 'הכותל נמצא';
+      el.q('[data-v]').innerHTML = s.facing ? 'ממש מולך' : `<em class="num">${Math.round(Math.abs(off))}°</em> ${off > 0 ? 'מימינך' : 'משמאלך'}`;
+    }
+  });
+
+  D.push({
+    letter: 'C', title: 'מצפן קלאסי', desc: 'לוח מצפן מדויק עם אותיות עבריות (צ, מז, ד, מע) ושנתות דקות. מחט דקה שבקצה שלה סמל הכותל, וקו כיוון קבוע למעלה.',
+    html: () => {
+      let t = '';
+      for (let i = 0; i < 72; i++) {
+        const a = i * 5, major = a % 30 === 0, mid = a % 10 === 0, len = major ? 12 : mid ? 8 : 5;
+        const s = Math.sin(rad(a)), c = -Math.cos(rad(a));
+        t += `<line x1="${(146 * s).toFixed(2)}" y1="${(146 * c).toFixed(2)}" x2="${((146 - len) * s).toFixed(2)}" y2="${((146 - len) * c).toFixed(2)}" stroke="${major ? 'var(--text)' : mid ? 'var(--textSub)' : 'var(--textMuted)'}" stroke-width="${major ? 1.6 : 1}" opacity="${major ? 1 : mid ? 0.8 : 0.5}"/>`;
+        if (major) {
+          const card = { 0: 'צ', 90: 'מז', 180: 'ד', 270: 'מע' }[a], r = card ? 116 : 120;
+          t += `<text x="${(r * s).toFixed(2)}" y="${(r * c).toFixed(2)}" transform="rotate(${a} ${(r * s).toFixed(2)} ${(r * c).toFixed(2)})" text-anchor="middle" dominant-baseline="central" font-family="Heebo" font-size="${card ? 17 : 10}" font-weight="${card ? 800 : 500}" fill="${a === 0 ? 'var(--goldText)' : card ? 'var(--text)' : 'var(--textMuted)'}">${card || a}</text>`;
+        }
+      }
+      return `${notes}
+      <div class="c-dial live-only">
+        <svg viewBox="-152 -152 304 304" aria-hidden="true"><circle r="150" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/><path class="c-hit" d="M${(150 * Math.sin(rad(-6))).toFixed(2)} ${(-150 * Math.cos(rad(-6))).toFixed(2)} A150 150 0 0 1 ${(150 * Math.sin(rad(6))).toFixed(2)} ${(-150 * Math.cos(rad(6))).toFixed(2)}" fill="none" stroke="var(--safe)" stroke-width="5" stroke-linecap="round"/></svg>
+        <div class="layer" data-dial><svg viewBox="-152 -152 304 304" aria-hidden="true">${t}<circle r="98" fill="none" stroke="var(--border)" stroke-width="1"/></svg></div>
+        <div class="layer c-needle" data-needle><svg viewBox="-152 -152 304 304" aria-hidden="true"><line x1="0" y1="20" x2="0" y2="34" stroke="var(--textMuted)" stroke-width="2" stroke-linecap="round"/><line class="n" x1="0" y1="14" x2="0" y2="-88" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+        <svg viewBox="-152 -152 304 304" aria-hidden="true" style="pointer-events:none"><circle r="7" fill="var(--text)"/><circle r="2.5" fill="var(--surface)"/></svg>
+        <div class="c-badge" data-badge>${use('kotel')}</div>
+        <div class="c-lubber"></div>
+      </div>
+      <div class="c-read"><div class="deg num">${BDEG}°</div><div class="dir">${WIND} · לכיוון הכותל</div><div class="c-hint" data-hint></div></div>
+      <div class="c-foot"><div><b class="num">${KM_TXT} ק״מ</b> <span class="src" style="display:inline">עד הכותל</span></div>${srcLine()}</div>`;
+    },
+    update(el, s) {
+      el.q('[data-dial]').style.transform = `rotate(${-s.heading}deg)`;
+      el.q('[data-needle]').style.transform = `rotate(${s.angle}deg)`;
+      el.q('[data-badge]').style.transform = `translate(${Math.sin(rad(s.angle)) * 108}px, ${-Math.cos(rad(s.angle)) * 108}px)`;
+      const hint = el.q('[data-hint]');
+      if (s.perm) { hint.innerHTML = 'כוונו את הטלפון לצפון'; return; }
+      hint.innerHTML = s.facing ? `${use('check')}הקו והמחט נפגשו` : `סובבו ${Math.round(Math.abs(s.off))}° ${turnWord(s.off)}`;
+    }
+  });
+
+  const ringsKm = [5, 20, 60, 200];
+  const kmR = km => 152 * Math.log10(1 + km) / Math.log10(201);
+  D.push({
+    letter: 'D', title: 'רדאר', desc: 'אתם במרכז, והכותל נקודה זוהרת במרחק האמיתי שלה על טבעות של קילומטרים. כשהיא נכנסת לקו הקדימה, גל של אור יוצא ממנה.',
+    html: () => `${notes}
+      <div class="d-card live-only">
+        <svg viewBox="0 0 343 343" aria-hidden="true">
+          ${ringsKm.map(k => `<circle cx="171.5" cy="171.5" r="${kmR(k).toFixed(1)}" fill="none" stroke="var(--radar-line)" stroke-width="1"/><text x="${(171.5 + kmR(k) * 0.71 + 4).toFixed(1)}" y="${(171.5 + kmR(k) * 0.71 + 4).toFixed(1)}" font-family="Heebo" font-size="10" fill="var(--radar-ink)" opacity="0.7">${k} ק״מ</text>`).join('')}
+          <line x1="171.5" y1="171.5" x2="171.5" y2="8" stroke="var(--radar-ink)" stroke-width="1.2" stroke-dasharray="3 5" opacity="0.6"/>
+          <path d="M171.5 171.5 L${(171.5 - 160 * Math.sin(rad(5))).toFixed(1)} ${(171.5 - 160 * Math.cos(rad(5))).toFixed(1)} A160 160 0 0 1 ${(171.5 + 160 * Math.sin(rad(5))).toFixed(1)} ${(171.5 - 160 * Math.cos(rad(5))).toFixed(1)} Z" fill="var(--radar-ink)" opacity="0.07"/>
+          <rect x="165.5" y="160.5" width="12" height="22" rx="3.5" fill="none" stroke="#FFF4E8" stroke-width="1.6"/><circle cx="171.5" cy="165" r="1.3" fill="#FFF4E8"/>
+        </svg>
+        <div class="d-n" data-n><span>צ</span></div>
+        <div class="d-tgt" data-t><div class="glow"></div><div class="pulse"></div><div class="d-wave"></div><div class="d-wave w2"></div><div class="core"></div><div class="lbl">${use('kotel')}הכותל</div></div>
+      </div>
+      <div class="d-read"><div><div class="km num">${KM_TXT}<small>ק״מ</small></div><div class="lbl">עד הכותל · <span class="num">${BDEG}°</span> מהצפון</div></div><div class="d-turn" data-turn></div></div>
+      <div class="d-foot">${srcLine()}</div>`,
+    update(el, s) {
+      const r = kmR(KM);
+      el.q('[data-t]').style.transform = `translate(${Math.sin(rad(s.angle)) * r}px, ${-Math.cos(rad(s.angle)) * r}px)`;
+      el.q('[data-n]').style.transform = `translate(${Math.sin(rad(-s.heading)) * 158}px, ${-Math.cos(rad(-s.heading)) * 158}px)`;
+      const t = el.q('[data-turn]');
+      if (s.perm) { t.innerHTML = 'הצפון למעלה<small>כוונו את הטלפון לצפון</small>'; return; }
+      t.innerHTML = s.facing ? `מכוון לכותל<small>הנקודה על הקו</small>` : `<span class="num">${Math.round(Math.abs(s.off))}°</span> ${turnWord(s.off)}<small>עד שהנקודה על הקו</small>`;
+    }
+  });
+
+  D.push({
+    letter: 'E', title: 'הצבע מוביל', desc: 'בלי לוח בכלל. המסך כולו מתחמם ככל שמתקרבים לכיוון, הוראה גדולה אומרת לאן לפנות, ובועת פלס נכנסת למרכז.',
+    screenClass: 'e-screen',
+    headerExtra: `<div class="rose" title="צפון"><svg class="e-rose" data-rose viewBox="-13 -13 26 26" aria-hidden="true"><path d="M0 -11 L3.4 0 L-3.4 0 Z" fill="var(--goldText)"/><path d="M0 11 L3.4 0 L-3.4 0 Z" fill="var(--textMuted)" opacity="0.6"/></svg></div>`,
+    html: () => `${notes}
+      <div class="e-mid">
+        <div class="e-icon live-only"><div class="e-chev" data-chev>${use('chev')}${use('chev')}${use('chev')}</div><div class="e-kot">${use('kotel')}</div></div>
+        <div class="e-say" data-say></div>
+        <div class="e-more" data-more></div>
+        <div class="e-level live-only"><div class="track"></div><div class="mid"></div><div class="bub" data-bub></div></div>
+      </div>
+      <div class="e-sheet"><div class="fact"><b class="num">${KM_TXT} ק״מ</b><span>עד הכותל</span></div><div class="fact"><b class="num">${BDEG}°</b><span>מהצפון · ${WIND}</span></div>${srcLine()}</div>`,
+    update(el, s) {
+      const tk = TOKENS[document.documentElement.dataset.theme];
+      const close = s.perm ? 0 : Math.pow(Math.max(0, 1 - Math.abs(s.off) / 120), 1.6);
+      el.screen.style.backgroundColor = s.facing ? blend(tk.bg, tk.safe, tk.okShare) : blend(tk.bg, tk.goldLight, close);
+      el.q('[data-rose]').style.transform = `rotate(${-s.heading}deg)`;
+      el.q('[data-bub]').style.transform = `translateX(${Math.max(-1, Math.min(1, s.off / 90)) * 128}px)`;
+      el.q('[data-chev]').classList.toggle('left', s.off < 0);
+      if (s.perm) { el.q('[data-say]').textContent = 'כוונו לצפון'; el.q('[data-more]').textContent = `ואז הכותל ב־${BDEG}° ימינה`; return; }
+      el.q('[data-say]').textContent = s.facing ? 'אתם מול הכותל' : `פנו ${turnWord(s.off)}`;
+      el.q('[data-more]').innerHTML = s.facing ? 'אפשר להתחיל להתפלל' : `עוד <span class="num">${Math.round(Math.abs(s.off))}°</span>`;
+    }
+  });
+
+  /* ---------- build ---------- */
+  const board = document.getElementById('board');
+  const els = D.map(d => {
+    const col = document.createElement('section');
+    col.className = 'col';
+    col.innerHTML = `<div class="phone"><div class="screen ${d.screenClass || ''}">${statusBar}${header(d.headerExtra)}<div class="body">${d.html()}</div></div></div>
+      <div class="cap"><div class="letter">${d.letter}</div><h2>${d.title}</h2><p>${d.desc}</p></div>
+      <div class="buzz-tag"><i></i>רטט קל בכניסה לכיוון</div>`;
+    board.appendChild(col);
+    const el = { col, screen: col.querySelector('.screen'), q: sel => col.querySelector(sel), d };
+    if (d.init) d.init(el);
+    return el;
+  });
+
+  /* ---------- simulated heading ---------- */
+  const SEG = [[95, 0, 600], [40, 2200, 400], [-32, 2400, 300], [3, 2100, 2600], [-115, 3000, 300], [62, 2900, 300], [-2, 2300, 2600], [95, 2600, 0]];
+  const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const TOTAL = SEG.slice(1).reduce((a, s) => a + s[1] + s[2], SEG[0][2]);
+  function offsetAt(ms) {
+    let t = ms % TOTAL;
+    if (t < SEG[0][2]) return SEG[0][0];
+    t -= SEG[0][2];
+    for (let i = 1; i < SEG.length; i++) {
+      const [to, dur, hold] = SEG[i], from = SEG[i - 1][0];
+      if (t < dur) return from + (to - from) * ease(t / dur);
+      t -= dur;
+      if (t < hold) return to;
+      t -= hold;
+    }
+    return SEG[0][0];
+  }
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let mode = 'sweep', paused = reduce, clock = 0, last = performance.now(), facing = false;
+  if (reduce) { clock = 0; document.getElementById('pause').setAttribute('aria-pressed', 'true'); document.getElementById('pause').textContent = 'הפעל'; }
+  const frozenOff = 34;
+
+  function frame(now) {
+    const dt = now - last; last = now;
+    if (!paused) clock += dt;
+    let off;
+    if (mode === 'facing') off = 1.4 + (reduce ? 0 : Math.sin(clock / 700) * 0.9);
+    else if (mode === 'perm') off = BEARING;
+    else off = (paused && clock === 0 ? frozenOff : offsetAt(clock)) + (reduce || paused ? 0 : Math.sin(clock / 410) * 0.6 + Math.sin(clock / 170) * 0.25);
+    const perm = mode === 'perm';
+    const heading = perm ? 0 : norm(BEARING - off);
+    const angle = norm(BEARING - heading);
+    const signed = angle > 180 ? angle - 360 : angle;
+    const abs = Math.abs(signed);
+    const was = facing;
+    facing = !perm && abs <= (facing ? 10 : 5);
+    const s = { heading, angle, off: signed, facing, perm };
+    for (const el of els) {
+      el.col.classList.toggle('facing', facing);
+      el.d.update(el, s);
+    }
+    if (facing && !was) {
+      for (const el of els) { el.col.classList.remove('buzzing'); void el.col.offsetWidth; el.col.classList.add('buzzing'); }
+      setTimeout(() => els.forEach(el => el.col.classList.remove('buzzing')), 950);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  const srcText = () => mode === 'perm' ? 'לפי העיר שבחרת: תל אביב' : 'לפי המיקום הנוכחי שלך';
+  const paintSrc = () => document.querySelectorAll('[data-src]').forEach(n => n.textContent = srcText());
+  paintSrc();
+
+  const seg = (id, fn) => document.getElementById(id).addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll(`#${id} button`).forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    fn(b.dataset.v);
+  });
+  seg('theme', v => document.documentElement.dataset.theme = v);
+  seg('mode', v => { mode = v; document.body.dataset.mode = v; paintSrc(); });
+  document.getElementById('pause').addEventListener('click', e => {
+    paused = !paused;
+    e.currentTarget.setAttribute('aria-pressed', String(paused));
+    e.currentTarget.textContent = paused ? 'הפעל' : 'השהה';
+  });
+  const params = new URLSearchParams(location.search);
+  if (params.get('theme')) document.querySelector(`#theme button[data-v="${params.get('theme')}"]`)?.click();
+  if (params.get('mode')) document.querySelector(`#mode button[data-v="${params.get('mode')}"]`)?.click();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -120,6 +120,25 @@ describe('history', () => {
       expect(screen.queryByTestId('history-calendar')).toBeNull();
     });
 
+    it('pins a switcher of its own past the hero, which switches tabs, and drops it back at the hero', async () => {
+      await renderFixture();
+      const scroll = (y: number) =>
+        fireEvent.scroll(screen.getByTestId('history-scroll'), {
+          nativeEvent: {
+            contentOffset: { x: 0, y },
+            contentSize: { width: 360, height: 3000 },
+            layoutMeasurement: { width: 360, height: 640 },
+          },
+        });
+      expect(screen.queryByTestId('history-tabs-pinned')).toBeNull();
+      scroll(900);
+      const pinned = await screen.findByTestId('history-tabs-pinned');
+      fireEvent.press(within(pinned).getByRole('radio', { name: 'הישגים' }));
+      expect(await screen.findByText('שיאים אישיים')).toBeOnTheScreen();
+      scroll(100);
+      expect(screen.queryByTestId('history-tabs-pinned')).toBeNull();
+    });
+
     it('draws the three period rings', async () => {
       await renderFixture();
       expect(within(screen.getByTestId('history-period-month')).getByLabelText('87%, 13 מתוך 15')).toBeOnTheScreen();

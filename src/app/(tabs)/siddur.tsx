@@ -92,6 +92,7 @@ const CatalogRow = memo(function CatalogRow({
 type CatalogSectionProps = {
   sectionKey: SectionKey;
   title: string;
+  subtitle: string;
   icon: IconName;
   open: ReadonlySet<SectionKey>;
   onToggle: (key: SectionKey) => void;
@@ -99,10 +100,11 @@ type CatalogSectionProps = {
   testID?: string;
 };
 
-function CatalogSection({ sectionKey, title, icon, open, onToggle, render, testID }: CatalogSectionProps) {
+function CatalogSection({ sectionKey, title, subtitle, icon, open, onToggle, render, testID }: CatalogSectionProps) {
   return (
     <SettingsSection
       title={title}
+      subtitle={subtitle}
       icon={icon}
       collapsible
       expanded={open.has(sectionKey)}
@@ -238,6 +240,14 @@ export default function SiddurScreen() {
     ),
   );
 
+  // A closed group says what it holds: its first names, and how many more.
+  const summary = (names: string[]) =>
+    names.length > SUMMARY_NAMES
+      ? `${names.slice(0, SUMMARY_NAMES).join(' · ')} ${t('siddur.groupMore', { n: names.length - SUMMARY_NAMES })}`
+      : names.join(' · ');
+  const nowName = (entry: NowEntry) =>
+    entry.mitzvah ? nameFor(entry.mitzvah.mitzvah) : label(STANDALONE_TEXTS[entry.standalone.id].name);
+
   const mitzvahRow = ({ mitzvah, window, hasText, openNow }: (typeof today)[number]) => {
     const { availableLabel } = SIDDUR_TEXTS[mitzvahTextId(mitzvah.id)!];
     return (
@@ -339,6 +349,7 @@ export default function SiddurScreen() {
       key={group}
       sectionKey={group}
       title={t(`siddur.group.${group}`)}
+      subtitle={summary(ids.map((id) => label(STANDALONE_TEXTS[id].name)))}
       icon={group}
       open={open}
       onToggle={toggle}
@@ -359,6 +370,7 @@ export default function SiddurScreen() {
           <CatalogSection
             sectionKey="now"
             title={t('siddur.group.now')}
+            subtitle={summary(openNow.map(nowName))}
             icon={SECTION_ICONS.now}
             open={open}
             onToggle={toggle}
@@ -370,6 +382,7 @@ export default function SiddurScreen() {
         <CatalogSection
           sectionKey="prayers"
           title={t('siddur.group.prayers')}
+          subtitle={summary(prayers.map(({ mitzvah }) => nameFor(mitzvah)))}
           icon={SECTION_ICONS.prayers}
           open={open}
           onToggle={toggle}
@@ -379,6 +392,7 @@ export default function SiddurScreen() {
           <CatalogSection
             sectionKey="mitzvot"
             title={t('siddur.group.mitzvot')}
+            subtitle={summary(mitzvotTexts.map(({ mitzvah }) => nameFor(mitzvah)))}
             icon={SECTION_ICONS.mitzvot}
             open={open}
             onToggle={toggle}
@@ -392,6 +406,8 @@ export default function SiddurScreen() {
     </SafeAreaView>
   );
 }
+
+const SUMMARY_NAMES = 3;
 
 const styles = StyleSheet.create({
   safe: {

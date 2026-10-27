@@ -4,23 +4,68 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import * as ExpoLocation from 'expo-location';
 import * as Haptics from 'expo-haptics';
-import Svg, { Circle, Line, Path } from 'react-native-svg';
+import Animated, {
+  Easing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
+import Svg, { Circle, Defs, Line, Path, RadialGradient, Rect, Stop, Text as SvgText } from 'react-native-svg';
 import { Banner } from '@/components/Banner';
 import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { getLocationName } from '@/data/cities';
+import { EASE_OUT, useReduceMotion } from '@/hooks/useMotion';
 import { LocationService } from '@/services/LocationService';
 import { useUserStore } from '@/stores/useUserStore';
+import { BRAND, blendHex } from '@/theme/colors';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
-import { spacing } from '@/theme/tokens';
-import { typography } from '@/theme/typography';
-import { arrowAngle, bearingTo, distanceKm, nextFacing, type GeoPoint } from '@/utils/compass';
+import { radius, spacing } from '@/theme/tokens';
+import { fontFamilies, typography } from '@/theme/typography';
+import { arrowAngle, bearingTo, distanceKm, nextFacing, normalizeDegrees, type GeoPoint } from '@/utils/compass';
 import { useI18n } from '@/i18n';
 
-const DIAL_MAX = scaled(280);
-const TICKS = 36;
+const VIEW = 343;
+const CENTER = VIEW / 2;
+const RADAR_RADIUS = 150;
+const RINGS_KM = [5, 20, 60, 200];
+const STAGE_MAX = scaled(VIEW);
+const SWEEP_MS = 3200;
+const SWEEP_TRAIL_DEG = 80;
+const SWEEP_SLICES = 8;
+const PULSE_MS = 2400;
+const WAVE_MS = 900;
+const WAVE_GAP_MS = 140;
+const GLOW_SIZE = 110;
+const CORE_SIZE = 14;
+const PILL_SIZE = 22;
+const CHECK_SIZE = scaled(22);
+
+// Distances from 0 to 200 km on a log scale, so a nearby Kotel and one across the world both fit.
+export function radarRadius(km: number, max = RADAR_RADIUS): number {
+  return (max * Math.log10(1 + Math.min(km, 200))) / Math.log10(201);
+}
+
+export function signedOffset(angle: number): number {
+  const off = normalizeDegrees(angle);
+  return off > 180 ? off - 360 : off;
+}
+
+const polar = (r: number, degrees: number): [number, number] => {
+  const rad = (degrees * Math.PI) / 180;
+  return [CENTER + r * Math.sin(rad), CENTER - r * Math.cos(rad)];
+};
+
+function sweepSlice(from: number, to: number): string {
+  const [x1, y1] = polar(RADAR_RADIUS, from);
+  const [x2, y2] = polar(RADAR_RADIUS, to);
+  return `M${CENTER} ${CENTER} L${x1} ${y1} A${RADAR_RADIUS} ${RADAR_RADIUS} 0 0 1 ${x2} ${y2} Z`;
+}
 
 type Reading = { heading: number; magnetic: boolean; accuracy: number };
 
@@ -62,6 +107,225 @@ function useHeading(granted: boolean | null): { reading: Reading | null; failed:
   );
 
   return { reading, failed };
+}
+
+type RadarProps = {
+  size: number;
+  heading: number;
+  angle: number;
+  distance: number;
+  facing: boolean;
+  live: boolean;
+};
+
+function Radar({ size, heading, angle, distance, facing, live }: RadarProps) {
+  const { colors, isDark } = useTheme();
+  const { t } = useI18n();
+  const reduceMotion = useReduceMotion();
+  const scale = size / VIEW;
+  const card = isDark ? blendHex('#000000', colors.bg, 0.45) : BRAND.navy;
+  const ink = isDark ? colors.textSub : blendHex(BRAND.parchment, BRAND.navy, 0.75);
+  const light = isDark ? colors.text : BRAND.parchment;
+  const line = blendHex(ink, card, 0.22);
+  const outer = blendHex(ink, card, 0.4);
+  const tone = facing ? colors.safe : colors.gold;
+  const targetRadius = radarRadius(distance);
+  const sweeping = live && !reduceMotion;
+
+  const sweep = useSharedValue(0);
+  const target = useSharedValue(angle);
+  const steady = useSharedValue(1);
+  const pulse = useSharedValue(0);
+  const wave = useSharedValue(0);
+  const echo = useSharedValue(0);
+  const wasFacing = useRef(facing);
+
+  useEffect(() => {
+    target.value = angle;
+    steady.value = facing || !sweeping ? 1 : 0;
+  }, [angle, facing, sweeping, target, steady]);
+
+  useEffect(() => {
+    if (!sweeping) {
+      cancelAnimation(sweep);
+      cancelAnimation(pulse);
+      sweep.value = normalizeDegrees(angle + 20);
+      pulse.value = 0;
+      return undefined;
+    }
+    sweep.value = 0;
+    sweep.value = withRepeat(withTiming(360, { duration: SWEEP_MS, easing: Easing.linear }), -1, false);
+    pulse.value = withRepeat(withTiming(1, { duration: PULSE_MS, easing: EASE_OUT }), -1, false);
+    return () => {
+      cancelAnimation(sweep);
+      cancelAnimation(pulse);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the static sweep only needs the angle when motion is off
+  }, [sweeping]);
+
+  useEffect(() => {
+    if (facing && !wasFacing.current && !reduceMotion) {
+      wave.value = 0;
+      echo.value = 0;
+      wave.value = withTiming(1, { duration: WAVE_MS, easing: EASE_OUT });
+      echo.value = withDelay(WAVE_GAP_MS, withTiming(1, { duration: WAVE_MS, easing: EASE_OUT }));
+    }
+    wasFacing.current = facing;
+  }, [facing, reduceMotion, wave, echo]);
+
+  const sweepStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${sweep.value}deg` }] }));
+  const lit = () => {
+    'worklet';
+    if (steady.value === 1) return 1;
+    const since = (((sweep.value - target.value) % 360) + 360) % 360;
+    return 0.18 + 0.82 * Math.exp(-since / 110);
+  };
+  const glowStyle = useAnimatedStyle(() => ({ opacity: lit() }));
+  const coreStyle = useAnimatedStyle(() => ({ opacity: 0.35 + 0.65 * lit() }));
+  const pulseStyle = useAnimatedStyle(() => ({
+    opacity: sweeping ? 0.8 * (1 - pulse.value) : 0,
+    transform: [{ scale: 1 + 3.5 * pulse.value }],
+  }));
+  const waveStyle = useAnimatedStyle(() => ({
+    opacity: wave.value > 0 && wave.value < 1 ? 0.9 * (1 - wave.value) : 0,
+    transform: [{ scale: 1 + 8 * wave.value }],
+  }));
+  const echoStyle = useAnimatedStyle(() => ({
+    opacity: echo.value > 0 && echo.value < 1 ? 0.9 * (1 - echo.value) : 0,
+    transform: [{ scale: 1 + 8 * echo.value }],
+  }));
+
+  const at = (px: number) => px * scale;
+  const glow = at(GLOW_SIZE);
+  const core = at(CORE_SIZE);
+  const pill = at(PILL_SIZE);
+  const ring = (dimension: number) => ({
+    position: 'absolute' as const,
+    width: dimension,
+    height: dimension,
+    left: -dimension / 2,
+    top: -dimension / 2,
+    borderRadius: dimension / 2,
+  });
+
+  return (
+    <View
+      style={[styles.radar, { width: size, height: size, backgroundColor: card }]}
+      accessible
+      accessibilityLabel={t('compass.a11y', { degrees: Math.round(angle) })}
+    >
+      <Svg width={size} height={size} viewBox={`0 0 ${VIEW} ${VIEW}`} style={StyleSheet.absoluteFill}>
+        {RINGS_KM.map((km, index) => {
+          const r = radarRadius(km);
+          const last = index === RINGS_KM.length - 1;
+          return (
+            <React.Fragment key={km}>
+              <Circle
+                cx={CENTER}
+                cy={CENTER}
+                r={r}
+                fill="none"
+                stroke={last ? outer : line}
+                strokeWidth={last ? 1.5 : 1}
+              />
+              <SvgText
+                x={CENTER}
+                y={CENTER + r - 7}
+                textAnchor="middle"
+                fontSize={10}
+                fontFamily={fontFamilies.heebo.semibold}
+                fill={ink}
+              >
+                {t('compass.ringKm', { km })}
+              </SvgText>
+            </React.Fragment>
+          );
+        })}
+        <Line
+          x1={CENTER}
+          y1={CENTER}
+          x2={CENTER}
+          y2={CENTER - RADAR_RADIUS}
+          stroke={ink}
+          strokeWidth={1.2}
+          strokeDasharray="3 5"
+          opacity={0.6}
+        />
+      </Svg>
+      <Animated.View testID="compass-sweep" style={[StyleSheet.absoluteFill, sweepStyle]} pointerEvents="none">
+        <Svg width={size} height={size} viewBox={`0 0 ${VIEW} ${VIEW}`}>
+          {Array.from({ length: SWEEP_SLICES }, (_, index) => {
+            const step = SWEEP_TRAIL_DEG / SWEEP_SLICES;
+            const from = -SWEEP_TRAIL_DEG + index * step;
+            return (
+              <Path
+                key={index}
+                d={sweepSlice(from, from + step)}
+                fill={tone}
+                opacity={(0.34 * (index + 1)) / SWEEP_SLICES}
+              />
+            );
+          })}
+          <Line x1={CENTER} y1={CENTER} x2={CENTER} y2={CENTER - RADAR_RADIUS} stroke={tone} strokeWidth={2} />
+        </Svg>
+      </Animated.View>
+      <Svg width={size} height={size} viewBox={`0 0 ${VIEW} ${VIEW}`} style={StyleSheet.absoluteFill}>
+        <Rect
+          x={CENTER - 6}
+          y={CENTER - 11}
+          width={12}
+          height={22}
+          rx={3.5}
+          fill="none"
+          stroke={light}
+          strokeWidth={1.6}
+        />
+        <Circle cx={CENTER} cy={CENTER - 6.5} r={1.3} fill={light} />
+      </Svg>
+
+      <View
+        testID="compass-dial"
+        style={[styles.layer, { transform: [{ rotate: `${-heading}deg` }] }]}
+        pointerEvents="none"
+      >
+        <View style={[styles.pin, { top: at(CENTER - RADAR_RADIUS), transform: [{ rotate: `${heading}deg` }] }]}>
+          <View style={[ring(pill), styles.center, { backgroundColor: card, borderColor: line, borderWidth: 1 }]}>
+            <Text style={[typography.micro, styles.northText, { color: ink }]}>{t('compass.north')}</Text>
+          </View>
+        </View>
+      </View>
+
+      <View
+        testID="compass-arrow"
+        style={[styles.layer, { transform: [{ rotate: `${angle}deg` }] }]}
+        pointerEvents="none"
+      >
+        <View style={[styles.pin, { top: at(CENTER - targetRadius), transform: [{ rotate: `${-angle}deg` }] }]}>
+          <Animated.View style={[ring(glow), glowStyle]}>
+            <Svg width={glow} height={glow}>
+              <Defs>
+                <RadialGradient id="compass-glow" cx="50%" cy="50%" r="50%">
+                  <Stop offset="0" stopColor={tone} stopOpacity={0.55} />
+                  <Stop offset="0.68" stopColor={tone} stopOpacity={0} />
+                </RadialGradient>
+              </Defs>
+              <Circle cx={glow / 2} cy={glow / 2} r={glow / 2} fill="url(#compass-glow)" />
+            </Svg>
+          </Animated.View>
+          <Animated.View style={[ring(core), { borderWidth: 1.5, borderColor: tone }, pulseStyle]} />
+          <Animated.View style={[ring(at(40)), { borderWidth: 2, borderColor: colors.safe }, waveStyle]} />
+          <Animated.View style={[ring(at(40)), { borderWidth: 2, borderColor: colors.safe }, echoStyle]} />
+          <Animated.View
+            testID="compass-target"
+            style={[ring(core), { backgroundColor: tone, borderWidth: at(3), borderColor: card }, coreStyle]}
+          />
+          <View style={[styles.label, { top: at(13), backgroundColor: blendHex(light, card, 0.12) }]}>
+            <Text style={[typography.small, styles.labelText, { color: light }]}>{t('compass.kotel')}</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
 }
 
 export default function CompassScreen() {
@@ -130,15 +394,16 @@ export default function CompassScreen() {
     wasFacing.current = facing;
   }, [facing]);
 
-  const size = Math.min(DIAL_MAX, width - spacing.xxxl * 2);
+  const size = Math.min(STAGE_MAX, width - spacing.lg * 2);
   const degrees = Math.round(bearing);
   const km = distance >= 100 ? String(Math.round(distance)) : distance.toFixed(1);
+  const offset = signedOffset(angle);
+  const turn = t(offset > 0 ? 'compass.turnRight' : 'compass.turnLeft', { degrees: Math.round(Math.abs(offset)) });
   const sourceLine = locating
     ? t('compass.locating')
     : fix
       ? t('compass.fromGps')
       : t('compass.fromCity', { city: getLocationName(saved, language) });
-  const dial = { width: size, height: size };
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
@@ -152,59 +417,41 @@ export default function CompassScreen() {
         {reading && (reading.accuracy === 0 || reading.accuracy === 1) ? (
           <Banner tone="warning" text={t('compass.calibrate')} />
         ) : null}
-        {facing ? <Banner tone="safe" text={t('compass.facing')} /> : null}
 
         {!unavailable && !needsPermission ? (
-          <View
-            style={[styles.dial, dial]}
-            accessible
-            accessibilityLabel={t('compass.a11y', { degrees: Math.round(angle) })}
-          >
-            <View
-              testID="compass-dial"
-              style={[styles.layer, { transform: [{ rotate: `${-(reading?.heading ?? 0)}deg` }] }]}
-            >
-              <Svg width={size} height={size} viewBox="0 0 100 100">
-                <Circle cx={50} cy={50} r={46} stroke={colors.border} strokeWidth={2} fill={colors.surface} />
-                {Array.from({ length: TICKS }, (_, index) => {
-                  const long = index % 3 === 0;
-                  const inner = long ? 38 : 41;
-                  const radians = (index * 360) / TICKS;
-                  const rad = (radians * Math.PI) / 180;
-                  return (
-                    <Line
-                      key={index}
-                      x1={50 + 44 * Math.sin(rad)}
-                      y1={50 - 44 * Math.cos(rad)}
-                      x2={50 + inner * Math.sin(rad)}
-                      y2={50 - inner * Math.cos(rad)}
-                      stroke={colors.textMuted}
-                      strokeWidth={long ? 1.4 : 0.8}
-                    />
-                  );
-                })}
-              </Svg>
-              <Text style={[typography.heading, styles.north, { color: colors.goldText }]}>{t('compass.north')}</Text>
-            </View>
-            <View testID="compass-arrow" style={[styles.layer, { transform: [{ rotate: `${angle}deg` }] }]}>
-              <Svg width={size} height={size} viewBox="0 0 100 100">
-                <Path d="M50,14L58,50L50,44L42,50Z" fill={facing ? colors.safe : colors.gold} />
-                <Line x1={50} y1={50} x2={50} y2={64} stroke={colors.textMuted} strokeWidth={2} strokeLinecap="round" />
-              </Svg>
-            </View>
-            <View style={styles.layer} pointerEvents="none">
-              <Svg width={size} height={size} viewBox="0 0 100 100">
-                <Path d="M46,1L54,1L50,7Z" fill={colors.text} />
-              </Svg>
-            </View>
+          <Radar
+            size={size}
+            heading={reading?.heading ?? 0}
+            angle={angle}
+            distance={distance}
+            facing={facing}
+            live={reading !== null}
+          />
+        ) : null}
+
+        {reading ? (
+          <View style={styles.say} accessibilityLiveRegion="polite">
+            {facing ? (
+              <>
+                <MitzvahIcon name="check" size={CHECK_SIZE} color={colors.safe} />
+                <Text style={[typography.title, { color: colors.safe }]}>{t('compass.facing')}</Text>
+              </>
+            ) : (
+              <Text style={[typography.title, { color: colors.text }]}>{turn}</Text>
+            )}
           </View>
         ) : null}
 
-        <Card padded style={styles.info}>
-          <Text style={[typography.title, { color: colors.text }]}>{t('compass.bearing', { degrees })}</Text>
-          <Text style={[typography.body, { color: colors.textSub }]}>{t('compass.distance', { km })}</Text>
-          <Text style={[typography.caption, { color: colors.textMuted }]}>{sourceLine}</Text>
-        </Card>
+        <View style={styles.facts}>
+          <Text style={[typography.body, { color: colors.textSub }]}>
+            <Text style={[typography.bodyBold, { color: colors.text }]}>{km}</Text> {t('compass.km')}
+          </Text>
+          <Text style={[typography.body, { color: colors.textSub }]}>
+            <Text style={[typography.bodyBold, { color: colors.text }]}>{degrees}°</Text>{' '}
+            {t('compass.fromNorth', { wind: t(`compass.wind.${Math.round(bearing / 45) % 8}`) })}
+          </Text>
+        </View>
+        <Text style={[typography.caption, styles.source, { color: colors.textMuted }]}>{sourceLine}</Text>
         {granted === false ? (
           <Button label={t('compass.permission')} variant="secondary" onPress={askPermission} />
         ) : null}
@@ -221,22 +468,57 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.xxxl,
+    gap: spacing.sm,
   },
-  dial: {
+  radar: {
     alignSelf: 'center',
-    marginVertical: spacing.xl,
+    marginVertical: spacing.md,
+    borderRadius: radius.xxl,
+    overflow: 'hidden',
   },
   layer: {
     ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
   },
-  north: {
+  pin: {
     position: 'absolute',
-    top: scaled(22),
+    left: '50%',
+    width: 0,
+    height: 0,
   },
-  info: {
+  center: {
     alignItems: 'center',
-    gap: spacing.xs,
+    justifyContent: 'center',
+  },
+  northText: {
+    fontFamily: typography.captionBold.fontFamily,
+  },
+  label: {
+    position: 'absolute',
+    alignSelf: 'center',
+    width: scaled(88),
+    left: -scaled(44),
+    alignItems: 'center',
+    borderRadius: radius.full,
+    paddingVertical: scaled(3),
+  },
+  labelText: {
+    fontFamily: typography.captionBold.fontFamily,
+  },
+  say: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  facts: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    columnGap: spacing.lg,
+  },
+  source: {
+    textAlign: 'center',
     marginBottom: spacing.md,
   },
 });

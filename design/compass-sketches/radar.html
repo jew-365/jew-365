@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="he" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מצפן רדאר</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root, [data-theme="light"] {
+  --bg: #F6F1E8; --surface: #FFFDF9; --surface2: #F1EADF; --text: #1D2240; --textSub: #69645D; --textMuted: #6A655E;
+  --border: #EBE3D6; --gold: #F08A3C; --onGold: #2B1608; --goldLight: #FDE9D5; --goldText: #A04A0C;
+  --safe: #0F9060; --safeWash: #0F906016; --warning: #B7791F; --shadow: rgba(94,62,28,0.08); --shadowStrong: rgba(94,62,28,0.18);
+  --page: #EAE2D4; --frame: #1D2240;
+  --radar-bg: #1D2240; --radar-line: rgba(246,241,232,0.13); --radar-ink: #C9C3D6; --radar-glow: #F59A4A;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  --bg: #0E1626; --surface: #172238; --surface2: #222F4A; --text: #EEF1F7; --textSub: #9DA9BF; --textMuted: #A3AEC3;
+  --border: #28354F; --gold: #F59A4A; --onGold: #1E1006; --goldLight: #3A2D26; --goldText: #F7A65E;
+  --safe: #10B981; --safeWash: #10B98122; --warning: #FBBF24; --shadow: rgba(0,1,10,0.25); --shadowStrong: rgba(0,1,10,0.45);
+  --page: #070C16; --frame: #000000;
+  --radar-bg: #080E1A; --radar-line: rgba(238,241,247,0.10); --radar-ink: #9DA9BF; --radar-glow: #F59A4A;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--page); }
+body { font-family: 'Heebo', system-ui, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; transition: background-color 240ms ease; }
+::selection { background: var(--goldLight); color: var(--text); }
+button { font: inherit; color: inherit; }
+button:focus-visible { outline: 2px solid var(--goldText); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- board chrome ---------- */
+.board-head { max-width: 1680px; margin: 0 auto; padding: 40px 24px 8px; display: flex; flex-wrap: wrap; gap: 20px 40px; align-items: end; justify-content: space-between; }
+.board-head h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+.board-head p { color: var(--textSub); font-size: 15px; line-height: 1.6; max-width: 62ch; margin-top: 6px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.seg { display: inline-flex; background: var(--surface2); border-radius: 999px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: transparent; padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--textSub); cursor: pointer; transition: background-color 160ms ease, color 160ms ease; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px var(--shadowStrong); }
+.seg button:active { transform: scale(0.97); }
+.ctl-label { font-size: 12px; color: var(--textSub); margin-inline-end: 4px; }
+.board { max-width: 1680px; margin: 0 auto; padding: 24px 24px 64px; display: flex; flex-wrap: wrap; gap: 36px 28px; justify-content: center; }
+.col { width: calc(375px * var(--z)); display: flex; flex-direction: column; gap: 14px; }
+:root { --z: 0.8; }
+.cap { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: baseline; }
+.cap .letter { grid-row: span 2; width: 30px; height: 30px; border-radius: 10px; background: var(--gold); color: var(--onGold); font-weight: 800; font-size: 16px; display: grid; place-items: center; align-self: start; }
+.cap h2 { font-size: 17px; font-weight: 700; }
+.cap p { font-size: 13px; line-height: 1.55; color: var(--textSub); }
+.buzz-tag { font-size: 11px; color: var(--textSub); display: inline-flex; align-items: center; gap: 6px; opacity: 0.35; transition: opacity 400ms ease; margin-top: 2px; }
+.buzz-tag i { width: 6px; height: 6px; border-radius: 50%; background: var(--safe); }
+.col.buzzing .buzz-tag { opacity: 1; transition-duration: 80ms; }
+
+/* ---------- phone ---------- */
+.phone { zoom: var(--z); width: 375px; height: 812px; border-radius: 48px; padding: 10px; background: var(--frame); box-shadow: 0 30px 60px -20px rgba(29,34,64,0.35), 0 2px 6px rgba(29,34,64,0.2); }
+.col.buzzing .phone { animation: buzz 220ms linear; }
+@keyframes buzz { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 50% { transform: translateX(2px); } 75% { transform: translateX(-1px); } }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 38px; overflow: hidden; background: var(--bg); display: flex; flex-direction: column; }
+.status { height: 46px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 28px 0; font-size: 15px; font-weight: 700; direction: ltr; }
+.status svg { height: 12px; }
+.hdr { flex: none; display: flex; align-items: center; gap: 12px; padding: 8px 16px 6px; }
+.back { width: 38px; height: 38px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 4px var(--shadow); display: grid; place-items: center; flex: none; }
+.back svg { width: 18px; height: 18px; color: var(--text); }
+.hdr-t { flex: 1; min-width: 0; }
+.hdr-t b { display: block; font-size: 22px; font-weight: 700; line-height: 1.2; }
+.hdr-t span { display: block; font-size: 13px; color: var(--textSub); }
+.body { position: relative; flex: 1; display: flex; flex-direction: column; padding: 0 16px 22px; min-height: 0; }
+.note { display: none; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 14px; font-size: 13px; line-height: 1.45; margin: 4px 0 6px; }
+.note svg { width: 18px; height: 18px; flex: none; margin-top: 1px; }
+.note.cal { background: color-mix(in srgb, var(--warning) 14%, var(--surface)); color: var(--text); }
+.note.cal svg { color: var(--warning); }
+.note.perm { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px var(--shadow); flex-direction: column; }
+.note.perm .row { display: flex; gap: 10px; }
+.note.perm svg { color: var(--goldText); }
+.note.perm .btn { align-self: stretch; border: 0; border-radius: 12px; background: var(--gold); color: var(--onGold); font-weight: 700; padding: 9px; font-size: 14px; }
+body[data-mode="calibrate"] .note.cal { display: flex; }
+body[data-mode="perm"] .note.perm { display: flex; }
+body[data-mode="perm"] .live-only { opacity: 0.4; filter: saturate(0.4); }
+.src { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--textSub); }
+.src svg { width: 14px; height: 14px; color: var(--goldText); flex: none; }
+.layer { position: absolute; inset: 0; will-change: transform; }
+.kotel { color: currentColor; }
+
+.nav { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 7px 14px; border-radius: 999px; background: var(--surface); color: var(--goldText); font-size: 13px; font-weight: 700; text-decoration: none; box-shadow: 0 1px 3px var(--shadow); }
+.nav:hover { background: var(--goldLight); }
+.nav:focus-visible { outline: 2px solid var(--goldText); outline-offset: 2px; }
+
+/* ---------- shared radar parts ---------- */
+.stage { position: relative; width: 343px; height: 343px; margin-top: 22px; flex: none; zoom: 0.94; }
+.stage > svg { position: absolute; inset: 0; overflow: visible; }
+.pin0 { position: absolute; left: 171.5px; top: 171.5px; width: 0; height: 0; will-change: transform; }
+.tgt { --tg: var(--gold); }
+.facing .tgt { --tg: var(--safe); }
+.tgt .glow { position: absolute; width: 110px; height: 110px; left: -55px; top: -55px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--tg) 55%, transparent) 0%, transparent 68%); transition: background 300ms ease; }
+.tgt .core { position: absolute; width: 14px; height: 14px; left: -7px; top: -7px; border-radius: 50%; background: var(--tg); box-shadow: 0 0 0 3px var(--surface); transition: background-color 200ms ease; }
+.tgt .pulse { position: absolute; width: 14px; height: 14px; left: -7px; top: -7px; border-radius: 50%; border: 1.5px solid var(--tg); animation: rpulse 2.4s var(--ease-out) infinite; }
+@keyframes rpulse { from { transform: scale(1); opacity: 0.8; } to { transform: scale(4.5); opacity: 0; } }
+.tgt .wave { position: absolute; width: 40px; height: 40px; left: -20px; top: -20px; border-radius: 50%; border: 2px solid var(--safe); opacity: 0; pointer-events: none; }
+.col.buzzing .tgt .wave { animation: rwave 900ms var(--ease-out); }
+.col.buzzing .tgt .wave.w2 { animation-delay: 140ms; }
+@keyframes rwave { from { transform: scale(1); opacity: 0.9; } to { transform: scale(9); opacity: 0; } }
+.tgt .lbl { position: absolute; top: 13px; left: -44px; width: 88px; display: flex; justify-content: center; }
+.tgt .lbl span { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px 3px 8px; border-radius: 999px; background: var(--surface); color: var(--text); font-size: 12px; font-weight: 700; box-shadow: 0 2px 8px var(--shadowStrong); white-space: nowrap; }
+.tgt .lbl svg { width: 18px; color: var(--goldText); transition: color 200ms ease; }
+.facing .tgt .lbl svg { color: var(--safe); }
+.npill { position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); color: var(--goldText); font-size: 12px; font-weight: 800; display: grid; place-items: center; box-shadow: 0 1px 4px var(--shadowStrong); }
+.foot { margin-top: auto; padding-top: 12px; }
+.big-km { font-size: 48px; font-weight: 800; letter-spacing: -0.03em; line-height: 0.95; }
+.big-km small { font-size: 18px; font-weight: 700; color: var(--textSub); margin-inline-start: 4px; letter-spacing: 0; }
+.cap-line { font-size: 13px; color: var(--textSub); margin-top: 6px; }
+.turn { font-size: 20px; font-weight: 700; color: var(--goldText); transition: color 200ms ease; }
+.facing .turn { color: var(--safe); }
+.ok { display: inline-flex; align-items: center; gap: 8px; }
+.ok svg { width: 22px; height: 22px; }
+
+/* ---------- D1 ---------- */
+.r1-card { background: var(--surface); border-radius: 26px; box-shadow: 0 10px 28px -14px var(--shadowStrong), 0 1px 3px var(--shadow); }
+.r1-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; gap: 12px; }
+.r1-row .side { text-align: end; }
+
+/* ---------- D2 ---------- */
+.r2-card { background: var(--radar-bg); border-radius: 26px; overflow: hidden; }
+[data-theme="dark"] .r2-card { box-shadow: inset 0 0 0 1px var(--border); }
+.r2-card .tgt .core { box-shadow: 0 0 0 3px var(--radar-bg), 0 0 16px 3px var(--tg); }
+.r2-card .tgt .lbl span { background: rgba(255,244,232,0.1); color: #FFF4E8; box-shadow: none; }
+.r2-card .tgt .lbl svg { color: var(--tg); }
+.r2-card .npill { background: var(--radar-bg); color: var(--radar-ink); border: 1px solid var(--radar-line); box-shadow: none; }
+.sweep { position: absolute; left: 21.5px; top: 21.5px; width: 300px; height: 300px; border-radius: 50%; --sw: var(--radar-glow); background: conic-gradient(from 0deg, transparent 0deg 280deg, color-mix(in srgb, var(--sw) 0%, transparent) 280deg, color-mix(in srgb, var(--sw) 34%, transparent) 360deg); will-change: transform; }
+.sweep::after { content: ""; position: absolute; left: 149px; top: 0; width: 2px; height: 150px; background: linear-gradient(to bottom, var(--sw), color-mix(in srgb, var(--sw) 20%, transparent)); border-radius: 1px; }
+.facing .sweep { --sw: var(--safe); }
+.r2-say { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; margin-top: 28px; transition: color 200ms ease; }
+.facing .r2-say { color: var(--safe); }
+.r2-facts { display: flex; gap: 20px; margin-top: 8px; font-size: 15px; color: var(--textSub); }
+.r2-facts b { color: var(--text); font-weight: 700; }
+
+/* ---------- D3 ---------- */
+.r3 .tgt .glow { width: 170px; height: 170px; left: -85px; top: -85px; background: radial-gradient(circle, color-mix(in srgb, var(--tg) 42%, transparent) 0%, color-mix(in srgb, var(--tg) 12%, transparent) 40%, transparent 70%); }
+.r3 .tgt .core { width: 16px; height: 16px; left: -8px; top: -8px; box-shadow: 0 0 0 4px var(--bg), 0 0 14px 2px var(--tg); }
+.r3 .tgt .lbl span { background: transparent; box-shadow: none; padding: 0; color: var(--goldText); }
+.facing.col .r3 .tgt .lbl span { color: var(--safe); }
+.r3-num { text-align: center; margin-top: 22px; }
+.r3-num .n { font-size: 84px; font-weight: 800; letter-spacing: -0.04em; line-height: 0.9; }
+.r3-num .u { font-size: 15px; color: var(--textSub); margin-top: 8px; }
+.r3-line { text-align: center; margin-top: 14px; font-size: 15px; color: var(--textSub); }
+.r3-line b { color: var(--goldText); font-weight: 700; }
+.facing .r3-line b { color: var(--safe); }
+
+/* ---------- D4 ---------- */
+.r4-card { background: var(--surface2); border-radius: 26px; }
+.r4-badge { position: absolute; left: -24px; top: -24px; width: 48px; height: 48px; border-radius: 50%; background: var(--surface); border: 2px solid var(--gold); display: grid; place-items: center; color: var(--goldText); box-shadow: 0 6px 14px var(--shadowStrong); transition: border-color 200ms ease, color 200ms ease; }
+.r4-badge svg { width: 26px; }
+.facing .r4-badge { border-color: var(--safe); color: var(--safe); }
+.r4-badge .wave { position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--safe); opacity: 0; }
+.col.buzzing .r4-badge .wave { animation: rwave 900ms var(--ease-out); }
+.col.buzzing .r4-badge .wave.w2 { animation-delay: 140ms; }
+.r4-arc { stroke: var(--gold); transition: stroke 200ms ease; }
+.facing .r4-arc { stroke: var(--safe); }
+.r4-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; }
+.r4-left { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+.r4-left small { display: block; font-size: 13px; font-weight: 400; color: var(--textSub); margin-top: 6px; letter-spacing: 0; }
+.facing .r4-left { color: var(--safe); }
+
+/* ---------- D5 ---------- */
+.r5-card { position: relative; width: 343px; height: 206px; margin-top: 22px; zoom: 0.94; border-radius: 26px 26px 18px 18px; background: var(--surface); box-shadow: 0 10px 28px -14px var(--shadowStrong), 0 1px 3px var(--shadow); overflow: hidden; flex: none; }
+.r5-card > svg { position: absolute; inset: 0; }
+.r5-card .pin0 { left: 171.5px; top: 192px; }
+.r5-card .tgt.edge { opacity: 0.5; }
+.r5-cue { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 26px; direction: ltr; color: var(--goldText); }
+.r5-cue .ch { display: flex; }
+.r5-cue .ch svg { width: 40px; height: 40px; margin: 0 -9px; animation: chev 1.2s ease-in-out infinite; }
+.r5-cue .ch svg:nth-child(2) { animation-delay: 0.15s; }
+.r5-cue .ch svg:nth-child(3) { animation-delay: 0.3s; }
+.r5-cue .ch.left { flex-direction: row-reverse; }
+.r5-cue .ch.left svg { transform: scaleX(-1); }
+@keyframes chev { 0%,100% { opacity: 0.25; } 40% { opacity: 1; } }
+.r5-cue .deg { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--text); }
+.r5-word { text-align: center; font-size: 22px; font-weight: 700; margin-top: 4px; }
+.r5-ok { display: none; justify-content: center; align-items: center; gap: 10px; color: var(--safe); font-size: 34px; font-weight: 800; margin-top: 30px; }
+.r5-ok svg { width: 36px; height: 36px; }
+.facing .r5-cue, .facing .r5-word { display: none; }
+.facing .r5-ok { display: flex; }
+.r5-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 30px; }
+.r5-tiles div { background: var(--surface); border-radius: 16px; padding: 12px 14px; box-shadow: 0 1px 4px var(--shadow); }
+.r5-tiles b { display: block; font-size: 22px; font-weight: 700; }
+.r5-tiles span { font-size: 13px; color: var(--textSub); }
+
+@media (prefers-reduced-motion: reduce) {
+  .col.buzzing .phone, .col.buzzing .tgt .wave, .col.buzzing .r4-badge .wave, .tgt .pulse, .r5-cue .ch svg { animation: none !important; }
+  .r5-cue .ch svg { opacity: 1; }
+}
+@media (max-width: 700px) { :root { --z: 0.86; } .board-head { padding-top: 24px; } }
+</style>
+</head>
+<body data-mode="sweep">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-kotel" viewBox="0 0 28 20">
+    <g fill="currentColor">
+      <rect x="0" y="15.2" width="8.6" height="4.8" rx="0.7"/><rect x="9.6" y="15.2" width="9" height="4.8" rx="0.7"/><rect x="19.6" y="15.2" width="8.4" height="4.8" rx="0.7"/>
+      <rect x="0" y="10.2" width="4.6" height="4.2" rx="0.6"/><rect x="5.6" y="10.2" width="9" height="4.2" rx="0.6"/><rect x="15.6" y="10.2" width="7.4" height="4.2" rx="0.6"/><rect x="24" y="10.2" width="4" height="4.2" rx="0.6"/>
+      <rect x="0" y="6" width="7.6" height="3.4" rx="0.5"/><rect x="8.6" y="6" width="5.4" height="3.4" rx="0.5"/><rect x="15" y="6" width="7.4" height="3.4" rx="0.5"/><rect x="23.4" y="6" width="4.6" height="3.4" rx="0.5"/>
+      <rect x="0" y="2.6" width="3.8" height="2.6" rx="0.4"/><rect x="4.8" y="2.6" width="6.2" height="2.6" rx="0.4"/><rect x="12" y="2.6" width="5.6" height="2.6" rx="0.4"/><rect x="18.6" y="2.6" width="5.6" height="2.6" rx="0.4"/><rect x="25.2" y="2.6" width="2.8" height="2.6" rx="0.4"/>
+      <rect x="6" y="0" width="4" height="1.8" rx="0.4" opacity="0.6"/><rect x="17" y="0" width="5" height="1.8" rx="0.4" opacity="0.6"/>
+    </g>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.4l3.2 3.2L17.2 8.6" fill="none" stroke="var(--surface)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.6 7-12.2A7 7 0 0 0 5 9.8C5 15.4 12 22 12 22z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9.8" r="2.6" fill="currentColor"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3l10 18H2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="18" r="1.2" fill="currentColor"/></symbol>
+  <symbol id="i-loc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+</svg>
+
+<header class="board-head">
+  <div>
+    <h1>מצפן תפילה · וריאציות רדאר</h1>
+    <p>חמש גרסאות לכיוון D. בכולן אותו מידע: לאן הכותל, כמה רחוק, מאיזה מקום מחושב, והצפון; ובכולן אותו מצב הצלחה בטווח 5°, גל ירוק ורטט קל. הנתונים אמיתיים: מתל אביב, לפי חישוב המצפן של האפליקציה.</p>
+    <a class="nav" href="index.html">→ חזרה לחמשת הכיוונים</a>
+  </div>
+  <div class="controls">
+    <span class="ctl-label">ערכה</span>
+    <div class="seg" id="theme"><button aria-pressed="true" data-v="light">בהירה</button><button aria-pressed="false" data-v="dark">כהה</button></div>
+    <span class="ctl-label">מצב</span>
+    <div class="seg" id="mode"><button aria-pressed="true" data-v="sweep">סיבוב</button><button aria-pressed="false" data-v="facing">מול הכותל</button><button aria-pressed="false" data-v="calibrate">צריך כיול</button><button aria-pressed="false" data-v="perm">בלי הרשאה</button></div>
+    <div class="seg"><button id="pause" aria-pressed="false">השהה</button></div>
+  </div>
+</header>
+<main class="board" id="board"></main>
+
+<script>
+(() => {
+  const KOTEL = { lat: 31.7767, lng: 35.2345 };
+  const FROM = { lat: 32.0853, lng: 34.7818 };
+  const rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+  const norm = d => ((d % 360) + 360) % 360;
+  const BEARING = (() => { const dL = rad(KOTEL.lng - FROM.lng), y = Math.sin(dL) * Math.cos(rad(KOTEL.lat)), x = Math.cos(rad(FROM.lat)) * Math.sin(rad(KOTEL.lat)) - Math.sin(rad(FROM.lat)) * Math.cos(rad(KOTEL.lat)) * Math.cos(dL); return norm(deg(Math.atan2(y, x))); })();
+  const KM = (() => { const dLa = rad(KOTEL.lat - FROM.lat), dLo = rad(KOTEL.lng - FROM.lng); const a = Math.sin(dLa / 2) ** 2 + Math.cos(rad(FROM.lat)) * Math.cos(rad(KOTEL.lat)) * Math.sin(dLo / 2) ** 2; return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); })();
+  const KM_TXT = KM >= 100 ? String(Math.round(KM)) : KM.toFixed(1);
+  const BDEG = Math.round(BEARING);
+  const WINDS = ['צפון', 'צפון־מזרח', 'מזרח', 'דרום־מזרח', 'דרום', 'דרום־מערב', 'מערב', 'צפון־מערב'];
+  const WIND = WINDS[Math.round(BEARING / 45) % 8];
+  const RINGS = [5, 20, 60, 200];
+  const kmR = (km, max) => max * Math.log10(1 + km) / Math.log10(201);
+  const pt = (cx, cy, r, a) => [cx + r * Math.sin(rad(a)), cy - r * Math.cos(rad(a))];
+  const f1 = n => n.toFixed(1);
+  const use = (id, cls = '') => `<svg class="${cls}" viewBox="0 0 ${id === 'kotel' ? '28 20' : '24 24'}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
+  const srcLine = () => `<div class="src">${use('pin')}<span data-src></span></div>`;
+  const notes = `
+    <div class="note cal">${use('warn')}<span>המצפן לא מדויק כרגע. הזיזו את הטלפון באוויר בתנועת 8 עד שההודעה תיעלם.</span></div>
+    <div class="note perm"><div class="row">${use('loc')}<span>בלי הרשאת מיקום הטלפון לא מדווח לאן הוא פונה. הכיוון מחושב מהעיר שבחרת: כוונו את ראש הטלפון לצפון.</span></div><button class="btn" type="button">לאפשר מיקום</button></div>`;
+  const turnWord = off => off > 0 ? 'ימינה' : 'שמאלה';
+  const turnTxt = s => s.perm ? 'כוונו לצפון' : `<span class="num">${Math.round(Math.abs(s.off))}°</span> ${turnWord(s.off)}`;
+  const tgt = (extra = '') => `<div class="pin0 tgt ${extra}" data-t><div class="glow"></div><div class="pulse"></div><div class="wave"></div><div class="wave w2"></div><div class="core"></div><div class="lbl"><span>${use('kotel')}הכותל</span></div></div>`;
+  const north = `<div class="pin0" data-n><span class="npill">צ</span></div>`;
+  const statusBar = `<div class="status"><span class="num">9:41</span><svg viewBox="0 0 64 12" aria-hidden="true"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0.5" width="3" height="11.5" rx="1"/><path d="M28 3.5a9 9 0 0 1 12 0l-1.6 1.7a6.6 6.6 0 0 0-8.8 0zM30.6 6.3a5.4 5.4 0 0 1 6.8 0L34 10z"/><rect x="45" y="1" width="16" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="47" y="3" width="11" height="6" rx="1.5"/><rect x="62" y="4" width="1.5" height="4" rx="0.7"/></g></svg></div>`;
+  const header = `<div class="hdr"><div class="back">${use('back')}</div><div class="hdr-t"><b>מצפן תפילה</b><span>לכיוון הכותל המערבי</span></div></div>`;
+  const C = 171.5;
+  const rings = ({ max, stroke, outer, labels, labelFill, halo }) => RINGS.map((k, i) => {
+    const r = kmR(k, max), last = i === RINGS.length - 1;
+    const lbl = labels ? `<text x="${C}" y="${f1(C + r - 7)}" text-anchor="middle" font-family="Heebo" font-size="10" font-weight="500" fill="${labelFill}" ${halo ? `stroke="${halo}" stroke-width="4" paint-order="stroke"` : ''}>${k} ק״מ</text>` : '';
+    return `<circle cx="${C}" cy="${C}" r="${f1(r)}" fill="none" stroke="${last && outer ? outer : stroke}" stroke-width="${last ? 1.5 : 1}"/>${lbl}`;
+  }).join('');
+  const wedge = (r, half, fill, op) => { const [x1, y1] = pt(C, C, r, -half), [x2, y2] = pt(C, C, r, half); return `<path d="M${C} ${C} L${f1(x1)} ${f1(y1)} A${r} ${r} 0 0 1 ${f1(x2)} ${f1(y2)} Z" fill="${fill}" opacity="${op}"/>`; };
+  const place = (el, r, a) => { const [x, y] = pt(0, 0, r, a); el.style.transform = `translate(${x}px, ${y}px)`; };
+
+  const D = [];
+
+  D.push({
+    letter: 'D1', title: 'רדאר נקי', desc: 'הגרסה שאהבת, מסודרת: הכרטיס בצבע הערכה ולא כחול קבוע, טבעות דקות עם תוויות קילומטרים, ומספר המרחק הוא הכותרת.',
+    html: () => `${notes}
+      <div class="stage r1-card live-only">
+        <svg viewBox="0 0 343 343" aria-hidden="true">
+          ${wedge(150, 6, 'var(--gold)', 0.1)}
+          ${rings({ max: 150, stroke: 'color-mix(in srgb, var(--text) 10%, transparent)', outer: 'color-mix(in srgb, var(--text) 18%, transparent)', labels: true, labelFill: 'var(--textSub)', halo: 'var(--surface)' })}
+          <line x1="${C}" y1="${C}" x2="${C}" y2="21.5" stroke="var(--text)" stroke-width="1.2" stroke-dasharray="2 5" stroke-linecap="round" opacity="0.35"/>
+          <circle cx="${C}" cy="${C}" r="13" fill="none" stroke="var(--text)" stroke-width="1" opacity="0.2"/><circle cx="${C}" cy="${C}" r="6" fill="var(--text)"/>
+        </svg>
+        ${north}${tgt()}
+      </div>
+      <div class="r1-row"><div><div class="big-km num">${KM_TXT}<small>ק״מ</small></div><div class="cap-line">עד הכותל המערבי</div></div><div class="side"><div class="turn" data-turn></div><div class="cap-line"><span class="num">${BDEG}°</span> מהצפון · ${WIND}</div></div></div>
+      <div class="foot">${srcLine()}</div>`,
+    update(el, s) {
+      place(el.q('[data-t]'), kmR(KM, 150), s.angle);
+      place(el.q('[data-n]'), 150, -s.heading);
+      el.q('[data-turn]').innerHTML = s.facing ? `<span class="ok">${use('check')}מול הכותל</span>` : turnTxt(s);
+    }
+  });
+
+  D.push({
+    letter: 'D2', title: 'סונאר', desc: 'קו סריקה מסתובב, והכותל נדלק כשהקו עובר עליו ודועך אחריו. מתחת, הוראה אחת גדולה לאן לפנות.',
+    html: () => `${notes}
+      <div class="stage r2-card live-only">
+        <svg viewBox="0 0 343 343" aria-hidden="true">
+          ${rings({ max: 150, stroke: 'var(--radar-line)', outer: 'color-mix(in srgb, var(--radar-ink) 35%, transparent)', labels: true, labelFill: 'var(--radar-ink)' })}
+          <line x1="${C}" y1="${C}" x2="${C}" y2="21.5" stroke="var(--radar-ink)" stroke-width="1.2" stroke-dasharray="3 5" opacity="0.6"/>
+        </svg>
+        <div class="sweep" data-sweep></div>
+        <svg viewBox="0 0 343 343" aria-hidden="true"><rect x="165.5" y="160.5" width="12" height="22" rx="3.5" fill="none" stroke="#FFF4E8" stroke-width="1.6"/><circle cx="${C}" cy="165" r="1.3" fill="#FFF4E8"/></svg>
+        ${north}${tgt()}
+      </div>
+      <div class="r2-say" data-say></div>
+      <div class="r2-facts"><span><b class="num">${KM_TXT}</b> ק״מ</span><span><b class="num">${BDEG}°</b> מהצפון · ${WIND}</span></div>
+      <div class="foot">${srcLine()}</div>`,
+    update(el, s) {
+      const t = el.q('[data-t]');
+      place(t, kmR(KM, 150), s.angle);
+      place(el.q('[data-n]'), 150, -s.heading);
+      el.q('[data-sweep]').style.transform = `rotate(${s.sweep}deg)`;
+      const since = norm(s.sweep - s.angle), lit = s.facing || s.still ? 1 : 0.18 + 0.82 * Math.exp(-since / 110);
+      t.querySelector('.glow').style.opacity = lit;
+      t.querySelector('.core').style.opacity = 0.35 + 0.65 * lit;
+      el.q('[data-say]').innerHTML = s.facing ? `<span class="ok">${use('check')}אתם מול הכותל</span>` : s.perm ? 'כוונו את הטלפון לצפון' : `סובבו ${turnTxt(s)}`;
+    }
+  });
+
+  D.push({
+    letter: 'D3', title: 'רדאר על הדף', desc: 'בלי כרטיס כהה: טבעות זהב דקות ישר על הדף, הכותל נקודה חמה וזוהרת, ומספר מרחק ענק מתחת.',
+    html: () => {
+      let ticks = '';
+      for (let a = 0; a < 360; a += 10) { const [x1, y1] = pt(C, C, 160, a), [x2, y2] = pt(C, C, a % 90 === 0 ? 151 : 155, a); ticks += `<line x1="${f1(x1)}" y1="${f1(y1)}" x2="${f1(x2)}" y2="${f1(y2)}" stroke="var(--goldText)" stroke-width="${a % 90 === 0 ? 1.6 : 1}" opacity="${a % 90 === 0 ? 0.8 : 0.4}"/>`; }
+      return `${notes}
+      <div class="stage r3 live-only">
+        <svg viewBox="0 0 343 343" aria-hidden="true">
+          ${rings({ max: 140, stroke: 'color-mix(in srgb, var(--goldText) 30%, transparent)', outer: 'color-mix(in srgb, var(--goldText) 45%, transparent)', labels: false })}
+          <line x1="${C}" y1="${C}" x2="${C}" y2="11.5" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+          <circle cx="${C}" cy="${C}" r="5" fill="var(--text)"/>
+        </svg>
+        <div class="layer" data-ticks><svg viewBox="0 0 343 343" aria-hidden="true" style="position:absolute;inset:0;overflow:visible">${ticks}<text x="${C}" y="-1" text-anchor="middle" font-family="Heebo" font-size="13" font-weight="800" fill="var(--goldText)">צ</text></svg></div>
+        ${tgt()}
+      </div>
+      <div class="r3-num"><div class="n num">${KM_TXT}</div><div class="u">ק״מ עד הכותל המערבי</div></div>
+      <div class="r3-line"><span class="num">${BDEG}°</span> מהצפון · ${WIND} · <b data-turn></b></div>
+      <div class="foot">${srcLine()}</div>`;
+    },
+    update(el, s) {
+      place(el.q('[data-t]'), kmR(KM, 140), s.angle);
+      el.q('[data-ticks]').style.transform = `rotate(${-s.heading}deg)`;
+      el.q('[data-turn]').innerHTML = s.facing ? 'אתם מולו' : s.perm ? 'כוונו לצפון' : `סובבו ${turnTxt(s)}`;
+    }
+  });
+
+  D.push({
+    letter: 'D4', title: 'הכותל למעלה', desc: 'הכותל קבוע בראש המסך והמפה מסודרת סביבו. הטלפון במרכז מסתובב איתך, וקשת מחברת את הכיוון שלך לכותל ומתקצרת עד שהיא נעלמת.',
+    html: () => {
+      const cards = [[0, 'צ'], [90, 'מז'], [180, 'ד'], [270, 'מע']].map(([a, l]) => { const [x, y] = pt(C, C, 132, a - BEARING); return `<text x="${f1(x)}" y="${f1(y)}" text-anchor="middle" dominant-baseline="central" font-family="Heebo" font-size="12" font-weight="800" fill="${a === 0 ? 'var(--goldText)' : 'var(--textSub)'}">${l}</text>`; }).join('');
+      return `${notes}
+      <div class="stage r4-card live-only">
+        <svg viewBox="0 0 343 343" aria-hidden="true">
+          ${rings({ max: 150, stroke: 'color-mix(in srgb, var(--text) 9%, transparent)', outer: 'color-mix(in srgb, var(--text) 16%, transparent)', labels: true, labelFill: 'var(--textSub)', halo: 'var(--surface2)' })}
+          ${cards}
+          <path class="r4-arc" data-arc fill="none" stroke-width="6" stroke-linecap="round"/>
+          <g data-me><line x1="${C}" y1="${C}" x2="${C}" y2="21.5" stroke="var(--text)" stroke-width="1.2" stroke-dasharray="2 5" opacity="0.45"/><path d="M${C - 7} 10 L${C + 7} 10 L${C} 22 Z" fill="var(--text)"/><rect x="${C - 8}" y="${C - 13}" width="16" height="26" rx="4" fill="var(--surface)" stroke="var(--text)" stroke-width="1.8"/><circle cx="${C}" cy="${C - 7}" r="1.6" fill="var(--text)"/></g>
+        </svg>
+        <div class="pin0" style="transform:translate(0px, -${f1(kmR(KM, 150))}px)"><div class="r4-badge">${use('kotel')}<i class="wave"></i><i class="wave w2"></i></div></div>
+      </div>
+      <div class="r4-row"><div class="r4-left" data-left></div><div style="text-align:end"><div class="big-km num" style="font-size:36px">${KM_TXT}<small>ק״מ</small></div><div class="cap-line"><span class="num">${BDEG}°</span> מהצפון · ${WIND}</div></div></div>
+      <div class="foot">${srcLine()}</div>`;
+    },
+    update(el, s) {
+      const me = -s.off;
+      el.q('[data-me]').style.transform = `rotate(${me}deg)`;
+      el.q('[data-me]').style.transformOrigin = `${C}px ${C}px`;
+      const R = 160, arc = el.q('[data-arc]');
+      if (Math.abs(me) < 1) arc.setAttribute('d', '');
+      else { const [x1, y1] = pt(C, C, R, me), [x2, y2] = pt(C, C, R, 0); arc.setAttribute('d', `M${f1(x1)} ${f1(y1)} A${R} ${R} 0 ${Math.abs(me) > 180 ? 1 : 0} ${me < 0 ? 1 : 0} ${f1(x2)} ${f1(y2)}`); }
+      arc.style.opacity = s.facing ? 0 : 0.85;
+      el.q('[data-left]').innerHTML = s.facing ? `<span class="ok">${use('check')}מול הכותל</span><small>הקשת נסגרה</small>` : s.perm ? `כוונו לצפון<small>הכותל ב־${BDEG}° ממנו</small>` : `${turnTxt(s)}<small>עד שהקשת נסגרת</small>`;
+    }
+  });
+
+  D.push({
+    letter: 'D5', title: 'חצי רדאר', desc: 'רק החצי שלפניך, כמו מבט קדימה. הכותל זז בקשת, והמקום שהתפנה מתחת מקבל הוראה גדולה עם חצים ואת המרחק.',
+    html: () => {
+      const cx = 171.5, cy = 192, max = 176;
+      const arcs = RINGS.map((k, i) => { const r = kmR(k, max), [x1, y1] = pt(cx, cy, r, -90), [x2, y2] = pt(cx, cy, r, 90); return `<path d="M${f1(x1)} ${f1(y1)} A${f1(r)} ${f1(r)} 0 0 1 ${f1(x2)} ${f1(y2)}" fill="none" stroke="color-mix(in srgb, var(--text) ${i === 3 ? 18 : 10}%, transparent)" stroke-width="${i === 3 ? 1.5 : 1}"/><text x="${f1(cx + r - 4)}" y="${cy - 4}" text-anchor="end" font-family="Heebo" font-size="10" fill="var(--textSub)">${k}</text>`; }).join('');
+      return `${notes}
+      <div class="r5-card live-only">
+        <svg viewBox="0 0 343 206" aria-hidden="true">${arcs}<line x1="${cx}" y1="${cy}" x2="${cx}" y2="14" stroke="var(--text)" stroke-width="1.2" stroke-dasharray="2 5" opacity="0.4"/><circle cx="${cx}" cy="${cy}" r="6" fill="var(--text)"/><text x="20" y="${cy - 4}" font-family="Heebo" font-size="10" fill="var(--textSub)">ק״מ</text></svg>
+        <div class="pin0" data-n><span class="npill">צ</span></div>
+        ${tgt()}
+      </div>
+      <div class="r5-cue" data-cue><div class="ch" data-ch>${use('chev')}${use('chev')}${use('chev')}</div><div class="deg num" data-deg></div></div>
+      <div class="r5-word" data-word></div>
+      <div class="r5-ok">${use('check')}מול הכותל</div>
+      <div class="r5-tiles"><div><b class="num">${KM_TXT} ק״מ</b><span>עד הכותל</span></div><div><b class="num">${BDEG}°</b><span>מהצפון · ${WIND}</span></div></div>
+      <div class="foot">${srcLine()}</div>`;
+    },
+    update(el, s) {
+      const max = 176, t = el.q('[data-t]'), edge = Math.abs(s.off) > 84;
+      place(t, kmR(KM, max), Math.max(-84, Math.min(84, s.off)));
+      t.classList.toggle('edge', edge);
+      const nrel = norm(-s.heading + 180) - 180, n = el.q('[data-n]');
+      place(n, max - 4, nrel);
+      n.style.opacity = Math.abs(nrel) > 86 ? 0 : 1;
+      el.q('[data-ch]').classList.toggle('left', s.off < 0);
+      el.q('[data-deg]').textContent = s.perm ? `${BDEG}°` : `${Math.round(Math.abs(s.off))}°`;
+      el.q('[data-word]').textContent = s.perm ? 'מהצפון, בכיוון השעון' : `סובבו ${turnWord(s.off)}`;
+    }
+  });
+
+  const board = document.getElementById('board');
+  const els = D.map(d => {
+    const col = document.createElement('section');
+    col.className = 'col';
+    col.innerHTML = `<div class="phone"><div class="screen">${statusBar}${header}<div class="body">${d.html()}</div></div></div>
+      <div class="cap"><div class="letter" style="font-size:13px">${d.letter}</div><h2>${d.title}</h2><p>${d.desc}</p></div>
+      <div class="buzz-tag"><i></i>רטט קל בכניסה לכיוון</div>`;
+    board.appendChild(col);
+    return { col, q: sel => col.querySelector(sel), d };
+  });
+
+  const SEG = [[95, 0, 600], [40, 2200, 400], [-32, 2400, 300], [3, 2100, 2600], [-115, 3000, 300], [62, 2900, 300], [-2, 2300, 2600], [95, 2600, 0]];
+  const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const TOTAL = SEG.slice(1).reduce((a, s) => a + s[1] + s[2], SEG[0][2]);
+  function offsetAt(ms) {
+    let t = ms % TOTAL;
+    if (t < SEG[0][2]) return SEG[0][0];
+    t -= SEG[0][2];
+    for (let i = 1; i < SEG.length; i++) {
+      const [to, dur, hold] = SEG[i], from = SEG[i - 1][0];
+      if (t < dur) return from + (to - from) * ease(t / dur);
+      t -= dur;
+      if (t < hold) return to;
+      t -= hold;
+    }
+    return SEG[0][0];
+  }
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let mode = 'sweep', paused = reduce, clock = 0, last = performance.now(), facing = false;
+  if (reduce) { const p = document.getElementById('pause'); p.setAttribute('aria-pressed', 'true'); p.textContent = 'הפעל'; }
+
+  function frame(now) {
+    const dt = Math.min(100, now - last); last = now;
+    if (!paused) clock += dt;
+    const still = reduce || paused;
+    let off;
+    if (mode === 'facing') off = 1.4 + (still ? 0 : Math.sin(clock / 700) * 0.9);
+    else if (mode === 'perm') off = BEARING;
+    else off = (still && clock === 0 ? 34 : offsetAt(clock)) + (still ? 0 : Math.sin(clock / 410) * 0.6 + Math.sin(clock / 170) * 0.25);
+    const perm = mode === 'perm';
+    const heading = perm ? 0 : norm(BEARING - off);
+    const angle = norm(BEARING - heading);
+    const signed = angle > 180 ? angle - 360 : angle;
+    const was = facing;
+    facing = !perm && Math.abs(signed) <= (facing ? 10 : 5);
+    const s = { heading, angle, off: signed, facing, perm, still, sweep: still ? angle + 20 : (clock / 3200 * 360) % 360 };
+    for (const el of els) { el.col.classList.toggle('facing', facing); el.d.update(el, s); }
+    if (facing && !was) {
+      for (const el of els) { el.col.classList.remove('buzzing'); void el.col.offsetWidth; el.col.classList.add('buzzing'); }
+      setTimeout(() => els.forEach(el => el.col.classList.remove('buzzing')), 950);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  const paintSrc = () => document.querySelectorAll('[data-src]').forEach(n => n.textContent = mode === 'perm' ? 'לפי העיר שבחרת: תל אביב' : 'לפי המיקום הנוכחי שלך');
+  paintSrc();
+  const seg = (id, fn) => document.getElementById(id).addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll(`#${id} button`).forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    fn(b.dataset.v);
+  });
+  seg('theme', v => document.documentElement.dataset.theme = v);
+  seg('mode', v => { mode = v; document.body.dataset.mode = v; paintSrc(); });
+  document.getElementById('pause').addEventListener('click', e => {
+    paused = !paused;
+    e.currentTarget.setAttribute('aria-pressed', String(paused));
+    e.currentTarget.textContent = paused ? 'הפעל' : 'השהה';
+  });
+  const params = new URLSearchParams(location.search);
+  if (params.get('theme')) document.querySelector(`#theme button[data-v="${params.get('theme')}"]`)?.click();
+  if (params.get('mode')) document.querySelector(`#mode button[data-v="${params.get('mode')}"]`)?.click();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

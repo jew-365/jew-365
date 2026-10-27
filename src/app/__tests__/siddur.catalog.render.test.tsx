@@ -122,6 +122,13 @@ describe('the siddur tab’s catalog', () => {
       expect(screen.queryByTestId('siddur-row-tikkun_haklali')).toBeNull();
     });
 
+    it('says under each closed group what it holds', () => {
+      openClosed(WEDNESDAY);
+      expect(screen.getByText(/^תפילת שחרית · תפילת מנחה · תפילת ערבית$/)).toBeOnTheScreen();
+      expect(screen.getByText('ברכת המזון · ברכה מעין שלוש · בורא נפשות')).toBeOnTheScreen();
+      expect(screen.getByText(/^תיקון הכללי · תהילים · נשמת כל חי ועוד \d+$/)).toBeOnTheScreen();
+    });
+
     it('opens and closes a group on a tap of its header', () => {
       openClosed(WEDNESDAY);
       fireEvent.press(screen.getByText('תפילות'));

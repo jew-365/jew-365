@@ -197,6 +197,7 @@ const SCROLLS_BY_PROP = Platform.OS === 'ios';
 const FOLD_DOWN_PX = 12;
 const FOLD_UP_PX = 4;
 const FOLD_MS = 180;
+const COMPACT_FADE_PX = 24;
 const JUMP_FREEZE_MS = 600;
 const UNFOLD_HOLD_MS = 4000;
 const JUMP_NEIGHBOURS = 2;
@@ -227,12 +228,14 @@ function resolveForReader(
 }
 
 // Folds everything above the text into a compact bar. The bar and the full block overlay the list, which
-// keeps a top padding of the full block, so folding moves no text.
+// keeps a top padding of the full block. Near the top the full block scrolls away with the text (attached);
+// past it the bar shows, and a move up brings the full block back over the text (pinned) until the top.
 type ReaderFold = ReturnType<typeof useReaderFold>;
 
 function useReaderFold() {
   const progress = useSharedValue(0);
   const folded = useSharedValue(false);
+  const pinned = useSharedValue(false);
   const fullHeight = useSharedValue(0);
   const compactHeight = useSharedValue(0);
   const lastY = useSharedValue(0);
@@ -260,24 +263,48 @@ function useReaderFold() {
       'worklet';
       if (folded.value === next) return;
       folded.value = next;
+      pinned.value = !next;
       travel.value = 0;
       if (!next) holdUntil.value = Date.now() + UNFOLD_HOLD_MS;
       progress.value = withTiming(next ? 1 : 0, { duration: FOLD_MS });
       runOnJS(mirror)(next);
     },
-    [folded, travel, holdUntil, progress, mirror],
+    [folded, pinned, travel, holdUntil, progress, mirror],
+  );
+  // Switches between attached and folded where the two look the same, so it needs no animation.
+  const settle = useCallback(
+    (next: boolean) => {
+      'worklet';
+      folded.value = next;
+      travel.value = 0;
+      progress.value = next ? 1 : 0;
+      runOnJS(mirror)(next);
+    },
+    [folded, travel, progress, mirror],
   );
   const track = useCallback(
     (y: number, autoDriven: boolean, userDriven: boolean, end: number) => {
       'worklet';
       const delta = y - lastY.value;
       lastY.value = y;
-      if (Date.now() < frozenUntil.value) {
+      if (fullHeight.value <= 0) {
+        if (folded.value) setTarget(false);
         travel.value = 0;
         return;
       }
-      if (fullHeight.value <= 0 || y < fullHeight.value) {
-        if (folded.value) setTarget(false);
+      if (y <= 0) pinned.value = false;
+      if (!pinned.value) {
+        if (y < fullHeight.value) {
+          if (folded.value) settle(false);
+          travel.value = 0;
+          return;
+        }
+        if (!folded.value) {
+          settle(true);
+          return;
+        }
+      }
+      if (Date.now() < frozenUntil.value || y < fullHeight.value) {
         travel.value = 0;
         return;
       }
@@ -290,19 +317,22 @@ function useReaderFold() {
       if (!folded.value && travel.value >= FOLD_DOWN_PX) setTarget(true);
       else if (folded.value && travel.value <= -FOLD_UP_PX && userDriven && y < end - 1) setTarget(false);
     },
-    [lastY, frozenUntil, fullHeight, folded, travel, holdUntil, setTarget],
+    [lastY, frozenUntil, fullHeight, folded, pinned, travel, holdUntil, setTarget, settle],
   );
   const open = useCallback(() => {
     folded.value = false;
+    pinned.value = false;
     progress.value = 0;
     lastY.value = 0;
     travel.value = 0;
     mirror(false);
-  }, [folded, progress, lastY, travel, mirror]);
+  }, [folded, pinned, progress, lastY, travel, mirror]);
   const unfold = useCallback(() => setTarget(false), [setTarget]);
+  // A jump keeps what covers the list: an open full block stays over the text where the jump lands.
   const freeze = useCallback(() => {
     frozenUntil.value = Date.now() + JUMP_FREEZE_MS;
-  }, [frozenUntil]);
+    if (!folded.value) pinned.value = true;
+  }, [frozenUntil, folded, pinned]);
   const setFull = useCallback(
     (height: number) => {
       const previous = sizes.current.full;
@@ -320,17 +350,33 @@ function useReaderFold() {
     },
     [compactHeight],
   );
-  const overlayStyle = useAnimatedStyle(() =>
-    fullHeight.value > 0 && compactHeight.value > 0
-      ? { height: interpolate(progress.value, [0, 1], [fullHeight.value, compactHeight.value]) }
-      : {},
+  const overlayStyle = useAnimatedStyle(() => {
+    if (fullHeight.value <= 0 || compactHeight.value <= 0) return {};
+    if (!folded.value && !pinned.value) {
+      return { height: Math.max(fullHeight.value - Math.max(lastY.value, 0), compactHeight.value) };
+    }
+    return { height: interpolate(progress.value, [0, 1], [fullHeight.value, compactHeight.value]) };
+  });
+  const fullStyle = useAnimatedStyle(() =>
+    !folded.value && !pinned.value
+      ? { opacity: 1, transform: [{ translateY: 0 - Math.min(Math.max(lastY.value, 0), fullHeight.value) }] }
+      : {
+          opacity: interpolate(progress.value, [0, 0.6], [1, 0], Extrapolation.CLAMP),
+          transform: [{ translateY: 0 }],
+        },
   );
-  const fullStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0, 0.6], [1, 0], Extrapolation.CLAMP),
-  }));
-  const compactStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0.4, 1], [0, 1], Extrapolation.CLAMP),
-  }));
+  const compactStyle = useAnimatedStyle(() =>
+    !folded.value && !pinned.value
+      ? {
+          opacity: interpolate(
+            fullHeight.value - Math.max(lastY.value, 0),
+            [compactHeight.value, compactHeight.value + COMPACT_FADE_PX],
+            [1, 0],
+            Extrapolation.CLAMP,
+          ),
+        }
+      : { opacity: interpolate(progress.value, [0.4, 1], [0, 1], Extrapolation.CLAMP) },
+  );
   return {
     track,
     open,
@@ -340,7 +386,12 @@ function useReaderFold() {
     getFolded,
     space,
     fullHeight: () => sizes.current.full,
-    inset: () => (foldedRef.current ? sizes.current.compact : sizes.current.full),
+    inset: () => {
+      const { full, compact } = sizes.current;
+      if (foldedRef.current) return compact;
+      if (pinned.value) return full;
+      return Math.max(full - Math.max(lastY.value, 0), compact);
+    },
     setFull,
     onCompactLayout,
     overlayStyle,
@@ -380,7 +431,7 @@ function ReaderOverlay({
       <Animated.View
         testID="siddur-header-compact"
         onLayout={fold.onCompactLayout}
-        style={[styles.compactBar, fold.compactStyle]}
+        style={[styles.compactBar, { backgroundColor: colors.bg }, fold.compactStyle]}
         pointerEvents={isFolded ? 'auto' : 'none'}
         accessibilityElementsHidden={!isFolded}
         importantForAccessibility={isFolded ? 'auto' : 'no-hide-descendants'}

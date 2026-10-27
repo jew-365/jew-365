@@ -985,6 +985,7 @@ export default function HistoryScreen() {
   const [dayKey, setDayKey] = useState(() => appDayKey(new Date(), location));
   const [playKey, setPlayKey] = useState(0);
   const [tab, setTab] = useState<Tab>('summary');
+  const [tabsPinned, setTabsPinned] = useState(false);
   const [enterFrom, setEnterFrom] = useState(0);
   const [monthStart, setMonthStart] = useState<string | null>(null);
   const [travel, setTravel] = useState(0);
@@ -1115,6 +1116,8 @@ export default function HistoryScreen() {
 
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     scrollY.current = event.nativeEvent.contentOffset.y;
+    const pinned = scrollY.current >= HERO_HEIGHT;
+    if (pinned !== tabsPinned) setTabsPinned(pinned);
     scrollListeners.current.forEach((listener) => listener());
   };
 
@@ -1780,47 +1783,61 @@ export default function HistoryScreen() {
   return (
     <ScrollBusContext.Provider value={scrollBus}>
       <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
-        <ScrollView
-          ref={scrollRef}
-          contentContainerStyle={styles.content}
-          stickyHeaderIndices={[1]}
-          onScroll={onScroll}
-          scrollEventThrottle={16}
-        >
-          <View style={styles.hero}>
-            <View style={StyleSheet.absoluteFill} pointerEvents="none">
-              <Landscape height={HERO_HEIGHT} />
-            </View>
-            <View style={styles.heroTop}>
-              <NavBar title={greeting} subtitle={dateLine} />
-            </View>
-            <StreakRing key={`ring-${playKey}-${model !== null}`} streak={stats.streak} size={RING_SIZE} animate />
-            {model ? (
-              <Text style={[typography.subheading, styles.center, { color: colors.text }]}>{goalCaption}</Text>
-            ) : null}
-            <Text style={[typography.small, styles.center, styles.explain, { color: colors.textSub }]}>
-              {t('history.streakExplain')}
-            </Text>
-          </View>
-
-          <View
-            accessibilityRole="radiogroup"
-            accessibilityLabel={t('history.tabs')}
-            style={[styles.tabs, { backgroundColor: colors.bg }]}
+        <View style={styles.flex}>
+          <ScrollView
+            ref={scrollRef}
+            testID="history-scroll"
+            contentContainerStyle={styles.content}
+            onScroll={onScroll}
+            scrollEventThrottle={16}
           >
-            <SegmentedControl animated options={tabOptions} value={tab} onChange={changeTab} />
-          </View>
+            <View style={styles.hero}>
+              <View style={StyleSheet.absoluteFill} pointerEvents="none">
+                <Landscape height={HERO_HEIGHT} />
+              </View>
+              <View style={styles.heroTop}>
+                <NavBar title={greeting} subtitle={dateLine} />
+              </View>
+              <StreakRing key={`ring-${playKey}-${model !== null}`} streak={stats.streak} size={RING_SIZE} animate />
+              {model ? (
+                <Text style={[typography.subheading, styles.center, { color: colors.text }]}>{goalCaption}</Text>
+              ) : null}
+              <Text style={[typography.small, styles.center, styles.explain, { color: colors.textSub }]}>
+                {t('history.streakExplain')}
+              </Text>
+            </View>
 
-          <View style={styles.body}>
-            {model && month ? (
-              <SlideIn key={`${tab}-${playKey}`} enterFrom={enterFrom}>
-                {tab === 'summary' ? renderSummary(model, month) : null}
-                {tab === 'trends' ? renderTrends(model) : null}
-                {tab === 'achievements' ? renderAchievements(model) : null}
-              </SlideIn>
-            ) : null}
-          </View>
-        </ScrollView>
+            <View
+              accessibilityRole="radiogroup"
+              accessibilityLabel={t('history.tabs')}
+              accessibilityElementsHidden={tabsPinned}
+              importantForAccessibility={tabsPinned ? 'no-hide-descendants' : 'auto'}
+              style={[styles.tabs, { backgroundColor: colors.bg }]}
+            >
+              <SegmentedControl animated options={tabOptions} value={tab} onChange={changeTab} />
+            </View>
+
+            <View style={[styles.body, { minHeight: Dimensions.get('window').height }]}>
+              {model && month ? (
+                <SlideIn key={`${tab}-${playKey}`} enterFrom={enterFrom}>
+                  {tab === 'summary' ? renderSummary(model, month) : null}
+                  {tab === 'trends' ? renderTrends(model) : null}
+                  {tab === 'achievements' ? renderAchievements(model) : null}
+                </SlideIn>
+              ) : null}
+            </View>
+          </ScrollView>
+          {tabsPinned ? (
+            <View
+              testID="history-tabs-pinned"
+              accessibilityRole="radiogroup"
+              accessibilityLabel={t('history.tabs')}
+              style={[styles.tabs, styles.tabsPinned, { backgroundColor: colors.bg }]}
+            >
+              <SegmentedControl animated options={tabOptions} value={tab} onChange={changeTab} />
+            </View>
+          ) : null}
+        </View>
         <BadgeSheet badge={badge} onClose={() => setBadge(null)} />
         <DaySheet
           day={openDay}
@@ -1848,6 +1865,7 @@ const styles = StyleSheet.create({
   heroTop: { alignSelf: 'stretch' },
   explain: { marginTop: spacing.xs, paddingHorizontal: spacing.xxl },
   tabs: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.sm },
+  tabsPinned: { position: 'absolute', top: 0, start: 0, end: 0, zIndex: 1 },
   body: { paddingHorizontal: spacing.lg },
   periodRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.sm, marginTop: spacing.md },
   period: { flex: 1, alignItems: 'center', gap: spacing.xs },

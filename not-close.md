@@ -386,6 +386,25 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Done:** 2026-10-26. Verified: [siddur.catalog.render.test.tsx](src/app/__tests__/siddur.catalog.render.test.tsx) (only "now" open on arrival, closed groups build no rows, a tap opens and closes, two groups open together, the groups kept when the reader is closed and reset when the user comes from another tab, without a remount). The reset follows a tab change rather than every focus, so the way back from a text keeps its group open (Claude's reading of Q6, cheap to flip); `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green on 2026-10-26, after an independent adversarial review whose findings were fixed.
   - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: yes, `d952b59` feat: app requests of 2026-10-26 and the new Tracking tab · Pushed: yes · Live: preview `1.0.21-7` (group `96417556-53dc-4220-ad9a-de5ce660623f`, 2026-10-27); production not yet · Channel: preview
 
+- [ ] Name what each siddur tab group holds under its title
+  - **Flag:** `OTA`.
+  - **Source:** the owner, 2026-10-27, on a screenshot of the closed groups: "אני רוצה פה בסידור שיהיה תת כותרת".
+  - **What it is:** every group header of the siddur tab ([src/app/(tabs)/siddur.tsx](<src/app/(tabs)/siddur.tsx>)) carries a `subtitle` with the names of its rows in order, the first three joined with ` · ` and then `siddur.groupMore` with the count of the rest; the now group names what is open now. The names come from the rows themselves, so they follow the nusach and the siddur voice.
+  - **What it solves:** a closed group says what it holds, so the user finds a text without opening every group.
+  - **Expected result:** a render test reads the prayers, meals and general subtitles.
+  - **Done:** 2026-10-27. Verified: "says under each closed group what it holds" in [siddur.catalog.render.test.tsx](src/app/__tests__/siddur.catalog.render.test.tsx); `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green on 2026-10-27. Not checked: on a phone.
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+
+- [ ] Redesign the prayer compass
+  - **Flag:** `OTA`.
+  - **Source:** the owner, 2026-10-27, on a phone screenshot of [src/app/compass.tsx](src/app/compass.tsx): "המצפן לא נראה טוב בכלל, תן לי כמה דוגמאות אחרות ואבחר מהם".
+  - **What it is:** five animated directions on [design/compass-sketches/index.html](design/compass-sketches/index.html) (A one arrow, B the Kotel on an arc, C a classic compass, D a radar, E the colour leads), light and dark; the owner picks one and the screen is rebuilt on it with the same data, permission flow and haptic.
+  - **What it solves:** the current dial reads as a generic clock with a cursor-like arrow and no sense of the Kotel.
+  - **Expected result:** the owner's pick; then the rebuilt screen with [compass.render.test.tsx](src/app/__tests__/compass.render.test.tsx) green and an emulator check with the virtual sensors.
+  - **Decided:** 2026-10-27, the owner: direction D, then D2 (סונאר) of the variants on [design/compass-sketches/radar.html](design/compass-sketches/radar.html): "אוקיי בוא נלך על D2 גש לביצוע".
+  - **Done:** 2026-10-27. [src/app/compass.tsx](src/app/compass.tsx) rebuilt on D2: a sonar card with km rings on a log scale, a sweep turning on the UI thread, the Kotel blip lit by the sweep, a north pill, a turn line with degrees and side, the distance and the bearing with its wind. Verified: [compass.render.test.tsx](src/app/__tests__/compass.render.test.tsx) (the turn line both ways, the target and north layers, the ring scale, permission, haptic and facing cases) and the smoke suite; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` (4965 tests in each zone) green on 2026-10-27. Not checked: on the emulator or a phone (the web build shows no compass).
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+
 - [ ] Find tzaddikim in the settings search
   - **Flag:** `OTA`.
   - **What it is:**
@@ -472,6 +491,24 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it is:** Expo writes `locales.he` to `values-b+he`, which Android never reads for Hebrew (it resolves `iw`); [scripts/withAndroidLegacyHebrewLocale.js](scripts/withAndroidLegacyHebrewLocale.js) writes the same strings to `values-b+iw`, Android only.
   - **What it solves:** a Hebrew Android phone shows "Jew 365" instead of `יהודי 365` on the launcher, in Settings and in system dialogs.
   - **Expected result:** a phone set to Hebrew shows `יהודי 365 P` for the preview build, and the store production build shows `יהודי 365`.
+
+- [ ] The reader's controls folded late, and a fold could leave an empty band at the top
+  - **Flag:** `OTA`.
+  - **Found:** the owner on the preview app `1.0.21-7`, 2026-10-27, with a screenshot of Shacharit: the controls disappeared only after about half a second of scrolling, and after a small scroll down and back up the compact bar stayed over a large empty band above the text.
+  - **What it is:** the fold waited until the text had scrolled the whole height of the controls block, and the top rule ran after the jump freeze's early return, so a scroll back to the top during a freeze (a header height change) left the reader folded over the list's top padding. Now the controls block scrolls away with the text from the first point and folds at once at its height, a fold inside that height turns back into the attached block on every scroll event, a freeze included, and a block brought back mid-text stays pinned until the top ([src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>), contract in [src/app/siddur/AGENTS.md](src/app/siddur/AGENTS.md)).
+  - **What it solves:** the controls leave as soon as the user reads on, and no empty band ever shows.
+  - **Expected result:** the fold cases of [siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx), and on a phone no delay and no band.
+  - **Done:** 2026-10-27. Verified: the fold cases of [siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx), among them the block scrolling with the text from 40 points, the fold at the block's height, no fold at the top during a freeze, and a pinned block attached again at the top (animated styles read through reanimated's `getAnimatedStyle`); `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green on 2026-10-27. Not checked: on a phone or the emulator.
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+
+- [ ] The Tracking tab's switcher could not be pressed after a scroll
+  - **Flag:** `OTA`.
+  - **Found:** the owner on the preview app `1.0.21-7` (Android), 2026-10-27, with a screenshot of הישגים: after scrolling down, a tap on another tab did nothing.
+  - **What it is:** the switcher was the ScrollView's sticky header (`stickyHeaderIndices`), whose tap area under Fabric on Android follows a debounced copy of its native-driven translation and can be left behind after a scroll. [src/app/(tabs)/history.tsx](<src/app/(tabs)/history.tsx>) now draws its own pinned copy over the scroll view once the offset passes the hero, and the body is at least the window's height so a short tab never clamps the scroll.
+  - **What it solves:** the tabs switch from any scroll position.
+  - **Expected result:** a render test scrolls past the hero, presses a tab in the pinned switcher and scrolls back; on the phone the tabs switch after a scroll.
+  - **Done:** 2026-10-27. Verified: "pins a switcher of its own past the hero…" in [history.render.test.tsx](src/app/__tests__/history.render.test.tsx); `pnpm typecheck`, `pnpm lint` and `pnpm check:dox` green, and `pnpm test:tz` (4965 tests in each zone) on 2026-10-27. Not checked: on a phone or the emulator.
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
 
 ## Open Questions
 

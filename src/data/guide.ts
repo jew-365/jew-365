@@ -76,8 +76,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'Five tabs sit at the bottom: More, Siddur, Home, Tracking and Settings. More holds the schedule, Chok LeYisrael, Tehillim, the hilulot, the prayer compass, the halacha hotline and this guide, which also opens from Settings → About and contact or by searching “guide” in Settings.',
       },
       {
-        he: 'מצפן התפילה בלשונית עוד מראה את הצפון ואת הכיוון לכותל מהמקום שבו אתם עומדים, עם המרחק בקילומטרים, ורטט קצר כשהטלפון פונה לכותל. הוא צריך הרשאת מיקום, ובלעדיה הוא מבקש אותה. כשהמצפן מבקש כיול, מזיזים את הטלפון בצורת שמונה.',
-        en: 'The prayer compass in the More tab shows north and the direction of the Kotel from where you stand, with the distance in kilometres, and a short vibration when the phone faces the Kotel. It needs the location permission and asks for it when missing. When it asks for calibration, move the phone in a figure eight.',
+        he: 'מצפן התפילה בלשונית עוד הוא רדאר: קו סריקה מסתובב, והכותל נדלק כנקודה במרחק שלו ובכיוון שלו ביחס לטלפון. מתחתיו כתוב כמה מעלות לסובב ולאיזה צד, המרחק בקילומטרים והכיוון מהצפון, וכשהטלפון פונה לכותל הוא נצבע ירוק ומגיע רטט קצר. הוא צריך הרשאת מיקום, ובלעדיה הוא מבקש אותה. כשהמצפן מבקש כיול, מזיזים את הטלפון בצורת שמונה.',
+        en: 'The prayer compass in the More tab is a radar: a sweep line turns and the Kotel lights up as a point at its distance and direction from the phone. Under it the screen says how many degrees to turn and which way, the distance in kilometres and the bearing from north, and when the phone faces the Kotel it turns green with a short vibration. It needs the location permission and asks for it when missing. When it asks for calibration, move the phone in a figure eight.',
       },
     ],
     routes: ['/(tabs)/more', '/guide', '/compass'],

@@ -31,7 +31,7 @@ jest.mock('expo-haptics', () => ({
 import { Linking, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { act, fireEvent, screen } from '@testing-library/react-native';
-import CompassScreen from '../compass';
+import CompassScreen, { radarRadius, signedOffset } from '../compass';
 import { CITIES } from '@/data/cities';
 import { useUserStore } from '@/stores/useUserStore';
 import { renderWithTheme } from '@/testing/render';
@@ -88,8 +88,30 @@ describe('Compass screen', () => {
     expect(screen.queryByTestId('compass-dial')).toBeNull();
     expect(screen.getByText(`לפי ${NEW_YORK.name}`)).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: PERMISSION })).toBeOnTheScreen();
-    expect(screen.getByText(`כיוון: ${Math.round(bearingTo(NEW_YORK))}°`)).toBeOnTheScreen();
-    expect(screen.getByText(/^מרחק: 9\d{3} ק״מ$/)).toBeOnTheScreen();
+    expect(screen.getByText(`${Math.round(bearingTo(NEW_YORK))}°`)).toBeOnTheScreen();
+    expect(screen.getByText(/^9\d{3}$/)).toBeOnTheScreen();
+    expect(screen.queryByText(/^סובב /)).toBeNull();
+  });
+
+  it('says which way to turn and how far, and turns the target and north on the radar', async () => {
+    await renderScreen();
+    const bearing = bearingTo(NEW_YORK);
+    await heading({ trueHeading: bearing - 34, magHeading: 0, accuracy: 3 });
+    expect(screen.getByText('סובב 34° ימינה')).toBeOnTheScreen();
+    expect(Number.parseFloat(rotation('compass-arrow'))).toBeCloseTo(34, 5);
+    await heading({ trueHeading: bearing + 20, magHeading: 0, accuracy: 3 });
+    expect(screen.getByText('סובב 20° שמאלה')).toBeOnTheScreen();
+    expect(screen.getByText(/ ק״מ עד הכותל$/)).toBeOnTheScreen();
+    expect(screen.getByText(/° מהצפון · צפון־מזרח$/)).toBeOnTheScreen();
+  });
+
+  it('places a near Kotel inside the inner rings and a far one on the outer ring', () => {
+    expect(radarRadius(0)).toBe(0);
+    expect(radarRadius(200)).toBeCloseTo(150, 5);
+    expect(radarRadius(9000)).toBeCloseTo(150, 5);
+    expect(radarRadius(5)).toBeLessThan(radarRadius(20));
+    expect(signedOffset(350)).toBe(-10);
+    expect(signedOffset(10)).toBe(10);
   });
 
   it('turns the dial against the heading and the arrow by bearing less heading', async () => {
@@ -158,7 +180,7 @@ describe('Compass screen', () => {
     await renderScreen();
     expect(mockPosition).toHaveBeenCalledTimes(1);
     expect(screen.getByText('לפי המיקום הנוכחי שלך')).toBeOnTheScreen();
-    expect(screen.getByText('כיוון: 129°')).toBeOnTheScreen();
+    expect(screen.getByText('129°')).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: PERMISSION })).toBeNull();
   });
 
@@ -246,6 +268,6 @@ describe('Compass screen', () => {
     await renderScreen();
     expect(screen.getByText('Prayer compass')).toBeOnTheScreen();
     expect(screen.getByText(`Based on ${NEW_YORK.nameEn}`)).toBeOnTheScreen();
-    expect(screen.getByText('Bearing: 54°')).toBeOnTheScreen();
+    expect(screen.getByText('54°')).toBeOnTheScreen();
   });
 });
