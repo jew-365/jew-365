@@ -403,7 +403,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** a reader who keeps a few places moves them along instead of piling up bookmarks.
   - **Expected result:** render tests of the sheet (new, move, other texts left out) and store tests of the move; on the phone the star offers the list.
   - **Done:** 2026-10-27. Verified: the two save-sheet cases of [siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx) and the move cases of [siddurBookmarks.test.ts](src/stores/__tests__/siddurBookmarks.test.ts); `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` (4983 tests in each zone) green on 2026-10-27. Not checked: on a phone (the web preview did not load).
-  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: yes, `fea3666` fix: location without the settings dialog, Settings at the top, bookmark save sheet · Pushed: yes · Live: preview `1.0.21-10` (group `0de3b444-9ff4-4277-8577-b3fefc94d97f`, 2026-10-27); production not yet · Channel: preview
 
 - [ ] Redesign the prayer compass
   - **Flag:** `OTA`.
@@ -540,7 +540,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** "locate me" works without the dialog and without failing after it.
   - **Expected result:** service tests for the request options and both fallbacks; on a phone with the network provider off, "locate me" finds the place.
   - **Done:** 2026-10-27. Verified: tests 5.6 to 5.8 of [services.test.ts](src/services/__tests__/services.test.ts), `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` (4979 tests in each zone) green on 2026-10-27. Not checked: on the emulator or a phone.
-  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: yes, `fea3666` fix: location without the settings dialog, Settings at the top, bookmark save sheet · Pushed: yes · Live: preview `1.0.21-10` (group `0de3b444-9ff4-4277-8577-b3fefc94d97f`, 2026-10-27); production not yet · Channel: preview
 
 - [ ] Settings could show a blank screen after coming back from another screen
   - **Flag:** `OTA`.
@@ -549,7 +549,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** Settings always opens on its search and its closed sections.
   - **Expected result:** a render test that a new visit scrolls to the top; on the phone, Settings opens at its top after another screen.
   - **Done:** 2026-10-27. Verified: "scrolls back to the top on every visit…" in [settings.searchIndex.render.test.tsx](src/app/__tests__/settings.searchIndex.render.test.tsx), `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` (4979 tests in each zone) green on 2026-10-27. Not checked: on the emulator or a phone.
-  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-3` · Committed: yes, `fea3666` fix: location without the settings dialog, Settings at the top, bookmark save sheet · Pushed: yes · Live: preview `1.0.21-10` (group `0de3b444-9ff4-4277-8577-b3fefc94d97f`, 2026-10-27); production not yet · Channel: preview
 
 ## Open Questions
 
