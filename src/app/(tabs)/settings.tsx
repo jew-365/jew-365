@@ -172,7 +172,7 @@ export default function SettingsScreen() {
   const [focusTarget, setFocusTarget] = useState<string | null>(null);
   const [creditOpen, setCreditOpen] = useState(false);
   const focusCount = useRef(0);
-  const { query, setQuery, searching, results } = useSettingsSearch(focusCount.current);
+  const { query, setQuery, searching, results, tiers, pending } = useSettingsSearch(focusCount.current);
   const params = useLocalSearchParams<{ focus?: string }>();
   const focusParam = useRef<string | undefined>(undefined);
   const routerRef = useRef(router);
@@ -416,7 +416,7 @@ export default function SettingsScreen() {
           />
 
           {searching ? (
-            <SettingsSearchResults query={query} results={results} onChoose={chooseResult} />
+            <SettingsSearchResults query={query} tiers={tiers} pending={pending} onChoose={chooseResult} />
           ) : (
             <>
               <Card style={styles.mitzvotGap}>

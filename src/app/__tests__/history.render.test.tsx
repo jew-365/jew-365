@@ -1,6 +1,6 @@
 const mockPush = jest.fn();
 
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock('expo-router', () => ({ useLocalSearchParams: () => ({}), useRouter: () => ({ push: mockPush }) }));
 jest.mock('react-native-reanimated', () => ({
   __esModule: true,
   ...jest.requireActual('react-native-reanimated'),

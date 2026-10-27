@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ScreenHeader } from '@/components/ScreenHeader';
@@ -10,6 +10,7 @@ import { SettingsSection } from '@/components/SettingsSection';
 import {
   guideList,
   latestWhatsNew,
+  GUIDE_TOPICS,
   visibleGuideTopics,
   whatsNewHeading,
   type GuideList,
@@ -28,7 +29,12 @@ export default function GuideScreen() {
   const router = useRouter();
   const nusach = useUserStore((s) => s.nusach);
   const taharahVisible = useUserStore((s) => taharahOffered(s));
+  const topic = useLocalSearchParams<{ topic?: string }>().topic;
   const [open, setOpen] = useState<ReadonlySet<GuideTopicId>>(() => new Set());
+  // The search opens a topic by its id.
+  useEffect(() => {
+    if (topic && GUIDE_TOPICS.some((entry) => entry.id === topic)) setOpen(new Set([topic as GuideTopicId]));
+  }, [topic]);
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
   const toggle = (id: GuideTopicId) =>
     setOpen((current) => {

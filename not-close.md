@@ -256,6 +256,29 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
 
 ### High — App requests of 2026-10-26
 
+- [ ] Make the search find everything in the app
+  - **Flag:** `OTA`.
+  - **Source:** the owner, 2026-10-27: "אני רוצה שהחיפוש יהיה חיפוש חכם שיודע למצוא כל מה שיש באפליקציה... אפילו משהו דומה או אפילו עם שגיאת כתיב", plus a binding rule in the agents' instructions so every addition updates the search. Then: "תעשה את זה חכם שזה יציג קודם את התוצאות הכי מהירות ואז חיפוש עמוק שלא יהיה איטי מידי", and "קודם מראה את התוצאות הכי קרובות ורק אחרי את מה שאולי דומה". Choices asked that day: every siddur section by name (and, with the deep pass, passages by phrase), figures shown with the user's value, and tzaddikim found by works and grave.
+  - **What it is:** [src/utils/settingsSearch.ts](src/utils/settingsSearch.ts) gains:
+    - `SEARCH_SCREENS` and `appContentItems()`: screens, tracking tabs, cards, figures and badges with the user's value, library and siddur categories, guide topics, and halacha lines by rav;
+    - tzaddik works and graves;
+    - `searchTiers()`, close results and then "אולי התכוונת";
+    - `deepTextOf()` / `searchDeep()`, siddur sections and passages.
+    
+    [src/components/SettingsSearch.tsx](src/components/SettingsSearch.tsx) runs the deep pass in the background 250 ms after typing stops. Route params land each result in place: `tab` on history, `topic` on the guide, `group` on the siddur tab, `open=halacha` on More, and `segment` on the reader. The binding rule is the root [AGENTS.md](AGENTS.md#search-finds-everything) section "Search Finds Everything", mirrored in [src/utils/AGENTS.md](src/utils/AGENTS.md). [src/utils/__tests__/searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) fails when a screen, a Settings anchor or a kind of content cannot be found.
+  - **What it solves:** the user finds any item of the app from one box, close results first and quickly, and future additions cannot silently fall out of the search.
+  - **Expected result:** the coverage and result suites green; the existing Settings, More, guide and reader suites green; the gate green; checked in the preview.
+  - **Done:** 2026-10-27. Verified:
+    - by [searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) (16 cases), "lands on the passage a search result names by its segment key" in [siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx), and the updated empty-state cases of the Settings and More suites.
+    - `pnpm typecheck`, `pnpm lint` and `pnpm check:dox` green, and `pnpm test:tz` green with 5004 tests in each zone, all on 2026-10-27.
+    - In the `expo-web` preview at 375 points in Hebrew:
+      - "קרליץ" found the beit hora'ah and the Chazon Ish;
+      - "תפלין" showed the mitzvah, its 54 marks and the badge 46 marks away under "אולי התכוונת" at once, then the blessing's own spelling from the deep pass;
+      - "אשרי יושבי" listed Shacharit, Mincha and Tehillim, and a press opened the reader on that passage;
+      - `tab`, `topic`, `open=halacha` and a siddur group from a result each opened their place.
+    - Not checked: on a phone.
+  - **Status:** Version: OTA, expected with the next production update `1.0.21-4` · Committed: no · Pushed: no · Live: no · Channel: none
+
 - [ ] Add a permissions step to onboarding and a permissions card to Settings
   - **Flag:** `Build`, with the next native build and its version decision ([state.md](state.md)); the whole step and card ship together, with every row's real status.
   - **Decided:** the owner, 2026-10-26 (Q4, "ב. לחכות עם כל הדף לבנייה הבאה"): nothing of this task ships over the air before that build.

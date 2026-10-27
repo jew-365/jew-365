@@ -698,6 +698,13 @@ describe('the siddur reader bookmarks and last place', () => {
     expect(resumeBanner()).toBeNull();
   });
 
+  it('lands on the passage a search result names by its segment key, with no resume offer', async () => {
+    seedPosition('tehillim', { nusach: null, appDay: '2026-10-27' });
+    await openKeyed({ id: 'tehillim', segment: 'k-mid-2' });
+    expect(resumeBanner()).toBeNull();
+    expect(scrollSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 1, animated: false }));
+  });
+
   it('offers no resume for another nusach', async () => {
     seedPosition('shacharit', { nusach: 'sefard', appDay: '2026-10-28' });
     await openKeyed(SHACHARIT, 'ashkenaz');

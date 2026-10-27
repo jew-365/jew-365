@@ -13,7 +13,11 @@ const mockNavigation = {
   },
 };
 
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }), useNavigation: () => mockNavigation }));
+jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => ({}),
+  useRouter: () => ({ push: mockPush }),
+  useNavigation: () => mockNavigation,
+}));
 jest.mock('react-native-reanimated', () => ({
   __esModule: true,
   ...jest.requireActual('react-native-reanimated'),

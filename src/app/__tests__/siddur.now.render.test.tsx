@@ -5,6 +5,7 @@ const mockNavigation = {
 };
 
 jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => ({}),
   useRouter: () => ({ push: jest.fn() }),
   useNavigation: () => mockNavigation,
   useFocusEffect: (effect: () => void) => require('react').useEffect(effect, [effect]),

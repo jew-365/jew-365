@@ -339,8 +339,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'הגדרות, חיפוש, גיבוי ואיפוס', en: 'Settings: search, backup and reset' },
     body: [
       {
-        he: 'בראש ההגדרות יש חיפוש: מקלידים מילה כמו ״התראות״, ״נוסח״ או ״גיבוי״ ומגיעים ישר להגדרה. החיפוש מוצא גם מצוות, טקסטים בסידור ופרקים בתוכם, וצדיקים מרשימת ההילולות עם תאריך ההילולה, וסולח על שגיאות הקלדה ועל הקלדה במקלדת של השפה השנייה. אותו חיפוש נמצא גם בראש לשונית עוד, ומשם הגדרה נפתחת בהגדרות במקום שלה.',
-        en: "Settings opens with a search: type a word such as “notifications”, “nusach” or “backup” to go straight to the setting. It also finds mitzvot, siddur texts and the sections inside them, and the tzaddikim of the hilulot list with their hilula date, and forgives typos and typing on the other language's keyboard. The same search sits at the top of the More tab, and a setting found there opens in Settings at its place.",
+        he: 'בראש ההגדרות יש חיפוש: מקלידים מילה כמו ״התראות״, ״נוסח״ או ״גיבוי״ ומגיעים ישר להגדרה. החיפוש מוצא כל דבר באפליקציה: מסכים, מצוות וקטגוריות, תפילות, קטעים ומשפטים מתוכן, צדיקים לפי שמם, ספריהם או מקום קבורתם, רבני קו ההלכה, נושאי המדריך, וההישגים והנתונים שלך עם הערך שלהם. הוא סולח על הקלדה במקלדת של השפה השנייה. התוצאות הקרובות מופיעות מיד, החיפוש בתוך התפילות מצטרף אחרי רגע, ותוצאות שנמצאו רק למרות שגיאת כתיב מופיעות בנפרד, תחת ״אולי התכוונת״. אותו חיפוש נמצא גם בראש לשונית עוד, ומשם הגדרה נפתחת בהגדרות במקום שלה.',
+        en: "Settings opens with a search: type a word such as “notifications”, “nusach” or “backup” to go straight to the setting. It finds anything in the app: screens, mitzvot and categories, prayers and the passages and phrases inside them, tzaddikim by name, works or grave, the rabbis of the halacha hotline, guide topics, and your badges and figures with their values. It forgives typing on the other language's keyboard. Close results show at once, the search inside the prayers joins a moment later, and results found only despite a misspelling show apart, under “Did you mean”. The same search sits at the top of the More tab, and a setting found there opens in Settings at its place.",
       },
       {
         he: 'החלקים: פרופיל (שם, טלפון, מגדר ומצב משפחתי), תפילה וסידור, מכשיר והתראות (עיר או GPS, התראות, הסיכום השבועי, ערכת נושא, גודל התצוגה ושפה), גיבוי, שחזור ואיפוס, ואודות ויצירת קשר. העיר או מיקום ה־GPS קובעים גם אם אתם בישראל או בחוץ לארץ, למשל לעניין יום טוב שני.',
@@ -393,6 +393,16 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 ];
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
+  {
+    label: '1.0.21-4',
+    date: '2026-10-27',
+    items: [
+      {
+        he: 'החיפוש בהגדרות ובלשונית עוד מוצא עכשיו הכל: כל מסך, הגדרה, מצווה, קטגוריה, תפילה ואפילו קטע או משפט מתוכה, צדיק לפי ספריו או מקום קבורתו, רב בקו ההלכה, נושא במדריך, ההישגים והנתונים שלך עם הערך שלהם. התוצאות הקרובות מופיעות מיד, והחיפוש בתוך התפילות מצטרף אחרי רגע. תוצאות עם שגיאת כתיב מופיעות בנפרד, תחת ״אולי התכוונת״.',
+        en: 'The search in Settings and in the More tab now finds everything: every screen, setting, mitzvah, category, prayer and even a passage or a phrase inside it, a tzaddik by his works or his grave, a rav of the halacha hotline, a guide topic, and your badges and figures with their values. Close results show at once and the search inside the prayers joins a moment later. Results found despite a misspelling show apart, under “Did you mean”.',
+      },
+    ],
+  },
   {
     label: '1.0.21-3',
     date: '2026-10-26',

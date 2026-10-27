@@ -1,6 +1,7 @@
 const mockPush = jest.fn();
 
 jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => ({}),
   useRouter: () => ({ push: mockPush }),
   useFocusEffect: (effect: () => void) => require('react').useEffect(effect, [effect]),
 }));
@@ -386,10 +387,11 @@ describe('Halacha hotline', () => {
       expect(mockPush).toHaveBeenCalledWith({ pathname: '/siddur/[id]', params: { id: 'tehillim' } });
     });
 
-    it('says when nothing matches', () => {
+    it('searches the prayers in the background, then says when nothing matches', async () => {
       renderAt('2026-11-16T12:00');
       type('קקקקקקקקק');
-      expect(screen.getByText(/^לא נמצא/)).toBeOnTheScreen();
+      expect(screen.getByText('מחפש גם בתוך התפילות…')).toBeOnTheScreen();
+      expect(await screen.findByText(/^לא נמצא/, {}, { timeout: 10000 })).toBeOnTheScreen();
     });
   });
 });

@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Keyboard, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { Card } from '@/components/Card';
 import { chokAddonCaption, useChokDownloadFlow } from '@/components/ChokAddonCard';
@@ -45,7 +45,7 @@ export default function MoreScreen() {
   const selichotDownload = useSelichotStore((s) => s.download);
   const selichotFlow = useSelichotDownloadFlow();
   const [visit, setVisit] = useState(0);
-  const { query, setQuery, searching, results } = useSettingsSearch(visit);
+  const { query, setQuery, searching, results, tiers, pending } = useSettingsSearch(visit);
   useFocusEffect(
     useCallback(() => {
       setVisit((count) => count + 1);
@@ -54,11 +54,19 @@ export default function MoreScreen() {
       void checkSelichotUpdate();
     }, [setQuery]),
   );
+  // The search elsewhere sends a halacha line here as `open=halacha`: open the sheet once.
+  const params = useLocalSearchParams<{ open?: string }>();
+  useEffect(() => {
+    if (params.open !== 'halacha') return;
+    setHalachaOpen(true);
+    router.setParams({ open: undefined });
+  }, [params.open, router]);
   // A setting opens Settings on its section; everything else opens where the Settings search sends it.
   const chooseResult = (item: SettingsSearchItem) => {
     Keyboard.dismiss();
     setQuery('');
-    if (item.kind) router.push(item.href);
+    if (item.kind && typeof item.href === 'object' && item.href.pathname === '/(tabs)/more') setHalachaOpen(true);
+    else if (item.kind) router.push(item.href);
     else if (item.route) router.push(item.route);
     else router.push({ pathname: '/(tabs)/settings', params: { focus: item.id } });
   };
@@ -92,7 +100,9 @@ export default function MoreScreen() {
             if (results[0]) chooseResult(results[0]);
           }}
         />
-        {searching ? <SettingsSearchResults query={query} results={results} onChoose={chooseResult} /> : null}
+        {searching ? (
+          <SettingsSearchResults query={query} tiers={tiers} pending={pending} onChoose={chooseResult} />
+        ) : null}
         <Card divided style={searching ? styles.hidden : undefined}>
           <ListRow
             icon="calendar"

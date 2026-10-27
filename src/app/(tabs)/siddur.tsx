@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { HDate } from '@hebcal/core';
 import { DateTime } from 'luxon';
 import { MITZVOT } from '@/data/mitzvot';
@@ -45,6 +45,7 @@ const MITZVAH_TEXTS = MITZVOT.filter((mitzvah) => mitzvahTextId(mitzvah.id));
 const PRAYER_IDS = ['shacharit', 'mincha', 'maariv'];
 
 type SectionKey = 'now' | 'prayers' | 'mitzvot' | SiddurGroup;
+const SECTION_KEYS: readonly SectionKey[] = ['now', 'prayers', 'mitzvot', ...SIDDUR_GROUPS];
 
 const OPEN_ON_FOCUS: ReadonlySet<SectionKey> = new Set<SectionKey>(['now']);
 const SECTION_ICONS: Record<'now' | 'prayers' | 'mitzvot', IconName> = {
@@ -133,6 +134,14 @@ export default function SiddurScreen() {
 
   const navigation = useNavigation();
   const tabKey = useRef<string | null>(null);
+  // The search sends a group here as `group`: open it with "now", then drop the param.
+  const groupParam = useLocalSearchParams<{ group?: string }>().group;
+  useEffect(() => {
+    if (!groupParam) return;
+    if ((SECTION_KEYS as readonly string[]).includes(groupParam))
+      setOpen(new Set([...OPEN_ON_FOCUS, groupParam as SectionKey]));
+    router.setParams({ group: undefined });
+  }, [groupParam, router]);
 
   useFocusEffect(
     useCallback(() => {

@@ -676,6 +676,7 @@ export default function SiddurScreen() {
     date?: string;
     slot?: string;
     section?: string;
+    segment?: string;
     from?: string;
   }>();
   const chok = params.id === CHOK_TEXT_ID;
@@ -1054,14 +1055,25 @@ export default function SiddurScreen() {
   useEffect(() => {
     if (offered.current || !bookmarkTextId || !readyText || !sections.length) return;
     offered.current = true;
-    if (params.section) return;
+    if (params.section || params.segment) return;
     const last = textLastPosition(useSiddurBookmarksStore.getState().lastPositions, bookmarkTextId, placeNusach);
     if (!last) return;
     const away = placeAway(last.segmentKey);
     if (away ? chokInstall?.files[away.parasha] === undefined : !placeTarget(sections, last)) return;
     if (dailyText && last.appDay !== dateKey(appDay(new Date(), location))) return;
     setResumeOffer(last);
-  }, [bookmarkTextId, readyText, sections, placeNusach, dailyText, location, params.section, placeAway, chokInstall]);
+  }, [
+    bookmarkTextId,
+    readyText,
+    sections,
+    placeNusach,
+    dailyText,
+    location,
+    params.section,
+    params.segment,
+    placeAway,
+    chokInstall,
+  ]);
 
   const hasMinyanPassages = useMemo(
     () => sections.some((section) => section.minyanOnly || section.segments.some((segment) => segment.minyan)),
@@ -1573,12 +1585,19 @@ export default function SiddurScreen() {
   }, [chok, chokWeekKey, shownSlot, doubleChoice, listRef, resetScroll]);
 
   useEffect(() => {
-    if (landedSection.current || !params.section || !listShown) return;
+    if (landedSection.current || (!params.section && !params.segment) || !listShown) return;
     landedSection.current = true;
+    // The search lands on a passage by its segment key, or on a section the picker may not list.
+    if (params.segment) {
+      const index = sections.findIndex((section) => section.segments.some((seg) => seg.key === params.segment));
+      if (index >= 0) jumpTo(index, Date.now() + JUMP_TIMEOUT_MS, params.segment);
+      return;
+    }
     const entry = picker.find((candidate) => candidate.title.he === params.section);
-    if (entry) jumpTo(entry.index);
+    const index = entry ? entry.index : sections.findIndex((section) => section.title.he === params.section);
+    if (index >= 0) jumpTo(index);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- jumpTo is rebuilt on every render; the ref lands once per open
-  }, [params.section, listShown, picker]);
+  }, [params.section, params.segment, listShown, picker, sections]);
 
   useEffect(() => {
     if (!pendingPlace || load.status !== 'chok' || loadStale) return;

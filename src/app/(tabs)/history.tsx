@@ -19,7 +19,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { gematriya } from '@hebcal/core';
 import { BottomSheet } from '@/components/BottomSheet';
 import { Button } from '@/components/Button';
@@ -1113,6 +1113,13 @@ export default function HistoryScreen() {
     },
     [tab],
   );
+  // The search sends a card or a figure here as `tab`: switch to it once, then drop the param.
+  const tabParam = useLocalSearchParams<{ tab?: string }>().tab;
+  useEffect(() => {
+    if (!tabParam) return;
+    if ((TAB_ORDER as readonly string[]).includes(tabParam)) changeTab(tabParam as Tab);
+    router.setParams({ tab: undefined });
+  }, [tabParam, changeTab, router]);
 
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     scrollY.current = event.nativeEvent.contentOffset.y;

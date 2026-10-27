@@ -401,8 +401,23 @@ pnpm test -- src/services/__tests__/HebcalService.test.ts
 pnpm typecheck
 ```
 
+## Search Finds Everything
+
+A binding rule, the owner's of 2026-10-27, that no change may skip: the search at the top of Settings and of the More tab finds everything in the app, from the largest item to the smallest, by its name, a near name or a misspelling.
+
+- In scope: every screen and tab, every setting, every mitzvah (custom ones included), every library and siddur category, every siddur text, chapter, section and passage, every tzaddik with his aliases, works and grave, every halacha line and its rav, every guide topic, every tracking card, figure and badge with the user's own value, and every city.
+- A change that adds, renames or removes any of these updates the search in the same change, never later. A setting goes into `SETTINGS_SEARCH_ITEMS`. A screen goes into `SEARCH_SCREENS`. Content goes into `settingsContentItems()` or `appContentItems()`. Siddur text is read by the deep pass. All of these live in [src/utils/settingsSearch.ts](src/utils/settingsSearch.ts). The change also adds the words people would type for it, in Hebrew and English. A result must open exactly where the item is, through a route param when the screen needs one (`focus`, `tab`, `topic`, `group`, `open`, `section`, `segment`).
+- Results come in two tiers. Close matches (exact, prefix, substring) show at once. Near misses (typo tolerance) show after them under "אולי התכוונת", never among the close ones. A deep pass over the siddur texts and the current streak runs in the background after typing pauses. It never blocks a keystroke, and its results join each tier when it ends ([src/components/SettingsSearch.tsx](src/components/SettingsSearch.tsx)).
+- [src/utils/__tests__/searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) fails on:
+  - a screen under [src/app/](src/app) that no result opens (exemptions sit in `NOT_SEARCHABLE` with their reason);
+  - a Settings anchor with no search item;
+  - a mitzvah, tzaddik, guide topic, halacha line, category, tracking tab or badge with no item.
+  
+  Extend it whenever a new kind of content appears.
+
 ## Common Change Checklist
 
+- Anything a user can see or reach: make the search find it in the same change ([Search Finds Everything](#search-finds-everything)).
 - New route: add the file under [src/app/](src/app), update navigation/tabs if needed, then update [routes.test.ts](src/app/__tests__/routes.test.ts) and add its case to [screens.smoke.render.test.tsx](src/app/__tests__/screens.smoke.render.test.tsx), which fails on a screen file without one.
 - New screen: open two sibling screens of the same kind first. A stack screen takes `ScreenHeader`, a tab `NavBar`; build lists, sheets, dialogs, banners and segmented choices from the shared components, take every colour, spacing, radius and type style from the theme tokens, put its icons through `MitzvahIcon` / `IconTile`, add both dictionaries' keys, and document it in the closest AGENTS.md. [designSystem.test.ts](src/app/__tests__/designSystem.test.ts) must stay green.
 - New UI copy: update both [he.json](src/i18n/he.json) and [en.json](src/i18n/en.json), then run i18n tests.

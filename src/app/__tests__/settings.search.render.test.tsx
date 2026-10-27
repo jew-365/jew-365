@@ -352,7 +352,10 @@ describe('Settings search', () => {
   it('says so when nothing matches', async () => {
     await renderSettings();
     await search('קקקקקק');
-    expect(screen.getByText(he('settings.searchEmpty', { query: 'קקקקקק' }))).toBeOnTheScreen();
+    expect(screen.getByText(he('settings.search.deep'))).toBeOnTheScreen();
+    expect(
+      await screen.findByText(he('settings.searchEmpty', { query: 'קקקקקק' }), {}, { timeout: 10000 }),
+    ).toBeOnTheScreen();
     expect(screen.getByText(he('settings.searchEmptyHint'))).toBeOnTheScreen();
   });
 
