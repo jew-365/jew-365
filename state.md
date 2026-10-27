@@ -54,7 +54,7 @@ Every other EAS build is superseded, and no other AAB was uploaded to Play ([act
 
 ## Design
 
-- The design lab ([design/lab/](design/lab), 2026-10-28) is where every design request is built and published as Artifacts ([design/lab/AGENTS.md](design/lab/AGENTS.md)). It is not committed yet ([not-close.md](not-close.md), Other Open Items).
+- The design lab ([design/lab/](design/lab), 2026-10-28) is where every design request is built and published as Artifacts ([design/lab/AGENTS.md](design/lab/AGENTS.md)). It is committed in `d7f98b7` and pushed ([not-close.md](not-close.md), Other Open Items).
 - The home screen study ([design/lab/studies/2026-10-27-home/](design/lab/studies/2026-10-27-home)) holds ten live directions on real data and waits for the owner's pick. Its canvas is https://claude.ai/artifact/UxdjEwamEp3YUTpkUTfxRn and its gallery https://claude.ai/artifact/KNs1VuDX7J6LWXNxfZQPhT, shared by link. Both sit in the Akeyless claude.ai account.
 
 ## Next steps
