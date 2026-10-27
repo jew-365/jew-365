@@ -401,6 +401,10 @@ Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were
 
 ## Other Open Items
 
+- **The design lab and the home screen study** ([design/lab/](design/lab)). The owner asked on 2026-10-28 for a side project inside the repo where every design request is built and shown as Artifacts. The home screen study of 2026-10-27 moved there from a temp scratchpad: ten live directions, real data, and its canvas and gallery links. It waits for the owner's pick of a direction.
+  - Done: 2026-10-28. The study builds from the repo byte-identical to the published Artifacts, `data.json` regenerates identical, `tools/shot.mjs` works through the `design-site` server, and `check:dox` and `lint` pass.
+  - Status: Version — · Committed: no · Pushed: no · Live: Artifacts (tooling, never in the app) · Channel: —
+
 - **Review the content of the 57 tzaddik pages** ([src/data/hilulaPages.ts](src/data/hilulaPages.ts)). Agents researched it and an adversarial pass fact-checked it on 2026-10-26: 124 corrections and 45 doubts. The points that need the owner or a rav:
   - King David's link goes to the traditional site on Mount Zion, which historians do not take as the real grave.
   - Kever Rachel and Nabi Samwil are reached through secured routes.

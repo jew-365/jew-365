@@ -1,0 +1,861 @@
+<!--board title="ט · סטוריז"-->
+<style>
+.ph{--hair:var(--border);--ringSeen:var(--border);--cn:var(--infoSoft);--cd:var(--accent)}
+@supports (color:color-mix(in srgb,red,blue)){.ph{--hair:color-mix(in srgb,var(--text) 18%,transparent);--ringSeen:color-mix(in srgb,var(--text) 26%,transparent);--cn:color-mix(in srgb,var(--info) 50%,var(--surface2))}}
+@keyframes popIn{0%{opacity:0;transform:translateY(12px) scale(.94)}60%{opacity:1;transform:translateY(-2px) scale(1.02)}100%{opacity:1;transform:none}}
+@keyframes popInA{0%{opacity:0;transform:translateY(12px) scale(.94)}60%{opacity:1;transform:translateY(-2px) scale(1.02)}100%{opacity:1;transform:none}}
+@keyframes popInB{0%{opacity:0;transform:translateY(12px) scale(.94)}60%{opacity:1;transform:translateY(-2px) scale(1.02)}100%{opacity:1;transform:none}}
+.enter-a{animation:popInA .55s both}
+.enter-b{animation:popInB .55s both}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bumpA{0%{transform:scale(1.22)}100%{transform:none}}
+@keyframes bumpB{0%{transform:scale(1.22)}100%{transform:none}}
+.bump-a{animation:bumpA .5s cubic-bezier(.2,.9,.3,1.3)}
+.bump-b{animation:bumpB .5s cubic-bezier(.2,.9,.3,1.3)}
+.h1{font-size:1.65em;font-weight:800;letter-spacing:-.01em;line-height:1.15}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.streak{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:0 14px 0 12px;border-radius:999px;background:var(--soft);color:var(--accentText);font-weight:800;flex:none}
+.streak .ic{width:20px;height:20px;stroke-width:2.1}
+.lbl{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:26px 2px 12px;font-size:1.125em;font-weight:800;letter-spacing:-.005em}
+.lbl small{font-size:.6875em;font-weight:600;color:var(--sub)}
+.sts{display:flex;gap:12px;overflow-x:auto;margin:14px -20px 0;padding:10px 20px 14px;scrollbar-width:none}
+.sts::-webkit-scrollbar{display:none}
+.stw{flex:none}
+.sgw{flex:1;min-width:0;display:flex}
+.st{width:76px;display:flex;flex-direction:column;align-items:center;gap:7px;min-height:44px}
+.ring{position:relative;display:block;width:72px;height:72px;border-radius:50%;background:var(--ringSeen);transition:box-shadow .6s ease}
+.ring::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--accent),var(--urgent),var(--info),var(--accent));animation:spin 9s linear infinite;transition:opacity .6s ease}
+.ring:not(.seen){animation:ringPulse 3.6s ease-in-out infinite}
+.ring.seen::before{opacity:0}
+@keyframes ringPulse{0%,100%{box-shadow:0 0 8px 0 color-mix(in srgb,var(--accent) 20%,transparent)}50%{box-shadow:0 0 20px 3px color-mix(in srgb,var(--accent) 42%,transparent)}}
+.face{position:absolute;inset:3px;border-radius:50%;background:var(--surface);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center;color:var(--accentText);transition:background .4s,color .4s}
+.face.personal{background:var(--soft)}
+.face.system{color:var(--info)}
+.face.general{color:var(--sub)}
+.face .ic{width:26px;height:26px}
+.ini{font-size:1.65em;font-weight:800;line-height:1;color:var(--accentText)}
+.badge{position:absolute;inset-inline-end:-4px;bottom:-4px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--onAccent);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center}
+.badge .ic{width:13px;height:13px;stroke-width:2.4}
+.st-l{font-size:.75em;font-weight:700;color:var(--text);text-align:center;line-height:1.25;transition:color .4s}
+.st .ring.seen+.st-l{color:var(--sub);font-weight:500}
+.peek{display:flex;align-items:center;gap:12px;width:100%;margin-top:6px;padding:12px 14px;border-radius:22px;background:var(--surface);box-shadow:var(--shadow);text-align:start;min-height:64px}
+.peek-ic{flex:none;width:44px;height:44px;border-radius:50%;background:var(--soft);color:var(--accentText);display:flex;align-items:center;justify-content:center}
+.peek.general .peek-ic{background:var(--surface2);color:var(--sub)}
+.peek.system .peek-ic{background:var(--infoSoft);color:var(--info)}
+.peek-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.peek-t b{font-weight:700;line-height:1.3}
+.peek-t>span{font-size:.8125em;color:var(--sub);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.peek-go{flex:none;display:flex;align-items:center;gap:4px;font-size:.8125em;font-weight:800;color:var(--accentText)}
+.peek-go .ic{width:16px;height:16px}
+.deck{display:flex;align-items:stretch;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:20px;margin:0 -20px;padding:4px 20px 18px;scrollbar-width:none}
+.deck::-webkit-scrollbar{display:none}
+.card{position:relative;flex:none;width:292px;scroll-snap-align:start;overflow:hidden;display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:28px;background:linear-gradient(165deg,var(--soft),var(--surface) 62%);box-shadow:var(--shadow)}
+.card.urgent{background:linear-gradient(165deg,var(--urgentSoft),var(--surface) 62%)}
+.card.small{width:182px;gap:10px;align-self:flex-start;background:var(--surface2);box-shadow:none}
+.opens-at{display:block;font-weight:700;font-size:.9375em}
+.card.calm{background:var(--surface);border:2px dashed var(--border);box-shadow:none;align-items:center;justify-content:center;text-align:center;gap:8px}
+.card-top{display:flex;align-items:center;gap:10px}
+.tile{flex:none;width:46px;height:46px;border-radius:16px;background:var(--surface);color:var(--accentText);display:flex;align-items:center;justify-content:center}
+.card.urgent .tile{color:var(--urgent)}
+.card.small .tile{width:40px;height:40px;border-radius:14px;background:var(--surface)}
+.card-n{flex:1;min-width:0;font-size:1.15em;font-weight:800;line-height:1.2}
+.pill{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;font-size:.75em;font-weight:700;padding:4px 11px;border-radius:999px;background:var(--urgentSoft);color:var(--urgent)}
+.pill i{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.6s ease-in-out infinite}
+.bigrow{display:flex;align-items:baseline;gap:8px}
+.big{font-size:3em;font-weight:900;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.unit{display:flex;flex-direction:column;font-size:.8125em;line-height:1.25;color:var(--sub);font-weight:600}
+.pbar{height:9px;border-radius:9px;background:var(--surface2);overflow:hidden}
+.card.small .pbar{background:var(--surface)}
+.pbar i{position:relative;display:block;height:100%;border-radius:9px;background:var(--accent);overflow:hidden;transition:width .9s cubic-bezier(.2,.8,.2,1),background .4s}
+.pbar i::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 28%,rgba(255,255,255,.6) 50%,transparent 72%);transform:translateX(120%);animation:sheen 2.8s ease-in-out infinite}
+@keyframes sheen{0%{transform:translateX(120%)}65%,100%{transform:translateX(-120%)}}
+.card.urgent .pbar i{background:var(--urgent)}
+.ends{display:flex;justify-content:space-between;gap:8px;margin-top:-4px;font-size:.8125em;color:var(--sub);font-weight:600}
+.acts{display:flex;gap:10px}
+.cbtn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:54px;border-radius:20px;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:1.0625em;transition:transform .15s}
+.cbtn:active{transform:scale(.96)}
+.cbtn .ic{stroke-width:2.4}
+.gbtn{flex:none;width:54px;min-height:54px;border-radius:20px;background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center}
+.opens{font-weight:800;font-size:1em;line-height:1.25}
+.opens-in{font-size:.8125em;color:var(--sub);font-weight:500}
+.card.calm .halo{width:68px;height:68px;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:flex;align-items:center;justify-content:center;animation:float 3.2s ease-in-out infinite}
+.card.calm .halo .ic{width:30px;height:30px}
+@keyframes float{50%{transform:translateY(-7px)}}
+.card-calm-t{font-size:1.15em;font-weight:800;line-height:1.25}
+.pop{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;background:var(--safe);color:var(--onSafe);clip-path:circle(0% at 50% 84%)}
+.pop .ic{width:68px;height:68px;stroke-width:2.4;stroke-dasharray:24;stroke-dashoffset:24}
+.pop i{position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4px;border-radius:3px;background:var(--onSafe);opacity:0}
+.pop i:nth-child(odd){background:var(--accent);border-radius:50%}
+.card.marking .pop{opacity:1;animation:wipeC .6s cubic-bezier(.5,0,.2,1) forwards}
+.card.marking .pop .ic{animation:drawC .35s .3s ease-out forwards}
+.card.marking .pop i{animation:burst .75s .3s ease-out forwards}
+.card.marking{animation:cardOut .5s .38s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes wipeC{to{clip-path:circle(140% at 50% 84%)}}
+@keyframes drawC{to{stroke-dashoffset:0}}
+@keyframes burst{0%{opacity:1;transform:rotate(var(--a)) translateY(0) scale(.5)}100%{opacity:0;transform:rotate(var(--a)) translateY(-96px) scale(1.15)}}
+@keyframes cardOut{to{opacity:0;transform:scale(.92)}}
+.today{background:var(--surface);border-radius:28px;padding:16px 16px 14px;box-shadow:var(--shadow);animation:popIn .6s both}
+.today-top{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.today-n{display:flex;align-items:baseline;gap:8px}
+.today-n b{display:inline-block;font-size:2.6em;font-weight:900;letter-spacing:-.03em;line-height:.95;font-variant-numeric:tabular-nums}
+.today-n .of{font-size:.875em;color:var(--sub);font-weight:600}
+.today-pct{font-size:1.25em;font-weight:800;color:var(--accentText);font-variant-numeric:tabular-nums}
+.seg{position:relative;display:flex;gap:6px;margin-top:14px}
+.sgb{flex:1;min-width:0;width:100%;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:7px;padding:0}
+.sg{display:block;width:100%;height:14px;border-radius:9px;background:var(--surface2);transition:background .5s ease,opacity .5s ease}
+.sg.done{background:var(--safe)}
+.sg.missed{background:var(--urgent)}
+.sg.active{background:var(--accent);animation:pulseBar 1.8s ease-in-out infinite}
+@keyframes pulseBar{50%{opacity:.55}}
+.sgb .ic{width:17px;height:17px;color:var(--sub);transition:color .5s ease}
+.sgb.done .ic{color:var(--safe)}
+.sgb.missed .ic{color:var(--urgent)}
+.sgb.active .ic{color:var(--accentText)}
+.nowmk{position:absolute;top:-8px;height:30px;width:3px;margin-right:-1.5px;border-radius:3px;background:var(--text);box-shadow:0 0 0 2px var(--surface),0 0 14px 1px color-mix(in srgb,var(--accent) 65%,transparent);pointer-events:none;z-index:2;transition:right 1s linear}
+.nowmk::before{content:"";position:absolute;top:-4px;left:50%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
+.nowmk::after{content:"";position:absolute;top:-4px;left:50%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;border:2px solid var(--accent);animation:mkRing 2.6s ease-out infinite}
+@keyframes mkRing{0%{transform:scale(1);opacity:.8}100%{transform:scale(3);opacity:0}}
+.seg.drag .nowmk{transition:none}
+.leg{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:.8125em;color:var(--sub)}
+.leg li{display:flex;align-items:center;gap:6px}
+.leg i{width:10px;height:10px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--sub)}
+.leg i.done{background:var(--safe);border-color:var(--safe)}
+.leg i.missed{background:var(--urgent);border-color:var(--urgent)}
+.leg i.active{background:var(--accent);border-color:var(--accent)}
+.lst{margin-top:12px;background:var(--surface);border-radius:24px;box-shadow:var(--shadow);overflow:hidden;animation:popIn .6s .05s both}
+.lst-h{display:flex;align-items:center;gap:10px;padding:14px 16px 8px;font-weight:800}
+.cnt{margin-inline-start:auto;min-width:26px;height:26px;padding:0 8px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:.8125em;font-weight:800;background:var(--safeSoft);color:var(--safe)}
+.cnt.bad{background:var(--urgentSoft);color:var(--urgent)}
+.lr{display:flex;align-items:center;gap:12px;padding:6px 10px 6px 16px;min-height:62px}
+.lr+.lr{border-top:1px solid var(--border)}
+.lr-ic{flex:none;width:38px;height:38px;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:flex;align-items:center;justify-content:center;transition:background .3s,color .3s}
+.lr-ic .ic{width:19px;height:19px;stroke-width:2.3}
+.lr.missed .lr-ic{background:var(--urgentSoft);color:var(--urgent)}
+.lr-t{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.lr-t b{font-weight:700}
+.lr-t>span{font-size:.8125em;color:var(--sub)}
+.lr.missed .lr-t>span{color:var(--urgent);font-weight:600}
+.lateTag{display:inline-block;margin-inline-start:6px;padding:0 6px;border-radius:6px;background:var(--urgentSoft);color:var(--urgent);font-size:.95em;font-weight:700}
+.pbtn2{flex:none;display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:0 14px;border-radius:22px;background:var(--surface2);color:var(--text);font-weight:700;font-size:.8125em;transition:background .25s,color .25s,transform .25s}
+.pbtn2 .ic{width:15px;height:15px}
+.pbtn2.soft{background:var(--soft);color:var(--accentText)}
+.lr.marking .pbtn2{background:var(--safe);color:var(--onSafe);transform:scale(1.06)}
+.lr.marking .lr-ic{background:var(--safe);color:var(--onSafe)}
+.lr.marking{animation:lrOut .55s .3s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes lrOut{to{opacity:0;transform:translateX(-24px)}}
+.nil{display:flex;align-items:center;gap:12px;padding:8px 16px 16px}
+.nil-ic{flex:none;width:44px;height:44px;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:flex;align-items:center;justify-content:center;animation:float 3.2s ease-in-out infinite}
+.nil-ic.dash{background:var(--surface2);color:var(--sub);animation:none}
+.nil p{font-size:.9375em;font-weight:600;color:var(--sub);line-height:1.4}
+
+.reelc{position:relative;overflow:hidden;padding:16px 0 8px;border-radius:28px;background:var(--surface);box-shadow:var(--shadow);animation:popIn .6s both}
+.reelc::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(90% 55% at 50% 0%,var(--soft),transparent 74%);opacity:.9}
+.rh,.reelw,.rail,.rh-hint{position:relative}
+.reelc i{font-style:normal}
+.rh{display:flex;flex-direction:column;gap:6px;padding:0 16px}
+.rh-top{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:4px 10px}
+.rh-main{display:flex;align-items:baseline;gap:10px;min-width:0}
+.rh-t{font-size:2.6em;font-weight:900;letter-spacing:-.03em;line-height:.95;font-variant-numeric:tabular-nums}
+.rh-c{font-size:.875em;color:var(--sub);font-weight:600}
+.rh-st{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 11px;border-radius:999px;background:var(--safeSoft);color:var(--safe);font-size:.75em;font-weight:800}
+.rh-st i{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.6s ease-in-out infinite}
+.rh-st.view{background:var(--soft);color:var(--accentText)}
+.rh-st.view i{animation:none}
+.znext{display:flex;align-items:flex-start;gap:8px;font-size:.875em;color:var(--sub);line-height:1.35}
+.znext>span{flex:1;min-width:0}
+.znext .ic{margin-top:1px;width:18px;height:18px;color:var(--accentText)}
+.znext b{color:var(--text)}
+.reelw{--lane:3.5em;--ay:calc(var(--lanes) * var(--lane) + 8px);margin-top:6px;border-radius:22px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none;outline:none}
+.reelw.drag{cursor:grabbing}
+.reelw:focus-visible{box-shadow:inset 0 0 0 3px var(--accent)}
+.reel{position:relative;height:calc(var(--ay) + 3.7em);overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 86%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 86%,transparent 100%)}
+.rstrip{position:absolute;top:0;bottom:0;right:50%;will-change:transform;transition:transform 1s linear}
+.reelw.drag .rstrip{transition:none}
+.band{position:absolute;top:calc(var(--ay) - 3px);height:6px}
+.band.night{background:var(--cn)}
+.band.day{background:var(--cd)}
+.band.dawn{background:linear-gradient(to left,var(--cn),var(--cd))}
+.band.dusk{background:linear-gradient(to left,var(--cd),var(--cn))}
+.tk{position:absolute;top:var(--ay);width:0;height:0}
+.tk::before{content:"";position:absolute;right:-.5px;top:7px;width:1px;height:5px;background:var(--hair)}
+.tk.half::before{height:8px}
+.tk.hour::before{height:11px;background:var(--sub);opacity:.75}
+.tk-l{position:absolute;top:21px;right:0;transform:translateX(50%);font-size:.75em;font-weight:700;color:var(--sub);white-space:nowrap;font-variant-numeric:tabular-nums}
+.livemk{position:absolute;top:var(--ay);width:0;height:0;pointer-events:none}
+.livemk::before{content:"";position:absolute;right:-5px;top:-5px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2.5px solid var(--text)}
+.livemk b{position:absolute;top:36px;right:0;transform:translateX(50%);padding:1px 8px;border-radius:999px;background:var(--text);color:var(--bg);font-size:.75em;font-weight:800;white-space:nowrap}
+.edge{position:absolute;top:calc(var(--ay) - 22px);height:44px;z-index:2;display:flex;align-items:center;gap:2px;padding:0 8px;border-radius:16px;background:color-mix(in srgb,var(--surface) 92%,transparent);box-shadow:0 0 0 1px var(--hair);font-size:.75em;font-weight:700;color:var(--text);white-space:nowrap;animation:popIn .5s both}
+.edge .ic{width:16px;height:16px;color:var(--accentText)}
+.edge.prev{right:6px}
+.edge.prev .ic{transform:scaleX(-1)}
+.edge.next{left:6px}
+.needle{position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;border-radius:2px;background:linear-gradient(var(--accent),var(--accent) 72%,color-mix(in srgb,var(--accent) 25%,transparent));box-shadow:0 0 7px color-mix(in srgb,var(--accent) 45%,transparent);pointer-events:none;animation:needleGlow 2.6s ease-in-out infinite}
+.needle::before{content:"";position:absolute;left:50%;top:0;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--surface)}
+.needle::after{content:"";position:absolute;left:50%;top:calc(var(--ay) - 7px);width:14px;height:14px;margin-left:-7px;border-radius:50%;border:3px solid var(--accent);background:var(--surface)}
+@keyframes needleGlow{50%{box-shadow:0 0 13px 1px color-mix(in srgb,var(--accent) 62%,transparent)}}
+.rzw{position:absolute;display:flex;flex-direction:column;align-items:center;transform:translateX(50%)}
+.rzp{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:76px;min-height:2.9em;padding:5px 8px;border-radius:16px;background:var(--surface);box-shadow:0 0 0 1px var(--hair),var(--shadow);white-space:nowrap;transition:transform .3s cubic-bezier(.2,.9,.3,1.25),background .35s,box-shadow .35s,color .35s}
+.rzp-n{display:flex;align-items:center;gap:4px;font-size:.75em;font-weight:600;color:var(--sub);line-height:1.2}
+.rzp-n .ic{width:14px;height:14px;color:var(--accentText)}
+.rzp-t{font-size:.9375em;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.rzp.past{background:var(--surface2);box-shadow:none}
+.rzp.past .rzp-t{font-weight:600;color:var(--sub)}
+.rzp.past .rzp-n .ic{color:var(--sub)}
+.rzp.next{background:var(--accent);color:var(--onAccent);box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 35%,transparent)}
+.rzp.next .rzp-n,.rzp.next .rzp-n .ic{color:var(--onAccent)}
+.rzp.near{transform:translateY(-3px) scale(1.08);box-shadow:0 0 0 2px var(--accent),0 10px 24px color-mix(in srgb,var(--accent) 38%,transparent)}
+.rzp.lock{animation:lockPop .55s cubic-bezier(.2,1.2,.3,1)}
+@keyframes lockPop{0%{transform:scale(1)}40%{transform:translateY(-4px) scale(1.16)}100%{transform:translateY(-3px) scale(1.08)}}
+.stem{position:relative;display:block;flex:1;width:1px;min-height:4px;background:var(--hair)}
+.stem::after{content:"";position:absolute;left:50%;bottom:-3.5px;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:var(--surface);box-shadow:0 0 0 1.5px var(--sub);transition:background .3s,box-shadow .3s}
+.stem.past::after{background:var(--sub)}
+.stem.next::after,.stem.near::after{background:var(--accent);box-shadow:0 0 0 1.5px var(--accent)}
+.rail{margin:0 16px;height:44px}
+.rail-rg{position:absolute;inset-block:0;inset-inline:12px}
+.rail-track{position:absolute;inset-inline:0;top:50%;height:6px;margin-top:-3px;border-radius:6px;box-shadow:inset 0 0 0 1px var(--hair)}
+.rail-dot{position:absolute;top:50%;width:6px;height:6px;margin:-3px -3px 0 0;border-radius:50%;background:var(--surface);box-shadow:0 0 0 1.5px var(--sub)}
+.rail-in{position:absolute;inset:0;width:100%;height:44px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:grab}
+.rail-in::-webkit-slider-runnable-track{height:44px;background:transparent}
+.rail-in::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;margin-top:10px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--accent),0 0 14px 2px color-mix(in srgb,var(--accent) 55%,transparent)}
+.rail-in::-moz-range-track{height:44px;background:transparent}
+.rail-in::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--accent),0 0 14px 2px color-mix(in srgb,var(--accent) 55%,transparent)}
+.rail-in:focus-visible{outline:none}
+.rail-in:focus-visible::-webkit-slider-thumb{outline:3px solid var(--text);outline-offset:3px}
+.rh-hint{display:block;padding:0 16px 8px;text-align:center}
+.sv{position:absolute;inset:0;z-index:12;display:flex;flex-direction:column;overflow:hidden;animation:svIn .35s cubic-bezier(.2,.9,.25,1) both}
+.ph.tall .sv{bottom:auto;height:844px}
+@keyframes svIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.sv.personal{background:linear-gradient(170deg,var(--soft),var(--surface) 78%)}
+.sv.general{background:linear-gradient(170deg,var(--surface2),var(--soft) 120%)}
+.sv.system{background:linear-gradient(170deg,var(--infoSoft),var(--surface) 80%)}
+.sv-bars{display:flex;gap:4px;padding:14px 14px 0;position:relative;z-index:2}
+.sv-bar{flex:1;height:3px;border-radius:3px;background:var(--hair);overflow:hidden}
+.sv-bar i{display:block;height:100%;width:0;border-radius:3px;background:var(--text)}
+.sv-bar i.full{width:100%}
+.sv-bar i.cur.fa{animation:fillA 5s linear forwards}
+.sv-bar i.cur.fb{animation:fillB 5s linear forwards}
+@keyframes fillA{from{width:0}to{width:100%}}
+@keyframes fillB{from{width:0}to{width:100%}}
+.sv.freeze .sv-bar i.cur{animation:none;width:42%}
+.sv-head{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding:12px 16px 0}
+.sv-av{width:40px;height:40px;border-radius:50%;background:var(--surface);color:var(--accentText);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
+.sv-av .ic{width:20px;height:20px}
+.sv.system .sv-av{color:var(--info)}
+.sv.general .sv-av{color:var(--sub)}
+.sv-tag{font-size:.875em;font-weight:800}
+.sv-x{margin-inline-start:auto;width:44px;height:44px;border-radius:50%;background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
+.sv-zone{position:absolute;top:70px;bottom:0;width:50%;z-index:1;background:none}
+.sv-l{left:0}
+.sv-r{right:0}
+.sv-body{position:relative;margin:auto 0;padding:0 28px;display:flex;flex-direction:column;align-items:flex-start;gap:16px;pointer-events:none}
+.in-a{animation:svBodyA .5s cubic-bezier(.2,.9,.25,1) both}
+.in-b{animation:svBodyB .5s cubic-bezier(.2,.9,.25,1) both}
+@keyframes svBodyA{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes svBodyB{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.sv-ic{width:88px;height:88px;border-radius:32px;background:var(--surface);box-shadow:var(--shadow);color:var(--accentText);display:flex;align-items:center;justify-content:center;animation:float 3.2s ease-in-out infinite}
+.sv-ic .ic{width:44px;height:44px}
+.sv.system .sv-ic{color:var(--info)}
+.sv.general .sv-ic{color:var(--sub)}
+.sv-kick{margin-bottom:-8px;font-size:.9375em;font-weight:800;letter-spacing:.04em;color:var(--accentText)}
+.sv::before,.sv::after{content:"";position:absolute;border-radius:50%;pointer-events:none}
+.sv::before{width:330px;height:330px;top:-110px;inset-inline-start:-120px;background:var(--accent);opacity:.13}
+.sv::after{width:260px;height:260px;bottom:-90px;inset-inline-end:-90px;background:var(--info);opacity:.1}
+.sv-t{font-size:2em;font-weight:900;line-height:1.15;letter-spacing:-.01em;text-wrap:balance}
+.sv-p{font-size:1.1875em;line-height:1.5;text-wrap:pretty}
+.sv-foot{position:relative;z-index:3;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:0 20px 24px}
+.sv-act{min-height:56px;border-radius:20px;background:var(--text);color:var(--bg);font-weight:800;font-size:1.0625em;display:flex;align-items:center;justify-content:center;gap:8px}
+.sv-act .ic{width:20px;height:20px}
+.sv-hide{min-height:48px;font-weight:700;color:var(--sub);text-decoration:underline;text-underline-offset:4px;text-align:center}
+.sv-hint{text-align:center;font-size:.75em;color:var(--sub);padding-top:6px}
+</style>
+<template>
+<div class="scroll" style="position: absolute; inset: 0; overflow-y: auto; padding: 24px 20px 124px">
+
+<header class="top">
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<p class="cap">{{dateLine}}</p>
+<h1 class="h1">{{greeting}}</h1>
+</div>
+<div class="streak" role="img" aria-label="{{streak}} ימים ברצף">[[ic:flame]]<b class="num">{{streak}}</b></div>
+</header>
+
+<!--NAMECARD-->
+
+<div class="sts" role="list" aria-label="הודעות">
+<sc-for list="{{stories}}" as="s" hint-placeholder-count="4">
+<div class="stw" role="listitem"><button class="st {{s.cls}} {{s.enter}}" onClick="{{s.open}}" aria-label="{{s.aria}}">
+<span class="ring {{s.seenCls}}"><span class="face {{s.kindCls}}">
+<sc-if value="{{s.showInitial}}" hint-placeholder-val="{{ true }}"><b class="ini">{{s.initial}}</b><span class="badge">[[icMsg:s]]</span></sc-if>
+<sc-if value="{{s.showIcon}}" hint-placeholder-val="{{ false }}">[[icMsg:s]]</sc-if>
+</span></span>
+<span class="st-l">{{s.label}}</span>
+</button></div>
+</sc-for>
+</div>
+<sc-if value="{{hasPeek}}" hint-placeholder-val="{{ true }}">
+<button class="peek {{peek.kindCls}} {{peekEnter}}" onClick="{{peekOpen}}" aria-label="פתיחת ההודעה: {{peek.title}}">
+<span class="peek-ic">[[icMsg:peek]]</span>
+<span class="peek-t"><b>{{peek.title}}</b><span>{{peek.body}}</span></span>
+<span class="peek-go">{{unseenText}}[[ic:chevron]]</span>
+</button>
+</sc-if>
+<sc-if value="{{noMessages}}" hint-placeholder-val="{{ false }}"><p class="empty-n cap" style="margin-top: 8px">אין הודעות חדשות.</p></sc-if>
+
+<h3 class="lbl" style="margin-top: 22px"><span>עכשיו</span><small>{{activeCount}} · נכון ל-{{nowT}}</small></h3>
+<div class="deck" role="list" aria-label="מצוות פתוחות ובהמשך">
+<sc-if value="{{noActive}}" hint-placeholder-val="{{ false }}">
+<section class="card calm enter-a" role="listitem" aria-live="polite">
+<div class="halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h4 class="card-calm-t">{{activeEmptyTitle}}</h4>
+<p class="cap" style="font-size: .9375em">{{activeEmptyText}}</p>
+</section>
+</sc-if>
+<sc-for list="{{cards}}" as="it" hint-placeholder-count="1">
+<article class="card {{it.urgentCls}} {{it.cls}} {{it.enter}}" role="listitem">
+<div class="card-top">
+<span class="tile">[[icItem:it]]</span>
+<h4 class="card-n">{{it.name}}</h4>
+</div>
+<sc-if value="{{it.urgent}}" hint-placeholder-val="{{ false }}"><span class="pill"><i></i>הזמן עומד להיגמר</span></sc-if>
+<div class="bigrow" role="img" aria-label="נשארו {{it.left}}">
+<span class="big">{{it.leftNum}}</span>
+<span class="unit"><span>{{it.leftUnit}}</span><span>נשארו</span></span>
+</div>
+<div>
+<div class="pbar" aria-hidden="true"><i style="width: {{it.pctGone}}%"></i></div>
+<div class="ends num" style="margin-top: 7px"><span>נפתח {{it.startT}}</span><span>{{it.endTxt}}</span></div>
+</div>
+<div class="acts">
+<button class="cbtn" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">[[ic:check]]<span>{{it.cta}}</span></button>
+<button class="gbtn" onClick="{{it.open}}" aria-label="פתיחת הנוסח: {{it.name}}">[[ic:book]]</button>
+</div>
+<div class="pop" aria-hidden="true">
+<i style="--a: 0deg"></i><i style="--a: 45deg"></i><i style="--a: 90deg"></i><i style="--a: 135deg"></i><i style="--a: 180deg"></i><i style="--a: 225deg"></i><i style="--a: 270deg"></i><i style="--a: 315deg"></i>
+[[ic:check]]
+</div>
+</article>
+</sc-for>
+<sc-for list="{{later}}" as="l" hint-placeholder-count="2">
+<article class="card small {{l.enter}}" role="listitem">
+<span class="tile">[[icItem:l]]</span>
+<h4 class="opens">{{l.name}}</h4>
+<p><span class="opens-at num">{{l.opensTxt}}</span><span class="opens-in num" style="display: block">{{l.inText}}</span></p>
+</article>
+</sc-for>
+</div>
+
+<h3 class="lbl" style="margin-top: 6px"><span>זמני היום</span><small>{{city}} · {{hebDay}}</small></h3>
+<section class="reelc" aria-label="גלגל הזמן">
+<div class="rh">
+<div class="rh-top">
+<div class="rh-main"><b class="rh-t num">{{nowT}}</b><span class="rh-c">{{reelCaption}}</span></div>
+<span class="rh-st {{reelStCls}}"><i></i>{{reelState}}</span>
+</div>
+<p class="znext">[[ic:clock]]<span>הבא: <b>{{nextZ.name}} ב-{{nextZ.time}}</b> · {{nextZ.left}}</span></p>
+</div>
+<div class="reelw {{reelDrag}}" role="group" tabindex="0" aria-label="גלגל הזמן. חצים מזיזים את הזמן, עם Shift קופצים רבע שעה" onPointerDown="{{rdDown}}" onPointerMove="{{rdMove}}" onPointerUp="{{rdUp}}" onPointerCancel="{{rdUp}}" onKeyDown="{{rdKey}}" style="--lanes: {{lanes}}">
+<div class="reel">
+<div class="rstrip" aria-hidden="true" style="width: {{reelW}}px; transform: translateX({{reelX}}px)">
+<sc-for list="{{bands}}" as="b" hint-placeholder-count="4"><i class="band {{b.cls}}" style="right: {{b.x}}px; width: {{b.w}}px"></i></sc-for>
+<sc-for list="{{ticks}}" as="k" hint-placeholder-count="12"><i class="tk {{k.cls}}" style="right: {{k.x}}px"><sc-if value="{{k.hour}}" hint-placeholder-val="{{ false }}"><b class="tk-l">{{k.label}}</b></sc-if></i></sc-for>
+<sc-if value="{{showLive}}" hint-placeholder-val="{{ false }}"><i class="livemk" style="right: {{liveX}}px"><b>עכשיו</b></i></sc-if>
+</div>
+<i class="needle" aria-hidden="true"></i>
+<div class="rstrip" style="width: {{reelW}}px; transform: translateX({{reelX}}px)">
+<sc-for list="{{rz}}" as="z" hint-placeholder-count="6">
+<div class="rzw" style="right: {{z.x}}px; top: {{z.top}}; height: {{z.hgt}}">
+<button class="rzp {{z.cls}}" onClick="{{z.go}}" aria-label="{{z.aria}}"><span class="rzp-n">[[icZ:z]]<span>{{z.short}}</span></span><b class="rzp-t">{{z.time}}</b></button>
+<i class="stem {{z.cls}}"></i>
+</div>
+</sc-for>
+</div>
+</div>
+<sc-if value="{{edgePrev}}" hint-placeholder-val="{{ false }}"><button class="edge prev" onClick="{{edgePrevGo}}" aria-label="{{edgePrevAria}}">[[ic:chevron]]<span>{{edgePrevTxt}}</span></button></sc-if>
+<sc-if value="{{edgeNext}}" hint-placeholder-val="{{ false }}"><button class="edge next" onClick="{{edgeNextGo}}" aria-label="{{edgeNextAria}}"><span>{{edgeNextTxt}}</span>[[ic:chevron]]</button></sc-if>
+</div>
+<div class="rail">
+<div class="rail-rg">
+<i class="rail-track" style="background: {{railBg}}"></i>
+<sc-for list="{{railDots}}" as="d" hint-placeholder-count="11"><i class="rail-dot" style="right: {{d.p}}%"></i></sc-for>
+</div>
+<input class="rail-in" type="range" min="{{dayStartSec}}" max="{{dayEndSec}}" step="60" value="{{nowSec}}" onChange="{{onRail}}" aria-label="סרגל היום" aria-valuetext="{{reelText}}">
+</div>
+<p class="rh-hint cap">גררו את הציר כדי לנסוע בזמן</p>
+</section>
+
+<h3 class="lbl" style="margin-top: 22px"><span>היום שלך</span><small>{{weekday}} · {{hebDay}}</small></h3>
+<section class="today" aria-label="התקדמות היום">
+<div class="today-top">
+<div class="today-n"><b class="num {{doneBump}}">{{doneN}}</b><span class="of">מתוך {{totalN}} בוצעו</span></div>
+<span class="today-pct num">{{donePct}}%</span>
+</div>
+<div class="seg {{reelDrag}}" role="list" aria-label="מצוות היום לפי סדר">
+<sc-for list="{{segs}}" as="t" hint-placeholder-count="6">
+<div class="sgw" role="listitem"><button class="sgb {{t.status}}" onClick="{{t.tap}}" aria-label="{{t.aria}}"><span class="sg {{t.status}}"></span>[[icItem:t]]</button></div>
+</sc-for>
+<i class="nowmk" aria-hidden="true" style="right: {{todayMk}}"></i>
+</div>
+<ul class="leg">
+<li><i class="done"></i>בוצע {{doneN}}</li>
+<li><i class="missed"></i>פוספס {{missedN}}</li>
+<li><i class="active"></i>פתוח {{activeN}}</li>
+<li><i></i>בהמשך {{upcomingN}}</li>
+</ul>
+</section>
+
+<section class="lst" aria-label="עשית">
+<div class="lst-h"><span>עשית</span><span class="cnt">{{doneN}}</span></div>
+<sc-if value="{{hasDone}}" hint-placeholder-val="{{ true }}">
+<ul>
+<sc-for list="{{done}}" as="d" hint-placeholder-count="2">
+<li class="lr {{d.enter}}">
+<span class="lr-ic">[[ic:check]]</span>
+<span class="lr-t"><b>{{d.name}}</b><span class="num">{{d.atTxt}}<sc-if value="{{d.late}}" hint-placeholder-val="{{ false }}"><i class="lateTag">באיחור</i></sc-if></span></span>
+<button class="pbtn2" onClick="{{d.undo}}" aria-label="{{d.undoLabel}}">[[ic:undo]]<span>ביטול</span></button>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noDone}}" hint-placeholder-val="{{ false }}"><div class="nil"><span class="nil-ic dash">[[ic:check]]</span><p>{{doneEmpty}}</p></div></sc-if>
+</section>
+
+<section class="lst" aria-label="פספסת">
+<div class="lst-h"><span>פספסת</span><span class="cnt bad">{{missedN}}</span></div>
+<sc-if value="{{hasMissed}}" hint-placeholder-val="{{ true }}">
+<ul>
+<sc-for list="{{missed}}" as="it" hint-placeholder-count="1">
+<li class="lr missed {{it.cls}} {{it.enter}}">
+<span class="lr-ic">[[ic:clock]]</span>
+<span class="lr-t"><b>{{it.name}}</b><span class="num">{{it.endedTxt}}</span></span>
+<button class="pbtn2 soft" onClick="{{it.mark}}" aria-label="{{it.markLabel}}"><span>בכל זאת עשיתי</span></button>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noMissed}}" hint-placeholder-val="{{ false }}"><div class="nil"><span class="nil-ic">[[ic:sparkle]]</span><p>{{missedEmpty}}</p></div></sc-if>
+</section>
+
+
+</div>
+
+<sc-if value="{{svOn}}" hint-placeholder-val="{{ false }}">
+<section class="sv {{svM.kindCls}} {{svFreeze}}" role="dialog" aria-modal="true" aria-label="{{svAria}}">
+<div class="sv-bars" aria-hidden="true">
+<sc-for list="{{svBars}}" as="b" hint-placeholder-count="6"><span class="sv-bar"><i class="{{b.cls}}"></i></span></sc-for>
+</div>
+<div class="sv-head">
+<span class="sv-av">[[icMsg:svM]]</span>
+<span class="sv-tag">{{svM.tagLine}}</span>
+<button class="sv-x" onClick="{{svClose}}" aria-label="סגירת ההודעות">[[ic:close]]</button>
+</div>
+<button class="sv-zone sv-l" onClick="{{svNext}}" aria-label="להודעה הבאה"></button>
+<button class="sv-zone sv-r" onClick="{{svPrev}}" aria-label="להודעה הקודמת"></button>
+<div class="sv-body {{svBodyCls}} {{svM.cls}}">
+<div class="sv-ic">[[icMsg:svM]]</div>
+<sc-if value="{{svM.hasKick}}" hint-placeholder-val="{{ true }}"><p class="sv-kick">{{svM.t1}}</p></sc-if>
+<h2 class="sv-t">{{svM.t2}}</h2>
+<p class="sv-p">{{svM.body}}</p>
+</div>
+<div class="sv-foot">
+<sc-if value="{{svM.hasAction}}" hint-placeholder-val="{{ true }}"><button class="sv-act" onClick="{{svAct}}"><span>{{svM.action}}</span>[[ic:chevron]]</button></sc-if>
+<sc-if value="{{svM.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="sv-hide" onClick="{{svDismiss}}" aria-label="{{svM.dismissLabel}}">הסתרה</button></sc-if>
+<p class="sv-hint">הקשה משמאל: הבא · מימין: הקודם</p>
+</div>
+</section>
+</sc-if>
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    this.rk = { pph: 76, snap: 22 };
+    this.rd = null;
+    this.rdRaf = 0;
+    this.rdAnim = 0;
+    this.rdTgt = 0;
+    this.rdPos = 0;
+    this.liveRef = null;
+    return { sv: null, svKey: 0, seen: {}, rdOn: false, lock: null };
+  }
+
+  boardMount() {
+    this.rm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+    this.onKey = (e) => {
+      if (this.state.sv == null) return;
+      if (e.key === 'Escape') this.svClose();
+      if (e.key === 'ArrowLeft') this.svGo(this.state.sv + 1);
+      if (e.key === 'ArrowRight') this.svGo(this.state.sv - 1);
+    };
+    document.addEventListener('keydown', this.onKey);
+    const st = Number(this.opt('story'));
+    if (st >= 1) this.svOpen(st - 1);
+  }
+
+  boardUnmount() {
+    [this.svTimer, this.svHideTimer, this.lockT].forEach((x) => clearTimeout(x));
+    this.rdStop();
+    document.removeEventListener('keydown', this.onKey);
+  }
+
+  svOpen(i) {
+    const ids = this.msgIds || [];
+    if (!ids.length) return;
+    const idx = Math.max(0, Math.min(ids.length - 1, i));
+    this.setState((s) => ({ sv: idx, svKey: s.svKey + 1, seen: { ...s.seen, [ids[idx]]: true } }));
+    this.svStart();
+  }
+
+  svGo(i) {
+    if (i >= (this.msgIds || []).length) this.svClose();
+    else this.svOpen(i);
+  }
+
+  svStart() {
+    clearTimeout(this.svTimer);
+    if (this.opt('svStop') === '1') return;
+    this.svTimer = setTimeout(() => this.svGo((this.state.sv == null ? 0 : this.state.sv) + 1), 5000);
+  }
+
+  svClose() {
+    clearTimeout(this.svTimer);
+    clearTimeout(this.svHideTimer);
+    this.setState({ sv: null });
+  }
+
+  rdBounds() {
+    return [this.dayStart(), this.dayEnd() - 60];
+  }
+
+  rdSeek(sec) {
+    this.rdTgt = sec;
+    if (this.rdRaf) return;
+    this.rdRaf = requestAnimationFrame(() => {
+      this.rdRaf = 0;
+      this.scrub(this.rdTgt);
+    });
+  }
+
+  rdStop() {
+    cancelAnimationFrame(this.rdRaf);
+    cancelAnimationFrame(this.rdAnim);
+    this.rdRaf = 0;
+    this.rdAnim = 0;
+  }
+
+  rdTween(to, ms, done, from) {
+    this.rdStop();
+    const [lo, hi] = this.rdBounds();
+    const a = from == null ? this.now() : from;
+    const b = Math.max(lo, Math.min(hi, to));
+    if (this.rm.matches || ms <= 0 || Math.abs(b - a) < 1) {
+      this.rdPos = b;
+      this.scrub(b);
+      if (done) done();
+      return;
+    }
+    const t0 = performance.now();
+    const step = (ts) => {
+      const k = Math.min(1, (ts - t0) / ms);
+      this.rdPos = a + (b - a) * (1 - Math.pow(1 - k, 3));
+      this.scrub(this.rdPos);
+      if (k < 1) this.rdAnim = requestAnimationFrame(step);
+      else {
+        this.rdAnim = 0;
+        if (done) done();
+      }
+    };
+    this.rdAnim = requestAnimationFrame(step);
+  }
+
+  rdGo(sec, id) {
+    this.setState({ rdOn: true });
+    this.rdTween(sec, 380, () => this.rdLockOn(id));
+  }
+
+  rdLockOn(id) {
+    clearTimeout(this.lockT);
+    this.setState({ rdOn: false, lock: id });
+    this.lockT = setTimeout(() => this.setState({ lock: null }), 1100);
+  }
+
+  rdSnap() {
+    const kx = this.rk.pph / 3600;
+    let best = null;
+    this.zmanimList().forEach((z) => {
+      const d = Math.abs(z.S - this.rdPos) * kx;
+      if (d <= this.rk.snap && (!best || d < best.d)) best = { z, d };
+    });
+    if (!best) {
+      this.scrub(this.rdPos);
+      this.setState({ rdOn: false });
+      return;
+    }
+    this.rdTween(best.z.S, 280, () => this.rdLockOn(best.z.id), this.rdPos);
+  }
+
+  rdFling(v0) {
+    const spp = 3600 / this.rk.pph;
+    const [lo, hi] = this.rdBounds();
+    let v = Math.max(-2200, Math.min(2200, v0));
+    let last = performance.now();
+    const step = (ts) => {
+      const dt = Math.min(0.05, (ts - last) / 1000);
+      last = ts;
+      v *= Math.exp(-dt / 0.28);
+      this.rdPos = Math.max(lo, Math.min(hi, this.rdPos + v * dt * spp));
+      this.scrub(this.rdPos);
+      if (Math.abs(v) > 30 && this.rdPos > lo && this.rdPos < hi) this.rdAnim = requestAnimationFrame(step);
+      else {
+        this.rdAnim = 0;
+        this.rdSnap();
+      }
+    };
+    this.rdAnim = requestAnimationFrame(step);
+  }
+
+  rdDown(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    this.rdStop();
+    this.rdPos = this.now();
+    this.rd = { id: e.pointerId, el: e.currentTarget, x0: e.clientX, x: e.clientX, ts: performance.now(), v: 0, moved: false };
+  }
+
+  rdMove(e) {
+    const d = this.rd;
+    if (!d || d.id !== e.pointerId) return;
+    if (!d.moved) {
+      if (Math.abs(e.clientX - d.x0) < 6) return;
+      d.moved = true;
+      d.x = e.clientX;
+      d.ts = performance.now();
+      try {
+        d.el.setPointerCapture(e.pointerId);
+      } catch (err) {}
+      this.setState({ rdOn: true });
+      return;
+    }
+    const ts = performance.now();
+    const dx = e.clientX - d.x;
+    d.v = d.v * 0.6 + ((dx / Math.max(1, ts - d.ts)) * 1000) * 0.4;
+    d.x = e.clientX;
+    d.ts = ts;
+    const [lo, hi] = this.rdBounds();
+    this.rdPos = Math.max(lo, Math.min(hi, this.rdPos + dx * (3600 / this.rk.pph)));
+    this.rdSeek(this.rdPos);
+  }
+
+  rdUp(e) {
+    const d = this.rd;
+    if (!d || d.id !== e.pointerId) return;
+    this.rd = null;
+    if (!d.moved) return;
+    try {
+      d.el.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    const v = performance.now() - d.ts > 90 ? 0 : d.v;
+    if (this.rm.matches || Math.abs(v) < 90) this.rdSnap();
+    else this.rdFling(v);
+  }
+
+  rdKey(e) {
+    const [lo, hi] = this.rdBounds();
+    const cur = this.now();
+    const big = e.shiftKey ? 900 : 60;
+    const k = e.key;
+    const to = k === 'ArrowLeft' || k === 'ArrowUp' ? cur + big : k === 'ArrowRight' || k === 'ArrowDown' ? cur - big : k === 'PageUp' ? cur + 3600 : k === 'PageDown' ? cur - 3600 : k === 'Home' ? lo : k === 'End' ? hi : null;
+    if (to == null) return;
+    e.preventDefault();
+    this.rdStop();
+    this.scrub(to);
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const s = this.state;
+    const msgs = c.messages;
+    this.msgIds = msgs.map((m) => m.id);
+    const initial = c.name ? c.name.trim().charAt(0) : '';
+    const label = (m) => (m.id === 'next' ? 'התראה הבאה' : m.id === 'streak' ? 'הרצף שלך' : m.tag);
+    const tagLine = (m) => (m.isPersonal && c.name ? m.tag + ' · אל ' + c.name : m.tag);
+    const n = c.activeN;
+
+    const stories = msgs.map((m, i) => ({
+      ...m,
+      label: label(m),
+      initial,
+      showInitial: m.isPersonal && Boolean(initial),
+      showIcon: !(m.isPersonal && initial),
+      seenCls: s.seen[m.id] ? 'seen' : '',
+      enter: 'enter-' + this.flip('st' + i, m.id),
+      open: () => this.svOpen(i),
+      aria: (s.seen[m.id] ? '' : 'חדש: ') + label(m) + ' — ' + m.title,
+    }));
+    const unseen = msgs.filter((m) => !s.seen[m.id]);
+    const peek = unseen[0] || msgs[0] || null;
+    const peekI = peek ? msgs.indexOf(peek) : 0;
+
+    const cur = s.sv != null ? msgs[s.sv] || null : null;
+    const parts = cur ? cur.title.split(' · ') : [];
+    const svM = cur ? { ...cur, tagLine: tagLine(cur), hasKick: parts.length > 1, t1: parts.length > 1 ? parts[0] : '', t2: parts.length > 1 ? parts.slice(1).join(' · ') : cur.title } : {};
+    const freezeOpt = this.opt('svStop') === '1';
+    const barKey = this.flip('svbar', s.svKey);
+    const bodyKey = this.flip('svbody', cur ? cur.id : '');
+
+    const t = c.nowSec;
+    const d0 = c.dayStartSec;
+    const d1 = c.dayEndSec;
+    const kx = this.rk.pph / 3600;
+    const xr = (sec) => (sec - d0) * kx;
+    const Z = this.zmanimList();
+    const zs = (id) => Z.find((z) => z.id === id).S;
+    const laneEnd = [];
+    const rz = c.zmanim.map((z, i) => {
+      const x = xr(Z[i].S);
+      let lane = laneEnd.findIndex((e) => x - e >= 88);
+      if (lane < 0) {
+        if (laneEnd.length < 3) lane = laneEnd.length;
+        else lane = laneEnd.indexOf(Math.min(...laneEnd));
+      }
+      laneEnd[lane] = x;
+      const near = Math.abs(Z[i].S - t) * kx < 16;
+      const cls = (z.isNext ? 'next' : z.past ? 'past' : '') + (near ? ' near' : '') + (s.lock === z.id ? ' lock' : '');
+      return {
+        ...z,
+        x: x.toFixed(1),
+        top: 'calc(' + lane + ' * var(--lane) + 6px)',
+        lane,
+        cls,
+        aria: 'מעבר ל' + z.name + ' ב-' + z.time,
+        go: () => this.rdGo(Z[i].S, z.id),
+      };
+    });
+    const lanes = Math.max(1, laneEnd.length);
+    const prevI = Z.reduce((a, z, i) => (z.S < t ? i : a), -1);
+    const nextI = Z.findIndex((z) => z.S > t);
+    const far = (i) => i >= 0 && Math.abs(Z[i].S - t) * kx >= 150;
+    const edgeTxt = (i) => c.zmanim[i].short + ' ' + c.zmanim[i].time;
+    rz.forEach((z) => (z.hgt = 'calc(' + (lanes - z.lane) + ' * var(--lane) + 2px)'));
+
+    const ticks = [];
+    for (let q = Math.ceil(d0 / 900) * 900; q <= d1; q += 900) {
+      const hour = q % 3600 === 0;
+      ticks.push({ x: xr(q).toFixed(1), cls: hour ? 'hour' : q % 1800 === 0 ? 'half' : 'quarter', hour, label: this.clock(q) });
+    }
+    const netz = zs('netz');
+    const shkia = zs('shkia');
+    const tzeit = zs('tzeit');
+    const bands = [
+      { cls: 'dawn', a: d0, b: netz },
+      { cls: 'day', a: netz, b: shkia },
+      { cls: 'dusk', a: shkia, b: tzeit },
+      { cls: 'night', a: tzeit, b: d1 },
+    ].map((b) => ({ cls: b.cls, x: xr(b.a).toFixed(1), w: (xr(b.b) - xr(b.a)).toFixed(1) }));
+    const pc = (sec) => (((sec - d0) / (d1 - d0)) * 100).toFixed(2);
+    const railBg = 'linear-gradient(to left, var(--cn) 0%, var(--cd) ' + pc(netz) + '%, var(--cd) ' + pc(shkia) + '%, var(--cn) ' + pc(tzeit) + '%, var(--cn) 100%)';
+
+    if (!c.isScrub) this.liveRef = { t, at: Date.now(), key: c.dateKey };
+    const lr = this.liveRef;
+    const liveT = c.isScrub && lr && lr.key === c.dateKey ? lr.t + (Date.now() - lr.at) / 1000 : null;
+    const showLive = liveT != null && liveT >= d0 && liveT < d1 && Math.abs(liveT - t) * kx > 20;
+
+    const pastZ = c.zmanim.filter((z) => z.past);
+    const lastZ = pastZ[pastZ.length - 1];
+    const reelCaption = lastZ ? 'אחרי ' + lastZ.name : '';
+
+    const its = this.items();
+    const ni = its.length;
+    const groups = [];
+    its.forEach((x, i) => {
+      const g = groups[groups.length - 1];
+      if (!g || x.S > g.S) groups.push({ S: x.S, first: i });
+    });
+    let prog = 0;
+    if (t >= groups[0].S) {
+      let gi = 0;
+      while (gi + 1 < groups.length && t >= groups[gi + 1].S) gi++;
+      const a = groups[gi];
+      const hasNext = gi + 1 < groups.length;
+      const toFirst = hasNext ? groups[gi + 1].first : ni;
+      const toS = hasNext ? groups[gi + 1].S : d1;
+      prog = a.first + (toFirst - a.first) * Math.min(1, (t - a.S) / (toS - a.S));
+    }
+    const pj = Math.min(ni - 1, Math.floor(prog));
+    const todayMk = 'calc(' + prog.toFixed(3) + ' * ((100% - ' + (ni - 1) * 6 + 'px) / ' + ni + ') + ' + pj * 6 + 'px)';
+
+    return {
+      ...c,
+      activeCount: n === 0 ? 'אין פתוחות' : n === 1 ? 'פתוחה אחת' : n === 2 ? 'שתיים פתוחות' : n + ' פתוחות',
+      stories,
+      hasPeek: Boolean(peek),
+      peek: peek || {},
+      peekEnter: 'enter-' + this.flip('peek', peek ? peek.id : ''),
+      peekOpen: () => this.svOpen(peekI),
+      unseenText: unseen.length ? unseen.length + ' חדשות' : 'לצפייה',
+      noMessages: msgs.length === 0,
+      cards: c.active.map((x, i) => ({ ...x, endTxt: x.endWord + ' ' + x.endT, enter: 'enter-' + this.flip('card' + i, x.id) })),
+      later: c.upcoming.map((x, i) => ({ ...x, opensTxt: 'נפתח ב-' + x.startT, enter: 'enter-' + this.flip('later' + i, x.id) })),
+      segs: c.timeline.map((x) => ({ ...x, aria: x.name + ': ' + x.statusText, tap: () => this.showToast({ text: x.name + ' · ' + x.statusText }) })),
+      done: c.done.map((d, i) => ({ ...d, atTxt: 'סומן ב-' + d.at, enter: 'enter-' + this.flip('done' + i, d.id) })),
+      missed: c.missed.map((x, i) => ({ ...x, endedTxt: 'נגמר ב-' + x.endT, enter: 'enter-' + this.flip('miss' + i, x.id) })),
+      doneBump: 'bump-' + this.flip('dn', c.doneN),
+      todayMk,
+      lanes,
+      edgePrev: far(prevI),
+      edgePrevTxt: prevI >= 0 ? edgeTxt(prevI) : '',
+      edgePrevAria: prevI >= 0 ? 'מעבר ל' + c.zmanim[prevI].name + ' ב-' + c.zmanim[prevI].time : '',
+      edgePrevGo: () => this.rdGo(Z[prevI].S, c.zmanim[prevI].id),
+      edgeNext: far(nextI),
+      edgeNextTxt: nextI >= 0 ? edgeTxt(nextI) : '',
+      edgeNextAria: nextI >= 0 ? 'מעבר ל' + c.zmanim[nextI].name + ' ב-' + c.zmanim[nextI].time : '',
+      edgeNextGo: () => this.rdGo(Z[nextI].S, c.zmanim[nextI].id),
+      rz,
+      bands,
+      ticks,
+      reelW: xr(d1).toFixed(1),
+      reelX: xr(t).toFixed(2),
+      reelDrag: s.rdOn ? 'drag' : '',
+      reelCaption,
+      reelState: c.isScrub ? 'תצוגה' : 'עכשיו',
+      reelStCls: c.isScrub ? 'view' : '',
+      reelText: c.nowT + (reelCaption ? ' · ' + reelCaption : ''),
+      showLive,
+      liveX: liveT == null ? '0' : xr(liveT).toFixed(1),
+      railBg,
+      railDots: c.zmanim.map((z) => ({ p: z.p })),
+      onRail: (e) => {
+        this.rdStop();
+        this.scrub(Number(e.target.value));
+      },
+      rdDown: (e) => this.rdDown(e),
+      rdMove: (e) => this.rdMove(e),
+      rdUp: (e) => this.rdUp(e),
+      rdKey: (e) => this.rdKey(e),
+      svOn: Boolean(cur),
+      svM,
+      svAria: cur ? 'הודעה: ' + cur.title : '',
+      svFreeze: freezeOpt ? 'freeze' : '',
+      svBodyCls: 'in-' + bodyKey,
+      svBars: msgs.map((m, i) => ({ cls: s.sv == null ? '' : i < s.sv ? 'full' : i === s.sv ? 'cur f' + barKey : '' })),
+      svClose: () => this.svClose(),
+      svNext: () => this.svGo((s.sv == null ? 0 : s.sv) + 1),
+      svPrev: () => this.svGo((s.sv == null ? 0 : s.sv) - 1),
+      svAct: () => {
+        if (!cur) return;
+        if (cur.id === 'next') this.svClose();
+        cur.act();
+      },
+      svDismiss: () => {
+        if (!cur) return;
+        clearTimeout(this.svTimer);
+        this.dismissMsg(cur.id, cur.title);
+        clearTimeout(this.svHideTimer);
+        this.svHideTimer = setTimeout(() => {
+          if (this.state.sv == null) return;
+          this.svGo(this.state.sv);
+        }, 480);
+      },
+    };
+  }
+}
+</script>

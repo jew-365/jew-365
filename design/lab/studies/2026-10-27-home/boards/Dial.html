@@ -1,0 +1,896 @@
+<!--board title="ו · שעון יום"-->
+<style>
+.ph{--skyHigh:#FFF2CC;--skyDay:#FFD98E;--skyDawn:#F4A57B;--skyDusk:#EE8F5C;--skyNight:#4F5A99;--skyDeep:#262E5E}
+.ph.t-rose{--skyHigh:#FFE9E0;--skyDay:#FFCBC4;--skyDawn:#F2A0A8;--skyDusk:#DD7A96;--skyNight:#5D4D8A;--skyDeep:#33294F}
+.ph.t-night{--skyHigh:#E9CE8E;--skyDay:#D4A55F;--skyDawn:#C77B50;--skyDusk:#AE5F3F;--skyNight:#36468E;--skyDeep:#222E66}
+.dh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.dh h1{font-size:1.375em;font-weight:700;letter-spacing:-.01em;line-height:1.2;margin-top:2px}
+.streak{display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:0 12px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-weight:700;font-size:.8125em;white-space:nowrap;flex:none}
+.streak .ic{width:16px;height:16px;color:var(--accent)}
+.label{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:.8125em;font-weight:700;color:var(--sub);margin:26px 4px 10px}
+.label b{font-weight:700;color:var(--text)}
+.label .tools{display:inline-flex;align-items:center;gap:10px}
+.clr{min-height:44px;margin-block:-14px;padding:0 6px;font-weight:700;font-size:1em;color:var(--accentText)}
+.dial{position:relative;width:350px;height:372px;margin:6px auto 0;user-select:none;-webkit-user-select:none}
+.dial > *{position:absolute}
+.face{left:31px;top:42px;width:288px;height:288px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow)}
+.sky{left:31px;top:42px;width:288px;height:288px;border-radius:50%;-webkit-mask:radial-gradient(circle farthest-side at 50% 50%,transparent 88.3%,#000 88.9%);mask:radial-gradient(circle farthest-side at 50% 50%,transparent 88.3%,#000 88.9%);animation:skyIn 1.1s ease-out both}
+@keyframes skyIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+.dsvg{left:0;top:0;overflow:visible}
+.tick{stroke:var(--surface);stroke-width:1.3;stroke-linecap:round}
+.tick.maj{stroke-width:2.5}
+.tk{fill:none;stroke:var(--surface2);stroke-width:7}
+.arcg{transition:opacity .35s}
+.dial.fil-active .arcg:not(.s-active),.dial.fil-done .arcg:not(.s-done),.dial.fil-missed .arcg:not(.s-missed),.dial.fil-upcoming .arcg:not(.s-upcoming){opacity:.15}
+.aline{fill:none;stroke-width:7;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;opacity:0;animation:drawIn 1.2s cubic-bezier(.3,.75,.2,1) var(--d,0s) both}
+@keyframes drawIn{0%{opacity:0;stroke-dashoffset:100}3%{opacity:1}100%{opacity:1;stroke-dashoffset:0}}
+.a-ghost{stroke:var(--soft)}
+.a-rem{stroke:var(--accent);filter:drop-shadow(0 0 2px var(--accent));animation:drawIn 1.2s cubic-bezier(.3,.75,.2,1) var(--d,0s) both,glowB 3.4s ease-in-out 1.8s infinite}
+@keyframes glowB{0%,100%{filter:drop-shadow(0 0 2px var(--accent))}50%{filter:drop-shadow(0 0 4.5px var(--accent))}}
+.a-done{stroke:var(--safe)}
+.a-out{stroke:var(--sub);stroke-opacity:.5}
+.a-in{stroke:var(--surface);stroke-width:3.8}
+.a-miss{fill:none;stroke:var(--urgent);stroke-width:7;stroke-dasharray:4 4.5}
+.a-mask{fill:none;stroke:#fff;stroke-width:12;stroke-dasharray:100;stroke-dashoffset:100;animation:drawM 1.2s cubic-bezier(.3,.75,.2,1) var(--d,0s) both}
+@keyframes drawM{to{stroke-dashoffset:0}}
+.mk{fill:var(--surface);stroke:var(--safe);stroke-width:2.2;animation:fadeIn .5s 1.2s both}
+.mk.late{stroke:var(--urgent)}
+.selh{fill:none;stroke:var(--text);stroke-opacity:.15;stroke-width:14;stroke-linecap:round}
+.ahit{fill:none;stroke:transparent;stroke-width:10;pointer-events:stroke;cursor:pointer;outline:none}
+.ahit:focus-visible{stroke:var(--accent);stroke-opacity:.4}
+.zdt{fill:var(--surface);stroke:var(--text);stroke-width:1.4;pointer-events:none}
+.zdt.past{opacity:.38}
+.zdt.next{fill:var(--accent);stroke:var(--surface);stroke-width:2;transform-box:fill-box;transform-origin:center;animation:dotBeat 2.4s ease-in-out infinite}
+@keyframes dotBeat{50%{transform:scale(1.18)}}
+.zhalo{fill:var(--accent);pointer-events:none;transform-box:fill-box;transform-origin:center;animation:haloPulse 2.4s ease-out infinite}
+@keyframes haloPulse{0%{transform:scale(.7);opacity:.55}100%{transform:scale(2.2);opacity:0}}
+.hand{pointer-events:none;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--accent) 55%,transparent))}
+.hand-o{stroke:var(--surface);stroke-width:4.6;stroke-linecap:round}
+.hand-i{stroke:var(--text);stroke-width:1.8;stroke-linecap:round}
+.orbit{transform-origin:175px 186px;animation:orbitSpin 60s linear infinite;pointer-events:none}
+.orbit circle{fill:var(--accent)}
+@keyframes orbitSpin{to{transform:rotate(360deg)}}
+.sweep{left:31px;top:42px;width:288px;height:288px;border-radius:50%;pointer-events:none;-webkit-mask:radial-gradient(circle farthest-side at 50% 50%,transparent 62%,#000 66%,#000 87%,transparent 90%);mask:radial-gradient(circle farthest-side at 50% 50%,transparent 62%,#000 66%,#000 87%,transparent 90%)}
+.lit{fill:none;stroke-width:7;stroke-linecap:round;pointer-events:none;stroke:var(--lc);stroke-opacity:.6;filter:drop-shadow(0 0 2.4px var(--lc))}
+.lit.l-active{--lc:var(--accent);stroke:color-mix(in srgb,var(--accent) 62%,#fff)}
+.lit.l-done{--lc:var(--safe);stroke:color-mix(in srgb,var(--safe) 62%,#fff)}
+.lit.l-missed{--lc:var(--urgent);stroke:color-mix(in srgb,var(--urgent) 62%,#fff);stroke-width:7;stroke-dasharray:4 4.5}
+.bezel{fill:none;stroke:transparent;stroke-width:26;pointer-events:stroke;cursor:grab;touch-action:none}
+.dial.drag .bezel{cursor:grabbing}
+.dial.scr .aline{animation:none;opacity:1;stroke-dashoffset:0}
+.dial.scr .a-rem{animation:glowB 3.4s ease-in-out infinite}
+.dial.scr .a-mask{animation:none;stroke-dashoffset:0}
+.dial.scr .mk{animation:none}
+.zl{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;line-height:1.2;font-size:.75em;text-align:center;white-space:nowrap;pointer-events:none;transition:opacity .25s}
+.zl b{font-weight:700;color:var(--text)}
+.zl span{color:var(--sub);font-weight:600}
+.zl.past{opacity:.6}
+.zl.nx b,.zl.nx span{color:var(--accentText)}
+.zl.hid{opacity:0}
+.bub{position:absolute;z-index:4;transform:translate(-50%,-50%);min-width:46px;height:24px;padding:0 8px;border-radius:12px;background:var(--text);color:var(--bg);font-weight:800;font-size:.75em;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.2);touch-action:none;cursor:grab;outline:none;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s;animation:bubIn .6s .8s backwards}
+.bub::before{content:'';position:absolute;inset:-12px}
+.bub:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.dial.drag .bub{transform:translate(-50%,-50%) scale(1.14);cursor:grabbing;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 45%,transparent),0 6px 18px rgba(0,0,0,.3)}
+.dial.hintOn .bub::after{content:'';position:absolute;inset:-4px;border-radius:16px;border:2px solid var(--accent);opacity:0;animation:bubRing 2.4s 1.6s ease-out infinite;pointer-events:none}
+@keyframes bubIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%)}}
+@keyframes bubRing{0%{opacity:.75;transform:scale(.92)}100%{opacity:0;transform:scale(1.4)}}
+.cdisc{left:83px;top:94px;width:184px;height:184px;border-radius:50%;background:var(--surface);box-shadow:0 0 0 1px var(--border);overflow:hidden;font-size:min(1em,16px)}
+.cin{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 8px}
+.cin.cf-a{animation:cfA .45s cubic-bezier(.2,.8,.2,1) both}
+.cin.cf-b{animation:cfB .45s cubic-bezier(.2,.8,.2,1) both}
+@keyframes cfA{from{opacity:0;transform:scale(.93);filter:blur(3px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes cfB{from{opacity:0;transform:scale(.93);filter:blur(3px)}to{opacity:1;transform:none;filter:blur(0)}}
+.cname{font-size:.875em;font-weight:700;line-height:1.2;max-width:150px}
+.cbig{font-size:2.15em;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:1px}
+.cbig.c-active{color:var(--text)}
+.cbig.c-urgent,.cbig.c-missed{color:var(--urgent)}
+.cbig.c-done{color:var(--safe)}
+.cbig.c-ahead{color:var(--sub)}
+.cunit{font-size:.75em;color:var(--sub);font-weight:600;line-height:1.25}
+.cmeta{display:flex;flex-direction:column;margin-top:5px;font-size:.75em;line-height:1.25;color:var(--sub);font-weight:500;font-variant-numeric:tabular-nums}
+.cbtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:104px;margin-top:6px;padding:0 16px;border-radius:22px;font-weight:700;font-size:.875em;transition:transform .15s,background .2s}
+.cbtn:active{transform:scale(.96)}
+.cbtn.primary{background:var(--accent);color:var(--onAccent)}
+.cbtn.ghost{background:var(--surface2);color:var(--text)}
+.cbtn.warn{background:var(--urgentSoft);color:var(--urgent)}
+.cbtn .ic{width:18px;height:18px;stroke-width:2.3}
+.cwait{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin-top:6px;padding:0 14px;border-radius:22px;border:1.5px dashed var(--border);color:var(--sub);font-size:.8125em;font-weight:600}
+.cwait .ic{width:16px;height:16px}
+.cempty .halo{width:52px;height:52px;margin-bottom:8px;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:flex;align-items:center;justify-content:center;animation:float 3.2s ease-in-out infinite}
+.cempty .halo .ic{width:26px;height:26px}
+@keyframes float{50%{transform:translateY(-5px)}}
+.cempty .cname{font-size:1em;max-width:150px}
+.cempty .cunit{margin-top:4px;max-width:140px}
+.stamp{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--safe);color:var(--onSafe);clip-path:circle(0% at 50% 62%);pointer-events:none}
+.cdisc.marking .stamp{animation:wipe .7s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes wipe{to{clip-path:circle(150% at 50% 62%)}}
+.stamp .ic{width:54px;height:54px;stroke-width:2.4;stroke-dasharray:24;stroke-dashoffset:24}
+.cdisc.marking .stamp .ic{animation:draw .35s .32s ease-out forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.stamp span{font-weight:700;font-size:1.125em}
+.lg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:2px}
+.lgc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:58px;padding:8px 4px;border-radius:18px;background:var(--surface);box-shadow:var(--shadow);transition:box-shadow .2s,background .2s,transform .15s}
+.lgc:active{transform:scale(.97)}
+.lgc[aria-pressed="true"]{background:var(--soft);box-shadow:inset 0 0 0 2px var(--accent),var(--shadow)}
+.lgc.zero .lg-top,.lgc.zero .lg-l{opacity:.55}
+.lg-top{display:flex;align-items:center;gap:7px}
+.lg-top b{font-size:1.125em;font-weight:800;line-height:1}
+.lg-l{font-size:.75em;font-weight:600;color:var(--sub)}
+.lgc[aria-pressed="true"] .lg-l{color:var(--accentText)}
+.sw{display:block;width:20px;height:8px;border-radius:4px}
+.sw-open{background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.sw-done{background:var(--safe)}
+.sw-missed{background:repeating-linear-gradient(to left,var(--urgent) 0 4px,transparent 4px 7px)}
+.sw-ahead{box-shadow:inset 0 0 0 1.5px var(--sub);opacity:.8}
+.rows{display:flex;flex-direction:column;gap:8px}
+.rrow{display:flex;flex-wrap:wrap;align-items:center;gap:4px;background:var(--surface);border-radius:20px;padding:5px;box-shadow:var(--shadow);animation:fadeIn .45s both;transition:box-shadow .25s}
+.rrow.foc{box-shadow:inset 0 0 0 2px var(--accent),var(--shadow)}
+.rmain{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:12px;padding:6px;border-radius:16px;min-height:62px}
+.rtile{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:none;background:var(--surface2);color:var(--sub)}
+.st-active .rtile{background:var(--soft);color:var(--accentText)}
+.st-done .rtile{background:var(--safeSoft);color:var(--safe)}
+.st-missed .rtile{background:var(--urgentSoft);color:var(--urgent)}
+.rtext{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.rname{font-weight:700;line-height:1.3}
+.rwin{font-size:.8125em;color:var(--sub);font-variant-numeric:tabular-nums;line-height:1.35}
+.rst{font-size:.8125em;font-weight:700;line-height:1.35}
+.st-active .rst{color:var(--accentText)}
+.st-done .rst{color:var(--safe)}
+.st-missed .rst{color:var(--urgent)}
+.st-upcoming .rst{color:var(--sub);font-weight:600}
+.lateTag{font-size:.6875em;font-weight:700;color:var(--urgent);background:var(--urgentSoft);border-radius:6px;padding:1px 6px;margin-inline-start:6px}
+.rcheck{width:48px;height:48px;border-radius:50%;background:var(--accent);color:var(--onAccent);display:flex;align-items:center;justify-content:center;flex:none;margin-inline-end:4px;transition:background .25s,color .25s,transform .25s}
+.rcheck .ic{stroke-width:2.4}
+.rcheck:active{transform:scale(.94)}
+.rrow.marking .rcheck{background:var(--safe);color:var(--onSafe);transform:scale(1.08)}
+.rlate{flex:1 1 100%;min-height:44px;margin:0 6px 6px;padding:0 12px;border-radius:14px;background:var(--urgentSoft);color:var(--urgent);font-weight:700;font-size:.875em;text-align:center}
+.rrow.marking .rlate{background:var(--safe);color:var(--onSafe)}
+.rundo{min-height:44px;padding:0 12px;border-radius:12px;font-weight:700;font-size:.9375em;color:var(--accentText);flex:none}
+.notes{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.empty{display:flex;align-items:center;gap:12px;padding:10px 14px 10px 12px;min-height:56px;border-radius:20px;border:1.5px dashed color-mix(in srgb,var(--sub) 38%,transparent);background:color-mix(in srgb,var(--safeSoft) 45%,transparent);color:var(--text);font-size:.9375em;font-weight:600;animation:fadeIn .45s both}
+.eic{width:34px;height:34px;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:flex;align-items:center;justify-content:center;flex:none}
+.eic .ic{width:18px;height:18px}
+.bigempty{background:var(--surface);border-radius:24px;padding:24px 20px;text-align:center;box-shadow:var(--shadow);animation:riseA .6s both}
+.bigempty .halo{width:64px;height:64px;margin:0 auto 10px;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:flex;align-items:center;justify-content:center;animation:float 3.2s ease-in-out infinite}
+.bigempty .halo .ic{width:28px;height:28px}
+.bigempty h4{font-size:1.125em;font-weight:700;margin:0}
+.bigempty .cap{margin-top:6px;font-size:.9375em}
+.mcard{background:var(--surface);border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
+.mrow{display:flex;align-items:flex-start;gap:12px;padding:12px 6px 12px 14px;animation:fadeIn .45s both}
+.mrow + .mrow{border-top:1px solid var(--border)}
+.mrow.personal{background:var(--soft)}
+.mrow.system{background:var(--infoSoft)}
+.mic{width:38px;height:38px;border-radius:12px;background:var(--surface2);color:var(--sub);display:flex;align-items:center;justify-content:center;flex:none}
+.mrow.personal .mic{background:var(--surface);color:var(--accentText)}
+.mrow.system .mic{background:var(--surface);color:var(--info)}
+.mic .ic{width:19px;height:19px}
+.mbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.mtag{font-size:.75em;font-weight:700;color:var(--sub)}
+.mrow.personal .mtag{color:var(--accentText)}
+.mrow.system .mtag{color:var(--info)}
+.mt{font-weight:700;line-height:1.3}
+.mb{font-size:.875em;line-height:1.4;text-wrap:pretty}
+.mact{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;min-height:44px;margin-bottom:-8px;font-weight:700;font-size:.875em;color:var(--accentText)}
+.mrow.system .mact{color:var(--info)}
+.mact .ic{width:16px;height:16px}
+.mx{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--sub);flex:none;margin-top:-4px}
+.mx .ic{width:16px;height:16px}
+.card{background:var(--surface);border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
+.zhead{display:flex;align-items:center;gap:8px;padding:14px 16px 4px;font-size:.875em;color:var(--sub)}
+.zhead b{color:var(--text)}
+.zhead .ic{width:18px;height:18px;color:var(--accentText);flex:none}
+.zcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(6,auto);grid-auto-flow:column;gap:2px 10px;padding:8px 10px 12px}
+.zi{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;padding:7px 8px;border-radius:14px;min-height:52px}
+.zdot{grid-row:1 / span 3;width:11px;height:11px;border-radius:50%;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--text)}
+.zn{font-size:.8125em;color:var(--sub);font-weight:500;line-height:1.25}
+.zt{font-weight:800;font-variant-numeric:tabular-nums;line-height:1.25}
+.zin{font-size:.75em;font-weight:700;color:var(--accentText);line-height:1.3}
+.zi.past{opacity:.5}
+.zi.next{background:var(--soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.zi.next .zdot{background:var(--accent);box-shadow:0 0 0 4px var(--soft),0 0 0 5.5px var(--accent);animation:dotBeat 2.4s ease-in-out infinite}
+.zi.next .zn{color:var(--accentText);font-weight:700}
+</style>
+<template>
+<div class="scroll" style="position: absolute; inset: 0; overflow-y: auto; padding: 24px 20px 124px">
+
+<header class="dh">
+<div style="min-width: 0">
+<p class="cap">{{dateLine}}</p>
+<h1>{{greeting}}</h1>
+</div>
+<span class="streak" role="img" aria-label="{{streakLabel}}">[[ic:flame]]<span class="num">{{streak}} ימים</span></span>
+</header>
+
+<!--NAMECARD-->
+
+<section id="dialTop" aria-label="שעון היום">
+<div class="dial fil-{{filterKey}} {{dialCls}}" id="dialBox" role="group" aria-label="{{dialAria}}">
+<div class="face" aria-hidden="true"></div>
+<div class="sky" aria-hidden="true" style="background: {{skyBg}}"></div>
+<div class="sweep" aria-hidden="true" style="background: {{sweepBg}}"></div>
+<div class="bub num" id="handGrip" data-g="hand" role="slider" tabindex="0" aria-label="מחוג הזמן, גרירה או חצים לבחירת שעה" aria-orientation="horizontal" aria-valuemin="{{sliderMin}}" aria-valuemax="{{sliderMax}}" aria-valuenow="{{sliderNow}}" aria-valuetext="{{sliderText}}" style="left: {{bub.x}}px; top: {{bub.y}}px" onPointerDown="{{dDown}}" onPointerMove="{{dMove}}" onPointerUp="{{dUp}}" onPointerCancel="{{dUp}}" onKeyDown="{{dKey}}">{{nowT}}</div>
+<svg class="dsvg" width="350" height="372" viewBox="0 0 350 372">
+<g aria-hidden="true">
+<sc-for list="{{ticks}}" as="k" hint-placeholder-count="24">
+<line class="tick {{k.cls}}" x1="{{k.x1}}" y1="{{k.y1}}" x2="{{k.x2}}" y2="{{k.y2}}"></line>
+</sc-for>
+<sc-for list="{{trackCircles}}" as="k" hint-placeholder-count="3">
+<circle class="tk" cx="175" cy="186" r="{{k.r}}"></circle>
+</sc-for>
+</g>
+<sc-if value="{{hasSelD}}" hint-placeholder-val="{{ false }}"><path class="selh" aria-hidden="true" d="{{selD}}"></path></sc-if>
+<g aria-hidden="true">
+<circle class="bezel" data-g="bezel" cx="175" cy="186" r="141" onPointerDown="{{dDown}}" onPointerMove="{{dMove}}" onPointerUp="{{dUp}}" onPointerCancel="{{dUp}}"></circle>
+</g>
+<g aria-hidden="true">
+<sc-for list="{{arcsUp}}" as="a" hint-placeholder-count="1">
+<g class="arcg s-upcoming">
+<path class="aline a-out" d="{{a.d}}" pathLength="100" style="--d: {{a.delay}}s"></path>
+<path class="aline a-in" d="{{a.d}}" pathLength="100" style="--d: {{a.delay}}s"></path>
+</g>
+</sc-for>
+<sc-for list="{{arcsMiss}}" as="a" hint-placeholder-count="1">
+<g class="arcg s-missed">
+<mask id="{{a.mid}}" maskUnits="userSpaceOnUse" x="0" y="0" width="350" height="372">
+<path class="a-mask" d="{{a.dFull}}" pathLength="100" style="--d: {{a.delay}}s"></path>
+</mask>
+<path class="a-miss" d="{{a.dFull}}" mask="{{a.murl}}"></path>
+</g>
+</sc-for>
+<sc-for list="{{arcsDone}}" as="a" hint-placeholder-count="1">
+<g class="arcg s-done">
+<path class="aline a-done" d="{{a.d}}" pathLength="100" style="--d: {{a.delay}}s"></path>
+<circle class="mk {{a.lateCls}}" cx="{{a.mx}}" cy="{{a.my}}" r="2.7"></circle>
+</g>
+</sc-for>
+<sc-for list="{{arcsAct}}" as="a" hint-placeholder-count="1">
+<g class="arcg s-active">
+<path class="aline a-ghost" d="{{a.d}}" pathLength="100" style="--d: {{a.delay}}s"></path>
+<path class="aline a-rem" d="{{a.dRem}}" pathLength="100" style="--d: {{a.delay}}s"></path>
+</g>
+</sc-for>
+</g>
+<g aria-hidden="true">
+<sc-for list="{{lits}}" as="a" hint-placeholder-count="3">
+<path class="lit {{a.cls}}" d="{{a.d}}"></path>
+</sc-for>
+</g>
+<g aria-hidden="true">
+<sc-if value="{{hasNextDot}}" hint-placeholder-val="{{ true }}"><circle class="zhalo" cx="{{nextDot.x}}" cy="{{nextDot.y}}" r="7"></circle></sc-if>
+<sc-for list="{{dots}}" as="z" hint-placeholder-count="11">
+<circle class="zdt {{z.cls}}" cx="{{z.x}}" cy="{{z.y}}" r="{{z.r}}"></circle>
+</sc-for>
+</g>
+<g class="hand" aria-hidden="true" style="transform: rotate({{handDeg}}deg); transform-origin: 175px 186px">
+<line class="hand-o" x1="175" y1="186" x2="175" y2="{{handEnd}}"></line>
+<line class="hand-i" x1="175" y1="186" x2="175" y2="{{handEnd}}"></line>
+</g>
+<g class="orbit" aria-hidden="true" style="animation-delay: {{orbitDelay}}"><circle cx="175" cy="92" r="2.3"></circle></g>
+<g role="group" aria-label="חלונות הזמן של המצוות">
+<sc-for list="{{arcs}}" as="a" hint-placeholder-count="6">
+<path class="ahit" d="{{a.dFull}}" role="button" tabindex="0" aria-pressed="{{a.pressed}}" aria-label="{{a.label}}" onClick="{{a.pick}}" onKeyDown="{{a.key}}"></path>
+</sc-for>
+</g>
+</svg>
+<sc-for list="{{labels}}" as="l" hint-placeholder-count="4">
+<div class="zl {{l.cls}}" aria-hidden="true" style="left: {{l.x}}px; top: {{l.y}}px"><b>{{l.name}}</b><span class="num">{{l.time}}</span></div>
+</sc-for>
+<div class="cdisc {{centerCls}}" role="group" aria-label="{{centerAria}}">
+<div class="cin {{centerAnim}}">
+<sc-if value="{{hasFocus}}" hint-placeholder-val="{{ true }}">
+<h2 class="cname">{{f.short}}</h2>
+<p class="cbig {{f.bigCls}}">{{f.bigText}}</p>
+<p class="cunit">{{f.bigUnit}}</p>
+<p class="cmeta"><span>{{f.metaStart}}</span><span>{{f.metaEnd}}</span></p>
+<sc-if value="{{f.hasBtn}}" hint-placeholder-val="{{ true }}">
+<button class="cbtn {{f.btnCls}}" onClick="{{f.btnClick}}" aria-label="{{f.btnAria}}">
+<sc-if value="{{f.icCheck}}" hint-placeholder-val="{{ true }}">[[ic:check]]</sc-if>
+<sc-if value="{{f.icUndo}}" hint-placeholder-val="{{ false }}">[[ic:undo]]</sc-if>
+<span>{{f.btnLabel}}</span>
+</button>
+</sc-if>
+<sc-if value="{{f.isUpcoming}}" hint-placeholder-val="{{ false }}"><span class="cwait">[[ic:clock]]<span>עוד לא נפתח</span></span></sc-if>
+</sc-if>
+<sc-if value="{{noFocus}}" hint-placeholder-val="{{ false }}">
+<div class="cempty" aria-live="polite" style="display: flex; flex-direction: column; align-items: center">
+<div class="halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h2 class="cname">{{activeEmptyTitle}}</h2>
+<p class="cunit">{{activeEmptyText}}</p>
+</div>
+</sc-if>
+</div>
+<div class="stamp" aria-hidden="true">[[ic:check]]<span>סומן</span></div>
+</div>
+</div>
+</section>
+
+<div class="lg" role="group" aria-label="סינון לפי מצב" style="margin-top: 6px">
+<sc-for list="{{legend}}" as="g" hint-placeholder-count="4">
+<button class="lgc {{g.cls}}" aria-pressed="{{g.on}}" aria-label="{{g.aria}}" onClick="{{g.toggle}}">
+<span class="lg-top"><i class="sw {{g.swCls}}"></i><b class="num">{{g.n}}</b></span>
+<span class="lg-l">{{g.label}}</span>
+</button>
+</sc-for>
+</div>
+
+<h3 class="label"><span>{{listTitle}}</span><span class="tools"><sc-if value="{{hasFilter}}" hint-placeholder-val="{{ false }}"><button class="clr" onClick="{{clearFilter}}">הצג הכול</button></sc-if><b>{{rowsN}}</b></span></h3>
+<sc-if value="{{hasRows}}" hint-placeholder-val="{{ true }}">
+<ul class="rows" role="list" aria-label="{{listTitle}}">
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+<li class="rrow st-{{r.status}} {{r.rowCls}}" role="listitem" style="animation-delay: {{r.delay}}s">
+<button class="rmain" onClick="{{r.focus}}" aria-label="{{r.focusLabel}}">
+<span class="rtile">[[icItem:r]]</span>
+<span class="rtext">
+<span class="rname">{{r.name}}</span>
+<span class="rwin">{{r.window}}</span>
+<span class="rst">{{r.stText}}<sc-if value="{{r.lateTag}}" hint-placeholder-val="{{ false }}"><span class="lateTag">באיחור</span></sc-if></span>
+</span>
+</button>
+<sc-if value="{{r.isActive}}" hint-placeholder-val="{{ true }}"><button class="rcheck" onClick="{{r.markRow}}" aria-label="{{r.markLabel}}">[[ic:check]]</button></sc-if>
+<sc-if value="{{r.isMissed}}" hint-placeholder-val="{{ false }}"><button class="rlate" onClick="{{r.markRow}}" aria-label="{{r.markLabel}}">בכל זאת עשיתי</button></sc-if>
+<sc-if value="{{r.isDone}}" hint-placeholder-val="{{ false }}"><button class="rundo" onClick="{{r.undo}}" aria-label="{{r.undoLabel}}">ביטול</button></sc-if>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noRows}}" hint-placeholder-val="{{ false }}">
+<section class="bigempty" aria-live="polite">
+<div class="halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h4>{{emptyTitle}}</h4>
+<p class="cap">{{emptyText}}</p>
+</section>
+</sc-if>
+<sc-if value="{{hasNotes}}" hint-placeholder-val="{{ false }}">
+<div class="notes">
+<sc-for list="{{notes}}" as="n" hint-placeholder-count="1">
+<p class="empty"><span class="eic">[[ic:sparkle]]</span><span>{{n.text}}</span></p>
+</sc-for>
+</div>
+</sc-if>
+
+<h3 class="label"><span>הודעות</span><b>{{msgCount}}</b></h3>
+<div class="mcard" role="list" aria-label="הודעות">
+<sc-for list="{{msgs}}" as="m" hint-placeholder-count="3">
+<article class="mrow {{m.kindCls}} {{m.cls}}" role="listitem" style="animation-delay: {{m.delay}}s">
+<span class="mic">[[icMsg:m]]</span>
+<div class="mbody">
+<p class="mtag">{{m.tag}}</p>
+<p class="mt">{{m.title}}</p>
+<p class="mb">{{m.body}}</p>
+<sc-if value="{{m.hasAction}}" hint-placeholder-val="{{ true }}"><button class="mact" onClick="{{m.act}}"><span>{{m.action}}</span>[[ic:chevron]]</button></sc-if>
+</div>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="mx" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</article>
+</sc-for>
+</div>
+
+<h3 class="label" id="zD"><span>זמני היום · {{city}}</span><b>{{hebDay}}</b></h3>
+<section class="card" aria-label="זמני היום">
+<p class="zhead">[[ic:clock]]<span>הזמן הבא: <b>{{nextZ.name}} ב-{{nextZ.time}}</b> · {{nextZ.left}}</span></p>
+<ul class="zcols">
+<sc-for list="{{zmanim}}" as="z" hint-placeholder-count="6">
+<li class="zi {{z.cls}}">
+<i class="zdot"></i>
+<span class="zn">{{z.name}}</span>
+<b class="zt">{{z.time}}</b>
+<sc-if value="{{z.isNext}}" hint-placeholder-val="{{ false }}"><span class="zin">{{nextZ.left}}</span></sc-if>
+</li>
+</sc-for>
+</ul>
+</section>
+</div>
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    return { sel: null, filt: null, drag: false, touched: false, vf: 0 };
+  }
+
+  boardMount() {
+    this.guard = (e) => {
+      if (e.target && e.target.closest && e.target.closest('[data-g]')) e.preventDefault();
+    };
+    this.box = document.getElementById('dialBox');
+    if (this.box) this.box.addEventListener('touchstart', this.guard, { passive: false });
+    this.orbitDelay = '-' + ((Date.now() / 1000) % 60).toFixed(2) + 's';
+  }
+
+  boardUnmount() {
+    clearTimeout(this.selTimer);
+    cancelAnimationFrame(this.vRaf);
+    cancelAnimationFrame(this.dRaf);
+    cancelAnimationFrame(this.cRaf);
+    if (this.box) this.box.removeEventListener('touchstart', this.guard);
+  }
+
+  eased(t, key) {
+    const now = performance.now();
+    const dt = Math.min(100, now - (this.vAt || now - 16));
+    this.vAt = now;
+    const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (this.vis == null || this.visKey !== key || calm) {
+      this.vis = t;
+    } else {
+      const d = t - this.vis;
+      const tau = this.state.drag ? 40 : 130;
+      this.vis = Math.abs(d) < 45 ? t : this.vis + d * (1 - Math.exp(-dt / tau));
+    }
+    this.visKey = key;
+    if (this.vis !== t) this.kick();
+    return this.vis;
+  }
+
+  kick() {
+    if (this.vRaf) return;
+    this.vRaf = requestAnimationFrame(() => {
+      this.vRaf = 0;
+      this.setState((st) => ({ vf: st.vf + 1 }));
+    });
+  }
+
+  dPoint(e) {
+    const r = document.getElementById('dialBox').getBoundingClientRect();
+    return { x: ((e.clientX - r.left) * 350) / r.width, y: ((e.clientY - r.top) * 372) / r.height };
+  }
+
+  dRaw(p) {
+    const dx = p.x - 175;
+    const dy = p.y - 186;
+    if (Math.hypot(dx, dy) < 30) return null;
+    let a = Math.atan2(-dx, dy);
+    if (a < 0) a += 2 * Math.PI;
+    return (a / (2 * Math.PI)) * 86400;
+  }
+
+  dSet(sec) {
+    this.dPend = sec;
+    if (this.dRaf) return;
+    this.dRaf = requestAnimationFrame(() => {
+      this.dRaf = 0;
+      this.dFlush();
+    });
+  }
+
+  dFlush() {
+    if (this.dPend == null) return;
+    const v = this.dPend;
+    this.dPend = null;
+    this.scrub(v);
+  }
+
+  dApply(fv, ts) {
+    const g = this.dg;
+    const lo = this.dayStart();
+    const hi = this.dayEnd() - 60;
+    const vt = Math.max(lo - 43200, Math.min(hi + 43200, fv - g.off));
+    g.off *= 0.92;
+    const sec = Math.max(lo, Math.min(hi, vt));
+    g.hist.push([ts, sec]);
+    while (g.hist.length > 2 && ts - g.hist[0][0] > 110) g.hist.shift();
+    this.dSet(sec);
+  }
+
+  dDown(e) {
+    if (e.button > 0) return;
+    const raw = this.dRaw(this.dPoint(e));
+    if (raw == null) return;
+    this.cStop();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+    const t = this.now();
+    const onHand = e.currentTarget.getAttribute('data-g') === 'hand';
+    const fv = raw + 86400 * Math.round((t - raw) / 86400);
+    this.dg = { id: e.pointerId, fv, off: onHand ? fv - t : 0, hist: [] };
+    this.setState({ drag: true, touched: true });
+    if (!onHand) this.dApply(fv, e.timeStamp);
+  }
+
+  dMove(e) {
+    const g = this.dg;
+    if (!g || e.pointerId !== g.id) return;
+    const raw = this.dRaw(this.dPoint(e));
+    if (raw == null) return;
+    g.fv = raw + 86400 * Math.round((g.fv - raw) / 86400);
+    this.dApply(g.fv, e.timeStamp);
+  }
+
+  dUp(e) {
+    const g = this.dg;
+    if (!g || e.pointerId !== g.id) return;
+    this.dg = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    this.dFlush();
+    this.setState({ drag: false });
+    const h = g.hist;
+    const last = h[h.length - 1];
+    const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!calm && h.length > 1 && last && e.timeStamp - last[0] < 90) {
+      const v = (last[1] - h[0][1]) / Math.max(16, last[0] - h[0][0]);
+      if (Math.abs(v) > 1.2) this.cStart(Math.max(-36, Math.min(36, v)), last[1]);
+    }
+  }
+
+  cStart(v, t) {
+    this.cs = { v, t, at: performance.now() };
+    this.cRaf = requestAnimationFrame((ts) => this.cStep(ts));
+  }
+
+  cStep(ts) {
+    const c = this.cs;
+    if (!c) return;
+    const dt = Math.max(0, Math.min(48, ts - c.at));
+    c.at = ts;
+    const lo = this.dayStart();
+    const hi = this.dayEnd() - 60;
+    c.t += c.v * dt;
+    c.v *= Math.exp(-dt / 330);
+    if (c.t <= lo || c.t >= hi) {
+      c.t = Math.max(lo, Math.min(hi, c.t));
+      c.v = 0;
+    }
+    this.scrub(c.t);
+    if (Math.abs(c.v) < 0.35) {
+      this.cs = null;
+      return;
+    }
+    this.cRaf = requestAnimationFrame((x) => this.cStep(x));
+  }
+
+  cStop() {
+    cancelAnimationFrame(this.cRaf);
+    this.cs = null;
+  }
+
+  dKey(e) {
+    const t = this.now();
+    const keys = { ArrowRight: 300, ArrowUp: 300, ArrowLeft: -300, ArrowDown: -300, PageUp: 3600, PageDown: -3600 };
+    let to = null;
+    if (e.key in keys) to = t + keys[e.key];
+    else if (e.key === 'Home') to = this.dayStart();
+    else if (e.key === 'End') to = this.dayEnd() - 60;
+    if (to == null) return;
+    e.preventDefault();
+    this.cStop();
+    this.setState({ touched: true });
+    this.scrub(to);
+  }
+
+  polar(sec, r) {
+    const a = ((sec % 86400) / 86400) * 2 * Math.PI;
+    return { x: 175 - r * Math.sin(a), y: 186 + r * Math.cos(a) };
+  }
+
+  arcD(s, e, r) {
+    const span = Math.max(0.01, Math.min(e - s, 86399));
+    const p0 = this.polar(s, r);
+    const p1 = this.polar(s + span, r);
+    const n = (v) => v.toFixed(2);
+    return 'M' + n(p0.x) + ' ' + n(p0.y) + ' A' + r + ' ' + r + ' 0 ' + (span > 43200 ? 1 : 0) + ' 1 ' + n(p1.x) + ' ' + n(p1.y);
+  }
+
+  pick(id) {
+    this.setState((s) => ({ sel: s.sel === id ? null : id }));
+  }
+
+  markSel(id) {
+    this.mark(id);
+    clearTimeout(this.selTimer);
+    this.selTimer = setTimeout(() => {
+      if (this.state.sel === id) this.setState({ sel: null });
+    }, 1150);
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const t = this.now();
+    const vis = this.eased(t, c.dateKey);
+    const st = this.state;
+    const RF = 144;
+    const TR = [120, 110, 100, 90];
+    const its = this.items();
+    const zl = this.zmanimList();
+    const zBy = Object.fromEntries(zl.map((z) => [z.id, z]));
+    const tlBy = Object.fromEntries(c.timeline.map((x) => [x.id, x]));
+    const itBy = Object.fromEntries(its.map((x) => [x.id, x]));
+    const pad = (n) => String(n).padStart(2, '0');
+
+    const overlap = (a, b) => [-86400, 0, 86400].some((k) => a.S < b.E + k && b.S + k < a.E);
+    const lanes = [];
+    const laneOf = {};
+    its
+      .slice()
+      .sort((a, b) => b.E - b.S - (a.E - a.S) || a.S - b.S)
+      .forEach((x) => {
+        let i = 0;
+        while (lanes[i] && lanes[i].some((y) => overlap(x, y))) i += 1;
+        (lanes[i] = lanes[i] || []).push(x);
+        laneOf[x.id] = i;
+      });
+    const radiusOf = (id) => TR[Math.min(laneOf[id], TR.length - 1)];
+
+    const selTl = st.sel ? tlBy[st.sel] : null;
+    const fTl = selTl || (c.hasHero ? tlBy[c.hero.id] : null);
+    const focusId = fTl ? fTl.id : null;
+
+    const arcs = its.map((x, i) => {
+      const r = radiusOf(x.id);
+      const tl = tlBy[x.id];
+      const ins = (4 / r) * (86400 / (2 * Math.PI));
+      const doneSec = this.doneAt(x.id);
+      const mk = doneSec != null ? this.polar(doneSec, r) : { x: 0, y: 0 };
+      const rem = Math.max(vis, x.S + ins);
+      return {
+        id: x.id,
+        status: tl.status,
+        d: this.arcD(x.S + ins, x.E - ins, r),
+        dFull: this.arcD(x.S, x.E, r),
+        dRem: this.arcD(rem, Math.max(rem + 1, x.E - ins), r),
+        mid: 'm-' + x.id,
+        murl: 'url(#m-' + x.id + ')',
+        delay: (laneOf[x.id] * 0.14 + i * 0.07).toFixed(2),
+        mx: mk.x.toFixed(2),
+        my: mk.y.toFixed(2),
+        lateCls: doneSec != null && doneSec >= x.E ? 'late' : '',
+        pressed: st.sel === x.id,
+        label: x.name + ' · ' + tl.statusText + ' · ' + tl.startT + ' עד ' + tl.endT + ' · הצגה במרכז השעון',
+        pick: () => this.pick(x.id),
+        key: (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.pick(x.id);
+          }
+        },
+      };
+    });
+    const selArc = focusId ? arcs.find((a) => a.id === focusId) : null;
+    const lits = its
+      .map((x, i) => {
+        const r = radiusOf(x.id);
+        const status = tlBy[x.id].status;
+        const ins = status === 'missed' ? 0 : (4 / r) * (86400 / (2 * Math.PI));
+        const from = x.S + ins;
+        const to = Math.min(vis, x.E - ins);
+        return status === 'upcoming' || to - from < 120 ? null : { cls: 'l-' + status, d: this.arcD(from, to, r) };
+      })
+      .filter(Boolean);
+
+    const ticks = Array.from({ length: 24 }, (_, h) => {
+      const major = h % 6 === 0;
+      const a = this.polar(h * 3600, 128);
+      const b = this.polar(h * 3600, major ? 135 : 132.5);
+      return { x1: a.x.toFixed(2), y1: a.y.toFixed(2), x2: b.x.toFixed(2), y2: b.y.toFixed(2), cls: major ? 'maj' : '' };
+    });
+
+    const nextZl = zl.find((z) => z.S > t) || null;
+    const dots = zl.map((z) => {
+      const isNext = nextZl && z.id === nextZl.id;
+      const p = this.polar(z.S, 137);
+      return { x: p.x.toFixed(2), y: p.y.toFixed(2), r: isNext ? 6.4 : 4.4, cls: isNext ? 'next' : z.S <= t ? 'past' : '' };
+    });
+    const nd = nextZl ? this.polar(nextZl.S, 137) : null;
+
+    const place = (sec, w, h, gap) => {
+      const a = ((sec % 86400) / 86400) * 2 * Math.PI;
+      const ext = Math.abs(Math.sin(a)) * (w / 2) + Math.abs(Math.cos(a)) * (h / 2);
+      const p = this.polar(sec, RF + gap + ext);
+      return { x: p.x, y: p.y, w, h };
+    };
+    const hit = (a, b) => !(a.x + a.w / 2 < b.x - b.w / 2 - 3 || a.x - a.w / 2 > b.x + b.w / 2 + 3 || a.y + a.h / 2 < b.y - b.h / 2 - 3 || a.y - a.h / 2 > b.y + b.h / 2 + 3);
+    const bubR = place(vis, 46, 24, 6);
+    const keys = ['netz', 'chatzot', 'shkia', 'chatzotL'];
+    const labels = keys.map((id) => {
+      const z = zBy[id];
+      const w = Math.max(34, z.short.length * 7 + 8);
+      const r = place(z.S, w, 31, 5);
+      const isNext = nextZl && nextZl.id === id;
+      return { id, rect: r, name: z.short, time: z.t, cls: (isNext ? 'nx ' : z.S <= t ? 'past ' : '') + (hit(r, bubR) ? 'hid' : '') };
+    });
+    if (nextZl && !keys.includes(nextZl.id)) {
+      const w = Math.max(34, nextZl.short.length * 7 + 8);
+      const r = place(nextZl.S, w, 31, 5);
+      const clash = hit(r, bubR) || labels.some((l) => hit(r, l.rect));
+      labels.push({ id: nextZl.id, rect: r, name: nextZl.short, time: nextZl.t, cls: 'nx ' + (clash ? 'hid' : '') });
+    }
+    const labelVals = labels.map((l) => ({ name: l.name, time: l.time, cls: l.cls, x: l.rect.x.toFixed(1), y: l.rect.y.toFixed(1) }));
+
+    const sec = (id) => zBy[id].S;
+    const deg = (s) => (((s - 43200) / 86400) * 360).toFixed(1);
+    const stops = [
+      [43200, 'High'],
+      [sec('plag'), 'Day'],
+      [sec('shkia'), 'Dusk'],
+      [sec('tzeit'), 'Night'],
+      [86400, 'Deep'],
+      [86400 + sec('alot'), 'Night'],
+      [86400 + sec('netz'), 'Dawn'],
+      [86400 + sec('netz') + 3600, 'Day'],
+      [129600, 'High'],
+    ];
+    const skyBg = 'conic-gradient(' + stops.map(([s, k]) => 'var(--sky' + k + ') ' + deg(s) + 'deg').join(', ') + ')';
+
+    let f = null;
+    if (fTl) {
+      const x = itBy[fTl.id];
+      const s = fTl.status;
+      const fmt = (secs) => {
+        const m = Math.max(0, Math.ceil(secs / 60));
+        return m < 60 ? { num: String(m), unit: 'דקות' } : { num: Math.floor(m / 60) + ':' + pad(m % 60), unit: 'שעות' };
+      };
+      f = {
+        short: x.short,
+        isUpcoming: s === 'upcoming',
+        metaStart: (s === 'upcoming' ? 'מתחיל ב-' : 'התחיל ב-') + fTl.startT,
+        metaEnd: 'נגמר ב-' + fTl.endT,
+        hasBtn: s !== 'upcoming',
+        icCheck: s !== 'done',
+        icUndo: s === 'done',
+      };
+      if (s === 'active') {
+        const left = fmt(x.E - t);
+        const urgent = Math.ceil((x.E - t) / 60) <= 45;
+        Object.assign(f, {
+          bigText: left.num,
+          bigUnit: left.unit + ' נותרו',
+          bigCls: urgent ? 'c-urgent' : 'c-active',
+          btnLabel: x.cta,
+          btnCls: 'primary',
+          btnAria: fTl.markLabel,
+          btnClick: () => this.markSel(x.id),
+        });
+      } else if (s === 'done') {
+        const d = this.doneAt(x.id);
+        Object.assign(f, {
+          bigText: 'בוצע',
+          bigUnit: 'סומן ב-' + this.clock(d) + (d >= x.E ? ' · באיחור' : ''),
+          bigCls: 'c-done',
+          btnLabel: 'ביטול סימון',
+          btnCls: 'ghost',
+          btnAria: 'ביטול הסימון של ' + x.name,
+          btnClick: () => this.undo(x.id),
+        });
+      } else if (s === 'missed') {
+        Object.assign(f, {
+          bigText: 'פוספס',
+          bigUnit: 'עבר לפני ' + this.left(t - x.E),
+          bigCls: 'c-missed',
+          btnLabel: 'בכל זאת עשיתי',
+          btnCls: 'warn',
+          btnAria: 'בכל זאת עשיתי — סימון ' + x.name,
+          btnClick: () => this.markSel(x.id),
+        });
+      } else {
+        const wait = fmt(x.S - t);
+        Object.assign(f, {
+          bigText: wait.num,
+          bigUnit: wait.unit + ' לפתיחה',
+          bigCls: 'c-ahead',
+          btnLabel: '',
+          btnCls: '',
+          btnAria: '',
+          btnClick: () => {},
+        });
+      }
+    }
+    const statusWord = { active: 'פתוח עכשיו', done: 'בוצע', missed: 'פוספס', upcoming: 'בהמשך' };
+
+    const legend = [
+      { key: 'active', label: 'פתוח', n: c.activeN, swCls: 'sw-open' },
+      { key: 'done', label: 'בוצע', n: c.doneN, swCls: 'sw-done' },
+      { key: 'missed', label: 'פוספס', n: c.missedN, swCls: 'sw-missed' },
+      { key: 'upcoming', label: 'בהמשך', n: c.upcomingN, swCls: 'sw-ahead' },
+    ].map((g) => ({
+      ...g,
+      on: st.filt === g.key,
+      cls: g.n === 0 ? 'zero' : '',
+      aria: g.label + ': ' + g.n + (st.filt === g.key ? ' · מסנן פעיל, לחיצה לניקוי' : ' · סינון הרשימה'),
+      toggle: () => this.setState((s) => ({ filt: s.filt === g.key ? null : g.key })),
+    }));
+
+    const filtered = c.timeline.filter((x) => !st.filt || x.status === st.filt);
+    const rows = filtered.map((x, i) => {
+      const it = itBy[x.id];
+      const d = this.doneAt(x.id);
+      const stText =
+        x.status === 'active'
+          ? 'נשארו ' + this.left(it.E - t)
+          : x.status === 'done'
+            ? 'בוצע ב-' + x.at
+            : x.status === 'missed'
+              ? 'פוספס · עבר לפני ' + this.left(t - it.E)
+              : 'בעוד ' + this.left(it.S - t);
+      return {
+        ...x,
+        delay: (i * 0.05).toFixed(2),
+        rowCls: (x.id === focusId ? 'foc ' : '') + x.cls,
+        window: (x.status === 'upcoming' ? 'נפתח ב-' : 'התחיל ב-') + x.startT + ' · נגמר ב-' + x.endT,
+        stText,
+        lateTag: x.status === 'done' && d >= it.E,
+        undoLabel: 'ביטול הסימון של ' + x.name,
+        markRow: () => this.markSel(x.id),
+        focus: () => {
+          this.setState({ sel: x.id });
+          this.jump('dialTop');
+        },
+        focusLabel: 'הצגה בשעון: ' + x.name + ' · ' + statusWord[x.status],
+      };
+    });
+
+    const listTitles = { active: 'פתוחות עכשיו', done: 'מה שעשית', missed: 'מה שפספסת', upcoming: 'בהמשך היום' };
+    const emptyBy = {
+      active: [c.activeEmptyTitle, c.activeEmptyText],
+      done: [c.doneEmpty, 'המצווה הראשונה שתסמן תופיע כאן.'],
+      missed: [c.missedEmpty, 'אם משהו יחמוק, אפשר יהיה לסמן אותו כאן אחר כך.'],
+      upcoming: ['אין עוד מצוות להיום', 'כל השאר כבר נפתח.'],
+    };
+    const emp = emptyBy[st.filt] || ['', ''];
+    const notes = [];
+    if (!st.filt && c.noMissed) notes.push({ text: c.missedEmpty });
+    if (!st.filt && c.noDone) notes.push({ text: c.doneEmpty });
+
+    const centerAria = fTl ? 'במרכז השעון: ' + fTl.name + ', ' + statusWord[fTl.status] : 'במרכז השעון: ' + c.activeEmptyTitle;
+
+    return {
+      ...c,
+      filterKey: st.filt || 'none',
+      dialAria: 'שעון של 24 שעות. ' + c.countLabel,
+      streakLabel: c.streak + ' ימים ברצף',
+      skyBg,
+      ticks,
+      trackCircles: lanes.map((_, i) => ({ r: TR[Math.min(i, TR.length - 1)] })),
+      arcs,
+      arcsUp: arcs.filter((a) => a.status === 'upcoming'),
+      arcsMiss: arcs.filter((a) => a.status === 'missed'),
+      arcsDone: arcs.filter((a) => a.status === 'done'),
+      arcsAct: arcs.filter((a) => a.status === 'active'),
+      hasSelD: Boolean(selArc),
+      selD: selArc ? selArc.dFull : '',
+      dots,
+      hasNextDot: Boolean(nd),
+      nextDot: nd ? { x: nd.x.toFixed(2), y: nd.y.toFixed(2) } : { x: 0, y: 0 },
+      handDeg: ((vis / 86400) * 360).toFixed(3),
+      sweepBg:
+        'conic-gradient(from ' +
+        ((((((vis / 86400) * 360 + 180 - 64) % 360) + 360) % 360)).toFixed(1) +
+        'deg, transparent 0deg, color-mix(in srgb, var(--accent) 30%, transparent) 64deg, transparent 64.6deg, transparent 360deg)',
+      lits,
+      dialCls: (st.drag ? 'drag ' : '') + (c.isScrub ? 'scr ' : '') + (st.touched ? '' : 'hintOn'),
+      dDown: (e) => this.dDown(e),
+      dMove: (e) => this.dMove(e),
+      dUp: (e) => this.dUp(e),
+      dKey: (e) => this.dKey(e),
+      sliderMin: Math.round(this.dayStart()),
+      sliderMax: Math.round(this.dayEnd() - 60),
+      sliderNow: Math.round(t),
+      sliderText: c.nowT + ', הבא: ' + c.nextZ.name + ' ' + c.nextZ.left,
+      orbitDelay: this.orbitDelay || '0s',
+      handEnd: (186 + Math.hypot(bubR.x - 175, bubR.y - 186)).toFixed(1),
+      labels: labelVals,
+      bub: { x: bubR.x.toFixed(1), y: bubR.y.toFixed(1) },
+      hasFocus: Boolean(f),
+      noFocus: !f,
+      f: f || {},
+      centerCls: fTl && fTl.isMarking ? 'marking' : '',
+      centerAnim: 'cf-' + this.flip('center', fTl ? fTl.id + ':' + fTl.status : 'none'),
+      centerAria,
+      legend,
+      hasFilter: Boolean(st.filt),
+      clearFilter: () => this.setState({ filt: null }),
+      listTitle: listTitles[st.filt] || 'מצוות היום',
+      rows,
+      rowsN: rows.length,
+      hasRows: rows.length > 0,
+      noRows: rows.length === 0,
+      emptyTitle: emp[0],
+      emptyText: emp[1],
+      notes,
+      hasNotes: notes.length > 0,
+      msgs: c.messages.map((m, i) => ({ ...m, delay: (i * 0.05).toFixed(2) })),
+    };
+  }
+}
+</script>

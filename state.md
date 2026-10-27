@@ -52,7 +52,14 @@ Every other EAS build is superseded, and no other AAB was uploaded to Play ([act
 - **Waits for the store production release** (finished, committed and pushed; [not-close.md](not-close.md), High — the 1.0.21 store release, and Bugs): the Jew 365 identity, the native half of the redesign, the four-symbol icons, the iOS build fixes, the store copy, the no-promise copy, the China mainland availability, and the Hebrew Android app name.
 - **Waits for the next native build:** the Selichot space saving (about 5.5 MB), the fresh-install stamps in the embedded bundle, the Hebrew Android app name in production, and the Build tasks (arm-only direct APK, R8). A build that raises `version` cuts installs off from updates until they install it, so it also needs a version decision.
 
+## Design
+
+- The design lab ([design/lab/](design/lab), 2026-10-28) is where every design request is built and published as Artifacts ([design/lab/AGENTS.md](design/lab/AGENTS.md)). It is not committed yet ([not-close.md](not-close.md), Other Open Items).
+- The home screen study ([design/lab/studies/2026-10-27-home/](design/lab/studies/2026-10-27-home)) holds ten live directions on real data and waits for the owner's pick. Its canvas is https://claude.ai/artifact/UxdjEwamEp3YUTpkUTfxRn and its gallery https://claude.ai/artifact/KNs1VuDX7J6LWXNxfZQPhT, shared by link. Both sit in the Akeyless claude.ai account.
+
 ## Next steps
+
+0. The owner picks a home screen direction from the gallery (up to three, ranked); then the open product decisions in the study's AGENTS.md come first, and the implementation ships over the air.
 
 1. Check production `1.0.21-3` on a phone with the production app (Settings shows `1.0.21-3`), and its launches with `npx eas-cli update:insights 4ac9d837-5dc2-47d4-95cd-f95e913e9cd0`. Still open in [not-close.md](not-close.md): the history sketches' follow-up, the permissions step (next build) and the performance measurement on the emulator.
 2. The owner, or a rav, reviews the tzaddik content (Other Open Items in [not-close.md](not-close.md)); the choices of the tzaddik pages and the display size (D1–D8) were approved on 2026-10-26 ([action-log.md](action-log.md)).

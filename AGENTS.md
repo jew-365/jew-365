@@ -155,6 +155,7 @@ Three root files say what is open, what is in production and where the project s
 - [scripts/siddur/](scripts/siddur) - Build from pinned Sefaria and Wikisource sources to [assets/siddur/](assets/siddur), the generated nusach texts, and to [docs/selichot/](docs/selichot), the downloadable Selichot add-on.
 - [scripts/chok/](scripts/chok) - Build from the committed Torat Emet files of חק לישראל in [scripts/chok/source/](scripts/chok/source) (CC BY-NC-SA 2.5) to the downloadable add-on in [docs/chok/](docs/chok)
 - [design/references/2026-10-21/](design/references/2026-10-21) - The product owner's references for the shipped 2026-10-21 redesign: the UI mockup and the chosen logo. Use design material only for UI/design work. [design/handoff/](design/handoff) (a Claude Design handoff) and [design/stage1-previews/index.html](design/stage1-previews/index.html) (a preview board of logo, icon styles, palettes and type scale) are the earlier navy-and-gold direction: source material, superseded by the redesign.
+- [design/lab/](design/lab) - The design lab: every design request (a screen, a component, a flow) becomes its own study folder of live interactive prototypes, built locally and published to the owner as Artifacts ([design/lab/AGENTS.md](design/lab/AGENTS.md)).
 - [PRODUCT.md](PRODUCT.md) - Product truth for design work (users, purpose, positioning, brand commitments, accessibility), the record the impeccable design skill reads before any visual decision. Visual decisions never go here.
 - [docs/](docs) - Public site published through GitHub Pages: support page, the privacy policy both stores link to, [taharah-review.html](docs/taharah-review.html), the rule table a rav reviews, [halacha-review.html](docs/halacha-review.html), the page where a rav answers the halachic rules listed under For the rav in [not-close.md](not-close.md), the Chok LeYisrael add-on files in [docs/chok/](docs/chok) and the Selichot add-on files in [docs/selichot/](docs/selichot).
 - [release/](release) - Store listing and privacy policy drafts.
@@ -415,7 +416,17 @@ A binding rule, the owner's of 2026-10-27, that no change may skip: the search a
   
   Extend it whenever a new kind of content appears.
 
+## Design Requests Go to the Design Lab
+
+A binding rule, the owner's of 2026-10-28: every design request is built as a study in [design/lab/](design/lab) and shown to the owner as Artifacts. That covers directions for the home screen, another screen, a component, a flow, or "more in this style". The full contract is [design/lab/AGENTS.md](design/lab/AGENTS.md).
+
+- A new request opens a new folder, `design/lab/studies/<YYYY-MM-DD>-<topic>/`. It starts from a copy of the closest existing study's core, build, assemble and site template, and never edits an older study. A next round of the same study changes that study in place and publishes to its same links.
+- The prototypes are built in the study (`node build.mjs`, `node assemble.mjs`) and published from its `out/` folder as two Artifacts: a Design canvas and a gallery site to share. The study's AGENTS.md records both links and the owner's picks. `out/` is never committed.
+- Design code never lives only in a temp scratchpad, and a study never touches production code under [src/](src). Implementing the owner's pick in the app is a separate task, under [src/AGENTS.md](src/AGENTS.md).
+
 ## Common Change Checklist
+
+- Design request (directions, a mockup, a redesign of a screen): a study in [design/lab/](design/lab) ([Design Requests Go to the Design Lab](#design-requests-go-to-the-design-lab)).
 
 - Anything a user can see or reach: make the search find it in the same change ([Search Finds Everything](#search-finds-everything)).
 - New route: add the file under [src/app/](src/app), update navigation/tabs if needed, then update [routes.test.ts](src/app/__tests__/routes.test.ts) and add its case to [screens.smoke.render.test.tsx](src/app/__tests__/screens.smoke.render.test.tsx), which fails on a screen file without one.

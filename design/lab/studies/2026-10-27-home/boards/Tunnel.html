@@ -1,0 +1,1007 @@
+<!--board title="ס · מנהרת זמן"-->
+<style>
+.ph{--hair:color-mix(in srgb,var(--text) 11%,transparent);--csub:color-mix(in srgb,var(--sub) 82%,var(--text));--cacc:color-mix(in srgb,var(--accentText) 84%,var(--text));--curg:color-mix(in srgb,var(--urgent) 84%,var(--text));--csafe:color-mix(in srgb,var(--safe) 82%,var(--text))}
+@keyframes tnSpin{to{transform:rotate(360deg)}}
+@keyframes tnBreath{0%,100%{transform:scale(.92);opacity:.78}50%{transform:scale(1.14);opacity:1}}
+@keyframes tnFloat{50%{transform:translateY(-6px)}}
+.tn-root{background:linear-gradient(180deg,color-mix(in srgb,var(--pt) 16%,var(--bg)) 0,var(--bg) 620px)}
+.glass{background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);border:1px solid var(--hair);border-radius:24px;box-shadow:var(--shadow),inset 0 1px 0 color-mix(in srgb,#fff 40%,transparent)}
+.rise{animation:riseA .7s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+
+.tn-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.tn-id{display:flex;flex-direction:column;gap:3px;min-width:0}
+.tn-h1{font-family:'Frank Ruhl Libre','Heebo',serif;font-size:2em;font-weight:700;line-height:1.12;letter-spacing:-.01em}
+.tn-streak{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:0 14px 0 12px;border-radius:999px;background:var(--soft);color:var(--cacc);font-weight:800;flex:none}
+.tn-streak .ic{width:20px;height:20px;stroke-width:2.1}
+.tn-pill{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:10px 14px;min-height:64px}
+.tp-time{display:flex;flex-direction:column;align-items:flex-start;gap:4px;flex:none}
+.tp-time>b{font-size:2.15em;font-weight:900;letter-spacing:-.03em;line-height:.95;font-variant-numeric:tabular-nums}
+.tp-st{display:inline-flex;align-items:center;gap:6px;min-height:22px;padding:0 9px;border-radius:999px;font-size:.75em;font-weight:800;background:var(--safeSoft);color:var(--csafe)}
+.tp-st i{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.6s ease-in-out infinite}
+.tp-st.view{background:var(--soft);color:var(--cacc)}
+.tp-st.view i{animation:none}
+.tp-next{display:flex;align-items:center;gap:10px;min-width:0}
+.tp-ic{width:40px;height:40px;border-radius:14px;background:var(--soft);color:var(--cacc);display:flex;align-items:center;justify-content:center;flex:none}
+.tp-nt{display:flex;flex-direction:column;gap:1px;line-height:1.25;min-width:0}
+.tp-nt>b{font-weight:800;font-size:.9375em}
+.tp-nt>span{font-size:.8125em;color:var(--csub);font-variant-numeric:tabular-nums}
+.tp-nt>.tp-in{align-self:flex-start;margin-top:2px;padding:1px 9px;border-radius:999px;background:var(--soft);color:var(--cacc);font-weight:800}
+
+.tn{position:relative;height:456px;margin:14px -12px 0;border-radius:34px;overflow:hidden;background:linear-gradient(180deg,var(--t1),var(--t2) 56%,var(--t3));box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),var(--shadow);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;color:#fff;isolation:isolate}
+.tn.drag{cursor:grabbing}
+.tn-stars{position:absolute;inset:0;pointer-events:none;opacity:var(--so)}
+.tn-stars i{position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 12% 10%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 26% 24%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 74% 8%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 88% 22%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 46% 6%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 62% 30%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 8% 38%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 93% 44%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 36% 14%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 82% 36%,#fff 50%,transparent 51%);animation:twinkle 4.4s ease-in-out infinite alternate}
+.tn-glow{position:absolute;left:187px;top:140px;width:330px;height:330px;margin:-165px 0 0 -165px;border-radius:50%;background:radial-gradient(circle,var(--tg) 0%,transparent 64%);animation:tnBreath 5.5s ease-in-out infinite;pointer-events:none;transition:filter .4s}
+.tn-core{position:absolute;left:187px;top:140px;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:radial-gradient(circle,#fff 0%,var(--tc) 52%,transparent 74%);box-shadow:0 0 34px 12px var(--tg);animation:tnBreath 4s ease-in-out infinite;pointer-events:none}
+.tn-grid{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.rl{fill:none;stroke:rgba(255,255,255,.075);stroke-width:1}
+.rb{fill:none;stroke-linejoin:round}
+.rb.a{stroke:rgba(255,255,255,.24);stroke-width:1.3}
+.rb.b{stroke:rgba(255,255,255,.15);stroke-width:1}
+.rb.c{stroke:rgba(255,255,255,.1);stroke-width:.8}
+.tn.drag .rb.a{stroke:rgba(255,255,255,.34)}
+.tn-vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 92% at 50% 36%,transparent 34%,rgba(3,5,16,.62) 100%)}
+.wave{position:absolute;left:calc(50% - 173px);top:-33px;width:346px;height:346px;border-radius:64px;border:1.5px solid rgba(255,255,255,.5);opacity:0;pointer-events:none;animation:waveOut 7s cubic-bezier(.3,.2,.5,1) infinite;animation-delay:var(--l)}
+@keyframes waveOut{0%{transform:scale(.1);opacity:0}12%{opacity:.5}100%{transform:scale(1.45);opacity:0}}
+.amb{position:absolute;left:187px;top:140px;width:2px;height:70px;transform-origin:50% 0;background:linear-gradient(to bottom,transparent,rgba(255,255,255,.8));opacity:0;animation:ambFlow var(--d) linear infinite;animation-delay:var(--l);pointer-events:none}
+@keyframes ambFlow{0%{transform:rotate(var(--a)) translateY(40px) scaleY(.2);opacity:0}18%{opacity:.5}100%{transform:rotate(var(--a)) translateY(340px) scaleY(1);opacity:0}}
+.sks{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s}
+.tn.drag .sks{opacity:1}
+.sk{position:absolute;left:187px;top:140px;width:3px;transform-origin:50% 0;border-radius:2px;background:linear-gradient(to bottom,transparent,rgba(255,255,255,.9))}
+
+.tn-cam{position:absolute;inset:0;perspective:800px;perspective-origin:187px 140px;pointer-events:none}
+.tn-world{position:absolute;inset:0;transform-style:preserve-3d}
+.tn-list{position:absolute;inset:0;transform-style:preserve-3d}
+.gate{position:absolute;left:calc(50% - 173px);top:-33px;width:346px;height:346px;border-radius:64px;border:2.5px solid color-mix(in srgb,var(--gc) 88%,transparent);box-shadow:0 0 16px color-mix(in srgb,var(--gc) 50%,transparent),inset 0 0 22px color-mix(in srgb,var(--gc) 28%,transparent);will-change:transform,opacity;transition:transform .4s ease-out,opacity .3s ease-out;pointer-events:none}
+.gate.past{border-color:color-mix(in srgb,var(--gc) 55%,transparent)}
+.gate.next{border-width:3.5px;border-color:var(--gc);box-shadow:0 0 28px 3px color-mix(in srgb,var(--gc) 75%,transparent),inset 0 0 32px color-mix(in srgb,var(--gc) 45%,transparent)}
+.gate.off{display:none}
+.gate-p{position:absolute;inset:-4px;border-radius:68px;border:2px solid var(--gc);opacity:0;pointer-events:none}
+.gate.next .gate-p{animation:gatePulse 2.4s ease-out infinite}
+@keyframes gatePulse{0%{transform:scale(1);opacity:.75}100%{transform:scale(1.14);opacity:0}}
+
+.tcard{position:absolute;left:calc(50% - 8.6em);top:140px;width:17.2em;will-change:transform,opacity;transition:transform .5s cubic-bezier(.2,.85,.25,1.06),opacity .4s ease;pointer-events:auto}
+.tcard.off{display:none}
+.tn.drag .tcard,.tn.drag .gate{transition-duration:.12s;transition-timing-function:linear}
+.tcard::before{content:"";position:absolute;inset:0;border-radius:1.4em;box-shadow:0 0 32px 6px var(--cglow);opacity:.3;pointer-events:none}
+.tcard.front::before{opacity:.55}
+.tcard.front.st-open::before{animation:glowP 2.6s ease-in-out infinite}
+@keyframes glowP{0%,100%{opacity:.4}50%{opacity:.95}}
+.tc-in{position:relative;display:flex;flex-direction:column;gap:.45em;padding:.65em .75em .7em;border-radius:1.4em;background:var(--cbg);border:1.5px solid var(--cbd);box-shadow:0 18px 38px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.14);color:#fff;overflow:hidden;text-align:start}
+.st-open{--cbg:linear-gradient(158deg,color-mix(in srgb,var(--accent) 34%,#10162F) 0%,#10162F 74%);--cbd:var(--accent);--cglow:color-mix(in srgb,var(--accent) 42%,transparent);--kc:color-mix(in srgb,var(--accent) 48%,#fff)}
+.st-done{--cbg:linear-gradient(158deg,color-mix(in srgb,var(--safe) 30%,#0C1A2E) 0%,#0C1A2E 74%);--cbd:color-mix(in srgb,var(--safe) 70%,#fff);--cglow:color-mix(in srgb,var(--safe) 26%,transparent);--kc:color-mix(in srgb,var(--safe) 40%,#fff)}
+.st-missed{--cbg:linear-gradient(158deg,color-mix(in srgb,var(--urgent) 26%,#1A1226) 0%,#15111F 74%);--cbd:color-mix(in srgb,var(--urgent) 62%,#fff);--cglow:color-mix(in srgb,var(--urgent) 22%,transparent);--kc:color-mix(in srgb,var(--urgent) 42%,#fff)}
+.st-missed .tc-in{filter:saturate(.7)}
+.st-up{--cbg:linear-gradient(rgba(14,20,46,.76),rgba(14,20,46,.76));--cbd:rgba(255,255,255,.36);--cglow:rgba(255,255,255,.08);--kc:#fff}
+.st-up .tc-in{border-style:dashed}
+.st-up.front .tc-in{background:var(--cbg),#0E142C}
+.tc-hit{position:absolute;inset:0;z-index:2;border-radius:1.4em}
+.tc-hit:focus-visible{outline:3px solid #fff;outline-offset:-3px}
+.tc-top{display:flex;align-items:center;gap:.65em}
+.tc-tile{flex:none;width:2.4em;height:2.4em;border-radius:.85em;background:rgba(255,255,255,.14);color:var(--kc);display:flex;align-items:center;justify-content:center}
+.st-open .tc-tile{background:var(--accent);color:var(--onAccent)}
+.st-done .tc-tile{background:var(--safe);color:var(--onSafe)}
+.st-missed .tc-tile{background:var(--urgent);color:var(--onUrgent)}
+.tc-id{min-width:0;display:flex;flex-direction:column;gap:.1em}
+.tc-n{font-size:1.0625em;font-weight:800;line-height:1.2}
+.tc-r{font-size:.8125em;color:rgba(255,255,255,.84);font-variant-numeric:tabular-nums;line-height:1.3}
+.tc-mid{display:flex;align-items:center;gap:.75em;min-height:3.6em}
+.tc-ring{position:relative;flex:none;width:3.8em;height:3.8em}
+.tc-ring svg{display:block;width:100%;height:100%;transform:rotate(-90deg)}
+.rg-t{fill:none;stroke:rgba(255,255,255,.18);stroke-width:5}
+.rg-p{fill:none;stroke:var(--accent);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+.st-open.urg .rg-p{stroke:color-mix(in srgb,var(--urgent) 50%,#fff)}
+.tc-orb{position:absolute;inset:0;animation:tnSpin 7s linear infinite}
+.tc-orb::after{content:"";position:absolute;left:50%;top:-.12em;width:.42em;height:.42em;margin-left:-.21em;border-radius:50%;background:#fff;box-shadow:0 0 .6em .1em rgba(255,255,255,.9)}
+.tc-rn{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;text-align:center}
+.tc-rn>b{font-size:1.05em;font-weight:800;font-variant-numeric:tabular-nums}
+.tc-rn>small{font-size:.75em;font-weight:600;color:rgba(255,255,255,.86)}
+.tc-st{min-width:0;display:flex;flex-direction:column;gap:.2em}
+.tc-sl{font-weight:800;font-size:.9375em;line-height:1.3;color:var(--kc)}
+.st-open .tc-sl{color:#fff}
+.tc-sub{font-size:.8125em;color:rgba(255,255,255,.84);line-height:1.3;font-variant-numeric:tabular-nums}
+.tc-warn{display:inline-flex;align-items:center;gap:.4em;font-size:.75em;font-weight:800;color:color-mix(in srgb,var(--urgent) 38%,#fff)}
+.tc-warn i{width:.55em;height:.55em;border-radius:50%;background:currentColor;animation:pulse 1.6s ease-in-out infinite}
+.tc-badge{flex:none;width:3.4em;height:3.4em;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--kc);color:var(--kc)}
+.tc-badge .ic{width:1.5em;height:1.5em;stroke-width:2.4}
+.tc-late{display:inline-block;margin-inline-start:.4em;padding:0 .45em;border-radius:.4em;background:rgba(255,255,255,.16);font-size:.9em;font-weight:700}
+.tc-acts{display:flex;gap:.5em;animation:fadeIn .35s both}
+.tbtn{flex:1;min-height:2.9em;border-radius:1em;display:inline-flex;align-items:center;justify-content:center;gap:.45em;font-weight:800;font-size:1em;background:rgba(255,255,255,.16);color:#fff;transition:transform .15s}
+.tbtn:active{transform:scale(.96)}
+.tbtn.pri{background:var(--accent);color:var(--onAccent)}
+.tbtn.sq{flex:none;width:2.9em}
+.tbtn .ic{width:1.2em;height:1.2em;stroke-width:2.3}
+.tc-pop{position:absolute;inset:0;z-index:3;display:none;align-items:center;justify-content:center;pointer-events:none;background:var(--safe);color:var(--onSafe);opacity:0}
+.tc-pop .ic{width:64px;height:64px;stroke-width:2.4;stroke-dasharray:24;stroke-dashoffset:24}
+.tc-pop i{position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4px;border-radius:3px;background:var(--onSafe);opacity:0}
+.tc-pop i:nth-child(odd){background:var(--accent);border-radius:50%}
+.tcard.marking .tc-pop{display:flex;animation:tcWash .76s ease-out forwards}
+.tcard.marking .tc-pop .ic{animation:tcDraw .35s .16s ease-out forwards}
+.tcard.marking .tc-pop i{animation:tcBurst .7s .2s ease-out forwards}
+.tcard.marking .tc-in{animation:tcOut .76s cubic-bezier(.5,0,.3,1) forwards}
+@keyframes tcWash{0%{opacity:0}30%{opacity:.96}78%{opacity:.96}100%{opacity:0}}
+@keyframes tcDraw{to{stroke-dashoffset:0}}
+@keyframes tcBurst{0%{opacity:1;transform:rotate(var(--a)) translateY(0) scale(.5)}100%{opacity:0;transform:rotate(var(--a)) translateY(-90px) scale(1.15)}}
+@keyframes tcOut{0%{transform:none;opacity:1}28%{transform:scale(1.04)}100%{transform:translateY(54px) scale(.88);opacity:0}}
+
+.glab{position:absolute;left:0;top:0;display:inline-flex;align-items:center;gap:.4em;min-height:1.95em;padding:0 .75em 0 .6em;border-radius:999px;background:rgba(8,12,28,.74);border:1px solid color-mix(in srgb,var(--gc) 75%,transparent);color:#fff;font-size:.75em;font-weight:700;white-space:nowrap;transition:transform .4s ease-out,opacity .3s;pointer-events:auto}
+.glab::after{content:"";position:absolute;inset:-11px -6px}
+.glab .ic{width:14px;height:14px;color:var(--gc)}
+.glab b{font-weight:800;font-variant-numeric:tabular-nums}
+.glab.next{background:var(--accent);color:var(--onAccent);border-color:var(--accent)}
+.glab.next .ic{color:var(--onAccent)}
+.glab.off{visibility:hidden;opacity:0}
+.tn.drag .glab{transition-duration:.12s;transition-timing-function:linear}
+.tn-empty{position:absolute;left:18px;right:18px;top:262px;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:22px;background:rgba(8,12,28,.76);border:1px solid rgba(255,255,255,.2);color:#fff;animation:fadeIn .5s both}
+.tn-empty .halo{width:46px;height:46px;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:flex;align-items:center;justify-content:center;flex:none;animation:tnFloat 3.2s ease-in-out infinite}
+.tn-empty .halo .ic{width:24px;height:24px}
+.tn-empty>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tn-empty b{font-size:1.0625em;font-weight:800;line-height:1.25}
+.tn-empty span.sub{font-size:.8125em;color:rgba(255,255,255,.86);line-height:1.35}
+.tn-chev{position:absolute;right:12px;top:84px;display:flex;flex-direction:column;align-items:center;color:rgba(255,255,255,.72);pointer-events:none;animation:chevUp 1.9s ease-in-out infinite;transition:opacity .3s}
+.tn-chev .ic{width:22px;height:22px;transform:rotate(90deg);stroke-width:2.2}
+.tn-chev .ic+.ic{margin-top:-12px;opacity:.55}
+.tn.drag .tn-chev{opacity:0!important}
+@keyframes chevUp{0%,100%{transform:translateY(5px);opacity:.35}50%{transform:translateY(-5px);opacity:.95}}
+.tn-slider{position:absolute;inset:0;z-index:3;border-radius:34px;pointer-events:none}
+.tn-slider:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+
+.tn-rail{position:relative;margin:8px 6px 0;height:44px}
+.tn-rg{position:absolute;inset-block:0;inset-inline:13px}
+.tn-line{position:absolute;inset-inline:0;top:50%;height:6px;margin-top:-3px;border-radius:6px;box-shadow:inset 0 0 0 1px var(--hair)}
+.tn-dot{position:absolute;top:50%;width:6px;height:6px;margin:-3px -3px 0 0;border-radius:50%;background:var(--surface);box-shadow:0 0 0 1.5px var(--csub)}
+.tn-in{position:absolute;inset:0;width:100%;height:44px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:grab}
+.tn-in::-webkit-slider-runnable-track{height:44px;background:transparent}
+.tn-in::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;margin-top:10px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--accent),0 0 14px 2px color-mix(in srgb,var(--accent) 55%,transparent)}
+.tn-in::-moz-range-track{height:44px;background:transparent}
+.tn-in::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--accent),0 0 14px 2px color-mix(in srgb,var(--accent) 55%,transparent)}
+.tn-in:focus-visible{outline:none}
+.tn-in:focus-visible::-webkit-slider-thumb{outline:3px solid var(--text);outline-offset:3px}
+.tn-hint{display:block;text-align:center;padding:0 8px 2px;color:var(--csub)}
+
+.hd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:26px 2px 10px}
+.hd-t{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;min-width:0;min-height:34px;padding-inline:5px 14px;border-radius:999px;background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--hair);font-size:.875em;font-weight:700;color:var(--text);box-shadow:var(--shadow)}
+.hd-i{width:24px;height:24px;border-radius:50%;background:var(--soft);color:var(--cacc);display:flex;align-items:center;justify-content:center}
+.hd-i .ic{width:15px;height:15px}
+.hd-n{flex:none;white-space:nowrap;min-width:34px;height:34px;padding:0 10px;border-radius:999px;background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:.8125em;font-weight:800;color:var(--text);box-shadow:var(--shadow)}
+.pm{position:relative;display:flex;align-items:flex-start;gap:12px;padding:14px 14px 10px;margin-bottom:10px;background:color-mix(in srgb,var(--soft) 93%,transparent)}
+.pm-ic{width:40px;height:40px;border-radius:14px;background:var(--surface);color:var(--cacc);display:flex;align-items:center;justify-content:center;flex:none}
+.pm-ic .ic{width:21px;height:21px}
+.pm-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.m-tag{font-size:.75em;font-weight:700;color:var(--cacc)}
+.m-t{font-weight:700;line-height:1.3}
+.m-body{font-size:.875em;line-height:1.45;color:var(--text);text-wrap:pretty}
+.pm-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:26px}
+.m-act{display:inline-flex;align-items:center;gap:4px;min-height:28px;font-weight:700;font-size:.875em;color:var(--cacc)}
+.m-act .ic{width:16px;height:16px}
+.pm .m-act::after{content:"";position:absolute;inset:0;border-radius:24px}
+.m-x{position:relative;z-index:2;flex:none;width:44px;height:44px;margin:-8px -8px -8px 0;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--csub)}
+.m-x .ic{width:16px;height:16px}
+.gs{padding:2px 0;margin-bottom:2px}
+.gr{position:relative;display:flex;align-items:flex-start;gap:10px;padding:9px 12px 9px 4px}
+.gr+.gr{border-top:1px solid var(--hair)}
+.gr-ic{width:34px;height:34px;border-radius:12px;background:var(--surface2);color:var(--csub);display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px}
+.gr.system .gr-ic{background:var(--infoSoft);color:var(--info)}
+.gr-ic .ic{width:18px;height:18px}
+.gr-b{flex:1;min-width:0;display:flex;flex-direction:column}
+.m-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.gr .m-tag{padding:0 7px;border-radius:7px;background:var(--surface2);color:var(--csub);line-height:1.6}
+.gr.system .m-tag{background:var(--infoSoft);color:color-mix(in srgb,var(--info) 80%,var(--text))}
+.gr .m-t{font-size:.9375em}
+.g-act{position:relative;align-self:flex-start;min-height:28px;display:inline-flex;align-items:center;gap:3px;margin-top:2px;font-weight:700;font-size:.8125em;color:var(--cacc)}
+.g-act::after{content:"";position:absolute;inset:-9px -10px}
+.g-act .ic{width:14px;height:14px}
+.gr .m-x{margin:-6px -4px -6px 0}
+.mempty{display:flex;align-items:center;gap:10px;padding:14px 16px;font-size:.9375em;font-weight:500;color:var(--csub)}
+.mempty .ic{width:20px;height:20px;color:var(--csafe)}
+
+.nowl{display:flex;flex-direction:column;gap:10px}
+.nowc{position:relative;padding:14px}
+.nh{display:flex;align-items:center;gap:12px}
+.tile{width:44px;height:44px;border-radius:15px;background:var(--soft);color:var(--cacc);display:flex;align-items:center;justify-content:center;flex:none}
+.nt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.nn{font-size:1.0625em;font-weight:700;line-height:1.25}
+.nt .cap{color:var(--csub)}
+.nl{display:flex;flex-direction:column;align-items:center;line-height:1.05;flex:none;min-width:58px;color:var(--text)}
+.nl .cap{font-size:.75em;color:var(--csub)}
+.nl b{font-size:1.5em;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.nl.urgent b{color:var(--curg)}
+.nrow{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:10px;font-size:.8125em;color:var(--csub);line-height:1.2}
+.nrow b{display:block;font-size:1.2em;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.nrow>span:last-child{text-align:left}
+.nrow .warn{align-self:center;display:inline-flex;align-items:center;gap:6px;font-size:.9em;font-weight:700;color:var(--curg)}
+.nrow .warn i{width:7px;height:7px;border-radius:50%;background:var(--urgent);animation:pulse 1.6s ease-in-out infinite}
+.nbar{height:6px;border-radius:6px;background:var(--surface2);overflow:hidden;margin-top:8px}
+.nbar i{display:block;height:100%;border-radius:6px;background:var(--accent);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.nowc.urgent .nbar i{background:var(--urgent)}
+.acts{display:flex;gap:10px;margin-top:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:17px;font-weight:700;font-size:1.0625em;transition:transform .15s ease,background .25s,color .25s}
+.btn:active{transform:scale(.97)}
+.btn .ic{width:21px;height:21px;stroke-width:2.2}
+.btn.primary{flex:2;background:var(--accent);color:var(--onAccent)}
+.btn.ghost{flex:1;background:var(--surface2);color:var(--text)}
+.nowc.marking{animation:nowOut .6s .3s cubic-bezier(.6,0,.2,1) forwards}
+.nowc.marking .btn.primary{background:var(--safe);color:var(--onSafe)}
+@keyframes nowOut{to{opacity:0;transform:translateX(-30px)}}
+.calm{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:24px 20px}
+.halo{width:64px;height:64px;border-radius:50%;background:var(--safeSoft);color:var(--csafe);display:flex;align-items:center;justify-content:center;animation:tnFloat 3.2s ease-in-out infinite;box-shadow:0 0 0 8px color-mix(in srgb,var(--safe) 10%,transparent)}
+.halo .ic{width:30px;height:30px}
+.calm h3{font-size:1.25em;font-weight:800}
+.calm .cap{font-size:.9375em;color:var(--csub)}
+
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:24px}
+.ph.big .duo{grid-template-columns:minmax(0,1fr)}
+.dcard{padding:12px 12px 8px;display:flex;flex-direction:column;min-width:0}
+.dh{display:flex;align-items:center;gap:8px;font-size:.875em;font-weight:800;margin-bottom:6px}
+.dh-i{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
+.dh-i .ic{width:15px;height:15px;stroke-width:2.3}
+.dh-i.miss{background:var(--urgentSoft);color:var(--curg)}
+.dh-i.done{background:var(--safeSoft);color:var(--csafe)}
+.dh b{margin-inline-start:auto;font-variant-numeric:tabular-nums;font-size:.9em;color:var(--csub)}
+.mrow{padding:6px 0 4px;display:flex;flex-direction:column;gap:1px}
+.mrow+.mrow,.drow+.drow{border-top:1px solid var(--hair)}
+.mrow .rt,.drow .rt{font-weight:700;font-size:.875em;line-height:1.3}
+.mrow .cap{color:var(--curg);font-weight:600;font-size:.75em}
+.late{margin-top:5px;min-height:44px;padding:0 10px;border-radius:14px;background:var(--surface2);color:var(--text);font-weight:700;font-size:.8125em;text-align:center;transition:background .25s,color .25s}
+.mrow.marking .late{background:var(--safe);color:var(--onSafe)}
+.mrow.marking{animation:nowOut .6s .3s cubic-bezier(.6,0,.2,1) forwards}
+.drow{display:flex;align-items:center;gap:6px;padding:5px 0}
+.drow>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.drow .cap{font-size:.75em;color:var(--csub)}
+.lateTag{display:inline-block;margin-inline-start:5px;padding:0 6px;border-radius:6px;background:var(--urgentSoft);color:var(--curg);font-size:1em;font-weight:700}
+.undo{flex:none;min-width:44px;min-height:44px;padding:0 6px;border-radius:12px;font-weight:700;font-size:.75em;color:var(--cacc);display:flex;align-items:center;justify-content:center}
+.dempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:10px 4px 14px;font-size:.8125em;font-weight:500;color:var(--csub);line-height:1.4}
+.dempty .halo2{width:44px;height:44px;border-radius:50%;background:var(--safeSoft);color:var(--csafe);display:flex;align-items:center;justify-content:center;animation:tnFloat 3.6s ease-in-out infinite}
+.dempty .halo2 .ic{width:22px;height:22px}
+
+.up{display:flex;align-items:center;gap:10px;margin-top:10px;min-height:52px;padding:6px 14px}
+.up-l{display:inline-flex;align-items:center;gap:6px;flex:none;font-size:.8125em;font-weight:800;color:var(--text)}
+.up-l .ic{width:17px;height:17px;color:var(--cacc)}
+.up-items{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;padding-block:4px}
+.up-i{display:inline-flex;align-items:center;gap:6px;font-size:.875em;font-weight:600}
+.up-i .ic{width:17px;height:17px;color:var(--csub)}
+.up-i span{color:var(--csub);font-variant-numeric:tabular-nums}
+.up-none{font-size:.875em;font-weight:600;color:var(--csub)}
+
+.zl{padding:12px 0 6px;overflow:hidden}
+.zl-head{display:flex;align-items:center;gap:8px;padding:0 16px 8px;font-size:.875em;color:var(--csub)}
+.zl-head .ic{width:18px;height:18px;color:var(--cacc);flex:none}
+.zl-n{flex:1;min-width:0}
+.zl-n b{color:var(--text)}
+.zl-in{flex:none;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--cacc);font-size:.9em;font-weight:700}
+.zr+.zr{border-top:1px solid var(--hair)}
+.zr-b{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:6px 16px;text-align:start}
+.zr-i{width:36px;height:36px;border-radius:50%;background:var(--surface2);color:var(--csub);display:flex;align-items:center;justify-content:center;flex:none}
+.zr-i .ic{width:19px;height:19px}
+.zr-n{flex:1;min-width:0;font-weight:600;line-height:1.25}
+.zr-s{font-size:.75em;font-weight:700;color:var(--cacc)}
+.zr-t{font-weight:800;font-variant-numeric:tabular-nums;min-width:3.2em;text-align:end}
+.zr.past .zr-n,.zr.past .zr-t{color:var(--csub);font-weight:500}
+.zr.past .zr-i{opacity:.7}
+.zr.next{background:var(--soft)}
+.zr.next .zr-i{background:var(--accent);color:var(--onAccent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 26%,transparent)}
+.zr.next .zr-n,.zr.next .zr-t{color:var(--cacc);font-weight:800}
+</style>
+<template>
+<div class="scroll tn-root" style="position: absolute; inset: 0; overflow-y: auto; padding: 24px 20px 124px; {{pageStyle}}">
+
+<header>
+<div class="tn-top">
+<div class="tn-id">
+<p class="cap">{{dateLine}}</p>
+<h1 class="tn-h1">{{greeting}}</h1>
+</div>
+<div class="tn-streak" role="img" aria-label="{{streak}} ימים ברצף">[[ic:flame]]<b class="num">{{streak}}</b></div>
+</div>
+<div class="glass tn-pill">
+<div class="tp-time">
+<b class="num">{{nowT}}</b>
+<span class="tp-st {{stCls}}"><i></i>{{stText}}</span>
+</div>
+<div class="tp-next">
+<span class="tp-ic">[[icZ:nextIc]]</span>
+<div class="tp-nt"><b>הבא: {{nextZ.name}}</b><span>{{nextZ.time}}</span><span class="tp-in">{{nextZ.left}}</span></div>
+</div>
+</div>
+</header>
+
+<!--NAMECARD-->
+
+<section class="tn {{fxCls}}" id="tn-stage" aria-label="מנהרת הזמן" style="{{stageStyle}}" onPointerDown="{{tDown}}" onPointerMove="{{tMove}}" onPointerUp="{{tUp}}" onPointerCancel="{{tUp}}">
+<div class="tn-stars" aria-hidden="true"><i></i></div>
+<div class="tn-glow" aria-hidden="true"></div>
+<div class="tn-core" aria-hidden="true"></div>
+<svg class="tn-grid" viewBox="0 0 374 456" aria-hidden="true">
+<path class="rl" d="M187 140L-12 456M187 140L386 456M187 140L-12 140M187 140L386 140M187 140L-12 -10M187 140L386 -10M187 140L70 -12M187 140L304 -12M187 140L-12 300M187 140L386 300M187 140L60 456M187 140L314 456"></path>
+<path class="rb c" d="{{ribC}}"></path>
+<path class="rb b" d="{{ribB}}"></path>
+<path class="rb a" d="{{ribA}}"></path>
+</svg>
+<i class="wave" aria-hidden="true" style="--l: -1s"></i>
+<i class="wave" aria-hidden="true" style="--l: -4.5s"></i>
+<i class="amb" aria-hidden="true" style="--a: -58deg; --d: 7.5s; --l: -1.2s"></i>
+<i class="amb" aria-hidden="true" style="--a: 74deg; --d: 9s; --l: -5s"></i>
+<i class="amb" aria-hidden="true" style="--a: 196deg; --d: 8.2s; --l: -3.4s"></i>
+<div class="sks" aria-hidden="true">
+<sc-for list="{{streaks}}" as="k" hint-placeholder-count="12"><i class="sk" style="height: {{k.h}}px; transform: {{k.tf}}; opacity: {{k.o}}"></i></sc-for>
+</div>
+<div class="tn-cam">
+<div class="tn-world">
+<div class="tn-list" aria-hidden="true">
+<sc-for list="{{gates}}" as="g" hint-placeholder-count="11"><div class="gate {{g.cls}}" style="{{g.style}}"><i class="gate-p"></i></div></sc-for>
+</div>
+<ul class="tn-list" role="list" aria-label="מצוות היום במנהרה">
+<sc-for list="{{cards}}" as="it" hint-placeholder-count="6">
+<li class="tcard {{it.cls}}" style="{{it.style}}">
+<div class="tc-in">
+<sc-if value="{{it.showHit}}" hint-placeholder-val="{{ true }}"><button class="tc-hit" onClick="{{it.focus}}" aria-label="{{it.focusLabel}}"></button></sc-if>
+<div class="tc-top">
+<span class="tc-tile" aria-hidden="true">
+<sc-if value="{{it.isDone}}" hint-placeholder-val="{{ false }}">[[ic:check]]</sc-if>
+<sc-if value="{{it.isMissed}}" hint-placeholder-val="{{ false }}">[[ic:clock]]</sc-if>
+<sc-if value="{{it.isLive}}" hint-placeholder-val="{{ true }}">[[icItem:it]]</sc-if>
+</span>
+<div class="tc-id"><h3 class="tc-n">{{it.name}}</h3><p class="tc-r">{{it.rangeTxt}}</p></div>
+</div>
+<div class="tc-mid">
+<sc-if value="{{it.isActive}}" hint-placeholder-val="{{ true }}">
+<div class="tc-ring" role="img" aria-label="נשארו {{it.left}}">
+<svg viewBox="0 0 64 64" aria-hidden="true"><circle class="rg-t" cx="32" cy="32" r="27"></circle><circle class="rg-p" cx="32" cy="32" r="27" style="stroke-dasharray: 169.65; stroke-dashoffset: {{it.rOff}}"></circle></svg>
+<i class="tc-orb" aria-hidden="true"></i>
+<span class="tc-rn" aria-hidden="true"><b>{{it.leftNum}}</b><small>{{it.leftUnit}}</small></span>
+</div>
+<div class="tc-st">
+<p class="tc-sl">נשארו {{it.left}}</p>
+<sc-if value="{{it.urgent}}" hint-placeholder-val="{{ false }}"><span class="tc-warn"><i></i>הזמן עומד להיגמר</span></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{it.isDone}}" hint-placeholder-val="{{ false }}">
+<span class="tc-badge" aria-hidden="true">[[ic:check]]</span>
+<div class="tc-st"><p class="tc-sl">{{it.statusText}}<sc-if value="{{it.late}}" hint-placeholder-val="{{ false }}"><span class="tc-late">באיחור</span></sc-if></p></div>
+</sc-if>
+<sc-if value="{{it.isMissed}}" hint-placeholder-val="{{ false }}">
+<span class="tc-badge" aria-hidden="true">[[ic:clock]]</span>
+<div class="tc-st"><p class="tc-sl">{{it.statusText}}</p></div>
+</sc-if>
+<sc-if value="{{it.isUpcoming}}" hint-placeholder-val="{{ false }}">
+<span class="tc-badge" aria-hidden="true">[[ic:clock]]</span>
+<div class="tc-st"><p class="tc-sl">{{it.statusText}}</p><p class="tc-sub">{{it.inText}}</p></div>
+</sc-if>
+</div>
+<sc-if value="{{it.hasAct}}" hint-placeholder-val="{{ false }}">
+<div class="tc-acts">
+<button class="tbtn pri" onClick="{{it.act}}" aria-label="{{it.actAria}}"><span>{{it.actText}}</span></button>
+<sc-if value="{{it.hasBook}}" hint-placeholder-val="{{ false }}"><button class="tbtn sq" onClick="{{it.open}}" aria-label="{{it.bookAria}}">[[ic:book]]</button></sc-if>
+</div>
+</sc-if>
+<div class="tc-pop" aria-hidden="true">
+<i style="--a: 0deg"></i><i style="--a: 45deg"></i><i style="--a: 90deg"></i><i style="--a: 135deg"></i><i style="--a: 180deg"></i><i style="--a: 225deg"></i><i style="--a: 270deg"></i><i style="--a: 315deg"></i>
+[[ic:check]]
+</div>
+</div>
+</li>
+</sc-for>
+</ul>
+</div>
+</div>
+<sc-for list="{{labels}}" as="g" hint-placeholder-count="11">
+<button class="glab {{g.cls}}" style="--gc: {{g.col}}; transform: {{g.tf}}; opacity: {{g.op}}" onClick="{{g.go}}" aria-label="{{g.aria}}">[[icZ:g]]<span>{{g.short}}</span><b>{{g.time}}</b></button>
+</sc-for>
+<sc-if value="{{showEmpty}}" hint-placeholder-val="{{ false }}">
+<div class="tn-empty" role="status"><span class="halo" aria-hidden="true">[[ic:sparkle]]</span><div><b>{{activeEmptyTitle}}</b><span class="sub">{{activeEmptyText}}</span></div></div>
+</sc-if>
+<div class="tn-chev" aria-hidden="true">[[ic:chevron]][[ic:chevron]]</div>
+<div class="tn-vig" aria-hidden="true"></div>
+<div class="tn-slider" role="slider" tabindex="0" aria-label="מנהרת הזמן. חצים מזיזים את הזמן, Shift קופץ רבע שעה" aria-orientation="vertical" aria-valuemin="{{dayStartSec}}" aria-valuemax="{{dayEndSec}}" aria-valuenow="{{nowSec}}" aria-valuetext="{{sliderText}}" onKeyDown="{{tKey}}"></div>
+</section>
+<div class="tn-rail">
+<div class="tn-rg" aria-hidden="true">
+<i class="tn-line" style="background: {{railBg}}"></i>
+<sc-for list="{{railDots}}" as="d" hint-placeholder-count="11"><i class="tn-dot" style="right: {{d.p}}%"></i></sc-for>
+</div>
+<input class="tn-in" type="range" min="{{dayStartSec}}" max="{{dayEndSec}}" step="60" value="{{nowSec}}" onChange="{{onRail}}" aria-label="סרגל הזמן" aria-valuetext="{{sliderText}}">
+</div>
+<p class="cap tn-hint">גררו את המנהרה למעלה כדי להתקדם בזמן, ולמטה כדי לחזור</p>
+
+<h2 class="hd rise" style="--d: .05s"><span class="hd-t"><span class="hd-i">[[ic:bell]]</span>הודעות</span><span class="hd-n num">{{msgCount}}</span></h2>
+<div role="list" aria-label="הודעות אישיות">
+<sc-for list="{{msgPersonal}}" as="m" hint-placeholder-count="2">
+<article class="glass pm rise {{m.cls}}" role="listitem" style="--d: .1s">
+<span class="pm-ic">[[icMsg:m]]</span>
+<div class="pm-b">
+<div class="pm-top"><p class="m-tag">{{m.tag}}</p>
+<sc-if value="{{m.hasAction}}" hint-placeholder-val="{{ true }}"><button class="m-act" onClick="{{m.act}}"><span>{{m.action}}</span>[[ic:chevron]]</button></sc-if></div>
+<p class="m-t">{{m.title}}</p>
+<p class="m-body">{{m.body}}</p>
+</div>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ false }}"><button class="m-x" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</article>
+</sc-for>
+</div>
+<sc-if value="{{hasMsgGeneral}}" hint-placeholder-val="{{ true }}">
+<div class="glass gs rise" role="list" aria-label="הודעות כלליות" style="--d: .16s">
+<sc-for list="{{msgGeneral}}" as="m" hint-placeholder-count="3">
+<article class="gr {{m.kindCls}} {{m.cls}}" role="listitem">
+<span class="gr-ic">[[icMsg:m]]</span>
+<div class="gr-b">
+<p class="m-line"><span class="m-tag">{{m.tag}}</span><span class="m-t">{{m.title}}</span></p>
+<p class="m-body">{{m.body}}</p>
+<sc-if value="{{m.hasAction}}" hint-placeholder-val="{{ true }}"><button class="g-act" onClick="{{m.act}}"><span>{{m.action}}</span>[[ic:chevron]]</button></sc-if>
+</div>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="m-x" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</article>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noGeneral}}" hint-placeholder-val="{{ false }}"><p class="glass mempty">[[ic:sparkle]]<span>אין הודעות כלליות. המנהרה שקטה.</span></p></sc-if>
+
+<h2 class="hd rise" style="--d: .2s"><span class="hd-t"><span class="hd-i">[[ic:sun]]</span>עכשיו</span><span class="hd-n"><span class="num">{{activeCount}}</span></span></h2>
+<sc-if value="{{hasActive}}" hint-placeholder-val="{{ true }}">
+<div class="nowl" role="list" aria-label="מצוות פתוחות עכשיו">
+<sc-for list="{{actives}}" as="it" hint-placeholder-count="2">
+<section class="glass nowc rise {{it.cls}} {{it.urgentCls}}" role="listitem" style="--d: {{it.delay}}">
+<div class="nh">
+<span class="tile">[[icItem:it]]</span>
+<div class="nt"><h3 class="nn">{{it.name}}</h3><p class="cap">מ{{it.fromName}} עד {{it.toName}}</p></div>
+<div class="nl {{it.urgentCls}}" role="img" aria-label="נשארו {{it.left}}"><span class="cap">נשארו</span><b>{{it.leftNum}}</b><span class="cap">{{it.leftUnit}}</span></div>
+</div>
+<div class="nbar" aria-hidden="true"><i style="width: {{it.pctLeft}}%"></i></div>
+<div class="nrow">
+<span>התחיל<b>{{it.startT}}</b></span>
+<sc-if value="{{it.urgent}}" hint-placeholder-val="{{ false }}"><span class="warn"><i></i>הזמן עומד להיגמר</span></sc-if>
+<span>{{it.endWord}}<b>{{it.endT}}</b></span>
+</div>
+<div class="acts">
+<button class="btn primary" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">[[ic:check]]<span>{{it.cta}}</span></button>
+<button class="btn ghost" onClick="{{it.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</section>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noActive}}" hint-placeholder-val="{{ false }}">
+<section class="glass calm rise" aria-live="polite" style="--d: .24s">
+<div class="halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h3>{{activeEmptyTitle}}</h3>
+<p class="cap">{{activeEmptyText}}</p>
+</section>
+</sc-if>
+
+<div class="duo">
+<section class="glass dcard rise" aria-label="עשית היום" style="--d: .28s">
+<h3 class="dh"><span class="dh-i done">[[ic:check]]</span>עשית היום<b>{{doneN}}</b></h3>
+<sc-if value="{{hasDone}}" hint-placeholder-val="{{ true }}">
+<div role="list">
+<sc-for list="{{done}}" as="d" hint-placeholder-count="2">
+<div class="drow" role="listitem">
+<div><span class="rt">{{d.name}}</span><span class="cap num">סומן ב-{{d.at}}<sc-if value="{{d.late}}" hint-placeholder-val="{{ false }}"><span class="lateTag">באיחור</span></sc-if></span></div>
+<button class="undo" onClick="{{d.undo}}" aria-label="{{d.undoLabel}}">ביטול</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noDone}}" hint-placeholder-val="{{ false }}"><div class="dempty"><span class="halo2" aria-hidden="true">[[ic:check]]</span><span>{{doneEmpty}}</span></div></sc-if>
+</section>
+<section class="glass dcard rise" aria-label="פספסת היום" style="--d: .34s">
+<h3 class="dh"><span class="dh-i miss">[[ic:clock]]</span>פספסת היום<b>{{missedN}}</b></h3>
+<sc-if value="{{hasMissed}}" hint-placeholder-val="{{ true }}">
+<div role="list">
+<sc-for list="{{missed}}" as="it" hint-placeholder-count="1">
+<div class="mrow {{it.cls}}" role="listitem">
+<span class="rt">{{it.name}}</span>
+<span class="cap num">{{it.ago}}</span>
+<button class="late" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">בכל זאת עשיתי</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noMissed}}" hint-placeholder-val="{{ false }}"><div class="dempty"><span class="halo2" aria-hidden="true">[[ic:sparkle]]</span><span>{{missedEmpty}}</span></div></sc-if>
+</section>
+</div>
+
+<div class="glass up rise" role="list" aria-label="בהמשך היום" style="--d: .4s">
+<span class="up-l">[[ic:clock]]בהמשך היום</span>
+<div class="up-items">
+<sc-if value="{{hasUpcoming}}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{upGroups}}" as="l" hint-placeholder-count="1">
+<span class="up-i" role="listitem">[[icItem:l]]<b>{{l.name}}</b><span>{{l.time}}</span></span>
+</sc-for>
+</sc-if>
+<sc-if value="{{noUpcoming}}" hint-placeholder-val="{{ false }}"><span class="up-none" role="listitem">אין עוד מצוות להיום</span></sc-if>
+</div>
+</div>
+
+<h2 class="hd rise" style="--d: .44s"><span class="hd-t"><span class="hd-i">[[ic:clock]]</span><span>זמני היום</span></span><span class="hd-n"><span>{{hebDay}}</span></span></h2>
+<section class="glass zl rise" aria-label="זמני היום" style="--d: .48s">
+<p class="zl-head">[[icZ:nextIc]]<span class="zl-n">הבא: <b>{{nextZ.name}} · {{nextZ.time}}</b></span><span class="zl-in">{{nextZ.left}}</span></p>
+<ol>
+<sc-for list="{{zrows}}" as="z" hint-placeholder-count="11">
+<li class="zr {{z.cls}}"><button class="zr-b" onClick="{{z.go}}" aria-label="{{z.aria}}" aria-current="{{z.cur}}">
+<span class="zr-i">[[icZ:z]]</span>
+<span class="zr-n">{{z.name}}</span>
+<span class="zr-s">{{z.sub}}</span>
+<b class="zr-t">{{z.time}}</b>
+</button></li>
+</sc-for>
+</ol>
+</section>
+
+</div>
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    this.tg = { ox: 187, oy: 140, p: 800, spp: 48, half: 173 };
+    this.td = null;
+    this.tRaf = 0;
+    this.tAnim = 0;
+    this.tTgt = 0;
+    this.tPos = 0;
+    return { fx: false, foc: null };
+  }
+
+  boardMount() {
+    this.rm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+  }
+
+  boardUnmount() {
+    this.tStop();
+  }
+
+  tHex(c) {
+    return [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+  }
+
+  tStr(a) {
+    return '#' + a.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+  }
+
+  tMix(a, b, k) {
+    return a.map((v, i) => v + (b[i] - v) * k);
+  }
+
+  tClamp(v, lo, hi) {
+    return Math.max(lo, Math.min(hi, v));
+  }
+
+  tSmooth(v) {
+    const k = this.tClamp(v, 0, 1);
+    return k * k * (3 - 2 * k);
+  }
+
+  tDepth(d) {
+    return d >= 0 ? 1400 * (1 - Math.exp(-d / 12240)) : -320 * (1 - Math.exp(d / 2520));
+  }
+
+  tKeys() {
+    const z = {};
+    this.zmanimList().forEach((x) => (z[x.id] = x.S));
+    const end = this.dayEnd();
+    const K = (t, top, mid, bot, name) => ({ t, top: this.tHex(top), mid: this.tHex(mid), bot: this.tHex(bot), name });
+    const dawnLen = z.netz - z.alot;
+    const a = K(z.alot, '#18215F', '#4B3D8E', '#9B6BA8', 'עלות השחר');
+    return [
+      a,
+      K(z.netz, '#8DA3E0', '#F2B7B4', '#FFD9AE', 'הנץ החמה'),
+      K(z.netz + (z.chatzot - z.netz) * 0.3, '#76B6F2', '#A8D4F6', '#D8EDFA', 'בוקר'),
+      K(z.chatzot, '#4B9DEB', '#6DB4F1', '#A8D5F8', 'צהריים'),
+      K(z.plag, '#5E9FE0', '#9CC5E8', '#F5D9A2', 'אחר הצהריים'),
+      K(z.shkia, '#5C5AA8', '#E4708C', '#FFB05C', 'שקיעה'),
+      K(z.tzeit, '#161D58', '#2E3382', '#6C5BA8', 'צאת הכוכבים'),
+      K(z.tzeit + (z.chatzotL - z.tzeit) * 0.25, '#070C1F', '#0F1A3E', '#1B2A58', 'לילה'),
+      K(end - dawnLen * 0.7, '#060A19', '#0D1533', '#18224D', 'לפני עלות השחר'),
+      { ...a, t: end },
+    ];
+  }
+
+  tAt(t) {
+    const K = this.tKeys();
+    let i = 0;
+    while (i < K.length - 2 && t >= K[i + 1].t) i++;
+    const a = K[i];
+    const b = K[i + 1];
+    const e = this.tSmooth((t - a.t) / (b.t - a.t));
+    const m = (p) => this.tMix(a[p], b[p], e);
+    return { top: m('top'), mid: m('mid'), bot: m('bot'), name: a.name };
+  }
+
+  tBounds() {
+    return [this.dayStart(), this.dayEnd() - 60];
+  }
+
+  tSeek(sec) {
+    this.tTgt = sec;
+    if (this.tRaf) return;
+    this.tRaf = requestAnimationFrame(() => {
+      this.tRaf = 0;
+      this.scrub(this.tTgt);
+    });
+  }
+
+  tStop() {
+    cancelAnimationFrame(this.tRaf);
+    cancelAnimationFrame(this.tAnim);
+    this.tRaf = 0;
+    this.tAnim = 0;
+  }
+
+  tEnd() {
+    this.setState({ fx: false });
+  }
+
+  tTween(to, ms, done, from) {
+    this.tStop();
+    const [lo, hi] = this.tBounds();
+    const a = from == null ? this.now() : from;
+    const b = Math.max(lo, Math.min(hi, to));
+    const dur = ms == null ? Math.max(380, Math.min(1100, 380 + Math.abs(b - a) / 40)) : ms;
+    if (this.rm.matches || Math.abs(b - a) < 1) {
+      this.tPos = b;
+      this.scrub(b);
+      if (done) done();
+      return;
+    }
+    const t0 = performance.now();
+    const step = (ts) => {
+      const k = Math.min(1, (ts - t0) / dur);
+      this.tPos = a + (b - a) * (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+      this.scrub(this.tPos);
+      if (k < 1) this.tAnim = requestAnimationFrame(step);
+      else {
+        this.tAnim = 0;
+        if (done) done();
+      }
+    };
+    this.tAnim = requestAnimationFrame(step);
+  }
+
+  tGoTo(sec) {
+    this.setState({ fx: true, foc: null });
+    this.tTween(sec, null, () => this.tEnd());
+  }
+
+  tFling(v0) {
+    const [lo, hi] = this.tBounds();
+    let v = Math.max(-2400, Math.min(2400, v0));
+    let last = performance.now();
+    const step = (ts) => {
+      const dt = Math.min(0.05, (ts - last) / 1000);
+      last = ts;
+      v *= Math.exp(-dt / 0.32);
+      this.tPos = Math.max(lo, Math.min(hi, this.tPos - v * dt * this.tg.spp));
+      this.scrub(this.tPos);
+      if (Math.abs(v) > 28 && this.tPos > lo && this.tPos < hi) this.tAnim = requestAnimationFrame(step);
+      else {
+        this.tAnim = 0;
+        this.tEnd();
+      }
+    };
+    this.tAnim = requestAnimationFrame(step);
+  }
+
+  tDown(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    this.tStop();
+    this.tPos = this.now();
+    this.td = { id: e.pointerId, el: e.currentTarget, tgt: e.target, y0: e.clientY, y: e.clientY, ts: performance.now(), v: 0, moved: false };
+  }
+
+  tMove(e) {
+    const d = this.td;
+    if (!d || d.id !== e.pointerId) return;
+    if (!d.moved) {
+      if (Math.abs(e.clientY - d.y0) < 6) return;
+      d.moved = true;
+      d.y = e.clientY;
+      d.ts = performance.now();
+      try {
+        d.el.setPointerCapture(e.pointerId);
+      } catch (err) {}
+      this.setState({ fx: true, foc: null });
+      return;
+    }
+    const ts = performance.now();
+    const dy = e.clientY - d.y;
+    d.v = d.v * 0.6 + ((dy / Math.max(1, ts - d.ts)) * 1000) * 0.4;
+    d.y = e.clientY;
+    d.ts = ts;
+    const [lo, hi] = this.tBounds();
+    this.tPos = Math.max(lo, Math.min(hi, this.tPos - dy * this.tg.spp));
+    this.tSeek(this.tPos);
+  }
+
+  tUp(e) {
+    const d = this.td;
+    if (!d || d.id !== e.pointerId) return;
+    this.td = null;
+    if (!d.moved) {
+      const hit = d.tgt && d.tgt.closest ? d.tgt.closest('button,li') : null;
+      if (this.state.fx || (!hit && this.state.foc)) this.setState({ fx: false, foc: hit ? this.state.foc : null });
+      return;
+    }
+    try {
+      d.el.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    const v = performance.now() - d.ts > 90 ? 0 : d.v;
+    if (this.rm.matches || Math.abs(v) < 90) {
+      this.scrub(this.tPos);
+      this.tEnd();
+    } else this.tFling(v);
+  }
+
+  tKey(e) {
+    const [lo, hi] = this.tBounds();
+    const cur = this.now();
+    const k = e.key;
+    const step = e.shiftKey ? 900 : 60;
+    const to = k === 'ArrowUp' || k === 'ArrowLeft' ? cur + step : k === 'ArrowDown' || k === 'ArrowRight' ? cur - step : k === 'PageUp' ? cur + 3600 : k === 'PageDown' ? cur - 3600 : k === 'Home' ? lo : k === 'End' ? hi : null;
+    if (to == null) return;
+    e.preventDefault();
+    this.tStop();
+    if (this.state.foc) this.setState({ foc: null });
+    this.scrub(to);
+  }
+
+  tRib(half, r, g) {
+    const x0 = g.ox - half;
+    const x1 = g.ox + half;
+    const y0 = g.oy - half;
+    const y1 = g.oy + half;
+    const f = (v) => v.toFixed(1);
+    return 'M' + f(x0 + r) + ' ' + f(y0) + 'H' + f(x1 - r) + 'A' + f(r) + ' ' + f(r) + ' 0 0 1 ' + f(x1) + ' ' + f(y0 + r) + 'V' + f(y1 - r) + 'A' + f(r) + ' ' + f(r) + ' 0 0 1 ' + f(x1 - r) + ' ' + f(y1) + 'H' + f(x0 + r) + 'A' + f(r) + ' ' + f(r) + ' 0 0 1 ' + f(x0) + ' ' + f(y1 - r) + 'V' + f(y0 + r) + 'A' + f(r) + ' ' + f(r) + ' 0 0 1 ' + f(x0 + r) + ' ' + f(y0) + 'Z';
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const s = this.state;
+    const t = c.nowSec;
+    const g = this.tg;
+    const Z = this.zmanimList();
+    const its = this.items();
+    const tl = c.timeline;
+    const sky = this.tAt(t);
+    const zs = {};
+    Z.forEach((z) => (zs[z.id] = z.S));
+    const noop = () => {};
+    const SIDE = { tefillin: 1, shma: -1, shacharit: 1, mincha: -1, maariv: 1, shmaNight: -1 };
+
+    const dk = [7, 11, 28];
+    const stageTop = this.tMix(sky.top, dk, 0.5);
+    const stageMid = this.tMix(sky.mid, dk, 0.5);
+    const stageBot = this.tMix(sky.bot, dk, 0.36);
+    const glowCol = this.tMix(sky.bot, [255, 255, 255], 0.22);
+    const isDayNow = t >= zs.netz && t < zs.shkia;
+    const coreCol = isDayNow ? this.tMix(sky.bot, [255, 236, 170], 0.55) : this.tMix(sky.bot, [226, 232, 255], 0.7);
+    const tw = Math.max(600, zs.tzeit - zs.shkia);
+    const dw = Math.max(600, zs.netz - zs.alot);
+    const starsOp = Math.max(this.tSmooth((t - (zs.tzeit - tw * 0.5)) / (tw * 1.5)), 1 - this.tSmooth((t - zs.alot) / (dw * 0.9)));
+    const stageStyle = [
+      '--t1:' + this.tStr(stageTop),
+      '--t2:' + this.tStr(stageMid),
+      '--t3:' + this.tStr(stageBot),
+      '--tg:rgba(' + glowCol.map((v) => Math.round(v)).join(',') + ',.55)',
+      '--tc:' + this.tStr(coreCol),
+      '--so:' + starsOp.toFixed(2),
+    ].join(';');
+    const pageStyle = '--pt:' + this.tStr(this.tMix(sky.mid, [150, 190, 255], 0.45));
+
+    const validFoc = s.foc && tl.some((x) => x.id === s.foc) ? s.foc : null;
+    const frontId = validFoc || (c.active[0] ? c.active[0].id : null);
+    const openOthers = c.active.filter((x) => x.id !== frontId);
+    const stackN = (frontId ? 1 : 0) + openOthers.length;
+    const base = stackN ? 150 + 60 * (stackN - 1) : 40;
+
+    const cards = its.map((x, i) => {
+      const m = tl[i];
+      const a = c.active.find((q) => q.id === x.id);
+      const dn = c.done.find((q) => q.id === x.id);
+      const ms = c.missed.find((q) => q.id === x.id);
+      const side = SIDE[x.id] || 1;
+      const isFront = x.id === frontId;
+      let D;
+      let lx;
+      let ly;
+      let op;
+      if (isFront) {
+        D = -30;
+        lx = 0;
+        ly = 152;
+        op = 1;
+      } else if (m.isActive) {
+        const r = openOthers.findIndex((o) => o.id === x.id) + 1;
+        D = 70 + 80 * (r - 1) + i;
+        lx = side * 54 * r;
+        ly = 152 - 28 * r;
+        op = 0.95 - 0.12 * (r - 1);
+      } else if (m.isUpcoming) {
+        D = base + this.tDepth(x.S - t) + i * 3;
+        lx = (side * 84 * (g.p + D)) / g.p;
+        ly = 104 + side * 8;
+        op = 0.92 - D / 2300;
+      } else {
+        const age = m.isDone ? t - this.doneAt(x.id) : t - x.E;
+        D = -70 - 140 * (1 - Math.exp(-age / 3600)) - i * 2;
+        const sg = g.p / (g.p + D);
+        lx = (side * 40) / sg;
+        ly = (470 + 90 * (1 - Math.exp(-age / 7200)) - g.oy) / sg;
+        op = 0.94 * Math.exp(-age / 5400);
+      }
+      const off = !isFront && op < (m.isDone || m.isMissed ? 0.12 : 0.04);
+      const st = m.isActive ? 'open' : m.isDone ? 'done' : m.isMissed ? 'missed' : 'up';
+      let act = null;
+      if (isFront) {
+        if (m.isActive) act = { text: a.cta, aria: a.markLabel, fn: () => { this.setState({ foc: null }); a.mark(); } };
+        else if (m.isDone) act = { text: 'ביטול', aria: dn.undoLabel, fn: () => { this.setState({ foc: null }); dn.undo(); } };
+        else if (m.isMissed) act = { text: 'בכל זאת עשיתי', aria: ms.markLabel, fn: () => { this.setState({ foc: null }); ms.mark(); } };
+        else act = { text: 'נסיעה ל-' + m.startT, aria: 'נסיעה בזמן אל פתיחת ' + m.name, fn: () => this.tGoTo(x.S) };
+      }
+      const rem = a ? a.pctLeft : 0;
+      return {
+        ...m,
+        isLive: !m.isDone && !m.isMissed,
+        cls: ['st-' + st, isFront ? 'front' : '', off ? 'off' : '', m.isMarking ? 'marking' : '', a && a.urgent ? 'urg' : ''].filter(Boolean).join(' '),
+        style: 'transform: translate3d(' + lx.toFixed(1) + 'px, calc(-50% + ' + ly.toFixed(1) + 'px), ' + (-D).toFixed(1) + 'px); opacity: ' + Math.max(0, op).toFixed(3),
+        rangeTxt: 'מ-\u2066' + m.startT + '\u2069 · ' + m.endWord + ' \u2066' + m.endT + '\u2069',
+        left: a ? a.left : '',
+        leftNum: a ? a.leftNum : '',
+        leftUnit: a ? a.leftUnit : '',
+        urgent: Boolean(a && a.urgent),
+        rOff: (169.65 * (1 - rem / 100)).toFixed(1),
+        late: Boolean(dn && dn.late),
+        inText: 'בעוד ' + this.left(x.S - t),
+        showHit: !isFront,
+        focus: () => {
+          this.setState({ foc: x.id });
+          setTimeout(() => {
+            const el = document.querySelector('.tcard.front .tbtn.pri');
+            if (el) el.focus();
+          }, 80);
+        },
+        focusLabel: 'הבאה לקדמת המנהרה: ' + m.name + ', ' + m.statusShort,
+        hasAct: Boolean(act),
+        actText: act ? act.text : '',
+        actAria: act ? act.aria : '',
+        act: act ? act.fn : noop,
+        hasBook: Boolean(isFront && m.isActive),
+        bookAria: 'פתיחת הנוסח: ' + m.name,
+        open: a ? a.open : noop,
+      };
+    });
+
+    const nextI = Z.findIndex((z) => z.S > t);
+    const KIND = { dawn: '#B79CFF', rise: '#FFB46B', day: '#9ED2FF', set: '#FF9A7A', night: '#8FA2FF' };
+    const gDepth = Z.map((z) => this.tDepth(z.S - t));
+    const gScale = gDepth.map((D) => g.p / (g.p + D));
+    const gates = Z.map((z, i) => {
+      const d0 = z.S - t;
+      let op = d0 <= 0 ? 0.85 * Math.exp(d0 / 1500) : 0.16 + 0.62 * (1 - gDepth[i] / 1450);
+      if (i === nextI) op = Math.max(op, 0.92);
+      const col = KIND[c.zmanim[i].isDawn ? 'dawn' : c.zmanim[i].isRise ? 'rise' : c.zmanim[i].isSet ? 'set' : c.zmanim[i].isNight ? 'night' : 'day'];
+      return {
+        cls: [d0 <= 0 ? 'past' : '', i === nextI ? 'next' : '', op < 0.03 ? 'off' : ''].filter(Boolean).join(' '),
+        style: '--gc: ' + col + '; transform: translate3d(0px, 0px, ' + (-gDepth[i]).toFixed(1) + 'px); opacity: ' + Math.max(0, op).toFixed(3),
+        col,
+        op: Math.max(0, op),
+      };
+    });
+
+    const prio = Z.map((z, i) => i)
+      .filter((i) => Z[i].S - t > -90 && gDepth[i] < 1500)
+      .sort((a, b) => (a === nextI ? -1 : b === nextI ? 1 : Z[a].S - Z[b].S));
+    const placed = [];
+    const lab = Z.map(() => null);
+    prio.forEach((i, n) => {
+      const y = Math.max(g.oy - g.half * gScale[i] - 4, 22);
+      const x = i === nextI ? g.ox : g.ox + (n % 2 ? 72 : -72);
+      if (placed.some((p) => Math.abs(p.y - y) < 28 && Math.abs(p.x - x) < 128)) return;
+      placed.push({ x, y });
+      lab[i] = { x, y };
+    });
+    const labels = Z.map((z, i) => {
+      const L = lab[i];
+      const zz = c.zmanim[i];
+      return {
+        ...zz,
+        cls: [i === nextI ? 'next' : '', L ? '' : 'off'].filter(Boolean).join(' '),
+        col: gates[i].col,
+        tf: 'translate(' + (L ? L.x : g.ox).toFixed(1) + 'px, ' + (L ? L.y : 0).toFixed(1) + 'px) translate(-50%, -50%)',
+        op: L ? Math.min(1, gates[i].op + 0.1).toFixed(2) : '0',
+        aria: 'נסיעה אל ' + z.name + ' ב-' + z.t,
+        go: () => this.tGoTo(z.S),
+      };
+    });
+
+    const ribs = { a: '', b: '', c: '' };
+    const first = Math.floor((t - 2700) / 1800);
+    for (let k = first; k <= first + 32; k++) {
+      const d0 = k * 1800 - t;
+      if (d0 < -2700) continue;
+      if (d0 > 11 * 3600) break;
+      const D = this.tDepth(d0);
+      const sc = g.p / (g.p + D);
+      if (sc > 1.7) continue;
+      ribs[D < 500 ? 'a' : D < 1100 ? 'b' : 'c'] += this.tRib(g.half * sc, 64 * sc, g);
+    }
+
+    const streaks = Array.from({ length: 12 }, (_, i) => {
+      const f = (((i / 12 + t / 2400) % 1) + 1) % 1;
+      const r = 44 + Math.pow(f, 1.6) * 380;
+      return { tf: 'rotate(' + ((i * 137.5) % 360).toFixed(1) + 'deg) translateY(' + r.toFixed(1) + 'px)', h: (10 + 120 * f).toFixed(1), o: Math.min(1, Math.sin(Math.PI * f) * 1.25).toFixed(2) };
+    });
+
+    const nz = nextI >= 0 ? c.zmanim[nextI] : c.zmanim[0];
+    const pastZ = c.zmanim.filter((z) => z.past);
+    const lastZ = pastZ[pastZ.length - 1];
+    const sliderText = c.nowT + ' · ' + sky.name + (lastZ ? ', אחרי ' + lastZ.name : '') + ', הבא: ' + c.nextZ.name + ' ' + c.nextZ.left;
+
+    const d0s = c.dayStartSec;
+    const d1s = c.dayEndSec;
+    const pc = (sec) => (((sec - d0s) / (d1s - d0s)) * 100).toFixed(2);
+    const railBg = 'linear-gradient(to left, ' + Z.map((z) => this.tStr(this.tMix(this.tAt(z.S).mid, [255, 255, 255], 0.12)) + ' ' + pc(z.S) + '%').join(', ') + ')';
+
+    const actives = c.active.map((it, i) => ({ ...it, delay: 0.24 + i * 0.07 + 's' }));
+    const upGroups = [];
+    c.upcoming.forEach((x) => {
+      let q = upGroups.find((u) => u.time === x.startT);
+      if (!q) {
+        q = { time: x.startT, names: [], isSun: x.isSun, isBox: x.isBox, isBook: x.isBook, isMoon: x.isMoon };
+        upGroups.push(q);
+      }
+      q.names.push(x.short);
+    });
+    upGroups.forEach((q) => (q.name = q.names.join(' · ')));
+
+    const zrows = c.zmanim.map((z, i) => ({
+      ...z,
+      cls: z.isNext ? 'next' : z.past ? 'past' : '',
+      cur: z.isNext ? 'true' : 'false',
+      sub: z.isNext ? c.nextZ.left : '',
+      aria: 'נסיעה אל ' + z.name + ' ב-' + z.time,
+      go: () => {
+        this.tGoTo(Z[i].S);
+        this.jump('tn-stage');
+      },
+    }));
+
+    return {
+      ...c,
+      cards,
+      gates,
+      labels,
+      streaks,
+      actives,
+      upGroups,
+      zrows,
+      railBg,
+      stageStyle,
+      pageStyle,
+      sliderText,
+      ribA: ribs.a,
+      ribB: ribs.b,
+      ribC: ribs.c,
+      nextIc: { isDay: nz.isDay, isDawn: nz.isDawn, isRise: nz.isRise, isSet: nz.isSet, isNight: nz.isNight },
+      stCls: c.isScrub ? 'view' : '',
+      stText: c.isScrub ? 'תצוגה' : 'עכשיו',
+      fxCls: s.fx ? 'drag' : '',
+      showEmpty: c.noActive && !frontId,
+      activeCount: c.activeN === 0 ? 'אין פתוחות' : c.activeN === 1 ? 'פתוחה אחת' : c.activeN === 2 ? 'שתיים פתוחות' : c.activeN + ' פתוחות',
+      noGeneral: !c.hasMsgGeneral,
+      noUpcoming: !c.hasUpcoming,
+      railDots: c.zmanim.map((z) => ({ p: z.p })),
+      onRail: (e) => {
+        this.tStop();
+        if (this.state.foc) this.setState({ foc: null });
+        this.scrub(Number(e.target.value));
+      },
+      tDown: (e) => this.tDown(e),
+      tMove: (e) => this.tMove(e),
+      tUp: (e) => this.tUp(e),
+      tKey: (e) => this.tKey(e),
+      missed: c.missed,
+      done: c.done,
+    };
+  }
+}
+</script>

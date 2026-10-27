@@ -1,0 +1,1090 @@
+<!--board title="ע · פעילויות חיות"-->
+<style>
+.ph{--spring:cubic-bezier(.3,1.25,.45,1);--bounce:cubic-bezier(.2,1.5,.35,1);--hl:rgba(255,255,255,.78);--glass:color-mix(in srgb,var(--surface) 72%,transparent);--glass2:color-mix(in srgb,var(--surface2) 70%,transparent);--line:color-mix(in srgb,var(--text) 10%,transparent);--cd:var(--accent);--cn:color-mix(in srgb,var(--info) 50%,var(--surface2));--ink:#04060B;--islA:color-mix(in srgb,var(--accent) 80%,#fff);--islS:rgba(255,255,255,.74)}
+@supports (transition-timing-function:linear(0,1)){.ph{--spring:linear(0,0.0917,0.2868,0.5015,0.6907,0.836,0.9356,0.9959,1.0267,1.0377,1.037,1.0305,1.0223,1.0145,1.0083,1.0038,1.0009,0.9993,0.9986,0.9985,0.9987,0.999,0.9993,0.9996,0.9998,0.9999,1,1,1);--bounce:linear(0,0.097,0.3191,0.5787,0.815,0.9945,1.1065,1.1567,1.1596,1.1328,1.0923,1.0507,1.0159,0.9915,0.9779,0.9735,0.9755,0.9811,0.988,0.9944,0.9994,1.0026,1.0041,1.0043,1.0036,1.0026,1.0015,1.0005,0.9998,0.9994,1)}}
+.ph.t-night{--hl:rgba(255,255,255,.1);--glass:color-mix(in srgb,var(--surface) 68%,transparent);--glass2:color-mix(in srgb,var(--surface2) 66%,transparent);--line:color-mix(in srgb,var(--text) 12%,transparent)}
+.ph.t-rose{--hl:rgba(255,255,255,.8)}
+
+.amb{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.amb i{position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--o) 46%,transparent),transparent);animation:drift 24s ease-in-out infinite alternate}
+.amb i:nth-child(even){animation-duration:30s;animation-direction:alternate-reverse}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(-46px,38px) scale(1.16)}}
+.ph.t-night .amb i{opacity:.75}
+.fade-t{position:absolute;inset-inline:0;top:0;height:66px;z-index:4;pointer-events:none;background:linear-gradient(var(--bg) 40%,transparent)}
+.fade-b{position:absolute;inset-inline:0;bottom:0;height:200px;z-index:4;pointer-events:none;background:linear-gradient(transparent,var(--bg) 66%)}
+.spc{transition:height .7s var(--spring)}
+
+.hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.hd-h{font-size:1.5em;font-weight:800;letter-spacing:-.01em;line-height:1.15}
+.hd-d{margin-top:.2em;font-size:.875em;color:var(--sub);font-weight:500}
+.streak{flex:none;display:inline-flex;align-items:center;gap:.35em;min-height:44px;padding:0 .95em 0 .8em;border-radius:999px;background:var(--glass);box-shadow:inset 0 1px 0 var(--hl),inset 0 0 0 1px var(--line);color:var(--accentText);font-weight:800;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.streak .ic{width:1.2em;height:1.2em;stroke-width:2.1}
+
+.lock{margin-top:.5em;text-align:center}
+.clk{display:flex;align-items:center;justify-content:center;direction:ltr;height:1.04em;font-size:5.5em;font-weight:800;line-height:1;letter-spacing:-.045em;font-variant-numeric:tabular-nums;-webkit-user-select:none;user-select:none}
+.dc{display:inline-grid;overflow:hidden;height:1.04em;padding:0 .012em}
+.dg{grid-area:1/1;display:block;text-align:center;background:linear-gradient(180deg,var(--text) 14%,color-mix(in srgb,var(--text) 52%,var(--accent)) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.dg.do{opacity:0}
+.dg.dn.ro-a{animation:dnA .7s var(--spring) both}
+.dg.dn.ro-b{animation:dnB .7s var(--spring) both}
+.dg.do.ro-a{animation:doA .46s cubic-bezier(.5,0,.8,.4) both}
+.dg.do.ro-b{animation:doB .46s cubic-bezier(.5,0,.8,.4) both}
+@keyframes dnA{from{transform:translateY(105%);opacity:0}to{transform:none;opacity:1}}
+@keyframes dnB{from{transform:translateY(105%);opacity:0}to{transform:none;opacity:1}}
+@keyframes doA{from{transform:none;opacity:1}to{transform:translateY(-105%);opacity:0}}
+@keyframes doB{from{transform:none;opacity:1}to{transform:translateY(-105%);opacity:0}}
+.clk-sep{display:inline-block;margin:0 .02em;padding-bottom:.12em;font-weight:500;color:var(--accentText);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.28}}
+.lock-sub{display:flex;align-items:center;justify-content:center;gap:.7em;margin-top:.55em}
+.chip{display:inline-flex;align-items:center;gap:.45em;min-height:1.9em;padding:0 .85em;border-radius:999px;background:var(--safeSoft);color:var(--safe);font-size:.75em;font-weight:800}
+.chip i{width:.6em;height:.6em;border-radius:50%;background:currentColor;animation:pulse 1.6s ease-in-out infinite}
+.chip.view{background:var(--soft);color:var(--accentText)}
+.chip.view i{animation:none}
+.sec{height:3px;width:min(9em,58%);margin:.85em auto 0;border-radius:3px;background:var(--line);overflow:hidden}
+.sec i{display:block;height:100%;border-radius:3px;background:linear-gradient(to left,var(--accent),var(--info));transition:width 1s linear}
+.sec i.nt,.sec i.fz{transition:none}
+.sec i.fz{opacity:.35}
+
+.w{position:relative;margin-top:14px;padding:1.05em;border-radius:30px;background:var(--glass);-webkit-backdrop-filter:blur(26px) saturate(1.5);backdrop-filter:blur(26px) saturate(1.5);box-shadow:var(--shadow),inset 0 1px 0 var(--hl),inset 0 0 0 1px var(--line);overflow:hidden;animation:wIn .7s var(--spring) both}
+@keyframes wIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+.w.urgent{background:linear-gradient(160deg,var(--urgentSoft),var(--glass) 70%)}
+.wh{display:flex;align-items:center;justify-content:space-between;gap:.6em}
+.wti{display:inline-flex;align-items:center;gap:.5em;font-weight:800;font-size:1.0625em}
+.wti .ic{width:1.15em;height:1.15em;color:var(--accentText)}
+.cntb{min-width:1.9em;height:1.9em;padding:0 .55em;border-radius:1em;display:inline-flex;align-items:center;justify-content:center;font-size:.8125em;font-weight:800;background:var(--safeSoft);color:var(--safe);font-variant-numeric:tabular-nums}
+.cntb.bad{background:var(--urgentSoft);color:var(--urgent)}
+.cntb.neu{background:var(--soft);color:var(--accentText)}
+.tile{flex:none;width:2.7em;height:2.7em;border-radius:16px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--surface) 78%,transparent);color:var(--accentText);box-shadow:inset 0 0 0 1px var(--line)}
+.w.urgent .tile{color:var(--urgent)}
+.tile.sm{width:2.4em;height:2.4em;border-radius:14px}
+
+.wo-h{display:flex;align-items:center;gap:.7em}
+.wo-tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:.1em}
+.wo-n{font-size:1.15em;font-weight:800;line-height:1.2}
+.pill{flex:none;display:inline-flex;align-items:center;gap:.5em;font-size:.75em;font-weight:800;padding:.3em .8em;border-radius:999px;background:var(--urgentSoft);color:var(--urgent)}
+.pill i{width:.6em;height:.6em;border-radius:50%;background:currentColor;animation:pulse 1.6s ease-in-out infinite}
+.wo-m{display:flex;align-items:center;gap:1em;margin-top:.85em}
+.ring{position:relative;flex:none;width:7.2em;height:7.2em}
+.ring-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.rg-trk{fill:none;stroke:color-mix(in srgb,var(--text) 10%,transparent);stroke-width:7}
+.rg-arc{fill:none;stroke:var(--accent);stroke-width:7;stroke-linecap:round;stroke-dasharray:100;transform:rotate(-90deg);transform-origin:50px 50px;transition:stroke-dashoffset 1s linear,stroke .4s;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--accent) 60%,transparent));animation:breathe 3.6s ease-in-out infinite}
+@keyframes breathe{50%{filter:drop-shadow(0 0 9px color-mix(in srgb,var(--accent) 85%,transparent))}}
+.rg-head{transform-origin:50px 50px;transition:transform 1s linear}
+.rg-head circle{fill:var(--surface);stroke:var(--accent);stroke-width:3;transition:stroke .4s}
+.urgent .rg-arc{stroke:var(--urgent);filter:drop-shadow(0 0 6px color-mix(in srgb,var(--urgent) 60%,transparent))}
+.urgent .rg-head circle{stroke:var(--urgent)}
+.drag .rg-arc,.drag .rg-head,.drag .sec i,.drag .ur-bar i{transition-duration:.12s}
+.isl.drag .io-bar i,.isl.drag .isl-ar{transition-duration:.12s}
+.ring-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.rc-n{display:flex;direction:ltr;font-size:1.3em;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.rc-u{font-size:.75em;font-weight:600;color:var(--sub)}
+.rc{display:inline-block}
+.rc.ro-a{animation:roA .34s cubic-bezier(.2,.9,.25,1) both}
+.rc.ro-b{animation:roB .34s cubic-bezier(.2,.9,.25,1) both}
+@keyframes roA{from{opacity:0;transform:translateY(55%)}to{opacity:1;transform:none}}
+@keyframes roB{from{opacity:0;transform:translateY(55%)}to{opacity:1;transform:none}}
+.wo-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:.7em}
+.tms{display:flex;gap:1.2em}
+.tm{display:flex;flex-direction:column;gap:.1em}
+.tm-l{font-size:.75em;font-weight:600;color:var(--sub)}
+.tm-v{font-size:1.3em;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.acts{display:flex;gap:.6em;margin-top:.9em}
+.cbtn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:3.1em;border-radius:20px;background:var(--accent);color:var(--onAccent);font-weight:800;font-size:1.0625em;box-shadow:0 8px 20px -8px color-mix(in srgb,var(--accent) 70%,transparent);transition:transform .15s}
+.cbtn:active{transform:scale(.96)}
+.cbtn .ic{stroke-width:2.4}
+.gbtn{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:.4em;min-height:3.1em;padding:0 1.1em;border-radius:20px;background:color-mix(in srgb,var(--surface) 80%,transparent);color:var(--text);font-weight:700;box-shadow:inset 0 0 0 1px var(--line)}
+.gbtn .ic{width:1.15em;height:1.15em}
+.pop{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;background:var(--safe);color:var(--onSafe);clip-path:circle(0% at 50% 88%)}
+.pop .ic{width:68px;height:68px;stroke-width:2.4;stroke-dasharray:24;stroke-dashoffset:24}
+.pop i{position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4px;border-radius:3px;background:var(--onSafe);opacity:0}
+.pop i:nth-child(odd){background:var(--accent);border-radius:50%}
+.w.marking .pop{opacity:1;animation:wipeC .6s cubic-bezier(.5,0,.2,1) forwards}
+.w.marking .pop .ic{animation:drawC .35s .3s ease-out forwards}
+.w.marking .pop i{animation:burst .75s .3s ease-out forwards}
+.w.marking{animation:cardOut .5s .38s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes wipeC{to{clip-path:circle(140% at 50% 88%)}}
+@keyframes drawC{to{stroke-dashoffset:0}}
+@keyframes burst{0%{opacity:1;transform:rotate(var(--a)) translateY(0) scale(.5)}100%{opacity:0;transform:rotate(var(--a)) translateY(-96px) scale(1.15)}}
+@keyframes cardOut{to{opacity:0;transform:scale(.94)}}
+.wempty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4em;padding:1.4em 1em;border:2px dashed var(--line);background:color-mix(in srgb,var(--safeSoft) 40%,var(--glass))}
+.halo{width:4.2em;height:4.2em;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:flex;align-items:center;justify-content:center;animation:float 3.2s ease-in-out infinite}
+.halo .ic{width:1.9em;height:1.9em}
+@keyframes float{50%{transform:translateY(-7px)}}
+.wempty h3{font-size:1.15em;font-weight:800}
+
+.wz-h{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;margin-block:-.4em 0}
+.wz-ch{width:2.2em;height:2.2em;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--surface) 80%,transparent);color:var(--sub);box-shadow:inset 0 0 0 1px var(--line)}
+.wz-ch .ic{width:1.1em;height:1.1em;transform:rotate(-90deg);transition:transform .5s var(--spring)}
+.wz.open .wz-ch .ic{transform:rotate(90deg)}
+.wz-next{display:flex;align-items:flex-end;justify-content:space-between;gap:.8em;margin-top:.2em}
+.wz-nn{display:flex;flex-direction:column;min-width:0}
+.wz-nn h3{font-size:1.5em;font-weight:800;line-height:1.15;letter-spacing:-.01em}
+.wz-nt{display:flex;flex-direction:column;align-items:flex-end;flex:none}
+.wz-tm{font-size:2.1em;font-weight:900;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.wz-cd{display:flex;direction:ltr;margin-top:.15em;font-size:.9375em;font-weight:800;color:var(--accentText);font-variant-numeric:tabular-nums}
+.mini{position:relative;height:4.6em;margin:.5em .5em 0}
+.mini-trk{position:absolute;inset-inline:0;top:1.2em;height:.5em;border-radius:1em;box-shadow:inset 0 0 0 1px var(--line);opacity:.9}
+.mini-d{position:absolute;top:1.45em;width:.75em;height:.75em;margin:-.375em -.375em 0 0;border-radius:50%;background:var(--surface);box-shadow:0 0 0 1.5px var(--sub);transition:background .4s,box-shadow .4s}
+.mini-d.past{background:var(--sub);box-shadow:0 0 0 1.5px var(--surface)}
+.mini-d.next{width:1.15em;height:1.15em;margin:-.575em -.575em 0 0;background:var(--accent);box-shadow:0 0 0 3px var(--surface),0 0 14px 2px color-mix(in srgb,var(--accent) 60%,transparent);animation:dotBeat 2.4s ease-in-out infinite}
+@keyframes dotBeat{50%{transform:scale(1.22)}}
+@keyframes popInA{0%{opacity:0;transform:translateY(12px) scale(.95)}60%{opacity:1;transform:translateY(-2px) scale(1.015)}100%{opacity:1;transform:none}}
+@keyframes popInB{0%{opacity:0;transform:translateY(12px) scale(.95)}60%{opacity:1;transform:translateY(-2px) scale(1.015)}100%{opacity:1;transform:none}}
+.enter-a{animation:popInA .55s both}
+.enter-b{animation:popInB .55s both}
+@keyframes bumpA{0%{transform:scale(1.25)}100%{transform:none}}
+@keyframes bumpB{0%{transform:scale(1.25)}100%{transform:none}}
+.bump-a{animation:bumpA .5s cubic-bezier(.2,.9,.3,1.3)}
+.bump-b{animation:bumpB .5s cubic-bezier(.2,.9,.3,1.3)}
+.mini-now{position:absolute;top:.3em;width:2px;height:2.5em;margin-right:-1px;border-radius:2px;background:var(--text);box-shadow:0 0 0 2px var(--glass),0 0 12px 1px color-mix(in srgb,var(--accent) 60%,transparent);transition:right 1s linear}
+.mini-now::before{content:"";position:absolute;left:50%;top:-.3em;width:.6em;height:.6em;margin-left:-.3em;border-radius:50%;background:var(--accent)}
+.drag .mini-now{transition-duration:0s}
+.scr.hold .scr-fill{transition:none}
+.mini-a{position:absolute;top:3em;transform:translateX(50%);font-size:.75em;font-weight:700;color:var(--sub);white-space:nowrap}
+.zx{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .65s cubic-bezier(.2,.9,.25,1),opacity .4s}
+.wz.open .zx{grid-template-rows:1fr;opacity:1}
+.zx-in{min-height:0;overflow:hidden}
+.zg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(6,auto);grid-auto-flow:column;gap:.1em .5em;padding-top:.6em}
+.zr{display:grid;grid-template-columns:auto 1fr;column-gap:.6em;align-items:center;width:100%;min-height:3.1em;padding:.3em .55em;border-radius:16px;text-align:start;transition:background .3s,box-shadow .3s}
+.zr:active{background:var(--glass2)}
+.zr-d{grid-row:1/span 2;width:.7em;height:.7em;border-radius:50%;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--text)}
+.zr-n{font-size:.8125em;color:var(--sub);font-weight:500;line-height:1.25}
+.zr-t{font-weight:800;font-variant-numeric:tabular-nums;line-height:1.25}
+.zr.past{opacity:.5}
+.zr.next{background:var(--soft);box-shadow:inset 0 0 0 2px var(--accent);opacity:1}
+.zr.next .zr-d{background:var(--accent);box-shadow:0 0 0 3px var(--soft),0 0 0 4.5px var(--accent);animation:dotBeat 2.4s ease-in-out infinite}
+.zr.next .zr-n{color:var(--accentText);font-weight:700}
+
+.nsec{margin-top:22px}
+.sh{display:flex;align-items:center;gap:.5em;margin:0 .2em .2em;font-size:1.0625em;font-weight:800}
+.sh .ic{width:1.15em;height:1.15em;color:var(--accentText)}
+.grp{margin-top:.5em}
+.grp-h{display:flex;align-items:center;justify-content:space-between;gap:.5em;margin:0 .3em .15em}
+.grp-h h3{display:flex;align-items:center;gap:.5em;font-size:.8125em;font-weight:700;color:var(--sub)}
+.grp-t{min-height:44px;padding:0 .7em;border-radius:12px;font-weight:700;font-size:.8125em;color:var(--accentText)}
+.stk{position:relative;transition:height .8s var(--spring)}
+.nc{position:absolute;top:0;inset-inline:0;height:7.2em;transform-origin:50% 0;touch-action:pan-y;-webkit-user-select:none;user-select:none;cursor:grab;transition:transform .8s var(--spring),opacity .35s}
+.nc.drag{transition:none;cursor:grabbing}
+.nc.settle{transition:transform .75s var(--bounce),opacity .3s}
+.nc.fly{transition:transform .26s cubic-bezier(.55,0,.85,.45),opacity .26s ease-in}
+.nc.leaving{animation:ncFade .38s forwards!important}
+@keyframes ncFade{to{opacity:0}}
+.nc.back{pointer-events:none}
+.nc-bg{position:absolute;inset:0;border-radius:24px;background:var(--glass);-webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);box-shadow:var(--shadow),inset 0 1px 0 var(--hl),inset 0 0 0 1px var(--line)}
+.nc.personal .nc-bg{background:linear-gradient(150deg,color-mix(in srgb,var(--soft) 88%,transparent),var(--glass) 80%)}
+.nc.system .nc-bg{background:linear-gradient(150deg,color-mix(in srgb,var(--infoSoft) 88%,transparent),var(--glass) 80%)}
+.nc-in{position:relative;z-index:2;display:flex;align-items:flex-start;gap:.7em;height:100%;padding:.6em .9em;pointer-events:none;transition:opacity .25s}
+.nc.back .nc-in{opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s .2s}
+.nc-ic{flex:none;width:2.5em;height:2.5em;margin-top:.3em;border-radius:15px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--surface) 80%,transparent);color:var(--sub);box-shadow:inset 0 0 0 1px var(--line)}
+.nc.personal .nc-ic{color:var(--accentText)}
+.nc.system .nc-ic{color:var(--info)}
+.nc-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:.05em;padding-top:.35em}
+.nc-tag{font-size:.75em;font-weight:800;color:var(--sub);line-height:1.3}
+.nc.personal .nc-tag{color:var(--accentText)}
+.nc.system .nc-tag{color:var(--info)}
+.nc-title{font-size:.9375em;font-weight:800;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nc-body{font-size:.8125em;line-height:1.35;color:var(--text);opacity:.88;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nc-side{flex:none;min-width:2.75em;max-width:4.8em;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+.nc-side>*{pointer-events:auto}
+.nc-x{width:2.75em;height:2.75em;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--sub)}
+.nc-x .ic{width:1em;height:1em}
+.nc-act{margin-top:auto;min-height:2.75em;max-width:4.8em;padding:0 .2em;font-weight:800;font-size:.8125em;line-height:1.15;text-align:center;color:var(--accentText)}
+.nc.system .nc-act{color:var(--info)}
+.nc-hit{position:absolute;inset:0;z-index:1;border-radius:24px}
+.nc-hit:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.nil{display:flex;align-items:center;gap:.8em;padding:.9em .5em .3em}
+.nil-ic{flex:none;width:2.75em;height:2.75em;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:flex;align-items:center;justify-content:center}
+.nil p{font-size:.9375em;font-weight:600;color:var(--sub);line-height:1.4}
+.nil-ic.dash{background:var(--glass2);color:var(--sub)}
+
+.sum{display:flex;align-items:center;gap:1.2em;margin-top:.75em}
+.sumc{display:flex;align-items:baseline;gap:.4em}
+.sumc b{font-size:2.5em;font-weight:900;line-height:.95;letter-spacing:-.03em;font-variant-numeric:tabular-nums;display:inline-block}
+.sumc.ok b{color:var(--safe)}
+.sumc.bad b{color:var(--urgent)}
+.sumc.zero b{color:var(--sub)}
+.sumc>span{font-size:.8125em;font-weight:600;color:var(--sub)}
+.segs{flex:1;display:flex;gap:5px;min-width:3em}
+.segs i{flex:1;height:.55em;border-radius:1em;background:var(--glass2);box-shadow:inset 0 0 0 1px var(--line);transition:background .5s,opacity .5s}
+.segs i.done{background:var(--safe);box-shadow:none}
+.segs i.missed{background:var(--urgent);box-shadow:none}
+.segs i.active{background:var(--accent);box-shadow:none;animation:pulseBar 1.8s ease-in-out infinite}
+@keyframes pulseBar{50%{opacity:.5}}
+.sl{display:flex;align-items:center;justify-content:space-between;margin:1em .1em .2em;font-size:.8125em;font-weight:800;color:var(--sub)}
+.lr{display:flex;flex-wrap:wrap;align-items:center;gap:.4em .8em;min-height:3.9em;padding:.2em 0}
+.lr+.lr{border-top:1px solid var(--line)}
+.lr-ic{flex:none;width:2.4em;height:2.4em;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:flex;align-items:center;justify-content:center}
+.lr-ic .ic{width:1.15em;height:1.15em;stroke-width:2.3}
+.lr.missed .lr-ic{background:var(--urgentSoft);color:var(--urgent)}
+.lr-t{flex:1 1 8em;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.lr-t b{font-weight:700}
+.lr-t>span{font-size:.8125em;color:var(--sub)}
+.lr.missed .lr-t>span{color:var(--urgent);font-weight:600}
+.lateTag{display:inline-block;margin-inline-start:.5em;padding:0 .45em;border-radius:6px;background:var(--urgentSoft);color:var(--urgent);font-size:.95em;font-weight:700}
+.pbtn2{flex:none;display:inline-flex;align-items:center;gap:.4em;min-height:44px;padding:0 1em;border-radius:22px;background:color-mix(in srgb,var(--surface) 82%,transparent);color:var(--text);font-weight:700;font-size:.8125em;box-shadow:inset 0 0 0 1px var(--line);transition:background .25s,color .25s,transform .25s}
+.pbtn2 .ic{width:1.1em;height:1.1em}
+.pbtn2.soft{background:var(--soft);color:var(--accentText)}
+.lr.marking .pbtn2{background:var(--safe);color:var(--onSafe);transform:scale(1.06)}
+.lr.marking .lr-ic{background:var(--safe);color:var(--onSafe)}
+.lr.marking{animation:lrOut .55s .3s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes lrOut{to{opacity:0;transform:translateX(-24px)}}
+.ur{display:flex;align-items:center;gap:.8em;min-height:3.9em;padding:.2em 0}
+.ur+.ur{border-top:1px solid var(--line)}
+.ur-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15em}
+.ur-t b{font-weight:700;line-height:1.3}
+.ur-t>span{font-size:.8125em;color:var(--sub);font-variant-numeric:tabular-nums}
+.ur-bar{display:block;height:.3em;border-radius:1em;background:var(--glass2);overflow:hidden}
+.ur-bar i{display:block;height:100%;border-radius:1em;background:linear-gradient(to left,var(--accent),var(--info));transition:width 1s linear}
+
+.scr{position:absolute;inset-inline:14px;bottom:94px;z-index:6;touch-action:none}
+.scr-p{position:relative;padding:.1em 1.4em .55em;border-radius:28px;background:var(--glass);-webkit-backdrop-filter:blur(26px) saturate(1.5);backdrop-filter:blur(26px) saturate(1.5);box-shadow:var(--shadow),inset 0 1px 0 var(--hl),inset 0 0 0 1px var(--line)}
+.scr-hit{position:relative;height:44px;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;border-radius:16px}
+.scr.hold .scr-hit{cursor:grabbing}
+.scr-hit:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.scr-rail{position:absolute;inset-inline:0;top:50%;height:4px;margin-top:-2px;border-radius:99px;background:color-mix(in srgb,var(--text) 15%,transparent);transition:height .4s var(--spring),margin-top .4s var(--spring)}
+.scr.hold .scr-rail{height:12px;margin-top:-6px}
+.scr-fill{position:absolute;top:0;bottom:0;right:0;border-radius:inherit;background:linear-gradient(to left,color-mix(in srgb,var(--accent) 38%,transparent),var(--accent));box-shadow:0 0 14px color-mix(in srgb,var(--accent) 55%,transparent);transition:width 1s linear}
+.scr-mk{position:absolute;top:50%;width:2px;height:14px;margin:-7px -1px 0 0;border-radius:2px;background:color-mix(in srgb,var(--text) 40%,transparent);transition:height .35s var(--spring),background .3s,width .3s}
+.scr.hold .scr-mk{height:20px;margin-top:-10px}
+.scr-mk.past{background:var(--surface)}
+.scr-mk.near{width:3px;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
+.scr-lv{position:absolute;top:50%;width:8px;height:8px;margin:-4px -4px 0 0;border-radius:2px;background:var(--text);transform:rotate(45deg);box-shadow:0 0 0 2px var(--surface)}
+.scr-thumb{position:absolute;top:50%;width:18px;height:18px;margin:-9px -9px 0 0;border-radius:50%;background:var(--surface);box-shadow:0 0 0 3.5px var(--accent),0 4px 14px color-mix(in srgb,var(--accent) 55%,transparent);transition:right 1s linear,transform .35s var(--spring)}
+.scr.hold .scr-thumb{transform:scale(1.45);transition:transform .35s var(--spring)}
+.scr-bub{position:absolute;bottom:calc(100% + 6px);display:flex;flex-direction:column;align-items:center;gap:.05em;min-width:7.6em;padding:.45em 1em;border-radius:18px;background:var(--text);color:var(--bg);box-shadow:0 12px 30px rgba(0,0,0,.28);opacity:0;transform:translate(50%,10px) scale(.84);pointer-events:none;white-space:nowrap}
+.scr.hold .scr-bub{opacity:1;transform:translate(50%,0) scale(1);transition:opacity .2s,transform .4s var(--spring)}
+.scr-bub b{font-size:1.25em;font-weight:900;line-height:1.1;font-variant-numeric:tabular-nums}
+.scr-bub>span{font-size:.75em;font-weight:700;opacity:.88}
+.scr-bub.snap>span{color:var(--toastAct);opacity:1}
+.scr-e{display:flex;justify-content:space-between;margin-top:-.2em;font-size:.75em;font-weight:600;color:var(--sub);font-variant-numeric:tabular-nums}
+
+.isl-w{position:absolute;top:11px;inset-inline:0;z-index:8;display:flex;justify-content:center;pointer-events:none;transition:transform .8s var(--spring)}
+.isl{position:relative;pointer-events:auto;overflow:hidden;background:var(--ink);color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.26),0 0 0 1px rgba(255,255,255,.07);transition:width .9s var(--spring),height .9s var(--spring),border-radius .9s var(--spring),box-shadow .5s;font-family:'Heebo',system-ui,sans-serif}
+.isl.open{box-shadow:0 26px 56px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.1)}
+.isl.urgent{--islA:#FF9A90}
+.isl-c{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;gap:.5em;padding:0 .85em;color:#fff;text-align:start;transition:opacity .25s .1s,transform .6s var(--spring),filter .3s .1s}
+.isl-c:active{transform:scale(.96)}
+.isl.open .isl-c{opacity:0;transform:scale(.82);filter:blur(6px);visibility:hidden;pointer-events:none;transition:opacity .14s,transform .3s,filter .2s,visibility 0s .22s}
+.isl-ic{position:relative;flex:none;width:1.9em;height:1.9em;display:flex;align-items:center;justify-content:center;color:var(--islA)}
+.isl-ic .ic{width:.95em;height:.95em}
+.isl-rg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.isl-tr{fill:none;stroke:rgba(255,255,255,.16);stroke-width:2.4}
+.isl-ar{fill:none;stroke:var(--islA);stroke-width:2.4;stroke-linecap:round;stroke-dasharray:100;transform:rotate(-90deg);transform-origin:15px 15px;transition:stroke-dashoffset 1s linear}
+.isl-cd{display:flex;direction:ltr;font-size:.9375em;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.isl-tx{flex:1;min-width:0;font-size:.875em;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.isl-o{position:absolute;top:0;left:50%;width:362px;height:100%;margin-left:-181px;padding:.85em 1em;opacity:0;visibility:hidden;transform:scale(.9) translateY(-10px);filter:blur(8px);transition:opacity .2s,transform .4s,filter .3s,visibility 0s .3s}
+.isl.open .isl-o{opacity:1;visibility:visible;transform:none;filter:none;transition:opacity .3s .14s,transform .8s .1s var(--spring),filter .35s .12s,visibility 0s 0s}
+.io-h{display:flex;align-items:center;gap:.7em}
+.io-tile{flex:none;width:2.6em;height:2.6em;border-radius:15px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);color:var(--islA)}
+.io-nm{flex:1;min-width:0;display:flex;flex-direction:column;gap:.1em}
+.io-nm h3{font-size:1.0625em;font-weight:800;line-height:1.2;color:#fff}
+.io-nm p{font-size:.8125em;color:var(--islS);font-variant-numeric:tabular-nums}
+.io-x{flex:none;width:2.75em;height:2.75em;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.13);color:#fff}
+.io-x .ic{width:1em;height:1em}
+.io-bar{height:.55em;margin-top:.85em;border-radius:1em;background:rgba(255,255,255,.14);overflow:hidden}
+.io-bar i{display:block;height:100%;border-radius:1em;background:linear-gradient(to left,var(--islA),color-mix(in srgb,var(--islA) 45%,#fff));box-shadow:0 0 12px var(--islA);transition:width 1s linear}
+.io-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:.5em;font-size:.8125em;color:var(--islS);font-variant-numeric:tabular-nums}
+.io-cd{display:inline-flex;align-items:baseline;gap:.5em}
+.io-cd b{display:flex;direction:ltr;font-size:1.45em;font-weight:800;color:#fff;letter-spacing:-.01em}
+.io-acts{display:flex;gap:.6em;margin-top:.7em}
+.io-cta{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:2.95em;border-radius:1.5em;background:var(--islA);color:#0B0E15;font-weight:800;transition:transform .15s}
+.io-cta:active{transform:scale(.96)}
+.io-cta .ic{stroke-width:2.4}
+.io-txt{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:.4em;min-height:2.95em;padding:0 1.15em;border-radius:1.5em;background:rgba(255,255,255,.14);color:#fff;font-weight:700}
+.io-txt.wide{flex:1}
+.io-txt .ic{width:1.1em;height:1.1em}
+.isl-scrim{position:absolute;inset:0;z-index:7;background:transparent;border:0;padding:0;cursor:default}
+</style>
+<template>
+<div class="amb" aria-hidden="true">
+<i style="--o: var(--accent); right: -140px; top: 40px"></i>
+<i style="--o: var(--info); left: -170px; top: 330px"></i>
+<i style="--o: var(--accent); right: -120px; top: 700px"></i>
+<i style="--o: var(--info); left: -150px; top: 1050px"></i>
+<i style="--o: var(--accent); right: -150px; top: 1400px"></i>
+<i style="--o: var(--info); left: -170px; top: 1750px"></i>
+<i style="--o: var(--accent); right: -130px; top: 2100px"></i>
+<i style="--o: var(--info); left: -160px; top: 2450px"></i>
+<i style="--o: var(--accent); right: -140px; top: 2800px"></i>
+</div>
+<div class="fade-t" aria-hidden="true"></div>
+
+<div class="scroll {{dragCls}}" style="position: absolute; inset: 0; z-index: 1; overflow-y: auto; padding: 0 20px 208px">
+
+<div class="spc" aria-hidden="true" style="height: {{spacerH}}px"></div>
+
+<header class="hd">
+<div style="min-width: 0">
+<h1 class="hd-h">{{greeting}}</h1>
+<p class="hd-d">{{dateTxt}}</p>
+</div>
+<div class="streak" role="img" aria-label="{{streak}} ימים ברצף">[[ic:flame]]<b class="num">{{streak}}</b></div>
+</header>
+
+<!--NAMECARD-->
+
+<section class="lock" aria-label="השעה עכשיו">
+<div class="clk" role="img" aria-label="השעה {{nowT}}">
+<sc-for list="{{clkCells}}" as="k" hint-placeholder-count="5">
+<sc-if value="{{k.isSep}}" hint-placeholder-val="{{ false }}"><span class="clk-sep" aria-hidden="true">:</span></sc-if>
+<sc-if value="{{k.isDig}}" hint-placeholder-val="{{ true }}"><span class="dc" aria-hidden="true"><b class="dg dn {{k.cls}}">{{k.ch}}</b><b class="dg do {{k.pcls}}">{{k.prev}}</b></span></sc-if>
+</sc-for>
+</div>
+<div class="lock-sub">
+<span class="chip {{chipCls}}"><i></i>{{chipText}}</span>
+<span class="cap">{{city}} · {{parasha}}</span>
+</div>
+<div class="sec" aria-hidden="true"><i class="{{secCls}}" style="width: {{secPct}}%"></i></div>
+</section>
+
+<sc-if value="{{hasActive}}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{wOpen}}" as="it" hint-placeholder-count="2">
+<article class="w wo {{it.urgentCls}} {{it.cls}} {{it.enter}}" aria-label="פתוח עכשיו: {{it.name}}">
+<div class="wo-h">
+<span class="tile">[[icItem:it]]</span>
+<div class="wo-tt"><h2 class="wo-n">{{it.name}}</h2><span class="cap">{{it.rangeTxt}}</span></div>
+<sc-if value="{{it.urgent}}" hint-placeholder-val="{{ false }}"><span class="pill"><i></i>נגמר בקרוב</span></sc-if>
+</div>
+<div class="wo-m">
+<div class="ring" role="img" aria-label="נשארו {{it.left}}">
+<svg class="ring-svg" viewBox="0 0 100 100" aria-hidden="true">
+<circle class="rg-trk" cx="50" cy="50" r="44"></circle>
+<circle class="rg-arc" cx="50" cy="50" r="44" pathLength="100" style="stroke-dashoffset: {{it.ringOff}}"></circle>
+<g class="rg-head" style="transform: rotate({{it.headDeg}}deg)"><circle cx="50" cy="6" r="4.4"></circle></g>
+</svg>
+<div class="ring-c" aria-hidden="true">
+<div class="rc-n"><sc-for list="{{it.cells}}" as="k" hint-placeholder-count="5"><span class="rc {{k.cls}}">{{k.ch}}</span></sc-for></div>
+<span class="rc-u">נותרו</span>
+</div>
+</div>
+<div class="wo-t">
+<div class="tms">
+<div class="tm"><span class="tm-l">התחיל</span><b class="tm-v">{{it.startT}}</b></div>
+<div class="tm"><span class="tm-l">{{it.endWord}}</span><b class="tm-v">{{it.endT}}</b></div>
+</div>
+<p class="cap">{{it.leftTxt}}</p>
+</div>
+</div>
+<div class="acts">
+<button class="cbtn" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">[[ic:check]]<span>{{it.cta}}</span></button>
+<button class="gbtn" onClick="{{it.open}}" aria-label="פתיחת הנוסח: {{it.name}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+<div class="pop" aria-hidden="true">
+<i style="--a: 0deg"></i><i style="--a: 45deg"></i><i style="--a: 90deg"></i><i style="--a: 135deg"></i><i style="--a: 180deg"></i><i style="--a: 225deg"></i><i style="--a: 270deg"></i><i style="--a: 315deg"></i>
+[[ic:check]]
+</div>
+</article>
+</sc-for>
+</sc-if>
+<sc-if value="{{noActive}}" hint-placeholder-val="{{ false }}">
+<section class="w wempty" aria-live="polite">
+<div class="halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h2>{{activeEmptyTitle}}</h2>
+<p class="cap" style="font-size: .9375em">{{activeEmptyText}}</p>
+</section>
+</sc-if>
+
+<section class="w wz {{zxCls}}" aria-label="זמני היום">
+<button class="wz-h" aria-expanded="{{zxOpen}}" aria-controls="zx-list" onClick="{{zxToggle}}" aria-label="{{zxLabel}}">
+<span class="wti">[[ic:clock]]<span>זמני היום</span></span>
+<span class="wz-ch" aria-hidden="true">[[ic:chevron]]</span>
+</button>
+<div class="wz-next">
+<div class="wz-nn"><span class="cap">הזמן הבא</span><h3>{{nextZ.name}}</h3></div>
+<div class="wz-nt">
+<b class="wz-tm">{{nextZ.time}}</b>
+<span class="wz-cd" aria-hidden="true"><sc-for list="{{nzCells}}" as="k" hint-placeholder-count="7"><span class="rc {{k.cls}}">{{k.ch}}</span></sc-for></span>
+</div>
+</div>
+<p class="pvh">{{nextZ.left}}</p>
+<div class="mini" aria-hidden="true">
+<i class="mini-trk" style="background: {{railBg}}"></i>
+<sc-for list="{{zdots}}" as="d" hint-placeholder-count="11"><i class="mini-d {{d.cls}}" style="right: {{d.p}}%"></i></sc-for>
+<i class="mini-now" style="right: {{nowPos}}%"></i>
+<sc-for list="{{zanch}}" as="a" hint-placeholder-count="3"><b class="mini-a" style="right: {{a.p}}%">{{a.short}}</b></sc-for>
+</div>
+<div class="zx"><div class="zx-in" id="zx-list">
+<ul class="zg" aria-label="כל זמני היום">
+<sc-for list="{{zrows}}" as="z" hint-placeholder-count="11">
+<li><button class="zr {{z.cls}}" onClick="{{z.go}}" aria-label="{{z.aria}}">
+<i class="zr-d"></i>
+<span class="zr-n">{{z.name}}</span>
+<b class="zr-t">{{z.time}}</b>
+</button></li>
+</sc-for>
+</ul>
+</div></div>
+</section>
+
+<section class="nsec" aria-label="הודעות">
+<h2 class="sh">[[ic:bell]]<span>הודעות</span><b class="cntb neu">{{msgCount}}</b></h2>
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+<section class="grp" aria-label="הודעות: {{g.title}}">
+<div class="grp-h">
+<h3><span>{{g.title}}</span><span class="cntb">{{g.n}}</span></h3>
+<sc-if value="{{g.canToggle}}" hint-placeholder-val="{{ true }}"><button class="grp-t" aria-expanded="{{g.open}}" onClick="{{g.toggle}}">{{g.toggleText}}</button></sc-if>
+</div>
+<ul class="stk" style="height: {{g.h}}em">
+<sc-for list="{{g.cards}}" as="n" hint-placeholder-count="3">
+<li class="nc {{n.kindCls}} {{n.cls}}" style="transform: {{n.tf}}; opacity: {{n.op}}; z-index: {{n.z}}; transition-delay: {{n.delay}}" onPointerDown="{{n.down}}" onPointerMove="{{n.move}}" onPointerUp="{{n.up}}" onPointerCancel="{{n.up}}">
+<div class="nc-bg"></div>
+<div class="nc-in">
+<span class="nc-ic">[[icMsg:n]]</span>
+<div class="nc-t"><p class="nc-tag">{{n.tag}}</p><h4 class="nc-title">{{n.title}}</h4><p class="nc-body">{{n.body}}</p></div>
+<div class="nc-side">
+<sc-if value="{{n.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="nc-x" onClick="{{n.dismissBtn}}" aria-label="{{n.dismissLabel}}">[[ic:close]]</button></sc-if>
+<sc-if value="{{n.hasAction}}" hint-placeholder-val="{{ true }}"><button class="nc-act" onClick="{{n.actBtn}}" aria-label="{{n.actAria}}">{{n.action}}</button></sc-if>
+</div>
+</div>
+<sc-if value="{{n.hasHit}}" hint-placeholder-val="{{ false }}"><button class="nc-hit" onClick="{{n.tap}}" aria-label="{{n.hitAria}}"></button></sc-if>
+</li>
+</sc-for>
+</ul>
+</section>
+</sc-for>
+<sc-if value="{{noMessages}}" hint-placeholder-val="{{ false }}"><div class="w" style="margin-top: 8px"><div class="nil"><span class="nil-ic dash">[[ic:bell]]</span><p>אין הודעות חדשות. הכול שקט.</p></div></div></sc-if>
+</section>
+
+<section class="w wt" aria-label="היום">
+<div class="wh">
+<span class="wti">[[ic:check]]<span>היום</span></span>
+<span class="cap">{{weekday}} · {{hebDay}}</span>
+</div>
+<div class="sum">
+<div class="sumc ok {{doneZero}}"><b class="{{doneBump}}">{{doneN}}</b><span>בוצעו</span></div>
+<div class="sumc bad {{missZero}}"><b class="{{missBump}}">{{missedN}}</b><span>פוספסו</span></div>
+<div class="segs" role="img" aria-label="{{countLabel}}">
+<sc-for list="{{segs}}" as="sg" hint-placeholder-count="6"><i class="{{sg.cls}}"></i></sc-for>
+</div>
+</div>
+<h3 class="sl"><span>עשית</span><span class="cntb">{{doneN}}</span></h3>
+<sc-if value="{{hasDone}}" hint-placeholder-val="{{ true }}">
+<ul>
+<sc-for list="{{done}}" as="d" hint-placeholder-count="2">
+<li class="lr {{d.enter}}">
+<span class="lr-ic">[[ic:check]]</span>
+<span class="lr-t"><b>{{d.name}}</b><span class="num">{{d.atTxt}}<sc-if value="{{d.late}}" hint-placeholder-val="{{ false }}"><i class="lateTag">באיחור</i></sc-if></span></span>
+<button class="pbtn2" onClick="{{d.undo}}" aria-label="{{d.undoLabel}}">[[ic:undo]]<span>ביטול</span></button>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noDone}}" hint-placeholder-val="{{ false }}"><div class="nil"><span class="nil-ic dash">[[ic:check]]</span><p>{{doneEmpty}}</p></div></sc-if>
+<h3 class="sl"><span>פספסת</span><span class="cntb bad">{{missedN}}</span></h3>
+<sc-if value="{{hasMissed}}" hint-placeholder-val="{{ true }}">
+<ul>
+<sc-for list="{{missed}}" as="it" hint-placeholder-count="1">
+<li class="lr missed {{it.cls}} {{it.enter}}">
+<span class="lr-ic">[[ic:clock]]</span>
+<span class="lr-t"><b>{{it.name}}</b><span class="num">{{it.ago}}</span></span>
+<button class="pbtn2 soft" onClick="{{it.mark}}" aria-label="{{it.markLabel}}"><span>בכל זאת עשיתי</span></button>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noMissed}}" hint-placeholder-val="{{ false }}"><div class="nil"><span class="nil-ic">[[ic:sparkle]]</span><p>{{missedEmpty}}</p></div></sc-if>
+</section>
+
+<section class="w wu" aria-label="בהמשך">
+<div class="wh">
+<span class="wti">[[ic:calendar]]<span>בהמשך</span></span>
+<span class="cntb neu">{{upcomingN}}</span>
+</div>
+<sc-if value="{{hasUpcoming}}" hint-placeholder-val="{{ true }}">
+<ul style="margin-top: .5em">
+<sc-for list="{{later}}" as="l" hint-placeholder-count="2">
+<li class="ur {{l.enter}}">
+<span class="tile sm">[[icItem:l]]</span>
+<div class="ur-t"><b>{{l.name}}</b><span>{{l.opensTxt}} · {{l.inText}}</span><span class="ur-bar" aria-hidden="true"><i style="width: {{l.near}}%"></i></span></div>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noUpcoming}}" hint-placeholder-val="{{ false }}"><div class="nil"><span class="nil-ic dash">[[ic:sparkle]]</span><p>אין עוד מצוות להיום. כל השאר כבר נפתח.</p></div></sc-if>
+</section>
+
+</div>
+
+<div class="fade-b" aria-hidden="true"></div>
+
+<div class="scr {{scCls}}">
+<div class="scr-p">
+<div class="scr-hit" role="slider" tabindex="0" aria-label="סרגל הזמן. גררו כדי לנסוע בזמן, חצים מזיזים חמש דקות, Page Up ו-Page Down שעה" aria-orientation="horizontal" aria-valuemin="{{sliderMin}}" aria-valuemax="{{sliderMax}}" aria-valuenow="{{sliderNow}}" aria-valuetext="{{sliderText}}" onPointerDown="{{scDown}}" onPointerMove="{{scMove}}" onPointerUp="{{scUp}}" onPointerCancel="{{scUp}}" onKeyDown="{{scKey}}">
+<div class="scr-bub {{bubCls}}" style="right: {{bubP}}%" aria-hidden="true"><b>{{nowT}}</b><span>{{bubName}}</span></div>
+<div class="scr-rail" id="scRail">
+<i class="scr-fill" style="width: {{nowPos}}%"></i>
+<sc-for list="{{marks}}" as="m" hint-placeholder-count="11"><i class="scr-mk {{m.cls}}" style="right: {{m.p}}%"></i></sc-for>
+<sc-if value="{{showLive}}" hint-placeholder-val="{{ false }}"><i class="scr-lv" style="right: {{liveP}}%"></i></sc-if>
+<i class="scr-thumb" style="right: {{nowPos}}%"></i>
+</div>
+</div>
+<div class="scr-e" aria-hidden="true"><span>{{startClock}}</span><span>{{endClock}}</span></div>
+</div>
+</div>
+
+<sc-if value="{{islOpen}}" hint-placeholder-val="{{ false }}"><button class="isl-scrim" onClick="{{islClose}}" aria-label="סגירת הפעילות החיה" tabindex="-1"></button></sc-if>
+<div class="isl-w" style="transform: translateY({{islDodge}}px)">
+<div class="isl {{islCls}} {{isl.urgentCls}}" style="width: {{islW}}; height: {{islH}}; border-radius: {{islR}}">
+<button class="isl-c" onClick="{{islToggle}}" aria-expanded="{{islOpen}}" aria-label="{{isl.aria}}">
+<span class="isl-ic">
+<svg class="isl-rg" viewBox="0 0 30 30" aria-hidden="true"><circle class="isl-tr" cx="15" cy="15" r="13"></circle><sc-if value="{{isl.isOpen}}" hint-placeholder-val="{{ true }}"><circle class="isl-ar" cx="15" cy="15" r="13" pathLength="100" style="stroke-dashoffset: {{isl.ringOff}}"></circle></sc-if></svg>
+[[icItem:isl]]<sc-if value="{{isl.isClock}}" hint-placeholder-val="{{ false }}">[[ic:clock]]</sc-if>
+</span>
+<sc-if value="{{isl.isOpen}}" hint-placeholder-val="{{ true }}"><span class="isl-cd"><sc-for list="{{isl.cells}}" as="k" hint-placeholder-count="5"><span class="rc {{k.cls}}">{{k.ch}}</span></sc-for></span></sc-if>
+<sc-if value="{{isl.notOpen}}" hint-placeholder-val="{{ false }}"><span class="isl-tx">{{isl.text}}</span></sc-if>
+</button>
+<div class="isl-o" role="dialog" aria-label="{{isl.aria}}" aria-hidden="{{islClosed}}">
+<div class="io-h">
+<span class="io-tile">[[icItem:isl]]<sc-if value="{{isl.isClock}}" hint-placeholder-val="{{ false }}">[[ic:clock]]</sc-if></span>
+<div class="io-nm"><h3>{{isl.name}}</h3><p>{{isl.caption}}</p></div>
+<button class="io-x" onClick="{{islClose}}" aria-label="סגירת הפעילות החיה" tabindex="{{islTab}}">[[ic:close]]</button>
+</div>
+<div class="io-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{isl.pctNow}}" aria-label="{{isl.barLabel}}"><i style="width: {{isl.pct}}%"></i></div>
+<div class="io-row">
+<span class="io-cd"><span>{{isl.cdLabel}}</span><b><sc-for list="{{isl.cells}}" as="k" hint-placeholder-count="5"><span class="rc {{k.cls}}">{{k.ch}}</span></sc-for></b></span>
+<span>{{isl.sideTxt}}</span>
+</div>
+<div class="io-acts">
+<sc-if value="{{isl.canMark}}" hint-placeholder-val="{{ true }}"><button class="io-cta" onClick="{{islMark}}" aria-label="{{isl.markLabel}}" tabindex="{{islTab}}">[[ic:check]]<span>{{isl.cta}}</span></button></sc-if>
+<sc-if value="{{isl.hasText}}" hint-placeholder-val="{{ true }}"><button class="io-txt {{isl.txtCls}}" onClick="{{isl.openText}}" aria-label="פתיחת הנוסח: {{isl.name}}" tabindex="{{islTab}}">[[ic:book]]<span>נוסח</span></button></sc-if>
+</div>
+</div>
+</div>
+</div>
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    this.scP = null;
+    this.scRaf = 0;
+    this.scTgt = 0;
+    this.nsd = null;
+    this.nsRaf = 0;
+    this.nsPend = null;
+    this.swipeEnd = -1000;
+    this.tw = false;
+    this.twRaf = 0;
+    this.rl = {};
+    this.liveRef = null;
+    this.msgById = {};
+    return { islOpen: false, zx: false, stk: {}, swipe: null, scDrag: false, scKb: false };
+  }
+
+  boardMount() {
+    this.rm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+    this.onEsc = (e) => {
+      if (e.key === 'Escape' && this.state.islOpen) this.setState({ islOpen: false });
+    };
+    document.addEventListener('keydown', this.onEsc);
+  }
+
+  boardUnmount() {
+    [this.kbT, this.flyT].forEach((x) => clearTimeout(x));
+    cancelAnimationFrame(this.scRaf);
+    cancelAnimationFrame(this.nsRaf);
+    cancelAnimationFrame(this.twRaf);
+    document.removeEventListener('keydown', this.onEsc);
+  }
+
+  pad(n) {
+    return String(n).padStart(2, '0');
+  }
+
+  hms(sec) {
+    const s = Math.max(0, Math.ceil(sec));
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    return h > 0 ? h + ':' + this.pad(m) + ':' + this.pad(s % 60) : this.pad(m) + ':' + this.pad(s % 60);
+  }
+
+  roll(key, str, still) {
+    const st = this.rl[key] || (this.rl[key] = []);
+    return Array.from(str).map((ch, i) => {
+      let e = st[i];
+      if (!e) e = st[i] = { cur: ch, prev: '', k: 0 };
+      if (e.cur !== ch) {
+        if (still) {
+          e.cur = ch;
+          e.prev = '';
+        } else {
+          e.prev = e.cur;
+          e.cur = ch;
+          e.k = e.k === 1 ? 2 : 1;
+        }
+      }
+      const cls = e.k === 1 ? 'ro-a' : e.k === 2 ? 'ro-b' : '';
+      return { ch: e.cur, prev: e.prev, cls, pcls: e.prev ? cls : '' };
+    });
+  }
+
+  scBounds() {
+    return [this.dayStart(), this.dayEnd() - 60];
+  }
+
+  scSeek(sec) {
+    this.scTgt = sec;
+    if (this.scRaf) return;
+    this.scRaf = requestAnimationFrame(() => {
+      this.scRaf = 0;
+      this.scrub(this.scTgt);
+    });
+  }
+
+  scSecAt(clientX) {
+    const r = document.getElementById('scRail').getBoundingClientRect();
+    const d0 = this.dayStart();
+    const span = this.dayEnd() - d0;
+    const p = Math.max(0, Math.min(1, (r.right - clientX) / r.width));
+    const kx = r.width / span;
+    let sec = d0 + p * span;
+    let best = null;
+    this.zmanimList().forEach((z) => {
+      const d = Math.abs(z.S - sec) * kx;
+      if (d <= 6 && (!best || d < best.d)) best = { S: z.S, d };
+    });
+    if (best) sec = best.S;
+    const [lo, hi] = this.scBounds();
+    return Math.max(lo, Math.min(hi, sec));
+  }
+
+  scDown(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    this.twStop();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+    this.scP = e.pointerId;
+    this.setState({ scDrag: true, islOpen: false });
+    this.scSeek(this.scSecAt(e.clientX));
+  }
+
+  scMove(e) {
+    if (this.scP !== e.pointerId) return;
+    this.scSeek(this.scSecAt(e.clientX));
+  }
+
+  scUp(e) {
+    if (this.scP !== e.pointerId) return;
+    this.scP = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    cancelAnimationFrame(this.scRaf);
+    this.scRaf = 0;
+    if (e.type !== 'pointercancel') this.scrub(this.scTgt);
+    this.setState({ scDrag: false });
+  }
+
+  scKey(e) {
+    const t = this.now();
+    const [lo, hi] = this.scBounds();
+    const step = { ArrowLeft: 300, ArrowUp: 300, ArrowRight: -300, ArrowDown: -300, PageUp: 3600, PageDown: -3600 };
+    const to = e.key in step ? t + step[e.key] : e.key === 'Home' ? lo : e.key === 'End' ? hi : null;
+    if (to == null) return;
+    e.preventDefault();
+    this.twStop();
+    this.scrub(to);
+    clearTimeout(this.kbT);
+    this.setState({ scKb: true });
+    this.kbT = setTimeout(() => this.setState({ scKb: false }), 1500);
+  }
+
+  twStop() {
+    cancelAnimationFrame(this.twRaf);
+    this.twRaf = 0;
+    this.tw = false;
+  }
+
+  twTo(sec) {
+    this.twStop();
+    const [lo, hi] = this.scBounds();
+    const a = this.now();
+    const b = Math.max(lo, Math.min(hi, sec));
+    if (this.rm.matches || Math.abs(b - a) < 1) {
+      this.scrub(b);
+      return;
+    }
+    this.tw = true;
+    const t0 = performance.now();
+    const ms = 520;
+    const step = (ts) => {
+      const k = Math.min(1, (ts - t0) / ms);
+      if (k >= 1) {
+        this.tw = false;
+        this.twRaf = 0;
+        this.scrub(b);
+        return;
+      }
+      this.scrub(a + (b - a) * (1 - Math.pow(1 - k, 3)));
+      this.twRaf = requestAnimationFrame(step);
+    };
+    this.twRaf = requestAnimationFrame(step);
+  }
+
+  nsSet(v) {
+    this.nsPend = v;
+    if (this.nsRaf) return;
+    this.nsRaf = requestAnimationFrame(() => {
+      this.nsRaf = 0;
+      if (this.nsPend) this.setState({ swipe: this.nsPend });
+      this.nsPend = null;
+    });
+  }
+
+  nsDown(e, m) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    this.nsd = { pid: e.pointerId, el: e.currentTarget, id: m.id, can: m.canDismiss, x0: e.clientX, x: e.clientX, ts: performance.now(), v: 0, dx: 0, moved: false };
+  }
+
+  nsMove(e) {
+    const d = this.nsd;
+    if (!d || d.pid !== e.pointerId) return;
+    if (!d.moved) {
+      if (Math.abs(e.clientX - d.x0) < 8) return;
+      d.moved = true;
+      try {
+        d.el.setPointerCapture(e.pointerId);
+      } catch (err) {}
+    }
+    const ts = performance.now();
+    const raw = e.clientX - d.x0;
+    d.v = d.v * 0.6 + ((e.clientX - d.x) / Math.max(1, ts - d.ts)) * 0.4;
+    d.x = e.clientX;
+    d.ts = ts;
+    d.dx = d.can ? raw : Math.sign(raw) * Math.min(64, Math.abs(raw) * 0.3);
+    this.nsSet({ id: d.id, dx: d.dx, drag: true });
+  }
+
+  nsUp(e) {
+    const d = this.nsd;
+    if (!d || d.pid !== e.pointerId) return;
+    this.nsd = null;
+    cancelAnimationFrame(this.nsRaf);
+    this.nsRaf = 0;
+    this.nsPend = null;
+    try {
+      d.el.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    if (!d.moved) return;
+    this.swipeEnd = performance.now();
+    const fling = Math.abs(d.v) > 0.7 && Math.abs(d.dx) > 40;
+    if (e.type !== 'pointercancel' && d.can && (Math.abs(d.dx) > 96 || fling)) {
+      this.setState({ swipe: { id: d.id, dx: (d.dx < 0 ? -1 : 1) * 460, fly: true } });
+      clearTimeout(this.flyT);
+      this.flyT = setTimeout(() => {
+        const m = this.msgById[d.id];
+        if (m) m.dismiss();
+      }, 240);
+    } else {
+      this.setState({ swipe: { id: d.id, dx: 0, settle: true } });
+    }
+  }
+
+  justSwiped() {
+    return performance.now() - this.swipeEnd < 400;
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const s = this.state;
+    const t = c.nowSec;
+    const d0 = c.dayStartSec;
+    const d1 = c.dayEndSec;
+    const span = d1 - d0;
+    const still = s.scDrag || this.tw;
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const its = this.items();
+    const itBy = Object.fromEntries(its.map((x) => [x.id, x]));
+    const Z = this.zmanimList();
+    const flags = (x) => ({ isSun: Boolean(x.isSun), isBox: Boolean(x.isBox), isBook: Boolean(x.isBook), isMoon: Boolean(x.isMoon) });
+
+    const sec = ((Math.floor(t) % 60) + 60) % 60;
+    const clkCells = this.roll('clk', c.nowT, still).map((k) => ({ ...k, isSep: k.ch === ':', isDig: k.ch !== ':' }));
+
+    const zi = Z.findIndex((z) => z.S > t);
+    const nzS = zi >= 0 ? Z[zi].S : d1;
+    const prevS = Z.filter((z) => z.S <= t).reduce((a, z) => Math.max(a, z.S), d0);
+
+    const act = c.active[0] || null;
+    const nxt = c.upcoming[0] || null;
+    let isl;
+    if (act) {
+      const x = itBy[act.id];
+      const rem = x.E - t;
+      const frac = clamp(rem / (x.E - x.S), 0, 1);
+      isl = {
+        ...flags(act),
+        isClock: false,
+        isOpen: true,
+        notOpen: false,
+        text: '',
+        cells: this.roll('isl', this.hms(rem), still),
+        ringOff: (100 * (1 - frac)).toFixed(2),
+        name: act.name,
+        caption: 'התחיל ' + act.startT + ' · ' + act.endWord + ' ' + act.endT,
+        pct: (100 * (1 - frac)).toFixed(2),
+        pctNow: Math.round(100 * (1 - frac)),
+        barLabel: 'התקדמות: ' + act.name,
+        cdLabel: 'נותרו',
+        sideTxt: Math.round(100 * (1 - frac)) + '% עבר',
+        canMark: true,
+        hasText: true,
+        txtCls: '',
+        cta: act.cta,
+        markLabel: act.markLabel,
+        openText: act.open,
+        markFn: act.mark,
+        urgentCls: act.urgent ? 'urgent' : '',
+        aria: 'פעילות חיה: ' + act.name + ', נותרו ' + act.left,
+        w: '8.4em',
+        h: '12.9em',
+      };
+    } else if (nxt) {
+      const x = itBy[nxt.id];
+      const frac = clamp((t - prevS) / Math.max(1, x.S - prevS), 0, 1);
+      const text = nxt.short + ' · ' + nxt.startT;
+      isl = {
+        ...flags(nxt),
+        isClock: false,
+        isOpen: false,
+        notOpen: true,
+        text,
+        cells: this.roll('isl', this.hms(x.S - t), still),
+        ringOff: '100',
+        name: 'הבאה: ' + nxt.name,
+        caption: 'נפתח ב-' + nxt.startT + ' · ' + nxt.endWord + ' ' + nxt.endT,
+        pct: (frac * 100).toFixed(2),
+        pctNow: Math.round(frac * 100),
+        barLabel: 'התקרבות לפתיחת ' + nxt.name,
+        cdLabel: 'נפתח בעוד',
+        sideTxt: '',
+        canMark: false,
+        hasText: true,
+        txtCls: 'wide',
+        cta: '',
+        markLabel: '',
+        openText: nxt.open,
+        markFn: () => {},
+        urgentCls: '',
+        aria: 'פעילות חיה: ' + text,
+        w: Math.min(15, 5.4 + text.length * 0.5).toFixed(1) + 'em',
+        h: '10.5em',
+      };
+    } else {
+      const text = c.nextZ.short + ' · ' + c.nextZ.time;
+      const frac = clamp((t - prevS) / Math.max(1, nzS - prevS), 0, 1);
+      isl = {
+        isSun: false,
+        isBox: false,
+        isBook: false,
+        isMoon: false,
+        isClock: true,
+        isOpen: false,
+        notOpen: true,
+        text,
+        cells: this.roll('isl', this.hms(nzS - t), still),
+        ringOff: '100',
+        name: c.nextZ.name,
+        caption: 'ב-' + c.nextZ.time,
+        pct: (frac * 100).toFixed(2),
+        pctNow: Math.round(frac * 100),
+        barLabel: 'התקרבות ל' + c.nextZ.name,
+        cdLabel: 'בעוד',
+        sideTxt: '',
+        canMark: false,
+        hasText: false,
+        txtCls: '',
+        cta: '',
+        markLabel: '',
+        openText: () => {},
+        markFn: () => {},
+        urgentCls: '',
+        aria: 'פעילות חיה: ' + text,
+        w: Math.min(15, 5.4 + text.length * 0.5).toFixed(1) + 'em',
+        h: '8.3em',
+      };
+    }
+
+    const wOpen = c.active.map((x, i) => {
+      const it = itBy[x.id];
+      const rem = it.E - t;
+      const frac = clamp(rem / (it.E - it.S), 0, 1);
+      return {
+        ...x,
+        ringOff: (100 * (1 - frac)).toFixed(2),
+        headDeg: (frac * 360).toFixed(2),
+        cells: this.roll('w:' + x.id, this.hms(rem), still),
+        rangeTxt: x.fromName + ' עד ' + x.toName,
+        leftTxt: 'נשארו ' + x.left,
+        enter: 'enter-' + this.flip('wo' + i, x.id),
+      };
+    });
+
+    const nzCells = this.roll('nz', this.hms(nzS - t), still);
+    const zs = (id) => Z.find((z) => z.id === id).S;
+    const pc = (v) => (((v - d0) / span) * 100).toFixed(2);
+    const railBg = 'linear-gradient(to left, var(--cn) 0%, var(--cd) ' + pc(zs('netz')) + '%, var(--cd) ' + pc(zs('shkia')) + '%, var(--cn) ' + pc(zs('tzeit')) + '%, var(--cn) 100%)';
+    const zdots = c.zmanim.map((z) => ({ p: z.p, cls: z.isNext ? 'next' : z.past ? 'past' : '' }));
+    const zanch = ['netz', 'chatzot', 'shkia'].map((id) => {
+      const z = c.zmanim.find((q) => q.id === id);
+      return { p: z.p, short: z.short };
+    });
+    const zrows = c.zmanim.map((z, i) => ({
+      ...z,
+      aria: 'מעבר ל' + z.name + ' ב-' + z.time,
+      go: () => this.twTo(Z[i].S),
+    }));
+
+    this.msgById = Object.fromEntries(c.messages.map((m) => [m.id, m]));
+    const H = 7.2;
+    const G = 0.55;
+    const P = 0.9;
+    const sw = s.swipe;
+    const grpDefs = [
+      { id: 'p', title: 'אישי', list: c.messages.filter((m) => m.isPersonal) },
+      { id: 'g', title: 'כללי ומערכת', list: c.messages.filter((m) => !m.isPersonal) },
+    ].filter((g) => g.list.length);
+    const groups = grpDefs.map((g) => {
+      const n = g.list.length;
+      const open = n === 1 || Boolean(s.stk[g.id]);
+      const toggle = () => this.setState((st) => ({ stk: { ...st.stk, [g.id]: !st.stk[g.id] } }));
+      const front = Math.min(n, 3);
+      const h = open ? n * H + (n - 1) * G : H + (front === 3 ? 1.1 : front === 2 ? 0.55 : 0);
+      const cards = g.list.map((m, i) => {
+        const mine = sw && sw.id === m.id ? sw : null;
+        const dx = mine ? mine.dx : 0;
+        const back = !open && i > 0;
+        const hidden = !open && i > 2;
+        const scale = open || i === 0 ? 1 : i === 1 ? 0.945 : 0.89;
+        const y = open ? i * (H + G) : Math.min(i, 2) * P;
+        const fade = mine && mine.fly ? 0 : 1 - Math.min(0.55, Math.abs(dx) / 340);
+        const cls = (back ? 'back ' : '') + (mine && mine.drag ? 'drag ' : '') + (mine && mine.settle ? 'settle ' : '') + (mine && mine.fly ? 'fly ' : '') + m.cls;
+        const isNext = m.id === 'next';
+        const parts = isNext ? m.title.split(' · ') : [];
+        return {
+          ...m,
+          tag: parts.length > 1 ? m.tag + ' · ' + parts[0] : m.tag,
+          title: parts.length > 1 ? parts.slice(1).join(' · ') : m.title,
+          kindCls: m.kindCls,
+          cls,
+          tf: 'translate3d(' + dx.toFixed(1) + 'px, ' + y.toFixed(2) + 'em, 0) scale(' + scale + ')',
+          op: hidden ? '0' : fade.toFixed(2),
+          z: String(30 - i),
+          delay: (mine ? 0 : open ? i * 30 : (n - 1 - i) * 15) + 'ms',
+          hasHit: (!open && i === 0) || (open && isNext),
+          hitAria: !open ? 'הצגת כל ההודעות: ' + g.title + ' (' + n + ')' : 'עריכת ההתראה האישית: ' + m.title,
+          tap: () => {
+            if (this.justSwiped()) return;
+            if (!open) toggle();
+            else if (isNext) m.act();
+          },
+          dismissBtn: (e) => {
+            e.stopPropagation();
+            if (!this.justSwiped()) m.dismiss();
+          },
+          actBtn: (e) => {
+            e.stopPropagation();
+            if (!this.justSwiped()) m.act();
+          },
+          actAria: m.action + ': ' + m.title,
+          down: (e) => this.nsDown(e, m),
+          move: (e) => this.nsMove(e),
+          up: (e) => this.nsUp(e),
+        };
+      });
+      return { id: g.id, title: g.title, n, open, h: h.toFixed(2), cards, canToggle: n > 1, toggle, toggleText: open ? 'הצג פחות' : 'הצג הכול (' + n + ')' };
+    });
+
+    const nearest = Z.reduce((a, z) => (Math.abs(z.S - t) < Math.abs(a.S - t) ? z : a), Z[0]);
+    const kxp = 326 / span;
+    const snapped = Math.abs(nearest.S - t) * kxp < 6;
+    const rel = snapped ? nearest.name : (t >= nearest.S ? 'אחרי ' : 'לפני ') + nearest.name;
+    const marks = Z.map((z) => ({ p: pc(z.S), cls: (z.S <= t ? 'past ' : '') + (z.id === nearest.id && Math.abs(z.S - t) * kxp < 14 ? 'near' : '') }));
+
+    if (!c.isScrub) this.liveRef = { t, at: Date.now(), key: c.dateKey };
+    const lr = this.liveRef;
+    const liveT = c.isScrub && lr && lr.key === c.dateKey ? lr.t + (Date.now() - lr.at) / 1000 : null;
+    const showLive = liveT != null && liveT >= d0 && liveT < d1 && Math.abs(liveT - t) * kxp > 12;
+
+    const islOpen = s.islOpen;
+    const hold = s.scDrag || s.scKb;
+
+    return {
+      ...c,
+      dragCls: still ? 'drag' : '',
+      spacerH: 70 + (c.showBack ? 52 : 0),
+      islDodge: c.showBack ? 52 : 0,
+      dateTxt: c.weekday + ' · ' + c.hebDay + ' · ' + c.gregShort,
+      clkCells,
+      chipCls: c.isScrub ? 'view' : '',
+      chipText: c.isScrub ? 'תצוגה' : 'עכשיו',
+      secPct: c.isScrub ? '100' : ((sec / 60) * 100).toFixed(2),
+      secCls: c.isScrub ? 'fz' : sec === 0 ? 'nt' : '',
+      isl,
+      islCls: (islOpen ? 'open ' : '') + (still ? 'drag' : ''),
+      islOpen,
+      islClosed: !islOpen,
+      islTab: islOpen ? '0' : '-1',
+      islW: islOpen ? '362px' : isl.w,
+      islH: islOpen ? isl.h : '2.75em',
+      islR: islOpen ? '2.1em' : '1.375em',
+      islToggle: () => this.setState((st) => ({ islOpen: !st.islOpen })),
+      islClose: () => this.setState({ islOpen: false }),
+      islMark: () => {
+        isl.markFn();
+        this.setState({ islOpen: false });
+      },
+      wOpen,
+      zxOpen: s.zx,
+      zxCls: s.zx ? 'open' : '',
+      zxLabel: s.zx ? 'סגירת רשימת הזמנים המלאה' : 'פתיחת רשימת הזמנים המלאה',
+      zxToggle: () => this.setState((st) => ({ zx: !st.zx })),
+      nzCells,
+      railBg,
+      zdots,
+      zanch,
+      zrows,
+      groups,
+      noMessages: c.messages.length === 0,
+      msgCount: c.messages.length,
+      doneZero: c.doneN === 0 ? 'zero' : '',
+      missZero: c.missedN === 0 ? 'zero' : '',
+      doneBump: 'bump-' + this.flip('dn', c.doneN),
+      missBump: 'bump-' + this.flip('ms', c.missedN),
+      segs: c.timeline.map((x) => ({ cls: x.status })),
+      done: c.done.map((d, i) => ({ ...d, atTxt: 'סומן ב-' + d.at, enter: 'enter-' + this.flip('done' + i, d.id) })),
+      missed: c.missed.map((x, i) => ({ ...x, enter: 'enter-' + this.flip('miss' + i, x.id) })),
+      later: c.upcoming.map((x, i) => ({
+        ...x,
+        opensTxt: 'נפתח ב-' + x.startT,
+        near: (clamp(1 - (itBy[x.id].S - t) / 21600, 0, 1) * 100).toFixed(1),
+        enter: 'enter-' + this.flip('later' + i, x.id),
+      })),
+      noUpcoming: c.upcoming.length === 0,
+      undoToast: () => {
+        c.undoToast();
+        if (s.toast && s.toast.msgId) this.setState({ swipe: null });
+      },
+      scCls: hold ? 'hold' : '',
+      bubCls: snapped ? 'snap' : '',
+      bubP: clamp(c.nowPos, 17, 83).toFixed(1),
+      bubName: rel,
+      marks,
+      showLive,
+      liveP: liveT == null ? '0' : pc(liveT),
+      startClock: this.clock(d0),
+      endClock: this.clock(d1) + ' מחר',
+      sliderMin: Math.round(d0),
+      sliderMax: Math.round(d1 - 60),
+      sliderNow: Math.round(clamp(t, d0, d1 - 60)),
+      sliderText: c.nowT + ' · ' + rel + ', הבא: ' + c.nextZ.name + ' ' + c.nextZ.left,
+      scDown: (e) => this.scDown(e),
+      scMove: (e) => this.scMove(e),
+      scUp: (e) => this.scUp(e),
+      scKey: (e) => this.scKey(e),
+    };
+  }
+}
+</script>

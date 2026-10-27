@@ -1,0 +1,956 @@
+<!--board title="י · שמיים"-->
+<style>
+.ph{--csub:color-mix(in srgb,var(--sub) 72%,var(--text));--cacc:color-mix(in srgb,var(--accentText) 78%,var(--text));--curg:color-mix(in srgb,var(--urgent) 80%,var(--text));--csafe:color-mix(in srgb,var(--safe) 78%,var(--text));--hair:color-mix(in srgb,var(--text) 10%,transparent)}
+.skyroot{position:absolute;inset:0;overflow:hidden;transition:--sk1 1.8s ease,--sk2 1.8s ease,--sk3 1.8s ease,--hz 1.8s ease,--glow 1.8s ease,--ink 1.4s ease,--inkopp 1.4s ease,--inkchip 1.4s ease}
+.ph.tall .skyroot{position:relative;inset:auto;min-height:844px;overflow:visible}
+.skybase{position:absolute;inset:0;background:var(--sk3)}
+.sky{position:absolute;top:0;left:0;right:0;height:844px;background:linear-gradient(180deg,var(--sk1) 0%,var(--sk2) 46%,var(--sk3) 100%)}
+.cel{position:absolute;top:0;left:0;width:390px;height:240px;clip-path:path('M0 0H390V214Q195 168 0 214Z');pointer-events:none}
+.hz{position:absolute;top:0;left:0;pointer-events:none}
+.hglow{position:absolute;top:92px;width:340px;height:150px;margin-left:-170px;background:radial-gradient(ellipse at 50% 82%,var(--glow) 0%,transparent 68%);transition:left 1.8s linear,opacity 1.8s ease}
+.skyroot.drag,.skyroot.drag .hglow,.skyroot.drag .sun,.skyroot.drag .moon,.skyroot.drag .clouds,.skyroot.drag .cl,.skyroot.drag .sw,.skyroot.drag .shoots,.skyroot.drag .hello,.skyroot.drag .spill{transition:none}
+.stars{position:absolute;inset:0}
+.sw{position:absolute;display:block;transition:opacity 1.2s ease}
+.star{position:absolute;left:0;top:0;border-radius:50%;background:#fff;box-shadow:0 0 6px 1px rgba(255,255,255,.7);animation:twinkle 3.4s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+.shoots{position:absolute;inset:0;overflow:hidden;transition:opacity 1.2s ease}
+.shoot{position:absolute;width:92px;height:1.6px;border-radius:2px;background:linear-gradient(to left,transparent,rgba(255,255,255,.95));opacity:0;filter:drop-shadow(0 0 4px rgba(255,255,255,.9));animation:shoot 41s linear infinite}
+.shoot.s1{left:250px;top:34px;animation-delay:-37s}
+.shoot.s2{left:300px;top:78px;animation-duration:67s;animation-delay:-49s}
+.shoot.s3{left:170px;top:22px;animation-duration:89s;animation-delay:-80s}
+@keyframes shoot{0%,96%{opacity:0;transform:translate(0,0) rotate(-24deg)}96.6%{opacity:.95}98.4%{opacity:.7}100%{opacity:0;transform:translate(-170px,76px) rotate(-24deg)}}
+.clouds{position:absolute;inset:0;transition:opacity 1.8s ease,color 1.8s ease}
+.cl{position:absolute;inset:0;transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.cloud{position:absolute;left:0;top:0;width:120px;height:50px;fill:currentColor;filter:drop-shadow(0 6px 10px rgba(40,70,120,.12));animation:drift linear infinite;will-change:transform}
+.cloud.c1{top:100px;width:96px;animation-duration:118s;animation-delay:-36s;opacity:.9}
+.cloud.c2{top:134px;width:150px;animation-duration:160s;animation-delay:-104s;opacity:.95}
+.cloud.c3{top:164px;width:84px;animation-duration:138s;animation-delay:-15s;opacity:.8}
+@keyframes drift{from{transform:translateX(-330px)}to{transform:translateX(700px)}}
+.sun{position:absolute;width:48px;height:48px;margin:-24px 0 0 -24px;transition:left 1.8s linear,top 1.8s linear,opacity 1.8s ease}
+.sun::after{content:"";position:absolute;inset:-26px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--sunc) 70%,transparent);opacity:0;animation:sunRing 6.5s ease-out infinite}
+@keyframes sunRing{0%{transform:scale(.55);opacity:.5}100%{transform:scale(1.9);opacity:0}}
+.sun-glow{position:absolute;inset:-46px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--sunc) 70%,transparent) 0%,color-mix(in srgb,var(--sunc) 22%,transparent) 42%,transparent 70%);animation:breathe 5s ease-in-out infinite}
+.sun-disc{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 38% 34%,#fffdf0 0%,var(--sunc) 58%,var(--sunc2) 100%);box-shadow:0 0 22px 6px color-mix(in srgb,var(--sunc) 60%,transparent);transition:transform .35s ease,box-shadow .35s ease}
+.skyroot.drag .sun-disc{transform:scale(1.08);box-shadow:0 0 30px 10px color-mix(in srgb,var(--sunc) 66%,transparent)}
+@keyframes breathe{0%,100%{transform:scale(.92);opacity:.78}50%{transform:scale(1.16);opacity:1}}
+.moon{position:absolute;width:40px;height:40px;margin:-20px 0 0 -20px;transition:left 1.8s linear,top 1.8s linear,opacity 1.8s ease}
+.moon-glow{position:absolute;inset:-34px;border-radius:50%;background:radial-gradient(circle,rgba(214,224,255,.45) 0%,rgba(214,224,255,.12) 45%,transparent 70%);animation:breathe 6s ease-in-out infinite}
+.moon svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 0 8px rgba(230,236,255,.8))}
+
+.scene{position:relative;height:240px;margin:0 -16px;padding:26px 20px 0;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.skyroot.drag .scene{cursor:grabbing}
+.skrail{position:absolute;inset-inline:26px;bottom:-8px;height:44px;z-index:3}
+.skrail-rg{position:absolute;inset-block:0;inset-inline:13px}
+.skrail-line{position:absolute;inset-inline:0;top:50%;height:2px;margin-top:-1px;border-radius:2px;background:color-mix(in srgb,var(--ink) 40%,transparent)}
+.skrail-dot{position:absolute;top:50%;width:5px;height:5px;margin:-2.5px -2.5px 0 0;border-radius:50%;background:color-mix(in srgb,var(--ink) 62%,transparent)}
+.skrail-in{position:absolute;inset:0;width:100%;height:44px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:grab}
+.skrail-in::-webkit-slider-runnable-track{height:44px;background:transparent}
+.skrail-in::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;margin-top:9px;border-radius:50%;background:var(--thumb);border:2px solid var(--ink);box-shadow:0 0 0 4px color-mix(in srgb,var(--thumb) 28%,transparent),0 0 16px 3px color-mix(in srgb,var(--thumb) 60%,transparent)}
+.skrail-in::-moz-range-track{height:44px;background:transparent}
+.skrail-in::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--thumb);border:2px solid var(--ink);box-shadow:0 0 0 4px color-mix(in srgb,var(--thumb) 28%,transparent),0 0 16px 3px color-mix(in srgb,var(--thumb) 60%,transparent)}
+.skrail-in:focus-visible{outline:none}
+.skrail-in:focus-visible::-webkit-slider-thumb{outline:3px solid var(--accent);outline-offset:4px}
+.skrail-in:focus-visible::-moz-range-thumb{outline:3px solid var(--accent);outline-offset:4px}
+.srow{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 8px;margin-inline:-10px}
+.spill{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--inkchip);font-size:.8125em;font-weight:600;line-height:1.5;color:var(--ink);text-shadow:0 1px 10px color-mix(in srgb,var(--inkopp) 45%,transparent);transition:color 1.4s ease}
+.hello{margin-top:4px;font-family:'Frank Ruhl Libre','Heebo',serif;font-size:2.05em;font-weight:700;line-height:1.12;letter-spacing:-.01em;color:var(--ink);text-shadow:0 1px 2px color-mix(in srgb,var(--inkopp) 22%,transparent),0 2px 18px color-mix(in srgb,var(--inkopp) 42%,transparent);transition:color 1.4s ease}
+
+.glass{background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2);border:1px solid var(--hair);border-radius:24px;box-shadow:var(--shadow),inset 0 1px 0 color-mix(in srgb,#fff 38%,transparent)}
+.rise{animation:riseA .7s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+.ph .pname{background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2);border:1px solid var(--hair);margin-top:0}
+.ph .tabs{background:color-mix(in srgb,var(--tab) 88%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2);border:1px solid var(--hair)}
+.ph .tab{color:var(--csub)}
+.ph .tab.on{color:var(--cacc)}
+
+.hd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:24px 2px 10px}
+.hd-t{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;min-width:0;min-height:34px;padding-inline:5px 14px;border-radius:999px;background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--hair);font-size:.875em;font-weight:700;color:var(--text);box-shadow:var(--shadow)}
+.hd-i{width:24px;height:24px;border-radius:50%;background:var(--soft);color:var(--cacc);display:flex;align-items:center;justify-content:center}
+.hd-i .ic{width:15px;height:15px}
+.hd-n{flex:none;white-space:nowrap;min-width:34px;height:34px;padding:0 10px;border-radius:999px;background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:.8125em;font-weight:800;color:var(--text);box-shadow:var(--shadow)}
+
+.pm{position:relative;display:flex;align-items:flex-start;gap:12px;padding:14px 14px 10px;margin-bottom:10px;background:color-mix(in srgb,var(--soft) 93%,transparent)}
+.pm-ic{width:40px;height:40px;border-radius:14px;background:var(--surface);color:var(--cacc);display:flex;align-items:center;justify-content:center;flex:none}
+.pm-ic .ic{width:21px;height:21px}
+.pm-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.m-tag{font-size:.75em;font-weight:700;color:var(--cacc)}
+.m-t{font-weight:700;line-height:1.3}
+.m-body{font-size:.875em;line-height:1.45;color:var(--text);text-wrap:pretty}
+.pm-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:26px}
+.m-act{display:inline-flex;align-items:center;gap:4px;min-height:28px;font-weight:700;font-size:.875em;color:var(--cacc)}
+.m-act .ic{width:16px;height:16px}
+.pm .m-act::after{content:"";position:absolute;inset:0;border-radius:24px}
+.pm:has(.m-act:active){transform:scale(.99)}
+.m-x{position:relative;z-index:2;flex:none;width:44px;height:44px;margin:-8px -8px -8px 0;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--csub)}
+.m-x .ic{width:16px;height:16px}
+.gs{padding:2px 0;margin-bottom:2px}
+.gr{position:relative;display:flex;align-items:flex-start;gap:10px;padding:9px 12px 9px 4px}
+.gr + .gr{border-top:1px solid var(--hair)}
+.gr-ic{width:34px;height:34px;border-radius:12px;background:var(--surface2);color:var(--csub);display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px}
+.gr.system .gr-ic{background:var(--infoSoft);color:var(--info)}
+.gr-ic .ic{width:18px;height:18px}
+.gr-b{flex:1;min-width:0;display:flex;flex-direction:column}
+.m-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.gr .m-tag{padding:0 7px;border-radius:7px;background:var(--surface2);color:var(--csub);line-height:1.6}
+.gr.system .m-tag{background:var(--infoSoft);color:color-mix(in srgb,var(--info) 80%,var(--text))}
+.gr .m-t{font-size:.9375em}
+.g-act{position:relative;align-self:flex-start;min-height:28px;display:inline-flex;align-items:center;gap:3px;margin-top:2px;font-weight:700;font-size:.8125em;color:var(--cacc)}
+.g-act::after{content:"";position:absolute;inset:-9px -10px}
+.g-act .ic{width:14px;height:14px}
+.gr .m-x{margin:-6px -4px -6px 0}
+.mempty{display:flex;align-items:center;gap:10px;padding:14px 16px;font-size:.9375em;font-weight:500;color:var(--csub)}
+.mempty .ic{width:20px;height:20px;color:var(--csafe)}
+
+.nowl{display:flex;flex-direction:column;gap:10px}
+.nowc{position:relative;padding:14px 14px 14px}
+.nh{display:flex;align-items:center;gap:12px}
+.tile{width:44px;height:44px;border-radius:15px;background:var(--soft);color:var(--cacc);display:flex;align-items:center;justify-content:center;flex:none}
+.nt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.nn{font-size:1.0625em;font-weight:700;line-height:1.25}
+.nt .cap{color:var(--csub)}
+.nl{display:flex;flex-direction:column;align-items:center;line-height:1.05;flex:none;min-width:58px;color:var(--text)}
+.nl .cap{font-size:.75em;color:var(--csub)}
+.nl b{font-size:1.75em;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.nl.urgent b{color:var(--curg)}
+.sp{position:relative;margin:12px 2px 2px}
+.sp svg{display:block;width:100%;height:auto;overflow:visible}
+.sp-track{fill:none;stroke:color-mix(in srgb,var(--text) 26%,transparent);stroke-width:1.6;stroke-dasharray:1.5 6;stroke-linecap:round}
+.sp-prog{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;transition:stroke-dasharray 1s cubic-bezier(.2,.8,.2,1)}
+.sp.urgent .sp-prog{stroke:var(--urgent)}
+.dot{position:absolute;width:18px;height:18px;border-radius:50%;transition:right 1s cubic-bezier(.2,.8,.2,1),top 1s cubic-bezier(.2,.8,.2,1)}
+.dot.sun{margin:0;background:radial-gradient(circle at 38% 34%,#fff7d0 0%,#ffc247 60%,#f5a524 100%);box-shadow:0 0 0 3px color-mix(in srgb,#ffb52e 30%,transparent),0 0 16px 3px rgba(255,170,40,.65);animation:dotBreath 3.4s ease-in-out infinite}
+.dot.moon{background:radial-gradient(circle at 36% 34%,#fff 0%,#dfe4ff 60%,#b9c3f2 100%);box-shadow:0 0 0 2px color-mix(in srgb,var(--text) 35%,transparent),0 0 14px 2px rgba(200,212,255,.8);animation:dotBreath 3.4s ease-in-out infinite}
+@keyframes dotBreath{50%{filter:brightness(1.12);transform:scale(1.12)}}
+.sp.urgent .dot.sun{box-shadow:0 0 0 3px color-mix(in srgb,var(--urgent) 40%,transparent),0 0 16px 3px color-mix(in srgb,var(--urgent) 55%,transparent)}
+.pe{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:4px;font-size:.8125em;color:var(--csub);line-height:1.2}
+.pe b{display:block;font-size:1.2em;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.pe > span:last-child{text-align:left}
+.pe .warn{align-self:center;display:inline-flex;align-items:center;gap:6px;font-size:.9em;font-weight:700;color:var(--curg)}
+.pe .warn i{width:7px;height:7px;border-radius:50%;background:var(--urgent);animation:pulse 1.6s ease-in-out infinite}
+.acts{display:flex;gap:10px;margin-top:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:17px;font-weight:700;font-size:1.0625em;transition:transform .15s ease,background .25s,color .25s}
+.btn:active{transform:scale(.97)}
+.btn .ic{width:21px;height:21px;stroke-width:2.2}
+.btn.primary{flex:2;background:var(--accent);color:var(--onAccent)}
+.btn.ghost{flex:1;background:var(--surface2);color:var(--text)}
+.nowc.marking .btn.primary{background:var(--safe);color:var(--onSafe)}
+.nowc.marking,.mrow.marking{animation:skOut .6s .3s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes skOut{to{opacity:0;transform:translateX(-30px)}}
+.calm{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:24px 20px}
+.halo{width:64px;height:64px;border-radius:50%;background:var(--safeSoft);color:var(--csafe);display:flex;align-items:center;justify-content:center;animation:float 3.2s ease-in-out infinite;box-shadow:0 0 0 8px color-mix(in srgb,var(--safe) 10%,transparent)}
+.halo .ic{width:30px;height:30px}
+@keyframes float{50%{transform:translateY(-6px)}}
+.calm h3{font-size:1.25em;font-weight:800}
+.calm .cap{font-size:.9375em;color:var(--csub)}
+
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:24px}
+.ph.big .duo{grid-template-columns:minmax(0,1fr)}
+.dcard{padding:12px 12px 8px;display:flex;flex-direction:column;min-width:0}
+.dh{display:flex;align-items:center;gap:8px;font-size:.875em;font-weight:800;margin-bottom:6px}
+.dh-i{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
+.dh-i .ic{width:15px;height:15px;stroke-width:2.3}
+.dh-i.miss{background:var(--urgentSoft);color:var(--curg)}
+.dh-i.done{background:var(--safeSoft);color:var(--csafe)}
+.dh b{margin-inline-start:auto;font-variant-numeric:tabular-nums;font-size:.9em;color:var(--csub)}
+.mrow{padding:6px 0 4px;display:flex;flex-direction:column;gap:1px}
+.mrow + .mrow,.drow + .drow{border-top:1px solid var(--hair)}
+.mrow .rt,.drow .rt{font-weight:700;font-size:.875em;line-height:1.3}
+.mrow .cap{color:var(--curg);font-weight:600;font-size:.75em}
+.late{margin-top:5px;min-height:44px;padding:0 10px;border-radius:14px;background:var(--surface2);color:var(--text);font-weight:700;font-size:.8125em;text-align:center;transition:background .25s,color .25s}
+.mrow.marking .late{background:var(--safe);color:var(--onSafe)}
+.drow{display:flex;align-items:center;gap:6px;padding:5px 0}
+.drow > div{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.drow .cap{font-size:.75em;color:var(--csub)}
+.lateTag{display:inline-block;margin-inline-start:5px;padding:0 6px;border-radius:6px;background:var(--urgentSoft);color:var(--curg);font-size:1em;font-weight:700}
+.undo{flex:none;min-width:44px;min-height:44px;padding:0 6px;border-radius:12px;font-weight:700;font-size:.75em;color:var(--cacc);display:flex;align-items:center;justify-content:center}
+.dempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:10px 4px 14px;font-size:.8125em;font-weight:500;color:var(--csub);line-height:1.4}
+.dempty .halo2{width:44px;height:44px;border-radius:50%;background:var(--safeSoft);color:var(--csafe);display:flex;align-items:center;justify-content:center;animation:float 3.6s ease-in-out infinite}
+.dempty .halo2 .ic{width:22px;height:22px}
+
+.up{display:flex;align-items:center;gap:10px;margin-top:10px;min-height:52px;padding:6px 14px}
+.up-l{display:inline-flex;align-items:center;gap:6px;flex:none;font-size:.8125em;font-weight:800;color:var(--text)}
+.up-l .ic{width:17px;height:17px;color:var(--cacc)}
+.up-items{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;padding-block:4px}
+.up-i{display:inline-flex;align-items:center;gap:6px;font-size:.875em;font-weight:600}
+.up-i .ic{width:17px;height:17px;color:var(--csub)}
+.up-i span{color:var(--csub);font-variant-numeric:tabular-nums}
+
+.tl{padding:12px 0 6px;overflow:hidden}
+.tl-head{display:flex;align-items:center;gap:8px;padding:0 16px 6px;font-size:.875em;color:var(--csub)}
+.tl-head .ic{width:18px;height:18px;color:var(--cacc)}
+.tl-head b{color:var(--text)}
+.tl-n{flex:1;min-width:0}
+.tl-n b{white-space:nowrap}
+.tl-in{flex:none;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--cacc);font-size:.9em;font-weight:700}
+.zscroll{overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;padding:4px 8px 4px}
+.zscroll::-webkit-scrollbar{display:none}
+.zscroll:focus-visible{outline:3px solid var(--accent);outline-offset:-3px;border-radius:24px}
+.zscroll.zdrag{scroll-snap-type:none}
+.zscroll.zdrag .zmk,.zscroll.zdrag .zveil{transition:none}
+.ztrack{--w:7em;position:relative;width:calc(var(--n) * var(--w))}
+.zlist{display:flex}
+.zs{flex:none;width:var(--w);padding:2px 2px 6px;scroll-snap-align:center}
+.zsb{display:flex;flex-direction:column;align-items:center;width:100%;text-align:center}
+.zrail{position:absolute;inset-inline:0;top:calc(2px + 38px + 13px - 22px);height:44px;z-index:3;touch-action:none;cursor:ew-resize}
+.zi{width:38px;height:38px;border-radius:50%;background:var(--surface2);color:var(--csub);display:flex;align-items:center;justify-content:center;flex:none}
+.zi .ic{width:20px;height:20px}
+.zs.past .zi{opacity:.7}
+.zs.next .zi{background:var(--accent);color:var(--onAccent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 28%,transparent)}
+.zrow{position:relative;height:26px;width:100%;display:flex;align-items:center;justify-content:center}
+.zdot{position:relative;width:14px;height:14px;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--hair)}
+.zs.past .zdot{opacity:.7}
+.zs.next .zdot{width:20px;height:20px;border-width:4px;box-shadow:0 0 0 3px var(--accent)}
+.zn{font-size:.78em;font-weight:500;line-height:1.25;color:var(--csub);min-height:2.5em;display:flex;align-items:center;justify-content:center;text-wrap:balance}
+.zt{font-size:1em;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+.zs.past .zt{font-weight:600;color:var(--csub)}
+.zs.next .zn{color:var(--cacc);font-weight:700}
+.zs.next .zt{color:var(--cacc)}
+.zin{margin-top:6px;max-width:100%;padding:3px 9px;border-radius:999px;background:var(--soft);color:var(--cacc);font-size:.75em;font-weight:700;white-space:nowrap}
+.zribbon{position:absolute;inset-inline:0;top:calc(2px + 38px + 9px);height:8px;border-radius:8px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--hair)}
+.zveil{position:absolute;top:0;bottom:0;right:0;background:color-mix(in srgb,var(--surface) 55%,transparent);transition:width .9s ease}
+.zmk{position:absolute;top:calc(2px + 38px + 13px);width:26px;height:26px;margin:-13px -13px 0 0;border-radius:50%;background:var(--surface);color:var(--accentText);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--accent),0 0 18px 4px color-mix(in srgb,var(--accent) 55%,transparent);transition:right .9s cubic-bezier(.2,.8,.2,1);animation:dotBreath 3.4s ease-in-out infinite;z-index:2}
+.zmk .ic{width:16px;height:16px;stroke-width:2.1}
+</style>
+<template>
+<div class="skyroot {{fxCls}}" style="{{skyStyle}}">
+<div class="skybase" aria-hidden="true"></div>
+<div class="sky" aria-hidden="true"></div>
+<div class="cel" role="img" aria-label="{{skyAria}}">
+<div class="hglow" style="left: {{glowX}}px; opacity: {{glowOp}}"></div>
+<div class="stars">
+<sc-for list="{{stars}}" as="st" hint-placeholder-count="3"><span class="sw" style="left: {{st.x}}px; top: {{st.y}}px; opacity: {{st.o}}"><i class="star" style="width: {{st.s}}px; height: {{st.s}}px; animation-delay: {{st.d}}; animation-duration: {{st.du}}"></i></span></sc-for>
+</div>
+<div class="shoots" style="opacity: {{shootOp}}"><i class="shoot s1"></i><i class="shoot s2"></i><i class="shoot s3"></i></div>
+<div class="sun" style="left: {{sunX}}px; top: {{sunY}}px; opacity: {{sunOp}}; --sunc: {{sunC}}; --sunc2: {{sunC2}}"><span class="sun-glow"></span><span class="sun-disc"></span></div>
+<div class="moon" style="left: {{moonX}}px; top: {{moonY}}px; opacity: {{moonOp}}">
+<span class="moon-glow"></span>
+<svg viewBox="0 0 40 40" aria-hidden="true"><defs><mask id="skMoonMask"><rect width="40" height="40" fill="#fff"></rect><circle cx="28" cy="15" r="13.5" fill="#000"></circle></mask></defs><circle cx="20" cy="20" r="16" fill="#F6F2E4" mask="url(#skMoonMask)"></circle></svg>
+</div>
+<div class="clouds" style="opacity: {{cloudOp}}; color: {{cloudC}}">
+<div class="cl" style="transform: translateX({{par1}}px)"><svg class="cloud c1" viewBox="0 0 120 50" aria-hidden="true"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></svg></div>
+<div class="cl" style="transform: translateX({{par2}}px)"><svg class="cloud c2" viewBox="0 0 120 50" aria-hidden="true"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></svg></div>
+<div class="cl" style="transform: translateX({{par3}}px)"><svg class="cloud c3" viewBox="0 0 120 50" aria-hidden="true"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></svg></div>
+</div>
+</div>
+<svg class="hz" width="390" height="240" viewBox="0 0 390 240" aria-hidden="true">
+<defs><linearGradient id="skHzG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color: var(--hz); stop-opacity: .5"></stop><stop offset="1" style="stop-color: var(--hz); stop-opacity: 0"></stop></linearGradient></defs>
+<path d="M0 214 Q195 168 390 214 L390 240 L0 240 Z" fill="url(#skHzG)"></path>
+<path d="M0 214 Q195 168 390 214" fill="none" style="stroke: var(--hz)" stroke-width="1.4" stroke-opacity=".75"></path>
+</svg>
+
+<div class="scroll" style="position: absolute; inset: 0; overflow-y: auto; padding: 0 16px 124px">
+
+<div class="scene" onPointerDown="{{skDown}}" onPointerMove="{{skMove}}" onPointerUp="{{skUp}}" onPointerCancel="{{skUp}}">
+<div class="srow">
+<span class="spill">{{dateLine}}</span>
+<span class="spill num">{{skyChip}}</span>
+</div>
+<h1 class="hello">{{greeting}}</h1>
+<div class="skrail" style="--thumb: {{thumbC}}">
+<div class="skrail-rg">
+<i class="skrail-line"></i>
+<sc-for list="{{railDots}}" as="d" hint-placeholder-count="11"><i class="skrail-dot" style="right: {{d.p}}%"></i></sc-for>
+</div>
+<input class="skrail-in" type="range" min="{{dayStartSec}}" max="{{dayEndSec}}" step="60" value="{{nowSec}}" onChange="{{onRail}}" aria-label="זמן ביום. החליקו על השמיים או השתמשו בחצים" aria-valuetext="{{skyChip}}">
+</div>
+</div>
+
+<!--NAMECARD-->
+
+<h2 class="hd rise" style="--d: .05s"><span class="hd-t"><span class="hd-i">[[ic:bell]]</span>הודעות</span><span class="hd-n num">{{msgCount}}</span></h2>
+<div role="list" aria-label="הודעות אישיות">
+<sc-for list="{{msgPersonal}}" as="m" hint-placeholder-count="2">
+<article class="glass pm rise {{m.cls}}" role="listitem" style="--d: .1s">
+<span class="pm-ic">[[icMsg:m]]</span>
+<div class="pm-b">
+<div class="pm-top"><p class="m-tag">{{m.tag}}</p>
+<sc-if value="{{m.hasAction}}" hint-placeholder-val="{{ true }}"><button class="m-act" onClick="{{m.act}}"><span>{{m.action}}</span>[[ic:chevron]]</button></sc-if></div>
+<p class="m-t">{{m.title}}</p>
+<p class="m-body">{{m.body}}</p>
+</div>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ false }}"><button class="m-x" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</article>
+</sc-for>
+</div>
+<sc-if value="{{hasMsgGeneral}}" hint-placeholder-val="{{ true }}">
+<div class="glass gs rise" role="list" aria-label="הודעות כלליות" style="--d: .18s">
+<sc-for list="{{msgGeneral}}" as="m" hint-placeholder-count="3">
+<article class="gr {{m.kindCls}} {{m.cls}}" role="listitem">
+<span class="gr-ic">[[icMsg:m]]</span>
+<div class="gr-b">
+<p class="m-line"><span class="m-tag">{{m.tag}}</span><span class="m-t">{{m.title}}</span></p>
+<p class="m-body">{{m.body}}</p>
+<sc-if value="{{m.hasAction}}" hint-placeholder-val="{{ true }}"><button class="g-act" onClick="{{m.act}}"><span>{{m.action}}</span>[[ic:chevron]]</button></sc-if>
+</div>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="m-x" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</article>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noGeneral}}" hint-placeholder-val="{{ false }}"><p class="glass mempty">[[ic:sparkle]]<span>אין הודעות כלליות. השמיים שקטים.</span></p></sc-if>
+
+<h2 class="hd rise" style="--d: .22s"><span class="hd-t"><span class="hd-i">[[ic:sun]]</span>עכשיו</span><span class="hd-n"><span class="num">{{activeN}} פתוחות</span></span></h2>
+<sc-if value="{{hasActive}}" hint-placeholder-val="{{ true }}">
+<div class="nowl" role="list" aria-label="מצוות פתוחות עכשיו">
+<sc-for list="{{actives}}" as="it" hint-placeholder-count="2">
+<section class="glass nowc rise {{it.cls}}" role="listitem" style="--d: {{it.delay}}">
+<div class="nh">
+<span class="tile">[[icItem:it]]</span>
+<div class="nt"><h3 class="nn">{{it.name}}</h3><p class="cap">מ{{it.fromName}} עד {{it.toName}}</p></div>
+<div class="nl {{it.urgentCls}}" role="img" aria-label="נשארו {{it.left}}"><span class="cap">נשארו</span><b>{{it.leftNum}}</b><span class="cap">{{it.leftUnit}}</span></div>
+</div>
+<div class="sp {{it.urgentCls}}" aria-hidden="true">
+<svg viewBox="0 0 318 40"><path class="sp-track" d="M314 36 Q159 -18 4 36"></path><path class="sp-prog" d="M314 36 Q159 -18 4 36" style="stroke-dasharray: {{it.dash}} 1000"></path></svg>
+<i class="dot {{it.dotCls}}" style="right: calc({{it.dotR}}% - 9px); top: calc({{it.dotT}}% - 9px)"></i>
+</div>
+<div class="pe">
+<span>התחיל<b>{{it.startT}}</b></span>
+<sc-if value="{{it.urgent}}" hint-placeholder-val="{{ false }}"><span class="warn"><i></i>הזמן עומד להיגמר</span></sc-if>
+<span>נגמר<b>{{it.endT}}</b></span>
+</div>
+<div class="acts">
+<button class="btn primary" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">[[ic:check]]<span>{{it.cta}}</span></button>
+<button class="btn ghost" onClick="{{it.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</section>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noActive}}" hint-placeholder-val="{{ false }}">
+<section class="glass calm rise" aria-live="polite" style="--d: .26s">
+<div class="halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h3>{{activeEmptyTitle}}</h3>
+<p class="cap">{{activeEmptyText}}</p>
+</section>
+</sc-if>
+
+<div class="duo">
+<section class="glass dcard rise" aria-label="פספסת היום" style="--d: .3s">
+<h3 class="dh"><span class="dh-i miss">[[ic:clock]]</span>פספסת היום<b>{{missedN}}</b></h3>
+<sc-if value="{{hasMissed}}" hint-placeholder-val="{{ true }}">
+<div role="list">
+<sc-for list="{{missed}}" as="it" hint-placeholder-count="1">
+<div class="mrow {{it.cls}}" role="listitem">
+<span class="rt">{{it.name}}</span>
+<span class="cap num">{{it.ago}}</span>
+<button class="late" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">בכל זאת עשיתי</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noMissed}}" hint-placeholder-val="{{ false }}"><div class="dempty"><span class="halo2" aria-hidden="true">[[ic:sparkle]]</span><span>{{missedEmpty}}</span></div></sc-if>
+</section>
+<section class="glass dcard rise" aria-label="עשית היום" style="--d: .36s">
+<h3 class="dh"><span class="dh-i done">[[ic:check]]</span>עשית היום<b>{{doneN}}</b></h3>
+<sc-if value="{{hasDone}}" hint-placeholder-val="{{ true }}">
+<div role="list">
+<sc-for list="{{done}}" as="d" hint-placeholder-count="2">
+<div class="drow" role="listitem">
+<div><span class="rt">{{d.name}}</span><span class="cap num">סומן ב-{{d.at}}<sc-if value="{{d.late}}" hint-placeholder-val="{{ false }}"><span class="lateTag">באיחור</span></sc-if></span></div>
+<button class="undo" onClick="{{d.undo}}" aria-label="{{d.undoLabel}}">ביטול</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noDone}}" hint-placeholder-val="{{ false }}"><div class="dempty"><span class="halo2" aria-hidden="true">[[ic:check]]</span><span>{{doneEmpty}}</span></div></sc-if>
+</section>
+</div>
+
+<sc-if value="{{hasUpcoming}}" hint-placeholder-val="{{ true }}">
+<div class="glass up rise" role="list" aria-label="בהמשך היום" style="--d: .42s">
+<span class="up-l">[[ic:clock]]בהמשך היום</span>
+<div class="up-items">
+<sc-for list="{{upGroups}}" as="l" hint-placeholder-count="1">
+<span class="up-i" role="listitem">[[icItem:l]]<b>{{l.name}}</b><span>{{l.time}}</span></span>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<h2 class="hd rise" style="--d: .46s"><span class="hd-t"><span class="hd-i">[[ic:clock]]</span><span>זמני היום</span></span><span class="hd-n"><span>{{hebDay}}</span></span></h2>
+<section class="glass tl rise" aria-label="זמני היום" style="--d: .5s">
+<p class="tl-head">[[ic:sunrise]]<span class="tl-n">הבא: <b>{{nextZ.name}} · {{nextZ.time}}</b></span><span class="tl-in">{{nextZ.left}}</span></p>
+<div class="zscroll {{zCls}}" id="zsc" tabindex="0" role="region" aria-label="ציר זמני היום, אפשר לגלול הצידה, ולגרור את הסמן להזזת הזמן">
+<div class="ztrack" id="ztr" style="--n: {{zn}}">
+<div class="zribbon" aria-hidden="true" style="background: {{ribbonBg}}"><i class="zveil" style="width: calc({{mk}} * var(--w))"></i></div>
+<div class="zmk" id="zmk" aria-hidden="true" style="right: calc({{mk}} * var(--w))">
+<sc-if value="{{mkSun}}" hint-placeholder-val="{{ true }}">[[ic:sun]]</sc-if>
+<sc-if value="{{mkMoon}}" hint-placeholder-val="{{ false }}">[[ic:moon]]</sc-if>
+</div>
+<div class="zrail" aria-hidden="true" onPointerDown="{{zrDown}}" onPointerMove="{{zrMove}}" onPointerUp="{{zrUp}}" onPointerCancel="{{zrUp}}"></div>
+<ul class="zlist">
+<sc-for list="{{stops}}" as="z" hint-placeholder-count="6">
+<li class="zs {{z.cls}}"><button class="zsb" onClick="{{z.go}}" aria-label="{{z.aria}}">
+<span class="zi">[[icZ:z]]</span>
+<span class="zrow"><i class="zdot" style="background: {{z.nodeBg}}"></i></span>
+<span class="zn">{{z.name}}</span>
+<b class="zt">{{z.time}}</b>
+<sc-if value="{{z.isNext}}" hint-placeholder-val="{{ false }}"><span class="zin">{{z.inS}}</span></sc-if>
+</button></li>
+</sc-for>
+</ul>
+</div>
+</div>
+</section>
+
+</div>
+</div>
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    ['--sk1', '--sk2', '--sk3', '--hz', '--glow', '--ink', '--inkopp', '--inkchip'].forEach((n) => {
+      try {
+        CSS.registerProperty({ name: n, syntax: '<color>', inherits: true, initialValue: '#000000' });
+      } catch (e) {}
+    });
+    this.zKey = null;
+    this.sk = null;
+    this.zr = null;
+    this.skRaf = 0;
+    this.skAnim = 0;
+    this.skTgt = 0;
+    this.skPos = 0;
+    this.settleT = 0;
+    return { fx: false };
+  }
+
+  skHex(c) {
+    return [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+  }
+
+  skStr(a) {
+    return '#' + a.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+  }
+
+  skMix(a, b, k) {
+    return a.map((v, i) => v + (b[i] - v) * k);
+  }
+
+  skLum(a) {
+    const f = (v) => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * f(a[0]) + 0.7152 * f(a[1]) + 0.0722 * f(a[2]);
+  }
+
+  skCr(a, b) {
+    const x = this.skLum(a);
+    const y = this.skLum(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  }
+
+  skClamp(v, lo, hi) {
+    return Math.max(lo, Math.min(hi, v));
+  }
+
+  skZ() {
+    const z = {};
+    this.zmanimList().forEach((x) => (z[x.id] = x.S));
+    return z;
+  }
+
+  skKeys() {
+    const z = this.skZ();
+    const end = this.dayEnd();
+    const H = (c) => this.skHex(c);
+    const K = (t, top, mid, bot, cloud, name) => ({ t, top: H(top), mid: H(mid), bot: H(bot), cloud: H(cloud), name });
+    const dawnLen = z.netz - z.alot;
+    const alotK = K(z.alot, '#18215F', '#4B3D8E', '#9B6BA8', '#C9A6D6', 'עלות השחר');
+    return [
+      alotK,
+      K(z.netz, '#8DA3E0', '#F2B7B4', '#FFD9AE', '#FFD6CC', 'הנץ החמה'),
+      K(z.netz + (z.chatzot - z.netz) * 0.3, '#76B6F2', '#A8D4F6', '#D8EDFA', '#FFFFFF', 'בוקר'),
+      K(z.chatzot, '#4B9DEB', '#6DB4F1', '#A8D5F8', '#FFFFFF', 'צהריים'),
+      K(z.plag, '#5E9FE0', '#9CC5E8', '#F5D9A2', '#FFF6E4', 'אחר הצהריים'),
+      K(z.shkia, '#5C5AA8', '#E4708C', '#FFB05C', '#FFC8B0', 'שקיעה'),
+      K(z.tzeit, '#161D58', '#2E3382', '#6C5BA8', '#9A8CC8', 'צאת הכוכבים'),
+      K(z.tzeit + (z.chatzotL - z.tzeit) * 0.25, '#070C1F', '#0F1A3E', '#1B2A58', '#7F8FC8', 'לילה'),
+      K(end - dawnLen * 0.7, '#060A19', '#0D1533', '#18224D', '#7F8FC8', 'לפני עלות השחר'),
+      { ...alotK, t: end },
+    ];
+  }
+
+  skAt(t) {
+    const K = this.skKeys();
+    let i = 0;
+    while (i < K.length - 2 && t >= K[i + 1].t) i++;
+    const a = K[i];
+    const b = K[i + 1];
+    const k = this.skClamp((t - a.t) / (b.t - a.t), 0, 1);
+    const e = k * k * (3 - 2 * k);
+    const m = (p) => this.skMix(a[p], b[p], e);
+    return { top: m('top'), mid: m('mid'), bot: m('bot'), cloud: m('cloud'), name: a.name };
+  }
+
+  skInk(s) {
+    const zone = this.skMix(s.top, s.mid, 0.14);
+    const dark = this.skHex('#0A1228');
+    const white = [255, 255, 255];
+    const useWhite = this.skCr(zone, white) > this.skCr(zone, dark);
+    const ink = useWhite ? white : dark;
+    const opp = useWhite ? [8, 14, 34] : [255, 255, 255];
+    let alpha = 0;
+    while (alpha < 0.5 && this.skCr(this.skMix(zone, opp, alpha), ink) < 5.2) alpha += 0.05;
+    return { zone, ink, opp, alpha, white: useWhite, contrast: this.skCr(this.skMix(zone, opp, alpha), ink) };
+  }
+
+  skArcLen(u) {
+    let s = 0;
+    const n = 24;
+    for (let i = 0; i < n; i++) {
+      const v = ((i + 0.5) / n) * u;
+      const dy = -108 + 216 * v;
+      s += (Math.sqrt(310 * 310 + dy * dy) * u) / n;
+    }
+    return s;
+  }
+
+  skCompact(sec) {
+    const m = Math.max(0, Math.ceil(sec / 60));
+    if (m < 60) return m + ' דק׳';
+    const h = Math.floor(m / 60);
+    const r = m % 60;
+    return h + ' שע׳' + (r ? ' ו-' + r + ' דק׳' : '');
+  }
+
+  skGeo() {
+    return { x0: 330, span: 270 };
+  }
+
+  skSmooth(v) {
+    const k = this.skClamp(v, 0, 1);
+    return k * k * (3 - 2 * k);
+  }
+
+  skyVals() {
+    const t = this.now();
+    const z = this.skZ();
+    const end = this.dayEnd();
+    const N = z.netz;
+    const S = z.shkia;
+    const G = this.skGeo();
+    const s = this.skAt(Math.round(t / 20) * 20);
+    const ik = this.skInk(s);
+    const hy = (x) => {
+      const u = (390 - x) / 390;
+      return 214 - 92 * u * (1 - u);
+    };
+
+    const f = (t - N) / (S - N);
+    const fc = this.skClamp(f, -0.1, 1.1);
+    const sx = G.x0 - G.span * fc;
+    const alt = Math.sin(Math.PI * fc);
+    const sy = hy(sx) - 55 * alt;
+    const sunOp = f < 0 ? this.skClamp(1 + f / 0.05, 0, 1) : f > 1 ? this.skClamp(1 - (f - 1) / 0.05, 0, 1) : 1;
+    const hgt = this.skClamp(alt / 0.55, 0, 1);
+    const sunC = this.skStr(this.skMix(this.skHex('#FF8A3D'), this.skHex('#FFE27A'), hgt));
+    const sunC2 = this.skStr(this.skMix(this.skHex('#E8531F'), this.skHex('#FFB347'), hgt));
+
+    const tw = Math.max(600, z.tzeit - S);
+    const dw = Math.max(600, N - z.alot);
+    let d = 0;
+    if (t >= S) d = this.skClamp((t - S) / (2 * tw), 0, 1);
+    else if (t <= N) d = this.skClamp((N - t) / dw, 0, 1);
+    d = d * d * (3 - 2 * d);
+
+    const g = t >= z.tzeit ? (t - z.tzeit) / (end - z.tzeit) : t < N ? 1.04 : -0.08;
+    const gc = this.skClamp(g, -0.08, 1.08);
+    const mx = G.x0 - G.span * gc;
+    const my = hy(mx) - 55 * Math.sin(Math.PI * gc);
+
+    let alt2 = alt;
+    if (t < N) alt2 = -(N - t) / dw;
+    else if (t > S) alt2 = -(t - S) / (2 * tw);
+    const glowOp = this.skClamp(1 - Math.abs(alt2) / 0.5, 0, 1);
+    const glowC = t < (N + S) / 2 ? '#FF9A86' : '#FF8A45';
+    const hz = this.skStr(this.skMix(s.bot, [255, 255, 255], 0.35));
+    const rgba = (a, al) => 'rgba(' + a.map((v) => Math.round(v)).join(',') + ',' + al.toFixed(2) + ')';
+
+    const starsOp = Math.max(this.skSmooth((t - (z.tzeit - tw * 0.5)) / (tw * 1.5)), 1 - this.skSmooth((t - z.alot) / (dw * 0.9)));
+    const stars = [
+      [28, 64, 2], [74, 84, 1.6], [44, 118, 2.4], [98, 142, 1.6], [150, 112, 2], [190, 152, 1.6], [226, 116, 2.6], [262, 172, 1.6],
+      [298, 128, 2], [332, 100, 1.6], [358, 152, 2.4], [374, 118, 1.6], [122, 174, 1.6], [18, 168, 2], [206, 98, 1.4], [150, 9, 1.6],
+      [244, 10, 2], [334, 11, 1.6], [24, 12, 1.6], [66, 52, 1.4], [92, 100, 1.8], [312, 182, 1.4],
+    ].map((a, i) => ({
+      x: a[0],
+      y: a[1],
+      s: a[2],
+      d: ((i * 0.37) % 3.4).toFixed(2) + 's',
+      du: (2.4 + ((i * 0.53) % 2.6)).toFixed(2) + 's',
+      o: this.skSmooth((starsOp - ((i * 0.618) % 1) * 0.6) / 0.4).toFixed(2),
+    }));
+
+    const u = (t - z.alot) / (end - z.alot);
+    const phase = s.name;
+    return {
+      skyStyle: [
+        '--sk1:' + this.skStr(s.top),
+        '--sk2:' + this.skStr(s.mid),
+        '--sk3:' + this.skStr(s.bot),
+        '--hz:' + hz,
+        '--glow:' + rgba(this.skHex(glowC), 0.6),
+        '--ink:' + this.skStr(ik.ink),
+        '--inkopp:' + this.skStr(ik.opp),
+        '--inkchip:' + rgba(ik.opp, ik.alpha),
+      ].join(';'),
+      skyAria: 'השמיים עכשיו: ' + phase,
+      skyName: phase,
+      skyChip: this.clock(t) + ' · ' + phase,
+      sunX: sx.toFixed(1),
+      sunY: sy.toFixed(1),
+      sunOp: sunOp.toFixed(2),
+      sunC,
+      sunC2,
+      moonX: mx.toFixed(1),
+      moonY: my.toFixed(1),
+      moonOp: d.toFixed(2),
+      starsOp: starsOp.toFixed(2),
+      shootOp: this.skClamp((starsOp - 0.7) / 0.3, 0, 1).toFixed(2),
+      cloudOp: ((1 - d) * 0.92).toFixed(2),
+      cloudC: this.skStr(s.cloud),
+      par1: (-u * 45).toFixed(1),
+      par2: (-u * 90).toFixed(1),
+      par3: (-u * 146).toFixed(1),
+      glowX: this.skClamp(sx, 60, 330).toFixed(1),
+      glowOp: glowOp.toFixed(2),
+      thumbC: this.skStr(this.skMix(this.skHex(sunC), [230, 236, 255], d)),
+      stars,
+      skDay: t >= N && t < S,
+    };
+  }
+
+  componentDidUpdate() {
+    if (this.zKey !== this.start) {
+      this.zKey = this.start;
+      this.centerZ(true);
+    }
+  }
+
+  boardMount() {
+    this.zKey = this.start;
+    this.rm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+    this.centerZ(false);
+    this.mountT = setTimeout(() => this.centerZ(false), 400);
+  }
+
+  boardUnmount() {
+    clearTimeout(this.mountT);
+    clearTimeout(this.settleT);
+    this.skStop();
+    if (this.zr) cancelAnimationFrame(this.zr.raf);
+  }
+
+  skBounds() {
+    return [this.dayStart(), this.dayEnd() - 60];
+  }
+
+  skRate(t) {
+    const z = this.skZ();
+    const G = this.skGeo();
+    return t >= z.tzeit ? (this.dayEnd() - z.tzeit) / G.span : (z.shkia - z.netz) / G.span;
+  }
+
+  skPosOf(t) {
+    const Z = this.zmanimList();
+    const n = Z.length;
+    if (t >= Z[n - 1].S) return n - 1 + 0.5 * Math.min(1, (t - Z[n - 1].S) / (this.dayEnd() - Z[n - 1].S));
+    let i = 0;
+    while (i < n - 2 && t >= Z[i + 1].S) i++;
+    return i + Math.max(0, (t - Z[i].S) / (Z[i + 1].S - Z[i].S));
+  }
+
+  skTimeOf(pos) {
+    const Z = this.zmanimList();
+    const n = Z.length;
+    if (pos >= n - 1) return Z[n - 1].S + Math.min(1, (pos - (n - 1)) / 0.5) * (this.dayEnd() - Z[n - 1].S);
+    const i = Math.max(0, Math.min(n - 2, Math.floor(pos)));
+    return Z[i].S + (pos - i) * (Z[i + 1].S - Z[i].S);
+  }
+
+  skSeek(sec) {
+    this.skTgt = sec;
+    if (this.skRaf) return;
+    this.skRaf = requestAnimationFrame(() => {
+      this.skRaf = 0;
+      this.scrub(this.skTgt);
+    });
+  }
+
+  skStop() {
+    cancelAnimationFrame(this.skRaf);
+    cancelAnimationFrame(this.skAnim);
+    this.skRaf = 0;
+    this.skAnim = 0;
+    clearTimeout(this.settleT);
+    const sc = document.getElementById('zsc');
+    if (sc && this.settling) sc.scrollTo({ left: sc.scrollLeft, behavior: 'auto' });
+    this.settling = false;
+  }
+
+  skSettle() {
+    clearTimeout(this.settleT);
+    this.settleT = setTimeout(() => {
+      this.settling = true;
+      this.centerZ(true);
+    }, 450);
+  }
+
+  skEnd() {
+    this.setState({ fx: false });
+    this.skSettle();
+  }
+
+  skTween(to, ms, done, from) {
+    this.skStop();
+    const [lo, hi] = this.skBounds();
+    const a = from == null ? this.now() : from;
+    const b = Math.max(lo, Math.min(hi, to));
+    const dur = ms == null ? Math.max(280, Math.min(1000, 280 + Math.abs(b - a) / 45)) : ms;
+    if (this.rm.matches || Math.abs(b - a) < 1) {
+      this.skPos = b;
+      this.scrub(b);
+      if (done) done();
+      return;
+    }
+    const t0 = performance.now();
+    const step = (ts) => {
+      const k = Math.min(1, (ts - t0) / dur);
+      this.skPos = a + (b - a) * (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+      this.scrub(this.skPos);
+      if (k < 1) this.skAnim = requestAnimationFrame(step);
+      else {
+        this.skAnim = 0;
+        if (done) done();
+      }
+    };
+    this.skAnim = requestAnimationFrame(step);
+  }
+
+  skGoTo(sec) {
+    this.setState({ fx: true });
+    this.skTween(sec, null, () => this.skEnd());
+  }
+
+  skFling(v0) {
+    const [lo, hi] = this.skBounds();
+    let v = Math.max(-2200, Math.min(2200, v0));
+    let last = performance.now();
+    const step = (ts) => {
+      const dt = Math.min(0.05, (ts - last) / 1000);
+      last = ts;
+      v *= Math.exp(-dt / 0.3);
+      this.skPos = Math.max(lo, Math.min(hi, this.skPos - v * dt * this.skRate(this.skPos)));
+      this.scrub(this.skPos);
+      if (Math.abs(v) > 25 && this.skPos > lo && this.skPos < hi) this.skAnim = requestAnimationFrame(step);
+      else {
+        this.skAnim = 0;
+        this.skEnd();
+      }
+    };
+    this.skAnim = requestAnimationFrame(step);
+  }
+
+  skDown(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.target.closest && e.target.closest('input,button,a')) return;
+    this.skStop();
+    this.skPos = this.now();
+    this.sk = { id: e.pointerId, el: e.currentTarget, x0: e.clientX, x: e.clientX, ts: performance.now(), v: 0, moved: false };
+  }
+
+  skMove(e) {
+    const d = this.sk;
+    if (!d || d.id !== e.pointerId) return;
+    if (!d.moved) {
+      if (Math.abs(e.clientX - d.x0) < 6) return;
+      d.moved = true;
+      d.x = e.clientX;
+      d.ts = performance.now();
+      try {
+        d.el.setPointerCapture(e.pointerId);
+      } catch (err) {}
+      this.setState({ fx: true });
+      return;
+    }
+    const ts = performance.now();
+    const dx = e.clientX - d.x;
+    d.v = d.v * 0.6 + ((dx / Math.max(1, ts - d.ts)) * 1000) * 0.4;
+    d.x = e.clientX;
+    d.ts = ts;
+    const [lo, hi] = this.skBounds();
+    this.skPos = Math.max(lo, Math.min(hi, this.skPos - dx * this.skRate(this.skPos)));
+    this.skSeek(this.skPos);
+  }
+
+  skUp(e) {
+    const d = this.sk;
+    if (!d || d.id !== e.pointerId) return;
+    this.sk = null;
+    if (!d.moved) return;
+    try {
+      d.el.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    const v = performance.now() - d.ts > 90 ? 0 : d.v;
+    if (this.rm.matches || Math.abs(v) < 90) {
+      this.scrub(this.skPos);
+      this.skEnd();
+    } else this.skFling(v);
+  }
+
+  zrAt(x) {
+    const tr = document.getElementById('ztr');
+    if (!tr) return this.now();
+    const r = tr.getBoundingClientRect();
+    const n = this.zmanimList().length;
+    const mk = ((r.right - x) / r.width) * n;
+    return this.skTimeOf(Math.max(0, Math.min(n - 0.5, mk - 0.5)));
+  }
+
+  zrLoop() {
+    const d = this.zr;
+    if (!d) return;
+    const sc = document.getElementById('zsc');
+    if (sc) {
+      const a = sc.getBoundingClientRect();
+      let dx = 0;
+      if (d.x < a.left + 40) dx = -Math.ceil((a.left + 40 - d.x) / 5);
+      else if (d.x > a.right - 40) dx = Math.ceil((d.x - (a.right - 40)) / 5);
+      if (dx) {
+        sc.scrollLeft += dx;
+        this.skSeek(this.zrAt(d.x));
+      }
+    }
+    d.raf = requestAnimationFrame(() => this.zrLoop());
+  }
+
+  zrDown(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    this.skStop();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+    this.zr = { id: e.pointerId, x0: e.clientX, x: e.clientX, moved: false, raf: 0 };
+    this.setState({ fx: true });
+    this.skTween(this.zrAt(e.clientX), 240, () => {
+      if (!this.zr) this.skEnd();
+    });
+  }
+
+  zrMove(e) {
+    const d = this.zr;
+    if (!d || d.id !== e.pointerId) return;
+    d.x = e.clientX;
+    if (!d.moved) {
+      if (Math.abs(e.clientX - d.x0) < 4) return;
+      d.moved = true;
+      cancelAnimationFrame(this.skAnim);
+      this.skAnim = 0;
+      d.raf = requestAnimationFrame(() => this.zrLoop());
+    }
+    this.skSeek(this.zrAt(e.clientX));
+  }
+
+  zrUp(e) {
+    const d = this.zr;
+    if (!d || d.id !== e.pointerId) return;
+    cancelAnimationFrame(d.raf);
+    this.zr = null;
+    if (d.moved) {
+      this.scrub(this.zrAt(d.x));
+      this.skEnd();
+    } else if (!this.skAnim) this.skEnd();
+  }
+
+  centerZ(smooth) {
+    const sc = document.getElementById('zsc');
+    const mk = document.getElementById('zmk');
+    if (!sc || !mk) return;
+    const a = sc.getBoundingClientRect();
+    const b = mk.getBoundingClientRect();
+    const nx = sc.querySelector('.zs.next');
+    let mid = b.left + b.width / 2;
+    if (nx) {
+      const r = nx.getBoundingClientRect();
+      mid = (mid + r.left + r.width / 2) / 2;
+    }
+    const delta = mid - (a.left + a.width / 2);
+    sc.scrollTo({ left: sc.scrollLeft + delta, behavior: smooth ? 'smooth' : 'auto' });
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const sv = this.skyVals();
+    const t = this.now();
+    const Z = this.zmanimList();
+    const n = Z.length;
+
+    const actives = c.active.map((it, i) => {
+      const u = this.skClamp(it.pctGone / 100, 0, 1);
+      const y = 36 - 108 * u * (1 - u);
+      return {
+        ...it,
+        dash: this.skArcLen(u).toFixed(1),
+        dotR: ((4 + 310 * u) / 3.18).toFixed(2),
+        dotT: ((y / 40) * 100).toFixed(2),
+        dotCls: it.isMoon ? 'moon' : 'sun',
+        delay: 0.26 + i * 0.07 + 's',
+      };
+    });
+
+    const mk = (this.skPosOf(t) + 0.5).toFixed(3);
+    const stops = c.zmanim.map((z, i) => ({
+      ...z,
+      nodeBg: this.skStr(this.skAt(Z[i].S).mid),
+      inS: z.isNext ? 'בעוד ' + this.skCompact(Z[i].S - t) : '',
+      aria: 'מעבר ל' + z.name + ' ב-' + z.time,
+      go: () => this.skGoTo(Z[i].S),
+    }));
+    const ribbonBg =
+      'linear-gradient(to left, ' +
+      Z.map((z, i) => this.skStr(this.skAt(z.S).mid) + ' ' + (((i + 0.5) / n) * 100).toFixed(2) + '%').join(', ') +
+      ')';
+
+    const upGroups = [];
+    c.upcoming.forEach((x) => {
+      let g = upGroups.find((q) => q.time === x.startT);
+      if (!g) {
+        g = { time: x.startT, names: [], isSun: x.isSun, isBox: x.isBox, isBook: x.isBook, isMoon: x.isMoon };
+        upGroups.push(g);
+      }
+      g.names.push(x.short);
+    });
+    upGroups.forEach((g) => (g.name = g.names.join(' · ')));
+
+    return {
+      ...c,
+      ...sv,
+      upGroups,
+      actives,
+      stops,
+      ribbonBg,
+      mk,
+      zn: n,
+      mkSun: sv.skDay,
+      mkMoon: !sv.skDay,
+      noGeneral: !c.hasMsgGeneral,
+      fxCls: this.state.fx ? 'drag' : '',
+      zCls: this.state.fx ? 'zdrag' : '',
+      railDots: c.zmanim.map((z) => ({ p: z.p })),
+      onRail: (e) => {
+        this.skStop();
+        this.scrub(Number(e.target.value));
+        this.skSettle();
+      },
+      skDown: (e) => this.skDown(e),
+      skMove: (e) => this.skMove(e),
+      skUp: (e) => this.skUp(e),
+      zrDown: (e) => this.zrDown(e),
+      zrMove: (e) => this.zrMove(e),
+      zrUp: (e) => this.zrUp(e),
+    };
+  }
+}
+</script>

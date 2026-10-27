@@ -1,0 +1,699 @@
+<!--board title="ב · קשת היום"-->
+<style>
+a{color:var(--accentText)}
+.h1{font-size:1.5em;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+.label{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:.8125em;font-weight:700;color:var(--sub);margin:26px 4px 10px}
+.label b{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.count{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-weight:700;font-size:.875em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.count i{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.sum{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.sumc{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 13px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:.8125em;font-weight:600}
+.sumc i{width:8px;height:8px;border-radius:50%;flex:none}
+.sumc b{font-weight:800;font-variant-numeric:tabular-nums}
+.sumc.d i{background:var(--safe)}
+.sumc.m i{background:var(--urgent)}
+.sumc.o i{background:var(--accent)}
+.sumc.m.has{background:var(--urgentSoft);color:var(--urgent)}
+.sumc.d.has{background:var(--safeSoft);color:var(--safe)}
+
+.sky{--glass:rgba(255,255,255,.34);--glassE:rgba(255,255,255,.4);--sk-t:var(--text);--sk-s:var(--sub);--sk-line:var(--sub);position:relative;overflow:hidden;margin-top:16px;border-radius:28px;box-shadow:var(--shadow),inset 0 1px 0 var(--glassE);background:radial-gradient(120% 62% at 50% -8%,var(--glass),transparent 64%),linear-gradient(180deg,color-mix(in srgb,var(--accent) 15%,var(--surface)) 0%,var(--surface) 55%,var(--surface2) 100%)}
+.t-night .sky{--glass:rgba(255,255,255,.06);--glassE:rgba(255,255,255,.1)}
+.sky.night{--sk-t:#F2F5FB;--sk-s:#BCC6DB;--sk-line:#8E9BB8}
+.sky::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#0B1430 0%,#16264A 56%,#0D1830 100%);opacity:0;transition:opacity 1s ease;pointer-events:none}
+.sky.night::before{opacity:1}
+.sky > *{position:relative}
+.readout{display:flex;flex-wrap:wrap;align-items:center;align-content:center;justify-content:center;gap:4px 7px;padding:12px 16px 0;min-height:calc(12px + 2.95em + 4px);text-align:center;font-size:.875em;color:var(--sk-s)}
+.readout b{color:var(--sk-t);font-weight:700}
+.readout.ra{animation:readA .4s both}
+.readout.rb{animation:readB .4s both}
+@keyframes readA{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes readB{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.rd-a{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 7px}
+.rd-b{font-weight:500}
+.rtag{font-size:.8125em;font-weight:700;padding:1px 9px;border-radius:999px;background:var(--accent);color:var(--onAccent)}
+.scene{position:relative;width:350px;height:216px;margin:2px auto 0;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+.hzn{stroke:var(--sk-line);opacity:.5}
+.trk2{stroke:var(--sk-line);opacity:.5}
+.prg2{stroke:var(--accent)}
+.prgN{stroke:#F6E7BF}
+.trl{transition:opacity .5s}
+.tr{fill:none;stroke-linecap:round}
+.tr.t1{stroke:var(--accent);stroke-width:7;opacity:.4}
+.tr.t2{stroke:var(--accent);stroke-width:5.5;opacity:.24}
+.tr.t3{stroke:var(--accent);stroke-width:4.5;opacity:.14}
+.trn .tr.t1{stroke:#F6E7BF;opacity:.34}
+.trn .tr.t2{stroke:#F6E7BF;opacity:.2}
+.trn .tr.t3{stroke:#F6E7BF;opacity:.12}
+.tick{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--sk-s);transition:transform .3s,background .3s,border-color .3s}
+.sky.night .tick{background:#101C3A}
+.tick.past{border-color:var(--accent);background:var(--accent)}
+.tick.nxt{border-color:var(--accent)}
+.tick.nxt::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:ring 2.2s ease-out infinite}
+.tick.sel{transform:scale(1.5);border-color:var(--sk-t);z-index:2}
+.tick.past.sel{background:var(--accent)}
+@keyframes ring{0%{opacity:.7;transform:scale(.5)}100%{opacity:0;transform:scale(1.5)}}
+.aura{position:absolute;width:132px;height:132px;margin:-66px 0 0 -66px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 34%,transparent) 0,color-mix(in srgb,var(--accent) 12%,transparent) 42%,transparent 70%);pointer-events:none;transition:opacity .6s;animation:breathe 5.2s ease-in-out infinite}
+.aura.off{opacity:0}
+@keyframes breathe{50%{transform:scale(1.14);opacity:.78}}
+.sun{position:absolute;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 36% 30%,rgba(255,255,255,.55) 0,transparent 46%),var(--accent);pointer-events:none;transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1);animation:sunIn .9s cubic-bezier(.2,.8,.2,1) backwards,glow 3.2s 1s ease-in-out infinite;box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 22%,transparent),0 0 22px color-mix(in srgb,var(--accent) 70%,transparent)}
+.sun::before{content:'';position:absolute;inset:-27px;border-radius:50%;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--accent) 42%,transparent) 0deg 3.5deg,transparent 3.5deg 22.5deg);-webkit-mask:radial-gradient(circle closest-side,transparent 40%,#000 48%,transparent 100%);mask:radial-gradient(circle closest-side,transparent 40%,#000 48%,transparent 100%);animation:rays 52s linear infinite;pointer-events:none}
+.sun.off{opacity:0;transform:scale(.35)}
+.scene.drag .sun{transform:scale(1.16)}
+@keyframes rays{to{transform:rotate(360deg)}}
+@keyframes sunIn{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:none}}
+@keyframes glow{50%{box-shadow:0 0 0 11px color-mix(in srgb,var(--accent) 12%,transparent),0 0 30px color-mix(in srgb,var(--accent) 60%,transparent)}}
+.moon{position:absolute;width:28px;height:28px;border-radius:50%;box-shadow:inset 9px -4px 0 0 #F6E7BF;filter:drop-shadow(0 0 8px rgba(246,231,191,.7));pointer-events:none;transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1);animation:sunIn .9s .2s cubic-bezier(.2,.8,.2,1) backwards}
+.moon::after{content:'';position:absolute;inset:-20px;border-radius:50%;background:radial-gradient(circle,rgba(246,231,191,.2) 0,transparent 66%);animation:breathe 6s ease-in-out infinite}
+.moon.off{opacity:0;transform:scale(.35)}
+.scene.drag .moon{transform:scale(1.16)}
+.stars{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.4s}
+.sky.night .stars{opacity:1}
+.star{position:absolute;border-radius:50%;background:#F2F5FB;opacity:.4;animation:twinkle 3.4s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.26;transform:scale(.8)}50%{opacity:.95;transform:scale(1.2)}}
+.grab{position:absolute;width:48px;height:48px;border-radius:50%;touch-action:none;cursor:grab;outline:none}
+.grab:focus-visible{outline:3px solid var(--sk-t);outline-offset:1px}
+.scene.drag .grab{cursor:grabbing}
+.scene.hintOn .grab::after{content:'';position:absolute;inset:4px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:ring 2.4s ease-out infinite}
+.hint{position:absolute;left:0;right:0;top:168px;text-align:center;font-size:.75em;font-weight:600;color:var(--sk-s);pointer-events:none;transition:opacity .5s}
+.hint.gone{opacity:0}
+.arcmid{position:absolute;left:0;right:0;top:78px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:none}
+.bigtime{font-size:2.6em;font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1;color:var(--sk-t);transition:color .3s}
+.scene.scr .bigtime{color:var(--accentText)}
+.sky.night .scene.scr .bigtime{color:#FFD9AE}
+.midcap{font-size:.8125em;font-weight:600;color:var(--accentText);padding:4px 12px;border-radius:999px;background:var(--soft);max-width:250px}
+.sky.night .midcap{background:rgba(255,255,255,.13);color:#FFD9AE}
+.edge{position:absolute;top:164px;display:flex;flex-direction:column;align-items:center;line-height:1.25;font-size:.75em;font-weight:500;color:var(--sk-s);text-align:center}
+.edge b{font-weight:700;color:var(--sk-t);font-variant-numeric:tabular-nums}
+.zchips{display:flex;gap:8px;overflow-x:auto;padding:6px 16px 18px;scroll-snap-type:x proximity;scrollbar-width:none}
+.zchips::-webkit-scrollbar{display:none}
+.zc{flex:none;scroll-snap-align:center;display:flex;flex-direction:column;align-items:flex-start;padding:7px 14px;border-radius:14px;background:var(--surface);box-shadow:var(--shadow);min-height:52px;text-align:right;transition:background .25s,color .25s}
+.zl{font-size:.75em;color:var(--sub);white-space:nowrap}
+.zt{font-weight:700;font-variant-numeric:tabular-nums}
+.zc.past .zt{color:var(--sub);font-weight:500}
+.zc.next{background:var(--soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.zc.next .zl{color:var(--accentText);font-weight:700}
+.zc[aria-pressed="true"]{background:var(--text);color:var(--bg);box-shadow:none}
+.zc[aria-pressed="true"] .zl,.zc[aria-pressed="true"] .zt{color:inherit}
+.sky.night .zc{background:rgba(255,255,255,.09);box-shadow:none;color:#F2F5FB}
+.sky.night .zc .zl{color:#BCC6DB}
+.sky.night .zc.past .zt{color:#A9B5CE}
+.sky.night .zc.next{background:rgba(245,154,74,.2);box-shadow:inset 0 0 0 2px var(--accent)}
+.sky.night .zc.next .zl{color:#FFD9AE}
+.sky.night .zc[aria-pressed="true"]{background:#F2F5FB;color:#0B1430;box-shadow:none}
+.sky.night .zc[aria-pressed="true"] .zl,.sky.night .zc[aria-pressed="true"] .zt{color:#0B1430}
+
+.pcard{background:var(--soft);border-radius:24px;padding:12px 12px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow)}
+.pc-top{display:flex;align-items:center;gap:8px;padding-inline-start:4px}
+.pc-ic{width:30px;height:30px;border-radius:10px;background:var(--surface);color:var(--accentText);display:flex;align-items:center;justify-content:center;flex:none}
+.pc-ic .ic{width:17px;height:17px}
+.pc-tag{font-size:.8125em;font-weight:700;color:var(--accentText)}
+.pc-edit{margin-inline-start:auto;min-height:44px;padding:0 10px;display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.875em;color:var(--accentText);border-radius:12px}
+.pc-edit .ic{width:17px;height:17px}
+.pmock{display:block;width:100%;text-align:right}
+.pmock:active{transform:scale(.99)}
+.mcard{margin-top:10px;background:var(--surface);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+.mr{display:flex;align-items:stretch;animation:fadeIn .45s both}
+.mr + .mr{border-top:1px solid var(--border)}
+.mmain{flex:1;min-width:0;display:flex;align-items:flex-start;gap:10px;padding:10px 4px 10px 6px;padding-inline-start:12px;min-height:60px;text-align:right}
+.mic{width:32px;height:32px;border-radius:11px;background:var(--surface2);color:var(--sub);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+.mic .ic{width:17px;height:17px}
+.mr.personal .mic{background:var(--soft);color:var(--accentText)}
+.mr.system .mic{background:var(--infoSoft);color:var(--info)}
+.mtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.mtt{font-size:.875em;line-height:1.3}
+.mtag{font-size:.8125em;font-weight:700;color:var(--sub);margin-inline-end:6px}
+.mr.personal .mtag{color:var(--accentText)}
+.mr.system .mtag{color:var(--info)}
+.mtt b{font-weight:700}
+.mbd{font-size:.8125em;line-height:1.4;color:var(--sub);text-wrap:pretty}
+.mact{display:inline-flex;align-items:center;gap:2px;margin-top:2px;font-size:.8125em;font-weight:700;color:var(--accentText)}
+.mr.system .mact{color:var(--info)}
+.mact .ic{width:14px;height:14px}
+.mx{width:44px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+.mx .ic{width:16px;height:16px}
+.empty{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:20px;border:1.5px dashed var(--border);color:var(--sub);font-size:.9375em;font-weight:500}
+.empty .ic{width:20px;height:20px;color:var(--safe)}
+.mcard + .empty,.pcard + .empty{margin-top:10px}
+.empty{margin-bottom:10px}
+.h2{font-size:1.3em;font-weight:700;line-height:1.2}
+.calm{background:var(--surface);border-radius:26px;padding:22px 20px;text-align:center;box-shadow:var(--shadow);margin-bottom:12px;animation:riseA .6s both}
+.halo{width:64px;height:64px;margin:0 auto 10px;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:flex;align-items:center;justify-content:center;animation:float 3.2s ease-in-out infinite}
+.halo .ic{width:28px;height:28px}
+@keyframes float{50%{transform:translateY(-6px)}}
+
+.tl{position:relative}
+.tl::before{content:'';position:absolute;top:24px;bottom:24px;right:59px;width:2px;border-radius:2px;background:var(--border)}
+.ent{display:grid;grid-template-columns:42px 22px minmax(0,1fr);column-gap:6px;align-items:start;margin-bottom:10px;animation:fadeIn .5s both}
+.tcol{display:flex;flex-direction:column;padding-top:12px;text-align:right;font-size:.8125em;line-height:1.3;font-variant-numeric:tabular-nums}
+.tcol b{font-weight:800}
+.tcol span{color:var(--sub);font-weight:500}
+.ent.active .tcol b{color:var(--accentText)}
+.rcol{display:flex;justify-content:center;padding-top:16px}
+.node{width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--sub);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;transition:background .3s,border-color .3s}
+.ent.active .node{border-color:var(--accent);background:var(--soft)}
+.ent.active .node::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:ring 2.2s ease-out infinite}
+.ent.done .node{background:var(--safe);border-color:var(--safe);color:var(--onSafe);width:22px;height:22px;margin-top:-3px;animation:pop .6s cubic-bezier(.2,1.7,.4,1)}
+.ent.done .node .ic{width:13px;height:13px;stroke-width:3.2}
+.ent.missed .node{border-color:var(--urgent);background:var(--urgentSoft)}
+.ent.upcoming .node{border-style:dashed}
+@keyframes pop{from{transform:scale(.3)}to{transform:scale(1)}}
+.ecard{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:10px;border:1.5px solid transparent;transition:background .3s,box-shadow .3s,border-color .3s}
+.ent.active .ecard{border-color:var(--accent)}
+.ent.done .ecard{background:var(--safeSoft);box-shadow:none}
+.ent.missed .ecard{background:var(--urgentSoft);box-shadow:none;border-color:color-mix(in srgb,var(--urgent) 40%,transparent)}
+.ent.upcoming .ecard{background:transparent;box-shadow:none;border:1.5px dashed var(--border)}
+.ehead{display:flex;align-items:center;gap:12px;min-height:44px}
+.tile{width:40px;height:40px;border-radius:13px;background:var(--soft);color:var(--accentText);display:flex;align-items:center;justify-content:center;flex:none}
+.ent.done .tile{background:var(--surface);color:var(--safe)}
+.ent.missed .tile{background:var(--surface);color:var(--urgent)}
+.ent.upcoming .tile{background:var(--surface2);color:var(--sub)}
+.etext{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.etitle{font-weight:600;line-height:1.3}
+.ent.upcoming .etitle{color:var(--sub)}
+.ent.active .cap{color:var(--accentText);font-weight:600}
+.ent.done .cap{color:var(--safe);font-weight:600}
+.ent.missed .cap{color:var(--urgent);font-weight:600}
+.lateTag{font-size:.75em;font-weight:700;color:var(--urgent);background:var(--surface);border-radius:6px;padding:1px 6px;margin-inline-start:6px}
+.lnk{min-height:44px;padding:0 12px;border-radius:12px;font-weight:700;font-size:.875em;color:var(--safe);flex:none}
+.bell{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--accentText);background:var(--soft);flex:none;position:relative;transition:background .25s,color .25s}
+.bell[aria-pressed="false"]{background:var(--surface2);color:var(--sub)}
+.bell[aria-pressed="false"]::after{content:'';position:absolute;width:24px;height:2px;border-radius:2px;background:currentColor;transform:rotate(-45deg)}
+.win{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
+.win-e{display:flex;flex-direction:column;line-height:1.2}
+.win-e .cap{font-size:.75em}
+.win-e b{font-weight:800;font-size:.9375em;font-variant-numeric:tabular-nums}
+.bar{position:relative;display:block;height:6px;border-radius:6px;background:var(--surface2);overflow:hidden}
+.bar i{position:absolute;inset-block:0;right:0;border-radius:6px;background:var(--accent);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.bar.urgent i{background:var(--urgent)}
+.btns{display:flex;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:16px;font-weight:700;transition:transform .15s,background .25s,color .25s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);color:var(--onAccent);flex:2}
+.btn.ghost{background:var(--surface);color:var(--text);flex:1}
+.btn.late{background:var(--surface);color:var(--urgent);flex:1}
+.btn .ic{stroke-width:2.4}
+.ent.marking .btn.primary,.ent.marking .btn.late{background:var(--safe);color:var(--onSafe)}
+.nowrow{display:grid;grid-template-columns:42px 22px minmax(0,1fr);column-gap:6px;align-items:center;margin:2px 0 12px}
+.nowt{font-size:.8125em;font-weight:800;color:var(--accentText);font-variant-numeric:tabular-nums;text-align:right}
+.nowdot{justify-self:center;width:12px;height:12px;border-radius:50%;background:var(--accent);position:relative;z-index:1;box-shadow:0 0 0 4px var(--bg)}
+.nowdot::after{content:'';position:absolute;inset:-6px;border-radius:50%;background:var(--accent);opacity:.3;animation:ring 1.8s ease-out infinite}
+.nowline{display:flex;align-items:center;gap:8px;font-size:.75em;font-weight:700;color:var(--accentText)}
+.nowline::after{content:'';flex:1;border-top:2px dashed var(--accent);opacity:.6}
+</style>
+<template>
+<div class="scroll" style="position: absolute; inset: 0; overflow-y: auto; padding: 24px 20px 124px">
+
+<header style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 3px; min-width: 0">
+<p class="cap">{{dateLine}}</p>
+<h1 class="h1">{{greeting}}</h1>
+</div>
+<span class="count" role="img" aria-label="{{countLabel}}"><i></i>{{countText}} היום</span>
+</header>
+
+<div class="sum" role="group" aria-label="סיכום היום">
+<span class="sumc d {{sumDoneCls}}"><i></i>בוצעו <b>{{doneN}}</b></span>
+<span class="sumc m {{sumMissedCls}}"><i></i>פוספסו <b>{{missedN}}</b></span>
+<span class="sumc o"><i></i>פתוחות <b>{{activeN}}</b></span>
+</div>
+
+<!--NAMECARD-->
+
+<section class="sky {{skyCls}}" aria-label="קשת היום וזמני היום">
+<p class="readout {{readCls}}" aria-live="{{liveMode}}"><span class="rd-a"><sc-if value="{{read.isNext}}" hint-placeholder-val="{{ true }}"><span class="rtag">הבא</span></sc-if><b>{{read.label}}</b><span>·</span><span class="num">{{read.hm}}</span></span><span class="rd-b">{{read.rel}}</span></p>
+<div class="scene {{sceneCls}}" id="scene" onPointerDown="{{gDown}}" onPointerMove="{{gMove}}" onPointerUp="{{gUp}}" onPointerCancel="{{gUp}}">
+<svg width="350" height="216" viewBox="0 0 350 216" aria-hidden="true" style="position: absolute; inset: 0">
+<path class="hzn" d="M0 158H350" fill="none" stroke-width="1.5"></path>
+<path class="trk2" d="{{dayPath}}" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 8"></path>
+<path class="prg2" d="{{dayPath}}" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="{{dayLen}}" style="stroke-dashoffset: {{dayDash}}"></path>
+<g class="trl" style="opacity: {{dayTrOp}}">
+<sc-for list="{{dayTr}}" as="k" hint-placeholder-count="3">
+<path class="tr {{k.cls}}" d="{{dayPath}}" stroke-dasharray="{{k.da}}" stroke-dashoffset="{{k.off}}"></path>
+</sc-for>
+</g>
+<path class="trk2" d="{{nightPath}}" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 8"></path>
+<path class="prgN" d="{{nightPath}}" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="{{nightLen}}" style="stroke-dashoffset: {{nightDash}}"></path>
+<g class="trl trn" style="opacity: {{nightTrOp}}">
+<sc-for list="{{nightTr}}" as="k" hint-placeholder-count="3">
+<path class="tr {{k.cls}}" d="{{nightPath}}" stroke-dasharray="{{k.da}}" stroke-dashoffset="{{k.off}}"></path>
+</sc-for>
+</g>
+</svg>
+<sc-for list="{{ticks}}" as="k" hint-placeholder-count="11">
+<span class="tick {{k.cls}}" style="left: {{k.x}}px; top: {{k.y}}px"></span>
+</sc-for>
+<div class="stars" aria-hidden="true">
+<sc-for list="{{stars}}" as="st" hint-placeholder-count="10">
+<i class="star" style="left: {{st.x}}px; top: {{st.y}}px; width: {{st.s}}px; height: {{st.s}}px; animation-delay: {{st.d}}s; animation-duration: {{st.du}}s"></i>
+</sc-for>
+</div>
+<span class="aura {{auraCls}}" aria-hidden="true" style="left: {{auraX}}px; top: {{auraY}}px"></span>
+<span class="sun {{sunCls}}" aria-hidden="true" style="left: {{sunX}}px; top: {{sunY}}px"></span>
+<span class="moon {{moonCls}}" aria-hidden="true" style="left: {{moonX}}px; top: {{moonY}}px"></span>
+<div class="arcmid">
+<span class="bigtime">{{nowT}}</span>
+<span class="midcap" aria-live="{{liveMode}}">{{midCaption}}</span>
+</div>
+<p class="hint {{hintCls}}" aria-hidden="true">{{hintText}}</p>
+<span class="edge" style="right: 8px"><span>עלות</span><b>{{edgeStart}}</b></span>
+<span class="edge" style="left: 8px"><span>צאה״כ</span><b>{{edgeEnd}}</b></span>
+<div class="grab" id="grab" role="slider" tabindex="0" aria-label="הזמן ביום, אפשר לגרור או להשתמש בחצים" aria-orientation="horizontal" aria-valuemin="{{sliderMin}}" aria-valuemax="{{sliderMax}}" aria-valuenow="{{sliderNow}}" aria-valuetext="{{sliderText}}" style="left: {{grabX}}px; top: {{grabY}}px" onKeyDown="{{gKey}}"></div>
+</div>
+<div class="zchips" id="zchips" role="group" aria-label="זמני היום, בחירה מציגה את הזמן בקשת">
+<sc-for list="{{zchips}}" as="z" hint-placeholder-count="11">
+<button class="zc {{z.cls}}" aria-pressed="{{z.pressed}}" onClick="{{z.pick}}"><span class="zl">{{z.label}}</span><span class="zt">{{z.time}}</span></button>
+</sc-for>
+</div>
+</section>
+
+<h3 class="label"><span>הודעות</span><b>{{msgCount}}</b></h3>
+<section class="pcard" aria-label="ההתראה הבאה שלך">
+<div class="pc-top">
+<span class="pc-ic">[[ic:bell]]</span>
+<span class="pc-tag">ההתראה הבאה שלך</span>
+<button class="pc-edit" onClick="{{msgNext.act}}" aria-label="עריכת ההודעות האישיות">[[ic:pencil]]<span>עריכה</span></button>
+</div>
+<button class="pmock" onClick="{{msgNext.act}}" aria-label="פתיחת ההודעות האישיות: {{pLineTitle}}">
+<div class="pnote"><div class="pnhead"><span class="pnapp">[[ic:bell]]</span><b>יהודי 365</b></div><p class="pntitle">{{pLineTitle}}</p><p class="pnbody">{{pLine}}</p></div>
+</button>
+</section>
+<sc-if value="{{hasOthers}}" hint-placeholder-val="{{ true }}">
+<ul class="mcard" role="list" aria-label="הודעות נוספות">
+<sc-for list="{{others}}" as="m" hint-placeholder-count="5">
+<li class="mr {{m.kindCls}} {{m.cls}}">
+<sc-if value="{{m.hasAction}}" hint-placeholder-val="{{ true }}">
+<button class="mmain" onClick="{{m.act}}" aria-label="{{m.title}}. {{m.action}}">
+<span class="mic">[[icMsg:m]]</span>
+<span class="mtx"><span class="mtt"><span class="mtag">{{m.tag}}</span><b>{{m.title}}</b></span><span class="mbd">{{m.body}}</span><span class="mact">{{m.action}}[[ic:chevron]]</span></span>
+</button>
+</sc-if>
+<sc-if value="{{m.noAction}}" hint-placeholder-val="{{ false }}">
+<div class="mmain">
+<span class="mic">[[icMsg:m]]</span>
+<span class="mtx"><span class="mtt"><span class="mtag">{{m.tag}}</span><b>{{m.title}}</b></span><span class="mbd">{{m.body}}</span></span>
+</div>
+</sc-if>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="mx" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noOthers}}" hint-placeholder-val="{{ false }}"><p class="empty">[[ic:check]]<span>אין הודעות נוספות כרגע.</span></p></sc-if>
+
+<h3 class="label"><span>היום שלך</span><b>{{totalN}} מצוות</b></h3>
+<sc-if value="{{noActive}}" hint-placeholder-val="{{ false }}">
+<section class="calm" aria-live="polite">
+<div class="halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h2 class="h2">{{activeEmptyTitle}}</h2>
+<p class="cap" style="margin-top: 6px; font-size: .9375em">{{activeEmptyText}}</p>
+</section>
+</sc-if>
+<sc-if value="{{noMissed}}" hint-placeholder-val="{{ false }}"><p class="empty">[[ic:sparkle]]<span>{{missedEmpty}}</span></p></sc-if>
+<sc-if value="{{noDone}}" hint-placeholder-val="{{ false }}"><p class="empty">[[ic:check]]<span>{{doneEmpty}}</span></p></sc-if>
+<div class="tl" role="list">
+<sc-for list="{{entries}}" as="en" hint-placeholder-count="7">
+<sc-if value="{{en.isNow}}" hint-placeholder-val="{{ false }}">
+<div class="nowrow" role="listitem" aria-label="{{en.label}}">
+<span class="nowt">{{en.time}}</span>
+<span class="nowdot"></span>
+<span class="nowline">{{en.nowWord}}</span>
+</div>
+</sc-if>
+<sc-if value="{{en.isItem}}" hint-placeholder-val="{{ true }}">
+<div class="ent {{en.rowCls}}" role="listitem">
+<span class="tcol"><b>{{en.startT}}</b><span>{{en.endT}}</span></span>
+<span class="rcol"><span class="node"><sc-if value="{{en.isDone}}" hint-placeholder-val="{{ false }}">[[ic:check]]</sc-if></span></span>
+<div class="ecard">
+<div class="ehead">
+<span class="tile">[[icItem:en]]</span>
+<span class="etext"><span class="etitle">{{en.name}}</span><span class="cap">{{en.caption}}<sc-if value="{{en.late}}" hint-placeholder-val="{{ false }}"><span class="lateTag">באיחור</span></sc-if></span></span>
+<sc-if value="{{en.isDone}}" hint-placeholder-val="{{ false }}"><button class="lnk" onClick="{{en.undo}}" aria-label="{{en.undoLabel}}">ביטול</button></sc-if>
+<sc-if value="{{en.isUpcoming}}" hint-placeholder-val="{{ false }}"><button class="bell" aria-pressed="{{en.bellOn}}" onClick="{{en.bell}}" aria-label="{{en.bellLabel}}">[[ic:bell]]</button></sc-if>
+</div>
+<sc-if value="{{en.isActive}}" hint-placeholder-val="{{ false }}">
+<div class="win" role="group" aria-label="חלון הזמן">
+<span class="win-e"><span class="cap">נפתח</span><b>{{en.startT}}</b></span>
+<span class="bar {{en.urgentCls}}" role="img" aria-label="{{en.barLabel}}"><i style="width: {{en.pctGone}}%"></i></span>
+<span class="win-e"><span class="cap">נגמר</span><b>{{en.winEnd}}</b></span>
+</div>
+<div class="btns">
+<button class="btn primary" onClick="{{en.mark}}" aria-label="{{en.markLabel}}">[[ic:check]]<span>{{en.cta}}</span></button>
+<button class="btn ghost" onClick="{{en.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</sc-if>
+<sc-if value="{{en.isMissed}}" hint-placeholder-val="{{ false }}">
+<button class="btn late" onClick="{{en.mark}}" aria-label="{{en.markLabel}}">[[ic:check]]<span>בכל זאת עשיתי</span></button>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</sc-for>
+</div>
+</div>
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    return { zSel: null, mute: {}, drag: false, touched: false, vf: 0 };
+  }
+
+  boardMount() {
+    this.chipTimer = setTimeout(() => this.centerChip(false), 80);
+  }
+
+  boardUnmount() {
+    clearTimeout(this.chipTimer);
+    cancelAnimationFrame(this.vRaf);
+    cancelAnimationFrame(this.gRaf);
+  }
+
+  componentDidUpdate() {
+    if (this.chipKey !== this.lastChip) {
+      const first = this.lastChip === undefined;
+      this.lastChip = this.chipKey;
+      if (!first) this.centerChip(true);
+    }
+  }
+
+  centerChip(smooth) {
+    const box = document.getElementById('zchips');
+    const on = box && box.querySelector('[aria-pressed="true"]');
+    if (!box || !on) return;
+    const b = box.getBoundingClientRect();
+    const o = on.getBoundingClientRect();
+    const dx = o.left + o.width / 2 - (b.left + b.width / 2);
+    if (smooth) box.scrollBy({ left: dx, behavior: 'smooth' });
+    else box.scrollLeft += dx;
+  }
+
+  geo() {
+    return { CX: 175, CY: 158, RX: 142, RY: 116, NRX: 100, NRY: 46 };
+  }
+
+  ellipseLen(rx, ry, f) {
+    const end = Math.PI * Math.max(0, Math.min(1, f));
+    let len = 0;
+    let px = rx;
+    let py = 0;
+    for (let i = 1; i <= 120; i++) {
+      const a = (end * i) / 120;
+      const x = rx * Math.cos(a);
+      const y = ry * Math.sin(a);
+      len += Math.hypot(x - px, y - py);
+      px = x;
+      py = y;
+    }
+    return len;
+  }
+
+  eased(t, key) {
+    const now = performance.now();
+    const dt = Math.min(100, now - (this.vAt || now - 16));
+    this.vAt = now;
+    const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (this.vis == null || this.visKey !== key || calm) {
+      this.vis = t;
+    } else {
+      const d = t - this.vis;
+      const tau = this.state.drag ? 42 : 130;
+      this.vis = Math.abs(d) < 45 ? t : this.vis + d * (1 - Math.exp(-dt / tau));
+    }
+    this.visKey = key;
+    if (this.vis !== t) this.kick();
+    return this.vis;
+  }
+
+  kick() {
+    if (this.vRaf) return;
+    this.vRaf = requestAnimationFrame(() => {
+      this.vRaf = 0;
+      this.setState((s) => ({ vf: s.vf + 1 }));
+    });
+  }
+
+  gPoint(e) {
+    const r = document.getElementById('scene').getBoundingClientRect();
+    return { x: ((e.clientX - r.left) * 350) / r.width, y: ((e.clientY - r.top) * 216) / r.height };
+  }
+
+  gTime(p) {
+    const { CX, CY, RX, RY, NRX, NRY } = this.geo();
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    if (p.y <= CY) {
+      const nu = (p.x - CX) / RX;
+      const nv = (CY - p.y) / RY;
+      const rho = Math.hypot(nu, nv);
+      return { rho, near: rho > 0.55 && rho < 1.4, sec: A0 + (Math.atan2(nv, nu) / Math.PI) * (A1 - A0) };
+    }
+    const nu = (p.x - CX) / NRX;
+    const nv = (p.y - CY) / NRY;
+    const rho = Math.hypot(nu, nv);
+    return { rho, near: rho > 0.62 && rho < 1.7, sec: A1 + (Math.atan2(nv, -nu) / Math.PI) * (E - A1) };
+  }
+
+  gSet(sec) {
+    this.gPend = sec;
+    if (this.gRaf) return;
+    this.gRaf = requestAnimationFrame(() => {
+      this.gRaf = 0;
+      this.gFlush();
+    });
+  }
+
+  gFlush() {
+    if (this.gPend == null) return;
+    const v = this.gPend;
+    this.gPend = null;
+    this.scrub(v);
+  }
+
+  gDown(e) {
+    if (e.button > 0) return;
+    const hit = this.gTime(this.gPoint(e));
+    const onGrab = Boolean(e.target.closest && e.target.closest('.grab'));
+    if (hit.rho < 0.15 || (!onGrab && !hit.near)) return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+    const cur = this.now();
+    this.gDrag = { id: e.pointerId, off: onGrab ? hit.sec - cur : 0, prev: cur };
+    this.setState({ drag: true, touched: true, zSel: null });
+    if (!onGrab) this.gSet(hit.sec);
+  }
+
+  gMove(e) {
+    const d = this.gDrag;
+    if (!d || e.pointerId !== d.id) return;
+    const hit = this.gTime(this.gPoint(e));
+    if (hit.rho < 0.15) return;
+    const lo = this.dayStart();
+    const hi = this.dayEnd() - 60;
+    let sec = hit.sec - d.off;
+    d.off *= 0.93;
+    if (Math.abs(sec - d.prev) > (hi - lo) * 0.75) sec = d.prev < (lo + hi) / 2 ? lo : hi;
+    sec = Math.max(lo, Math.min(hi, sec));
+    d.prev = sec;
+    this.gSet(sec);
+  }
+
+  gUp(e) {
+    const d = this.gDrag;
+    if (!d || e.pointerId !== d.id) return;
+    this.gDrag = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    this.gFlush();
+    this.setState({ drag: false });
+  }
+
+  gKey(e) {
+    const t = this.now();
+    const keys = { ArrowLeft: 300, ArrowUp: 300, ArrowRight: -300, ArrowDown: -300, PageUp: 3600, PageDown: -3600 };
+    let to = null;
+    if (e.key in keys) to = t + keys[e.key];
+    else if (e.key === 'Home') to = this.dayStart();
+    else if (e.key === 'End') to = this.dayEnd() - 60;
+    if (to == null) return;
+    e.preventDefault();
+    this.setState({ zSel: null, touched: true });
+    this.scrub(to);
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const s = this.state;
+    const t = this.now();
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    const NIGHT = E - A1;
+    const { CX, CY, RX, RY, NRX, NRY } = this.geo();
+    const cl = (f) => Math.max(0, Math.min(1, f));
+    const dayP = (f) => ({ x: CX + RX * Math.cos(Math.PI * cl(f)), y: CY - RY * Math.sin(Math.PI * cl(f)) });
+    const nightP = (f) => ({ x: CX - NRX * Math.cos(Math.PI * cl(f)), y: CY + NRY * Math.sin(Math.PI * cl(f)) });
+    const vis = this.eased(t, c.dateKey);
+    const visNight = vis >= A1;
+    const dayFrac = cl((vis - A0) / (A1 - A0));
+    const nightFrac = cl((vis - A1) / NIGHT);
+    if (!this.lens) this.lens = { day: this.ellipseLen(RX, RY, 1), night: this.ellipseLen(NRX, NRY, 1) };
+    const dayLen = this.lens.day;
+    const nightLen = this.lens.night;
+    const dayAt = this.ellipseLen(RX, RY, dayFrac);
+    const nightAt = this.ellipseLen(NRX, NRY, nightFrac);
+    const sun = dayP(dayFrac);
+    const moon = nightP(nightFrac);
+    const orb = visNight ? moon : sun;
+    const trail = (at, total) =>
+      [
+        { cls: 't3', L: 96 },
+        { cls: 't2', L: 56 },
+        { cls: 't1', L: 28 },
+      ].map(({ cls, L }) => {
+        const a = Math.max(0, at - L);
+        return { cls, da: (at - a).toFixed(1) + ' ' + (total + 40).toFixed(0), off: (-a).toFixed(1) };
+      });
+
+    const zl = this.zmanimList();
+    const zS = Object.fromEntries(zl.map((z) => [z.id, z.S]));
+    const nextId = (c.zmanim.find((z) => z.isNext) || {}).id || null;
+    const selId = (c.isScrub && s.zSel) || nextId;
+    const sel = c.zmanim.find((z) => z.id === selId) || null;
+    const selS = sel ? zS[sel.id] : 0;
+    const read = sel
+      ? {
+          label: sel.name,
+          hm: sel.time,
+          rel: Math.abs(selS - t) < 30 ? 'הגיע הזמן' : selS > t ? 'בעוד ' + this.left(selS - t) : 'עבר לפני ' + this.left(t - selS),
+          isNext: sel.isNext,
+        }
+      : { label: c.nextZ.name, hm: c.nextZ.time, rel: c.nextZ.left, isNext: true };
+    if (this.readKey !== read.label) {
+      this.readKey = read.label;
+      this.readFlip = !this.readFlip;
+    }
+    this.chipKey = selId;
+
+    const ticks = c.zmanim.map((z, i) => {
+      const S = zl[i].S;
+      const p = S <= A1 ? dayP((S - A0) / (A1 - A0)) : nightP((S - A1) / NIGHT);
+      return { x: (p.x - 6).toFixed(1), y: (p.y - 6).toFixed(1), cls: (z.past ? 'past' : '') + (z.isNext ? ' nxt' : '') + (z.id === selId ? ' sel' : '') };
+    });
+    const zchips = c.zmanim.map((z) => ({
+      id: z.id,
+      label: z.isNext ? 'הבא · ' + z.short : z.short,
+      time: z.time,
+      cls: z.cls,
+      pressed: z.id === selId,
+      pick: () => {
+        const same = Boolean(c.isScrub && s.zSel === z.id);
+        this.setState({ zSel: same ? null : z.id, touched: true });
+        if (!same) this.scrub(zS[z.id]);
+      },
+    }));
+    const stars = [
+      [46, 40, 2.6, 0, 3.4], [92, 20, 2, 1.1, 4.1], [128, 62, 2, 2.2, 3.1], [224, 28, 3, 0.6, 3.8], [262, 60, 2, 1.7, 4.4], [302, 34, 2.6, 2.6, 3.3],
+      [22, 94, 2, 1.4, 4.7], [330, 92, 2, 0.3, 3.6], [64, 122, 1.8, 2.9, 4.2], [288, 122, 1.8, 1.9, 3.5],
+      [20, 18, 1.8, 0.8, 4.9], [172, 10, 1.8, 2.4, 3.7], [200, 52, 1.6, 1.3, 5.1], [334, 20, 1.8, 3.1, 4], [112, 34, 1.6, 0.4, 4.6],
+      [48, 70, 1.6, 2.1, 3.9], [308, 76, 1.6, 0.9, 4.3], [14, 140, 1.6, 1.6, 5], [338, 140, 1.6, 2.7, 3.4],
+    ].map(([x, y, sz, d, du]) => ({ x, y, s: sz, d, du }));
+
+    const first = c.hasHero ? c.hero : null;
+    const nextItem = c.upcoming[0] || null;
+    const midCaption = first ? first.short + ' · עוד ' + first.left : nextItem ? 'הבא: ' + nextItem.short + ' ב-' + nextItem.startT : 'הכול סומן להיום';
+
+    const nowRow = { isNow: true, isItem: false, time: c.nowT, nowWord: c.isScrub ? 'בתצוגה' : 'עכשיו', label: (c.isScrub ? 'בתצוגה ' : 'עכשיו ') + c.nowT };
+    const entries = [];
+    let placed = false;
+    c.timeline.forEach((it) => {
+      if (!placed && it.isUpcoming) {
+        entries.push(nowRow);
+        placed = true;
+      }
+      const dn = c.done.find((d) => d.id === it.id);
+      const muted = Boolean(s.mute[it.id]);
+      const act = c.active.find((a) => a.id === it.id);
+      entries.push({
+        ...it,
+        isNow: false,
+        isItem: true,
+        rowCls: it.status + (it.isMarking ? ' marking' : ''),
+        caption: it.statusText + (it.isUpcoming && muted ? ' · ללא תזכורת' : ''),
+        late: dn ? dn.late : false,
+        undoLabel: 'ביטול הסימון של ' + it.name,
+        winEnd: it.endsTomorrow ? 'מחר ' + it.endT : it.endT,
+        pctGone: act ? act.pctGone : 0,
+        urgentCls: act ? act.urgentCls : '',
+        barLabel: act ? 'נשארו ' + act.left + ' מתוך החלון' : '',
+        bellOn: !muted,
+        bellLabel: (muted ? 'הפעלת התזכורת ל' : 'כיבוי התזכורת ל') + it.short,
+        bell: () => {
+          this.setState((st) => ({ mute: { ...st.mute, [it.id]: !muted } }));
+          this.showToast({ text: muted ? 'תזכורת ל' + it.short + ' ב-' + it.startT : 'התזכורת ל' + it.short + ' כובתה' });
+        },
+      });
+    });
+    if (!placed) entries.push(nowRow);
+
+    const others = c.messages.filter((m) => m.id !== 'next').map((m) => ({ ...m, body: m.body.replace(/(\d)–(\d)/g, '$1⁠–⁠$2'), noAction: !m.hasAction }));
+    const msgNext = c.messages.find((m) => m.id === 'next') || { act: () => {} };
+
+    return {
+      ...c,
+      skyCls: c.isNight ? 'night' : '',
+      sceneCls: (s.drag ? 'drag ' : '') + (c.isScrub ? 'scr ' : '') + (s.touched ? '' : 'hintOn'),
+      liveMode: s.drag ? 'off' : 'polite',
+      gDown: (e) => this.gDown(e),
+      gMove: (e) => this.gMove(e),
+      gUp: (e) => this.gUp(e),
+      gKey: (e) => this.gKey(e),
+      read,
+      readCls: this.readFlip ? 'ra' : 'rb',
+      dayPath: 'M' + (CX + RX) + ' ' + CY + 'A' + RX + ' ' + RY + ' 0 0 0 ' + (CX - RX) + ' ' + CY,
+      nightPath: 'M' + (CX - NRX) + ' ' + CY + 'A' + NRX + ' ' + NRY + ' 0 0 0 ' + (CX + NRX) + ' ' + CY,
+      dayLen: dayLen.toFixed(1),
+      nightLen: nightLen.toFixed(1),
+      dayDash: (dayLen - dayAt).toFixed(1),
+      nightDash: (nightLen - nightAt).toFixed(1),
+      dayTr: trail(dayAt, dayLen),
+      nightTr: trail(nightAt, nightLen),
+      dayTrOp: !visNight && dayAt > 3 ? 1 : 0,
+      nightTrOp: visNight && nightAt > 3 ? 1 : 0,
+      ticks,
+      zchips,
+      stars,
+      auraCls: visNight ? 'off' : '',
+      auraX: sun.x.toFixed(1),
+      auraY: sun.y.toFixed(1),
+      sunCls: visNight ? 'off' : '',
+      moonCls: visNight ? '' : 'off',
+      sunX: (sun.x - 14).toFixed(1),
+      sunY: (sun.y - 14).toFixed(1),
+      moonX: (moon.x - 14).toFixed(1),
+      moonY: (moon.y - 14).toFixed(1),
+      grabX: (orb.x - 24).toFixed(1),
+      grabY: (orb.y - 24).toFixed(1),
+      hintText: visNight ? 'גררו את הירח' : 'גררו את השמש',
+      hintCls: s.touched || c.isScrub ? 'gone' : '',
+      sliderMin: Math.round(A0),
+      sliderMax: Math.round(E - 60),
+      sliderNow: Math.round(t),
+      sliderText: c.nowT + ', הבא: ' + c.nextZ.name + ' ' + c.nextZ.left,
+      midCaption,
+      edgeStart: c.zmanim.find((z) => z.id === 'alot').time,
+      edgeEnd: c.zmanim.find((z) => z.id === 'tzeit').time,
+      sumDoneCls: c.doneN ? 'has' : '',
+      sumMissedCls: c.missedN ? 'has' : '',
+      msgNext,
+      others,
+      hasOthers: others.length > 0,
+      noOthers: others.length === 0,
+      entries,
+    };
+  }
+}
+</script>

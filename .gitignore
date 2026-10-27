@@ -32,3 +32,6 @@ scripts/chok/source/y_hok?1.txt
 
 # Claude Code runtime lock
 .claude/scheduled_tasks.lock
+
+# Design lab build output (regenerate with each study's build.mjs and assemble.mjs)
+design/lab/studies/*/out/
