@@ -22,8 +22,9 @@ import { getLocationName } from '@/data/cities';
 import { EASE_OUT, useReduceMotion } from '@/hooks/useMotion';
 import { LocationService } from '@/services/LocationService';
 import { useUserStore } from '@/stores/useUserStore';
-import { BRAND, blendHex } from '@/theme/colors';
+import { blendHex, readableOn, type ThemeColors } from '@/theme/colors';
 import { scaled } from '@/theme/scale';
+import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies, typography } from '@/theme/typography';
@@ -67,9 +68,37 @@ function sweepSlice(from: number, to: number): string {
   return `M${CENTER} ${CENTER} L${x1} ${y1} A${RADAR_RADIUS} ${RADAR_RADIUS} 0 0 1 ${x2} ${y2} Z`;
 }
 
-type Reading = { heading: number; magnetic: boolean; accuracy: number };
+export type RadarColors = {
+  card: string;
+  edge: string;
+  line: string;
+  outer: string;
+  ink: string;
+  glyph: string;
+  sweep: string;
+  done: string;
+  labelBg: string;
+  labelInk: string;
+};
 
-type Fix = { point: GeoPoint; name: string } | null;
+export function radarColors(colors: ThemeColors): RadarColors {
+  const card = colors.surface;
+  const labelBg = colors.goldLight;
+  return {
+    card,
+    edge: colors.border,
+    line: blendHex(colors.textSub, card, 0.22),
+    outer: blendHex(colors.textSub, card, 0.45),
+    ink: readableOn(card, [colors.textSub, colors.text]),
+    glyph: colors.text,
+    sweep: colors.gold,
+    done: colors.safe,
+    labelBg,
+    labelInk: readableOn(labelBg, [colors.goldText, colors.text]),
+  };
+}
+
+type Reading = { heading: number; magnetic: boolean; accuracy: number };
 
 function useHeading(granted: boolean | null): { reading: Reading | null; failed: boolean } {
   const [reading, setReading] = useState<Reading | null>(null);
@@ -119,16 +148,23 @@ type RadarProps = {
 };
 
 function Radar({ size, heading, angle, distance, facing, live }: RadarProps) {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { t } = useI18n();
   const reduceMotion = useReduceMotion();
   const scale = size / VIEW;
-  const card = isDark ? blendHex('#000000', colors.bg, 0.45) : BRAND.navy;
-  const ink = isDark ? colors.textSub : blendHex(BRAND.parchment, BRAND.navy, 0.75);
-  const light = isDark ? colors.text : BRAND.parchment;
-  const line = blendHex(ink, card, 0.22);
-  const outer = blendHex(ink, card, 0.4);
-  const tone = facing ? colors.safe : colors.gold;
+  const {
+    card,
+    edge,
+    line,
+    outer,
+    ink,
+    glyph,
+    sweep: sweepTone,
+    done,
+    labelBg,
+    labelInk,
+  } = useMemo(() => radarColors(colors), [colors]);
+  const tone = facing ? done : sweepTone;
   const targetRadius = radarRadius(distance);
   const sweeping = live && !reduceMotion;
 
@@ -210,7 +246,12 @@ function Radar({ size, heading, angle, distance, facing, live }: RadarProps) {
 
   return (
     <View
-      style={[styles.radar, { width: size, height: size, backgroundColor: card }]}
+      testID="compass-radar"
+      style={[
+        styles.radar,
+        shadowStyle(colors.shadow, shadowPresets.cardSoft),
+        { width: size, height: size, backgroundColor: card, borderColor: edge },
+      ]}
       accessible
       accessibilityLabel={t('compass.a11y', { degrees: Math.round(angle) })}
     >
@@ -277,10 +318,10 @@ function Radar({ size, heading, angle, distance, facing, live }: RadarProps) {
           height={22}
           rx={3.5}
           fill="none"
-          stroke={light}
+          stroke={glyph}
           strokeWidth={1.6}
         />
-        <Circle cx={CENTER} cy={CENTER - 6.5} r={1.3} fill={light} />
+        <Circle cx={CENTER} cy={CENTER - 6.5} r={1.3} fill={glyph} />
       </Svg>
 
       <View
@@ -313,14 +354,14 @@ function Radar({ size, heading, angle, distance, facing, live }: RadarProps) {
             </Svg>
           </Animated.View>
           <Animated.View style={[ring(core), { borderWidth: 1.5, borderColor: tone }, pulseStyle]} />
-          <Animated.View style={[ring(at(40)), { borderWidth: 2, borderColor: colors.safe }, waveStyle]} />
-          <Animated.View style={[ring(at(40)), { borderWidth: 2, borderColor: colors.safe }, echoStyle]} />
+          <Animated.View style={[ring(at(40)), { borderWidth: 2, borderColor: done }, waveStyle]} />
+          <Animated.View style={[ring(at(40)), { borderWidth: 2, borderColor: done }, echoStyle]} />
           <Animated.View
             testID="compass-target"
             style={[ring(core), { backgroundColor: tone, borderWidth: at(3), borderColor: card }, coreStyle]}
           />
-          <View style={[styles.label, { top: at(13), backgroundColor: blendHex(light, card, 0.12) }]}>
-            <Text style={[typography.small, styles.labelText, { color: light }]}>{t('compass.kotel')}</Text>
+          <View style={[styles.label, { top: at(13), backgroundColor: labelBg }]}>
+            <Text style={[typography.small, styles.labelText, { color: labelInk }]}>{t('compass.kotel')}</Text>
           </View>
         </View>
       </View>
@@ -336,7 +377,8 @@ export default function CompassScreen() {
   const saved = useUserStore((s) => s.location);
   const [granted, setGranted] = useState<boolean | null>(null);
   const { reading, failed } = useHeading(granted);
-  const [fix, setFix] = useState<Fix>(null);
+  const [fix, setFix] = useState<GeoPoint | null>(null);
+  const [lost, setLost] = useState(false);
   const unavailable = Platform.OS === 'web' || failed;
   const needsPermission = !unavailable && granted === false;
   const waiting = !unavailable && granted === true && reading === null;
@@ -345,11 +387,14 @@ export default function CompassScreen() {
 
   const locate = useCallback(async () => {
     setLocating(true);
-    const { location } = await LocationService.getCurrentLocation();
+    setLost(false);
+    const last = await LocationService.getLastKnownPoint();
+    if (last) setFix(last);
+    const precise = await LocationService.getPrecisePoint();
+    if (precise) setFix(precise);
     setLocating(false);
-    if (location)
-      setFix({ point: { lat: location.lat, lng: location.lng }, name: getLocationName(location, language) });
-  }, [language]);
+    setLost(!last && !precise);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -378,7 +423,7 @@ export default function CompassScreen() {
     }
   };
 
-  const point: GeoPoint = fix?.point ?? saved;
+  const point: GeoPoint = fix ?? saved;
   const bearing = useMemo(() => bearingTo(point), [point]);
   const distance = useMemo(() => distanceKm(point), [point]);
   const angle = reading ? arrowAngle(bearing, reading.heading) : 0;
@@ -412,6 +457,13 @@ export default function CompassScreen() {
       <ScrollView contentContainerStyle={styles.list}>
         {unavailable ? <Banner tone="warning" text={t('compass.unavailable')} /> : null}
         {needsPermission ? <Banner tone="info" text={t('compass.needsPermission')} /> : null}
+        {lost && !fix ? (
+          <Banner
+            tone="warning"
+            text={t('compass.noFix', { city: getLocationName(saved, language) })}
+            onPress={() => void locate()}
+          />
+        ) : null}
         {waiting ? <Banner tone="info" text={t('compass.waiting')} /> : null}
         {reading && reading.magnetic ? <Banner tone="info" text={t('compass.magnetic')} /> : null}
         {reading && (reading.accuracy === 0 || reading.accuracy === 1) ? (
@@ -474,6 +526,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginVertical: spacing.md,
     borderRadius: radius.xxl,
+    borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
   },
   layer: {

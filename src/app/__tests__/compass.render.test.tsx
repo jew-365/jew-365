@@ -10,6 +10,7 @@ const mockWatch = jest.fn(async (callback: (heading: MockHeading) => void) => {
 const mockPermission = jest.fn();
 const mockRequest = jest.fn();
 const mockPosition = jest.fn();
+const mockLastKnown = jest.fn();
 
 jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
@@ -17,11 +18,12 @@ jest.mock('expo-router', () => ({
   useFocusEffect: (effect: () => void) => require('react').useEffect(effect, [effect]),
 }));
 jest.mock('expo-location', () => ({
-  Accuracy: { Balanced: 3 },
+  Accuracy: { Balanced: 3, High: 4 },
   watchHeadingAsync: (callback: (heading: MockHeading) => void) => mockWatch(callback),
   getForegroundPermissionsAsync: () => mockPermission(),
   requestForegroundPermissionsAsync: () => mockRequest(),
-  getCurrentPositionAsync: () => mockPosition(),
+  getCurrentPositionAsync: (options: unknown) => mockPosition(options),
+  getLastKnownPositionAsync: (options: unknown) => mockLastKnown(options),
 }));
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(async () => {}),
@@ -31,7 +33,8 @@ jest.mock('expo-haptics', () => ({
 import { Linking, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { act, fireEvent, screen } from '@testing-library/react-native';
-import CompassScreen, { radarRadius, signedOffset } from '../compass';
+import CompassScreen, { radarColors, radarRadius, signedOffset } from '../compass';
+import { THEMES, THEME_NAMES, contrastRatio } from '@/theme/colors';
 import { CITIES } from '@/data/cities';
 import { useUserStore } from '@/stores/useUserStore';
 import { renderWithTheme } from '@/testing/render';
@@ -76,6 +79,8 @@ describe('Compass screen', () => {
     mockRequest.mockResolvedValue({ granted: false, canAskAgain: false });
     mockPosition.mockReset();
     mockPosition.mockRejectedValue(new Error('no fix'));
+    mockLastKnown.mockReset();
+    mockLastKnown.mockResolvedValue(null);
     jest.mocked(Haptics.impactAsync).mockClear();
   });
 
@@ -184,6 +189,49 @@ describe('Compass screen', () => {
     expect(screen.queryByRole('button', { name: PERMISSION })).toBeNull();
   });
 
+  it('measures from the last known position when the precise fix is refused, as the Location Accuracy dialog does', async () => {
+    useUserStore.setState({ location: JERUSALEM, inIsrael: true });
+    mockLastKnown.mockResolvedValue({ coords: { latitude: 32.0853, longitude: 34.7818 } });
+    mockPosition.mockRejectedValue(new Error('Location request failed due to unsatisfied device settings'));
+    await renderScreen();
+    expect(screen.getByText('129°')).toBeOnTheScreen();
+    expect(screen.getByText('לפי המיקום הנוכחי שלך')).toBeOnTheScreen();
+    expect(screen.queryByText(/המיקום שלך לא נמצא/)).toBeNull();
+    await heading({ trueHeading: 90, magHeading: 85, accuracy: 3 });
+    expect(screen.getByText('סובב 39° ימינה')).toBeOnTheScreen();
+    expect(Number.parseFloat(rotation('compass-arrow'))).toBeCloseTo(
+      arrowAngle(bearingTo({ lat: 32.0853, lng: 34.7818 }), 90),
+      5,
+    );
+  });
+
+  it('asks for the precise fix without the settings dialog and lets it replace the last known one', async () => {
+    mockLastKnown.mockResolvedValue({ coords: { latitude: JERUSALEM.lat, longitude: JERUSALEM.lng } });
+    mockPosition.mockResolvedValue({ coords: { latitude: 32.0853, longitude: 34.7818 } });
+    await renderScreen();
+    expect(mockPosition).toHaveBeenCalledWith(
+      expect.objectContaining({ accuracy: 4, mayShowUserSettingsDialog: false }),
+    );
+    expect(screen.getByText('129°')).toBeOnTheScreen();
+  });
+
+  it('warns that it measures from the saved city when no position is found, and retries on a tap', async () => {
+    useUserStore.setState({ location: JERUSALEM, inIsrael: true });
+    await renderScreen();
+    const warning = screen.getByText(
+      `המיקום שלך לא נמצא, ולכן הכיוון מחושב לפי ${JERUSALEM.name}. הדלק מיקום במכשיר והקש כאן לנסות שוב`,
+    );
+    expect(warning).toBeOnTheScreen();
+    expect(screen.getByText(`${Math.round(bearingTo(JERUSALEM))}°`)).toBeOnTheScreen();
+    mockPosition.mockResolvedValue({ coords: { latitude: 32.0853, longitude: 34.7818 } });
+    await act(async () => {
+      fireEvent.press(warning);
+    });
+    expect(mockPosition).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText(/המיקום שלך לא נמצא/)).toBeNull();
+    expect(screen.getByText('129°')).toBeOnTheScreen();
+  });
+
   it('starts the heading subscription and shows the dial once the button grants the permission', async () => {
     mockPermission.mockResolvedValueOnce({ granted: false, canAskAgain: true });
     mockPermission.mockResolvedValue({ granted: true, canAskAgain: true });
@@ -261,6 +309,26 @@ describe('Compass screen', () => {
     expect(screen.getByText(NO_SENSOR)).toBeOnTheScreen();
     expect(mockWatch).not.toHaveBeenCalled();
     platform.restore();
+  });
+
+  it.each(THEME_NAMES)('draws the radar in the %s palette with readable ink', (name) => {
+    const palette = THEMES[name];
+    const radar = radarColors(palette);
+    expect(radar.card).toBe(palette.surface);
+    expect(radar.sweep).toBe(palette.gold);
+    expect(radar.done).toBe(palette.safe);
+    expect(radar.glyph).toBe(palette.text);
+    expect(contrastRatio(radar.ink, radar.card)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(radar.labelInk, radar.labelBg)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(radar.glyph, radar.card)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(radar.outer, radar.card)).toBeGreaterThan(contrastRatio(radar.line, radar.card));
+  });
+
+  it('fills the radar card from the palette in use', async () => {
+    useUserStore.setState({ theme: 'plum' });
+    await renderScreen();
+    const card = [screen.getByTestId('compass-radar').props.style].flat(Infinity).find((s) => s?.backgroundColor);
+    expect(card.backgroundColor).toBe(THEMES.plum.surface);
   });
 
   it('words the screen in English', async () => {

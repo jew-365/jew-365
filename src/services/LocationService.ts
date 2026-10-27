@@ -14,7 +14,11 @@ export type LocationResolution = {
   source: LocationSource;
 };
 
+export type DevicePoint = { lat: number; lng: number };
+
 const DEFAULT_TIMEOUT_MS = 10000;
+const PRECISE_TIMEOUT_MS = 20000;
+const LAST_KNOWN_MAX_AGE_MS = 30 * 60 * 1000;
 const NEAREST_CITY_KM = 25;
 const CURRENT_LOCATION_NAME = { he: 'מיקום נוכחי', en: 'Current location' };
 
@@ -89,6 +93,32 @@ export const LocationService = {
     if (perm.granted) return 'ready';
     if (perm.canAskAgain === false) return 'denied';
     return 'missing';
+  },
+
+  async getLastKnownPoint(): Promise<DevicePoint | null> {
+    try {
+      const last = await ExpoLocation.getLastKnownPositionAsync({ maxAge: LAST_KNOWN_MAX_AGE_MS });
+      return last ? { lat: last.coords.latitude, lng: last.coords.longitude } : null;
+    } catch {
+      return null;
+    }
+  },
+
+  // No settings dialog: declining Android's "Location Accuracy" prompt rejects the request outright,
+  // while a GPS-only fused request still resolves.
+  async getPrecisePoint(timeoutMs: number = PRECISE_TIMEOUT_MS): Promise<DevicePoint | null> {
+    try {
+      const result = await withTimeout(
+        ExpoLocation.getCurrentPositionAsync({
+          accuracy: ExpoLocation.Accuracy.High,
+          mayShowUserSettingsDialog: false,
+        }),
+        timeoutMs,
+      );
+      return { lat: result.coords.latitude, lng: result.coords.longitude };
+    } catch {
+      return null;
+    }
   },
 
   async requestPermission(): Promise<LocationStatus> {

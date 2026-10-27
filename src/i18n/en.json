@@ -79,6 +79,7 @@
   "compass.calibrate": "The compass needs calibration. Move the device in a figure-eight",
   "compass.unavailable": "The compass needs a device with a heading sensor",
   "compass.needsPermission": "The compass needs location access to show the direction",
+  "compass.noFix": "Your location was not found, so the direction is measured from %{city}. Turn on location and tap here to try again",
   "compass.waiting": "Waiting for the heading sensor…",
   "compass.a11y": "Compass. The Kotel is %{degrees} degrees from the way the device faces",
   "guide.title": "User guide",
