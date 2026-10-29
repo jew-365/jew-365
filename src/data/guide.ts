@@ -429,6 +429,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         he: 'בדף הבית היום והלילה הם עכשיו עיגול אחד: השמש נעה על חציו העליון, הירח על חציו התחתון, וגרירה עוברת בו מהיום אל הלילה.',
         en: 'On Home the day and the night are now one circle: the sun moves along its upper half, the moon along its lower half, and a drag passes through it from the day into the night.',
       },
+      {
+        he: 'ב״היום שלי״ הציר מסודר לפי שעות בלבד, והכרטיסים והטבעות לפי פתוח, בוצע ופוספס. הצבעים של בוצע ופוספס מתונים, והודעות מופיעות מתחת ל״היום שלי״.',
+        en: 'In My day the timeline is ordered by time alone, while the cards and rings go open, done, missed. The done and missed colours are softer, and messages now sit below My day.',
+      },
     ],
   },
   {

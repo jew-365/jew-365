@@ -287,10 +287,6 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** every later fix is judged against numbers, not guesses.
   - **Expected result:** a table under this item: each scenario's longest JS-thread block in ms and the top functions in it, and a target per scenario (no block over 100 ms while idle or on a tap).
 
-### Medium — App requests of 2026-10-26
-
-### Low — App requests of 2026-10-26
-
 ### App requests of 2026-10-28 — batch rules
 
 - **Requested:** the user, 2026-10-28, in a Claude Code session: three requests in one message — entrance animations that wait until they are on screen, the battery "Unrestricted" setting reachable from Settings and onboarding, and the prayer compass offered from the siddur.
@@ -299,62 +295,15 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
 
 ### High — App requests of 2026-10-28
 
-
 ### High — Home screen of 2026-10-29
-- [ ] Build the approved home screen
+- [ ] Put home's messages below My day
   - **Flag:** `OTA`.
-  - **Requested:** the owner's picks of 2026-10-29 in [design/lab/studies/2026-10-28-home-mix/](design/lab/studies/2026-10-28-home-mix/AGENTS.md) (board Final).
-  - **What it is:** the full-bleed arc hero with preview, the Open now ring cards, Messages, and My day in three persisted looks.
-  - **Expected result:** the guide's home topic describes the screen and every check in the spec is green.
-  - **Done:** 2026-10-29. Typecheck, lint, check:dox and the whole `pnpm test:tz` pass; seen in the web build at phone size; an independent review found nine issues, all fixed. Not checked: a phone (the sun drag inside the scroll view on Android, chip centring in Hebrew, the first name in the greeting).
-  - **Status:** Version `1.0.21` · Committed: `efe17c1` feat(home): day-arc hero, ring cards and My day; quiet hours; late marks · Pushed: yes (2026-10-29) · Live: preview `1.0.21-20` (group `cc2feda6-f3a0-4aff-a457-1c1c41db9f98`; first on `1.0.21-18`), not in production · Channel: `preview`
-- [ ] Draw the home hero's day and night as one circle
-  - **Flag:** `OTA`.
-  - **Requested:** the owner's pick of the circle on 2026-10-30, board HomeCircle of [design/lab/studies/2026-10-29-home-ellipse/](design/lab/studies/2026-10-29-home-ellipse/AGENTS.md).
-  - **What it is:** the hero's day arc and its separate small night arc become one regular circle of 112 units (centre on the horizon, scene 286 units high): the day half above the horizon from alot to tzeit, the night half below it back to the next alot, the sun on the upper half and the moon on the lower half, the zman ticks on the day half and chatzot halayla on the night half, the night half in the moon colour on the land gradient, the day half lit in full at night, and a drag that crosses from the day into the night through the tzeit end and holds at the alot end ([src/utils/dayArc.ts](src/utils/dayArc.ts), [src/components/DaySkyScene.tsx](src/components/DaySkyScene.tsx), [src/components/DayArcHero.tsx](src/components/DayArcHero.tsx)); the sky and hills art, the clock plate, the edge pills, the back control with its 17-point gap, the chips strip and the page below stay as they were.
-  - **Expected result:** at 12:30 in Jerusalem the sun rides the upper half and the lower half is a dotted moon-coloured track; at 20:15 the day half is lit in full and the moon sits on the lower half; dragging the sun left through the tzeit end turns it into the moon and dragging back returns it; the back pill clears the apex tick on every phone from 360 x 640 up; the hero is 421 of 422 points at 390 x 844 (420.2 measured in the web build); typecheck, lint, check:dox and the whole `pnpm test:tz` pass.
-  - **Done:** 2026-10-30. Typecheck, lint, check:dox and the whole `pnpm test:tz` (222 suites, 5,747 tests in each of the four zones, one suite skipped as before) pass; seen in the expo-web build at 390 x 844, 375 x 812 and 360 x 640 (the sun dragged across the tzeit end into the night half and back, a chip pressed). Not checked: a phone (the drag inside the scroll view on Android and iOS). On 360 x 640 the hero is 346 of 320 points, 26 over half a screen, because the circle must stay 179 points high for the back pill to clear its apex; the clock plate overlaps the horizon by about 20 points there, and the home arc's accessibility label `home.arc.label` still says "the day's arc".
-  - **Status:** Version `1.0.21` · Committed: no · Pushed: no · Live: preview `1.0.21-22` (group `69a5401d-9cd7-4e6d-8242-7e9ff2eaa9e3`), not in production · Channel: `preview`
-- [ ] Set the missed and done colours of My day to a middle softness
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-29: the earlier softening of the missed colour went too far; use something between the first look and the softened one, and the same for what was done.
-  - **What it is:** `missedTone()` and `doneTone()` in [src/theme/colors.ts](src/theme/colors.ts): a missed fill of 14% and border of 31% of `urgent` over the card (was 9% and 22%), its ink 66% toward the text colour (was 55%) and its ring at 80% of the warm-tilted `urgent` (was 62%); a done fill of 17% of `safe` (was 12%) and its ink 66% (was 55%); `lateTone()` is unchanged, so a late mark stays on the warning hue.
-  - **Expected result:** a missed card and a done card in My day read clearly stronger than the softened look and clearly softer than the first one, in every palette, with ink at 4.5:1 or more on its fill (pinned for all six palettes in [src/theme/__tests__/colorMath.test.ts](src/theme/__tests__/colorMath.test.ts)).
-  - **Done:** 2026-10-29. Typecheck, lint, check:dox and the whole `pnpm test:tz` (222 suites, 5,747 tests in each of the four zones, one suite skipped as before) pass; seen on the dark palette in the expo-web build at phone size. Not checked: the light palettes by eye, a phone.
-  - **Status:** Version `1.0.21` · Committed: no · Pushed: no · Live: preview `1.0.21-23` (group `e6956519-e0b2-49b1-9ab6-ddd596f21503`), not in production · Channel: `preview`
-- [ ] Order My day's timeline by time alone
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-30: open, done, missed in the cards and rings looks only; the timeline by time, whatever the status.
-  - **What it is:** `timeOrderDayEntries()` in [src/utils/homeDay.ts](src/utils/homeDay.ts) (window start, else mark time) orders the `rail` look in [src/components/DayLooks.tsx](src/components/DayLooks.tsx), and `railNowIndex(entries, now)` puts its now row after the last entry that started; cards and rings keep `orderDayEntries()`.
-  - **Expected result:** in the timeline a done 05:00 entry sits above an open 11:50 one and a missed 05:53 one above it too, the now row between 11:50 and 17:23; cards and rings list open, done, then missed.
-  - **Done:** 2026-10-30. Typecheck, lint, check:dox and the whole `pnpm test:tz` (222 suites, 5,748 tests in each of the four zones) pass. Not checked: on a phone.
-  - **Status:** Version `1.0.21` · Committed: no · Pushed: no · Live: preview `1.0.21-24` (group `c9620b25-3b66-452c-8e0d-86fd5d12ae36`), not in production · Channel: `preview`
-
-### High — Notification quiet hours of 2026-10-29
-- [ ] Let the user keep notifications out of chosen hours
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-29: "an option not to receive notifications before hour X or after hour Y, both or either", with his decisions D1–D6 of that day.
-  - **What it is:** two switches with a time each in Settings → Device and notifications (`quietBefore`, `quietAfter` in `useUserStore`), applied by `quietHoursTrigger()` in [src/utils/skipRules.ts](src/utils/skipRules.ts) in every planner but the pre-block notice and the check-ins; taharah by `TAHARAH_QUIET_POLICY`; the end and update notices by their own rules.
-  - **Expected result:** with "not before 07:00", Shacharit's netz reminder (Jerusalem, 2026-10-28) is scheduled at 07:00 under its own id, the mitzvah screen names 07:00, and a rebuild at 06:30 keeps it; with "not after 22:00" alone, the bedtime Shema's 23:00 reminder is not scheduled; the pre-block notice and the check-ins keep their times; the search finds both rows; typecheck, lint, check:dox and the whole `pnpm test:tz` pass.
-  - **For the owner's word:** D10, D15, D16, D17, D25 of the spec.
-  - **Done:** 2026-10-29. Typecheck, lint, check:dox and the whole `pnpm test:tz` (217 suites, 5,477 tests, four zones) pass; seen only in tests, not on a phone. One spec fixture was wrong (Jerusalem shkia on 2026-10-12 is 18:10, so the hilula case uses an hour of 19:00).
-  - **Status:** Version `1.0.21` · Committed: `efe17c1` feat(home): day-arc hero, ring cards and My day; quiet hours; late marks · Pushed: yes (2026-10-29) · Live: preview `1.0.21-20` (group `cc2feda6-f3a0-4aff-a457-1c1c41db9f98`), not in production · Channel: `preview`
-
-### High — Late marks of 2026-10-29
-- [ ] Mark a missed mitzvah as done in time or after its time
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-29: a mitzvah whose window has closed can still be marked through a dialog of two choices, "עשיתי בזמן ולא סימנתי" and "עשיתי אחרי שעבר הזמן", with a defined effect on the rest of the app, and a report of every late mark.
-  - **Decisions (the owner's, 2026-10-29):**
-    - **D1:** a late mark counts on home's My day as done (with an orange tag) and keeps the day streak; every percentage, the history calendar, trends, the weekly report, each mitzvah's run and records and every badge (100 and 1000 marks, full week and month) score it as a miss (option 3 of the table offered).
-    - **D2:** the late marks report, `/late-marks` ([src/app/late-marks.tsx](src/app/late-marks.tsx)): which mitzvah, the day, when the time ended, when it was marked and how late, per mitzvah and in total; opened from the history tab's סיכום, the weekly report and the search.
-    - **D3:** "in time but not marked" is filed one minute before the window closed, never before it opened, with no flag.
-    - **D4:** a notification's mark-done stays a plain mark (it cannot ask).
-    - **D5:** the mitzvah screen gains today's mark (the owner had no preference, so the recommendation): the window home shows, marked at once while open, asked about once closed, with an undo.
-    - **D6:** the dialog asks wherever a closed window is marked: home's My day, the mitzvah screen, the check-in, the day view (today), the reader's "סיימתי" and the Chok LeYisrael make-ups.
-  - **What it is:** the `late` map in [src/stores/useCompletionsStore.ts](src/stores/useCompletionsStore.ts) beside `completions`, the judge's `late` state in [src/utils/historyStats.ts](src/utils/historyStats.ts), [src/utils/lateMarks.ts](src/utils/lateMarks.ts) and the shared [src/hooks/useLateMarkDialog.tsx](src/hooks/useLateMarkDialog.tsx); the notifications code is unchanged.
-  - **Expected result:** at 10:00 in Jerusalem on 2026-10-28, marking Shacharit (closed at sof zman tefila) asks; "in time" files 60 s before the window's end and the day reads 100%; "after" reads 50% in history with a "באיחור" chip, while home and the streak count it, and `/late-marks` lists it with its delay.
-  - **Done:** 2026-10-29. Typecheck, lint, check:dox and the whole `pnpm test:tz` (222 suites, 5,719 tests, four zones) pass; five new suites pin the rules and the screens, and six existing tests now answer the dialog. An independent review found five small issues (a NowCard closed since the last tick, auto-scroll behind the sheet, the check-in deadline after the question, the cards look's tile, two sheets in a row on iOS), all fixed; a late flag coming back after an OTA rollback and a re-mark of the same day was left as too rare to fix. Not checked: a phone or the web preview (another session's Metro server held the folder), the sheet over the reader and the check-in on iOS.
-  - **Status:** Version `1.0.21` · Committed: `efe17c1` feat(home): day-arc hero, ring cards and My day; quiet hours; late marks · Pushed: yes (2026-10-29) · Live: preview `1.0.21-20` (group `cc2feda6-f3a0-4aff-a457-1c1c41db9f98`), not in production · Channel: `preview`
+  - **Requested:** the owner, 2026-10-30: the messages block after My day, not before it.
+  - **What it solves:** the day list comes first and the information rows after it.
+  - **What it is:** in `src/app/(tabs)/home.tsx` the `home.messages` block now follows the `home.myDay` block and precedes the taharah card; the guide's what's-new entry of `1.0.21-6` names it.
+  - **Expected result:** on home the order is the hero, open now, My day, messages, taharah card.
+  - **Done:** 2026-10-30. Verified: typecheck, lint, check:dox, the home and guide suites and the whole `pnpm test:tz` (222 suites, 5,748 tests in each of the four zones) pass. Not checked: on a phone.
+  - **Status:** Version: OTA `1.0.21-6` · Committed: no · Pushed: no · Live: production `1.0.21-6` (group `5226dac2-a39e-49ca-afea-265dbdc64856`, built from the uncommitted tree on top of `4c62f3c`) and preview `1.0.21-25` (group `f0145073-9fbd-4901-8adf-d43d3a48a509`) · Channel: `production`, `preview`
 
 ## Bugs
 

@@ -687,36 +687,6 @@ export default function HomeScreen() {
               </View>
             )}
 
-            {messageCount ? (
-              <>
-                <SectionLabel text={t('home.messages')} count={messageCount} />
-                {errorScope ? (
-                  <Banner
-                    tone="warning"
-                    text={t('home.lastError', { what: t(`errors.scope.${errorScope}`) })}
-                    onPress={retryLastError}
-                  />
-                ) : null}
-                {banner ? <Banner tone={banner.tone} text={banner.text} onPress={banner.onPress} /> : null}
-                {messages.length ? (
-                  <View testID="home-messages">
-                    <Card divided>
-                      {messages.map((message) => (
-                        <ListRow
-                          key={message.id}
-                          icon={message.icon}
-                          title={message.title}
-                          caption={message.caption}
-                          onPress={message.href ? () => router.push(message.href as never) : undefined}
-                          chevron={Boolean(message.href)}
-                        />
-                      ))}
-                    </Card>
-                  </View>
-                ) : null}
-              </>
-            ) : null}
-
             {entries.length ? (
               <>
                 <SectionLabel text={t('home.myDay')} />
@@ -744,6 +714,36 @@ export default function HomeScreen() {
                     onUndo={(entry) => undoComplete(entry.id, entry.date)}
                   />
                 </View>
+              </>
+            ) : null}
+
+            {messageCount ? (
+              <>
+                <SectionLabel text={t('home.messages')} count={messageCount} />
+                {errorScope ? (
+                  <Banner
+                    tone="warning"
+                    text={t('home.lastError', { what: t(`errors.scope.${errorScope}`) })}
+                    onPress={retryLastError}
+                  />
+                ) : null}
+                {banner ? <Banner tone={banner.tone} text={banner.text} onPress={banner.onPress} /> : null}
+                {messages.length ? (
+                  <View testID="home-messages">
+                    <Card divided>
+                      {messages.map((message) => (
+                        <ListRow
+                          key={message.id}
+                          icon={message.icon}
+                          title={message.title}
+                          caption={message.caption}
+                          onPress={message.href ? () => router.push(message.href as never) : undefined}
+                          chevron={Boolean(message.href)}
+                        />
+                      ))}
+                    </Card>
+                  </View>
+                ) : null}
               </>
             ) : null}
 
