@@ -1,4 +1,5 @@
-import { isQuietAt } from '@/utils/skipRules';
+import { isQuietAt, quietHoursTrigger } from '@/utils/skipRules';
+import { calendarDayEnd } from '@/utils/locationDay';
 import { weekEndFor } from '@/utils/weeklyReport';
 import { dateKey } from '@/stores/useCompletionsStore';
 import { t } from '@/i18n';
@@ -13,8 +14,11 @@ export function planReport(input: PlanInput, horizon: Horizon): ScheduleCandidat
   const { location, now } = input;
   return holyBlocksWithin([...horizon.recentDays, ...horizon.days], location).flatMap((block): ScheduleCandidate[] => {
     const weekEnd = weekEndFor(block);
-    const trigger = new Date(block.end.getTime() + REPORT_DELAY_MIN * 60_000);
-    if (!weekEnd || trigger.getTime() <= now.getTime() || isQuietAt(trigger, location)) return [];
+    const planned = new Date(block.end.getTime() + REPORT_DELAY_MIN * 60_000);
+    const trigger = input.quietHours
+      ? quietHoursTrigger(planned, input.quietHours, calendarDayEnd(planned, location), location)
+      : planned;
+    if (!weekEnd || !trigger || trigger.getTime() <= now.getTime() || isQuietAt(trigger, location)) return [];
     const week = dateKey(weekEnd);
     return [
       {

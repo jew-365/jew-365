@@ -591,6 +591,10 @@ export function hilulotOn(day: HDate, inIsrael: boolean): Hilula[] {
   return hilulotOfYear(day.getFullYear(), inIsrael).get(day.abs()) ?? [];
 }
 
+export function hilulaNames(list: readonly Hilula[], language: 'he' | 'en'): string {
+  return list.map((h) => h.name[language]).join(', ');
+}
+
 // "י״ח אייר" / "18 Iyyar": the day and month, without the year.
 export function hilulaDateLabel(day: HDate, language: 'he' | 'en'): string {
   return language === 'en' ? day.render('en', false) : day.renderGematriya(true).replace(/ \S+$/, '');

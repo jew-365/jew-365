@@ -8,7 +8,8 @@ import { backIcon, forwardIcon, iconFor } from '@/components/MitzvahIcon';
 import { MitzvahCard } from '@/components/MitzvahCard';
 import { CounterPill, HeaderPill, ScreenHeader } from '@/components/ScreenHeader';
 import { useDayModel } from '@/hooks/useDayModel';
-import { Completions, RETENTION_DAYS, useCompletionsStore } from '@/stores/useCompletionsStore';
+import { useLateMarkDialog } from '@/hooks/useLateMarkDialog';
+import { Completions, RETENTION_DAYS, dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -27,7 +28,8 @@ export default function DayRoute() {
   const router = useRouter();
   const params = useLocalSearchParams<{ date?: string }>();
   const completions = useCompletionsStore((s) => s.completions);
-  const markDone = useCompletionsStore((s) => s.markDone);
+  const late = useCompletionsStore((s) => s.late);
+  const lateMark = useLateMarkDialog();
 
   const routeDate = typeof params.date === 'string' ? params.date : '';
   const [dateParam, setDateParam] = useState(routeDate);
@@ -137,11 +139,22 @@ export default function DayRoute() {
                 pct={missed ? 0 : pct}
                 urgent={missed || (isToday && item.urgent)}
                 done={item.done}
+                late={Boolean(item.done && item.mitzvahId && late[dateKey(date)]?.[item.mitzvahId])}
                 readOnly={readOnly}
                 statusText={statusText}
                 statusTone={missed ? 'urgent' : 'muted'}
                 hideProgress={!isToday}
-                onComplete={isToday ? () => item.mitzvahId && markDone(item.mitzvahId, date) : undefined}
+                onComplete={
+                  isToday && item.mitzvahId
+                    ? () =>
+                        lateMark.mark({
+                          id: item.mitzvahId!,
+                          name: item.name,
+                          date,
+                          window: item.windowEnd ? { start: item.time, end: item.windowEnd } : null,
+                        })
+                    : undefined
+                }
                 onPress={() =>
                   item.mitzvahId && router.push({ pathname: '/mitzvah/[id]', params: { id: item.mitzvahId } })
                 }
@@ -155,6 +168,7 @@ export default function DayRoute() {
           ) : null}
         </ScrollView>
       )}
+      {lateMark.dialog}
     </SafeAreaView>
   );
 }

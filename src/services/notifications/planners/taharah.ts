@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon';
 import type { HolyBlock, Location } from '@/types/zmanim';
 import type { CycleState, OnahKind, TaharahTask } from '@/types/taharah';
-import { quietBlockAt } from '@/utils/skipRules';
+import { quietBlockAt, quietHoursTrigger } from '@/utils/skipRules';
 import { checkInPhraseKey } from '@/utils/checkIn';
-import { locationNoon } from '@/utils/locationDay';
+import { calendarDayEnd, locationNoon } from '@/utils/locationDay';
 import { deriveCycle } from '@/utils/taharah/cycle';
 import { civilHebrewDayAt, hebrewDay } from '@/utils/taharah/onot';
 import { taharahTasksFor } from '@/utils/taharah/tasks';
@@ -21,6 +21,21 @@ const TAHARAH_BEFORE_QUIET_MIN = 10;
 const TAHARAH_POST_BLOCK_DELAY_MIN = 15;
 
 type TaharahNotificationTask = NonNullable<PendingNotificationMeta['taharah']>['task'];
+
+export type TaharahQuietPolicy = 'exempt' | 'moveOrKeep' | 'move';
+
+export const TAHARAH_QUIET_POLICY: Record<TaharahNotificationTask, TaharahQuietPolicy> = {
+  hefsek: 'exempt',
+  bedikaMorning: 'moveOrKeep',
+  bedikaEvening: 'exempt',
+  tevila: 'exempt',
+  tevilaPrep: 'exempt',
+  perisha: 'exempt',
+  bedikaVeset: 'exempt',
+  expectOnset: 'move',
+  postBlock: 'move',
+  preBlock: 'exempt',
+};
 
 type TaharahDraft = {
   identifier: string;
@@ -54,6 +69,15 @@ function beforeQuiet(trigger: Date, end: Date, location: Location): Date {
   const block = quietBlockAt(trigger, location);
   if (!block) return trigger;
   return end.getTime() > block.end.getTime() ? block.end : shifted(block.start, -TAHARAH_BEFORE_QUIET_MIN);
+}
+
+function quietTrigger(draft: TaharahDraft, input: PlanInput): Date | null {
+  const hours = input.quietHours;
+  const policy = TAHARAH_QUIET_POLICY[draft.task];
+  if (!hours || policy === 'exempt') return draft.trigger;
+  const { location } = input;
+  if (policy === 'moveOrKeep') return quietHoursTrigger(draft.trigger, hours, draft.end, location) ?? draft.trigger;
+  return quietHoursTrigger(draft.trigger, hours, calendarDayEnd(draft.trigger, location), location);
 }
 
 function firstDayAbs(block: HolyBlock, location: Location): number {
@@ -220,7 +244,9 @@ export function planTaharah(input: PlanInput, horizon: Horizon): ScheduleCandida
   const unshifted: ScheduleCandidate[] = [];
   const shiftedGroups = new Map<string, ShiftedTaharahGroup>();
   for (const draft of drafts) {
-    const trigger = beforeQuiet(draft.trigger, draft.end, location);
+    const own = quietTrigger(draft, input);
+    if (!own) continue;
+    const trigger = beforeQuiet(own, draft.end, location);
     if (trigger.getTime() <= now.getTime() || scheduled.has(draft.identifier)) continue;
     scheduled.add(draft.identifier);
     // Only a reminder pulled ahead of the block joins the merged pre-block notice; one deferred to

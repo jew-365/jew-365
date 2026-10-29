@@ -12,6 +12,14 @@ import type { LocationSource, LocationStatus } from '@/services/LocationService'
 import type { HilulaWhen, RoshChodeshWhen } from '@/services/notifications/ids';
 import { THEME_NAMES, ThemeName } from '@/theme/colors';
 import { DEFAULT_UI_SCALE, isUiScale } from '@/theme/scale';
+import {
+  DEFAULT_QUIET_AFTER,
+  DEFAULT_QUIET_BEFORE,
+  isQuietBound,
+  quietBoundOf,
+  quietBoundsValid,
+  type QuietBound,
+} from '@/utils/quietHours';
 
 export type Language = 'he' | 'en';
 export type NotificationPermissionStatus = 'unknown' | 'granted' | 'denied';
@@ -93,6 +101,9 @@ const savedNotices = <K extends string>(
     NoticeSetting
   >;
 
+export const HOME_LOOKS = ['rings', 'cards', 'rail'] as const;
+export type HomeLook = (typeof HOME_LOOKS)[number];
+
 type UserState = {
   nusach: Nusach;
   location: Location;
@@ -119,9 +130,12 @@ type UserState = {
   hilulaNotices: HilulaNotices;
   roshChodeshNotices: RoshChodeshNotices;
   weeklyReportEnabled: boolean;
+  quietBefore: QuietBound;
+  quietAfter: QuietBound;
   chokDoubleChoice: ChokDoubleChoice | null;
   chokCommentaryOpen: boolean;
   chokThuNightDay: ChokThuNightDay | null;
+  homeLook: HomeLook;
   gender: Gender | null;
   maritalStatus: MaritalStatus | null;
   taharahEnabled: boolean;
@@ -150,9 +164,12 @@ type UserState = {
   setHilulaNotice: (kind: HilulaWhen, setting: NoticeSetting) => void;
   setRoshChodeshNotice: (kind: RoshChodeshWhen, setting: NoticeSetting) => void;
   setWeeklyReportEnabled: (v: boolean) => void;
+  setQuietBefore: (bound: QuietBound) => void;
+  setQuietAfter: (bound: QuietBound) => void;
   setChokDoubleChoice: (choice: ChokDoubleChoice) => void;
   setChokCommentaryOpen: (open: boolean) => void;
   setChokThuNightDay: (day: ChokThuNightDay) => void;
+  setHomeLook: (look: HomeLook) => void;
   setGender: (g: Gender | null) => void;
   setMaritalStatus: (m: MaritalStatus | null) => void;
   setTaharahEnabled: (v: boolean) => void;
@@ -160,7 +177,10 @@ type UserState = {
 };
 
 type PersistedUserState = Partial<
-  Pick<UserState, 'taharahEnabled' | 'maritalStatus' | 'hilulaNotices' | 'roshChodeshNotices'>
+  Pick<
+    UserState,
+    'taharahEnabled' | 'maritalStatus' | 'hilulaNotices' | 'roshChodeshNotices' | 'quietBefore' | 'quietAfter'
+  >
 > & { theme?: unknown };
 
 const DEFAULT_LOCATION = CITIES[0];
@@ -177,6 +197,7 @@ const mergeSavedUserState = (persisted: unknown, current: UserState): UserState 
   const merged = { ...current, ...saved, theme: theme === undefined ? current.theme : savedThemeName(theme) };
   if (merged.taharahEnabled && merged.maritalStatus == null) merged.maritalStatus = 'married';
   if (!isUiScale(merged.uiScale)) merged.uiScale = DEFAULT_UI_SCALE;
+  if (!HOME_LOOKS.includes(merged.homeLook)) merged.homeLook = 'rail';
   merged.location = refreshSavedLocation(merged.location, merged.locationSource);
   merged.inIsrael = merged.location.inIsrael;
   merged.hilulaNotices = savedNotices(DEFAULT_HILULA_NOTICES, saved.hilulaNotices);
@@ -184,6 +205,12 @@ const mergeSavedUserState = (persisted: unknown, current: UserState): UserState 
   if (merged.hilulotEnabled && !anyNoticeOn(merged.hilulaNotices)) merged.hilulaNotices = DEFAULT_HILULA_NOTICES;
   if (merged.roshChodeshEnabled && !anyNoticeOn(merged.roshChodeshNotices))
     merged.roshChodeshNotices = DEFAULT_ROSH_CHODESH_NOTICES;
+  merged.quietBefore = quietBoundOf(saved.quietBefore, DEFAULT_QUIET_BEFORE);
+  merged.quietAfter = quietBoundOf(saved.quietAfter, DEFAULT_QUIET_AFTER);
+  if (!quietBoundsValid(merged.quietBefore, merged.quietAfter)) {
+    merged.quietBefore = { ...merged.quietBefore, enabled: false };
+    merged.quietAfter = { ...merged.quietAfter, enabled: false };
+  }
   return merged;
 };
 
@@ -216,9 +243,12 @@ export const useUserStore = create<UserState>()(
       hilulaNotices: DEFAULT_HILULA_NOTICES,
       roshChodeshNotices: DEFAULT_ROSH_CHODESH_NOTICES,
       weeklyReportEnabled: true,
+      quietBefore: DEFAULT_QUIET_BEFORE,
+      quietAfter: DEFAULT_QUIET_AFTER,
       chokDoubleChoice: null,
       chokCommentaryOpen: false,
       chokThuNightDay: null,
+      homeLook: 'rail',
       gender: null,
       maritalStatus: null,
       taharahEnabled: false,
@@ -260,9 +290,22 @@ export const useUserStore = create<UserState>()(
             : s,
         ),
       setWeeklyReportEnabled: (v) => set({ weeklyReportEnabled: v }),
+      setQuietBefore: (bound) =>
+        set((s) =>
+          isQuietBound(bound) && quietBoundsValid(bound, s.quietAfter)
+            ? { quietBefore: { enabled: bound.enabled, minutes: bound.minutes } }
+            : s,
+        ),
+      setQuietAfter: (bound) =>
+        set((s) =>
+          isQuietBound(bound) && quietBoundsValid(s.quietBefore, bound)
+            ? { quietAfter: { enabled: bound.enabled, minutes: bound.minutes } }
+            : s,
+        ),
       setChokDoubleChoice: (choice) => set({ chokDoubleChoice: choice }),
       setChokCommentaryOpen: (open) => set({ chokCommentaryOpen: open }),
       setChokThuNightDay: (day) => set({ chokThuNightDay: day }),
+      setHomeLook: (look) => set((state) => (HOME_LOOKS.includes(look) ? { homeLook: look } : state)),
       setGender: (g) => set({ gender: g }),
       setMaritalStatus: (m) => set({ maritalStatus: m }),
       setTaharahEnabled: (v) => set({ taharahEnabled: v }),
@@ -293,9 +336,12 @@ export const useUserStore = create<UserState>()(
           hilulaNotices: DEFAULT_HILULA_NOTICES,
           roshChodeshNotices: DEFAULT_ROSH_CHODESH_NOTICES,
           weeklyReportEnabled: true,
+          quietBefore: DEFAULT_QUIET_BEFORE,
+          quietAfter: DEFAULT_QUIET_AFTER,
           chokDoubleChoice: null,
           chokCommentaryOpen: false,
           chokThuNightDay: null,
+          homeLook: 'rail',
           gender: null,
           maritalStatus: null,
           taharahEnabled: false,

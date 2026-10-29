@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon';
 import type { HDate } from '@hebcal/core';
 import type { HolyBlock, Location } from '@/types/zmanim';
-import { Hilula, hilulaDateLabel, hilulotOn } from '@/data/hilulot';
-import { isQuietAt } from '@/utils/skipRules';
-import { locationNoon } from '@/utils/locationDay';
+import { Hilula, hilulaDateLabel, hilulaNames, hilulotOn } from '@/data/hilulot';
+import { isQuietAt, quietHoursTrigger } from '@/utils/skipRules';
+import { calendarDayEnd, locationNoon } from '@/utils/locationDay';
 import { civilHebrewDayAt } from '@/utils/taharah/onot';
 import { t } from '@/i18n';
 import { HILULA_KIND, type HilulaWhen } from '@/services/notifications/ids';
@@ -58,13 +58,9 @@ function hilulaNoticesOn(day: Date, location: Location, inIsrael: boolean, notic
   });
 }
 
-function hilulaNames(hilulot: Hilula[], english: boolean): string {
-  return hilulot.map((hilula) => (english ? hilula.name.en : hilula.name.he)).join(', ');
-}
-
 function hilulaTexts(notice: HilulaNotice, english: boolean): { title: string; body: string } {
-  const names = hilulaNames(notice.hilulot, english);
   const locale = english ? 'en' : 'he';
+  const names = hilulaNames(notice.hilulot, locale);
   const date = hilulaDateLabel(notice.day, locale);
   if (notice.eveningsAhead === 0) {
     if (notice.phase === 'open')
@@ -101,6 +97,21 @@ function hilulaCandidate(notice: HilulaNotice, english: boolean): ScheduleCandid
   };
 }
 
+function quiet(notice: HilulaNotice, input: PlanInput): HilulaNotice[] {
+  if (!input.quietHours) return [notice];
+  const { location } = input;
+  const trigger = quietHoursTrigger(
+    notice.trigger,
+    input.quietHours,
+    calendarDayEnd(notice.trigger, location),
+    location,
+  );
+  if (!trigger) return [];
+  if (trigger.getTime() === notice.trigger.getTime()) return [notice];
+  const phase = noticePhase(trigger, DateTime.fromJSDate(notice.day.prev().greg()), location);
+  return [{ ...notice, trigger, phase }];
+}
+
 // A notice that would fire inside a holy block is named in that block's pre-block notice instead.
 export function planHilulot(input: PlanInput, horizon: Horizon): ScheduleCandidate[] {
   if (!input.hilulotEnabled) return [];
@@ -108,6 +119,7 @@ export function planHilulot(input: PlanInput, horizon: Horizon): ScheduleCandida
   const english = input.language === 'en';
   return horizon.days
     .flatMap((day) => hilulaNoticesOn(day, location, settings.inIsrael, input.hilulaNotices))
+    .flatMap((notice) => quiet(notice, input))
     .filter((notice) => notice.trigger.getTime() > now.getTime() && !isQuietAt(notice.trigger, location))
     .map((notice) => hilulaCandidate(notice, english));
 }
@@ -129,7 +141,7 @@ export function hilulaLines(block: HolyBlock, input: PlanInput): string[] {
   const locale = english ? 'en' : 'he';
   return [...swallowed.values()].map(({ day, hilulot }) => {
     const opens = DateTime.fromJSDate(day.prev().greg());
-    const names = hilulaNames(hilulot, english);
+    const names = hilulaNames(hilulot, locale);
     return opens.toISODate() === erev.toISODate()
       ? t('holyBlock.notice.hilulaTonight', { names })
       : t('holyBlock.notice.hilulaOn', { names, day: noticeDayLabel(opens, erev, locale) });

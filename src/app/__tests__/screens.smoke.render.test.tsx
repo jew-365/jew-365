@@ -68,6 +68,10 @@ jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: jest.fn(async () => ({ granted: false, canAskAgain: true })),
   getCurrentPositionAsync: jest.fn(),
 }));
+jest.mock('expo-status-bar', () => ({
+  ...jest.requireActual('expo-status-bar'),
+  setStatusBarStyle: jest.fn(),
+}));
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(async () => {}),
   selectionAsync: jest.fn(async () => {}),
@@ -172,6 +176,7 @@ import DayScreen from '../day/[date]';
 import GuideScreen from '../guide';
 import HilulaScreen from '../hilula/[id]';
 import HilulotScreen from '../hilulot';
+import LateMarksScreen from '../late-marks';
 import MitzvahScreen from '../mitzvah/[id]';
 import MitzvotScreen from '../mitzvot';
 import ReportScreen from '../report';
@@ -571,6 +576,7 @@ const CASES: SmokeCase[] = [
     },
     check: text(/מותקן בנוסח אשכנז/, /Installed for Ashkenaz/),
   },
+  { file: 'late-marks', label: 'default', Screen: LateMarksScreen, check: text('סימונים באיחור', 'Late marks') },
   { file: 'mitzvot', label: 'default', Screen: MitzvotScreen, check: text('המצוות שלי', 'My mitzvot') },
   { file: 'report', label: 'latest week', Screen: ReportScreen, check: text('סיכום שבועי', 'Weekly report') },
   {
@@ -700,7 +706,7 @@ const CASES: SmokeCase[] = [
     },
   },
   { file: '(tabs)/history', label: 'default', Screen: HistoryScreen, check: text('סיכום', 'Summary') },
-  { file: '(tabs)/home', label: 'default', Screen: HomeScreen, check: text('עכשיו — לפי דחיפות', 'Now by urgency') },
+  { file: '(tabs)/home', label: 'default', Screen: HomeScreen, check: text(/^פתוח עכשיו/, /^Open now/) },
   { file: '(tabs)/index', label: 'redirects to home', Screen: TabsIndexScreen, check: redirectsTo('/(tabs)/home') },
   { file: '(tabs)/more', label: 'default', Screen: MoreScreen, check: text('עוד', 'More') },
   { file: '(tabs)/settings', label: 'default', Screen: SettingsScreen, check: text('הגדרות', 'Settings') },

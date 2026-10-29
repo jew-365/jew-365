@@ -7,6 +7,7 @@ import { useUserStore } from '@/stores/useUserStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import type { PlanInput } from '@/services/notifications/types';
+import { quietHoursOf } from '@/utils/quietHours';
 
 // What a plan is made for: the horizon's start, the mitzvot to plan, and the place and settings they
 // are computed at. A rebuild takes all four from the stores; a caller may hand in its own.
@@ -71,6 +72,7 @@ export function readPlanInput(now: Date, scope: PlanScope = currentScope(now)): 
     hilulaNotices: user.hilulaNotices,
     roshChodeshNotices: user.roshChodeshNotices,
     weeklyReportEnabled: user.weeklyReportEnabled,
+    quietHours: quietHoursOf(user.quietBefore, user.quietAfter),
     taharahEnabled: user.taharahEnabled,
     taharah: {
       events: taharah.events,

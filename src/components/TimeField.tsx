@@ -29,6 +29,7 @@ export function normalizeTimeInput(raw: string): string {
 type PickerProps = {
   value: string;
   onChange: (value: string) => void;
+  error?: string;
 };
 
 type Props = PickerProps & {
@@ -37,7 +38,7 @@ type Props = PickerProps & {
   inline?: boolean;
 };
 
-function TimePicker({ value, onChange }: PickerProps) {
+function TimePicker({ value, onChange, error }: PickerProps) {
   const { colors } = useTheme();
   const { t } = useI18n();
   const [draft, setDraft] = useState(value);
@@ -112,11 +113,12 @@ function TimePicker({ value, onChange }: PickerProps) {
       <View style={styles.wheels}>
         {rowMirrored ? [minuteWheel, colon, hourWheel] : [hourWheel, colon, minuteWheel]}
       </View>
+      {error ? <Text style={[typography.small, styles.error, { color: colors.urgent }]}>{error}</Text> : null}
     </>
   );
 }
 
-export function TimeField({ label, value, onChange, style, inline = false }: Props) {
+export function TimeField({ label, value, onChange, error, style, inline = false }: Props) {
   const { colors } = useTheme();
   const [picking, setPicking] = useState(false);
   const openPicker = () => {
@@ -129,7 +131,7 @@ export function TimeField({ label, value, onChange, style, inline = false }: Pro
     return (
       <View style={style}>
         {labelText}
-        <TimePicker value={value} onChange={onChange} />
+        <TimePicker value={value} onChange={onChange} error={error} />
       </View>
     );
   }
@@ -149,7 +151,7 @@ export function TimeField({ label, value, onChange, style, inline = false }: Pro
         </Text>
       </Pressable>
       <BottomSheet visible={picking} title={label} onClose={() => setPicking(false)}>
-        <TimePicker value={value} onChange={onChange} />
+        <TimePicker value={value} onChange={onChange} error={error} />
       </BottomSheet>
     </View>
   );
@@ -182,5 +184,9 @@ const styles = StyleSheet.create({
   },
   wheel: {
     width: scaled(96),
+  },
+  error: {
+    marginTop: spacing.md,
+    textAlign: 'center',
   },
 });

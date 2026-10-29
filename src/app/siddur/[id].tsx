@@ -60,6 +60,7 @@ import {
   standaloneTextId,
 } from '@/data/siddur';
 import { useDayModel } from '@/hooks/useDayModel';
+import { useLateMarkDialog } from '@/hooks/useLateMarkDialog';
 import { useNow } from '@/hooks/useNow';
 import { HDate } from '@hebcal/core';
 import { verifyChokInstall } from '@/services/ChokContentService';
@@ -157,6 +158,7 @@ import { currentOrNextWindow, dayWindow, windowDueToday } from '@/utils/buildDay
 import { afterPaint } from '@/utils/afterPaint';
 import { compassPrayerOf } from '@/utils/compass';
 import { calendarDay } from '@/utils/checkIn';
+import { windowClosed } from '@/utils/lateMarks';
 import { appDay } from '@/utils/locationDay';
 import { calendarLocale } from '@/utils/weeklyReport';
 import { translate, useI18n } from '@/i18n';
@@ -174,6 +176,8 @@ const SCROLL_REPORT_MS = 250;
 const LAST_POSITION_DELAY_MS = 1000;
 const SEGMENT_SETTLE_MS = 1000;
 const TOAST_MS = 2000;
+// iOS cannot present a Modal while another one is still sliding away.
+const SHEET_SWAP_MS = 400;
 const DELETE_ICON_SIZE = scaled(16);
 const DELETE_ICON_STROKE = 2.4;
 const AUTO_SCROLL_START_MS = 1000;
@@ -205,8 +209,8 @@ const CHOK_VARIANT_NAMES: Record<HaftarahVariant, string> = {
 const SCROLLS_BY_PROP = Platform.OS === 'ios';
 const FOLD_DOWN_PX = 12;
 const DOUBLE_TAP_GAP_MS = 300;
-const DOUBLE_TAP_PRESS_MS = 250;
-const DOUBLE_TAP_SLOP_PX = 10;
+const TAP_MAX_MS = 250;
+const TAP_SLOP = 10;
 const DOUBLE_TAP_DISTANCE_PX = 40;
 const FOLD_MS = 180;
 const COMPACT_FADE_PX = 24;
@@ -425,27 +429,45 @@ function useReaderFold() {
   };
 }
 
-// Two quick taps on the text, near each other, with no scroll between them. Touch events only observe, so
-// the list keeps its scroll and every passage keeps its own tap.
-function useDoubleTap(onDoubleTap: () => void) {
+const TapGuardContext = React.createContext<() => void>(() => {});
+
+// Marks the touch in progress as taken by a control inside the list, so it is no tap on the text.
+function TapGuard({ children }: { children: React.ReactNode }) {
+  const consume = useContext(TapGuardContext);
+  return <View onTouchStart={consume}>{children}</View>;
+}
+
+// A short, still touch on the text is a tap, and a second one close by, with no scroll between them, is a
+// double tap too. Touch events only observe, so the list keeps its scroll and every passage keeps its own tap.
+// A control inside the list calls `consume` from its own touch start (a child's handler runs before the
+// list's), which withdraws that one touch from `onTap` and leaves the double tap as it was.
+function useTaps(onTap: () => void, onDoubleTap: () => void) {
   const start = useRef<{ x: number; y: number; at: number } | null>(null);
   const lastTap = useRef<{ x: number; y: number; at: number } | null>(null);
+  const consumed = useRef(false);
   return {
+    consume: () => {
+      consumed.current = true;
+    },
     onTouchStart: (event: GestureResponderEvent) => {
       const { pageX, pageY, touches } = event.nativeEvent;
       start.current = touches.length > 1 ? null : { x: pageX, y: pageY, at: Date.now() };
+      if (!start.current) consumed.current = false;
     },
     onTouchEnd: (event: GestureResponderEvent) => {
       const began = start.current;
+      const taken = consumed.current;
       start.current = null;
+      consumed.current = false;
       if (!began) return;
       const { pageX, pageY } = event.nativeEvent;
       const now = Date.now();
-      const still = Math.hypot(pageX - began.x, pageY - began.y) <= DOUBLE_TAP_SLOP_PX;
-      if (!still || now - began.at > DOUBLE_TAP_PRESS_MS) {
+      const still = Math.hypot(pageX - began.x, pageY - began.y) <= TAP_SLOP;
+      if (!still || now - began.at > TAP_MAX_MS) {
         lastTap.current = null;
         return;
       }
+      if (!taken) onTap();
       const previous = lastTap.current;
       if (
         previous &&
@@ -461,6 +483,7 @@ function useDoubleTap(onDoubleTap: () => void) {
     onTouchCancel: () => {
       start.current = null;
       lastTap.current = null;
+      consumed.current = false;
     },
   };
 }
@@ -889,7 +912,7 @@ export default function SiddurScreen() {
         : reading !== null
       : Boolean(mitzvah && hasSiddurText(mitzvah, nusach, windowDate, place));
   const done = useCompletionsStore((s) => Boolean(mitzvah && s.completions[dateKey(windowDate)]?.[mitzvah.id]));
-  const markDone = useCompletionsStore((s) => s.markDone);
+  const lateMark = useLateMarkDialog();
   const chokActive = useMitzvotStore(selectActive(CHOK_TEXT_ID));
   const chokMarks = useCompletionsStore((s) => (chok ? s.completions : null));
   const chokTodayKey = useMemo(
@@ -929,7 +952,11 @@ export default function SiddurScreen() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [renderUpTo, setRenderUpTo] = useState<number | null>(null);
   const fold = useReaderFold();
-  const doubleTap = useDoubleTap(fold.toggle);
+  const toggleAutoScroll = () => {
+    Haptics.selectionAsync().catch(() => {});
+    setAutoScroll(!autoScrollOn);
+  };
+  const taps = useTaps(toggleAutoScroll, fold.toggle);
   const topSectionRef = useRef<(fallback: number) => number>((fallback) => fallback);
   const { subscribe: subscribeFold } = fold;
   useEffect(() => subscribeFold(() => setShownSection((previous) => topSectionRef.current(previous))), [subscribeFold]);
@@ -949,6 +976,7 @@ export default function SiddurScreen() {
   const offered = useRef(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const swapTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const persistRef = useRef<() => void>(() => {});
   // Keys of the blocks the reader flipped away from their default (closed, or open for a passage said
   // alone), so a mode switch clears it and every default applies again.
@@ -997,6 +1025,7 @@ export default function SiddurScreen() {
       clearTimeout(jumpTimer.current);
       clearTimeout(saveTimer.current);
       clearTimeout(toastTimer.current);
+      clearTimeout(swapTimer.current);
     };
   }, []);
 
@@ -1170,26 +1199,36 @@ export default function SiddurScreen() {
     if (params.from === settingsTarget && router.canGoBack()) router.back();
     else router.push({ pathname: '/mitzvah/[id]', params: { id: settingsTarget } });
   };
+  // A mark whose window has closed (the time passed today, a make-up day) asks when it was done first.
+  const markTarget = (mitzvahId: string, date: Date) => {
+    const target = findAnyMitzvah(mitzvahId);
+    return {
+      id: mitzvahId,
+      name: mitzvahId === CHOK_TEXT_ID ? t('chok.title') : target ? nameOf(target.name) : '',
+      date,
+      window: target ? dayWindow(target, date, location, settings) : null,
+    };
+  };
   // Done ends the session with the text: mark it, then land on home whatever opened the reader (a
   // home card, the mitzvah screen, a notification on a cold start).
-  const finish = (mitzvahId: string, date: Date = windowDate) => {
-    if (bookmarkTextId) {
-      finished.current = true;
-      clearLastPosition(bookmarkTextId);
-    }
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    markDone(mitzvahId, date);
-    if (router.canDismiss()) {
-      router.dismissAll();
-      router.navigate('/(tabs)/home');
-    } else {
-      router.replace('/(tabs)/home');
-    }
-  };
-  const finishMakeUp = (makeUp: ChokMakeUpFold) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    markDone(CHOK_TEXT_ID, calendarDay(makeUp.dateKey));
-  };
+  const finish = (mitzvahId: string, date: Date = windowDate) =>
+    lateMark.mark(markTarget(mitzvahId, date), () => {
+      if (bookmarkTextId) {
+        finished.current = true;
+        clearLastPosition(bookmarkTextId);
+      }
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      if (router.canDismiss()) {
+        router.dismissAll();
+        router.navigate('/(tabs)/home');
+      } else {
+        router.replace('/(tabs)/home');
+      }
+    });
+  const finishMakeUp = (makeUp: ChokMakeUpFold) =>
+    lateMark.mark(markTarget(CHOK_TEXT_ID, calendarDay(makeUp.dateKey)), () => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    });
   const doneTarget = mitzvah
     ? offSeason
       ? null
@@ -1237,7 +1276,14 @@ export default function SiddurScreen() {
     setThuNightDay(day);
     setAskingThuNight(false);
     const date = chokPortion && chokTodayDate ? chokDoneDay(chokPortion, chokTodayDate, day) : null;
-    if (date) finish(CHOK_TEXT_ID, date);
+    if (!date) return;
+    const { window } = markTarget(CHOK_TEXT_ID, date);
+    // A closed window asks in a sheet of its own, which waits until this one has gone.
+    if (window && windowClosed(window, new Date())) {
+      swapTimer.current = setTimeout(() => finish(CHOK_TEXT_ID, date), SHEET_SWAP_MS);
+    } else {
+      finish(CHOK_TEXT_ID, date);
+    }
   };
   const listExtraData = useMemo(
     () => ({ textSize, language, colors, toggled, prayerMode, commentaryOpen }),
@@ -1340,11 +1386,13 @@ export default function SiddurScreen() {
     const makeUp = makeUpFolds.find((fold) => fold.label.he === section.title.he);
     if (!makeUp) return null;
     return (
-      <Button
-        label={t('chok.makeUpDone', { day: t(`chok.slot.${makeUp.slot}`) })}
-        onPress={() => finishMakeUp(makeUp)}
-        style={styles.doneAction}
-      />
+      <TapGuard>
+        <Button
+          label={t('chok.makeUpDone', { day: t(`chok.slot.${makeUp.slot}`) })}
+          onPress={() => finishMakeUp(makeUp)}
+          style={styles.doneAction}
+        />
+      </TapGuard>
     );
   };
   const optionalSection = (
@@ -1454,10 +1502,6 @@ export default function SiddurScreen() {
       setRenderUpTo(null);
     }
   };
-  const toggleAutoScroll = () => {
-    Haptics.selectionAsync().catch(() => {});
-    setAutoScroll(!autoScrollOn);
-  };
   const sizeIndex = SIDDUR_FONT_SIZES.findIndex((size) => size >= fontSize);
   const currentIndex = sizeIndex === -1 ? SIDDUR_FONT_SIZES.length - 1 : sizeIndex;
 
@@ -1524,7 +1568,8 @@ export default function SiddurScreen() {
       !bookmarksOpen &&
       saving === null &&
       resumeOffer === null &&
-      !compassPromptOpen,
+      !compassPromptOpen &&
+      !lateMark.open,
     autoScrollPixelsPerSecond(SIDDUR_SCROLL_SPEEDS[scrollSpeedLevel(scrollSpeed) - 1], textSize),
     onUserScroll,
     onScrollReport,
@@ -1886,136 +1931,144 @@ export default function SiddurScreen() {
         {body ? (
           <View style={[styles.bodyWrap, { paddingTop: fold.space }]}>{body}</View>
         ) : (
-          <Animated.FlatList
-            ref={listRef}
-            testID="siddur-list"
-            data={sections}
-            extraData={listExtraData}
-            keyExtractor={(section) => section.title.he}
-            initialNumToRender={4}
-            windowSize={renderUpTo !== null ? Number.POSITIVE_INFINITY : undefined}
-            maxToRenderPerBatch={
-              renderUpTo !== null ? Math.min(sections.length, renderUpTo + JUMP_NEIGHBOURS) : undefined
-            }
-            viewabilityConfig={SECTION_VIEWABILITY}
-            onViewableItemsChanged={onViewableSectionsChanged}
-            contentContainerStyle={contentStyle}
-            ListHeaderComponent={
-              chok ? (
-                <View
-                  onLayout={(event) => {
-                    headerHeight.current = event.nativeEvent.layout.height;
-                  }}
-                >
-                  <ChokLicenseNotice style={styles.licenseNotice} />
-                </View>
-              ) : null
-            }
-            onScrollToIndexFailed={() => {
-              jumpMissed.current = true;
-            }}
-            onScroll={autoScroll.scrollHandler}
-            animatedProps={autoScroll.animatedProps}
-            {...(autoScroll.webInput.onWheel ? { onWheel: autoScroll.webInput.onWheel } : {})}
-            onTouchStart={(event) => {
-              autoScroll.webInput.onTouchStart?.();
-              doubleTap.onTouchStart(event);
-            }}
-            onTouchEnd={(event) => {
-              autoScroll.webInput.onTouchEnd?.();
-              doubleTap.onTouchEnd(event);
-            }}
-            onTouchCancel={() => {
-              autoScroll.webInput.onTouchCancel?.();
-              doubleTap.onTouchCancel();
-            }}
-            scrollEventThrottle={16}
-            onLayout={autoScroll.onLayout}
-            onContentSizeChange={autoScroll.onContentSizeChange}
-            renderItem={({ item: section }) => (
-              <View
-                testID={`siddur-section-${section.title.he}`}
-                onLayout={(event) => sectionHeights.current.set(section.title.he, event.nativeEvent.layout.height)}
-              >
-                {section.headings?.map((heading) => (
-                  <Text
-                    key={heading.he}
-                    accessibilityRole="header"
-                    style={[
-                      heading.level === 1 ? typography.title : typography.heading,
-                      styles.sectionHeading,
-                      { color: colors.goldText },
-                    ]}
+          <TapGuardContext.Provider value={taps.consume}>
+            <Animated.FlatList
+              ref={listRef}
+              testID="siddur-list"
+              data={sections}
+              extraData={listExtraData}
+              keyExtractor={(section) => section.title.he}
+              initialNumToRender={4}
+              windowSize={renderUpTo !== null ? Number.POSITIVE_INFINITY : undefined}
+              maxToRenderPerBatch={
+                renderUpTo !== null ? Math.min(sections.length, renderUpTo + JUMP_NEIGHBOURS) : undefined
+              }
+              viewabilityConfig={SECTION_VIEWABILITY}
+              onViewableItemsChanged={onViewableSectionsChanged}
+              contentContainerStyle={contentStyle}
+              ListHeaderComponent={
+                chok ? (
+                  <View
+                    onTouchStart={taps.consume}
+                    onLayout={(event) => {
+                      headerHeight.current = event.nativeEvent.layout.height;
+                    }}
                   >
-                    {nameOf(heading)}
-                  </Text>
-                ))}
-                <MeasuredView>
-                  <Card padded style={styles.sectionCard}>
-                    {sectionCard(section)}
-                  </Card>
-                </MeasuredView>
-              </View>
-            )}
-            ListFooterComponent={
-              <>
-                {browsing ? (
-                  <View style={styles.browsingFooter}>
-                    <Text style={[typography.caption, styles.browsingNote, { color: colors.textSub }]}>
-                      {t('chok.browsing.note')}
-                    </Text>
-                    <Button
-                      variant="secondary"
-                      label={t('chok.browsing.back')}
-                      onPress={() => browse(null)}
-                      style={styles.doneAction}
-                    />
+                    <ChokLicenseNotice style={styles.licenseNotice} />
                   </View>
-                ) : doneTarget ? (
-                  doneTarget.done ? (
-                    <View style={styles.doneRow}>
-                      <MitzvahIcon name="check" size={DONE_ICON_SIZE} color={colors.safe} />
-                      <Text style={[typography.bodyBold, { color: colors.safe }]}>{t('siddur.doneAlready')}</Text>
+                ) : null
+              }
+              onScrollToIndexFailed={() => {
+                jumpMissed.current = true;
+              }}
+              onScroll={autoScroll.scrollHandler}
+              animatedProps={autoScroll.animatedProps}
+              {...(autoScroll.webInput.onWheel ? { onWheel: autoScroll.webInput.onWheel } : {})}
+              onTouchStart={(event) => {
+                autoScroll.webInput.onTouchStart?.();
+                taps.onTouchStart(event);
+              }}
+              onTouchEnd={(event) => {
+                autoScroll.webInput.onTouchEnd?.();
+                taps.onTouchEnd(event);
+              }}
+              onTouchCancel={() => {
+                autoScroll.webInput.onTouchCancel?.();
+                taps.onTouchCancel();
+              }}
+              scrollEventThrottle={16}
+              onLayout={autoScroll.onLayout}
+              onContentSizeChange={autoScroll.onContentSizeChange}
+              renderItem={({ item: section }) => (
+                <View
+                  testID={`siddur-section-${section.title.he}`}
+                  onLayout={(event) => sectionHeights.current.set(section.title.he, event.nativeEvent.layout.height)}
+                >
+                  {section.headings?.map((heading) => (
+                    <Text
+                      key={heading.he}
+                      accessibilityRole="header"
+                      style={[
+                        heading.level === 1 ? typography.title : typography.heading,
+                        styles.sectionHeading,
+                        { color: colors.goldText },
+                      ]}
+                    >
+                      {nameOf(heading)}
+                    </Text>
+                  ))}
+                  <MeasuredView>
+                    <Card padded style={styles.sectionCard}>
+                      {sectionCard(section)}
+                    </Card>
+                  </MeasuredView>
+                </View>
+              )}
+              ListFooterComponent={
+                <>
+                  {browsing ? (
+                    <View style={styles.browsingFooter}>
+                      <Text style={[typography.caption, styles.browsingNote, { color: colors.textSub }]}>
+                        {t('chok.browsing.note')}
+                      </Text>
+                      <TapGuard>
+                        <Button
+                          variant="secondary"
+                          label={t('chok.browsing.back')}
+                          onPress={() => browse(null)}
+                          style={styles.doneAction}
+                        />
+                      </TapGuard>
                     </View>
-                  ) : (
-                    <Button
-                      label={t('siddur.done')}
-                      onPress={() =>
-                        thuNightUnanswered ? setAskingThuNight(true) : finish(doneTarget.id, doneTarget.date)
-                      }
-                      style={styles.doneAction}
-                    />
-                  )
-                ) : null}
+                  ) : doneTarget ? (
+                    doneTarget.done ? (
+                      <View style={styles.doneRow}>
+                        <MitzvahIcon name="check" size={DONE_ICON_SIZE} color={colors.safe} />
+                        <Text style={[typography.bodyBold, { color: colors.safe }]}>{t('siddur.doneAlready')}</Text>
+                      </View>
+                    ) : (
+                      <TapGuard>
+                        <Button
+                          label={t('siddur.done')}
+                          onPress={() =>
+                            thuNightUnanswered ? setAskingThuNight(true) : finish(doneTarget.id, doneTarget.date)
+                          }
+                          style={styles.doneAction}
+                        />
+                      </TapGuard>
+                    )
+                  ) : null}
 
-                {readyText?.dedication ? (
-                  <Text style={[typography.caption, styles.dedication, { color: colors.textSub }]}>
-                    {readyText.dedication}
-                  </Text>
-                ) : null}
-
-                {readyText?.credits.length ? (
-                  <View style={styles.credits}>
-                    <Text style={[typography.captionBold, { color: colors.textSub }]}>{t('siddur.sources')}</Text>
-                    <Text style={[typography.caption, { color: colors.textMuted, marginTop: scaled(2) }]}>
-                      {t('siddur.adapted')}
+                  {readyText?.dedication ? (
+                    <Text style={[typography.caption, styles.dedication, { color: colors.textSub }]}>
+                      {readyText.dedication}
                     </Text>
-                    {readyText.credits.map((credit) => (
-                      <Pressable
-                        key={credit.title}
-                        onPress={() => Linking.openURL(credit.url).catch(() => {})}
-                        accessibilityRole="link"
-                      >
-                        <Text style={[typography.caption, { color: colors.textMuted, marginTop: spacing.xs }]}>
-                          {credit.title} · {credit.license}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                ) : null}
-              </>
-            }
-          />
+                  ) : null}
+
+                  {readyText?.credits.length ? (
+                    <View style={styles.credits}>
+                      <Text style={[typography.captionBold, { color: colors.textSub }]}>{t('siddur.sources')}</Text>
+                      <Text style={[typography.caption, { color: colors.textMuted, marginTop: scaled(2) }]}>
+                        {t('siddur.adapted')}
+                      </Text>
+                      {readyText.credits.map((credit) => (
+                        <Pressable
+                          key={credit.title}
+                          onPress={() => Linking.openURL(credit.url).catch(() => {})}
+                          onTouchStart={taps.consume}
+                          accessibilityRole="link"
+                        >
+                          <Text style={[typography.caption, { color: colors.textMuted, marginTop: spacing.xs }]}>
+                            {credit.title} · {credit.license}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  ) : null}
+                </>
+              }
+            />
+          </TapGuardContext.Provider>
         )}
       </View>
 
@@ -2121,6 +2174,8 @@ export default function SiddurScreen() {
         <SheetAction label={t('chok.thuNight.thu')} onPress={() => chooseThuNightDay('thu')} />
         <SheetAction label={t('chok.thuNight.fri')} onPress={() => chooseThuNightDay('fri')} />
       </BottomSheet>
+
+      {lateMark.dialog}
 
       <ConfirmDialog
         visible={compassPromptOpen}
@@ -2232,10 +2287,12 @@ function OptionalToggle({
   tone?: 'optional' | 'minyan';
 }) {
   const { colors } = useTheme();
+  const consume = useContext(TapGuardContext);
   const accent = tone === 'minyan' ? colors.minyan : colors.optional;
   return (
     <Pressable
       onPress={onPress}
+      onTouchStart={consume}
       accessibilityRole="button"
       aria-expanded={expanded}
       style={({ pressed }) => [

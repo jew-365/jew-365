@@ -12,6 +12,7 @@ jest.mock('@/utils/afterPaint', () => ({
   },
 }));
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }), useNavigation: () => mockNavigation }));
+jest.mock('expo-status-bar', () => ({ setStatusBarStyle: jest.fn() }));
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(async () => {}),
   selectionAsync: jest.fn(async () => {}),
@@ -28,7 +29,7 @@ jest.mock('@/services/NotificationScheduler', () => ({
   refreshSchedulingOnForeground: async () => {},
 }));
 
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react-native';
 import HomeScreen from '../(tabs)/home';
 import { CITIES } from '@/data/cities';
 import { useCompletionsStore, dateKey } from '@/stores/useCompletionsStore';
@@ -97,7 +98,7 @@ describe('Kiddush Levana on home', () => {
     expect(screen.queryByText(NAME_PATTERN)).toBeNull();
     before.unmount();
     renderAt('2026-10-14T12:00');
-    expect(screen.getByText(NAME_PATTERN)).toBeOnTheScreen();
+    expect(within(screen.getByTestId('home-day-kiddush_levana')).getByText(/^נפתח ב-/)).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: `סמן ${NAME} כהושלם` })).toBeNull();
   });
 
@@ -126,11 +127,11 @@ describe('Kiddush Levana on home', () => {
       completions: { '2026-10-14': { kiddush_levana: at(JERUSALEM, '2026-10-18T20:00').getTime() } },
     });
     const tonight = renderAt('2026-10-18T22:00');
-    expect(screen.getByText('בוצעו (1)')).toBeOnTheScreen();
+    expect(within(screen.getByTestId('home-day-kiddush_levana')).getByText(/^בוצע ב-/)).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: `סמן ${NAME} כהושלם` })).toBeNull();
     tonight.unmount();
     renderAt('2026-10-20T20:00');
+    expect(screen.queryByTestId('home-day-kiddush_levana')).toBeNull();
     expect(screen.queryByText(NAME_PATTERN)).toBeNull();
-    expect(screen.queryByText('בוצעו (1)')).toBeNull();
   });
 });

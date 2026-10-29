@@ -143,10 +143,6 @@ describe('i18n gender-aware lookup', () => {
     useUserStore.setState({ language: 'en', gender: 'female' });
     expect(t('onboarding.registerTitle')).toBe(enTable['onboarding.registerTitle.f']);
   });
-
-  it('interpolates the home next-mitzvah line', () => {
-    expect(t('home.nextAt', { name: 'x', time: 'y' })).toBe('x · y');
-  });
 });
 
 describe('formatDate', () => {

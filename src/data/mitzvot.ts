@@ -286,7 +286,7 @@ export const MITZVOT: Mitzvah[] = [
     defaultReminders: [
       {
         anchor: 'clock',
-        offsetMin: 22 * 60 + 30,
+        offsetMin: 23 * 60,
         label: 'זמן קריאת שמע על המיטה',
         bodyVariants: ['זמן קריאת שמע על המיטה', 'קריאת שמע לפני השינה', 'לסיים את היום בשמע ישראל'],
       },

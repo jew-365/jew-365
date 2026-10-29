@@ -1013,7 +1013,7 @@ describe('the siddur reader folds its controls while the user reads', () => {
       },
     });
 
-  async function open() {
+  async function open(sections: SiddurSection[] = KEYED) {
     jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
     useUserStore.getState().reset();
     useUserStore.setState({
@@ -1023,7 +1023,7 @@ describe('the siddur reader folds its controls while the user reads', () => {
       nusach: 'ashkenaz',
       siddurCompassPrompt: false,
     });
-    mockLoadedText = { nusach: 'ashkenaz', id: 'shacharit', credits: [], sections: KEYED };
+    mockLoadedText = { nusach: 'ashkenaz', id: 'shacharit', credits: [], sections };
     for (const key of Object.keys(mockParams)) delete mockParams[key];
     Object.assign(mockParams, { id: 'shacharit', date: '2026-10-28' });
     renderWithTheme(<SiddurReaderScreen />);
@@ -1177,6 +1177,93 @@ describe('the siddur reader folds its controls while the user reads', () => {
     tap(260, 520);
     await act(async () => {});
     expect(folded()).toBe(true);
+  });
+
+  describe('a short tap on the text', () => {
+    const OPTIONAL: SiddurSection[] = [
+      ...KEYED,
+      {
+        title: { he: 'תוספת', en: 'Extra' },
+        optional: { he: 'רשות', en: 'Optional' },
+        segments: [{ key: 'k-extra-1', he: [[{ t: 'וְעוֹד מְעַט טֶקְסְט' }]] }],
+      },
+    ];
+    const autoScrollOn = () => useUserStore.getState().siddurAutoScroll;
+    const switches = () => screen.getAllByRole('switch', { name: 'גלילה אוטומטית', hidden: true });
+    const touch = async (
+      held: number,
+      from: [number, number] = [180, 400],
+      to: [number, number] = from,
+      guard?: ReturnType<typeof screen.getByRole>,
+    ) => {
+      const list = screen.getByTestId('siddur-list');
+      if (guard) fireEvent(guard, 'touchStart', { nativeEvent: { pageX: from[0], pageY: from[1], touches: [{}] } });
+      fireEvent(list, 'touchStart', { nativeEvent: { pageX: from[0], pageY: from[1], touches: [{}] } });
+      await later(held);
+      fireEvent(list, 'touchEnd', { nativeEvent: { pageX: to[0], pageY: to[1], touches: [] } });
+      await act(async () => {});
+    };
+
+    it('turns auto-scroll on and off, in step with the play switch', async () => {
+      await open();
+      expect(autoScrollOn()).toBe(false);
+      await touch(40);
+      expect(autoScrollOn()).toBe(true);
+      for (const play of switches()) expect(play.props.accessibilityState.checked).toBe(true);
+      await touch(40, [100, 300]);
+      expect(autoScrollOn()).toBe(false);
+      for (const play of switches()) expect(play.props.accessibilityState.checked).toBe(false);
+      fireEvent.press(switches()[0]);
+      expect(autoScrollOn()).toBe(true);
+      await touch(40);
+      expect(autoScrollOn()).toBe(false);
+    });
+
+    it('ignores a drag, a long press and a second finger', async () => {
+      await open();
+      await touch(40, [180, 400], [180, 430]);
+      expect(autoScrollOn()).toBe(false);
+      await touch(400);
+      expect(autoScrollOn()).toBe(false);
+      const list = screen.getByTestId('siddur-list');
+      fireEvent(list, 'touchStart', { nativeEvent: { pageX: 180, pageY: 400, touches: [{}, {}] } });
+      fireEvent(list, 'touchEnd', { nativeEvent: { pageX: 180, pageY: 400, touches: [] } });
+      fireEvent(list, 'touchStart', { nativeEvent: { pageX: 180, pageY: 400, touches: [{}] } });
+      fireEvent(list, 'touchCancel', { nativeEvent: { pageX: 180, pageY: 400, touches: [] } });
+      await act(async () => {});
+      expect(autoScrollOn()).toBe(false);
+      await touch(40);
+      expect(autoScrollOn()).toBe(true);
+    });
+
+    it('is not a tap on the text when a control inside the list takes it', async () => {
+      await open(OPTIONAL);
+      const toggle = screen.getByRole('button', { name: 'רשות', expanded: false });
+      await touch(40, [180, 400], [180, 400], toggle);
+      expect(autoScrollOn()).toBe(false);
+      fireEvent.press(toggle);
+      await act(async () => {});
+      expect(screen.getByRole('button', { name: 'רשות', expanded: true })).toBeOnTheScreen();
+      await touch(40);
+      expect(autoScrollOn()).toBe(true);
+    });
+
+    it('leaves auto-scroll as it was on a double tap, which still toggles the controls once', async () => {
+      await open();
+      await scrollList(600);
+      expect(folded()).toBe(true);
+      await touch(40);
+      expect(autoScrollOn()).toBe(true);
+      expect(folded()).toBe(true);
+      await touch(40, [182, 402]);
+      expect(autoScrollOn()).toBe(false);
+      expect(folded()).toBe(false);
+      await later(1000);
+      await touch(40);
+      await touch(40);
+      expect(autoScrollOn()).toBe(false);
+      expect(folded()).toBe(true);
+    });
   });
 
   it('turns auto-scroll on and off from the compact bar', async () => {

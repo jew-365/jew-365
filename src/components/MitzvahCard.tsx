@@ -1,19 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSequence,
-  withTiming,
-  withDelay,
-} from 'react-native-reanimated';
 import { useTheme } from '@/theme/ThemeProvider';
+import { lateTone } from '@/theme/colors';
 import { scaled } from '@/theme/scale';
-import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { fontFamilies, typography } from '@/theme/typography';
-import { durations, radius, spacing } from '@/theme/tokens';
+import { radius, spacing } from '@/theme/tokens';
 import { Card } from './Card';
 import { IconTile } from './IconTile';
+import { MarkStamp } from './MarkStamp';
 import { MitzvahIcon, type IconName } from './MitzvahIcon';
 import { TimeRibbon } from './TimeRibbon';
 import { useI18n } from '@/i18n';
@@ -35,6 +29,8 @@ type Props = {
   pct: number;
   urgent?: boolean;
   done?: boolean;
+  // A done mark made after the window had passed: the done line says so.
+  late?: boolean;
   stamping?: boolean;
   readOnly?: boolean;
   statusText?: string;
@@ -53,6 +49,7 @@ export function MitzvahCard({
   pct,
   urgent,
   done,
+  late,
   stamping,
   readOnly,
   statusText,
@@ -72,33 +69,8 @@ export function MitzvahCard({
   const canComplete = !readOnly && !done && Boolean(onComplete);
   const buttonCount = (onOpenText ? 1 : 0) + (canComplete || done ? 1 : 0);
   const [rowHeight, setRowHeight] = useState(TILE_SIZE);
-
-  const stampOpacity = useSharedValue(0);
-  const stampScale = useSharedValue(2.8);
-  const stampRotate = useSharedValue(-18);
-
-  useEffect(() => {
-    if (stamping) {
-      stampOpacity.value = 0;
-      stampScale.value = 2.8;
-      stampRotate.value = -18;
-      stampOpacity.value = withSequence(
-        withTiming(1, { duration: durations.stamp * 0.2 }),
-        withDelay(durations.stamp * 0.5, withTiming(0, { duration: durations.stamp * 0.3 })),
-      );
-      stampScale.value = withSequence(
-        withTiming(1.06, { duration: durations.stamp * 0.2 }),
-        withTiming(1, { duration: durations.stamp * 0.52 }),
-        withTiming(0.96, { duration: durations.stamp * 0.28 }),
-      );
-      stampRotate.value = withTiming(-12, { duration: durations.stamp * 0.2 });
-    }
-  }, [stamping, stampOpacity, stampScale, stampRotate]);
-
-  const stampStyle = useAnimatedStyle(() => ({
-    opacity: stampOpacity.value,
-    transform: [{ scale: stampScale.value }, { rotate: `${stampRotate.value}deg` }],
-  }));
+  const doneLabel = late ? t('state.markedLate') : t('state.completed');
+  const doneInk = late ? lateTone(colors).ink : colors.safe;
 
   return (
     <Card style={[styles.card, { backgroundColor: bg, opacity: done ? 0.55 : 1 }]}>
@@ -108,7 +80,7 @@ export function MitzvahCard({
         disabled={!onPress && !onLongPress}
         accessible
         accessibilityRole="button"
-        accessibilityLabel={[name, statusText, done ? t('state.completed') : timeLeft].filter(Boolean).join(', ')}
+        accessibilityLabel={[name, statusText, done ? doneLabel : timeLeft].filter(Boolean).join(', ')}
         // Without this the long-press menu — the only way to skip a mitzvah for the day without
         // falsely marking it done — is unreachable with a screen reader.
         accessibilityActions={onLongPress ? [{ name: 'longpress', label: t('home.quick.title') }] : undefined}
@@ -135,9 +107,9 @@ export function MitzvahCard({
             </Text>
             {done && (
               <View style={styles.iconLine}>
-                <MitzvahIcon name="check" size={DONE_LINE_ICON_SIZE} color={colors.safe} />
-                <Text style={[typography.micro, { color: colors.safe, fontFamily: fontFamilies.heebo.semibold }]}>
-                  {t('state.completed')}
+                <MitzvahIcon name="check" size={DONE_LINE_ICON_SIZE} color={doneInk} />
+                <Text style={[typography.micro, { color: doneInk, fontFamily: fontFamilies.heebo.semibold }]}>
+                  {doneLabel}
                 </Text>
               </View>
             )}
@@ -216,24 +188,7 @@ export function MitzvahCard({
           ) : null}
         </View>
       ) : null}
-      {stamping && (
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <View style={[styles.stampOverlay, { backgroundColor: bg + 'BB' }]}>
-            <Animated.View
-              style={[
-                styles.stamp,
-                {
-                  borderColor: colors.goldText,
-                },
-                shadowStyle(colors.goldLight, shadowPresets.glow),
-                stampStyle,
-              ]}
-            >
-              <Text style={[styles.stampText, { color: colors.goldText }]}>{t('state.stamped')}</Text>
-            </Animated.View>
-          </View>
-        </View>
-      )}
+      <MarkStamp active={Boolean(stamping)} background={bg} />
     </Card>
   );
 }
@@ -266,21 +221,5 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  stampOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stamp: {
-    borderWidth: scaled(3),
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.xl,
-    borderRadius: radius.sm,
-  },
-  stampText: {
-    fontSize: scaled(21),
-    fontFamily: fontFamilies.heebo.black,
-    letterSpacing: scaled(3),
   },
 });

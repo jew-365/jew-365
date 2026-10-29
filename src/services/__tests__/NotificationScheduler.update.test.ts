@@ -261,6 +261,17 @@ describe('NotificationScheduler update notice', () => {
     expect(StorageService.get(UPDATE_NOTIFIED_KEY)).toBe('u1');
   });
 
+  it('6b waits out the quiet hours', async () => {
+    useUserStore.getState().setQuietBefore({ enabled: true, minutes: 420 });
+
+    await expect(notifyIfUpdateReady(PINNED_NOW)).resolves.toBe(false);
+    expect(mockState.pending).toEqual([]);
+    expect(StorageService.get(UPDATE_NOTIFIED_KEY)).toBeUndefined();
+
+    await expect(notifyIfUpdateReady(at(JERUSALEM, '2026-11-11T07:00'))).resolves.toBe(true);
+    expect(pendingIds()).toEqual(['update:u1']);
+  });
+
   it('7 a notice for the running update, or an older one, is stale', async () => {
     expect(shouldSuppressForCompletion({ kind: 'update', updateId: 'running-id' })).toBe(true);
     expect(shouldSuppressForCompletion({ kind: 'update', updateId: 'u0', updateCreatedAt: OLDER })).toBe(true);

@@ -11,6 +11,7 @@ import { MitzvahCard } from '@/components/MitzvahCard';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
 import { useDayModel } from '@/hooks/useDayModel';
+import { useLateMarkDialog } from '@/hooks/useLateMarkDialog';
 import { useViewport, ViewportContext } from '@/hooks/useInView';
 import { StorageService } from '@/services/StorageService';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
@@ -18,7 +19,14 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { motion, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { HolyBlock } from '@/types/zmanim';
-import { CHECK_IN_PROMPTED_KEY, checkInFor, checkInLastDay, checkInPhraseKey, latestCheckIn } from '@/utils/checkIn';
+import {
+  CHECK_IN_PROMPTED_KEY,
+  CheckInItem,
+  checkInFor,
+  checkInLastDay,
+  checkInPhraseKey,
+  latestCheckIn,
+} from '@/utils/checkIn';
 import { clockOf } from '@/utils/clock';
 import { formatDate, useI18n } from '@/i18n';
 
@@ -32,8 +40,9 @@ export default function CheckInRoute() {
   const viewport = useViewport();
   const completions = useCompletionsStore((s) => s.completions);
   const skipped = useCompletionsStore((s) => s.skipped);
-  const markDone = useCompletionsStore((s) => s.markDone);
+  const late = useCompletionsStore((s) => s.late);
   const unmark = useCompletionsStore((s) => s.unmark);
+  const lateMark = useLateMarkDialog();
   const finishCheckIn = useCompletionsStore((s) => s.finishCheckIn);
 
   // The block whose check-in was open on arrival. It stays on screen after the last mark, which
@@ -66,12 +75,19 @@ export default function CheckInRoute() {
   );
 
   // Past the deadline a mark would rewrite a day that is already decided — and revive a broken streak.
-  const mark = (id: string, date: Date) => {
+  // Nearly every window here has closed with the block, so the mark asks when it was done.
+  const mark = (item: CheckInItem, date: Date) => {
     if (!checkIn || Date.now() >= checkIn.deadline.getTime()) {
       close();
       return;
     }
-    markDone(id, date);
+    lateMark.mark({
+      id: item.mitzvah.id,
+      name: nameFor(item.mitzvah),
+      date,
+      window: item.window,
+      until: checkIn.deadline,
+    });
   };
 
   const close = () => {
@@ -119,8 +135,8 @@ export default function CheckInRoute() {
                           pct={0}
                           hideProgress
                           statusText={t('checkin.pending')}
-                          onPress={() => mark(item.mitzvah.id, day.date)}
-                          onComplete={() => mark(item.mitzvah.id, day.date)}
+                          onPress={() => mark(item, day.date)}
+                          onComplete={() => mark(item, day.date)}
                         />
                       ))}
                   </View>
@@ -132,7 +148,11 @@ export default function CheckInRoute() {
                           <CompletedRow
                             key={item.mitzvah.id}
                             name={nameFor(item.mitzvah)}
-                            time={clockOf(item.window.start)}
+                            time={
+                              late[day.key]?.[item.mitzvah.id]
+                                ? `${clockOf(item.window.start)} · ${t('state.markedLate')}`
+                                : clockOf(item.window.start)
+                            }
                             onUndo={() => unmark(item.mitzvah.id, day.date)}
                             undoLabel={t('home.undo')}
                           />
@@ -152,6 +172,7 @@ export default function CheckInRoute() {
           {t('checkin.empty')}
         </Text>
       )}
+      {lateMark.dialog}
     </SafeAreaView>
   );
 }

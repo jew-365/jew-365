@@ -23,6 +23,7 @@ jest.mock('@/utils/afterPaint', () => ({
   },
 }));
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }), useNavigation: () => mockNavigation }));
+jest.mock('expo-status-bar', () => ({ setStatusBarStyle: jest.fn() }));
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(async () => {}),
   selectionAsync: jest.fn(async () => {}),
@@ -40,13 +41,11 @@ jest.mock('@/services/NotificationScheduler', () => ({
 }));
 
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react-native';
-import { DateTime } from 'luxon';
 import { Reveal } from '@/components/Reveal';
 import HomeScreen from '../(tabs)/home';
 import { AppLogo } from '@/components/AppLogo';
-import { MitzvahCard } from '@/components/MitzvahCard';
+import { CounterPill } from '@/components/ScreenHeader';
 import { CITIES } from '@/data/cities';
-import { formatDate } from '@/i18n';
 import { useChokStore } from '@/stores/useChokStore';
 import { useCompletionsStore, dateKey } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
@@ -56,7 +55,6 @@ import { installChokFixture } from '@/testing/chok';
 import { HIDDEN_INTL_NAMES, hideIntlDateNames } from '@/testing/intl';
 import { renderWithTheme } from '@/testing/render';
 import { at, zmanimFor } from '@/testing/zmanim';
-import { THEMES } from '@/theme/colors';
 import type { CustomMitzvah } from '@/types/mitzvah';
 import { chokReaderPortion } from '@/utils/chok';
 import { clockOf } from '@/utils/clock';
@@ -105,11 +103,29 @@ function renderAt(wallClock: string) {
 
 const completeButton = (name: string) => screen.getByRole('button', { name: `סמן ${name} כהושלם` });
 const completions = () => useCompletionsStore.getState().completions;
-const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const dayLabel = (day: number) => formatDate(DateTime.fromObject({ year: 2027, month: 6, day }), 'cccc · d LLLL', 'he');
+const nowCard = (id: string) => screen.getByTestId(`home-now-${id}`);
+const dayCard = (id: string) => screen.getByTestId(`home-day-${id}`);
 
 const cardWrappers = () =>
-  screen.UNSAFE_getAllByType(Reveal).filter((view) => within(view).UNSAFE_queryAllByType(MitzvahCard).length > 0);
+  screen
+    .UNSAFE_getAllByType(Reveal)
+    .filter(
+      (view) =>
+        view.findAll(
+          (node: { props: { testID?: unknown } }) =>
+            typeof node.props.testID === 'string' && node.props.testID.startsWith('home-now-'),
+        ).length > 0,
+    );
+const dayWrappers = () =>
+  screen
+    .UNSAFE_getAllByType(Reveal)
+    .filter(
+      (view) =>
+        view.findAll(
+          (node: { props: { testID?: unknown } }) =>
+            typeof node.props.testID === 'string' && node.props.testID.startsWith('home-day-'),
+        ).length > 0,
+    );
 
 function emitNavigation(event: 'focus' | 'blur') {
   mockFocused = event === 'focus';
@@ -137,6 +153,7 @@ describe('home between midnight and alot', () => {
       notificationPermission: 'granted',
       gender: 'male',
       maritalStatus: 'single',
+      homeLook: 'rings',
     });
     useCompletionsStore.getState().reset();
     useCustomMitzvotStore.getState().reset();
@@ -149,7 +166,7 @@ describe('home between midnight and alot', () => {
 
   it("keeps last night's maariv current and files its done under the evening's day", async () => {
     renderAt(NIGHT_OF_THE_14TH);
-    expect(screen.getByText('עכשיו — לפי דחיפות')).toBeOnTheScreen();
+    expect(screen.getByText(/^פתוח עכשיו/)).toBeOnTheScreen();
     fireEvent.press(completeButton('תפילת ערבית'));
     expect(Object.keys(completions())).toEqual(['2027-06-14']);
     expect(completions()['2027-06-14'].maariv).toBeGreaterThan(0);
@@ -168,7 +185,7 @@ describe('home between midnight and alot', () => {
       },
     });
     renderAt('2027-06-14T21:35');
-    expect(screen.queryByText('לא בוצע')).toBeNull();
+    expect(screen.queryByTestId('home-day-shacharit')).toBeNull();
     expect(screen.queryByRole('button', { name: 'סמן תפילת שחרית כהושלם' })).toBeNull();
     expect(completeButton('תפילת ערבית')).toBeOnTheScreen();
   });
@@ -185,22 +202,24 @@ describe('home between midnight and alot', () => {
       completions: { '2027-06-14': { shacharit: at(JERUSALEM, '2027-06-14T08:00').getTime() } },
     });
     renderAt('2027-06-14T21:35');
-    expect(screen.getByText('1/2')).toBeOnTheScreen();
-    expect(screen.queryByText('לא בוצע')).toBeNull();
+    const summary = within(screen.getByTestId('home-rings-summary'));
+    expect(summary.getAllByText('1')[0]).toBeOnTheScreen();
+    expect(summary.getByText('מתוך 2')).toBeOnTheScreen();
+    expect(screen.queryByText(/^פוספס · /)).toBeNull();
   });
 
   it("files an undo under the window's day", () => {
     useCompletionsStore.setState({ completions: { '2027-06-14': { maariv: Date.now() } } });
     renderAt(NIGHT_OF_THE_14TH);
-    expect(screen.getByText('בוצעו (1)')).toBeOnTheScreen();
-    fireEvent.press(screen.getByRole('button', { name: 'בטל' }));
+    expect(within(dayCard('maariv')).getByText(/^בוצע ב-/)).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'ביטול סימון — תפילת ערבית' }));
     expect(completions()['2027-06-14']).toBeUndefined();
-    expect(screen.queryByText('בוצעו (1)')).toBeNull();
+    expect(within(dayCard('maariv')).getByText(/^פתוח · נשארו/)).toBeOnTheScreen();
   });
 
   it("files a skip under the window's day", async () => {
     renderAt(NIGHT_OF_THE_14TH);
-    fireEvent(screen.getByRole('button', { name: /^תפילת ערבית/ }), 'longPress');
+    fireEvent(within(nowCard('maariv')).getByRole('button', { name: /^תפילת ערבית/ }), 'longPress');
     fireEvent.press(screen.getByText('דלג היום'));
     await act(async () => {});
     const skipped = useCompletionsStore.getState().skipped;
@@ -210,7 +229,7 @@ describe('home between midnight and alot', () => {
 
   it("opens the text on the window's day", () => {
     renderAt(NIGHT_OF_THE_14TH);
-    fireEvent.press(screen.getByRole('button', { name: 'פתח נוסח' }));
+    fireEvent.press(screen.getByRole('button', { name: 'נוסח — תפילת ערבית' }));
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/siddur/[id]',
       params: { id: 'maariv', date: '2027-06-14' },
@@ -223,15 +242,13 @@ describe('home between midnight and alot', () => {
     const night = renderAt(AFTER_CHATZOT);
     expect(completeButton('תפילת ערבית')).toBeOnTheScreen();
     expect(screen.queryByText('אין מצווה פתוחה ברגע זה')).toBeNull();
-    expect(screen.queryByText(/^לא בוצע/)).toBeNull();
-    expect(screen.queryByText(/^עבר הזמן ב-/)).toBeNull();
-    expect(screen.queryByText('הבא בתור')).toBeNull();
+    expect(screen.queryByText(/^פוספס · /)).toBeNull();
     night.unmount();
     jest.useRealTimers();
 
     renderAt(AFTER_ALOT);
-    expect(screen.queryByText(/^לא בוצע/)).toBeNull();
-    expect(screen.getByText('הבא בתור')).toBeOnTheScreen();
+    expect(screen.queryByText(/^פוספס · /)).toBeNull();
+    expect(within(dayCard('maariv')).getByText(/^נפתח ב-/)).toBeOnTheScreen();
   });
 
   it("files a maariv marked after chatzot under the evening's day", async () => {
@@ -242,15 +259,15 @@ describe('home between midnight and alot', () => {
     expect(dateKey(mockCancel.mock.calls[0][1] as Date)).toBe('2027-06-14');
   });
 
-  it('names the evening date in the subtitle until alot and the new date after it', () => {
+  it('names the evening date in the date line until alot and the new date after it', () => {
     const night = renderAt(NIGHT_OF_THE_14TH);
-    expect(screen.getByText(new RegExp(`^${escapeRegExp(dayLabel(14))}`))).toBeOnTheScreen();
-    expect(screen.queryByText(new RegExp(escapeRegExp(dayLabel(15))))).toBeNull();
+    expect(screen.getByText(/^יום שני · /)).toBeOnTheScreen();
+    expect(screen.queryByText(/^יום שלישי · /)).toBeNull();
     night.unmount();
     jest.useRealTimers();
 
     renderAt(AFTER_ALOT);
-    expect(screen.getByText(new RegExp(`^${escapeRegExp(dayLabel(15))}`))).toBeOnTheScreen();
+    expect(screen.getByText(/^יום שלישי · /)).toBeOnTheScreen();
   });
 
   describe.each(HIDDEN_INTL_NAMES)('without Intl weekday and month names (%s, Hermes on iOS)', (mode) => {
@@ -260,16 +277,16 @@ describe('home between midnight and alot', () => {
     });
     afterAll(() => restore());
 
-    it('names the day in the subtitle in Hebrew and English, never "null"', () => {
+    it('names the day in the date line in Hebrew and English, never "null"', () => {
       const hebrew = renderAt(AFTER_ALOT);
-      expect(screen.getByText(/^יום שלישי · 15 יוני · /)).toBeOnTheScreen();
+      expect(screen.getByText(/^יום שלישי · /)).toBeOnTheScreen();
       expect(screen.queryByText(/null/)).toBeNull();
       hebrew.unmount();
       jest.useRealTimers();
 
       useUserStore.setState({ language: 'en' });
       renderAt(AFTER_ALOT);
-      expect(screen.getByText(/^Tuesday · Jun 15 · /)).toBeOnTheScreen();
+      expect(screen.getByText(/^Tuesday · /)).toBeOnTheScreen();
       expect(screen.queryByText(/null/)).toBeNull();
     });
   });
@@ -277,25 +294,28 @@ describe('home between midnight and alot', () => {
   it('counts a mark of last night as the evening day, not the new one', () => {
     useCompletionsStore.setState({ completions: { '2027-06-14': { maariv: 1 } } });
     const night = renderAt(AFTER_CHATZOT);
-    expect(screen.getByText('1/1')).toBeOnTheScreen();
+    const first = within(screen.getByTestId('home-rings-summary'));
+    expect(first.getAllByText('1')[0]).toBeOnTheScreen();
+    expect(first.getByText('מתוך 1')).toBeOnTheScreen();
     night.unmount();
     jest.useRealTimers();
 
     renderAt(AFTER_ALOT);
-    expect(screen.getByText('0/1')).toBeOnTheScreen();
-    expect(screen.queryByText(/^בוצעו/)).toBeNull();
+    const second = within(screen.getByTestId('home-rings-summary'));
+    expect(second.getAllByText('0')[0]).toBeOnTheScreen();
+    expect(second.getByText('מתוך 1')).toBeOnTheScreen();
+    expect(screen.queryByText(/^בוצע ב-/)).toBeNull();
   });
 
-  it('puts the wordmark on its own brand row and keeps the done counter in the header', () => {
-    useCompletionsStore.setState({ completions: { '2027-06-14': { maariv: 1 } } });
-    renderAt(AFTER_CHATZOT);
-    const brand = screen.getByTestId('home-brand');
-    expect(brand).toHaveStyle({ flexDirection: 'row', justifyContent: 'flex-end' });
+  it('draws the hero with the icon in the top chip and the greeting', () => {
+    renderAt(NIGHT_OF_THE_14TH);
+    expect(screen.getByTestId('home-hero')).toBeOnTheScreen();
     expect(screen.UNSAFE_getAllByType(AppLogo)).toHaveLength(1);
-    expect(within(brand).UNSAFE_getByType(AppLogo).props).toMatchObject({ variant: 'wordmark', size: 34 });
-    expect(within(brand).queryByLabelText('בוצעו 1 מתוך 1')).toBeNull();
-    expect(screen.getByLabelText('בוצעו 1 מתוך 1')).toHaveStyle({ backgroundColor: THEMES.gold.goldLight });
-    expect(screen.getByText('1/1')).toHaveStyle({ color: THEMES.gold.goldText });
+    expect(screen.UNSAFE_getByType(AppLogo).props).toMatchObject({ variant: 'icon', size: 40 });
+    expect(screen.UNSAFE_queryAllByType(CounterPill)).toHaveLength(0);
+    expect(screen.getByText('לילה טוב')).toBeOnTheScreen();
+    act(() => useUserStore.setState({ profileName: 'דוד לוי' }));
+    expect(screen.getByText('לילה טוב, דוד')).toBeOnTheScreen();
   });
 
   describe('a custom mitzvah whose window starts after midnight', () => {
@@ -306,9 +326,8 @@ describe('home between midnight and alot', () => {
 
     it('is next up the evening before, with the start of the coming window', () => {
       renderAt('2027-06-14T23:00');
-      expect(screen.getByText('הבא בתור')).toBeOnTheScreen();
-      const start = clockOf(at(JERUSALEM, '2027-06-15T00:30'));
-      expect(screen.getByText(`${MIDNIGHT_NAME} · ${start}`)).toBeOnTheScreen();
+      const start = clockOf(at(JERUSALEM, '2027-06-15T00:30'), JERUSALEM.tz);
+      expect(within(dayCard(MIDNIGHT_ID)).getByText(`נפתח ב-${start}`)).toBeOnTheScreen();
     });
 
     it("is filed under the evening's day when done inside the window", () => {
@@ -318,15 +337,46 @@ describe('home between midnight and alot', () => {
       expect(completions()['2027-06-14'][MIDNIGHT_ID]).toBeGreaterThan(0);
     });
 
+    it('keeps a missed entry on My day through the stamp when it is marked', async () => {
+      renderAt('2027-06-15T02:00');
+      expect(within(dayCard(MIDNIGHT_ID)).getByText(/^פוספס · /)).toBeOnTheScreen();
+      fireEvent.press(completeButton(MIDNIGHT_NAME));
+      fireEvent.press(screen.getByText('עשיתי בזמן ולא סימנתי'));
+      expect(Object.keys(completions())).toEqual(['2027-06-14']);
+      let gap = false;
+      await waitFor(
+        () => {
+          if (!screen.queryByTestId(`home-day-${MIDNIGHT_ID}`)) gap = true;
+          expect(within(dayCard(MIDNIGHT_ID)).getByText(/^בוצע ב-/)).toBeOnTheScreen();
+        },
+        { timeout: 3000 },
+      );
+      expect(gap).toBe(false);
+    });
+
+    it('does not call everything marked while a missed entry is still open', () => {
+      useCustomMitzvotStore.getState().add(customWindow(LATE_ID, LATE_NAME, '22:00', '01:00'));
+      enableOnly(MIDNIGHT_ID, LATE_ID);
+      useCompletionsStore.setState({ completions: { '2027-06-14': { [LATE_ID]: Date.now() } } });
+      renderAt('2027-06-15T02:00');
+      expect(within(dayCard(MIDNIGHT_ID)).getByText(/^פוספס · /)).toBeOnTheScreen();
+      expect(within(dayCard(LATE_ID)).getByText(/^בוצע ב-/)).toBeOnTheScreen();
+      expect(screen.queryByText('הכול סומן להיום')).toBeNull();
+      fireEvent.press(completeButton(MIDNIGHT_NAME));
+      fireEvent.press(screen.getByText('עשיתי אחרי שעבר הזמן'));
+      expect(screen.getByText('הכול סומן להיום')).toBeOnTheScreen();
+    });
+
     it('is missed after its window, until alot', () => {
       renderAt('2027-06-15T02:00');
-      expect(screen.getByText('לא בוצע (1)')).toBeOnTheScreen();
+      const end = clockOf(at(JERUSALEM, '2027-06-15T01:30'), JERUSALEM.tz);
+      expect(within(dayCard(MIDNIGHT_ID)).getByText(`פוספס · נגמר ב-${end}`)).toBeOnTheScreen();
     });
 
     it("is next up for the following night's window once alot has passed", () => {
       renderAt(AFTER_ALOT);
-      const start = clockOf(at(JERUSALEM, '2027-06-16T00:30'));
-      expect(screen.getByText(`${MIDNIGHT_NAME} · ${start}`)).toBeOnTheScreen();
+      const start = clockOf(at(JERUSALEM, '2027-06-16T00:30'), JERUSALEM.tz);
+      expect(within(dayCard(MIDNIGHT_ID)).getByText(`נפתח ב-${start}`)).toBeOnTheScreen();
     });
   });
 
@@ -360,9 +410,10 @@ describe('home between midnight and alot', () => {
       jest.useRealTimers();
 
       renderAt('2026-10-28T05:00');
-      expect(screen.getByText('הבא בתור')).toBeOnTheScreen();
-      expect(screen.getByText(`${NIGHT_NAME} · ${clockOf(at(JERUSALEM, '2026-10-29T03:29'))}`)).toBeOnTheScreen();
-      expect(screen.queryByText('בוצעו (1)')).toBeNull();
+      expect(
+        within(dayCard(NIGHT_ID)).getByText(`נפתח ב-${clockOf(at(JERUSALEM, '2026-10-29T03:29'), JERUSALEM.tz)}`),
+      ).toBeOnTheScreen();
+      expect(screen.queryByText(/^בוצע ב-/)).toBeNull();
     });
   });
 
@@ -380,7 +431,7 @@ describe('home between midnight and alot', () => {
     it('stays current in the evening, after shkia', () => {
       renderAt('2026-12-16T20:00');
       expect(completeButton(CHOK_NAME)).toBeOnTheScreen();
-      expect(screen.queryByText(/^לא בוצע/)).toBeNull();
+      expect(screen.queryByText(/^פוספס · /)).toBeNull();
       expect(screen.queryByText('אין מצווה פתוחה ברגע זה')).toBeNull();
     });
 
@@ -393,7 +444,7 @@ describe('home between midnight and alot', () => {
     it('opens the reader with no date on Thursday night, on ליל שישי', () => {
       const thursdayNight = at(JERUSALEM, '2026-12-17T21:00');
       renderAt('2026-12-17T21:00');
-      fireEvent.press(screen.getByRole('button', { name: 'פתח נוסח' }));
+      fireEvent.press(screen.getByRole('button', { name: 'נוסח — חק לישראל' }));
       expect(mockPush).toHaveBeenCalledTimes(1);
       expect(mockPush.mock.calls[0][0]).toStrictEqual({ pathname: '/siddur/[id]', params: { id: 'chok_leyisrael' } });
       expect(chokReaderPortion({ now: thursdayNight }, JERUSALEM, true).slot).toBe('thuNight');
@@ -412,9 +463,14 @@ describe('home between midnight and alot', () => {
       useCustomMitzvotStore.getState().add(customWindow(MIDNIGHT_ID, MIDNIGHT_NAME, '00:30', '01:30'));
       enableOnly(MIDNIGHT_ID);
       renderAt('2027-06-15T02:00');
-      expect(screen.getByText('לא בוצע (1)')).toBeOnTheScreen();
-      expect(cardWrappers()).toHaveLength(1);
-      expect(cardWrappers()[0].props).toMatchObject({ delay: 0, duration: 260, shift: 25 });
+      expect(within(dayCard(MIDNIGHT_ID)).getByText(/^פוספס · /)).toBeOnTheScreen();
+      const wrappers = dayWrappers().filter(
+        (view) =>
+          view.findAll((node: { props: { testID?: unknown } }) => node.props.testID === `home-day-${MIDNIGHT_ID}`)
+            .length > 0,
+      );
+      expect(wrappers).toHaveLength(1);
+      expect(wrappers[0].props).toMatchObject({ delay: 0, duration: 260, shift: 25 });
     });
 
     it('replays after a return from another tab, not on a blur', async () => {
@@ -439,7 +495,17 @@ describe('home between midnight and alot', () => {
 
     it('follows blur and focus and unsubscribes on unmount', () => {
       const view = renderAt(NIGHT_OF_THE_14TH);
-      expect(mockListeners.map((entry) => entry.event).sort()).toEqual(['blur', 'blur', 'blur', 'focus', 'focus']);
+      expect(mockListeners.map((entry) => entry.event).sort()).toEqual([
+        'blur',
+        'blur',
+        'blur',
+        'blur',
+        'blur',
+        'focus',
+        'focus',
+        'focus',
+        'focus',
+      ]);
       view.unmount();
       expect(mockListeners).toEqual([]);
     });

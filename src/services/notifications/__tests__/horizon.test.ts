@@ -16,6 +16,7 @@ import { DEFAULT_HILULA_NOTICES, DEFAULT_ROSH_CHODESH_NOTICES } from '@/stores/u
 import { at } from '@/testing/zmanim';
 import { t } from '@/i18n';
 import { isQuietAt } from '@/utils/skipRules';
+import type { QuietHours } from '@/utils/quietHours';
 import type { Mitzvah } from '@/types/mitzvah';
 import { planHorizonEnd } from '../planners/horizonEnd';
 
@@ -271,5 +272,49 @@ describe('thinning edges and the end notice fallback', () => {
 
     expect(soon.trigger.getTime()).toBe(now.getTime() + 5 * 60_000);
     expect(moved.trigger.getTime()).toBe(shabbat.end.getTime());
+  });
+});
+
+describe('the end notice in quiet hours', () => {
+  const hoursOf = (before: number | null, after: number | null): QuietHours => ({ before, after });
+  const triggerOf = (quietHours: QuietHours, day: Date, { now, fallbackAt }: { now?: Date; fallbackAt?: Date } = {}) =>
+    planHorizonEnd(planInput({ quietHours, ...(now && { now }) }), day, fallbackAt).map((n) => n.trigger.getTime());
+  const TUESDAY = new Date(2026, 10, 10);
+  const FRIDAY = new Date(2026, 10, 13);
+
+  it('1 moves 20:00 back to the last open hour', () => {
+    expect(triggerOf(hoursOf(null, 1140), TUESDAY)).toEqual([at(JERUSALEM, '2026-11-10T19:00').getTime()]);
+  });
+
+  it('2 moves 20:00 forward to the first open hour', () => {
+    expect(triggerOf(hoursOf(1260, null), TUESDAY)).toEqual([at(JERUSALEM, '2026-11-10T21:00').getTime()]);
+  });
+
+  it('3 keeps 20:00 when the open hours hold it', () => {
+    expect(triggerOf(hoursOf(420, 1320), TUESDAY)).toEqual([at(JERUSALEM, '2026-11-10T20:00').getTime()]);
+  });
+
+  it('4 moves the exit of the block that covers the hour to the next day, or drops it with no day to wait for', () => {
+    const exit = HebcalService.holyBlockAt(at(JERUSALEM, '2026-11-14T12:00'), JERUSALEM)!.end;
+
+    expect(exit.getTime()).toBeGreaterThan(at(JERUSALEM, '2026-11-14T17:00').getTime());
+    expect(triggerOf(hoursOf(null, 1020), FRIDAY)).toEqual([at(JERUSALEM, '2026-11-15T17:00').getTime()]);
+    expect(triggerOf(hoursOf(420, 1020), FRIDAY)).toEqual([at(JERUSALEM, '2026-11-15T07:00').getTime()]);
+  });
+
+  it('5 moves a fallback inside the quiet night to the first open hour', () => {
+    const now = at(JERUSALEM, '2026-11-10T22:30');
+
+    expect(triggerOf(hoursOf(420, 1320), TUESDAY, { now, fallbackAt: at(JERUSALEM, '2026-11-10T22:40') })).toEqual([
+      at(JERUSALEM, '2026-11-11T07:00').getTime(),
+    ]);
+  });
+
+  it('6 is left out when the next hour it could wait for falls inside a block', () => {
+    const now = at(JERUSALEM, '2026-11-12T23:00');
+
+    expect(
+      triggerOf(hoursOf(null, 1140), new Date(2026, 10, 12), { now, fallbackAt: at(JERUSALEM, '2026-11-12T23:10') }),
+    ).toEqual([]);
   });
 });

@@ -136,7 +136,7 @@ describe('mitzvot windows extra', () => {
       expect(w.end.getTime()).toBeLessThan(block.end.getTime());
     });
 
-    it('is a daily evening mitzvah of every nusach, ideally before chatzot, with one 22:30 clock reminder', () => {
+    it('is a daily evening mitzvah of every nusach, ideally before chatzot, with one 23:00 clock reminder', () => {
       expect(bedtime()).toMatchObject({
         name: { he: 'קריאת שמע על המיטה', en: 'Bedtime Shema' },
         icon: 'night',
@@ -150,7 +150,7 @@ describe('mitzvot windows extra', () => {
       expect(bedtime().defaultReminders).toEqual([
         {
           anchor: 'clock',
-          offsetMin: 1350,
+          offsetMin: 1380,
           label: 'זמן קריאת שמע על המיטה',
           bodyVariants: ['זמן קריאת שמע על המיטה', 'קריאת שמע לפני השינה', 'לסיים את היום בשמע ישראל'],
         },

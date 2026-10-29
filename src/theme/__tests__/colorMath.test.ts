@@ -1,4 +1,14 @@
-import { CALENDAR_PARTIAL_SHARES, THEMES, THEME_NAMES, blendHex, contrastRatio, readableOn } from '../colors';
+import {
+  CALENDAR_PARTIAL_SHARES,
+  THEMES,
+  THEME_NAMES,
+  T_LIGHT,
+  blendHex,
+  contrastRatio,
+  doneTone,
+  missedTone,
+  readableOn,
+} from '../colors';
 
 describe('color math', () => {
   it('blends two hex colours channel by channel', () => {
@@ -31,6 +41,20 @@ describe('color math', () => {
       expect(contrastRatio(fill, ink)).toBeGreaterThanOrEqual(4.5);
     });
     expect(contrastRatio(gold, readableOn(gold, [text, onGold]))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('derives the missed and done tones', () => {
+    expect(missedTone(T_LIGHT)).toEqual({ fill: '#faeae6', border: '#f4cfcb', ink: '#7d2634', ring: '#da877c' });
+    expect(doneTone(T_LIGHT)).toEqual({ fill: '#e2f0e7', ink: '#155f52' });
+  });
+
+  it.each(THEME_NAMES)('%s: missed and done inks stay readable', (name) => {
+    const colors = THEMES[name];
+    const missed = missedTone(colors);
+    expect(contrastRatio(missed.ink, missed.fill)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(colors.text, missed.fill)).toBeGreaterThanOrEqual(4.5);
+    const done = doneTone(colors);
+    expect(contrastRatio(done.ink, done.fill)).toBeGreaterThanOrEqual(4.5);
   });
 
   it('keeps the three partial steps apart', () => {

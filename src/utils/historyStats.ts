@@ -23,18 +23,21 @@ export type HistoryInput = {
   checkIns?: CheckIns;
   archivedDays?: ArchivedDays;
   skipped?: Completions;
+  late?: Completions;
   enabledSince?: Record<string, number>;
   location: Location;
   settings: UserSettings;
 };
 
+// `missed` holds every decided item that does not count as done, a late mark included, so every score
+// reads a late mark as a miss; a surface that shows late marks apart reads the judged items.
 export type DayVerdict = { key: string; done: string[]; missed: string[]; pending: string[] };
 
 export function addDays(day: Date, days: number): Date {
   return new Date(day.getFullYear(), day.getMonth(), day.getDate() + days);
 }
 
-export type JudgedState = 'done' | 'missed' | 'skipped' | 'waiting' | 'open' | 'later';
+export type JudgedState = 'done' | 'late' | 'missed' | 'skipped' | 'waiting' | 'open' | 'later';
 
 export type JudgedItem = {
   id: string;
@@ -53,7 +56,7 @@ export type DayJudge = (day: Date) => JudgedDay;
 // into a Shabbat / Yom Tov block — until that block's check-in is finished or its deadline passes.
 // Only then can a missing mark count against the user. A skip settles it at once, and a mitzvah
 // whose window ended unmarked before it was switched on is not judged on it, while a done mark always counts
-// (`trackedOn()`), the install day's morning included.
+// (`trackedOn()`), the install day's morning included. A done mark made after the time had passed is `late`.
 export function judgeDayItems(day: Date, input: HistoryInput, now: Date, opts?: { checkInFlags?: boolean }): JudgedDay {
   const key = dateKey(day);
   const judged: JudgedDay = { key, items: [] };
@@ -64,6 +67,7 @@ export function judgeDayItems(day: Date, input: HistoryInput, now: Date, opts?: 
   const dayEnd = appDayEnd(day, location);
   const doneMap = input.completions[key] ?? {};
   const skippedMap = input.skipped?.[key] ?? {};
+  const lateMap = input.late?.[key] ?? {};
   let block: ReturnType<typeof blockForDay> | undefined;
   const blockOfDay = () => {
     if (block === undefined) block = blockForDay(day, location);
@@ -84,7 +88,7 @@ export function judgeDayItems(day: Date, input: HistoryInput, now: Date, opts?: 
             return found !== null && waitsInCheckIn(mitzvah, window, found);
           })()
         : false;
-      item('done', doneMap[mitzvah.id], inCheckIn);
+      item(lateMap[mitzvah.id] ? 'late' : 'done', doneMap[mitzvah.id], inCheckIn);
       continue;
     }
     if (skippedMap[mitzvah.id]) {
@@ -108,7 +112,7 @@ export function verdictOf(judged: JudgedDay): DayVerdict {
   const verdict: DayVerdict = { key: judged.key, done: [], missed: [], pending: [] };
   for (const { id, state } of judged.items) {
     if (state === 'done') verdict.done.push(id);
-    else if (state === 'missed' || state === 'skipped') verdict.missed.push(id);
+    else if (state === 'missed' || state === 'skipped' || state === 'late') verdict.missed.push(id);
     else verdict.pending.push(id);
   }
   return verdict;
@@ -169,7 +173,9 @@ export function computeStats(
   settings: UserSettings,
   daysBack = 30,
   now: Date = new Date(),
-  extra: Pick<HistoryInput, 'checkIns' | 'archivedDays' | 'skipped' | 'enabledSince'> & { judge?: DayJudge } = {},
+  extra: Pick<HistoryInput, 'checkIns' | 'archivedDays' | 'skipped' | 'late' | 'enabledSince'> & {
+    judge?: DayJudge;
+  } = {},
 ): HistoryStats {
   const { judge = (day: Date) => judgeDayItems(day, input, now), ...inputExtra } = extra;
   const input: HistoryInput = { mitzvot, completions, location, settings, ...inputExtra };

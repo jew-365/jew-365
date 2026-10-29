@@ -1,4 +1,12 @@
-import { TIME_PATTERN, clockOf, clockRange, fireTimeText, formatRemaining, timeToMinutes } from '../clock';
+import {
+  TIME_PATTERN,
+  clockOf,
+  clockRange,
+  fireTimeText,
+  formatRemaining,
+  remainingParts,
+  timeToMinutes,
+} from '../clock';
 import { translate } from '@/i18n';
 
 const he = (scope: string) => translate(scope, undefined, 'he');
@@ -26,6 +34,17 @@ describe('timeToMinutes', () => {
   it('orders a window the way the custom mitzvah form compares it', () => {
     expect(timeToMinutes('12:00')).toBeGreaterThan(timeToMinutes('08:00'));
     expect(timeToMinutes('09:59')).toBeLessThan(timeToMinutes('10:00'));
+  });
+});
+
+describe('remainingParts', () => {
+  it.each([
+    [0, { value: '0', unit: 'minutes' }],
+    [45 * MINUTE, { value: '45', unit: 'minutes' }],
+    [61 * MINUTE, { value: '1:01', unit: 'hours' }],
+    [49 * 60 * MINUTE, { value: '2', unit: 'days' }],
+  ])('splits %d ms', (ms, parts) => {
+    expect(remainingParts(ms)).toEqual(parts);
   });
 });
 

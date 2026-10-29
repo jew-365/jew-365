@@ -24,7 +24,9 @@ import {
   siddurPlace,
   siddurTextPresent,
 } from '@/data/siddur';
+import { useLateMarkDialog } from '@/hooks/useLateMarkDialog';
 import { useNeedsReminderDialog } from '@/hooks/useNeedsReminderDialog';
+import { useNow } from '@/hooks/useNow';
 import { useChokStore } from '@/stores/useChokStore';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
@@ -37,11 +39,14 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { ContentBlock, Reminder, UserSettings } from '@/types/mitzvah';
-import { currentOrNextWindow, windowDueToday } from '@/utils/buildDayTimeline';
+import { appDayWindow, currentOrNextWindow, windowDueToday } from '@/utils/buildDayTimeline';
+import { trackedOn } from '@/utils/checkIn';
 import { clockOf, clockRange, fireTimeText } from '@/utils/clock';
 import { customStartsOn, scheduleDateLabel } from '@/utils/customMitzvah';
 import { appDayKey } from '@/utils/locationDay';
+import { windowClosed } from '@/utils/lateMarks';
 import { mitzvahName, reminderLabel } from '@/utils/mitzvahName';
+import { quietHoursOf } from '@/utils/quietHours';
 import { timingSummary } from '@/utils/reminderTiming';
 import { buildTriggerTime, nextReminderAt } from '@/services/NotificationScheduler';
 import { useI18n } from '@/i18n';
@@ -64,8 +69,14 @@ export default function MitzvahDetailScreen() {
   const nusach = useUserStore((s) => s.nusach);
   const ksSofZman = useUserStore((s) => s.halachicOpinions.ksSofZman);
   const inIsrael = useUserStore((s) => s.inIsrael);
+  const quietBefore = useUserStore((s) => s.quietBefore);
+  const quietAfter = useUserStore((s) => s.quietAfter);
   const completions = useCompletionsStore((s) => s.completions);
   const skipped = useCompletionsStore((s) => s.skipped);
+  const late = useCompletionsStore((s) => s.late);
+  const unmark = useCompletionsStore((s) => s.unmark);
+  const lateMark = useLateMarkDialog();
+  const ticked = useNow();
   const active = useMitzvotStore(selectActive(params.id));
   const setReminders = useMitzvotStore((s) => s.setReminders);
   const resetToDefault = useMitzvotStore((s) => s.resetToDefault);
@@ -88,6 +99,7 @@ export default function MitzvahDetailScreen() {
     () => ({ nusach, halachicOpinions: { ksSofZman }, inIsrael }),
     [nusach, ksSofZman, inIsrael],
   );
+  const quietHours = useMemo(() => quietHoursOf(quietBefore, quietAfter), [quietBefore, quietAfter]);
   const window = useMemo(
     () => (mitzvah && !addonMissing ? currentOrNextWindow(mitzvah, location, settings) : null),
     [mitzvah, addonMissing, location, settings],
@@ -103,12 +115,40 @@ export default function MitzvahDetailScreen() {
   const nextTrigger = useMemo(
     () =>
       mitzvah && showNext
-        ? nextReminderAt(mitzvah, reminders, { now: new Date(), location, settings, completions, skipped })
+        ? nextReminderAt(mitzvah, reminders, {
+            now: new Date(),
+            location,
+            settings,
+            completions,
+            skipped,
+            quietHours,
+          })
         : null,
-    [mitzvah, showNext, reminders, location, settings, completions, skipped],
+    [mitzvah, showNext, reminders, location, settings, completions, skipped, quietHours],
   );
+  // The mark of the window home shows today: offered once it has opened, and asked about once it has closed.
+  const todayMark = useMemo(() => {
+    if (!mitzvah || addonMissing || !active.enabled) return null;
+    const now = new Date();
+    const found = appDayWindow(mitzvah, location, settings, now);
+    if (!found) return null;
+    const key = dateKey(found.date);
+    const doneAt = completions[key]?.[mitzvah.id];
+    const skippedAt = skipped[key]?.[mitzvah.id];
+    const since = active.enabledAt ? { [mitzvah.id]: active.enabledAt } : {};
+    if (!trackedOn(mitzvah, found, since, Boolean(doneAt))) return null;
+    if (!doneAt && !skippedAt && now.getTime() < found.start.getTime()) return null;
+    return {
+      window: found,
+      doneAt,
+      skipped: Boolean(skippedAt),
+      late: Boolean(doneAt && late[key]?.[mitzvah.id]),
+      closed: windowClosed(found, now),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ticked re-runs the memo on purpose, it reads the clock itself
+  }, [mitzvah, addonMissing, active.enabled, active.enabledAt, location, settings, completions, skipped, late, ticked]);
   const reminderRows = useMemo(() => {
-    const scope = { now: new Date(), location, settings, completions, skipped };
+    const scope = { now: new Date(), location, settings, completions, skipped, quietHours };
     return reminders
       .map((reminder, index) => ({
         reminder,
@@ -117,7 +157,7 @@ export default function MitzvahDetailScreen() {
         order: window ? buildTriggerTime(reminder, window, location).getTime() : index,
       }))
       .sort((a, b) => a.order - b.order || a.index - b.index);
-  }, [mitzvah, showNext, reminders, window, location, settings, completions, skipped]);
+  }, [mitzvah, showNext, reminders, window, location, settings, completions, skipped, quietHours]);
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
 
@@ -236,6 +276,43 @@ export default function MitzvahDetailScreen() {
             }
           />
         </Card>
+        {todayMark ? (
+          <View testID="mitzvah-today-mark">
+            <Card padded>
+              <Text style={[typography.subheading, { color: colors.text }]}>{t('detail.today.title')}</Text>
+              <Text style={[typography.caption, styles.todayCaption, { color: colors.textSub }]}>
+                {todayMark.doneAt
+                  ? t(todayMark.late ? 'detail.today.late' : 'detail.today.done', {
+                      time: clockOf(new Date(todayMark.doneAt), location.tz),
+                    })
+                  : todayMark.skipped
+                    ? t('state.skipped')
+                    : t(todayMark.closed ? 'detail.today.closed' : 'detail.today.open', {
+                        time: clockOf(todayMark.window.end, location.tz),
+                      })}
+              </Text>
+              {todayMark.doneAt || todayMark.skipped ? (
+                <Button
+                  variant="secondary"
+                  icon="undo"
+                  label={t('home.undo')}
+                  accessibilityLabel={t('home.day.undoLabel', { name })}
+                  onPress={() => unmark(mitzvah.id, todayMark.window.date)}
+                />
+              ) : (
+                <Button
+                  variant="secondary"
+                  icon="check"
+                  label={t('notifications.markDone')}
+                  accessibilityLabel={t('state.completeAction', { name })}
+                  onPress={() =>
+                    lateMark.mark({ id: mitzvah.id, name, date: todayMark.window.date, window: todayMark.window })
+                  }
+                />
+              )}
+            </Card>
+          </View>
+        ) : null}
         {isChok ? <ChokAddonCard /> : null}
         {isSelichot ? <SelichotAddonCard /> : null}
         {textNow || textAnytime ? <Button label={t('siddur.open')} onPress={openText} /> : null}
@@ -418,6 +495,7 @@ export default function MitzvahDetailScreen() {
         onCancel={() => setDeleteIndex(null)}
       />
       {needsReminder.dialog}
+      {lateMark.dialog}
     </SafeAreaView>
   );
 }
@@ -491,6 +569,10 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     gap: spacing.md,
+  },
+  todayCaption: {
+    marginTop: spacing.xs,
+    marginBottom: spacing.md,
   },
   windowRow: {
     flexDirection: 'row',

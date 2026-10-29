@@ -8,6 +8,7 @@ import { downloadNewUpdate, isUpdateApplied } from '@/services/appUpdates';
 import { clearLastError, getLastError, reportError } from '@/services/errors';
 import { afterPaint } from '@/utils/afterPaint';
 import { isQuietAt } from '@/utils/skipRules';
+import { inQuietHours, quietHoursOf } from '@/utils/quietHours';
 import { appDay, appDayEnd } from '@/utils/locationDay';
 import { blockForDay, blockOfCheckIn, checkInFor } from '@/utils/checkIn';
 import { deriveCycle } from '@/utils/taharah/cycle';
@@ -212,8 +213,9 @@ export async function notifyIfUpdateReady(now: Date = new Date()): Promise<boole
   const previous = StorageService.get<string>(UPDATE_NOTIFIED_KEY);
   if (previous === update.id) return false;
   if (!hasNotificationPermission()) return false;
-  const { isOnboarded, location } = useUserStore.getState();
+  const { isOnboarded, location, quietBefore, quietAfter } = useUserStore.getState();
   if (isOnboarded && isQuietAt(now, location)) return false;
+  if (inQuietHours(now, quietHoursOf(quietBefore, quietAfter), location.tz)) return false;
   await os.ensureChannels();
   if (previous) await os.dismiss([`${UPDATE_KIND}:${previous}`]);
   await os.presentNow({
@@ -507,6 +509,8 @@ export function initNotificationHandlers(): () => void {
         state.roshChodeshEnabled !== prev.roshChodeshEnabled ||
         state.hilulaNotices !== prev.hilulaNotices ||
         state.roshChodeshNotices !== prev.roshChodeshNotices ||
+        state.quietBefore !== prev.quietBefore ||
+        state.quietAfter !== prev.quietAfter ||
         state.weeklyReportEnabled !== prev.weeklyReportEnabled
       ) {
         NotificationScheduler.rebuild().catch(reportScheduleError);

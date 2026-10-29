@@ -68,6 +68,7 @@ import { NavBar } from '@/components/NavBar';
 import { PermissionsList } from '@/components/PermissionsList';
 import { SectionLabel } from '@/components/SectionLabel';
 import { ThemeSwatchRow } from '@/components/ThemeSwatchRow';
+import { TimeField } from '@/components/TimeField';
 import { SettingsSearchBox, SettingsSearchResults, useSettingsSearch } from '@/components/SettingsSearch';
 import { SettingsSection } from '@/components/SettingsSection';
 import { ScrollSpeedStepper } from '@/components/ScrollSpeedStepper';
@@ -80,6 +81,8 @@ import type { ChokThuNightDay } from '@/types/chok';
 import { findMitzvah } from '@/data/mitzvot';
 import { Nusach } from '@/types/mitzvah';
 import type { SiddurVoice } from '@/types/siddur';
+import { minutesToTime, timeToMinutes } from '@/utils/clock';
+import { quietBoundsValid, type QuietBound } from '@/utils/quietHours';
 import { SETTINGS_SEARCH_ITEMS, type SettingsSearchItem, type SettingsSectionKey } from '@/utils/settingsSearch';
 
 const NUSACHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
@@ -127,6 +130,8 @@ export default function SettingsScreen() {
       siddurCompassPrompt: s.siddurCompassPrompt,
       taharahEnabled: s.taharahEnabled,
       weeklyReportEnabled: s.weeklyReportEnabled,
+      quietBefore: s.quietBefore,
+      quietAfter: s.quietAfter,
       location: s.location,
       inIsrael: s.inIsrael,
       locationStatus: s.locationStatus,
@@ -147,6 +152,8 @@ export default function SettingsScreen() {
       setChokThuNightDay: s.setChokThuNightDay,
       setSiddurCompassPrompt: s.setSiddurCompassPrompt,
       setWeeklyReportEnabled: s.setWeeklyReportEnabled,
+      setQuietBefore: s.setQuietBefore,
+      setQuietAfter: s.setQuietAfter,
       setTheme: s.setTheme,
       setUiScale: s.setUiScale,
       setLanguage: s.setLanguage,
@@ -631,6 +638,15 @@ export default function SettingsScreen() {
                     style={styles.groupGap}
                   />
                 </Anchor>
+                <QuietHoursBlock
+                  before={user.quietBefore}
+                  after={user.quietAfter}
+                  onBefore={user.setQuietBefore}
+                  onAfter={user.setQuietAfter}
+                  beforeAnchor={anchor('quietBefore')}
+                  afterAnchor={anchor('quietAfter')}
+                  taharahNote={taharahVisible && user.taharahEnabled}
+                />
                 <Anchor {...anchor('permissions')}>
                   <SectionLabel variant="field" text={t('permissions.title')} style={styles.fieldLabel} />
                   <PermissionsList />
@@ -887,6 +903,92 @@ function TaharahBlock({ enabled, gender, onOpen }: TaharahBlockProps) {
       />
       {enabled ? <Button label={t('settings.taharahOpen')} onPress={onOpen} style={styles.buttonGap} /> : null}
       <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>{t('taharah.disclaimer')}</Text>
+    </>
+  );
+}
+
+type AnchorTarget = Omit<AnchorProps, 'children'>;
+
+type QuietHoursBlockProps = {
+  before: QuietBound;
+  after: QuietBound;
+  onBefore: (bound: QuietBound) => void;
+  onAfter: (bound: QuietBound) => void;
+  beforeAnchor: AnchorTarget;
+  afterAnchor: AnchorTarget;
+  taharahNote: boolean;
+};
+
+function QuietHoursBlock({
+  before,
+  after,
+  onBefore,
+  onAfter,
+  beforeAnchor,
+  afterAnchor,
+  taharahNote,
+}: QuietHoursBlockProps) {
+  const { colors } = useTheme();
+  const { t } = useI18n();
+  const [refused, setRefused] = useState<'before' | 'after' | null>(null);
+  const error = t('settings.quietHoursError');
+  const anyOn = before.enabled || after.enabled;
+
+  const change = (which: 'before' | 'after', next: QuietBound) => {
+    const allowed = which === 'before' ? quietBoundsValid(next, after) : quietBoundsValid(before, next);
+    setRefused(allowed ? null : which);
+    if (!allowed) return;
+    if (which === 'before') onBefore(next);
+    else onAfter(next);
+  };
+
+  return (
+    <>
+      <Anchor {...beforeAnchor}>
+        <SwitchRow
+          label={t('settings.quietBefore')}
+          hint={t('settings.quietBeforeHint')}
+          value={before.enabled}
+          onValueChange={(enabled) => change('before', { ...before, enabled })}
+          style={styles.groupGap}
+        />
+        {before.enabled ? (
+          <TimeField
+            label={t('settings.quietBeforeTime')}
+            value={minutesToTime(before.minutes)}
+            onChange={(time) => change('before', { enabled: true, minutes: timeToMinutes(time) })}
+            error={refused === 'before' ? error : undefined}
+            style={styles.buttonGap}
+          />
+        ) : null}
+      </Anchor>
+      <Anchor {...afterAnchor}>
+        <SwitchRow
+          label={t('settings.quietAfter')}
+          hint={t('settings.quietAfterHint')}
+          value={after.enabled}
+          onValueChange={(enabled) => change('after', { ...after, enabled })}
+          style={styles.groupGap}
+        />
+        {after.enabled ? (
+          <TimeField
+            label={t('settings.quietAfterTime')}
+            value={minutesToTime(after.minutes)}
+            onChange={(time) => change('after', { enabled: true, minutes: timeToMinutes(time) })}
+            error={refused === 'after' ? error : undefined}
+            style={styles.buttonGap}
+          />
+        ) : null}
+      </Anchor>
+      {refused ? <Text style={[typography.small, styles.note, { color: colors.urgent }]}>{error}</Text> : null}
+      {anyOn ? (
+        <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>{t('settings.quietHoursNote')}</Text>
+      ) : null}
+      {anyOn && taharahNote ? (
+        <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>
+          {t('settings.quietHoursTaharahNote')}
+        </Text>
+      ) : null}
     </>
   );
 }

@@ -35,12 +35,13 @@ import { useNow } from '@/hooks/useNow';
 import { useCountUp, useEntrance, usePop, usePressScale } from '@/hooks/useMotion';
 import { useRowMirrored } from '@/hooks/useRowMirrored';
 import { formatDate, useI18n } from '@/i18n';
+import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { MITZVOT } from '@/data/mitzvot';
 import { Achievements, BadgeId, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { enabledSinceOf, useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
-import { CALENDAR_PARTIAL_SHARES, blendHex, readableOn } from '@/theme/colors';
+import { CALENDAR_PARTIAL_SHARES, blendHex, lateTone, readableOn } from '@/theme/colors';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { motion, radius, spacing } from '@/theme/tokens';
@@ -96,7 +97,9 @@ import {
   weekdayInsight,
   weeksInsight,
 } from '@/utils/historyTrends';
+import { countLateMarks } from '@/utils/lateMarks';
 import { appDay, appDayKey } from '@/utils/locationDay';
+import { firstName } from '@/utils/homeDay';
 import { nextStreakGoal } from '@/utils/streakGoal';
 import { shabbatOf } from '@/utils/weeklyReport';
 
@@ -130,6 +133,7 @@ type ViewModel = {
   live: LiveRuns;
   achievements: Achievements | null;
   totals: MarkTotals;
+  lateCount: number;
   periods: PeriodPercents;
   month: CalendarMonth;
   weeks: WeekPoint[];
@@ -459,20 +463,25 @@ function DayItemRow({
 }) {
   const { colors } = useTheme();
   const { t } = useI18n();
+  const late = lateTone(colors);
   const label =
     item.state === 'done'
       ? item.inCheckIn
         ? t('history.day.state.doneInCheckIn')
         : t('history.day.state.doneAt', { time: clockOf(new Date(item.markedAt ?? 0), zone) })
-      : item.state === 'waiting'
-        ? t(blockKind === 'shabbat' ? 'history.day.state.waitingShabbat' : 'history.day.state.waitingYomTov')
-        : t(`history.day.state.${item.state}`);
+      : item.state === 'late'
+        ? t('history.day.state.late', { time: clockOf(new Date(item.markedAt ?? 0), zone) })
+        : item.state === 'waiting'
+          ? t(blockKind === 'shabbat' ? 'history.day.state.waitingShabbat' : 'history.day.state.waitingYomTov')
+          : t(`history.day.state.${item.state}`);
   const tone =
-    item.state === 'done' || item.state === 'open' || item.state === 'waiting'
-      ? colors.goldText
-      : item.state === 'missed'
-        ? colors.textSub
-        : colors.textMuted;
+    item.state === 'late'
+      ? late.ink
+      : item.state === 'done' || item.state === 'open' || item.state === 'waiting'
+        ? colors.goldText
+        : item.state === 'missed'
+          ? colors.textSub
+          : colors.textMuted;
   return (
     <Pressable
       testID={`history-day-item-${item.id}`}
@@ -489,10 +498,13 @@ function DayItemRow({
         style={[
           styles.dayState,
           item.state === 'done' && { backgroundColor: colors.goldLight },
+          item.state === 'late' && { backgroundColor: late.fill },
           item.state === 'waiting' && { borderWidth: 1, borderStyle: 'dashed', borderColor: colors.gold },
         ]}
       >
-        {item.state === 'done' ? <MitzvahIcon name="check" size={scaled(12)} color={tone} strokeWidth={2.5} /> : null}
+        {item.state === 'done' || item.state === 'late' ? (
+          <MitzvahIcon name="check" size={scaled(12)} color={tone} strokeWidth={2.5} />
+        ) : null}
         <Text style={[typography.small, { color: tone }]}>{label}</Text>
       </View>
     </Pressable>
@@ -898,6 +910,7 @@ export default function HistoryScreen() {
   const checkIns = useCompletionsStore((s) => s.checkIns);
   const archivedDays = useCompletionsStore((s) => s.archivedDays);
   const skipped = useCompletionsStore((s) => s.skipped);
+  const late = useCompletionsStore((s) => s.late);
   const [model, setModel] = useState<ViewModel | null>(null);
   const focused = useIsFocused();
   const computedFor = useRef<readonly unknown[] | null>(null);
@@ -938,7 +951,7 @@ export default function HistoryScreen() {
 
   useEffect(() => {
     if (!focused) return;
-    const inputs = [enabled, completions, checkIns, archivedDays, skipped, activeMap, location, settings, dayKey];
+    const inputs = [enabled, completions, checkIns, archivedDays, skipped, late, activeMap, location, settings, dayKey];
     const last = computedFor.current;
     if (last && inputs.every((input, index) => Object.is(input, last[index]))) return;
     let cancelled = false;
@@ -950,6 +963,7 @@ export default function HistoryScreen() {
         checkIns,
         archivedDays,
         skipped,
+        late,
         enabledSince: enabledSinceOf(activeMap),
         location,
         settings,
@@ -959,6 +973,7 @@ export default function HistoryScreen() {
         checkIns,
         archivedDays,
         skipped,
+        late,
         enabledSince: input.enabledSince,
         judge,
       });
@@ -979,7 +994,8 @@ export default function HistoryScreen() {
         stats,
         live: fold.live,
         achievements: useCompletionsStore.getState().achievements,
-        totals: markTotals(completions, store.archivedMarks),
+        totals: markTotals(completions, store.archivedMarks, late),
+        lateCount: countLateMarks({ find: findAnyMitzvah, completions, late }),
         periods: periodPercents(input, now, judge),
         month: calendarMonth(null, input, now, judge),
         weeks,
@@ -996,7 +1012,7 @@ export default function HistoryScreen() {
       cancelled = true;
       task.cancel();
     };
-  }, [focused, enabled, completions, checkIns, archivedDays, skipped, activeMap, location, settings, dayKey]);
+  }, [focused, enabled, completions, checkIns, archivedDays, skipped, late, activeMap, location, settings, dayKey]);
 
   const month = useMemo(() => {
     if (!model) return null;
@@ -1040,8 +1056,8 @@ export default function HistoryScreen() {
   const stats = model?.stats ?? EMPTY_STATS;
   const now = new Date();
   const today = appDay(now, location);
-  const firstName = profileName.trim().split(/\s+/)[0];
-  const greeting = firstName ? t('history.greeting', { name: firstName }) : t('history.greetingNeutral');
+  const name = firstName(profileName);
+  const greeting = name ? t('history.greeting', { name }) : t('history.greetingNeutral');
   const dateLine = `${formatDate(today, 'cccc', language)}, ${HebcalService.getHebrewDateAt(now, location).hebrewDateStr}`;
   const goal = nextStreakGoal(stats.streak);
   const remaining = goal - stats.streak;
@@ -1191,6 +1207,19 @@ export default function HistoryScreen() {
               onPress={() => changeTab('achievements')}
             />
           </View>
+          {data.lateCount ? (
+            <View testID="history-late-link">
+              <ListRow
+                icon="calendar"
+                title={t('late.title')}
+                caption={t(data.lateCount === 1 ? 'history.lateLink.once' : 'history.lateLink', {
+                  count: data.lateCount,
+                })}
+                chevron
+                onPress={() => router.push('/late-marks')}
+              />
+            </View>
+          ) : null}
         </Card>
 
         <MonthCalendar

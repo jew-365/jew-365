@@ -267,3 +267,28 @@ export function readableOn(fill: string, candidates: string[]): string {
 }
 
 export const CALENDAR_PARTIAL_SHARES = { p1: 0.22, p2: 0.4, p3: 0.55 } as const;
+
+export function missedTone(colors: ThemeColors): { fill: string; border: string; ink: string; ring: string } {
+  return {
+    fill: blendHex(colors.urgent, colors.surface, 0.09),
+    border: blendHex(colors.urgent, colors.surface, 0.22),
+    ink: blendHex(colors.urgent, colors.text, 0.55),
+    ring: blendHex(blendHex(colors.urgent, '#B0683C', 0.68), colors.surface, 0.62),
+  };
+}
+
+export function doneTone(colors: ThemeColors): { fill: string; ink: string } {
+  return {
+    fill: blendHex(colors.safe, colors.surface, 0.12),
+    ink: blendHex(colors.safe, colors.text, 0.55),
+  };
+}
+
+// A done mark made after its window had passed: the warning hue, never the done green.
+export function lateTone(colors: ThemeColors): { fill: string; ink: string; ring: string } {
+  return {
+    fill: blendHex(colors.warning, colors.surface, 0.14),
+    ink: blendHex(colors.warning, colors.text, 0.45),
+    ring: colors.warning,
+  };
+}

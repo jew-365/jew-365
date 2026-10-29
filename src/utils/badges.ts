@@ -41,11 +41,13 @@ export function badgeKind(id: BadgeId): BadgeKind {
 
 export type MarkTotals = { total: number; byMitzvah: Record<string, number> };
 
-export function markTotals(completions: Completions, archived: MarkCounts): MarkTotals {
+// A late mark keeps the day but never counts as a mark here.
+export function markTotals(completions: Completions, archived: MarkCounts, late: Completions = {}): MarkTotals {
   const byMitzvah = { ...archived.byMitzvah };
   let total = archived.total;
-  for (const day of Object.values(completions)) {
+  for (const [key, day] of Object.entries(completions)) {
     for (const id of Object.keys(day)) {
+      if (late[key]?.[id]) continue;
       total += 1;
       byMitzvah[id] = (byMitzvah[id] ?? 0) + 1;
     }
@@ -58,6 +60,7 @@ export function markBadges(
   archived: MarkCounts,
   fallbackKey: string = dateKey(),
   knownIds?: string[],
+  late: Completions = {},
 ): Partial<Record<BadgeId, string>> {
   const keys = Object.keys(completions).sort();
   const earliest = keys[0] ?? fallbackKey;
@@ -72,6 +75,7 @@ export function markBadges(
   }
   for (const key of keys) {
     for (const id of Object.keys(completions[key])) {
+      if (late[key]?.[id]) continue;
       total += 1;
       counts[id] = (counts[id] ?? 0) + 1;
       if (total >= THOUSAND_MARKS && !badges.thousandMarks) badges.thousandMarks = key;
@@ -150,7 +154,7 @@ export function foldAchievements(
     let due = 0;
     for (const day of days) {
       for (const { state } of judge(day).items) {
-        if (state === 'waiting' || state === 'open' || state === 'later' || state === 'missed' || state === 'skipped') {
+        if (state !== 'done') {
           return false;
         }
         due += 1;
@@ -237,7 +241,7 @@ export function foldAchievements(
     : (stored?.fold ?? null);
   return {
     next: {
-      badges: { ...badges, ...markBadges(input.completions, archived, appDayKey(now, location), knownIds) },
+      badges: { ...badges, ...markBadges(input.completions, archived, appDayKey(now, location), knownIds, input.late) },
       bestStreak,
       bestWeek,
       mitzvahBest,

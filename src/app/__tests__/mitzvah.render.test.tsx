@@ -628,7 +628,7 @@ describe('Mitzvah screen', () => {
       expect(screen.getByText('Ideally before chatzot (halachic midnight)')).toBeOnTheScreen();
     });
 
-    it('runs the bedtime Shema to the next alot, prints its description and 22:30 reminder, and opens its text', () => {
+    it('runs the bedtime Shema to the next alot, prints its description and 23:00 reminder, and opens its text', () => {
       const clock = (instant: Date) => DateTime.fromJSDate(instant, { zone: JERUSALEM.tz }).toFormat('HH:mm');
       const start = clock(zmanimFor(at(JERUSALEM, '2026-10-28T12:00'), JERUSALEM).tzeitHakochavim);
       const end = clock(zmanimFor(at(JERUSALEM, '2026-10-29T12:00'), JERUSALEM).alotHaShachar);
@@ -636,8 +636,8 @@ describe('Mitzvah screen', () => {
       expect(screen.getByText(`יומי · ${start} עד ${end} למחרת`)).toBeOnTheScreen();
       expect(screen.getByText('לכתחילה לפני חצות הלילה')).toBeOnTheScreen();
       expect(screen.getByText('זמן קריאת שמע על המיטה')).toBeOnTheScreen();
-      expect(screen.getByText('ההתראה הבאה תישלח ב-28/10 22:30')).toBeOnTheScreen();
-      expect(screen.getByText('הבאה ב-28/10 22:30')).toBeOnTheScreen();
+      expect(screen.getByText('ההתראה הבאה תישלח ב-28/10 23:00')).toBeOnTheScreen();
+      expect(screen.getByText('הבאה ב-28/10 23:00')).toBeOnTheScreen();
       fireEvent.press(screen.getByRole('button', { name: 'פתח נוסח' }));
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/siddur/[id]',

@@ -14,15 +14,21 @@ export function minutesToTime(minutes: number): string {
   return `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
 }
 
-export function formatRemaining(ms: number, t: Translate): string {
+export type RemainingUnit = 'minutes' | 'hours' | 'days';
+
+export function remainingParts(ms: number): { value: string; unit: RemainingUnit } {
   const totalMin = Math.max(0, Math.round(ms / 60000));
-  if (totalMin >= 2 * 24 * 60) return `${Math.floor(totalMin / (24 * 60))} ${t('time.unit.days')}`;
+  if (totalMin >= 2 * 24 * 60) return { value: String(Math.floor(totalMin / (24 * 60))), unit: 'days' };
   if (totalMin >= 60) {
-    const hours = Math.floor(totalMin / 60);
     const minutes = String(totalMin % 60).padStart(2, '0');
-    return `${hours}:${minutes} ${t('time.unit.hours')}`;
+    return { value: `${Math.floor(totalMin / 60)}:${minutes}`, unit: 'hours' };
   }
-  return `${totalMin} ${t('time.unit.minutes')}`;
+  return { value: String(totalMin), unit: 'minutes' };
+}
+
+export function formatRemaining(ms: number, t: Translate): string {
+  const parts = remainingParts(ms);
+  return `${parts.value} ${t(`time.unit.${parts.unit}`)}`;
 }
 
 export function clockOf(date: Date, zone?: string): string {

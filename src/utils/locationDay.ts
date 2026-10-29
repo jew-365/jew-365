@@ -29,3 +29,8 @@ export function appDayEnd(day: Date, location: Location): Date {
   const next = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1);
   return HebcalService.dawnAt(locationNoon(next, location), location);
 }
+
+export function calendarDayEnd(instant: Date, location: Location): Date {
+  const local = DateTime.fromJSDate(instant, { zone: location.tz });
+  return appDayEnd(new Date(local.year, local.month - 1, local.day), location);
+}

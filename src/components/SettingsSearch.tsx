@@ -134,7 +134,7 @@ export function useSettingsSearch(visit: number) {
           taharah,
           stats: {
             achievements: completions.achievements,
-            totals: markTotals(completions.completions, completions.archivedMarks),
+            totals: markTotals(completions.completions, completions.archivedMarks, completions.late),
             mitzvot: enabled,
           },
         }),

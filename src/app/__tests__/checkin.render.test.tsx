@@ -81,6 +81,20 @@ describe('check-in', () => {
     const card = screen.UNSAFE_getAllByType(MitzvahCard).find((node) => node.props.name === 'קריאת שמע על המיטה');
     expect(card?.props.icon).toBe('night');
     act(() => card!.props.onComplete());
+    expect(useCompletionsStore.getState().completions['2026-11-13']).toBeUndefined();
+    fireEvent.press(screen.getByText('עשיתי בזמן ולא סימנתי'));
     expect(useCompletionsStore.getState().completions['2026-11-13']?.krias_shma_al_hamita).toBeTruthy();
+    expect(useCompletionsStore.getState().late).toEqual({});
+  });
+
+  it('writes nothing when the question is answered after the deadline', async () => {
+    renderWithTheme(<CheckInRoute />);
+    await screen.findByText(/מה עשית בשבת/);
+    const card = screen.UNSAFE_getAllByType(MitzvahCard).find((node) => node.props.name === 'קריאת שמע על המיטה');
+    act(() => card!.props.onComplete());
+    jest.setSystemTime(at(JERUSALEM, '2026-11-16T07:00'));
+    fireEvent.press(screen.getByText('עשיתי אחרי שעבר הזמן'));
+    expect(useCompletionsStore.getState().completions).toEqual({});
+    expect(useCompletionsStore.getState().late).toEqual({});
   });
 });

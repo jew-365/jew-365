@@ -1,10 +1,10 @@
-import { useCompletionsStore } from '@/stores/useCompletionsStore';
+import { DoneMark, useCompletionsStore } from '@/stores/useCompletionsStore';
 
 // Every store action queues its own scheduler call (cancel, settle, rebuild), so this layer never
 // adds one: the cancel it used to await ran a second time on every completion.
 export const CompletionService = {
-  async markDone(mitzvahId: string, date: Date = new Date()): Promise<void> {
-    useCompletionsStore.getState().markDone(mitzvahId, date);
+  async markDone(mitzvahId: string, date: Date = new Date(), mark?: DoneMark): Promise<void> {
+    useCompletionsStore.getState().markDone(mitzvahId, date, mark);
   },
 
   async unmark(mitzvahId: string, date: Date = new Date()): Promise<void> {

@@ -43,6 +43,7 @@ export default function ReportScreen() {
   const checkIns = useCompletionsStore((s) => s.checkIns);
   const archivedDays = useCompletionsStore((s) => s.archivedDays);
   const skipped = useCompletionsStore((s) => s.skipped);
+  const late = useCompletionsStore((s) => s.late);
   const now = useNow();
   const [chosen, setChosen] = useState(week);
   useEffect(() => setChosen(week), [week]);
@@ -75,6 +76,7 @@ export default function ReportScreen() {
               checkIns,
               archivedDays,
               skipped,
+              late,
               enabledSince: enabledSinceOf(activeMap),
               location,
               settings,
@@ -84,7 +86,20 @@ export default function ReportScreen() {
             now,
           )
         : null,
-    [weekStart, weekEnd, enabled, completions, checkIns, archivedDays, skipped, activeMap, location, settings, now],
+    [
+      weekStart,
+      weekEnd,
+      enabled,
+      completions,
+      checkIns,
+      archivedDays,
+      skipped,
+      late,
+      activeMap,
+      location,
+      settings,
+      now,
+    ],
   );
   const events = useMemo(
     () => (weekEnd ? upcomingWeek(weekEnd, location, locale, { inIsrael, enabled: hilulotEnabled }) : []),
@@ -147,6 +162,14 @@ export default function ReportScreen() {
                 icon="check"
                 title={t('report.doneOf', { done: summary.done, total: summary.done + summary.missed })}
               />
+              {summary.late ? (
+                <ListRow
+                  icon="calendar"
+                  title={t(summary.late === 1 ? 'report.lateLine.once' : 'report.lateLine', { count: summary.late })}
+                  chevron
+                  onPress={() => router.push('/late-marks')}
+                />
+              ) : null}
               <ListRow
                 icon="candles"
                 title={t(summary.streak === 1 ? 'report.streak.once' : 'report.streak', { count: summary.streak })}

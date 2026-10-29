@@ -1,26 +1,26 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { setStatusBarStyle } from 'expo-status-bar';
 import { Banner, BannerTone } from '@/components/Banner';
-import { AppLogo } from '@/components/AppLogo';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { Card } from '@/components/Card';
-import { CompletedRow } from '@/components/CompletedRow';
+import { DayArcHero } from '@/components/DayArcHero';
+import { DayLookEntry, DayLooks } from '@/components/DayLooks';
 import { Reveal } from '@/components/Reveal';
-import { formatDayLine } from '@/components/DayStepper';
 import { IconTile } from '@/components/IconTile';
 import { ListRow } from '@/components/ListRow';
-import { iconFor } from '@/components/MitzvahIcon';
-import { MitzvahCard } from '@/components/MitzvahCard';
-import { NavBar } from '@/components/NavBar';
-import { CounterPill } from '@/components/ScreenHeader';
+import { IconName, iconFor } from '@/components/MitzvahIcon';
+import { NowCard } from '@/components/NowCard';
 import { SectionLabel } from '@/components/SectionLabel';
+import { SegmentedControl } from '@/components/SegmentedControl';
 import { useSelichotDownloadFlow } from '@/components/SelichotAddonCard';
 import { useDayModel } from '@/hooks/useDayModel';
+import { useLateMarkDialog } from '@/hooks/useLateMarkDialog';
 import { useViewport, ViewportContext } from '@/hooks/useInView';
-import { useReplayKey } from '@/hooks/useIsFocused';
+import { useIsFocused, useReplayKey } from '@/hooks/useIsFocused';
 import { useNow } from '@/hooks/useNow';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { getLocationName } from '@/data/cities';
@@ -33,7 +33,7 @@ import { selichotDownloadSupported } from '@/services/SelichotContentService';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
-import { useUserStore } from '@/stores/useUserStore';
+import { HomeLook, useUserStore } from '@/stores/useUserStore';
 import { useShallow } from 'zustand/react/shallow';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -41,12 +41,16 @@ import { useQuietBlock } from '@/components/ShabbatScreen';
 import { typography } from '@/theme/typography';
 import { durations, motion, spacing } from '@/theme/tokens';
 import { afterPaint } from '@/utils/afterPaint';
-import { clockOf, formatRemaining } from '@/utils/clock';
+import { clockOf, clockRange } from '@/utils/clock';
 import { DayWindow, appDayWindow } from '@/utils/buildDayTimeline';
 import { checkInLastDay, checkInPhraseKey, latestCheckIn, overlapsBlock, trackedOn } from '@/utils/checkIn';
 import { Mitzvah } from '@/types/mitzvah';
 import { TaharahEvent, TaharahSettings } from '@/types/taharah';
 import { Location } from '@/types/zmanim';
+import { dayFrameFor } from '@/utils/dayArc';
+import { computeStreak } from '@/utils/historyStats';
+import { DayEntry, dayEntryStatusText, firstName, greetingKey, heroCaption, orderDayEntries } from '@/utils/homeDay';
+import { hilulaMessage, holyBlockMessage, roshChodeshMessage, streakMessage } from '@/utils/homeMessages';
 import { appDay, appDayKey, locationNoon } from '@/utils/locationDay';
 import { deriveCycle } from '@/utils/taharah/cycle';
 import { currentOnah } from '@/utils/taharah/onot';
@@ -66,7 +70,6 @@ type LiveItem = {
   mitzvah: Mitzvah;
   window: DayWindow;
   pct: number;
-  timeLeft: string;
   urgent: boolean;
   name: string;
   hasText: boolean;
@@ -74,16 +77,21 @@ type LiveItem = {
 };
 
 const PROFILE_INTRO_KEY = 'profile:intro-dismissed';
-const WORDMARK_SIZE = scaled(34);
 
 type CompletedItem = {
   id: string;
   name: string;
-  time: string;
+  icon: IconName;
   timestamp: number;
   wasSkipped: boolean;
+  wasLate: boolean;
   date: Date;
+  window: DayWindow | null;
 };
+
+type SkyTop = { color: string; lightInk: boolean };
+
+const nonNull = <T,>(value: T | null): value is T => value !== null;
 
 type Translate = (scope: string, options?: Record<string, unknown>) => string;
 type BannerSpec = { tone: BannerTone; text: string; onPress?: () => void };
@@ -117,8 +125,37 @@ function taharahCardFor(
   };
 }
 
+type SkyFrameProps = {
+  setterRef: React.MutableRefObject<(next: SkyTop | null) => void>;
+  focused: boolean;
+  quiet: boolean;
+  children: React.ReactNode;
+};
+
+function SkyFrame({ setterRef, focused, quiet, children }: SkyFrameProps) {
+  const { colors, isDark } = useTheme();
+  const [sky, setSky] = useState<SkyTop | null>(null);
+  setterRef.current = (next) =>
+    setSky((prev) => (prev?.color === next?.color && prev?.lightInk === next?.lightInk ? prev : next));
+  const barStyle = sky ? (sky.lightInk ? 'light' : 'dark') : isDark ? 'light' : 'dark';
+
+  useEffect(() => {
+    if (!focused || quiet) return;
+    const fallback = isDark ? 'light' : 'dark';
+    setStatusBarStyle(barStyle);
+    return () => setStatusBarStyle(fallback);
+  }, [focused, quiet, barStyle, isDark]);
+
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: sky?.color ?? colors.surface2 }]} edges={['top']}>
+      {children}
+    </SafeAreaView>
+  );
+}
+
 export default function HomeScreen() {
   const { colors } = useTheme();
+  const focused = useIsFocused();
   const quiet = useQuietBlock() !== null;
   const { t } = useI18n();
   const {
@@ -147,29 +184,40 @@ export default function HomeScreen() {
   const gender = useUserStore((s) => s.gender);
   const maritalStatus = useUserStore((s) => s.maritalStatus);
   const taharahEnabled = useUserStore((s) => s.taharahEnabled);
+  const profileName = useUserStore((s) => s.profileName);
+  const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
+  const homeLook = useUserStore((s) => s.homeLook);
+  const setHomeLook = useUserStore((s) => s.setHomeLook);
   const taharahEvents = useTaharahStore((s) => s.events);
   const taharahSettings = useTaharahStore((s) => s.settings);
   const taharahLockEnabled = useTaharahStore((s) => s.lockEnabled);
   const completions = useCompletionsStore((s) => s.completions);
   const checkIns = useCompletionsStore((s) => s.checkIns);
   const skipped = useCompletionsStore((s) => s.skipped);
+  const late = useCompletionsStore((s) => s.late);
+  const archivedDays = useCompletionsStore((s) => s.archivedDays);
+  const lateMark = useLateMarkDialog();
   const [tick, setTick] = useState(0);
   // Only a memo dependency: each tick re-runs the memo, which reads the time itself.
   const tickedAt = useNow();
   const [stampingId, setStampingId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [scrubbing, setScrubbing] = useState(false);
   const lastError = useLastError();
   const [introDismissed, setIntroDismissed] = useState(() => StorageService.get<boolean>(PROFILE_INTRO_KEY) === true);
   const stampTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const skySetter = useRef<(next: SkyTop | null) => void>(() => {});
 
   const {
     allCurrent,
     allMissed,
     allCompleted,
-    nextUp,
+    upcoming,
     totalActive,
-    hebrewTitle,
-    subtitle,
+    now,
+    frame,
+    dateLine,
+    todayKey,
     zmanimUnavailable,
     checkIn,
     taharahCard,
@@ -179,9 +227,6 @@ export default function HomeScreen() {
     const now = new Date();
     const today = appDay(now, location);
     const hebrew = HebcalService.getHebrewDateAt(now, location);
-    const greg = formatDayLine(today, language);
-    const parasha = HebcalService.getParasha(today, location);
-    const subtitleText = [greg, getLocationName(location, language), parasha].filter(Boolean).join(' · ');
 
     const place = siddurPlace(location, inIsrael);
     const found = latestCheckIn(checkInInput(), now);
@@ -193,6 +238,7 @@ export default function HomeScreen() {
     // Shabbat/Yom Tov. Using `enabled.length` made Shabbat read "5/6" with everything applicable done.
     // A mark is filed under the day of the mitzvah's window, which after midnight is yesterday's date.
     const windowDays = new Map<string, Date>();
+    const windowsById = new Map<string, DayWindow>();
     for (const mitzvah of enabled) {
       const window = appDayWindow(mitzvah, location, settings, now);
       if (!window) continue;
@@ -203,13 +249,13 @@ export default function HomeScreen() {
         continue;
       }
       windowDays.set(mitzvah.id, window.date);
+      windowsById.set(mitzvah.id, window);
       const totalMs = window.end.getTime() - window.start.getTime();
       const remainingMs = window.end.getTime() - now.getTime();
       const item: LiveItem = {
         mitzvah,
         window,
         pct: totalMs > 0 ? Math.max(0, Math.min(1, remainingMs / totalMs)) : 0,
-        timeLeft: formatRemaining(remainingMs, t),
         urgent: remainingMs <= 45 * 60 * 1000,
         name: nameFor(mitzvah),
         hasText: hasSiddurText(mitzvah, nusach, window.date, place),
@@ -243,10 +289,12 @@ export default function HomeScreen() {
           {
             id: mitzvah.id,
             name: nameFor(mitzvah),
-            time: done ? clockOf(new Date(timestamp)) : t('state.skipped'),
+            icon: iconFor(mitzvah.icon),
             timestamp,
             wasSkipped: !done,
+            wasLate: Boolean(done && late[key]?.[mitzvah.id]),
             date,
+            window: windowsById.get(mitzvah.id) ?? null,
           },
         ];
       })
@@ -256,10 +304,14 @@ export default function HomeScreen() {
       allCurrent: currentItems,
       allMissed: missedItems,
       allCompleted: completedItems,
-      nextUp: upcomingItems[0] ?? null,
+      upcoming: upcomingItems,
       totalActive: windowDays.size,
-      hebrewTitle: hebrew.hebrewDateStr,
-      subtitle: subtitleText,
+      now,
+      frame: dayFrameFor(today, location, settings.halachicOpinions.ksSofZman),
+      dateLine: [formatDate(today, 'cccc', language), hebrew.hebrewDateStr, getLocationName(location, language)].join(
+        ' · ',
+      ),
+      todayKey: dateKey(today),
       zmanimUnavailable: ZmanimService.getZmanim(locationNoon(today, location), location) === null,
       checkIn: openCheckIn,
       taharahCard:
@@ -279,6 +331,7 @@ export default function HomeScreen() {
     settings,
     completions,
     skipped,
+    late,
     checkIns,
     language,
     t,
@@ -294,16 +347,107 @@ export default function HomeScreen() {
     tickedAt,
   ]);
 
+  const streak = useMemo(
+    () =>
+      computeStreak(
+        { mitzvot: enabled, completions, skipped, checkIns, archivedDays, enabledSince, location, settings },
+        new Date(),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- todayKey re-runs the streak when the app day turns
+    [enabled, completions, skipped, checkIns, archivedDays, enabledSince, location, settings, todayKey],
+  );
+  const messages = useMemo(
+    () =>
+      [
+        streakMessage(streak, t),
+        holyBlockMessage(now, location, language, t),
+        roshChodeshMessage(now, location, language, t),
+        hilulaMessage(now, location, inIsrael, hilulotEnabled, language, t),
+      ].filter(nonNull),
+    [streak, now, location, language, inIsrael, hilulotEnabled, t],
+  );
+
   const current = useMemo(
     () => allCurrent.filter((item) => !item.marked || item.mitzvah.id === stampingId),
     [allCurrent, stampingId],
   );
-  const missed = useMemo(
-    () => allMissed.filter((item) => !item.marked || item.mitzvah.id === stampingId),
-    [allMissed, stampingId],
-  );
   const completed = useMemo(() => allCompleted.filter((item) => item.id !== stampingId), [allCompleted, stampingId]);
   const doneCount = completed.filter((item) => !item.wasSkipped).length;
+
+  const entries = useMemo(() => {
+    const raw: DayEntry[] = [
+      ...allCurrent
+        .filter((item) => !item.marked)
+        .map((item) => ({
+          id: item.mitzvah.id,
+          status: 'active' as const,
+          start: item.window.start,
+          end: item.window.end,
+          markedAt: null,
+          date: item.window.date,
+        })),
+      ...upcoming.map((item) => ({
+        id: item.mitzvah.id,
+        status: 'upcoming' as const,
+        start: item.window.start,
+        end: item.window.end,
+        markedAt: null,
+        date: item.window.date,
+      })),
+      ...allMissed
+        .filter((item) => !item.marked || item.mitzvah.id === stampingId)
+        .map((item) => ({
+          id: item.mitzvah.id,
+          status: 'missed' as const,
+          start: item.window.start,
+          end: item.window.end,
+          markedAt: null,
+          date: item.window.date,
+        })),
+      ...completed.map((item) => ({
+        id: item.id,
+        status: item.wasSkipped ? ('skipped' as const) : item.wasLate ? ('late' as const) : ('done' as const),
+        start: item.window?.start ?? null,
+        end: item.window?.end ?? null,
+        markedAt: item.timestamp,
+        date: item.date,
+      })),
+    ];
+    const meta = new Map<string, { name: string; icon: IconName }>();
+    for (const item of [...allCurrent, ...upcoming, ...allMissed]) {
+      meta.set(item.mitzvah.id, { name: item.name, icon: iconFor(item.mitzvah.icon) });
+    }
+    for (const item of completed) meta.set(item.id, { name: item.name, icon: item.icon });
+    return orderDayEntries(raw).map((entry): DayLookEntry => {
+      const info = meta.get(entry.id);
+      return {
+        ...entry,
+        name: info?.name ?? entry.id,
+        icon: info?.icon ?? 'star',
+        statusText: dayEntryStatusText(entry, now, location.tz, t),
+        range: entry.start && entry.end ? clockRange(entry.start, entry.end, t, location.tz, entry.date) : null,
+        startLabel: entry.start
+          ? clockOf(entry.start, location.tz)
+          : entry.markedAt
+            ? clockOf(new Date(entry.markedAt), location.tz)
+            : null,
+        endLabel: entry.end ? clockOf(entry.end, location.tz) : null,
+      };
+    });
+  }, [allCurrent, upcoming, allMissed, completed, stampingId, now, location.tz, t]);
+
+  const name = firstName(profileName);
+  const greeting = t(greetingKey(now, location.tz, name !== ''), { name });
+  const caption = heroCaption(
+    current[0] ? { name: current[0].name, end: current[0].window.end } : null,
+    upcoming[0] ? { name: upcoming[0].name, start: upcoming[0].window.start } : null,
+    allCompleted.length > 0 && allMissed.every((item) => item.marked),
+    now,
+    location.tz,
+    t,
+  );
+
+  const onSkyTop = useCallback((next: SkyTop | null) => skySetter.current(next), []);
 
   const todayTime = today.getTime();
   const selichotOffer = useMemo(
@@ -324,9 +468,8 @@ export default function HomeScreen() {
   // dropped every other card tapped during it. The card is held on screen while it animates.
   const dayFor = (id: string) => windowDays.get(id) ?? today;
 
-  const complete = async (id: string, date: Date) => {
+  const stamp = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    CompletionService.markDone(id, date).catch(() => {});
     setSelectedId(null);
     setStampingId(id);
     if (stampTimeoutRef.current) clearTimeout(stampTimeoutRef.current);
@@ -335,6 +478,24 @@ export default function HomeScreen() {
       stampTimeoutRef.current = null;
     }, durations.stamp);
   };
+
+  // An open card is marked at once; one whose window closed since the last tick asks first, as a missed entry does.
+  const completeOpen = (item: LiveItem) =>
+    lateMark.mark({ id: item.mitzvah.id, name: item.name, date: item.window.date, window: item.window }, () =>
+      stamp(item.mitzvah.id),
+    );
+
+  // A missed entry's window has closed, so the dialog asks when it was done before marking it.
+  const completeMissed = (entry: DayLookEntry) =>
+    lateMark.mark(
+      {
+        id: entry.id,
+        name: entry.name,
+        date: entry.date,
+        window: entry.start && entry.end ? { start: entry.start, end: entry.end } : null,
+      },
+      () => stamp(entry.id),
+    );
 
   const skipToday = async (id: string) => {
     await CompletionService.markSkipped(id, dayFor(id)).catch(() => {});
@@ -463,52 +624,46 @@ export default function HomeScreen() {
     return () => sub.remove();
   }, []);
 
-  const countTotal = Math.max(totalActive, doneCount);
+  const nextUpcoming = upcoming[0];
+  const messageCount = (errorScope ? 1 : 0) + (banner ? 1 : 0) + messages.length;
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
-      <View testID="home-brand" style={styles.brand}>
-        <AppLogo variant="wordmark" size={WORDMARK_SIZE} />
-      </View>
-      <NavBar
-        title={hebrewTitle}
-        subtitle={subtitle}
-        actions={
-          <CounterPill
-            label={`${doneCount}/${countTotal}`}
-            accessibilityLabel={t('common.doneOf', { done: doneCount, total: countTotal })}
-          />
-        }
-      />
+    <SkyFrame setterRef={skySetter} focused={focused} quiet={quiet}>
       <ViewportContext.Provider value={viewport.bus}>
         <ScrollView
-          contentContainerStyle={styles.content}
+          scrollEnabled={!scrubbing}
+          contentContainerStyle={[styles.content, { backgroundColor: colors.bg }]}
           onScroll={viewport.notify}
           onContentSizeChange={viewport.notify}
           scrollEventThrottle={motion.inViewThrottleMs}
         >
-          {errorScope ? (
-            <Banner
-              tone="warning"
-              text={t('home.lastError', { what: t(`errors.scope.${errorScope}`) })}
-              onPress={retryLastError}
-            />
-          ) : null}
-          {banner ? <Banner tone={banner.tone} text={banner.text} onPress={banner.onPress} /> : null}
-
-          <SectionLabel text={t('home.relevantNow')} />
-          <View style={styles.list}>
+          <DayArcHero
+            frame={frame}
+            now={now}
+            tz={location.tz}
+            greeting={greeting}
+            dateLine={dateLine}
+            caption={caption}
+            onScrubChange={setScrubbing}
+            onSkyTop={onSkyTop}
+          />
+          <View style={styles.body}>
+            <SectionLabel text={t('home.openNow')} count={current.length} style={styles.openNowLabel} />
             {current.length ? (
               current.map((item, index) => (
                 <Reveal key={item.mitzvah.id} delay={index * 40} duration={280} shift={25} playKey={playKey}>
-                  <MitzvahCard
-                    icon={iconFor(item.mitzvah.icon)}
+                  <NowCard
+                    testID={`home-now-${item.mitzvah.id}`}
                     name={item.name}
-                    timeLeft={item.timeLeft}
+                    icon={iconFor(item.mitzvah.icon)}
+                    start={item.window.start}
+                    end={item.window.end}
+                    now={now}
+                    tz={location.tz}
                     pct={item.pct}
                     urgent={item.urgent}
                     stamping={stampingId === item.mitzvah.id}
-                    onComplete={() => complete(item.mitzvah.id, item.window.date)}
+                    onComplete={() => completeOpen(item)}
                     onOpenText={openText(item)}
                     onPress={() => openDetail(item.mitzvah.id)}
                     onLongPress={() => setSelectedId(item.mitzvah.id)}
@@ -521,90 +676,99 @@ export default function HomeScreen() {
                 <Text style={[typography.body, { color: colors.textSub, textAlign: 'center' }]}>
                   {doneCount >= totalActive && totalActive > 0 ? t('home.allDone') : t('home.noActive')}
                 </Text>
-              </View>
-            )}
-          </View>
-
-          {nextUp ? (
-            <Card style={styles.nextUpGap}>
-              <ListRow
-                icon={iconFor(nextUp.mitzvah.icon)}
-                iconTone="muted"
-                title={t('home.nextUp')}
-                caption={t('home.nextAt', { name: nextUp.name, time: clockOf(nextUp.window.start) })}
-                onPress={() => openDetail(nextUp.mitzvah.id)}
-                onLongPress={() => setSelectedId(nextUp.mitzvah.id)}
-              />
-            </Card>
-          ) : null}
-
-          {missed.length ? (
-            <>
-              <SectionLabel text={t('home.missed')} count={missed.length} />
-              <View style={styles.list}>
-                {missed.map((item, index) => (
-                  <Reveal key={item.mitzvah.id} delay={index * 30} duration={260} shift={25} playKey={playKey}>
-                    <MitzvahCard
-                      icon={iconFor(item.mitzvah.icon)}
-                      name={item.name}
-                      timeLeft=""
-                      pct={0}
-                      urgent
-                      hideProgress
-                      statusText={t('home.passedAt', { time: clockOf(item.window.end) })}
-                      statusTone="urgent"
-                      stamping={stampingId === item.mitzvah.id}
-                      onComplete={() => complete(item.mitzvah.id, item.window.date)}
-                      onOpenText={openText(item)}
-                      onPress={() => openDetail(item.mitzvah.id)}
-                      onLongPress={() => setSelectedId(item.mitzvah.id)}
-                    />
-                  </Reveal>
-                ))}
-              </View>
-            </>
-          ) : null}
-
-          {completed.length ? (
-            <>
-              <SectionLabel text={t('home.completed')} count={completed.length} />
-              <Card divided>
-                {completed.map((item) => (
-                  <CompletedRow
-                    key={item.id}
-                    playKey={playKey}
-                    name={item.name}
-                    time={item.time}
-                    onPress={() => openDetail(item.id)}
-                    onUndo={() => undoComplete(item.id, item.date)}
-                    undoLabel={t('home.undo')}
-                  />
-                ))}
-              </Card>
-            </>
-          ) : null}
-
-          {taharahCard ? (
-            <Card style={styles.taharahCard}>
-              <Pressable
-                onPress={() => router.push('/taharah')}
-                accessibilityRole="button"
-                style={({ pressed }) => [styles.taharahBody, { opacity: pressed ? 0.85 : 1 }]}
-              >
-                {taharahCard.concealed ? null : (
-                  <Text style={[typography.captionBold, styles.cardLabel, { color: colors.textSub }]}>
-                    {t('taharah.home.title')}
-                  </Text>
-                )}
-                <Text style={[typography.heading, { color: colors.text }]}>{taharahCard.title}</Text>
-                {taharahCard.caption ? (
-                  <Text style={[typography.caption, styles.cardCaption, { color: colors.textMuted }]}>
-                    {taharahCard.caption}
+                {nextUpcoming ? (
+                  <Text style={[typography.caption, styles.nextCaption, { color: colors.textSub }]}>
+                    {t('home.now.nextCaption', {
+                      name: nextUpcoming.name,
+                      time: clockOf(nextUpcoming.window.start, location.tz),
+                    })}
                   </Text>
                 ) : null}
-              </Pressable>
-            </Card>
-          ) : null}
+              </View>
+            )}
+
+            {messageCount ? (
+              <>
+                <SectionLabel text={t('home.messages')} count={messageCount} />
+                {errorScope ? (
+                  <Banner
+                    tone="warning"
+                    text={t('home.lastError', { what: t(`errors.scope.${errorScope}`) })}
+                    onPress={retryLastError}
+                  />
+                ) : null}
+                {banner ? <Banner tone={banner.tone} text={banner.text} onPress={banner.onPress} /> : null}
+                {messages.length ? (
+                  <View testID="home-messages">
+                    <Card divided>
+                      {messages.map((message) => (
+                        <ListRow
+                          key={message.id}
+                          icon={message.icon}
+                          title={message.title}
+                          caption={message.caption}
+                          onPress={message.href ? () => router.push(message.href as never) : undefined}
+                          chevron={Boolean(message.href)}
+                        />
+                      ))}
+                    </Card>
+                  </View>
+                ) : null}
+              </>
+            ) : null}
+
+            {entries.length ? (
+              <>
+                <SectionLabel text={t('home.myDay')} />
+                <View accessibilityRole="radiogroup" accessibilityLabel={t('home.look.label')}>
+                  <SegmentedControl<HomeLook>
+                    options={[
+                      { value: 'rail', label: t('home.look.rail') },
+                      { value: 'cards', label: t('home.look.cards') },
+                      { value: 'rings', label: t('home.look.rings') },
+                    ]}
+                    value={homeLook}
+                    onChange={setHomeLook}
+                  />
+                </View>
+                <View style={styles.looks}>
+                  <DayLooks
+                    look={homeLook}
+                    entries={entries}
+                    now={now}
+                    nowLabel={clockOf(now, location.tz)}
+                    playKey={playKey}
+                    onPress={(entry) => openDetail(entry.id)}
+                    onLongPress={(entry) => setSelectedId(entry.id)}
+                    onMark={completeMissed}
+                    onUndo={(entry) => undoComplete(entry.id, entry.date)}
+                  />
+                </View>
+              </>
+            ) : null}
+
+            {taharahCard ? (
+              <Card style={styles.taharahCard}>
+                <Pressable
+                  onPress={() => router.push('/taharah')}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [styles.taharahBody, { opacity: pressed ? 0.85 : 1 }]}
+                >
+                  {taharahCard.concealed ? null : (
+                    <Text style={[typography.captionBold, styles.cardLabel, { color: colors.textSub }]}>
+                      {t('taharah.home.title')}
+                    </Text>
+                  )}
+                  <Text style={[typography.heading, { color: colors.text }]}>{taharahCard.title}</Text>
+                  {taharahCard.caption ? (
+                    <Text style={[typography.caption, styles.cardCaption, { color: colors.textMuted }]}>
+                      {taharahCard.caption}
+                    </Text>
+                  ) : null}
+                </Pressable>
+              </Card>
+            ) : null}
+          </View>
         </ScrollView>
       </ViewportContext.Provider>
 
@@ -631,7 +795,8 @@ export default function HomeScreen() {
         />
       </BottomSheet>
       {selichotFlow.dialog}
-    </SafeAreaView>
+      {lateMark.dialog}
+    </SkyFrame>
   );
 }
 
@@ -640,14 +805,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xxl,
   },
-  brand: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+  body: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
+  },
+  openNowLabel: {
+    marginTop: spacing.lg,
+  },
+  looks: {
+    marginTop: spacing.md,
   },
   taharahCard: {
     marginTop: spacing.lg,
@@ -661,12 +828,6 @@ const styles = StyleSheet.create({
   cardCaption: {
     marginTop: spacing.xs,
   },
-  nextUpGap: {
-    marginBottom: spacing.lg,
-  },
-  list: {
-    marginBottom: spacing.sm,
-  },
   emptyWrap: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -674,5 +835,9 @@ const styles = StyleSheet.create({
   },
   emptyIcon: {
     marginBottom: spacing.md,
+  },
+  nextCaption: {
+    marginTop: spacing.sm,
+    textAlign: 'center',
   },
 });

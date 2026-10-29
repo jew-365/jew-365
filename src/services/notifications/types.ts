@@ -7,6 +7,7 @@ import type { CheckIns, Completions } from '@/stores/useCompletionsStore';
 import type { HilulaNotices, RoshChodeshNotices } from '@/stores/useUserStore';
 import type { TaharahLeads } from '@/stores/useTaharahStore';
 import type { ANDROID_CHANNELS, PendingNotificationMeta } from '@/services/notifications/ids';
+import type { QuietHours } from '@/utils/quietHours';
 
 export type ChannelKey = keyof typeof ANDROID_CHANNELS;
 
@@ -45,6 +46,7 @@ export type PlanInput = {
   hilulaNotices: HilulaNotices;
   roshChodeshNotices: RoshChodeshNotices;
   weeklyReportEnabled: boolean;
+  quietHours?: QuietHours;
   taharahEnabled: boolean;
   taharah: {
     events: TaharahEvent[];

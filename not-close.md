@@ -300,6 +300,41 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
 ### High — App requests of 2026-10-28
 
 
+### High — Home screen of 2026-10-29
+- [ ] Build the approved home screen
+  - **Flag:** `OTA`.
+  - **Requested:** the owner's picks of 2026-10-29 in [design/lab/studies/2026-10-28-home-mix/](design/lab/studies/2026-10-28-home-mix/AGENTS.md) (board Final).
+  - **What it is:** the full-bleed arc hero with preview, the Open now ring cards, Messages, and My day in three persisted looks.
+  - **Expected result:** the guide's home topic describes the screen and every check in the spec is green.
+  - **Done:** 2026-10-29. Typecheck, lint, check:dox and the whole `pnpm test:tz` pass; seen in the web build at phone size; an independent review found nine issues, all fixed. Not checked: a phone (the sun drag inside the scroll view on Android, chip centring in Hebrew, the first name in the greeting).
+  - **Status:** Version `1.0.21` · Committed: no · Pushed: no · Live: preview `1.0.21-20` (group `cc2feda6-f3a0-4aff-a457-1c1c41db9f98`; first on `1.0.21-18`), not in production · Channel: `preview`
+
+### High — Notification quiet hours of 2026-10-29
+- [ ] Let the user keep notifications out of chosen hours
+  - **Flag:** `OTA`.
+  - **Requested:** the owner, 2026-10-29: "an option not to receive notifications before hour X or after hour Y, both or either", with his decisions D1–D6 of that day.
+  - **What it is:** two switches with a time each in Settings → Device and notifications (`quietBefore`, `quietAfter` in `useUserStore`), applied by `quietHoursTrigger()` in [src/utils/skipRules.ts](src/utils/skipRules.ts) in every planner but the pre-block notice and the check-ins; taharah by `TAHARAH_QUIET_POLICY`; the end and update notices by their own rules.
+  - **Expected result:** with "not before 07:00", Shacharit's netz reminder (Jerusalem, 2026-10-28) is scheduled at 07:00 under its own id, the mitzvah screen names 07:00, and a rebuild at 06:30 keeps it; with "not after 22:00" alone, the bedtime Shema's 23:00 reminder is not scheduled; the pre-block notice and the check-ins keep their times; the search finds both rows; typecheck, lint, check:dox and the whole `pnpm test:tz` pass.
+  - **For the owner's word:** D10, D15, D16, D17, D25 of the spec.
+  - **Done:** 2026-10-29. Typecheck, lint, check:dox and the whole `pnpm test:tz` (217 suites, 5,477 tests, four zones) pass; seen only in tests, not on a phone. One spec fixture was wrong (Jerusalem shkia on 2026-10-12 is 18:10, so the hilula case uses an hour of 19:00).
+  - **Status:** Version `1.0.21` · Committed: no · Pushed: no · Live: preview `1.0.21-20` (group `cc2feda6-f3a0-4aff-a457-1c1c41db9f98`), not in production · Channel: `preview`
+
+### High — Late marks of 2026-10-29
+- [ ] Mark a missed mitzvah as done in time or after its time
+  - **Flag:** `OTA`.
+  - **Requested:** the owner, 2026-10-29: a mitzvah whose window has closed can still be marked through a dialog of two choices, "עשיתי בזמן ולא סימנתי" and "עשיתי אחרי שעבר הזמן", with a defined effect on the rest of the app, and a report of every late mark.
+  - **Decisions (the owner's, 2026-10-29):**
+    - **D1:** a late mark counts on home's My day as done (with an orange tag) and keeps the day streak; every percentage, the history calendar, trends, the weekly report, each mitzvah's run and records and every badge (100 and 1000 marks, full week and month) score it as a miss (option 3 of the table offered).
+    - **D2:** the late marks report, `/late-marks` ([src/app/late-marks.tsx](src/app/late-marks.tsx)): which mitzvah, the day, when the time ended, when it was marked and how late, per mitzvah and in total; opened from the history tab's סיכום, the weekly report and the search.
+    - **D3:** "in time but not marked" is filed one minute before the window closed, never before it opened, with no flag.
+    - **D4:** a notification's mark-done stays a plain mark (it cannot ask).
+    - **D5:** the mitzvah screen gains today's mark (the owner had no preference, so the recommendation): the window home shows, marked at once while open, asked about once closed, with an undo.
+    - **D6:** the dialog asks wherever a closed window is marked: home's My day, the mitzvah screen, the check-in, the day view (today), the reader's "סיימתי" and the Chok LeYisrael make-ups.
+  - **What it is:** the `late` map in [src/stores/useCompletionsStore.ts](src/stores/useCompletionsStore.ts) beside `completions`, the judge's `late` state in [src/utils/historyStats.ts](src/utils/historyStats.ts), [src/utils/lateMarks.ts](src/utils/lateMarks.ts) and the shared [src/hooks/useLateMarkDialog.tsx](src/hooks/useLateMarkDialog.tsx); the notifications code is unchanged.
+  - **Expected result:** at 10:00 in Jerusalem on 2026-10-28, marking Shacharit (closed at sof zman tefila) asks; "in time" files 60 s before the window's end and the day reads 100%; "after" reads 50% in history with a "באיחור" chip, while home and the streak count it, and `/late-marks` lists it with its delay.
+  - **Done:** 2026-10-29. Typecheck, lint, check:dox and the whole `pnpm test:tz` (222 suites, 5,719 tests, four zones) pass; five new suites pin the rules and the screens, and six existing tests now answer the dialog. An independent review found five small issues (a NowCard closed since the last tick, auto-scroll behind the sheet, the check-in deadline after the question, the cards look's tile, two sheets in a row on iOS), all fixed; a late flag coming back after an OTA rollback and a re-mark of the same day was left as too rare to fix. Not checked: a phone or the web preview (another session's Metro server held the folder), the sheet over the reader and the check-in on iOS.
+  - **Status:** Version `1.0.21` · Committed: no · Pushed: no · Live: no · Channel: none
+
 ## Bugs
 
 - [ ] A Hebrew Android phone shows the app's English name
@@ -328,6 +363,7 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
 - **R3 — Bedtime Shema.**
   - **Question:** What is its window?
   - **Assumption:** From tzeit to alot, ideally before chatzot halayla.
+  - **Reminder:** one `clock` reminder at 23:00 on the location's clock, no reminder at the window's start (the owner's call, 2026-10-29; was 22:30); `RULES_VERSION` of the review page is 2.
   - **Lives in:** the `krias_shma_al_hamita` entry in [src/data/mitzvot.ts](src/data/mitzvot.ts).
 - **R4 — Chanukah candles.**
   - **Question:** When are the candles lit each night?
@@ -389,7 +425,7 @@ Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were
 
 ## Other Open Items
 
-- **The owner's pick of a home screen direction** ([design/lab/](design/lab)). The home screen study of 2026-10-27 (ten live directions with real data, its canvas and gallery links in the study's AGENTS.md) waits for the owner to pick a direction; building the pick in the app is a separate task.
+- **The owner's pick of a home screen direction**: picked on 2026-10-29 (board Final of [design/lab/studies/2026-10-28-home-mix/](design/lab/studies/2026-10-28-home-mix/AGENTS.md)); built by the task Build the approved home screen.
 
 - **Review the content of the 57 tzaddik pages** ([src/data/hilulaPages.ts](src/data/hilulaPages.ts)). Agents researched it and an adversarial pass fact-checked it on 2026-10-26: 124 corrections and 45 doubts. The points that need the owner or a rav:
   - King David's link goes to the traditional site on Mount Zion, which historians do not take as the real grave.

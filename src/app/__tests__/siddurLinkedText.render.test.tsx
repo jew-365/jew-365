@@ -385,7 +385,10 @@ describe('the reader for a mitzvah text opened with no date', () => {
     expect(screen.getByText(header(new HDate(new Date(2026, 9, 26))))).toBeOnTheScreen();
 
     fireEvent.press(screen.getByText('סיימתי'));
+    expect(useCompletionsStore.getState().completions['2026-10-26']).toBeUndefined();
+    fireEvent.press(screen.getByText('עשיתי אחרי שעבר הזמן'));
     expect(useCompletionsStore.getState().completions['2026-10-26'].shacharit).toBeTruthy();
+    expect(useCompletionsStore.getState().late['2026-10-26'].shacharit).toBeTruthy();
   });
 
   it('opens Shacharit while its window is open with no notice', async () => {

@@ -219,7 +219,10 @@ describe('the Chok LeYisrael reader with the mitzvah switched on', () => {
     expect(screen.queryByText('פירוש mon')).toBeNull();
     expect(screen.getAllByRole('button', { name: 'רש״י', expanded: false })).toHaveLength(2);
     fireEvent.press(screen.getByText('סיימתי את יום שני'));
+    expect(marked('2026-11-16')).toBe(false);
+    fireEvent.press(screen.getByText('עשיתי אחרי שעבר הזמן'));
     expect(marked('2026-11-16')).toBe(true);
+    expect(useCompletionsStore.getState().late['2026-11-16']?.chok_leyisrael).toBeTruthy();
     expect(screen.queryByText('פסוק mon')).toBeNull();
     expect(screen.queryByText('סיימתי את יום שני')).toBeNull();
     expect(closedFold('השלמה: יום שלישי')).toBeOnTheScreen();
@@ -281,7 +284,9 @@ describe('the Chok LeYisrael reader with the mitzvah switched on', () => {
     expect(screen.getByText('פסוק mon')).toBeOnTheScreen();
     expect(closedFold(/^השלמה/)).toBeNull();
     fireEvent.press(screen.getByText('סיימתי'));
+    fireEvent.press(screen.getByText('עשיתי בזמן ולא סימנתי'));
     expect(marked('2026-11-16')).toBe(true);
+    expect(useCompletionsStore.getState().late).toEqual({});
   });
 
   describe('on Thursday night', () => {

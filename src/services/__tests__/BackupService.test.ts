@@ -268,6 +268,34 @@ describe('BackupService', () => {
       expect(useCompletionsStore.getState().archivedMarks).toEqual(archivedMarks);
     });
 
+    it('carries the quiet hours', async () => {
+      fillSource();
+      useUserStore.getState().setQuietBefore({ enabled: true, minutes: 450 });
+      useUserStore.getState().setQuietAfter({ enabled: true, minutes: 1290 });
+      const backup = createBackup(CREATED);
+      resetAll();
+
+      await restoreBackup(parseBackup(JSON.stringify(backup)));
+
+      expect(useUserStore.getState().quietBefore).toEqual({ enabled: true, minutes: 450 });
+      expect(useUserStore.getState().quietAfter).toEqual({ enabled: true, minutes: 1290 });
+    });
+
+    it('restores the defaults from a backup that predates the quiet hours', async () => {
+      fillSource();
+      const backup = createBackup(CREATED);
+      const file = JSON.parse(backup.stores['user-store']!);
+      delete file.state.quietBefore;
+      delete file.state.quietAfter;
+      backup.stores['user-store'] = JSON.stringify(file);
+      useUserStore.getState().setQuietBefore({ enabled: true, minutes: 450 });
+
+      await restoreBackup(parseBackup(JSON.stringify(backup)));
+
+      expect(useUserStore.getState().quietBefore).toEqual({ enabled: false, minutes: 420 });
+      expect(useUserStore.getState().quietAfter).toEqual({ enabled: false, minutes: 1320 });
+    });
+
     it('replaces every store with the file and rebuilds the schedule once', async () => {
       const haifa = fillSource();
       const backup = createBackup(CREATED);

@@ -6,6 +6,7 @@ import { WHEEL_ITEM_HEIGHT } from '../WheelPicker';
 import { renderWithTheme } from '@/testing/render';
 import { t } from '@/i18n';
 import { useUserStore } from '@/stores/useUserStore';
+import { THEMES } from '@/theme/colors';
 
 const LABEL = 'Start time';
 const ROW_NAME = /^\d\d$/;
@@ -636,5 +637,33 @@ describe('typing a time on a phone keyboard', () => {
     expect(minuteWheel()).toHaveAccessibilityValue({ text: '15' });
     closeSheet();
     expect(within(field()).getByText('21:15')).toBeOnTheScreen();
+  });
+});
+
+describe('TimeField error', () => {
+  beforeEach(() => {
+    useUserStore.getState().reset();
+  });
+
+  it('shows the error under the wheels in the urgent colour once the sheet is open', () => {
+    renderWithTheme(<TimeField label={LABEL} value="08:30" onChange={jest.fn()} error="Too short" />);
+    expect(screen.queryByText('Too short')).toBeNull();
+    openPicker();
+    expect(screen.getByText('Too short')).toBeOnTheScreen();
+    expect(screen.getByText('Too short')).toHaveStyle({ color: THEMES.gold.urgent });
+  });
+
+  it('shows the error at once in the inline mode', () => {
+    renderWithTheme(<TimeField inline label={LABEL} value="08:30" onChange={jest.fn()} error="Too short" />);
+    expect(screen.getByText('Too short')).toBeOnTheScreen();
+  });
+
+  it('draws no error line without an error', () => {
+    renderWithTheme(<TimeField inline label={LABEL} value="08:30" onChange={jest.fn()} />);
+    expect(screen.queryByText('Too short')).toBeNull();
+    screen.unmount();
+    renderWithTheme(<TimeField label={LABEL} value="08:30" onChange={jest.fn()} />);
+    openPicker();
+    expect(screen.queryByText('Too short')).toBeNull();
   });
 });

@@ -2,8 +2,8 @@ import { DateTime } from 'luxon';
 import type { HDate } from '@hebcal/core';
 import type { HolyBlock, Location } from '@/types/zmanim';
 import { isRoshChodeshDay, roshChodeshLabel, roshChodeshMonth, startsRoshChodesh } from '@/data/roshChodesh';
-import { isQuietAt } from '@/utils/skipRules';
-import { locationNoon } from '@/utils/locationDay';
+import { isQuietAt, quietHoursTrigger } from '@/utils/skipRules';
+import { calendarDayEnd, locationNoon } from '@/utils/locationDay';
 import { civilHebrewDayAt } from '@/utils/taharah/onot';
 import { formatDate, t } from '@/i18n';
 import { ROSH_CHODESH_KIND, type RoshChodeshWhen } from '@/services/notifications/ids';
@@ -115,11 +115,27 @@ function roshChodeshCandidate(notice: RoshChodeshNotice, language: PlanInput['la
   };
 }
 
+function quiet(notice: RoshChodeshNotice, input: PlanInput): RoshChodeshNotice[] {
+  if (!input.quietHours) return [notice];
+  const { location } = input;
+  const trigger = quietHoursTrigger(
+    notice.trigger,
+    input.quietHours,
+    calendarDayEnd(notice.trigger, location),
+    location,
+  );
+  if (!trigger) return [];
+  if (trigger.getTime() === notice.trigger.getTime()) return [notice];
+  const phase = notice.when === 'day' ? 'open' : noticePhase(trigger, notice.date, location);
+  return [{ ...notice, trigger, phase }];
+}
+
 export function planRoshChodesh(input: PlanInput, horizon: Horizon): ScheduleCandidate[] {
   if (!input.roshChodeshEnabled) return [];
   const { location, language, now } = input;
   return horizon.days
     .flatMap((day) => roshChodeshNoticesOn(day, location, input.roshChodeshNotices))
+    .flatMap((notice) => quiet(notice, input))
     .filter((notice) => notice.trigger.getTime() > now.getTime() && !isQuietAt(notice.trigger, location))
     .map((notice) => roshChodeshCandidate(notice, language));
 }

@@ -88,16 +88,16 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'דף הבית וסימון מצווה', en: 'Home and marking a mitzvah' },
     body: [
       {
-        he: 'בדף הבית מופיעות המצוות שהזמן שלהן פתוח עכשיו, הדחופה ראשונה, ולכל אחת הזמן שנותר ופס התקדמות. כל מצווה מופיעה בחלון הזמן ההלכתי שלה, שמחושב לפי המיקום שנבחר. מתחתיהן מופיעים ״הבא בתור״, מה שלא בוצע ומה שכבר בוצע היום.',
-        en: 'Home shows the mitzvot whose time is open now, the most urgent first, each with the time left and a progress bar. Each mitzvah appears in its halachic time window, computed for the location you chose. Below them are Next up, what was missed and what is already done today.',
+        he: 'בראש דף הבית קשת היום: השמש או הירח נעים לאורכה לפי הזמנים ההלכתיים של המיקום שנבחר, השמיים משנים את צבעם מעלות השחר ועד הלילה, ומתחתיה רצועה של אחד־עשר זמני היום, שבה הזמן ההלכתי הבא מסומן. גרירת השמש או הירח, או הקשה על אחד הזמנים, מציגה את הקשת בשעה אחרת, ו״חזרה לעכשיו״ מחזיר אותה. הרשימות שמתחת נשארות בזמן אמת.',
+        en: "At the top of Home is the day's arc: the sun or the moon moves along it by the halachic times of the location you chose, the sky changes colour from dawn to night, and under it is a strip of the day's eleven zmanim, with the next one marked. Drag the sun or the moon, or tap a zman, to see the arc at another time; Back to now returns it. The lists below stay live.",
       },
       {
-        he: 'הקשה על כפתור הסימון בכרטיס מסמנת את המצווה כבוצעה ומבטלת את שאר ההתראות שלה לאותו יום. ״בטל״ ברשימת ״בוצעו״ מחזיר אותה. גם מצווה שהזמן שלה עבר אפשר לסמן עד סוף היום.',
-        en: 'Tap the check button on a card to mark the mitzvah done; its other notifications for that day are cancelled. Undo in the Completed list brings it back. A mitzvah whose time has passed can still be marked until the day ends.',
+        he: '״פתוח עכשיו״ מציג כל מצווה שהזמן שלה פתוח, עם טבעת של הזמן שנותר ושעות ההתחלה והסוף. ״עשיתי״ מסמן אותה כבוצעה ומבטל את שאר ההתראות שלה לאותו יום, ו״פתח נוסח״ פותח את הנוסח בסידור. תחת ״הודעות״ מופיע מה שדורש תשומת לב, כמו סימון אחרי שבת או מיקום שלא אושר, וגם הרצף, השבת הקרובה, ראש חודש, והילולות כשההתראות עליהן פועלות.',
+        en: 'Open now shows every mitzvah whose time is open, with a ring of the time left and its start and end. Done marks it done and cancels its other notifications for that day, and Open text opens its text in the siddur. Messages shows what needs attention, such as the check-in after Shabbat or a location that was not allowed, along with your streak, the coming Shabbat, Rosh Chodesh, and hilulot when their notices are on.',
       },
       {
-        he: 'הקשה על הכרטיס פותחת את מסך המצווה, ולחיצה ארוכה פותחת פעולות מהירות: ״פרטים״, או ״דלג היום״ ליום שבו המצווה לא נוגעת. כשיש למצווה נוסח, ״פתח נוסח״ פותח אותו בסידור. פס בראש הדף מזכיר את מה שדורש תשומת לב, כמו סימון אחרי שבת או מיקום שלא אושר.',
-        en: "Tapping a card opens the mitzvah's screen, and a long press opens quick actions: Details, or Skip today for a day it does not apply. When the mitzvah has a text, Open text opens it in the siddur. A strip at the top flags what needs attention, such as the check-in after Shabbat or a location that was not allowed.",
+        he: '״היום שלי״ מסדר את כל מצוות היום: מה שעוד פתוח, אחר כך מה שבוצע ובסוף מה שפוספס, בשלוש תצוגות לבחירה, טבעות, כרטיסים או ציר, והבחירה נשמרת. מצווה שפוספסה אפשר לסמן עד סוף היום, ו״בטל״ מחזיר סימון. הקשה על מצווה פותחת את המסך שלה, ולחיצה ארוכה פותחת פעולות מהירות: ״פרטים״ או ״דלג היום״.',
+        en: "My day lists all of today's mitzvot: what is still open, then what is done and last what was missed, in three views you can choose, Rings, Cards or Timeline, and your choice is kept. A missed mitzvah can still be marked until the day ends, and Undo takes a mark back. Tap a mitzvah to open its screen; a long press opens quick actions: Details or Skip today.",
       },
       {
         he: 'היום באפליקציה מתחלף בעלות השחר ולא בחצות: הלילה שייך לערב שלפניו, ולכן ערבית שנאמרת אחרי חצות נרשמת ליום של אותו ערב.',
@@ -128,8 +128,12 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "In the notification, Done marks the mitzvah without opening the app, and Open text opens its text when it has one. Tapping the notification opens the text, or the mitzvah's screen when there is none. Settings → Device and notifications → Permissions shows every permission the app needs and allows what is missing; on Android, Unrestricted battery takes one tap, so reminders arrive on time.",
       },
       {
-        he: 'התזכורות נקבעות מראש לימים הבאים, גם אם לא פותחים את האפליקציה: באנדרואיד לכחודש, ובאייפון לכשבוע וחצי, כשמהיום השלישי נשארת תזכורת אחת לכל מצווה. ביום האחרון שתוכנן מגיעה בשמונה בערב התראה ״התזכורות עומדות להיגמר״, וכל פתיחה של האפליקציה מתכננת מחדש.',
-        en: 'Reminders are set ahead for the coming days even if the app is not opened: about a month on Android and about a week and a half on iPhone, where from the third day each mitzvah keeps one reminder. On the last planned day a notification at 8 pm says your reminders are about to run out, and every time the app opens it plans again.',
+        he: 'בהגדרות ← מכשיר והתראות אפשר לבחור ״לא לשלוח התראות לפני השעה״, ״לא לשלוח התראות אחרי השעה״, או את שתיהן. התראה שזמנה לפני השעה שנבחרה מגיעה בשעה הזו, והתראה שזמנה מאוחר יותר עוברת למחרת לשעה שנבחרה ב״החל מהשעה״, כל עוד זמן המצווה עוד פתוח; אחרת היא לא נשלחת. ההודעה לפני שבת וחג ותזכורות הסימון אחריהם נשלחות תמיד בזמנן.',
+        en: "In Settings → Device and notifications you can choose No notifications before, No notifications after, or both. A notification due before the chosen hour arrives at that hour, and one due after it moves to the next day at the hour set under Send from, as long as the mitzvah's time is still open; otherwise it is not sent. The notice before Shabbat and Yom Tov and the check-in reminders after them always go out on time.",
+      },
+      {
+        he: 'התזכורות נקבעות מראש לימים הבאים, גם אם לא פותחים את האפליקציה: באנדרואיד לכחודש, ובאייפון לכשבוע וחצי, כשמהיום השלישי נשארת תזכורת אחת לכל מצווה. ביום האחרון שתוכנן מגיעה בשמונה בערב, או בשעה המותרת הקרובה כשנבחרו שעות בלי התראות, התראה ״התזכורות עומדות להיגמר״, וכל פתיחה של האפליקציה מתכננת מחדש.',
+        en: 'Reminders are set ahead for the coming days even if the app is not opened: about a month on Android and about a week and a half on iPhone, where from the third day each mitzvah keeps one reminder. On the last planned day a notification at 8 pm, or the nearest allowed hour when notification hours are limited, says your reminders are about to run out, and every time the app opens it plans again.',
       },
     ],
     routes: ['/mitzvah/[id]'],
@@ -186,8 +190,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "In the Siddur tab each group opens and closes with a tap on its title: first the texts whose time is open now (open each time you enter the tab), then the meal blessings, the prayers (Shacharit, Mincha and Maariv), the mitzvot (tefillin, the morning Shema, the morning blessings, candle lighting, havdalah and the Omer), then the other blessings and prayers by group. A text not said today is greyed out, with when it is said, and it still opens at any time, in the text of the next day it is said and without Done. Each text is set for the day: Hallel, Musaf and inserts such as Ya'aleh VeYavo appear on their days.",
       },
       {
-        he: 'בראש הקורא: ״בחר חלק״ לקפיצה לחלק אחר, במניין או ביחיד בתפילות שיש בהן קטעים למניין (ביחיד, קדיש, ברכו, קדושה וקריאת התורה מקופלים), הגדלה והקטנה של הטקסט, וגלילה אוטומטית במהירות שבוחרים. קטע מקופל נפתח בהקשה. בזמן הקריאה הכלים מתקפלים לשורה אחת קבועה עם ״חזור״, שם הטקסט, כפתור הגלילה האוטומטית וכפתור ״כלים״ שפותח את כל הכלים; גלילה, לכל כיוון, לא פותחת אותם; הקשה כפולה מהירה על הטקסט פותחת או סוגרת אותם, גלילה סוגרת אותם, והם חוזרים לבד בראש הטקסט. כשהאפליקציה באנגלית, מתחת לעברית מופיע התרגום, כשיש למקור תרגום.',
-        en: "At the top of the reader: Jump to section, Minyan or Alone in prayers with minyan passages (Alone folds Kaddish, Barchu, Kedusha and the Torah reading), larger and smaller text, and auto-scroll at the speed you choose. A folded passage opens on tap. While you read, the controls fold into one fixed line with Back, the text's name, the auto-scroll button and a Tools button that opens every control; scrolling either way never opens them; a quick double tap on the text opens or closes them, scrolling closes them, and they come back by themselves at the top of the text. When the app is in English, the source's translation appears under the Hebrew where it has one.",
+        he: 'בראש הקורא: ״בחר חלק״ לקפיצה לחלק אחר, במניין או ביחיד בתפילות שיש בהן קטעים למניין (ביחיד, קדיש, ברכו, קדושה וקריאת התורה מקופלים), הגדלה והקטנה של הטקסט, וגלילה אוטומטית במהירות שבוחרים. קטע מקופל נפתח בהקשה. בזמן הקריאה הכלים מתקפלים לשורה אחת קבועה עם ״חזור״, שם הטקסט, כפתור הגלילה האוטומטית וכפתור ״כלים״ שפותח את כל הכלים; גלילה, לכל כיוון, לא פותחת אותם; הקשה קצרה על הטקסט מפעילה ועוצרת את הגלילה האוטומטית; הקשה כפולה מהירה על הטקסט פותחת או סוגרת אותם, גלילה סוגרת אותם, והם חוזרים לבד בראש הטקסט. כשהאפליקציה באנגלית, מתחת לעברית מופיע התרגום, כשיש למקור תרגום.',
+        en: "At the top of the reader: Jump to section, Minyan or Alone in prayers with minyan passages (Alone folds Kaddish, Barchu, Kedusha and the Torah reading), larger and smaller text, and auto-scroll at the speed you choose. A folded passage opens on tap. While you read, the controls fold into one fixed line with Back, the text's name, the auto-scroll button and a Tools button that opens every control; scrolling either way never opens them; a short tap on the text starts or stops auto-scroll; a quick double tap on the text opens or closes the controls, scrolling closes them, and they come back by themselves at the top of the text. When the app is in English, the source's translation appears under the Hebrew where it has one.",
       },
       {
         he: 'כפתור הכוכב שומר את המקום הנוכחי כסימנייה; כשכבר יש סימניות בטקסט הוא שואל אם להוסיף סימנייה חדשה או להעביר אחת קיימת למקום הזה, ו״סימניות״ מציג את ״המקום האחרון״ ואת הסימניות של הטקסט, לקפיצה או למחיקה. בפתיחה הבאה הקורא מציע להמשיך מהמקום שבו עצרתם: בטקסט של מצווה (התפילות, הדלקת נרות, הבדלה וספירת העומר) רק באותו יום, ובשאר הטקסטים תמיד. ״סיימתי״ בסוף הטקסט מסמן את המצווה, ובטקסט של מצווה כפתור ההגדרות בראש הקורא פותח את מסך המצווה.',
@@ -267,11 +271,15 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'The streak counts days in a row with at least one mitzvah marked. A day with nothing marked and something missed breaks it; a Shabbat or Yom Tov still waiting for its check-in does not.',
       },
       {
+        he: 'מצווה שהזמן שלה נגמר אפשר עדיין לסמן: ב״היום שלי״ בבית, במסך המצווה, בסידור ובצ׳ק־אין אחרי שבת. האפליקציה שואלת מתי עשית. ״עשיתי בזמן ולא סימנתי״ נספר כמו סימון בזמן. ״עשיתי אחרי שעבר הזמן״ מסומן בכתום: הוא שומר על היום בבית ועל הרצף, אבל לא נספר באחוזים, בלוח החודש, במגמות, בדוח השבועי ובהישגים. כל הסימונים באיחור מרוכזים ב״סימונים באיחור״, שנפתח מ״סיכום״ ומהדוח השבועי: איזו מצווה, באיזה יום, מתי נגמר הזמן ומתי סימנת, וסיכום לפי מצווה.',
+        en: 'A mitzvah whose time has ended can still be marked: in My day on Home, on the mitzvah\'s screen, in the siddur and in the check-in after Shabbat. The app asks when you did it. "I did it in time and didn\'t mark it" counts like a mark made in time. "I did it after the time passed" shows in orange: it keeps the day on Home and your streak, but does not count toward percentages, the month calendar, Trends, the weekly report or badges. Every late mark is listed in Late marks, opened from Summary and the weekly report: which mitzvah, on which day, when its time ended and when you marked it, with a summary per mitzvah.',
+      },
+      {
         he: 'דוח שבועי נפתח מרשימת הדוחות בלשונית מגמות: מה סומן, היום הכי טוב, איזו מצווה כדאי לחזק ומה מחכה בשבוע הבא, ומעבר בין השבועות. כ־45 דקות אחרי צאת השבת מגיעה התראה שהסיכום מוכן; אפשר לכבות אותה בהגדרות ← מכשיר והתראות.',
         en: 'A weekly report opens from the reports list in Trends: what was marked, the best day, which mitzvah to strengthen and what the next week holds, with buttons to move between weeks. About 45 minutes after Shabbat ends a notification says the report is ready; it can be turned off in Settings → Device and notifications.',
       },
     ],
-    routes: ['/(tabs)/history', '/report'],
+    routes: ['/(tabs)/history', '/report', '/late-marks'],
     action: { label: { he: 'לסיכום השבועי', en: 'Open the weekly report' }, href: '/report' },
   },
   {
@@ -329,6 +337,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         he: 'הנתונים נשמרים מוצפנים ואינם נכללים בגיבוי. ״מחיקת הרישומים״ מתחילה ספירה חדשה, ו״איפוס מעקב הטהרה״ מוחק גם את ההגדרות ומכבה את המעקב. האפליקציה אינה פוסקת הלכה: בכל ספק היא עוצרת את הספירה עד שרושמים את הוראת הרב.',
         en: "The data is stored encrypted and is not part of the backup. Delete the records starts a new count, and Reset family purity tracking also deletes the settings and turns tracking off. The app does not rule on halacha: on any doubt it stops the count until the rav's instruction is recorded.",
       },
+      {
+        he: 'שעות בלי התראות לא דוחות את תזכורות הפסק הטהרה, בדיקת הערב, בדיקת העונה, הטבילה והפרישה; בדיקת הבוקר נדחית לשעה שנבחרה רק כשזו לפני חצות היום.',
+        en: 'Hours without notifications never delay the reminders of the hefsek, the evening bedika, the onah bedika, the tevila and separation; the morning bedika moves to the chosen hour only when that is before midday.',
+      },
     ],
     routes: ['/taharah', '/taharah/log', '/taharah/calendar', '/taharah/settings'],
     taharahOnly: true,
@@ -343,8 +355,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "Settings opens with a search: type a word such as “notifications”, “nusach” or “backup” to go straight to the setting. It finds anything in the app: screens, mitzvot and categories, prayers and the passages and phrases inside them, tzaddikim by name, works or grave, the rabbis of the halacha hotline, guide topics, and your badges and figures with their values. It forgives typing on the other language's keyboard. Close results show at once, the search inside the prayers joins a moment later, and results found only despite a misspelling show apart, under “Did you mean”. The same search sits at the top of the More tab, and a setting found there opens in Settings at its place.",
       },
       {
-        he: 'החלקים: פרופיל (שם, טלפון, מגדר ומצב משפחתי), תפילה וסידור, מכשיר והתראות (עיר או GPS, התראות, הרשאות, הסיכום השבועי, ערכת נושא, גודל התצוגה ושפה), גיבוי, שחזור ואיפוס, ואודות ויצירת קשר. העיר או מיקום ה־GPS קובעים גם אם אתם בישראל או בחוץ לארץ, למשל לעניין יום טוב שני.',
-        en: 'Its sections: Profile (name, phone, gender and marital status), Prayer and siddur, Device and notifications (city or GPS, notifications, permissions, the weekly report, theme, display size and language), Backup, restore and reset, and About and contact. The city or GPS location also decides whether you count as in Israel or abroad, for example for the second day of Yom Tov.',
+        he: 'החלקים: פרופיל (שם, טלפון, מגדר ומצב משפחתי), תפילה וסידור, מכשיר והתראות (עיר או GPS, התראות, הסיכום השבועי, שעות בלי התראות, הרשאות, ערכת נושא, גודל התצוגה ושפה), גיבוי, שחזור ואיפוס, ואודות ויצירת קשר. העיר או מיקום ה־GPS קובעים גם אם אתם בישראל או בחוץ לארץ, למשל לעניין יום טוב שני.',
+        en: 'Its sections: Profile (name, phone, gender and marital status), Prayer and siddur, Device and notifications (city or GPS, notifications, the weekly report, hours without notifications, permissions, theme, display size and language), Backup, restore and reset, and About and contact. The city or GPS location also decides whether you count as in Israel or abroad, for example for the second day of Yom Tov.',
       },
       {
         he: 'באנדרואיד ההגדרות, המצוות וההיסטוריה מגובות לחשבון Google, ובאייפון בגיבוי iCloud של המכשיר. בהגדרות ← גיבוי, שחזור ואיפוס אפשר גם לייצא קובץ גיבוי ולשחזר ממנו בכל טלפון; שחזור מחליף את מה שיש בטלפון. ״איפוס האפליקציה״ מוחק הכל, גם את נתוני הטהרה, שאינם נכללים בגיבוי.',
@@ -360,8 +372,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'עדכונים', en: 'Updates' },
     body: [
       {
-        he: 'רוב העדכונים מגיעים לבד: האפליקציה בודקת אם יש עדכון בכל פתיחה וחזרה אליה ומורידה אותו ברקע. כשהוא מוכן מופיע הפס ״גרסה חדשה של האפליקציה מוכנה״, והקשה עליו טוענת אותה. גם כשהאפליקציה ברקע מגיעה התראה כשעדכון מוכן, כשההתראות פעילות ולא בשבת ובחג.',
-        en: 'Most updates arrive by themselves: the app checks for one each time it opens or comes back, and downloads it in the background. When it is ready a strip says “A new version of the app is ready”, and tapping it loads it. Even with the app in the background, a notification says when an update is ready, while notifications are on and never on Shabbat or Yom Tov.',
+        he: 'רוב העדכונים מגיעים לבד: האפליקציה בודקת אם יש עדכון בכל פתיחה וחזרה אליה ומורידה אותו ברקע. כשהוא מוכן מופיע הפס ״גרסה חדשה של האפליקציה מוכנה״, והקשה עליו טוענת אותה. גם כשהאפליקציה ברקע מגיעה התראה כשעדכון מוכן, כשההתראות פעילות, לא בשבת ובחג ולא בשעות בלי התראות.',
+        en: 'Most updates arrive by themselves: the app checks for one each time it opens or comes back, and downloads it in the background. When it is ready a strip says “A new version of the app is ready”, and tapping it loads it. Even with the app in the background, a notification says when an update is ready, while notifications are on, never on Shabbat or Yom Tov and never in hours without notifications.',
       },
       {
         he: 'מספר הגרסה מופיע בהגדרות ← אודות ויצירת קשר, בצורה גרסה־מספר עדכון. מה שהשתנה בכל עדכון מופיע ב״מה חדש״ בראש המדריך הזה. שינויים שדורשים גרסה חדשה של האפליקציה מגיעים דרך החנות.',
@@ -393,6 +405,28 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 ];
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
+  {
+    label: '1.0.21-6',
+    date: '2026-10-29',
+    items: [
+      {
+        he: 'בקורא, הקשה קצרה על הטקסט מפעילה ועוצרת את הגלילה האוטומטית.',
+        en: 'In the reader, a short tap on the text starts or stops auto-scroll.',
+      },
+      {
+        he: 'דף בית חדש: קשת היום עם השמש, הירח וזמני היום, ״פתוח עכשיו״ עם טבעת של הזמן שנותר, הודעות במקום אחד, ו״היום שלי״ בשלוש תצוגות: טבעות, כרטיסים או ציר.',
+        en: "A new Home: the day's arc with the sun, the moon and the day's zmanim, Open now with a ring of the time left, messages in one place, and My day in three views: Rings, Cards or Timeline.",
+      },
+      {
+        he: 'בהגדרות ← מכשיר והתראות אפשר לבחור שעות בלי התראות: לא לפני שעה מסוימת, לא אחריה, או שתיהן. התראה שנופלת בשעות האלה נדחית לשעה המותרת כשזמן המצווה עוד פתוח.',
+        en: "Settings → Device and notifications can now keep notifications out of chosen hours: not before an hour, not after one, or both. A notification due in those hours moves to the allowed hour while the mitzvah's time is still open.",
+      },
+      {
+        he: 'סימון של מצווה שהזמן שלה נגמר שואל מתי עשית: בזמן ולא סימנת, או אחרי שעבר הזמן. סימון באיחור שומר על הרצף ולא נספר באחוזים ובהישגים, ובמעקב יש דוח של כל הסימונים באיחור. במסך המצווה אפשר עכשיו לסמן את החלון של היום.',
+        en: "Marking a mitzvah whose time has ended asks when you did it: in time without marking, or after the time passed. A late mark keeps your streak but does not count toward percentages and badges, and Tracking has a report of every late mark. The mitzvah screen can now mark today's window.",
+      },
+    ],
+  },
   {
     label: '1.0.21-5',
     date: '2026-10-28',

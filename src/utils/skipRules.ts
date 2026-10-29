@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { Mitzvah, Reminder, ReminderAnchor, UserSettings } from '@/types/mitzvah';
 import { HolyBlock, Location } from '@/types/zmanim';
 import { HebcalService } from '@/services/HebcalService';
+import { inQuietHours, quietHoursEdge, type QuietHours } from './quietHours';
 
 export type DayObservance = { isShabbat: boolean; isYomTov: boolean; isCholHamoed: boolean };
 
@@ -99,6 +100,13 @@ export function reminderFires(
         : at >= window.start.getTime() - HEADS_UP_MAX_MIN * 60_000 && at <= end;
   if (!inRange) return false;
   return !isQuietAt(trigger, location);
+}
+
+export function quietHoursTrigger(trigger: Date, hours: QuietHours, latest: Date, location: Location): Date | null {
+  if (!inQuietHours(trigger, hours, location.tz) || isQuietAt(trigger, location)) return trigger;
+  const edge = quietHoursEdge(trigger, hours, location.tz);
+  if (!edge || edge.getTime() > latest.getTime() || isQuietAt(edge, location)) return null;
+  return edge;
 }
 
 export function blockExitsWithin(window: { start: Date; end: Date }, location: Location): Date[] {

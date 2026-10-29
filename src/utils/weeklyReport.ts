@@ -4,7 +4,7 @@ import { translate } from '@/i18n';
 import { dateKey } from '@/stores/useCompletionsStore';
 import type { HolyBlock, Location } from '@/types/zmanim';
 import { calendarDay, checkInFor } from '@/utils/checkIn';
-import { HistoryInput, addDays, computeStreak, judgeDay } from '@/utils/historyStats';
+import { HistoryInput, addDays, computeStreak, judgeDayItems, verdictOf } from '@/utils/historyStats';
 import { appDay, locationNoon } from '@/utils/locationDay';
 import { civilHebrewDayAt } from '@/utils/taharah/onot';
 
@@ -15,12 +15,14 @@ export type WeekDay = { key: string; done: number; missed: number; pending: numb
 
 export type MitzvahWeek = { id: string; done: number; missed: number; pending: number };
 
+// `missed` counts a late mark too, which scores as a miss; `late` says how many of them were marked late.
 export type WeekSummary = {
   weekEnd: string;
   days: WeekDay[];
   done: number;
   missed: number;
   pending: number;
+  late: number;
   checkInPending: number;
   perMitzvah: MitzvahWeek[];
   bestDay: string | null;
@@ -96,7 +98,8 @@ function waitingInCheckIn(input: HistoryInput, weekEnd: Date, now: Date): number
 }
 
 export function weekSummary(input: HistoryInput, weekStart: Date, weekEnd: Date, now: Date): WeekSummary {
-  const verdicts = daysBetween(weekStart, weekEnd).map((day) => judgeDay(day, input, now));
+  const judged = daysBetween(weekStart, weekEnd).map((day) => judgeDayItems(day, input, now));
+  const verdicts = judged.map(verdictOf);
   const days = verdicts.map(({ key, done, missed, pending }): WeekDay => ({
     key,
     done: done.length,
@@ -123,6 +126,7 @@ export function weekSummary(input: HistoryInput, weekStart: Date, weekEnd: Date,
     done: days.reduce((sum, day) => sum + day.done, 0),
     missed: days.reduce((sum, day) => sum + day.missed, 0),
     pending: days.reduce((sum, day) => sum + day.pending, 0),
+    late: judged.reduce((sum, day) => sum + day.items.filter((item) => item.state === 'late').length, 0),
     checkInPending: waitingInCheckIn(input, weekEnd, now),
     perMitzvah,
     bestDay: best.done > 0 ? best.key : null,

@@ -41,6 +41,7 @@ import {
   noticeTimingOf,
   scrollSpeedLevel,
   useUserStore,
+  type HomeLook,
   type NoticeSetting,
 } from '../useUserStore';
 import {
@@ -850,5 +851,33 @@ describe('useUserStore compass prompt', () => {
     const current = useUserStore.getState();
     expect(merge!({ nusach: 'sefard' }, current).siddurCompassPrompt).toBe(true);
     expect(merge!({ siddurCompassPrompt: false }, current).siddurCompassPrompt).toBe(false);
+  });
+});
+
+describe('useUserStore home look', () => {
+  beforeEach(() => useUserStore.getState().reset());
+
+  it('starts on the timeline', () => {
+    expect(useUserStore.getState().homeLook).toBe('rail');
+  });
+
+  it('takes a known look and ignores an unknown one', () => {
+    useUserStore.getState().setHomeLook('cards');
+    expect(useUserStore.getState().homeLook).toBe('cards');
+    useUserStore.getState().setHomeLook('grid' as HomeLook);
+    expect(useUserStore.getState().homeLook).toBe('cards');
+  });
+
+  it('merges an unknown saved look back to the timeline and keeps a known one', () => {
+    const { merge } = useUserStore.persist.getOptions();
+    const current = useUserStore.getState();
+    expect(merge!({ homeLook: 'grid' }, current).homeLook).toBe('rail');
+    expect(merge!({ homeLook: 'cards' }, current).homeLook).toBe('cards');
+  });
+
+  it('resets to the timeline', () => {
+    useUserStore.getState().setHomeLook('cards');
+    useUserStore.getState().reset();
+    expect(useUserStore.getState().homeLook).toBe('rail');
   });
 });

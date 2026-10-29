@@ -25,6 +25,9 @@ export type Achievements = {
   fold: AchievementFold | null;
 };
 export type MarkCounts = { lastKey: string | null; total: number; byMitzvah: Record<string, number> };
+// How a done mark is written: `at` replaces the mark's time (a mark made after the window as if in it),
+// `late` files it as done after the time had passed.
+export type DoneMark = { at?: number; late?: boolean };
 
 export const EMPTY_MARK_COUNTS: MarkCounts = Object.freeze({
   lastKey: null,
@@ -35,12 +38,14 @@ export const EMPTY_MARK_COUNTS: MarkCounts = Object.freeze({
 type CompletionsState = {
   completions: Completions;
   skipped: Completions;
+  // The done marks made after their window had passed, keyed as `completions`, each also in it.
+  late: Completions;
   checkIns: CheckIns;
   archivedDays: ArchivedDays;
   achievements: Achievements | null;
   archivedMarks: MarkCounts;
   saveAchievements: (next: Achievements) => void;
-  markDone: (id: string, date?: Date) => void;
+  markDone: (id: string, date?: Date, mark?: DoneMark) => void;
   markSkipped: (id: string, date?: Date) => void;
   unmark: (id: string, date?: Date) => void;
   finishCheckIn: (blockId: string) => void;
@@ -153,7 +158,13 @@ export function mergeAchievements(prev: Achievements | null, next: Achievements)
   };
 }
 
-export function archiveMarkCounts(counts: MarkCounts, completions: Completions, today: Date = new Date()): MarkCounts {
+// A late mark never counts toward the mark totals, so it is not archived as one.
+export function archiveMarkCounts(
+  counts: MarkCounts,
+  completions: Completions,
+  today: Date = new Date(),
+  late: Completions = {},
+): MarkCounts {
   const cutoffKey = retentionCutoffKey(today);
   const keys = Object.keys(completions)
     .filter((key) => key < cutoffKey && (counts.lastKey === null || key > counts.lastKey))
@@ -163,11 +174,24 @@ export function archiveMarkCounts(counts: MarkCounts, completions: Completions, 
   let total = counts.total;
   for (const key of keys) {
     for (const id of Object.keys(completions[key])) {
+      if (late[key]?.[id]) continue;
       total += 1;
       byMitzvah[id] = (byMitzvah[id] ?? 0) + 1;
     }
   }
   return { lastKey: keys[keys.length - 1], total, byMitzvah };
+}
+
+// A late mark with no done mark beside it (an older bundle's unmark left it) means nothing.
+export function lateMarksOf(late: Completions, completions: Completions): Completions {
+  return Object.fromEntries(
+    Object.entries(late)
+      .map(([key, day]): [string, Record<string, number>] => [
+        key,
+        Object.fromEntries(Object.entries(day).filter(([id]) => completions[key]?.[id])),
+      ])
+      .filter(([, day]) => Object.keys(day).length),
+  );
 }
 
 export function isArchivedDay(archive: ArchivedDays, key: string): boolean {
@@ -186,6 +210,7 @@ export const useCompletionsStore = create<CompletionsState>()(
     (set, get) => ({
       completions: {},
       skipped: {},
+      late: {},
       checkIns: {},
       archivedDays: [],
       achievements: null,
@@ -195,11 +220,15 @@ export const useCompletionsStore = create<CompletionsState>()(
           const merged = mergeAchievements(s.achievements, next);
           return JSON.stringify(merged) === JSON.stringify(s.achievements) ? s : { achievements: merged };
         }),
-      markDone: (id, date = new Date()) => {
+      markDone: (id, date = new Date(), mark = {}) => {
         const key = dateKey(date);
+        const now = Date.now();
         set((s) => ({
-          completions: { ...s.completions, [key]: { ...(s.completions[key] ?? {}), [id]: Date.now() } },
+          completions: { ...s.completions, [key]: { ...(s.completions[key] ?? {}), [id]: mark.at ?? now } },
           skipped: setDay(s.skipped, key, withoutMark(s.skipped[key], id)),
+          late: mark.late
+            ? { ...s.late, [key]: { ...(s.late[key] ?? {}), [id]: now } }
+            : setDay(s.late, key, withoutMark(s.late[key], id)),
         }));
         afterPaint(() => {
           try {
@@ -215,6 +244,7 @@ export const useCompletionsStore = create<CompletionsState>()(
         set((s) => ({
           completions: setDay(s.completions, key, withoutMark(s.completions[key], id)),
           skipped: { ...s.skipped, [key]: { ...(s.skipped[key] ?? {}), [id]: Date.now() } },
+          late: setDay(s.late, key, withoutMark(s.late[key], id)),
         }));
         afterPaint(() => {
           try {
@@ -230,6 +260,7 @@ export const useCompletionsStore = create<CompletionsState>()(
         set((s) => ({
           completions: setDay(s.completions, key, withoutMark(s.completions[key], id)),
           skipped: setDay(s.skipped, key, withoutMark(s.skipped[key], id)),
+          late: setDay(s.late, key, withoutMark(s.late[key], id)),
         }));
         queueMicrotask(() => {
           try {
@@ -274,6 +305,7 @@ export const useCompletionsStore = create<CompletionsState>()(
         set({
           completions: {},
           skipped: {},
+          late: {},
           checkIns: {},
           archivedDays: [],
           achievements: null,
@@ -289,13 +321,15 @@ export const useCompletionsStore = create<CompletionsState>()(
       merge: (persisted: unknown, current: CompletionsState): CompletionsState => {
         const saved = persisted as Partial<CompletionsState> | undefined;
         const completions = saved?.completions ?? {};
+        const late = lateMarksOf(saved?.late ?? {}, completions);
         return {
           ...current,
           ...saved,
-          archivedMarks: archiveMarkCounts(saved?.archivedMarks ?? EMPTY_MARK_COUNTS, completions),
+          archivedMarks: archiveMarkCounts(saved?.archivedMarks ?? EMPTY_MARK_COUNTS, completions, new Date(), late),
           archivedDays: archiveMarkedDays(saved?.archivedDays ?? [], completions),
           completions: pruneCompletions(completions),
           skipped: pruneCompletions(saved?.skipped ?? {}),
+          late: pruneCompletions(late),
           checkIns: pruneCheckIns(saved?.checkIns ?? {}),
         };
       },
