@@ -1,0 +1,459 @@
+<title>מסך הבית: חמישה מיקסים</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&family=Frank+Ruhl+Libre:wght@700;900&display=swap">
+<style>
+:root {
+  --bg: #EEF0F7;
+  --surface: rgba(255, 255, 255, .72);
+  --solid: #FFFFFF;
+  --ink: #141A33;
+  --sub: #545B74;
+  --line: rgba(20, 26, 51, .12);
+  --accent: #F08A3C;
+  --accent-ink: #A0480B;
+  --on-accent: #2B1608;
+  --glow: rgba(240, 138, 60, .45);
+  --bezel: #141A33;
+  --veil: rgba(10, 14, 30, .9);
+  --shadow: 0 1px 2px rgba(20, 26, 51, .06), 0 24px 60px rgba(20, 26, 51, .14);
+  --aurora-a: rgba(126, 140, 255, .35);
+  --aurora-b: rgba(255, 160, 110, .32);
+  --aurora-c: rgba(90, 210, 200, .22);
+  --font: 'Heebo', 'Segoe UI', Arial, sans-serif;
+  --letter: 'Frank Ruhl Libre', 'David', 'Times New Roman', serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #070A16; --surface: rgba(22, 28, 52, .66); --solid: #121831; --ink: #EEF1FA; --sub: #A3ABC6; --line: rgba(238, 241, 250, .12);
+    --accent: #F59A4A; --accent-ink: #F7A65E; --on-accent: #1E1006; --glow: rgba(245, 154, 74, .5); --bezel: #252E4D;
+    --veil: rgba(3, 5, 12, .94); --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 24px 60px rgba(0, 0, 0, .5);
+    --aurora-a: rgba(96, 110, 255, .30); --aurora-b: rgba(255, 130, 80, .20); --aurora-c: rgba(60, 200, 190, .16);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #070A16; --surface: rgba(22, 28, 52, .66); --solid: #121831; --ink: #EEF1FA; --sub: #A3ABC6; --line: rgba(238, 241, 250, .12);
+  --accent: #F59A4A; --accent-ink: #F7A65E; --on-accent: #1E1006; --glow: rgba(245, 154, 74, .5); --bezel: #252E4D;
+  --veil: rgba(3, 5, 12, .94); --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 24px 60px rgba(0, 0, 0, .5);
+  --aurora-a: rgba(96, 110, 255, .30); --aurora-b: rgba(255, 130, 80, .20); --aurora-c: rgba(60, 200, 190, .16);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+.aurora { position: fixed; inset: -20vmax; z-index: -1; pointer-events: none; filter: blur(60px); opacity: .9; }
+.aurora i { position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%; animation: drift 26s ease-in-out infinite alternate; }
+.aurora i:nth-child(1) { background: var(--aurora-a); top: 0; right: 10%; }
+.aurora i:nth-child(2) { background: var(--aurora-b); top: 30%; left: 0; animation-duration: 32s; animation-delay: -8s; }
+.aurora i:nth-child(3) { background: var(--aurora-c); bottom: 0; right: 30%; animation-duration: 38s; animation-delay: -16s; }
+@keyframes drift { to { transform: translate(8vmax, -6vmax) scale(1.15); } }
+body.locked { overflow: hidden; }
+.wrap { max-width: 1040px; margin: 0 auto; }
+h1, h2, h3, p { margin: 0; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 8px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.top { padding-block: 40px 22px; display: grid; gap: 14px; }
+.sky { position: relative; height: 120px; border-radius: 28px; overflow: hidden; box-shadow: var(--shadow); transition: background 1.2s ease; }
+.sky .sun { position: absolute; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: radial-gradient(circle, #FFF7D6 0%, #FFD36B 45%, rgba(255, 190, 80, 0) 72%); box-shadow: 0 0 40px 14px rgba(255, 200, 90, .55); transition: left 1.2s ease, top 1.2s ease, opacity 1.2s; animation: breathe 4s ease-in-out infinite; }
+.sky .moon { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; box-shadow: inset -6px -3px 0 0 #F4F1E6; transition: left 1.2s ease, top 1.2s ease, opacity 1.2s; }
+.sky .stars { position: absolute; inset: 0; background-image: radial-gradient(1.4px 1.4px at 12% 30%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 30% 18%, #fff 50%, transparent 51%), radial-gradient(1.4px 1.4px at 54% 40%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 70% 22%, #fff 50%, transparent 51%), radial-gradient(1.2px 1.2px at 86% 46%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 44% 70%, #fff 50%, transparent 51%); transition: opacity 1.2s; animation: twinkle 3.6s ease-in-out infinite alternate; }
+@keyframes twinkle { to { opacity: .4; } }
+@keyframes breathe { 50% { transform: scale(1.12); } }
+.sky .read { position: absolute; inset-inline-start: 18px; bottom: 14px; display: grid; gap: 0; color: #fff; text-shadow: 0 1px 8px rgba(0, 0, 0, .35); }
+.sky .read b { font-size: 2rem; font-weight: 900; line-height: 1; letter-spacing: -.02em; }
+.sky .read span { font-size: .875rem; font-weight: 600; opacity: .92; }
+.sky .live-tag { position: absolute; inset-inline-end: 14px; top: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; background: rgba(0, 0, 0, .28); color: #fff; font-size: .75rem; font-weight: 800; backdrop-filter: blur(6px); }
+.sky .live-tag i { width: 8px; height: 8px; border-radius: 50%; background: #FF5A5A; animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .3; transform: scale(.7); } }
+.eyebrow { font-size: .8125rem; font-weight: 800; letter-spacing: .04em; color: var(--accent-ink); }
+h1 { font-size: clamp(2.1rem, 8vw, 3.6rem); font-weight: 900; line-height: 1.02; letter-spacing: -.02em; text-wrap: balance; }
+.lede { font-size: 1.0625rem; color: var(--sub); max-width: 38em; text-wrap: pretty; }
+.news { max-width: 38em; padding: 14px 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); font-size: .9375rem; color: var(--sub); text-wrap: pretty; }
+.news b { color: var(--ink); }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; padding-block: 6px 4px; }
+.jump a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 600; backdrop-filter: blur(10px); }
+.jump a b { font-family: var(--letter); font-size: 1.125rem; font-weight: 900; color: var(--accent-ink); }
+
+.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; margin: 14px calc(-1 * max(16px, env(safe-area-inset-left, 0px))) 0;
+  padding: 10px max(16px, env(safe-area-inset-left, 0px)) 12px; background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(16px) saturate(1.3); -webkit-backdrop-filter: blur(16px) saturate(1.3); border-bottom: 1px solid var(--line);
+}
+.bar-in { max-width: 1040px; margin: 0 auto; display: grid; gap: 10px; }
+.bar-row { display: flex; align-items: center; gap: 14px; overflow-x: auto; scrollbar-width: none; }
+.bar-row::-webkit-scrollbar { display: none; }
+.ctl { display: flex; align-items: center; gap: 6px; flex: none; }
+.ctl > span { font-size: .75rem; font-weight: 700; color: var(--sub); }
+.swatch { width: 44px; height: 44px; border-radius: 50%; border: 0; background: none; display: grid; place-items: center; }
+.swatch i { width: 26px; height: 26px; border-radius: 50%; display: block; box-shadow: 0 0 0 2px var(--solid), 0 0 0 3px var(--line); transition: box-shadow .2s; }
+.swatch[aria-pressed="true"] i { box-shadow: 0 0 0 3px var(--solid), 0 0 0 5px var(--ink); }
+.toggle { border: 1px solid var(--line); min-height: 44px; padding: 0 14px; border-radius: 14px; background: var(--surface); font-weight: 700; white-space: nowrap; }
+.toggle[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.live { display: inline-flex; align-items: center; gap: 8px; border: 0; min-height: 44px; padding: 0 16px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); font-weight: 800; white-space: nowrap; }
+.live i { width: 9px; height: 9px; border-radius: 50%; background: var(--sub); }
+.live[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: transparent; box-shadow: 0 0 22px var(--glow); }
+.live[aria-pressed="true"] i { background: #C8102E; animation: pulse 1.4s ease-in-out infinite; }
+.scrub { position: relative; display: grid; gap: 4px; }
+.scrub-top { display: flex; justify-content: space-between; align-items: baseline; font-size: .8125rem; color: var(--sub); }
+.scrub-top b { font-size: 1.125rem; font-weight: 900; color: var(--ink); }
+.track { position: relative; height: 44px; }
+.track-bg { position: absolute; inset-inline: 0; top: 17px; height: 10px; border-radius: 5px; overflow: hidden; }
+.ticks { position: absolute; inset: 0; pointer-events: none; }
+.ticks i { position: absolute; top: 12px; width: 2px; height: 20px; margin-left: -1px; border-radius: 1px; background: var(--ink); opacity: .35; }
+.ticks i.next { background: var(--accent); opacity: 1; height: 24px; top: 10px; box-shadow: 0 0 10px var(--glow); }
+#time { position: absolute; inset: 0; width: 100%; height: 44px; margin: 0; background: transparent; -webkit-appearance: none; appearance: none; cursor: pointer; }
+#time::-webkit-slider-runnable-track { height: 44px; background: transparent; }
+#time::-moz-range-track { height: 44px; background: transparent; }
+#time::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; margin-top: 8px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #FFF8E1, var(--accent) 70%); box-shadow: 0 0 0 4px var(--solid), 0 0 24px var(--glow); }
+#time::-moz-range-thumb { width: 28px; height: 28px; border: 0; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #FFF8E1, var(--accent) 70%); box-shadow: 0 0 0 4px var(--solid), 0 0 24px var(--glow); }
+.zlabels { display: flex; justify-content: space-between; font-size: .6875rem; color: var(--sub); font-weight: 600; }
+
+.stall { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: start; margin-top: 44px; padding: 28px; border-radius: 34px; background: var(--surface); border: 1px solid var(--line); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: var(--shadow); scroll-margin-top: 150px; }
+.info { display: grid; gap: 14px; padding-top: 12px; min-width: 0; align-content: start; }
+.head { display: flex; align-items: center; gap: 12px; }
+.letter { width: 56px; height: 56px; border-radius: 18px; background: linear-gradient(135deg, var(--accent), #FFC27A); color: var(--on-accent); display: grid; place-items: center; font-family: var(--letter); font-size: 2rem; font-weight: 900; line-height: 1; box-shadow: 0 8px 24px var(--glow); }
+.badge { display: inline-flex; align-items: center; min-height: 26px; padding: 0 10px; border-radius: 13px; font-size: .75rem; font-weight: 800; background: var(--ink); color: var(--bg); }
+.badge.kept { background: transparent; color: var(--sub); border: 1px solid var(--line); }
+h2 { font-size: clamp(1.75rem, 6vw, 2.5rem); font-weight: 900; letter-spacing: -.015em; line-height: 1.05; }
+.idea { font-size: 1.125rem; max-width: 30em; text-wrap: pretty; }
+.try { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.try li { display: flex; gap: 10px; align-items: baseline; color: var(--sub); }
+.try li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; transform: translateY(-2px); box-shadow: 0 0 8px var(--glow); }
+.fit { font-size: .9375rem; color: var(--sub); border-top: 1px solid var(--line); padding-top: 12px; max-width: 30em; }
+.fit b { color: var(--ink); }
+.device { display: grid; justify-items: center; gap: 18px; width: 414px; max-width: 100%; }
+.screen { position: relative; border-radius: 42px; overflow: hidden; background: var(--bezel); box-shadow: 0 0 0 10px var(--bezel), 0 0 0 11px var(--line), var(--shadow); margin: 11px; direction: ltr; }
+.screen iframe { position: absolute; top: 0; left: 0; width: 390px; height: 844px; border: 0; transform-origin: 0 0; background: #F6F1E8; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.pick { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 22px; border-radius: 26px; border: 2px solid var(--ink); background: transparent; font-weight: 800; transition: background .2s, color .2s, border-color .2s, transform .15s, box-shadow .3s; }
+.pick svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; transition: fill .2s; }
+.pick[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); box-shadow: 0 0 26px var(--glow); }
+.pick[aria-pressed="true"] svg { fill: currentColor; }
+.pick:active { transform: scale(.97); }
+.pick .rank { display: none; position: absolute; top: -10px; inset-inline-start: -8px; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: var(--bg); font-size: .8125rem; font-weight: 900; place-items: center; }
+.pick[aria-pressed="true"] .rank { display: grid; }
+.ghost { min-height: 52px; padding: 0 18px; border-radius: 26px; border: 1px solid var(--line); background: var(--solid); font-weight: 700; }
+.close { display: none; }
+.device.fs { position: fixed; inset: 0; z-index: 60; width: auto; max-width: none; background: var(--veil); align-content: center; padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(12px + env(safe-area-inset-bottom, 0px)); gap: 14px; }
+.device.fs .actions { display: none; }
+.device.fs .close { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 24px; border: 0; background: #FBF8F2; color: #1D2240; font-weight: 800; }
+
+.choice { margin-top: 56px; background: var(--surface); border: 1px solid var(--line); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 30px; padding: 28px 22px; display: grid; gap: 14px; box-shadow: var(--shadow); scroll-margin-top: 150px; }
+.choice h2 { font-size: clamp(1.6rem, 5vw, 2.1rem); }
+.picked { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.picked li { display: flex; align-items: center; gap: 10px; font-size: 1.125rem; font-weight: 800; }
+.picked li b { font-family: var(--letter); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-size: .875rem; flex: none; }
+.none { font-weight: 500; color: var(--sub); }
+.choice label { font-size: .8125rem; font-weight: 700; color: var(--sub); }
+.choice textarea { min-height: 96px; border: 1.5px solid var(--line); background: var(--solid); border-radius: 14px; padding: 12px 14px; resize: vertical; line-height: 1.5; }
+.copy { justify-self: start; display: inline-flex; align-items: center; gap: 8px; min-height: 54px; padding: 0 24px; border-radius: 27px; border: 0; background: var(--accent); color: var(--on-accent); font-weight: 800; font-size: 1.0625rem; box-shadow: 0 0 24px var(--glow); }
+.copy:disabled { background: var(--line); color: var(--sub); cursor: default; box-shadow: none; }
+.status { font-size: .9375rem; font-weight: 600; color: var(--accent-ink); min-height: 1.5em; }
+.out { width: 100%; min-height: 84px; border: 1px dashed var(--line); background: transparent; border-radius: 12px; padding: 10px 12px; font-size: .9375rem; color: var(--sub); resize: none; }
+.foot { margin-top: 28px; font-size: .8125rem; color: var(--sub); text-align: center; text-wrap: balance; }
+
+@media (max-width: 860px) {
+  .stall { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 22px 16px; border-radius: 28px; }
+  .info { padding-top: 0; }
+  .device { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<div class="wrap" dir="rtl" lang="he">
+  <header class="top">
+    <div class="sky" id="sky" aria-hidden="true"><div class="stars" id="stars"></div><div class="sun" id="sun"></div><div class="moon" id="moon"></div><span class="live-tag" id="liveTag"><i></i>חי · ירושלים</span><div class="read"><b class="num" id="skyTime">--:--</b><span id="skyLine"></span></div></div>
+    <p class="eyebrow">יהודי 365 · הצעות עיצוב למסך הבית · סבב 3</p>
+    <h1>חמישה מיקסים למסך הבית</h1>
+    <p class="lede">חמישה מיקסים שנבנו רק ממה שאהבת: הקשת של ב עם השעה ומצב היום, "עכשיו" של ל, והציר, הרשימות והשורה למטה של י. כל טלפון כאן עובד באמת: הוא פתוח על השעה של עכשיו בירושלים, עם הזמנים, התאריך העברי וההודעות של היום, ואפשר לגרור בו את הזמן באצבע ולראות את היום משתנה.</p>
+    <p class="news"><b>הסדר בכל מיקס:</b> השעה ומצב היום, מיד אחריו מה פתוח עכשיו (במקום כרטיס "ההתראה הבאה" עם העריכה), ואז ההודעות. אחריהן מה עשית ומה פספסת, בעיצוב שונה בכל מיקס. <b>בסוף בוחרים שניים:</b> הראשון יהיה ברירת המחדל של האפליקציה והשני החלופה שאפשר להחליף אליה בהגדרות.</p>
+    <nav class="jump" aria-label="מעבר לכיוון">
+<!--JUMP-->
+      <a href="#bchira">הבחירה שלך</a>
+    </nav>
+  </header>
+</div>
+
+<div class="bar" dir="rtl" lang="he">
+  <div class="bar-in" role="toolbar" aria-label="תצוגת הטלפונים">
+    <div class="bar-row">
+      <button class="live" id="live" aria-pressed="true"><i></i><span>עכשיו</span></button>
+      <div class="ctl" role="group" aria-label="צבע">
+        <span>צבע</span>
+        <button class="swatch" data-palette="gold" aria-label="זהב" aria-pressed="false"><i style="background: #F08A3C"></i></button>
+        <button class="swatch" data-palette="rose" aria-label="ורוד" aria-pressed="false"><i style="background: #E2617F"></i></button>
+        <button class="swatch" data-palette="night" aria-label="לילה" aria-pressed="false"><i style="background: #172238"></i></button>
+      </div>
+      <button class="toggle" id="big" aria-pressed="false">טקסט גדול</button>
+    </div>
+    <div class="scrub">
+      <div class="scrub-top"><label for="time">לגרור כדי לטייל ביום, בכל הטלפונים יחד</label><b class="num" id="timeOut">--:--</b></div>
+      <div class="track"><div class="track-bg" id="trackBg"></div><div class="ticks" id="ticks"></div><input id="time" type="range" min="0" max="1439" step="1" value="0" aria-valuetext=""></div>
+      <div class="zlabels" aria-hidden="true"><span>עלות השחר</span><span>חצות היום</span><span>שקיעה</span><span>עלות השחר</span></div>
+    </div>
+  </div>
+</div>
+
+<main class="wrap" dir="rtl" lang="he">
+<!--STALLS-->
+
+  <section class="choice" id="bchira" aria-labelledby="h-bchira">
+    <h2 id="h-bchira">הבחירה שלך</h2>
+    <p class="none" id="none" aria-live="polite">עוד לא בחרת. בוחרים שניים לפי הסדר: הראשון ברירת המחדל של האפליקציה והשני החלופה. לוחצים "הכי יפה בעיני" מתחת לטלפונים שאהבת.</p>
+    <ol class="picked" id="picked" aria-live="polite"></ol>
+    <label for="why">למה דווקא הם? (לא חובה)</label>
+    <textarea id="why" maxlength="300" placeholder="מה אהבת, ומה היית משנה"></textarea>
+    <button class="copy" id="copy" disabled>העתקת הבחירה</button>
+    <p class="status" id="status" role="status"></p>
+    <label for="out">הטקסט שיועתק</label>
+    <textarea class="out" id="out" readonly></textarea>
+  </section>
+
+  <p class="foot">הזמנים, התאריכים, השבתות וההילולות אמיתיים לירושלים, מחושבים באותן ספריות שהאפליקציה משתמשת בהן. הבחירה נשמרת רק בדפדפן שלך.</p>
+</main>
+
+<script>
+(function () {
+  var DATA = /*DATA*/null;
+  var KEY = 'jew365-home-pick-mix-v1';
+  var LABELS = /*LABELS*/;
+  var darkHost = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { saved = {}; }
+  var state = {
+    palette: saved.palette || (darkHost ? 'night' : 'gold'),
+    big: Boolean(saved.big),
+    picks: Array.isArray(saved.picks) ? saved.picks.filter(function (p) { return LABELS[p]; }).slice(0, 2) : [],
+    why: saved.why || '',
+    time: 'live'
+  };
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ palette: state.palette, big: state.big, picks: state.picks, why: state.why })); } catch (e) { /* storage blocked */ } }
+
+  var fmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  function realNow() {
+    var p = fmt.formatToParts(new Date());
+    var g = function (k) { return p.filter(function (x) { return x.type === k; })[0].value; };
+    return { date: g('year') + '-' + g('month') + '-' + g('day'), min: Number(g('hour')) * 60 + Number(g('minute')) };
+  }
+  function shift(key, n) { var a = key.split('-').map(Number); return new Date(Date.UTC(a[0], a[1] - 1, a[2] + n)).toISOString().slice(0, 10); }
+  function appDay() {
+    var r = realNow();
+    var d = DATA.days[r.date] ? r.date : DATA.demo;
+    var m = r.min;
+    if (m < DATA.days[d].z.alot && DATA.days[shift(d, -1)]) { d = shift(d, -1); m += 1440; }
+    return { date: d, min: m };
+  }
+  function hm(m) { m = ((Math.round(m) % 1440) + 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+
+  var range = document.getElementById('time');
+  var day = null;
+  function setupDay() {
+    var a = appDay();
+    day = DATA.days[a.date];
+    range.min = day.z.alot;
+    range.max = day.nextAlot - 1;
+    var span = day.nextAlot - day.z.alot;
+    var pct = function (m) { return ((m - day.z.alot) / span) * 100; };
+    var stops = [[day.z.alot, '#1B2350'], [day.z.netz, '#F6B48A'], [day.z.netz + 60, '#8EC5F2'], [day.z.chatzot, '#5EA8EE'], [day.z.plag, '#F2C178'], [day.z.shkia, '#F08A6C'], [day.z.tzeit, '#2A2F6B'], [day.nextAlot, '#0C1030']];
+    document.getElementById('trackBg').style.background = 'linear-gradient(to left, ' + stops.map(function (s) { return s[1] + ' ' + pct(s[0]).toFixed(1) + '%'; }).join(', ') + ')';
+    var ids = ['alot', 'misheyakir', 'netz', 'sofShma', 'sofTfila', 'chatzot', 'minchaG', 'plag', 'shkia', 'tzeit', 'chatzotL'];
+    document.getElementById('ticks').innerHTML = ids.map(function (id) { return '<i data-m="' + day.z[id] + '" style="right: calc(14px + (100% - 28px) * ' + (pct(day.z[id]) / 100).toFixed(4) + ')"></i>'; }).join('');
+  }
+  function skyColors(m) {
+    var z = day.z;
+    if (m < z.netz - 20) return ['#0B1030', '#232B66'];
+    if (m < z.netz + 40) return ['#3B3F82', '#F5A989'];
+    if (m < z.plag) return ['#3D8BE0', '#A9D7F7'];
+    if (m < z.shkia - 10) return ['#4D86D6', '#F4CB86'];
+    if (m < z.tzeit) return ['#3C3577', '#F3906F'];
+    return ['#080C24', '#1E2556'];
+  }
+  function paintSky(m) {
+    var c = skyColors(m);
+    document.getElementById('sky').style.background = 'linear-gradient(180deg, ' + c[0] + ', ' + c[1] + ')';
+    var z = day.z;
+    var isDay = m >= z.netz && m <= z.shkia;
+    var sun = document.getElementById('sun');
+    var moon = document.getElementById('moon');
+    var f = isDay ? (m - z.netz) / (z.shkia - z.netz) : 0;
+    sun.style.opacity = isDay ? '1' : '0';
+    sun.style.left = (90 - f * 80) + '%';
+    sun.style.top = (82 - Math.sin(Math.PI * f) * 62) + '%';
+    var nf = m > z.shkia ? (m - z.shkia) / (day.nextAlot - z.shkia) : (m + 1440 - z.shkia) / (day.nextAlot - z.shkia);
+    moon.style.opacity = isDay ? '0' : '1';
+    moon.style.left = (88 - Math.min(1, Math.max(0, nf)) * 76) + '%';
+    moon.style.top = (70 - Math.sin(Math.PI * Math.min(1, Math.max(0, nf))) * 46) + '%';
+    document.getElementById('stars').style.opacity = isDay ? '0' : '1';
+    document.getElementById('skyTime').textContent = hm(m);
+    var next = ['alot', 'misheyakir', 'netz', 'sofShma', 'sofTfila', 'chatzot', 'minchaG', 'plag', 'shkia', 'tzeit', 'chatzotL'].filter(function (id) { return z[id] > m; })[0];
+    var names = { alot: 'עלות השחר', misheyakir: 'משיכיר', netz: 'הנץ החמה', sofShma: 'סוף זמן ק״ש', sofTfila: 'סוף זמן תפילה', chatzot: 'חצות היום', minchaG: 'מנחה גדולה', plag: 'פלג המנחה', shkia: 'שקיעה', tzeit: 'צאת הכוכבים', chatzotL: 'חצות הלילה' };
+    document.getElementById('skyLine').textContent = (m >= z.shkia ? day.hebNight : day.hebDay) + ' · ' + (next ? 'הבא: ' + names[next] + ' ' + hm(z[next]) : 'הבא: עלות השחר ' + hm(day.nextAlot));
+    document.querySelectorAll('#ticks i').forEach(function (t) { t.classList.toggle('next', next && Number(t.dataset.m) === z[next]); });
+  }
+
+  var frames = Array.prototype.slice.call(document.querySelectorAll('iframe[data-src]'));
+  function hash() {
+    return 'theme=' + state.palette + '&startTime=' + encodeURIComponent(state.time) + '&bigText=' + (state.big ? '1' : '0');
+  }
+  function pushHash() {
+    var h = hash();
+    frames.forEach(function (f) {
+      try {
+        if (f.contentWindow && f.contentWindow.location.href.indexOf(f.dataset.src) !== -1) {
+          f.contentWindow.location.hash = h;
+          return;
+        }
+      } catch (e) { /* not reachable yet */ }
+      f.src = f.dataset.src + '#' + h;
+    });
+  }
+  var pending = null;
+  function pushSoon() {
+    if (pending) return;
+    pending = setTimeout(function () { pending = null; pushHash(); }, 140);
+  }
+
+  function shownMin() { return state.time === 'live' ? appDay().min : Number(state.time.split(':')[0]) * 60 + Number(state.time.split(':')[1]) + (Number(state.time.split(':')[0]) * 60 < day.z.alot ? 1440 : 0); }
+  function syncTime() {
+    var m = shownMin();
+    range.value = String(Math.min(Number(range.max), Math.max(Number(range.min), m)));
+    range.setAttribute('aria-valuetext', hm(m) + (state.time === 'live' ? ', עכשיו' : ''));
+    document.getElementById('timeOut').textContent = hm(m);
+    document.getElementById('live').setAttribute('aria-pressed', String(state.time === 'live'));
+    document.getElementById('liveTag').style.visibility = state.time === 'live' ? 'visible' : 'hidden';
+    paintSky(m);
+  }
+
+  function syncControls() {
+    document.querySelectorAll('[data-palette]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.palette === state.palette)); });
+    document.getElementById('big').setAttribute('aria-pressed', String(state.big));
+    document.querySelectorAll('.device[data-id]').forEach(function (d) {
+      var p = d.querySelector('.pick');
+      var i = state.picks.indexOf(d.dataset.id);
+      p.setAttribute('aria-pressed', String(i >= 0));
+      p.querySelector('.rank').textContent = i >= 0 ? String(i + 1) : '';
+      p.querySelector('.lbl').textContent = i >= 0 ? (i === 0 ? 'הכי יפה בעיני' : 'בחירה ' + (i + 1)) : 'הכי יפה בעיני';
+    });
+    var list = document.getElementById('picked');
+    list.innerHTML = '';
+    state.picks.forEach(function (id, i) {
+      var li = document.createElement('li');
+      var b = document.createElement('b');
+      b.textContent = String(i + 1);
+      li.appendChild(b);
+      li.appendChild(document.createTextNode(LABELS[id]));
+      list.appendChild(li);
+    });
+    document.getElementById('none').style.display = state.picks.length ? 'none' : '';
+    document.getElementById('copy').disabled = !state.picks.length;
+    document.getElementById('out').value = shareText();
+  }
+  function shareText() {
+    if (!state.picks.length) return '';
+    var lines = ['יהודי 365 · מסך הבית החדש'];
+    state.picks.forEach(function (id, i) { lines.push((i === 0 ? 'ברירת מחדל: ' : 'חלופה: ') + LABELS[id]); });
+    var why = state.why.trim();
+    if (why) lines.push('למה: ' + why);
+    return lines.join('\n');
+  }
+
+  document.querySelectorAll('[data-palette]').forEach(function (b) {
+    b.addEventListener('click', function () { state.palette = b.dataset.palette; save(); syncControls(); pushHash(); });
+  });
+  document.getElementById('big').addEventListener('click', function () { state.big = !state.big; save(); syncControls(); pushHash(); });
+  document.getElementById('live').addEventListener('click', function () { state.time = 'live'; syncTime(); pushHash(); });
+  range.addEventListener('input', function () { state.time = hm(Number(range.value)); syncTime(); pushSoon(); });
+  range.addEventListener('change', function () { pushHash(); });
+
+  document.querySelectorAll('.device[data-id] .pick').forEach(function (p) {
+    p.addEventListener('click', function () {
+      var id = p.closest('.device').dataset.id;
+      var i = state.picks.indexOf(id);
+      if (i >= 0) state.picks.splice(i, 1);
+      else if (state.picks.length < 2) state.picks.push(id);
+      else { document.getElementById('status').textContent = 'אפשר לבחור עד שלושה. מבטלים בחירה ואז בוחרים אחרת.'; return; }
+      save();
+      syncControls();
+      document.getElementById('status').textContent = '';
+    });
+  });
+  var why = document.getElementById('why');
+  why.value = state.why;
+  why.addEventListener('input', function () { state.why = why.value; save(); document.getElementById('out').value = shareText(); });
+  document.getElementById('copy').addEventListener('click', function () {
+    var text = shareText();
+    var status = document.getElementById('status');
+    var out = document.getElementById('out');
+    function fallback() {
+      out.focus();
+      out.select();
+      status.textContent = 'לא הצלחנו להעתיק אוטומטית. הטקסט למטה מסומן, אפשר להעתיק אותו ידנית.';
+    }
+    try {
+      navigator.clipboard.writeText(text).then(function () { status.textContent = 'הועתק. אפשר להדביק בוואטסאפ או בכל הודעה.'; }, fallback);
+    } catch (e) { fallback(); }
+  });
+
+  var devices = Array.prototype.slice.call(document.querySelectorAll('.device'));
+  function fit() {
+    devices.forEach(function (d) {
+      var screen = d.querySelector('.screen');
+      var w;
+      if (d.classList.contains('fs')) w = Math.min(window.innerWidth - 44, (window.innerHeight - 110) * 390 / 844, 390);
+      else w = Math.min(d.clientWidth - 24, 390);
+      w = Math.max(200, Math.floor(w));
+      var s = w / 390;
+      screen.style.width = w + 'px';
+      screen.style.height = Math.round(844 * s) + 'px';
+      screen.querySelector('iframe').style.transform = 'scale(' + s + ')';
+    });
+  }
+  var opened = null;
+  function closeFull() {
+    if (!opened) return;
+    opened.classList.remove('fs');
+    document.body.classList.remove('locked');
+    var back = opened.querySelector('.full');
+    opened = null;
+    fit();
+    if (back) back.focus();
+  }
+  devices.forEach(function (d) {
+    var full = d.querySelector('.full');
+    if (full) full.addEventListener('click', function () {
+      opened = d;
+      d.classList.add('fs');
+      document.body.classList.add('locked');
+      fit();
+      d.querySelector('.close').focus();
+    });
+    d.querySelector('.close').addEventListener('click', closeFull);
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeFull(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(document.body);
+  window.addEventListener('resize', fit);
+
+  setupDay();
+  syncControls();
+  syncTime();
+  pushHash();
+  fit();
+  setInterval(function () { if (state.time === 'live') syncTime(); }, 20000);
+
+  var target = location.hash.slice(1);
+  if (/^[a-z]+$/.test(target) && document.getElementById(target)) {
+    setTimeout(function () { document.getElementById(target).scrollIntoView(); }, 50);
+  }
+})();
+</script>

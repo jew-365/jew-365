@@ -52,3 +52,4 @@
 ## Child DOX Index
 
 - [studies/2026-10-27-home/AGENTS.md](studies/2026-10-27-home/AGENTS.md) - The home screen study of 2026-10-27: ten live, scrubbable directions on real data.
+- [studies/2026-10-28-home-mix/AGENTS.md](studies/2026-10-28-home-mix/AGENTS.md) - The home screen study of 2026-10-28, round 4: five mixes of the owner's likes, for him to pick two (a default and an alternative).

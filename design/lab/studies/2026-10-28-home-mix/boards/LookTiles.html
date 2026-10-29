@@ -1,0 +1,1103 @@
+<!--board title="ר3 · אריחים"-->
+<style>
+.h1{font-size:1.5em;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+.label{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:.8125em;font-weight:700;color:var(--sub);margin:26px 4px 10px}
+.label b{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.sum{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.sumc{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 13px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:.8125em;font-weight:600}
+.sumc i{width:8px;height:8px;border-radius:50%;flex:none}
+.sumc b{font-weight:800;font-variant-numeric:tabular-nums}
+.sumc.d i{background:var(--safe)}
+.sumc.m i{background:var(--urgent)}
+.sumc.o i{background:var(--accent)}
+.sumc.m.has{background:var(--urgentSoft);color:var(--urgent)}
+.sumc.d.has{background:var(--safeSoft);color:var(--safe)}
+.sumc.t{margin-inline-start:auto}
+
+.sky{position:relative;overflow:hidden;margin-top:16px;border-radius:28px;box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.35);color:#F7F9FF}
+.readout{position:relative;display:flex;justify-content:center;padding:12px 12px 0;min-height:52px}
+.rpill{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 7px;padding:6px 14px;border-radius:18px;background:rgba(8,14,36,.64);font-size:.875em;text-align:center;color:#F7F9FF}
+.rpill b{font-weight:700}
+.rpill.ra{animation:readA .4s both}
+.rpill.rb{animation:readB .4s both}
+@keyframes readA{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes readB{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.rd-a{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 7px}
+.rtag{font-size:.8125em;font-weight:700;padding:1px 9px;border-radius:999px;background:#F59A4A;color:#1E1006}
+.scene{position:relative;width:100%;max-width:350px;height:216px;margin:0 auto;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+.scene svg{position:absolute;inset:0;overflow:visible}
+.sky-rays{position:absolute;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(255,236,180,.5) 0deg 4deg,transparent 4deg 18deg);-webkit-mask:radial-gradient(circle closest-side,transparent 12%,#000 36%,transparent 100%);mask:radial-gradient(circle closest-side,transparent 12%,#000 36%,transparent 100%);animation:rays 90s linear infinite;transition:opacity .6s}
+@keyframes rays{to{transform:rotate(360deg)}}
+.clouds{position:absolute;inset:0;overflow:hidden;pointer-events:none;transition:opacity .6s}
+.cl{position:absolute;left:0;width:96px;height:40px;animation:drift 80s linear infinite}
+.cl.c2{width:70px;height:30px;animation-duration:110s}
+.cl.c3{width:120px;height:50px;animation-duration:140s}
+.cl svg{position:static;width:100%;height:100%;fill:currentColor}
+@keyframes drift{from{transform:translateX(-140px)}to{transform:translateX(420px)}}
+.stars{position:absolute;inset:0;pointer-events:none;transition:opacity 1.2s}
+.star{position:absolute;border-radius:50%;background:#F2F5FB;animation:twinkle 3.4s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.26;transform:scale(.8)}50%{opacity:.95;transform:scale(1.2)}}
+.hzn{stroke:rgba(255,255,255,.4)}
+.trk2{stroke:rgba(255,255,255,.55)}
+.trl{transition:opacity .5s}
+.tr{fill:none;stroke-linecap:round;stroke:inherit}
+.tr.t1{stroke-width:7;opacity:.5}
+.tr.t2{stroke-width:5.5;opacity:.3}
+.tr.t3{stroke-width:4.5;opacity:.16}
+.tick{position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid rgba(8,14,36,.55);transition:transform .3s,background .3s}
+.tick.past{background:#F59A4A;border-color:#fff}
+.tick.nxt::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid #fff;opacity:0;animation:ring 2.2s ease-out infinite}
+.tick.sel{transform:scale(1.5);z-index:2;border-color:#fff}
+@keyframes ring{0%{opacity:.7;transform:scale(.5)}100%{opacity:0;transform:scale(1.5)}}
+.glive{position:absolute;width:14px;height:14px;border-radius:50%;border:2px dashed #fff;background:rgba(8,14,36,.4);pointer-events:none}
+.nowln{position:absolute;width:0;border-inline-start:2px dashed rgba(255,255,255,.7);pointer-events:none;transform:translateX(-1px)}
+.nowpin{position:absolute;width:10px;height:10px;margin:-5px 0 0 -5px;transform:rotate(45deg);background:#fff;border-radius:2px;pointer-events:none;box-shadow:0 0 8px #fff}
+.aura{position:absolute;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;pointer-events:none;transition:opacity .6s;animation:breathe 5.2s ease-in-out infinite}
+.aura.off{opacity:0}
+@keyframes breathe{50%{transform:scale(1.14);opacity:.78}}
+.sun{position:absolute;width:30px;height:30px;border-radius:50%;pointer-events:none;transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1);animation:glow 3.2s ease-in-out infinite}
+.sun.off{opacity:0;transform:scale(.35)}
+.scene.drag .sun{transform:scale(1.16)}
+@keyframes glow{50%{filter:brightness(1.12)}}
+.moon{position:absolute;width:28px;height:28px;border-radius:50%;box-shadow:inset 9px -4px 0 0 #F6E7BF;filter:drop-shadow(0 0 8px rgba(246,231,191,.7));pointer-events:none;transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1)}
+.moon.off{opacity:0;transform:scale(.35)}
+.scene.drag .moon{transform:scale(1.16)}
+.grab{position:absolute;width:48px;height:48px;border-radius:50%;touch-action:none;cursor:grab;outline:none}
+.grab:focus-visible{outline:3px solid #fff;outline-offset:1px}
+.scene.drag .grab{cursor:grabbing}
+.scene.hintOn .grab::after{content:'';position:absolute;inset:4px;border-radius:50%;border:2px solid #fff;opacity:0;animation:ring 2.4s ease-out infinite}
+.hint{position:absolute;left:0;right:0;top:176px;text-align:center;font-size:.75em;font-weight:600;color:#E6ECF8;pointer-events:none;transition:opacity .5s}
+.hint.gone{opacity:0}
+.arcmid{position:absolute;left:50%;top:66px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;width:max-content;padding:8px 18px 10px;border-radius:26px;background:rgba(8,14,36,.64);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);pointer-events:none;min-width:150px;max-width:250px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.bigtime{font-size:2.5em;font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1;color:#fff}
+.scene.scr .bigtime{color:#FFD9AE}
+.midcap{font-size:.8125em;font-weight:600;color:#FFE8CC;text-align:center;line-height:1.3}
+.edge{position:absolute;top:166px;display:flex;flex-direction:column;align-items:center;line-height:1.25;font-size:.75em;font-weight:500;color:#DCE4F4;text-align:center;pointer-events:none}
+.edge b{font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.zchips{display:flex;gap:8px;overflow-x:auto;padding:6px 4px 14px;margin:6px -4px 0;scroll-snap-type:x proximity;scrollbar-width:none}
+.zchips::-webkit-scrollbar{display:none}
+.zc{flex:none;scroll-snap-align:center;display:flex;flex-direction:column;align-items:flex-start;padding:7px 14px;border-radius:14px;background:var(--surface);box-shadow:var(--shadow);min-height:52px;text-align:right;transition:background .25s,color .25s}
+.zl{font-size:.75em;color:var(--sub);white-space:nowrap}
+.zt{font-weight:700;font-variant-numeric:tabular-nums}
+.zc.past .zt{color:var(--sub);font-weight:500}
+.zc.next{background:var(--soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.zc.next .zl{color:var(--accentText);font-weight:700}
+.zc[aria-pressed="true"]{background:var(--text);color:var(--bg);box-shadow:none}
+.zc[aria-pressed="true"] .zl,.zc[aria-pressed="true"] .zt{color:inherit}
+
+.glass{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 7%,var(--surface)),var(--surface));border-radius:24px;box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.4);border:1px solid color-mix(in srgb,var(--text) 7%,transparent)}
+.nowrail{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -20px;padding:4px 20px 14px;scrollbar-width:none}
+.nowrail::-webkit-scrollbar{display:none}
+.nowrail.one{overflow:visible}
+.nowrail > li{flex:none;width:100%;scroll-snap-align:center}
+.nowrail.many > li{width:calc(100% - 34px)}
+.mx-now{position:relative;padding:14px;animation:fadeIn .5s both}
+.mx-nh{display:flex;align-items:center;gap:12px}
+.mx-tile{width:44px;height:44px;border-radius:15px;background:var(--soft);color:var(--accentText);display:grid;place-items:center;flex:none}
+.mx-nt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.mx-nn{font-size:1.0625em;font-weight:700;line-height:1.25}
+.mx-ring{position:relative;width:60px;height:60px;flex:none;display:grid;place-items:center}
+.mx-ring svg{position:absolute;inset:0;width:60px;height:60px}
+.mx-rt{fill:none;stroke:color-mix(in srgb,var(--text) 14%,transparent);stroke-width:4}
+.mx-rp{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 70%,transparent))}
+.mx-ring.urgent .mx-rp{stroke:var(--urgent);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--urgent) 70%,transparent))}
+.mx-rn{position:relative;display:flex;flex-direction:column;align-items:center;line-height:1.05}
+.mx-rn b{font-size:1em;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.mx-rn span{font-size:.75em;color:var(--sub);font-weight:600}
+.mx-ring.urgent .mx-rn b{color:var(--urgent)}
+.mx-bar{position:relative;height:6px;margin:16px 6px 4px;border-radius:6px;background:color-mix(in srgb,var(--text) 12%,transparent)}
+.mx-bf{position:absolute;top:0;bottom:0;right:0;border-radius:6px;background:linear-gradient(to left,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent));transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.mx-bar.urgent .mx-bf{background:linear-gradient(to left,color-mix(in srgb,var(--urgent) 45%,transparent),var(--urgent))}
+.mx-bd{position:absolute;top:50%;width:16px;height:16px;margin:-8px -8px 0 0;border-radius:50%;background:radial-gradient(circle at 38% 34%,#fff7d0 0%,#ffc247 60%,#f5a524 100%);box-shadow:0 0 0 3px rgba(255,181,46,.3),0 0 14px 3px rgba(255,170,40,.6);animation:thumb 3.4s ease-in-out infinite;transition:right .9s cubic-bezier(.2,.8,.2,1)}
+.mx-bd.moon{background:radial-gradient(circle at 36% 34%,#fff 0%,#dfe4ff 60%,#b9c3f2 100%);box-shadow:0 0 0 2px color-mix(in srgb,var(--text) 35%,transparent),0 0 12px 2px rgba(200,212,255,.8)}
+@keyframes thumb{50%{filter:brightness(1.12);transform:scale(1.12)}}
+.mx-pe{display:flex;justify-content:space-between;gap:10px;margin-top:8px;line-height:1.25}
+.mx-pe > span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.mx-pe > span:last-child{text-align:left}
+.mx-pe .cap{font-size:.75em}
+.mx-pe b{font-size:1.0625em;font-weight:800;font-variant-numeric:tabular-nums}
+.mx-acts{display:flex;gap:10px;margin-top:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:16px;font-weight:700;transition:transform .15s,background .25s,color .25s}
+.btn:active{transform:scale(.97)}
+.btn .ic{width:21px;height:21px;stroke-width:2.2}
+.btn.primary{flex:2;background:var(--accent);color:var(--onAccent);box-shadow:0 8px 20px -8px color-mix(in srgb,var(--accent) 80%,transparent)}
+.btn.ghost{flex:1;background:var(--surface2);color:var(--text)}
+.btn.late{flex:1;background:var(--surface);color:var(--urgent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--urgent) 45%,transparent)}
+.btn.undo{flex:1;background:var(--surface);color:var(--safe);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--safe) 45%,transparent)}
+.marking .btn.primary,.marking .btn.late{background:var(--safe);color:var(--onSafe)}
+.mx-now.marking{animation:mxOut .6s .3s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes mxOut{to{opacity:0;transform:translateX(-30px)}}
+.calm{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:24px 20px;animation:riseA .6s both}
+.halo{width:64px;height:64px;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:grid;place-items:center;animation:float 3.2s ease-in-out infinite;box-shadow:0 0 0 8px color-mix(in srgb,var(--safe) 10%,transparent)}
+.halo .ic{width:30px;height:30px}
+@keyframes float{50%{transform:translateY(-6px)}}
+.calm h3{font-size:1.25em;font-weight:800}
+.calm .cap{font-size:.9375em}
+.calm .btn{margin-top:8px;padding:0 20px;flex:none}
+
+.mcard{background:var(--surface);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+.mr{display:flex;align-items:stretch;animation:fadeIn .45s both}
+.mr + .mr{border-top:1px solid var(--border)}
+.mmain{flex:1;min-width:0;display:flex;align-items:flex-start;gap:10px;padding:10px 4px 10px 6px;padding-inline-start:12px;min-height:60px;text-align:right}
+.mic{width:32px;height:32px;border-radius:11px;background:var(--surface2);color:var(--sub);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+.mic .ic{width:17px;height:17px}
+.mr.personal .mic{background:var(--soft);color:var(--accentText)}
+.mr.system .mic{background:var(--infoSoft);color:var(--info)}
+.mtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.mtt{font-size:.875em;line-height:1.3}
+.mtag{font-size:.8125em;font-weight:700;color:var(--sub);margin-inline-end:6px}
+.mr.personal .mtag{color:var(--accentText)}
+.mr.system .mtag{color:var(--info)}
+.mtt b{font-weight:700}
+.mbd{font-size:.8125em;line-height:1.4;color:var(--sub);text-wrap:pretty}
+.mact{display:inline-flex;align-items:center;gap:2px;margin-top:2px;font-size:.8125em;font-weight:700;color:var(--accentText)}
+.mr.system .mact{color:var(--info)}
+.mact .ic{width:14px;height:14px}
+.mx{width:44px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+.mx .ic{width:16px;height:16px}
+.empty{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:20px;border:1.5px dashed var(--border);color:var(--sub);font-size:.9375em;font-weight:500}
+.empty .ic{width:20px;height:20px;color:var(--safe)}
+
+.dayh{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:28px 0 10px}
+.dayh h2{padding-inline:4px}
+.dayh h2{font-size:1.3em;font-weight:700;line-height:1.2}
+.seg{display:flex;padding:3px;gap:2px;border-radius:16px;background:var(--surface2);box-shadow:inset 0 0 0 1px var(--border)}
+.seg button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 12px;border-radius:13px;font-weight:700;font-size:.875em;color:var(--sub);transition:background .25s,color .25s}
+.seg button .ic{width:18px;height:18px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--accentText);box-shadow:var(--shadow)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-weight:600;font-size:.875em;transition:background .25s,color .25s}
+.chip b{font-weight:800;font-variant-numeric:tabular-nums;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--surface2);display:inline-flex;align-items:center;justify-content:center;font-size:.9em}
+.chip[aria-pressed="true"]{background:var(--text);color:var(--bg);box-shadow:none}
+.chip[aria-pressed="true"] b{background:color-mix(in srgb,var(--bg) 25%,transparent);color:var(--bg)}
+.lk-a{animation:lkA .45s both}
+.lk-b{animation:lkB .45s both}
+@keyframes lkA{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes lkB{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.tl{position:relative}
+.tl::before{content:'';position:absolute;top:24px;bottom:24px;right:59px;width:2px;border-radius:2px;background:var(--border)}
+.ent{display:grid;grid-template-columns:42px 22px minmax(0,1fr);column-gap:6px;align-items:start;margin-bottom:10px}
+.tcol{display:flex;flex-direction:column;padding-top:12px;text-align:right;font-size:.8125em;line-height:1.3;font-variant-numeric:tabular-nums}
+.tcol b{font-weight:800}
+.tcol span{color:var(--sub);font-weight:500}
+.ent.active .tcol b{color:var(--accentText)}
+.rcol{display:flex;justify-content:center;padding-top:16px}
+.node{width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--sub);display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+.ent.active .node{border-color:var(--accent);background:var(--soft)}
+.ent.active .node::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:ring 2.2s ease-out infinite}
+.ent.done .node{background:var(--safe);border-color:var(--safe);color:var(--onSafe);width:22px;height:22px;margin-top:-3px;animation:pop .6s cubic-bezier(.2,1.7,.4,1)}
+.ent.done .node .ic{width:13px;height:13px;stroke-width:3.2}
+.ent.missed .node{border-color:var(--urgent);background:var(--urgentSoft)}
+.ent.upcoming .node{border-style:dashed}
+@keyframes pop{from{transform:scale(.3)}to{transform:scale(1)}}
+.ecard{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:10px;border:1.5px solid transparent}
+.ent.active .ecard{border-color:var(--accent)}
+.ent.done .ecard{background:var(--safeSoft);box-shadow:none}
+.ent.missed .ecard{background:var(--urgentSoft);box-shadow:none;border-color:color-mix(in srgb,var(--urgent) 40%,transparent)}
+.ent.upcoming .ecard{background:transparent;box-shadow:none;border:1.5px dashed var(--border);opacity:.82}
+.ehead{display:flex;align-items:center;gap:12px;min-height:44px}
+.tile{width:40px;height:40px;border-radius:13px;background:var(--soft);color:var(--accentText);display:flex;align-items:center;justify-content:center;flex:none}
+.ent.done .tile{background:var(--surface);color:var(--safe)}
+.ent.missed .tile{background:var(--surface);color:var(--urgent)}
+.ent.upcoming .tile{background:var(--surface2);color:var(--sub)}
+.etext{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.etitle{font-weight:600;line-height:1.3}
+.ent.upcoming .etitle{color:var(--sub)}
+.ent.active .cap{color:var(--accentText);font-weight:600}
+.ent.done .cap{color:var(--safe);font-weight:600}
+.ent.missed .cap{color:var(--urgent);font-weight:600}
+.lateTag{font-size:.75em;font-weight:700;color:var(--urgent);background:var(--surface);border-radius:6px;padding:1px 6px;margin-inline-start:6px}
+.lnk{min-height:44px;padding:0 12px;border-radius:12px;font-weight:700;font-size:.875em;color:var(--safe);flex:none}
+.win{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
+.win-e{display:flex;flex-direction:column;line-height:1.2}
+.win-e .cap{font-size:.75em}
+.win-e b{font-weight:800;font-size:.9375em;font-variant-numeric:tabular-nums}
+.pbar{position:relative;display:block;height:6px;border-radius:6px;background:var(--surface2);overflow:hidden}
+.pbar i{position:absolute;inset-block:0;right:0;border-radius:6px;background:var(--accent);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.pbar.urgent i{background:var(--urgent)}
+.btns{display:flex;gap:8px}
+.ent.marking .btn.primary,.ent.marking .btn.late{background:var(--safe);color:var(--onSafe)}
+.nowrow{display:grid;grid-template-columns:42px 22px minmax(0,1fr);column-gap:6px;align-items:center;margin:2px 0 12px}
+.nowt{font-size:.8125em;font-weight:800;color:var(--accentText);font-variant-numeric:tabular-nums;text-align:right}
+.nowdot{justify-self:center;width:12px;height:12px;border-radius:50%;background:var(--accent);position:relative;z-index:1;box-shadow:0 0 0 4px var(--bg)}
+.nowdot::after{content:'';position:absolute;inset:-6px;border-radius:50%;background:var(--accent);opacity:.3;animation:ring 1.8s ease-out infinite}
+.nowline{display:flex;align-items:center;gap:8px;font-size:.75em;font-weight:700;color:var(--accentText)}
+.nowline::after{content:'';flex:1;border-top:2px dashed var(--accent);opacity:.6}
+
+.gg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ph.big .gg{grid-template-columns:minmax(0,1fr)}
+.gc{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:22px;background:var(--surface);box-shadow:var(--shadow);border:1.5px solid transparent;background-image:linear-gradient(160deg,color-mix(in srgb,var(--surface) 60%,transparent),transparent 60%)}
+.gc.span2{grid-column:1/-1}
+.gc.active{border-color:var(--accent);background-color:var(--soft)}
+.gc.done{background-color:var(--safeSoft);box-shadow:none}
+.gc.missed{background-color:var(--urgentSoft);box-shadow:none;border-color:color-mix(in srgb,var(--urgent) 40%,transparent)}
+.gc.upcoming{background-color:transparent;background-image:none;box-shadow:none;border:1.5px dashed var(--border);opacity:.85}
+.gc-h{display:flex;align-items:center;gap:10px}
+.gc-t{width:40px;height:40px;border-radius:13px;background:var(--soft);color:var(--accentText);display:grid;place-items:center;flex:none}
+.gc.active .gc-t{background:var(--surface)}
+.gc.done .gc-t{background:var(--surface);color:var(--safe)}
+.gc.missed .gc-t{background:var(--surface);color:var(--urgent)}
+.gc.upcoming .gc-t{background:var(--surface2);color:var(--sub)}
+.gc-n{display:flex;flex-direction:column;gap:1px;min-width:0}
+.gc-n b{font-weight:700;line-height:1.25;font-size:.9375em}
+.gc-s{font-size:.8125em;font-weight:600}
+.gc.active .gc-s{color:var(--accentText)}
+.gc.done .gc-s{color:var(--safe)}
+.gc.missed .gc-s{color:var(--urgent)}
+.gc.upcoming .gc-s{color:var(--sub)}
+.gc-tm{font-size:.8125em;color:var(--sub);font-variant-numeric:tabular-nums}
+.gc-act{margin-top:auto;display:flex;gap:8px}
+.gc-act .btn{min-height:46px;font-size:.9375em;border-radius:14px}
+.gc.marking .btn.primary,.gc.marking .btn.late{background:var(--safe);color:var(--onSafe)}
+
+.tg-sum{padding:14px 14px 12px;margin-bottom:12px}
+.tg-sh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+.tg-sh b{font-size:1.0625em;font-weight:800}
+.tg-bar{display:flex;gap:3px;height:10px;border-radius:6px;overflow:hidden}
+.tg-bar i{display:block;height:100%;min-width:0;transition:flex-grow .6s cubic-bezier(.2,.8,.2,1)}
+.tg-bar i.d{background:var(--safe)}
+.tg-bar i.m{background:var(--urgent)}
+.tg-bar i.o{background:var(--accent)}
+.tg-bar i.u{background:color-mix(in srgb,var(--text) 16%,transparent)}
+.tg-lg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:.8125em;color:var(--sub);font-weight:600}
+.tg-lg > span{display:inline-flex;align-items:center;gap:6px}
+.tg-lg i{width:8px;height:8px;border-radius:50%}
+.tg-lg b{color:var(--text);font-variant-numeric:tabular-nums}
+.tg-lg .d i{background:var(--safe)}.tg-lg .m i{background:var(--urgent)}.tg-lg .o i{background:var(--accent)}.tg-lg .u i{background:var(--sub)}
+.tg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;grid-auto-flow:row dense}
+.ph.big .tg{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tg > li{min-width:0;display:flex}
+.tg > li.open{grid-column:1/-1}
+.tt{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:104px;padding:10px 4px 8px;border-radius:20px;background:var(--surface);box-shadow:var(--shadow);text-align:center;transition:transform .15s,background .25s}
+.tt:active{transform:scale(.96)}
+.tt.upcoming{background:transparent;box-shadow:none;border:1.5px dashed var(--border)}
+.tt.active{background:var(--soft)}
+.tr-w{position:relative;width:60px;height:60px;display:grid;place-items:center;flex:none}
+.tr-w svg{position:absolute;inset:0;width:100%;height:100%}
+.tr-w .rt{fill:none;stroke:color-mix(in srgb,var(--text) 12%,transparent);stroke-width:4}
+.tr-w .rp{fill:none;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1)}
+.tr-w.done .rp{stroke:var(--safe)}
+.tr-w.missed .rp{stroke:var(--urgent)}
+.tr-w.active .rp{stroke:var(--accent);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 70%,transparent))}
+.tr-w.upcoming .rt{stroke:var(--sub);stroke-dasharray:3 5;stroke-width:2.5;opacity:.7}
+.tr-w.upcoming .rp{stroke:none}
+.tr-i{position:relative;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--accentText)}
+.tr-w.done .tr-i{background:var(--safeSoft);color:var(--safe)}
+.tr-w.missed .tr-i{background:var(--urgentSoft);color:var(--urgent)}
+.tr-w.upcoming .tr-i{background:var(--surface2);color:var(--sub)}
+.tr-i .ic{width:18px;height:18px}
+.tr-b{position:absolute;bottom:-1px;inset-inline-end:-1px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:var(--safe);color:var(--onSafe);box-shadow:0 0 0 2px var(--surface)}
+.tr-b .ic{width:11px;height:11px;stroke-width:3.4}
+.tr-b.m{background:var(--urgent);color:var(--onUrgent)}
+.tt-n{font-size:.8125em;font-weight:700;line-height:1.2;max-width:100%;overflow-wrap:anywhere}
+.tt-t{font-size:.75em;color:var(--sub);font-variant-numeric:tabular-nums;font-weight:600}
+.tt.active .tt-t{color:var(--accentText)}
+.td{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:22px;background:var(--surface);box-shadow:var(--shadow);border:1.5px solid transparent;animation:tdIn .35s cubic-bezier(.2,.8,.2,1) both}
+.td.active{border-color:var(--accent);background:var(--soft)}
+.td.done{background:var(--safeSoft);box-shadow:none}
+.td.missed{background:var(--urgentSoft);box-shadow:none;border-color:color-mix(in srgb,var(--urgent) 40%,transparent)}
+.td.upcoming{background:transparent;box-shadow:none;border:1.5px dashed var(--border)}
+@keyframes tdIn{from{opacity:.4;transform:scale(.94)}to{opacity:1;transform:none}}
+.td-h{display:flex;align-items:center;gap:12px}
+.td-h .tr-w{width:52px;height:52px}
+.td-x{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.td-x b{font-weight:700;line-height:1.25}
+.td-s{font-size:.8125em;font-weight:600;color:var(--sub)}
+.td.active .td-s{color:var(--accentText)}.td.done .td-s{color:var(--safe)}.td.missed .td-s{color:var(--urgent)}
+.td-c{width:44px;height:44px;flex:none;display:grid;place-items:center;border-radius:14px;background:var(--surface2);color:var(--sub)}
+.td-c .ic{width:18px;height:18px;transform:rotate(90deg)}
+.td-se{display:flex;justify-content:space-between;gap:10px;line-height:1.25}
+.td-se > span{display:flex;flex-direction:column;gap:1px}
+.td-se > span:last-child{text-align:left}
+.td-se .cap{font-size:.75em}
+.td-se b{font-weight:800;font-variant-numeric:tabular-nums}
+.td-a{display:flex;gap:8px}
+.td.marking .btn.primary,.td.marking .btn.late{background:var(--safe);color:var(--onSafe)}
+</style>
+<template>
+<div class="scroll" style="position: absolute; inset: 0; overflow-y: auto; padding: 24px 20px 124px">
+
+<header style="display: flex; flex-direction: column; gap: 3px; min-width: 0">
+<p class="cap">{{weekday}} · {{hebDate}} · {{city}}</p>
+<h1 class="h1">{{greeting}}</h1>
+</header>
+
+<div class="sum" role="group" aria-label="סיכום היום">
+<span class="sumc d {{sumDoneCls}}"><i></i>בוצעו <b>{{doneN}}</b></span>
+<span class="sumc m {{sumMissedCls}}"><i></i>פוספסו <b>{{missedN}}</b></span>
+<span class="sumc o"><i></i>פתוחות <b>{{activeN}}</b></span>
+<span class="sumc t" role="img" aria-label="{{countLabel}}">רצף <b>{{streak}}</b></span>
+</div>
+
+<!--NAMECARD-->
+
+<section class="sky" aria-label="קשת היום וזמני היום" style="background: {{skyBg}}">
+<p class="readout"><span class="rpill {{readCls}}" aria-live="{{liveMode}}"><span class="rd-a"><sc-if value="{{read.isNext}}" hint-placeholder-val="{{ true }}"><span class="rtag">הבא</span></sc-if><b>{{read.label}}</b><span>·</span><span class="num">{{read.hm}}</span></span><span>{{read.rel}}</span></span></p>
+<div class="scene {{sceneCls}}" id="scene" onPointerDown="{{gDown}}" onPointerMove="{{gMove}}" onPointerUp="{{gUp}}" onPointerCancel="{{gUp}}">
+<div class="stars" aria-hidden="true" style="opacity: {{starsOp}}">
+<sc-for list="{{stars}}" as="st" hint-placeholder-count="10">
+<i class="star" style="left: {{st.x}}px; top: {{st.y}}px; width: {{st.s}}px; height: {{st.s}}px; animation-delay: {{st.d}}s; animation-duration: {{st.du}}s"></i>
+</sc-for>
+</div>
+<div class="sky-rays" aria-hidden="true" style="left: {{sunCx}}px; top: {{sunCy}}px; opacity: {{rayOp}}"></div>
+<div class="clouds" aria-hidden="true" style="opacity: {{cloudOp}}; color: {{cloudC}}">
+<span class="cl c1" style="top: 34px; animation-delay: -20s"><svg viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse></svg></span>
+<span class="cl c2" style="top: 100px; animation-delay: -64s"><svg viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse></svg></span>
+<span class="cl c3" style="top: 62px; animation-delay: -110s"><svg viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse></svg></span>
+</div>
+<svg width="350" height="216" viewBox="0 0 350 216" aria-hidden="true">
+<defs>
+<linearGradient id="gArc" gradientUnits="userSpaceOnUse" x1="317" y1="0" x2="33" y2="0"><stop offset="0" stop-color="#FF9FB4"></stop><stop offset="0.25" stop-color="#FFC56A"></stop><stop offset="0.5" stop-color="#FFF3C2"></stop><stop offset="0.78" stop-color="#FFA24D"></stop><stop offset="1" stop-color="#C58BFF"></stop></linearGradient>
+<linearGradient id="gNight" gradientUnits="userSpaceOnUse" x1="75" y1="0" x2="275" y2="0"><stop offset="0" stop-color="#C58BFF"></stop><stop offset="0.5" stop-color="#9FB6FF"></stop><stop offset="1" stop-color="#FFD9AE"></stop></linearGradient>
+</defs>
+<path d="M0 146C36 134 72 140 112 146C160 154 206 130 258 137C300 142 328 148 350 142V216H0Z" fill="{{hillFar}}" opacity="0.8"></path>
+<path d="M0 158C50 148 92 156 142 155C200 153 244 147 292 154C320 157 338 153 350 151V216H0Z" fill="{{hillNear}}"></path>
+<path d="{{dayPath}}" fill="none" stroke="url(#gArc)" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 8" opacity="0.55"></path>
+<path d="{{dayPath}}" fill="none" stroke="url(#gArc)" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="{{dayLen}}" style="stroke-dashoffset: {{dayDash}}"></path>
+<g class="trl" style="opacity: {{dayTrOp}}; stroke: {{sunC2}}">
+<sc-for list="{{dayTr}}" as="k" hint-placeholder-count="3">
+<path class="tr {{k.cls}}" d="{{dayPath}}" stroke-dasharray="{{k.da}}" stroke-dashoffset="{{k.off}}"></path>
+</sc-for>
+</g>
+<path d="{{nightPath}}" fill="none" stroke="url(#gNight)" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 8" opacity="0.55"></path>
+<path d="{{nightPath}}" fill="none" stroke="url(#gNight)" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="{{nightLen}}" style="stroke-dashoffset: {{nightDash}}"></path>
+<g class="trl" style="opacity: {{nightTrOp}}; stroke: #F6E7BF">
+<sc-for list="{{nightTr}}" as="k" hint-placeholder-count="3">
+<path class="tr {{k.cls}}" d="{{nightPath}}" stroke-dasharray="{{k.da}}" stroke-dashoffset="{{k.off}}"></path>
+</sc-for>
+</g>
+</svg>
+<sc-for list="{{ticks}}" as="k" hint-placeholder-count="11">
+<span class="tick {{k.cls}}" style="left: {{k.x}}px; top: {{k.y}}px"></span>
+</sc-for>
+<sc-if value="{{showGhost}}" hint-placeholder-val="{{ false }}"><span class="glive" aria-hidden="true" style="left: {{ghostX}}px; top: {{ghostY}}px"></span></sc-if>
+<span class="nowln" aria-hidden="true" style="left: {{lnX}}px; top: {{lnTop}}px; height: {{lnH}}px"></span>
+<span class="nowpin" aria-hidden="true" style="left: {{lnX}}px; top: 158px"></span>
+<span class="aura {{auraCls}}" aria-hidden="true" style="left: {{sunCx}}px; top: {{sunCy}}px; background: {{auraBg}}"></span>
+<span class="sun {{sunCls}}" aria-hidden="true" style="left: {{sunX}}px; top: {{sunY}}px; background: {{sunBg}}; box-shadow: {{sunSh}}"></span>
+<span class="moon {{moonCls}}" aria-hidden="true" style="left: {{moonX}}px; top: {{moonY}}px"></span>
+<div class="arcmid">
+<span class="bigtime">{{nowT}}</span>
+<span class="midcap" aria-live="{{liveMode}}">{{midCaption}}</span>
+</div>
+<p class="hint {{hintCls}}" aria-hidden="true">{{hintText}}</p>
+<span class="edge" style="right: 8px"><span>עלות</span><b>{{edgeStart}}</b></span>
+<span class="edge" style="left: 8px"><span>צאה״כ</span><b>{{edgeEnd}}</b></span>
+<div class="grab" id="grab" role="slider" tabindex="0" aria-label="הזמן ביום, אפשר לגרור או להשתמש בחצים" aria-orientation="horizontal" aria-valuemin="{{sliderMin}}" aria-valuemax="{{sliderMax}}" aria-valuenow="{{sliderNow}}" aria-valuetext="{{sliderText}}" style="left: {{grabX}}px; top: {{grabY}}px" onKeyDown="{{gKey}}"></div>
+</div>
+</section>
+<div class="zchips" id="zchips" role="group" aria-label="זמני היום, בחירה מציגה את הזמן בקשת">
+<sc-for list="{{zchips}}" as="z" hint-placeholder-count="11">
+<button class="zc {{z.cls}}" aria-pressed="{{z.pressed}}" onClick="{{z.pick}}"><span class="zl">{{z.label}}</span><span class="zt">{{z.time}}</span></button>
+</sc-for>
+</div>
+
+<h3 class="label" style="margin-top: 10px"><span>פתוח עכשיו</span><b>{{activeN}}</b></h3>
+<sc-if value="{{hasActive}}" hint-placeholder-val="{{ true }}">
+<ul class="nowrail {{railCls}}" aria-label="מצוות פתוחות עכשיו">
+<sc-for list="{{actives}}" as="it" hint-placeholder-count="2">
+<li>
+<section class="glass mx-now {{it.cls}}">
+<div class="mx-nh">
+<span class="mx-tile">[[icItem:it]]</span>
+<div class="mx-nt"><h4 class="mx-nn">{{it.name}}</h4><p class="cap">{{it.startT}} · מ{{it.fromName}} עד {{it.toName}} · {{it.endT}}</p></div>
+<div class="mx-ring {{it.urgentCls}}" role="img" aria-label="נשארו {{it.left}}">
+<svg viewBox="0 0 60 60" aria-hidden="true"><circle class="mx-rt" cx="30" cy="30" r="25"></circle><circle class="mx-rp" cx="30" cy="30" r="25" transform="rotate(-90 30 30)" style="stroke-dasharray: 157.1; stroke-dashoffset: {{it.ringOff}}"></circle></svg>
+<span class="mx-rn"><b class="num">{{it.leftNum}}</b><span>{{it.leftUnit}}</span></span>
+</div>
+</div>
+<div class="mx-acts">
+<button class="btn primary" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">[[ic:check]]<span>{{it.cta}}</span></button>
+<button class="btn ghost" onClick="{{it.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</section>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noActive}}" hint-placeholder-val="{{ false }}">
+<section class="glass calm" aria-live="polite">
+<div class="halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h3>{{activeEmptyTitle}}</h3>
+<p class="cap">{{activeEmptyText}}</p>
+</section>
+</sc-if>
+
+<h3 class="label"><span>הודעות</span><b>{{msgCount}}</b></h3>
+<sc-if value="{{hasMsgs}}" hint-placeholder-val="{{ true }}">
+<ul class="mcard" role="list" aria-label="הודעות">
+<sc-for list="{{msgs}}" as="m" hint-placeholder-count="5">
+<li class="mr {{m.kindCls}} {{m.cls}}">
+<sc-if value="{{m.hasAction}}" hint-placeholder-val="{{ true }}">
+<button class="mmain" onClick="{{m.act}}" aria-label="{{m.title}}. {{m.action}}">
+<span class="mic">[[icMsg:m]]</span>
+<span class="mtx"><span class="mtt"><span class="mtag">{{m.tag}}</span><b>{{m.title}}</b></span><span class="mbd">{{m.body}}</span><span class="mact">{{m.action}}[[ic:chevron]]</span></span>
+</button>
+</sc-if>
+<sc-if value="{{m.noAction}}" hint-placeholder-val="{{ false }}">
+<div class="mmain">
+<span class="mic">[[icMsg:m]]</span>
+<span class="mtx"><span class="mtt"><span class="mtag">{{m.tag}}</span><b>{{m.title}}</b></span><span class="mbd">{{m.body}}</span></span>
+</div>
+</sc-if>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="mx" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noMsgs}}" hint-placeholder-val="{{ false }}"><p class="empty">[[ic:check]]<span>אין הודעות כרגע.</span></p></sc-if>
+
+<div class="dayh">
+<h2>היום שלי</h2>
+<div class="seg" role="group" aria-label="תצוגת היום">
+<button aria-pressed="{{lkRail.pressed}}" onClick="{{lkRail.pick}}">[[ic:list]]<span>ציר</span></button>
+<button aria-pressed="{{lkCards.pressed}}" onClick="{{lkCards.pick}}">[[ic:grid]]<span>כרטיסים</span></button>
+<button aria-pressed="{{lkBand.pressed}}" onClick="{{lkBand.pick}}">[[ic:sparkle]]<span>אריחים</span></button>
+</div>
+</div>
+<div class="chips" role="group" aria-label="סינון המצוות">
+<sc-for list="{{filters}}" as="f" hint-placeholder-count="4">
+<button class="chip" aria-pressed="{{f.pressed}}" onClick="{{f.pick}}"><span>{{f.label}}</span><b>{{f.count}}</b></button>
+</sc-for>
+</div>
+
+<sc-if value="{{noRows}}" hint-placeholder-val="{{ false }}">
+<section class="glass calm" aria-live="polite">
+<div class="halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h3>{{emptyTitle}}</h3>
+<p class="cap">{{emptyText}}</p>
+<sc-if value="{{canReset}}" hint-placeholder-val="{{ true }}"><button class="btn ghost" onClick="{{resetFilter}}">הצגת הכול</button></sc-if>
+</section>
+</sc-if>
+
+<sc-if value="{{isRail}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{hasRows}}" hint-placeholder-val="{{ true }}">
+<div class="tl {{lkEnter}}" role="list">
+<sc-for list="{{entries}}" as="en" hint-placeholder-count="7">
+<sc-if value="{{en.isNow}}" hint-placeholder-val="{{ false }}">
+<div class="nowrow" role="listitem" aria-label="{{en.label}}">
+<span class="nowt">{{en.time}}</span>
+<span class="nowdot"></span>
+<span class="nowline">{{en.nowWord}}</span>
+</div>
+</sc-if>
+<sc-if value="{{en.isItem}}" hint-placeholder-val="{{ true }}">
+<div class="ent {{en.rowCls}}" role="listitem">
+<span class="tcol"><b>{{en.startT}}</b><span>{{en.endT}}</span></span>
+<span class="rcol"><span class="node"><sc-if value="{{en.isDone}}" hint-placeholder-val="{{ false }}">[[ic:check]]</sc-if></span></span>
+<div class="ecard">
+<div class="ehead">
+<span class="tile">[[icItem:en]]</span>
+<span class="etext"><span class="etitle">{{en.name}}</span><span class="cap">{{en.statusText}}<sc-if value="{{en.late}}" hint-placeholder-val="{{ false }}"><span class="lateTag">באיחור</span></sc-if></span></span>
+<sc-if value="{{en.isDone}}" hint-placeholder-val="{{ false }}"><button class="lnk" onClick="{{en.undo}}" aria-label="{{en.undoLabel}}">ביטול</button></sc-if>
+</div>
+<sc-if value="{{en.isActive}}" hint-placeholder-val="{{ false }}">
+<div class="win" role="group" aria-label="חלון הזמן">
+<span class="win-e"><span class="cap">נפתח</span><b>{{en.startT}}</b></span>
+<span class="pbar {{en.urgentCls}}" role="img" aria-label="{{en.barLabel}}"><i style="width: {{en.pctGone}}%"></i></span>
+<span class="win-e"><span class="cap">נגמר</span><b>{{en.winEnd}}</b></span>
+</div>
+<div class="btns">
+<button class="btn primary" onClick="{{en.mark}}" aria-label="{{en.markLabel}}">[[ic:check]]<span>{{en.cta}}</span></button>
+<button class="btn ghost" onClick="{{en.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</sc-if>
+<sc-if value="{{en.isMissed}}" hint-placeholder-val="{{ false }}">
+<button class="btn late" onClick="{{en.mark}}" aria-label="{{en.markLabel}}">[[ic:check]]<span>בכל זאת עשיתי</span></button>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</sc-for>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{isCards}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{hasRows}}" hint-placeholder-val="{{ true }}">
+<ul class="gg {{lkEnter}}" role="list">
+<sc-for list="{{cardRows}}" as="g" hint-placeholder-count="6">
+<li class="gc {{g.status}} {{g.span}} {{g.cls}}">
+<div class="gc-h">
+<span class="gc-t">[[icItem:g]]</span>
+<span class="gc-n"><b>{{g.name}}</b><span class="gc-s">{{g.statusText}}<sc-if value="{{g.late}}" hint-placeholder-val="{{ false }}"><span class="lateTag">באיחור</span></sc-if></span></span>
+</div>
+<sc-if value="{{g.isActive}}" hint-placeholder-val="{{ false }}">
+<div class="mx-bar {{g.urgentCls}}" aria-hidden="true" style="margin-top: 10px"><i class="mx-bf" style="width: {{g.pctGone}}%"></i><i class="mx-bd {{g.dotCls}}" style="right: {{g.pctGone}}%"></i></div>
+<div class="mx-pe">
+<span><span class="cap">נפתח</span><b>{{g.startT}}</b></span>
+<span><span class="cap">נגמר</span><b>{{g.winEnd}}</b></span>
+</div>
+</sc-if>
+<sc-if value="{{g.notActive}}" hint-placeholder-val="{{ true }}"><p class="gc-tm">{{g.range}}</p></sc-if>
+<div class="gc-act">
+<sc-if value="{{g.isActive}}" hint-placeholder-val="{{ false }}">
+<button class="btn primary" onClick="{{g.mark}}" aria-label="{{g.markLabel}}">[[ic:check]]<span>{{g.cta}}</span></button>
+<button class="btn ghost" onClick="{{g.open}}">[[ic:book]]<span>נוסח</span></button>
+</sc-if>
+<sc-if value="{{g.isMissed}}" hint-placeholder-val="{{ false }}"><button class="btn late" onClick="{{g.mark}}" aria-label="{{g.markLabel}}">[[ic:check]]<span>בכל זאת עשיתי</span></button></sc-if>
+<sc-if value="{{g.isDone}}" hint-placeholder-val="{{ false }}"><button class="btn undo" onClick="{{g.undo}}" aria-label="{{g.undoLabel}}">[[ic:undo]]<span>ביטול</span></button></sc-if>
+</div>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{isBand}}" hint-placeholder-val="{{ true }}">
+<section class="glass tg-sum" aria-label="סיכום היום">
+<div class="tg-sh"><b>{{sumTitle}}</b><span class="cap">{{sumSub}}</span></div>
+<div class="tg-bar" role="img" aria-label="{{sumAria}}">
+<sc-for list="{{segs}}" as="g" hint-placeholder-count="4"><i class="{{g.cls}}" style="flex-grow: {{g.n}}; flex-basis: 0"></i></sc-for>
+</div>
+<p class="tg-lg"><span class="d"><i></i>בוצעו <b>{{doneN}}</b></span><span class="m"><i></i>פוספסו <b>{{missedN}}</b></span><span class="o"><i></i>פתוחות <b>{{activeN}}</b></span><span class="u"><i></i>בהמשך <b>{{upcomingN}}</b></span></p>
+</section>
+<sc-if value="{{hasRows}}" hint-placeholder-val="{{ true }}">
+<ul class="tg {{lkEnter}}" role="list" aria-label="אריחי היום">
+<sc-for list="{{tiles}}" as="t" hint-placeholder-count="6">
+<li class="{{t.liCls}}">
+<sc-if value="{{t.closed}}" hint-placeholder-val="{{ true }}">
+<button class="tt {{t.status}}" aria-expanded="false" aria-label="{{t.aria}}" onClick="{{t.pick}}">
+<span class="tr-w {{t.status}}"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="rt" cx="32" cy="32" r="28"></circle><circle class="rp" cx="32" cy="32" r="28" transform="rotate(-90 32 32)" style="stroke-dasharray: 175.9; stroke-dashoffset: {{t.off}}"></circle></svg><span class="tr-i">[[icItem:t]]</span><sc-if value="{{t.isDone}}" hint-placeholder-val="{{ false }}"><span class="tr-b">[[ic:check]]</span></sc-if><sc-if value="{{t.isMissed}}" hint-placeholder-val="{{ false }}"><span class="tr-b m">[[ic:close]]</span></sc-if></span>
+<span class="tt-n">{{t.short}}</span>
+<span class="tt-t">{{t.startT}}</span>
+</button>
+</sc-if>
+<sc-if value="{{t.open}}" hint-placeholder-val="{{ false }}">
+<div class="td {{t.status}} {{t.cls}}" role="group" aria-label="{{t.name}}" aria-live="polite">
+<div class="td-h">
+<span class="tr-w {{t.status}}"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="rt" cx="32" cy="32" r="28"></circle><circle class="rp" cx="32" cy="32" r="28" transform="rotate(-90 32 32)" style="stroke-dasharray: 175.9; stroke-dashoffset: {{t.off}}"></circle></svg><span class="tr-i">[[icItem:t]]</span></span>
+<span class="td-x"><b>{{t.name}}</b><span class="td-s">{{t.statusText}}<sc-if value="{{t.late}}" hint-placeholder-val="{{ false }}"><span class="lateTag">באיחור</span></sc-if></span></span>
+<button class="td-c" onClick="{{t.pick}}" aria-expanded="true" aria-label="{{t.closeLabel}}">[[ic:chevron]]</button>
+</div>
+<sc-if value="{{t.isActive}}" hint-placeholder-val="{{ false }}"><div class="mx-bar {{t.urgentCls}}" aria-hidden="true" style="margin: 6px 6px 0"><i class="mx-bf" style="width: {{t.pctGone}}%"></i><i class="mx-bd {{t.dotCls}}" style="right: {{t.pctGone}}%"></i></div></sc-if>
+<div class="td-se"><span><span class="cap">התחלה</span><b>{{t.startT}}</b></span><span><span class="cap">סיום</span><b>{{t.winEnd}}</b></span></div>
+<div class="td-a">
+<sc-if value="{{t.isActive}}" hint-placeholder-val="{{ false }}"><button class="btn primary" onClick="{{t.mark}}" aria-label="{{t.markLabel}}">[[ic:check]]<span>{{t.cta}}</span></button><button class="btn ghost" onClick="{{t.openText}}">[[ic:book]]<span>נוסח</span></button></sc-if>
+<sc-if value="{{t.isMissed}}" hint-placeholder-val="{{ false }}"><button class="btn late" onClick="{{t.mark}}" aria-label="{{t.markLabel}}">[[ic:check]]<span>בכל זאת עשיתי</span></button></sc-if>
+<sc-if value="{{t.isDone}}" hint-placeholder-val="{{ false }}"><button class="btn undo" onClick="{{t.undo}}" aria-label="{{t.undoLabel}}">[[ic:undo]]<span>ביטול</span></button></sc-if>
+</div>
+</div>
+</sc-if>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+</sc-if>
+
+</div>
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    return { look: 'band', filter: 'all', sel: null, drag: false, touched: false, zSel: null, vf: 0 };
+  }
+
+  boardMount() {
+    this.chipTimer = setTimeout(() => this.centerChip(false), 80);
+  }
+
+  boardUnmount() {
+    clearTimeout(this.chipTimer);
+    cancelAnimationFrame(this.vRaf);
+    cancelAnimationFrame(this.gRaf);
+  }
+
+  componentDidUpdate() {
+    if (this.chipKey !== this.lastChip) {
+      const first = this.lastChip === undefined;
+      this.lastChip = this.chipKey;
+      if (!first) this.centerChip(true);
+    }
+  }
+
+  centerChip(smooth) {
+    const box = document.getElementById('zchips');
+    const on = box && box.querySelector('[aria-pressed="true"]');
+    if (!box || !on) return;
+    const b = box.getBoundingClientRect();
+    const o = on.getBoundingClientRect();
+    const dx = o.left + o.width / 2 - (b.left + b.width / 2);
+    if (smooth) box.scrollBy({ left: dx, behavior: 'smooth' });
+    else box.scrollLeft += dx;
+  }
+
+  geo() {
+    return { CX: 175, CY: 158, RX: 142, RY: 116, NRX: 100, NRY: 46 };
+  }
+
+  ellipseLen(rx, ry, f) {
+    const end = Math.PI * Math.max(0, Math.min(1, f));
+    let len = 0;
+    let px = rx;
+    let py = 0;
+    for (let i = 1; i <= 120; i++) {
+      const a = (end * i) / 120;
+      const x = rx * Math.cos(a);
+      const y = ry * Math.sin(a);
+      len += Math.hypot(x - px, y - py);
+      px = x;
+      py = y;
+    }
+    return len;
+  }
+
+  eased(t, key) {
+    const now = performance.now();
+    const dt = Math.min(100, now - (this.vAt || now - 16));
+    this.vAt = now;
+    const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (this.vis == null || this.visKey !== key || calm) {
+      this.vis = t;
+    } else {
+      const d = t - this.vis;
+      const tau = this.state.drag ? 42 : 130;
+      this.vis = Math.abs(d) < 45 ? t : this.vis + d * (1 - Math.exp(-dt / tau));
+    }
+    this.visKey = key;
+    if (this.vis !== t) this.kick();
+    return this.vis;
+  }
+
+  kick() {
+    if (this.vRaf) return;
+    this.vRaf = requestAnimationFrame(() => {
+      this.vRaf = 0;
+      this.setState((s) => ({ vf: s.vf + 1 }));
+    });
+  }
+
+  gPoint(e) {
+    const r = document.getElementById('scene').getBoundingClientRect();
+    return { x: ((e.clientX - r.left) * 350) / r.width, y: ((e.clientY - r.top) * 216) / r.height };
+  }
+
+  gTime(p) {
+    const { CX, CY, RX, RY, NRX, NRY } = this.geo();
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    if (p.y <= CY) {
+      const nu = (p.x - CX) / RX;
+      const nv = (CY - p.y) / RY;
+      const rho = Math.hypot(nu, nv);
+      return { rho, near: rho > 0.55 && rho < 1.4, sec: A0 + (Math.atan2(nv, nu) / Math.PI) * (A1 - A0) };
+    }
+    const nu = (p.x - CX) / NRX;
+    const nv = (p.y - CY) / NRY;
+    const rho = Math.hypot(nu, nv);
+    return { rho, near: rho > 0.62 && rho < 1.7, sec: A1 + (Math.atan2(nv, -nu) / Math.PI) * (E - A1) };
+  }
+
+  gSet(sec) {
+    this.gPend = sec;
+    if (this.gRaf) return;
+    this.gRaf = requestAnimationFrame(() => {
+      this.gRaf = 0;
+      this.gFlush();
+    });
+  }
+
+  gFlush() {
+    if (this.gPend == null) return;
+    const v = this.gPend;
+    this.gPend = null;
+    this.scrub(v);
+  }
+
+  gDown(e) {
+    if (e.button > 0) return;
+    const hit = this.gTime(this.gPoint(e));
+    const onGrab = Boolean(e.target.closest && e.target.closest('.grab'));
+    if (hit.rho < 0.15 || (!onGrab && !hit.near)) return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+    const cur = this.now();
+    this.gDrag = { id: e.pointerId, off: onGrab ? hit.sec - cur : 0, prev: cur };
+    this.setState({ drag: true, touched: true, zSel: null });
+    if (!onGrab) this.gSet(hit.sec);
+  }
+
+  gMove(e) {
+    const d = this.gDrag;
+    if (!d || e.pointerId !== d.id) return;
+    const hit = this.gTime(this.gPoint(e));
+    if (hit.rho < 0.15) return;
+    const lo = this.dayStart();
+    const hi = this.dayEnd() - 60;
+    let sec = hit.sec - d.off;
+    d.off *= 0.93;
+    if (Math.abs(sec - d.prev) > (hi - lo) * 0.75) sec = d.prev < (lo + hi) / 2 ? lo : hi;
+    sec = Math.max(lo, Math.min(hi, sec));
+    d.prev = sec;
+    this.gSet(sec);
+  }
+
+  gUp(e) {
+    const d = this.gDrag;
+    if (!d || e.pointerId !== d.id) return;
+    this.gDrag = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    this.gFlush();
+    this.setState({ drag: false });
+  }
+
+  gKey(e) {
+    const t = this.now();
+    const keys = { ArrowLeft: 300, ArrowUp: 300, ArrowRight: -300, ArrowDown: -300, PageUp: 3600, PageDown: -3600 };
+    let to = null;
+    if (e.key in keys) to = t + keys[e.key];
+    else if (e.key === 'Home') to = this.dayStart();
+    else if (e.key === 'End') to = this.dayEnd() - 60;
+    if (to == null) return;
+    e.preventDefault();
+    this.setState({ zSel: null, touched: true });
+    this.scrub(to);
+  }
+
+  hx(h) {
+    const n = parseInt(h.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+
+  mx(a, b, k) {
+    const A = this.hx(a);
+    const B = this.hx(b);
+    return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0')).join('');
+  }
+
+  lum(h) {
+    const [r, g, b] = this.hx(h);
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  }
+
+  skyAt(sec, A0, A1, E) {
+    const z = (id) => this.zmanSec(id);
+    const raw = [
+      [A0, '#17234f', '#6b5b94'],
+      [z('netz'), '#4a6fb5', '#f6b57a'],
+      [z('netz') + 5400, '#5aa0e6', '#cfe8f8'],
+      [z('chatzot'), '#4c9be8', '#bddff6'],
+      [z('shkia') - 5400, '#5c98dc', '#f2dcaa'],
+      [z('shkia'), '#3d4f93', '#ef8f5e'],
+      [A1, '#151f47', '#4b3d72'],
+      [Math.min(A1 + 3000, E - 60), '#0b1430', '#16264a'],
+      [E, '#0b1430', '#101c3a'],
+    ];
+    const K = [];
+    raw.forEach((k) => {
+      if (!K.length || k[0] > K[K.length - 1][0]) K.push(k);
+    });
+    if (sec <= K[0][0]) return { top: K[0][1], bot: K[0][2] };
+    for (let i = 1; i < K.length; i++) {
+      if (sec <= K[i][0]) {
+        const f = (sec - K[i - 1][0]) / (K[i][0] - K[i - 1][0]);
+        return { top: this.mx(K[i - 1][1], K[i][1], f), bot: this.mx(K[i - 1][2], K[i][2], f) };
+      }
+    }
+    const L = K[K.length - 1];
+    return { top: L[1], bot: L[2] };
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const s = this.state;
+    const t = this.now();
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    const NIGHT = E - A1;
+    const { CX, CY, RX, RY, NRX, NRY } = this.geo();
+    const cl = (f) => Math.max(0, Math.min(1, f));
+    const dayP = (f) => ({ x: CX + RX * Math.cos(Math.PI * cl(f)), y: CY - RY * Math.sin(Math.PI * cl(f)) });
+    const nightP = (f) => ({ x: CX - NRX * Math.cos(Math.PI * cl(f)), y: CY + NRY * Math.sin(Math.PI * cl(f)) });
+    const posOf = (S) => (S <= A1 ? dayP((S - A0) / (A1 - A0)) : nightP((S - A1) / NIGHT));
+    const vis = this.eased(t, c.dateKey);
+    const visNight = vis >= A1;
+    const dayFrac = cl((vis - A0) / (A1 - A0));
+    const nightFrac = cl((vis - A1) / NIGHT);
+    if (!this.lens) this.lens = { day: this.ellipseLen(RX, RY, 1), night: this.ellipseLen(NRX, NRY, 1) };
+    const dayLen = this.lens.day;
+    const nightLen = this.lens.night;
+    const dayAt = this.ellipseLen(RX, RY, dayFrac);
+    const nightAt = this.ellipseLen(NRX, NRY, nightFrac);
+    const sun = dayP(dayFrac);
+    const moon = nightP(nightFrac);
+    const orb = visNight ? moon : sun;
+    const trail = (at, total) =>
+      [
+        { cls: 't3', L: 96 },
+        { cls: 't2', L: 56 },
+        { cls: 't1', L: 28 },
+      ].map(({ cls, L }) => {
+        const a = Math.max(0, at - L);
+        return { cls, da: (at - a).toFixed(1) + ' ' + (total + 40).toFixed(0), off: (-a).toFixed(1) };
+      });
+
+    const sk = this.skyAt(vis, A0, A1, E);
+    const darkness = cl((0.34 - this.lum(sk.top)) / 0.16);
+    const alt = Math.sin(Math.PI * dayFrac);
+    const sunC = this.mx('#FF7A3D', '#FFD25A', Math.pow(alt, 0.55));
+    const sunC2 = this.mx('#FF9A5A', '#FFE9A3', Math.pow(alt, 0.55));
+
+    const zl = this.zmanimList();
+    const zS = Object.fromEntries(zl.map((z) => [z.id, z.S]));
+    const nextId = (c.zmanim.find((z) => z.isNext) || {}).id || null;
+    const selId = (c.isScrub && s.zSel) || nextId;
+    const sel = c.zmanim.find((z) => z.id === selId) || null;
+    const selS = sel ? zS[sel.id] : 0;
+    const read = sel
+      ? {
+          label: sel.name,
+          hm: sel.time,
+          rel: Math.abs(selS - t) < 30 ? 'הגיע הזמן' : selS > t ? 'בעוד ' + this.left(selS - t) : 'עבר לפני ' + this.left(t - selS),
+          isNext: sel.isNext,
+        }
+      : { label: c.nextZ.name, hm: c.nextZ.time, rel: c.nextZ.left, isNext: true };
+    if (this.readKey !== read.label) {
+      this.readKey = read.label;
+      this.readFlip = !this.readFlip;
+    }
+    this.chipKey = selId;
+
+    const ticks = c.zmanim.map((z, i) => {
+      const p = posOf(zl[i].S);
+      return { x: (p.x - 6).toFixed(1), y: (p.y - 6).toFixed(1), cls: (z.past ? 'past' : '') + (z.isNext ? ' nxt' : '') + (z.id === selId ? ' sel' : '') };
+    });
+    const zchips = c.zmanim.map((z) => ({
+      id: z.id,
+      label: z.isNext ? 'הבא · ' + z.short : z.short,
+      time: z.time,
+      cls: z.cls,
+      pressed: z.id === selId,
+      pick: () => {
+        const same = Boolean(c.isScrub && s.zSel === z.id);
+        this.setState({ zSel: same ? null : z.id, touched: true });
+        if (!same) this.scrub(zS[z.id]);
+      },
+    }));
+    const stars = [
+      [46, 40, 2.6, 0, 3.4], [92, 20, 2, 1.1, 4.1], [128, 62, 2, 2.2, 3.1], [224, 28, 3, 0.6, 3.8], [262, 60, 2, 1.7, 4.4], [302, 34, 2.6, 2.6, 3.3],
+      [22, 94, 2, 1.4, 4.7], [330, 92, 2, 0.3, 3.6], [64, 122, 1.8, 2.9, 4.2], [288, 122, 1.8, 1.9, 3.5],
+      [20, 18, 1.8, 0.8, 4.9], [172, 10, 1.8, 2.4, 3.7], [200, 52, 1.6, 1.3, 5.1], [334, 20, 1.8, 3.1, 4], [112, 34, 1.6, 0.4, 4.6],
+      [48, 70, 1.6, 2.1, 3.9], [308, 76, 1.6, 0.9, 4.3], [14, 140, 1.6, 1.6, 5], [338, 140, 1.6, 2.7, 3.4],
+    ].map(([x, y, sz, d, du]) => ({ x, y, s: sz, d, du }));
+
+    const first = c.hasHero ? c.hero : null;
+    const nextItem = c.upcoming[0] || null;
+    const midCaption = first ? first.short + ' · עוד ' + first.left : nextItem ? 'הבא: ' + nextItem.short + ' ב-' + nextItem.startT : 'הכול סומן להיום';
+
+    const live = c.isScrub ? posOf(this.liveSec()) : null;
+    const lnY1 = Math.min(orb.y, CY);
+    const lnY2 = Math.max(orb.y, CY);
+
+    const actives = c.active.map((a, i) => ({
+      ...a,
+      ringOff: this.dash(157.1, a.pctLeft),
+      dotCls: a.isMoon ? 'moon' : '',
+      cls: a.isMarking ? 'marking' : '',
+    }));
+
+    const msgs = c.messages.map((m) => {
+      const isNext = m.id === 'next';
+      return { ...m, action: isNext ? 'לפרטים' : m.action, body: m.body.replace(/(\d)–(\d)/g, '$1⁠–⁠$2'), noAction: !m.hasAction };
+    });
+
+    const look = s.look;
+    const fl = s.filter;
+    const tlAll = c.timeline;
+    const cnt = { all: tlAll.length, open: c.activeN + c.upcomingN, done: c.doneN, missed: c.missedN };
+    const pass = (it) => fl === 'all' || (fl === 'open' && (it.isActive || it.isUpcoming)) || (fl === 'done' && it.isDone) || (fl === 'missed' && it.isMissed);
+    const raw = this.items();
+    const rawOf = (id) => raw.find((x) => x.id === id);
+    const rows = tlAll.filter(pass).map((it) => {
+      const dn = c.done.find((d) => d.id === it.id);
+      const act = c.active.find((a) => a.id === it.id);
+      const r = rawOf(it.id);
+      const w = Math.max(3, it.p1 - it.p0);
+      const fillPct = act && r ? Math.max(0, Math.min(100, ((t - r.S) / (r.E - r.S)) * 100)) : 0;
+      const dAt = this.doneAt(it.id);
+      return {
+        ...it,
+        late: dn ? dn.late : false,
+        undoLabel: 'ביטול הסימון של ' + it.name,
+        winEnd: it.endsTomorrow ? 'מחר ' + it.endT : it.endT,
+        pctGone: act ? act.pctGone : 0,
+        urgentCls: act ? act.urgentCls : '',
+        dotCls: it.isMoon ? 'moon' : '',
+        barLabel: act ? 'נשארו ' + act.left + ' מתוך החלון' : '',
+        rowCls: it.status + (it.isMarking ? ' marking' : ''),
+        span: '',
+        notActive: !it.isActive,
+        w: w.toFixed(1),
+        p0: it.p0,
+        fill: fillPct.toFixed(1),
+        dotR: dAt != null ? Math.max(1, Math.min(99, ((dAt - A0) / (E - A0)) * 100)).toFixed(1) : 0,
+      };
+    });
+
+    if (look === 'cards') {
+      let col = 0;
+      rows.forEach((r, i) => {
+        if (r.isActive) {
+          if (col === 1 && i > 0) rows[i - 1].span = 'span2';
+          r.span = 'span2';
+          col = 0;
+        } else col = (col + 1) % 2;
+      });
+      if (col === 1 && rows.length) rows[rows.length - 1].span = 'span2';
+    }
+    const entries = [];
+    if (look === 'rail') {
+      const nowRow = { isNow: true, isItem: false, time: c.nowT, nowWord: c.isScrub ? 'בתצוגה' : 'עכשיו', label: (c.isScrub ? 'בתצוגה ' : 'עכשיו ') + c.nowT };
+      let placed = fl !== 'all' && fl !== 'open';
+      rows.forEach((it) => {
+        if (!placed && it.isUpcoming) {
+          entries.push(nowRow);
+          placed = true;
+        }
+        entries.push({ ...it, isNow: false, isItem: true });
+      });
+      if (!placed && rows.length) entries.push(nowRow);
+    }
+
+    const tiles = rows.map((it) => {
+      const open = s.sel === it.id;
+      const frac = it.isActive ? Math.max(0, Math.min(1, (it.pctGone || 0) / 100)) : it.isUpcoming ? 1 : 0;
+      return {
+        ...it,
+        open,
+        closed: !open,
+        liCls: open ? 'open' : '',
+        off: (175.9 * (it.isDone || it.isMissed ? 0 : 1 - frac)).toFixed(1),
+        aria: it.name + ', ' + it.statusText + ', ' + it.range,
+        closeLabel: 'סגירת הפרטים של ' + it.name,
+        openText: it.open,
+        pick: () => this.setState((st) => ({ sel: st.sel === it.id ? null : it.id })),
+      };
+    });
+    const segs = [
+      { cls: 'd', n: c.doneN },
+      { cls: 'm', n: c.missedN },
+      { cls: 'o', n: c.activeN },
+      { cls: 'u', n: c.upcomingN },
+    ].filter((g) => g.n > 0);
+    if (!segs.length) segs.push({ cls: 'u', n: 1 });
+    const sumTitle = c.totalN === 0 ? 'אין מצוות להיום' : c.doneN + ' מתוך ' + c.totalN + ' בוצעו';
+    const sumSub = c.missedN ? c.missedN + ' לתיקון' : c.activeN ? c.activeN + ' פתוחות עכשיו' : c.upcomingN ? 'הבא בהמשך' : 'הכול סגור';
+    const sumAria = 'בוצעו ' + c.doneN + ', פוספסו ' + c.missedN + ', פתוחות ' + c.activeN + ', בהמשך ' + c.upcomingN;
+
+    const emptyMap = {
+      all: ['אין מצוות להיום', 'כשיהיו מצוות להיום הן יופיעו כאן.'],
+      open: ['הכול נסגר להיום', 'אין מצווה פתוחה או ממתינה כרגע.'],
+      done: ['עוד לא סומן כלום', c.doneEmpty],
+      missed: ['אין מה לתקן', c.missedEmpty],
+    };
+    const em = emptyMap[fl];
+    const pick = (k) => () => this.setState({ filter: k, sel: null });
+
+    return {
+      ...c,
+      sumDoneCls: c.doneN ? 'has' : '',
+      sumMissedCls: c.missedN ? 'has' : '',
+      sceneCls: (s.drag ? 'drag ' : '') + (c.isScrub ? 'scr ' : '') + (s.touched ? '' : 'hintOn'),
+      liveMode: s.drag ? 'off' : 'polite',
+      gDown: (e) => this.gDown(e),
+      gMove: (e) => this.gMove(e),
+      gUp: (e) => this.gUp(e),
+      gKey: (e) => this.gKey(e),
+      skyBg: 'linear-gradient(180deg,' + sk.top + ' 0%,' + sk.bot + ' 78%)',
+      hillFar: this.mx(sk.bot, '#0b1430', 0.5),
+      hillNear: this.mx(sk.bot, '#0b1430', 0.84),
+      starsOp: darkness.toFixed(2),
+      cloudOp: (visNight ? 0.12 : 0.12 + 0.4 * cl(this.lum(sk.top) * 1.8)).toFixed(2),
+      cloudC: this.mx(sk.bot, '#ffffff', 0.65),
+      rayOp: visNight ? 0 : (0.1 + 0.34 * (1 - alt)).toFixed(2),
+      read,
+      readCls: this.readFlip ? 'ra' : 'rb',
+      dayPath: 'M' + (CX + RX) + ' ' + CY + 'A' + RX + ' ' + RY + ' 0 0 0 ' + (CX - RX) + ' ' + CY,
+      nightPath: 'M' + (CX - NRX) + ' ' + CY + 'A' + NRX + ' ' + NRY + ' 0 0 0 ' + (CX + NRX) + ' ' + CY,
+      dayLen: dayLen.toFixed(1),
+      nightLen: nightLen.toFixed(1),
+      dayDash: (dayLen - dayAt).toFixed(1),
+      nightDash: (nightLen - nightAt).toFixed(1),
+      dayTr: trail(dayAt, dayLen),
+      nightTr: trail(nightAt, nightLen),
+      dayTrOp: !visNight && dayAt > 3 ? 1 : 0,
+      nightTrOp: visNight && nightAt > 3 ? 1 : 0,
+      sunC2,
+      ticks,
+      zchips,
+      stars,
+      showGhost: Boolean(live),
+      ghostX: live ? (live.x - 7).toFixed(1) : 0,
+      ghostY: live ? (live.y - 7).toFixed(1) : 0,
+      lnX: orb.x.toFixed(1),
+      lnTop: lnY1.toFixed(1),
+      lnH: Math.max(0, lnY2 - lnY1).toFixed(1),
+      auraCls: visNight ? 'off' : '',
+      auraBg: 'radial-gradient(circle,' + sunC + '55 0,' + sunC + '1f 42%,transparent 70%)',
+      sunCx: sun.x.toFixed(1),
+      sunCy: sun.y.toFixed(1),
+      sunCls: visNight ? 'off' : '',
+      sunBg: 'radial-gradient(circle at 36% 30%,#fffbe8 0,' + sunC2 + ' 38%,' + sunC + ' 100%)',
+      sunSh: '0 0 0 6px ' + sunC + '38,0 0 26px ' + sunC + 'cc',
+      moonCls: visNight ? '' : 'off',
+      sunX: (sun.x - 15).toFixed(1),
+      sunY: (sun.y - 15).toFixed(1),
+      moonX: (moon.x - 14).toFixed(1),
+      moonY: (moon.y - 14).toFixed(1),
+      grabX: (orb.x - 24).toFixed(1),
+      grabY: (orb.y - 24).toFixed(1),
+      hintText: visNight ? 'גררו את הירח' : 'גררו את השמש',
+      hintCls: s.touched || c.isScrub ? 'gone' : '',
+      sliderMin: Math.round(A0),
+      sliderMax: Math.round(E - 60),
+      sliderNow: Math.round(t),
+      sliderText: c.nowT + ', הבא: ' + c.nextZ.name + ' ' + c.nextZ.left,
+      midCaption,
+      edgeStart: c.zmanim.find((z) => z.id === 'alot').time,
+      edgeEnd: c.zmanim.find((z) => z.id === 'tzeit').time,
+      hasActive: c.activeN > 0,
+      actives,
+      railCls: actives.length > 1 ? 'many' : 'one',
+      msgs,
+      hasMsgs: msgs.length > 0,
+      noMsgs: msgs.length === 0,
+      lkRail: { pressed: look === 'rail', pick: () => this.setState({ look: 'rail' }) },
+      lkCards: { pressed: look === 'cards', pick: () => this.setState({ look: 'cards' }) },
+      lkBand: { pressed: look === 'band', pick: () => this.setState({ look: 'band' }) },
+      filters: [
+        { label: 'הכל', count: cnt.all, pressed: fl === 'all', pick: pick('all') },
+        { label: 'פתוח', count: cnt.open, pressed: fl === 'open', pick: pick('open') },
+        { label: 'בוצע', count: cnt.done, pressed: fl === 'done', pick: pick('done') },
+        { label: 'פוספס', count: cnt.missed, pressed: fl === 'missed', pick: pick('missed') },
+      ],
+      noRows: rows.length === 0,
+      hasRows: rows.length > 0,
+      emptyTitle: em[0],
+      emptyText: em[1],
+      canReset: fl !== 'all',
+      resetFilter: () => this.setState({ filter: 'all' }),
+      isRail: look === 'rail',
+      isCards: look === 'cards',
+      isBand: look === 'band',
+      lkEnter: 'lk-' + this.flip('look', look + '|' + fl),
+      entries,
+      cardRows: look === 'cards' ? rows : [],
+      tiles: look === 'band' ? tiles : [],
+      segs,
+      sumTitle,
+      sumSub,
+      sumAria,
+    };
+  }
+}
+</script>

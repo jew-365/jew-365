@@ -1,0 +1,840 @@
+<!--board title="ד · קשת ושמיים"-->
+<style>
+.ph{--csub:color-mix(in srgb,var(--sub) 74%,var(--text));--cacc:color-mix(in srgb,var(--accentText) 80%,var(--text));--curg:color-mix(in srgb,var(--urgent) 82%,var(--text));--csafe:color-mix(in srgb,var(--safe) 78%,var(--text));--hair:color-mix(in srgb,var(--text) 10%,transparent)}
+.h1{font-size:1.5em;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+.sum{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.sumc{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 13px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:.8125em;font-weight:600}
+.sumc i{width:8px;height:8px;border-radius:50%;flex:none}
+.sumc b{font-weight:800;font-variant-numeric:tabular-nums}
+.sumc.d i{background:var(--safe)}
+.sumc.m i{background:var(--urgent)}
+.sumc.o i{background:var(--accent)}
+.sumc.m.has{background:var(--urgentSoft);color:var(--curg)}
+.sumc.d.has{background:var(--safeSoft);color:var(--csafe)}
+
+.gl{border:1px solid transparent;border-radius:24px;box-shadow:var(--shadow);background:linear-gradient(color-mix(in srgb,var(--surface) 86%,transparent),color-mix(in srgb,var(--surface) 86%,transparent)) padding-box,linear-gradient(145deg,color-mix(in srgb,var(--accent) 42%,transparent),color-mix(in srgb,var(--text) 7%,transparent) 36%,color-mix(in srgb,var(--text) 7%,transparent) 64%,color-mix(in srgb,var(--info) 34%,transparent)) border-box;-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3)}
+.rise{animation:riseA .7s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+.hd{display:flex;align-items:center;gap:10px;margin:26px 2px 10px}
+.hd-i{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--soft);color:var(--cacc);flex:none}
+.hd-i .ic{width:17px;height:17px}
+.hd-t{font-size:1.0625em;font-weight:800;letter-spacing:-.01em}
+.hd-l{flex:1;height:1px;background:linear-gradient(to left,color-mix(in srgb,var(--text) 24%,transparent),transparent)}
+.hd-n{flex:none;gap:4px;min-height:26px;padding:0 10px;border-radius:999px;background:var(--surface2);display:inline-flex;align-items:center;font-size:.8125em;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+.sky{position:relative;overflow:hidden;margin-top:16px;border-radius:28px;box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.3);background:var(--sk3);transition:background 1s}
+.sk-bg{position:absolute;inset:0;background:linear-gradient(180deg,var(--sk1) 0%,var(--sk2) 52%,var(--sk3) 100%)}
+.sk-row{position:relative;display:flex;justify-content:center;padding:12px 16px 0;min-height:48px}
+.pill{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 7px;padding:4px 14px;border-radius:18px;background:var(--inkchip);color:var(--ink);font-size:.875em;text-align:center;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.pill b{font-weight:700}
+.pill.ra{animation:readA .4s both}
+.pill.rb{animation:readB .4s both}
+@keyframes readA{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes readB{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.rtag{font-size:.8125em;font-weight:800;padding:1px 9px;border-radius:999px;background:var(--accent);color:var(--onAccent)}
+.scene{position:relative;width:350px;height:216px;margin:0 auto;touch-action:pan-y;user-select:none;-webkit-user-select:none;overflow:hidden}
+.scene > svg{position:absolute;inset:0}
+.hzn{stroke:var(--ink);opacity:.35}
+.trk2{stroke:var(--ink);opacity:.45}
+.prgN{stroke:#F6E7BF}
+.tr{fill:none;stroke-linecap:round}
+.tr.t1{stroke:#FFD27A;stroke-width:8;opacity:.4}
+.tr.t2{stroke:#FFB868;stroke-width:6;opacity:.24}
+.tr.t3{stroke:#FF9E6B;stroke-width:5;opacity:.14}
+.trn .tr.t1{stroke:#F6E7BF;opacity:.34}
+.trn .tr.t2{stroke:#F6E7BF;opacity:.2}
+.trn .tr.t3{stroke:#F6E7BF;opacity:.12}
+.trl{transition:opacity .5s}
+.cld{position:absolute;inset:0;pointer-events:none;transition:opacity 1.2s,color 1.2s}
+.cloud{position:absolute;left:0;top:0;fill:currentColor;filter:drop-shadow(0 5px 8px rgba(40,70,120,.12));animation:drift linear infinite;will-change:transform}
+.cloud.c1{top:34px;width:84px;animation-duration:118s;animation-delay:-36s;opacity:.85}
+.cloud.c2{top:84px;width:120px;animation-duration:160s;animation-delay:-104s;opacity:.8}
+.cloud.c3{top:122px;width:70px;animation-duration:138s;animation-delay:-15s;opacity:.7}
+@keyframes drift{from{transform:translateX(-160px)}to{transform:translateX(380px)}}
+.rays{position:absolute;width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,244,200,.2) 0deg 4deg,transparent 4deg 18deg);-webkit-mask:radial-gradient(circle closest-side,transparent 12%,#000 30%,transparent 100%);mask:radial-gradient(circle closest-side,transparent 12%,#000 30%,transparent 100%);animation:spin 80s linear infinite;pointer-events:none;transition:opacity .6s}
+.rays.off{opacity:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.aura{position:absolute;width:140px;height:140px;margin:-70px 0 0 -70px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--sunc) 50%,transparent) 0,color-mix(in srgb,var(--sunc) 16%,transparent) 42%,transparent 70%);pointer-events:none;transition:opacity .6s;animation:breathe 5.2s ease-in-out infinite}
+.aura.off{opacity:0}
+@keyframes breathe{50%{transform:scale(1.14);opacity:.78}}
+.sun{position:absolute;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 38% 34%,#fffdf0 0%,var(--sunc) 58%,var(--sunc2) 100%);pointer-events:none;transition:opacity .5s;box-shadow:0 0 0 6px color-mix(in srgb,var(--sunc) 24%,transparent),0 0 24px 4px color-mix(in srgb,var(--sunc) 70%,transparent);animation:glow 3.2s ease-in-out infinite}
+.sun.off{opacity:0}
+.scene.drag .sun{transform:scale(1.14)}
+@keyframes glow{50%{box-shadow:0 0 0 11px color-mix(in srgb,var(--sunc) 14%,transparent),0 0 32px 6px color-mix(in srgb,var(--sunc) 60%,transparent)}}
+.moon{position:absolute;width:28px;height:28px;border-radius:50%;box-shadow:inset 9px -4px 0 0 #F6E7BF;filter:drop-shadow(0 0 8px rgba(246,231,191,.7));pointer-events:none;transition:opacity .5s}
+.moon.off{opacity:0}
+.stars{position:absolute;inset:0;pointer-events:none;transition:opacity 1.2s}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle 3.4s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.26;transform:scale(.8)}50%{opacity:.95;transform:scale(1.2)}}
+.tick{position:absolute;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #5b6584;transition:transform .3s,background .3s}
+.tick.past{border-color:var(--accent);background:var(--accent)}
+.tick.nxt{border-color:var(--accent)}
+.tick.nxt::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:ring 2.2s ease-out infinite}
+.tick.sel{transform:scale(1.5);z-index:2;border-color:#1D2240}
+@keyframes ring{0%{opacity:.7;transform:scale(.5)}100%{opacity:0;transform:scale(1.5)}}
+.ghost{position:absolute;width:14px;height:14px;border-radius:3px;transform:rotate(45deg);border:2px dashed var(--ink);background:var(--inkchip);transition:opacity .4s}
+.ghost.off{opacity:0}
+.ghostL{position:absolute;padding:0 7px;border-radius:9px;background:var(--inkchip);color:var(--ink);font-size:.75em;font-weight:700;transition:opacity .4s;pointer-events:none}
+.ghostL.off{opacity:0}
+.grab{position:absolute;width:48px;height:48px;border-radius:50%;touch-action:none;cursor:grab;outline:none;z-index:4}
+.grab:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.scene.drag .grab{cursor:grabbing}
+.scene.hintOn .grab::after{content:'';position:absolute;inset:4px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:ring 2.4s ease-out infinite}
+.hint{position:absolute;left:0;right:0;top:172px;text-align:center;pointer-events:none;transition:opacity .5s}
+.hint.gone{opacity:0}
+.hint .pill{font-size:.75em;font-weight:600;padding:2px 12px}
+.arcmid{position:absolute;left:0;right:0;top:66px;display:flex;justify-content:center;pointer-events:none}
+.cbox{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 18px 9px;border-radius:24px;background:var(--inkchip);color:var(--ink);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.bigtime{font-size:2.5em;font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.scene.scr .bigtime{font-weight:600}
+.midcap{font-size:.8125em;font-weight:600;max-width:230px;text-align:center;line-height:1.3}
+.edge{position:absolute;top:166px;display:flex;flex-direction:column;align-items:center;line-height:1.25;font-size:.75em;font-weight:500;padding:2px 9px;border-radius:12px;background:var(--inkchip);color:var(--ink);text-align:center}
+.edge b{font-weight:800;font-variant-numeric:tabular-nums}
+.zchips{position:relative;display:flex;gap:8px;overflow-x:auto;padding:8px 16px 16px;scroll-snap-type:x proximity;scrollbar-width:none}
+.zchips::-webkit-scrollbar{display:none}
+.zc{flex:none;scroll-snap-align:center;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:7px 14px;border-radius:14px;background:var(--surface);color:var(--text);box-shadow:0 2px 10px rgba(0,0,0,.14);min-height:52px;text-align:right;transition:background .25s,color .25s}
+.zl{font-size:.75em;color:var(--sub);white-space:nowrap}
+.zt{font-weight:700;font-variant-numeric:tabular-nums}
+.zc.past .zt{color:var(--sub);font-weight:500}
+.zc.next{background:var(--soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.zc.next .zl{color:var(--accentText);font-weight:700}
+.zc[aria-pressed="true"]{background:var(--text);color:var(--bg);box-shadow:none}
+.zc[aria-pressed="true"] .zl,.zc[aria-pressed="true"] .zt{color:inherit}
+
+.snap{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -20px;padding:4px 20px 12px;scroll-padding-inline:20px;scrollbar-width:none}
+.snap::-webkit-scrollbar{display:none}
+.snap > .now{flex:0 0 100%;scroll-snap-align:center;min-width:0}
+.snap.multi > .now{flex-basis:88%}
+.now{position:relative;padding:14px}
+.nh{display:flex;align-items:center;gap:12px}
+.tile{width:44px;height:44px;border-radius:15px;background:var(--soft);color:var(--cacc);display:flex;align-items:center;justify-content:center;flex:none}
+.nt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.nn{font-size:1.0625em;font-weight:700;line-height:1.25}
+.nt .cap{color:var(--csub)}
+.ringw{position:relative;width:60px;height:60px;flex:none;display:flex;align-items:center;justify-content:center}
+.ringw svg{position:absolute;inset:0;width:60px;height:60px}
+.rg-t{fill:none;stroke:color-mix(in srgb,var(--text) 14%,transparent);stroke-width:4}
+.rg-p{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 70%,transparent))}
+.ringw.urgent .rg-p{stroke:var(--urgent);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--urgent) 70%,transparent))}
+.ring-n{position:relative;display:flex;flex-direction:column;align-items:center;line-height:1.05}
+.ring-n b{font-size:1em;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.ring-n span{font-size:.75em;color:var(--csub);font-weight:600}
+.ringw.urgent .ring-n b{color:var(--curg)}
+.hbar{position:relative;height:6px;margin:16px 8px 4px;border-radius:6px;background:color-mix(in srgb,var(--text) 12%,transparent)}
+.hbar-f{position:absolute;top:0;bottom:0;right:0;border-radius:6px;background:linear-gradient(to left,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent));transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.hbar.urgent .hbar-f{background:linear-gradient(to left,color-mix(in srgb,var(--urgent) 45%,transparent),var(--urgent))}
+.hbar-d{position:absolute;top:50%;width:16px;height:16px;margin:-8px -8px 0 0;border-radius:50%;background:radial-gradient(circle at 38% 34%,#fff7d0 0%,#ffc247 60%,#f5a524 100%);box-shadow:0 0 0 3px color-mix(in srgb,#ffb52e 30%,transparent),0 0 14px 3px rgba(255,170,40,.6);animation:dotB 3.4s ease-in-out infinite;transition:right .9s cubic-bezier(.2,.8,.2,1)}
+.hbar-d.moon{background:radial-gradient(circle at 36% 34%,#fff 0%,#dfe4ff 60%,#b9c3f2 100%);box-shadow:0 0 0 2px color-mix(in srgb,var(--text) 35%,transparent),0 0 12px 2px rgba(200,212,255,.8)}
+.hbar.urgent .hbar-d{box-shadow:0 0 0 3px color-mix(in srgb,var(--urgent) 40%,transparent),0 0 14px 3px color-mix(in srgb,var(--urgent) 55%,transparent)}
+@keyframes dotB{50%{filter:brightness(1.12);transform:scale(1.12)}}
+.pe{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-top:8px;line-height:1.25}
+.pe > span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.pe > span:last-child{text-align:left}
+.pe .cap{color:var(--csub);font-size:.75em}
+.pe b{font-size:1.0625em;font-weight:800;font-variant-numeric:tabular-nums}
+.acts{display:flex;gap:10px;margin-top:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:17px;font-weight:700;font-size:1.0625em;transition:transform .15s,background .25s,color .25s}
+.btn:active{transform:scale(.97)}
+.btn .ic{width:21px;height:21px;stroke-width:2.2}
+.btn.primary{flex:2;background:var(--accent);color:var(--onAccent);box-shadow:0 8px 20px -8px color-mix(in srgb,var(--accent) 80%,transparent)}
+.btn.ghostb{flex:1;background:var(--surface2);color:var(--text)}
+.now.marking .btn.primary{background:var(--safe);color:var(--onSafe)}
+.now.marking{animation:mOut .6s .3s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes mOut{to{opacity:0;transform:translateX(-30px)}}
+.calm{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:24px 20px}
+.halo{width:64px;height:64px;border-radius:50%;background:var(--safeSoft);color:var(--csafe);display:flex;align-items:center;justify-content:center;animation:float 3.2s ease-in-out infinite;box-shadow:0 0 0 8px color-mix(in srgb,var(--safe) 10%,transparent)}
+.halo .ic{width:30px;height:30px}
+@keyframes float{50%{transform:translateY(-6px)}}
+.calm h3{font-size:1.25em;font-weight:800}
+.calm .cap{font-size:.9375em;color:var(--csub)}
+
+.mcard{overflow:hidden}
+.mr{display:flex;align-items:stretch;animation:fadeIn .45s both}
+.mr + .mr{border-top:1px solid var(--hair)}
+.mmain{flex:1;min-width:0;display:flex;align-items:flex-start;gap:10px;padding:10px 12px;min-height:60px;text-align:right}
+.mic{width:34px;height:34px;border-radius:12px;background:var(--surface2);color:var(--csub);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+.mic .ic{width:18px;height:18px}
+.mr.personal .mic{background:var(--soft);color:var(--cacc)}
+.mr.system .mic{background:var(--infoSoft);color:var(--info)}
+.mtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.mtt{font-size:.9375em;line-height:1.3}
+.mtag{display:inline-block;padding:0 7px;border-radius:7px;background:var(--surface2);color:var(--csub);font-size:.8125em;font-weight:700;line-height:1.6;margin-inline-end:6px}
+.mr.personal .mtag{background:var(--soft);color:var(--cacc)}
+.mr.system .mtag{background:var(--infoSoft);color:color-mix(in srgb,var(--info) 80%,var(--text))}
+.mtt b{font-weight:700}
+.mbd{font-size:.8125em;line-height:1.4;color:var(--csub);text-wrap:pretty}
+.mact{display:inline-flex;align-items:center;gap:2px;margin-top:2px;font-size:.8125em;font-weight:700;color:var(--cacc)}
+.mact .ic{width:14px;height:14px}
+.mx{width:44px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--csub)}
+.mx .ic{width:16px;height:16px}
+.empty{display:flex;align-items:center;gap:10px;padding:14px 16px;font-size:.9375em;font-weight:500;color:var(--csub)}
+.empty .ic{width:20px;height:20px;color:var(--csafe);flex:none}
+
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:26px}
+.ph.big .duo{grid-template-columns:minmax(0,1fr)}
+.dcard{padding:12px 12px 8px;display:flex;flex-direction:column;min-width:0}
+.dh{display:flex;align-items:center;gap:6px;font-size:.8125em;font-weight:800;margin-bottom:6px}
+.dh-i{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
+.dh-i .ic{width:15px;height:15px;stroke-width:2.3}
+.dh-i.miss{background:var(--urgentSoft);color:var(--curg)}
+.dh-i.done{background:var(--safeSoft);color:var(--csafe)}
+.dh b{margin-inline-start:auto;min-width:26px;height:26px;padding:0 8px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;font-size:.9em}
+.dh.miss b{background:var(--urgentSoft);color:var(--curg)}
+.dh.done b{background:var(--safeSoft);color:var(--csafe)}
+.mrow{padding:6px 0 4px;display:flex;flex-direction:column;gap:1px}
+.mrow + .mrow,.drow + .drow{border-top:1px solid var(--hair)}
+.rt{font-weight:700;font-size:.875em;line-height:1.3}
+.mrow .cap{color:var(--curg);font-weight:600;font-size:.75em}
+.late{margin-top:5px;min-height:44px;padding:0 10px;border-radius:14px;background:var(--surface2);color:var(--text);font-weight:700;font-size:.8125em;text-align:center;transition:background .25s,color .25s}
+.mrow.marking .late{background:var(--safe);color:var(--onSafe)}
+.mrow.marking{animation:mOut .6s .3s cubic-bezier(.6,0,.2,1) forwards}
+.drow{display:flex;align-items:center;gap:6px;padding:5px 0}
+.drow > div{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.drow .cap{font-size:.75em;color:var(--csub)}
+.lateTag{display:inline-block;margin-inline-start:5px;padding:0 6px;border-radius:6px;background:var(--urgentSoft);color:var(--curg);font-weight:700}
+.undo{flex:none;min-width:44px;min-height:44px;padding:0 6px;border-radius:12px;font-weight:700;font-size:.75em;color:var(--cacc);display:flex;align-items:center;justify-content:center}
+.dempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:10px 4px 14px;font-size:.8125em;font-weight:500;color:var(--csub);line-height:1.4}
+.halo2{width:44px;height:44px;border-radius:50%;background:var(--safeSoft);color:var(--csafe);display:flex;align-items:center;justify-content:center;animation:float 3.6s ease-in-out infinite}
+.halo2 .ic{width:22px;height:22px}
+
+.up{display:flex;align-items:center;gap:12px;margin-top:10px;min-height:60px;padding:8px 14px;width:100%;text-align:right}
+.up:active{transform:scale(.99)}
+.up-ic{width:40px;height:40px;border-radius:14px;background:var(--soft);color:var(--cacc);display:flex;align-items:center;justify-content:center;flex:none}
+.up-t{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.up-t .cap{color:var(--csub);font-weight:700}
+.up-t b{font-size:.9375em;font-weight:700}
+.up-time{flex:none;display:flex;flex-direction:column;align-items:center;line-height:1.1;padding:4px 12px;border-radius:14px;background:var(--surface2)}
+.up-time b{font-size:1.125em;font-weight:800;font-variant-numeric:tabular-nums}
+.up-time span{font-size:.75em;color:var(--csub);font-weight:600}
+.up.none{cursor:default;color:var(--csub);font-weight:500}
+</style>
+<template>
+<div class="scroll" style="position: absolute; inset: 0; overflow-y: auto; padding: 24px 20px 124px">
+
+<header style="display: flex; flex-direction: column; gap: 3px; min-width: 0">
+<p class="cap">{{dateLine}}</p>
+<h1 class="h1">{{greeting}}</h1>
+</header>
+
+<!--NAMECARD-->
+
+<div class="sum" role="group" aria-label="סיכום היום">
+<span class="sumc d {{sumDoneCls}}"><i></i>בוצעו <b>{{doneN}}</b></span>
+<span class="sumc m {{sumMissedCls}}"><i></i>פוספסו <b>{{missedN}}</b></span>
+<span class="sumc o"><i></i>פתוחות <b>{{activeN}}</b></span>
+</div>
+
+<section class="sky" style="{{skyStyle}}" aria-label="קשת היום וזמני היום">
+<div class="sk-bg" aria-hidden="true"></div>
+<div class="sk-row"><p class="pill {{readCls}}" aria-live="{{liveMode}}"><sc-if value="{{read.isNext}}" hint-placeholder-val="{{ true }}"><span class="rtag">הבא</span></sc-if><b>{{read.label}}</b><span>·</span><span class="num">{{read.hm}}</span><span>{{read.rel}}</span></p></div>
+<div class="scene {{sceneCls}}" id="scene" onPointerDown="{{gDown}}" onPointerMove="{{gMove}}" onPointerUp="{{gUp}}" onPointerCancel="{{gUp}}">
+<svg width="350" height="216" viewBox="0 0 350 216" aria-hidden="true">
+<defs>
+<linearGradient id="mtArcG" gradientUnits="userSpaceOnUse" x1="317" y1="0" x2="33" y2="0"><stop offset="0" stop-color="#C58BD9"></stop><stop offset=".16" stop-color="#FF9FB0"></stop><stop offset=".32" stop-color="#FFD27A"></stop><stop offset=".5" stop-color="#FFF1A8"></stop><stop offset=".68" stop-color="#FFC66B"></stop><stop offset=".84" stop-color="#FF8A5C"></stop><stop offset="1" stop-color="#B07CD8"></stop></linearGradient>
+<linearGradient id="mtGrd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color: {{groundTop}}; stop-opacity: .55"></stop><stop offset="1" style="stop-color: {{groundBot}}; stop-opacity: .92"></stop></linearGradient>
+</defs>
+<rect x="0" y="158" width="350" height="58" fill="url(#mtGrd)"></rect>
+<path class="hzn" d="M0 158H350" fill="none" stroke-width="1.2"></path>
+<path class="trk2" d="{{dayPath}}" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 8"></path>
+<path d="{{dayPath}}" fill="none" stroke="url(#mtArcG)" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="{{dayLen}}" style="stroke-dashoffset: {{dayDash}}"></path>
+<g class="trl" style="opacity: {{dayTrOp}}">
+<sc-for list="{{dayTr}}" as="k" hint-placeholder-count="3">
+<path class="tr {{k.cls}}" d="{{dayPath}}" stroke-dasharray="{{k.da}}" stroke-dashoffset="{{k.off}}"></path>
+</sc-for>
+</g>
+<path class="trk2" d="{{nightPath}}" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 8"></path>
+<path class="prgN" d="{{nightPath}}" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="{{nightLen}}" style="stroke-dashoffset: {{nightDash}}"></path>
+<g class="trl trn" style="opacity: {{nightTrOp}}">
+<sc-for list="{{nightTr}}" as="k" hint-placeholder-count="3">
+<path class="tr {{k.cls}}" d="{{nightPath}}" stroke-dasharray="{{k.da}}" stroke-dashoffset="{{k.off}}"></path>
+</sc-for>
+</g>
+</svg>
+<div class="stars" aria-hidden="true" style="opacity: {{starsOp}}">
+<sc-for list="{{stars}}" as="st" hint-placeholder-count="10">
+<i class="star" style="left: {{st.x}}px; top: {{st.y}}px; width: {{st.s}}px; height: {{st.s}}px; animation-delay: {{st.d}}s; animation-duration: {{st.du}}s"></i>
+</sc-for>
+</div>
+<div class="cld" aria-hidden="true" style="opacity: {{cloudOp}}; color: {{cloudC}}">
+<svg class="cloud c1" viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></svg>
+<svg class="cloud c2" viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></svg>
+<svg class="cloud c3" viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></svg>
+</div>
+<span class="rays {{auraCls}}" aria-hidden="true" style="left: {{auraX}}px; top: {{auraY}}px"></span>
+<span class="aura {{auraCls}}" aria-hidden="true" style="left: {{auraX}}px; top: {{auraY}}px; --sunc: {{sunC}}"></span>
+<span class="sun {{sunCls}}" aria-hidden="true" style="left: {{sunX}}px; top: {{sunY}}px; --sunc: {{sunC}}; --sunc2: {{sunC2}}"></span>
+<span class="moon {{moonCls}}" aria-hidden="true" style="left: {{moonX}}px; top: {{moonY}}px"></span>
+<svg width="350" height="216" viewBox="0 0 350 216" aria-hidden="true" style="pointer-events: none">
+<path d="{{hillBack}}" style="fill: {{hillBackC}}"></path>
+<path d="{{hillFront}}" style="fill: {{hillFrontC}}"></path>
+</svg>
+<sc-for list="{{ticks}}" as="k" hint-placeholder-count="11">
+<span class="tick {{k.cls}}" style="left: {{k.x}}px; top: {{k.y}}px"></span>
+</sc-for>
+<span class="ghost {{ghostCls}}" aria-hidden="true" style="left: {{ghostX}}px; top: {{ghostY}}px"></span>
+<div class="arcmid">
+<div class="cbox">
+<span class="bigtime" aria-hidden="true">{{nowT}}</span>
+<span class="midcap" aria-live="{{liveMode}}">{{midCaption}}</span>
+</div>
+</div>
+<p class="hint {{hintCls}}" aria-hidden="true"><span class="pill">{{hintText}}</span></p>
+<span class="edge" style="right: 8px"><span>עלות</span><b>{{edgeStart}}</b></span>
+<span class="edge" style="left: 8px"><span>צאה״כ</span><b>{{edgeEnd}}</b></span>
+<div class="grab" id="grab" role="slider" tabindex="0" aria-label="הזמן ביום, אפשר לגרור או להשתמש בחצים" aria-orientation="horizontal" aria-valuemin="{{sliderMin}}" aria-valuemax="{{sliderMax}}" aria-valuenow="{{sliderNow}}" aria-valuetext="{{sliderText}}" style="left: {{grabX}}px; top: {{grabY}}px" onKeyDown="{{gKey}}"></div>
+</div>
+<div class="zchips" id="zchips" role="group" aria-label="זמני היום, בחירה מציגה את הזמן בקשת">
+<sc-for list="{{zchips}}" as="z" hint-placeholder-count="11">
+<button class="zc {{z.cls}}" aria-pressed="{{z.pressed}}" onClick="{{z.pick}}"><span class="zl">{{z.label}}</span><span class="zt">{{z.time}}</span></button>
+</sc-for>
+</div>
+</section>
+
+<h2 class="hd rise"><span class="hd-i">[[ic:sun]]</span><span class="hd-t">פתוח עכשיו</span><i class="hd-l"></i><span class="hd-n">{{activeN}} פתוחות</span></h2>
+<sc-if value="{{hasActive}}" hint-placeholder-val="{{ true }}">
+<div class="snap {{snapCls}}" role="list" aria-label="מצוות פתוחות עכשיו" tabindex="0">
+<sc-for list="{{actives}}" as="it" hint-placeholder-count="2">
+<section class="gl now {{it.cls}} {{it.enter}}" role="listitem">
+<div class="nh">
+<span class="tile">[[icItem:it]]</span>
+<div class="nt"><h3 class="nn">{{it.name}}</h3><p class="cap">{{it.startT}} · מ{{it.fromName}} עד {{it.toName}} · {{it.endT}}</p></div>
+<div class="ringw {{it.urgentCls}}" role="img" aria-label="נשארו {{it.left}}">
+<svg viewBox="0 0 60 60" aria-hidden="true"><circle class="rg-t" cx="30" cy="30" r="25"></circle><circle class="rg-p" cx="30" cy="30" r="25" transform="rotate(-90 30 30)" style="stroke-dasharray: 157.1; stroke-dashoffset: {{it.ringOff}}"></circle></svg>
+<span class="ring-n"><b class="num">{{it.leftNum}}</b><span>{{it.leftUnit}}</span></span>
+</div>
+</div>
+<div class="hbar {{it.urgentCls}}" aria-hidden="true"><i class="hbar-f" style="width: {{it.pctGone}}%"></i><i class="hbar-d {{it.dotCls}}" style="right: {{it.pctGone}}%"></i></div>
+<div class="pe">
+<span><span class="cap">התחיל · {{it.fromName}}</span><b>{{it.startT}}</b></span>
+<span><span class="cap">{{it.endWord}} · {{it.toName}}</span><b>{{it.endT}}</b></span>
+</div>
+<div class="acts">
+<button class="btn primary" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">[[ic:check]]<span>{{it.cta}}</span></button>
+<button class="btn ghostb" onClick="{{it.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</section>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noActive}}" hint-placeholder-val="{{ false }}">
+<section class="gl calm rise" aria-live="polite">
+<div class="halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h3>{{activeEmptyTitle}}</h3>
+<p class="cap">{{activeEmptyText}}</p>
+</section>
+</sc-if>
+
+<h2 class="hd rise"><span class="hd-i">[[ic:bell]]</span><span class="hd-t">הודעות</span><i class="hd-l"></i><span class="hd-n">{{msgCount}}</span></h2>
+<sc-if value="{{hasMsgs}}" hint-placeholder-val="{{ true }}">
+<ul class="gl mcard rise" role="list" aria-label="הודעות">
+<sc-for list="{{msgs}}" as="m" hint-placeholder-count="5">
+<li class="mr {{m.kindCls}} {{m.cls}}">
+<sc-if value="{{m.hasAction}}" hint-placeholder-val="{{ true }}">
+<button class="mmain" onClick="{{m.act}}" aria-label="{{m.title}}. {{m.action}}">
+<span class="mic">[[icMsg:m]]</span>
+<span class="mtx"><span class="mtt"><span class="mtag">{{m.tag}}</span><b>{{m.title}}</b></span><span class="mbd">{{m.body}}</span><span class="mact">{{m.action}}[[ic:chevron]]</span></span>
+</button>
+</sc-if>
+<sc-if value="{{m.noAction}}" hint-placeholder-val="{{ false }}">
+<div class="mmain">
+<span class="mic">[[icMsg:m]]</span>
+<span class="mtx"><span class="mtt"><span class="mtag">{{m.tag}}</span><b>{{m.title}}</b></span><span class="mbd">{{m.body}}</span></span>
+</div>
+</sc-if>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="mx" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noMsgs}}" hint-placeholder-val="{{ false }}"><p class="gl empty rise">[[ic:sparkle]]<span>אין הודעות כרגע. השמיים שקטים.</span></p></sc-if>
+
+<div class="duo">
+<section class="gl dcard rise" aria-label="פספסתי היום" style="--d: .1s">
+<h3 class="dh miss"><span class="dh-i miss">[[ic:clock]]</span>פספסתי היום<b>{{missedN}}</b></h3>
+<sc-if value="{{hasMissed}}" hint-placeholder-val="{{ true }}">
+<div role="list">
+<sc-for list="{{missedRows}}" as="it" hint-placeholder-count="1">
+<div class="mrow {{it.cls}} {{it.enter}}" role="listitem">
+<span class="rt">{{it.name}}</span>
+<span class="cap num">{{it.ago}}</span>
+<button class="late" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">בכל זאת עשיתי</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noMissed}}" hint-placeholder-val="{{ false }}"><div class="dempty"><span class="halo2" aria-hidden="true">[[ic:sparkle]]</span><span>{{missedEmpty}}</span></div></sc-if>
+</section>
+<section class="gl dcard rise" aria-label="עשיתי היום" style="--d: .16s">
+<h3 class="dh done"><span class="dh-i done">[[ic:check]]</span>עשיתי היום<b>{{doneN}}</b></h3>
+<sc-if value="{{hasDone}}" hint-placeholder-val="{{ true }}">
+<div role="list">
+<sc-for list="{{doneRows}}" as="d" hint-placeholder-count="2">
+<div class="drow {{d.enter}}" role="listitem">
+<div><span class="rt">{{d.name}}</span><span class="cap num">סומן ב-{{d.at}}<sc-if value="{{d.late}}" hint-placeholder-val="{{ false }}"><span class="lateTag">באיחור</span></sc-if></span></div>
+<button class="undo" onClick="{{d.undo}}" aria-label="{{d.undoLabel}}">ביטול</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noDone}}" hint-placeholder-val="{{ false }}"><div class="dempty"><span class="halo2" aria-hidden="true">[[ic:check]]</span><span>{{doneEmpty}}</span></div></sc-if>
+</section>
+</div>
+
+<sc-if value="{{hasUp}}" hint-placeholder-val="{{ true }}">
+<button class="gl up rise" style="--d: .22s" onClick="{{upGo}}" aria-label="בהמשך היום: {{upName}} ב-{{upTime}}. מעבר לשעת ההתחלה">
+<span class="up-ic">[[icItem:upItem]]</span>
+<span class="up-t"><span class="cap">בהמשך היום</span><b>{{upName}}</b></span>
+<span class="up-time"><b>{{upTime}}</b><span>{{upIn}}</span></span>
+</button>
+</sc-if>
+<sc-if value="{{noUp}}" hint-placeholder-val="{{ false }}">
+<p class="gl up none rise" style="--d: .22s"><span class="up-ic">[[ic:moon]]</span><span class="up-t"><span class="cap">בהמשך היום</span><b>אין עוד מצוות להיום</b></span></p>
+</sc-if>
+
+</div>
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    return { zSel: null, drag: false, touched: false, vf: 0 };
+  }
+
+  boardMount() {
+    this.chipTimer = setTimeout(() => this.centerChip(false), 80);
+  }
+
+  boardUnmount() {
+    clearTimeout(this.chipTimer);
+    cancelAnimationFrame(this.vRaf);
+    cancelAnimationFrame(this.gRaf);
+  }
+
+  componentDidUpdate() {
+    if (this.chipKey !== this.lastChip) {
+      const first = this.lastChip === undefined;
+      this.lastChip = this.chipKey;
+      if (!first) this.centerChip(true);
+    }
+  }
+
+  centerChip(smooth) {
+    const box = document.getElementById('zchips');
+    const on = box && box.querySelector('[aria-pressed="true"]');
+    if (!box || !on) return;
+    const b = box.getBoundingClientRect();
+    const o = on.getBoundingClientRect();
+    const dx = o.left + o.width / 2 - (b.left + b.width / 2);
+    if (smooth) box.scrollBy({ left: dx, behavior: 'smooth' });
+    else box.scrollLeft += dx;
+  }
+
+  geo() {
+    return { CX: 175, CY: 158, RX: 142, RY: 116, NRX: 100, NRY: 46 };
+  }
+
+  ellipseLen(rx, ry, f) {
+    const end = Math.PI * Math.max(0, Math.min(1, f));
+    let len = 0;
+    let px = rx;
+    let py = 0;
+    for (let i = 1; i <= 120; i++) {
+      const a = (end * i) / 120;
+      const x = rx * Math.cos(a);
+      const y = ry * Math.sin(a);
+      len += Math.hypot(x - px, y - py);
+      px = x;
+      py = y;
+    }
+    return len;
+  }
+
+  eased(t, key) {
+    const now = performance.now();
+    const dt = Math.min(100, now - (this.vAt || now - 16));
+    this.vAt = now;
+    const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (this.vis == null || this.visKey !== key || calm) {
+      this.vis = t;
+    } else {
+      const d = t - this.vis;
+      const tau = this.state.drag ? 42 : 130;
+      this.vis = Math.abs(d) < 45 ? t : this.vis + d * (1 - Math.exp(-dt / tau));
+    }
+    this.visKey = key;
+    if (this.vis !== t) this.kick();
+    return this.vis;
+  }
+
+  kick() {
+    if (this.vRaf) return;
+    this.vRaf = requestAnimationFrame(() => {
+      this.vRaf = 0;
+      this.setState((s) => ({ vf: s.vf + 1 }));
+    });
+  }
+
+  gPoint(e) {
+    const r = document.getElementById('scene').getBoundingClientRect();
+    return { x: ((e.clientX - r.left) * 350) / r.width, y: ((e.clientY - r.top) * 216) / r.height };
+  }
+
+  gTime(p) {
+    const { CX, CY, RX, RY, NRX, NRY } = this.geo();
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    if (p.y <= CY) {
+      const nu = (p.x - CX) / RX;
+      const nv = (CY - p.y) / RY;
+      const rho = Math.hypot(nu, nv);
+      return { rho, near: rho > 0.55 && rho < 1.4, sec: A0 + (Math.atan2(nv, nu) / Math.PI) * (A1 - A0) };
+    }
+    const nu = (p.x - CX) / NRX;
+    const nv = (p.y - CY) / NRY;
+    const rho = Math.hypot(nu, nv);
+    return { rho, near: rho > 0.62 && rho < 1.7, sec: A1 + (Math.atan2(nv, -nu) / Math.PI) * (E - A1) };
+  }
+
+  gSet(sec) {
+    this.gPend = sec;
+    if (this.gRaf) return;
+    this.gRaf = requestAnimationFrame(() => {
+      this.gRaf = 0;
+      this.gFlush();
+    });
+  }
+
+  gFlush() {
+    if (this.gPend == null) return;
+    const v = this.gPend;
+    this.gPend = null;
+    this.scrub(v);
+  }
+
+  gDown(e) {
+    if (e.button > 0) return;
+    const hit = this.gTime(this.gPoint(e));
+    const onGrab = Boolean(e.target.closest && e.target.closest('.grab'));
+    if (hit.rho < 0.15 || (!onGrab && !hit.near)) return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+    const cur = this.now();
+    this.gDrag = { id: e.pointerId, off: onGrab ? hit.sec - cur : 0, prev: cur };
+    this.setState({ drag: true, touched: true, zSel: null });
+    if (!onGrab) this.gSet(hit.sec);
+  }
+
+  gMove(e) {
+    const d = this.gDrag;
+    if (!d || e.pointerId !== d.id) return;
+    const hit = this.gTime(this.gPoint(e));
+    if (hit.rho < 0.15) return;
+    const lo = this.dayStart();
+    const hi = this.dayEnd() - 60;
+    let sec = hit.sec - d.off;
+    d.off *= 0.93;
+    if (Math.abs(sec - d.prev) > (hi - lo) * 0.75) sec = d.prev < (lo + hi) / 2 ? lo : hi;
+    sec = Math.max(lo, Math.min(hi, sec));
+    d.prev = sec;
+    this.gSet(sec);
+  }
+
+  gUp(e) {
+    const d = this.gDrag;
+    if (!d || e.pointerId !== d.id) return;
+    this.gDrag = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    this.gFlush();
+    this.setState({ drag: false });
+  }
+
+  gKey(e) {
+    const t = this.now();
+    const keys = { ArrowLeft: 300, ArrowUp: 300, ArrowRight: -300, ArrowDown: -300, PageUp: 3600, PageDown: -3600 };
+    let to = null;
+    if (e.key in keys) to = t + keys[e.key];
+    else if (e.key === 'Home') to = this.dayStart();
+    else if (e.key === 'End') to = this.dayEnd() - 60;
+    if (to == null) return;
+    e.preventDefault();
+    this.setState({ zSel: null, touched: true });
+    this.scrub(to);
+  }
+
+  mxHex(c) {
+    return [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+  }
+
+  mxStr(a) {
+    return '#' + a.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+  }
+
+  mxMix(a, b, k) {
+    return a.map((v, i) => v + (b[i] - v) * k);
+  }
+
+  mxLum(a) {
+    const f = (v) => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * f(a[0]) + 0.7152 * f(a[1]) + 0.0722 * f(a[2]);
+  }
+
+  mxCr(a, b) {
+    const x = this.mxLum(a);
+    const y = this.mxLum(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  }
+
+  mxCl(v, lo, hi) {
+    return Math.max(lo, Math.min(hi, v));
+  }
+
+  mxKeys() {
+    const z = {};
+    this.zmanimList().forEach((x) => (z[x.id] = x.S));
+    const end = this.dayEnd();
+    const H = (c) => this.mxHex(c);
+    const K = (t, top, mid, bot, cloud, name) => ({ t, top: H(top), mid: H(mid), bot: H(bot), cloud: H(cloud), name });
+    const dawnLen = z.netz - z.alot;
+    const alotK = K(z.alot, '#18215F', '#4B3D8E', '#9B6BA8', '#C9A6D6', 'עלות השחר');
+    return [
+      alotK,
+      K(z.netz, '#8DA3E0', '#F2B7B4', '#FFD9AE', '#FFD6CC', 'הנץ החמה'),
+      K(z.netz + (z.chatzot - z.netz) * 0.3, '#76B6F2', '#A8D4F6', '#D8EDFA', '#FFFFFF', 'בוקר'),
+      K(z.chatzot, '#4B9DEB', '#6DB4F1', '#A8D5F8', '#FFFFFF', 'צהריים'),
+      K(z.plag, '#5E9FE0', '#9CC5E8', '#F5D9A2', '#FFF6E4', 'אחר הצהריים'),
+      K(z.shkia, '#5C5AA8', '#E4708C', '#FFB05C', '#FFC8B0', 'שקיעה'),
+      K(z.tzeit, '#161D58', '#2E3382', '#6C5BA8', '#9A8CC8', 'צאת הכוכבים'),
+      K(z.tzeit + (z.chatzotL - z.tzeit) * 0.25, '#070C1F', '#0F1A3E', '#1B2A58', '#7F8FC8', 'לילה'),
+      K(end - dawnLen * 0.7, '#060A19', '#0D1533', '#18224D', '#7F8FC8', 'לפני עלות השחר'),
+      { ...alotK, t: end },
+    ];
+  }
+
+  mxAt(t) {
+    const K = this.mxKeys();
+    let i = 0;
+    while (i < K.length - 2 && t >= K[i + 1].t) i++;
+    const a = K[i];
+    const b = K[i + 1];
+    const k = this.mxCl((t - a.t) / (b.t - a.t), 0, 1);
+    const e = k * k * (3 - 2 * k);
+    const m = (p) => this.mxMix(a[p], b[p], e);
+    return { top: m('top'), mid: m('mid'), bot: m('bot'), cloud: m('cloud'), name: a.name };
+  }
+
+  mxInk(s) {
+    const zones = [s.top, this.mxMix(s.top, s.mid, 0.6), s.mid, s.bot];
+    const dark = this.mxHex('#0A1228');
+    const white = [255, 255, 255];
+    const worst = (ink) => Math.min(...zones.map((z) => this.mxCr(z, ink)));
+    const useWhite = worst(white) > worst(dark);
+    const ink = useWhite ? white : dark;
+    const opp = useWhite ? [8, 14, 34] : [255, 255, 255];
+    let alpha = 0.18;
+    while (alpha < 0.8 && Math.min(...zones.map((z) => this.mxCr(this.mxMix(z, opp, alpha), ink))) < 5.2) alpha += 0.04;
+    return { ink, opp, alpha };
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const s = this.state;
+    const t = this.now();
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    const NIGHT = E - A1;
+    const { CX, CY, RX, RY, NRX, NRY } = this.geo();
+    const cl = (f) => Math.max(0, Math.min(1, f));
+    const dayP = (f) => ({ x: CX + RX * Math.cos(Math.PI * cl(f)), y: CY - RY * Math.sin(Math.PI * cl(f)) });
+    const nightP = (f) => ({ x: CX - NRX * Math.cos(Math.PI * cl(f)), y: CY + NRY * Math.sin(Math.PI * cl(f)) });
+    const vis = this.eased(t, c.dateKey);
+    const visNight = vis >= A1;
+    const dayFrac = cl((vis - A0) / (A1 - A0));
+    const nightFrac = cl((vis - A1) / NIGHT);
+    if (!this.lens) this.lens = { day: this.ellipseLen(RX, RY, 1), night: this.ellipseLen(NRX, NRY, 1) };
+    const dayLen = this.lens.day;
+    const nightLen = this.lens.night;
+    const dayAt = this.ellipseLen(RX, RY, dayFrac);
+    const nightAt = this.ellipseLen(NRX, NRY, nightFrac);
+    const sun = dayP(dayFrac);
+    const moon = nightP(nightFrac);
+    const orb = visNight ? moon : sun;
+    const trail = (at, total) =>
+      [
+        { cls: 't3', L: 96 },
+        { cls: 't2', L: 56 },
+        { cls: 't1', L: 28 },
+      ].map(({ cls, L }) => {
+        const a = Math.max(0, at - L);
+        return { cls, da: (at - a).toFixed(1) + ' ' + (total + 40).toFixed(0), off: (-a).toFixed(1) };
+      });
+
+    const zl = this.zmanimList();
+    const zS = Object.fromEntries(zl.map((z) => [z.id, z.S]));
+    const nextId = (c.zmanim.find((z) => z.isNext) || {}).id || null;
+    const selId = (c.isScrub && s.zSel) || nextId;
+    const sel = c.zmanim.find((z) => z.id === selId) || null;
+    const selS = sel ? zS[sel.id] : 0;
+    const read = sel
+      ? {
+          label: sel.name,
+          hm: sel.time,
+          rel: Math.abs(selS - t) < 30 ? 'הגיע הזמן' : selS > t ? 'בעוד ' + this.left(selS - t) : 'עבר לפני ' + this.left(t - selS),
+          isNext: sel.isNext,
+        }
+      : { label: c.nextZ.name, hm: c.nextZ.time, rel: c.nextZ.left, isNext: true };
+    if (this.readKey !== read.label) {
+      this.readKey = read.label;
+      this.readFlip = !this.readFlip;
+    }
+    this.chipKey = selId;
+
+    const ticks = c.zmanim.map((z, i) => {
+      const S = zl[i].S;
+      const p = S <= A1 ? dayP((S - A0) / (A1 - A0)) : nightP((S - A1) / NIGHT);
+      return { x: (p.x - 6).toFixed(1), y: (p.y - 6).toFixed(1), cls: (z.past ? 'past' : '') + (z.isNext ? ' nxt' : '') + (z.id === selId ? ' sel' : '') };
+    });
+    const zchips = c.zmanim.map((z) => ({
+      id: z.id,
+      label: z.isNext ? 'הבא · ' + z.short : z.short,
+      time: z.time,
+      cls: z.cls,
+      pressed: z.id === selId,
+      pick: () => {
+        const same = Boolean(c.isScrub && s.zSel === z.id);
+        this.setState({ zSel: same ? null : z.id, touched: true });
+        if (!same) this.scrub(zS[z.id]);
+      },
+    }));
+
+    const sk = this.mxAt(Math.round(t / 20) * 20);
+    const ik = this.mxInk(sk);
+    const rgba = (a, al) => 'rgba(' + a.map((v) => Math.round(v)).join(',') + ',' + al.toFixed(2) + ')';
+    const dkc = [8, 12, 30];
+    const alt = Math.sin(Math.PI * dayFrac);
+    const hgt = this.mxCl(alt / 0.55, 0, 1);
+    const sunC = this.mxStr(this.mxMix(this.mxHex('#FF8A3D'), this.mxHex('#FFE27A'), hgt));
+    const sunC2 = this.mxStr(this.mxMix(this.mxHex('#E8531F'), this.mxHex('#FFB347'), hgt));
+    const nz = (A1 - zS.shkia) || 1200;
+    const dz = (zS.netz - A0) || 1200;
+    let nightK = 0;
+    if (t >= zS.shkia) nightK = this.mxCl((t - zS.shkia) / (2 * nz), 0, 1);
+    else if (t <= zS.netz) nightK = this.mxCl((zS.netz - t) / dz, 0, 1);
+    nightK = nightK * nightK * (3 - 2 * nightK);
+    const stars = [
+      [46, 40, 2.6, 0, 3.4], [92, 20, 2, 1.1, 4.1], [128, 62, 2, 2.2, 3.1], [224, 28, 3, 0.6, 3.8], [262, 60, 2, 1.7, 4.4], [302, 34, 2.6, 2.6, 3.3],
+      [22, 94, 2, 1.4, 4.7], [330, 92, 2, 0.3, 3.6], [64, 122, 1.8, 2.9, 4.2], [288, 122, 1.8, 1.9, 3.5],
+      [20, 18, 1.8, 0.8, 4.9], [172, 10, 1.8, 2.4, 3.7], [200, 52, 1.6, 1.3, 5.1], [334, 20, 1.8, 3.1, 4], [112, 34, 1.6, 0.4, 4.6],
+      [48, 70, 1.6, 2.1, 3.9], [308, 76, 1.6, 0.9, 4.3], [14, 140, 1.6, 1.6, 5], [338, 140, 1.6, 2.7, 3.4],
+    ].map(([x, y, sz, d, du]) => ({ x, y, s: sz, d, du }));
+
+    const live = this.liveSec();
+    const gp = live <= A1 ? dayP((live - A0) / (A1 - A0)) : nightP((live - A1) / NIGHT);
+    const showGhost = c.isScrub && Math.abs(live - t) > 240;
+
+    const first = c.hasHero ? c.hero : null;
+    const nextItem = c.upcoming[0] || null;
+    const midCaption = first ? first.short + ' · עוד ' + first.left : nextItem ? 'הבא: ' + nextItem.short + ' ב-' + nextItem.startT : 'הכול סומן להיום';
+
+    const actives = c.active.map((it, i) => ({
+      ...it,
+      ringOff: this.dash(157.1, it.pctLeft),
+      dotCls: it.isMoon ? 'moon' : '',
+      enter: 'enter-' + this.flip('act' + i, it.id),
+    }));
+    const doneRows = c.done.map((d, i) => ({ ...d, enter: 'enter-' + this.flip('dn' + i, d.id + d.at) }));
+    const missedRows = c.missed.map((m, i) => ({ ...m, enter: 'enter-' + this.flip('ms' + i, m.id) }));
+    const msgs = [...c.msgPersonal, ...c.msgGeneral].map((m) => ({ ...m, body: m.body.replace(/(\d)–(\d)/g, '$1⁠–⁠$2'), noAction: !m.hasAction, action: m.id === 'next' ? 'פתיחת ההודעות האישיות' : m.action }));
+
+    const up = c.upcoming[0] || null;
+    const upRaw = up ? this.items().find((x) => x.id === up.id) : null;
+
+    return {
+      ...c,
+      skyStyle: ['--sk1:' + this.mxStr(sk.top), '--sk2:' + this.mxStr(sk.mid), '--sk3:' + this.mxStr(sk.bot), '--ink:' + this.mxStr(ik.ink), '--inkchip:' + rgba(ik.opp, ik.alpha)].join(';'),
+      groundTop: this.mxStr(this.mxMix(sk.bot, dkc, 0.35)),
+      groundBot: this.mxStr(this.mxMix(sk.bot, dkc, 0.7)),
+      hillBack: 'M0 158V142Q45 128 95 140T200 138T290 134T350 142V158Z',
+      hillFront: 'M0 158V150Q60 140 120 150T250 148T350 150V158Z',
+      hillBackC: this.mxStr(this.mxMix(sk.bot, dkc, 0.4)),
+      hillFrontC: this.mxStr(this.mxMix(sk.bot, dkc, 0.58)),
+      sceneCls: (s.drag ? 'drag ' : '') + (c.isScrub ? 'scr ' : '') + (s.touched ? '' : 'hintOn'),
+      liveMode: s.drag ? 'off' : 'polite',
+      gDown: (e) => this.gDown(e),
+      gMove: (e) => this.gMove(e),
+      gUp: (e) => this.gUp(e),
+      gKey: (e) => this.gKey(e),
+      read,
+      readCls: this.readFlip ? 'ra' : 'rb',
+      dayPath: 'M' + (CX + RX) + ' ' + CY + 'A' + RX + ' ' + RY + ' 0 0 0 ' + (CX - RX) + ' ' + CY,
+      nightPath: 'M' + (CX - NRX) + ' ' + CY + 'A' + NRX + ' ' + NRY + ' 0 0 0 ' + (CX + NRX) + ' ' + CY,
+      dayLen: dayLen.toFixed(1),
+      nightLen: nightLen.toFixed(1),
+      dayDash: (dayLen - dayAt).toFixed(1),
+      nightDash: (nightLen - nightAt).toFixed(1),
+      dayTr: trail(dayAt, dayLen),
+      nightTr: trail(nightAt, nightLen),
+      dayTrOp: !visNight && dayAt > 3 ? 1 : 0,
+      nightTrOp: visNight && nightAt > 3 ? 1 : 0,
+      ticks,
+      zchips,
+      stars,
+      starsOp: nightK.toFixed(2),
+      cloudOp: ((1 - nightK) * 0.9).toFixed(2),
+      cloudC: this.mxStr(sk.cloud),
+      auraCls: visNight ? 'off' : '',
+      auraX: sun.x.toFixed(1),
+      auraY: sun.y.toFixed(1),
+      sunC,
+      sunC2,
+      sunCls: visNight ? 'off' : '',
+      moonCls: visNight ? '' : 'off',
+      sunX: (sun.x - 15).toFixed(1),
+      sunY: (sun.y - 15).toFixed(1),
+      moonX: (moon.x - 14).toFixed(1),
+      moonY: (moon.y - 14).toFixed(1),
+      ghostCls: showGhost ? '' : 'off',
+      ghostX: (gp.x - 7).toFixed(1),
+      ghostY: (gp.y - 7).toFixed(1),
+      grabX: (orb.x - 24).toFixed(1),
+      grabY: (orb.y - 24).toFixed(1),
+      hintText: visNight ? 'גררו את הירח' : 'גררו את השמש',
+      hintCls: s.touched || c.isScrub ? 'gone' : '',
+      sliderMin: Math.round(A0),
+      sliderMax: Math.round(E - 60),
+      sliderNow: Math.round(t),
+      sliderText: c.nowT + ', הבא: ' + c.nextZ.name + ' ' + c.nextZ.left,
+      midCaption,
+      edgeStart: c.zmanim.find((z) => z.id === 'alot').time,
+      edgeEnd: c.zmanim.find((z) => z.id === 'tzeit').time,
+      sumDoneCls: c.doneN ? 'has' : '',
+      sumMissedCls: c.missedN ? 'has' : '',
+      actives,
+      snapCls: actives.length > 1 ? 'multi' : '',
+      doneRows,
+      missedRows,
+      msgs,
+      hasMsgs: msgs.length > 0,
+      noMsgs: msgs.length === 0,
+      hasUp: Boolean(up),
+      noUp: !up,
+      upItem: up || {},
+      upName: up ? up.name : '',
+      upTime: up ? up.startT : '',
+      upIn: up ? up.inText : '',
+      upGo: () => {
+        if (!upRaw) return;
+        this.setState({ zSel: null, touched: true });
+        this.scrub(upRaw.S);
+      },
+    };
+  }
+}
+</script>

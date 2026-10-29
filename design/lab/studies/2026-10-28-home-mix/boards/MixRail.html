@@ -1,0 +1,858 @@
+<!--board title="ג · קשת וציר"-->
+<style>
+a{color:var(--accentText)}
+.x-h1{font-size:1.5em;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+.x-label{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:.8125em;font-weight:700;color:var(--sub);margin:28px 4px 10px}
+.x-label b{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.x-count{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-weight:700;font-size:.875em;font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
+.x-count i{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.x-sum{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.x-sumc{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 13px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:.8125em;font-weight:600}
+.x-sumc i{width:8px;height:8px;border-radius:50%;flex:none}
+.x-sumc b{font-weight:800;font-variant-numeric:tabular-nums}
+.x-sumc.d i{background:var(--safe)}
+.x-sumc.m i{background:var(--urgent)}
+.x-sumc.o i{background:var(--accent)}
+.x-sumc.m.has{background:var(--urgentSoft);color:var(--urgent)}
+.x-sumc.d.has{background:var(--safeSoft);color:var(--safe)}
+
+/* ---------- scene ---------- */
+.x-sky{position:relative;overflow:hidden;margin-top:16px;border-radius:30px;box-shadow:var(--shadow);isolation:isolate;background:#0B1430;--pl-bg:rgba(8,14,34,.58);--pl-t:#F4F6FC;--pl-s:#C9D3E8}
+.x-sky.pl-light{--pl-bg:rgba(255,255,255,.64);--pl-t:#0F1B3D;--pl-s:#33415F}
+.x-air{position:relative;height:300px;overflow:hidden}
+.x-rd{position:absolute;inset-inline:0;top:0;height:64px;display:flex;align-items:center;justify-content:center;padding:0 12px;z-index:3}
+.x-rdp{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 7px;max-width:100%;padding:6px 14px;border-radius:20px;background:var(--pl-bg);color:var(--pl-s);font-size:.875em;line-height:1.3;text-align:center;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:background .6s,color .6s;min-height:36px}
+.x-rdp b{color:var(--pl-t);font-weight:700}
+.x-rdp.ra{animation:xReadA .4s both}
+.x-rdp.rb{animation:xReadB .4s both}
+@keyframes xReadA{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes xReadB{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.x-rtag{font-size:.8125em;font-weight:800;padding:0 9px;border-radius:999px;background:#FFC247;color:#2B1608}
+.x-scene{position:absolute;left:50%;margin-left:-175px;top:64px;width:350px;height:236px;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+.x-scene svg{position:absolute;inset:0;overflow:visible}
+.x-glow{position:absolute;left:-40px;right:-40px;top:96px;height:130px;border-radius:50%;pointer-events:none;filter:blur(18px)}
+.x-stars{position:absolute;inset:0;pointer-events:none}
+.x-star{position:absolute;border-radius:50%;background:#F2F5FB;animation:xTwinkle 3.4s ease-in-out infinite}
+@keyframes xTwinkle{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+.x-clouds{position:absolute;inset:0;pointer-events:none;transition:opacity .8s}
+.x-cl{position:absolute;height:20px;border-radius:20px;background:var(--cl);filter:blur(.6px);opacity:.8}
+.x-cl::before,.x-cl::after{content:'';position:absolute;border-radius:50%;background:var(--cl)}
+.x-cl::before{width:26px;height:26px;left:12px;top:-12px}
+.x-cl::after{width:20px;height:20px;right:14px;top:-8px}
+.x-cl.c1{left:12px;top:46px;width:84px;animation:xDriftA 26s ease-in-out infinite alternate}
+.x-cl.c2{left:210px;top:30px;width:64px;transform:scale(.8);animation:xDriftB 34s ease-in-out infinite alternate}
+.x-cl.c3{left:130px;top:112px;width:70px;opacity:.5;animation:xDriftA 40s ease-in-out infinite alternate-reverse}
+@keyframes xDriftA{from{translate:-22px 0}to{translate:26px 0}}
+@keyframes xDriftB{from{translate:24px 0}to{translate:-28px 0}}
+.x-tick{position:absolute;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid rgba(12,26,60,.62);transition:transform .3s,background .3s}
+.x-tick.past{background:#FFC247}
+.x-tick.nxt::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid #FFC247;opacity:0;animation:xRing 2.2s ease-out infinite}
+.x-tick.sel{transform:scale(1.55);z-index:2}
+@keyframes xRing{0%{opacity:.8;transform:scale(.5)}100%{opacity:0;transform:scale(1.5)}}
+.x-beam{position:absolute;width:2px;margin-left:-1px;pointer-events:none;border-radius:2px;transition:opacity .4s}
+.x-aura{position:absolute;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(255,196,80,.55) 0,rgba(255,196,80,.18) 40%,transparent 70%);animation:xBreathe 5.2s ease-in-out infinite;transition:opacity .6s}
+.x-aura.moonA{background:radial-gradient(circle,rgba(220,230,255,.4) 0,rgba(220,230,255,.12) 42%,transparent 70%)}
+@keyframes xBreathe{50%{transform:scale(1.14);opacity:.78}}
+.x-sun{position:absolute;width:30px;height:30px;border-radius:50%;pointer-events:none;background:radial-gradient(circle at 36% 30%,#FFFDF0 0,#FFE08A 38%,#FFB82E 100%);box-shadow:0 0 0 6px rgba(255,190,60,.28),0 0 26px rgba(255,170,40,.85);transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1);animation:xGlow 3.2s ease-in-out infinite}
+.x-sun::before{content:'';position:absolute;inset:-28px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,214,120,.5) 0deg 3.5deg,transparent 3.5deg 22.5deg);-webkit-mask:radial-gradient(circle closest-side,transparent 40%,#000 48%,transparent 100%);mask:radial-gradient(circle closest-side,transparent 40%,#000 48%,transparent 100%);animation:xRays 52s linear infinite}
+.x-sun.off{opacity:0;transform:scale(.3)}
+@keyframes xRays{to{transform:rotate(360deg)}}
+@keyframes xGlow{50%{box-shadow:0 0 0 11px rgba(255,190,60,.16),0 0 34px rgba(255,170,40,.7)}}
+.x-moon{position:absolute;width:30px;height:30px;border-radius:50%;box-shadow:inset 10px -4px 0 0 #F6E7BF;filter:drop-shadow(0 0 9px rgba(246,231,191,.8));pointer-events:none;transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1)}
+.x-moon.off{opacity:0;transform:scale(.3)}
+.x-scene.drag .x-sun,.x-scene.drag .x-moon{transform:scale(1.16)}
+.x-ghost{position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;border:2px dashed #fff;background:rgba(12,26,60,.5);pointer-events:none;transition:opacity .4s}
+.x-ghost.off{opacity:0}
+.x-ghostl{position:absolute;margin:-34px 0 0 -26px;width:52px;text-align:center;font-size:.75em;font-weight:700;color:#fff;background:rgba(12,26,60,.72);border-radius:8px;padding:1px 0;pointer-events:none;transition:opacity .4s}
+.x-ghostl.off{opacity:0}
+.x-grab{position:absolute;width:48px;height:48px;border-radius:50%;touch-action:none;cursor:grab;outline:none}
+.x-grab:focus-visible{outline:3px solid #fff;outline-offset:1px}
+.x-scene.drag .x-grab{cursor:grabbing}
+.x-scene.hintOn .x-grab::after{content:'';position:absolute;inset:4px;border-radius:50%;border:2px solid #FFC247;opacity:0;animation:xRing 2.4s ease-out infinite}
+.x-mid{position:absolute;left:0;right:0;bottom:62px;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.x-clk{padding:0 16px;border-radius:22px;background:var(--pl-bg);color:var(--pl-t);font-size:2.6em;font-weight:400;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:background .6s,color .6s}
+.x-scene.scr .x-clk{box-shadow:0 0 0 2px #FFC247}
+.x-cap{max-width:230px;padding:3px 13px;border-radius:999px;background:var(--pl-bg);color:var(--pl-s);font-size:.8125em;font-weight:600;line-height:1.3;text-align:center;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:background .6s,color .6s}
+.x-edge{position:absolute;top:196px;display:flex;flex-direction:column;align-items:center;line-height:1.25;font-size:.75em;font-weight:500;color:#D5DDEE;text-align:center;pointer-events:none}
+.x-edge b{font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.x-hint{position:absolute;left:0;right:0;top:210px;text-align:center;font-size:.75em;font-weight:600;color:#D5DDEE;pointer-events:none;transition:opacity .5s}
+.x-hint.gone{opacity:0}
+.x-ground{position:relative;padding:2px 0 16px}
+.x-zchips{display:flex;gap:8px;overflow-x:auto;padding:6px 16px;scroll-snap-type:x proximity;scrollbar-width:none}
+.x-zchips::-webkit-scrollbar{display:none}
+.x-zc{flex:none;scroll-snap-align:center;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:6px 14px;border-radius:14px;background:rgba(255,255,255,.1);color:#F2F5FB;min-height:52px;text-align:right;transition:background .25s,color .25s}
+.x-zl{font-size:.75em;color:#C9D3E8;white-space:nowrap}
+.x-zt{font-weight:700;font-variant-numeric:tabular-nums}
+.x-zc.past .x-zt{color:#C9D3E8;font-weight:500}
+.x-zc.next{background:rgba(255,194,71,.22);box-shadow:inset 0 0 0 2px #FFC247}
+.x-zc.next .x-zl{color:#FFE3A3;font-weight:700}
+.x-zc[aria-pressed="true"]{background:#F2F5FB;color:#0B1430;box-shadow:none}
+.x-zc[aria-pressed="true"] .x-zl,.x-zc[aria-pressed="true"] .x-zt{color:#0B1430}
+.x-sky .x-zchips button:focus-visible{outline-color:#fff}
+
+/* ---------- open now ---------- */
+.x-sc{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-20px;padding:6px 20px 16px;scroll-padding-inline:20px;scrollbar-width:none}
+.x-sc::-webkit-scrollbar{display:none}
+.x-sc:focus-visible{outline:3px solid var(--accent);outline-offset:-3px;border-radius:20px}
+.x-now{flex:0 0 100%;scroll-snap-align:start;position:relative;padding:14px;border-radius:28px;border:1.5px solid transparent;background:radial-gradient(120% 70% at 100% 0%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 60%) padding-box,linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(145deg,color-mix(in srgb,var(--accent) 55%,transparent),color-mix(in srgb,var(--text) 6%,transparent) 50%,color-mix(in srgb,var(--accent) 28%,transparent)) border-box;box-shadow:var(--shadow)}
+.x-sc.multi .x-now{flex-basis:90%}
+.x-nh{display:flex;align-items:center;gap:12px}
+.x-tile{width:44px;height:44px;border-radius:15px;background:var(--soft);color:var(--accentText);display:grid;place-items:center;flex:none}
+.x-nt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.x-nn{font-size:1.0625em;font-weight:700;line-height:1.25}
+.x-ring{position:relative;width:60px;height:60px;flex:none;display:grid;place-items:center}
+.x-ring svg{position:absolute;inset:0;width:60px;height:60px}
+.x-rg-t{fill:none;stroke:color-mix(in srgb,var(--text) 14%,transparent);stroke-width:4}
+.x-rg-p{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 70%,transparent))}
+.x-ring.urgent .x-rg-p{stroke:var(--urgent);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--urgent) 70%,transparent))}
+.x-ring-n{position:relative;display:flex;flex-direction:column;align-items:center;line-height:1.05}
+.x-ring-n b{font-size:1em;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.x-ring-n span{font-size:.75em;color:var(--sub);font-weight:600}
+.x-ring.urgent .x-ring-n b{color:var(--urgent)}
+.x-hbar{position:relative;height:6px;margin:18px 6px 4px;border-radius:6px;background:color-mix(in srgb,var(--text) 12%,transparent)}
+.x-hbar-f{position:absolute;top:0;bottom:0;right:0;border-radius:6px;background:linear-gradient(to left,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent));transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.x-hbar.urgent .x-hbar-f{background:linear-gradient(to left,color-mix(in srgb,var(--urgent) 45%,transparent),var(--urgent))}
+.x-hbar-d{position:absolute;top:50%;width:18px;height:18px;margin:-9px -9px 0 0;border-radius:50%;background:radial-gradient(circle at 38% 34%,#fff7d0 0%,#ffc247 60%,#f5a524 100%);box-shadow:0 0 0 3px rgba(255,181,46,.3),0 0 14px 3px rgba(255,170,40,.6);animation:xDot 3.4s ease-in-out infinite;transition:right .9s cubic-bezier(.2,.8,.2,1)}
+.x-hbar-d.moon{background:radial-gradient(circle at 36% 34%,#fff 0%,#dfe4ff 60%,#b9c3f2 100%);box-shadow:0 0 0 2px color-mix(in srgb,var(--text) 30%,transparent),0 0 12px 2px rgba(150,165,230,.7)}
+.x-hbar.urgent .x-hbar-d{box-shadow:0 0 0 3px color-mix(in srgb,var(--urgent) 40%,transparent),0 0 14px 3px color-mix(in srgb,var(--urgent) 55%,transparent)}
+@keyframes xDot{50%{filter:brightness(1.12);transform:scale(1.12)}}
+.x-pe{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-top:8px;line-height:1.25}
+.x-pe>span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.x-pe>span:last-child{text-align:left}
+.x-pe .cap{font-size:.75em}
+.x-pe b{font-size:1.0625em;font-weight:800;font-variant-numeric:tabular-nums}
+.x-acts{display:flex;gap:10px;margin-top:14px}
+.x-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:17px;font-weight:700;transition:transform .15s,background .25s,color .25s}
+.x-btn:active{transform:scale(.97)}
+.x-btn .ic{width:21px;height:21px;stroke-width:2.2}
+.x-btn.primary{flex:2;background:var(--accent);color:var(--onAccent);box-shadow:0 8px 20px -8px color-mix(in srgb,var(--accent) 80%,transparent)}
+.x-btn.ghost{flex:1;background:var(--surface2);color:var(--text)}
+.x-btn.late{background:var(--surface);color:var(--urgent);width:100%;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--urgent) 45%,transparent)}
+.x-now.marking .x-btn.primary,.x-ent.marking .x-btn.primary,.x-ent.marking .x-btn.late{background:var(--safe);color:var(--onSafe)}
+.x-now.marking{animation:xOut .6s .3s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes xOut{to{opacity:0;transform:translateX(-30px)}}
+.x-enter-a{animation:riseA .55s cubic-bezier(.2,.8,.2,1) both}
+.x-enter-b{animation:riseB .55s cubic-bezier(.2,.8,.2,1) both}
+.x-calm{background:var(--surface);border-radius:28px;padding:24px 20px;text-align:center;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:6px;animation:riseA .6s both}
+.x-halo{width:64px;height:64px;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:grid;place-items:center;animation:xFloat 3.2s ease-in-out infinite;box-shadow:0 0 0 8px color-mix(in srgb,var(--safe) 10%,transparent)}
+.x-halo .ic{width:30px;height:30px}
+@keyframes xFloat{50%{transform:translateY(-6px)}}
+.x-calm h3{font-size:1.25em;font-weight:800}
+.x-calm .cap{font-size:.9375em}
+
+/* ---------- messages ---------- */
+.x-mcard{background:var(--surface);border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
+.x-m{display:flex;align-items:stretch;animation:fadeIn .45s both}
+.x-m + .x-m{border-top:1px solid var(--border)}
+.x-mm{flex:1;min-width:0;display:flex;align-items:flex-start;gap:12px;padding:12px 8px 12px 6px;padding-inline-start:14px;min-height:64px;text-align:right}
+.x-mic{width:36px;height:36px;border-radius:12px;background:var(--surface2);color:var(--sub);display:grid;place-items:center;flex:none}
+.x-mic .ic{width:19px;height:19px}
+.x-m.personal .x-mic{background:var(--soft);color:var(--accentText)}
+.x-m.system .x-mic{background:var(--infoSoft);color:var(--info)}
+.x-mtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.x-mtag{align-self:flex-start;font-size:.75em;font-weight:800;color:var(--sub);letter-spacing:.01em}
+.x-m.personal .x-mtag{color:var(--accentText)}
+.x-m.system .x-mtag{color:var(--info)}
+.x-mt{font-size:.9375em;font-weight:700;line-height:1.3}
+.x-mb{font-size:.8125em;line-height:1.45;color:var(--sub);text-wrap:pretty}
+.x-mact{display:inline-flex;align-items:center;gap:2px;margin-top:2px;font-size:.8125em;font-weight:700;color:var(--accentText)}
+.x-m.system .x-mact{color:var(--info)}
+.x-mact .ic,.x-chev .ic{width:15px;height:15px}
+.x-chev{align-self:center;color:var(--sub);flex:none;display:grid;place-items:center;transform:scaleX(-1)}
+.x-mx{width:44px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+.x-mx .ic{width:16px;height:16px}
+.x-empty{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:20px;border:1.5px dashed var(--border);color:var(--sub);font-size:.9375em;font-weight:500}
+.x-empty .ic{width:20px;height:20px;color:var(--safe)}
+
+/* ---------- rail ---------- */
+.x-rail{position:relative}
+.x-row{display:grid;grid-template-columns:46px 26px minmax(0,1fr);column-gap:8px;align-items:start;padding-bottom:12px;animation:fadeIn .5s both}
+.x-tcol{display:flex;flex-direction:column;padding-top:13px;text-align:right;font-size:.8125em;line-height:1.3;font-variant-numeric:tabular-nums}
+.x-tcol b{font-weight:800}
+.x-tcol span{color:var(--sub);font-weight:500}
+.x-ent.active .x-tcol b{color:var(--accentText)}
+.x-ent.upcoming .x-tcol b{color:var(--sub);font-weight:700}
+.x-rcol{position:relative;align-self:stretch;display:flex;justify-content:center}
+.x-rcol::before{content:'';position:absolute;top:0;bottom:-12px;left:calc(50% - 1px);width:2px;border-radius:2px;background:var(--border)}
+.x-row.first .x-rcol::before{top:24px}
+.x-row.last .x-rcol::before{bottom:auto;height:24px}
+.x-row.first.last .x-rcol::before{display:none}
+.x-ent.done .x-rcol::before{background:var(--safe)}
+.x-ent.missed .x-rcol::before{background:color-mix(in srgb,var(--urgent) 55%,var(--border))}
+.x-ent.active .x-rcol::before{background:linear-gradient(var(--accent),color-mix(in srgb,var(--accent) 35%,var(--border)))}
+.x-ent.upcoming .x-rcol::before{background:repeating-linear-gradient(180deg,var(--sub) 0 4px,transparent 4px 9px);opacity:.5}
+.x-node{position:relative;z-index:1;margin-top:16px;width:18px;height:18px;border-radius:50%;background:var(--bg);border:2px solid var(--sub);display:flex;align-items:center;justify-content:center;transition:background .3s,border-color .3s}
+.x-ent.active .x-node{border-color:var(--accent);background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}
+.x-ent.active .x-node::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:xRing 2.2s ease-out infinite}
+.x-ent.done .x-node{background:var(--safe);border-color:var(--safe);color:var(--onSafe);width:24px;height:24px;margin-top:12px;animation:xPop .6s cubic-bezier(.2,1.7,.4,1)}
+.x-ent.done .x-node .ic{width:14px;height:14px;stroke-width:3.2}
+.x-ent.missed .x-node{border-color:var(--urgent);background:var(--urgentSoft);color:var(--urgent);width:22px;height:22px;margin-top:13px}
+.x-ent.missed .x-node .ic{width:12px;height:12px;stroke-width:3}
+.x-ent.upcoming .x-node{border-style:dashed;opacity:.8}
+@keyframes xPop{from{transform:scale(.3)}to{transform:scale(1)}}
+.x-ecard{background:var(--surface);border-radius:22px;box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:10px;border:1.5px solid transparent;transition:background .3s,border-color .3s,opacity .3s}
+.x-ent.active .x-ecard{border-color:var(--accent);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 10%,var(--surface)),var(--surface))}
+.x-ent.done .x-ecard{background:var(--safeSoft);box-shadow:none}
+.x-ent.missed .x-ecard{background:var(--urgentSoft);box-shadow:none;border-color:color-mix(in srgb,var(--urgent) 38%,transparent)}
+.x-ent.upcoming .x-ecard{background:transparent;box-shadow:none;border:1.5px dashed var(--border);opacity:.8}
+.x-ehead{display:flex;align-items:center;gap:12px;min-height:44px}
+.x-etile{width:40px;height:40px;border-radius:13px;background:var(--soft);color:var(--accentText);display:grid;place-items:center;flex:none}
+.x-ent.done .x-etile{background:var(--surface);color:var(--safe)}
+.x-ent.missed .x-etile{background:var(--surface);color:var(--urgent)}
+.x-ent.upcoming .x-etile{background:var(--surface2);color:var(--sub)}
+.x-etext{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.x-etitle{font-weight:600;line-height:1.3}
+.x-ent.upcoming .x-etitle{color:var(--sub)}
+.x-ent.active .cap{color:var(--accentText);font-weight:600}
+.x-ent.done .cap{color:var(--safe);font-weight:600}
+.x-ent.missed .cap{color:var(--urgent);font-weight:600}
+.x-lateTag{font-size:.75em;font-weight:700;color:var(--urgent);background:var(--surface);border-radius:6px;padding:1px 6px;margin-inline-start:6px}
+.x-lnk{min-height:44px;padding:0 12px;border-radius:12px;font-weight:700;font-size:.875em;color:var(--safe);flex:none}
+.x-win{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px}
+.x-win-e{display:flex;flex-direction:column;line-height:1.2}
+.x-win-e .cap{font-size:.75em}
+.x-win-e b{font-weight:800;font-size:.9375em;font-variant-numeric:tabular-nums}
+.x-mbar{position:relative;height:6px;border-radius:6px;background:var(--surface2)}
+.x-mbar i{position:absolute;inset-block:0;right:0;border-radius:6px;background:linear-gradient(to left,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent))}
+.x-mbar.urgent i{background:linear-gradient(to left,color-mix(in srgb,var(--urgent) 45%,transparent),var(--urgent))}
+.x-mbar b{position:absolute;top:50%;width:14px;height:14px;margin:-7px -7px 0 0;border-radius:50%;background:radial-gradient(circle at 38% 34%,#fff7d0 0%,#ffc247 60%,#f5a524 100%);box-shadow:0 0 0 3px rgba(255,181,46,.3),0 0 10px 2px rgba(255,170,40,.6)}
+.x-nowrow{display:grid;grid-template-columns:46px 26px minmax(0,1fr);column-gap:8px;align-items:center;padding-bottom:12px}
+.x-nowrow .x-rcol{align-self:stretch}
+.x-nowrow .x-rcol::before{background:var(--accent)}
+.x-nowt{font-size:.8125em;font-weight:800;color:var(--accentText);font-variant-numeric:tabular-nums;text-align:right}
+.x-nowdot{position:relative;z-index:1;align-self:center;width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--bg),0 0 14px color-mix(in srgb,var(--accent) 80%,transparent)}
+.x-nowdot::after{content:'';position:absolute;inset:-7px;border-radius:50%;background:var(--accent);opacity:.3;animation:xRing 1.8s ease-out infinite}
+.x-nowline{display:flex;align-items:center;gap:8px;font-size:.75em;font-weight:800;color:var(--onAccent)}
+.x-nowline span{padding:3px 12px;border-radius:999px;background:var(--accent);box-shadow:0 4px 14px -4px color-mix(in srgb,var(--accent) 80%,transparent)}
+.x-nowline::after{content:'';flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--accent) 0 6px,transparent 6px 11px);opacity:.7}
+</style>
+<template>
+<div class="scroll" style="position: absolute; inset: 0; overflow-y: auto; padding: 24px 20px 124px">
+
+<header style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 3px; min-width: 0">
+<p class="cap">{{dateLine}}</p>
+<h1 class="x-h1">{{greeting}}</h1>
+</div>
+<span class="x-count" role="img" aria-label="{{countLabel}}"><i></i>{{countText}} היום</span>
+</header>
+
+<div class="x-sum" role="group" aria-label="סיכום היום">
+<span class="x-sumc d {{sumDoneCls}}"><i></i>בוצעו <b>{{doneN}}</b></span>
+<span class="x-sumc m {{sumMissedCls}}"><i></i>פוספסו <b>{{missedN}}</b></span>
+<span class="x-sumc o"><i></i>פתוחות <b>{{activeN}}</b></span>
+</div>
+
+<!--NAMECARD-->
+
+<section class="x-sky {{plCls}}" aria-label="קשת היום וזמני היום">
+<div class="x-air" style="background: {{airBg}}">
+<div class="x-rd"><p class="x-rdp {{readCls}}" aria-live="{{liveMode}}"><sc-if value="{{read.isNext}}" hint-placeholder-val="{{ true }}"><span class="x-rtag">הבא</span></sc-if><b>{{read.label}}</b><span>·</span><span class="num">{{read.hm}}</span><span>{{read.rel}}</span></p></div>
+<div class="x-scene {{sceneCls}}" id="scene" onPointerDown="{{gDown}}" onPointerMove="{{gMove}}" onPointerUp="{{gUp}}" onPointerCancel="{{gUp}}">
+<span class="x-glow" aria-hidden="true" style="background: {{glowBg}}; opacity: {{glowOp}}"></span>
+<div class="x-stars" aria-hidden="true" style="opacity: {{starsOp}}">
+<sc-for list="{{stars}}" as="st" hint-placeholder-count="10">
+<i class="x-star" style="left: {{st.x}}px; top: {{st.y}}px; width: {{st.s}}px; height: {{st.s}}px; animation-delay: {{st.d}}s; animation-duration: {{st.du}}s"></i>
+</sc-for>
+</div>
+<div class="x-clouds" aria-hidden="true" style="opacity: {{cloudOp}}; --cl: {{cloudC}}"><i class="x-cl c1"></i><i class="x-cl c2"></i><i class="x-cl c3"></i></div>
+<svg width="350" height="236" viewBox="0 0 350 236" aria-hidden="true">
+<defs>
+<linearGradient id="xgDay" gradientUnits="userSpaceOnUse" x1="315" y1="0" x2="35" y2="0"><stop offset="0" stop-color="#FFA94D"></stop><stop offset=".25" stop-color="#FFC93D"></stop><stop offset=".5" stop-color="#FFE066"></stop><stop offset=".72" stop-color="#FFB02E"></stop><stop offset=".9" stop-color="#FF7A59"></stop><stop offset="1" stop-color="#D9548C"></stop></linearGradient>
+<linearGradient id="xgNight" gradientUnits="userSpaceOnUse" x1="35" y1="0" x2="315" y2="0"><stop offset="0" stop-color="#C9B6FF"></stop><stop offset=".4" stop-color="#E6ECFF"></stop><stop offset=".75" stop-color="#9FB0F0"></stop><stop offset="1" stop-color="#FFB38A"></stop></linearGradient>
+</defs>
+<g style="opacity: {{dayOp}}; transition: opacity .6s">
+<path d="{{dayPath}}" fill="none" stroke="rgba(10,20,50,.2)" stroke-width="6" stroke-linecap="round"></path>
+<path d="{{dayPath}}" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="1 8"></path>
+<path d="{{dayPath}}" fill="none" stroke="url(#xgDay)" stroke-width="5" stroke-linecap="round" stroke-dasharray="{{pathLen}}" style="stroke-dashoffset: {{dayDash}}; filter: drop-shadow(0 0 4px rgba(255,180,60,.7))"></path>
+<sc-for list="{{dayTr}}" as="k" hint-placeholder-count="3">
+<path d="{{dayPath}}" fill="none" stroke="#FFF1C2" stroke-linecap="round" stroke-width="{{k.w}}" stroke-opacity="{{k.o}}" stroke-dasharray="{{k.da}}" stroke-dashoffset="{{k.off}}"></path>
+</sc-for>
+</g>
+<g style="opacity: {{nightOp}}; transition: opacity .6s">
+<path d="{{nightPath}}" fill="none" stroke="rgba(5,10,30,.35)" stroke-width="6" stroke-linecap="round"></path>
+<path d="{{nightPath}}" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="1 8"></path>
+<path d="{{nightPath}}" fill="none" stroke="url(#xgNight)" stroke-width="5" stroke-linecap="round" stroke-dasharray="{{pathLen}}" style="stroke-dashoffset: {{nightDash}}; filter: drop-shadow(0 0 4px rgba(190,205,255,.7))"></path>
+<sc-for list="{{nightTr}}" as="k" hint-placeholder-count="3">
+<path d="{{nightPath}}" fill="none" stroke="#F3F5FF" stroke-linecap="round" stroke-width="{{k.w}}" stroke-opacity="{{k.o}}" stroke-dasharray="{{k.da}}" stroke-dashoffset="{{k.off}}"></path>
+</sc-for>
+</g>
+<path d="M0 192C40 170 90 176 140 186S230 172 290 182S335 176 350 172V236H0Z" fill="{{hill1}}"></path>
+<path d="M0 204C50 188 100 196 160 202S260 190 350 200V236H0Z" fill="{{hill2}}"></path>
+<path d="M0 216C60 208 120 214 180 218S300 210 350 214V236H0Z" fill="{{hill3}}"></path>
+</svg>
+<sc-for list="{{ticks}}" as="k" hint-placeholder-count="11">
+<span class="x-tick {{k.cls}}" style="left: {{k.x}}px; top: {{k.y}}px"></span>
+</sc-for>
+<span class="x-beam" aria-hidden="true" style="left: {{orbX}}px; top: {{orbY}}px; height: {{beamH}}px; opacity: {{beamOp}}; background: {{beamBg}}"></span>
+<span class="x-aura {{auraCls}}" aria-hidden="true" style="left: {{orbX}}px; top: {{orbY}}px"></span>
+<span class="x-sun {{sunCls}}" aria-hidden="true" style="left: {{sunX}}px; top: {{sunY}}px"></span>
+<span class="x-moon {{moonCls}}" aria-hidden="true" style="left: {{moonX}}px; top: {{moonY}}px"></span>
+<span class="x-ghost {{ghostCls}}" aria-hidden="true" style="left: {{ghostX}}px; top: {{ghostY}}px"></span>
+<span class="x-ghostl {{ghostCls}}" aria-hidden="true" style="left: {{ghostX}}px; top: {{ghostY}}px">עכשיו</span>
+<div class="x-mid">
+<span class="x-clk">{{nowT}}</span>
+<span class="x-cap" aria-live="{{liveMode}}">{{midCaption}}</span>
+</div>
+<p class="x-hint {{hintCls}}" aria-hidden="true">{{hintText}}</p>
+<span class="x-edge" style="right: 10px"><span>עלות</span><b>{{edgeStart}}</b></span>
+<span class="x-edge" style="left: 10px"><span>צאה״כ</span><b>{{edgeEnd}}</b></span>
+<div class="x-grab" id="grab" role="slider" tabindex="0" aria-label="הזמן ביום, אפשר לגרור או להשתמש בחצים" aria-orientation="horizontal" aria-valuemin="{{sliderMin}}" aria-valuemax="{{sliderMax}}" aria-valuenow="{{sliderNow}}" aria-valuetext="{{sliderText}}" style="left: {{grabX}}px; top: {{grabY}}px" onKeyDown="{{gKey}}"></div>
+</div>
+</div>
+<div class="x-ground" style="background: {{hill3}}">
+<div class="x-zchips" id="zchips" role="group" aria-label="זמני היום, בחירה מציגה את הזמן בקשת">
+<sc-for list="{{zchips}}" as="z" hint-placeholder-count="11">
+<button class="x-zc {{z.cls}}" aria-pressed="{{z.pressed}}" onClick="{{z.pick}}"><span class="x-zl">{{z.label}}</span><span class="x-zt">{{z.time}}</span></button>
+</sc-for>
+</div>
+</div>
+</section>
+
+<h3 class="x-label"><span>פתוח עכשיו</span><b>{{activeN}} פתוחות</b></h3>
+<sc-if value="{{hasActive}}" hint-placeholder-val="{{ true }}">
+<div class="x-sc {{scCls}}" role="list" aria-label="מצוות פתוחות עכשיו" tabindex="{{scTab}}">
+<sc-for list="{{actives}}" as="it" hint-placeholder-count="2">
+<section class="x-now {{it.cls}} {{it.enter}}" role="listitem">
+<div class="x-nh">
+<span class="x-tile">[[icItem:it]]</span>
+<div class="x-nt"><h4 class="x-nn">{{it.name}}</h4><p class="cap">{{it.startT}} · מ{{it.fromName}} עד {{it.toName}} · {{it.endT}}</p></div>
+<div class="x-ring {{it.urgentCls}}" role="img" aria-label="נשארו {{it.left}}">
+<svg viewBox="0 0 60 60" aria-hidden="true"><circle class="x-rg-t" cx="30" cy="30" r="25"></circle><circle class="x-rg-p" cx="30" cy="30" r="25" transform="rotate(-90 30 30)" style="stroke-dasharray: 157.1; stroke-dashoffset: {{it.ringOff}}"></circle></svg>
+<span class="x-ring-n"><b class="num">{{it.leftNum}}</b><span>{{it.leftUnit}}</span></span>
+</div>
+</div>
+<div class="x-hbar {{it.urgentCls}}" aria-hidden="true"><i class="x-hbar-f" style="width: {{it.pctGone}}%"></i><i class="x-hbar-d {{it.dotCls}}" style="right: {{it.pctGone}}%"></i></div>
+<div class="x-pe">
+<span><span class="cap">נפתח · {{it.fromName}}</span><b>{{it.startT}}</b></span>
+<span><span class="cap">{{it.endWord}} · {{it.toName}}</span><b>{{it.endT}}</b></span>
+</div>
+<div class="x-acts">
+<button class="x-btn primary" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">[[ic:check]]<span>{{it.cta}}</span></button>
+<button class="x-btn ghost" onClick="{{it.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</section>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noActive}}" hint-placeholder-val="{{ false }}">
+<section class="x-calm" aria-live="polite">
+<div class="x-halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h3>{{activeEmptyTitle}}</h3>
+<p class="cap">{{activeEmptyText}}</p>
+</section>
+</sc-if>
+
+<h3 class="x-label"><span>הודעות</span><b>{{msgCount}}</b></h3>
+<sc-if value="{{hasMessages}}" hint-placeholder-val="{{ true }}">
+<ul class="x-mcard" role="list" aria-label="הודעות">
+<sc-for list="{{msgs}}" as="m" hint-placeholder-count="5">
+<li class="x-m {{m.kindCls}} {{m.cls}}">
+<sc-if value="{{m.hasAction}}" hint-placeholder-val="{{ true }}">
+<button class="x-mm" onClick="{{m.act}}" aria-label="{{m.aria}}">
+<span class="x-mic">[[icMsg:m]]</span>
+<span class="x-mtx"><span class="x-mtag">{{m.tag}}</span><span class="x-mt">{{m.title}}</span><span class="x-mb">{{m.body}}</span><sc-if value="{{m.showAction}}" hint-placeholder-val="{{ false }}"><span class="x-mact">{{m.action}}[[ic:chevron]]</span></sc-if></span>
+<sc-if value="{{m.isNext}}" hint-placeholder-val="{{ false }}"><span class="x-chev">[[ic:chevron]]</span></sc-if>
+</button>
+</sc-if>
+<sc-if value="{{m.noAction}}" hint-placeholder-val="{{ false }}">
+<div class="x-mm">
+<span class="x-mic">[[icMsg:m]]</span>
+<span class="x-mtx"><span class="x-mtag">{{m.tag}}</span><span class="x-mt">{{m.title}}</span><span class="x-mb">{{m.body}}</span></span>
+</div>
+</sc-if>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="x-mx" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noMessages}}" hint-placeholder-val="{{ false }}"><p class="x-empty">[[ic:check]]<span>אין הודעות כרגע.</span></p></sc-if>
+
+<h3 class="x-label"><span>היום שלך</span><b>{{totalN}} מצוות</b></h3>
+<div class="x-rail" role="list" aria-label="ציר היום">
+<sc-for list="{{entries}}" as="en" hint-placeholder-count="7">
+<sc-if value="{{en.isNow}}" hint-placeholder-val="{{ false }}">
+<div class="x-nowrow" role="listitem" aria-label="{{en.label}}">
+<span class="x-nowt">{{en.time}}</span>
+<span class="x-rcol"><span class="x-nowdot"></span></span>
+<span class="x-nowline"><span>{{en.nowWord}}</span></span>
+</div>
+</sc-if>
+<sc-if value="{{en.isItem}}" hint-placeholder-val="{{ true }}">
+<div class="x-row x-ent {{en.rowCls}} {{en.pos}}" role="listitem">
+<span class="x-tcol"><b>{{en.startT}}</b><span>{{en.endT}}</span></span>
+<span class="x-rcol"><span class="x-node"><sc-if value="{{en.isDone}}" hint-placeholder-val="{{ false }}">[[ic:check]]</sc-if><sc-if value="{{en.isMissed}}" hint-placeholder-val="{{ false }}">[[ic:close]]</sc-if></span></span>
+<div class="x-ecard">
+<div class="x-ehead">
+<span class="x-etile">[[icItem:en]]</span>
+<span class="x-etext"><span class="x-etitle">{{en.name}}</span><span class="cap">{{en.statusText}}<sc-if value="{{en.late}}" hint-placeholder-val="{{ false }}"><span class="x-lateTag">באיחור</span></sc-if></span></span>
+<sc-if value="{{en.isDone}}" hint-placeholder-val="{{ false }}"><button class="x-lnk" onClick="{{en.undo}}" aria-label="{{en.undoLabel}}">ביטול</button></sc-if>
+</div>
+<sc-if value="{{en.isActive}}" hint-placeholder-val="{{ false }}">
+<div class="x-win" role="group" aria-label="חלון הזמן">
+<span class="x-win-e"><span class="cap">נפתח</span><b>{{en.startT}}</b></span>
+<span class="x-mbar {{en.urgentCls}}" role="img" aria-label="{{en.barLabel}}"><i style="width: {{en.pctGone}}%"></i><b style="right: {{en.pctGone}}%"></b></span>
+<span class="x-win-e"><span class="cap">נגמר</span><b>{{en.winEnd}}</b></span>
+</div>
+<div class="x-acts" style="margin-top: 0">
+<button class="x-btn primary" onClick="{{en.mark}}" aria-label="{{en.markLabel}}">[[ic:check]]<span>{{en.cta}}</span></button>
+<button class="x-btn ghost" onClick="{{en.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</sc-if>
+<sc-if value="{{en.isMissed}}" hint-placeholder-val="{{ false }}">
+<button class="x-btn late" onClick="{{en.mark}}" aria-label="{{en.markLabel}}">[[ic:check]]<span>בכל זאת עשיתי</span></button>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</sc-for>
+</div>
+</div>
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    return { zSel: null, drag: false, touched: false, vf: 0 };
+  }
+
+  boardMount() {
+    this.chipTimer = setTimeout(() => this.centerChip(false), 80);
+  }
+
+  boardUnmount() {
+    clearTimeout(this.chipTimer);
+    cancelAnimationFrame(this.vRaf);
+    cancelAnimationFrame(this.gRaf);
+  }
+
+  componentDidUpdate() {
+    if (this.chipKey !== this.lastChip) {
+      const first = this.lastChip === undefined;
+      this.lastChip = this.chipKey;
+      if (!first) this.centerChip(true);
+    }
+  }
+
+  centerChip(smooth) {
+    const box = document.getElementById('zchips');
+    const on = box && box.querySelector('[aria-pressed="true"]');
+    if (!box || !on) return;
+    const b = box.getBoundingClientRect();
+    const o = on.getBoundingClientRect();
+    const dx = o.left + o.width / 2 - (b.left + b.width / 2);
+    if (smooth) box.scrollBy({ left: dx, behavior: 'smooth' });
+    else box.scrollLeft += dx;
+  }
+
+  geo() {
+    return { CX: 175, CY: 178, RX: 140, RY: 118 };
+  }
+
+  ellipseLen(rx, ry, f) {
+    const end = Math.PI * Math.max(0, Math.min(1, f));
+    let len = 0;
+    let px = rx;
+    let py = 0;
+    for (let i = 1; i <= 120; i++) {
+      const a = (end * i) / 120;
+      const x = rx * Math.cos(a);
+      const y = ry * Math.sin(a);
+      len += Math.hypot(x - px, y - py);
+      px = x;
+      py = y;
+    }
+    return len;
+  }
+
+  eased(t, key) {
+    const now = performance.now();
+    const dt = Math.min(100, now - (this.vAt || now - 16));
+    this.vAt = now;
+    const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (this.vis == null || this.visKey !== key || calm) {
+      this.vis = t;
+    } else {
+      const d = t - this.vis;
+      const tau = this.state.drag ? 42 : 130;
+      this.vis = Math.abs(d) < 45 ? t : this.vis + d * (1 - Math.exp(-dt / tau));
+    }
+    this.visKey = key;
+    if (this.vis !== t) this.kick();
+    return this.vis;
+  }
+
+  kick() {
+    if (this.vRaf) return;
+    this.vRaf = requestAnimationFrame(() => {
+      this.vRaf = 0;
+      this.setState((s) => ({ vf: s.vf + 1 }));
+    });
+  }
+
+  hx(h) {
+    return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  }
+
+  mx(a, b, k) {
+    return a.map((v, i) => v + (b[i] - v) * k);
+  }
+
+  rgb(a, al) {
+    const s = a.map((v) => Math.max(0, Math.min(255, Math.round(v)))).join(',');
+    return al == null ? 'rgb(' + s + ')' : 'rgba(' + s + ',' + al + ')';
+  }
+
+  lum(a) {
+    const f = (v) => {
+      const x = v / 255;
+      return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * f(a[0]) + 0.7152 * f(a[1]) + 0.0722 * f(a[2]);
+  }
+
+  skyAt(sec) {
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    const nz = this.zmanSec('netz');
+    const ch = this.zmanSec('chatzot');
+    const keys = [
+      [A0, '#1B2750', '#6E5A8C', 0.85],
+      [nz, '#4A6FB0', '#FFB27A', 0],
+      [(nz + ch) / 2, '#5FA2E4', '#D8E9F7', 0],
+      [ch, '#3F8FE0', '#BFE0FA', 0],
+      [this.zmanSec('plag'), '#4F8BD6', '#F4DDB0', 0],
+      [this.zmanSec('shkia'), '#36468C', '#FF8A4C', 0],
+      [A1, '#151F45', '#4A3A6A', 0.55],
+      [A1 + 4800, '#0B1430', '#1A2858', 1],
+      [Math.max(A1 + 6000, this.zmanSec('chatzotL')), '#08102A', '#16224A', 1],
+      [E, '#1B2750', '#6E5A8C', 0.85],
+    ].filter((k, i, a) => i === 0 || k[0] > a[i - 1][0]);
+    let i = 0;
+    while (i < keys.length - 2 && sec >= keys[i + 1][0]) i++;
+    const a = keys[i];
+    const b = keys[i + 1];
+    const k = Math.max(0, Math.min(1, (sec - a[0]) / (b[0] - a[0] || 1)));
+    const e = k * k * (3 - 2 * k);
+    return { top: this.mx(this.hx(a[1]), this.hx(b[1]), e), hor: this.mx(this.hx(a[2]), this.hx(b[2]), e), N: a[3] + (b[3] - a[3]) * e };
+  }
+
+  gPoint(e) {
+    const r = document.getElementById('scene').getBoundingClientRect();
+    return { x: ((e.clientX - r.left) * 350) / r.width, y: ((e.clientY - r.top) * 236) / r.height };
+  }
+
+  gTime(p) {
+    const { CX, CY, RX, RY } = this.geo();
+    const nu = (p.x - CX) / RX;
+    const nv = (CY - p.y) / RY;
+    const below = p.y > CY - 2;
+    return { rho: Math.hypot(nu, nv), below, left: nu < 0, theta: below ? (nu < 0 ? Math.PI : 0) : Math.atan2(nv, nu) };
+  }
+
+  gSet(sec) {
+    this.gPend = sec;
+    if (this.gRaf) return;
+    this.gRaf = requestAnimationFrame(() => {
+      this.gRaf = 0;
+      this.gFlush();
+    });
+  }
+
+  gFlush() {
+    if (this.gPend == null) return;
+    const v = this.gPend;
+    this.gPend = null;
+    this.scrub(v);
+  }
+
+  gDown(e) {
+    if (e.button > 0) return;
+    const p = this.gPoint(e);
+    const hit = this.gTime(p);
+    const onGrab = Boolean(e.target.closest && e.target.closest('.x-grab'));
+    if (!onGrab && !(hit.rho > 0.7 && hit.rho < 1.35 && !hit.below)) return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    const cur = this.now();
+    const night = cur >= A1;
+    const f = hit.theta / Math.PI;
+    const at = night ? A1 + (1 - f) * (E - A1) : A0 + f * (A1 - A0);
+    this.gDrag = { id: e.pointerId, off: onGrab ? at - cur : 0, night, latch: hit.below };
+    this.setState({ drag: true, touched: true, zSel: null });
+    if (!onGrab) this.gSet(this.gClamp(at, night));
+  }
+
+  gClamp(sec, night) {
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    return night ? Math.max(A1, Math.min(E - 60, sec)) : Math.max(A0, Math.min(A1 - 1, sec));
+  }
+
+  gMove(e) {
+    const d = this.gDrag;
+    if (!d || e.pointerId !== d.id) return;
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    const { CY } = this.geo();
+    const p = this.gPoint(e);
+    const hit = this.gTime(p);
+    let sec;
+    if (hit.below && hit.left && !d.latch) {
+      d.night = !d.night;
+      d.latch = true;
+      d.off = 0;
+      sec = d.night ? A1 : A1 - 1;
+    } else {
+      if (p.y < CY - 30) d.latch = false;
+      const f = hit.theta / Math.PI;
+      sec = (d.night ? A1 + (1 - f) * (E - A1) : A0 + f * (A1 - A0)) - d.off;
+      d.off *= 0.93;
+      sec = this.gClamp(sec, d.night);
+    }
+    this.gSet(sec);
+  }
+
+  gUp(e) {
+    const d = this.gDrag;
+    if (!d || e.pointerId !== d.id) return;
+    this.gDrag = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    this.gFlush();
+    this.setState({ drag: false });
+  }
+
+  gKey(e) {
+    const t = this.now();
+    const keys = { ArrowLeft: 300, ArrowUp: 300, ArrowRight: -300, ArrowDown: -300, PageUp: 3600, PageDown: -3600 };
+    let to = null;
+    if (e.key in keys) to = t + keys[e.key];
+    else if (e.key === 'Home') to = this.dayStart();
+    else if (e.key === 'End') to = this.dayEnd() - 60;
+    if (to == null) return;
+    e.preventDefault();
+    this.setState({ zSel: null, touched: true });
+    this.scrub(to);
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const s = this.state;
+    const t = this.now();
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    const NIGHT = E - A1;
+    const { CX, CY, RX, RY } = this.geo();
+    const cl = (f) => Math.max(0, Math.min(1, f));
+    const orbAt = (th) => ({ x: CX + RX * Math.cos(th), y: CY - RY * Math.sin(th) });
+    const vis = this.eased(t, c.dateKey);
+    const visNight = vis >= A1;
+    const dayFrac = cl((vis - A0) / (A1 - A0));
+    const nightFrac = cl((vis - A1) / NIGHT);
+    if (!this.pathLen) this.pathLen = this.ellipseLen(RX, RY, 1);
+    const L = this.pathLen;
+    const dayAt = this.ellipseLen(RX, RY, dayFrac);
+    const nightAt = this.ellipseLen(RX, RY, nightFrac);
+    const sun = orbAt(Math.PI * dayFrac);
+    const moon = orbAt(Math.PI * (1 - nightFrac));
+    const orb = visNight ? moon : sun;
+    const trail = (at) =>
+      [
+        { w: 5, o: 0.16, Ln: 96 },
+        { w: 5, o: 0.3, Ln: 56 },
+        { w: 5, o: 0.6, Ln: 24 },
+      ].map(({ w, o, Ln }) => {
+        const a = Math.max(0, at - Ln);
+        return { w, o, da: (at - a).toFixed(1) + ' ' + (L + 40).toFixed(0), off: (-a).toFixed(1) };
+      });
+
+    const sky = this.skyAt(vis);
+    const mid = this.mx(sky.top, sky.hor, 0.55);
+    const ground = this.mx(sky.top, this.hx('#0A1428'), 0.74);
+    const hill1 = this.rgb(this.mx(sky.hor, ground, 0.66));
+    const hill2 = this.rgb(this.mx(sky.hor, ground, 0.84));
+    const hill3 = this.rgb(ground);
+    const horizonY = 64 + CY;
+    const airBg = 'linear-gradient(180deg,' + this.rgb(sky.top) + ' 0,' + this.rgb(mid) + ' ' + Math.round(horizonY * 0.55) + 'px,' + this.rgb(sky.hor) + ' ' + horizonY + 'px,' + this.rgb(sky.hor) + ' 100%)';
+    const sunH = Math.sin(Math.PI * dayFrac);
+    const glowOp = visNight ? 0.25 : (0.25 + 0.75 * (1 - sunH)).toFixed(2);
+    const cloudC = this.rgb(this.mx(sky.hor, [255, 255, 255], 0.6));
+
+    const zl = this.zmanimList();
+    const zS = Object.fromEntries(zl.map((z) => [z.id, z.S]));
+    const nextId = (c.zmanim.find((z) => z.isNext) || {}).id || null;
+    const selId = (c.isScrub && s.zSel) || nextId;
+    const sel = c.zmanim.find((z) => z.id === selId) || null;
+    const selS = sel ? zS[sel.id] : 0;
+    const read = sel
+      ? {
+          label: sel.name,
+          hm: sel.time,
+          rel: Math.abs(selS - t) < 30 ? 'הגיע הזמן' : selS > t ? 'בעוד ' + this.left(selS - t) : 'עבר לפני ' + this.left(t - selS),
+          isNext: sel.isNext,
+        }
+      : { label: c.nextZ.name, hm: c.nextZ.time, rel: c.nextZ.left, isNext: true };
+    if (this.readKey !== read.label) {
+      this.readKey = read.label;
+      this.readFlip = !this.readFlip;
+    }
+    this.chipKey = selId;
+
+    const ticks = c.zmanim.map((z, i) => {
+      const S = zl[i].S;
+      const p = S <= A1 ? orbAt(Math.PI * cl((S - A0) / (A1 - A0))) : orbAt(Math.PI * (1 - cl((S - A1) / NIGHT)));
+      return { x: (p.x - 6).toFixed(1), y: (p.y - 6).toFixed(1), cls: (z.past ? 'past' : '') + (z.isNext ? ' nxt' : '') + (z.id === selId ? ' sel' : '') };
+    });
+    const zchips = c.zmanim.map((z) => ({
+      id: z.id,
+      label: z.isNext ? 'הבא · ' + z.short : z.short,
+      time: z.time,
+      cls: z.cls,
+      pressed: z.id === selId,
+      pick: () => {
+        const same = Boolean(c.isScrub && s.zSel === z.id);
+        this.setState({ zSel: same ? null : z.id, touched: true });
+        if (!same) this.scrub(zS[z.id]);
+      },
+    }));
+    const stars = [
+      [46, 40, 2.6, 0, 3.4], [92, 20, 2, 1.1, 4.1], [128, 62, 2, 2.2, 3.1], [224, 28, 3, 0.6, 3.8], [262, 60, 2, 1.7, 4.4], [302, 34, 2.6, 2.6, 3.3],
+      [22, 94, 2, 1.4, 4.7], [330, 92, 2, 0.3, 3.6], [64, 122, 1.8, 2.9, 4.2], [288, 122, 1.8, 1.9, 3.5],
+      [20, 18, 1.8, 0.8, 4.9], [172, 10, 1.8, 2.4, 3.7], [200, 52, 1.6, 1.3, 5.1], [334, 20, 1.8, 3.1, 4], [112, 34, 1.6, 0.4, 4.6],
+      [48, 70, 1.6, 2.1, 3.9], [308, 76, 1.6, 0.9, 4.3], [14, 140, 1.6, 1.6, 5], [338, 140, 1.6, 2.7, 3.4],
+    ].map(([x, y, sz, d, du]) => ({ x, y, s: sz, d, du }));
+
+    const first = c.hasHero ? c.hero : null;
+    const nextItem = c.upcoming[0] || null;
+    const midCaption = first ? first.short + ' · עוד ' + first.left : nextItem ? 'הבא: ' + nextItem.short + ' ב-' + nextItem.startT : 'הכול סומן להיום';
+
+    const live = this.liveSec();
+    const ghostNight = live >= A1;
+    const ghostP = ghostNight ? orbAt(Math.PI * (1 - cl((live - A1) / NIGHT))) : orbAt(Math.PI * cl((live - A0) / (A1 - A0)));
+    const beamOn = orb.y < CY - 16;
+
+    const actives = c.active.map((it, i) => ({
+      ...it,
+      ringOff: this.dash(157.1, it.pctLeft),
+      dotCls: it.isMoon ? 'moon' : '',
+      enter: 'x-enter-' + this.flip('act' + i, it.id),
+    }));
+
+    const nowRow = { isNow: true, isItem: false, time: c.nowT, nowWord: c.isScrub ? 'בתצוגה' : 'עכשיו', label: (c.isScrub ? 'בתצוגה ' : 'עכשיו ') + c.nowT };
+    const entries = [];
+    let placed = false;
+    c.timeline.forEach((it) => {
+      if (!placed && it.isUpcoming) {
+        entries.push(nowRow);
+        placed = true;
+      }
+      const dn = c.done.find((d) => d.id === it.id);
+      const act = c.active.find((a) => a.id === it.id);
+      entries.push({
+        ...it,
+        isNow: false,
+        isItem: true,
+        rowCls: it.status + (it.isMarking ? ' marking' : ''),
+        late: dn ? dn.late : false,
+        undoLabel: 'ביטול הסימון של ' + it.name,
+        winEnd: it.endsTomorrow ? 'מחר ' + it.endT : it.endT,
+        pctGone: act ? act.pctGone : 0,
+        urgentCls: act ? act.urgentCls : '',
+        barLabel: act ? 'נשארו ' + act.left + ' מתוך החלון' : '',
+      });
+    });
+    if (!placed) entries.push(nowRow);
+    entries.forEach((en, i) => {
+      en.pos = (i === 0 ? 'first ' : '') + (i === entries.length - 1 ? 'last' : '');
+    });
+
+    const msgs = c.messages.map((m) => ({
+      ...m,
+      body: m.body.replace(/(\d)–(\d)/g, '$1⁠–⁠$2'),
+      noAction: !m.hasAction,
+      isNext: m.id === 'next',
+      showAction: m.hasAction && m.id !== 'next',
+      aria: m.id === 'next' ? 'פתיחת ההודעות האישיות: ' + m.title : m.title + '. ' + m.action,
+    }));
+
+    return {
+      ...c,
+      plCls: this.lum(mid) > 0.33 ? 'pl-light' : '',
+      airBg,
+      glowBg: 'radial-gradient(closest-side,' + this.rgb(sky.hor, 0.95) + ',transparent)',
+      glowOp,
+      hill1,
+      hill2,
+      hill3,
+      cloudC,
+      cloudOp: ((1 - sky.N) * 0.9).toFixed(2),
+      starsOp: sky.N.toFixed(2),
+      stars,
+      sceneCls: (s.drag ? 'drag ' : '') + (c.isScrub ? 'scr ' : '') + (s.touched ? '' : 'hintOn'),
+      liveMode: s.drag ? 'off' : 'polite',
+      gDown: (e) => this.gDown(e),
+      gMove: (e) => this.gMove(e),
+      gUp: (e) => this.gUp(e),
+      gKey: (e) => this.gKey(e),
+      read,
+      readCls: this.readFlip ? 'ra' : 'rb',
+      dayPath: 'M' + (CX + RX) + ' ' + CY + 'A' + RX + ' ' + RY + ' 0 0 0 ' + (CX - RX) + ' ' + CY,
+      nightPath: 'M' + (CX - RX) + ' ' + CY + 'A' + RX + ' ' + RY + ' 0 0 1 ' + (CX + RX) + ' ' + CY,
+      pathLen: L.toFixed(1),
+      dayDash: (L - dayAt).toFixed(1),
+      nightDash: (L - nightAt).toFixed(1),
+      dayTr: trail(dayAt),
+      nightTr: trail(nightAt),
+      dayOp: visNight ? 0.18 : 1,
+      nightOp: visNight ? 1 : 0.18,
+      ticks,
+      zchips,
+      auraCls: visNight ? 'moonA' : '',
+      orbX: orb.x.toFixed(1),
+      orbY: orb.y.toFixed(1),
+      beamH: Math.max(0, CY - orb.y).toFixed(1),
+      beamOp: beamOn ? 0.9 : 0,
+      beamBg: visNight ? 'linear-gradient(rgba(220,230,255,.75),transparent)' : 'linear-gradient(rgba(255,224,150,.85),transparent)',
+      sunCls: visNight ? 'off' : '',
+      moonCls: visNight ? '' : 'off',
+      sunX: (sun.x - 15).toFixed(1),
+      sunY: (sun.y - 15).toFixed(1),
+      moonX: (moon.x - 15).toFixed(1),
+      moonY: (moon.y - 15).toFixed(1),
+      grabX: (orb.x - 24).toFixed(1),
+      grabY: (orb.y - 24).toFixed(1),
+      ghostCls: c.isScrub ? '' : 'off',
+      ghostX: ghostP.x.toFixed(1),
+      ghostY: ghostP.y.toFixed(1),
+      hintText: visNight ? 'גררו את הירח' : 'גררו את השמש',
+      hintCls: s.touched || c.isScrub ? 'gone' : '',
+      sliderMin: Math.round(A0),
+      sliderMax: Math.round(E - 60),
+      sliderNow: Math.round(t),
+      sliderText: c.nowT + ', הבא: ' + c.nextZ.name + ' ' + c.nextZ.left,
+      midCaption,
+      edgeStart: c.zmanim.find((z) => z.id === 'alot').time,
+      edgeEnd: c.zmanim.find((z) => z.id === 'tzeit').time,
+      sumDoneCls: c.doneN ? 'has' : '',
+      sumMissedCls: c.missedN ? 'has' : '',
+      actives,
+      scCls: actives.length > 1 ? 'multi' : '',
+      scTab: actives.length > 1 ? 0 : -1,
+      msgs,
+      noMessages: msgs.length === 0,
+      entries,
+    };
+  }
+}
+</script>

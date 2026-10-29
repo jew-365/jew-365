@@ -1,0 +1,922 @@
+<!--board title="ח · מסך אחד וטאבים"-->
+<style>
+.ph{--mxsub:color-mix(in srgb,var(--sub) 80%,var(--text));--mxacc:color-mix(in srgb,var(--accentText) 82%,var(--text));--mxurg:color-mix(in srgb,var(--urgent) 84%,var(--text));--mxsafe:color-mix(in srgb,var(--safe) 80%,var(--text));--hair:color-mix(in srgb,var(--text) 10%,transparent)}
+.mx-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mx-ht{min-width:0;display:flex;flex-direction:column;gap:1px}
+.mx-h1{font-size:1.4em;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+.mx-count{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-weight:700;font-size:.875em;font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
+.mx-count i{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.mx-sum{display:flex;gap:8px;margin-top:10px;overflow:hidden}
+.mx-sc{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 11px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:.8125em;font-weight:600;white-space:nowrap}
+.mx-sc i{width:7px;height:7px;border-radius:50%;flex:none}
+.mx-sc b{font-weight:800;font-variant-numeric:tabular-nums}
+.mx-sc.d i{background:var(--safe)}
+.mx-sc.m i{background:var(--urgent)}
+.mx-sc.o i{background:var(--accent)}
+.mx-sc.d.has{background:var(--safeSoft);color:var(--mxsafe)}
+.mx-sc.m.has{background:var(--urgentSoft);color:var(--mxurg)}
+
+.mx-scene{position:relative;height:190px;margin-top:12px;border-radius:28px;overflow:hidden;isolation:isolate;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;box-shadow:0 16px 36px -16px rgba(10,16,38,.55)}
+.mx-layer{position:absolute;inset:0;pointer-events:none}
+.mx-glow{position:absolute;top:60px;width:300px;height:130px;margin-left:-150px;pointer-events:none}
+.mx-star{position:absolute;border-radius:50%;background:#fff;box-shadow:0 0 6px 1px rgba(255,255,255,.7);animation:mxTw 3.4s ease-in-out infinite}
+@keyframes mxTw{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+.mx-cloud{position:absolute;left:0;fill:currentColor;height:auto;animation:mxDrift linear infinite;will-change:transform}
+.mx-cloud.c1{top:36px;width:84px;animation-duration:90s;animation-delay:-30s;opacity:.9}
+.mx-cloud.c2{top:62px;width:120px;animation-duration:124s;animation-delay:-80s;opacity:.85}
+.mx-cloud.c3{top:20px;width:64px;animation-duration:104s;animation-delay:-10s;opacity:.7}
+@keyframes mxDrift{from{transform:translateX(-150px)}to{transform:translateX(520px)}}
+.mx-svg{position:absolute;left:0;top:0;width:100%;height:190px;pointer-events:none;overflow:visible}
+.mx-under{fill:none;stroke:rgba(10,16,38,.22);stroke-width:5.5;stroke-linecap:round}
+.mx-fut{fill:none;stroke-width:3;stroke-linecap:round;stroke-dasharray:1 7;opacity:.95}
+.mx-past{fill:none;stroke-width:4;stroke-linecap:round}
+.mx-trail{fill:none;stroke-width:9;stroke-linecap:round;opacity:.65;filter:url(#mxBlur)}
+.mx-hz{stroke:rgba(255,255,255,.55);stroke-width:1}
+.mx-nowline{position:absolute;width:0;border-left:1.5px dashed rgba(255,255,255,.7);pointer-events:none}
+.mx-sun{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;pointer-events:none}
+.mx-sun-glow{position:absolute;inset:-34px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--sunc) 70%,transparent) 0%,color-mix(in srgb,var(--sunc) 22%,transparent) 42%,transparent 70%);animation:mxBreathe 5s ease-in-out infinite}
+.mx-sun-rays{position:absolute;inset:-26px;border-radius:50%;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--sunc) 55%,transparent) 0deg 3deg,transparent 3deg 22.5deg);-webkit-mask:radial-gradient(circle closest-side,transparent 40%,#000 50%,transparent 100%);mask:radial-gradient(circle closest-side,transparent 40%,#000 50%,transparent 100%);animation:mxRays 60s linear infinite}
+.mx-sun-disc{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 38% 34%,#fffdf0 0%,var(--sunc) 58%,var(--sunc2) 100%);box-shadow:0 0 18px 5px color-mix(in srgb,var(--sunc) 60%,transparent)}
+@keyframes mxBreathe{0%,100%{transform:scale(.92);opacity:.78}50%{transform:scale(1.16);opacity:1}}
+@keyframes mxRays{to{transform:rotate(360deg)}}
+.mx-moon{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;pointer-events:none}
+.mx-moon-glow{position:absolute;inset:-28px;border-radius:50%;background:radial-gradient(circle,rgba(214,224,255,.45) 0%,rgba(214,224,255,.12) 45%,transparent 70%);animation:mxBreathe 6s ease-in-out infinite}
+.mx-moon svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 0 8px rgba(230,236,255,.8))}
+.mx-tick{position:absolute;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#fff;border:2px solid rgba(10,16,38,.6);pointer-events:none}
+.mx-tick.past{background:var(--accent);border-color:rgba(10,16,38,.55)}
+.mx-tick.next{width:14px;height:14px;margin:-7px 0 0 -7px;background:var(--accent);border-color:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 45%,transparent),0 0 14px 2px color-mix(in srgb,var(--accent) 80%,transparent);animation:mxDot 2.2s ease-in-out infinite}
+@keyframes mxDot{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 22%,transparent),0 0 20px 4px color-mix(in srgb,var(--accent) 60%,transparent)}}
+.mx-ghost{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;border:2px solid #fff;background:rgba(10,16,38,.5);pointer-events:none;animation:mxDot 2s ease-in-out infinite}
+.mx-pill{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:1px;min-width:132px;padding:7px 16px 8px;border-radius:22px;background:rgba(8,14,34,.66);border:1px solid rgba(255,255,255,.2);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#F4F6FC;box-shadow:0 10px 26px rgba(0,0,0,.3);pointer-events:none;text-align:center}
+.mx-bt{font-size:2.15em;font-weight:500;letter-spacing:-.02em;line-height:1.05;font-variant-numeric:tabular-nums}
+.mx-bs{display:inline-flex;align-items:center;gap:6px;font-size:.75em;font-weight:600;color:#D3DBEE;line-height:1.3;white-space:nowrap}
+.mx-live{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none}
+.mx-live.on{background:#4CC38A;animation:pulse 1.6s ease-in-out infinite}
+.mx-edge{position:absolute;bottom:8px;padding:2px 9px;border-radius:999px;background:rgba(8,14,34,.62);color:#EAF0FF;font-size:.75em;font-weight:600;line-height:1.5;pointer-events:none;font-variant-numeric:tabular-nums}
+.mx-grab{position:absolute;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;cursor:grab;touch-action:none;outline:none}
+.mx-grab:focus-visible{outline:3px solid #fff;outline-offset:0;box-shadow:0 0 0 6px var(--accent)}
+.mx-scene.drag .mx-grab{cursor:grabbing}
+.mx-hint{position:absolute;right:0;left:0;top:10px;text-align:center;font-size:.75em;font-weight:600;color:#fff;text-shadow:0 1px 6px rgba(8,14,34,.7);pointer-events:none;transition:opacity .5s}
+.mx-hint.gone{opacity:0}
+
+.mx-next{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;margin-top:8px;padding:0 14px;border-radius:16px;background:var(--surface);box-shadow:var(--shadow);font-size:.875em;text-align:right}
+.mx-next .ic{width:18px;height:18px;color:var(--mxacc)}
+.mx-next-t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--mxsub)}
+.mx-next-t b{color:var(--text);font-weight:700;font-variant-numeric:tabular-nums}
+.mx-next-in{flex:none;padding:2px 10px;border-radius:999px;background:var(--soft);color:var(--mxacc);font-weight:700;font-size:.9em}
+
+.mx-glass{border:1px solid transparent;border-radius:24px;box-shadow:var(--shadow);background:linear-gradient(color-mix(in srgb,var(--surface) 86%,transparent),color-mix(in srgb,var(--surface) 86%,transparent)) padding-box,linear-gradient(145deg,color-mix(in srgb,var(--accent) 42%,transparent),color-mix(in srgb,var(--text) 7%,transparent) 36%,color-mix(in srgb,var(--text) 7%,transparent) 64%,color-mix(in srgb,var(--info) 34%,transparent)) border-box}
+.mx-oh{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px;margin:10px 2px 2px;font-size:.8125em;font-weight:800;color:var(--mxsub)}
+.mx-oh.dots{min-height:44px;margin:2px 2px 0}
+.mx-oh b{color:var(--text)}
+.mx-dots{display:flex}
+.mx-dot{width:30px;height:44px;display:flex;align-items:center;justify-content:center}
+.mx-dot i{width:8px;height:8px;border-radius:99px;background:color-mix(in srgb,var(--text) 22%,transparent);transition:width .25s,background .25s}
+.mx-dot.on i{width:22px;background:var(--accent)}
+.mx-snap{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:2px 16px 8px;scrollbar-width:none}
+.mx-snap::-webkit-scrollbar{display:none}
+.mx-now{position:relative;flex:0 0 100%;scroll-snap-align:center;padding:12px 14px 12px;min-width:0}
+.mx-snap.many .mx-now{flex-basis:92%}
+.mx-nh{display:flex;align-items:center;gap:12px}
+.mx-tile{width:42px;height:42px;border-radius:14px;background:var(--soft);color:var(--mxacc);display:grid;place-items:center;flex:none}
+.mx-tile .ic{width:22px;height:22px}
+.mx-nt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.mx-nn{font-size:1.0625em;font-weight:700;line-height:1.25}
+.mx-nt .cap{color:var(--mxsub)}
+.mx-ring{position:relative;width:54px;height:54px;flex:none;display:grid;place-items:center}
+.mx-ring svg{position:absolute;inset:0;width:54px;height:54px}
+.mx-rg-t{fill:none;stroke:color-mix(in srgb,var(--text) 14%,transparent);stroke-width:4}
+.mx-rg-p{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 70%,transparent))}
+.mx-ring.urgent .mx-rg-p{stroke:var(--urgent);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--urgent) 70%,transparent))}
+.mx-rn{position:relative;display:flex;flex-direction:column;align-items:center;line-height:1.02}
+.mx-rn b{font-size:.9375em;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.mx-rn span{font-size:.75em;color:var(--mxsub);font-weight:600}
+.mx-ring.urgent .mx-rn b{color:var(--mxurg)}
+.mx-hbar{position:relative;height:6px;margin:14px 6px 2px;border-radius:6px;background:color-mix(in srgb,var(--text) 12%,transparent)}
+.mx-hbar-f{position:absolute;top:0;bottom:0;right:0;border-radius:6px;background:linear-gradient(to left,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent));transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.mx-hbar.urgent .mx-hbar-f{background:linear-gradient(to left,color-mix(in srgb,var(--urgent) 45%,transparent),var(--urgent))}
+.mx-hbar-d{position:absolute;top:50%;width:16px;height:16px;margin:-8px -8px 0 0;border-radius:50%;background:radial-gradient(circle at 38% 34%,#fff7d0 0%,#ffc247 60%,#f5a524 100%);box-shadow:0 0 0 3px color-mix(in srgb,#ffb52e 30%,transparent),0 0 14px 3px rgba(255,170,40,.6);animation:mxThumb 3.4s ease-in-out infinite;transition:right .9s cubic-bezier(.2,.8,.2,1)}
+.mx-hbar-d.moon{background:radial-gradient(circle at 36% 34%,#fff 0%,#dfe4ff 60%,#b9c3f2 100%);box-shadow:0 0 0 2px color-mix(in srgb,var(--text) 35%,transparent),0 0 12px 2px rgba(200,212,255,.8)}
+.mx-hbar.urgent .mx-hbar-d{box-shadow:0 0 0 3px color-mix(in srgb,var(--urgent) 40%,transparent),0 0 14px 3px color-mix(in srgb,var(--urgent) 55%,transparent)}
+@keyframes mxThumb{50%{filter:brightness(1.12);transform:scale(1.12)}}
+.mx-pe{display:flex;justify-content:space-between;gap:10px;margin-top:6px;line-height:1.25}
+.mx-pe>span{display:flex;flex-direction:column;min-width:0}
+.mx-pe>span:last-child{text-align:left}
+.mx-pe .cap{font-size:.75em;color:var(--mxsub)}
+.mx-pe b{font-size:.9375em;font-weight:800;font-variant-numeric:tabular-nums}
+.mx-acts{display:flex;gap:10px;margin-top:10px}
+.mx-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:16px;font-weight:700;font-size:1em;transition:transform .15s ease,background .25s,color .25s}
+.mx-btn:active{transform:scale(.97)}
+.mx-btn .ic{width:20px;height:20px;stroke-width:2.2}
+.mx-btn.primary{flex:2;background:var(--accent);color:var(--onAccent);box-shadow:0 8px 20px -8px color-mix(in srgb,var(--accent) 80%,transparent)}
+.mx-btn.ghost{flex:1;background:var(--surface2);color:var(--text)}
+.mx-btn.late{width:100%;background:var(--surface);color:var(--mxurg)}
+.mx-now.marking .mx-btn.primary{background:var(--safe);color:var(--onSafe)}
+.mx-now.marking{animation:mxOut .6s .3s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes mxOut{to{opacity:0;transform:translateX(-30px)}}
+.enter-a{animation:mxEnA .5s cubic-bezier(.2,.8,.2,1) both}
+.enter-b{animation:mxEnB .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes mxEnA{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes mxEnB{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+.mx-calm{display:flex;align-items:center;gap:14px;margin-top:10px;padding:14px 16px}
+.mx-halo{width:52px;height:52px;border-radius:50%;background:var(--safeSoft);color:var(--mxsafe);display:grid;place-items:center;flex:none;animation:mxFloat 3.2s ease-in-out infinite;box-shadow:0 0 0 7px color-mix(in srgb,var(--safe) 10%,transparent)}
+.mx-halo .ic{width:26px;height:26px}
+@keyframes mxFloat{50%{transform:translateY(-4px)}}
+.mx-calm h3{font-size:1.0625em;font-weight:800}
+.mx-calm .cap{color:var(--mxsub)}
+
+.mx-top{display:flex;align-items:center;gap:4px;margin-top:6px;padding:6px 6px 6px 10px;border-radius:20px}
+.mx-top-m{flex:1;min-width:0;display:flex;align-items:center;gap:10px;min-height:48px;text-align:right}
+.mx-top-ic{width:36px;height:36px;border-radius:12px;background:var(--soft);color:var(--mxacc);display:grid;place-items:center;flex:none}
+.mx-top-ic .ic{width:19px;height:19px}
+.mx-top-tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.mx-top-t{font-size:.875em;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mx-top-b{font-size:.8125em;line-height:1.35;color:var(--mxsub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mx-tag{display:inline-block;margin-inline-end:6px;padding:0 7px;border-radius:7px;background:var(--soft);color:var(--mxacc);font-size:.9em;font-weight:700}
+.mx-more{flex:none;min-height:44px;min-width:60px;padding:0 12px;border-radius:14px;background:var(--surface2);font-weight:800;font-size:.8125em;display:inline-flex;align-items:center;justify-content:center;gap:2px;color:var(--text)}
+.mx-more .ic{width:14px;height:14px}
+
+.mx-tabs{position:sticky;top:0;z-index:5;margin:10px -16px 0;padding:8px 16px 8px;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.mx-seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;padding:3px;border-radius:18px;background:var(--surface2);box-shadow:inset 0 0 0 1px var(--hair)}
+.mx-tab{position:relative;min-height:44px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:.875em;color:var(--mxsub);text-align:center;transition:background .25s,color .25s,box-shadow .25s}
+.mx-tab[aria-selected="true"]{background:var(--surface);color:var(--text);box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.mx-badge{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--accent);color:var(--onAccent);font-size:.75em;font-weight:800;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.mx-pane{padding-top:10px}
+.mx-en-a{animation:mxPaneA .38s cubic-bezier(.2,.8,.2,1) both}
+.mx-en-b{animation:mxPaneB .38s cubic-bezier(.2,.8,.2,1) both}
+@keyframes mxPaneA{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes mxPaneB{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.mx-notes{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.mx-note{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:16px;border:1.5px dashed var(--border);color:var(--mxsub);font-size:.875em;font-weight:500}
+.mx-note .ic{width:18px;height:18px;color:var(--mxsafe);flex:none}
+.mx-tl{position:relative}
+.mx-tl::before{content:'';position:absolute;top:22px;bottom:22px;right:64px;width:2px;border-radius:2px;background:linear-gradient(var(--border),var(--border))}
+.mx-ent{display:grid;grid-template-columns:48px 22px minmax(0,1fr);column-gap:6px;align-items:start;margin-bottom:8px;animation:fadeIn .45s both}
+.mx-tc{display:flex;flex-direction:column;padding-top:10px;text-align:right;font-size:.8125em;line-height:1.3;font-variant-numeric:tabular-nums}
+.mx-tc b{font-weight:800}
+.mx-tc span{color:var(--mxsub);font-weight:500;font-size:.92em}
+.mx-ent.active .mx-tc b{color:var(--mxacc)}
+.mx-rc{display:flex;justify-content:center;padding-top:14px}
+.mx-node{width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--sub);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;transition:background .3s,border-color .3s}
+.mx-ent.active .mx-node{border-color:var(--accent);background:var(--soft)}
+.mx-ent.active .mx-node::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:mxRing 2.2s ease-out infinite}
+@keyframes mxRing{0%{opacity:.7;transform:scale(.5)}100%{opacity:0;transform:scale(1.5)}}
+.mx-ent.done .mx-node{background:var(--safe);border-color:var(--safe);color:var(--onSafe);width:22px;height:22px;margin-top:-3px;animation:pop .6s cubic-bezier(.2,1.7,.4,1)}
+.mx-ent.done .mx-node .ic{width:13px;height:13px;stroke-width:3.2}
+.mx-ent.missed .mx-node{border-color:var(--urgent);background:var(--urgentSoft)}
+.mx-ent.upcoming .mx-node{border-style:dashed}
+.mx-ec{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);padding:8px 10px;display:flex;flex-direction:column;gap:8px;border:1.5px solid transparent;transition:background .3s,border-color .3s}
+.mx-ent.active .mx-ec{border-color:var(--accent)}
+.mx-ent.done .mx-ec{background:var(--safeSoft);box-shadow:none}
+.mx-ent.missed .mx-ec{background:var(--urgentSoft);box-shadow:none;border-color:color-mix(in srgb,var(--urgent) 40%,transparent)}
+.mx-ent.upcoming .mx-ec{background:transparent;box-shadow:none;border:1.5px dashed var(--border)}
+.mx-eh{display:flex;align-items:center;gap:10px;min-height:44px}
+.mx-et{width:34px;height:34px;border-radius:11px;background:var(--soft);color:var(--mxacc);display:grid;place-items:center;flex:none}
+.mx-et .ic{width:19px;height:19px}
+.mx-ent.done .mx-et{background:var(--surface);color:var(--mxsafe)}
+.mx-ent.missed .mx-et{background:var(--surface);color:var(--mxurg)}
+.mx-ent.upcoming .mx-et{background:var(--surface2);color:var(--mxsub)}
+.mx-ex{flex:1;min-width:0;display:flex;flex-direction:column;gap:0}
+.mx-en{font-weight:600;line-height:1.3}
+.mx-ent.upcoming .mx-en{color:var(--mxsub)}
+.mx-ex .cap{color:var(--mxsub)}
+.mx-ent.active .mx-ex .cap{color:var(--mxacc);font-weight:600}
+.mx-ent.done .mx-ex .cap{color:var(--mxsafe);font-weight:600}
+.mx-ent.missed .mx-ex .cap{color:var(--mxurg);font-weight:600}
+.mx-late{display:inline-block;margin-inline-start:6px;padding:0 6px;border-radius:6px;background:var(--surface);color:var(--mxurg);font-size:.92em;font-weight:700}
+.mx-lnk{flex:none;min-height:44px;min-width:44px;padding:0 10px;border-radius:12px;font-weight:700;font-size:.875em;color:var(--mxsafe)}
+.mx-mini{position:relative;height:5px;border-radius:5px;background:color-mix(in srgb,var(--text) 12%,transparent);overflow:hidden}
+.mx-mini i{position:absolute;inset-block:0;right:0;border-radius:5px;background:var(--accent);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.mx-mini.urgent i{background:var(--urgent)}
+.mx-eb{display:flex;gap:8px}
+.mx-eb .mx-btn{min-height:44px;font-size:.9375em}
+.mx-ent.marking .mx-btn.primary,.mx-ent.marking .mx-btn.late{background:var(--safe);color:var(--onSafe)}
+.mx-nowrow{display:grid;grid-template-columns:48px 22px minmax(0,1fr);column-gap:6px;align-items:center;margin:0 0 8px}
+.mx-nowt{font-size:.8125em;font-weight:800;color:var(--mxacc);font-variant-numeric:tabular-nums;text-align:right}
+.mx-nowdot{justify-self:center;width:12px;height:12px;border-radius:50%;background:var(--accent);position:relative;z-index:1;box-shadow:0 0 0 4px var(--bg)}
+.mx-nowdot::after{content:'';position:absolute;inset:-6px;border-radius:50%;background:var(--accent);opacity:.3;animation:mxRing 1.8s ease-out infinite}
+.mx-nowl{display:flex;align-items:center;gap:8px;font-size:.75em;font-weight:700;color:var(--mxacc)}
+.mx-nowl::after{content:'';flex:1;border-top:2px dashed var(--accent);opacity:.6}
+
+.mx-ml{display:flex;flex-direction:column;gap:8px}
+.mx-mr{display:flex;align-items:flex-start;gap:4px;padding:6px 6px 6px 12px;border-radius:20px}
+.mx-mmain{flex:1;min-width:0;display:flex;align-items:flex-start;gap:10px;padding:6px 0;text-align:right}
+.mx-mic{width:36px;height:36px;border-radius:12px;background:var(--surface2);color:var(--mxsub);display:grid;place-items:center;flex:none}
+.mx-mic .ic{width:19px;height:19px}
+.mx-mr.personal .mx-mic{background:var(--soft);color:var(--mxacc)}
+.mx-mr.system .mx-mic{background:var(--infoSoft);color:var(--info)}
+.mx-mtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.mx-mt{font-weight:700;line-height:1.3;font-size:.9375em}
+.mx-mb{font-size:.8125em;line-height:1.45;color:var(--mxsub);text-wrap:pretty}
+.mx-mtag{align-self:flex-start;padding:0 7px;border-radius:7px;background:var(--surface2);color:var(--mxsub);font-size:.75em;font-weight:700;line-height:1.7}
+.mx-mr.personal .mx-mtag{background:var(--soft);color:var(--mxacc)}
+.mx-mr.system .mx-mtag{background:var(--infoSoft);color:color-mix(in srgb,var(--info) 80%,var(--text))}
+.mx-mact{align-self:flex-start;min-height:44px;display:inline-flex;align-items:center;gap:3px;font-weight:700;font-size:.8125em;color:var(--mxacc)}
+.mx-mact .ic{width:14px;height:14px}
+.mx-chev{align-self:center;color:var(--mxsub);flex:none}
+.mx-chev .ic{width:16px;height:16px}
+.mx-x{flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--mxsub)}
+.mx-x .ic{width:16px;height:16px}
+.mx-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:26px 20px}
+
+.mx-zhead{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:8px;border-radius:20px;background:var(--soft);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.mx-zhead .ic{width:22px;height:22px;color:var(--mxacc);flex:none}
+.mx-zhead-t{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.mx-zhead-t b{font-weight:800;color:var(--mxacc)}
+.mx-zhead-t span{font-size:.8125em;color:var(--mxsub)}
+.mx-zhead-in{flex:none;padding:3px 11px;border-radius:999px;background:var(--surface);color:var(--mxacc);font-weight:800;font-size:.875em}
+.mx-zl{padding:4px;border-radius:22px;display:flex;flex-direction:column}
+.mx-zr{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:4px 10px;border-radius:16px;color:var(--text);text-align:right;transition:background .2s}
+.mx-zr+.mx-zr{margin-top:1px}
+.mx-zi{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--surface2);color:var(--mxsub)}
+.mx-zi .ic{width:17px;height:17px}
+.mx-zn{flex:1;min-width:0;font-size:.9375em;font-weight:600;line-height:1.25}
+.mx-zs{font-size:.8125em;color:var(--mxsub);font-weight:500;flex:none}
+.mx-zt{font-size:1em;font-weight:800;font-variant-numeric:tabular-nums;min-width:3.2em;text-align:left}
+.mx-zr.past{color:var(--mxsub)}
+.mx-zr.past .mx-zn{font-weight:500}
+.mx-zr.past .mx-zt{font-weight:600}
+.mx-zr.next{background:var(--soft);box-shadow:inset 0 0 0 1.5px var(--accent);color:var(--mxacc)}
+.mx-zr.next .mx-zi{background:var(--accent);color:var(--onAccent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 28%,transparent)}
+.mx-zr.next .mx-zn{font-weight:800}
+.mx-zr.next .mx-zs{color:var(--mxacc);font-weight:700}
+.ph.big .mx-sum{flex-wrap:wrap}
+.ph.big .mx-bt{font-size:1.8em}
+.ph.big .mx-next{padding-block:6px;height:auto}
+.ph.big .mx-next-t,.ph.big .mx-top-t,.ph.big .mx-top-b{white-space:normal;overflow:visible}
+</style>
+<template>
+<div class="scroll" style="position: absolute; inset: 0; overflow-y: auto; padding: 14px 16px 124px">
+
+<header class="mx-head">
+<div class="mx-ht">
+<p class="cap">{{dateLine}}</p>
+<h1 class="mx-h1">{{greeting}}</h1>
+</div>
+<span class="mx-count" role="img" aria-label="{{countLabel}}"><i></i>{{countText}}</span>
+</header>
+<div class="mx-sum" role="group" aria-label="סיכום היום">
+<span class="mx-sc d {{sumDoneCls}}"><i></i>בוצעו <b>{{doneN}}</b></span>
+<span class="mx-sc m {{sumMissedCls}}"><i></i>פוספסו <b>{{missedN}}</b></span>
+<span class="mx-sc o"><i></i>פתוחות <b>{{activeN}}</b></span>
+</div>
+
+<!--NAMECARD-->
+
+<section class="mx-scene {{sceneCls}}" style="{{skyBg}}" role="group" aria-label="קשת היום. אפשר לגרור את השמש כדי לנסוע בזמן" onPointerDown="{{mxDown}}" onPointerMove="{{mxMove}}" onPointerUp="{{mxUp}}" onPointerCancel="{{mxUp}}">
+<div class="mx-layer" aria-hidden="true" style="opacity: {{starsOp}}">
+<sc-for list="{{stars}}" as="st" hint-placeholder-count="10"><i class="mx-star" style="left: {{st.x}}%; top: {{st.y}}px; width: {{st.s}}px; height: {{st.s}}px; animation-delay: {{st.d}}; animation-duration: {{st.du}}"></i></sc-for>
+</div>
+<i class="mx-glow" aria-hidden="true" style="left: {{glowX}}%; opacity: {{glowOp}}; background: radial-gradient(ellipse at 50% 100%, {{glowC}} 0%, transparent 68%)"></i>
+<div class="mx-layer" aria-hidden="true" style="opacity: {{cloudOp}}; color: {{cloudC}}">
+<svg class="mx-cloud c1" viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></svg>
+<svg class="mx-cloud c2" viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></svg>
+<svg class="mx-cloud c3" viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></svg>
+</div>
+<svg class="mx-svg" viewBox="0 0 358 190" preserveAspectRatio="none" aria-hidden="true">
+<defs>
+<linearGradient id="mxSunG" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#FFB26B"></stop><stop offset="0.28" stop-color="#FFE08A"></stop><stop offset="0.5" stop-color="#FFF6C8"></stop><stop offset="0.74" stop-color="#FFC27A"></stop><stop offset="1" stop-color="#FF8A5B"></stop></linearGradient>
+<linearGradient id="mxMoonG" gradientUnits="userSpaceOnUse" x1="358" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#C6D2FA"></stop><stop offset="0.5" stop-color="#F1F4FF"></stop><stop offset="1" stop-color="#AFC0F0"></stop></linearGradient>
+<filter id="mxBlur" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="3.2"></feGaussianBlur></filter>
+<clipPath id="mxPastClip"><rect x="0" y="0" width="0" height="190" style="x: {{clipX}}px; width: {{clipW}}px"></rect></clipPath>
+<clipPath id="mxTrailClip"><rect x="0" y="0" width="0" height="190" style="x: {{clipX}}px; width: {{trailW}}px"></rect></clipPath>
+</defs>
+<path class="mx-under" style="d: path('{{sunPath}}')"></path>
+<path class="mx-under" style="d: path('{{moonPath}}')"></path>
+<path class="mx-fut" style="d: path('{{sunPath}}')" stroke="url(#mxSunG)"></path>
+<path class="mx-fut" style="d: path('{{moonPath}}')" stroke="url(#mxMoonG)"></path>
+<g clip-path="url(#mxTrailClip)"><path class="mx-trail" style="d: path('{{sunPath}}')" stroke="url(#mxSunG)"></path><path class="mx-trail" style="d: path('{{moonPath}}')" stroke="url(#mxMoonG)"></path></g>
+<g clip-path="url(#mxPastClip)"><path class="mx-past" style="d: path('{{sunPath}}')" stroke="url(#mxSunG)"></path><path class="mx-past" style="d: path('{{moonPath}}')" stroke="url(#mxMoonG)"></path></g>
+<path class="mx-hz" d="M0 152H358"></path>
+</svg>
+<i class="mx-nowline" aria-hidden="true" style="left: {{orbPct}}%; top: {{lineTop}}px; height: {{lineH}}px"></i>
+<div class="mx-sun" aria-hidden="true" style="left: {{orbPct}}%; top: {{sunY}}px; opacity: {{sunOp}}; --sunc: {{sunC}}; --sunc2: {{sunC2}}"><span class="mx-sun-glow"></span><span class="mx-sun-rays"></span><span class="mx-sun-disc"></span></div>
+<div class="mx-moon" aria-hidden="true" style="left: {{orbPct}}%; top: {{moonY}}px; opacity: {{moonOp}}">
+<span class="mx-moon-glow"></span>
+<svg viewBox="0 0 40 40"><defs><mask id="mxMoonMask"><rect width="40" height="40" fill="#fff"></rect><circle cx="28" cy="15" r="13.5" fill="#000"></circle></mask></defs><circle cx="20" cy="20" r="16" fill="#F6F2E4" mask="url(#mxMoonMask)"></circle></svg>
+</div>
+<svg class="mx-svg" viewBox="0 0 358 190" preserveAspectRatio="none" aria-hidden="true">
+<path style="d: path('{{hillFar}}'); fill: {{hillFarC}}"></path>
+<path style="d: path('{{hillNear}}'); fill: {{hillNearC}}"></path>
+</svg>
+<div class="mx-layer" aria-hidden="true">
+<sc-for list="{{ticks}}" as="k" hint-placeholder-count="11"><i class="mx-tick {{k.cls}}" style="left: {{k.x}}%; top: {{k.y}}px"></i></sc-for>
+<sc-if value="{{isScrub}}" hint-placeholder-val="{{ false }}"><i class="mx-ghost" style="left: {{ghostPct}}%; top: 152px"></i></sc-if>
+</div>
+<div class="mx-pill" aria-hidden="true">
+<span class="mx-bt num">{{nowT}}</span>
+<span class="mx-bs"><i class="mx-live {{liveCls}}"></i>{{pillSub}}</span>
+</div>
+<span class="mx-edge" style="right: 8px" aria-hidden="true">עלות {{edgeStart}}</span>
+<span class="mx-edge" style="left: 8px" aria-hidden="true">עלות {{edgeEnd}}</span>
+<p class="mx-hint {{hintCls}}" aria-hidden="true">{{hintText}}</p>
+<div class="mx-grab" id="mxGrab" role="slider" tabindex="0" aria-label="הזמן ביום. אפשר לגרור או להשתמש בחצים" aria-orientation="horizontal" aria-valuemin="{{sliderMin}}" aria-valuemax="{{sliderMax}}" aria-valuenow="{{sliderNow}}" aria-valuetext="{{sliderText}}" style="left: {{orbPct}}%; top: {{grabY}}px" onKeyDown="{{mxKey}}"></div>
+</section>
+
+<button class="mx-next" onClick="{{goNext}}" aria-label="{{nextAria}}">[[icZ:nextZi]]<span class="mx-next-t">הבא: <b>{{nextZ.name}} · {{nextZ.time}}</b></span><span class="mx-next-in">{{nextZ.left}}</span></button>
+
+<sc-if value="{{hasActive}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{manyActive}}" hint-placeholder-val="{{ false }}">
+<div class="mx-oh dots"><span>פתוח עכשיו · <b>{{activeN}}</b></span>
+<div class="mx-dots" role="group" aria-label="מעבר בין המצוות הפתוחות">
+<sc-for list="{{dots}}" as="d" hint-placeholder-count="2"><button class="mx-dot {{d.cls}}" onClick="{{d.go}}" aria-label="{{d.aria}}" aria-current="{{d.cur}}"><i></i></button></sc-for>
+</div></div>
+</sc-if>
+<sc-if value="{{oneActive}}" hint-placeholder-val="{{ true }}"><div class="mx-oh"><span>פתוח עכשיו</span></div></sc-if>
+<div class="mx-snap {{snapCls}}" id="mxSnap" role="list" aria-label="מצוות פתוחות עכשיו">
+<sc-for list="{{actives}}" as="it" hint-placeholder-count="2">
+<section class="mx-glass mx-now {{it.cls}} {{it.enter}}" role="listitem">
+<div class="mx-nh">
+<span class="mx-tile">[[icItem:it]]</span>
+<div class="mx-nt"><h3 class="mx-nn">{{it.name}}</h3><p class="cap">{{it.startT}} · מ{{it.fromName}} עד {{it.toName}} · {{it.endT}}</p></div>
+<div class="mx-ring {{it.urgentCls}}" role="img" aria-label="נשארו {{it.left}}">
+<svg viewBox="0 0 54 54" aria-hidden="true"><circle class="mx-rg-t" cx="27" cy="27" r="22.5"></circle><circle class="mx-rg-p" cx="27" cy="27" r="22.5" transform="rotate(-90 27 27)" style="stroke-dasharray: 141.4; stroke-dashoffset: {{it.ringOff}}"></circle></svg>
+<span class="mx-rn"><b class="num">{{it.leftNum}}</b><span>{{it.leftUnit}}</span></span>
+</div>
+</div>
+<div class="mx-hbar {{it.urgentCls}}" aria-hidden="true"><i class="mx-hbar-f" style="width: {{it.pctGone}}%"></i><i class="mx-hbar-d {{it.dotCls}}" style="right: {{it.pctGone}}%"></i></div>
+<div class="mx-pe">
+<span><span class="cap">התחיל · {{it.fromName}}</span><b>{{it.startT}}</b></span>
+<span><span class="cap">{{it.endWord}} · {{it.toName}}</span><b>{{it.endT}}</b></span>
+</div>
+<div class="mx-acts">
+<button class="mx-btn primary" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">[[ic:check]]<span>{{it.cta}}</span></button>
+<button class="mx-btn ghost" onClick="{{it.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</section>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noActive}}" hint-placeholder-val="{{ false }}">
+<section class="mx-glass mx-calm" aria-live="polite">
+<div class="mx-halo" aria-hidden="true">[[ic:sparkle]]</div>
+<div><h3>{{activeEmptyTitle}}</h3><p class="cap">{{activeEmptyText}}</p></div>
+</section>
+</sc-if>
+
+<sc-if value="{{hasTop}}" hint-placeholder-val="{{ true }}">
+<div class="mx-glass mx-top {{top.cls}}">
+<sc-if value="{{top.hasAction}}" hint-placeholder-val="{{ true }}">
+<button class="mx-top-m" onClick="{{top.act}}" aria-label="{{top.aria}}">
+<span class="mx-top-ic">[[icMsg:top]]</span>
+<span class="mx-top-tx"><span class="mx-top-t"><span class="mx-tag">{{top.tag}}</span>{{top.title}}</span><span class="mx-top-b">{{top.body}}</span></span>
+</button>
+</sc-if>
+<sc-if value="{{top.noAction}}" hint-placeholder-val="{{ false }}">
+<div class="mx-top-m">
+<span class="mx-top-ic">[[icMsg:top]]</span>
+<span class="mx-top-tx"><span class="mx-top-t"><span class="mx-tag">{{top.tag}}</span>{{top.title}}</span><span class="mx-top-b">{{top.body}}</span></span>
+</div>
+</sc-if>
+<sc-if value="{{hasMore}}" hint-placeholder-val="{{ true }}"><button class="mx-more" onClick="{{showMsgs}}" aria-label="{{moreAria}}"><span>{{moreText}}</span>[[ic:chevron]]</button></sc-if>
+</div>
+</sc-if>
+
+<div class="mx-tabs">
+<div class="mx-seg" role="tablist" aria-label="תצוגות היום" onKeyDown="{{tabKey}}">
+<sc-for list="{{tabs}}" as="tb" hint-placeholder-count="3">
+<button class="mx-tab" id="mxtab-{{tb.id}}" role="tab" aria-selected="{{tb.sel}}" aria-controls="mxpane" tabindex="{{tb.ti}}" onClick="{{tb.pick}}"><span>{{tb.label}}</span><sc-if value="{{tb.hasBadge}}" hint-placeholder-val="{{ false }}"><span class="mx-badge num">{{tb.badge}}</span></sc-if></button>
+</sc-for>
+</div>
+</div>
+
+<div class="mx-pane {{paneCls}}" id="mxpane" role="tabpanel" aria-labelledby="mxtab-{{tab}}">
+
+<sc-if value="{{tabDay}}" hint-placeholder-val="{{ true }}">
+<div class="mx-notes">
+<sc-if value="{{noDone}}" hint-placeholder-val="{{ false }}"><p class="mx-note">[[ic:check]]<span>{{doneEmpty}}</span></p></sc-if>
+<sc-if value="{{noMissed}}" hint-placeholder-val="{{ false }}"><p class="mx-note">[[ic:sparkle]]<span>{{missedEmpty}}</span></p></sc-if>
+</div>
+<div class="mx-tl" role="list" aria-label="המצוות של היום">
+<sc-for list="{{entries}}" as="en" hint-placeholder-count="7">
+<sc-if value="{{en.isNow}}" hint-placeholder-val="{{ false }}">
+<div class="mx-nowrow" role="listitem" aria-label="{{en.label}}"><span class="mx-nowt">{{en.time}}</span><span class="mx-nowdot"></span><span class="mx-nowl">{{en.nowWord}}</span></div>
+</sc-if>
+<sc-if value="{{en.isItem}}" hint-placeholder-val="{{ true }}">
+<div class="mx-ent {{en.rowCls}}" role="listitem">
+<span class="mx-tc"><b>{{en.startT}}</b><span>{{en.endT}}</span></span>
+<span class="mx-rc"><span class="mx-node"><sc-if value="{{en.isDone}}" hint-placeholder-val="{{ false }}">[[ic:check]]</sc-if></span></span>
+<div class="mx-ec">
+<div class="mx-eh">
+<span class="mx-et">[[icItem:en]]</span>
+<span class="mx-ex"><span class="mx-en">{{en.name}}</span><span class="cap">{{en.statusText}}<sc-if value="{{en.late}}" hint-placeholder-val="{{ false }}"><span class="mx-late">באיחור</span></sc-if></span></span>
+<sc-if value="{{en.isDone}}" hint-placeholder-val="{{ false }}"><button class="mx-lnk" onClick="{{en.undo}}" aria-label="{{en.undoLabel}}">ביטול</button></sc-if>
+</div>
+<sc-if value="{{en.isActive}}" hint-placeholder-val="{{ false }}">
+<span class="mx-mini {{en.urgentCls}}" role="img" aria-label="{{en.barLabel}}"><i style="width: {{en.pctGone}}%"></i></span>
+<div class="mx-eb">
+<button class="mx-btn primary" onClick="{{en.mark}}" aria-label="{{en.markLabel}}">[[ic:check]]<span>{{en.cta}}</span></button>
+<button class="mx-btn ghost" onClick="{{en.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</sc-if>
+<sc-if value="{{en.isMissed}}" hint-placeholder-val="{{ false }}">
+<button class="mx-btn late" onClick="{{en.mark}}" aria-label="{{en.markLabel}}">[[ic:check]]<span>בכל זאת עשיתי</span></button>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{tabMsg}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{hasMessages}}" hint-placeholder-val="{{ true }}">
+<ul class="mx-ml" role="list" aria-label="כל ההודעות">
+<sc-for list="{{msgRows}}" as="m" hint-placeholder-count="5">
+<li class="mx-glass mx-mr {{m.kindCls}} {{m.cls}}">
+<sc-if value="{{m.rowButton}}" hint-placeholder-val="{{ false }}">
+<button class="mx-mmain" onClick="{{m.act}}" aria-label="{{m.aria}}">
+<span class="mx-mic">[[icMsg:m]]</span>
+<span class="mx-mtx"><span class="mx-mtag">{{m.tag}}</span><span class="mx-mt">{{m.title}}</span><span class="mx-mb">{{m.body}}</span></span>
+<span class="mx-chev">[[ic:chevron]]</span>
+</button>
+</sc-if>
+<sc-if value="{{m.rowPlain}}" hint-placeholder-val="{{ true }}">
+<div class="mx-mmain">
+<span class="mx-mic">[[icMsg:m]]</span>
+<span class="mx-mtx"><span class="mx-mtag">{{m.tag}}</span><span class="mx-mt">{{m.title}}</span><span class="mx-mb">{{m.body}}</span>
+<sc-if value="{{m.showAction}}" hint-placeholder-val="{{ false }}"><button class="mx-mact" onClick="{{m.act}}"><span>{{m.action}}</span>[[ic:chevron]]</button></sc-if></span>
+</div>
+</sc-if>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="mx-x" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noMessages}}" hint-placeholder-val="{{ false }}">
+<section class="mx-glass mx-empty" aria-live="polite"><div class="mx-halo" aria-hidden="true">[[ic:bell]]</div><h3>אין הודעות כרגע</h3><p class="cap">כשיהיה משהו חדש, זה יופיע כאן.</p></section>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{tabZ}}" hint-placeholder-val="{{ false }}">
+<div class="mx-zhead">[[icZ:nextZi]]<div class="mx-zhead-t"><b>{{nextZ.name}} · {{nextZ.time}}</b><span>הזמן הבא ביום</span></div><span class="mx-zhead-in">{{nextZ.left}}</span></div>
+<ul class="mx-glass mx-zl" role="list" aria-label="זמני היום">
+<sc-for list="{{zrows}}" as="z" hint-placeholder-count="11">
+<li><button class="mx-zr {{z.cls}}" onClick="{{z.pick}}" aria-label="{{z.aria}}"><span class="mx-zi">[[icZ:z]]</span><span class="mx-zn">{{z.name}}</span><span class="mx-zs">{{z.sub}}</span><b class="mx-zt">{{z.time}}</b></button></li>
+</sc-for>
+</ul>
+</sc-if>
+
+</div>
+</div>
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    this.mx = { drag: false, id: null, x0: 0, off: 0, moved: false, onGrab: false, raf: 0, pend: null, scale: 1, left: 0 };
+    this.mxMemo = {};
+    return { tab: 'day', snap: 0, touched: false, dragging: false };
+  }
+
+  boardMount() {
+    this.mxScroll = (e) => {
+      const el = e.target;
+      if (!el || el.id !== 'mxSnap' || !el.children.length) return;
+      const step = el.children[0].offsetWidth + 10;
+      const i = Math.max(0, Math.min(el.children.length - 1, Math.round(Math.abs(el.scrollLeft) / step)));
+      if (i !== this.state.snap) this.setState({ snap: i });
+    };
+    document.addEventListener('scroll', this.mxScroll, true);
+  }
+
+  boardUnmount() {
+    document.removeEventListener('scroll', this.mxScroll, true);
+    cancelAnimationFrame(this.mx.raf);
+  }
+
+  mxCl(v, lo, hi) {
+    return Math.max(lo, Math.min(hi, v));
+  }
+
+  mxHex(c) {
+    return [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+  }
+
+  mxStr(a) {
+    return '#' + a.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+  }
+
+  mxMix(a, b, k) {
+    return a.map((v, i) => v + (b[i] - v) * k);
+  }
+
+  mxKeys(z) {
+    const dk = this.dayKey();
+    if (this.mxMemo.kk === dk) return this.mxMemo.keys;
+    const D = 86400;
+    const H = (c) => this.mxHex(c);
+    const K = (t, top, mid, bot, cloud, name, L, N) => ({ t, top: H(top), mid: H(mid), bot: H(bot), cloud: H(cloud), name, L, N });
+    const night = K(z.tzeit + 5400, '#050A1C', '#0C1634', '#18265A', '#7F8FC8', 'לילה', 0, 1);
+    const pre = K(z.alot - 3000, '#060A19', '#0D1533', '#18224D', '#7F8FC8', 'לפני עלות השחר', 0, 1);
+    const keys = [
+      { ...night, t: night.t - D },
+      pre,
+      K(z.alot, '#18215F', '#4B3D8E', '#9B6BA8', '#C9A6D6', 'עלות השחר', 0.12, 0.7),
+      K(z.netz, '#7F97DA', '#F2B7B4', '#FFD9AE', '#FFD6CC', 'הנץ החמה', 0.5, 0.1),
+      K(z.netz + 5400, '#76B6F2', '#A8D4F6', '#D8EDFA', '#FFFFFF', 'בוקר', 0.9, 0),
+      K(z.chatzot, '#3F93E8', '#68B0F0', '#A8D5F8', '#FFFFFF', 'צהריים', 1, 0),
+      K(z.plag, '#5E9FE0', '#9CC5E8', '#F5D9A2', '#FFF6E4', 'אחר הצהריים', 0.9, 0),
+      K(z.shkia, '#4E4C9E', '#E4708C', '#FFB05C', '#FFC8B0', 'שקיעה', 0.5, 0.1),
+      K(z.tzeit, '#161D58', '#2E3382', '#6C5BA8', '#9A8CC8', 'צאת הכוכבים', 0.1, 0.75),
+      night,
+      { ...pre, t: pre.t + D },
+    ];
+    this.mxMemo.kk = dk;
+    this.mxMemo.keys = keys;
+    return keys;
+  }
+
+  mxSky(t, z) {
+    const K = this.mxKeys(z);
+    let i = 0;
+    while (i < K.length - 2 && t >= K[i + 1].t) i++;
+    const a = K[i];
+    const b = K[i + 1];
+    const k = this.mxCl((t - a.t) / (b.t - a.t), 0, 1);
+    const e = k * k * (3 - 2 * k);
+    const m = (p) => this.mxMix(a[p], b[p], e);
+    return { top: m('top'), mid: m('mid'), bot: m('bot'), cloud: m('cloud'), L: a.L + (b.L - a.L) * e, N: a.N + (b.N - a.N) * e, name: e < 0.5 ? a.name : b.name };
+  }
+
+  mxSunAlt(t, z) {
+    const D = 86400;
+    const N = z.netz;
+    const S = z.shkia;
+    const C = z.chatzot;
+    if (t >= N && t <= S) return t <= C ? Math.sin((Math.PI / 2) * ((t - N) / (C - N))) : Math.cos((Math.PI / 2) * ((t - C) / (S - C)));
+    const tt = t < N ? t + D : t;
+    const g = this.mxCl((tt - S) / (N + D - S), 0, 1);
+    return -0.55 * Math.sin(Math.PI * g);
+  }
+
+  mxMoonAlt(t, z) {
+    const D = 86400;
+    const tt = t < z.netz ? t + D : t;
+    if (tt < z.shkia) return 0;
+    const g = this.mxCl((tt - z.shkia) / (z.netz + D - z.shkia), 0, 1);
+    return 0.6 * Math.sin(Math.PI * g);
+  }
+
+  mxStatic(z, A0, E, xOf) {
+    const dk = this.dayKey();
+    if (this.mxMemo.sk === dk) return this.mxMemo.st;
+    const HOR = 152;
+    const H = 118;
+    const grid = [];
+    for (let i = 0; i <= 160; i++) grid.push(A0 + ((E - A0) * i) / 160);
+    const ts = Array.from(new Set(grid.concat([z.netz, z.shkia]))).sort((a, b) => a - b);
+    let sun = '';
+    let moon = '';
+    let prev = false;
+    ts.forEach((t) => {
+      const x = xOf(t).toFixed(1);
+      if (t >= z.netz && t <= z.shkia) {
+        const a = this.mxSunAlt(t, z);
+        sun += (sun ? 'L' : 'M') + x + ' ' + (HOR - Math.max(0, a) * H).toFixed(1);
+      }
+      const dark = t <= z.netz || t >= z.shkia;
+      const m = this.mxMoonAlt(t, z);
+      if (dark && m >= 0) {
+        moon += (prev ? 'L' : 'M') + x + ' ' + (HOR - m * H).toFixed(1);
+        prev = true;
+      } else prev = false;
+    });
+    const hill = (base, amp, seed) => {
+      let p = 'M0 190L0 ' + base;
+      for (let x = 0; x <= 358; x += 6) p += 'L' + x + ' ' + (base - amp * (0.5 * Math.sin(x / (60 + seed * 9) + seed * 1.7) + 0.32 * Math.sin(x / (29 + seed * 5) + seed * 2.9 + 1) + 0.18 * Math.sin(x / (15 + seed * 3) + seed * 0.7))).toFixed(1);
+      return p + 'L358 190Z';
+    };
+    let sd = 7;
+    const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+    const stars = [];
+    for (let i = 0; i < 30; i++) stars.push({ x: (rnd() * 100).toFixed(1), y: Math.round(5 + rnd() * 120), s: (1.3 + rnd() * 1.4).toFixed(1), d: '-' + (rnd() * 3.4).toFixed(2) + 's', du: (2.4 + rnd() * 2.6).toFixed(2) + 's' });
+    const st = { sun, moon, far: hill(152, 7, 1), near: hill(168, 6, 2), stars };
+    this.mxMemo.sk = dk;
+    this.mxMemo.st = st;
+    return st;
+  }
+
+  mxSecOf(px, A0, E) {
+    const f = this.mxCl((358 - 14 - px) / (358 - 28), 0, 1);
+    const tz = this.zmanSec('tzeit');
+    const FD = 0.72;
+    return f <= FD ? A0 + (f / FD) * (tz - A0) : tz + ((f - FD) / (1 - FD)) * (E - tz);
+  }
+
+  mxPx(e) {
+    const r = e.currentTarget.getBoundingClientRect();
+    return ((e.clientX - r.left) * 358) / r.width;
+  }
+
+  mxSet(sec) {
+    this.mx.pend = sec;
+    if (this.mx.raf) return;
+    this.mx.raf = requestAnimationFrame(() => {
+      this.mx.raf = 0;
+      this.mxFlush();
+    });
+  }
+
+  mxFlush() {
+    if (this.mx.pend == null) return;
+    const v = this.mx.pend;
+    this.mx.pend = null;
+    this.scrub(v);
+  }
+
+  mxDown(e) {
+    if (e.button > 0) return;
+    const A0 = this.dayStart();
+    const E = this.dayEnd();
+    const px = this.mxPx(e);
+    const m = this.mx;
+    m.drag = true;
+    m.id = e.pointerId;
+    m.x0 = px;
+    m.moved = false;
+    m.onGrab = Boolean(e.target.closest && e.target.closest('.mx-grab'));
+    m.off = m.onGrab ? this.mxSecOf(px, A0, E) - this.now() : 0;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+  }
+
+  mxMove(e) {
+    const m = this.mx;
+    if (!m.drag || e.pointerId !== m.id) return;
+    const px = this.mxPx(e);
+    if (!m.moved && Math.abs(px - m.x0) < 4) return;
+    if (!m.moved) {
+      m.moved = true;
+      this.setState({ dragging: true, touched: true });
+    }
+    const lo = this.dayStart();
+    const hi = this.dayEnd() - 60;
+    m.off *= 0.94;
+    this.mxSet(this.mxCl(this.mxSecOf(px, lo, this.dayEnd()) - m.off, lo, hi));
+  }
+
+  mxUp(e) {
+    const m = this.mx;
+    if (!m.drag || e.pointerId !== m.id) return;
+    m.drag = false;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    this.mxFlush();
+    if (m.moved) this.setState({ dragging: false });
+  }
+
+  mxKey(e) {
+    const t = this.now();
+    const keys = { ArrowLeft: 300, ArrowUp: 300, ArrowRight: -300, ArrowDown: -300, PageUp: 3600, PageDown: -3600 };
+    let to = null;
+    if (e.key in keys) to = t + keys[e.key] * (e.shiftKey ? 0.2 : 1);
+    else if (e.key === 'Home') to = this.dayStart();
+    else if (e.key === 'End') to = this.dayEnd() - 60;
+    if (to == null) return;
+    e.preventDefault();
+    this.setState({ touched: true });
+    this.scrub(to);
+  }
+
+  mxTabKey(e) {
+    const ids = ['day', 'msg', 'z'];
+    const i = ids.indexOf(this.state.tab);
+    let n = -1;
+    if (e.key === 'ArrowLeft') n = (i + 1) % 3;
+    else if (e.key === 'ArrowRight') n = (i + 2) % 3;
+    else if (e.key === 'Home') n = 0;
+    else if (e.key === 'End') n = 2;
+    if (n < 0) return;
+    e.preventDefault();
+    this.setState({ tab: ids[n] });
+    setTimeout(() => {
+      const el = document.getElementById('mxtab-' + ids[n]);
+      if (el) el.focus();
+    }, 0);
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const s = this.state;
+    const t = this.now();
+    const A0 = this.dayStart();
+    const E = this.dayEnd();
+    const W = 358;
+    const M = 14;
+    const HOR = 152;
+    const H = 118;
+    const zl = this.zmanimList();
+    const z = {};
+    zl.forEach((x) => (z[x.id] = x.S));
+    const cl = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    const FD = 0.72;
+    const xOf = (sec) => W - M - (sec <= z.tzeit ? ((sec - A0) / (z.tzeit - A0)) * FD : FD + ((sec - z.tzeit) / (E - z.tzeit)) * (1 - FD)) * (W - 2 * M);
+    const pct = (x) => ((x / W) * 100).toFixed(2);
+    const mk = (a) => this.mxStr(a);
+    const sky = this.mxSky(t, z);
+    const st = this.mxStatic(z, A0, E, xOf);
+
+    const alt = this.mxSunAlt(t, z);
+    const mAlt = this.mxMoonAlt(t, z);
+    const x = xOf(t);
+    const sunVis = alt > -0.02;
+    const hgt = cl(alt, 0, 1);
+    const sunY = HOR - (alt >= 0 ? alt * H : alt * 70);
+    const moonY = HOR - mAlt * H;
+    const orbY = sunVis ? sunY : mAlt > 0.01 ? moonY : HOR;
+    const lineTop = Math.min(orbY + 14, HOR);
+    const fall = (v) => cl(v, 0, 1);
+
+    const dark = [6, 10, 26];
+    const hillFar = this.mxMix(sky.bot, dark, 0.42);
+    const hillNear = this.mxMix(sky.bot, dark, 0.7);
+    const lead = this.mxMix(sky.bot, [255, 190, 120], 0.35);
+
+    const ticks = c.zmanim.map((zz, i) => {
+      const S = zl[i].S;
+      const a = this.mxSunAlt(S, z);
+      const m = this.mxMoonAlt(S, z);
+      const y = a > 0 ? HOR - a * H : m > 0 ? HOR - m * H : HOR;
+      return { x: pct(xOf(S)), y: y.toFixed(1), cls: zz.isNext ? 'next' : zz.past ? 'past' : '' };
+    });
+
+    const nextObj = c.zmanim.find((q) => q.isNext) || { isDawn: true };
+    const nextS = (zl.find((q) => q.id === nextObj.id) || { S: E - 60 }).S;
+    const nextAria = 'הצגת ' + c.nextZ.name + ' בקשת, ' + c.nextZ.time;
+
+    const actives = c.active.map((it, i) => ({
+      ...it,
+      ringOff: this.dash(141.4, it.pctLeft),
+      dotCls: it.isMoon ? 'moon' : '',
+      enter: 'enter-' + this.flip('act' + i, it.id),
+    }));
+    const snap = Math.min(s.snap, Math.max(0, actives.length - 1));
+    const dots = actives.map((it, i) => ({
+      cls: i === snap ? 'on' : '',
+      cur: i === snap ? 'true' : 'false',
+      aria: 'מעבר אל ' + it.name,
+      go: () => {
+        const el = document.getElementById('mxSnap');
+        const card = el && el.children[i];
+        if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        this.setState({ snap: i });
+      },
+    }));
+
+    const m0 = c.messages[0] || null;
+    const top = m0
+      ? { ...m0, noAction: !m0.hasAction, aria: m0.title + '. ' + (m0.id === 'next' ? 'פתיחת ההודעות האישיות' : m0.action) }
+      : {};
+    const moreN = Math.max(0, c.msgCount - 1);
+
+    const ids = ['day', 'msg', 'z'];
+    const labels = { day: 'היום שלי', msg: 'הודעות', z: 'זמני היום' };
+    const tabs = ids.map((id) => ({
+      id,
+      label: labels[id],
+      sel: s.tab === id,
+      ti: s.tab === id ? '0' : '-1',
+      hasBadge: id === 'msg' && c.msgCount > 0,
+      badge: c.msgCount,
+      pick: () => this.setState({ tab: id }),
+    }));
+
+    const nowRow = { isNow: true, isItem: false, time: c.nowT, nowWord: c.isScrub ? 'בתצוגה' : 'עכשיו', label: (c.isScrub ? 'בתצוגה ' : 'עכשיו ') + c.nowT };
+    const entries = [];
+    let placed = false;
+    c.timeline.forEach((it) => {
+      if (!placed && it.isUpcoming) {
+        entries.push(nowRow);
+        placed = true;
+      }
+      const dn = c.done.find((d) => d.id === it.id);
+      const act = c.active.find((a) => a.id === it.id);
+      entries.push({
+        ...it,
+        isNow: false,
+        isItem: true,
+        rowCls: it.status + (it.isMarking ? ' marking' : ''),
+        late: dn ? dn.late : false,
+        undoLabel: 'ביטול הסימון של ' + it.name,
+        pctGone: act ? act.pctGone : 0,
+        urgentCls: act ? act.urgentCls : '',
+        barLabel: act ? 'נשארו ' + act.left + ' מתוך החלון' : '',
+      });
+    });
+    if (!placed) entries.push(nowRow);
+
+    const msgRows = c.messages.map((m) => {
+      const isNext = m.id === 'next';
+      return {
+        ...m,
+        body: m.body.replace(/(\d)–(\d)/g, '$1⁠–⁠$2'),
+        rowButton: isNext,
+        rowPlain: !isNext,
+        showAction: m.hasAction && !isNext,
+        aria: m.title + '. פתיחת ההודעות האישיות',
+      };
+    });
+
+    const toTop = () => {
+      const sc = document.querySelector('.scroll');
+      if (sc) sc.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    const zrows = c.zmanim.map((q, i) => ({
+      ...q,
+      sub: q.isNext ? c.nextZ.leftShort : q.past ? 'עבר' : 'בעוד ' + this.hm(zl[i].S - t),
+      aria: 'הצגת ' + q.name + ' בקשת, ' + q.time,
+      pick: () => {
+        this.setState({ touched: true });
+        this.scrub(zl[i].S);
+        toTop();
+      },
+    }));
+
+    const liveOn = c.isLive || c.mode === 'fixed';
+    const pillSub = (c.isScrub ? 'בתצוגה · ' : '') + sky.name;
+
+    return {
+      ...c,
+      sumDoneCls: c.doneN ? 'has' : '',
+      sumMissedCls: c.missedN ? 'has' : '',
+      sceneCls: (s.dragging ? 'drag ' : '') + (c.isScrub ? 'scr' : ''),
+      skyBg: 'background: linear-gradient(180deg,' + mk(sky.top) + ' 0%,' + mk(sky.mid) + ' 55%,' + mk(sky.bot) + ' 100%)',
+      stars: st.stars,
+      starsOp: fall(sky.N).toFixed(2),
+      glowX: pct(xOf(alt > -0.1 ? t : z.netz)),
+      glowOp: fall(sky.L * 0.9).toFixed(2),
+      glowC: 'rgba(' + lead.map(Math.round).join(',') + ',0.75)',
+      cloudOp: fall(1 - sky.N * 1.1).toFixed(2),
+      cloudC: mk(sky.cloud),
+      clipX: x.toFixed(1),
+      clipW: Math.max(0, W - x + 2).toFixed(1),
+      trailW: Math.min(70, Math.max(0, W - x + 2)).toFixed(1),
+      sunPath: st.sun || 'M0 0',
+      moonPath: st.moon || 'M0 0',
+      hillFar: st.far,
+      hillNear: st.near,
+      hillFarC: mk(hillFar),
+      hillNearC: mk(hillNear),
+      orbPct: pct(x),
+      lineTop: lineTop.toFixed(1),
+      lineH: Math.max(0, HOR - lineTop).toFixed(1),
+      sunY: sunY.toFixed(1),
+      moonY: moonY.toFixed(1),
+      sunOp: fall((alt + 0.12) / 0.1).toFixed(2),
+      moonOp: sunVis ? '0' : fall(mAlt / 0.05).toFixed(2),
+      sunC: mk(this.mxMix(this.mxHex('#FF8A3D'), this.mxHex('#FFE27A'), hgt)),
+      sunC2: mk(this.mxMix(this.mxHex('#E8531F'), this.mxHex('#FFB347'), hgt)),
+      grabY: orbY.toFixed(1),
+      ghostPct: pct(xOf(cl(c.liveSec, A0, E))),
+      ticks,
+      liveCls: liveOn ? 'on' : '',
+      pillSub,
+      edgeStart: c.zmanim.find((q) => q.id === 'alot').time,
+      edgeEnd: this.clock(E),
+      hintText: sunVis ? 'גררו את השמש' : 'גררו את הירח',
+      hintCls: s.touched || c.isScrub ? 'gone' : '',
+      sliderMin: Math.round(A0),
+      sliderMax: Math.round(E - 60),
+      sliderNow: Math.round(t),
+      sliderText: c.nowT + ', ' + sky.name + ', הבא: ' + c.nextZ.name + ' ' + c.nextZ.left,
+      mxDown: (e) => this.mxDown(e),
+      mxMove: (e) => this.mxMove(e),
+      mxUp: (e) => this.mxUp(e),
+      mxKey: (e) => this.mxKey(e),
+      nextZi: nextObj,
+      nextAria,
+      goNext: () => {
+        this.setState({ touched: true });
+        this.scrub(nextS);
+      },
+      actives,
+      manyActive: actives.length > 1,
+      oneActive: actives.length === 1,
+      snapCls: actives.length > 1 ? 'many' : '',
+      dots,
+      top,
+      hasTop: Boolean(m0),
+      hasMore: moreN > 0,
+      moreText: 'עוד ' + moreN,
+      moreAria: 'עוד ' + moreN + ' הודעות. מעבר ללשונית ההודעות',
+      showMsgs: () => this.setState({ tab: 'msg' }),
+      tab: s.tab,
+      tabs,
+      tabKey: (e) => this.mxTabKey(e),
+      tabDay: s.tab === 'day',
+      tabMsg: s.tab === 'msg',
+      tabZ: s.tab === 'z',
+      paneCls: 'mx-en-' + this.flip('tab', s.tab),
+      entries,
+      msgRows,
+      noMessages: c.messages.length === 0,
+      zrows,
+    };
+  }
+}
+</script>

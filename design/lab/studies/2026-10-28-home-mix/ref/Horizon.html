@@ -1,0 +1,1216 @@
+<!--board title="ל · אופק"-->
+<style>
+.ph{--hzsub:color-mix(in srgb,var(--sub) 74%,var(--text));--hzacc:color-mix(in srgb,var(--accentText) 80%,var(--text));--hzurg:color-mix(in srgb,var(--urgent) 82%,var(--text));--hzsafe:color-mix(in srgb,var(--safe) 78%,var(--text));--hair:color-mix(in srgb,var(--text) 10%,transparent)}
+
+.hzs{position:relative;height:var(--sh);margin:0 -16px;overflow:hidden;border-radius:0 0 34px 34px;touch-action:pan-y;user-select:none;-webkit-user-select:none;background:var(--hs3);isolation:isolate;box-shadow:0 18px 40px -18px rgba(10,16,38,.55)}
+.hz-sky{position:absolute;inset:0;background:linear-gradient(180deg,var(--hs1) 0%,var(--hs2) 52%,var(--hs3) 100%)}
+.hz-hglow{position:absolute;width:340px;height:150px;margin-left:-170px;background:radial-gradient(ellipse at 50% 82%,var(--glow) 0%,transparent 68%);pointer-events:none}
+.hz-stars{position:absolute;top:0;right:0;width:460px;height:176px;pointer-events:none}
+.hz-star{position:absolute;border-radius:50%;background:#fff;box-shadow:0 0 6px 1px rgba(255,255,255,.7);animation:hzTw 3.4s ease-in-out infinite}
+@keyframes hzTw{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+.hz-sun{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;pointer-events:none}
+.hz-sun-glow{position:absolute;inset:-46px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--sunc) 70%,transparent) 0%,color-mix(in srgb,var(--sunc) 22%,transparent) 42%,transparent 70%);animation:hzBreathe 5s ease-in-out infinite}
+.hz-sun-disc{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 38% 34%,#fffdf0 0%,var(--sunc) 58%,var(--sunc2) 100%);box-shadow:0 0 22px 6px color-mix(in srgb,var(--sunc) 60%,transparent)}
+@keyframes hzBreathe{0%,100%{transform:scale(.92);opacity:.78}50%{transform:scale(1.16);opacity:1}}
+.hz-moon{position:absolute;width:38px;height:38px;margin:-19px 0 0 -19px;pointer-events:none}
+.hz-moon-glow{position:absolute;inset:-34px;border-radius:50%;background:radial-gradient(circle,rgba(214,224,255,.45) 0%,rgba(214,224,255,.12) 45%,transparent 70%);animation:hzBreathe 6s ease-in-out infinite}
+.hz-moon svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 0 8px rgba(230,236,255,.8))}
+.hz-clouds{position:absolute;inset:0;pointer-events:none}
+.hz-cloud{position:absolute;left:0;top:0;height:auto;fill:currentColor;filter:drop-shadow(0 6px 10px rgba(40,70,120,.12));animation:hzDrift linear infinite;will-change:transform}
+.hz-cloud.c1{top:92px;width:92px;animation-duration:96s;animation-delay:-30s;opacity:.9}
+.hz-cloud.c2{top:118px;width:140px;animation-duration:130s;animation-delay:-84s;opacity:.95}
+.hz-cloud.c3{top:104px;width:80px;animation-duration:112s;animation-delay:-12s;opacity:.8}
+@keyframes hzDrift{from{transform:translateX(-170px)}to{transform:translateX(580px)}}
+.hz-birds{position:absolute;inset:0;pointer-events:none}
+.hz-bird{position:absolute;right:-30px;width:22px;height:10px;color:var(--ink);opacity:.7;animation:hzFly linear infinite}
+.hz-bird svg{display:block;width:22px;height:10px;transform-origin:50% 100%;animation:hzFlap .8s ease-in-out infinite alternate}
+.hz-bird.b1{top:112px;animation-duration:38s;animation-delay:-8s}
+.hz-bird.b2{top:128px;animation-duration:46s;animation-delay:-27s}
+.hz-bird.b2 svg{animation-duration:.95s}
+.hz-bird.b3{top:120px;animation-duration:54s;animation-delay:-41s}
+@keyframes hzFly{from{transform:translate(0,0)}50%{transform:translate(-240px,-8px)}to{transform:translate(-470px,4px)}}
+@keyframes hzFlap{from{transform:scaleY(1)}to{transform:scaleY(.45)}}
+.hz-hill{position:absolute;right:0;will-change:transform;pointer-events:none}
+.hz-motes{position:absolute;inset:0;pointer-events:none}
+.hz-mote{position:absolute;width:4px;height:4px;border-radius:50%;background:#FFE9A8;box-shadow:0 0 8px 3px rgba(255,214,120,.65);animation:hzMote 7s ease-in-out infinite alternate,hzMoteG 2.6s ease-in-out infinite}
+@keyframes hzMote{from{transform:translate(0,0)}to{transform:translate(14px,-18px)}}
+@keyframes hzMoteG{0%,100%{opacity:.35}50%{opacity:1}}
+
+.hz-top{position:absolute;top:0;left:0;right:0;padding:14px 20px 0;pointer-events:none}
+.hz-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 8px}
+.hz-chip{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--chip);font-size:.8125em;font-weight:600;line-height:1.5;color:var(--ink);text-shadow:0 1px 10px color-mix(in srgb,var(--opp) 45%,transparent)}
+.hz-hello{margin-top:6px;width:fit-content;max-width:100%;padding:0 10px;margin-inline:-10px 0;border-radius:16px;background:var(--chip);font-family:'Frank Ruhl Libre','Heebo',serif;font-size:1.95em;font-weight:700;line-height:1.14;letter-spacing:-.01em;color:var(--ink);text-shadow:0 1px 2px color-mix(in srgb,var(--opp) 22%,transparent),0 2px 18px color-mix(in srgb,var(--opp) 42%,transparent)}
+.ph.big .hz-hello{font-size:1.6em}
+
+.hz-bubble{position:absolute;left:50%;bottom:calc(var(--rh) + 24px);transform:translateX(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;min-width:88px;padding:5px 14px 5px;border-radius:16px;background:rgba(10,16,38,.84);border:1px solid rgba(255,255,255,.2);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#F2F5FB;box-shadow:0 10px 26px rgba(0,0,0,.35);pointer-events:none}
+.hz-bubble::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:rgba(10,16,38,.84)}
+.hz-bt{font-size:1.4em;font-weight:800;letter-spacing:-.01em;line-height:1.1}
+.hz-bs{display:inline-flex;align-items:center;gap:6px;font-size:.75em;font-weight:600;color:#C9D2E6;line-height:1.3}
+.hz-live{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none}
+.hz-live.on{background:#4CC38A;animation:pulse 1.6s ease-in-out infinite}
+
+.hz-ruler{position:absolute;left:0;right:0;bottom:0;height:var(--rh);overflow:hidden;background:linear-gradient(180deg,rgba(10,16,38,.7),rgba(7,12,30,.92) 46%);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);border-top:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);z-index:2;color:#F2F5FB}
+.hz-slider{position:absolute;inset:0;pointer-events:none;z-index:4;border-radius:0 0 34px 34px}
+.hz-slider:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.hz-strip{position:absolute;top:0;right:0;height:100%;will-change:transform;isolation:isolate}
+.hz-rail-bg{position:absolute;left:0;right:0;top:51px;height:3px;opacity:.9}
+.hz-g10{position:absolute;top:58px;height:4px;background:repeating-linear-gradient(to left,rgba(255,255,255,.34) 0 1px,transparent 1px 15px)}
+.hz-g60{position:absolute;top:58px;height:8px;background:repeating-linear-gradient(to left,rgba(255,255,255,.7) 0 1.5px,transparent 1.5px 90px)}
+.hz-hn{position:absolute;top:66px;transform:translateX(50%);font-size:.75em;line-height:14px;font-weight:500;color:#B9C4DB;font-variant-numeric:tabular-nums}
+.hz-nl{position:absolute;top:8px;bottom:0;width:0;border-right:2px dashed rgba(255,255,255,.55)}
+.hz-z{position:absolute;top:0;width:0;height:60px}
+.hz-z::before{content:"";position:absolute;top:0;right:0;width:46px;height:var(--rh);transform:translateX(50%);background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 26%,transparent),transparent 70%);opacity:0;z-index:-1}
+.hz-z.next::before{opacity:1}
+.hz-zs{position:absolute;right:0;width:1px;background:rgba(255,255,255,.32);transform:translateX(50%)}
+.hz-z.u .hz-zs{top:27px;height:24px}
+.hz-z.l .hz-zs{top:45px;height:6px}
+.hz-z.next .hz-zs{background:var(--accent);width:2px}
+.hz-zd{position:absolute;top:47.5px;right:0;width:9px;height:9px;border-radius:50%;border:2px solid #0A1230;transform:translateX(50%)}
+.hz-z.past .hz-zd{opacity:.65}
+.hz-z.next .hz-zd{width:13px;height:13px;top:45.5px;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 60%,transparent),0 0 14px 3px color-mix(in srgb,var(--accent) 80%,transparent);animation:hzDot 2.2s ease-in-out infinite}
+@keyframes hzDot{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 28%,transparent),0 0 20px 5px color-mix(in srgb,var(--accent) 60%,transparent)}}
+.hz-zl{position:absolute;right:0;transform:translateX(50%);z-index:1;height:16px;padding:0 8px;border-radius:8px;background:#1E2A58;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);color:#F2F5FB;font-size:.75em;font-weight:600;line-height:16px;white-space:nowrap;display:inline-flex;gap:5px}
+.hz-z.u .hz-zl{top:11px}
+.hz-z.l .hz-zl{top:29px}
+.hz-zl b{font-weight:800;font-variant-numeric:tabular-nums}
+.hz-z.past .hz-zl{background:#141C40;box-shadow:none;color:#A9B5CE}
+.hz-z.past .hz-zl b{font-weight:500}
+.hz-z.next .hz-zl{background:var(--accent);color:var(--onAccent);box-shadow:0 0 16px color-mix(in srgb,var(--accent) 70%,transparent);animation:hzNext 2.4s ease-in-out infinite}
+@keyframes hzNext{50%{box-shadow:0 0 24px 2px color-mix(in srgb,var(--accent) 55%,transparent)}}
+.hz-zl:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.hz-b{position:absolute;height:15px;border-radius:8px}
+.hz-b.ahead{background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.34)}
+.hz-b.open{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 65%,transparent),0 0 10px color-mix(in srgb,var(--accent) 45%,transparent);animation:hzBand 3s ease-in-out infinite}
+@keyframes hzBand{50%{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 65%,transparent),0 0 16px 1px color-mix(in srgb,var(--accent) 38%,transparent)}}
+.hz-b.done{background:var(--safe);box-shadow:0 0 14px color-mix(in srgb,var(--safe) 55%,transparent)}
+.hz-b.missed{background:repeating-linear-gradient(135deg,var(--urgent) 0 5px,color-mix(in srgb,var(--urgent) 40%,#0A1230) 5px 10px);box-shadow:0 0 0 1px color-mix(in srgb,var(--urgent) 70%,transparent)}
+.hz-dd{position:absolute;width:15px;height:15px;margin-right:-7.5px;border-radius:50%;background:#fff;color:#0B7A51;display:grid;place-items:center;box-shadow:0 0 10px rgba(255,255,255,.7);animation:pop .6s cubic-bezier(.2,1.7,.4,1)}
+.hz-dd .ic{width:10px;height:10px;stroke-width:3.2}
+.hz-fade{position:absolute;top:0;bottom:0;width:34px;pointer-events:none;z-index:2}
+.hz-fade.l{left:0;background:linear-gradient(to right,rgba(7,12,30,.85),transparent)}
+.hz-fade.r{right:0;background:linear-gradient(to left,rgba(7,12,30,.85),transparent)}
+.hz-ovl{position:absolute;inset:0;pointer-events:none;z-index:3}
+.hz-lp{position:absolute;height:15px;display:inline-flex;align-items:center;gap:4px;padding:0 7px;border-radius:8px;background:rgba(8,13,32,.88);color:#F2F5FB;font-size:.75em;font-weight:700;line-height:1;white-space:nowrap}
+.hz-lp.ahead{color:#C4CEE2;font-weight:600}
+.hz-lpt{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.hz-lp .ic{width:11px;height:11px;stroke-width:3}
+.hz-lp.done .ic{color:#4CC38A}
+.hz-lp.missed .ic{color:#FF9A9A}
+.hz-od{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none;animation:pulse 1.6s ease-in-out infinite}
+.hz-nowp{position:absolute;top:58px;transform:translateX(50%);display:inline-flex;align-items:center;gap:3px;height:20px;padding:0 9px;border-radius:10px;background:var(--accent);color:var(--onAccent);font-size:.75em;font-weight:800;pointer-events:auto;box-shadow:0 0 14px color-mix(in srgb,var(--accent) 65%,transparent)}
+.hz-nowp::after,.hz-ne::after{content:"";position:absolute;inset:-14px -6px}
+.hz-ne{position:absolute;transform:translateX(50%);display:inline-flex;align-items:center;gap:4px;height:16px;padding:0 8px;border-radius:8px;background:var(--accent);color:var(--onAccent);font-size:.75em;font-weight:700;line-height:16px;white-space:nowrap;pointer-events:auto;box-shadow:0 0 16px color-mix(in srgb,var(--accent) 70%,transparent);animation:hzNext 2.4s ease-in-out infinite}
+.hz-ne b{font-weight:800;font-variant-numeric:tabular-nums}
+.hz-ne .ic{width:12px;height:12px;stroke-width:3}
+.hz-ne .fl{transform:scaleX(-1)}
+.hz-nowp .ic{width:12px;height:12px;stroke-width:3}
+.hz-nowp .fl{transform:scaleX(-1)}
+.hz-needle{position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;z-index:3;background:linear-gradient(180deg,#fff,rgba(255,255,255,.55));box-shadow:0 0 10px rgba(255,255,255,.85),0 0 20px var(--accent);pointer-events:none}
+.hz-rail{position:absolute;left:0;right:0;bottom:calc(var(--rh) - 26px);height:44px;z-index:5;pointer-events:none}
+.hz-track{position:absolute;left:22px;right:22px;top:19px;height:6px;border-radius:6px;box-shadow:0 0 0 1px rgba(255,255,255,.22)}
+.hz-rd{position:absolute;top:50%;width:3px;height:10px;margin:-5px -1.5px 0 0;border-radius:2px;background:rgba(255,255,255,.75)}
+.hz-rwin{position:absolute;top:-5px;height:16px;border:1.5px solid rgba(255,255,255,.85);border-radius:8px;background:rgba(255,255,255,.14)}
+.hz-rnow{position:absolute;top:-7px;width:3px;height:20px;margin-right:-1.5px;border-radius:2px;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.hz-range{position:absolute;inset:0;width:100%;height:44px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;pointer-events:none}
+.hz-range::-webkit-slider-runnable-track{height:44px;background:transparent;border:0}
+.hz-range::-moz-range-track{height:44px;background:transparent;border:0}
+.hz-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;pointer-events:auto;width:44px;height:44px;border:0;border-radius:50%;cursor:grab;background:radial-gradient(circle at 50% 50%,#FFF6D8 0 4px,#F5A94A 5px 7.5px,rgba(245,169,74,.4) 8px 11px,transparent 12px)}
+.hz-range::-moz-range-thumb{pointer-events:auto;width:44px;height:44px;border:0;border-radius:50%;cursor:grab;background:radial-gradient(circle at 50% 50%,#FFF6D8 0 4px,#F5A94A 5px 7.5px,rgba(245,169,74,.4) 8px 11px,transparent 12px)}
+.hz-range:focus-visible{outline:none}
+.hz-range:focus-visible::-webkit-slider-thumb{outline:3px solid #fff;outline-offset:-8px}
+
+.hzb{position:relative;margin:0 -16px;padding:4px 16px 0;background:radial-gradient(220px 180px at 88% 60px,color-mix(in srgb,var(--accent) 20%,transparent),transparent 72%),radial-gradient(260px 220px at 6% 420px,color-mix(in srgb,var(--info) 16%,transparent),transparent 72%),radial-gradient(240px 200px at 92% 860px,color-mix(in srgb,var(--safe) 12%,transparent),transparent 72%),radial-gradient(260px 220px at 8% 1260px,color-mix(in srgb,var(--accent) 14%,transparent),transparent 72%)}
+.hz-glass{border:1px solid transparent;border-radius:24px;box-shadow:var(--shadow);background:linear-gradient(color-mix(in srgb,var(--surface) 80%,transparent),color-mix(in srgb,var(--surface) 80%,transparent)) padding-box,linear-gradient(145deg,color-mix(in srgb,var(--accent) 42%,transparent),color-mix(in srgb,var(--text) 7%,transparent) 36%,color-mix(in srgb,var(--text) 7%,transparent) 64%,color-mix(in srgb,var(--info) 34%,transparent)) border-box;-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3)}
+.hz-rise{animation:riseA .7s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+.enter-a{animation:hzEnA .5s cubic-bezier(.2,.8,.2,1) both}
+.enter-b{animation:hzEnB .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes hzEnA{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes hzEnB{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.hzh{display:flex;align-items:center;gap:10px;margin:26px 2px 10px}
+.hzh-i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--hzacc);flex:none}
+.hzh-i .ic{width:17px;height:17px}
+.hzh-t{font-size:1.0625em;font-weight:800;letter-spacing:-.01em}
+.hzh-l{flex:1;height:1px;background:linear-gradient(to left,color-mix(in srgb,var(--text) 24%,transparent),transparent)}
+.hzh-n{flex:none;min-height:26px;padding:0 10px;border-radius:999px;background:var(--surface2);display:inline-flex;align-items:center;font-size:.8125em;font-weight:800;white-space:nowrap}
+
+.hz-next{position:relative;margin-bottom:10px;padding:0;background:linear-gradient(color-mix(in srgb,var(--soft) 90%,transparent),color-mix(in srgb,var(--soft) 90%,transparent)) padding-box,linear-gradient(145deg,color-mix(in srgb,var(--accent) 60%,transparent),color-mix(in srgb,var(--text) 6%,transparent) 50%,color-mix(in srgb,var(--accent) 30%,transparent)) border-box}
+.hz-next-b{display:flex;flex-direction:column;gap:10px;width:100%;padding:12px 12px 14px;border-radius:24px;text-align:right}
+.hz-next-b:active{transform:scale(.99)}
+.hz-next-h{display:flex;align-items:center;gap:8px;min-height:30px}
+.hz-next-ic{width:30px;height:30px;border-radius:10px;background:var(--surface);color:var(--hzacc);display:grid;place-items:center;flex:none}
+.hz-next-ic .ic{width:17px;height:17px}
+.hz-tag{font-size:.8125em;font-weight:700;color:var(--hzacc)}
+.hz-edit{margin-inline-start:auto;display:inline-flex;align-items:center;gap:6px;min-height:34px;font-size:.875em;font-weight:700;color:var(--hzacc)}
+.hz-edit .ic{width:16px;height:16px}
+.hz-pm{position:relative;display:flex;align-items:flex-start;gap:12px;padding:12px 14px;margin-bottom:10px;background:linear-gradient(color-mix(in srgb,var(--surface) 80%,transparent),color-mix(in srgb,var(--surface) 80%,transparent)) padding-box,linear-gradient(145deg,color-mix(in srgb,var(--accent) 42%,transparent),color-mix(in srgb,var(--text) 7%,transparent) 50%) border-box}
+.hz-pm-ic{width:36px;height:36px;border-radius:12px;background:var(--soft);color:var(--hzacc);display:grid;place-items:center;flex:none}
+.hz-pm-ic .ic{width:19px;height:19px}
+.hz-pm-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.hz-mt{font-weight:700;line-height:1.3}
+.hz-mb{font-size:.875em;line-height:1.45;text-wrap:pretty}
+.hz-x{position:relative;flex:none;width:44px;height:44px;margin:-8px -8px -8px 0;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--hzsub)}
+.hz-x .ic{width:16px;height:16px}
+.hz-gs{padding:2px 0;margin-bottom:2px}
+.hz-gr{display:flex;align-items:flex-start;gap:10px;padding:9px 12px 9px 4px}
+.hz-gr+.hz-gr{border-top:1px solid var(--hair)}
+.hz-gr-ic{width:34px;height:34px;border-radius:12px;background:var(--surface2);color:var(--hzsub);display:grid;place-items:center;flex:none;margin:2px 12px 0 0}
+.hz-gr.system .hz-gr-ic{background:var(--infoSoft);color:var(--info)}
+.hz-gr-ic .ic{width:18px;height:18px}
+.hz-gr-b{flex:1;min-width:0;display:flex;flex-direction:column}
+.hz-gl{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.hz-gtag{padding:0 7px;border-radius:7px;background:var(--surface2);color:var(--hzsub);font-size:.75em;font-weight:700;line-height:1.6}
+.hz-gr.system .hz-gtag{background:var(--infoSoft);color:color-mix(in srgb,var(--info) 80%,var(--text))}
+.hz-gr .hz-mt{font-size:.9375em}
+.hz-gact{position:relative;align-self:flex-start;min-height:28px;display:inline-flex;align-items:center;gap:3px;margin-top:2px;font-weight:700;font-size:.8125em;color:var(--hzacc)}
+.hz-gact::after{content:"";position:absolute;inset:-9px -10px}
+.hz-gact .ic{width:14px;height:14px}
+.hz-gr .hz-x{margin:-6px -4px -6px 0}
+.hz-empty{display:flex;align-items:center;gap:10px;padding:14px 16px;font-size:.9375em;font-weight:500;color:var(--hzsub)}
+.hz-empty .ic{width:20px;height:20px;color:var(--hzsafe);flex:none}
+
+.hz-stack{display:flex;flex-direction:column;gap:10px}
+.hz-now{position:relative;padding:14px}
+.hz-nh{display:flex;align-items:center;gap:12px}
+.hz-tile{width:44px;height:44px;border-radius:15px;background:var(--soft);color:var(--hzacc);display:grid;place-items:center;flex:none}
+.hz-nt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.hz-nn{font-size:1.0625em;font-weight:700;line-height:1.25}
+.hz-nt .cap{color:var(--hzsub)}
+.hz-ring{position:relative;width:60px;height:60px;flex:none;display:grid;place-items:center}
+.hz-ring svg{position:absolute;inset:0;width:60px;height:60px}
+.hz-rg-t{fill:none;stroke:color-mix(in srgb,var(--text) 14%,transparent);stroke-width:4}
+.hz-rg-p{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 70%,transparent))}
+.hz-ring.urgent .hz-rg-p{stroke:var(--urgent);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--urgent) 70%,transparent))}
+.hz-ring-n{position:relative;display:flex;flex-direction:column;align-items:center;line-height:1.05}
+.hz-ring-n b{font-size:1em;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.hz-ring-n span{font-size:.75em;color:var(--hzsub);font-weight:600}
+.hz-ring.urgent .hz-ring-n b{color:var(--hzurg)}
+.hz-hbar{position:relative;height:6px;margin:16px 5px 4px;border-radius:6px;background:color-mix(in srgb,var(--text) 12%,transparent)}
+.hz-hbar-f{position:absolute;top:0;bottom:0;right:0;border-radius:6px;background:linear-gradient(to left,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent));transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.hz-hbar.urgent .hz-hbar-f{background:linear-gradient(to left,color-mix(in srgb,var(--urgent) 45%,transparent),var(--urgent))}
+.hz-hbar-d{position:absolute;top:50%;width:16px;height:16px;margin:-8px -8px 0 0;border-radius:50%;background:radial-gradient(circle at 38% 34%,#fff7d0 0%,#ffc247 60%,#f5a524 100%);box-shadow:0 0 0 3px color-mix(in srgb,#ffb52e 30%,transparent),0 0 14px 3px rgba(255,170,40,.6);animation:hzDotB 3.4s ease-in-out infinite;transition:right .9s cubic-bezier(.2,.8,.2,1)}
+.hz-hbar-d.moon{background:radial-gradient(circle at 36% 34%,#fff 0%,#dfe4ff 60%,#b9c3f2 100%);box-shadow:0 0 0 2px color-mix(in srgb,var(--text) 35%,transparent),0 0 12px 2px rgba(200,212,255,.8)}
+.hz-hbar.urgent .hz-hbar-d{box-shadow:0 0 0 3px color-mix(in srgb,var(--urgent) 40%,transparent),0 0 14px 3px color-mix(in srgb,var(--urgent) 55%,transparent)}
+@keyframes hzDotB{50%{filter:brightness(1.12);transform:scale(1.12)}}
+.hz-pe{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-top:8px;line-height:1.25}
+.hz-pe>span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.hz-pe>span:last-child{text-align:left}
+.hz-pe .cap{color:var(--hzsub);font-size:.75em}
+.hz-pe b{font-size:1.0625em;font-weight:800;font-variant-numeric:tabular-nums}
+.hz-acts{display:flex;gap:10px;margin-top:14px}
+.hz-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:17px;font-weight:700;font-size:1.0625em;transition:transform .15s ease,background .25s,color .25s}
+.hz-btn:active{transform:scale(.97)}
+.hz-btn .ic{width:21px;height:21px;stroke-width:2.2}
+.hz-btn.primary{flex:2;background:var(--accent);color:var(--onAccent);box-shadow:0 8px 20px -8px color-mix(in srgb,var(--accent) 80%,transparent)}
+.hz-btn.ghost{flex:1;background:var(--surface2);color:var(--text)}
+.hz-now.marking .hz-btn.primary{background:var(--safe);color:var(--onSafe)}
+.hz-now.marking{animation:hzOut .6s .3s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes hzOut{to{opacity:0;transform:translateX(-30px)}}
+.hz-calm{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:24px 20px}
+.hz-halo{width:64px;height:64px;border-radius:50%;background:var(--safeSoft);color:var(--hzsafe);display:grid;place-items:center;animation:hzFloat 3.2s ease-in-out infinite;box-shadow:0 0 0 8px color-mix(in srgb,var(--safe) 10%,transparent)}
+.hz-halo .ic{width:30px;height:30px}
+@keyframes hzFloat{50%{transform:translateY(-6px)}}
+.hz-calm h3{font-size:1.25em;font-weight:800}
+.hz-calm .cap{font-size:.9375em;color:var(--hzsub)}
+
+.hz-duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:24px}
+.ph.big .hz-duo{grid-template-columns:minmax(0,1fr)}
+.hz-dcard{padding:12px 12px 8px;display:flex;flex-direction:column;min-width:0}
+.hz-dh{display:flex;align-items:center;gap:8px;font-size:.875em;font-weight:800;margin-bottom:6px}
+.hz-dh-i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none}
+.hz-dh-i .ic{width:15px;height:15px;stroke-width:2.3}
+.hz-dh-i.miss{background:var(--urgentSoft);color:var(--hzurg)}
+.hz-dh-i.done{background:var(--safeSoft);color:var(--hzsafe)}
+.hz-dh b{margin-inline-start:auto;font-variant-numeric:tabular-nums;font-size:.9em;color:var(--hzsub)}
+.hz-mrow{padding:6px 0 4px;display:flex;flex-direction:column;gap:1px}
+.hz-mrow+.hz-mrow,.hz-drow+.hz-drow{border-top:1px solid var(--hair)}
+.hz-rt{font-weight:700;font-size:.875em;line-height:1.3}
+.hz-mrow .cap{color:var(--hzurg);font-weight:600;font-size:.75em}
+.hz-late{margin-top:5px;min-height:44px;padding:0 10px;border-radius:14px;background:var(--surface2);color:var(--text);font-weight:700;font-size:.8125em;text-align:center;transition:background .25s,color .25s}
+.hz-mrow.marking .hz-late{background:var(--safe);color:var(--onSafe)}
+.hz-drow{display:flex;align-items:center;gap:6px;padding:5px 0}
+.hz-drow>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.hz-drow .cap{font-size:.75em;color:var(--hzsub)}
+.hz-lateTag{display:inline-block;margin-inline-start:5px;padding:0 6px;border-radius:6px;background:var(--urgentSoft);color:var(--hzurg);font-weight:700}
+.hz-undo{flex:none;min-width:44px;min-height:44px;padding:0 6px;border-radius:12px;font-weight:700;font-size:.75em;color:var(--hzacc);display:flex;align-items:center;justify-content:center}
+.hz-dempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:10px 4px 14px;font-size:.8125em;font-weight:500;color:var(--hzsub);line-height:1.4}
+.hz-dempty i{width:44px;height:44px;border-radius:50%;background:var(--safeSoft);color:var(--hzsafe);display:grid;place-items:center;animation:hzFloat 3.6s ease-in-out infinite}
+.hz-dempty i .ic{width:22px;height:22px}
+
+.hz-up{display:flex;align-items:center;gap:10px;margin-top:10px;min-height:52px;padding:6px 14px}
+.hz-up-l{display:inline-flex;align-items:center;gap:6px;flex:none;font-size:.8125em;font-weight:800}
+.hz-up-l .ic{width:17px;height:17px;color:var(--hzacc)}
+.hz-up-items{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;padding-block:4px}
+.hz-up-i{display:inline-flex;align-items:center;gap:6px;font-size:.875em;font-weight:600}
+.hz-up-i .ic{width:17px;height:17px;color:var(--hzsub)}
+.hz-up-i span{color:var(--hzsub);font-variant-numeric:tabular-nums}
+.hz-up-e{font-size:.875em;font-weight:500;color:var(--hzsub)}
+
+.hz-tz{padding:12px 12px 8px;overflow:hidden}
+.hz-tz-h{display:flex;align-items:center;gap:8px;padding:0 4px 8px;font-size:.875em;color:var(--hzsub)}
+.hz-tz-h .ic{width:18px;height:18px;color:var(--hzacc);flex:none}
+.hz-tz-n{flex:1;min-width:0}
+.hz-tz-n b{color:var(--text)}
+.hz-tz-in{flex:none;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--hzacc);font-size:.9em;font-weight:700}
+.hz-tzl{display:grid;grid-auto-flow:column;grid-template-rows:repeat(6,auto);gap:2px 10px}
+.ph.big .hz-tzl{grid-auto-flow:row;grid-template-rows:none}
+.hz-zr{display:flex;align-items:center;gap:8px;min-height:44px;padding:4px 8px;border-radius:14px;color:var(--text)}
+.hz-zi{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--surface2);color:var(--hzsub)}
+.hz-zi .ic{width:15px;height:15px}
+.hz-zn{flex:1;min-width:0;font-size:.8125em;font-weight:600;line-height:1.25}
+.hz-zt{font-size:.9375em;font-weight:800;font-variant-numeric:tabular-nums}
+.hz-zr.past{color:var(--hzsub)}
+.hz-zr.past .hz-zn{font-weight:500}
+.hz-zr.past .hz-zt{font-weight:600}
+.hz-zr.next{background:var(--soft);box-shadow:inset 0 0 0 1.5px var(--accent);color:var(--hzacc)}
+.hz-zr.next .hz-zi{background:var(--accent);color:var(--onAccent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 28%,transparent)}
+.hz-zr.next .hz-zn{font-weight:800}
+</style>
+<template>
+<div class="scroll" style="position: absolute; inset: 0; overflow-y: auto; padding: 0 16px 124px">
+
+<section class="hzs" style="{{sceneStyle}}" role="group" aria-label="אופק היום. אפשר לגרור הצידה כדי לנסוע בזמן" onPointerDown="{{hzDown}}" onPointerMove="{{hzMove}}" onPointerUp="{{hzUp}}" onPointerCancel="{{hzCancel}}">
+<div class="hz-sky" aria-hidden="true"></div>
+<div class="hz-hglow" aria-hidden="true" style="left: {{glowX}}px; top: {{glowY}}px; opacity: {{glowOp}}"></div>
+<div class="hz-stars" aria-hidden="true" style="opacity: {{starsOp}}; transform: translateX({{starsX}}px)">
+<sc-for list="{{stars}}" as="st" hint-placeholder-count="10"><i class="hz-star" style="right: {{st.x}}px; top: {{st.y}}px; width: {{st.s}}px; height: {{st.s}}px; animation-delay: {{st.d}}; animation-duration: {{st.du}}"></i></sc-for>
+</div>
+<div class="hz-moon" aria-hidden="true" style="left: {{moonX}}px; top: {{moonY}}px; opacity: {{moonOp}}">
+<span class="hz-moon-glow"></span>
+<svg viewBox="0 0 40 40"><defs><mask id="hzMoonMask"><rect width="40" height="40" fill="#fff"></rect><circle cx="28" cy="15" r="13.5" fill="#000"></circle></mask></defs><circle cx="20" cy="20" r="16" fill="#F6F2E4" mask="url(#hzMoonMask)"></circle></svg>
+</div>
+<div class="hz-sun" aria-hidden="true" style="left: {{sunX}}px; top: {{sunY}}px; opacity: {{sunOp}}; --sunc: {{sunC}}; --sunc2: {{sunC2}}"><span class="hz-sun-glow"></span><span class="hz-sun-disc"></span></div>
+<div class="hz-clouds" aria-hidden="true" style="opacity: {{cloudOp}}; color: {{cloudC}}; transform: translateX({{cloudX}}px)">
+<svg class="hz-cloud c1" viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></svg>
+<svg class="hz-cloud c2" viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></svg>
+<svg class="hz-cloud c3" viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></svg>
+</div>
+<div class="hz-birds" aria-hidden="true" style="opacity: {{birdsOp}}">
+<span class="hz-bird b1"><svg viewBox="0 0 22 10"><path d="M1 8Q6 0 11 6Q16 0 21 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg></span>
+<span class="hz-bird b2"><svg viewBox="0 0 22 10"><path d="M1 8Q6 0 11 6Q16 0 21 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg></span>
+<span class="hz-bird b3"><svg viewBox="0 0 22 10"><path d="M1 8Q6 0 11 6Q16 0 21 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg></span>
+</div>
+<sc-for list="{{hills}}" as="L" hint-placeholder-count="3">
+<svg class="hz-hill" aria-hidden="true" width="{{L.w}}" height="{{L.h}}" style="top: {{L.top}}px; transform: translateX({{L.x}}px)">
+<defs><linearGradient id="{{L.gid}}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color: {{L.c1}}"></stop><stop offset="1" style="stop-color: {{L.c2}}"></stop></linearGradient></defs>
+<path d="{{L.d}}" style="fill: {{L.fill}}"></path>
+<path d="{{L.trees}}" style="fill: {{L.treeC}}"></path>
+</svg>
+</sc-for>
+<div class="hz-motes" aria-hidden="true" style="opacity: {{motesOp}}">
+<i class="hz-mote" style="right: 40px; top: {{moteY1}}px; animation-delay: -1s"></i>
+<i class="hz-mote" style="right: 96px; top: {{moteY2}}px; animation-delay: -4s"></i>
+<i class="hz-mote" style="right: 152px; top: {{moteY3}}px; animation-delay: -2.5s"></i>
+<i class="hz-mote" style="right: 214px; top: {{moteY1}}px; animation-delay: -5.5s"></i>
+<i class="hz-mote" style="right: 262px; top: {{moteY2}}px; animation-delay: -3s"></i>
+<i class="hz-mote" style="right: 318px; top: {{moteY3}}px; animation-delay: -6.5s"></i>
+<i class="hz-mote" style="right: 354px; top: {{moteY1}}px; animation-delay: -0.5s"></i>
+</div>
+
+<div class="hz-top">
+<div class="hz-row">
+<span class="hz-chip">{{dateLine}}</span>
+<span class="hz-chip">{{phaseName}}</span>
+</div>
+<h1 class="hz-hello">{{greeting}}</h1>
+</div>
+
+<div class="hz-bubble" aria-hidden="true">
+<span class="hz-bt num">{{bubbleT}}</span>
+<span class="hz-bs"><i class="hz-live {{liveCls}}"></i>{{bubbleSub}}</span>
+</div>
+
+<div class="hz-ruler">
+<div class="hz-slider" tabindex="0" role="slider" aria-label="ציר היום. חצים להזזת הזמן, PageUp ו-PageDown לקפיצה של שעה" aria-orientation="horizontal" aria-valuemin="{{dayStartSec}}" aria-valuemax="{{dayLastSec}}" aria-valuenow="{{nowSec}}" aria-valuetext="{{sliderText}}" onKeyDown="{{hzKey}}"></div>
+<div class="hz-strip" style="width: {{stripW}}px; transform: translateX({{stripX}}px)">
+<i class="hz-rail-bg" aria-hidden="true" style="background: {{railBg}}"></i>
+<i class="hz-g10" aria-hidden="true" style="{{g10St}}"></i>
+<i class="hz-g60" aria-hidden="true" style="{{g60St}}"></i>
+<sc-for list="{{hours}}" as="h" hint-placeholder-count="12"><span class="hz-hn" aria-hidden="true" style="{{h.st}}">{{h.t}}</span></sc-for>
+<sc-if value="{{showNow}}" hint-placeholder-val="{{ false }}"><i class="hz-nl" aria-hidden="true" style="{{nowLineSt}}"></i></sc-if>
+<sc-for list="{{bands}}" as="b" hint-placeholder-count="6">
+<i class="hz-b {{b.cls}}" aria-hidden="true" style="{{b.st}}"></i>
+<sc-if value="{{b.isDone}}" hint-placeholder-val="{{ false }}"><span class="hz-dd" aria-hidden="true" style="{{b.dotSt}}">[[ic:check]]</span></sc-if>
+</sc-for>
+<sc-for list="{{marks}}" as="z" hint-placeholder-count="11">
+<div class="hz-z {{z.cls}}" style="{{z.st}}">
+<i class="hz-zs" aria-hidden="true"></i>
+<i class="hz-zd" aria-hidden="true" style="background: {{z.nodeBg}}"></i>
+<button class="hz-zl" tabindex="-1" data-hz-z="1" onClick="{{z.go}}" aria-label="{{z.aria}}"><span>{{z.short}}</span><b>{{z.time}}</b></button>
+</div>
+</sc-for>
+</div>
+<i class="hz-fade l" aria-hidden="true"></i>
+<i class="hz-fade r" aria-hidden="true"></i>
+<div class="hz-ovl">
+<sc-for list="{{pills}}" as="p" hint-placeholder-count="6">
+<span class="hz-lp {{p.cls}}" style="{{p.st}}">
+<sc-if value="{{p.isDone}}" hint-placeholder-val="{{ false }}">[[ic:check]]</sc-if>
+<sc-if value="{{p.isMissed}}" hint-placeholder-val="{{ false }}">[[ic:alert]]</sc-if>
+<sc-if value="{{p.isOpen}}" hint-placeholder-val="{{ false }}"><i class="hz-od"></i></sc-if>
+<span class="hz-lpt">{{p.name}}</span><span class="pvh">{{p.stText}}</span>
+</span>
+</sc-for>
+<sc-if value="{{showNow}}" hint-placeholder-val="{{ false }}">
+<button class="hz-nowp" tabindex="-1" data-hz-now="1" style="{{nowSt}}" onClick="{{hzNowClick}}" aria-label="נסיעה בחזרה לעכשיו">
+<sc-if value="{{nowArrowR}}" hint-placeholder-val="{{ false }}">[[ic:chevron:fl]]</sc-if>
+<span>עכשיו</span>
+<sc-if value="{{nowArrowL}}" hint-placeholder-val="{{ false }}">[[ic:chevron]]</sc-if>
+</button>
+</sc-if>
+<sc-if value="{{showNextEdge}}" hint-placeholder-val="{{ false }}">
+<button class="hz-ne" tabindex="-1" data-hz-next="1" style="{{nextEdgeSt}}" onClick="{{hzNextClick}}" aria-label="{{nextEdgeAria}}">
+<sc-if value="{{nextArrowR}}" hint-placeholder-val="{{ false }}">[[ic:chevron:fl]]</sc-if>
+<span>{{nextEdgeName}}</span><b>{{nextEdgeTime}}</b>
+<sc-if value="{{nextArrowL}}" hint-placeholder-val="{{ false }}">[[ic:chevron]]</sc-if>
+</button>
+</sc-if>
+</div>
+<i class="hz-needle" aria-hidden="true"></i>
+</div>
+
+<div class="hz-rail">
+<div class="hz-track" aria-hidden="true" style="background: {{railMini}}">
+<sc-for list="{{railDots}}" as="d" hint-placeholder-count="11"><i class="hz-rd" style="right: {{d.r}}%"></i></sc-for>
+<i class="hz-rwin" style="right: {{winR}}%; width: {{winW}}%"></i>
+<sc-if value="{{showNow}}" hint-placeholder-val="{{ false }}"><i class="hz-rnow" style="right: {{railNow}}%"></i></sc-if>
+</div>
+<label class="pvh" for="hz-range">קפיצה לשעה ביום</label>
+<input id="hz-range" class="hz-range" type="range" min="{{dayStartSec}}" max="{{dayLastSec}}" step="60" value="{{railVal}}" onChange="{{hzRange}}" aria-valuetext="{{sliderText}}">
+</div>
+</section>
+
+<div class="hzb">
+
+<!--NAMECARD-->
+
+<h2 class="hzh hz-rise" style="--d: .05s"><span class="hzh-i">[[ic:bell]]</span><span class="hzh-t">הודעות</span><i class="hzh-l"></i><span class="hzh-n num">{{msgCount}}</span></h2>
+<sc-if value="{{hasMessages}}" hint-placeholder-val="{{ true }}">
+<div role="list" aria-label="הודעות אישיות">
+<sc-for list="{{personalMsgs}}" as="m" hint-placeholder-count="2">
+<article class="hz-glass hz-rise {{m.cls}} {{m.shape}}" role="listitem" style="--d: .1s">
+<sc-if value="{{m.isNext}}" hint-placeholder-val="{{ true }}">
+<button class="hz-next-b" onClick="{{m.act}}" aria-label="פתיחת ההודעות האישיות: {{pLineTitle}}">
+<span class="hz-next-h"><span class="hz-next-ic">[[ic:bell]]</span><span class="hz-tag">ההתראה הבאה שלך</span><span class="hz-edit">[[ic:pencil]]<span>עריכה</span></span></span>
+<span class="pnote"><span class="pnhead"><span class="pnapp">[[ic:bell]]</span><b>יהודי 365</b></span><span class="pntitle" style="display: block">{{pLineTitle}}</span><span class="pnbody" style="display: block">{{pLine}}</span></span>
+</button>
+</sc-if>
+<sc-if value="{{m.notNext}}" hint-placeholder-val="{{ false }}">
+<span class="hz-pm-ic">[[icMsg:m]]</span>
+<div class="hz-pm-b"><p class="hz-gtag" style="align-self: flex-start">{{m.tag}}</p><p class="hz-mt">{{m.title}}</p><p class="hz-mb">{{m.body}}</p></div>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="hz-x" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</sc-if>
+</article>
+</sc-for>
+</div>
+<sc-if value="{{hasMsgGeneral}}" hint-placeholder-val="{{ true }}">
+<div class="hz-glass hz-gs hz-rise" role="list" aria-label="הודעות כלליות" style="--d: .18s">
+<sc-for list="{{msgGeneral}}" as="m" hint-placeholder-count="3">
+<article class="hz-gr {{m.kindCls}} {{m.cls}}" role="listitem">
+<span class="hz-gr-ic">[[icMsg:m]]</span>
+<div class="hz-gr-b">
+<p class="hz-gl"><span class="hz-gtag">{{m.tag}}</span><span class="hz-mt">{{m.title}}</span></p>
+<p class="hz-mb">{{m.body}}</p>
+<sc-if value="{{m.hasAction}}" hint-placeholder-val="{{ true }}"><button class="hz-gact" onClick="{{m.act}}"><span>{{m.action}}</span>[[ic:chevron]]</button></sc-if>
+</div>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="hz-x" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</article>
+</sc-for>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{noMessages}}" hint-placeholder-val="{{ false }}"><p class="hz-glass hz-empty hz-rise">[[ic:sparkle]]<span>אין הודעות כרגע. האופק שקט.</span></p></sc-if>
+
+<h2 class="hzh hz-rise" style="--d: .2s"><span class="hzh-i">[[ic:sun]]</span><span class="hzh-t">עכשיו</span><i class="hzh-l"></i><span class="hzh-n"><span class="num">{{activeN}} פתוחות</span></span></h2>
+<sc-if value="{{hasActive}}" hint-placeholder-val="{{ true }}">
+<div class="hz-stack" role="list" aria-label="מצוות פתוחות עכשיו">
+<sc-for list="{{actives}}" as="it" hint-placeholder-count="2">
+<section class="hz-glass hz-now {{it.cls}} {{it.enter}}" role="listitem">
+<div class="hz-nh">
+<span class="hz-tile">[[icItem:it]]</span>
+<div class="hz-nt"><h3 class="hz-nn">{{it.name}}</h3><p class="cap">מ{{it.fromName}} עד {{it.toName}}</p></div>
+<div class="hz-ring {{it.urgentCls}}" role="img" aria-label="נשארו {{it.left}}">
+<svg viewBox="0 0 60 60" aria-hidden="true"><circle class="hz-rg-t" cx="30" cy="30" r="25"></circle><circle class="hz-rg-p" cx="30" cy="30" r="25" transform="rotate(-90 30 30)" style="stroke-dasharray: 157.1; stroke-dashoffset: {{it.ringOff}}"></circle></svg>
+<span class="hz-ring-n"><b class="num">{{it.leftNum}}</b><span>{{it.leftUnit}}</span></span>
+</div>
+</div>
+<div class="hz-hbar {{it.urgentCls}}" aria-hidden="true"><i class="hz-hbar-f" style="width: {{it.pctGone}}%"></i><i class="hz-hbar-d {{it.dotCls}}" style="right: {{it.pctGone}}%"></i></div>
+<div class="hz-pe">
+<span><span class="cap">התחיל · {{it.fromName}}</span><b>{{it.startT}}</b></span>
+<span><span class="cap">{{it.endWord}} · {{it.toName}}</span><b>{{it.endT}}</b></span>
+</div>
+<div class="hz-acts">
+<button class="hz-btn primary" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">[[ic:check]]<span>{{it.cta}}</span></button>
+<button class="hz-btn ghost" onClick="{{it.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</section>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noActive}}" hint-placeholder-val="{{ false }}">
+<section class="hz-glass hz-calm hz-rise" aria-live="polite">
+<div class="hz-halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h3>{{activeEmptyTitle}}</h3>
+<p class="cap">{{activeEmptyText}}</p>
+</section>
+</sc-if>
+
+<div class="hz-duo">
+<section class="hz-glass hz-dcard hz-rise" aria-label="עשית היום" style="--d: .3s">
+<h3 class="hz-dh"><span class="hz-dh-i done">[[ic:check]]</span>עשית היום<b>{{doneN}}</b></h3>
+<sc-if value="{{hasDone}}" hint-placeholder-val="{{ true }}">
+<div role="list">
+<sc-for list="{{doneRows}}" as="d" hint-placeholder-count="2">
+<div class="hz-drow {{d.enter}}" role="listitem">
+<div><span class="hz-rt">{{d.name}}</span><span class="cap num">סומן ב-{{d.at}}<sc-if value="{{d.late}}" hint-placeholder-val="{{ false }}"><span class="hz-lateTag">באיחור</span></sc-if></span></div>
+<button class="hz-undo" onClick="{{d.undo}}" aria-label="{{d.undoLabel}}">ביטול</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noDone}}" hint-placeholder-val="{{ false }}"><div class="hz-dempty"><i aria-hidden="true">[[ic:check]]</i><span>{{doneEmpty}}</span></div></sc-if>
+</section>
+<section class="hz-glass hz-dcard hz-rise" aria-label="פספסת היום" style="--d: .36s">
+<h3 class="hz-dh"><span class="hz-dh-i miss">[[ic:clock]]</span>פספסת היום<b>{{missedN}}</b></h3>
+<sc-if value="{{hasMissed}}" hint-placeholder-val="{{ true }}">
+<div role="list">
+<sc-for list="{{missedRows}}" as="it" hint-placeholder-count="1">
+<div class="hz-mrow {{it.cls}} {{it.enter}}" role="listitem">
+<span class="hz-rt">{{it.name}}</span>
+<span class="cap num">{{it.ago}}</span>
+<button class="hz-late" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">בכל זאת עשיתי</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noMissed}}" hint-placeholder-val="{{ false }}"><div class="hz-dempty"><i aria-hidden="true">[[ic:sparkle]]</i><span>{{missedEmpty}}</span></div></sc-if>
+</section>
+</div>
+
+<div class="hz-glass hz-up hz-rise" role="list" aria-label="בהמשך היום" style="--d: .42s">
+<span class="hz-up-l">[[ic:clock]]בהמשך</span>
+<div class="hz-up-items">
+<sc-for list="{{upGroups}}" as="l" hint-placeholder-count="1">
+<span class="hz-up-i" role="listitem">[[icItem:l]]<b>{{l.name}}</b><span>{{l.time}}</span></span>
+</sc-for>
+<sc-if value="{{noUpcoming}}" hint-placeholder-val="{{ false }}"><span class="hz-up-e">אין עוד מצוות להיום. נתראה מחר בעלות השחר.</span></sc-if>
+</div>
+</div>
+
+<h2 class="hzh hz-rise" style="--d: .46s"><span class="hzh-i">[[ic:clock]]</span><span class="hzh-t">זמני היום</span><i class="hzh-l"></i><span class="hzh-n"><span>{{hebDay}}</span></span></h2>
+<section class="hz-glass hz-tz hz-rise" aria-label="זמני היום" style="--d: .5s">
+<p class="hz-tz-h">[[ic:sunrise]]<span class="hz-tz-n">הבא: <b>{{nextZ.name}} · {{nextZ.time}}</b></span><span class="hz-tz-in">{{nextZ.left}}</span></p>
+<ul class="hz-tzl" role="list">
+<sc-for list="{{zmanim}}" as="z" hint-placeholder-count="11">
+<li class="hz-zr {{z.cls}}"><span class="hz-zi">[[icZ:z]]</span><span class="hz-zn">{{z.name}}</span><b class="hz-zt">{{z.time}}</b></li>
+</sc-for>
+</ul>
+</section>
+
+</div>
+</div>
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    this.hz = { drag: false, id: null, sec: 0, v: 0, lx: 0, lt: 0, x0: 0, moved: false, raf: 0, qraf: 0, craf: 0, rt: 0, busy: false, chase: false, shown: null, dkey: null, goal: null, down: null, tapAt: 0, scale: 1 };
+    this.hzMemo = {};
+    return {};
+  }
+
+  boardUnmount() {
+    const h = this.hz;
+    cancelAnimationFrame(h.raf);
+    cancelAnimationFrame(h.qraf);
+    cancelAnimationFrame(h.craf);
+    clearTimeout(h.rt);
+  }
+
+  hzCl(v, lo, hi) {
+    return Math.max(lo, Math.min(hi, v));
+  }
+
+  hzHex(c) {
+    return [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+  }
+
+  hzStr(a) {
+    return '#' + a.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+  }
+
+  hzMix(a, b, k) {
+    return a.map((v, i) => v + (b[i] - v) * k);
+  }
+
+  hzLum(a) {
+    const f = (v) => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * f(a[0]) + 0.7152 * f(a[1]) + 0.0722 * f(a[2]);
+  }
+
+  hzCr(a, b) {
+    const x = this.hzLum(a);
+    const y = this.hzLum(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  }
+
+  hzKeys() {
+    const dk = this.dayKey();
+    if (this.hzMemo.kk === dk) return this.hzMemo.keys;
+    const z = {};
+    this.zmanimList().forEach((x) => (z[x.id] = x.S));
+    const D = 86400;
+    const H = (c) => this.hzHex(c);
+    const K = (t, top, mid, bot, cloud, name, L, N) => ({ t, top: H(top), mid: H(mid), bot: H(bot), cloud: H(cloud), name, L, N });
+    const night = K(z.tzeit + 5400, '#050A1C', '#0C1634', '#18265A', '#7F8FC8', 'לילה', 0, 1);
+    const pre = K(z.alot - 3000, '#060A19', '#0D1533', '#18224D', '#7F8FC8', 'לפני עלות השחר', 0, 1);
+    const keys = [
+      { ...night, t: night.t - D },
+      pre,
+      K(z.alot, '#18215F', '#4B3D8E', '#9B6BA8', '#C9A6D6', 'עלות השחר', 0.12, 0.7),
+      K(z.netz, '#7F97DA', '#F2B7B4', '#FFD9AE', '#FFD6CC', 'הנץ החמה', 0.5, 0.1),
+      K(z.netz + 5400, '#76B6F2', '#A8D4F6', '#D8EDFA', '#FFFFFF', 'בוקר', 0.9, 0),
+      K(z.chatzot, '#3F93E8', '#68B0F0', '#A8D5F8', '#FFFFFF', 'צהריים', 1, 0),
+      K(z.plag, '#5E9FE0', '#9CC5E8', '#F5D9A2', '#FFF6E4', 'אחר הצהריים', 0.9, 0),
+      K(z.shkia, '#4E4C9E', '#E4708C', '#FFB05C', '#FFC8B0', 'שקיעה', 0.5, 0.1),
+      K(z.tzeit, '#161D58', '#2E3382', '#6C5BA8', '#9A8CC8', 'צאת הכוכבים', 0.1, 0.75),
+      night,
+      { ...pre, t: pre.t + D },
+    ];
+    this.hzMemo.kk = dk;
+    this.hzMemo.keys = keys;
+    return keys;
+  }
+
+  hzAt(tn) {
+    const K = this.hzKeys();
+    let i = 0;
+    while (i < K.length - 2 && tn >= K[i + 1].t) i++;
+    const a = K[i];
+    const b = K[i + 1];
+    const k = this.hzCl((tn - a.t) / (b.t - a.t), 0, 1);
+    const e = k * k * (3 - 2 * k);
+    const m = (p) => this.hzMix(a[p], b[p], e);
+    return { top: m('top'), mid: m('mid'), bot: m('bot'), cloud: m('cloud'), L: a.L + (b.L - a.L) * e, N: a.N + (b.N - a.N) * e, name: a.name };
+  }
+
+  hzInk(s) {
+    const zone = this.hzMix(s.top, s.mid, 0.3);
+    const dark = this.hzHex('#0A1228');
+    const white = [255, 255, 255];
+    const useWhite = this.hzCr(zone, white) > this.hzCr(zone, dark);
+    const ink = useWhite ? white : dark;
+    const opp = useWhite ? [8, 14, 34] : [255, 255, 255];
+    let alpha = 0;
+    while (alpha < 0.55 && this.hzCr(this.hzMix(zone, opp, alpha), ink) < 5.2) alpha += 0.05;
+    return { ink, opp, alpha };
+  }
+
+  hzAlt(t, z) {
+    const D = 86400;
+    const N = z.netz;
+    const S = z.shkia;
+    const C = z.chatzot;
+    if (t >= N && t <= S) return t <= C ? Math.sin((Math.PI / 2) * ((t - N) / (C - N))) : Math.cos((Math.PI / 2) * ((t - C) / (S - C)));
+    const tt = t < N ? t + D : t;
+    const g = this.hzCl((tt - S) / (N + D - S), 0, 1);
+    return -0.55 * Math.sin(Math.PI * g);
+  }
+
+  hzWave(x, a, seed) {
+    return a * (0.5 * Math.sin(x / (74 + seed * 9) + seed * 1.7) + 0.32 * Math.sin(x / (37 + seed * 5) + seed * 2.9 + 1) + 0.18 * Math.sin(x / (19 + seed * 3) + seed * 0.7));
+  }
+
+  hzHills() {
+    if (this.hzMemo.hills) return this.hzMemo.hills;
+    const defs = [
+      { gid: 'hzgf', rate: 0.07, base: 60, amp: 11, seed: 1, pad: 6, trees: false },
+      { gid: 'hzgm', rate: 0.17, base: 42, amp: 13, seed: 2, pad: 6, trees: false },
+      { gid: 'hzgn', rate: 0.38, base: 26, amp: 12, seed: 3, pad: 22, trees: true },
+    ];
+    const hills = defs.map((d) => {
+      const w = Math.ceil(390 + d.rate * 2250 + 12);
+      const up = d.base + d.amp + d.pad;
+      const h = up + 26;
+      const by = d.amp + d.pad;
+      let p = 'M0 ' + h;
+      for (let x = 0; x <= w; x += 6) p += 'L' + x + ' ' + (by - this.hzWave(x, d.amp, d.seed)).toFixed(1);
+      p += 'L' + w + ' ' + h + 'Z';
+      let trees = '';
+      if (d.trees) {
+        let sd = 11;
+        const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+        const ell = (cx, cy, rx, ry) => 'M' + (cx - rx).toFixed(1) + ' ' + cy.toFixed(1) + 'A' + rx + ' ' + ry + ' 0 1 0 ' + (cx + rx).toFixed(1) + ' ' + cy.toFixed(1) + 'A' + rx + ' ' + ry + ' 0 1 0 ' + (cx - rx).toFixed(1) + ' ' + cy.toFixed(1) + 'Z';
+        for (let x = 14; x < w - 10; x += 24 + rnd() * 56) {
+          const y = by - this.hzWave(x, d.amp, d.seed);
+          if (rnd() < 0.5) {
+            const ry = 9 + rnd() * 6;
+            trees += ell(x, y - ry + 3, 2.8, ry);
+          } else {
+            const rx = 5 + rnd() * 3;
+            trees += ell(x, y - rx * 0.6, rx, rx * 0.78);
+          }
+        }
+      }
+      return { gid: d.gid, rate: d.rate, w, h, up, d: p, trees: trees || 'M0 0' };
+    });
+    this.hzMemo.hills = hills;
+    return hills;
+  }
+
+  hzStars() {
+    if (this.hzMemo.stars) return this.hzMemo.stars;
+    let sd = 5;
+    const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+    const out = [];
+    for (let i = 0; i < 34; i++) {
+      out.push({ x: Math.round(rnd() * 450), y: Math.round(6 + rnd() * 160), s: (1.3 + rnd() * 1.4).toFixed(1), d: (rnd() * 3.4).toFixed(2) + 's', du: (2.4 + rnd() * 2.6).toFixed(2) + 's' });
+    }
+    this.hzMemo.stars = out;
+    return out;
+  }
+
+  hzLive() {
+    this.timeNow();
+    const want = String(this.opt('startTime') ?? 'live');
+    const fixed = /^\d{1,2}:\d{2}$/.test(want) ? want.padStart(5, '0') : null;
+    let t;
+    if (fixed) t = this.sec(fixed) + this.state.e - this.base;
+    else {
+      const r = this.realNow();
+      t = this.appDayOf(r.date, r.sec).sec;
+    }
+    const ds = this.dayStart();
+    const de = this.dayEnd();
+    if (t < ds) t += 86400;
+    if (t >= de) t -= 86400;
+    return t;
+  }
+
+  hzShown(target, dkey) {
+    const h = this.hz;
+    if (h.shown == null || h.dkey !== dkey || h.busy) {
+      h.shown = target;
+      h.dkey = dkey;
+      return target;
+    }
+    if (h.chase) return h.shown;
+    if (Math.abs(target - h.shown) > 240) {
+      this.hzChase(h.shown, target);
+      return h.shown;
+    }
+    h.shown = target;
+    return target;
+  }
+
+  hzChase(from, to) {
+    const h = this.hz;
+    const t0 = performance.now();
+    const dur = Math.max(500, Math.min(1300, 380 + Math.abs(to - from) * 0.025 * 0.4));
+    h.chase = true;
+    const step = (ts) => {
+      if (!h.chase) return;
+      const k = Math.min(1, (ts - t0) / dur);
+      h.shown = from + (to - from) * (1 - Math.pow(1 - k, 3));
+      if (k < 1) h.craf = requestAnimationFrame(step);
+      else {
+        h.chase = false;
+        h.shown = null;
+      }
+      this.forceUpdate();
+    };
+    h.craf = requestAnimationFrame(step);
+  }
+
+  hzGlide(goal, dur, after) {
+    const h = this.hz;
+    const lo = this.dayStart();
+    const hi = this.dayEnd() - 60;
+    const to = this.hzCl(goal, lo, hi);
+    const from = h.busy ? h.sec : this.now();
+    cancelAnimationFrame(h.raf);
+    cancelAnimationFrame(h.craf);
+    h.chase = false;
+    h.busy = true;
+    h.goal = to;
+    h.sec = from;
+    const px = Math.abs(to - from) * 0.025;
+    const d = dur != null ? dur : this.hzCl(420 + px * 0.42, 480, 1300);
+    const t0 = performance.now();
+    const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+    const step = (ts) => {
+      const k = Math.min(1, (ts - t0) / d);
+      h.sec = from + (to - from) * ease(k);
+      this.scrub(h.sec);
+      if (k < 1) h.raf = requestAnimationFrame(step);
+      else {
+        h.raf = 0;
+        h.busy = false;
+        h.goal = null;
+        h.shown = null;
+        if (after) after();
+      }
+    };
+    h.raf = requestAnimationFrame(step);
+  }
+
+  hzFling(v0) {
+    const h = this.hz;
+    const lo = this.dayStart();
+    const hi = this.dayEnd() - 60;
+    let v = this.hzCl(v0, -3.5, 3.5) * 40;
+    let last = performance.now();
+    h.busy = true;
+    const step = (ts) => {
+      const dt = Math.min(48, ts - last);
+      last = ts;
+      h.sec += v * dt;
+      v *= Math.exp(-dt / 360);
+      if (h.sec <= lo) {
+        h.sec = lo;
+        v = 0;
+      } else if (h.sec >= hi) {
+        h.sec = hi;
+        v = 0;
+      }
+      this.scrub(h.sec);
+      if (Math.abs(v) / 40 > 0.012) h.raf = requestAnimationFrame(step);
+      else {
+        h.raf = 0;
+        h.busy = false;
+        h.shown = null;
+      }
+    };
+    h.raf = requestAnimationFrame(step);
+  }
+
+  hzGoLive() {
+    this.hzGlide(this.hzLive(), null, () => this.goLive());
+  }
+
+  hzOnDown(e) {
+    const h = this.hz;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.target && e.target.closest && e.target.closest('.hz-range')) return;
+    cancelAnimationFrame(h.raf);
+    cancelAnimationFrame(h.craf);
+    h.raf = 0;
+    h.chase = false;
+    h.busy = true;
+    h.shown = null;
+    h.drag = true;
+    h.id = e.pointerId;
+    h.moved = false;
+    h.x0 = h.lx = e.clientX;
+    h.lt = performance.now();
+    h.v = 0;
+    h.sec = this.now();
+    h.goal = null;
+    h.down = e.target;
+    const r = e.currentTarget.getBoundingClientRect();
+    h.scale = r.width / 390 || 1;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+  }
+
+  hzOnMove(e) {
+    const h = this.hz;
+    if (!h.drag || e.pointerId !== h.id) return;
+    if (!h.moved && Math.abs(e.clientX - h.x0) < 5) return;
+    h.moved = true;
+    const dx = (e.clientX - h.lx) / h.scale;
+    const now = performance.now();
+    const dt = Math.max(1, now - h.lt);
+    h.v = 0.6 * (dx / dt) + 0.4 * h.v;
+    h.lx = e.clientX;
+    h.lt = now;
+    h.sec = this.hzCl(h.sec + dx * 40, this.dayStart(), this.dayEnd() - 60);
+    if (!h.qraf) {
+      h.qraf = requestAnimationFrame(() => {
+        h.qraf = 0;
+        if (h.drag) this.scrub(h.sec);
+      });
+    }
+  }
+
+  hzOnUp(e) {
+    const h = this.hz;
+    if (!h.drag || e.pointerId !== h.id) return;
+    h.drag = false;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    if (!h.moved) {
+      h.busy = false;
+      this.hzTap(e, h.down);
+      return;
+    }
+    const idle = performance.now() - h.lt;
+    const v = idle > 90 ? 0 : h.v;
+    if (Math.abs(v) < 0.06) {
+      this.scrub(h.sec);
+      h.busy = false;
+      h.shown = null;
+      return;
+    }
+    this.hzFling(v);
+  }
+
+  hzOnCancel(e) {
+    const h = this.hz;
+    if (!h.drag) return;
+    h.drag = false;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    if (h.moved) this.scrub(h.sec);
+    h.busy = false;
+    h.shown = null;
+  }
+
+  hzTap(e, down) {
+    const h = this.hz;
+    h.tapAt = Date.now();
+    if (down && down.closest && down.closest('[data-hz-now]')) {
+      this.hzGoLive();
+      return;
+    }
+    if (down && down.closest && down.closest('[data-hz-next]')) {
+      const nz = this.zmanimList().find((z) => z.S > this.now());
+      if (nz) this.hzGlide(nz.S);
+      return;
+    }
+    const r = e.currentTarget.getBoundingClientRect();
+    const sc = r.width / 390 || 1;
+    const ry =(e.clientY - r.top) / sc - (r.height / sc - 138);
+    if (ry < 0 || ry > 64) return;
+    const v = (r.right - e.clientX) / sc;
+    const t = this.now();
+    let best = null;
+    let bd = 1e9;
+    this.zmanimList().forEach((z) => {
+      const d = Math.abs(195 + (z.S - t) * 0.025 - v);
+      if (d < bd) {
+        bd = d;
+        best = z;
+      }
+    });
+    if (best && bd <= 46) this.hzGlide(best.S);
+  }
+
+  hzOnKey(e) {
+    const k = e.key;
+    let goal = null;
+    const base = this.hz.goal != null ? this.hz.goal : this.now();
+    if (k === 'ArrowLeft' || k === 'ArrowUp') goal = base + (e.shiftKey ? 60 : 300);
+    else if (k === 'ArrowRight' || k === 'ArrowDown') goal = base - (e.shiftKey ? 60 : 300);
+    else if (k === 'PageUp') goal = base + 3600;
+    else if (k === 'PageDown') goal = base - 3600;
+    else if (k === 'Home') goal = this.dayStart();
+    else if (k === 'End') goal = this.dayEnd() - 60;
+    if (goal == null) return;
+    e.preventDefault();
+    this.hzGlide(goal, 190);
+  }
+
+  hzOnRange(e) {
+    const h = this.hz;
+    const v = Number(e.target.value);
+    cancelAnimationFrame(h.raf);
+    cancelAnimationFrame(h.craf);
+    h.raf = 0;
+    h.chase = false;
+    h.busy = true;
+    h.sec = v;
+    this.scrub(v);
+    clearTimeout(h.rt);
+    h.rt = setTimeout(() => {
+      h.busy = false;
+      h.shown = null;
+      this.forceUpdate();
+    }, 260);
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const K = 0.025;
+    const D = 86400;
+    const cl = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    const ds = this.dayStart();
+    const de = this.dayEnd();
+    const big = /\bbig\b/.test(c.phCls);
+    const dy = big ? 16 : 0;
+    const RH = 138;
+    const SH = 354 + dy;
+    const rt = SH - RH;
+    const t = this.hzShown(this.now(), c.dateKey);
+    const tn = ((t % D) + D) % D;
+    const Z = this.zmanimList();
+    const zs = {};
+    Z.forEach((z) => (zs[z.id] = z.S));
+    const s = this.hzAt(tn);
+    const ik = this.hzInk(s);
+    const off = (t - ds) * K;
+    const total = (de - ds) * K;
+    const stripW = Math.round(total + 390);
+    const R = (sec) => 195 + (sec - ds) * K;
+    const px = (v) => v.toFixed(1) + 'px';
+    const rgba = (a, al) => 'rgba(' + a.map((v) => Math.round(v)).join(',') + ',' + al.toFixed(2) + ')';
+
+    const Y0 = rt - 58;
+    const A = 56;
+    const alt = this.hzAlt(t, zs);
+    const f = (t - zs.netz) / (zs.shkia - zs.netz);
+    const sx = cl(350 - 310 * f, -120, 520);
+    const sy = Y0 - A * alt;
+    const sunOp = cl((alt + 0.3) / 0.3, 0, 1);
+    const hgt = cl(alt / 0.55, 0, 1);
+    const sunC = this.hzStr(this.hzMix(this.hzHex('#FF8A3D'), this.hzHex('#FFE27A'), hgt));
+    const sunC2 = this.hzStr(this.hzMix(this.hzHex('#E8531F'), this.hzHex('#FFB347'), hgt));
+    const tt = t < zs.netz ? t + D : t;
+    const gm = cl((tt - zs.shkia) / (zs.netz + D - zs.shkia), -0.15, 1.15);
+    const mx = 350 - 310 * gm;
+    const my = Y0 - A * 0.92 * Math.sin(Math.PI * gm);
+    const glowOp = cl(1 - Math.abs(alt) / 0.5, 0, 1);
+
+    const L = s.L;
+    const col = (night, day, tint) => this.hzMix(this.hzMix(this.hzHex(night), this.hzHex(day), L), s.bot, tint);
+    const cols = [col('#16204A', '#8FA6C8', 0.36), col('#0F1838', '#7E9A86', 0.22), col('#0A112B', '#5E7551', 0.12)];
+    const haze = [0.5, 0.34, 0.2];
+    const hills = this.hzHills().map((h, i) => ({
+      gid: h.gid,
+      w: h.w,
+      h: h.h,
+      top: rt - h.up,
+      x: (h.rate * off).toFixed(1),
+      d: h.d,
+      trees: h.trees,
+      c1: this.hzStr(cols[i]),
+      c2: this.hzStr(this.hzMix(cols[i], s.bot, haze[i])),
+      fill: 'url(#' + h.gid + ')',
+      treeC: this.hzStr(this.hzMix(cols[i], [0, 0, 0], 0.3)),
+    }));
+
+    const mk = (a) => this.hzStr(a);
+    const sceneStyle = [
+      '--sh:' + SH + 'px',
+      '--rh:' + RH + 'px',
+      '--hs1:' + mk(s.top),
+      '--hs2:' + mk(s.mid),
+      '--hs3:' + mk(s.bot),
+      '--glow:' + rgba(this.hzHex(t < (zs.netz + zs.shkia) / 2 ? '#FF9A86' : '#FF8A45'), 0.6),
+      '--ink:' + mk(ik.ink),
+      '--opp:' + mk(ik.opp),
+      '--chip:' + rgba(ik.opp, ik.alpha),
+    ].join(';');
+
+    const nowLive = this.hzLive();
+    const away = Math.abs(nowLive - t) > 90;
+    const vN = 195 + (nowLive - t) * K;
+    const nowOk = away && nowLive >= ds && nowLive < de;
+    const nowR = cl(vN, 44, 346);
+
+    const nzI = Z.findIndex((z) => z.S > t);
+    const nzV = nzI >= 0 ? 195 + (Z[nzI].S - t) * K : 0;
+    const nextEdge = nzI >= 0 && (nzV < 52 || nzV > 338);
+
+    const hours = [];
+    for (let hh = Math.ceil(ds / 3600); hh * 3600 <= de; hh++) {
+      const x = R(hh * 3600);
+      if (nowOk && Math.abs(x - R(nowLive)) < 30) continue;
+      hours.push({ t: String(hh % 24).padStart(2, '0'), st: 'right: ' + px(x) });
+    }
+    const g10R = R(Math.ceil(ds / 600) * 600);
+    const g60R = R(Math.ceil(ds / 3600) * 3600);
+
+    const nextId = (c.zmanim.find((z) => z.isNext) || {}).id;
+    const marks = c.zmanim.map((z, i) => ({
+      id: z.id,
+      short: z.short,
+      time: z.time,
+      cls: (i % 2 ? 'l' : 'u') + (z.isNext ? ' next' : z.past ? ' past' : ''),
+      st: 'right: ' + px(R(Z[i].S)),
+      nodeBg: mk(this.hzAt(((Z[i].S % D) + D) % D).mid),
+      aria: 'נסיעה אל ' + z.name + ', ' + z.time,
+      go: () => {
+        if (Date.now() - this.hz.tapAt < 500) return;
+        this.hzGlide(Z[i].S);
+      },
+    }));
+
+    const items = this.items();
+    const tl = {};
+    c.timeline.forEach((x) => (tl[x.id] = x));
+    const laneEnd = [];
+    const bands = [];
+    const pills = [];
+    items
+      .slice()
+      .sort((a, b) => a.S - b.S || b.E - a.E)
+      .forEach((it) => {
+        let lane = laneEnd.findIndex((e) => e + 600 <= it.S);
+        if (lane < 0) lane = laneEnd.length;
+        laneEnd[lane] = it.E;
+        const st = tl[it.id].status;
+        const top = 84 + lane * 18;
+        const wBand = (it.E - it.S) * K;
+        let bg = '';
+        if (st === 'open' || st === 'active') {
+          const p = cl(((t - it.S) / (it.E - it.S)) * 100, 0, 100).toFixed(2);
+          bg = ';background: linear-gradient(to left, var(--accent) 0, var(--accent) ' + p + '%, color-mix(in srgb, var(--accent) 20%, transparent) ' + p + '%)';
+        }
+        const d = this.doneAt(it.id);
+        bands.push({
+          cls: st === 'active' ? 'open' : st === 'upcoming' ? 'ahead' : st,
+          st: 'right: ' + px(R(it.S)) + '; width: ' + px(wBand) + '; top: ' + top + 'px' + bg,
+          isDone: st === 'done' && d != null,
+          dotSt: 'right: ' + px(R(d != null ? d : it.S)) + '; top: ' + top + 'px',
+        });
+        const vS = 195 + (it.S - t) * K;
+        const vE = 195 + (it.E - t) * K;
+        const start = Math.max(vS, 0) + 5;
+        const avail = Math.min(vE, 390) - start - 5;
+        if (avail >= 46) {
+          pills.push({
+            cls: st === 'active' ? 'open' : st === 'upcoming' ? 'ahead' : st,
+            st: 'right: ' + px(start) + '; top: ' + top + 'px; max-width: ' + px(avail),
+            name: it.short,
+            stText: tl[it.id].statusShort,
+            isDone: st === 'done',
+            isMissed: st === 'missed',
+            isOpen: st === 'active',
+          });
+        }
+      });
+
+    const gk = c.dateKey;
+    if (this.hzMemo.rk !== gk + '|' + stripW) {
+      this.hzMemo.rk = gk + '|' + stripW;
+      const sm = [];
+      const mi = [];
+      for (let sec = ds; sec <= de; sec += 1800) {
+        const c2 = this.hzStr(this.hzAt(((sec % D) + D) % D).mid);
+        sm.push(c2 + ' ' + (((sec - ds) / (de - ds)) * 100).toFixed(2) + '%');
+        mi.push(c2 + ' ' + (((R(sec)) / stripW) * 100).toFixed(2) + '%');
+      }
+      this.hzMemo.railMini = 'linear-gradient(to left, ' + sm.join(', ') + ')';
+      this.hzMemo.railBg = 'linear-gradient(to left, ' + mi.join(', ') + ')';
+    }
+    const pct = (sec) => cl(((sec - ds) / (de - ds)) * 100, 0, 100);
+    const span = 195 / K;
+    const winR = pct(t - span);
+    const winL = pct(t + span);
+
+    const upGroups = [];
+    c.upcoming.forEach((x) => {
+      let g = upGroups.find((q) => q.time === x.startT);
+      if (!g) {
+        g = { time: x.startT, names: [], isSun: x.isSun, isBox: x.isBox, isBook: x.isBook, isMoon: x.isMoon };
+        upGroups.push(g);
+      }
+      g.names.push(x.short);
+    });
+    upGroups.forEach((g) => (g.name = g.names.join(' · ')));
+
+    const actives = c.active.map((it, i) => ({
+      ...it,
+      ringOff: this.dash(157.1, it.pctLeft),
+      dotCls: it.isMoon ? 'moon' : '',
+      enter: 'enter-' + this.flip('act' + i, it.id),
+    }));
+    const doneRows = c.done.map((d, i) => ({ ...d, enter: 'enter-' + this.flip('dn' + i, d.id + d.at) }));
+    const missedRows = c.missed.map((m, i) => ({ ...m, enter: 'enter-' + this.flip('ms' + i, m.id) }));
+    const personalMsgs = c.msgPersonal.map((m) => ({ ...m, isNext: m.id === 'next', notNext: m.id !== 'next', shape: m.id === 'next' ? 'hz-next' : 'hz-pm' }));
+
+    const clk = this.clock(t);
+    const sliderText = clk + ', ' + s.name + '. הבא: ' + c.nextZ.name + ' ' + c.nextZ.left;
+
+    return {
+      ...c,
+      sceneStyle,
+      stars: this.hzStars(),
+      starsOp: s.N.toFixed(2),
+      starsX: (0.03 * off).toFixed(1),
+      cloudOp: ((1 - s.N) * 0.92).toFixed(2),
+      cloudC: mk(s.cloud),
+      cloudX: (0.1 * off).toFixed(1),
+      birdsOp: cl((L - 0.4) / 0.4, 0, 1).toFixed(2),
+      motesOp: cl((s.N - 0.3) / 0.5, 0, 1).toFixed(2),
+      moteY1: Math.round(rt - 70),
+      moteY2: Math.round(rt - 46),
+      moteY3: Math.round(rt - 24),
+      sunX: sx.toFixed(1),
+      sunY: sy.toFixed(1),
+      sunOp: sunOp.toFixed(2),
+      sunC,
+      sunC2,
+      moonX: mx.toFixed(1),
+      moonY: my.toFixed(1),
+      moonOp: s.N.toFixed(2),
+      glowX: cl(sx, 40, 350).toFixed(1),
+      glowY: Math.round(Y0 - 110),
+      glowOp: glowOp.toFixed(2),
+      hills,
+      phaseName: s.name,
+      bubbleT: clk,
+      bubbleSub: c.isScrub ? 'תצוגה' : 'עכשיו',
+      liveCls: c.isScrub ? '' : 'on',
+      dayLastSec: de - 60,
+      sliderText,
+      stripW,
+      stripX: off.toFixed(1),
+      railBg: this.hzMemo.railBg,
+      railMini: this.hzMemo.railMini,
+      g10St: 'right: ' + px(g10R) + '; width: ' + px(stripW - g10R),
+      g60St: 'right: ' + px(g60R) + '; width: ' + px(stripW - g60R),
+      hours,
+      marks,
+      bands,
+      pills,
+      showNow: nowOk,
+      nowLineSt: 'right: ' + px(R(nowLive)),
+      nowSt: 'right: ' + px(nowR),
+      nowArrowL: nowOk && vN > 346,
+      nowArrowR: nowOk && vN < 44,
+      showNextEdge: nextEdge,
+      nextEdgeSt: 'right: ' + px(cl(nzV, 58, 332)) + '; top: ' + (nzI % 2 ? 29 : 11) + 'px',
+      nextEdgeName: nzI >= 0 ? Z[nzI].short : '',
+      nextEdgeTime: nzI >= 0 ? Z[nzI].t : '',
+      nextEdgeAria: nzI >= 0 ? 'נסיעה אל ' + Z[nzI].name + ', ' + Z[nzI].t : '',
+      nextArrowL: nextEdge && nzV > 338,
+      nextArrowR: nextEdge && nzV < 52,
+      hzNextClick: () => {
+        if (Date.now() - this.hz.tapAt < 500) return;
+        const nz = this.zmanimList().find((z) => z.S > this.now());
+        if (nz) this.hzGlide(nz.S);
+      },
+      hzNowClick: () => {
+        if (Date.now() - this.hz.tapAt < 500) return;
+        this.hzGoLive();
+      },
+      railDots: Z.map((z) => ({ r: pct(z.S).toFixed(2) })),
+      winR: winR.toFixed(2),
+      winW: Math.max(0, winL - winR).toFixed(2),
+      railNow: pct(nowLive).toFixed(2),
+      railVal: Math.round(cl(t, ds, de - 60)),
+      hzDown: (e) => this.hzOnDown(e),
+      hzMove: (e) => this.hzOnMove(e),
+      hzUp: (e) => this.hzOnUp(e),
+      hzCancel: (e) => this.hzOnCancel(e),
+      hzKey: (e) => this.hzOnKey(e),
+      hzRange: (e) => this.hzOnRange(e),
+      personalMsgs,
+      noMessages: !c.hasMessages,
+      actives,
+      doneRows,
+      missedRows,
+      upGroups,
+      noUpcoming: c.upcoming.length === 0,
+    };
+  }
+}
+</script>

@@ -1,0 +1,1171 @@
+<!--board title="ק9 · קשת חלון"-->
+<style>
+.h1{font-size:1.5em;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+.label{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:.8125em;font-weight:700;color:var(--sub);margin:26px 4px 10px}
+.label b{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.sum{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.sumc{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 13px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:.8125em;font-weight:600}
+.sumc i{width:8px;height:8px;border-radius:50%;flex:none}
+.sumc b{font-weight:800;font-variant-numeric:tabular-nums}
+.sumc.d i{background:var(--safe)}
+.sumc.m i{background:var(--urgent)}
+.sumc.o i{background:var(--accent)}
+.sumc.m.has{background:var(--urgentSoft);color:var(--urgent)}
+.sumc.d.has{background:var(--safeSoft);color:var(--safe)}
+.sumc.t{margin-inline-start:auto}
+
+.arcw{--stone:color-mix(in srgb,var(--accent) 7%,color-mix(in srgb,var(--surface) 64%,var(--border)));--stoneHi:color-mix(in srgb,var(--stone) 55%,var(--surface));--stoneLo:color-mix(in srgb,var(--stone) 82%,#2a1d0e);position:relative;overflow:hidden;margin-top:16px;border-radius:28px;background:radial-gradient(circle at 18% 22%,rgba(255,255,255,.2) 0 1px,transparent 1.6px) 0 0/23px 29px,radial-gradient(circle at 70% 60%,rgba(60,40,20,.14) 0 1px,transparent 1.6px) 0 0/31px 37px,linear-gradient(180deg,var(--stoneHi),var(--stone) 60%,var(--stoneLo));box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.35);color:#F7F9FF}
+.readout{position:relative;display:flex;justify-content:center;padding:12px 12px 0;min-height:52px}
+.rpill{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 7px;padding:6px 14px;border-radius:18px;background:rgba(24,16,30,.72);font-size:.875em;text-align:center;color:#F7F9FF}
+.rpill b{font-weight:700}
+.rpill.ra{animation:readA .4s both}
+.rpill.rb{animation:readB .4s both}
+@keyframes readA{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes readB{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.rd-a{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 7px}
+.rtag{font-size:.8125em;font-weight:700;padding:1px 9px;border-radius:999px;background:#F59A4A;color:#1E1006}
+.scene{position:relative;width:100%;max-width:350px;height:230px;margin:0 auto;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+.scene svg{position:absolute;left:0;top:0;overflow:visible}
+.mortar{fill:none;stroke:color-mix(in srgb,var(--text) 15%,transparent);stroke-width:1.2}
+.fr{fill:var(--stoneHi)}
+.vs{fill:none;stroke:rgba(40,24,8,.3);stroke-width:1.2}
+.key{fill:color-mix(in srgb,var(--stoneHi) 78%,#fff);stroke:rgba(40,24,8,.32);stroke-width:1.2}
+.frline{fill:none;stroke:rgba(40,24,8,.3);stroke-width:1.5}
+.sillTop{fill:var(--stoneHi)}
+.sillShade{fill:rgba(40,24,8,.26)}
+.jamb{fill:rgba(30,16,4,.32)}
+.sillEdge{stroke:rgba(40,24,8,.4);stroke-width:1.5}
+.spill{position:absolute;inset:0;pointer-events:none;transition:opacity .5s}
+.view{position:absolute;left:83px;top:24px;width:184px;height:172px;border-radius:92px 92px 0 0;overflow:hidden;pointer-events:none;box-shadow:inset 0 6px 16px rgba(30,16,4,.5)}
+.vin{position:absolute;left:-83px;top:-24px;width:350px;height:230px}
+.vin svg{position:absolute;left:0;top:0}
+.stars{position:absolute;inset:0;pointer-events:none;transition:opacity 1.2s}
+.star{position:absolute;border-radius:50%;background:#FFF3E2;animation:twinkle 3.4s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.26;transform:scale(.8)}50%{opacity:.95;transform:scale(1.2)}}
+.sky-rays{position:absolute;width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(255,226,170,.5) 0deg 4deg,transparent 4deg 18deg);-webkit-mask:radial-gradient(circle closest-side,transparent 12%,#000 36%,transparent 100%);mask:radial-gradient(circle closest-side,transparent 12%,#000 36%,transparent 100%);animation:rays 90s linear infinite;transition:opacity .6s}
+@keyframes rays{to{transform:rotate(360deg)}}
+.clouds{position:absolute;inset:0;overflow:hidden;pointer-events:none;transition:opacity .6s}
+.cl{position:absolute;left:0;width:96px;height:40px;animation:drift 80s linear infinite}
+.cl.c2{width:70px;height:30px;animation-duration:110s}
+.cl.c3{width:120px;height:50px;animation-duration:140s}
+.cl svg{position:static;width:100%;height:100%;fill:currentColor}
+@keyframes drift{from{transform:translateX(-140px)}to{transform:translateX(420px)}}
+.aura{position:absolute;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;pointer-events:none;transition:opacity .6s;animation:breathe 5.2s ease-in-out infinite}
+.maura{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;pointer-events:none;transition:opacity .6s;animation:breathe 5.2s ease-in-out infinite}
+.aura.off,.maura.off{opacity:0}
+@keyframes breathe{50%{transform:scale(1.14);opacity:.78}}
+.sun{position:absolute;width:30px;height:30px;border-radius:50%;pointer-events:none;transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1);animation:glow 3.2s ease-in-out infinite}
+.sun.off{opacity:0}
+.sun.dim{opacity:.62}
+.arcw.drag .sun{transform:scale(1.16)}
+@keyframes glow{50%{filter:brightness(1.12)}}
+.moon{position:absolute;width:28px;height:28px;border-radius:50%;box-shadow:inset 9px -4px 0 0 #F6E7BF;filter:drop-shadow(0 0 8px rgba(246,231,191,.7));pointer-events:none;transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1)}
+.moon.off{opacity:0}
+.arcw.drag .moon{transform:scale(1.16)}
+.trl{transition:opacity .5s}
+.tr{fill:none;stroke-linecap:round;stroke:inherit}
+.tr.t1{stroke-width:7;opacity:.5}
+.tr.t2{stroke-width:5.5;opacity:.3}
+.tr.t3{stroke-width:4.5;opacity:.16}
+.arcg{transition:opacity .5s}
+.tick{position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.92);border:2px solid rgba(40,24,30,.6);transition:transform .3s,background .3s,opacity .4s}
+.tick.past{background:#F59A4A;border-color:#fff}
+.tick.hid{opacity:0;transform:scale(.4)}
+.tick.nxt::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid #fff;opacity:0;animation:ring 2.2s ease-out infinite}
+.tick.sel{transform:scale(1.5);z-index:2;border-color:#fff}
+@keyframes ring{0%{opacity:.7;transform:scale(.5)}100%{opacity:0;transform:scale(1.5)}}
+.glive{position:absolute;width:14px;height:14px;border-radius:50%;border:2px dashed #fff;background:rgba(24,16,30,.45);pointer-events:none}
+.grab{position:absolute;width:48px;height:48px;border-radius:50%;touch-action:none;cursor:grab;outline:none}
+.grab:focus-visible{outline:3px solid #fff;outline-offset:1px}
+.arcw.drag .grab{cursor:grabbing}
+.arcw.hintOn .grab::after{content:'';position:absolute;inset:4px;border-radius:50%;border:2px solid #fff;opacity:0;animation:ring 2.4s ease-out infinite}
+.hint{position:absolute;left:175px;top:164px;transform:translateX(-50%);width:max-content;padding:2px 12px;border-radius:999px;background:rgba(24,16,30,.72);text-align:center;font-size:.75em;font-weight:600;color:#F7F9FF;pointer-events:none;transition:opacity .5s}
+.hint.gone{opacity:0}
+.edge{position:absolute;top:96px;display:flex;flex-direction:column;align-items:center;line-height:1.25;padding:3px 8px;border-radius:12px;background:rgba(24,16,30,.72);font-size:.75em;font-weight:500;color:#F2E8E4;text-align:center;pointer-events:none}
+.edge b{font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.sillf{position:relative;display:flex;justify-content:center;padding:12px 16px 16px;background:linear-gradient(180deg,var(--stoneLo),color-mix(in srgb,var(--stoneLo) 86%,#000));box-shadow:inset 0 2px 0 rgba(255,255,255,.26),inset 0 -1px 0 rgba(0,0,0,.2)}
+.plaque{display:flex;flex-direction:column;align-items:center;gap:3px;width:max-content;max-width:100%;min-width:210px;padding:8px 22px 9px;border-radius:16px;background:linear-gradient(180deg,rgba(22,14,26,.88),rgba(36,24,38,.78));box-shadow:inset 0 3px 8px rgba(0,0,0,.55),0 1px 0 rgba(255,255,255,.38);border:1px solid rgba(255,206,150,.42)}
+.bigtime{font-size:2.25em;font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.6)}
+.arcw.scr .bigtime{color:#FFD9AE}
+.midcap{font-size:.8125em;font-weight:600;color:#FFE8CC;text-align:center;line-height:1.3}
+.zchips{display:flex;gap:8px;overflow-x:auto;padding:6px 4px 14px;margin:6px -4px 0;scroll-snap-type:x proximity;scrollbar-width:none}
+.zchips::-webkit-scrollbar{display:none}
+.zc{flex:none;scroll-snap-align:center;display:flex;flex-direction:column;align-items:flex-start;padding:7px 14px;border-radius:14px;background:var(--surface);box-shadow:var(--shadow);min-height:52px;text-align:right;transition:background .25s,color .25s}
+.zl{font-size:.75em;color:var(--sub);white-space:nowrap}
+.zt{font-weight:700;font-variant-numeric:tabular-nums}
+.zc.past .zt{color:var(--sub);font-weight:500}
+.zc.next{background:var(--soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.zc.next .zl{color:var(--accentText);font-weight:700}
+.zc[aria-pressed="true"]{background:var(--text);color:var(--bg);box-shadow:none}
+.zc[aria-pressed="true"] .zl,.zc[aria-pressed="true"] .zt{color:inherit}
+
+.glass{background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 7%,var(--surface)),var(--surface));border-radius:24px;box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.4);border:1px solid color-mix(in srgb,var(--text) 7%,transparent)}
+.nowrail{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -20px;padding:4px 20px 14px;scrollbar-width:none}
+.nowrail::-webkit-scrollbar{display:none}
+.nowrail.one{overflow:visible}
+.nowrail > li{flex:none;width:100%;scroll-snap-align:center}
+.nowrail.many > li{width:calc(100% - 34px)}
+.mx-now{position:relative;padding:14px;animation:fadeIn .5s both}
+.mx-nh{display:flex;align-items:center;gap:12px}
+.mx-tile{width:44px;height:44px;border-radius:15px;background:var(--soft);color:var(--accentText);display:grid;place-items:center;flex:none}
+.mx-nt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.mx-nn{font-size:1.0625em;font-weight:700;line-height:1.25}
+.mx-ring{position:relative;width:60px;height:60px;flex:none;display:grid;place-items:center}
+.mx-ring svg{position:absolute;inset:0;width:60px;height:60px}
+.mx-rt{fill:none;stroke:color-mix(in srgb,var(--text) 14%,transparent);stroke-width:4}
+.mx-rp{fill:none;stroke:var(--accent);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 70%,transparent))}
+.mx-ring.urgent .mx-rp{stroke:var(--urgent);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--urgent) 70%,transparent))}
+.mx-rn{position:relative;display:flex;flex-direction:column;align-items:center;line-height:1.05}
+.mx-rn b{font-size:1em;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.mx-rn span{font-size:.75em;color:var(--sub);font-weight:600}
+.mx-ring.urgent .mx-rn b{color:var(--urgent)}
+.mx-bar{position:relative;height:6px;margin:16px 6px 4px;border-radius:6px;background:color-mix(in srgb,var(--text) 12%,transparent)}
+.mx-bf{position:absolute;top:0;bottom:0;right:0;border-radius:6px;background:linear-gradient(to left,color-mix(in srgb,var(--accent) 45%,transparent),var(--accent));transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.mx-bar.urgent .mx-bf{background:linear-gradient(to left,color-mix(in srgb,var(--urgent) 45%,transparent),var(--urgent))}
+.mx-bd{position:absolute;top:50%;width:16px;height:16px;margin:-8px -8px 0 0;border-radius:50%;background:radial-gradient(circle at 38% 34%,#fff7d0 0%,#ffc247 60%,#f5a524 100%);box-shadow:0 0 0 3px rgba(255,181,46,.3),0 0 14px 3px rgba(255,170,40,.6);animation:thumb 3.4s ease-in-out infinite;transition:right .9s cubic-bezier(.2,.8,.2,1)}
+.mx-bd.moon{background:radial-gradient(circle at 36% 34%,#fff 0%,#dfe4ff 60%,#b9c3f2 100%);box-shadow:0 0 0 2px color-mix(in srgb,var(--text) 35%,transparent),0 0 12px 2px rgba(200,212,255,.8)}
+@keyframes thumb{50%{filter:brightness(1.12);transform:scale(1.12)}}
+.mx-pe{display:flex;justify-content:space-between;gap:10px;margin-top:8px;line-height:1.25}
+.mx-pe > span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.mx-pe > span:last-child{text-align:left}
+.mx-pe .cap{font-size:.75em}
+.mx-pe b{font-size:1.0625em;font-weight:800;font-variant-numeric:tabular-nums}
+.mx-acts{display:flex;gap:10px;margin-top:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;border-radius:16px;font-weight:700;transition:transform .15s,background .25s,color .25s}
+.btn:active{transform:scale(.97)}
+.btn .ic{width:21px;height:21px;stroke-width:2.2}
+.btn.primary{flex:2;background:var(--accent);color:var(--onAccent);box-shadow:0 8px 20px -8px color-mix(in srgb,var(--accent) 80%,transparent)}
+.btn.ghost{flex:1;background:var(--surface2);color:var(--text)}
+.btn.late{flex:1;background:var(--surface);color:var(--urgent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--urgent) 45%,transparent)}
+.btn.undo{flex:1;background:var(--surface);color:var(--safe);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--safe) 45%,transparent)}
+.marking .btn.primary,.marking .btn.late{background:var(--safe);color:var(--onSafe)}
+.mx-now.marking{animation:mxOut .6s .3s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes mxOut{to{opacity:0;transform:translateX(-30px)}}
+.calm{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:24px 20px;animation:riseA .6s both}
+.halo{width:64px;height:64px;border-radius:50%;background:var(--safeSoft);color:var(--safe);display:grid;place-items:center;animation:float 3.2s ease-in-out infinite;box-shadow:0 0 0 8px color-mix(in srgb,var(--safe) 10%,transparent)}
+.halo .ic{width:30px;height:30px}
+@keyframes float{50%{transform:translateY(-6px)}}
+.calm h3{font-size:1.25em;font-weight:800}
+.calm .cap{font-size:.9375em}
+.calm .btn{margin-top:8px;padding:0 20px;flex:none}
+
+.mcard{background:var(--surface);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+.mr{display:flex;align-items:stretch;animation:fadeIn .45s both}
+.mr + .mr{border-top:1px solid var(--border)}
+.mmain{flex:1;min-width:0;display:flex;align-items:flex-start;gap:10px;padding:10px 4px 10px 6px;padding-inline-start:12px;min-height:60px;text-align:right}
+.mic{width:32px;height:32px;border-radius:11px;background:var(--surface2);color:var(--sub);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+.mic .ic{width:17px;height:17px}
+.mr.personal .mic{background:var(--soft);color:var(--accentText)}
+.mr.system .mic{background:var(--infoSoft);color:var(--info)}
+.mtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.mtt{font-size:.875em;line-height:1.3}
+.mtag{font-size:.8125em;font-weight:700;color:var(--sub);margin-inline-end:6px}
+.mr.personal .mtag{color:var(--accentText)}
+.mr.system .mtag{color:var(--info)}
+.mtt b{font-weight:700}
+.mbd{font-size:.8125em;line-height:1.4;color:var(--sub);text-wrap:pretty}
+.mact{display:inline-flex;align-items:center;gap:2px;margin-top:2px;font-size:.8125em;font-weight:700;color:var(--accentText)}
+.mr.system .mact{color:var(--info)}
+.mact .ic{width:14px;height:14px}
+.mx{width:44px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+.mx .ic{width:16px;height:16px}
+.empty{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:20px;border:1.5px dashed var(--border);color:var(--sub);font-size:.9375em;font-weight:500}
+.empty .ic{width:20px;height:20px;color:var(--safe)}
+
+.dayh{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:28px 0 10px}
+.dayh h2{padding-inline:4px}
+.dayh h2{font-size:1.3em;font-weight:700;line-height:1.2}
+.seg{display:flex;padding:3px;gap:2px;border-radius:16px;background:var(--surface2);box-shadow:inset 0 0 0 1px var(--border)}
+.seg button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 12px;border-radius:13px;font-weight:700;font-size:.875em;color:var(--sub);transition:background .25s,color .25s}
+.seg button .ic{width:18px;height:18px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--accentText);box-shadow:var(--shadow)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-weight:600;font-size:.875em;transition:background .25s,color .25s}
+.chip b{font-weight:800;font-variant-numeric:tabular-nums;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--surface2);display:inline-flex;align-items:center;justify-content:center;font-size:.9em}
+.chip[aria-pressed="true"]{background:var(--text);color:var(--bg);box-shadow:none}
+.chip[aria-pressed="true"] b{background:color-mix(in srgb,var(--bg) 25%,transparent);color:var(--bg)}
+.lk-a{animation:lkA .45s both}
+.lk-b{animation:lkB .45s both}
+@keyframes lkA{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes lkB{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.tl{position:relative}
+.tl::before{content:'';position:absolute;top:24px;bottom:24px;right:59px;width:2px;border-radius:2px;background:var(--border)}
+.ent{display:grid;grid-template-columns:42px 22px minmax(0,1fr);column-gap:6px;align-items:start;margin-bottom:10px}
+.tcol{display:flex;flex-direction:column;padding-top:12px;text-align:right;font-size:.8125em;line-height:1.3;font-variant-numeric:tabular-nums}
+.tcol b{font-weight:800}
+.tcol span{color:var(--sub);font-weight:500}
+.ent.active .tcol b{color:var(--accentText)}
+.rcol{display:flex;justify-content:center;padding-top:16px}
+.node{width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--sub);display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+.ent.active .node{border-color:var(--accent);background:var(--soft)}
+.ent.active .node::after{content:'';position:absolute;inset:-7px;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:ring 2.2s ease-out infinite}
+.ent.done .node{background:var(--safe);border-color:var(--safe);color:var(--onSafe);width:22px;height:22px;margin-top:-3px;animation:pop .6s cubic-bezier(.2,1.7,.4,1)}
+.ent.done .node .ic{width:13px;height:13px;stroke-width:3.2}
+.ent.missed .node{border-color:var(--urgent);background:var(--urgentSoft)}
+.ent.upcoming .node{border-style:dashed}
+@keyframes pop{from{transform:scale(.3)}to{transform:scale(1)}}
+.ecard{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:10px;border:1.5px solid transparent}
+.ent.active .ecard{border-color:var(--accent)}
+.ent.done .ecard{background:var(--safeSoft);box-shadow:none}
+.ent.missed .ecard{background:var(--urgentSoft);box-shadow:none;border-color:color-mix(in srgb,var(--urgent) 40%,transparent)}
+.ent.upcoming .ecard{background:transparent;box-shadow:none;border:1.5px dashed var(--border);opacity:.82}
+.ehead{display:flex;align-items:center;gap:12px;min-height:44px}
+.tile{width:40px;height:40px;border-radius:13px;background:var(--soft);color:var(--accentText);display:flex;align-items:center;justify-content:center;flex:none}
+.ent.done .tile{background:var(--surface);color:var(--safe)}
+.ent.missed .tile{background:var(--surface);color:var(--urgent)}
+.ent.upcoming .tile{background:var(--surface2);color:var(--sub)}
+.etext{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.etitle{font-weight:600;line-height:1.3}
+.ent.upcoming .etitle{color:var(--sub)}
+.ent.active .cap{color:var(--accentText);font-weight:600}
+.ent.done .cap{color:var(--safe);font-weight:600}
+.ent.missed .cap{color:var(--urgent);font-weight:600}
+.lateTag{font-size:.75em;font-weight:700;color:var(--urgent);background:var(--surface);border-radius:6px;padding:1px 6px;margin-inline-start:6px}
+.lnk{min-height:44px;padding:0 12px;border-radius:12px;font-weight:700;font-size:.875em;color:var(--safe);flex:none}
+.win{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
+.win-e{display:flex;flex-direction:column;line-height:1.2}
+.win-e .cap{font-size:.75em}
+.win-e b{font-weight:800;font-size:.9375em;font-variant-numeric:tabular-nums}
+.pbar{position:relative;display:block;height:6px;border-radius:6px;background:var(--surface2);overflow:hidden}
+.pbar i{position:absolute;inset-block:0;right:0;border-radius:6px;background:var(--accent);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.pbar.urgent i{background:var(--urgent)}
+.btns{display:flex;gap:8px}
+.ent.marking .btn.primary,.ent.marking .btn.late{background:var(--safe);color:var(--onSafe)}
+.nowrow{display:grid;grid-template-columns:42px 22px minmax(0,1fr);column-gap:6px;align-items:center;margin:2px 0 12px}
+.nowt{font-size:.8125em;font-weight:800;color:var(--accentText);font-variant-numeric:tabular-nums;text-align:right}
+.nowdot{justify-self:center;width:12px;height:12px;border-radius:50%;background:var(--accent);position:relative;z-index:1;box-shadow:0 0 0 4px var(--bg)}
+.nowdot::after{content:'';position:absolute;inset:-6px;border-radius:50%;background:var(--accent);opacity:.3;animation:ring 1.8s ease-out infinite}
+.nowline{display:flex;align-items:center;gap:8px;font-size:.75em;font-weight:700;color:var(--accentText)}
+.nowline::after{content:'';flex:1;border-top:2px dashed var(--accent);opacity:.6}
+
+.gg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ph.big .gg{grid-template-columns:minmax(0,1fr)}
+.gc{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:22px;background:var(--surface);box-shadow:var(--shadow);border:1.5px solid transparent;background-image:linear-gradient(160deg,color-mix(in srgb,var(--surface) 60%,transparent),transparent 60%)}
+.gc.span2{grid-column:1/-1}
+.gc.active{border-color:var(--accent);background-color:var(--soft)}
+.gc.done{background-color:var(--safeSoft);box-shadow:none}
+.gc.missed{background-color:var(--urgentSoft);box-shadow:none;border-color:color-mix(in srgb,var(--urgent) 40%,transparent)}
+.gc.upcoming{background-color:transparent;background-image:none;box-shadow:none;border:1.5px dashed var(--border);opacity:.85}
+.gc-h{display:flex;align-items:center;gap:10px}
+.gc-t{width:40px;height:40px;border-radius:13px;background:var(--soft);color:var(--accentText);display:grid;place-items:center;flex:none}
+.gc.active .gc-t{background:var(--surface)}
+.gc.done .gc-t{background:var(--surface);color:var(--safe)}
+.gc.missed .gc-t{background:var(--surface);color:var(--urgent)}
+.gc.upcoming .gc-t{background:var(--surface2);color:var(--sub)}
+.gc-n{display:flex;flex-direction:column;gap:1px;min-width:0}
+.gc-n b{font-weight:700;line-height:1.25;font-size:.9375em}
+.gc-s{font-size:.8125em;font-weight:600}
+.gc.active .gc-s{color:var(--accentText)}
+.gc.done .gc-s{color:var(--safe)}
+.gc.missed .gc-s{color:var(--urgent)}
+.gc.upcoming .gc-s{color:var(--sub)}
+.gc-tm{font-size:.8125em;color:var(--sub);font-variant-numeric:tabular-nums}
+.gc-act{margin-top:auto;display:flex;gap:8px}
+.gc-act .btn{min-height:46px;font-size:.9375em;border-radius:14px}
+.gc.marking .btn.primary,.gc.marking .btn.late{background:var(--safe);color:var(--onSafe)}
+
+.rh{display:flex;align-items:center;gap:16px;padding:16px;margin-bottom:12px}
+.rh-fig{position:relative;width:132px;height:132px;flex:none}
+.rh-fig > svg{position:absolute;inset:0;width:132px;height:132px}
+.rh-t{fill:none;stroke-width:9;stroke:color-mix(in srgb,var(--text) 10%,transparent)}
+.rh-p{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1),opacity .4s;filter:drop-shadow(0 0 4px color-mix(in srgb,currentColor 50%,transparent))}
+.rh-p.d{stroke:var(--safe);color:var(--safe)}
+.rh-p.o{stroke:var(--accent);color:var(--accent)}
+.rh-p.m{stroke:var(--urgent);color:var(--urgent)}
+.rh-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.rh-c b{font-size:1.75em;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.rh-c span{font-size:.75em;color:var(--sub);font-weight:600}
+.rh-leg{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.rh-lg{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;padding:0 10px;border-radius:14px;font-weight:600;font-size:.875em;text-align:right;transition:background .25s}
+.rh-lg i{width:10px;height:10px;border-radius:50%;flex:none}
+.rh-lg.d i{background:var(--safe)}
+.rh-lg.o i{background:var(--accent)}
+.rh-lg.m i{background:var(--urgent)}
+.rh-lg b{margin-inline-start:auto;font-weight:800;font-variant-numeric:tabular-nums}
+.rh-lg[aria-pressed="true"]{background:var(--surface2);box-shadow:inset 0 0 0 1.5px var(--border)}
+.rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ph.big .rgrid{grid-template-columns:minmax(0,1fr)}
+.rg{display:flex;flex-direction:column;border-radius:22px;background:var(--surface);box-shadow:var(--shadow);border:1.5px solid transparent;overflow:hidden}
+.rg.open{grid-column:1/-1}
+.rg.active{border-color:var(--accent);background:var(--soft)}
+.rg.done{background:var(--safeSoft);box-shadow:none}
+.rg.missed{background:var(--urgentSoft);box-shadow:none;border-color:color-mix(in srgb,var(--urgent) 40%,transparent)}
+.rg.upcoming{background:transparent;box-shadow:none;border:1.5px dashed var(--border)}
+.rg-b{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;min-height:44px;padding:14px 10px 12px;text-align:center}
+.rg.open .rg-b{flex-direction:row;text-align:right;gap:14px;padding:14px}
+.rg-ring{position:relative;width:64px;height:64px;flex:none}
+.rg-ring > svg{position:absolute;inset:0;width:64px;height:64px}
+.rg-t{fill:none;stroke-width:6;stroke:color-mix(in srgb,var(--text) 12%,transparent)}
+.rg.upcoming .rg-t{stroke:var(--sub);stroke-dasharray:3 6;stroke-linecap:round;opacity:.7}
+.rg-p{fill:none;stroke-width:6;stroke-linecap:round;stroke:var(--accent);transition:stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1),opacity .4s;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--accent) 60%,transparent))}
+.rg.active .rg-p{animation:rgGlow 3.4s ease-in-out infinite}
+@keyframes rgGlow{50%{filter:drop-shadow(0 0 7px color-mix(in srgb,var(--accent) 90%,transparent))}}
+.rg.done .rg-p,.rg.marking .rg-p{stroke:var(--safe);filter:drop-shadow(0 0 3px color-mix(in srgb,var(--safe) 55%,transparent))}
+.rg.missed .rg-p{stroke:var(--urgent);filter:drop-shadow(0 0 3px color-mix(in srgb,var(--urgent) 55%,transparent))}
+.rg-ic{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--accentText)}
+.rg-ic .ic{flex:none;width:24px;height:24px}
+.rg.done .rg-ic,.rg.marking .rg-ic{color:var(--safe)}
+.rg.missed .rg-ic{color:var(--urgent)}
+.rg.upcoming .rg-ic{color:var(--sub)}
+.rg.done .rg-ic .ic{animation:pop .6s cubic-bezier(.2,1.7,.4,1)}
+.rg-n{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rg-n b{font-weight:700;font-size:.9375em;line-height:1.25}
+.rg-s{font-size:.8125em;font-weight:600;color:var(--sub)}
+.rg.active .rg-s{color:var(--accentText)}
+.rg.done .rg-s{color:var(--safe)}
+.rg.missed .rg-s{color:var(--urgent)}
+.rg-tm{font-size:.8125em;color:var(--sub);font-variant-numeric:tabular-nums}
+.rg-strip{display:flex;flex-direction:column;gap:10px;padding:2px 12px 12px;animation:fadeIn .35s both}
+</style>
+<template>
+<div class="scroll" style="position: absolute; inset: 0; overflow-y: auto; padding: 24px 20px 124px">
+
+<header style="display: flex; flex-direction: column; gap: 3px; min-width: 0">
+<p class="cap">{{weekday}} · {{hebDate}} · {{city}}</p>
+<h1 class="h1">{{greeting}}</h1>
+</header>
+
+<!--NAMECARD-->
+
+<section class="arcw {{sceneCls}}" aria-label="חלון היום וזמני היום">
+<p class="readout"><span class="rpill {{readCls}}" aria-live="{{liveMode}}"><span class="rd-a"><sc-if value="{{read.isNext}}" hint-placeholder-val="{{ true }}"><span class="rtag">הבא</span></sc-if><b>{{read.label}}</b><span>·</span><span class="num">{{read.hm}}</span></span><span>{{read.rel}}</span></span></p>
+<div class="scene" id="scene" onPointerDown="{{gDown}}" onPointerMove="{{gMove}}" onPointerUp="{{gUp}}" onPointerCancel="{{gUp}}">
+<svg width="350" height="230" viewBox="0 0 350 230" aria-hidden="true">
+<defs>
+<filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7"></feTurbulence><feColorMatrix type="matrix" values="0 0 0 0 0.35 0 0 0 0 0.27 0 0 0 0 0.2 0 0 0 0.55 -0.15"></feColorMatrix></filter>
+<filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.2"></feGaussianBlur></filter>
+<clipPath id="sillClip"><rect x="0" y="196" width="350" height="34"></rect></clipPath>
+</defs>
+<rect width="350" height="230" filter="url(#grain)" opacity="0.45"></rect>
+<path class="mortar" d="{{courses}}"></path>
+<g class="mortar"><circle cx="34" cy="60" r="15"></circle><circle cx="34" cy="60" r="7"></circle><path d="M34 45V75M19 60H49M23.4 49.4L44.6 70.6M44.6 49.4L23.4 70.6"></path><circle cx="316" cy="60" r="15"></circle><circle cx="316" cy="60" r="7"></circle><path d="M316 45V75M301 60H331M305.4 49.4L326.6 70.6M326.6 49.4L305.4 70.6"></path></g>
+<path class="fr" d="{{frameOuter}}"></path>
+<path class="vs" d="{{voussoirs}}"></path>
+<path class="key" d="{{keystone}}"></path>
+<path class="frline" d="{{frameOuter}}"></path>
+<rect class="sillTop" x="0" y="196" width="350" height="34"></rect>
+<g clip-path="url(#sillClip)">
+<rect class="sillShade" x="0" y="196" width="350" height="34" style="opacity: {{shadeOp}}"></rect>
+<polygon class="jamb" points="{{jambL}}" filter="url(#soft)"></polygon>
+<polygon class="jamb" points="{{jambR}}" filter="url(#soft)"></polygon>
+<polygon points="{{lightPts}}" filter="url(#soft)" style="fill: {{lightC}}; opacity: {{lightOp}}"></polygon>
+</g>
+<line class="sillEdge" x1="0" y1="196" x2="350" y2="196"></line>
+</svg>
+<div class="spill" aria-hidden="true" style="background: {{spillBg}}; opacity: {{spillOp}}"></div>
+<div class="view" aria-hidden="true" style="background: {{skyGrad}}">
+<div class="vin">
+<div class="stars" style="opacity: {{starsOp}}">
+<sc-for list="{{stars}}" as="st" hint-placeholder-count="10">
+<i class="star" style="left: {{st.x}}px; top: {{st.y}}px; width: {{st.s}}px; height: {{st.s}}px; animation-delay: {{st.d}}s; animation-duration: {{st.du}}s"></i>
+</sc-for>
+</div>
+<div class="sky-rays" style="left: {{sunCx}}px; top: {{sunCy}}px; opacity: {{rayOp}}"></div>
+<div class="clouds" style="opacity: {{cloudOp}}; color: {{cloudC}}">
+<span class="cl c1" style="top: 44px; animation-delay: -20s"><svg viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse></svg></span>
+<span class="cl c2" style="top: 92px; animation-delay: -64s"><svg viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse></svg></span>
+<span class="cl c3" style="top: 66px; animation-delay: -110s"><svg viewBox="0 0 120 50"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse></svg></span>
+</div>
+<span class="aura {{auraCls}}" style="left: {{sunCx}}px; top: {{sunCy}}px; background: {{auraBg}}"></span>
+<span class="maura {{mauraCls}}" style="left: {{moonCx}}px; top: {{moonCy}}px; background: radial-gradient(circle,rgba(246,231,191,.4) 0,rgba(246,231,191,.1) 45%,transparent 70%)"></span>
+<svg width="350" height="230" viewBox="0 0 350 230">
+<path d="M0 176C40 158 70 166 110 170S170 148 210 162S300 156 350 168V200H0Z" style="fill: {{hillFar}}"></path>
+<g style="fill: {{hillFar}}"><rect x="150" y="162" width="10" height="14"></rect><rect x="164" y="156" width="8" height="20"></rect><path d="M176 176v-9a9 9 0 0 1 18 0v9z"></path><rect x="197" y="160" width="12" height="16"></rect></g>
+<g style="fill: #FFD58A; opacity: {{lightsOp}}"><circle cx="154" cy="168" r="1"></circle><circle cx="168" cy="164" r="1"></circle><circle cx="168" cy="170" r="1"></circle><circle cx="201" cy="166" r="1"></circle><circle cx="205" cy="171" r="1"></circle></g>
+<path d="M0 190C50 177 90 183 130 185S200 175 240 183S320 179 350 187V200H0Z" style="fill: {{hillNear}}"></path>
+</svg>
+<span class="sun {{sunCls}}" style="left: {{sunX}}px; top: {{sunY}}px; background: {{sunBg}}; box-shadow: {{sunSh}}"></span>
+<span class="moon {{moonCls}}" style="left: {{moonX}}px; top: {{moonY}}px"></span>
+<p class="hint {{hintCls}}">{{hintText}}</p>
+</div>
+</div>
+<svg width="350" height="230" viewBox="0 0 350 230" aria-hidden="true">
+<defs>
+<linearGradient id="gArc" gradientUnits="userSpaceOnUse" x1="251" y1="0" x2="99" y2="0"><stop offset="0" style="stop-color: color-mix(in srgb, var(--accent) 55%, #ffb8aa)"></stop><stop offset="0.5" stop-color="#FFF1D4"></stop><stop offset="1" style="stop-color: color-mix(in srgb, var(--accent) 70%, #d98aa6)"></stop></linearGradient>
+<linearGradient id="gNight" gradientUnits="userSpaceOnUse" x1="99" y1="0" x2="251" y2="0"><stop offset="0" stop-color="#D9C6E6"></stop><stop offset="0.5" stop-color="#EDE6F5"></stop><stop offset="1" stop-color="#FFD9AE"></stop></linearGradient>
+</defs>
+<g class="arcg" style="opacity: {{dayOpa}}">
+<path d="{{dayPath}}" fill="none" stroke="url(#gArc)" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 8" opacity="0.6"></path>
+<path d="{{dayPath}}" fill="none" stroke="url(#gArc)" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="{{arcLen}}" style="stroke-dashoffset: {{dayDash}}"></path>
+<g class="trl" style="opacity: {{dayTrOp}}; stroke: {{sunC2}}">
+<sc-for list="{{dayTr}}" as="k" hint-placeholder-count="3">
+<path class="tr {{k.cls}}" d="{{dayPath}}" stroke-dasharray="{{k.da}}" stroke-dashoffset="{{k.off}}"></path>
+</sc-for>
+</g>
+</g>
+<g class="arcg" style="opacity: {{nightOpa}}">
+<path d="{{nightPath}}" fill="none" stroke="url(#gNight)" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 8" opacity="0.6"></path>
+<path d="{{nightPath}}" fill="none" stroke="url(#gNight)" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="{{arcLen}}" style="stroke-dashoffset: {{nightDash}}"></path>
+<g class="trl" style="opacity: {{nightTrOp}}; stroke: #F6E7BF">
+<sc-for list="{{nightTr}}" as="k" hint-placeholder-count="3">
+<path class="tr {{k.cls}}" d="{{nightPath}}" stroke-dasharray="{{k.da}}" stroke-dashoffset="{{k.off}}"></path>
+</sc-for>
+</g>
+</g>
+</svg>
+<sc-for list="{{ticks}}" as="k" hint-placeholder-count="11">
+<span class="tick {{k.cls}}" style="left: {{k.x}}px; top: {{k.y}}px"></span>
+</sc-for>
+<sc-if value="{{showGhost}}" hint-placeholder-val="{{ false }}"><span class="glive" aria-hidden="true" style="left: {{ghostX}}px; top: {{ghostY}}px"></span></sc-if>
+<span class="edge" style="right: 4px"><span>עלות</span><b>{{edgeStart}}</b></span>
+<span class="edge" style="left: 4px"><span>צאה״כ</span><b>{{edgeEnd}}</b></span>
+<div class="grab" id="grab" role="slider" tabindex="0" aria-label="הזמן ביום, אפשר לגרור או להשתמש בחצים" aria-orientation="horizontal" aria-valuemin="{{sliderMin}}" aria-valuemax="{{sliderMax}}" aria-valuenow="{{sliderNow}}" aria-valuetext="{{sliderText}}" style="left: {{grabX}}px; top: {{grabY}}px" onKeyDown="{{gKey}}"></div>
+</div>
+<div class="sillf"><div class="plaque"><span class="bigtime">{{nowT}}</span><span class="midcap" aria-live="{{liveMode}}">{{midCaption}}</span></div></div>
+</section>
+<div class="zchips" id="zchips" role="group" aria-label="זמני היום, בחירה מציגה את הזמן בקשת">
+<sc-for list="{{zchips}}" as="z" hint-placeholder-count="11">
+<button class="zc {{z.cls}}" aria-pressed="{{z.pressed}}" onClick="{{z.pick}}"><span class="zl">{{z.label}}</span><span class="zt">{{z.time}}</span></button>
+</sc-for>
+</div>
+
+<h3 class="label" style="margin-top: 10px"><span>פתוח עכשיו</span><b>{{activeN}}</b></h3>
+<sc-if value="{{hasActive}}" hint-placeholder-val="{{ true }}">
+<ul class="nowrail {{railCls}}" aria-label="מצוות פתוחות עכשיו">
+<sc-for list="{{actives}}" as="it" hint-placeholder-count="2">
+<li>
+<section class="glass mx-now {{it.cls}}">
+<div class="mx-nh">
+<span class="mx-tile">[[icItem:it]]</span>
+<div class="mx-nt"><h4 class="mx-nn">{{it.name}}</h4><p class="cap">{{it.startT}} · מ{{it.fromName}} עד {{it.toName}} · {{it.endT}}</p></div>
+<div class="mx-ring {{it.urgentCls}}" role="img" aria-label="נשארו {{it.left}}">
+<svg viewBox="0 0 60 60" aria-hidden="true"><circle class="mx-rt" cx="30" cy="30" r="25"></circle><circle class="mx-rp" cx="30" cy="30" r="25" transform="rotate(-90 30 30)" style="stroke-dasharray: 157.1; stroke-dashoffset: {{it.ringOff}}"></circle></svg>
+<span class="mx-rn"><b class="num">{{it.leftNum}}</b><span>{{it.leftUnit}}</span></span>
+</div>
+</div>
+<div class="mx-acts">
+<button class="btn primary" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">[[ic:check]]<span>{{it.cta}}</span></button>
+<button class="btn ghost" onClick="{{it.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</section>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noActive}}" hint-placeholder-val="{{ false }}">
+<section class="glass calm" aria-live="polite">
+<div class="halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h3>{{activeEmptyTitle}}</h3>
+<p class="cap">{{activeEmptyText}}</p>
+</section>
+</sc-if>
+
+<h3 class="label"><span>הודעות</span><b>{{msgCount}}</b></h3>
+<sc-if value="{{hasMsgs}}" hint-placeholder-val="{{ true }}">
+<ul class="mcard" role="list" aria-label="הודעות">
+<sc-for list="{{msgs}}" as="m" hint-placeholder-count="5">
+<li class="mr {{m.kindCls}} {{m.cls}}">
+<sc-if value="{{m.hasAction}}" hint-placeholder-val="{{ true }}">
+<button class="mmain" onClick="{{m.act}}" aria-label="{{m.title}}. {{m.action}}">
+<span class="mic">[[icMsg:m]]</span>
+<span class="mtx"><span class="mtt"><span class="mtag">{{m.tag}}</span><b>{{m.title}}</b></span><span class="mbd">{{m.body}}</span><span class="mact">{{m.action}}[[ic:chevron]]</span></span>
+</button>
+</sc-if>
+<sc-if value="{{m.noAction}}" hint-placeholder-val="{{ false }}">
+<div class="mmain">
+<span class="mic">[[icMsg:m]]</span>
+<span class="mtx"><span class="mtt"><span class="mtag">{{m.tag}}</span><b>{{m.title}}</b></span><span class="mbd">{{m.body}}</span></span>
+</div>
+</sc-if>
+<sc-if value="{{m.canDismiss}}" hint-placeholder-val="{{ true }}"><button class="mx" onClick="{{m.dismiss}}" aria-label="{{m.dismissLabel}}">[[ic:close]]</button></sc-if>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+<sc-if value="{{noMsgs}}" hint-placeholder-val="{{ false }}"><p class="empty">[[ic:check]]<span>אין הודעות כרגע.</span></p></sc-if>
+
+<div class="dayh">
+<h2>היום שלי</h2>
+<div class="seg" role="group" aria-label="תצוגת היום">
+<button aria-pressed="{{lkRail.pressed}}" onClick="{{lkRail.pick}}">[[ic:list]]<span>ציר</span></button>
+<button aria-pressed="{{lkCards.pressed}}" onClick="{{lkCards.pick}}">[[ic:grid]]<span>כרטיסים</span></button>
+<button aria-pressed="{{lkRings.pressed}}" onClick="{{lkRings.pick}}">[[ic:clock]]<span>טבעות</span></button>
+</div>
+</div>
+
+<sc-if value="{{noRows}}" hint-placeholder-val="{{ false }}">
+<section class="glass calm" aria-live="polite">
+<div class="halo" aria-hidden="true">[[ic:sparkle]]</div>
+<h3>{{emptyTitle}}</h3>
+<p class="cap">{{emptyText}}</p>
+<sc-if value="{{canReset}}" hint-placeholder-val="{{ true }}"><button class="btn ghost" onClick="{{resetFilter}}">הצגת הכול</button></sc-if>
+</section>
+</sc-if>
+
+<sc-if value="{{isRail}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{hasRows}}" hint-placeholder-val="{{ true }}">
+<div class="tl {{lkEnter}}" role="list">
+<sc-for list="{{entries}}" as="en" hint-placeholder-count="7">
+<sc-if value="{{en.isNow}}" hint-placeholder-val="{{ false }}">
+<div class="nowrow" role="listitem" aria-label="{{en.label}}">
+<span class="nowt">{{en.time}}</span>
+<span class="nowdot"></span>
+<span class="nowline">{{en.nowWord}}</span>
+</div>
+</sc-if>
+<sc-if value="{{en.isItem}}" hint-placeholder-val="{{ true }}">
+<div class="ent {{en.rowCls}}" role="listitem">
+<span class="tcol"><b>{{en.startT}}</b><span>{{en.endT}}</span></span>
+<span class="rcol"><span class="node"><sc-if value="{{en.isDone}}" hint-placeholder-val="{{ false }}">[[ic:check]]</sc-if></span></span>
+<div class="ecard">
+<div class="ehead">
+<span class="tile">[[icItem:en]]</span>
+<span class="etext"><span class="etitle">{{en.name}}</span><span class="cap">{{en.statusText}}<sc-if value="{{en.late}}" hint-placeholder-val="{{ false }}"><span class="lateTag">באיחור</span></sc-if></span></span>
+<sc-if value="{{en.isDone}}" hint-placeholder-val="{{ false }}"><button class="lnk" onClick="{{en.undo}}" aria-label="{{en.undoLabel}}">ביטול</button></sc-if>
+</div>
+<sc-if value="{{en.isActive}}" hint-placeholder-val="{{ false }}">
+<div class="win" role="group" aria-label="חלון הזמן">
+<span class="win-e"><span class="cap">נפתח</span><b>{{en.startT}}</b></span>
+<span class="pbar {{en.urgentCls}}" role="img" aria-label="{{en.barLabel}}"><i style="width: {{en.pctGone}}%"></i></span>
+<span class="win-e"><span class="cap">נגמר</span><b>{{en.winEnd}}</b></span>
+</div>
+<div class="btns">
+<button class="btn primary" onClick="{{en.mark}}" aria-label="{{en.markLabel}}">[[ic:check]]<span>{{en.cta}}</span></button>
+<button class="btn ghost" onClick="{{en.open}}">[[ic:book]]<span>נוסח</span></button>
+</div>
+</sc-if>
+<sc-if value="{{en.isMissed}}" hint-placeholder-val="{{ false }}">
+<button class="btn late" onClick="{{en.mark}}" aria-label="{{en.markLabel}}">[[ic:check]]<span>בכל זאת עשיתי</span></button>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</sc-for>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{isCards}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{hasRows}}" hint-placeholder-val="{{ true }}">
+<ul class="gg {{lkEnter}}" role="list">
+<sc-for list="{{cardRows}}" as="g" hint-placeholder-count="6">
+<li class="gc {{g.status}} {{g.span}} {{g.cls}}">
+<div class="gc-h">
+<span class="gc-t">[[icItem:g]]</span>
+<span class="gc-n"><b>{{g.name}}</b><span class="gc-s">{{g.statusText}}<sc-if value="{{g.late}}" hint-placeholder-val="{{ false }}"><span class="lateTag">באיחור</span></sc-if></span></span>
+</div>
+<sc-if value="{{g.isActive}}" hint-placeholder-val="{{ false }}">
+<div class="mx-bar {{g.urgentCls}}" aria-hidden="true" style="margin-top: 10px"><i class="mx-bf" style="width: {{g.pctGone}}%"></i><i class="mx-bd {{g.dotCls}}" style="right: {{g.pctGone}}%"></i></div>
+<div class="mx-pe">
+<span><span class="cap">נפתח</span><b>{{g.startT}}</b></span>
+<span><span class="cap">נגמר</span><b>{{g.winEnd}}</b></span>
+</div>
+</sc-if>
+<sc-if value="{{g.notActive}}" hint-placeholder-val="{{ true }}"><p class="gc-tm">{{g.range}}</p></sc-if>
+<div class="gc-act">
+<sc-if value="{{g.isActive}}" hint-placeholder-val="{{ false }}">
+<button class="btn primary" onClick="{{g.mark}}" aria-label="{{g.markLabel}}">[[ic:check]]<span>{{g.cta}}</span></button>
+<button class="btn ghost" onClick="{{g.open}}">[[ic:book]]<span>נוסח</span></button>
+</sc-if>
+<sc-if value="{{g.isMissed}}" hint-placeholder-val="{{ false }}"><button class="btn late" onClick="{{g.mark}}" aria-label="{{g.markLabel}}">[[ic:check]]<span>בכל זאת עשיתי</span></button></sc-if>
+<sc-if value="{{g.isDone}}" hint-placeholder-val="{{ false }}"><button class="btn undo" onClick="{{g.undo}}" aria-label="{{g.undoLabel}}">[[ic:undo]]<span>ביטול</span></button></sc-if>
+</div>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{isRings}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{hasTot}}" hint-placeholder-val="{{ true }}">
+<section class="glass rh {{lkEnter}}" aria-label="טבעות היום">
+<div class="rh-fig" role="img" aria-label="{{heroAria}}">
+<svg viewBox="0 0 132 132" aria-hidden="true">
+<sc-for list="{{heroRings}}" as="hr" hint-placeholder-count="3">
+<circle class="rh-t" cx="66" cy="66" r="{{hr.r}}"></circle>
+<circle class="rh-p {{hr.cls}}" cx="66" cy="66" r="{{hr.r}}" transform="rotate(-90 66 66)" style="stroke-dasharray: {{hr.c}}; stroke-dashoffset: {{hr.off}}; opacity: {{hr.op}}"></circle>
+</sc-for>
+</svg>
+<div class="rh-c"><b class="num">{{doneN}}</b><span>מתוך {{heroTotal}}</span></div>
+</div>
+<div class="rh-leg" role="group" aria-label="סיכום הטבעות">
+<sc-for list="{{heroLeg}}" as="hl" hint-placeholder-count="3">
+<div class="rh-lg {{hl.cls}}"><i></i><span>{{hl.label}}</span><b class="num">{{hl.n}}</b></div>
+</sc-for>
+</div>
+</section>
+</sc-if>
+<sc-if value="{{hasRows}}" hint-placeholder-val="{{ true }}">
+<ul class="rgrid {{lkEnter}}" role="list">
+<sc-for list="{{ringRows}}" as="g" hint-placeholder-count="6">
+<li class="rg {{g.cardCls}}">
+<button class="rg-b" aria-pressed="{{g.sel}}" onClick="{{g.pick}}" aria-label="{{g.aria}}">
+<span class="rg-ring"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="rg-t" cx="32" cy="32" r="26"></circle><circle class="rg-p" cx="32" cy="32" r="26" transform="rotate(-90 32 32)" style="stroke-dasharray: 163.4; stroke-dashoffset: {{g.ringOff}}; opacity: {{g.ringOp}}"></circle></svg><span class="rg-ic"><sc-if value="{{g.showItem}}" hint-placeholder-val="{{ true }}">[[icItem:g]]</sc-if><sc-if value="{{g.isDone}}" hint-placeholder-val="{{ false }}">[[ic:check]]</sc-if><sc-if value="{{g.isMissed}}" hint-placeholder-val="{{ false }}">[[ic:alert]]</sc-if></span></span>
+<span class="rg-n"><b>{{g.name}}</b><span class="rg-s">{{g.statusText}}<sc-if value="{{g.late}}" hint-placeholder-val="{{ false }}"><span class="lateTag">באיחור</span></sc-if></span><span class="rg-tm">{{g.range}}</span></span>
+</button>
+<sc-if value="{{g.sel}}" hint-placeholder-val="{{ false }}">
+<div class="rg-strip">
+<sc-if value="{{g.isActive}}" hint-placeholder-val="{{ false }}">
+<div class="win" role="group" aria-label="חלון הזמן">
+<span class="win-e"><span class="cap">נפתח</span><b>{{g.startT}}</b></span>
+<span class="pbar {{g.urgentCls}}" role="img" aria-label="{{g.barLabel}}"><i style="width: {{g.pctGone}}%"></i></span>
+<span class="win-e"><span class="cap">נגמר</span><b>{{g.winEnd}}</b></span>
+</div>
+<div class="btns"><button class="btn primary" onClick="{{g.mark}}" aria-label="{{g.markLabel}}">[[ic:check]]<span>{{g.cta}}</span></button><button class="btn ghost" onClick="{{g.open}}">[[ic:book]]<span>נוסח</span></button></div>
+</sc-if>
+<sc-if value="{{g.isMissed}}" hint-placeholder-val="{{ false }}"><div class="btns"><button class="btn late" onClick="{{g.mark}}" aria-label="{{g.markLabel}}">[[ic:check]]<span>בכל זאת עשיתי</span></button></div></sc-if>
+<sc-if value="{{g.isDone}}" hint-placeholder-val="{{ false }}"><div class="btns"><button class="btn undo" onClick="{{g.undo}}" aria-label="{{g.undoLabel}}">[[ic:undo]]<span>ביטול</span></button></div></sc-if>
+<sc-if value="{{g.isUpcoming}}" hint-placeholder-val="{{ false }}"><p class="cap">{{g.statusText}} · {{g.range}}</p></sc-if>
+</div>
+</sc-if>
+</li>
+</sc-for>
+</ul>
+</sc-if>
+</sc-if>
+
+</div>
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    return { look: 'rings', filter: 'all', sel: null, drag: false, touched: false, zSel: null, vf: 0 };
+  }
+
+  boardMount() {
+    this.chipTimer = setTimeout(() => this.centerChip(false), 80);
+  }
+
+  boardUnmount() {
+    clearTimeout(this.chipTimer);
+    cancelAnimationFrame(this.vRaf);
+    cancelAnimationFrame(this.gRaf);
+  }
+
+  componentDidUpdate() {
+    if (this.chipKey !== this.lastChip) {
+      const first = this.lastChip === undefined;
+      this.lastChip = this.chipKey;
+      if (!first) this.centerChip(true);
+    }
+  }
+
+  centerChip(smooth) {
+    const box = document.getElementById('zchips');
+    const on = box && box.querySelector('[aria-pressed="true"]');
+    if (!box || !on) return;
+    const b = box.getBoundingClientRect();
+    const o = on.getBoundingClientRect();
+    const dx = o.left + o.width / 2 - (b.left + b.width / 2);
+    if (smooth) box.scrollBy({ left: dx, behavior: 'smooth' });
+    else box.scrollLeft += dx;
+  }
+
+  geo() {
+    return { CX: 175, CY: 116, R: 76, R0: 92, RF: 108, SILL: 196 };
+  }
+
+  eased(t, key) {
+    const now = performance.now();
+    const dt = Math.min(100, now - (this.vAt || now - 16));
+    this.vAt = now;
+    const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (this.vis == null || this.visKey !== key || calm) {
+      this.vis = t;
+    } else {
+      const d = t - this.vis;
+      const tau = this.state.drag ? 42 : 130;
+      this.vis = Math.abs(d) < 45 ? t : this.vis + d * (1 - Math.exp(-dt / tau));
+    }
+    this.visKey = key;
+    if (this.vis !== t) this.kick();
+    return this.vis;
+  }
+
+  kick() {
+    if (this.vRaf) return;
+    this.vRaf = requestAnimationFrame(() => {
+      this.vRaf = 0;
+      this.setState((s) => ({ vf: s.vf + 1 }));
+    });
+  }
+
+  gPoint(e) {
+    const r = document.getElementById('scene').getBoundingClientRect();
+    return { x: ((e.clientX - r.left) * 350) / r.width, y: ((e.clientY - r.top) * 230) / r.height };
+  }
+
+  gTime(p, prev) {
+    const { CX, CY, R } = this.geo();
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    const u = p.x - CX;
+    const v = CY - p.y;
+    if (v < -26) return { rho: 0, near: false, sec: prev };
+    const rho = Math.hypot(u, v) / R;
+    const th = Math.atan2(Math.max(v, 0), u);
+    const secD = A0 + (th / Math.PI) * (A1 - A0);
+    const secN = A1 + (1 - th / Math.PI) * (E - A1);
+    const sec = Math.abs(secD - prev) <= Math.abs(secN - prev) ? secD : secN;
+    return { rho, near: rho > 0.45 && rho < 1.5, sec };
+  }
+
+  gSet(sec) {
+    this.gPend = sec;
+    if (this.gRaf) return;
+    this.gRaf = requestAnimationFrame(() => {
+      this.gRaf = 0;
+      this.gFlush();
+    });
+  }
+
+  gFlush() {
+    if (this.gPend == null) return;
+    const v = this.gPend;
+    this.gPend = null;
+    this.scrub(v);
+  }
+
+  gDown(e) {
+    if (e.button > 0) return;
+    const cur = this.now();
+    const hit = this.gTime(this.gPoint(e), cur);
+    const onGrab = Boolean(e.target.closest && e.target.closest('.grab'));
+    if (hit.rho < 0.15 || (!onGrab && !hit.near)) return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+    this.gDrag = { id: e.pointerId, off: onGrab ? hit.sec - cur : 0, prev: cur };
+    this.setState({ drag: true, touched: true, zSel: null });
+    if (!onGrab) this.gSet(hit.sec);
+  }
+
+  gMove(e) {
+    const d = this.gDrag;
+    if (!d || e.pointerId !== d.id) return;
+    const hit = this.gTime(this.gPoint(e), d.prev);
+    if (hit.rho < 0.15) return;
+    const lo = this.dayStart();
+    const hi = this.dayEnd() - 60;
+    let sec = hit.sec - d.off;
+    d.off *= 0.93;
+    if (Math.abs(sec - d.prev) > (hi - lo) * 0.6) sec = d.prev;
+    sec = Math.max(lo, Math.min(hi, sec));
+    d.prev = sec;
+    this.gSet(sec);
+  }
+
+  gUp(e) {
+    const d = this.gDrag;
+    if (!d || e.pointerId !== d.id) return;
+    this.gDrag = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    this.gFlush();
+    this.setState({ drag: false });
+  }
+
+  gKey(e) {
+    const t = this.now();
+    const dir = t >= this.zmanSec('tzeit') ? -1 : 1;
+    const keys = { ArrowLeft: 300 * dir, ArrowRight: -300 * dir, ArrowUp: 300, ArrowDown: -300, PageUp: 3600, PageDown: -3600 };
+    let to = null;
+    if (e.key in keys) to = t + keys[e.key];
+    else if (e.key === 'Home') to = this.dayStart();
+    else if (e.key === 'End') to = this.dayEnd() - 60;
+    if (to == null) return;
+    e.preventDefault();
+    this.setState({ zSel: null, touched: true });
+    this.scrub(to);
+  }
+
+  hx(h) {
+    const n = parseInt(h.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+
+  mx(a, b, k) {
+    const A = this.hx(a);
+    const B = this.hx(b);
+    return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0')).join('');
+  }
+
+  lum(h) {
+    const [r, g, b] = this.hx(h);
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  }
+
+  skyAt(sec, A0, A1, E) {
+    const z = (id) => this.zmanSec(id);
+    const P = (a, b, k) => 'color-mix(in srgb, ' + a + ' ' + (100 - k) + '%, ' + b + ' ' + k + '%)';
+    const AC = 'var(--accent)';
+    const SF = 'var(--surface)';
+    const SO = 'var(--soft)';
+    const raw = [
+      [A0, '#1d2340', P('#3d3352', AC, 32), 0.12],
+      [z('netz'), P('#6b5a78', AC, 22), P(SO, AC, 55), 0.45],
+      [z('netz') + 5400, P(SF, AC, 16), P(SF, SO, 60), 0.9],
+      [z('chatzot'), P(SF, AC, 12), P(SF, AC, 26), 1],
+      [z('shkia') - 5400, P(SO, AC, 30), P(SO, AC, 52), 0.85],
+      [z('shkia'), P('#6e4a64', AC, 30), P(AC, '#c9566e', 38), 0.42],
+      [A1, '#1f2442', P('#3a2f4f', AC, 18), 0.14],
+      [Math.min(A1 + 3000, E - 60), '#121a30', '#1e2742', 0],
+      [E, '#121a30', '#1b2440', 0],
+    ];
+    const K = [];
+    raw.forEach((k) => {
+      if (!K.length || k[0] > K[K.length - 1][0]) K.push(k);
+    });
+    if (sec <= K[0][0]) return { top: K[0][1], bot: K[0][2], b: K[0][3] };
+    for (let i = 1; i < K.length; i++) {
+      if (sec <= K[i][0]) {
+        const f = (sec - K[i - 1][0]) / (K[i][0] - K[i - 1][0]);
+        const k = Math.round(f * 100);
+        return { top: P(K[i - 1][1], K[i][1], k), bot: P(K[i - 1][2], K[i][2], k), b: K[i - 1][3] + (K[i][3] - K[i - 1][3]) * f };
+      }
+    }
+    const L = K[K.length - 1];
+    return { top: L[1], bot: L[2], b: L[3] };
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const s = this.state;
+    const t = this.now();
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    const NIGHT = E - A1;
+    const { CX, CY, R, R0, RF, SILL } = this.geo();
+    const cl = (f) => Math.max(0, Math.min(1, f));
+    const dayP = (f) => ({ x: CX + R * Math.cos(Math.PI * cl(f)), y: CY - R * Math.sin(Math.PI * cl(f)) });
+    const nightP = (f) => ({ x: CX - R * Math.cos(Math.PI * cl(f)), y: CY - R * Math.sin(Math.PI * cl(f)) });
+    const posOf = (S) => (S <= A1 ? dayP((S - A0) / (A1 - A0)) : nightP((S - A1) / NIGHT));
+    const vis = this.eased(t, c.dateKey);
+    const visNight = vis >= A1;
+    const dayFrac = cl((vis - A0) / (A1 - A0));
+    const nightFrac = cl((vis - A1) / NIGHT);
+    const ARC = Math.PI * R;
+    const dayAt = ARC * dayFrac;
+    const nightAt = ARC * nightFrac;
+    const sun = dayP(dayFrac);
+    const moon = nightP(nightFrac);
+    const orb = visNight ? moon : sun;
+    const trail = (at, total) =>
+      [
+        { cls: 't3', L: 80 },
+        { cls: 't2', L: 48 },
+        { cls: 't1', L: 24 },
+      ].map(({ cls, L }) => {
+        const a = Math.max(0, at - L);
+        return { cls, da: (at - a).toFixed(1) + ' ' + (total + 40).toFixed(0), off: (-a).toFixed(1) };
+      });
+
+    const sk = this.skyAt(vis, A0, A1, E);
+    const darkness = cl((0.5 - sk.b) / 0.36);
+    const alt = Math.sin(Math.PI * dayFrac);
+    const sunC = this.mx('#FF7A3D', '#FFD25A', Math.pow(alt, 0.55));
+    const sunC2 = this.mx('#FF9A5A', '#FFE9A3', Math.pow(alt, 0.55));
+    const dimSun = !visNight && (vis < this.zmanSec('netz') || vis > this.zmanSec('shkia'));
+
+    const zl = this.zmanimList();
+    const zS = Object.fromEntries(zl.map((z) => [z.id, z.S]));
+    const nextId = (c.zmanim.find((z) => z.isNext) || {}).id || null;
+    const selId = (c.isScrub && s.zSel) || nextId;
+    const sel = c.zmanim.find((z) => z.id === selId) || null;
+    const selS = sel ? zS[sel.id] : 0;
+    const read = sel
+      ? {
+          label: sel.name,
+          hm: sel.time,
+          rel: Math.abs(selS - t) < 30 ? 'הגיע הזמן' : selS > t ? 'בעוד ' + this.left(selS - t) : 'עבר לפני ' + this.left(t - selS),
+          isNext: sel.isNext,
+        }
+      : { label: c.nextZ.name, hm: c.nextZ.time, rel: c.nextZ.left, isNext: true };
+    if (this.readKey !== read.label) {
+      this.readKey = read.label;
+      this.readFlip = !this.readFlip;
+    }
+    this.chipKey = selId;
+
+    const ticks = c.zmanim.map((z, i) => {
+      const S = zl[i].S;
+      const p = posOf(S);
+      const show = Math.abs(S - A1) < 1 || (S < A1 && !visNight) || (S > A1 && visNight);
+      return { x: (p.x - 6).toFixed(1), y: (p.y - 6).toFixed(1), cls: (z.past ? 'past' : '') + (z.isNext ? ' nxt' : '') + (z.id === selId ? ' sel' : '') + (show ? '' : ' hid') };
+    });
+    const zchips = c.zmanim.map((z) => ({
+      id: z.id,
+      label: z.isNext ? 'הבא · ' + z.short : z.short,
+      time: z.time,
+      cls: z.cls,
+      pressed: z.id === selId,
+      pick: () => {
+        const same = Boolean(c.isScrub && s.zSel === z.id);
+        this.setState({ zSel: same ? null : z.id, touched: true });
+        if (!same) this.scrub(zS[z.id]);
+      },
+    }));
+    const stars = [
+      [100, 40, 2, 0, 3.4], [130, 70, 1.8, 1.1, 4.1], [160, 34, 2.4, 2.2, 3.1], [200, 52, 2, 0.6, 3.8], [232, 36, 2.6, 1.7, 4.4], [250, 80, 1.8, 2.6, 3.3],
+      [112, 100, 1.8, 1.4, 4.7], [246, 120, 2, 0.3, 3.6], [140, 126, 1.6, 2.9, 4.2], [206, 110, 1.6, 1.9, 3.5], [92, 60, 1.6, 0.8, 4.9], [176, 28, 1.8, 2.4, 3.7],
+      [222, 96, 1.6, 1.3, 5.1], [258, 50, 1.6, 3.1, 4], [124, 48, 1.6, 0.4, 4.6], [96, 134, 1.6, 2.1, 3.9],
+    ].map(([x, y, sz, d, du]) => ({ x, y, s: sz, d, du }));
+
+    if (!this.wall) {
+      let d = '';
+      for (let r = 0; r < 6; r++) {
+        const y = r * 38;
+        if (r) d += 'M0 ' + y + 'H350';
+        for (let k = 0; k < 5; k++) {
+          const x = (r % 2) * 44 + k * 88;
+          if (x > 0 && x < 350) d += 'M' + x + ' ' + y + 'V' + (y + 38);
+        }
+      }
+      const pt = (r, th) => (CX + r * Math.cos(th)).toFixed(1) + ' ' + (CY - r * Math.sin(th)).toFixed(1);
+      let vs = '';
+      for (let k = 1; k <= 9; k++) {
+        if (k === 5) continue;
+        const th = (Math.PI * k) / 10;
+        vs += 'M' + pt(R0, th) + 'L' + pt(RF, th);
+      }
+      [142, 168].forEach((y) => {
+        vs += 'M' + (CX - RF) + ' ' + y + 'H' + (CX - R0) + 'M' + (CX + R0) + ' ' + y + 'H' + (CX + RF);
+      });
+      const hc = Math.PI / 2;
+      this.wall = {
+        courses: d,
+        voussoirs: vs,
+        keystone: 'M' + pt(R0, hc + 0.14) + 'L' + pt(RF + 14, hc + 0.12) + 'L' + pt(RF + 14, hc - 0.12) + 'L' + pt(R0, hc - 0.14) + 'Z',
+        frameOuter: 'M' + (CX - RF) + ' ' + SILL + 'V' + CY + 'A' + RF + ' ' + RF + ' 0 0 1 ' + (CX + RF) + ' ' + CY + 'V' + SILL + 'Z',
+      };
+    }
+    const dxL = (CX - orb.x) * (1 + 0.5 * (1 - (visNight ? 0.5 : alt)));
+    const x0 = CX - R0;
+    const x1 = CX + R0;
+    const pts = (a, b, c2, d2) => a + ',' + SILL + ' ' + b + ',' + SILL + ' ' + c2 + ',' + (SILL + 34) + ' ' + d2 + ',' + (SILL + 34);
+    const lightOp = visNight ? 0.3 : (0.2 + 0.55 * Math.pow(alt, 0.5)) * (1 - 0.7 * darkness);
+
+    const first = c.hasHero ? c.hero : null;
+    const nextItem = c.upcoming[0] || null;
+    const midCaption = first ? first.short + ' · עוד ' + first.left : nextItem ? 'הבא: ' + nextItem.short + ' ב-' + nextItem.startT : 'הכול סומן להיום';
+
+    const actives = c.active.map((a, i) => ({
+      ...a,
+      ringOff: this.dash(157.1, a.pctLeft),
+      dotCls: a.isMoon ? 'moon' : '',
+      cls: a.isMarking ? 'marking' : '',
+    }));
+
+    const msgs = c.messages.map((m) => {
+      const isNext = m.id === 'next';
+      return { ...m, action: isNext ? 'לפרטים' : m.action, body: m.body.replace(/(\d)–(\d)/g, '$1⁠–⁠$2'), noAction: !m.hasAction };
+    });
+
+    const look = s.look;
+    const fl = s.filter;
+    const tlAll = c.timeline;
+    const cnt = { all: tlAll.length, open: c.activeN + c.upcomingN, done: c.doneN, missed: c.missedN };
+    const pass = (it) => fl === 'all' || (fl === 'open' && (it.isActive || it.isUpcoming)) || (fl === 'done' && it.isDone) || (fl === 'missed' && it.isMissed);
+    const raw = this.items();
+    const rawOf = (id) => raw.find((x) => x.id === id);
+    const rows = tlAll.filter(pass).map((it) => {
+      const dn = c.done.find((d) => d.id === it.id);
+      const act = c.active.find((a) => a.id === it.id);
+      const r = rawOf(it.id);
+      const w = Math.max(3, it.p1 - it.p0);
+      const fillPct = act && r ? Math.max(0, Math.min(100, ((t - r.S) / (r.E - r.S)) * 100)) : 0;
+      const dAt = this.doneAt(it.id);
+      return {
+        ...it,
+        late: dn ? dn.late : false,
+        undoLabel: 'ביטול הסימון של ' + it.name,
+        winEnd: it.endsTomorrow ? 'מחר ' + it.endT : it.endT,
+        pctGone: act ? act.pctGone : 0,
+        urgentCls: act ? act.urgentCls : '',
+        dotCls: it.isMoon ? 'moon' : '',
+        barLabel: act ? 'נשארו ' + act.left + ' מתוך החלון' : '',
+        rowCls: it.status + (it.isMarking ? ' marking' : ''),
+        span: '',
+        notActive: !it.isActive,
+        w: w.toFixed(1),
+        p0: it.p0,
+        fill: fillPct.toFixed(1),
+        dotR: dAt != null ? Math.max(1, Math.min(99, ((dAt - A0) / (E - A0)) * 100)).toFixed(1) : 0,
+      };
+    });
+
+    if (look === 'cards') {
+      let col = 0;
+      rows.forEach((r, i) => {
+        if (r.isActive) {
+          if (col === 1 && i > 0) rows[i - 1].span = 'span2';
+          r.span = 'span2';
+          col = 0;
+        } else col = (col + 1) % 2;
+      });
+      if (col === 1 && rows.length) rows[rows.length - 1].span = 'span2';
+    }
+    const entries = [];
+    if (look === 'rail') {
+      const nowRow = { isNow: true, isItem: false, time: c.nowT, nowWord: c.isScrub ? 'בתצוגה' : 'עכשיו', label: (c.isScrub ? 'בתצוגה ' : 'עכשיו ') + c.nowT };
+      let placed = fl !== 'all' && fl !== 'open';
+      rows.forEach((it) => {
+        if (!placed && it.isUpcoming) {
+          entries.push(nowRow);
+          placed = true;
+        }
+        entries.push({ ...it, isNow: false, isItem: true });
+      });
+      if (!placed && rows.length) entries.push(nowRow);
+    }
+
+    const MC = 163.4;
+    const ringRows = look === 'rings' ? rows.map((it) => {
+      const f = it.isActive ? Math.max(0.03, Math.min(1, (it.pctGone || 0) / 100)) : it.isDone || it.isMissed ? 1 : 0;
+      const on = s.sel === it.id;
+      return {
+        ...it,
+        sel: on,
+        cardCls: it.status + (it.isMarking ? ' marking' : '') + (on ? ' open' : ''),
+        ringOff: (MC * (1 - f)).toFixed(1),
+        ringOp: f > 0 ? 1 : 0,
+        showItem: !it.isDone && !it.isMissed,
+        aria: it.name + ', ' + it.statusText + ', ' + it.range,
+        pick: () => this.setState((st) => ({ sel: st.sel === it.id ? null : it.id })),
+      };
+    }) : [];
+    const tot = tlAll.length;
+    const heroRings = [
+      { cls: 'd', r: 58, n: c.doneN },
+      { cls: 'o', r: 46, n: cnt.open },
+      { cls: 'm', r: 34, n: c.missedN },
+    ].map((h) => {
+      const C = 2 * Math.PI * h.r;
+      const f = tot ? h.n / tot : 0;
+      return { cls: h.cls, r: h.r, c: C.toFixed(1), off: (C * (1 - f)).toFixed(1), op: f > 0 ? 1 : 0 };
+    });
+    const legPick = (k) => () => this.setState((st) => ({ filter: st.filter === k ? 'all' : k, sel: null }));
+    const heroLeg = [
+      { cls: 'd', label: 'בוצעו', n: c.doneN, pressed: fl === 'done', pick: legPick('done') },
+      { cls: 'o', label: 'פתוחות', n: cnt.open, pressed: fl === 'open', pick: legPick('open') },
+      { cls: 'm', label: 'פוספסו', n: c.missedN, pressed: fl === 'missed', pick: legPick('missed') },
+    ];
+
+    const emptyMap = {
+      all: ['אין מצוות להיום', 'כשיהיו מצוות להיום הן יופיעו כאן.'],
+      open: ['הכול נסגר להיום', 'אין מצווה פתוחה או ממתינה כרגע.'],
+      done: ['עוד לא סומן כלום', c.doneEmpty],
+      missed: ['אין מה לתקן', c.missedEmpty],
+    };
+    const em = emptyMap[fl];
+    const pick = (k) => () => this.setState({ filter: k, sel: null });
+
+    return {
+      ...c,
+      sceneCls: (s.drag ? 'drag ' : '') + (c.isScrub ? 'scr ' : '') + (s.touched ? '' : 'hintOn'),
+      liveMode: s.drag ? 'off' : 'polite',
+      gDown: (e) => this.gDown(e),
+      gMove: (e) => this.gMove(e),
+      gUp: (e) => this.gUp(e),
+      gKey: (e) => this.gKey(e),
+      skyGrad: 'linear-gradient(180deg,' + sk.top + ' 0%,' + sk.bot + ' 100%)',
+      starsOp: darkness.toFixed(2),
+      stars,
+      cloudOp: (visNight ? 0.1 : 0.14 + 0.34 * cl(sk.b)).toFixed(2),
+      cloudC: 'color-mix(in srgb, ' + sk.bot + ' 40%, #fff 60%)',
+      rayOp: visNight ? 0 : (0.08 + 0.3 * (1 - alt)).toFixed(2),
+      auraCls: visNight ? 'off' : '',
+      auraBg: 'radial-gradient(circle,' + sunC + '55 0,' + sunC + '1f 42%,transparent 70%)',
+      mauraCls: visNight ? '' : 'off',
+      moonCx: moon.x.toFixed(1),
+      moonCy: moon.y.toFixed(1),
+      hillFar: 'color-mix(in srgb, ' + sk.bot + ' 42%, #4a3a4e 58%)',
+      hillNear: 'color-mix(in srgb, ' + sk.bot + ' 20%, #2a2030 80%)',
+      lightsOp: cl((darkness - 0.4) / 0.5).toFixed(2),
+      courses: this.wall.courses,
+      voussoirs: this.wall.voussoirs,
+      keystone: this.wall.keystone,
+      frameOuter: this.wall.frameOuter,
+      shadeOp: visNight ? 1 : 0.8,
+      jambL: pts(x0 - 16, x0, x0 + dxL, x0 - 16 + dxL),
+      jambR: pts(x1, x1 + 16, x1 + 16 + dxL, x1 + dxL),
+      lightPts: pts(x0, x1, x1 + dxL, x0 + dxL),
+      lightC: visNight ? '#D6E0F5' : this.mx(sunC2, '#fff3d0', 0.35),
+      lightOp: lightOp.toFixed(2),
+      spillBg: visNight ? 'radial-gradient(ellipse 60% 55% at 50% 52%,rgba(214,224,245,.35),transparent 70%)' : 'radial-gradient(ellipse 60% 55% at 50% 52%,' + sunC + '66,transparent 70%)',
+      spillOp: visNight ? 0.35 : ((0.25 + 0.6 * alt) * (1 - 0.8 * darkness)).toFixed(2),
+      read,
+      readCls: this.readFlip ? 'ra' : 'rb',
+      dayPath: 'M' + (CX + R) + ' ' + CY + 'A' + R + ' ' + R + ' 0 0 0 ' + (CX - R) + ' ' + CY,
+      nightPath: 'M' + (CX - R) + ' ' + CY + 'A' + R + ' ' + R + ' 0 0 1 ' + (CX + R) + ' ' + CY,
+      arcLen: ARC.toFixed(1),
+      dayDash: (ARC - dayAt).toFixed(1),
+      nightDash: (ARC - nightAt).toFixed(1),
+      dayTr: trail(dayAt, ARC),
+      nightTr: trail(nightAt, ARC),
+      dayTrOp: !visNight && dayAt > 3 ? 1 : 0,
+      nightTrOp: visNight && nightAt > 3 ? 1 : 0,
+      dayOpa: visNight ? 0 : 1,
+      nightOpa: visNight ? 1 : 0,
+      sunC2,
+      ticks,
+      zchips,
+      showGhost: c.isScrub,
+      ghostX: c.isScrub ? (posOf(this.liveSec()).x - 7).toFixed(1) : 0,
+      ghostY: c.isScrub ? (posOf(this.liveSec()).y - 7).toFixed(1) : 0,
+      sunCx: sun.x.toFixed(1),
+      sunCy: sun.y.toFixed(1),
+      sunCls: visNight ? 'off' : dimSun ? 'dim' : '',
+      sunBg: 'radial-gradient(circle at 36% 30%,#fffbe8 0,' + sunC2 + ' 38%,' + sunC + ' 100%)',
+      sunSh: '0 0 0 6px ' + sunC + '38,0 0 26px ' + sunC + 'cc',
+      moonCls: visNight ? '' : 'off',
+      sunX: (sun.x - 15).toFixed(1),
+      sunY: (sun.y - 15).toFixed(1),
+      moonX: (moon.x - 14).toFixed(1),
+      moonY: (moon.y - 14).toFixed(1),
+      grabX: (orb.x - 24).toFixed(1),
+      grabY: (orb.y - 24).toFixed(1),
+      hintText: visNight ? 'גררו את הירח' : 'גררו את השמש',
+      hintCls: s.touched || c.isScrub ? 'gone' : '',
+      sliderMin: Math.round(A0),
+      sliderMax: Math.round(E - 60),
+      sliderNow: Math.round(t),
+      sliderText: c.nowT + ', הבא: ' + c.nextZ.name + ' ' + c.nextZ.left,
+      midCaption,
+      edgeStart: c.zmanim.find((z) => z.id === 'alot').time,
+      edgeEnd: c.zmanim.find((z) => z.id === 'tzeit').time,
+      hasActive: c.activeN > 0,
+      actives,
+      railCls: actives.length > 1 ? 'many' : 'one',
+      msgs,
+      hasMsgs: msgs.length > 0,
+      noMsgs: msgs.length === 0,
+      lkRail: { pressed: look === 'rail', pick: () => this.setState({ look: 'rail' }) },
+      lkCards: { pressed: look === 'cards', pick: () => this.setState({ look: 'cards' }) },
+      lkRings: { pressed: look === 'rings', pick: () => this.setState({ look: 'rings' }) },
+      filters: [
+        { label: 'הכל', count: cnt.all, pressed: fl === 'all', pick: pick('all') },
+        { label: 'פתוח', count: cnt.open, pressed: fl === 'open', pick: pick('open') },
+        { label: 'בוצע', count: cnt.done, pressed: fl === 'done', pick: pick('done') },
+        { label: 'פוספס', count: cnt.missed, pressed: fl === 'missed', pick: pick('missed') },
+      ],
+      noRows: rows.length === 0,
+      hasRows: rows.length > 0,
+      emptyTitle: em[0],
+      emptyText: em[1],
+      canReset: fl !== 'all',
+      resetFilter: () => this.setState({ filter: 'all' }),
+      isRail: look === 'rail',
+      isCards: look === 'cards',
+      isRings: look === 'rings',
+      lkEnter: 'lk-' + this.flip('look', look + '|' + fl),
+      entries,
+      cardRows: look === 'cards' ? rows : [],
+      ringRows,
+      heroRings,
+      heroLeg,
+      heroTotal: tot,
+      hasTot: tot > 0,
+      heroAria: 'בוצעו ' + c.doneN + ', פתוחות ' + cnt.open + ', פוספסו ' + c.missedN + ' מתוך ' + tot,
+    };
+  }
+}
+</script>
+
