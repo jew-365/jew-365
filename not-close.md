@@ -307,7 +307,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it is:** the full-bleed arc hero with preview, the Open now ring cards, Messages, and My day in three persisted looks.
   - **Expected result:** the guide's home topic describes the screen and every check in the spec is green.
   - **Done:** 2026-10-29. Typecheck, lint, check:dox and the whole `pnpm test:tz` pass; seen in the web build at phone size; an independent review found nine issues, all fixed. Not checked: a phone (the sun drag inside the scroll view on Android, chip centring in Hebrew, the first name in the greeting).
-  - **Status:** Version `1.0.21` · Committed: no · Pushed: no · Live: preview `1.0.21-20` (group `cc2feda6-f3a0-4aff-a457-1c1c41db9f98`; first on `1.0.21-18`), not in production · Channel: `preview`
+  - **Status:** Version `1.0.21` · Committed: `efe17c1` feat(home): day-arc hero, ring cards and My day; quiet hours; late marks · Pushed: yes (2026-10-29) · Live: preview `1.0.21-20` (group `cc2feda6-f3a0-4aff-a457-1c1c41db9f98`; first on `1.0.21-18`), not in production · Channel: `preview`
 
 ### High — Notification quiet hours of 2026-10-29
 - [ ] Let the user keep notifications out of chosen hours
@@ -317,7 +317,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Expected result:** with "not before 07:00", Shacharit's netz reminder (Jerusalem, 2026-10-28) is scheduled at 07:00 under its own id, the mitzvah screen names 07:00, and a rebuild at 06:30 keeps it; with "not after 22:00" alone, the bedtime Shema's 23:00 reminder is not scheduled; the pre-block notice and the check-ins keep their times; the search finds both rows; typecheck, lint, check:dox and the whole `pnpm test:tz` pass.
   - **For the owner's word:** D10, D15, D16, D17, D25 of the spec.
   - **Done:** 2026-10-29. Typecheck, lint, check:dox and the whole `pnpm test:tz` (217 suites, 5,477 tests, four zones) pass; seen only in tests, not on a phone. One spec fixture was wrong (Jerusalem shkia on 2026-10-12 is 18:10, so the hilula case uses an hour of 19:00).
-  - **Status:** Version `1.0.21` · Committed: no · Pushed: no · Live: preview `1.0.21-20` (group `cc2feda6-f3a0-4aff-a457-1c1c41db9f98`), not in production · Channel: `preview`
+  - **Status:** Version `1.0.21` · Committed: `efe17c1` feat(home): day-arc hero, ring cards and My day; quiet hours; late marks · Pushed: yes (2026-10-29) · Live: preview `1.0.21-20` (group `cc2feda6-f3a0-4aff-a457-1c1c41db9f98`), not in production · Channel: `preview`
 
 ### High — Late marks of 2026-10-29
 - [ ] Mark a missed mitzvah as done in time or after its time
@@ -333,7 +333,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it is:** the `late` map in [src/stores/useCompletionsStore.ts](src/stores/useCompletionsStore.ts) beside `completions`, the judge's `late` state in [src/utils/historyStats.ts](src/utils/historyStats.ts), [src/utils/lateMarks.ts](src/utils/lateMarks.ts) and the shared [src/hooks/useLateMarkDialog.tsx](src/hooks/useLateMarkDialog.tsx); the notifications code is unchanged.
   - **Expected result:** at 10:00 in Jerusalem on 2026-10-28, marking Shacharit (closed at sof zman tefila) asks; "in time" files 60 s before the window's end and the day reads 100%; "after" reads 50% in history with a "באיחור" chip, while home and the streak count it, and `/late-marks` lists it with its delay.
   - **Done:** 2026-10-29. Typecheck, lint, check:dox and the whole `pnpm test:tz` (222 suites, 5,719 tests, four zones) pass; five new suites pin the rules and the screens, and six existing tests now answer the dialog. An independent review found five small issues (a NowCard closed since the last tick, auto-scroll behind the sheet, the check-in deadline after the question, the cards look's tile, two sheets in a row on iOS), all fixed; a late flag coming back after an OTA rollback and a re-mark of the same day was left as too rare to fix. Not checked: a phone or the web preview (another session's Metro server held the folder), the sheet over the reader and the check-in on iOS.
-  - **Status:** Version `1.0.21` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version `1.0.21` · Committed: `efe17c1` feat(home): day-arc hero, ring cards and My day; quiet hours; late marks · Pushed: yes (2026-10-29) · Live: preview `1.0.21-20` (group `cc2feda6-f3a0-4aff-a457-1c1c41db9f98`), not in production · Channel: `preview`
 
 ## Bugs
 

@@ -48,7 +48,7 @@ Every other EAS build is superseded, and no other AAB was uploaded to Play ([act
 
 ## Not in production yet
 
-- **Over the air:** the new home screen (preview `1.0.21-18`), its hero tweaks, the quiet hours, the 23:00 bedtime Shema, the reader tap and the timeline default (preview `1.0.21-19`), the hero polish and the late mark (preview `1.0.21-20`), all since 2026-10-29, not in production, and uncommitted.
+- **Over the air:** the new home screen (preview `1.0.21-18`), its hero tweaks, the quiet hours, the 23:00 bedtime Shema, the reader tap and the timeline default (preview `1.0.21-19`), the hero polish and the late mark (preview `1.0.21-20`), all since 2026-10-29, not in production; committed and pushed in `efe17c1`.
 - **Waits for the store production release** (finished, committed and pushed; [not-close.md](not-close.md), High — the 1.0.21 store release, and Bugs): the Jew 365 identity, the native half of the redesign, the four-symbol icons, the iOS build fixes, the store copy, the no-promise copy, the China mainland availability, and the Hebrew Android app name.
 - **Waits for the next native build:** the Selichot space saving (about 5.5 MB), the fresh-install stamps in the embedded bundle, the Hebrew Android app name in production, and the Build tasks (arm-only direct APK, R8). A build that raises `version` cuts installs off from updates until they install it, so it also needs a version decision.
 
