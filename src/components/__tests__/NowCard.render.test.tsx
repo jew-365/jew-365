@@ -70,7 +70,7 @@ describe('NowCard', () => {
   it('calls onOpenText from the text button', () => {
     const onOpenText = jest.fn();
     setup({ onOpenText });
-    fireEvent.press(screen.getByRole('button', { name: `נוסח — ${NAME}` }));
+    fireEvent.press(screen.getByRole('button', { name: `נוסח - ${NAME}` }));
     expect(onOpenText).toHaveBeenCalledTimes(1);
     expect(screen.getByText('נוסח')).toBeOnTheScreen();
   });

@@ -15,7 +15,7 @@ export function renderGuideHtml(language: AppLanguage): string {
   const he = language === 'he';
   const root = he ? '../' : '../../';
   const tr = (key: string) => escapeHtml(translate(key, undefined, language, null));
-  const title = he ? `${tr('app.name')} — ${tr('guide.title')}` : `${tr('guide.title')} — ${tr('app.name')}`;
+  const title = he ? `${tr('app.name')} - ${tr('guide.title')}` : `${tr('guide.title')} - ${tr('app.name')}`;
   const footerName = he
     ? `${tr('app.name')} (${escapeHtml(translate('app.name', undefined, 'en', null))})`
     : tr('app.name');

@@ -471,8 +471,8 @@ const CASES: SmokeCase[] = [
     wallClock: NIGHT_OF_THE_14TH,
     check: async (language) => {
       await text(
-        'תצוגה עתידית — אפשר לסמן רק ביום עצמו',
-        'Future view — marking is available only on that day',
+        'תצוגה עתידית - אפשר לסמן רק ביום עצמו',
+        'Future view - marking is available only on that day',
       )(language);
       expect(screen.queryByText('המצוות של היום')).toBeNull();
       expect(screen.queryByText('Day view')).toBeNull();
@@ -483,7 +483,7 @@ const CASES: SmokeCase[] = [
     label: 'a past day',
     Screen: DayScreen,
     params: { date: '2026-10-21' },
-    check: text('תצוגה היסטורית — לא ניתן לסמן', 'Historical view — marking is disabled'),
+    check: text('תצוגה היסטורית - לא ניתן לסמן', 'Historical view - marking is disabled'),
   },
   {
     file: 'day/[date]',

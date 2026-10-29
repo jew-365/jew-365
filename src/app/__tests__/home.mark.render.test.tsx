@@ -77,6 +77,6 @@ describe('home on a mark', () => {
 
     await waitFor(() => expect(screen.queryByText('נעשה!')).toBeNull(), { timeout: 3000 });
     expect(windows.mock.calls.length - settled).toBe(1);
-    expect(screen.getByRole('button', { name: 'ביטול סימון — תפילת ערבית' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'ביטול סימון - תפילת ערבית' })).toBeOnTheScreen();
   });
 });

@@ -91,7 +91,7 @@ describe('day view', () => {
 
     fireEvent.press(screen.getByRole('button', { name: `היום הקודם, ${label(27)}` }));
     expect(screen.getByText(title(27))).toBeOnTheScreen();
-    expect(screen.getByText('תצוגה היסטורית — לא ניתן לסמן')).toBeOnTheScreen();
+    expect(screen.getByText('תצוגה היסטורית - לא ניתן לסמן')).toBeOnTheScreen();
     expect(screen.queryByText('המצוות של היום')).toBeNull();
 
     fireEvent.press(screen.getByRole('button', { name: `היום הבא, ${label(28)}` }));
@@ -100,7 +100,7 @@ describe('day view', () => {
 
     fireEvent.press(screen.getByRole('button', { name: `היום הבא, ${label(29)}` }));
     expect(screen.getByText(title(29))).toBeOnTheScreen();
-    expect(screen.getByText('תצוגה עתידית — אפשר לסמן רק ביום עצמו')).toBeOnTheScreen();
+    expect(screen.getByText('תצוגה עתידית - אפשר לסמן רק ביום עצמו')).toBeOnTheScreen();
 
     expect(mockPush).not.toHaveBeenCalled();
     expect(mockBack).not.toHaveBeenCalled();

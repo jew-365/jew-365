@@ -168,7 +168,7 @@ export const MITZVOT: Mitzvah[] = [
         label: 'הגיע זמן הנחת תפילין',
         bodyVariants: ['הגיע זמן הנחת תפילין', 'התפילין מחכות', 'בוקר טוב, זמן תפילין'],
       },
-      { anchor: 'start', offsetMin: 180, label: 'תזכורת — עדיין לא הנחת תפילין', skipIfDone: true },
+      { anchor: 'start', offsetMin: 180, label: 'תזכורת - עדיין לא הנחת תפילין', skipIfDone: true },
       { anchor: 'end', offsetMin: -45, label: "נותרו 45 דק' להנחת תפילין", skipIfDone: true },
     ],
     computeWindow: ({ zmanim }) => win(zmanim.misheyakir, zmanim.shkia),
@@ -250,7 +250,7 @@ export const MITZVOT: Mitzvah[] = [
         label: 'זמן תפילת ערבית',
         bodyVariants: ['זמן תפילת ערבית', 'ערבית לסיום היום', 'הלילה נכנס, זמן ערבית'],
       },
-      { anchor: 'start', offsetMin: 120, label: 'תזכורת — ערבית', skipIfDone: true },
+      { anchor: 'start', offsetMin: 120, label: 'תזכורת - ערבית', skipIfDone: true },
     ],
     computeWindow: (ctx) => win(nightfall(ctx.zmanim, ctx.location), nextAlot(ctx)),
   },
@@ -365,7 +365,7 @@ export const MITZVOT: Mitzvah[] = [
         includeContentInBody: true,
         bodyVariants: ['זמן ספירת העומר', 'הלילה סופרים את העומר', 'ספירת העומר לפני השינה'],
       },
-      { anchor: 'start', offsetMin: 60, label: 'תזכורת — ספירת העומר', skipIfDone: true },
+      { anchor: 'start', offsetMin: 60, label: 'תזכורת - ספירת העומר', skipIfDone: true },
     ],
     computeWindow: (ctx) => {
       if (omerDayFor(ctx.zmanim.chatzot, ctx.location.tz) === null) return null;

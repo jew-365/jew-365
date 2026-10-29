@@ -77,12 +77,12 @@ describe('DayLooks', () => {
     expect(handlers.onMark).toHaveBeenCalledWith(M);
     expect(screen.queryByRole('button', { name: 'סמן A כהושלם' })).toBeNull();
 
-    const undo = screen.getAllByRole('button', { name: /^ביטול סימון — / });
+    const undo = screen.getAllByRole('button', { name: /^ביטול סימון - / });
     expect(undo).toHaveLength(3);
     expect(undo.map((node: Node) => node.props.accessibilityLabel)).toEqual([
-      'ביטול סימון — D1',
-      'ביטול סימון — S',
-      'ביטול סימון — D2',
+      'ביטול סימון - D1',
+      'ביטול סימון - S',
+      'ביטול סימון - D2',
     ]);
     expect(screen.getAllByText('בטל')).toHaveLength(3);
     fireEvent.press(undo[0]);

@@ -212,7 +212,7 @@ describe('home between midnight and alot', () => {
     useCompletionsStore.setState({ completions: { '2027-06-14': { maariv: Date.now() } } });
     renderAt(NIGHT_OF_THE_14TH);
     expect(within(dayCard('maariv')).getByText(/^בוצע ב-/)).toBeOnTheScreen();
-    fireEvent.press(screen.getByRole('button', { name: 'ביטול סימון — תפילת ערבית' }));
+    fireEvent.press(screen.getByRole('button', { name: 'ביטול סימון - תפילת ערבית' }));
     expect(completions()['2027-06-14']).toBeUndefined();
     expect(within(dayCard('maariv')).getByText(/^פתוח · נשארו/)).toBeOnTheScreen();
   });
@@ -229,7 +229,7 @@ describe('home between midnight and alot', () => {
 
   it("opens the text on the window's day", () => {
     renderAt(NIGHT_OF_THE_14TH);
-    fireEvent.press(screen.getByRole('button', { name: 'נוסח — תפילת ערבית' }));
+    fireEvent.press(screen.getByRole('button', { name: 'נוסח - תפילת ערבית' }));
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/siddur/[id]',
       params: { id: 'maariv', date: '2027-06-14' },
@@ -444,7 +444,7 @@ describe('home between midnight and alot', () => {
     it('opens the reader with no date on Thursday night, on ליל שישי', () => {
       const thursdayNight = at(JERUSALEM, '2026-12-17T21:00');
       renderAt('2026-12-17T21:00');
-      fireEvent.press(screen.getByRole('button', { name: 'נוסח — חק לישראל' }));
+      fireEvent.press(screen.getByRole('button', { name: 'נוסח - חק לישראל' }));
       expect(mockPush).toHaveBeenCalledTimes(1);
       expect(mockPush.mock.calls[0][0]).toStrictEqual({ pathname: '/siddur/[id]', params: { id: 'chok_leyisrael' } });
       expect(chokReaderPortion({ now: thursdayNight }, JERUSALEM, true).slot).toBe('thuNight');

@@ -81,7 +81,7 @@ describe('StreakRing', () => {
 
   it('percent mode with nothing due draws an empty arc and a dash', () => {
     renderWithTheme(<StreakRing percent={{ done: 0, total: 0 }} />);
-    expect(screen.getByText('—')).toBeOnTheScreen();
+    expect(screen.getByText('-')).toBeOnTheScreen();
     expect(screen.getByLabelText('עוד אין מצוות שזמנן הגיע')).toBeOnTheScreen();
     expect(circles()).toHaveLength(2);
   });
