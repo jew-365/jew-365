@@ -7,6 +7,7 @@ import {
   miniRingFraction,
   orderDayEntries,
   railNowIndex,
+  timeOrderDayEntries,
   ringDashOffset,
   type DayEntry,
 } from '../homeDay';
@@ -58,9 +59,13 @@ describe('homeDay', () => {
   });
 
   it('finds the rail now row', () => {
-    expect(railNowIndex(ordered)).toBe(2);
-    expect(railNowIndex([D1, M])).toBeNull();
-    expect(railNowIndex([A])).toBe(1);
+    expect(railNowIndex(timeOrderDayEntries(ordered), NOW)).toBe(6);
+    expect(railNowIndex([D1, M], NOW)).toBeNull();
+    expect(railNowIndex([A], NOW)).toBe(1);
+  });
+
+  it('orders the rail by time alone', () => {
+    expect(timeOrderDayEntries(ordered).map((e) => e.id)).toEqual(['A', 'D1', 'D2', 'M', 'S', 'B', 'U']);
   });
 
   it('words the status', () => {

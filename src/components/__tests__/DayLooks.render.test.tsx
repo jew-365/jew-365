@@ -107,12 +107,21 @@ describe('DayLooks', () => {
     expect(dayIds()).toEqual(['A', 'B', 'U', 'D1', 'S', 'D2', 'M']);
   });
 
-  it('rail: the now row sits between B and U', () => {
+  it('rail: time order whatever the status, the now row between B and U', () => {
     setup('rail');
     const order = screen.UNSAFE_root.findAll(
       (node: Node) => typeof node.type === 'string' && /^home-(day|rail-now)/.test(String(node.props.testID)),
     ).map((node: Node) => String(node.props.testID));
-    expect(order.slice(0, 4)).toEqual(['home-day-A', 'home-day-B', 'home-rail-now', 'home-day-U']);
+    expect(order).toEqual([
+      'home-day-D1',
+      'home-day-D2',
+      'home-day-S',
+      'home-day-A',
+      'home-day-M',
+      'home-day-B',
+      'home-rail-now',
+      'home-day-U',
+    ]);
     expect(screen.getByText('עכשיו 12:30')).toBeOnTheScreen();
   });
 

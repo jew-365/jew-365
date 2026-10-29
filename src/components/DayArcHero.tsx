@@ -39,6 +39,8 @@ import {
   nextZman,
   relativeLabel,
   skyAt,
+  stageOffset,
+  stageUnits,
   type ArcPoint,
   type ArcZman,
   type DayFrame,
@@ -46,9 +48,9 @@ import {
   type ZmanId,
 } from '@/utils/dayArc';
 
-export const SCENE_MIN = scaled(150);
-export const SCENE_MAX = scaled(216);
-export const HERO_CHROME = scaled(230);
+export const SCENE_MIN = scaled(179);
+export const SCENE_MAX = scaled(ARC.height);
+export const HERO_CHROME = scaled(168);
 
 export function sceneScale(windowHeight: number): number {
   return Math.min(SCENE_MAX, Math.max(SCENE_MIN, windowHeight / 2 - HERO_CHROME)) / ARC.height;
@@ -114,7 +116,10 @@ export const DayArcHero = React.memo(function DayArcHero({
   const { colors } = useTheme();
   const { t } = useI18n();
   const rtl = useRowMirrored();
-  const k = sceneScale(useWindowDimensions().height);
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const k = sceneScale(windowHeight);
+  const units = stageUnits(windowWidth, k);
+  const offset = stageOffset(units);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [touched, setTouched] = useState(false);
   const drag = useRef<DragRef | null>(null);
@@ -250,6 +255,11 @@ export const DayArcHero = React.memo(function DayArcHero({
 
   const clampTo = (ms: number) => Math.min(frame.end.getTime() - 60000, Math.max(frame.start.getTime(), ms));
 
+  const arcPointOf = (e: GestureResponderEvent): ArcPoint => ({
+    x: e.nativeEvent.locationX / k + offset,
+    y: e.nativeEvent.locationY / k,
+  });
+
   const grab = (
     <View
       testID="home-arc-grab"
@@ -268,12 +278,13 @@ export const DayArcHero = React.memo(function DayArcHero({
       onStartShouldSetResponder={(e?: GestureResponderEvent) => {
         if (!e) return true;
         const sun = arcPoint(shown, frame, rtl);
-        return Math.hypot(e.nativeEvent.locationX / k - sun.x, e.nativeEvent.locationY / k - sun.y) <= GRAB_RADIUS;
+        const touch = arcPointOf(e);
+        return Math.hypot(touch.x - sun.x, touch.y - sun.y) <= GRAB_RADIUS;
       }}
       onMoveShouldSetResponder={() => false}
       onResponderTerminationRequest={() => false}
       onResponderGrant={(e: GestureResponderEvent) => {
-        const p0 = { x: e.nativeEvent.locationX / k, y: e.nativeEvent.locationY / k };
+        const p0 = arcPointOf(e);
         drag.current = {
           state: dragStart(p0, shown.getTime(), frame, rtl),
           startPoint: p0,
@@ -350,6 +361,7 @@ export const DayArcHero = React.memo(function DayArcHero({
           selected={preview?.zman ?? null}
           rtl={rtl}
           k={k}
+          units={units}
           sky={sky}
           ink={ink}
           clock={clockOf(shown, tz)}

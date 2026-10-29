@@ -39,7 +39,13 @@ export type ArcZman = { id: ZmanId; at: Date };
 export type DayFrame = { start: Date; tzeit: Date; end: Date; zmanim: readonly ArcZman[] };
 export type ArcPoint = { x: number; y: number };
 
-export const ARC = { width: 350, height: 216, cx: 175, cy: 158, rx: 142, ry: 116, nrx: 100, nry: 46 } as const;
+export const ARC = { width: 350, height: 286, skyHeight: 216, cx: 175, cy: 158, r: 112 } as const;
+
+export const HALF_LENGTH = Math.PI * ARC.r;
+
+export const stageUnits = (windowWidth: number, k: number): number => windowWidth / k;
+
+export const stageOffset = (units: number): number => ARC.cx - units / 2;
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
@@ -78,8 +84,10 @@ export function arcFraction(at: Date, f: DayFrame): { night: boolean; fraction: 
 export function arcPoint(at: Date, f: DayFrame, rtl: boolean): ArcPoint {
   const { night, fraction } = arcFraction(at, f);
   const angle = Math.PI * fraction;
-  const x = night ? ARC.cx - ARC.nrx * Math.cos(angle) : ARC.cx + ARC.rx * Math.cos(angle);
-  const y = night ? ARC.cy + ARC.nry * Math.sin(angle) : ARC.cy - ARC.ry * Math.sin(angle);
+  const dx = ARC.r * Math.cos(angle);
+  const dy = ARC.r * Math.sin(angle);
+  const x = night ? ARC.cx - dx : ARC.cx + dx;
+  const y = night ? ARC.cy + dy : ARC.cy - dy;
   return { x: rtl ? x : 2 * ARC.cx - x, y };
 }
 
@@ -87,39 +95,23 @@ export function timeAtPoint(p: ArcPoint, f: DayFrame, rtl: boolean): { atMs: num
   const x = rtl ? p.x : 2 * ARC.cx - p.x;
   const start = f.start.getTime();
   const tzeit = f.tzeit.getTime();
-  if (p.y <= ARC.cy) {
-    const nu = (x - ARC.cx) / ARC.rx;
-    const nv = (ARC.cy - p.y) / ARC.ry;
-    return { atMs: start + (Math.atan2(nv, nu) / Math.PI) * (tzeit - start), rho: Math.hypot(nu, nv) };
-  }
-  const nu = (x - ARC.cx) / ARC.nrx;
-  const nv = (p.y - ARC.cy) / ARC.nry;
-  return {
-    atMs: tzeit + (Math.atan2(nv, -nu) / Math.PI) * (f.end.getTime() - tzeit),
-    rho: Math.hypot(nu, nv),
-  };
+  const nu = (x - ARC.cx) / ARC.r;
+  const nv = (ARC.cy - p.y) / ARC.r;
+  const rho = Math.hypot(nu, nv);
+  if (nv >= 0) return { atMs: start + (Math.atan2(nv, nu) / Math.PI) * (tzeit - start), rho };
+  return { atMs: tzeit + (Math.atan2(-nv, -nu) / Math.PI) * (f.end.getTime() - tzeit), rho };
 }
 
-export function ellipseLength(rx: number, ry: number, fraction: number): number {
-  const steps = 120;
-  const sweep = Math.PI * clamp01(fraction);
-  let length = 0;
-  let prevX = rx;
-  let prevY = 0;
-  for (let i = 1; i <= steps; i++) {
-    const angle = (sweep * i) / steps;
-    const x = rx * Math.cos(angle);
-    const y = ry * Math.sin(angle);
-    length += Math.hypot(x - prevX, y - prevY);
-    prevX = x;
-    prevY = y;
-  }
-  return length;
-}
+export const arcLength = (fraction: number): number => HALF_LENGTH * clamp01(fraction);
 
-export const dayPath = (rtl: boolean) => (rtl ? 'M317 158A142 116 0 0 0 33 158' : 'M33 158A142 116 0 0 1 317 158');
+const ARC_LEFT = ARC.cx - ARC.r;
+const ARC_RIGHT = ARC.cx + ARC.r;
+const halfPath = (from: number, to: number, sweep: 0 | 1) =>
+  `M${from} ${ARC.cy}A${ARC.r} ${ARC.r} 0 0 ${sweep} ${to} ${ARC.cy}`;
 
-export const nightPath = (rtl: boolean) => (rtl ? 'M75 158A100 46 0 0 0 275 158' : 'M275 158A100 46 0 0 1 75 158');
+export const dayPath = (rtl: boolean) => (rtl ? halfPath(ARC_RIGHT, ARC_LEFT, 0) : halfPath(ARC_LEFT, ARC_RIGHT, 1));
+
+export const nightPath = (rtl: boolean) => (rtl ? halfPath(ARC_LEFT, ARC_RIGHT, 0) : halfPath(ARC_RIGHT, ARC_LEFT, 1));
 
 export type DragState = { offsetMs: number; prevMs: number };
 

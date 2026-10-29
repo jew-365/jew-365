@@ -88,8 +88,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'דף הבית וסימון מצווה', en: 'Home and marking a mitzvah' },
     body: [
       {
-        he: 'בראש דף הבית קשת היום: השמש או הירח נעים לאורכה לפי הזמנים ההלכתיים של המיקום שנבחר, השמיים משנים את צבעם מעלות השחר ועד הלילה, ומתחתיה רצועה של אחד־עשר זמני היום, שבה הזמן ההלכתי הבא מסומן. גרירת השמש או הירח, או הקשה על אחד הזמנים, מציגה את הקשת בשעה אחרת, ו״חזרה לעכשיו״ מחזיר אותה. הרשימות שמתחת נשארות בזמן אמת.',
-        en: "At the top of Home is the day's arc: the sun or the moon moves along it by the halachic times of the location you chose, the sky changes colour from dawn to night, and under it is a strip of the day's eleven zmanim, with the next one marked. Drag the sun or the moon, or tap a zman, to see the arc at another time; Back to now returns it. The lists below stay live.",
+        he: 'בראש דף הבית עיגול אחד של היום והלילה: השמש נעה על חציו העליון מעלות השחר ועד צאת הכוכבים, והירח על חציו התחתון עד עלות השחר הבאה, לפי הזמנים ההלכתיים של המיקום שנבחר. השמיים משנים את צבעם מעלות השחר ועד הלילה, ומתחת לעיגול רצועה של אחד־עשר זמני היום, שבה הזמן ההלכתי הבא מסומן. גרירת השמש או הירח, גם מהיום אל הלילה ובחזרה, או הקשה על אחד הזמנים, מציגה את העיגול בשעה אחרת, ו״חזרה לעכשיו״ מחזיר אותו. הרשימות שמתחת נשארות בזמן אמת.',
+        en: "At the top of Home is one circle for the day and the night: the sun moves along its upper half from dawn to nightfall and the moon along its lower half until the next dawn, by the halachic times of the location you chose. The sky changes colour from dawn to night, and under the circle is a strip of the day's eleven zmanim, with the next one marked. Drag the sun or the moon, even from the day into the night and back, or tap a zman, to see the circle at another time; Back to now returns it. The lists below stay live.",
       },
       {
         he: '״פתוח עכשיו״ מציג כל מצווה שהזמן שלה פתוח, עם טבעת של הזמן שנותר ושעות ההתחלה והסוף. ״עשיתי״ מסמן אותה כבוצעה ומבטל את שאר ההתראות שלה לאותו יום, ו״פתח נוסח״ פותח את הנוסח בסידור. תחת ״הודעות״ מופיע מה שדורש תשומת לב, כמו סימון אחרי שבת או מיקום שלא אושר, וגם הרצף, השבת הקרובה, ראש חודש, והילולות כשההתראות עליהן פועלות.',
@@ -414,8 +414,8 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: 'In the reader, a short tap on the text starts or stops auto-scroll.',
       },
       {
-        he: 'דף בית חדש: קשת היום עם השמש, הירח וזמני היום, ״פתוח עכשיו״ עם טבעת של הזמן שנותר, הודעות במקום אחד, ו״היום שלי״ בשלוש תצוגות: טבעות, כרטיסים או ציר.',
-        en: "A new Home: the day's arc with the sun, the moon and the day's zmanim, Open now with a ring of the time left, messages in one place, and My day in three views: Rings, Cards or Timeline.",
+        he: 'דף בית חדש: מעגל היום עם השמש, הירח וזמני היום, ״פתוח עכשיו״ עם טבעת של הזמן שנותר, הודעות במקום אחד, ו״היום שלי״ בשלוש תצוגות: טבעות, כרטיסים או ציר.',
+        en: "A new Home: the day's circle with the sun, the moon and the day's zmanim, Open now with a ring of the time left, messages in one place, and My day in three views: Rings, Cards or Timeline.",
       },
       {
         he: 'בהגדרות ← מכשיר והתראות אפשר לבחור שעות בלי התראות: לא לפני שעה מסוימת, לא אחריה, או שתיהן. התראה שנופלת בשעות האלה נדחית לשעה המותרת כשזמן המצווה עוד פתוח.',
@@ -424,6 +424,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: 'סימון של מצווה שהזמן שלה נגמר שואל מתי עשית: בזמן ולא סימנת, או אחרי שעבר הזמן. סימון באיחור שומר על הרצף ולא נספר באחוזים ובהישגים, ובמעקב יש דוח של כל הסימונים באיחור. במסך המצווה אפשר עכשיו לסמן את החלון של היום.',
         en: "Marking a mitzvah whose time has ended asks when you did it: in time without marking, or after the time passed. A late mark keeps your streak but does not count toward percentages and badges, and Tracking has a report of every late mark. The mitzvah screen can now mark today's window.",
+      },
+      {
+        he: 'בדף הבית היום והלילה הם עכשיו עיגול אחד: השמש נעה על חציו העליון, הירח על חציו התחתון, וגרירה עוברת בו מהיום אל הלילה.',
+        en: 'On Home the day and the night are now one circle: the sun moves along its upper half, the moon along its lower half, and a drag passes through it from the day into the night.',
       },
     ],
   },

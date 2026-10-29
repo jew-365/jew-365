@@ -1,0 +1,1068 @@
+<!--board title="היום · כמו באפליקציה"-->
+<style>
+.ph{--gold:#F08A3C;--goldLight:#FDE9D5;--goldText:#A04A0C;--onGold:#2B1608;--muted:#6A655E;--safe:#0F9060;--urgent:#CC2A2A;--urgentBg:#FEF2F2;--warn:#B7791F;--shd:0 2px 12px rgba(94,62,28,.08);--raised:0 4px 20px rgba(94,62,28,.08);--accent:var(--gold);--onAccent:var(--onGold);--soft:var(--goldLight);--accentText:var(--goldText)}
+.ph.t-rose{--gold:#E2617F;--goldLight:#FBE3E6;--goldText:#A8304F;--onGold:#2A0C15;--muted:#72646C;--shd:0 2px 12px rgba(101,55,54,.08);--raised:0 4px 20px rgba(101,55,54,.08)}
+.ph.t-night{--gold:#F59A4A;--goldLight:#3A2D26;--goldText:#F7A65E;--onGold:#1E1006;--muted:#A3AEC3;--safe:#10B981;--urgent:#F45F5F;--urgentBg:#2A1515;--warn:#FBBF24;--shd:0 2px 12px rgba(0,1,10,.08);--raised:0 4px 20px rgba(0,1,10,.08)}
+.ph{--missFill:color-mix(in srgb,var(--urgent) 9%,var(--surface));--missInk:color-mix(in srgb,var(--urgent) 55%,var(--text));--missRing:color-mix(in srgb,color-mix(in srgb,var(--urgent) 68%,#B0683C) 62%,var(--surface));--doneFill:color-mix(in srgb,var(--safe) 12%,var(--surface));--doneInk:color-mix(in srgb,var(--safe) 55%,var(--text));--lateFill:color-mix(in srgb,var(--warn) 14%,var(--surface));--lateInk:color-mix(in srgb,var(--warn) 45%,var(--text))}
+.ph{font-size:16px;line-height:normal}
+.ph p,.ph h1,.ph h2{margin:0}
+.scroll{position:absolute;inset:0 0 85px 0;padding:0 0 28px;overflow-y:auto;overflow-x:hidden;background:var(--bg)}
+.ph.tall .scroll{padding-bottom:113px}
+.backpill{display:none!important}
+
+.hero{position:relative;padding-top:16px;background:linear-gradient(180deg,var(--sk1) 0%,var(--sk2) 32%,var(--sk3) 60%,var(--sk3) 100%)}
+.topchip{display:flex;align-items:center;gap:12px;margin:0 20px;padding:6px 16px;border-radius:20px;background:var(--inkchip);color:var(--ink)}
+.greet{display:flex;flex-direction:column;min-width:0;flex-shrink:1}
+.greet .dl{font-size:13px;line-height:18px;font-weight:400}
+.greet h1{font-size:22px;line-height:28px;font-weight:800}
+.spc{flex:1}
+.logo{position:relative;flex:none;width:52px;height:52px;margin:-6px 0;display:flex;align-items:center;justify-content:center}
+.logo .halo{position:absolute;inset:0;width:52px;height:52px}
+.logo .appic{position:relative;display:block;height:40px;width:auto}
+.block{position:relative;padding-top:17px}
+.land{position:absolute;z-index:0;left:0;right:0;bottom:0}
+.scene{position:relative;z-index:1;width:100%;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.sg{position:absolute;top:0}
+.sg > svg{position:absolute;left:0;top:0}
+.moon{position:absolute;border-radius:50%;pointer-events:none}
+.hills{position:absolute;left:0;top:0;width:100%;pointer-events:none}
+.hzn{stroke:var(--ink);stroke-opacity:.35}
+.sg.top{z-index:3}
+.plate{position:absolute;left:0;right:0;display:flex;justify-content:center;pointer-events:none}
+.pin{display:flex;flex-direction:column;align-items:center;padding:8px 18px;border-radius:24px;background:var(--inkchip);color:var(--ink)}
+.bigtime{font-size:40px;line-height:44px;font-weight:400;font-variant-numeric:tabular-nums}
+.scene.scr .bigtime{font-weight:600}
+.midcap{max-width:230px;text-align:center;font-size:13px;line-height:18px;font-weight:700}
+.hintw{position:absolute;left:0;right:0;display:flex;justify-content:center;pointer-events:none;transition:opacity .4s}
+.hintw.gone{opacity:0}
+.hintp{padding:0 12px;border-radius:999px;background:var(--surface);color:var(--text);font-size:11px;line-height:14px}
+.edge{position:absolute;display:flex;flex-direction:column;align-items:center;padding:0 8px;border-radius:12px;background:var(--edgebg)}
+.edge > span{font-size:11px;line-height:14px}
+.edge > b{font-size:13px;line-height:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.grab{position:absolute;border-radius:50%;touch-action:none;cursor:grab;outline:none;z-index:4}
+.grab:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.scene.drag .grab{cursor:grabbing}
+.backw{position:absolute;top:0;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5}
+.bpill{position:relative;pointer-events:auto;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px 10px;border:2px solid var(--gold);border-radius:999px;background:color-mix(in srgb,var(--surface) 60%,transparent);color:var(--text);font-size:13px;line-height:18px;font-weight:700}
+.bpill:active{background:color-mix(in srgb,var(--surface2) 60%,transparent)}
+.bpill::after{content:'';position:absolute;inset:-8px}
+.bpill .ic{width:18px;height:18px;stroke-width:2.2}
+.zchips{position:relative;z-index:2;display:flex;gap:8px;overflow-x:auto;padding:8px 16px 12px;scrollbar-width:none}
+.zchips::-webkit-scrollbar{display:none}
+.zc{flex:none;display:flex;flex-direction:column;justify-content:center;min-height:52px;padding:7px 14px;border-radius:14px;border:2px solid transparent;text-align:start}
+.zc.mk{border-color:var(--gold)}
+.zl{font-size:12px;line-height:16px;font-weight:400;white-space:nowrap}
+.zt{font-size:15px;line-height:22px;font-weight:400;font-variant-numeric:tabular-nums}
+.zt.b{font-weight:700}
+
+.body{padding:0 16px}
+.sl{margin:12px 0 8px;padding:0 4px;font-size:17px;line-height:24px;font-weight:700;color:var(--text)}
+.sl.first{margin-top:16px}
+.card{background:var(--surface);border-radius:20px;box-shadow:var(--shd);overflow:hidden}
+.card.pad{padding:16px}
+.tile{flex:none;display:flex;align-items:center;justify-content:center;border-radius:18px;background:var(--surface2);color:var(--muted)}
+.tile.accent{background:var(--goldLight);color:var(--gold)}
+.tile.l44{width:44px;height:44px}
+.tile.l44 .ic{width:24px;height:24px}
+.tile.l40{width:40px;height:40px;border-radius:16px}
+.tile.l40 .ic{width:22px;height:22px}
+.tile.l48{width:48px;height:48px;border-radius:19px}
+.tile.l48 .ic{width:26px;height:26px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 20px;border-radius:16px;font-size:15px;line-height:22px;font-weight:700;transition:transform .15s}
+.btn:active{transform:scale(.97)}
+.btn .ic{width:18px;height:18px}
+.btn.primary{flex:2;background:var(--gold);color:var(--onGold)}
+.btn.secondary{flex:1;background:var(--surface2);color:var(--text)}
+.btn.compact{min-height:40px;padding:8px;font-size:13px;line-height:18px}
+.btn.compact .ic{width:16px;height:16px}
+.btn.compact.secondary{margin-top:8px;width:100%}
+
+.nowc{margin-bottom:12px;animation:rv .28s cubic-bezier(.2,.8,.2,1) both}
+.nowc.marking{animation:mxOut .6s .3s cubic-bezier(.6,0,.2,1) forwards}
+.nowc .card{position:relative}
+.nowc .card.urgent{background:var(--urgentBg)}
+.nbody{display:flex;align-items:center;gap:12px;width:100%;text-align:start}
+.nmeta{flex:1;min-width:0;display:flex;flex-direction:column}
+.nname{font-size:17px;line-height:24px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ncap{font-size:13px;line-height:18px;color:var(--sub)}
+.nring{position:relative;flex:none;width:60px;height:60px;display:flex;align-items:center;justify-content:center}
+.nring svg{position:absolute;inset:0;width:60px;height:60px}
+.nring .rt{fill:none;stroke:var(--border);stroke-width:4}
+.nring .rp{fill:none;stroke:var(--gold);stroke-width:4;stroke-linecap:round}
+.nring.urgent .rp{stroke:var(--urgent)}
+.rtx{position:relative;display:flex;flex-direction:column;align-items:center}
+.rtx > b{font-size:15px;line-height:22px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.rtx > span{font-size:11px;line-height:14px;color:var(--sub)}
+.nring.urgent .rtx > b{color:var(--urgent)}
+.nacts{display:flex;gap:8px;margin-top:12px}
+.stamp{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:inherit;color:var(--goldText);font-size:22px;line-height:28px;font-weight:800}
+.nowc.marking .stamp{display:flex}
+@keyframes mxOut{to{opacity:0;transform:translateX(-30px)}}
+@keyframes rv{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:none}}
+.emptyw{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 0}
+.emptyw .tile{margin-bottom:12px}
+.emptyw .t1{font-size:15px;line-height:22px;color:var(--sub);text-align:center}
+.emptyw .t2{margin-top:8px;font-size:13px;line-height:18px;color:var(--sub);text-align:center}
+
+.mrow{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:16px;text-align:start}
+.mrow + .mrow::before{content:'';position:absolute;top:0;inset-inline:16px;height:1px;background:var(--border)}
+.mtx{flex:1;min-width:0;display:flex;flex-direction:column}
+.mtt{font-size:17px;line-height:24px;font-weight:700;color:var(--text)}
+.mcp{margin-top:2px;font-size:13px;line-height:18px;color:var(--sub)}
+.mch{flex:none;width:16px;height:16px;color:var(--muted)}
+.mch .ic{width:16px;height:16px;stroke-width:1.8}
+
+.seg{display:flex;gap:4px}
+.seg button{flex:1;padding:8px 0;border-radius:12px;text-align:center;font-size:13px;line-height:18px;font-weight:700;background:var(--surface2);color:var(--text)}
+.seg button[aria-pressed="true"]{background:var(--gold);color:var(--onGold)}
+.looks{margin-top:12px}
+.lk-a{animation:lkA .4s both}
+.lk-b{animation:lkB .4s both}
+@keyframes lkA{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes lkB{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.rrow{position:relative;display:flex;align-items:stretch;gap:4px;margin-bottom:8px}
+.rtime{flex:none;width:42px;padding-top:16px;display:flex;flex-direction:column}
+.rtime > b{font-size:13px;line-height:18px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.rtime > span{font-size:12px;line-height:16px;color:var(--sub);font-variant-numeric:tabular-nums}
+.rnode{position:relative;flex:none;width:22px;padding-top:16px;display:flex;justify-content:center}
+.rline{position:absolute;top:0;bottom:-8px;left:50%;width:2px;margin-left:-1px;background:var(--border)}
+.rdot{position:relative;z-index:1;width:16px;height:16px;box-sizing:border-box;border-radius:50%;border:2px solid var(--muted);background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--surface)}
+.rdot .ic{width:10px;height:10px;stroke-width:2.4}
+.rdot.st-active{border-color:var(--gold);background:var(--goldLight)}
+.rdot.st-done{border-color:var(--safe);background:var(--safe)}
+.rdot.st-late{border-color:var(--warn);background:var(--warn)}
+.rdot.st-missed{border-color:var(--missRing);background:var(--missFill)}
+.rdot.st-upcoming{border-style:dashed}
+.rcw{flex:1;min-width:0}
+.rnow{display:flex;align-items:center;gap:4px;margin-bottom:8px}
+.rnow .a{flex:none;width:42px}
+.rnow .b{flex:none;width:22px;display:flex;justify-content:center}
+.nd{width:12px;height:12px;border-radius:50%;background:var(--gold)}
+.nt{font-size:13px;line-height:18px;font-weight:700;color:var(--goldText)}
+.nl{flex:1;align-self:center;border-top:2px dashed var(--gold);opacity:.6}
+
+.ecard{position:relative}
+.ecard.st-active{background:var(--goldLight)}
+.ecard.st-done{background:var(--doneFill)}
+.ecard.st-late{background:var(--lateFill)}
+.ecard.st-missed{background:var(--missFill)}
+.ecard.st-upcoming{opacity:.85}
+.ebody{display:block;width:100%;text-align:start}
+.erow{display:flex;align-items:center;gap:8px}
+.emeta{flex:1;min-width:0;display:flex;flex-direction:column}
+.ename{font-size:15px;line-height:22px;font-weight:700;color:var(--text)}
+.est{font-size:13px;line-height:18px;font-weight:700;color:var(--sub)}
+.st-active .est{color:var(--goldText)}
+.st-done .est{color:var(--doneInk)}
+.st-late .est{color:var(--lateInk)}
+.st-missed .est{color:var(--missInk)}
+.erng{font-size:12px;line-height:16px;color:var(--sub)}
+.st-done .tile.accent,.st-late .tile.accent{background:var(--surface2);color:var(--muted)}
+
+.grid2{display:flex;flex-direction:column}
+.grow{display:flex;gap:8px;margin-top:8px}
+.gcell{flex:1;min-width:0}
+.rcell{display:flex;flex-direction:column;align-items:center;gap:4px}
+.rcell .ename,.rcell .est,.rcell .erng{text-align:center}
+.mring{position:relative;width:64px;height:64px;display:flex;align-items:center;justify-content:center}
+.mring svg.mr{position:absolute;inset:0;width:64px;height:64px}
+.mring .mt{fill:none;stroke:var(--border);stroke-width:6}
+.mring.st-upcoming .mt{stroke:var(--muted);stroke-dasharray:3 6;stroke-opacity:.7}
+.mring .mp{fill:none;stroke-width:6;stroke-linecap:round}
+.mring.st-active .mp{stroke:var(--gold)}
+.mring.st-done .mp{stroke:var(--safe)}
+.mring.st-late .mp{stroke:var(--warn)}
+.mring.st-missed .mp{stroke:var(--missRing)}
+.mring.st-upcoming .mp{stroke:var(--muted)}
+.mring .mi{position:relative;display:flex}
+.mring .mi .ic{width:24px;height:24px}
+.mring.st-active .mi{color:var(--goldText)}
+.mring.st-done .mi{color:var(--safe)}
+.mring.st-late .mi{color:var(--lateInk)}
+.mring.st-missed .mi{color:var(--missInk)}
+.mring.st-upcoming .mi{color:var(--muted)}
+.sumc{margin-bottom:8px}
+.sumr{display:flex;align-items:center;gap:16px}
+.fig{position:relative;flex:none;width:132px;height:132px;display:flex;align-items:center;justify-content:center}
+.fig svg{position:absolute;inset:0;width:132px;height:132px}
+.fig .ft{fill:none;stroke:var(--border);stroke-width:9}
+.fig .fp{fill:none;stroke-width:9;stroke-linecap:round}
+.fig .fp.d{stroke:var(--safe)}
+.fig .fp.o{stroke:var(--gold)}
+.fig .fp.m{stroke:var(--missRing)}
+.fc{position:relative;display:flex;flex-direction:column;align-items:center}
+.fc > b{font-size:22px;line-height:28px;font-weight:800;color:var(--text)}
+.fc > span{font-size:12px;line-height:16px;color:var(--sub)}
+.leg{flex:1;display:flex;flex-direction:column;gap:8px}
+.lg{display:flex;align-items:center;gap:8px}
+.lg i{width:10px;height:10px;border-radius:50%;flex:none}
+.lg.d i{background:var(--safe)}
+.lg.o i{background:var(--gold)}
+.lg.m i{background:var(--missRing)}
+.lg > span{flex:1;font-size:13px;line-height:18px;font-weight:700;color:var(--text)}
+.lg > b{font-size:15px;line-height:22px;font-weight:700;color:var(--text)}
+
+.tabs{position:absolute;inset:auto 0 0 0;height:85px;padding:8px 12px;display:flex;align-items:stretch;justify-content:stretch;gap:0;background:var(--bg);border-radius:0;box-shadow:none;z-index:10}
+.tabs::before{content:'';position:absolute;inset:8px 12px;border-radius:24px;background:var(--surface);box-shadow:var(--raised)}
+.tab{position:relative;flex:1;min-width:0;min-height:0;padding:8px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:0;color:var(--muted);font-size:11px;font-weight:400}
+.tab .tp{display:flex;align-items:center;justify-content:center;width:48px;height:32px;border-radius:16px}
+.tab .tp svg{width:22px;height:22px;stroke:var(--muted);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab .tl{font-size:11px;line-height:14px}
+.tab .tu{display:block;width:16px;height:3px;border-radius:999px}
+.tab.on{color:var(--goldText);font-weight:700}
+.tab.on .tp{background:var(--goldLight)}
+.tab.on .tp svg{stroke:var(--gold)}
+.tab.on .tu{background:var(--gold)}
+</style>
+<template>
+<div class="scroll" id="scroll">
+
+<section class="hero" aria-label="קשת היום וזמני היום" style="{{skyStyle}}">
+<header class="topchip">
+<div class="greet"><p class="dl">{{dateLine}}</p><h1>{{greeting}}</h1></div>
+<span class="spc"></span>
+<span class="logo" role="img" aria-label="יהודי 365"><svg class="halo" viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="hLogoHalo"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".75"></stop><stop offset=".7" stop-color="#FFFFFF" stop-opacity=".55"></stop><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"></stop></radialGradient></defs><circle cx="50" cy="50" r="50" fill="url(#hLogoHalo)"></circle></svg><svg class="appic" role="img" aria-label="יהודי 365" xmlns="http://www.w3.org/2000/svg" viewBox="-226.54 -346.1 977.52 1029.72"><defs><linearGradient id="fiicr" gradientUnits="userSpaceOnUse" x1="36.34" y1="-196.37" x2="488.1" y2="586.1"><stop offset="0" stop-color="#0022AE"/><stop offset="0.07" stop-color="#0038CE"/><stop offset="0.14" stop-color="#014AE1"/><stop offset="0.18" stop-color="#0068FD"/><stop offset="0.27" stop-color="#1F8AFD"/><stop offset="0.37" stop-color="#3E9DFA"/><stop offset="0.47" stop-color="#48A0FE"/><stop offset="0.68" stop-color="#4DA5FD"/><stop offset="0.85" stop-color="#63B2FE"/><stop offset="0.93" stop-color="#78BFFD"/><stop offset="1" stop-color="#87C8FE"/></linearGradient><linearGradient id="fiict" gradientUnits="userSpaceOnUse" x1="262.22" y1="-219.9" x2="262.22" y2="609.63"><stop offset="0" stop-color="#0037C8"/><stop offset="0.12" stop-color="#002AAA"/><stop offset="0.3" stop-color="#0030BE"/><stop offset="0.52" stop-color="#0038D0"/><stop offset="0.64" stop-color="#1A6EF0"/><stop offset="0.73" stop-color="#2F94FE"/><stop offset="0.9" stop-color="#459FFD"/><stop offset="1" stop-color="#5DAEFE"/></linearGradient><mask id="fiiccg" maskUnits="userSpaceOnUse" x="-214.54" y="-334.1" width="953.52" height="1005.72"><rect x="-214.54" y="-334.1" width="953.52" height="1005.72" fill="#fff"/><g stroke-linecap="round" stroke-linejoin="round"><path d="M-31 -1.5L-11 24.5L31 -24.5" transform="translate(474.31 -204.02) scale(1.56)" fill="none" stroke="#000" stroke-width="27.76"/><path d="M0 -35C-20 -35 -26 -17 -27 3C-28 13 -34 19 -40 24V27H40V24C34 19 28 13 27 3C26 -17 20 -35 0 -35Z" transform="translate(587.19 508.69) scale(1.53)" fill="#000" stroke="#000" stroke-width="11.87"/><path d="M-8 -35V-40A8 8 0 0 1 8 -40V-35" transform="translate(587.19 508.69) scale(1.53)" fill="#000" stroke="#000" stroke-width="10.87"/><path d="M-12 38H12A12 12 0 0 1 -12 38Z" transform="translate(587.19 508.69) scale(1.53)" fill="#000" stroke="#000" stroke-width="10.87"/></g></mask><mask id="fiicck" maskUnits="userSpaceOnUse" x="-214.54" y="-334.1" width="953.52" height="1005.72"><rect x="-214.54" y="-334.1" width="953.52" height="1005.72" fill="#fff"/><g stroke-linecap="round" stroke-linejoin="round"><path d="M-31 -1.5L-11 24.5L31 -24.5" transform="translate(474.31 -204.02) scale(1.56)" fill="none" stroke="#000" stroke-width="27.76"/><path d="M-31 -1.5L-11 24.5L31 -24.5Z" transform="translate(474.31 -204.02) scale(1.56)" fill="#000" stroke="#000" stroke-width="27.76"/><path d="M0 -35C-20 -35 -26 -17 -27 3C-28 13 -34 19 -40 24V27H40V24C34 19 28 13 27 3C26 -17 20 -35 0 -35Z" transform="translate(587.19 508.69) scale(1.53)" fill="#000" stroke="#000" stroke-width="11.87"/><path d="M-8 -35V-40A8 8 0 0 1 8 -40V-35" transform="translate(587.19 508.69) scale(1.53)" fill="#000" stroke="#000" stroke-width="10.87"/><path d="M-12 38H12A12 12 0 0 1 -12 38Z" transform="translate(587.19 508.69) scale(1.53)" fill="#000" stroke="#000" stroke-width="10.87"/></g></mask></defs><path d="M587.19 508.69A451.76 451.76 0 1 1 474.31 -204.02" fill="none" stroke="url(#fiicr)" stroke-width="26" stroke-linecap="round" mask="url(#fiicck)"/><g fill="none" stroke="url(#fiicr)" stroke-width="29"><path d="M262.22 -256.9V-307.6"/><path d="M229.28 -307.6H295.15" stroke-linecap="round"/></g><g fill="none" stroke="url(#fiict)" stroke-width="28" stroke-linecap="round"><path d="M262.22 -137.9L262.22 -219.9"/><path d="M79.84 -121.03L54.84 -164.33"/><path d="M-53.67 12.49L-96.97 -12.51"/><path d="M-70.54 194.87L-152.54 194.87"/><path d="M-53.67 377.25L-96.97 402.25"/><path d="M79.84 510.76L54.84 554.06"/><path d="M262.22 527.63L262.22 609.63"/></g><path d="M40.32 0L96 0L96 112A48 48 0 0 1 48 160A48 48 0 0 1 0 112M262 0L174 0L174 160M174 80L244.4 80M174 160L262 160M340 0L377.5 160L415 48L452.5 160L490 0M21 246L117 246M117 246L53.93 314.83A47 47 0 0 1 113.16 340.38A47 47 0 0 1 91.09 401A47 47 0 0 1 29.3 382.5M267 246L206.55 331.97A47 47 0 0 0 217.97 397.45A47 47 0 0 0 283.45 386.03A47 47 0 0 0 272.03 320.55A47 47 0 0 0 206.55 331.97M469 246L378.04 246L378.04 327.32A50 50 0 0 1 431.94 307.7A50 50 0 0 1 468.81 351.64A50 50 0 0 1 440.13 401.32A50 50 0 0 1 383.64 391.36" fill="none" stroke="#012B97" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/><g fill="none" stroke="#FF3B03" stroke-linecap="round" stroke-linejoin="round"><circle cx="528.5" cy="219" r="15" stroke-width="11"/><g stroke-width="9"></g></g><g transform="translate(474.31 -204.02) scale(1.56)" fill="none" stroke="#012B97" stroke-linecap="round" stroke-linejoin="round"><path d="M-31 -1.5L-11 24.5L31 -24.5" stroke-width="22"/></g><g transform="translate(587.19 508.69) scale(1.53)" fill="none" stroke="#FF3B03" stroke-linecap="round" stroke-linejoin="round"><path d="M0 -35C-20 -35 -26 -17 -27 3C-28 13 -34 19 -40 24V27H40V24C34 19 28 13 27 3C26 -17 20 -35 0 -35Z" stroke-width="6" fill="#FF3B03"/><path d="M-8 -35V-40A8 8 0 0 1 8 -40V-35" stroke-width="5"/><path d="M-12 38H12A12 12 0 0 1 -12 38Z" stroke-width="5"/></g></svg></span>
+</header>
+<div class="block">
+<div class="land" style="{{landStyle}}"></div>
+<div class="scene {{sceneCls}}" id="scene" style="{{sceneStyle}}" onPointerDown="{{gDown}}" onPointerMove="{{gMove}}" onPointerUp="{{gUp}}" onPointerCancel="{{gUp}}">
+<div class="sg" style="{{stageStyle}}">
+<svg width="{{sw}}" height="{{sh}}" viewBox="{{vb}}" aria-hidden="true">
+<defs>
+<linearGradient id="hArcG" gradientUnits="userSpaceOnUse" x1="{{gx1}}" y1="0" x2="{{gx2}}" y2="0"><stop offset="0" stop-color="#C58BD9"></stop><stop offset=".16" stop-color="#FF9FB0"></stop><stop offset=".32" stop-color="#FFD27A"></stop><stop offset=".5" stop-color="#FFF1A8"></stop><stop offset=".68" stop-color="#FFC66B"></stop><stop offset=".84" stop-color="#FF8A5C"></stop><stop offset="1" stop-color="#B07CD8"></stop></linearGradient>
+<radialGradient id="hAura"><stop offset="0" stop-color="{{sunCore}}" stop-opacity=".5"></stop><stop offset=".6" stop-color="{{sunCore}}" stop-opacity=".16"></stop><stop offset="1" stop-color="{{sunCore}}" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="hSun" cx="38%" cy="34%" fx="38%" fy="34%" r="66%"><stop offset="0" stop-color="#FFFDF0"></stop><stop offset=".58" stop-color="{{sunCore}}"></stop><stop offset="1" stop-color="{{sunEdge}}"></stop></radialGradient>
+</defs>
+<g transform="{{decoTf}}">
+<g opacity="{{starsOp}}">
+<sc-for list="{{stars}}" as="st" hint-placeholder-count="19"><circle cx="{{st.x}}" cy="{{st.y}}" r="{{st.r}}" fill="#FFFFFF"></circle></sc-for>
+</g>
+<g opacity="{{cloudOp}}" fill="{{cloudC}}">
+<sc-for list="{{clouds}}" as="cl" hint-placeholder-count="3"><g transform="{{cl.tf}}" opacity="{{cl.op}}"><ellipse cx="30" cy="34" rx="26" ry="14"></ellipse><ellipse cx="62" cy="26" rx="28" ry="20"></ellipse><ellipse cx="92" cy="34" rx="24" ry="13"></ellipse><rect x="30" y="30" width="62" height="17" rx="8"></rect></g></sc-for>
+</g>
+</g>
+<path d="{{dayPath}}" fill="none" stroke="{{trackInk}}" stroke-opacity=".45" stroke-width="3" stroke-dasharray="1 8" stroke-linecap="round"></path>
+<path d="{{dayPath}}" fill="none" stroke="url(#hArcG)" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="{{dayLen}}" stroke-dashoffset="{{dayDash}}" opacity="{{dayProgOp}}"></path>
+<path d="{{nightPath}}" fill="none" stroke="{{nightTrackInk}}" stroke-opacity=".45" stroke-width="3" stroke-dasharray="1 8" stroke-linecap="round"></path>
+<path d="{{nightPath}}" fill="none" stroke="#F6E7BF" stroke-width="4" stroke-linecap="round" stroke-dasharray="{{nightLen}}" stroke-dashoffset="{{nightDash}}" opacity="{{nightProgOp}}"></path>
+<g opacity="{{sunOp}}">
+<circle cx="{{sunX}}" cy="{{sunY}}" r="70" fill="url(#hAura)"></circle>
+<circle cx="{{sunX}}" cy="{{sunY}}" r="27" fill="{{sunCore}}" opacity=".25"></circle>
+<circle cx="{{sunX}}" cy="{{sunY}}" r="21" fill="{{sunCore}}" opacity=".24"></circle>
+<circle cx="{{sunX}}" cy="{{sunY}}" r="15" fill="url(#hSun)"></circle>
+</g>
+</svg>
+<span class="moon" aria-hidden="true" style="{{moonStyle}}"></span>
+</div>
+<svg class="hills" viewBox="-20 0 390 216" preserveAspectRatio="none" aria-hidden="true" style="{{hillsStyle}}">
+<path d="M-20 158V142Q45 128 95 140T200 138T290 134T370 142V158Z" style="fill: {{hillBackC}}"></path>
+<path d="M-20 158V150Q60 140 120 150T250 148T370 150V158Z" style="fill: {{hillFrontC}}"></path>
+<path class="hzn" d="M-20 158H370" fill="none" stroke-width="1.2"></path>
+</svg>
+<div class="sg top" style="{{stageStyle}}">
+<svg width="{{sw}}" height="{{sh}}" viewBox="{{vb}}" aria-hidden="true">
+<sc-for list="{{ticks}}" as="k" hint-placeholder-count="11"><circle cx="{{k.x}}" cy="{{k.y}}" r="{{k.r}}" fill="{{k.fill}}" stroke="{{k.stroke}}" stroke-width="2"></circle></sc-for>
+<rect x="{{ghostX}}" y="{{ghostY}}" width="10" height="10" transform="{{ghostTf}}" fill="{{inkchipHex}}" stroke="{{inkHex}}" stroke-width="2" stroke-dasharray="2 2" opacity="{{ghostOp}}"></rect>
+</svg>
+<div class="plate" style="top: {{plateTop}}px"><div class="pin"><span class="bigtime" aria-hidden="true">{{nowT}}</span><span class="midcap" aria-live="{{liveMode}}">{{midCaption}}</span></div></div>
+<div class="hintw {{hintCls}}" style="top: {{hintTop}}px" aria-hidden="true"><span class="hintp">{{hintText}}</span></div>
+<span class="edge" style="right: {{edgeX}}px; top: {{edgeTop}}px; color: {{edgeInk}}"><span>עלות</span><b>{{edgeStart}}</b></span>
+<span class="edge" style="left: {{edgeX}}px; top: {{edgeTop}}px; color: {{edgeInk}}"><span>צאה״כ</span><b>{{edgeEnd}}</b></span>
+<div class="grab" id="grab" role="slider" tabindex="0" aria-label="הזמן ביום, אפשר לגרור או להשתמש בחצים" aria-orientation="horizontal" aria-valuemin="{{sliderMin}}" aria-valuemax="{{sliderMax}}" aria-valuenow="{{sliderNow}}" aria-valuetext="{{sliderText}}" style="{{grabStyle}}" onKeyDown="{{gKey}}"></div>
+</div>
+</div>
+<sc-if value="{{isScrub}}" hint-placeholder-val="{{ false }}">
+<div class="backw"><button class="bpill" onClick="{{back}}">[[ia:undo]]<span>חזרה לעכשיו</span></button></div>
+</sc-if>
+<div class="zchips" id="zchips" role="group" aria-label="זמני היום">
+<sc-for list="{{zchips}}" as="z" hint-placeholder-count="11">
+<button class="zc {{z.cls}}" style="{{z.style}}" aria-pressed="{{z.pressed}}" aria-label="{{z.aria}}" onClick="{{z.pick}}"><span class="zl" style="color: {{z.ink}}">{{z.label}}</span><span class="zt {{z.tcls}}" style="color: {{z.ink}}">{{z.time}}</span></button>
+</sc-for>
+</div>
+</div>
+</section>
+
+<div class="body">
+<!--NAMECARD-->
+<h2 class="sl first">{{openLabel}}</h2>
+<sc-if value="{{hasActive}}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{actives}}" as="it" hint-placeholder-count="2">
+<div class="nowc {{it.cls}}">
+<section class="card pad {{it.cardCls}}">
+<button class="nbody" onClick="{{it.pick}}" aria-label="{{it.aria}}">
+<span class="tile accent l44">[[iaItem:it]]</span>
+<span class="nmeta"><span class="nname">{{it.name}}</span><span class="ncap">{{it.startLine}}</span><span class="ncap">{{it.endLine}}</span></span>
+<span class="nring {{it.ringCls}}" aria-hidden="true"><svg viewBox="0 0 60 60"><circle class="rt" cx="30" cy="30" r="25"></circle><circle class="rp" cx="30" cy="30" r="25" transform="rotate(-90 30 30)" stroke-dasharray="157.08" stroke-dashoffset="{{it.ringOff}}"></circle></svg><span class="rtx"><b>{{it.leftNum}}</b><span>{{it.leftUnit}}</span></span></span>
+</button>
+<div class="nacts">
+<button class="btn primary" onClick="{{it.mark}}" aria-label="{{it.markLabel}}">[[ia:check]]<span>עשיתי</span></button>
+<button class="btn secondary" onClick="{{it.open}}" aria-label="{{it.openLabel}}">[[ia:siddur]]<span>נוסח</span></button>
+</div>
+<div class="stamp" aria-hidden="true">עשיתי</div>
+</section>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{noActive}}" hint-placeholder-val="{{ false }}">
+<div class="emptyw" aria-live="polite">
+<span class="tile accent l48">[[ia:sparkle]]</span>
+<p class="t1">{{emptyLine}}</p>
+<sc-if value="{{hasNext}}" hint-placeholder-val="{{ false }}"><p class="t2">{{nextCaption}}</p></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{hasMsgs}}" hint-placeholder-val="{{ true }}">
+<h2 class="sl">{{msgLabel}}</h2>
+<section class="card" role="list" aria-label="הודעות">
+<sc-for list="{{msgs}}" as="m" hint-placeholder-count="3">
+<sc-if value="{{m.hasHref}}" hint-placeholder-val="{{ true }}">
+<button class="mrow" role="listitem" onClick="{{m.act}}"><span class="tile accent l44">[[iaMsg:m]]</span><span class="mtx"><span class="mtt">{{m.title}}</span><span class="mcp">{{m.caption}}</span></span><span class="mch">[[ia:chevronLeft]]</span></button>
+</sc-if>
+<sc-if value="{{m.noHref}}" hint-placeholder-val="{{ false }}">
+<div class="mrow" role="listitem"><span class="tile accent l44">[[iaMsg:m]]</span><span class="mtx"><span class="mtt">{{m.title}}</span><span class="mcp">{{m.caption}}</span></span></div>
+</sc-if>
+</sc-for>
+</section>
+</sc-if>
+
+<sc-if value="{{hasEntries}}" hint-placeholder-val="{{ true }}">
+<h2 class="sl">היום שלי</h2>
+<div class="seg" role="radiogroup" aria-label="תצוגת היום">
+<button role="radio" aria-pressed="{{lkRail.pressed}}" onClick="{{lkRail.pick}}">ציר</button>
+<button role="radio" aria-pressed="{{lkCards.pressed}}" onClick="{{lkCards.pick}}">כרטיסים</button>
+<button role="radio" aria-pressed="{{lkRings.pressed}}" onClick="{{lkRings.pick}}">טבעות</button>
+</div>
+<div class="looks {{lkEnter}}">
+
+<sc-if value="{{isRail}}" hint-placeholder-val="{{ true }}">
+<div role="list">
+<sc-for list="{{rail}}" as="e" hint-placeholder-count="7">
+<sc-if value="{{e.isNow}}" hint-placeholder-val="{{ false }}">
+<div class="rnow" role="listitem" aria-label="{{e.label}}"><span class="a"></span><span class="b"><i class="nd"></i></span><span class="nt">{{e.label}}</span><span class="nl"></span></div>
+</sc-if>
+<sc-if value="{{e.isItem}}" hint-placeholder-val="{{ true }}">
+<div class="rrow" role="listitem">
+<div class="rtime"><b>{{e.startLabel}}</b><span>{{e.endLabel}}</span></div>
+<div class="rnode"><i class="rline"></i><i class="rdot {{e.cardCls}}"><sc-if value="{{e.nodeCheck}}" hint-placeholder-val="{{ false }}">[[ia:check]]</sc-if></i></div>
+<div class="rcw">
+<section class="card pad ecard {{e.cardCls}} {{e.cls}}">
+<button class="ebody" onClick="{{e.pick}}" aria-label="{{e.aria}}"><span class="erow"><span class="tile l40 {{e.tileCls}}">[[iaItem:e]]</span><span class="emeta"><span class="ename">{{e.name}}</span><span class="est">{{e.statusText}}</span></span></span><span class="erng">{{e.range}}</span></button>
+<sc-if value="{{e.isMissed}}" hint-placeholder-val="{{ false }}"><button class="btn compact secondary" onClick="{{e.mark}}" aria-label="{{e.markLabel}}">[[ia:check]]<span>עשיתי</span></button></sc-if>
+<sc-if value="{{e.hasUndo}}" hint-placeholder-val="{{ false }}"><button class="btn compact secondary" onClick="{{e.undo}}" aria-label="{{e.undoLabel}}">[[ia:undo]]<span>בטל</span></button></sc-if>
+</section>
+</div>
+</div>
+</sc-if>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isCards}}" hint-placeholder-val="{{ false }}">
+<div class="grid2" role="list">
+<sc-for list="{{gridRows}}" as="gr" hint-placeholder-count="3">
+<div class="grow">
+<sc-for list="{{gr.cells}}" as="e" hint-placeholder-count="2">
+<div class="gcell" role="listitem">
+<sc-if value="{{e.filled}}" hint-placeholder-val="{{ true }}">
+<section class="card pad ecard {{e.cardCls}} {{e.cls}}">
+<button class="ebody" onClick="{{e.pick}}" aria-label="{{e.aria}}"><span class="erow"><span class="tile l40 {{e.tileCls}}">[[iaItem:e]]</span><span class="emeta"><span class="ename">{{e.name}}</span><span class="est">{{e.statusText}}</span></span></span><span class="erng">{{e.range}}</span></button>
+<sc-if value="{{e.isMissed}}" hint-placeholder-val="{{ false }}"><button class="btn compact secondary" onClick="{{e.mark}}" aria-label="{{e.markLabel}}">[[ia:check]]<span>עשיתי</span></button></sc-if>
+<sc-if value="{{e.hasUndo}}" hint-placeholder-val="{{ false }}"><button class="btn compact secondary" onClick="{{e.undo}}" aria-label="{{e.undoLabel}}">[[ia:undo]]<span>בטל</span></button></sc-if>
+</section>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isRings}}" hint-placeholder-val="{{ false }}">
+<section class="card pad sumc" aria-label="טבעות היום">
+<div class="sumr">
+<div class="fig" role="img" aria-label="{{ringsAria}}">
+<svg viewBox="0 0 132 132" aria-hidden="true">
+<sc-for list="{{figRings}}" as="fr" hint-placeholder-count="3"><circle class="ft" cx="66" cy="66" r="{{fr.r}}"></circle><circle class="fp {{fr.cls}}" cx="66" cy="66" r="{{fr.r}}" transform="rotate(-90 66 66)" stroke-dasharray="{{fr.len}}" stroke-dashoffset="{{fr.off}}" opacity="{{fr.op}}"></circle></sc-for>
+</svg>
+<div class="fc"><b>{{doneCount}}</b><span>{{ofTotal}}</span></div>
+</div>
+<div class="leg">
+<sc-for list="{{legend}}" as="lg" hint-placeholder-count="3"><div class="lg {{lg.cls}}"><i></i><span>{{lg.label}}</span><b>{{lg.n}}</b></div></sc-for>
+</div>
+</div>
+</section>
+<div class="grid2" role="list">
+<sc-for list="{{gridRows}}" as="gr" hint-placeholder-count="3">
+<div class="grow">
+<sc-for list="{{gr.cells}}" as="e" hint-placeholder-count="2">
+<div class="gcell" role="listitem">
+<sc-if value="{{e.filled}}" hint-placeholder-val="{{ true }}">
+<section class="card pad ecard {{e.cardCls}} {{e.cls}}">
+<button class="ebody rcell" onClick="{{e.pick}}" aria-label="{{e.aria}}"><span class="mring {{e.cardCls}}"><svg class="mr" viewBox="0 0 64 64" aria-hidden="true"><circle class="mt" cx="32" cy="32" r="26"></circle><circle class="mp" cx="32" cy="32" r="26" transform="rotate(-90 32 32)" stroke-dasharray="163.36" stroke-dashoffset="{{e.ringOff}}" opacity="{{e.ringOp}}"></circle></svg><span class="mi"><sc-if value="{{e.showItem}}" hint-placeholder-val="{{ true }}">[[iaItem:e]]</sc-if><sc-if value="{{e.isCheck}}" hint-placeholder-val="{{ false }}">[[ia:check]]</sc-if><sc-if value="{{e.isWarn}}" hint-placeholder-val="{{ false }}">[[ia:warning]]</sc-if></span></span><span class="ename">{{e.name}}</span><span class="est">{{e.statusText}}</span><span class="erng">{{e.range}}</span></button>
+<sc-if value="{{e.isMissed}}" hint-placeholder-val="{{ false }}"><button class="btn compact secondary" onClick="{{e.mark}}" aria-label="{{e.markLabel}}">[[ia:check]]<span>עשיתי</span></button></sc-if>
+<sc-if value="{{e.hasUndo}}" hint-placeholder-val="{{ false }}"><button class="btn compact secondary" onClick="{{e.undo}}" aria-label="{{e.undoLabel}}">[[ia:undo]]<span>בטל</span></button></sc-if>
+</section>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+</div>
+</sc-if>
+
+</div>
+</div>
+</template>
+<script>
+const SHAPE = 'now';
+const ELLIPSE = SHAPE !== 'now';
+const K = 192 / 216;
+const TH = {
+  gold: { surface: '#FFFDF9', goldLight: '#FDE9D5', gold: '#F08A3C', text: '#1D2240', bg: '#F6F1E8' },
+  rose: { surface: '#FFFDFC', goldLight: '#FBE3E6', gold: '#E2617F', text: '#2E1D2A', bg: '#FAEFEC' },
+  night: { surface: '#172238', goldLight: '#3A2D26', gold: '#F59A4A', text: '#EEF1F7', bg: '#0E1626' },
+};
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    const want = this.opt('look');
+    return { look: want === 'cards' || want === 'rings' ? want : 'rail', drag: false, touched: false, zSel: null };
+  }
+
+  boardMount() {
+    this.chipTimer = setTimeout(() => this.centerChip(false), 80);
+  }
+
+  boardUnmount() {
+    clearTimeout(this.chipTimer);
+    cancelAnimationFrame(this.gRaf);
+  }
+
+  componentDidUpdate() {
+    if (this.chipKey !== this.lastChip) {
+      const first = this.lastChip === undefined;
+      this.lastChip = this.chipKey;
+      if (!first) this.centerChip(true);
+    }
+  }
+
+  showToast(toast) {
+    clearTimeout(this.toastTimer);
+    this.toastFlip = !this.toastFlip;
+    if (toast.undoId || toast.msgId) this.setState({ toast: null });
+    else this.setState({ toast });
+    this.toastTimer = setTimeout(() => this.setState({ toast: null }), 2600);
+  }
+
+  centerChip(smooth) {
+    const box = document.getElementById('zchips');
+    const on = box && box.querySelector('.mk');
+    if (!box || !on) return;
+    const b = box.getBoundingClientRect();
+    const o = on.getBoundingClientRect();
+    const dx = o.left + o.width / 2 - (b.left + b.width / 2);
+    if (smooth) box.scrollBy({ left: dx, behavior: 'smooth' });
+    else box.scrollLeft += dx;
+  }
+
+  geo() {
+    const W = ELLIPSE ? 390 / K : 350;
+    const H = ELLIPSE ? 286 : 216;
+    const RX = SHAPE === 'circle' ? 112 : 142;
+    return { W, H, CX: W / 2, CY: 158, RX, RY: ELLIPSE ? 112 : 116, NRX: SHAPE === 'now' ? 100 : RX, NRY: ELLIPSE ? 112 : 46 };
+  }
+
+  ellipseLen(rx, ry, f) {
+    const end = Math.PI * Math.max(0, Math.min(1, f));
+    let len = 0;
+    let px = rx;
+    let py = 0;
+    for (let i = 1; i <= 120; i++) {
+      const a = (end * i) / 120;
+      const x = rx * Math.cos(a);
+      const y = ry * Math.sin(a);
+      len += Math.hypot(x - px, y - py);
+      px = x;
+      py = y;
+    }
+    return len;
+  }
+
+  gPoint(e) {
+    const g = this.geo();
+    const r = document.getElementById('scene').getBoundingClientRect();
+    return { x: (e.clientX - r.left - (r.width - g.W * K) / 2) / K, y: (e.clientY - r.top) / K };
+  }
+
+  orbPoint() {
+    const g = this.geo();
+    const t = this.now();
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    const f = (v) => Math.max(0, Math.min(1, v));
+    if (t < A1) {
+      const a = Math.PI * f((t - A0) / (A1 - A0));
+      return { x: g.CX + g.RX * Math.cos(a), y: g.CY - g.RY * Math.sin(a) };
+    }
+    const a = Math.PI * f((t - A1) / (E - A1));
+    return { x: g.CX - g.NRX * Math.cos(a), y: g.CY + g.NRY * Math.sin(a) };
+  }
+
+  gTime(p) {
+    const { CX, CY, RX, RY, NRX, NRY } = this.geo();
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    if (p.y <= CY) {
+      const nu = (p.x - CX) / RX;
+      const nv = (CY - p.y) / RY;
+      return { rho: Math.hypot(nu, nv), sec: A0 + (Math.atan2(nv, nu) / Math.PI) * (A1 - A0) };
+    }
+    const nu = (p.x - CX) / NRX;
+    const nv = (p.y - CY) / NRY;
+    return { rho: Math.hypot(nu, nv), sec: A1 + (Math.atan2(nv, -nu) / Math.PI) * (E - A1) };
+  }
+
+  gSet(sec) {
+    this.gPend = sec;
+    if (this.gRaf) return;
+    this.gRaf = requestAnimationFrame(() => {
+      this.gRaf = 0;
+      this.gFlush();
+    });
+  }
+
+  gFlush() {
+    if (this.gPend == null) return;
+    const v = this.gPend;
+    this.gPend = null;
+    this.scrub(v);
+  }
+
+  gDown(e) {
+    if (e.button > 0) return;
+    const p = this.gPoint(e);
+    const orb = this.orbPoint();
+    if (Math.hypot(p.x - orb.x, p.y - orb.y) > 30) return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+    const hit = this.gTime(p);
+    const cur = this.now();
+    this.gDrag = { id: e.pointerId, off: hit.sec - cur, prev: cur };
+    this.setState({ drag: true, touched: true, zSel: null });
+  }
+
+  gMove(e) {
+    const d = this.gDrag;
+    if (!d || e.pointerId !== d.id) return;
+    const hit = this.gTime(this.gPoint(e));
+    if (hit.rho < 0.15) return;
+    const lo = this.dayStart();
+    const hi = this.dayEnd() - 60;
+    let sec = hit.sec - d.off;
+    d.off *= 0.93;
+    if (Math.abs(sec - d.prev) > (hi - lo) * 0.75) sec = d.prev < (lo + hi) / 2 ? lo : hi;
+    sec = Math.max(lo, Math.min(hi, sec));
+    d.prev = sec;
+    this.gSet(sec);
+  }
+
+  gUp(e) {
+    const d = this.gDrag;
+    if (!d || e.pointerId !== d.id) return;
+    this.gDrag = null;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+    this.gFlush();
+    this.setState({ drag: false });
+  }
+
+  gKey(e) {
+    const t = this.now();
+    const keys = { ArrowLeft: 900, ArrowUp: 900, ArrowRight: -900, ArrowDown: -900, PageUp: 3600, PageDown: -3600 };
+    let to = null;
+    if (e.key in keys) to = t + keys[e.key];
+    else if (e.key === 'Home') to = this.dayStart();
+    else if (e.key === 'End') to = this.dayEnd() - 60;
+    if (to == null) return;
+    e.preventDefault();
+    this.setState({ zSel: null, touched: true });
+    this.scrub(to);
+  }
+
+  hx(c) {
+    return [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+  }
+
+  st(a) {
+    return '#' + a.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+  }
+
+  bl(top, bottom, share) {
+    const k = Math.max(0, Math.min(1, share));
+    return top.map((v, i) => Math.round(v * k + bottom[i] * (1 - k)));
+  }
+
+  lum(a) {
+    const f = (v) => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * f(a[0]) + 0.7152 * f(a[1]) + 0.0722 * f(a[2]);
+  }
+
+  cr(a, b) {
+    const hi = Math.max(this.lum(a), this.lum(b));
+    const lo = Math.min(this.lum(a), this.lum(b));
+    return (hi + 0.05) / (lo + 0.05);
+  }
+
+  skyKeys() {
+    const z = {};
+    this.zmanimList().forEach((x) => (z[x.id] = x.S));
+    const end = this.dayEnd();
+    const H = (c) => this.hx(c);
+    const K1 = (t, top, mid, bot, cloud) => ({ t, top: H(top), mid: H(mid), bot: H(bot), cloud: H(cloud) });
+    const alot = K1(z.alot, '#18215F', '#4B3D8E', '#9B6BA8', '#C9A6D6');
+    return [
+      alot,
+      K1(z.netz, '#8DA3E0', '#F2B7B4', '#FFD9AE', '#FFD6CC'),
+      K1(z.netz + (z.chatzot - z.netz) * 0.3, '#76B6F2', '#A8D4F6', '#D8EDFA', '#FFFFFF'),
+      K1(z.chatzot, '#4B9DEB', '#6DB4F1', '#A8D5F8', '#FFFFFF'),
+      K1(z.plag, '#5E9FE0', '#9CC5E8', '#F5D9A2', '#FFF6E4'),
+      K1(z.shkia, '#5C5AA8', '#E4708C', '#FFB05C', '#FFC8B0'),
+      K1(z.tzeit, '#161D58', '#2E3382', '#6C5BA8', '#9A8CC8'),
+      K1(z.tzeit + (z.chatzotL - z.tzeit) * 0.25, '#070C1F', '#0F1A3E', '#1B2A58', '#7F8FC8'),
+      K1(end - (z.netz - z.alot) * 0.7, '#060A19', '#0D1533', '#18224D', '#7F8FC8'),
+      { ...alot, t: end },
+    ];
+  }
+
+  skyAt(ms) {
+    const keys = this.skyKeys();
+    let i = 0;
+    keys.forEach((k, index) => {
+      if (ms >= k.t && index <= keys.length - 2) i = index;
+    });
+    const k = Math.max(0, Math.min(1, (ms - keys[i].t) / (keys[i + 1].t - keys[i].t)));
+    const e = k * k * (3 - 2 * k);
+    const m = (p) => this.bl(keys[i + 1][p], keys[i][p], e);
+    return { top: m('top'), mid: m('mid'), bot: m('bot'), cloud: m('cloud') };
+  }
+
+  inkFor(s) {
+    const zones = [s.top, this.bl(s.mid, s.top, 0.6), s.mid, s.bot];
+    const dark = this.hx('#0A1228');
+    const white = [255, 255, 255];
+    const worst = (c) => Math.min(...zones.map((z) => this.cr(z, c)));
+    const light = worst(white) > worst(dark);
+    const ink = light ? white : dark;
+    const opp = light ? this.hx('#080E22') : white;
+    let n = 0;
+    for (; n < 16; n++) {
+      const a = 0.18 + 0.04 * n;
+      if (Math.min(...zones.map((z) => this.cr(this.bl(opp, z, a), ink))) >= 5.2) break;
+    }
+    return { ink, opp, alpha: Math.round((0.18 + 0.04 * n) * 100) / 100, light };
+  }
+
+  ground(s) {
+    const g = this.hx('#080C1E');
+    return { back: this.bl(g, s.bot, 0.4), front: this.bl(g, s.bot, 0.58), shadeTop: this.bl(g, s.bot, 0.35), shadeBottom: this.bl(g, s.bot, 0.7) };
+  }
+
+  backdrop(s, share) {
+    const g = this.ground(s);
+    const op = 0.55 + (0.92 - 0.55) * share;
+    return this.bl(this.bl(g.shadeBottom, g.shadeTop, share), s.bot, op);
+  }
+
+  glassInk(backdrops, fill) {
+    const w = Math.min(...backdrops.map((b) => this.cr(this.bl(fill, b, 0.2), [255, 255, 255])));
+    const d = Math.min(...backdrops.map((b) => this.cr(this.bl(fill, b, 0.2), this.hx('#0A1228'))));
+    return w > d ? [255, 255, 255] : this.hx('#0A1228');
+  }
+
+  fmtLeft(sec) {
+    const m = Math.max(0, Math.round(sec / 60));
+    if (m >= 2880) return { v: String(Math.floor(m / 1440)), u: 'ימים' };
+    if (m >= 60) return { v: Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'), u: 'שעות' };
+    return { v: String(m), u: "דק'" };
+  }
+
+  leftText(sec) {
+    const p = this.fmtLeft(sec);
+    return p.v + ' ' + p.u;
+  }
+
+  appMessages(c, t) {
+    const D = this.data();
+    const date = this.dayKey();
+    const day = D.days[date];
+    const shkia = day.z.shkia * 60;
+    const out = [];
+    const nowDate = t >= 86400 ? this.shiftDate(date, 1) : date;
+    const nowMin = (t >= 86400 ? t - 86400 : t) / 60;
+    if (c.streak > 0) {
+      const goals = [7, 30, 100, 365];
+      const goal = goals.find((g) => g > c.streak) || Math.ceil((c.streak + 1) / 365) * 365;
+      const rem = goal - c.streak;
+      out.push({ id: 'streak', ic: 'isStar', title: c.streak === 1 ? 'יום אחד ברצף' : c.streak + ' ימים ברצף', caption: rem === 1 ? 'עוד יום אחד ליעד ' + goal : 'עוד ' + rem + ' ימים ליעד ' + goal, href: 'history' });
+    }
+    const block = D.blocks.find((b) => b.erev > nowDate || (b.erev === nowDate && b.startMin > nowMin));
+    if (block) {
+      const ahead = this.daysBetween(date, block.erev);
+      if (ahead <= 8) {
+        const when = ahead === 0 ? 'היום' : ahead === 1 ? 'מחר' : D.days[block.erev] ? D.days[block.erev].weekday : '';
+        out.push({ id: 'holyBlock', ic: 'isCandles', title: 'שבת', caption: when + ' · הדלקת נרות ' + this.clock(block.candle * 60) + ' · צאת השבת ' + this.clock(block.exit * 60), href: null });
+      }
+    }
+    const rc = D.events.filter((e) => e.rc && e.d >= date);
+    if (rc.length) {
+      const first = rc[0];
+      const month = first.title.replace(/^ראש חודש /, '');
+      const days = rc.filter((e) => e.title === first.title).map((e) => e.d);
+      const n = this.daysBetween(date, first.d);
+      const afterShkia = t >= shkia;
+      const inWords = ['', 'מחר', 'בעוד יומיים', 'בעוד שלושה ימים', 'בעוד ארבעה ימים', 'בעוד חמישה ימים', 'בעוד שישה ימים', 'בעוד שבעה ימים'];
+      if (n <= 0) {
+        const lastDay = days[days.length - 1] === date;
+        if (!(lastDay && afterShkia)) out.push({ id: 'roshChodesh', ic: 'isMoon', title: 'היום ראש חודש ' + month, caption: 'יעלה ויבוא, הלל ומוסף בשחרית.', href: 'rc' });
+      } else if (n === 1) {
+        if (afterShkia) out.push({ id: 'roshChodesh', ic: 'isMoon', title: 'היום ראש חודש ' + month, caption: 'נכנס היום בשקיעה. יעלה ויבוא בתפילה ובברכת המזון.', href: 'rc' });
+        else out.push({ id: 'roshChodesh', ic: 'isMoon', title: 'ראש חודש ' + month + ' מחר', caption: 'נכנס הערב בשקיעה.', href: 'rc' });
+      } else if (n <= 7) {
+        const eve = this.shiftDate(date, n - 1);
+        out.push({ id: 'roshChodesh', ic: 'isMoon', title: 'ראש חודש ' + month + ' ' + inWords[n], caption: 'נכנס ב' + D.days[eve].weekday + ' בשקיעה.', href: 'rc' });
+      }
+    }
+    const tonight = day.hilulaTonight;
+    const today = day.hilulaToday;
+    if (t >= shkia && tonight.length) out.push({ id: 'hilula', ic: 'isHilula', title: 'הלילה: הילולת ' + tonight.join(', '), caption: 'יום ההילולה, ' + day.hebNightLbl + ', נכנס היום בשקיעה.', href: 'hilula' });
+    else if (t < shkia && today.length) out.push({ id: 'hilula', ic: 'isHilula', title: 'היום: הילולת ' + today.join(', '), caption: day.hebLbl, href: 'hilula' });
+    else if (t < shkia && tonight.length) out.push({ id: 'hilula', ic: 'isHilula', title: 'הערב: הילולת ' + tonight.join(', '), caption: 'יום ההילולה, ' + day.hebNightLbl + ', נכנס הערב בשקיעה.', href: 'hilula' });
+    return out;
+  }
+
+  renderVals() {
+    const c = this.coreVals();
+    const s = this.state;
+    const t = this.now();
+    const A0 = this.dayStart();
+    const A1 = this.zmanSec('tzeit');
+    const E = this.dayEnd();
+    const NIGHT = E - A1;
+    const g = this.geo();
+    const { CX, CY, RX, RY, NRX, NRY } = g;
+    const cl = (f) => Math.max(0, Math.min(1, f));
+    const px = (n) => (n * K).toFixed(1);
+    const th = TH[c.theme];
+    const surfaceA = this.hx(th.surface);
+    const goldLightA = this.hx(th.goldLight);
+
+    const dayP = (f) => ({ x: CX + RX * Math.cos(Math.PI * cl(f)), y: CY - RY * Math.sin(Math.PI * cl(f)) });
+    const nightP = (f) => ({ x: CX - NRX * Math.cos(Math.PI * cl(f)), y: CY + NRY * Math.sin(Math.PI * cl(f)) });
+    const posOf = (S) => (S <= A1 ? dayP((S - A0) / (A1 - A0)) : nightP((S - A1) / NIGHT));
+    const night = t >= A1;
+    const fraction = night ? cl((t - A1) / NIGHT) : cl((t - A0) / (A1 - A0));
+    if (!this.lens) this.lens = { day: this.ellipseLen(RX, RY, 1), night: this.ellipseLen(NRX, NRY, 1) };
+    const dayLen = this.lens.day;
+    const nightLen = this.lens.night;
+    const dayShown = night && ELLIPSE ? 1 : fraction;
+    const dayDash = dayLen - this.ellipseLen(RX, RY, dayShown);
+    const nightDash = nightLen - this.ellipseLen(NRX, NRY, fraction);
+    const orb = this.orbPoint();
+
+    const sk = this.skyAt(t);
+    const ik = this.inkFor(sk);
+    const gr = this.ground(sk);
+    const rgba = (a, al) => 'rgba(' + a.map((v) => Math.round(v)).join(',') + ',' + al + ')';
+    const inkHex = this.st(ik.ink);
+    const dayFrac = cl((t - A0) / (A1 - A0));
+    const hgt = cl(Math.sin(Math.PI * dayFrac) / 0.55);
+    const sunCore = this.st(this.bl(this.hx('#FFE27A'), this.hx('#FF8A3D'), hgt));
+    const sunEdge = this.st(this.bl(this.hx('#FFB347'), this.hx('#E8531F'), hgt));
+    const zl = this.zmanimList();
+    const zS = Object.fromEntries(zl.map((z) => [z.id, z.S]));
+    const nz = zS.tzeit - zS.shkia || 1200;
+    let share = 0;
+    if (t >= zS.shkia) share = cl((t - zS.shkia) / (2 * nz));
+    else if (t <= zS.netz) share = cl((zS.netz - t) / (zS.netz - A0 || 1200));
+    share = share * share * (3 - 2 * share);
+
+    const nextId = (c.zmanim.find((z) => z.isNext) || {}).id || null;
+    const selId = (c.isScrub && s.zSel) || null;
+    const markedId = selId || nextId;
+    this.chipKey = markedId;
+    const stripBd = [0.43, 0.67, 0.91].map((sh) => this.backdrop(sk, sh));
+    const edgeBd = [0.05, 0.18, 0.32].map((sh) => this.backdrop(sk, sh));
+    const inkPlain = this.glassInk(stripBd, surfaceA);
+    const inkNext = this.glassInk(stripBd, goldLightA);
+    const inkEdge = this.glassInk(edgeBd, surfaceA);
+    const zchips = c.zmanim.map((z) => {
+      const selected = z.id === selId;
+      const isNext = z.id === nextId;
+      const past = zS[z.id] <= t && !isNext;
+      const ink = selected ? th.bg : this.st(isNext ? inkNext : inkPlain);
+      return {
+        id: z.id,
+        label: isNext ? 'הבא · ' + z.short : z.short,
+        time: z.time,
+        cls: z.id === markedId ? 'mk' : '',
+        tcls: past ? '' : 'b',
+        pressed: selected,
+        ink,
+        aria: z.name + ', ' + z.time,
+        style: 'background: ' + (selected ? th.text : rgba(isNext ? goldLightA : surfaceA, 0.2)),
+        pick: () => {
+          if (selected) {
+            this.setState({ zSel: null });
+            this.goLive();
+          } else {
+            this.setState({ zSel: z.id, touched: true });
+            this.scrub(zS[z.id]);
+          }
+        },
+      };
+    });
+
+    const ticks = c.zmanim.map((z, i) => {
+      const p = posOf(zl[i].S);
+      const past = zS[z.id] <= t && !z.isNext;
+      const sel = z.id === selId;
+      return { x: p.x.toFixed(1), y: p.y.toFixed(1), r: sel ? 9 : 6, fill: past ? th.gold : '#FFFFFF', stroke: sel ? '#1D2240' : past || z.isNext ? th.gold : '#5B6584' };
+    });
+    const live = this.liveSec();
+    const showGhost = c.isScrub && Math.abs(live - t) > 240;
+    const gp = posOf(live);
+
+    const stars = [[46, 40, 2.6], [92, 20, 2], [128, 62, 2], [224, 28, 3], [262, 60, 2], [302, 34, 2.6], [22, 94, 2], [330, 92, 2], [64, 122, 1.8], [288, 122, 1.8], [20, 18, 1.8], [172, 10, 1.8], [200, 52, 1.6], [334, 20, 1.8], [112, 34, 1.6], [48, 70, 1.6], [308, 76, 1.6], [14, 140, 1.6], [338, 140, 1.6]].map(([x, y, sz]) => ({ x, y, r: sz / 2 }));
+    const clouds = [[20, 34, 84, 0.85], [196, 84, 120, 0.8], [268, 122, 70, 0.7]].map(([x, y, w, op]) => ({ tf: 'translate(' + x + ' ' + y + ') scale(' + (w / 120).toFixed(4) + ')', op }));
+
+    const APP = { tefillin: ['הנחת תפילין', 'isTefillin', 'tefillin'], shma: ['קריאת שמע שחרית', 'isShema', 'krias_shma_shacharit'], shacharit: ['תפילת שחרית', 'isShacharit', 'shacharit'], mincha: ['תפילת מנחה', 'isMincha', 'mincha'], maariv: ['תפילת ערבית', 'isMaariv', 'maariv'], shmaNight: ['קריאת שמע על המיטה', 'isNight', 'krias_shma_al_hamita'] };
+    const raw = this.items();
+    const made = raw.map((x) => {
+      const d = this.doneAt(x.id);
+      const stt = d != null ? (d >= x.E ? 'late' : 'done') : t >= x.E ? 'missed' : t >= x.S ? 'active' : 'upcoming';
+      const [name, flag, appId] = APP[x.id];
+      const span = x.E - x.S;
+      const left = this.fmtLeft(x.E - t);
+      const statusText = stt === 'active' ? 'פתוח · נשארו ' + this.leftText(x.E - t) : stt === 'upcoming' ? 'נפתח ב-' + this.clock(x.S) : stt === 'done' ? 'בוצע ב-' + this.clock(d) : stt === 'late' ? 'באיחור · סומן ב-' + this.clock(d) : 'פוספס · נגמר ב-' + this.clock(x.E);
+      const range = this.clock(x.S) + (x.E >= 86400 ? ' עד ' + this.clock(x.E) + ' למחרת' : ' עד ' + this.clock(x.E));
+      const marking = s.marking === x.id;
+      return {
+        id: x.id,
+        appId,
+        name,
+        st: stt,
+        S: x.S,
+        E: x.E,
+        d,
+        [flag]: true,
+        statusText,
+        range,
+        startLabel: this.clock(x.S),
+        endLabel: this.clock(x.E),
+        startLine: this.clock(x.S) + ' - התחלה',
+        endLine: this.clock(x.E) + ' - סוף',
+        cardCls: 'st-' + stt,
+        cls: marking ? 'marking' : '',
+        tileCls: stt === 'active' ? 'accent' : '',
+        nodeCheck: stt === 'done' || stt === 'late',
+        isMissed: stt === 'missed',
+        hasUndo: stt === 'done' || stt === 'late',
+        ringOff: (157.08 * (1 - cl((x.E - t) / span))).toFixed(2),
+        ringCls: x.E - t <= 2700 ? 'urgent' : '',
+        leftNum: left.v,
+        leftUnit: left.u,
+        urgentCard: x.E - t <= 2700,
+        showItem: stt === 'active' || stt === 'upcoming',
+        isCheck: stt === 'done' || stt === 'late',
+        isWarn: stt === 'missed',
+        aria: name + ', ' + statusText,
+        markLabel: 'עשיתי - סימון ' + name,
+        undoLabel: 'ביטול סימון - ' + name,
+        openLabel: 'נוסח - ' + name,
+        pick: () => this.showToast({ text: 'פותח את ' + name + '…' }),
+        mark: () => this.mark(x.id),
+        undo: () => this.undo(x.id),
+        open: () => this.showToast({ text: 'פותח את נוסח ' + name + '…' }),
+      };
+    });
+    const mini = (e) => {
+      const x = raw.find((r) => r.id === e.id);
+      const f = e.st === 'upcoming' ? 0 : e.st !== 'active' ? 1 : Math.min(1, Math.max(0.03, (t - x.S) / (x.E - x.S)));
+      return { ringOff: (163.36 * (1 - f)).toFixed(2), ringOp: f > 0 ? 1 : 0 };
+    };
+    const rank = { active: 0, upcoming: 1, done: 2, late: 2, missed: 3 };
+    const sortKey = (e) => (e.st === 'done' || e.st === 'late' ? e.d : e.S);
+    const ordered = made
+      .map((e) => ({ ...e, ...mini(e) }))
+      .sort((a, b) => rank[a.st] - rank[b.st] || sortKey(a) - sortKey(b) || (a.appId < b.appId ? -1 : a.appId > b.appId ? 1 : 0));
+
+    const actives = made
+      .filter((e) => e.st === 'active')
+      .sort((a, b) => a.E - b.E)
+      .map((e) => ({ ...e, cardCls: e.urgentCard ? 'urgent' : '' }));
+    const activeN = actives.length;
+    const doneCount = made.filter((e) => e.st === 'done' || e.st === 'late').length;
+    const totalActive = made.length;
+    const emptyLine = doneCount >= totalActive && totalActive > 0 ? 'כל המצוות של היום בוצעו' : 'אין מצווה פתוחה ברגע זה';
+    const nextU = made.filter((e) => e.st === 'upcoming').sort((a, b) => a.S - b.S)[0] || null;
+    const allMarked = doneCount > 0 && !made.some((e) => e.st === 'missed');
+    const midCaption = c.isScrub ? 'תצוגה בלבד' : actives[0] ? actives[0].name + ' · עוד ' + this.leftText(actives[0].E - t) : nextU ? 'הבא: ' + nextU.name + ' ב-' + nextU.startLabel : allMarked ? 'הכול סומן להיום' : '';
+
+    const msgs = this.appMessages(c, t).map((m) => ({
+      ...m,
+      [m.ic]: true,
+      hasHref: Boolean(m.href),
+      noHref: !m.href,
+      act: () => this.showToast({ text: 'פותח את ' + m.title + '…' }),
+    }));
+
+    const look = s.look;
+    const nowIdx = ordered.some((e) => e.st === 'active' || e.st === 'upcoming') ? (ordered.findIndex((e) => e.st !== 'active') === -1 ? ordered.length : ordered.findIndex((e) => e.st !== 'active')) : null;
+    const nowLabel = (c.isScrub ? 'בתצוגה ' : 'עכשיו ') + c.nowT;
+    const rail = [];
+    ordered.forEach((e, i) => {
+      if (nowIdx === i) rail.push({ isNow: true, isItem: false, label: nowLabel });
+      rail.push({ ...e, isNow: false, isItem: true });
+    });
+    if (nowIdx === ordered.length) rail.push({ isNow: true, isItem: false, label: nowLabel });
+
+    const gridRows = [];
+    for (let i = 0; i < ordered.length; i += 2) {
+      const a = { ...ordered[i], filled: true };
+      const b = ordered[i + 1] ? { ...ordered[i + 1], filled: true } : { filled: false };
+      gridRows.push({ cells: [a, b] });
+    }
+
+    const cnt = { done: doneCount, open: made.filter((e) => e.st === 'active' || e.st === 'upcoming').length, missed: made.filter((e) => e.st === 'missed').length };
+    const tot = cnt.done + cnt.open + cnt.missed;
+    const figRings = [
+      { cls: 'd', r: 58, n: cnt.done },
+      { cls: 'o', r: 46, n: cnt.open },
+      { cls: 'm', r: 34, n: cnt.missed },
+    ].map((h) => {
+      const len = 2 * Math.PI * h.r;
+      const f = tot ? h.n / tot : 0;
+      return { cls: h.cls, r: h.r, len: len.toFixed(2), off: (len * (1 - f)).toFixed(2), op: h.n === 0 ? 0 : 1 };
+    });
+    const legend = [
+      { cls: 'd', label: 'בוצעו', n: cnt.done },
+      { cls: 'o', label: 'פתוחות', n: cnt.open },
+      { cls: 'm', label: 'פוספסו', n: cnt.missed },
+    ];
+
+    const dayPath = 'M' + (CX + RX) + ' ' + CY + 'A' + RX + ' ' + RY + ' 0 0 0 ' + (CX - RX) + ' ' + CY;
+    const nightPath = 'M' + (CX - NRX) + ' ' + CY + 'A' + NRX + ' ' + NRY + ' 0 0 0 ' + (CX + NRX) + ' ' + CY;
+    const stageLeft = (390 - g.W * K) / 2;
+    const stageStyle = 'left: ' + stageLeft.toFixed(2) + 'px; width: ' + px(g.W) + 'px; height: ' + px(g.H) + 'px';
+    const moonD = 28 * K;
+    const edgeX = ELLIPSE ? 8 : 8 * K;
+    const grabR = 30 * K;
+    const orbNight = night;
+
+    return {
+      ...c,
+      skyStyle: ['--sk1:' + this.st(sk.top), '--sk2:' + this.st(sk.mid), '--sk3:' + this.st(sk.bot), '--ink:' + inkHex, '--inkchip:' + rgba(ik.opp, ik.alpha), '--edgebg:' + rgba(surfaceA, 0.2)].join(';'),
+      landStyle: 'top: ' + (17 + 158 * K).toFixed(1) + 'px; background: linear-gradient(180deg, ' + rgba(gr.shadeTop, 0.55) + ', ' + rgba(gr.shadeBottom, 0.92) + ')',
+      sceneStyle: 'height: ' + px(g.H) + 'px',
+      stageStyle,
+      sw: px(g.W),
+      sh: px(g.H),
+      vb: '0 0 ' + g.W.toFixed(2) + ' ' + g.H,
+      gx1: CX + RX,
+      gx2: CX - RX,
+      decoTf: 'translate(' + ((g.W - 350) / 2).toFixed(2) + ' 0)',
+      sunCore,
+      sunEdge,
+      sunOp: night ? 0 : 1,
+      sunX: orb.x.toFixed(2),
+      sunY: orb.y.toFixed(2),
+      starsOp: (share * 0.6).toFixed(3),
+      cloudOp: ((1 - share) * 0.9).toFixed(3),
+      cloudC: this.st(sk.cloud),
+      stars,
+      clouds,
+      dayPath,
+      nightPath,
+      dayLen: dayLen.toFixed(2),
+      nightLen: nightLen.toFixed(2),
+      dayDash: dayDash.toFixed(2),
+      nightDash: nightDash.toFixed(2),
+      dayProgOp: !night || fraction > 0 ? 1 : 0,
+      nightProgOp: night ? 1 : 0,
+      trackInk: inkHex,
+      nightTrackInk: ELLIPSE ? '#F6E7BF' : inkHex,
+      moonStyle: 'width: ' + moonD.toFixed(1) + 'px; height: ' + moonD.toFixed(1) + 'px; left: ' + ((orb.x - 14) * K).toFixed(1) + 'px; top: ' + ((orb.y - 14) * K).toFixed(1) + 'px; box-shadow: inset ' + (9 * K).toFixed(1) + 'px ' + (-4 * K).toFixed(1) + 'px 0 0 #F6E7BF; opacity: ' + (orbNight ? 1 : 0),
+      hillsStyle: 'height: ' + px(216) + 'px',
+      hillBackC: this.st(gr.back),
+      hillFrontC: this.st(gr.front),
+      ticks,
+      ghostX: (gp.x - 5).toFixed(1),
+      ghostY: (gp.y - 5).toFixed(1),
+      ghostTf: 'rotate(45 ' + gp.x.toFixed(1) + ' ' + gp.y.toFixed(1) + ')',
+      ghostOp: showGhost ? 1 : 0,
+      inkHex,
+      inkchipHex: this.st(ik.opp),
+      plateTop: px(66),
+      hintTop: px(172),
+      hintCls: s.touched || c.isScrub ? 'gone' : '',
+      hintText: night ? 'גררו את הירח' : 'גררו את השמש',
+      edgeX: edgeX.toFixed(1),
+      edgeTop: px(166),
+      edgeInk: this.st(inkEdge),
+      edgeStart: c.zmanim.find((z) => z.id === 'alot').time,
+      edgeEnd: c.zmanim.find((z) => z.id === 'tzeit').time,
+      grabStyle: 'width: ' + (grabR * 2).toFixed(1) + 'px; height: ' + (grabR * 2).toFixed(1) + 'px; left: ' + ((orb.x - 30) * K).toFixed(1) + 'px; top: ' + ((orb.y - 30) * K).toFixed(1) + 'px',
+      sceneCls: (s.drag ? 'drag ' : '') + (c.isScrub ? 'scr ' : ''),
+      liveMode: s.drag ? 'off' : 'polite',
+      gDown: (e) => this.gDown(e),
+      gMove: (e) => this.gMove(e),
+      gUp: (e) => this.gUp(e),
+      gKey: (e) => this.gKey(e),
+      sliderMin: Math.round(A0),
+      sliderMax: Math.round(E - 60),
+      sliderNow: Math.round(t),
+      sliderText: c.nowT + ', הבא: ' + c.nextZ.name + ' ' + c.nextZ.left,
+      midCaption,
+      zchips,
+      dateLine: c.weekday + ' · ' + (t >= zS.shkia ? this.day().hebNightFull : this.day().hebFull) + ' · ' + c.city,
+      openLabel: 'פתוח עכשיו (' + activeN + ')',
+      hasActive: activeN > 0,
+      noActive: activeN === 0,
+      actives,
+      emptyLine,
+      hasNext: Boolean(nextU),
+      nextCaption: nextU ? 'הבאה: ' + nextU.name + ' ב-' + nextU.startLabel : '',
+      msgs,
+      hasMsgs: msgs.length > 0,
+      msgLabel: 'הודעות (' + msgs.length + ')',
+      hasEntries: ordered.length > 0,
+      lkRail: { pressed: look === 'rail', pick: () => this.setState({ look: 'rail' }) },
+      lkCards: { pressed: look === 'cards', pick: () => this.setState({ look: 'cards' }) },
+      lkRings: { pressed: look === 'rings', pick: () => this.setState({ look: 'rings' }) },
+      isRail: look === 'rail',
+      isCards: look === 'cards',
+      isRings: look === 'rings',
+      lkEnter: 'lk-' + this.flip('look', look),
+      rail,
+      gridRows,
+      figRings,
+      legend,
+      doneCount: String(cnt.done),
+      ofTotal: 'מתוך ' + tot,
+      ringsAria: 'בוצעו ' + cnt.done + ', פתוחות ' + cnt.open + ', פוספסו ' + cnt.missed + ', מתוך ' + tot,
+    };
+  }
+}
+</script>

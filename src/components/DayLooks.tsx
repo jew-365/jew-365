@@ -12,6 +12,7 @@ import {
   dayRingCounts,
   miniRingFraction,
   railNowIndex,
+  timeOrderDayEntries,
   ringDashOffset,
   type DayEntry,
   type DayEntryStatus,
@@ -355,7 +356,8 @@ export const DayLooks = React.memo(function DayLooks({
   };
 
   const railRows = () => {
-    const nowIndex = railNowIndex(entries);
+    const timed = timeOrderDayEntries(entries);
+    const nowIndex = railNowIndex(timed, now);
     const rows: React.ReactNode[] = [];
     const nowRow = (
       <View key="rail-now" testID="home-rail-now" style={styles.railRow}>
@@ -369,7 +371,7 @@ export const DayLooks = React.memo(function DayLooks({
         <View style={[styles.nowLine, { borderColor: colors.gold }]} />
       </View>
     );
-    entries.forEach((e, index) => {
+    timed.forEach((e, index) => {
       if (nowIndex === index) {
         rows.push(nowRow);
       }
@@ -397,7 +399,7 @@ export const DayLooks = React.memo(function DayLooks({
         ),
       );
     });
-    if (nowIndex === entries.length) rows.push(nowRow);
+    if (nowIndex === timed.length) rows.push(nowRow);
     return rows;
   };
 

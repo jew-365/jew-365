@@ -1,6 +1,8 @@
 import {
   alphaHex,
+  ARC,
   ARC_ZMANIM,
+  arcLength,
   arcPoint,
   BACK_ALPHA,
   backBackdrops,
@@ -12,8 +14,8 @@ import {
   dragStart,
   edgeInk,
   EDGE_SHARES,
-  ellipseLength,
   groundColors,
+  HALF_LENGTH,
   inkFor,
   LAND_OPACITY,
   nextZman,
@@ -21,6 +23,8 @@ import {
   nightShare,
   relativeLabel,
   skyAt,
+  stageOffset,
+  stageUnits,
   STRIP_SHARES,
   stripBackdrop,
   sunColors,
@@ -68,34 +72,88 @@ describe('dayFrameFor', () => {
 });
 
 describe('arc geometry', () => {
-  it('places the sun and moon rtl', () => {
+  it('is one regular circle on the horizon, 112 units about the centre', () => {
+    expect(ARC).toMatchObject({ cx: 175, cy: 158, r: 112, height: 286 });
+    expect(ARC.cy + ARC.r).toBeLessThan(ARC.height);
+    expect(ARC.cy - ARC.r).toBe(46);
+  });
+
+  it('places the sun on the upper half and the moon on the lower half of the same circle, rtl', () => {
     const pt = (d: Date) => arcPoint(d, F, true);
-    expect(pt(F.start).x).toBeCloseTo(317, 6);
+    expect(pt(F.start).x).toBeCloseTo(287, 6);
     expect(pt(F.start).y).toBeCloseTo(158, 6);
     const noon = pt(mid(F.start, F.tzeit));
     expect(noon.x).toBeCloseTo(175, 3);
-    expect(noon.y).toBeCloseTo(42, 3);
+    expect(noon.y).toBeCloseTo(46, 3);
     const dusk = pt(shift(F.tzeit, -1));
-    expect(dusk.x).toBeCloseTo(33, 1);
+    expect(dusk.x).toBeCloseTo(63, 1);
     expect(dusk.y).toBeCloseTo(158, 1);
+    expect(pt(F.tzeit).x).toBeCloseTo(63, 6);
+    expect(pt(F.tzeit).y).toBeCloseTo(158, 6);
     const nightMid = pt(mid(F.tzeit, F.end));
     expect(nightMid.x).toBeCloseTo(175, 3);
-    expect(nightMid.y).toBeCloseTo(204, 3);
-    expect(pt(shift(F.end, -1)).x).toBeCloseTo(275, 1);
-    expect(pt(F.tzeit).x).toBeCloseTo(75, 6);
+    expect(nightMid.y).toBeCloseTo(270, 3);
+    expect(pt(shift(F.end, -1)).x).toBeCloseTo(287, 1);
+    expect(pt(shift(F.end, -1)).y).toBeCloseTo(158, 1);
+  });
+
+  it('puts the first quarter of the night on the lower left and the last on the lower right, rtl', () => {
+    const quarter = (share: number) =>
+      arcPoint(new Date(F.tzeit.getTime() + share * (F.end.getTime() - F.tzeit.getTime())), F, true);
+    const first = quarter(0.25);
+    const last = quarter(0.75);
+    expect(first.x).toBeCloseTo(175 - 112 * Math.SQRT1_2, 3);
+    expect(first.y).toBeCloseTo(158 + 112 * Math.SQRT1_2, 3);
+    expect(last.x).toBeCloseTo(175 + 112 * Math.SQRT1_2, 3);
+    expect(last.y).toBeCloseTo(158 + 112 * Math.SQRT1_2, 3);
+  });
+
+  it('keeps every point of the day on the circle, the day above the horizon and the night below it', () => {
+    const span = (a: Date, b: Date, n: number) =>
+      Array.from({ length: n + 1 }, (_, i) => new Date(a.getTime() + ((b.getTime() - a.getTime()) * i) / n));
+    [true, false].forEach((rtl) => {
+      span(F.start, shift(F.tzeit, -1), 40).forEach((d) => {
+        const p = arcPoint(d, F, rtl);
+        expect(Math.hypot(p.x - ARC.cx, p.y - ARC.cy)).toBeCloseTo(ARC.r, 6);
+        expect(p.y).toBeLessThanOrEqual(ARC.cy + 1e-9);
+      });
+      span(F.tzeit, shift(F.end, -1), 40).forEach((d) => {
+        const p = arcPoint(d, F, rtl);
+        expect(Math.hypot(p.x - ARC.cx, p.y - ARC.cy)).toBeCloseTo(ARC.r, 6);
+        expect(p.y).toBeGreaterThanOrEqual(ARC.cy - 1e-9);
+      });
+    });
   });
 
   it('mirrors for ltr', () => {
-    expect(arcPoint(F.start, F, false).x).toBeCloseTo(33, 6);
-    expect(arcPoint(mid(F.tzeit, F.end), F, false).y).toBeCloseTo(204, 3);
+    expect(arcPoint(F.start, F, false).x).toBeCloseTo(63, 6);
+    expect(arcPoint(mid(F.tzeit, F.end), F, false).y).toBeCloseTo(270, 3);
+    expect(arcPoint(F.tzeit, F, false).x).toBeCloseTo(287, 6);
   });
 
-  it.each([true, false])('timeAtPoint inverts arcPoint (rtl %s)', (rtl) => {
+  it('draws the day zmanim on the upper half and chatzot halayla on the lower half', () => {
+    F.zmanim
+      .filter((z) => z.id !== 'chatzotLayla')
+      .forEach((z) => expect(arcPoint(z.at, F, true).y).toBeLessThanOrEqual(ARC.cy + 1e-9));
+    const layla = arcPoint(zman('chatzotLayla'), F, true);
+    expect(layla.y).toBeGreaterThan(ARC.cy + 100);
+    expect(Math.hypot(layla.x - ARC.cx, layla.y - ARC.cy)).toBeCloseTo(ARC.r, 6);
+    expect(arcPoint(zman('tzeit'), F, true).x).toBeCloseTo(63, 6);
+    expect(arcPoint(zman('tzeit'), F, true).y).toBeCloseTo(158, 6);
+    expect(arcPoint(zman('chatzot'), F, true).y).toBeLessThan(ARC.cy - 100);
+  });
+
+  it.each([true, false])('timeAtPoint inverts arcPoint on both halves (rtl %s)', (rtl) => {
+    const nightAt = (share: number) => new Date(F.tzeit.getTime() + share * (F.end.getTime() - F.tzeit.getTime()));
     const samples = [
       F.start,
       mid(F.start, F.tzeit),
       shift(F.tzeit, -60000),
+      shift(F.tzeit, 60000),
+      nightAt(0.25),
       mid(F.tzeit, F.end),
+      zman('chatzotLayla'),
+      nightAt(0.75),
       shift(F.end, -120000),
     ];
     samples.forEach((s) => {
@@ -106,25 +164,110 @@ describe('arc geometry', () => {
     expect(timeAtPoint({ x: 175, y: 158 }, F, rtl).rho).toBe(0);
   });
 
-  it('measures the ellipse', () => {
-    expect(ellipseLength(142, 116, 1)).toBeCloseTo(406.283, 2);
-    expect(ellipseLength(100, 46, 1)).toBeCloseTo(237.242, 2);
-    expect(ellipseLength(142, 116, 0.5)).toBeCloseTo(203.146, 2);
+  it('reads one time at the tzeit end from either side and a whole day apart at the alot end', () => {
+    const above = timeAtPoint({ x: 63, y: 157 }, F, true);
+    const below = timeAtPoint({ x: 63, y: 159 }, F, true);
+    expect(Math.abs(above.atMs - F.tzeit.getTime())).toBeLessThan(10 * 60000);
+    expect(Math.abs(below.atMs - F.tzeit.getTime())).toBeLessThan(10 * 60000);
+    expect(below.atMs).toBeGreaterThan(above.atMs);
+    const right = timeAtPoint({ x: 287, y: 157 }, F, true);
+    const rightBelow = timeAtPoint({ x: 287, y: 159 }, F, true);
+    expect(Math.abs(right.atMs - F.start.getTime())).toBeLessThan(10 * 60000);
+    expect(Math.abs(rightBelow.atMs - F.end.getTime())).toBeLessThan(10 * 60000);
   });
 
-  it('writes the paths', () => {
-    expect(dayPath(true)).toBe('M317 158A142 116 0 0 0 33 158');
-    expect(nightPath(false)).toBe('M275 158A100 46 0 0 1 75 158');
+  it('measures the half circle', () => {
+    expect(HALF_LENGTH).toBeCloseTo(Math.PI * 112, 6);
+    expect(arcLength(1)).toBeCloseTo(351.858, 3);
+    expect(arcLength(0.5)).toBeCloseTo(175.929, 3);
+    expect(arcLength(0)).toBe(0);
+    expect(arcLength(-1)).toBe(0);
+    expect(arcLength(3)).toBeCloseTo(HALF_LENGTH, 6);
+  });
+
+  it('writes the two half paths of one closed circle', () => {
+    expect(dayPath(true)).toBe('M287 158A112 112 0 0 0 63 158');
+    expect(nightPath(true)).toBe('M63 158A112 112 0 0 0 287 158');
+    expect(dayPath(false)).toBe('M63 158A112 112 0 0 1 287 158');
+    expect(nightPath(false)).toBe('M287 158A112 112 0 0 1 63 158');
+    const ends = (d: string) => d.match(/-?\d+ 158/g)!;
+    [true, false].forEach((rtl) => {
+      const day = ends(dayPath(rtl));
+      const night = ends(nightPath(rtl));
+      expect(day[1]).toBe(night[0]);
+      expect(night[1]).toBe(day[0]);
+    });
+  });
+
+  it('centres the stage on the circle whatever the window width', () => {
+    expect(stageUnits(390, 1)).toBe(390);
+    expect(stageUnits(390, 0.5)).toBe(780);
+    expect(stageOffset(350)).toBe(0);
+    expect(stageOffset(439.5)).toBeCloseTo(175 - 219.75, 6);
+    [320, 390, 750].forEach((width) => {
+      const units = stageUnits(width, 0.8);
+      expect(ARC.cx - stageOffset(units)).toBeCloseTo(units / 2, 9);
+    });
   });
 });
 
 describe('drag', () => {
   it('follows the point from where it was grabbed', () => {
     const start = dragStart(arcPoint(T, F, true), T.getTime(), F, true);
-    const r = dragMove(start, { x: 175, y: 42 }, F, true)!;
+    const r = dragMove(start, { x: 175, y: 46 }, F, true)!;
     const midpoint = (F.start.getTime() + F.tzeit.getTime()) / 2;
     expect(Math.abs(r.atMs - midpoint)).toBeLessThanOrEqual(2);
     expect(r.state.offsetMs).toBeCloseTo(start.offsetMs * 0.93, 6);
+  });
+
+  it('follows the point onto the lower half and back, grabbed where the moon is', () => {
+    const night = at(J, '2026-10-29T20:15');
+    const start = dragStart(arcPoint(night, F, true), night.getTime(), F, true);
+    expect(Math.abs(start.offsetMs)).toBeLessThan(2);
+    const bottom = dragMove(start, { x: 175, y: 270 }, F, true)!;
+    const midpoint = (F.tzeit.getTime() + F.end.getTime()) / 2;
+    expect(Math.abs(bottom.atMs - midpoint)).toBeLessThanOrEqual(2);
+    const back = dragMove(bottom.state, arcPoint(zman('plag'), F, true), F, true)!;
+    expect(Math.abs(back.atMs - zman('plag').getTime())).toBeLessThanOrEqual(2);
+  });
+
+  it('crosses the tzeit end from day into night and back with no jump', () => {
+    const justBefore = shift(F.tzeit, -20 * 60000);
+    const justAfter = shift(F.tzeit, 20 * 60000);
+    const start = dragStart(arcPoint(justBefore, F, true), justBefore.getTime(), F, true);
+    const across = dragMove(start, arcPoint(justAfter, F, true), F, true)!;
+    expect(Math.abs(across.atMs - justAfter.getTime())).toBeLessThanOrEqual(2);
+    const back = dragMove(across.state, arcPoint(justBefore, F, true), F, true)!;
+    expect(Math.abs(back.atMs - justBefore.getTime())).toBeLessThanOrEqual(2);
+    let state = start;
+    let last = justBefore.getTime();
+    [-10, -5, -1, 1, 5, 10].forEach((minutes) => {
+      const r = dragMove(state, arcPoint(shift(F.tzeit, minutes * 60000), F, true), F, true)!;
+      expect(r.atMs).toBeGreaterThan(last);
+      expect(r.atMs - last).toBeLessThan(15 * 60000);
+      state = r.state;
+      last = r.atMs;
+    });
+  });
+
+  it('crosses the tzeit end the same way in ltr', () => {
+    const justBefore = shift(F.tzeit, -20 * 60000);
+    const justAfter = shift(F.tzeit, 20 * 60000);
+    const start = dragStart(arcPoint(justBefore, F, false), justBefore.getTime(), F, false);
+    const across = dragMove(start, arcPoint(justAfter, F, false), F, false)!;
+    expect(Math.abs(across.atMs - justAfter.getTime())).toBeLessThanOrEqual(2);
+  });
+
+  it('holds at alot when the point crosses the alot end from the day side into the night half', () => {
+    const state = { offsetMs: 0, prevMs: F.start.getTime() + 20 * 60000 };
+    const below = arcPoint(shift(F.end, -20 * 60000), F, true);
+    expect(dragMove(state, below, F, true)!.atMs).toBe(F.start.getTime());
+  });
+
+  it('holds at the next alot when the point crosses the alot end from the night half into the day side', () => {
+    const state = { offsetMs: 0, prevMs: F.end.getTime() - 20 * 60000 };
+    const above = arcPoint(shift(F.start, 20 * 60000), F, true);
+    expect(dragMove(state, above, F, true)!.atMs).toBe(F.end.getTime() - 60000);
   });
 
   it('ignores the centre', () => {

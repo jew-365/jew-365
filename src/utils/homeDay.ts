@@ -33,6 +33,17 @@ export function orderDayEntries(entries: readonly DayEntry[]): DayEntry[] {
   });
 }
 
+const timeOf = (e: DayEntry): number =>
+  (e.start ?? (e.markedAt !== null ? new Date(e.markedAt) : null))?.getTime() ?? Number.POSITIVE_INFINITY;
+
+export function timeOrderDayEntries<T extends DayEntry>(entries: readonly T[]): T[] {
+  return [...entries].sort((a, b) => {
+    const diff = timeOf(a) - timeOf(b);
+    if (diff !== 0 && !Number.isNaN(diff)) return diff < 0 ? -1 : 1;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+}
+
 export function dayRingCounts(entries: readonly DayEntry[]): {
   done: number;
   open: number;
@@ -59,9 +70,9 @@ export function miniRingFraction(e: DayEntry, now: Date): number {
   return Math.min(1, Math.max(0.03, (now.getTime() - e.start.getTime()) / span));
 }
 
-export function railNowIndex(entries: readonly DayEntry[]): number | null {
+export function railNowIndex(entries: readonly DayEntry[], now: Date): number | null {
   if (!entries.some((e) => e.status === 'active' || e.status === 'upcoming')) return null;
-  const index = entries.findIndex((e) => e.status !== 'active');
+  const index = entries.findIndex((e) => timeOf(e) > now.getTime());
   return index === -1 ? entries.length : index;
 }
 

@@ -1284,7 +1284,7 @@
   "home.greeting.eveningNeutral": "Good evening",
   "home.greeting.night": "Good night, %{name}",
   "home.greeting.nightNeutral": "Good night",
-  "home.arc.label": "The day's arc and zmanim",
+  "home.arc.label": "The day's circle and zmanim",
   "home.arc.caption.open": "%{name} · %{left} left",
   "home.arc.caption.next": "Next: %{name} at %{time}",
   "home.arc.caption.allDone": "All marked for today",

@@ -44,8 +44,8 @@ describe('color math', () => {
   });
 
   it('derives the missed and done tones', () => {
-    expect(missedTone(T_LIGHT)).toEqual({ fill: '#faeae6', border: '#f4cfcb', ink: '#7d2634', ring: '#da877c' });
-    expect(doneTone(T_LIGHT)).toEqual({ fill: '#e2f0e7', ink: '#155f52' });
+    expect(missedTone(T_LIGHT)).toEqual({ fill: '#f8dfdc', border: '#efbcb9', ink: '#912731', ring: '#d15e57' });
+    expect(doneTone(T_LIGHT)).toEqual({ fill: '#d6eadf', ink: '#146b55' });
   });
 
   it.each(THEME_NAMES)('%s: missed and done inks stay readable', (name) => {

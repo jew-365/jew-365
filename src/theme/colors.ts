@@ -270,17 +270,17 @@ export const CALENDAR_PARTIAL_SHARES = { p1: 0.22, p2: 0.4, p3: 0.55 } as const;
 
 export function missedTone(colors: ThemeColors): { fill: string; border: string; ink: string; ring: string } {
   return {
-    fill: blendHex(colors.urgent, colors.surface, 0.09),
-    border: blendHex(colors.urgent, colors.surface, 0.22),
-    ink: blendHex(colors.urgent, colors.text, 0.55),
-    ring: blendHex(blendHex(colors.urgent, '#B0683C', 0.68), colors.surface, 0.62),
+    fill: blendHex(colors.urgent, colors.surface, 0.14),
+    border: blendHex(colors.urgent, colors.surface, 0.31),
+    ink: blendHex(colors.urgent, colors.text, 0.66),
+    ring: blendHex(blendHex(colors.urgent, '#B0683C', 0.8), colors.surface, 0.8),
   };
 }
 
 export function doneTone(colors: ThemeColors): { fill: string; ink: string } {
   return {
-    fill: blendHex(colors.safe, colors.surface, 0.12),
-    ink: blendHex(colors.safe, colors.text, 0.55),
+    fill: blendHex(colors.safe, colors.surface, 0.17),
+    ink: blendHex(colors.safe, colors.text, 0.66),
   };
 }
 

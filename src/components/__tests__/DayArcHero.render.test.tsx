@@ -1,29 +1,39 @@
 import { Dimensions, I18nManager, ScrollView, StyleSheet } from 'react-native';
 import type { ComponentProps } from 'react';
 import { act, fireEvent, screen, within } from '@testing-library/react-native';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { AppLogo } from '../AppLogo';
-import { BACK_TOUCH, BLOCK_GAP, DayArcHero, sceneScale } from '../DayArcHero';
+import { BACK_TOUCH, BLOCK_GAP, DayArcHero, HERO_CHROME, SCENE_MAX, SCENE_MIN, sceneScale } from '../DayArcHero';
 import { CITIES } from '@/data/cities';
 import { renderWithTheme } from '@/testing/render';
 import { at } from '@/testing/zmanim';
 import { useUserStore } from '@/stores/useUserStore';
 import { THEMES } from '@/theme/colors';
 import { scaled } from '@/theme/scale';
+import { SKY_SCENE } from '@/theme/sky';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import {
   alphaHex,
+  ARC,
+  arcFraction,
+  arcLength,
   arcPoint,
   BACK_ALPHA,
   CHIP_ALPHA,
   chipInk,
   dayFrameFor,
+  dayPath,
   dragMove,
   dragStart,
   edgeInk,
+  HALF_LENGTH,
   inkFor,
   nextZman,
+  nightPath,
   skyAt,
+  stageOffset,
+  stageUnits,
   type ZmanId,
 } from '@/utils/dayArc';
 import { clockOf } from '@/utils/clock';
@@ -295,11 +305,11 @@ describe('DayArcHero', () => {
     };
   };
   const STAND_OFF: Record<number, [number, number, number, number]> = {
-    640: [-4.46, 0.54, 18.83, 23.83],
-    812: [-0.55, 4.45, 26.78, 31.78],
-    844: [1.86, 6.86, 31.67, 36.67],
-    915: [5.46, 10.46, 39, 44],
-    1000: [5.46, 10.46, 39, 44],
+    640: [-4.19, 0.81, 14.31, 19.31],
+    812: [3.33, 8.33, 27.92, 32.92],
+    844: [5.37, 10.37, 31.62, 36.62],
+    915: [9.45, 14.45, 39, 44],
+    1000: [9.45, 14.45, 39, 44],
   };
 
   it.each(PHONES)(
@@ -313,6 +323,39 @@ describe('DayArcHero', () => {
       expect(r.plateFromPill).toBeCloseTo(platePill, 2);
       expect(r.tickFromPill).toBeGreaterThan(0);
       expect(r.plateFromBox).toBeGreaterThan(0);
+    },
+  );
+
+  const lineHeight = (variant: { lineHeight?: number }) => variant.lineHeight as number;
+  const TOP_ROW = lineHeight(typography.caption) + lineHeight(typography.title) + 2 * scaled(6);
+  const STRIP =
+    spacing.sm + 2 * 2 + 2 * scaled(7) + lineHeight(typography.small) + lineHeight(typography.body) + spacing.md;
+  const CHROME = spacing.lg + TOP_ROW + BLOCK_GAP + STRIP;
+  const HERO: Record<number, [scene: number, hero: number]> = {
+    640: [179, 346],
+    812: [238, 405],
+    844: [254, 421],
+    915: [286, 453],
+    1000: [286, 453],
+  };
+
+  it('budgets the hero chrome at 168 points, 1 above what the layout tokens add up to', () => {
+    expect(CHROME).toBe(167);
+    expect(HERO_CHROME).toBe(scaled(168));
+    expect(HERO_CHROME).toBeGreaterThanOrEqual(CHROME);
+    expect(SCENE_MAX).toBe(scaled(ARC.height));
+    expect(SCENE_MIN).toBe(scaled(179));
+  });
+
+  it.each(PHONES)(
+    'sizes the scene and the hero on %s x %s, within half a screen except on the 640 point phone',
+    (_width, height) => {
+      const scene = ARC.height * sceneScale(height);
+      const [pinnedScene, pinnedHero] = HERO[height];
+      expect(scene).toBeCloseTo(pinnedScene, 2);
+      expect(scene + CHROME).toBeCloseTo(pinnedHero, 2);
+      if (height === 640) expect(scene + CHROME - height / 2).toBeCloseTo(26, 2);
+      else expect(scene + CHROME).toBeLessThanOrEqual(height / 2);
     },
   );
 
@@ -492,29 +535,31 @@ describe('DayArcHero', () => {
     expect(screen.getByTestId('home-arc-clock')).toHaveTextContent('12:15');
   });
 
+  const WINDOW = Dimensions.get('window');
+  const stageK = sceneScale(WINDOW.height);
+  const stageShift = stageOffset(stageUnits(WINDOW.width, stageK));
+  const touchAt = (p: { x: number; y: number }) => ({
+    locationX: (p.x - stageShift) * stageK,
+    locationY: p.y * stageK,
+  });
+
   it('drags the sun and keeps the preview after release', () => {
     const { onScrubChange } = setup();
-    const k = sceneScale(Dimensions.get('window').height);
+    const k = stageK;
     const o = arcPoint(NOON, F, true);
     const grab = screen.getByTestId('home-arc-grab');
-    expect(
-      fireEvent(grab, 'startShouldSetResponder', { nativeEvent: { locationX: o.x * k, locationY: o.y * k } }),
-    ).toBe(true);
-    expect(
-      fireEvent(grab, 'startShouldSetResponder', { nativeEvent: { locationX: o.x * k + 60 * k, locationY: o.y * k } }),
-    ).toBe(false);
+    expect(fireEvent(grab, 'startShouldSetResponder', { nativeEvent: touchAt(o) })).toBe(true);
+    expect(fireEvent(grab, 'startShouldSetResponder', { nativeEvent: touchAt({ x: o.x + 60, y: o.y }) })).toBe(false);
     act(() => {
-      fireEvent(grab, 'responderGrant', {
-        nativeEvent: { locationX: o.x * k, locationY: o.y * k, pageX: 500, pageY: 500 },
-      });
+      fireEvent(grab, 'responderGrant', { nativeEvent: { ...touchAt(o), pageX: 500, pageY: 500 } });
     });
     expect(onScrubChange).toHaveBeenLastCalledWith(true);
     act(() => {
       fireEvent(grab, 'responderMove', {
-        nativeEvent: { pageX: 500 + (175 - o.x) * k, pageY: 500 + (42 - o.y) * k },
+        nativeEvent: { pageX: 500 + (175 - o.x) * k, pageY: 500 + (46 - o.y) * k },
       });
     });
-    const expected = dragMove(dragStart(o, NOON.getTime(), F, true), { x: 175, y: 42 }, F, true)!;
+    const expected = dragMove(dragStart(o, NOON.getTime(), F, true), { x: 175, y: 46 }, F, true)!;
     expect(screen.getByTestId('home-arc-clock')).toHaveTextContent(clockOf(new Date(expected.atMs), J.tz));
     act(() => {
       fireEvent(grab, 'responderRelease', { nativeEvent: {} });
@@ -555,11 +600,10 @@ describe('DayArcHero', () => {
 
   it('releases the scrub when the frame disappears mid-drag', () => {
     const { view, onScrubChange, onSkyTop } = setup();
-    const k = sceneScale(Dimensions.get('window').height);
     const o = arcPoint(NOON, F, true);
     act(() => {
       fireEvent(screen.getByTestId('home-arc-grab'), 'responderGrant', {
-        nativeEvent: { locationX: o.x * k, locationY: o.y * k, pageX: 500, pageY: 500 },
+        nativeEvent: { ...touchAt(o), pageX: 500, pageY: 500 },
       });
     });
     expect(onScrubChange).toHaveBeenLastCalledWith(true);
@@ -570,11 +614,10 @@ describe('DayArcHero', () => {
 
   it('releases the scrub on unmount', () => {
     const { view, onScrubChange } = setup();
-    const k = sceneScale(Dimensions.get('window').height);
     const o = arcPoint(NOON, F, true);
     act(() => {
       fireEvent(screen.getByTestId('home-arc-grab'), 'responderGrant', {
-        nativeEvent: { locationX: o.x * k, locationY: o.y * k, pageX: 500, pageY: 500 },
+        nativeEvent: { ...touchAt(o), pageX: 500, pageY: 500 },
       });
     });
     expect(onScrubChange).toHaveBeenLastCalledWith(true);
@@ -582,9 +625,162 @@ describe('DayArcHero', () => {
     expect(onScrubChange).toHaveBeenLastCalledWith(false);
   });
 
-  it('scales the scene to about half the screen', () => {
+  describe('one circle for the day and the night', () => {
+    const arcs = (d: string) => screen.UNSAFE_getAllByType(Path).filter((p) => p.props.d === d);
+    const ticks = () =>
+      screen.UNSAFE_getAllByType(Circle).filter((c) => c.props.strokeWidth === 2 && [6, 9].includes(c.props.r));
+    const orb = (kind: 'sun' | 'moon') =>
+      screen
+        .UNSAFE_getAllByType(Circle)
+        .filter((c) => (kind === 'moon' ? c.props.mask : c.props.r === 15 && c.props.fill))[0];
+
+    it('draws the day half with its progress and the night half with its track only, by day', () => {
+      setup();
+      const { fraction } = arcFraction(NOON, F);
+      const sky = inkFor(skyAt(F, NOON));
+      const [dayTrack, dayLit] = arcs(dayPath(true));
+      expect(arcs(dayPath(true))).toHaveLength(2);
+      expect(arcs(nightPath(true))).toHaveLength(1);
+      expect(dayTrack.props).toMatchObject({ stroke: sky.ink, strokeDasharray: '1 8' });
+      expect(dayLit.props.strokeDasharray).toBeCloseTo(HALF_LENGTH, 6);
+      expect(dayLit.props.strokeDashoffset).toBeCloseTo(HALF_LENGTH - arcLength(fraction), 6);
+      expect(arcs(nightPath(true))[0].props).toMatchObject({ stroke: SKY_SCENE.moon, strokeDasharray: '1 8' });
+    });
+
+    it('lights the whole day half at night and the night half up to the moon, in the moon colour', () => {
+      setup(NIGHT);
+      const { night, fraction } = arcFraction(NIGHT, frameAt(NIGHT));
+      expect(night).toBe(true);
+      const [, dayLit] = arcs(dayPath(true));
+      expect(dayLit.props.strokeDashoffset).toBe(0);
+      const [nightTrack, nightLit] = arcs(nightPath(true));
+      expect(nightTrack.props).toMatchObject({ stroke: SKY_SCENE.moon, strokeDasharray: '1 8' });
+      expect(nightLit.props.stroke).toBe(SKY_SCENE.moon);
+      expect(nightLit.props.strokeDasharray).toBeCloseTo(HALF_LENGTH, 6);
+      expect(nightLit.props.strokeDashoffset).toBeCloseTo(HALF_LENGTH - arcLength(fraction), 6);
+    });
+
+    it('rides the sun on the upper half by day', () => {
+      setup();
+      const sun = arcPoint(NOON, F, true);
+      expect(sun.y).toBeLessThan(ARC.cy);
+      expect(orb('sun').props).toMatchObject({ cx: sun.x, cy: sun.y });
+      expect(screen.UNSAFE_queryAllByType(Circle).filter((c) => c.props.mask)).toHaveLength(0);
+    });
+
+    it('rides the moon on the lower half of the same circle by night', () => {
+      setup(NIGHT);
+      const moon = arcPoint(NIGHT, frameAt(NIGHT), true);
+      expect(moon.y).toBeGreaterThan(ARC.cy);
+      expect(orb('moon').props).toMatchObject({ cx: moon.x, cy: moon.y, r: 14 });
+      expect(Math.hypot(moon.x - ARC.cx, moon.y - ARC.cy)).toBeCloseTo(ARC.r, 6);
+    });
+
+    it.each([
+      ['noon', NOON],
+      ['night', NIGHT],
+    ])('keeps the zman ticks on the day half and chatzot halayla on the night half at %s', (_name, now) => {
+      setup(now);
+      const frame = frameAt(now);
+      const drawn = ticks();
+      expect(drawn).toHaveLength(frame.zmanim.length);
+      frame.zmanim.forEach((z, i) => {
+        const p = arcPoint(z.at, frame, true);
+        expect(drawn[i].props).toMatchObject({ cx: p.x, cy: p.y });
+        if (z.id === 'chatzotLayla') expect(p.y).toBeGreaterThan(ARC.cy + 100);
+        else expect(p.y).toBeLessThanOrEqual(ARC.cy);
+      });
+    });
+
+    it('draws the stage as wide as the window, centred on the circle', () => {
+      const width = 390;
+      const height = 844;
+      const win = { width, height, scale: 3, fontScale: 1 };
+      const get = jest.spyOn(Dimensions, 'get').mockReturnValue(win);
+      try {
+        setup();
+        const k = sceneScale(height);
+        const units = stageUnits(width, k);
+        const viewBox = `${stageOffset(units)} 0 ${units} ${ARC.height}`;
+        expect(styleOf(screen.getByTestId('home-arc'))).toMatchObject({ width: units * k, height: ARC.height * k });
+        expect(units * k).toBeCloseTo(width, 9);
+        expect(stageOffset(units)).toBeCloseTo(175 - width / k / 2, 9);
+        const sizes = screen.UNSAFE_getAllByType(Svg).filter((s) => s.props.viewBox === viewBox);
+        expect(sizes).toHaveLength(2);
+        sizes.forEach((s) => expect(s.props).toMatchObject({ width: units * k, height: ARC.height * k }));
+        const hills = screen.UNSAFE_getAllByType(Svg).find((s) => s.props.viewBox === `-20 0 390 ${ARC.skyHeight}`)!;
+        expect(hills.props.height).toBeCloseTo(ARC.skyHeight * k, 9);
+        ['home-arc-edge-start', 'home-arc-edge-end'].forEach((id) =>
+          expect(styleOf(screen.getByTestId(id))).toMatchObject({ top: 166 * k }),
+        );
+        expect(styleOf(screen.getByTestId('home-arc-edge-start')).start).toBe(spacing.sm);
+        expect(styleOf(screen.getByTestId('home-arc-edge-end')).end).toBe(spacing.sm);
+      } finally {
+        get.mockRestore();
+      }
+    });
+
+    const drag = (now: Date, to: { x: number; y: number }[]) => {
+      setup(now);
+      const frame = frameAt(now);
+      const origin = arcPoint(now, frame, true);
+      const grab = screen.getByTestId('home-arc-grab');
+      act(() => {
+        fireEvent(grab, 'responderGrant', { nativeEvent: { ...touchAt(origin), pageX: 500, pageY: 500 } });
+      });
+      let state = dragStart(origin, now.getTime(), frame, true);
+      return to.map((p) => {
+        act(() => {
+          fireEvent(grab, 'responderMove', {
+            nativeEvent: { pageX: 500 + (p.x - origin.x) * stageK, pageY: 500 + (p.y - origin.y) * stageK },
+          });
+        });
+        const r = dragMove(state, p, frame, true)!;
+        state = r.state;
+        return { shown: screen.getByTestId('home-arc-clock').props.children as string, expected: r.atMs, frame };
+      });
+    };
+
+    it('drags the sun through the tzeit end into the night half and back with the moon', () => {
+      const before = at(J, '2026-10-29T17:12');
+      const frame = frameAt(before);
+      const after = new Date(frame.tzeit.getTime() + 20 * 60000);
+      const [across, back] = drag(before, [arcPoint(after, frame, true), arcPoint(before, frame, true)]);
+      expect(across.expected).toBeGreaterThan(frame.tzeit.getTime());
+      expect(across.shown).toBe(clockOf(new Date(across.expected), J.tz));
+      expect(back.shown).toBe(clockOf(new Date(back.expected), J.tz));
+      expect(Math.abs(back.expected - before.getTime())).toBeLessThanOrEqual(2);
+    });
+
+    it('turns the sun into the moon on the lower half while dragging across the tzeit end', () => {
+      const before = at(J, '2026-10-29T17:12');
+      const frame = frameAt(before);
+      const after = arcPoint(new Date(frame.tzeit.getTime() + 20 * 60000), frame, true);
+      expect(after.y).toBeGreaterThan(ARC.cy);
+      drag(before, [after]);
+      expect(screen.UNSAFE_queryAllByType(Circle).filter((c) => c.props.mask)).toHaveLength(1);
+      expect(orb('moon').props.cy).toBeGreaterThan(ARC.cy);
+    });
+
+    it('holds at alot when the drag crosses the alot end into the night half', () => {
+      const early = at(J, '2026-10-29T04:59');
+      const frame = frameAt(early);
+      const [held] = drag(early, [arcPoint(new Date(frame.end.getTime() - 20 * 60000), frame, true)]);
+      expect(held.expected).toBe(frame.start.getTime());
+      expect(held.shown).toBe(clockOf(frame.start, J.tz));
+    });
+
+    it('holds just before the next alot when the drag crosses the alot end into the day half', () => {
+      const late = at(J, '2026-10-30T04:19');
+      const frame = frameAt(late);
+      const [held] = drag(late, [arcPoint(new Date(frame.start.getTime() + 20 * 60000), frame, true)]);
+      expect(held.expected).toBe(frame.end.getTime() - 60000);
+    });
+  });
+
+  it('scales the scene to about half the screen, between 179 and 286 points high', () => {
     expect(sceneScale(1334)).toBe(1);
-    expect(sceneScale(844)).toBeCloseTo(192 / 216, 6);
-    expect(sceneScale(600)).toBeCloseTo(150 / 216, 6);
+    expect(sceneScale(844)).toBeCloseTo(254 / 286, 6);
+    expect(sceneScale(600)).toBeCloseTo(179 / 286, 6);
   });
 });

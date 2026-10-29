@@ -1284,7 +1284,7 @@
   "home.greeting.eveningNeutral": "ערב טוב",
   "home.greeting.night": "לילה טוב, %{name}",
   "home.greeting.nightNeutral": "לילה טוב",
-  "home.arc.label": "קשת היום וזמני היום",
+  "home.arc.label": "מעגל היום וזמני היום",
   "home.arc.caption.open": "%{name} · עוד %{left}",
   "home.arc.caption.next": "הבא: %{name} ב-%{time}",
   "home.arc.caption.allDone": "הכול סומן להיום",

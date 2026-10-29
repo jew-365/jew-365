@@ -22,15 +22,17 @@ import {
   alphaHex,
   ARC,
   arcFraction,
+  arcLength,
   arcPoint,
   CHIP_ALPHA,
   dayPath,
   edgeInk,
-  ellipseLength,
   groundColors,
+  HALF_LENGTH,
   nextZman,
   nightPath,
   nightShare,
+  stageOffset,
   sunColors,
   type DayFrame,
   type ZmanId,
@@ -39,8 +41,6 @@ import {
 const CLOCK_SIZE = scaled(40);
 const CLOCK_LINE = scaled(44);
 const CAPTION_MAX = scaled(230);
-const DAY_LENGTH = ellipseLength(ARC.rx, ARC.ry, 1);
-const NIGHT_LENGTH = ellipseLength(ARC.nrx, ARC.nry, 1);
 
 const STARS: readonly (readonly [number, number, number])[] = [
   [46, 40, 2.6],
@@ -80,6 +80,7 @@ type DaySkySceneProps = {
   selected: ZmanId | null;
   rtl: boolean;
   k: number;
+  units: number;
   sky: SkyStop;
   ink: { ink: string; chip: string };
   clock: string;
@@ -98,6 +99,7 @@ export function DaySkyScene({
   selected,
   rtl,
   k,
+  units,
   sky,
   ink,
   clock,
@@ -115,11 +117,13 @@ export function DaySkyScene({
   const share = nightShare(frame, shown);
   const nextId = nextZman(frame, shown)?.id ?? null;
   const ghost = previewing && Math.abs(live.getTime() - shown.getTime()) > 240000 ? arcPoint(live, frame, rtl) : null;
-  const width = ARC.width * k;
+  const originX = stageOffset(units);
+  const width = units * k;
   const height = ARC.height * k;
   const box = { width, height };
-  const dayDash = DAY_LENGTH - ellipseLength(ARC.rx, ARC.ry, fraction);
-  const nightDash = NIGHT_LENGTH - ellipseLength(ARC.nrx, ARC.nry, fraction);
+  const viewBox = `${originX} 0 ${units} ${ARC.height}`;
+  const dayDash = night ? 0 : HALF_LENGTH - arcLength(fraction);
+  const nightDash = HALF_LENGTH - arcLength(fraction);
   const track = {
     stroke: ink.ink,
     strokeOpacity: 0.45,
@@ -129,27 +133,22 @@ export function DaySkyScene({
   } as const;
   const edgeColor = edgeInk(sky, colors.surface).ink;
   const edgePill = [styles.edge, { backgroundColor: alphaHex(colors.surface, CHIP_ALPHA), top: 166 * k }];
+  const arcStart = ARC.cx + (rtl ? ARC.r : -ARC.r);
+  const arcEnd = ARC.cx + (rtl ? -ARC.r : ARC.r);
 
   return (
     <View style={[styles.outer, { height }]}>
       <Svg
         width={width}
         height={height}
-        viewBox={`0 0 ${ARC.width} ${ARC.height}`}
+        viewBox={viewBox}
         pointerEvents="none"
         accessible={false}
         importantForAccessibility="no-hide-descendants"
         style={styles.backSvg}
       >
         <Defs>
-          <LinearGradient
-            id="homeArcGradient"
-            gradientUnits="userSpaceOnUse"
-            x1={rtl ? 317 : 33}
-            y1="0"
-            x2={rtl ? 33 : 317}
-            y2="0"
-          >
+          <LinearGradient id="homeArcGradient" gradientUnits="userSpaceOnUse" x1={arcStart} y1="0" x2={arcEnd} y2="0">
             {SKY_SCENE.arcStops.map(([offset, color]) => (
               <Stop key={offset} offset={offset} stopColor={color} />
             ))}
@@ -164,8 +163,8 @@ export function DaySkyScene({
             <Stop offset="0.58" stopColor={core} />
             <Stop offset="1" stopColor={edge} />
           </RadialGradient>
-          <Mask id="homeMoonMask" x="0" y="0" width={ARC.width} height={ARC.height} maskUnits="userSpaceOnUse">
-            <Rect x="0" y="0" width={ARC.width} height={ARC.height} fill={BRAND.white} />
+          <Mask id="homeMoonMask" x={originX} y="0" width={units} height={ARC.height} maskUnits="userSpaceOnUse">
+            <Rect x={originX} y="0" width={units} height={ARC.height} fill={BRAND.white} />
             <Circle cx={p.x + (rtl ? 9 : -9)} cy={p.y - 4} r={14} fill="#000000" />
           </Mask>
         </Defs>
@@ -185,18 +184,16 @@ export function DaySkyScene({
           ))}
         </G>
         <Path d={dayPath(rtl)} fill="none" {...track} />
-        {!night || fraction > 0 ? (
-          <Path
-            d={dayPath(rtl)}
-            fill="none"
-            stroke="url(#homeArcGradient)"
-            strokeWidth={4.5}
-            strokeLinecap="round"
-            strokeDasharray={DAY_LENGTH}
-            strokeDashoffset={dayDash}
-          />
-        ) : null}
-        <Path d={nightPath(rtl)} fill="none" {...track} />
+        <Path
+          d={dayPath(rtl)}
+          fill="none"
+          stroke="url(#homeArcGradient)"
+          strokeWidth={4.5}
+          strokeLinecap="round"
+          strokeDasharray={HALF_LENGTH}
+          strokeDashoffset={dayDash}
+        />
+        <Path d={nightPath(rtl)} fill="none" {...track} stroke={SKY_SCENE.moon} />
         {night ? (
           <Path
             d={nightPath(rtl)}
@@ -204,7 +201,7 @@ export function DaySkyScene({
             stroke={SKY_SCENE.moon}
             strokeWidth={4}
             strokeLinecap="round"
-            strokeDasharray={NIGHT_LENGTH}
+            strokeDasharray={HALF_LENGTH}
             strokeDashoffset={nightDash}
           />
         ) : null}
@@ -221,13 +218,13 @@ export function DaySkyScene({
       </Svg>
 
       <Svg
-        viewBox="-20 0 390 216"
+        viewBox={`-20 0 390 ${ARC.skyHeight}`}
         preserveAspectRatio="none"
         pointerEvents="none"
         accessible={false}
         importantForAccessibility="no-hide-descendants"
         width="100%"
-        height={height}
+        height={ARC.skyHeight * k}
         style={styles.hills}
       >
         <Path d="M-20 158V142Q45 128 95 140T200 138T290 134T370 142V158Z" fill={ground.back} />
@@ -239,7 +236,7 @@ export function DaySkyScene({
         <Svg
           width={width}
           height={height}
-          viewBox={`0 0 ${ARC.width} ${ARC.height}`}
+          viewBox={viewBox}
           pointerEvents="none"
           accessible={false}
           importantForAccessibility="no-hide-descendants"
@@ -305,11 +302,11 @@ export function DaySkyScene({
           </View>
         ) : null}
 
-        <View testID="home-arc-edge-start" style={[edgePill, { start: 8 * k }]}>
+        <View testID="home-arc-edge-start" style={[edgePill, { start: spacing.sm }]}>
           <Text style={[typography.micro, { color: edgeColor }]}>{edgeStart.label}</Text>
           <Text style={[typography.captionBold, { color: edgeColor }]}>{edgeStart.time}</Text>
         </View>
-        <View testID="home-arc-edge-end" style={[edgePill, { end: 8 * k }]}>
+        <View testID="home-arc-edge-end" style={[edgePill, { end: spacing.sm }]}>
           <Text style={[typography.micro, { color: edgeColor }]}>{edgeEnd.label}</Text>
           <Text style={[typography.captionBold, { color: edgeColor }]}>{edgeEnd.time}</Text>
         </View>
