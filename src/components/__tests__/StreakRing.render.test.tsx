@@ -5,12 +5,19 @@ import { StreakRing } from '../StreakRing';
 import { renderWithTheme } from '@/testing/render';
 import { THEMES, THEME_NAMES } from '@/theme/colors';
 import { useUserStore } from '@/stores/useUserStore';
+import { useEntrance } from '@/hooks/useMotion';
+import { ViewportHarness, mockWindowRects, scrollViewport } from '@/testing/viewport';
 
 jest.mock('react-native-reanimated', () => ({
   ...jest.requireActual('react-native-reanimated'),
   __esModule: true,
   useReducedMotion: jest.fn(() => true),
 }));
+
+jest.mock('@/hooks/useMotion', () => {
+  const actual = jest.requireActual('@/hooks/useMotion');
+  return { ...actual, useEntrance: jest.fn(actual.useEntrance), usePop: jest.fn(actual.usePop) };
+});
 
 const circles = () => screen.UNSAFE_getAllByType(Circle);
 
@@ -113,5 +120,48 @@ describe('StreakRing', () => {
     warn.mockRestore();
     error.mockRestore();
     (useReducedMotion as jest.Mock).mockReturnValue(true);
+  });
+
+  describe('starts when seen', () => {
+    let rects: ReturnType<typeof mockWindowRects>;
+    const lastGate = () => {
+      const calls = (useEntrance as jest.Mock).mock.calls;
+      return calls[calls.length - 1][2];
+    };
+    beforeEach(() => {
+      jest.useFakeTimers();
+      (useReducedMotion as jest.Mock).mockReturnValue(false);
+      (useEntrance as jest.Mock).mockClear();
+      rects = mockWindowRects(800);
+    });
+    afterEach(() => {
+      rects.restore();
+      jest.useRealTimers();
+      (useReducedMotion as jest.Mock).mockReturnValue(true);
+    });
+
+    it('waits off screen with the final value in its label', () => {
+      rects.set({ y: 5000, height: 220 });
+      renderWithTheme(
+        <ViewportHarness>
+          <StreakRing streak={12} animate />
+        </ViewportHarness>,
+      );
+      expect(lastGate()).toBe(false);
+      expect(screen.getByText('0')).toBeOnTheScreen();
+      expect(screen.getByLabelText('12 ימים ברצף')).toBeOnTheScreen();
+      rects.set({ y: 100, height: 220 });
+      scrollViewport();
+      expect(lastGate()).toBe(true);
+    });
+
+    it('measures nothing without animate', () => {
+      renderWithTheme(
+        <ViewportHarness>
+          <StreakRing streak={12} />
+        </ViewportHarness>,
+      );
+      expect(rects.measure).toHaveBeenCalledTimes(0);
+    });
   });
 });

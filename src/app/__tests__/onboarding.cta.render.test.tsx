@@ -5,6 +5,7 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, back: jest.fn(), replace: jest.fn() }),
   useLocalSearchParams: () => ({}),
 }));
+jest.mock('@/components/PermissionsList', () => ({ PermissionsList: () => null }));
 jest.mock('@/services/NotificationScheduler', () => ({
   requestNotificationPermissions: jest.fn(async () => true),
   syncNotificationPermissionStatus: jest.fn(async () => {}),
@@ -17,6 +18,7 @@ import WelcomeScreen from '../onboarding/index';
 import OnboardingLocationScreen from '../onboarding/location';
 import OnboardingMitzvotScreen from '../onboarding/mitzvot';
 import NusachScreen from '../onboarding/nusach';
+import PermissionsScreen from '../onboarding/permissions';
 import ProfileScreen from '../onboarding/profile';
 import ReadyScreen from '../onboarding/ready';
 import { ONBOARDING_STEPS, OnboardingDots } from '@/components/OnboardingDots';
@@ -61,6 +63,14 @@ describe('Onboarding Continue buttons', () => {
 
     expect(next()).toBeEnabled();
     fireEvent.press(next());
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
+  });
+
+  it('Continue on the permissions step is enabled and goes to ready', () => {
+    renderWithTheme(<PermissionsScreen />);
+    const next = screen.getByRole('button', { name: he('common.continue') });
+    expect(next).toBeEnabled();
+    fireEvent.press(next);
     expect(mockPush).toHaveBeenCalledWith('/onboarding/ready');
   });
 
@@ -87,14 +97,15 @@ describe('Onboarding Continue buttons', () => {
     ['nusach', NusachScreen, 2],
     ['mitzvot', OnboardingMitzvotScreen, 3],
     ['location', OnboardingLocationScreen, 4],
-    ['ready', ReadyScreen, 5],
+    ['permissions', PermissionsScreen, 5],
+    ['ready', ReadyScreen, 6],
   ])('draws the %s step as dot %i of ONBOARDING_STEPS', async (_name, Screen, step) => {
     renderWithTheme(<Screen />);
     await act(async () => {});
     expect(screen.UNSAFE_getByType(OnboardingDots).props).toMatchObject({ step, total: ONBOARDING_STEPS });
   });
 
-  it('counts six onboarding steps', () => {
-    expect(ONBOARDING_STEPS).toBe(6);
+  it('counts seven onboarding steps', () => {
+    expect(ONBOARDING_STEPS).toBe(7);
   });
 });

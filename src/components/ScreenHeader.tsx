@@ -76,6 +76,7 @@ export function ScreenHeader({
             {title}
           </Text>
         </Pressable>
+        {actions ? <View style={styles.actions}>{actions}</View> : null}
       </View>
     );
   }

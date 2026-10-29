@@ -408,6 +408,10 @@ export async function refreshSchedulingOnForeground(): Promise<void> {
   if (!pending.length || staleFormat) await NotificationScheduler.rebuild();
 }
 
+export async function notificationPermissionState(): Promise<'granted' | 'missing' | 'blocked' | null> {
+  return os.getPermissionState().catch(() => null);
+}
+
 export async function requestNotificationPermissions(): Promise<boolean> {
   await os.ensureChannels();
   if (await os.getPermissions()) {

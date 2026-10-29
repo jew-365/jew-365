@@ -11,7 +11,6 @@ import { halachaRulingFor } from '@/data/halachaLines';
 import { translate, useI18n } from '@/i18n';
 import { HebcalService } from '@/services/HebcalService';
 import { loadSiddurText } from '@/services/SiddurService';
-import { supportsBatteryOptimizationSettings } from '@/services/deviceSettings';
 import { taharahOffered } from '@/stores/taharahOptIn';
 import { useChokStore } from '@/stores/useChokStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
@@ -145,7 +144,7 @@ export function useSettingsSearch(visit: number) {
     return index;
   };
 
-  const context = { taharah, backup: Platform.OS !== 'web', battery: supportsBatteryOptimizationSettings() };
+  const context = { taharah, backup: Platform.OS !== 'web' };
   const instant = useMemo(
     () => (searching ? searchTiers(query, indexFor(), context) : EMPTY_TIERS),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- indexFor reads the profile and custom mitzvot; its own cache decides when to rebuild

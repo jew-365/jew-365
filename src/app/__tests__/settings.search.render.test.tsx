@@ -11,6 +11,7 @@ jest.mock('@/services/NotificationScheduler', () => ({
   NotificationScheduler: { rebuild: jest.fn(async () => {}), cancelAll: jest.fn(async () => {}) },
   requestNotificationPermissions: jest.fn(async () => true),
   syncNotificationPermissionStatus: jest.fn(async () => true),
+  notificationPermissionState: jest.fn(async () => 'granted'),
 }));
 
 import { act, fireEvent, screen, within } from '@testing-library/react-native';
@@ -108,6 +109,16 @@ describe('Settings layout', () => {
     expect(useUserStore.getState().chokCommentaryOpen).toBe(true);
     act(() => useUserStore.getState().setChokCommentaryOpen(false));
     expect(toggle().props.value).toBe(false);
+  });
+
+  it('puts the compass offer switch in Prayer, on by default', async () => {
+    await renderSettings();
+    openSection('settings.prayer');
+    const block = screen.getByTestId('settings-anchor-compassPrompt');
+    const toggle = () => within(block).getByLabelText(he('settings.compassPrompt'));
+    expect(toggle().props.value).toBe(true);
+    fireEvent(toggle(), 'valueChange', false);
+    expect(useUserStore.getState().siddurCompassPrompt).toBe(false);
   });
 
   it('offers the ליל שישי day in Prayer, bound to the field the reader writes', async () => {
@@ -224,6 +235,17 @@ describe('Settings search', () => {
     expect(target.props.style).toBeTruthy();
   });
 
+  it('opens Device at the permissions card for "סוללה"', async () => {
+    await renderSettings();
+    await search('סוללה');
+    await act(async () => {
+      fireEvent.press(screen.getByText(he('permissions.title')));
+    });
+    const target = screen.getByTestId('settings-anchor-permissions');
+    expect(target.props.style).toBeTruthy();
+    expect(within(target).getByText(he('permissions.notifications.title'))).toBeOnTheScreen();
+  });
+
   it('opens Prayer at the commentary switch for "ברטנורה"', async () => {
     await renderSettings();
     await search('ברטנורה');
@@ -233,6 +255,17 @@ describe('Settings search', () => {
     const target = screen.getByTestId('settings-anchor-chokCommentary');
     expect(target.props.style).toBeTruthy();
     expect(within(target).getByLabelText(he('settings.chokCommentaryOpen'))).toBeOnTheScreen();
+  });
+
+  it('opens Prayer at the compass offer switch for "הצעת מצפן"', async () => {
+    await renderSettings();
+    await search('הצעת מצפן');
+    await act(async () => {
+      fireEvent.press(screen.getByText(he('settings.compassPrompt')));
+    });
+    const target = screen.getByTestId('settings-anchor-compassPrompt');
+    expect(target.props.style).toBeTruthy();
+    expect(within(target).getByLabelText(he('settings.compassPrompt'))).toBeOnTheScreen();
   });
 
   it('opens Prayer at the ליל שישי chips for "ליל שישי"', async () => {

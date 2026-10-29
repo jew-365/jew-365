@@ -64,8 +64,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'תחילת הדרך', en: 'Getting started' },
     body: [
       {
-        he: 'בפתיחה הראשונה האפליקציה שואלת כמה שאלות קצרות: שם וטלפון (אפשר לדלג), מגדר ומצב משפחתי, נוסח התפילה, אחרי אילו מצוות לעקוב, ועיר או מיקום לפי GPS לחישוב הזמנים. אחרי אישור ההתראות מצוות היום כבר מחכות בדף הבית.',
-        en: "The first time the app opens it asks a few short questions: name and phone (optional), gender and marital status, your nusach, which mitzvot to track, and a city or a GPS location for the zmanim. Once notifications are allowed, today's mitzvot are waiting on Home.",
+        he: 'בפתיחה הראשונה האפליקציה שואלת כמה שאלות קצרות: שם וטלפון (אפשר לדלג), מגדר ומצב משפחתי, נוסח התפילה, אחרי אילו מצוות לעקוב, ועיר או מיקום לפי GPS לחישוב הזמנים, ואז מסך הרשאות שמראה מה כבר מאושר ומאפשר לאשר את השאר. אחרי אישור ההתראות מצוות היום כבר מחכות בדף הבית.',
+        en: "The first time the app opens it asks a few short questions: name and phone (optional), gender and marital status, your nusach, which mitzvot to track, and a city or a GPS location for the zmanim, then a permissions screen that shows what is already allowed and lets you allow the rest. Once notifications are allowed, today's mitzvot are waiting on Home.",
       },
       {
         he: 'במעבר לטלפון חדש מקישים במסך הפתיחה על ״יש לי קובץ גיבוי״ ומשחזרים את הקובץ שיוצא בטלפון הקודם.',
@@ -76,8 +76,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'Five tabs sit at the bottom: More, Siddur, Home, Tracking and Settings. More holds the schedule, Chok LeYisrael, Tehillim, the hilulot, the prayer compass, the halacha hotline and this guide, which also opens from Settings → About and contact or by searching “guide” in Settings.',
       },
       {
-        he: 'מצפן התפילה בלשונית עוד הוא רדאר: קו סריקה מסתובב, והכותל נדלק כנקודה במרחק שלו ובכיוון שלו ביחס לטלפון. מתחתיו כתוב כמה מעלות לסובב ולאיזה צד, המרחק בקילומטרים והכיוון מהצפון, וכשהטלפון פונה לכותל הוא נצבע ירוק ומגיע רטט קצר. הוא צריך הרשאת מיקום, ובלעדיה הוא מבקש אותה. הכיוון מחושב מהמקום שבו אתה עומד, וכשהמיקום לא נמצא המסך אומר זאת, מחשב לפי העיר שבהגדרות ומאפשר לנסות שוב. כשהמצפן מבקש כיול, מזיזים את הטלפון בצורת שמונה.',
-        en: 'The prayer compass in the More tab is a radar: a sweep line turns and the Kotel lights up as a point at its distance and direction from the phone. Under it the screen says how many degrees to turn and which way, the distance in kilometres and the bearing from north, and when the phone faces the Kotel it turns green with a short vibration. It needs the location permission and asks for it when missing. The direction is measured from where you stand; when your location is not found the screen says so, measures from the city in Settings and lets you try again. When it asks for calibration, move the phone in a figure eight.',
+        he: 'מצפן התפילה בלשונית עוד הוא רדאר: קו סריקה מסתובב, והכותל נדלק כנקודה במרחק שלו ובכיוון שלו ביחס לטלפון. מתחתיו כתוב כמה מעלות לסובב ולאיזה צד, המרחק בקילומטרים והכיוון מהצפון, וכשהטלפון פונה לכותל הוא נצבע ירוק ומגיע רטט קצר. הוא צריך הרשאת מיקום, ובלעדיה הוא מבקש אותה. הכיוון מחושב מהמקום שבו אתה עומד, וכשהמיקום לא נמצא המסך אומר זאת, מחשב לפי העיר שבהגדרות ומאפשר לנסות שוב. כשהמצפן מבקש כיול, מזיזים את הטלפון בצורת שמונה. אפשר לפתוח אותו גם מכפתור המצפן בראש שחרית, מנחה וערבית בסידור, ובכניסה לתפילות האלה מופיעה לחמש שניות הצעה לפתוח אותו, שאפשר לכבות בהגדרות ← תפילה וסידור. כשנכנסים אליו מתפילה ופונים לכותל, מופיע בתחתית כפתור ״המשך לתפילה״.',
+        en: 'The prayer compass in the More tab is a radar: a sweep line turns and the Kotel lights up as a point at its distance and direction from the phone. Under it the screen says how many degrees to turn and which way, the distance in kilometres and the bearing from north, and when the phone faces the Kotel it turns green with a short vibration. It needs the location permission and asks for it when missing. The direction is measured from where you stand; when your location is not found the screen says so, measures from the city in Settings and lets you try again. When it asks for calibration, move the phone in a figure eight. It also opens from the compass button at the top of Shacharit, Mincha and Maariv in the siddur, and opening those prayers offers it for five seconds, an offer you can turn off in Settings → Prayer and siddur. Opened from a prayer, it shows a “Continue to the prayer” button at the bottom once you face the Kotel.',
       },
     ],
     routes: ['/(tabs)/more', '/guide', '/compass'],
@@ -124,8 +124,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'A mitzvah that is on always keeps at least one reminder: the last one cannot be deleted, and switching on a mitzvah with none asks you to set one first.',
       },
       {
-        he: 'בהתראה עצמה ״עשיתי״ מסמן את המצווה בלי לפתוח את האפליקציה, ו״פתח נוסח״ פותח את הנוסח כשיש כזה. הקשה על ההתראה פותחת את הנוסח, או את מסך המצווה כשאין לה נוסח. באנדרואיד כדאי לפטור את האפליקציה מחיסכון בסוללה בהגדרות ← מכשיר והתראות, כדי שהתזכורות יגיעו בזמן.',
-        en: "In the notification, Done marks the mitzvah without opening the app, and Open text opens its text when it has one. Tapping the notification opens the text, or the mitzvah's screen when there is none. On Android, exempt the app from battery saving in Settings → Device and notifications so reminders arrive on time.",
+        he: 'בהתראה עצמה ״עשיתי״ מסמן את המצווה בלי לפתוח את האפליקציה, ו״פתח נוסח״ פותח את הנוסח כשיש כזה. הקשה על ההתראה פותחת את הנוסח, או את מסך המצווה כשאין לה נוסח. בהגדרות ← מכשיר והתראות ← הרשאות רואים כל הרשאה שהאפליקציה צריכה ומאשרים את מה שחסר; באנדרואיד ״סוללה ללא הגבלה״ מאושרת בהקשה אחת, כדי שהתזכורות יגיעו בזמן.',
+        en: "In the notification, Done marks the mitzvah without opening the app, and Open text opens its text when it has one. Tapping the notification opens the text, or the mitzvah's screen when there is none. Settings → Device and notifications → Permissions shows every permission the app needs and allows what is missing; on Android, Unrestricted battery takes one tap, so reminders arrive on time.",
       },
       {
         he: 'התזכורות נקבעות מראש לימים הבאים, גם אם לא פותחים את האפליקציה: באנדרואיד לכחודש, ובאייפון לכשבוע וחצי, כשמהיום השלישי נשארת תזכורת אחת לכל מצווה. ביום האחרון שתוכנן מגיעה בשמונה בערב התראה ״התזכורות עומדות להיגמר״, וכל פתיחה של האפליקציה מתכננת מחדש.',
@@ -186,8 +186,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "In the Siddur tab each group opens and closes with a tap on its title: first the texts whose time is open now (open each time you enter the tab), then the meal blessings, the prayers (Shacharit, Mincha and Maariv), the mitzvot (tefillin, the morning Shema, the morning blessings, candle lighting, havdalah and the Omer), then the other blessings and prayers by group. A text not said today is greyed out, with when it is said, and it still opens at any time, in the text of the next day it is said and without Done. Each text is set for the day: Hallel, Musaf and inserts such as Ya'aleh VeYavo appear on their days.",
       },
       {
-        he: 'בראש הקורא: ״בחר חלק״ לקפיצה לחלק אחר, במניין או ביחיד בתפילות שיש בהן קטעים למניין (ביחיד, קדיש, ברכו, קדושה וקריאת התורה מקופלים), הגדלה והקטנה של הטקסט, וגלילה אוטומטית במהירות שבוחרים. קטע מקופל נפתח בהקשה. בזמן הקריאה הכלים מתקפלים לשורה אחת עם ״חזור״ ושם הטקסט, וחוזרים כשגוללים למעלה או מקישים על השורה. כשהאפליקציה באנגלית, מתחת לעברית מופיע התרגום, כשיש למקור תרגום.',
-        en: "At the top of the reader: Jump to section, Minyan or Alone in prayers with minyan passages (Alone folds Kaddish, Barchu, Kedusha and the Torah reading), larger and smaller text, and auto-scroll at the speed you choose. A folded passage opens on tap. While you read, the controls fold into one line with Back and the text's name, and come back when you scroll up or tap that line. When the app is in English, the source's translation appears under the Hebrew where it has one.",
+        he: 'בראש הקורא: ״בחר חלק״ לקפיצה לחלק אחר, במניין או ביחיד בתפילות שיש בהן קטעים למניין (ביחיד, קדיש, ברכו, קדושה וקריאת התורה מקופלים), הגדלה והקטנה של הטקסט, וגלילה אוטומטית במהירות שבוחרים. קטע מקופל נפתח בהקשה. בזמן הקריאה הכלים מתקפלים לשורה אחת קבועה עם ״חזור״, שם הטקסט, כפתור הגלילה האוטומטית וכפתור ״כלים״ שפותח את כל הכלים; גלילה, לכל כיוון, לא פותחת אותם; הקשה כפולה מהירה על הטקסט פותחת או סוגרת אותם, גלילה סוגרת אותם, והם חוזרים לבד בראש הטקסט. כשהאפליקציה באנגלית, מתחת לעברית מופיע התרגום, כשיש למקור תרגום.',
+        en: "At the top of the reader: Jump to section, Minyan or Alone in prayers with minyan passages (Alone folds Kaddish, Barchu, Kedusha and the Torah reading), larger and smaller text, and auto-scroll at the speed you choose. A folded passage opens on tap. While you read, the controls fold into one fixed line with Back, the text's name, the auto-scroll button and a Tools button that opens every control; scrolling either way never opens them; a quick double tap on the text opens or closes them, scrolling closes them, and they come back by themselves at the top of the text. When the app is in English, the source's translation appears under the Hebrew where it has one.",
       },
       {
         he: 'כפתור הכוכב שומר את המקום הנוכחי כסימנייה; כשכבר יש סימניות בטקסט הוא שואל אם להוסיף סימנייה חדשה או להעביר אחת קיימת למקום הזה, ו״סימניות״ מציג את ״המקום האחרון״ ואת הסימניות של הטקסט, לקפיצה או למחיקה. בפתיחה הבאה הקורא מציע להמשיך מהמקום שבו עצרתם: בטקסט של מצווה (התפילות, הדלקת נרות, הבדלה וספירת העומר) רק באותו יום, ובשאר הטקסטים תמיד. ״סיימתי״ בסוף הטקסט מסמן את המצווה, ובטקסט של מצווה כפתור ההגדרות בראש הקורא פותח את מסך המצווה.',
@@ -343,8 +343,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "Settings opens with a search: type a word such as “notifications”, “nusach” or “backup” to go straight to the setting. It finds anything in the app: screens, mitzvot and categories, prayers and the passages and phrases inside them, tzaddikim by name, works or grave, the rabbis of the halacha hotline, guide topics, and your badges and figures with their values. It forgives typing on the other language's keyboard. Close results show at once, the search inside the prayers joins a moment later, and results found only despite a misspelling show apart, under “Did you mean”. The same search sits at the top of the More tab, and a setting found there opens in Settings at its place.",
       },
       {
-        he: 'החלקים: פרופיל (שם, טלפון, מגדר ומצב משפחתי), תפילה וסידור, מכשיר והתראות (עיר או GPS, התראות, הסיכום השבועי, ערכת נושא, גודל התצוגה ושפה), גיבוי, שחזור ואיפוס, ואודות ויצירת קשר. העיר או מיקום ה־GPS קובעים גם אם אתם בישראל או בחוץ לארץ, למשל לעניין יום טוב שני.',
-        en: 'Its sections: Profile (name, phone, gender and marital status), Prayer and siddur, Device and notifications (city or GPS, notifications, the weekly report, theme, display size and language), Backup, restore and reset, and About and contact. The city or GPS location also decides whether you count as in Israel or abroad, for example for the second day of Yom Tov.',
+        he: 'החלקים: פרופיל (שם, טלפון, מגדר ומצב משפחתי), תפילה וסידור, מכשיר והתראות (עיר או GPS, התראות, הרשאות, הסיכום השבועי, ערכת נושא, גודל התצוגה ושפה), גיבוי, שחזור ואיפוס, ואודות ויצירת קשר. העיר או מיקום ה־GPS קובעים גם אם אתם בישראל או בחוץ לארץ, למשל לעניין יום טוב שני.',
+        en: 'Its sections: Profile (name, phone, gender and marital status), Prayer and siddur, Device and notifications (city or GPS, notifications, permissions, the weekly report, theme, display size and language), Backup, restore and reset, and About and contact. The city or GPS location also decides whether you count as in Israel or abroad, for example for the second day of Yom Tov.',
       },
       {
         he: 'באנדרואיד ההגדרות, המצוות וההיסטוריה מגובות לחשבון Google, ובאייפון בגיבוי iCloud של המכשיר. בהגדרות ← גיבוי, שחזור ואיפוס אפשר גם לייצא קובץ גיבוי ולשחזר ממנו בכל טלפון; שחזור מחליף את מה שיש בטלפון. ״איפוס האפליקציה״ מוחק הכל, גם את נתוני הטהרה, שאינם נכללים בגיבוי.',
@@ -393,6 +393,28 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 ];
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
+  {
+    label: '1.0.21-5',
+    date: '2026-10-28',
+    items: [
+      {
+        he: 'מסך הרשאות חדש, בהרשמה ובהגדרות ← מכשיר והתראות: התראות, מיקום, ובאנדרואיד גם סוללה ללא הגבלה בהקשה אחת, כל אחת מסומנת ״פעיל״ כשהיא מאושרת.',
+        en: 'A new permissions screen, in onboarding and in Settings → Device and notifications: notifications, location and, on Android, unrestricted battery in one tap, each marked On once granted.',
+      },
+      {
+        he: 'בסידור, הכלים מתקפלים בזמן הקריאה לשורה קבועה עם כפתור הגלילה האוטומטית וכפתור ״כלים״, גלילה כבר לא פותחת אותם באמצע הטקסט, והקשה כפולה על הטקסט פותחת או סוגרת אותם.',
+        en: 'In the siddur, the controls fold while you read into a fixed line with the auto-scroll button and a Tools button, scrolling no longer opens them mid-text, and a double tap on the text opens or closes them.',
+      },
+      {
+        he: 'מצפן התפילה נפתח גם משחרית, מנחה וערבית בסידור, עם הצעה קצרה בכניסה שאפשר לכבות בהגדרות ← תפילה וסידור, וכפתור שחוזר לתפילה כשפונים לכותל.',
+        en: 'The prayer compass also opens from Shacharit, Mincha and Maariv in the siddur, with a short offer on opening that you can turn off in Settings → Prayer and siddur, and a button back to the prayer once you face the Kotel.',
+      },
+      {
+        he: 'האנימציות מתחילות רק כשהחלק שלהן מגיע למסך, כך שגם מה שנמצא למטה בדף מונפש כשגוללים אליו.',
+        en: 'Animations now start only when their part of the screen comes into view, so what sits lower on a page animates when you scroll to it.',
+      },
+    ],
+  },
   {
     label: '1.0.21-4',
     date: '2026-10-27',

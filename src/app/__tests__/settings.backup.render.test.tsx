@@ -11,6 +11,7 @@ jest.mock('@/services/NotificationScheduler', () => ({
   NotificationScheduler: { rebuild: jest.fn(async () => {}), cancelAll: jest.fn(async () => {}) },
   requestNotificationPermissions: jest.fn(async () => true),
   syncNotificationPermissionStatus: jest.fn(async () => true),
+  notificationPermissionState: jest.fn(async () => 'granted'),
 }));
 jest.mock('@/services/AppResetService', () => ({ AppResetService: { reset: jest.fn(async () => {}) } }));
 jest.mock('@/services/BackupService', () => ({

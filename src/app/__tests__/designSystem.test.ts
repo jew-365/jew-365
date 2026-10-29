@@ -38,6 +38,59 @@ const LUXON_NAME_GETTER =
 const formatsNames = (source: string) =>
   [...source.matchAll(TO_FORMAT_CALL)].some(([, pattern]) => !PLAIN_LITERAL.test(pattern) || NAME_TOKEN.test(pattern));
 
+const MOTION_BUILDERS = /\b(?:withTiming|withSpring|withDelay|withSequence|withRepeat|withDecay)\b/;
+const REANIMATED_IMPORT = /import\s+(?:[\w*\s,]*\{([^}]*)\}|[\w*\s,]+)\s*from\s*['"]react-native-reanimated['"]/g;
+const importsMotionBuilder = (source: string) =>
+  [...source.matchAll(REANIMATED_IMPORT)].some(([, named]) => MOTION_BUILDERS.test(named ?? ''));
+const LEGACY_MOTION = /\bAnimated\.(?:timing|spring|decay|loop|sequence)\(|\bLayoutAnimation\./;
+const ENTERING_PROP = /\bentering\s*=\s*\{/;
+const LAYOUT_PROP = /\blayout\s*=\s*\{/;
+const REANIMATED_NAMESPACE = /import\s+\*\s+as\s+\w+\s+from\s*['"]react-native-reanimated['"]/;
+const ENTRANCE_CALL = /\b(?:useEntrance|usePop)\(/g;
+
+function callArgs(source: string, open: number): string[] {
+  const args: string[] = [];
+  let depth = 0;
+  let start = open + 1;
+  for (let i = open + 1; i < source.length; i++) {
+    const char = source[i];
+    if ('([{'.includes(char)) depth++;
+    else if (')]}'.includes(char)) {
+      if (depth === 0) {
+        args.push(source.slice(start, i).trim());
+        break;
+      }
+      depth--;
+    } else if (char === ',' && depth === 0) {
+      args.push(source.slice(start, i).trim());
+      start = i + 1;
+    }
+  }
+  if (args.length && args[args.length - 1] === '') args.pop();
+  return args;
+}
+
+function ungatedEntrances(source: string): string[] {
+  return [...source.matchAll(ENTRANCE_CALL)]
+    .filter((match) => {
+      const args = callArgs(source, (match.index ?? 0) + match[0].length - 1);
+      return args.length < 3 || args[2] === 'true';
+    })
+    .map((match) => source.slice(match.index ?? 0, (match.index ?? 0) + 60));
+}
+
+const INTERACTION_MOTION: Record<string, string> = {
+  'components/MitzvahCard.tsx': 'the stamp answers a mark',
+  'components/SegmentedControl.tsx': 'the indicator follows the choice',
+  'components/ConfirmDialog.tsx': 'the countdown bar is a timer, not an entrance',
+  'app/compass.tsx': 'the sweep, pulse and waves follow the live heading',
+  'app/siddur/[id].tsx': 'a fold opens and closes on a tap',
+};
+
+const MOTION_DEFINITIONS: Record<string, string> = {
+  'hooks/useMotion.ts': 'defines the reanimated builders and the entrance hooks every other file gates',
+};
+
 function offenders(files: SourceFile[], offends: (file: SourceFile) => boolean): string[] {
   return files.filter(offends).map((file) => file.rel);
 }
@@ -177,5 +230,71 @@ describe('design system tripwires', () => {
 
   it('no Luxon weekday or month name getter; names come from formatDate() in src/i18n', () => {
     expect(offenders(sourceFiles, ({ source }) => LUXON_NAME_GETTER.test(source))).toEqual([]);
+  });
+
+  it('the entrance scans flag what they claim', () => {
+    expect(importsMotionBuilder("import Animated, { withSpring } from 'react-native-reanimated';")).toBe(true);
+    expect(importsMotionBuilder("import { withTiming } from '@/utils/reminderTiming';")).toBe(false);
+    expect(importsMotionBuilder("import Animated, { FadeOut } from 'react-native-reanimated';")).toBe(false);
+    expect(ungatedEntrances('useEntrance(0, 100)')).toHaveLength(1);
+    expect(ungatedEntrances('useEntrance(0, 100, true)')).toHaveLength(1);
+    expect(ungatedEntrances('useEntrance(delay ?? 0, motion.barMs, active && view.inView, playKey)')).toEqual([]);
+    expect(ungatedEntrances('usePop(start + f(1, 2), motion.chipFrom, active)')).toEqual([]);
+    expect(importsMotionBuilder("import * as Reanimated from 'react-native-reanimated';")).toBe(false);
+    expect(REANIMATED_NAMESPACE.test("import * as Reanimated from 'react-native-reanimated';")).toBe(true);
+    expect(REANIMATED_NAMESPACE.test("import Animated, { FadeIn } from 'react-native-reanimated';")).toBe(false);
+    expect(LAYOUT_PROP.test('<Animated.View layout={LinearTransition}>')).toBe(true);
+    expect(LAYOUT_PROP.test('onLayout={check} const layout = x')).toBe(false);
+    expect(ENTERING_PROP.test('<Animated.View entering={FadeIn}>')).toBe(true);
+    expect(ENTERING_PROP.test('exiting={FadeOut.duration(250)}')).toBe(false);
+  });
+
+  it('no file passes entering= or layout=; an entrance is Reveal or useEntrance behind useInView', () => {
+    expect(offenders(sourceFiles, ({ source }) => ENTERING_PROP.test(source) || LAYOUT_PROP.test(source))).toEqual([]);
+  });
+
+  it('no file imports reanimated as a namespace, which would hide its builders', () => {
+    expect(offenders(sourceFiles, ({ source }) => REANIMATED_NAMESPACE.test(source))).toEqual([]);
+  });
+
+  it('reanimated animation builders only in the interaction allowlist', () => {
+    expect(
+      offenders(
+        sourceFiles,
+        (file) =>
+          importsMotionBuilder(file.source) && !(file.rel in INTERACTION_MOTION) && !(file.rel in MOTION_DEFINITIONS),
+      ),
+    ).toEqual([]);
+    for (const rel of [...Object.keys(INTERACTION_MOTION), ...Object.keys(MOTION_DEFINITIONS)]) {
+      const file = sourceFiles.find((candidate) => candidate.rel === rel);
+      expect(file).toBeDefined();
+      expect(importsMotionBuilder(file?.source ?? '')).toBe(true);
+    }
+  });
+
+  it('no React Native Animated timing or LayoutAnimation', () => {
+    expect(offenders(sourceFiles, ({ source }) => LEGACY_MOTION.test(source))).toEqual([]);
+  });
+
+  it('every useEntrance and usePop call passes a gate, in a file that calls useInView', () => {
+    expect(
+      offenders(
+        allFiles,
+        ({ source }) =>
+          ungatedEntrances(source).length > 0 ||
+          (/\b(?:useEntrance|usePop)\(/.test(source) && !/\buseInView\(/.test(source)),
+      ),
+    ).toEqual([]);
+  });
+
+  it('every screen with a gated animation provides the viewport', () => {
+    expect(
+      offenders(
+        appFiles,
+        ({ source }) =>
+          /<(?:ProgressBar|StreakRing|Reveal|CompletedRow)\b|\buseInView\(/.test(source) &&
+          !source.includes('ViewportContext.Provider'),
+      ),
+    ).toEqual([]);
   });
 });

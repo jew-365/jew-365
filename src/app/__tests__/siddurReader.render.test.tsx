@@ -81,7 +81,7 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
 }));
 
-import { AppState, FlatList, StyleSheet } from 'react-native';
+import { AccessibilityInfo, AppState, FlatList, Platform, StyleSheet } from 'react-native';
 import { act, fireEvent, screen, within } from '@testing-library/react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
 import SiddurReaderScreen from '../siddur/[id]';
@@ -116,7 +116,13 @@ const FIRST_LINE = 'מוֹדֶה אֲנִי';
 async function openShacharit() {
   jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
   useUserStore.getState().reset();
-  useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+  useUserStore.setState({
+    language: 'he',
+    location: JERUSALEM,
+    inIsrael: true,
+    nusach: 'ashkenaz',
+    siddurCompassPrompt: false,
+  });
   for (const key of Object.keys(mockParams)) delete mockParams[key];
   Object.assign(mockParams, { id: 'shacharit', date: '2026-10-28' });
   renderWithTheme(<SiddurReaderScreen />);
@@ -127,7 +133,13 @@ async function openShacharit() {
 async function openAt(section?: string) {
   jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
   useUserStore.getState().reset();
-  useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+  useUserStore.setState({
+    language: 'he',
+    location: JERUSALEM,
+    inIsrael: true,
+    nusach: 'ashkenaz',
+    siddurCompassPrompt: false,
+  });
   for (const key of Object.keys(mockParams)) delete mockParams[key];
   Object.assign(mockParams, { id: 'shacharit', ...(section ? { section } : {}) });
   renderWithTheme(<SiddurReaderScreen />);
@@ -169,6 +181,7 @@ function openVoiced(voice: SiddurVoice | null) {
     location: JERUSALEM,
     inIsrael: true,
     nusach: 'ashkenaz',
+    siddurCompassPrompt: false,
     siddurVoice: voice,
   });
   mockLoadedText = VOICED;
@@ -247,7 +260,13 @@ describe('the siddur reader header while the text loads', () => {
   it('draws every control row before the text arrives, so nothing moves when it does', async () => {
     jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
     useUserStore.getState().reset();
-    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+    useUserStore.setState({
+      language: 'he',
+      location: JERUSALEM,
+      inIsrael: true,
+      nusach: 'ashkenaz',
+      siddurCompassPrompt: false,
+    });
     for (const key of Object.keys(mockParams)) delete mockParams[key];
     Object.assign(mockParams, { id: 'shacharit', date: '2026-10-28' });
     let release: () => void = () => {};
@@ -324,7 +343,13 @@ describe('the siddur reader mitzvah settings pill', () => {
   it('has none for a text no mitzvah links to', async () => {
     jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T13:00'), doNotFake: [...ONLY_DATE] });
     useUserStore.getState().reset();
-    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+    useUserStore.setState({
+      language: 'he',
+      location: JERUSALEM,
+      inIsrael: true,
+      nusach: 'ashkenaz',
+      siddurCompassPrompt: false,
+    });
     for (const key of Object.keys(mockParams)) delete mockParams[key];
     Object.assign(mockParams, { id: 'birkat_hamazon' });
     renderWithTheme(<SiddurReaderScreen />);
@@ -439,10 +464,16 @@ describe('the siddur reader bookmarks and last place', () => {
   const MIDDLE_REACHED = { index: 1, animated: false, viewOffset: -150 };
   let scrollSpy: jest.SpyInstance;
 
-  async function openKeyed(params: Record<string, string>, nusach?: Nusach) {
+  async function openKeyed(params: Record<string, string>, nusach?: Nusach, compassPrompt = false) {
     jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
     useUserStore.getState().reset();
-    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+    useUserStore.setState({
+      language: 'he',
+      location: JERUSALEM,
+      inIsrael: true,
+      nusach: 'ashkenaz',
+      siddurCompassPrompt: compassPrompt,
+    });
     mockLoadedText = keyedText(params.id, nusach);
     for (const key of Object.keys(mockParams)) delete mockParams[key];
     Object.assign(mockParams, params);
@@ -813,6 +844,16 @@ describe('the siddur reader bookmarks and last place', () => {
     fireEvent.press(screen.getByText('המקום האחרון'));
     expect(liveChangeListeners()).toBe(idle + 1);
   });
+
+  it('holds auto-scroll while the compass offer shows', async () => {
+    await openKeyed(SHACHARIT, undefined, true);
+    const idle = liveChangeListeners();
+    act(() => useUserStore.getState().setSiddurAutoScroll(true));
+    expect(liveChangeListeners()).toBe(idle);
+
+    fireEvent.press(screen.getByRole('button', { name: 'לא' }));
+    expect(liveChangeListeners()).toBe(idle + 1);
+  });
 });
 
 describe('the siddur reader header for a custom mitzvah', () => {
@@ -840,7 +881,13 @@ describe('the siddur reader header for a custom mitzvah', () => {
   ) {
     jest.useFakeTimers({ now: at(JERUSALEM, wallClock), doNotFake: [...ONLY_DATE] });
     useUserStore.getState().reset();
-    useUserStore.setState({ language, location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+    useUserStore.setState({
+      language,
+      location: JERUSALEM,
+      inIsrael: true,
+      nusach: 'ashkenaz',
+      siddurCompassPrompt: false,
+    });
     useCompletionsStore.getState().reset();
     useCustomMitzvotStore.getState().reset();
     useCustomMitzvotStore.getState().add(nightStudy(...hours));
@@ -942,6 +989,12 @@ describe('the siddur reader folds its controls while the user reads', () => {
     await scrollList(y);
     fireEvent(screen.getByTestId('siddur-list'), 'scrollEndDrag', scrollEvent(y));
   }
+  async function openTools() {
+    fireEvent.press(
+      within(screen.getByTestId('siddur-header-compact', { hidden: true })).getByRole('button', { name: EXPAND }),
+    );
+    await act(async () => {});
+  }
   const animated = (testID: string) => getAnimatedStyle(screen.getByTestId(testID, { hidden: true }));
   const folded = () => screen.getByTestId('siddur-header-compact', { hidden: true }).props.pointerEvents === 'auto';
   const pause = (ms: number) => act(() => new Promise((resolve) => setTimeout(resolve, ms)));
@@ -963,7 +1016,13 @@ describe('the siddur reader folds its controls while the user reads', () => {
   async function open() {
     jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
     useUserStore.getState().reset();
-    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+    useUserStore.setState({
+      language: 'he',
+      location: JERUSALEM,
+      inIsrael: true,
+      nusach: 'ashkenaz',
+      siddurCompassPrompt: false,
+    });
     mockLoadedText = { nusach: 'ashkenaz', id: 'shacharit', credits: [], sections: KEYED };
     for (const key of Object.keys(mockParams)) delete mockParams[key];
     Object.assign(mockParams, { id: 'shacharit', date: '2026-10-28' });
@@ -1051,14 +1110,133 @@ describe('the siddur reader folds its controls while the user reads', () => {
     ).toBeOnTheScreen();
   });
 
-  it('unfolds on a drag up from any point', async () => {
+  it('never unfolds on a scroll up, slow or fast', async () => {
     await open();
     await scrollList(600);
     expect(folded()).toBe(true);
-    await dragTo(598);
+    await dragTo(580);
+    await dragTo(450);
+    fireEvent(screen.getByTestId('siddur-list'), 'scrollBeginDrag', scrollEvent(450));
+    for (const y of [440, 430, 420, 410]) {
+      await later(80);
+      await scrollList(y);
+    }
     expect(folded()).toBe(true);
+  });
+
+  it('opens every control from the tools button and folds them again on a scroll down', async () => {
+    await open();
+    await scrollList(600);
+    const tools = within(screen.getByTestId('siddur-header-compact', { hidden: true })).getByRole('button', {
+      name: EXPAND,
+    });
+    expect(tools).toHaveTextContent('כלים');
+    fireEvent.press(tools);
+    await act(async () => {});
+    expect(folded()).toBe(false);
+    await dragTo(606);
+    expect(folded()).toBe(false);
+    await dragTo(620);
+    expect(folded()).toBe(true);
+  });
+
+  it('folds the opened controls again on a scroll up too', async () => {
+    await open();
+    await scrollList(600);
+    await openTools();
     await dragTo(594);
     expect(folded()).toBe(false);
+    await dragTo(580);
+    expect(folded()).toBe(true);
+  });
+
+  it('opens and folds the controls on a quick double tap on the text', async () => {
+    await open();
+    const list = screen.getByTestId('siddur-list');
+    const tap = (x: number, y: number) => {
+      fireEvent(list, 'touchStart', { nativeEvent: { pageX: x, pageY: y, touches: [{}] } });
+      fireEvent(list, 'touchEnd', { nativeEvent: { pageX: x, pageY: y, touches: [] } });
+    };
+    tap(180, 400);
+    tap(182, 402);
+    await act(async () => {});
+    expect(folded()).toBe(false);
+    await scrollList(600);
+    expect(folded()).toBe(true);
+    tap(180, 400);
+    await act(async () => {});
+    expect(folded()).toBe(true);
+    tap(182, 402);
+    await act(async () => {});
+    expect(folded()).toBe(false);
+    tap(180, 400);
+    tap(180, 400);
+    await act(async () => {});
+    expect(folded()).toBe(true);
+    tap(100, 300);
+    tap(260, 520);
+    await act(async () => {});
+    expect(folded()).toBe(true);
+  });
+
+  it('turns auto-scroll on and off from the compact bar', async () => {
+    await open();
+    await scrollList(600);
+    const bar = within(screen.getByTestId('siddur-header-compact', { hidden: true }));
+    expect(useUserStore.getState().siddurAutoScroll).toBe(false);
+    fireEvent.press(bar.getByRole('switch', { name: 'גלילה אוטומטית' }));
+    expect(useUserStore.getState().siddurAutoScroll).toBe(true);
+    fireEvent.press(bar.getByRole('switch', { name: 'גלילה אוטומטית' }));
+    expect(useUserStore.getState().siddurAutoScroll).toBe(false);
+  });
+
+  it('does not unfold on a fast flick up, however far it goes', async () => {
+    await open();
+    await scrollList(1200);
+    fireEvent(screen.getByTestId('siddur-list'), 'scrollBeginDrag', scrollEvent(1200));
+    for (const y of [1160, 1100, 1020, 940]) {
+      await later(16);
+      await scrollList(y);
+    }
+    fireEvent(screen.getByTestId('siddur-list'), 'scrollEndDrag', scrollEvent(940));
+    expect(folded()).toBe(true);
+  });
+
+  it('does not unfold during the momentum of a fling up', async () => {
+    await open();
+    await scrollList(1200);
+    fireEvent(screen.getByTestId('siddur-list'), 'momentumScrollBegin', scrollEvent(1200));
+    for (const y of [1180, 1150, 1120, 1100]) {
+      await later(100);
+      await scrollList(y);
+    }
+    expect(folded()).toBe(true);
+  });
+
+  it('does not unfold when the list corrects its height mid-fling', async () => {
+    await open();
+    await scrollList(600);
+    fireEvent(screen.getByTestId('siddur-list'), 'momentumScrollBegin', scrollEvent(600));
+    await scrollList(700);
+    fireEvent.scroll(screen.getByTestId('siddur-list'), {
+      nativeEvent: {
+        contentOffset: { x: 0, y: 640 },
+        contentSize: { width: 360, height: 1940 },
+        layoutMeasurement: { width: 360, height: 640 },
+      },
+    });
+    await act(async () => {});
+    expect(folded()).toBe(true);
+  });
+
+  it('does not unfold on the small reverse move of a finger lifting', async () => {
+    await open();
+    await scrollList(600);
+    fireEvent(screen.getByTestId('siddur-list'), 'scrollBeginDrag', scrollEvent(600));
+    await scrollList(700);
+    await scrollList(694);
+    fireEvent(screen.getByTestId('siddur-list'), 'scrollEndDrag', scrollEvent(694));
+    expect(folded()).toBe(true);
   });
 
   it('does not unfold on an upward move nobody dragged', async () => {
@@ -1077,8 +1255,8 @@ describe('the siddur reader folds its controls while the user reads', () => {
     await scrollList(1361);
     await scrollList(1360);
     expect(folded()).toBe(true);
-    await dragTo(1340);
-    expect(folded()).toBe(false);
+    await dragTo(1320);
+    expect(folded()).toBe(true);
   });
 
   it('unfolds on a tap on the compact bar', async () => {
@@ -1110,7 +1288,7 @@ describe('the siddur reader folds its controls while the user reads', () => {
   it('keeps a full block brought back mid-text over the text until the top', async () => {
     await open();
     await scrollList(600);
-    await dragTo(590);
+    await openTools();
     expect(folded()).toBe(false);
     await dragTo(100);
     expect(folded()).toBe(false);
@@ -1145,7 +1323,8 @@ describe('the siddur reader folds its controls while the user reads', () => {
     await pause(1100);
     expect(saved().shacharit.segmentKey).toBe('k-mid-2');
     await dragTo(766 - FULL);
-    await dragTo(766 - FULL - 6);
+    await openTools();
+    await dragTo(766 - FULL - 4);
     await dragTo(766 - FULL);
     expect(folded()).toBe(false);
     await pause(1100);
@@ -1157,9 +1336,23 @@ describe('the siddur reader folds its controls while the user reads', () => {
     await scrollList(400);
     expect(folded()).toBe(true);
     await later(300);
-    await dragTo(390);
+    await dragTo(360);
+    await openTools();
     expect(folded()).toBe(false);
     expect(screen.getByRole('button', { name: 'בחר חלק: אמצע' })).toBeOnTheScreen();
+  });
+
+  it('moves the list neither for a sub-point change of the full block nor in the middle of a drag', async () => {
+    await open();
+    await scrollList(600);
+    offsetSpy.mockClear();
+    layout('siddur-header-full', 0, FULL + 0.4);
+    await act(async () => {});
+    expect(offsetSpy).not.toHaveBeenCalled();
+    fireEvent(screen.getByTestId('siddur-list'), 'scrollBeginDrag', scrollEvent(600));
+    layout('siddur-header-full', 0, FULL + 40);
+    await act(async () => {});
+    expect(offsetSpy).not.toHaveBeenCalled();
   });
 
   it('keeps the text where it is when the full block grows or shrinks while scrolled', async () => {
@@ -1195,5 +1388,114 @@ describe('the siddur reader folds its controls while the user reads', () => {
     await act(async () => {});
     expect(folded()).toBe(false);
     expect(screen.getByText(RESUME)).toBeOnTheScreen();
+  });
+});
+
+describe('the siddur reader compass offer', () => {
+  const TITLE = 'לפתוח מצפן תפילה?';
+  const BODY = 'אם הודעה זאת מפריעה לך, אפשר לכבות אותה בהגדרות בחלק של הסידור';
+  const PILL = 'פתח מצפן תפילה';
+
+  async function openPrayer(params: Record<string, string>, prompt = true) {
+    jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
+    useUserStore.getState().reset();
+    useUserStore.setState({
+      language: 'he',
+      location: JERUSALEM,
+      inIsrael: true,
+      nusach: 'ashkenaz',
+      siddurCompassPrompt: prompt,
+    });
+    mockLoadedText = null;
+    for (const key of Object.keys(mockParams)) delete mockParams[key];
+    Object.assign(mockParams, params);
+    renderWithTheme(<SiddurReaderScreen />);
+    await screen.findByTestId('siddur-list');
+    await act(async () => {});
+  }
+
+  beforeEach(() => mockRouter.push.mockClear());
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it.each(['shacharit', 'mincha', 'maariv'])('offers the compass on opening %s', async (id) => {
+    await openPrayer({ id, date: '2026-10-28' });
+    expect(screen.getByText(TITLE)).toBeOnTheScreen();
+    expect(screen.getByText(BODY)).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'כן' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'לא' })).toBeOnTheScreen();
+    expect(screen.getByTestId('confirm-dialog-countdown', { includeHiddenElements: true })).toBeOnTheScreen();
+  });
+
+  it('לא closes the offer at once and opens nothing', async () => {
+    await openPrayer({ id: 'shacharit', date: '2026-10-28' });
+    fireEvent.press(screen.getByRole('button', { name: 'לא' }));
+    expect(screen.queryByText(TITLE)).toBeNull();
+    expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  it('כן opens the compass with the prayer and its date', async () => {
+    await openPrayer({ id: 'shacharit', date: '2026-10-28' });
+    fireEvent.press(screen.getByRole('button', { name: 'כן' }));
+    expect(mockRouter.push).toHaveBeenCalledTimes(1);
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      pathname: '/compass',
+      params: { prayer: 'shacharit', date: '2026-10-28' },
+    });
+    expect(screen.queryByText(TITLE)).toBeNull();
+  });
+
+  it('opened without a date, כן sends the prayer alone', async () => {
+    await openPrayer({ id: 'shacharit' });
+    fireEvent.press(screen.getByRole('button', { name: 'כן' }));
+    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/compass', params: { prayer: 'shacharit' } });
+  });
+
+  it('offers nothing when the setting is off, and keeps the pill', async () => {
+    await openPrayer({ id: 'shacharit', date: '2026-10-28' }, false);
+    expect(screen.queryByText(TITLE)).toBeNull();
+    expect(screen.getByRole('button', { name: PILL })).toBeOnTheScreen();
+  });
+
+  it('the pill opens the compass', async () => {
+    await openPrayer({ id: 'shacharit', date: '2026-10-28' }, false);
+    fireEvent.press(screen.getByRole('button', { name: PILL }));
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      pathname: '/compass',
+      params: { prayer: 'shacharit', date: '2026-10-28' },
+    });
+  });
+
+  it('offers nothing and draws no pill for another text', async () => {
+    await openPrayer({ id: 'tefillin', date: '2026-10-28' });
+    expect(screen.queryByText(TITLE)).toBeNull();
+    expect(screen.queryByRole('button', { name: PILL })).toBeNull();
+  });
+
+  it('offers nothing when the compass sent the reader back', async () => {
+    await openPrayer({ id: 'shacharit', date: '2026-10-28', fromCompass: '1' });
+    expect(screen.queryByText(TITLE)).toBeNull();
+    expect(screen.getByRole('button', { name: PILL })).toBeOnTheScreen();
+  });
+
+  it('runs no countdown with a screen reader on', async () => {
+    jest.spyOn(AccessibilityInfo, 'isScreenReaderEnabled').mockResolvedValue(true);
+    await openPrayer({ id: 'shacharit', date: '2026-10-28' });
+    expect(screen.getByText(TITLE)).toBeOnTheScreen();
+    expect(screen.queryByTestId('confirm-dialog-countdown', { includeHiddenElements: true })).toBeNull();
+  });
+
+  it('offers nothing and draws no pill on the web', async () => {
+    const original = Platform.OS;
+    Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'web' });
+    try {
+      await openPrayer({ id: 'shacharit', date: '2026-10-28' });
+      expect(screen.queryByText(TITLE)).toBeNull();
+      expect(screen.queryByRole('button', { name: PILL })).toBeNull();
+    } finally {
+      Object.defineProperty(Platform, 'OS', { configurable: true, get: () => original });
+    }
   });
 });

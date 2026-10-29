@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Linking, Platform, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import * as ExpoLocation from 'expo-location';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -28,9 +28,18 @@ import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies, typography } from '@/theme/typography';
-import { arrowAngle, bearingTo, distanceKm, nextFacing, normalizeDegrees, type GeoPoint } from '@/utils/compass';
+import {
+  arrowAngle,
+  bearingTo,
+  compassPrayerOf,
+  distanceKm,
+  nextFacing,
+  normalizeDegrees,
+  type GeoPoint,
+} from '@/utils/compass';
 import { useI18n } from '@/i18n';
 
+const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
 const VIEW = 343;
 const CENTER = VIEW / 2;
 const RADAR_RADIUS = 150;
@@ -373,6 +382,9 @@ export default function CompassScreen() {
   const { colors } = useTheme();
   const { language, t } = useI18n();
   const router = useRouter();
+  const params = useLocalSearchParams<{ prayer?: string; date?: string }>();
+  const prayer = compassPrayerOf(typeof params.prayer === 'string' ? params.prayer : undefined);
+  const prayerDate = typeof params.date === 'string' && DATE_KEY.test(params.date) ? params.date : undefined;
   const { width } = useWindowDimensions();
   const saved = useUserStore((s) => s.location);
   const [granted, setGranted] = useState<boolean | null>(null);
@@ -438,6 +450,20 @@ export default function CompassScreen() {
     if (facing && !wasFacing.current) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     wasFacing.current = facing;
   }, [facing]);
+
+  const [reached, setReached] = useState(false);
+  useEffect(() => {
+    if (facing) setReached(true);
+  }, [facing]);
+  const backToPrayer = () => {
+    if (!prayer) return;
+    if (router.canGoBack()) router.back();
+    else
+      router.replace({
+        pathname: '/siddur/[id]',
+        params: { id: prayer, ...(prayerDate ? { date: prayerDate } : {}), fromCompass: '1' },
+      });
+  };
 
   const size = Math.min(STAGE_MAX, width - spacing.lg * 2);
   const degrees = Math.round(bearing);
@@ -508,6 +534,11 @@ export default function CompassScreen() {
           <Button label={t('compass.permission')} variant="secondary" onPress={askPermission} />
         ) : null}
       </ScrollView>
+      {prayer && reached ? (
+        <SafeAreaView edges={['bottom']} style={[styles.footer, { backgroundColor: colors.bg }]}>
+          <Button label={t('compass.backToPrayer')} icon="siddur" onPress={backToPrayer} />
+        </SafeAreaView>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -515,6 +546,11 @@ export default function CompassScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
+  },
+  footer: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
   },
   list: {
     paddingHorizontal: spacing.lg,

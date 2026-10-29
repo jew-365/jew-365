@@ -47,3 +47,11 @@ export function isFacing(angle: number): boolean {
 export function nextFacing(wasFacing: boolean, angle: number): boolean {
   return angularOffset(angle) <= (wasFacing ? FACING_REARM_DEG : FACING_TOLERANCE_DEG);
 }
+
+export const COMPASS_PRAYERS = ['shacharit', 'mincha', 'maariv'] as const;
+
+export type CompassPrayer = (typeof COMPASS_PRAYERS)[number];
+
+export function compassPrayerOf(id: string | undefined): CompassPrayer | null {
+  return COMPASS_PRAYERS.find((prayer) => prayer === id) ?? null;
+}

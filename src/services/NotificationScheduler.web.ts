@@ -82,6 +82,10 @@ export async function syncNotificationPermissionStatus(): Promise<boolean> {
   return false;
 }
 
+export async function notificationPermissionState(): Promise<'granted' | 'missing' | 'blocked' | null> {
+  return null;
+}
+
 export async function requestNotificationPermissions(): Promise<boolean> {
   return false;
 }

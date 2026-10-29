@@ -45,7 +45,6 @@ import {
 } from '@/services/ContactService';
 import { reportError } from '@/services/errors';
 import { reloadApp } from '@/services/appReload';
-import { openBatteryOptimizationSettings, supportsBatteryOptimizationSettings } from '@/services/deviceSettings';
 import {
   chooseGender,
   chooseMaritalStatus,
@@ -66,6 +65,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { ListRow } from '@/components/ListRow';
 import { MitzvahIcon, type IconName } from '@/components/MitzvahIcon';
 import { NavBar } from '@/components/NavBar';
+import { PermissionsList } from '@/components/PermissionsList';
 import { SectionLabel } from '@/components/SectionLabel';
 import { ThemeSwatchRow } from '@/components/ThemeSwatchRow';
 import { SettingsSearchBox, SettingsSearchResults, useSettingsSearch } from '@/components/SettingsSearch';
@@ -124,6 +124,7 @@ export default function SettingsScreen() {
       siddurVoice: s.siddurVoice,
       chokCommentaryOpen: s.chokCommentaryOpen,
       chokThuNightDay: s.chokThuNightDay,
+      siddurCompassPrompt: s.siddurCompassPrompt,
       taharahEnabled: s.taharahEnabled,
       weeklyReportEnabled: s.weeklyReportEnabled,
       location: s.location,
@@ -144,6 +145,7 @@ export default function SettingsScreen() {
       setSiddurVoice: s.setSiddurVoice,
       setChokCommentaryOpen: s.setChokCommentaryOpen,
       setChokThuNightDay: s.setChokThuNightDay,
+      setSiddurCompassPrompt: s.setSiddurCompassPrompt,
       setWeeklyReportEnabled: s.setWeeklyReportEnabled,
       setTheme: s.setTheme,
       setUiScale: s.setUiScale,
@@ -564,6 +566,15 @@ export default function SettingsScreen() {
                     renderLabel={(value) => t(`chok.thuNight.${value}`)}
                   />
                 </Anchor>
+                <Anchor {...anchor('compassPrompt')}>
+                  <SwitchRow
+                    label={t('settings.compassPrompt')}
+                    hint={t('settings.compassPromptHint')}
+                    value={user.siddurCompassPrompt}
+                    onValueChange={user.setSiddurCompassPrompt}
+                    style={styles.groupGap}
+                  />
+                </Anchor>
               </SettingsSection>
 
               <SettingsSection
@@ -620,29 +631,10 @@ export default function SettingsScreen() {
                     style={styles.groupGap}
                   />
                 </Anchor>
-                <Anchor {...anchor('permission')}>
-                  <Row
-                    label={t('settings.notificationsOsStatus')}
-                    value={permGranted ? t('settings.notificationsGranted') : t('settings.notificationsDenied')}
-                  />
-                  {!permGranted ? (
-                    <Button label={t('settings.openOsSettings')} onPress={openOsSettings} style={styles.buttonGap} />
-                  ) : null}
+                <Anchor {...anchor('permissions')}>
+                  <SectionLabel variant="field" text={t('permissions.title')} style={styles.fieldLabel} />
+                  <PermissionsList />
                 </Anchor>
-                {/* Exact alarms are declared in the manifest, but OEM battery managers can still defer
-                    them. Exempting the app is the one part only the user can do. */}
-                {supportsBatteryOptimizationSettings() ? (
-                  <Anchor {...anchor('battery')}>
-                    <Text style={[typography.small, styles.groupGap, { color: colors.textMuted }]}>
-                      {t('settings.batteryHint')}
-                    </Text>
-                    <Button
-                      label={t('settings.batteryAction')}
-                      onPress={() => openBatteryOptimizationSettings()}
-                      style={styles.buttonGap}
-                    />
-                  </Anchor>
-                ) : null}
                 <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>
                   {Platform.OS === 'ios' ? t('settings.iosHint') : t('settings.androidHint')}
                 </Text>
@@ -997,16 +989,6 @@ function Anchor({ id, focus, onReveal, children }: AnchorProps) {
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  const { colors } = useTheme();
-  return (
-    <View style={[styles.row, styles.statusRow]}>
-      <Text style={[typography.bodyBold, { color: colors.text }]}>{label}</Text>
-      <Text style={[typography.body, { color: colors.goldText }]}>{value}</Text>
-    </View>
-  );
-}
-
 type SwitchRowProps = {
   label: string;
   hint: string;
@@ -1053,9 +1035,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  statusRow: {
-    marginTop: spacing.md,
   },
   speedRow: {
     marginTop: spacing.lg,

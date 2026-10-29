@@ -34,7 +34,7 @@ import {
 const ROOT = path.resolve(__dirname, '../../..');
 const APP_DIR = path.join(ROOT, 'src/app');
 const JERUSALEM = CITIES[0];
-const ALL: SettingsSearchContext = { taharah: true, backup: true, battery: true };
+const ALL: SettingsSearchContext = { taharah: true, backup: true };
 
 const namer: SearchNamer = (key, params) => ({
   he: translate(key, params, 'he', null),

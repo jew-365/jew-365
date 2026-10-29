@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AppState,
   Dimensions,
@@ -10,14 +10,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import Animated, {
-  FadeIn,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { gematriya } from '@hebcal/core';
@@ -30,14 +23,16 @@ import { ListRow } from '@/components/ListRow';
 import { MitzvahIcon, backIcon, forwardIcon, iconFor, type IconName } from '@/components/MitzvahIcon';
 import { NavBar } from '@/components/NavBar';
 import { ProgressBar } from '@/components/ProgressBar';
+import { Reveal } from '@/components/Reveal';
 import { HeaderPill } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { StreakRing } from '@/components/StreakRing';
 import { useDayModel } from '@/hooks/useDayModel';
-import { useIsFocused } from '@/hooks/useIsFocused';
+import { useInView, useViewport, ViewportContext } from '@/hooks/useInView';
+import { useIsFocused, useReplayKey } from '@/hooks/useIsFocused';
 import { useNow } from '@/hooks/useNow';
-import { EASE_OUT, useCountUp, useEntrance, usePressScale, useReduceMotion } from '@/hooks/useMotion';
+import { useCountUp, useEntrance, usePop, usePressScale } from '@/hooks/useMotion';
 import { useRowMirrored } from '@/hooks/useRowMirrored';
 import { formatDate, useI18n } from '@/i18n';
 import { MITZVOT } from '@/data/mitzvot';
@@ -155,35 +150,6 @@ type BadgeInfo = {
   left?: string;
 };
 
-type ScrollBus = { subscribe: (listener: () => void) => () => void };
-
-const ScrollBusContext = createContext<ScrollBus>({ subscribe: () => () => {} });
-
-function useInView() {
-  const ref = useRef<View>(null);
-  const bus = useContext(ScrollBusContext);
-  const [inView, setInView] = useState(false);
-  const check = useCallback(() => {
-    ref.current?.measureInWindow((_x, y, _width, height) => {
-      if (height <= 0) return;
-      const viewport = Dimensions.get('window').height;
-      const needed = Math.min(height, viewport) * motion.visibleShare;
-      if (y + needed <= viewport && y + height - needed >= 0) setInView(true);
-    });
-  }, []);
-  useEffect(() => {
-    if (inView) return;
-    check();
-    const timer = setTimeout(check, 120);
-    const unsubscribe = bus.subscribe(check);
-    return () => {
-      clearTimeout(timer);
-      unsubscribe();
-    };
-  }, [inView, bus, check]);
-  return { ref, inView, onLayout: check };
-}
-
 function useBatchSlot() {
   const batch = useRef({ at: 0, count: 0 });
   return useCallback(() => {
@@ -193,32 +159,20 @@ function useBatchSlot() {
   }, []);
 }
 
+function useSeenDelay(inView: boolean, takeSlot: () => number, step: number): number | null {
+  const [delay, setDelay] = useState<number | null>(null);
+  useEffect(() => {
+    if (inView && delay === null) setDelay(takeSlot() * step);
+  }, [inView, delay, takeSlot, step]);
+  return delay;
+}
+
 function Insight({ text }: { text: string }) {
   const { colors } = useTheme();
   return (
     <View style={styles.insight}>
       <MitzvahIcon name="sparkle" size={INSIGHT_ICON} color={colors.goldText} />
       <Text style={[typography.caption, styles.insightText, { color: colors.text }]}>{text}</Text>
-    </View>
-  );
-}
-
-function FadeSlideIn({ active, delay, children }: { active: boolean; delay: number; children: React.ReactNode }) {
-  const progress = useEntrance(delay, motion.lineMs, active);
-  const style = useAnimatedStyle(() => ({
-    opacity: progress.value,
-    transform: [{ translateY: (1 - progress.value) * motion.lineShift }],
-  }));
-  return <Animated.View style={style}>{children}</Animated.View>;
-}
-
-function RevealOnView({ delay, children }: { delay: number; children: React.ReactNode }) {
-  const view = useInView();
-  return (
-    <View ref={view.ref} onLayout={view.onLayout}>
-      <FadeSlideIn active={view.inView} delay={delay}>
-        {children}
-      </FadeSlideIn>
     </View>
   );
 }
@@ -254,21 +208,20 @@ function PressableScale({
 }
 
 function SlideIn({ enterFrom, children }: { enterFrom: number; children: React.ReactNode }) {
-  const reduce = useReduceMotion();
   const mirrored = useRowMirrored();
-  const opacity = useSharedValue(reduce || enterFrom === 0 ? 1 : 0);
-  const shift = useSharedValue(reduce ? 0 : enterFrom * motion.tabShift * (mirrored ? 1 : -1));
-  useEffect(() => {
-    if (reduce) {
-      opacity.value = 1;
-      shift.value = 0;
-      return;
-    }
-    opacity.value = withTiming(1, { duration: motion.tabFadeMs, easing: EASE_OUT });
-    shift.value = withTiming(0, { duration: motion.tabSlideMs, easing: EASE_OUT });
-  }, [reduce, opacity, shift]);
-  const style = useAnimatedStyle(() => ({ opacity: opacity.value, transform: [{ translateX: shift.value }] }));
-  return <Animated.View style={style}>{children}</Animated.View>;
+  const view = useInView({ share: 0 });
+  const fade = useEntrance(0, motion.tabFadeMs, view.inView);
+  const slide = useEntrance(0, motion.tabSlideMs, view.inView);
+  const from = enterFrom * motion.tabShift * (mirrored ? 1 : -1);
+  const style = useAnimatedStyle(() => ({
+    opacity: enterFrom === 0 ? 1 : fade.value,
+    transform: [{ translateX: (1 - slide.value) * from }],
+  }));
+  return (
+    <View ref={view.ref} onLayout={view.onLayout}>
+      <Animated.View style={style}>{children}</Animated.View>
+    </View>
+  );
 }
 
 function useDayPalette() {
@@ -471,7 +424,7 @@ function MonthCalendar({
         </View>
       </View>
       {insight ? (
-        <FadeSlideIn
+        <Reveal
           key={month.startKey}
           active={view.inView}
           delay={firstVisit ? (month.days.length - 1) * motion.calCellStagger + motion.gridCellMs : 0}
@@ -483,7 +436,7 @@ function MonthCalendar({
               month: month.monthName[language],
             })}
           />
-        </FadeSlideIn>
+        </Reveal>
       ) : null}
     </>
   );
@@ -639,22 +592,7 @@ function DaySheet({
 function StreakChip({ streak, delay, active }: { streak: number; delay: number; active: boolean }) {
   const { colors } = useTheme();
   const { t } = useI18n();
-  const reduce = useReduceMotion();
-  const scale = useSharedValue(reduce ? 1 : motion.chipFrom);
-  const opacity = useSharedValue(reduce ? 1 : 0);
-  useEffect(() => {
-    if (reduce) {
-      scale.value = 1;
-      opacity.value = 1;
-      return;
-    }
-    scale.value = motion.chipFrom;
-    opacity.value = 0;
-    if (!active) return;
-    scale.value = withDelay(delay, withSpring(1, motion.badgeSpring));
-    opacity.value = withDelay(delay, withTiming(1, { duration: motion.badgeFadeMs, easing: EASE_OUT }));
-  }, [active, delay, reduce, scale, opacity]);
-  const pop = useAnimatedStyle(() => ({ opacity: opacity.value, transform: [{ scale: scale.value }] }));
+  const pop = usePop(delay, motion.chipFrom, active);
   return (
     <Animated.View style={[styles.chip, { backgroundColor: streak ? colors.goldLight : colors.surface2 }, pop]}>
       <MitzvahIcon name="sparkle" size={scaled(12)} color={streak ? colors.goldText : colors.textMuted} />
@@ -684,11 +622,8 @@ function ConsistencyRow({
 }) {
   const { colors } = useTheme();
   const view = useInView();
-  const [delay, setDelay] = useState<number | null>(null);
-  useEffect(() => {
-    if (view.inView && delay === null) setDelay(takeSlot() * motion.rowBarStagger);
-  }, [view.inView, delay, takeSlot]);
-  const active = delay !== null;
+  const delay = useSeenDelay(view.inView, takeSlot, motion.rowBarStagger);
+  const active = view.inView && delay !== null;
   const start = delay ?? 0;
   const progress = useEntrance(start, motion.barMs, active);
   const shown = useCountUp(progress, item.percent ?? 0);
@@ -739,22 +674,18 @@ function SelectionDetail({
 }) {
   const { colors } = useTheme();
   const { t } = useI18n();
-  const reduce = useReduceMotion();
   return (
-    <Animated.View
-      key={id}
-      entering={reduce ? undefined : FadeIn.duration(motion.detailFadeMs)}
-      style={[styles.detail, { backgroundColor: colors.goldWash }]}
-      accessibilityLiveRegion="polite"
-    >
-      <View style={styles.flex}>
-        <Text style={[typography.bodyBold, { color: colors.text }]}>{title}</Text>
-        <Text style={[typography.caption, { color: colors.textSub }]}>{caption}</Text>
+    <Reveal key={id} duration={motion.detailFadeMs} shift={0}>
+      <View style={[styles.detail, { backgroundColor: colors.goldWash }]} accessibilityLiveRegion="polite">
+        <View style={styles.flex}>
+          <Text style={[typography.bodyBold, { color: colors.text }]}>{title}</Text>
+          <Text style={[typography.caption, { color: colors.textSub }]}>{caption}</Text>
+        </View>
+        <Text style={[typography.heading, { color: colors.goldText }]}>
+          {percent === null ? t('history.percentNone') : `${percent}%`}
+        </Text>
       </View>
-      <Text style={[typography.heading, { color: colors.goldText }]}>
-        {percent === null ? t('history.percentNone') : `${percent}%`}
-      </Text>
-    </Animated.View>
+    </Reveal>
   );
 }
 
@@ -775,11 +706,14 @@ function WeekBar({
 }) {
   const { colors } = useTheme();
   const { t } = useI18n();
-  const progress = useEntrance(index * motion.weekBarStagger, motion.barMs);
+  const view = useInView();
+  const progress = useEntrance(index * motion.weekBarStagger, motion.barMs, view.inView);
   const grow = useAnimatedStyle(() => ({ transform: [{ scaleY: progress.value }] }));
   if (week.percent === null) return <View style={styles.weekColumn} />;
   return (
     <Pressable
+      ref={view.ref}
+      onLayout={view.onLayout}
       testID={`history-week-${week.weekEnd}`}
       onPress={onSelect}
       accessibilityRole="button"
@@ -876,48 +810,39 @@ function WeekdayRow({
   );
 }
 
-function EarnedTile({ badge, index, onPress }: { badge: BadgeInfo; index: number; onPress: () => void }) {
+function EarnedTile({ badge, takeSlot, onPress }: { badge: BadgeInfo; takeSlot: () => number; onPress: () => void }) {
   const { colors } = useTheme();
   const { t, language } = useI18n();
-  const reduce = useReduceMotion();
-  const scale = useSharedValue(reduce ? 1 : motion.badgeFrom);
-  const opacity = useSharedValue(reduce ? 1 : 0);
-  useEffect(() => {
-    if (reduce) {
-      scale.value = 1;
-      opacity.value = 1;
-      return;
-    }
-    const delay = index * motion.badgeStagger;
-    scale.value = withDelay(delay, withSpring(1, motion.badgeSpring));
-    opacity.value = withDelay(delay, withTiming(1, { duration: motion.badgeFadeMs, easing: EASE_OUT }));
-  }, [index, reduce, scale, opacity]);
-  const pop = useAnimatedStyle(() => ({ opacity: opacity.value, transform: [{ scale: scale.value }] }));
+  const view = useInView();
+  const delay = useSeenDelay(view.inView, takeSlot, motion.badgeStagger);
+  const pop = usePop(delay ?? 0, motion.badgeFrom, view.inView && delay !== null);
   const press = usePressScale();
   const date = hebrewDayLabel(badge.on ?? '', language, true);
   return (
-    <Animated.View style={[styles.flex, pop]}>
-      <Pressable
-        testID={`history-badge-${badge.id}`}
-        onPress={onPress}
-        onPressIn={press.onPressIn}
-        onPressOut={press.onPressOut}
-        accessibilityRole="button"
-        accessibilityLabel={t('history.badges.tileLabel', { title: badge.title, date })}
-      >
-        <Animated.View style={press.style}>
-          <Card padded>
-            <View style={styles.badgeInner}>
-              <IconTile name={badge.icon} size={BADGE_TILE} />
-              <Text style={[typography.captionBold, styles.center, { color: colors.text }]} numberOfLines={2}>
-                {badge.title}
-              </Text>
-              <Text style={[typography.micro, styles.center, { color: colors.textSub }]}>{date}</Text>
-            </View>
-          </Card>
-        </Animated.View>
-      </Pressable>
-    </Animated.View>
+    <View ref={view.ref} onLayout={view.onLayout} style={styles.flex}>
+      <Animated.View style={pop}>
+        <Pressable
+          testID={`history-badge-${badge.id}`}
+          onPress={onPress}
+          onPressIn={press.onPressIn}
+          onPressOut={press.onPressOut}
+          accessibilityRole="button"
+          accessibilityLabel={t('history.badges.tileLabel', { title: badge.title, date })}
+        >
+          <Animated.View style={press.style}>
+            <Card padded>
+              <View style={styles.badgeInner}>
+                <IconTile name={badge.icon} size={BADGE_TILE} />
+                <Text style={[typography.captionBold, styles.center, { color: colors.text }]} numberOfLines={2}>
+                  {badge.title}
+                </Text>
+                <Text style={[typography.micro, styles.center, { color: colors.textSub }]}>{date}</Text>
+              </View>
+            </Card>
+          </Animated.View>
+        </Pressable>
+      </Animated.View>
+    </View>
   );
 }
 
@@ -977,13 +902,11 @@ export default function HistoryScreen() {
   const focused = useIsFocused();
   const computedFor = useRef<readonly unknown[] | null>(null);
   const computation = useRef<Computation | null>(null);
-  const wasFocused = useRef(focused);
   const customItems = useCustomMitzvotStore((s) => s.items);
   const knownIds = useRef<string[]>([]);
   knownIds.current = [...MITZVOT.map((m) => m.id), ...Object.values(customItems).map((m) => m.id)];
   const ticked = useNow();
   const [dayKey, setDayKey] = useState(() => appDayKey(new Date(), location));
-  const [playKey, setPlayKey] = useState(0);
   const [tab, setTab] = useState<Tab>('summary');
   const [tabsPinned, setTabsPinned] = useState(false);
   const [enterFrom, setEnterFrom] = useState(0);
@@ -995,19 +918,12 @@ export default function HistoryScreen() {
   const [selectedWeekday, setSelectedWeekday] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const scrollY = useRef(0);
-  const scrollListeners = useRef(new Set<() => void>());
   const takeSlot = useBatchSlot();
-  const scrollBus = useMemo<ScrollBus>(
-    () => ({
-      subscribe: (listener) => {
-        scrollListeners.current.add(listener);
-        return () => {
-          scrollListeners.current.delete(listener);
-        };
-      },
-    }),
-    [],
-  );
+  const playKey = useReplayKey(() => {
+    setTravel(0);
+    setMonthStart(null);
+  });
+  const viewport = useViewport();
 
   useEffect(() => {
     setDayKey(appDayKey(ticked, location));
@@ -1019,18 +935,6 @@ export default function HistoryScreen() {
     });
     return () => subscription.remove();
   }, [location]);
-
-  useEffect(() => {
-    const returned = focused && !wasFocused.current;
-    wasFocused.current = focused;
-    if (!returned) return;
-    const task = afterPaint(() => {
-      setPlayKey((n) => n + 1);
-      setTravel(0);
-      setMonthStart(null);
-    });
-    return () => task.cancel();
-  }, [focused]);
 
   useEffect(() => {
     if (!focused) return;
@@ -1125,7 +1029,7 @@ export default function HistoryScreen() {
     scrollY.current = event.nativeEvent.contentOffset.y;
     const pinned = scrollY.current >= HERO_HEIGHT;
     if (pinned !== tabsPinned) setTabsPinned(pinned);
-    scrollListeners.current.forEach((listener) => listener());
+    viewport.notify();
   };
 
   const nameForId = (id: string) => {
@@ -1328,9 +1232,9 @@ export default function HistoryScreen() {
           ) : null}
         </Card>
         {leader ? (
-          <RevealOnView delay={0}>
+          <Reveal>
             <Insight text={t('history.insight.leader', { name: nameForId(leader.id), percent: leader.percent })} />
-          </RevealOnView>
+          </Reveal>
         ) : null}
       </>
     );
@@ -1441,9 +1345,9 @@ export default function HistoryScreen() {
               />
             </Card>
             {weeksText ? (
-              <RevealOnView delay={0}>
+              <Reveal>
                 <Insight text={weeksText} />
-              </RevealOnView>
+              </Reveal>
             ) : null}
 
             <SectionLabel text={t('history.weekday.title')} />
@@ -1486,9 +1390,9 @@ export default function HistoryScreen() {
               </View>
             </Card>
             {dayInsightText ? (
-              <RevealOnView delay={0}>
+              <Reveal>
                 <Insight text={dayInsightText} />
-              </RevealOnView>
+              </Reveal>
             ) : null}
           </>
         )}
@@ -1536,9 +1440,9 @@ export default function HistoryScreen() {
           })}
         </Card>
         {trendText ? (
-          <RevealOnView delay={0}>
+          <Reveal>
             <Insight text={trendText} />
-          </RevealOnView>
+          </Reveal>
         ) : null}
 
         <SectionLabel text={t('history.reports.title')} />
@@ -1658,12 +1562,7 @@ export default function HistoryScreen() {
             {tileRows.map((row, r) => (
               <View key={r} style={styles.badgeRow}>
                 {row.map((info, i) => (
-                  <EarnedTile
-                    key={info.id}
-                    badge={info}
-                    index={r * BADGES_PER_ROW + i}
-                    onPress={() => setBadge(info)}
-                  />
+                  <EarnedTile key={info.id} badge={info} takeSlot={takeSlot} onPress={() => setBadge(info)} />
                 ))}
                 {Array.from({ length: BADGES_PER_ROW - row.length }, (_, k) => (
                   <View key={`pad-${k}`} style={styles.flex} />
@@ -1788,7 +1687,7 @@ export default function HistoryScreen() {
   ];
 
   return (
-    <ScrollBusContext.Provider value={scrollBus}>
+    <ViewportContext.Provider value={viewport.bus}>
       <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
         <View style={styles.flex}>
           <ScrollView
@@ -1796,6 +1695,7 @@ export default function HistoryScreen() {
             testID="history-scroll"
             contentContainerStyle={styles.content}
             onScroll={onScroll}
+            onContentSizeChange={viewport.notify}
             scrollEventThrottle={16}
           >
             <View style={styles.hero}>
@@ -1859,7 +1759,7 @@ export default function HistoryScreen() {
           }}
         />
       </SafeAreaView>
-    </ScrollBusContext.Provider>
+    </ViewportContext.Provider>
   );
 }
 

@@ -4,7 +4,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 
-export const ONBOARDING_STEPS = 6;
+export const ONBOARDING_STEPS = 7;
 
 const DOT_SIZE = scaled(7);
 const ACTIVE_DOT_WIDTH = scaled(22);

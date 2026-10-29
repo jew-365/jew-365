@@ -2,13 +2,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AppState, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { Banner, BannerTone } from '@/components/Banner';
 import { AppLogo } from '@/components/AppLogo';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { Card } from '@/components/Card';
 import { CompletedRow } from '@/components/CompletedRow';
+import { Reveal } from '@/components/Reveal';
 import { formatDayLine } from '@/components/DayStepper';
 import { IconTile } from '@/components/IconTile';
 import { ListRow } from '@/components/ListRow';
@@ -19,7 +19,8 @@ import { CounterPill } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
 import { useSelichotDownloadFlow } from '@/components/SelichotAddonCard';
 import { useDayModel } from '@/hooks/useDayModel';
-import { useIsFocused } from '@/hooks/useIsFocused';
+import { useViewport, ViewportContext } from '@/hooks/useInView';
+import { useReplayKey } from '@/hooks/useIsFocused';
 import { useNow } from '@/hooks/useNow';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { getLocationName } from '@/data/cities';
@@ -38,7 +39,7 @@ import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useQuietBlock } from '@/components/ShabbatScreen';
 import { typography } from '@/theme/typography';
-import { durations, spacing } from '@/theme/tokens';
+import { durations, motion, spacing } from '@/theme/tokens';
 import { afterPaint } from '@/utils/afterPaint';
 import { clockOf, formatRemaining } from '@/utils/clock';
 import { DayWindow, appDayWindow } from '@/utils/buildDayTimeline';
@@ -134,7 +135,8 @@ export default function HomeScreen() {
     enabledSince,
   } = useDayModel();
   const router = useRouter();
-  const focused = useIsFocused();
+  const playKey = useReplayKey();
+  const viewport = useViewport();
   const user = useUserStore(
     useShallow((s) => ({
       locationStatus: s.locationStatus,
@@ -478,131 +480,133 @@ export default function HomeScreen() {
           />
         }
       />
-      <ScrollView contentContainerStyle={styles.content}>
-        {errorScope ? (
-          <Banner
-            tone="warning"
-            text={t('home.lastError', { what: t(`errors.scope.${errorScope}`) })}
-            onPress={retryLastError}
-          />
-        ) : null}
-        {banner ? <Banner tone={banner.tone} text={banner.text} onPress={banner.onPress} /> : null}
-
-        <SectionLabel text={t('home.relevantNow')} />
-        <View style={styles.list}>
-          {current.length ? (
-            current.map((item, index) => (
-              <Animated.View
-                key={item.mitzvah.id}
-                entering={focused ? FadeInDown.delay(index * 40).duration(280) : undefined}
-              >
-                <MitzvahCard
-                  icon={iconFor(item.mitzvah.icon)}
-                  name={item.name}
-                  timeLeft={item.timeLeft}
-                  pct={item.pct}
-                  urgent={item.urgent}
-                  stamping={stampingId === item.mitzvah.id}
-                  onComplete={() => complete(item.mitzvah.id, item.window.date)}
-                  onOpenText={openText(item)}
-                  onPress={() => openDetail(item.mitzvah.id)}
-                  onLongPress={() => setSelectedId(item.mitzvah.id)}
-                />
-              </Animated.View>
-            ))
-          ) : (
-            <View style={styles.emptyWrap}>
-              <IconTile name="sparkle" tone="accent" size={scaled(48)} style={styles.emptyIcon} />
-              <Text style={[typography.body, { color: colors.textSub, textAlign: 'center' }]}>
-                {doneCount >= totalActive && totalActive > 0 ? t('home.allDone') : t('home.noActive')}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {nextUp ? (
-          <Card style={styles.nextUpGap}>
-            <ListRow
-              icon={iconFor(nextUp.mitzvah.icon)}
-              iconTone="muted"
-              title={t('home.nextUp')}
-              caption={t('home.nextAt', { name: nextUp.name, time: clockOf(nextUp.window.start) })}
-              onPress={() => openDetail(nextUp.mitzvah.id)}
-              onLongPress={() => setSelectedId(nextUp.mitzvah.id)}
+      <ViewportContext.Provider value={viewport.bus}>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          onScroll={viewport.notify}
+          onContentSizeChange={viewport.notify}
+          scrollEventThrottle={motion.inViewThrottleMs}
+        >
+          {errorScope ? (
+            <Banner
+              tone="warning"
+              text={t('home.lastError', { what: t(`errors.scope.${errorScope}`) })}
+              onPress={retryLastError}
             />
-          </Card>
-        ) : null}
+          ) : null}
+          {banner ? <Banner tone={banner.tone} text={banner.text} onPress={banner.onPress} /> : null}
 
-        {missed.length ? (
-          <>
-            <SectionLabel text={t('home.missed')} count={missed.length} />
-            <View style={styles.list}>
-              {missed.map((item, index) => (
-                <Animated.View
-                  key={item.mitzvah.id}
-                  entering={focused ? FadeInDown.delay(index * 30).duration(260) : undefined}
-                >
+          <SectionLabel text={t('home.relevantNow')} />
+          <View style={styles.list}>
+            {current.length ? (
+              current.map((item, index) => (
+                <Reveal key={item.mitzvah.id} delay={index * 40} duration={280} shift={25} playKey={playKey}>
                   <MitzvahCard
                     icon={iconFor(item.mitzvah.icon)}
                     name={item.name}
-                    timeLeft=""
-                    pct={0}
-                    urgent
-                    hideProgress
-                    statusText={t('home.passedAt', { time: clockOf(item.window.end) })}
-                    statusTone="urgent"
+                    timeLeft={item.timeLeft}
+                    pct={item.pct}
+                    urgent={item.urgent}
                     stamping={stampingId === item.mitzvah.id}
                     onComplete={() => complete(item.mitzvah.id, item.window.date)}
                     onOpenText={openText(item)}
                     onPress={() => openDetail(item.mitzvah.id)}
                     onLongPress={() => setSelectedId(item.mitzvah.id)}
                   />
-                </Animated.View>
-              ))}
-            </View>
-          </>
-        ) : null}
+                </Reveal>
+              ))
+            ) : (
+              <View style={styles.emptyWrap}>
+                <IconTile name="sparkle" tone="accent" size={scaled(48)} style={styles.emptyIcon} />
+                <Text style={[typography.body, { color: colors.textSub, textAlign: 'center' }]}>
+                  {doneCount >= totalActive && totalActive > 0 ? t('home.allDone') : t('home.noActive')}
+                </Text>
+              </View>
+            )}
+          </View>
 
-        {completed.length ? (
-          <>
-            <SectionLabel text={t('home.completed')} count={completed.length} />
-            <Card divided>
-              {completed.map((item) => (
-                <CompletedRow
-                  key={item.id}
-                  name={item.name}
-                  time={item.time}
-                  onPress={() => openDetail(item.id)}
-                  onUndo={() => undoComplete(item.id, item.date)}
-                  undoLabel={t('home.undo')}
-                />
-              ))}
+          {nextUp ? (
+            <Card style={styles.nextUpGap}>
+              <ListRow
+                icon={iconFor(nextUp.mitzvah.icon)}
+                iconTone="muted"
+                title={t('home.nextUp')}
+                caption={t('home.nextAt', { name: nextUp.name, time: clockOf(nextUp.window.start) })}
+                onPress={() => openDetail(nextUp.mitzvah.id)}
+                onLongPress={() => setSelectedId(nextUp.mitzvah.id)}
+              />
             </Card>
-          </>
-        ) : null}
+          ) : null}
 
-        {taharahCard ? (
-          <Card style={styles.taharahCard}>
-            <Pressable
-              onPress={() => router.push('/taharah')}
-              accessibilityRole="button"
-              style={({ pressed }) => [styles.taharahBody, { opacity: pressed ? 0.85 : 1 }]}
-            >
-              {taharahCard.concealed ? null : (
-                <Text style={[typography.captionBold, styles.cardLabel, { color: colors.textSub }]}>
-                  {t('taharah.home.title')}
-                </Text>
-              )}
-              <Text style={[typography.heading, { color: colors.text }]}>{taharahCard.title}</Text>
-              {taharahCard.caption ? (
-                <Text style={[typography.caption, styles.cardCaption, { color: colors.textMuted }]}>
-                  {taharahCard.caption}
-                </Text>
-              ) : null}
-            </Pressable>
-          </Card>
-        ) : null}
-      </ScrollView>
+          {missed.length ? (
+            <>
+              <SectionLabel text={t('home.missed')} count={missed.length} />
+              <View style={styles.list}>
+                {missed.map((item, index) => (
+                  <Reveal key={item.mitzvah.id} delay={index * 30} duration={260} shift={25} playKey={playKey}>
+                    <MitzvahCard
+                      icon={iconFor(item.mitzvah.icon)}
+                      name={item.name}
+                      timeLeft=""
+                      pct={0}
+                      urgent
+                      hideProgress
+                      statusText={t('home.passedAt', { time: clockOf(item.window.end) })}
+                      statusTone="urgent"
+                      stamping={stampingId === item.mitzvah.id}
+                      onComplete={() => complete(item.mitzvah.id, item.window.date)}
+                      onOpenText={openText(item)}
+                      onPress={() => openDetail(item.mitzvah.id)}
+                      onLongPress={() => setSelectedId(item.mitzvah.id)}
+                    />
+                  </Reveal>
+                ))}
+              </View>
+            </>
+          ) : null}
+
+          {completed.length ? (
+            <>
+              <SectionLabel text={t('home.completed')} count={completed.length} />
+              <Card divided>
+                {completed.map((item) => (
+                  <CompletedRow
+                    key={item.id}
+                    playKey={playKey}
+                    name={item.name}
+                    time={item.time}
+                    onPress={() => openDetail(item.id)}
+                    onUndo={() => undoComplete(item.id, item.date)}
+                    undoLabel={t('home.undo')}
+                  />
+                ))}
+              </Card>
+            </>
+          ) : null}
+
+          {taharahCard ? (
+            <Card style={styles.taharahCard}>
+              <Pressable
+                onPress={() => router.push('/taharah')}
+                accessibilityRole="button"
+                style={({ pressed }) => [styles.taharahBody, { opacity: pressed ? 0.85 : 1 }]}
+              >
+                {taharahCard.concealed ? null : (
+                  <Text style={[typography.captionBold, styles.cardLabel, { color: colors.textSub }]}>
+                    {t('taharah.home.title')}
+                  </Text>
+                )}
+                <Text style={[typography.heading, { color: colors.text }]}>{taharahCard.title}</Text>
+                {taharahCard.caption ? (
+                  <Text style={[typography.caption, styles.cardCaption, { color: colors.textMuted }]}>
+                    {taharahCard.caption}
+                  </Text>
+                ) : null}
+              </Pressable>
+            </Card>
+          ) : null}
+        </ScrollView>
+      </ViewportContext.Provider>
 
       <BottomSheet
         visible={Boolean(selectedMitzvah)}

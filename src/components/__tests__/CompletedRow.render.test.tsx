@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 import { screen, userEvent } from '@testing-library/react-native';
 import { CompletedRow } from '../CompletedRow';
 import { MitzvahIcon } from '../MitzvahIcon';
+import { Reveal } from '../Reveal';
 import { renderWithTheme } from '@/testing/render';
 import { THEMES } from '@/theme/colors';
 import { radius } from '@/theme/tokens';
@@ -20,6 +21,11 @@ describe('CompletedRow', () => {
     renderWithTheme(<CompletedRow {...BASE} />);
     expect(screen.getByText('תפילין')).toBeOnTheScreen();
     expect(screen.getByText('07:42')).toBeOnTheScreen();
+  });
+
+  it('reveals with a 7-point rise over 300 ms and forwards playKey', () => {
+    renderWithTheme(<CompletedRow {...BASE} playKey={2} />);
+    expect(screen.UNSAFE_getByType(Reveal).props).toMatchObject({ shift: 7, duration: 300, playKey: 2 });
   });
 
   it('draws no undo button without onUndo', () => {

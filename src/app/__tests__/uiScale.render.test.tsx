@@ -139,6 +139,7 @@ function atScale(uiScale: number, run: (harness: Harness) => void) {
         inIsrael: true,
         nusach: 'ashkenaz',
         isOnboarded: true,
+        siddurCompassPrompt: false,
       });
       harness.useMitzvotStore.getState().reset();
       for (const key of Object.keys(mockParams)) delete mockParams[key];

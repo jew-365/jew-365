@@ -1,8 +1,10 @@
 const mockPush = jest.fn();
 const mockListeners: { event: string; listener: () => void }[] = [];
 let mockFocused = true;
+let mockTabIndex = 0;
 const mockNavigation = {
   isFocused: () => mockFocused,
+  getState: () => ({ index: mockTabIndex, routes: [{ key: 'this-tab' }, { key: 'other-tab' }] }),
   addListener: (event: string, listener: () => void) => {
     const entry = { event, listener };
     mockListeners.push(entry);
@@ -51,6 +53,16 @@ function emit(event: 'focus' | 'blur') {
   act(() => {
     mockListeners.filter((entry) => entry.event === event).forEach((entry) => entry.listener());
   });
+}
+
+function switchTabAway() {
+  mockTabIndex = 1;
+  emit('blur');
+}
+
+function switchTabBack() {
+  mockTabIndex = 0;
+  emit('focus');
 }
 
 describe('history stats and focus', () => {
@@ -121,12 +133,24 @@ describe('history stats and focus', () => {
     renderWithTheme(<HistoryScreen />);
     const before = await screen.findByTestId('history-calendar');
 
-    emit('blur');
-    emit('focus');
+    switchTabAway();
+    switchTabBack();
     expect(screen.getByTestId('history-calendar')).toBe(before);
     await act(async () => {
       await new Promise((r) => setTimeout(r, 300));
     });
     expect(screen.getByTestId('history-calendar')).not.toBe(before);
+  });
+
+  it('does not replay when a pushed stack screen is popped back', async () => {
+    renderWithTheme(<HistoryScreen />);
+    const before = await screen.findByTestId('history-calendar');
+
+    emit('blur');
+    emit('focus');
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 300));
+    });
+    expect(screen.getByTestId('history-calendar')).toBe(before);
   });
 });

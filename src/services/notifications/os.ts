@@ -224,6 +224,12 @@ export async function getPermissions(): Promise<boolean> {
   return status === 'granted';
 }
 
+export async function getPermissionState(): Promise<'granted' | 'missing' | 'blocked'> {
+  const { status, canAskAgain } = await Notifications.getPermissionsAsync();
+  if (status === 'granted') return 'granted';
+  return canAskAgain === false ? 'blocked' : 'missing';
+}
+
 export async function requestPermissions(): Promise<boolean> {
   const { status } = await Notifications.requestPermissionsAsync({
     ios: { allowAlert: true, allowBadge: true, allowSound: true },

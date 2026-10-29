@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { type RefObject } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedProps, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
+import { useInView, type InView } from '@/hooks/useInView';
 import { useCountUp, useEntrance } from '@/hooks/useMotion';
 import { useTheme } from '@/theme/ThemeProvider';
 import { scaled } from '@/theme/scale';
@@ -33,6 +34,8 @@ type BodyProps = {
   caption: React.ReactNode;
   label: string;
   emptyText?: string;
+  viewRef: RefObject<View | null>;
+  onLayout: (() => void) | undefined;
 };
 
 function RingBody({
@@ -50,6 +53,8 @@ function RingBody({
   caption,
   label,
   emptyText,
+  viewRef,
+  onLayout,
 }: BodyProps) {
   const { colors } = useTheme();
   const center = size / 2;
@@ -61,7 +66,7 @@ function RingBody({
   const mainValue = useCountUp(progress, main, initialMain);
   const secondValue = useCountUp(progress, second ?? 0, initialSecond);
   return (
-    <View accessible accessibilityLabel={label} style={{ width: size, height: size }}>
+    <View ref={viewRef} onLayout={onLayout} accessible accessibilityLabel={label} style={{ width: size, height: size }}>
       <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
         <Circle cx={center} cy={center} r={r} fill={colors.surface} fillOpacity={DISC_OPACITY} />
         <Circle cx={center} cy={center} r={r} fill="none" stroke={colors.surface2} strokeWidth={stroke} />
@@ -100,12 +105,14 @@ function StreakBody({
   animate,
   delay,
   playKey,
-}: Required<Pick<Common, 'size'>> & Common & { streak: number }) {
+  active,
+  view,
+}: Required<Pick<Common, 'size'>> & Common & { streak: number; active: boolean; view: InView }) {
   const { colors } = useTheme();
   const { t } = useI18n();
   const days = Math.max(0, Math.floor(streak));
   const one = days === 1;
-  const entrance = useEntrance(delay ?? 0, motion.streakRingMs, animate, playKey);
+  const entrance = useEntrance(delay ?? 0, motion.streakRingMs, animate === true && active, playKey);
   const fixed = useSharedValue(1);
   return (
     <RingBody
@@ -119,6 +126,8 @@ function StreakBody({
       suffix=""
       second={null}
       secondSuffix=""
+      viewRef={view.ref}
+      onLayout={view.onLayout}
       mainFont={{ size: Math.round(size * 0.29), line: Math.round(size * 0.33) }}
       caption={
         <Text style={[typography.heading, { color: colors.text }]}>
@@ -136,10 +145,13 @@ function PercentBody({
   animate,
   delay,
   playKey,
-}: Required<Pick<Common, 'size'>> & Common & { percent: { done: number; total: number } }) {
+  active,
+  view,
+}: Required<Pick<Common, 'size'>> &
+  Common & { percent: { done: number; total: number }; active: boolean; view: InView }) {
   const { t } = useI18n();
   const { done, total } = percent;
-  const entrance = useEntrance(delay ?? 0, motion.periodRingMs, animate, playKey);
+  const entrance = useEntrance(delay ?? 0, motion.periodRingMs, animate === true && active, playKey);
   const fixed = useSharedValue(1);
   const value = total <= 0 ? 0 : done >= total ? 100 : Math.min(99, Math.round((done / total) * 100));
   const mainFont = { size: Math.round(size * 0.26), line: Math.round(size * 0.3) };
@@ -161,6 +173,8 @@ function PercentBody({
         caption={null}
         label={t('history.ring.empty')}
         emptyText={t('history.percentNone')}
+        viewRef={view.ref}
+        onLayout={view.onLayout}
       />
     );
   }
@@ -179,16 +193,39 @@ function PercentBody({
       mainFont={mainFont}
       caption={null}
       label={t('history.ring.percentLabel', { percent: value, done, total })}
+      viewRef={view.ref}
+      onLayout={view.onLayout}
     />
   );
 }
 
 export function StreakRing(props: Props) {
   const { size = scaled(220), animate = false, delay, playKey } = props;
+  const view = useInView({ enabled: animate });
   if (props.percent) {
-    return <PercentBody percent={props.percent} size={size} animate={animate} delay={delay} playKey={playKey} />;
+    return (
+      <PercentBody
+        percent={props.percent}
+        size={size}
+        animate={animate}
+        delay={delay}
+        playKey={playKey}
+        active={view.inView}
+        view={view}
+      />
+    );
   }
-  return <StreakBody streak={props.streak} size={size} animate={animate} delay={delay} playKey={playKey} />;
+  return (
+    <StreakBody
+      streak={props.streak}
+      size={size}
+      animate={animate}
+      delay={delay}
+      playKey={playKey}
+      active={view.inView}
+      view={view}
+    />
+  );
 }
 
 const styles = StyleSheet.create({

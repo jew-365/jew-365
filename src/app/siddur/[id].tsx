@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   AppState,
   FlatList,
+  GestureResponderEvent,
   I18nManager,
   LayoutChangeEvent,
   Linking,
@@ -91,6 +92,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChokLicenseNotice } from '@/components/ChokLicenseNotice';
 import { ChokWeekControls } from '@/components/ChokWeekControls';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { ListRow } from '@/components/ListRow';
 import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { PickerCard } from '@/components/PickerCard';
@@ -153,6 +155,7 @@ import {
 } from '@/utils/chok';
 import { currentOrNextWindow, dayWindow, windowDueToday } from '@/utils/buildDayTimeline';
 import { afterPaint } from '@/utils/afterPaint';
+import { compassPrayerOf } from '@/utils/compass';
 import { calendarDay } from '@/utils/checkIn';
 import { appDay } from '@/utils/locationDay';
 import { calendarLocale } from '@/utils/weeklyReport';
@@ -163,6 +166,7 @@ const KEEP_AWAKE_TAG = 'siddur-reader';
 const RIGHT_EDGE = I18nManager.isRTL ? ('left' as const) : ('right' as const);
 const LEFT_EDGE = I18nManager.isRTL ? ('right' as const) : ('left' as const);
 const SECTION_VIEWABILITY = { viewAreaCoveragePercentThreshold: 2 };
+const COMPASS_PROMPT_MS = 5000;
 const JUMP_RETRY_MS = 50;
 const JUMP_TIMEOUT_MS = 5000;
 const LIST_PADDING = spacing.lg;
@@ -200,7 +204,10 @@ const CHOK_VARIANT_NAMES: Record<HaftarahVariant, string> = {
 // itself as animating and swallows the next tap. Moving the contentOffset prop scrolls without that.
 const SCROLLS_BY_PROP = Platform.OS === 'ios';
 const FOLD_DOWN_PX = 12;
-const FOLD_UP_PX = 4;
+const DOUBLE_TAP_GAP_MS = 300;
+const DOUBLE_TAP_PRESS_MS = 250;
+const DOUBLE_TAP_SLOP_PX = 10;
+const DOUBLE_TAP_DISTANCE_PX = 40;
 const FOLD_MS = 180;
 const COMPACT_FADE_PX = 24;
 const JUMP_FREEZE_MS = 600;
@@ -244,6 +251,7 @@ function useReaderFold() {
   const fullHeight = useSharedValue(0);
   const compactHeight = useSharedValue(0);
   const lastY = useSharedValue(0);
+  const lastContent = useSharedValue(0);
   const travel = useSharedValue(0);
   const frozenUntil = useSharedValue(0);
   const holdUntil = useSharedValue(0);
@@ -288,10 +296,12 @@ function useReaderFold() {
     [folded, travel, progress, mirror],
   );
   const track = useCallback(
-    (y: number, autoDriven: boolean, userDriven: boolean, end: number) => {
+    (y: number, autoDriven: boolean, contentHeight: number) => {
       'worklet';
       const delta = y - lastY.value;
       lastY.value = y;
+      const resized = contentHeight !== lastContent.value;
+      lastContent.value = contentHeight;
       if (fullHeight.value <= 0) {
         if (folded.value) setTarget(false);
         travel.value = 0;
@@ -309,21 +319,24 @@ function useReaderFold() {
           return;
         }
       }
-      if (Date.now() < frozenUntil.value || y < fullHeight.value) {
+      if (folded.value || Date.now() < frozenUntil.value || y < fullHeight.value || resized) {
         travel.value = 0;
         return;
       }
       if (delta === 0) return;
-      if (autoDriven && Date.now() < holdUntil.value) {
+      if (autoDriven && (delta < 0 || Date.now() < holdUntil.value)) {
         travel.value = 0;
         return;
       }
-      travel.value = delta * travel.value < 0 ? delta : travel.value + delta;
-      if (!folded.value && travel.value >= FOLD_DOWN_PX) setTarget(true);
-      else if (folded.value && travel.value <= -FOLD_UP_PX && userDriven && y < end - 1) setTarget(false);
+      travel.value += Math.abs(delta);
+      if (travel.value >= FOLD_DOWN_PX) setTarget(true);
     },
-    [lastY, frozenUntil, fullHeight, folded, pinned, travel, holdUntil, setTarget, settle],
+    [lastY, lastContent, frozenUntil, fullHeight, folded, pinned, travel, holdUntil, setTarget, settle],
   );
+  const beginGesture = useCallback(() => {
+    'worklet';
+    travel.value = 0;
+  }, [travel]);
   const open = useCallback(() => {
     folded.value = false;
     pinned.value = false;
@@ -333,6 +346,10 @@ function useReaderFold() {
     mirror(false);
   }, [folded, pinned, progress, lastY, travel, mirror]);
   const unfold = useCallback(() => setTarget(false), [setTarget]);
+  const toggle = useCallback(() => {
+    if (folded.value) setTarget(false);
+    else if (pinned.value && lastY.value >= fullHeight.value) setTarget(true);
+  }, [folded, pinned, lastY, fullHeight, setTarget]);
   // A jump keeps what covers the list: an open full block stays over the text where the jump lands.
   const freeze = useCallback(() => {
     frozenUntil.value = Date.now() + JUMP_FREEZE_MS;
@@ -341,6 +358,7 @@ function useReaderFold() {
   const setFull = useCallback(
     (height: number) => {
       const previous = sizes.current.full;
+      if (previous > 0 && Math.abs(height - previous) < 1) return 0;
       sizes.current.full = height;
       fullHeight.value = height;
       setSpace(height);
@@ -384,8 +402,10 @@ function useReaderFold() {
   );
   return {
     track,
+    beginGesture,
     open,
     unfold,
+    toggle,
     freeze,
     subscribe,
     getFolded,
@@ -402,6 +422,46 @@ function useReaderFold() {
     overlayStyle,
     fullStyle,
     compactStyle,
+  };
+}
+
+// Two quick taps on the text, near each other, with no scroll between them. Touch events only observe, so
+// the list keeps its scroll and every passage keeps its own tap.
+function useDoubleTap(onDoubleTap: () => void) {
+  const start = useRef<{ x: number; y: number; at: number } | null>(null);
+  const lastTap = useRef<{ x: number; y: number; at: number } | null>(null);
+  return {
+    onTouchStart: (event: GestureResponderEvent) => {
+      const { pageX, pageY, touches } = event.nativeEvent;
+      start.current = touches.length > 1 ? null : { x: pageX, y: pageY, at: Date.now() };
+    },
+    onTouchEnd: (event: GestureResponderEvent) => {
+      const began = start.current;
+      start.current = null;
+      if (!began) return;
+      const { pageX, pageY } = event.nativeEvent;
+      const now = Date.now();
+      const still = Math.hypot(pageX - began.x, pageY - began.y) <= DOUBLE_TAP_SLOP_PX;
+      if (!still || now - began.at > DOUBLE_TAP_PRESS_MS) {
+        lastTap.current = null;
+        return;
+      }
+      const previous = lastTap.current;
+      if (
+        previous &&
+        now - previous.at <= DOUBLE_TAP_GAP_MS &&
+        Math.hypot(pageX - previous.x, pageY - previous.y) <= DOUBLE_TAP_DISTANCE_PX
+      ) {
+        lastTap.current = null;
+        onDoubleTap();
+        return;
+      }
+      lastTap.current = { x: pageX, y: pageY, at: now };
+    },
+    onTouchCancel: () => {
+      start.current = null;
+      lastTap.current = null;
+    },
   };
 }
 
@@ -508,7 +568,7 @@ function useAutoScroll(
   onScrollReport: (offsetY: number) => void,
   fold: ReaderFold,
 ) {
-  const { track: trackFold, open: openFold } = fold;
+  const { track: trackFold, beginGesture, open: openFold } = fold;
   const speed = useSharedValue(pixelsPerSecond);
   const offset = useSharedValue(0);
   const reportedAt = useSharedValue(0);
@@ -586,7 +646,7 @@ function useAutoScroll(
         offset.value = event.contentOffset.y;
         end.value = Math.max(0, event.contentSize.height - event.layoutMeasurement.height);
         const userDriven = pressed.value || dragging.value || flinging.value || Date.now() < userUntil.value;
-        trackFold(event.contentOffset.y, !userDriven, userDriven, end.value);
+        trackFold(event.contentOffset.y, !userDriven, event.contentSize.height);
         const now = Date.now();
         if (now - reportedAt.value >= SCROLL_REPORT_MS) {
           reportedAt.value = now;
@@ -596,6 +656,7 @@ function useAutoScroll(
       onBeginDrag: () => {
         dragging.value = true;
         flinging.value = false;
+        beginGesture();
         runOnJS(onDragStart)();
       },
       onEndDrag: () => {
@@ -612,7 +673,7 @@ function useAutoScroll(
         holdMs.value = AUTO_SCROLL_RESUME_MS;
       },
     },
-    [onDragStart, onScrollReport, trackFold],
+    [onDragStart, onScrollReport, trackFold, beginGesture],
   );
   const updateEnd = () => {
     end.value = Math.max(0, sizes.current.content - sizes.current.viewport);
@@ -631,7 +692,7 @@ function useAutoScroll(
     openFold();
   }, [offset, position, sentPixel, propOffset, holdMs, openFold]);
   // react-native-web sends no drag or momentum events, so a touch or a wheel pauses it instead.
-  const webInput =
+  const webInput: Partial<Record<'onWheel' | 'onTouchStart' | 'onTouchEnd' | 'onTouchCancel', () => void>> =
     Platform.OS === 'web'
       ? {
           onWheel: () => {
@@ -652,6 +713,7 @@ function useAutoScroll(
     reset,
     animatedProps: SCROLLS_BY_PROP ? animatedProps : undefined,
     webInput,
+    gesturing: () => pressed.value || dragging.value || flinging.value,
     hold: (ms: number) => {
       holdMs.value = ms;
     },
@@ -678,6 +740,7 @@ export default function SiddurScreen() {
     section?: string;
     segment?: string;
     from?: string;
+    fromCompass?: string;
   }>();
   const chok = params.id === CHOK_TEXT_ID;
   const textOnly = !chok && !params.date && standaloneTextId(params.id) !== null;
@@ -726,6 +789,11 @@ export default function SiddurScreen() {
       : linkedMitzvah && findMitzvah(linkedMitzvah)?.nuschaotSupported.includes(nusach)
         ? linkedMitzvah
         : null;
+  const compassPrayer =
+    Platform.OS === 'web' ? null : compassPrayerOf(mitzvah && !mitzvah.isCustom ? mitzvah.id : undefined);
+  const [compassPromptOpen, setCompassPromptOpen] = useState(
+    () => compassPrayer !== null && params.fromCompass !== '1' && useUserStore.getState().siddurCompassPrompt,
+  );
   const requestedDate = useMemo(() => parseDateParam(params.date), [params.date]);
   const { settings } = useDayModel();
   const place = useMemo(() => siddurPlace(location, inIsrael), [location, inIsrael]);
@@ -861,7 +929,10 @@ export default function SiddurScreen() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [renderUpTo, setRenderUpTo] = useState<number | null>(null);
   const fold = useReaderFold();
+  const doubleTap = useDoubleTap(fold.toggle);
   const topSectionRef = useRef<(fallback: number) => number>((fallback) => fallback);
+  const { subscribe: subscribeFold } = fold;
+  useEffect(() => subscribeFold(() => setShownSection((previous) => topSectionRef.current(previous))), [subscribeFold]);
   const [bookmarksOpen, setBookmarksOpen] = useState(false);
   const [resumeOffer, setResumeOffer] = useState<SiddurLastPosition | null>(null);
   const [pendingPlace, setPendingPlace] = useState<SiddurPlace | null>(null);
@@ -1085,6 +1156,15 @@ export default function SiddurScreen() {
   );
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
+  const openCompass = () => {
+    if (!compassPrayer) return;
+    setCompassPromptOpen(false);
+    router.push({
+      pathname: '/compass',
+      params: { prayer: compassPrayer, ...(params.date ? { date: params.date } : {}) },
+    });
+  };
+
   const openMitzvahSettings = () => {
     if (!settingsTarget) return;
     if (params.from === settingsTarget && router.canGoBack()) router.back();
@@ -1443,13 +1523,15 @@ export default function SiddurScreen() {
       !quiet &&
       !bookmarksOpen &&
       saving === null &&
-      resumeOffer === null,
+      resumeOffer === null &&
+      !compassPromptOpen,
     autoScrollPixelsPerSecond(SIDDUR_SCROLL_SPEEDS[scrollSpeedLevel(scrollSpeed) - 1], textSize),
     onUserScroll,
     onScrollReport,
     fold,
   );
   const pendingShift = useRef(0);
+  const { gesturing } = autoScroll;
   const onFullLayout = (event: LayoutChangeEvent) => {
     const previous = fold.fullHeight();
     const delta = fold.setFull(event.nativeEvent.layout.height);
@@ -1459,9 +1541,10 @@ export default function SiddurScreen() {
     if (pendingShift.current === 0) return;
     const offset = autoScroll.offset.value + pendingShift.current;
     pendingShift.current = 0;
+    if (gesturing()) return;
     fold.freeze();
     listRef.current?.scrollToOffset({ offset, animated: false });
-  }, [fold, autoScroll.offset, listRef]);
+  }, [fold, autoScroll.offset, gesturing, listRef]);
   const placeholder = body !== null && loadStatus === 'loading' && available;
   const bookmarkable = bookmarkTextId !== null && (!body || placeholder);
   const placeInView = () =>
@@ -1623,6 +1706,21 @@ export default function SiddurScreen() {
               onBack={goBack}
               onCompactPress={fold.unfold}
               compactLabel={t('siddur.compact.expand')}
+              actions={
+                <>
+                  <PlayToggle
+                    on={autoScrollOn}
+                    onPress={toggleAutoScroll}
+                    accessibilityLabel={t('siddur.autoScroll')}
+                  />
+                  <HeaderPill
+                    icon="chevronDown"
+                    label={t('siddur.compact.tools')}
+                    accessibilityLabel={t('siddur.compact.expand')}
+                    onPress={fold.unfold}
+                  />
+                </>
+              }
             />
           }
         >
@@ -1631,7 +1729,7 @@ export default function SiddurScreen() {
             subtitle={subtitle}
             onBack={goBack}
             actions={
-              settingsTarget || bookmarkable ? (
+              settingsTarget || bookmarkable || compassPrayer ? (
                 <>
                   {settingsTarget ? (
                     <HeaderPill
@@ -1639,6 +1737,9 @@ export default function SiddurScreen() {
                       accessibilityLabel={t('siddur.mitzvahSettings')}
                       onPress={openMitzvahSettings}
                     />
+                  ) : null}
+                  {compassPrayer ? (
+                    <HeaderPill icon="compass" accessibilityLabel={t('siddur.openCompass')} onPress={openCompass} />
                   ) : null}
                   {bookmarkable ? (
                     <>
@@ -1815,7 +1916,19 @@ export default function SiddurScreen() {
             }}
             onScroll={autoScroll.scrollHandler}
             animatedProps={autoScroll.animatedProps}
-            {...autoScroll.webInput}
+            {...(autoScroll.webInput.onWheel ? { onWheel: autoScroll.webInput.onWheel } : {})}
+            onTouchStart={(event) => {
+              autoScroll.webInput.onTouchStart?.();
+              doubleTap.onTouchStart(event);
+            }}
+            onTouchEnd={(event) => {
+              autoScroll.webInput.onTouchEnd?.();
+              doubleTap.onTouchEnd(event);
+            }}
+            onTouchCancel={() => {
+              autoScroll.webInput.onTouchCancel?.();
+              doubleTap.onTouchCancel();
+            }}
             scrollEventThrottle={16}
             onLayout={autoScroll.onLayout}
             onContentSizeChange={autoScroll.onContentSizeChange}
@@ -2008,6 +2121,17 @@ export default function SiddurScreen() {
         <SheetAction label={t('chok.thuNight.thu')} onPress={() => chooseThuNightDay('thu')} />
         <SheetAction label={t('chok.thuNight.fri')} onPress={() => chooseThuNightDay('fri')} />
       </BottomSheet>
+
+      <ConfirmDialog
+        visible={compassPromptOpen}
+        title={t('siddur.compassPrompt.title')}
+        body={t('siddur.compassPrompt.body')}
+        confirmLabel={t('common.yes')}
+        cancelLabel={t('common.no')}
+        countdownMs={screenReader ? undefined : COMPASS_PROMPT_MS}
+        onConfirm={openCompass}
+        onCancel={() => setCompassPromptOpen(false)}
+      />
 
       {toast ? (
         <View pointerEvents="none" accessibilityLiveRegion="polite" style={styles.toast}>

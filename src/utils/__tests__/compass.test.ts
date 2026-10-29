@@ -1,4 +1,13 @@
-import { KOTEL, arrowAngle, bearingTo, distanceKm, isFacing, nextFacing, normalizeDegrees } from '../compass';
+import {
+  KOTEL,
+  arrowAngle,
+  bearingTo,
+  compassPrayerOf,
+  distanceKm,
+  isFacing,
+  nextFacing,
+  normalizeDegrees,
+} from '../compass';
 
 const TEL_AVIV = { lat: 32.0853, lng: 34.7818 };
 const NEW_YORK = { lat: 40.7128, lng: -74.006 };
@@ -90,5 +99,15 @@ describe('nextFacing', () => {
     expect(nextFacing(true, 351)).toBe(true);
     expect(nextFacing(true, 10.1)).toBe(false);
     expect(nextFacing(false, 9)).toBe(false);
+  });
+});
+
+describe('compassPrayerOf', () => {
+  it.each(['shacharit', 'mincha', 'maariv'])('accepts %s', (id) => {
+    expect(compassPrayerOf(id)).toBe(id);
+  });
+
+  it.each(['tefillin', 'musaf', '', undefined])('rejects %s', (id) => {
+    expect(compassPrayerOf(id)).toBeNull();
   });
 });

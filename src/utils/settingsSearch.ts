@@ -32,7 +32,7 @@ import { catalogListsText, chapterVisible, dayFeatures } from './siddur';
 
 export type SettingsSectionKey = 'profile' | 'prayer' | 'device' | 'backup' | 'contact';
 
-export type SettingsSearchCondition = 'taharah' | 'backup' | 'battery';
+export type SettingsSearchCondition = 'taharah' | 'backup';
 
 type SearchItemBase = {
   id: string;
@@ -351,6 +351,25 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
     ],
   },
   {
+    id: 'compassPrompt',
+    icon: 'compass',
+    titleKey: 'settings.compassPrompt',
+    section: 'prayer',
+    terms: [
+      'הצעת מצפן',
+      'מצפן',
+      'מצפן תפילה',
+      'כותל',
+      'כיוון התפילה',
+      'הודעה בכניסה',
+      'חלון בכניסה לסידור',
+      'compass prompt',
+      'compass',
+      'prayer compass',
+      'kotel',
+    ],
+  },
+  {
     id: 'location',
     icon: 'sun',
     titleKey: 'settings.zmanim',
@@ -385,20 +404,44 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
     terms: ['דוח', 'דו"ח', 'סיכום', 'שבועי', 'מוצאי שבת', 'report', 'weekly', 'summary'],
   },
   {
-    id: 'permission',
+    id: 'permissions',
     icon: 'bell',
-    titleKey: 'settings.notificationsOsStatus',
-    labelKeys: ['settings.openOsSettings'],
+    titleKey: 'permissions.title',
+    labelKeys: [
+      'permissions.battery.title',
+      'permissions.samsungSleep.title',
+      'permissions.unusedApp.title',
+      'permissions.backgroundRefresh.title',
+    ],
     section: 'device',
-    terms: ['הרשאה', 'הרשאות', 'חסום', 'חסומות', 'מערכת', 'permission', 'blocked', 'system'],
-  },
-  {
-    id: 'battery',
-    icon: 'bell',
-    titleKey: 'settings.batteryAction',
-    section: 'device',
-    when: 'battery',
-    terms: ['סוללה', 'חיסכון', 'אופטימיזציה', 'איחור', 'battery', 'optimization', 'late'],
+    terms: [
+      'הרשאה',
+      'הרשאות',
+      'חסום',
+      'חסומות',
+      'מערכת',
+      'סוללה',
+      'חיסכון',
+      'אופטימיזציה',
+      'איחור',
+      'ללא הגבלה',
+      'שינה',
+      'רקע',
+      'השהיה',
+      'סמסונג',
+      'permission',
+      'permissions',
+      'blocked',
+      'system',
+      'battery',
+      'optimization',
+      'late',
+      'unrestricted',
+      'sleep',
+      'background',
+      'pause',
+      'samsung',
+    ],
   },
   {
     id: 'taharahDevice',

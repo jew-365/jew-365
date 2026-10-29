@@ -1,15 +1,25 @@
 import { Platform, StyleSheet } from 'react-native';
 import { screen } from '@testing-library/react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 import { ProgressBar } from '../ProgressBar';
 import { renderWithTheme } from '@/testing/render';
 import { THEMES } from '@/theme/colors';
 import { useUserStore } from '@/stores/useUserStore';
+import { useEntrance } from '@/hooks/useMotion';
+import { ViewportHarness, mockWindowRects, scrollViewport } from '@/testing/viewport';
 
 jest.mock('react-native-reanimated', () => ({
   ...jest.requireActual('react-native-reanimated'),
   __esModule: true,
   useReducedMotion: jest.fn(() => true),
 }));
+
+jest.mock('@/hooks/useMotion', () => {
+  const actual = jest.requireActual('@/hooks/useMotion');
+  return { ...actual, useEntrance: jest.fn(actual.useEntrance), usePop: jest.fn(actual.usePop) };
+});
+
+const gates = () => (useEntrance as jest.Mock).mock.calls.slice(-2).map((call) => call[2]);
 
 const fill = () => StyleSheet.flatten(screen.getByTestId('bar').props.style);
 
@@ -62,6 +72,67 @@ describe('ProgressBar', () => {
     it('grows from the left in English', () => {
       renderWithTheme(<ProgressBar percent={50} testID="bar" />);
       expect(fill().transformOrigin).toBe('left');
+    });
+  });
+
+  describe('starts when seen', () => {
+    let rects: ReturnType<typeof mockWindowRects>;
+    beforeEach(() => {
+      jest.useFakeTimers();
+      (useReducedMotion as jest.Mock).mockReturnValue(false);
+      (useEntrance as jest.Mock).mockClear();
+      rects = mockWindowRects(800);
+    });
+    afterEach(() => {
+      rects.restore();
+      jest.useRealTimers();
+      (useReducedMotion as jest.Mock).mockReturnValue(true);
+    });
+
+    it('holds the fill and the tick until the bar is on screen', () => {
+      rects.set({ y: 5000, height: 6 });
+      renderWithTheme(
+        <ViewportHarness>
+          <ProgressBar percent={50} tick={30} testID="bar" />
+        </ViewportHarness>,
+      );
+      expect(gates()).toEqual([false, false]);
+      rects.set({ y: 100, height: 6 });
+      scrollViewport();
+      expect(gates()).toEqual([true, true]);
+    });
+
+    it('grows again each time it comes back on screen', () => {
+      rects.set({ y: 100, height: 6 });
+      renderWithTheme(
+        <ViewportHarness>
+          <ProgressBar percent={50} tick={30} testID="bar" />
+        </ViewportHarness>,
+      );
+      expect(gates()).toEqual([true, true]);
+      rects.set({ y: 5000, height: 6 });
+      scrollViewport();
+      expect(gates()).toEqual([false, false]);
+      rects.set({ y: 100, height: 6 });
+      scrollViewport();
+      expect(gates()).toEqual([true, true]);
+    });
+
+    it('starts at once outside a viewport provider', () => {
+      renderWithTheme(<ProgressBar percent={50} tick={30} testID="bar" />);
+      expect(gates()).toEqual([true, true]);
+      expect(rects.measure).toHaveBeenCalledTimes(0);
+    });
+
+    it('stays still while the caller holds active false', () => {
+      rects.set({ y: 100, height: 6 });
+      renderWithTheme(
+        <ViewportHarness>
+          <ProgressBar percent={50} tick={30} active={false} testID="bar" />
+        </ViewportHarness>,
+      );
+      expect(gates()).toEqual([false, false]);
+      expect(rects.measure).toHaveBeenCalledTimes(0);
     });
   });
 });

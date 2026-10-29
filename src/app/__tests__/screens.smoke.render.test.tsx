@@ -190,6 +190,7 @@ import OnboardingWelcomeScreen from '../onboarding/index';
 import OnboardingLocationScreen from '../onboarding/location';
 import OnboardingMitzvotScreen from '../onboarding/mitzvot';
 import OnboardingNusachScreen from '../onboarding/nusach';
+import OnboardingPermissionsScreen from '../onboarding/permissions';
 import OnboardingProfileScreen from '../onboarding/profile';
 import OnboardingReadyScreen from '../onboarding/ready';
 import TaharahLayout from '../taharah/_layout';
@@ -731,6 +732,13 @@ const CASES: SmokeCase[] = [
     Screen: OnboardingNusachScreen,
     fresh: true,
     check: text('מה הנוסח שלך?', 'Which nusach are you?'),
+  },
+  {
+    file: 'onboarding/permissions',
+    label: 'permissions',
+    Screen: OnboardingPermissionsScreen,
+    fresh: true,
+    check: text('מה האפליקציה צריכה', 'What the app needs'),
   },
   {
     file: 'onboarding/profile',

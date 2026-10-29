@@ -11,10 +11,11 @@ import { MitzvahCard } from '@/components/MitzvahCard';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
 import { useDayModel } from '@/hooks/useDayModel';
+import { useViewport, ViewportContext } from '@/hooks/useInView';
 import { StorageService } from '@/services/StorageService';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useTheme } from '@/theme/ThemeProvider';
-import { spacing } from '@/theme/tokens';
+import { motion, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { HolyBlock } from '@/types/zmanim';
 import { CHECK_IN_PROMPTED_KEY, checkInFor, checkInLastDay, checkInPhraseKey, latestCheckIn } from '@/utils/checkIn';
@@ -28,6 +29,7 @@ export default function CheckInRoute() {
   const { t } = useI18n();
   const { language, nameFor, checkInInput } = useDayModel();
   const router = useRouter();
+  const viewport = useViewport();
   const completions = useCompletionsStore((s) => s.completions);
   const skipped = useCompletionsStore((s) => s.skipped);
   const markDone = useCompletionsStore((s) => s.markDone);
@@ -95,45 +97,52 @@ export default function CheckInRoute() {
       <ScreenHeader title={title} subtitle={checkIn ? t('checkin.subtitle', { deadline }) : undefined} onBack={close} />
       {checkIn ? (
         <>
-          <ScrollView contentContainerStyle={styles.content}>
-            {checkIn.days.map((day) => (
-              <View key={day.key} style={styles.day}>
-                <SectionLabel text={formatDayLine(day.date, language)} />
-                <View style={styles.list}>
-                  {day.items
-                    .filter((item) => !item.done)
-                    .map((item) => (
-                      <MitzvahCard
-                        key={item.mitzvah.id}
-                        icon={iconFor(item.mitzvah.icon)}
-                        name={nameFor(item.mitzvah)}
-                        timeLeft=""
-                        pct={0}
-                        hideProgress
-                        statusText={t('checkin.pending')}
-                        onPress={() => mark(item.mitzvah.id, day.date)}
-                        onComplete={() => mark(item.mitzvah.id, day.date)}
-                      />
-                    ))}
-                </View>
-                {day.items.some((item) => item.done) ? (
-                  <Card divided style={styles.doneGap}>
+          <ViewportContext.Provider value={viewport.bus}>
+            <ScrollView
+              contentContainerStyle={styles.content}
+              onScroll={viewport.notify}
+              onContentSizeChange={viewport.notify}
+              scrollEventThrottle={motion.inViewThrottleMs}
+            >
+              {checkIn.days.map((day) => (
+                <View key={day.key} style={styles.day}>
+                  <SectionLabel text={formatDayLine(day.date, language)} />
+                  <View style={styles.list}>
                     {day.items
-                      .filter((item) => item.done)
+                      .filter((item) => !item.done)
                       .map((item) => (
-                        <CompletedRow
+                        <MitzvahCard
                           key={item.mitzvah.id}
+                          icon={iconFor(item.mitzvah.icon)}
                           name={nameFor(item.mitzvah)}
-                          time={clockOf(item.window.start)}
-                          onUndo={() => unmark(item.mitzvah.id, day.date)}
-                          undoLabel={t('home.undo')}
+                          timeLeft=""
+                          pct={0}
+                          hideProgress
+                          statusText={t('checkin.pending')}
+                          onPress={() => mark(item.mitzvah.id, day.date)}
+                          onComplete={() => mark(item.mitzvah.id, day.date)}
                         />
                       ))}
-                  </Card>
-                ) : null}
-              </View>
-            ))}
-          </ScrollView>
+                  </View>
+                  {day.items.some((item) => item.done) ? (
+                    <Card divided style={styles.doneGap}>
+                      {day.items
+                        .filter((item) => item.done)
+                        .map((item) => (
+                          <CompletedRow
+                            key={item.mitzvah.id}
+                            name={nameFor(item.mitzvah)}
+                            time={clockOf(item.window.start)}
+                            onUndo={() => unmark(item.mitzvah.id, day.date)}
+                            undoLabel={t('home.undo')}
+                          />
+                        ))}
+                    </Card>
+                  ) : null}
+                </View>
+              ))}
+            </ScrollView>
+          </ViewportContext.Provider>
           <View style={styles.footer}>
             <Button label={t('checkin.finish')} onPress={finish} />
           </View>

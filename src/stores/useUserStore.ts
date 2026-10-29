@@ -110,6 +110,7 @@ type UserState = {
   isOnboarded: boolean;
   siddurFontSize: number;
   siddurAutoScroll: boolean;
+  siddurCompassPrompt: boolean;
   siddurScrollSpeed: number;
   siddurVoice: SiddurVoice | null;
   prayerMode: PrayerMode;
@@ -140,6 +141,7 @@ type UserState = {
   setOnboarded: (v: boolean) => void;
   setSiddurFontSize: (size: number) => void;
   setSiddurAutoScroll: (v: boolean) => void;
+  setSiddurCompassPrompt: (v: boolean) => void;
   setSiddurScrollSpeed: (level: number) => void;
   setSiddurVoice: (voice: SiddurVoice) => void;
   setPrayerMode: (mode: PrayerMode) => void;
@@ -205,6 +207,7 @@ export const useUserStore = create<UserState>()(
       isOnboarded: false,
       siddurFontSize: DEFAULT_SIDDUR_FONT_SIZE,
       siddurAutoScroll: false,
+      siddurCompassPrompt: true,
       siddurScrollSpeed: DEFAULT_SIDDUR_SCROLL_SPEED,
       siddurVoice: null,
       prayerMode: 'minyan',
@@ -237,6 +240,7 @@ export const useUserStore = create<UserState>()(
       setOnboarded: (v) => set({ isOnboarded: v }),
       setSiddurFontSize: (size) => set({ siddurFontSize: size }),
       setSiddurAutoScroll: (v) => set({ siddurAutoScroll: v }),
+      setSiddurCompassPrompt: (v) => set({ siddurCompassPrompt: v }),
       setSiddurScrollSpeed: (level) => set({ siddurScrollSpeed: scrollSpeedLevel(level) }),
       setSiddurVoice: (voice) => set({ siddurVoice: voice }),
       setPrayerMode: (mode) => set({ prayerMode: mode }),
@@ -280,6 +284,7 @@ export const useUserStore = create<UserState>()(
           isOnboarded: false,
           siddurFontSize: DEFAULT_SIDDUR_FONT_SIZE,
           siddurAutoScroll: false,
+          siddurCompassPrompt: true,
           siddurScrollSpeed: DEFAULT_SIDDUR_SCROLL_SPEED,
           siddurVoice: null,
           prayerMode: 'minyan',

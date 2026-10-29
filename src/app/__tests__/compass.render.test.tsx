@@ -1,6 +1,9 @@
 type MockHeading = { trueHeading: number; magHeading: number; accuracy: number };
 
 const mockBack = jest.fn();
+const mockReplace = jest.fn();
+const mockParams: Record<string, string | undefined> = {};
+let mockCanGoBack = true;
 const mockRemove = jest.fn();
 let mockHeadingCallback: ((heading: MockHeading) => void) | null = null;
 const mockWatch = jest.fn(async (callback: (heading: MockHeading) => void) => {
@@ -14,7 +17,8 @@ const mockLastKnown = jest.fn();
 
 jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: mockBack, canGoBack: () => true }),
+  useRouter: () => ({ push: jest.fn(), replace: mockReplace, back: mockBack, canGoBack: () => mockCanGoBack }),
+  useLocalSearchParams: () => mockParams,
   useFocusEffect: (effect: () => void) => require('react').useEffect(effect, [effect]),
 }));
 jest.mock('expo-location', () => ({
@@ -75,6 +79,9 @@ describe('Compass screen', () => {
     mockWatch.mockClear();
     mockRequest.mockReset();
     mockBack.mockClear();
+    mockReplace.mockClear();
+    mockCanGoBack = true;
+    for (const key of Object.keys(mockParams)) delete mockParams[key];
     mockPermission.mockResolvedValue({ granted: true, canAskAgain: true });
     mockRequest.mockResolvedValue({ granted: false, canAskAgain: false });
     mockPosition.mockReset();
@@ -337,5 +344,91 @@ describe('Compass screen', () => {
     expect(screen.getByText('Prayer compass')).toBeOnTheScreen();
     expect(screen.getByText(`Based on ${NEW_YORK.nameEn}`)).toBeOnTheScreen();
     expect(screen.getByText('54°')).toBeOnTheScreen();
+  });
+});
+
+describe('Compass continue button', () => {
+  const CONTINUE = 'המשך לתפילה';
+
+  beforeEach(() => {
+    useUserStore.getState().reset();
+    useUserStore.setState({ location: NEW_YORK, inIsrael: false });
+    mockHeadingCallback = null;
+    mockBack.mockClear();
+    mockReplace.mockClear();
+    mockCanGoBack = true;
+    for (const key of Object.keys(mockParams)) delete mockParams[key];
+    mockPermission.mockResolvedValue({ granted: true, canAskAgain: true });
+    mockPosition.mockReset();
+    mockPosition.mockRejectedValue(new Error('no fix'));
+    mockLastKnown.mockReset();
+    mockLastKnown.mockResolvedValue(null);
+  });
+
+  const face = () => heading({ trueHeading: bearingTo(NEW_YORK), magHeading: 0, accuracy: 3 });
+
+  it('shows no continue button without a prayer, even when facing', async () => {
+    await renderScreen();
+    await face();
+    expect(screen.queryByRole('button', { name: CONTINUE })).toBeNull();
+  });
+
+  it('shows the continue button from the first facing moment and keeps it after turning away', async () => {
+    mockParams.prayer = 'shacharit';
+    await renderScreen();
+    await heading({ trueHeading: bearingTo(NEW_YORK) - 34, magHeading: 0, accuracy: 3 });
+    expect(screen.queryByRole('button', { name: CONTINUE })).toBeNull();
+    await face();
+    expect(screen.getByRole('button', { name: CONTINUE })).toBeOnTheScreen();
+    await heading({ trueHeading: bearingTo(NEW_YORK) + 40, magHeading: 0, accuracy: 3 });
+    expect(screen.getByRole('button', { name: CONTINUE })).toBeOnTheScreen();
+  });
+
+  it('goes back to the reader beneath', async () => {
+    mockParams.prayer = 'shacharit';
+    await renderScreen();
+    await face();
+    fireEvent.press(screen.getByRole('button', { name: CONTINUE }));
+    expect(mockBack).toHaveBeenCalledTimes(1);
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it('opens the prayer when nothing is beneath', async () => {
+    mockCanGoBack = false;
+    Object.assign(mockParams, { prayer: 'mincha', date: '2026-10-28' });
+    await renderScreen();
+    await face();
+    fireEvent.press(screen.getByRole('button', { name: CONTINUE }));
+    expect(mockReplace).toHaveBeenCalledWith({
+      pathname: '/siddur/[id]',
+      params: { id: 'mincha', date: '2026-10-28', fromCompass: '1' },
+    });
+  });
+
+  it('ignores a text that is not a prayer', async () => {
+    mockParams.prayer = 'tefillin';
+    await renderScreen();
+    await face();
+    expect(screen.queryByRole('button', { name: CONTINUE })).toBeNull();
+  });
+
+  it('drops a malformed date', async () => {
+    mockCanGoBack = false;
+    Object.assign(mockParams, { prayer: 'maariv', date: 'tomorrow' });
+    await renderScreen();
+    await face();
+    fireEvent.press(screen.getByRole('button', { name: CONTINUE }));
+    expect(mockReplace).toHaveBeenCalledWith({
+      pathname: '/siddur/[id]',
+      params: { id: 'maariv', fromCompass: '1' },
+    });
+  });
+
+  it('words the button in English', async () => {
+    useUserStore.setState({ language: 'en' });
+    mockParams.prayer = 'shacharit';
+    await renderScreen();
+    await face();
+    expect(screen.getByRole('button', { name: 'Continue to the prayer' })).toBeOnTheScreen();
   });
 });

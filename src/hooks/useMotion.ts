@@ -6,6 +6,7 @@ import {
   useReducedMotion,
   useSharedValue,
   withDelay,
+  withSpring,
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
@@ -60,4 +61,23 @@ export function usePressScale() {
     scale.value = withTiming(1, { duration: reduce ? 0 : motion.pressOutMs, easing: EASE_OUT });
   }, [reduce, scale]);
   return { style, onPressIn, onPressOut };
+}
+
+export function usePop(delay: number, from: number, active: boolean, playKey: unknown = 0) {
+  const reduce = useReduceMotion();
+  const scale = useSharedValue(reduce ? 1 : from);
+  const opacity = useSharedValue(reduce ? 1 : 0);
+  useEffect(() => {
+    if (reduce) {
+      scale.value = 1;
+      opacity.value = 1;
+      return;
+    }
+    scale.value = from;
+    opacity.value = 0;
+    if (!active) return;
+    scale.value = withDelay(delay, withSpring(1, motion.badgeSpring));
+    opacity.value = withDelay(delay, withTiming(1, { duration: motion.badgeFadeMs, easing: EASE_OUT }));
+  }, [delay, from, active, reduce, playKey, scale, opacity]);
+  return useAnimatedStyle(() => ({ opacity: opacity.value, transform: [{ scale: scale.value }] }));
 }

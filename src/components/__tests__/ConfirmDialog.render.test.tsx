@@ -1,5 +1,5 @@
 import { Modal } from 'react-native';
-import { fireEvent, screen } from '@testing-library/react-native';
+import { act, fireEvent, screen } from '@testing-library/react-native';
 import { ConfirmDialog } from '../ConfirmDialog';
 import { QuietBlockContext } from '../ShabbatScreen';
 import { findBackdrop, renderWithTheme } from '@/testing/render';
@@ -140,5 +140,101 @@ describe('ConfirmDialog', () => {
     );
     expect(screen.queryByText('Reset?')).toBeNull();
     expect(screen.queryByRole('button')).toBeNull();
+  });
+});
+
+describe('countdown', () => {
+  beforeEach(() => {
+    useUserStore.getState().reset();
+    jest.useFakeTimers();
+  });
+  afterEach(() => jest.useRealTimers());
+
+  it('draws no bar and never closes itself without a countdown', () => {
+    const { onCancel } = setup();
+    expect(screen.queryByTestId('confirm-dialog-countdown', { includeHiddenElements: true })).toBeNull();
+    act(() => {
+      jest.advanceTimersByTime(10000);
+    });
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it('draws the bar and calls onCancel once when the countdown runs out', () => {
+    const { onCancel, onConfirm } = setup({ countdownMs: 3000 });
+    expect(screen.getByTestId('confirm-dialog-countdown', { includeHiddenElements: true })).toBeOnTheScreen();
+    act(() => {
+      jest.advanceTimersByTime(2999);
+    });
+    expect(onCancel).toHaveBeenCalledTimes(0);
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(onConfirm).not.toHaveBeenCalled();
+  });
+
+  it('stops when hidden', () => {
+    const onConfirm = jest.fn();
+    const onCancel = jest.fn();
+    const element = (visible: boolean) => (
+      <ConfirmDialog
+        visible={visible}
+        title="Reset?"
+        confirmLabel="Reset"
+        countdownMs={3000}
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />
+    );
+    const view = renderWithTheme(element(true));
+    view.rerender(element(false));
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it('stops when unmounted', () => {
+    const onCancel = jest.fn();
+    const view = renderWithTheme(
+      <ConfirmDialog
+        visible
+        title="Reset?"
+        confirmLabel="Reset"
+        countdownMs={3000}
+        onConfirm={jest.fn()}
+        onCancel={onCancel}
+      />,
+    );
+    view.unmount();
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it('keeps one countdown when the caller passes a new onCancel', () => {
+    const first = jest.fn();
+    const second = jest.fn();
+    const element = (onCancel: () => void) => (
+      <ConfirmDialog
+        visible
+        title="Reset?"
+        confirmLabel="Reset"
+        countdownMs={3000}
+        onConfirm={jest.fn()}
+        onCancel={onCancel}
+      />
+    );
+    const view = renderWithTheme(element(first));
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+    view.rerender(element(second));
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(second).toHaveBeenCalledTimes(1);
+    expect(first).not.toHaveBeenCalled();
   });
 });

@@ -28,7 +28,7 @@ const index = buildSettingsSearchIndex((key) => [
   translate(key, undefined, 'en', null),
 ]);
 const JERUSALEM = CITIES[0];
-const ALL: SettingsSearchContext = { taharah: true, backup: true, battery: true };
+const ALL: SettingsSearchContext = { taharah: true, backup: true };
 const ids = (query: string, context = ALL) => searchSettings(query, index, context).map((item) => item.id);
 const top = (query: string, context = ALL) => ids(query, context)[0];
 
@@ -69,6 +69,8 @@ describe('typedInOtherLayout', () => {
 });
 
 const SETTING_QUERIES: [string, string][] = [
+  ['הצעת מצפן', 'compassPrompt'],
+  ['compass prompt', 'compassPrompt'],
   ['התראות', 'notifications'],
   ['נוסח', 'nusach'],
   ['ספרדי', 'nusach'],
@@ -95,7 +97,9 @@ const SETTING_QUERIES: [string, string][] = [
   ['מחיקת הנתונים שלך', 'reset'],
   ['Delete your data', 'reset'],
   ['גרסה', 'version'],
-  ['סוללה', 'battery'],
+  ['סוללה', 'permissions'],
+  ['הרשאות', 'permissions'],
+  ['battery', 'permissions'],
   ['דוח שבועי', 'weeklyReport'],
   ['שחזור', 'backupImport'],
   ['ייצוא', 'backupExport'],
@@ -168,11 +172,10 @@ describe('searchSettings', () => {
   });
 
   it('hides what this user or device does not have', () => {
-    const plain: SettingsSearchContext = { taharah: false, backup: false, battery: false };
+    const plain: SettingsSearchContext = { taharah: false, backup: false };
     expect(ids('טהרה', plain)).not.toEqual(expect.arrayContaining(['taharah']));
     expect(ids('טהרה', plain)).not.toEqual(expect.arrayContaining(['taharahDevice']));
     expect(ids('גיבוי', plain)).not.toEqual(expect.arrayContaining(['backupExport']));
-    expect(ids('סוללה', plain)).not.toEqual(expect.arrayContaining(['battery']));
     expect(ids('טהרה')).toEqual(expect.arrayContaining(['taharah', 'taharahDevice']));
   });
 
@@ -201,14 +204,14 @@ describe('searchSettings', () => {
   });
 
   it('finds the reset on web, where the backup file items are hidden', () => {
-    const web: SettingsSearchContext = { taharah: false, backup: false, battery: false };
+    const web: SettingsSearchContext = { taharah: false, backup: false };
     expect(top('גיבוי', web)).toBe('reset');
     expect(top('איפוס', web)).toBe('reset');
     expect(top('backup', web)).toBe('reset');
   });
 
   it('finds the reset by the section title in both languages on web', () => {
-    const web: SettingsSearchContext = { taharah: false, backup: false, battery: false };
+    const web: SettingsSearchContext = { taharah: false, backup: false };
     expect(top(translate('settings.backup', undefined, 'he', null), web)).toBe('reset');
     expect(top(translate('settings.backup', undefined, 'en', null), web)).toBe('reset');
   });

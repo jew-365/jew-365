@@ -96,6 +96,7 @@ import {
   shouldSuppressForCompletion,
   initNotificationHandlers,
   syncNotificationPermissionStatus,
+  notificationPermissionState,
   refreshSchedulingOnForeground,
   LAST_REBUILD_KEY,
   SCHEDULE_FORMAT_KEY,
@@ -416,6 +417,19 @@ describe('NotificationScheduler', () => {
 
     useSelichotStore.getState().reset();
     rebuild.mockRestore();
+  });
+
+  it('reports the permission state from status and canAskAgain', async () => {
+    const Notifications = jest.requireMock('expo-notifications');
+    const read = Notifications.getPermissionsAsync as jest.Mock;
+    read.mockResolvedValueOnce({ status: 'granted', canAskAgain: true });
+    await expect(notificationPermissionState()).resolves.toBe('granted');
+    read.mockResolvedValueOnce({ status: 'denied', canAskAgain: false });
+    await expect(notificationPermissionState()).resolves.toBe('blocked');
+    read.mockResolvedValueOnce({ status: 'undetermined', canAskAgain: true });
+    await expect(notificationPermissionState()).resolves.toBe('missing');
+    read.mockRejectedValueOnce(new Error('boom'));
+    await expect(notificationPermissionState()).resolves.toBeNull();
   });
 
   it('6.5 granting permission after a denial triggers a rebuild', async () => {

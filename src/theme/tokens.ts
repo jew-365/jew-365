@@ -57,5 +57,7 @@ export const motion = {
   lineShift: 6,
   chipFrom: 0.9,
   visibleShare: 0.5,
+  inViewThrottleMs: 100,
+  inViewSettleMs: 120,
   batchWindowMs: 150,
 } as const;

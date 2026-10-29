@@ -122,7 +122,13 @@ const OFF_SEASON = 'הנוסח הזה לא נאמר עכשיו. מוצג הנו�
 
 function resetReader() {
   useUserStore.getState().reset();
-  useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+  useUserStore.setState({
+    language: 'he',
+    location: JERUSALEM,
+    inIsrael: true,
+    nusach: 'ashkenaz',
+    siddurCompassPrompt: false,
+  });
   useCompletionsStore.getState().reset();
   useMitzvotStore.getState().reset();
   for (const key of Object.keys(mockParams)) delete mockParams[key];

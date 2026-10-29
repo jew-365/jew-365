@@ -24,7 +24,7 @@ $StateDir = Join-Path $env:TEMP 'jew365-native'
 $StateFile = Join-Path $StateDir 'run.json'
 $RunLog = Join-Path $StateDir 'run.log'
 $ExcludedPrefixes = @('.claude/', '.agents/', '.idea/', 'design/', 'docs/', 'release/', 'coverage/')
-$NativePattern = '^(pnpm-lock\.yaml|app\.json|app\.config\.[^/]+|plugins/.+|assets/.+|android/.+|ios/.+|scripts/with[^/]*\.js|locales/[^/]+\.json)$'
+$NativePattern = '^(pnpm-lock\.yaml|app\.json|app\.config\.[^/]+|plugins/.+|assets/.+|android/.+|ios/.+|modules/.+|scripts/with[^/]*\.js|locales/[^/]+\.json)$'
 $Serial = $null
 
 function Say([string]$Message) { Write-Host "[native] $Message" }

@@ -833,3 +833,22 @@ describe('useUserStore saved city', () => {
     expect(hydrate({ location: useUserStore.getState().location, locationSource: 'manual' }).location).toBe(HAIFA);
   });
 });
+
+describe('useUserStore compass prompt', () => {
+  beforeEach(() => useUserStore.getState().reset());
+
+  it('starts on, turns off and resets to on', () => {
+    expect(useUserStore.getState().siddurCompassPrompt).toBe(true);
+    useUserStore.getState().setSiddurCompassPrompt(false);
+    expect(useUserStore.getState().siddurCompassPrompt).toBe(false);
+    useUserStore.getState().reset();
+    expect(useUserStore.getState().siddurCompassPrompt).toBe(true);
+  });
+
+  it('stays on for a payload saved before the field existed and keeps a saved choice', () => {
+    const { merge } = useUserStore.persist.getOptions();
+    const current = useUserStore.getState();
+    expect(merge!({ nusach: 'sefard' }, current).siddurCompassPrompt).toBe(true);
+    expect(merge!({ siddurCompassPrompt: false }, current).siddurCompassPrompt).toBe(false);
+  });
+});

@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import { useInView } from '@/hooks/useInView';
 import { useEntrance } from '@/hooks/useMotion';
 import { useRowMirrored } from '@/hooks/useRowMirrored';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -37,13 +38,15 @@ export function ProgressBar({
 }: Props) {
   const { colors } = useTheme();
   const mirrored = useRowMirrored();
-  const growth = useEntrance(delay, motion.barMs, active, playKey);
-  const tickFade = useEntrance(delay + motion.barMs / 2, motion.barMs, active, playKey);
+  const view = useInView({ enabled: active });
+  const gate = active && view.inView;
+  const growth = useEntrance(delay, motion.barMs, gate, playKey);
+  const tickFade = useEntrance(delay + motion.barMs / 2, motion.barMs, gate, playKey);
   const grow = useAnimatedStyle(() => ({ transform: [{ scaleX: growth.value }] }));
   const fade = useAnimatedStyle(() => ({ opacity: tickFade.value }));
   const clamped = Math.min(100, Math.max(0, percent));
   return (
-    <View>
+    <View ref={view.ref} onLayout={view.onLayout}>
       <View style={[styles.track, { height, backgroundColor: colors.surface2 }]}>
         <Animated.View
           testID={testID}

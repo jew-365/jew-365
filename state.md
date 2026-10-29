@@ -1,6 +1,6 @@
 # Project State
 
-Where Jew 365 stands now, on one page. Last updated 2026-10-28 at commit `82136c0`, after production update `1.0.21-4` (built from `82136c0`, pushed with this records commit on 2026-10-28); the EAS facts below come from the publish outputs of 2026-10-27 and 2026-10-28 and the earlier reads of 2026-10-26 (`eas update:list`, `eas branch:list`, `eas channel:list`, `eas build:list`, `curl`), the store facts from both consoles on 2026-10-26 ([release/RELEASE_LOG.md](release/RELEASE_LOG.md)), not re-read. This page points to the documents that own the details:
+Where Jew 365 stands now, on one page. Last updated 2026-10-29 after preview update `1.0.21-17` (published from the uncommitted tree on top of `ee0a14c`; earlier at commit `82136c0`, after production update `1.0.21-4` (built from `82136c0`, pushed with this records commit on 2026-10-28)); the EAS facts below come from the publish outputs of 2026-10-27 and 2026-10-28 and the earlier reads of 2026-10-26 (`eas update:list`, `eas branch:list`, `eas channel:list`, `eas build:list`, `curl`), the store facts from both consoles on 2026-10-26 ([release/RELEASE_LOG.md](release/RELEASE_LOG.md)), not re-read. This page points to the documents that own the details:
 
 - Everything open: [not-close.md](not-close.md).
 - Everything in production, with its version, commit and production id: [action-log.md](action-log.md).
@@ -26,10 +26,10 @@ Where Jew 365 stands now, on one page. Last updated 2026-10-28 at commit `82136c
 | Channel | Latest update | Group id | Published | Reaches |
 | --- | --- | --- | --- | --- |
 | production | `1.0.21-4` the search that finds everything (screens, categories, stats, badges, guide, rabbis, siddur passages; close results first), on top of `1.0.21-3`, from `82136c0`; it replaced `1.0.21-3` (`4ac9d837-5dc2-47d4-95cd-f95e913e9cd0`) | `61520fca-c1f2-4fc2-82dd-e128c0f491eb` | 2026-10-28, Android and iOS | every production 1.0.21 build |
-| preview | `1.0.21-12` the search that finds everything (screens, categories, stats, badges, guide, rabbis, siddur passages; close results first), on top of `1.0.21-11` and everything before it, from `d5b7fdc`; it replaced `1.0.21-11` (`8f70dfd2-97dd-42ed-a1f6-630d38fc2d5c`) | `06457b91-6051-47a6-b1ee-b1a62a24fe48` | 2026-10-27, Android and iOS | the preview app, build `c625eaa5` |
+| preview | `1.0.21-17` the reader: a drag after Tools no longer stops short, any scroll folds opened controls, a double tap on the text toggles them; on top of `1.0.21-16` (the fixed compact bar), `1.0.21-14` (the compass offer at 5 s, entrance animations that replay each time they come on screen) and `1.0.21-13` (the compass offer from Shacharit, Mincha and Maariv, the permissions step and card, whose battery row grants "Unrestricted" only in a build with the `power-settings` module, which this preview build `c625eaa5` lacks); published from the uncommitted working tree on top of `ee0a14c`; it replaced `1.0.21-16` (`25e98034-9cde-43ee-be23-1f4eb88be680`) | `702c81c3-24d6-4b7f-90f2-ce829fff7f08` | 2026-10-29, Android and iOS | the preview app, build `c625eaa5` |
 | development | none: no channel or branch | — | — | nothing |
 
-Rollback from production `1.0.21-4` to `1.0.21-3` is `npx eas-cli update:republish --group 4ac9d837-5dc2-47d4-95cd-f95e913e9cd0 --message "Rollback to 1.0.21-3" --non-interactive` (never further back than `1.0.21-2`: an install that downloaded Chok LeYisrael compressed cannot be read by `1.0.21-1`); `npx eas-cli update:roll-back-to-embedded --branch preview` returns the preview app to its build's bundle. A publish to `preview` reaches only the preview app: every production build's channel is `production`. Rollback from preview `1.0.21-12` to `1.0.21-11` is `npx eas-cli update:republish --group 8f70dfd2-97dd-42ed-a1f6-630d38fc2d5c --message "Rollback to 1.0.21-11" --non-interactive`.
+Rollback from production `1.0.21-4` to `1.0.21-3` is `npx eas-cli update:republish --group 4ac9d837-5dc2-47d4-95cd-f95e913e9cd0 --message "Rollback to 1.0.21-3" --non-interactive` (never further back than `1.0.21-2`: an install that downloaded Chok LeYisrael compressed cannot be read by `1.0.21-1`); `npx eas-cli update:roll-back-to-embedded --branch preview` returns the preview app to its build's bundle. A publish to `preview` reaches only the preview app: every production build's channel is `production`. Rollback from preview `1.0.21-17` to `1.0.21-16` is `npx eas-cli update:republish --group 25e98034-9cde-43ee-be23-1f4eb88be680 --message "Rollback to 1.0.21-16" --non-interactive`.
 
 ## Builds and stores
 
@@ -48,7 +48,7 @@ Every other EAS build is superseded, and no other AAB was uploaded to Play ([act
 
 ## Not in production yet
 
-- **Over the air:** nothing: production `1.0.21-4` runs the same app code as preview `1.0.21-12`.
+- **Over the air:** preview `1.0.21-17` (the compass offer, the permissions step and card, the entrance animations, the reader's fixed bar and its double tap) is not in production and not committed.
 - **Waits for the store production release** (finished, committed and pushed; [not-close.md](not-close.md), High — the 1.0.21 store release, and Bugs): the Jew 365 identity, the native half of the redesign, the four-symbol icons, the iOS build fixes, the store copy, the no-promise copy, the China mainland availability, and the Hebrew Android app name.
 - **Waits for the next native build:** the Selichot space saving (about 5.5 MB), the fresh-install stamps in the embedded bundle, the Hebrew Android app name in production, and the Build tasks (arm-only direct APK, R8). A build that raises `version` cuts installs off from updates until they install it, so it also needs a version decision.
 

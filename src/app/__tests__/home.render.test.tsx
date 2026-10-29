@@ -2,8 +2,10 @@ const mockPush = jest.fn();
 const mockCancel = jest.fn(async (..._args: unknown[]) => {});
 const mockListeners: { event: string; listener: () => void }[] = [];
 let mockFocused = true;
+let mockTabIndex = 0;
 const mockNavigation = {
   isFocused: () => mockFocused,
+  getState: () => ({ index: mockTabIndex, routes: [{ key: 'this-tab' }, { key: 'other-tab' }] }),
   addListener: (event: string, listener: () => void) => {
     const entry = { event, listener };
     mockListeners.push(entry);
@@ -39,7 +41,7 @@ jest.mock('@/services/NotificationScheduler', () => ({
 
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react-native';
 import { DateTime } from 'luxon';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Reveal } from '@/components/Reveal';
 import HomeScreen from '../(tabs)/home';
 import { AppLogo } from '@/components/AppLogo';
 import { MitzvahCard } from '@/components/MitzvahCard';
@@ -107,9 +109,7 @@ const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\
 const dayLabel = (day: number) => formatDate(DateTime.fromObject({ year: 2027, month: 6, day }), 'cccc · d LLLL', 'he');
 
 const cardWrappers = () =>
-  screen
-    .UNSAFE_getAllByType(Animated.View)
-    .filter((view) => within(view).UNSAFE_queryAllByType(MitzvahCard).length > 0);
+  screen.UNSAFE_getAllByType(Reveal).filter((view) => within(view).UNSAFE_queryAllByType(MitzvahCard).length > 0);
 
 function emitNavigation(event: 'focus' | 'blur') {
   mockFocused = event === 'focus';
@@ -121,6 +121,7 @@ function emitNavigation(event: 'focus' | 'blur') {
 describe('home between midnight and alot', () => {
   beforeEach(() => {
     mockFocused = true;
+    mockTabIndex = 0;
     mockPush.mockClear();
     mockCancel.mockClear();
     useUserStore.getState().reset();
@@ -399,41 +400,46 @@ describe('home between midnight and alot', () => {
     });
   });
 
-  describe('entering animations follow focus', () => {
-    it('fades the live card in while home is focused', () => {
+  describe('cards reveal when seen', () => {
+    it('wraps the live card in a Reveal with its stagger', () => {
       renderAt(NIGHT_OF_THE_14TH);
       const wrappers = cardWrappers();
       expect(wrappers).toHaveLength(1);
-      expect(wrappers[0].props.entering).toBeInstanceOf(FadeInDown);
+      expect(wrappers[0].props).toMatchObject({ delay: 0, duration: 280, shift: 25, playKey: 0 });
     });
 
-    it('mounts the live card with no entering animation while home is not focused', () => {
-      mockFocused = false;
-      renderAt(NIGHT_OF_THE_14TH);
-      const wrappers = cardWrappers();
-      expect(wrappers).toHaveLength(1);
-      expect(wrappers[0].props.entering).toBeUndefined();
-    });
-
-    it("sets the missed card's entering prop only while home is focused", () => {
+    it('wraps the missed card with the missed stagger', () => {
       useCustomMitzvotStore.getState().add(customWindow(MIDNIGHT_ID, MIDNIGHT_NAME, '00:30', '01:30'));
       enableOnly(MIDNIGHT_ID);
-      mockFocused = false;
       renderAt('2027-06-15T02:00');
       expect(screen.getByText('לא בוצע (1)')).toBeOnTheScreen();
       expect(cardWrappers()).toHaveLength(1);
-      expect(cardWrappers()[0].props.entering).toBeUndefined();
+      expect(cardWrappers()[0].props).toMatchObject({ delay: 0, duration: 260, shift: 25 });
+    });
+
+    it('replays after a return from another tab, not on a blur', async () => {
+      renderAt(NIGHT_OF_THE_14TH);
+      mockTabIndex = 1;
+      emitNavigation('blur');
+      await act(async () => {});
+      expect(cardWrappers()[0].props.playKey).toBe(0);
+      mockTabIndex = 0;
       emitNavigation('focus');
-      expect(cardWrappers()[0].props.entering).toBeInstanceOf(FadeInDown);
+      await act(async () => {});
+      expect(cardWrappers()[0].props.playKey).toBe(1);
+    });
+
+    it('does not replay when a pushed stack screen is popped back over home', async () => {
+      renderAt(NIGHT_OF_THE_14TH);
+      emitNavigation('blur');
+      emitNavigation('focus');
+      await act(async () => {});
+      expect(cardWrappers()[0].props.playKey).toBe(0);
     });
 
     it('follows blur and focus and unsubscribes on unmount', () => {
       const view = renderAt(NIGHT_OF_THE_14TH);
-      expect(mockListeners.map((entry) => entry.event).sort()).toEqual(['blur', 'blur', 'focus', 'focus']);
-      emitNavigation('blur');
-      expect(cardWrappers()[0].props.entering).toBeUndefined();
-      emitNavigation('focus');
-      expect(cardWrappers()[0].props.entering).toBeInstanceOf(FadeInDown);
+      expect(mockListeners.map((entry) => entry.event).sort()).toEqual(['blur', 'blur', 'blur', 'focus', 'focus']);
       view.unmount();
       expect(mockListeners).toEqual([]);
     });
