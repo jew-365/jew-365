@@ -84,9 +84,8 @@ export function dayEntryStatusText(e: DayEntry, now: Date, tz: string, t: Transl
     case 'upcoming':
       return t('home.day.status.upcoming', { time: clockOf(start, tz) });
     case 'done':
-      return t('home.day.status.done', { time: clockOf(new Date(e.markedAt ?? now.getTime()), tz) });
     case 'late':
-      return t('home.day.status.late', { time: clockOf(new Date(e.markedAt ?? now.getTime()), tz) });
+      return t('home.day.status.done', { time: clockOf(new Date(e.markedAt ?? now.getTime()), tz) });
     case 'skipped':
       return t('state.skipped');
     case 'missed':

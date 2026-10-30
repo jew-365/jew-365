@@ -1344,7 +1344,7 @@
   "lateMark.late": "עשיתי אחרי שעבר הזמן",
   "lateMark.lateCaption": "נספר כבוצע ומסומן כאיחור",
   "state.markedLate": "סומן באיחור",
-  "home.day.status.late": "באיחור · סומן ב-%{time}",
+  "home.day.lateBadge": "בוצע באיחור",
   "history.day.state.late": "באיחור · %{time}",
   "report.lateLine": "מתוכן %{count} סומנו באיחור",
   "report.lateLine.once": "מתוכן אחת סומנה באיחור",

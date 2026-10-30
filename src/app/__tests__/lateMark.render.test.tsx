@@ -250,48 +250,52 @@ describe('the late marks report', () => {
 });
 
 describe("a late entry in home's My day", () => {
-  it.each(['rail', 'cards', 'rings'] as const)('is drawn late in the %s look, with an undo', (look) => {
-    setUp('2026-10-28T10:00');
-    const base = {
-      id: 'shacharit',
-      status: 'late' as const,
-      start: at(JERUSALEM, '2026-10-28T06:10'),
-      end: at(JERUSALEM, '2026-10-28T09:20'),
-      markedAt: at(JERUSALEM, '2026-10-28T09:50').getTime(),
-      date: new Date(2026, 9, 28),
-    };
-    const onUndo = jest.fn();
-    const onMark = jest.fn();
-    renderWithTheme(
-      <DayLooks
-        look={look}
-        entries={[
-          {
-            ...base,
-            name: SHACHARIT.name.he,
-            icon: 'shacharit',
-            statusText: dayEntryStatusText(base, new Date(), JERUSALEM.tz, t),
-            range: null,
-            startLabel: null,
-            endLabel: null,
-          },
-        ]}
-        now={new Date()}
-        nowLabel="10:00"
-        playKey={0}
-        onPress={jest.fn()}
-        onLongPress={jest.fn()}
-        onMark={onMark}
-        onUndo={onUndo}
-      />,
-    );
-    const card = within(screen.getByTestId('home-day-shacharit'));
-    expect(card.getByText('באיחור · סומן ב-09:50')).toBeOnTheScreen();
-    fireEvent.press(card.getByText('בטל'));
-    expect(onUndo).toHaveBeenCalledTimes(1);
-    expect(onMark).not.toHaveBeenCalled();
-    if (look === 'rings') {
-      expect(screen.getByLabelText('בוצעו 1, פתוחות 0, פוספסו 0, מתוך 1')).toBeOnTheScreen();
-    }
-  });
+  it.each(['rail', 'cards', 'rings'] as const)(
+    'is drawn done with the late label in the %s look, with an undo',
+    (look) => {
+      setUp('2026-10-28T10:00');
+      const base = {
+        id: 'shacharit',
+        status: 'late' as const,
+        start: at(JERUSALEM, '2026-10-28T06:10'),
+        end: at(JERUSALEM, '2026-10-28T09:20'),
+        markedAt: at(JERUSALEM, '2026-10-28T09:50').getTime(),
+        date: new Date(2026, 9, 28),
+      };
+      const onUndo = jest.fn();
+      const onMark = jest.fn();
+      renderWithTheme(
+        <DayLooks
+          look={look}
+          entries={[
+            {
+              ...base,
+              name: SHACHARIT.name.he,
+              icon: 'shacharit',
+              statusText: dayEntryStatusText(base, new Date(), JERUSALEM.tz, t),
+              range: null,
+              startLabel: null,
+              endLabel: null,
+            },
+          ]}
+          now={new Date()}
+          nowLabel="10:00"
+          playKey={0}
+          onPress={jest.fn()}
+          onLongPress={jest.fn()}
+          onMark={onMark}
+          onUndo={onUndo}
+        />,
+      );
+      const card = within(screen.getByTestId('home-day-shacharit'));
+      expect(card.getByText('בוצע ב-09:50')).toBeOnTheScreen();
+      expect(card.getByText('בוצע באיחור')).toBeOnTheScreen();
+      fireEvent.press(card.getByText('בטל'));
+      expect(onUndo).toHaveBeenCalledTimes(1);
+      expect(onMark).not.toHaveBeenCalled();
+      if (look === 'rings') {
+        expect(screen.getByLabelText('בוצעו 1, פתוחות 0, פוספסו 0, מתוך 1')).toBeOnTheScreen();
+      }
+    },
+  );
 });

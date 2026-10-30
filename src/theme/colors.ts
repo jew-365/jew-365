@@ -284,6 +284,9 @@ export function doneTone(colors: ThemeColors): { fill: string; ink: string } {
   };
 }
 
+// My day draws a late mark as done, with this orange label (the owner's call, 2026-10-30): one orange in every palette, ink at 4.5:1 or more.
+export const LATE_BADGE = { fill: '#F97316', ink: '#2B1608' } as const;
+
 // A done mark made after its window had passed: the warning hue, never the done green.
 export function lateTone(colors: ThemeColors): { fill: string; ink: string; ring: string } {
   return {

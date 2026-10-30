@@ -1344,7 +1344,7 @@
   "lateMark.late": "I did it after the time passed",
   "lateMark.lateCaption": "Counts as done and is shown as late",
   "state.markedLate": "Marked late",
-  "home.day.status.late": "Late · marked at %{time}",
+  "home.day.lateBadge": "Done late",
   "history.day.state.late": "Late · %{time}",
   "report.lateLine": "%{count} of them marked late",
   "report.lateLine.once": "One of them marked late",

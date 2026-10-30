@@ -4,7 +4,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { useI18n } from '@/i18n';
 import type { HomeLook } from '@/stores/useUserStore';
 import { useTheme } from '@/theme/ThemeProvider';
-import { doneTone, lateTone, missedTone, type ThemeColors } from '@/theme/colors';
+import { LATE_BADGE, doneTone, missedTone, type ThemeColors } from '@/theme/colors';
 import { scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -59,25 +59,26 @@ const MINI_RING_LENGTH = 163.36;
 const REVEAL_STEP = 30;
 const REVEAL_DURATION = 260;
 const REVEAL_SHIFT = 25;
+const BADGE_PADDING_V = scaled(2);
 
 type Tones = {
   missed: ReturnType<typeof missedTone>;
   done: ReturnType<typeof doneTone>;
-  late: ReturnType<typeof lateTone>;
 };
+
+// A late mark looks done; only its orange label tells it apart (the owner's call, 2026-10-30).
+const looksDone = (status: DayEntryStatus) => status === 'done' || status === 'late';
 
 function cardFill(status: DayEntryStatus, colors: ThemeColors, tones: Tones): string {
   if (status === 'active') return colors.goldLight;
-  if (status === 'done') return tones.done.fill;
-  if (status === 'late') return tones.late.fill;
+  if (looksDone(status)) return tones.done.fill;
   if (status === 'missed') return tones.missed.fill;
   return colors.surface;
 }
 
 function statusInk(status: DayEntryStatus, colors: ThemeColors, tones: Tones): string {
   if (status === 'active') return colors.goldText;
-  if (status === 'done') return tones.done.ink;
-  if (status === 'late') return tones.late.ink;
+  if (looksDone(status)) return tones.done.ink;
   if (status === 'missed') return tones.missed.ink;
   return colors.textSub;
 }
@@ -101,7 +102,8 @@ export const DayLooks = React.memo(function DayLooks({
 }: Props) {
   const { colors } = useTheme();
   const { t } = useI18n();
-  const tones: Tones = { missed: missedTone(colors), done: doneTone(colors), late: lateTone(colors) };
+  const tones: Tones = { missed: missedTone(colors), done: doneTone(colors) };
+  const lateLabel = t('home.day.lateBadge');
 
   const renderAction = (e: DayLookEntry) => {
     if (e.status === 'missed') {
@@ -117,7 +119,7 @@ export const DayLooks = React.memo(function DayLooks({
         />
       );
     }
-    if (e.status === 'done' || e.status === 'late' || e.status === 'skipped') {
+    if (looksDone(e.status) || e.status === 'skipped') {
       return (
         <Button
           size="compact"
@@ -138,7 +140,7 @@ export const DayLooks = React.memo(function DayLooks({
       onPress={() => onPress(e)}
       onLongPress={() => onLongPress(e)}
       accessibilityRole="button"
-      accessibilityLabel={`${e.name}, ${e.statusText}`}
+      accessibilityLabel={[e.name, e.statusText, e.status === 'late' ? lateLabel : null].filter(Boolean).join(', ')}
       accessibilityActions={[{ name: 'longpress', label: t('home.quick.title') }]}
       onAccessibilityAction={() => onLongPress(e)}
       style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
@@ -163,11 +165,18 @@ export const DayLooks = React.memo(function DayLooks({
   );
 
   const statusLine = (e: DayLookEntry, centered: boolean) => (
-    <Text
-      style={[typography.captionBold, { color: statusInk(e.status, colors, tones) }, centered && styles.centerText]}
-    >
-      {e.statusText}
-    </Text>
+    <>
+      <Text
+        style={[typography.captionBold, { color: statusInk(e.status, colors, tones) }, centered && styles.centerText]}
+      >
+        {e.statusText}
+      </Text>
+      {e.status === 'late' ? (
+        <View testID={`home-day-late-${e.id}`} style={[styles.lateBadge, centered && styles.centerSelf]}>
+          <Text style={[typography.captionBold, { color: LATE_BADGE.ink }]}>{lateLabel}</Text>
+        </View>
+      ) : null}
+    </>
   );
 
   const rangeLine = (e: DayLookEntry, centered: boolean) =>
@@ -177,15 +186,13 @@ export const DayLooks = React.memo(function DayLooks({
 
   const miniRingColor = (status: DayEntryStatus): string => {
     if (status === 'active') return colors.gold;
-    if (status === 'done') return colors.safe;
-    if (status === 'late') return tones.late.ring;
+    if (looksDone(status)) return colors.safe;
     if (status === 'missed') return tones.missed.ring;
     return colors.textMuted;
   };
 
   const miniIcon = (e: DayLookEntry): { name: IconName; color: string } => {
-    if (e.status === 'done') return { name: 'check', color: colors.safe };
-    if (e.status === 'late') return { name: 'check', color: tones.late.ink };
+    if (looksDone(e.status)) return { name: 'check', color: colors.safe };
     if (e.status === 'missed') return { name: 'warning', color: tones.missed.ink };
     if (e.status === 'active') return { name: e.icon, color: colors.goldText };
     return { name: e.icon, color: colors.textMuted };
@@ -243,7 +250,7 @@ export const DayLooks = React.memo(function DayLooks({
         <IconTile
           name={e.icon}
           size={CARD_TILE_SIZE}
-          tone={e.status === 'active' ? 'accent' : e.status === 'done' || e.status === 'late' ? 'done' : 'muted'}
+          tone={e.status === 'active' ? 'accent' : looksDone(e.status) ? 'done' : 'muted'}
         />
         <View style={styles.meta}>
           <Text style={[typography.bodyBold, { color: colors.text }]} numberOfLines={2}>
@@ -346,8 +353,7 @@ export const DayLooks = React.memo(function DayLooks({
 
   const nodeStyle = (status: DayEntryStatus) => {
     if (status === 'active') return { borderColor: colors.gold, backgroundColor: colors.goldLight };
-    if (status === 'done') return { borderColor: colors.safe, backgroundColor: colors.safe };
-    if (status === 'late') return { borderColor: tones.late.ring, backgroundColor: tones.late.ring };
+    if (looksDone(status)) return { borderColor: colors.safe, backgroundColor: colors.safe };
     if (status === 'missed') return { borderColor: tones.missed.ring, backgroundColor: tones.missed.fill };
     if (status === 'upcoming') {
       return { borderColor: colors.textMuted, backgroundColor: colors.bg, borderStyle: 'dashed' as const };
@@ -389,7 +395,7 @@ export const DayLooks = React.memo(function DayLooks({
             <View style={styles.nodeColumn}>
               <View style={[styles.railLine, { backgroundColor: colors.border }]} />
               <View style={[styles.node, nodeStyle(e.status)]}>
-                {e.status === 'done' || e.status === 'late' ? (
+                {looksDone(e.status) ? (
                   <MitzvahIcon name="check" size={NODE_CHECK_SIZE} color={colors.surface} />
                 ) : null}
               </View>
@@ -420,6 +426,15 @@ export const DayLooks = React.memo(function DayLooks({
 const styles = StyleSheet.create({
   action: { marginTop: spacing.sm },
   centerText: { textAlign: 'center' },
+  centerSelf: { alignSelf: 'center' },
+  lateBadge: {
+    alignSelf: 'flex-start',
+    marginTop: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: BADGE_PADDING_V,
+    borderRadius: radius.full,
+    backgroundColor: LATE_BADGE.fill,
+  },
   summary: { marginBottom: spacing.sm },
   summaryRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
   figure: { width: FIGURE_SIZE, height: FIGURE_SIZE, alignItems: 'center', justifyContent: 'center' },

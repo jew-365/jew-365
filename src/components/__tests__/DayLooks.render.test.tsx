@@ -5,7 +5,7 @@ import { Reveal } from '../Reveal';
 import { CITIES } from '@/data/cities';
 import { renderWithTheme } from '@/testing/render';
 import { at } from '@/testing/zmanim';
-import { THEMES, doneTone, missedTone } from '@/theme/colors';
+import { LATE_BADGE, THEMES, doneTone, lateTone, missedTone } from '@/theme/colors';
 import { dayEntryStatusText, type DayEntry } from '@/utils/homeDay';
 import { t } from '@/i18n';
 
@@ -43,6 +43,7 @@ const D1 = entry('D1', 'done', '05:00', '06:00', '07:00');
 const S = entry('S', 'skipped', '05:00', '06:00', '08:00');
 const D2 = entry('D2', 'done', '05:00', '06:00', '09:00');
 const M = entry('M', 'missed', '05:53', '09:33');
+const L = entry('L', 'late', '05:00', '06:00', '10:00');
 const ORDERED = [A, B, U, D1, S, D2, M];
 
 function setup(look: 'rings' | 'cards' | 'rail', entries = ORDERED) {
@@ -53,6 +54,13 @@ function setup(look: 'rings' | 'cards' | 'rail', entries = ORDERED) {
 
 function dayIds() {
   return screen.getAllByTestId(/^home-day-/).map((node: Node) => String(node.props.testID).replace('home-day-', ''));
+}
+
+function coloursOnScreen(): unknown[] {
+  return screen.UNSAFE_root.findAll(() => true).flatMap((node: Node) => {
+    const style = StyleSheet.flatten(node.props.style) ?? {};
+    return [style.color, style.backgroundColor, style.borderColor, node.props.color, node.props.stroke];
+  });
 }
 
 function fillsIn(id: string): unknown[] {
@@ -99,6 +107,33 @@ describe('DayLooks', () => {
     setup('rings');
     expect(fillsIn('M')).toContain(missedTone(THEMES.gold).fill);
     expect(fillsIn('D1')).toContain(doneTone(THEMES.gold).fill);
+  });
+
+  it.each(['rings', 'cards', 'rail'] as const)('%s: a late mark looks done, with an orange late label', (look) => {
+    const gold = THEMES.gold;
+    setup(look, [{ ...L, status: 'done' }]);
+    const asDone = new Set(coloursOnScreen());
+    screen.unmount();
+
+    const handlers = setup(look, [L]);
+    expect(fillsIn('L')).toContain(doneTone(gold).fill);
+    expect(StyleSheet.flatten(screen.getByText('בוצע ב-10:00').props.style).color).toBe(doneTone(gold).ink);
+    const colours = coloursOnScreen();
+    expect(new Set(colours)).toEqual(new Set([...asDone, LATE_BADGE.fill, LATE_BADGE.ink]));
+    for (const yellow of [...Object.values(lateTone(gold)), gold.warning]) expect(colours).not.toContain(yellow);
+
+    const badge = screen.getByTestId('home-day-late-L');
+    expect(StyleSheet.flatten(badge.props.style).backgroundColor).toBe(LATE_BADGE.fill);
+    expect(StyleSheet.flatten(within(badge).getByText('בוצע באיחור').props.style).color).toBe(LATE_BADGE.ink);
+    expect(screen.getByRole('button', { name: 'L, בוצע ב-10:00, בוצע באיחור' })).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'ביטול סימון - L' }));
+    expect(handlers.onUndo).toHaveBeenCalledWith(L);
+  });
+
+  it('no late label on a mark made in time', () => {
+    setup('rings');
+    expect(screen.queryByTestId(/^home-day-late-/)).toBeNull();
+    expect(screen.queryByText('בוצע באיחור')).toBeNull();
   });
 
   it('cards: no summary, same order', () => {

@@ -1,5 +1,5 @@
 import { CITIES } from '@/data/cities';
-import { THEMES, THEME_NAMES, contrastRatio, lateTone } from '@/theme/colors';
+import { LATE_BADGE, THEMES, THEME_NAMES, contrastRatio, lateTone } from '@/theme/colors';
 import { Mitzvah } from '@/types/mitzvah';
 import { at } from '@/testing/zmanim';
 import { FOLD_RULE, foldAchievements, markBadges, markTotals } from '../badges';
@@ -293,9 +293,9 @@ describe("home's My day", () => {
     expect(dayRingCounts(entries)).toEqual({ done: 2, open: 0, missed: 1, total: 3 });
   });
 
-  it('words a late entry as late', () => {
+  it('words a late entry as done; My day adds the late label', () => {
     const t = (key: string) => key;
-    expect(dayEntryStatusText(entry('a', 'late', 10), new Date(), 'Asia/Jerusalem', t)).toBe('home.day.status.late');
+    expect(dayEntryStatusText(entry('a', 'late', 10), new Date(), 'Asia/Jerusalem', t)).toBe('home.day.status.done');
   });
 });
 
@@ -303,5 +303,9 @@ describe('lateTone', () => {
   it.each(THEME_NAMES)('reads at 4.5:1 or more on its own fill in the %s palette', (name) => {
     const tone = lateTone(THEMES[name]);
     expect(contrastRatio(tone.ink, tone.fill)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("My day's orange late label reads at 4.5:1 or more", () => {
+    expect(contrastRatio(LATE_BADGE.ink, LATE_BADGE.fill)).toBeGreaterThanOrEqual(4.5);
   });
 });
