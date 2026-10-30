@@ -313,7 +313,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it is:** `countsAsDone()` in `src/utils/historyStats.ts` is the one rule; the badge fold is rescanned once under `FOLD_RULE` 2; the screens are `src/app/(tabs)/history.tsx` and `src/app/report.tsx`; the search finds the new cards, figures and badges.
   - **Expected result:** a late mark raises every percentage and keeps every run and badge; the in-time lines, late counts, chart, card, report line and the three badges show as specified; the guide's `1.0.21-7` entry names it.
   - **Done:** 2026-10-30. Verified: typecheck, lint, the full suite in four zones (5,766 tests; `history.reveal` passed alone in all four and its calendar wait was raised to 10 s after a timeout under the full parallel load); the web preview with a real late mark: the dialog caption, the in-time lines under the rings, the To improve card and the 12-week late chart. Not checked: on a phone, and the new badges earned on real data.
-  - **Status:** Version: OTA, `1.0.21-7` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `898ed4a` feat(history): count late marks as done, with in-time stats and badges · Pushed: no · Live: preview `1.0.21-26` (group `bb747076-6b89-4277-a54e-07ff79ee2272`), production not yet · Channel: preview
 
 ## Bugs
 
