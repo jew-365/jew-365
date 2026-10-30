@@ -29,8 +29,7 @@ export type HistoryInput = {
   settings: UserSettings;
 };
 
-// `missed` holds every decided item that does not count as done, a late mark included, so every score
-// reads a late mark as a miss; a surface that shows late marks apart reads the judged items.
+// `done` holds every item that counts as done, a late mark included (countsAsDone); a surface that shows late marks apart reads the judged items.
 export type DayVerdict = { key: string; done: string[]; missed: string[]; pending: string[] };
 
 export function addDays(day: Date, days: number): Date {
@@ -108,11 +107,15 @@ export function judgeDayItems(day: Date, input: HistoryInput, now: Date, opts?: 
   return judged;
 }
 
+export function countsAsDone(state: JudgedState): boolean {
+  return state === 'done' || state === 'late';
+}
+
 export function verdictOf(judged: JudgedDay): DayVerdict {
   const verdict: DayVerdict = { key: judged.key, done: [], missed: [], pending: [] };
   for (const { id, state } of judged.items) {
-    if (state === 'done') verdict.done.push(id);
-    else if (state === 'missed' || state === 'skipped' || state === 'late') verdict.missed.push(id);
+    if (countsAsDone(state)) verdict.done.push(id);
+    else if (state === 'missed' || state === 'skipped') verdict.missed.push(id);
     else verdict.pending.push(id);
   }
   return verdict;

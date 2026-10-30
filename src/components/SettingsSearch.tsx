@@ -6,7 +6,7 @@ import { ListRow } from './ListRow';
 import { MitzvahIcon } from './MitzvahIcon';
 import { SectionLabel } from './SectionLabel';
 import { CHOK_TEXT_ID } from '@/data/chok';
-import { getAllMitzvot } from '@/data/customMitzvotAdapter';
+import { findAnyMitzvah, getAllMitzvot } from '@/data/customMitzvotAdapter';
 import { halachaRulingFor } from '@/data/halachaLines';
 import { translate, useI18n } from '@/i18n';
 import { HebcalService } from '@/services/HebcalService';
@@ -25,6 +25,7 @@ import type { SiddurTextId } from '@/types/siddur';
 import type { Location } from '@/types/zmanim';
 import { markTotals } from '@/utils/badges';
 import { computeStreak } from '@/utils/historyStats';
+import { countLateMarks } from '@/utils/lateMarks';
 import { appDayKey } from '@/utils/locationDay';
 import {
   SETTINGS_SEARCH_ITEMS,
@@ -134,7 +135,12 @@ export function useSettingsSearch(visit: number) {
           taharah,
           stats: {
             achievements: completions.achievements,
-            totals: markTotals(completions.completions, completions.archivedMarks, completions.late),
+            totals: markTotals(completions.completions, completions.archivedMarks),
+            lateTotal: countLateMarks({
+              find: findAnyMitzvah,
+              completions: completions.completions,
+              late: completions.late,
+            }),
             mitzvot: enabled,
           },
         }),

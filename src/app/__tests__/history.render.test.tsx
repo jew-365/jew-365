@@ -185,7 +185,7 @@ describe('history', () => {
     it('links to the achievements tab with the count and the best streak', async () => {
       await renderFixture();
       const link = within(screen.getByTestId('history-achievements-link'));
-      expect(link.getByText('2 הישגים · השיא שלך 8 ימים')).toBeOnTheScreen();
+      expect(link.getByText('3 הישגים · השיא שלך 8 ימים')).toBeOnTheScreen();
       fireEvent.press(link.getByRole('button'));
       expect(await screen.findByTestId('history-badge-streak7')).toBeOnTheScreen();
     });
@@ -225,6 +225,7 @@ describe('history', () => {
       openTab('הישגים');
       expect(await screen.findByTestId('history-badge-streak7')).toBeOnTheScreen();
       expect(screen.getByTestId('history-badge-fullWeek')).toBeOnTheScreen();
+      expect(screen.getByTestId('history-badge-punctualWeek')).toBeOnTheScreen();
       expect(screen.getByTestId('history-next-thousandMarks')).toBeOnTheScreen();
       expect(
         within(screen.getByTestId('history-record-streak')).getByText('הרצף הארוך ביותר: ל׳ בתשרי עד ח׳ בחשון'),

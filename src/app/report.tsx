@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { DateTime } from 'luxon';
@@ -119,6 +119,7 @@ export default function ReportScreen() {
 
   const mitzvahOf = (id: string) => enabled.find((item) => item.id === id);
   const improved = summary?.improve ? mitzvahOf(summary.improve.id) : undefined;
+  const lateMitzvah = summary?.lateTop ? mitzvahOf(summary.lateTop.id) : undefined;
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
@@ -196,17 +197,31 @@ export default function ReportScreen() {
               })}
             </Card>
 
-            {summary.improve && improved ? (
+            {(summary.improve && improved) || (summary.lateTop && lateMitzvah) ? (
               <>
                 <SectionLabel text={t('report.improve')} />
-                <Banner
-                  tone="warning"
-                  text={t(summary.improve.missed === 1 ? 'report.improveLine.once' : 'report.improveLine', {
-                    name: nameFor(improved),
-                    count: summary.improve.missed,
-                  })}
-                  onPress={() => router.push({ pathname: '/mitzvah/[id]', params: { id: improved.id } })}
-                />
+                {summary.improve && improved ? (
+                  <Banner
+                    tone="warning"
+                    text={t(summary.improve.missed === 1 ? 'report.improveLine.once' : 'report.improveLine', {
+                      name: nameFor(improved),
+                      count: summary.improve.missed,
+                    })}
+                    onPress={() => router.push({ pathname: '/mitzvah/[id]', params: { id: improved.id } })}
+                  />
+                ) : null}
+                {summary.lateTop && lateMitzvah ? (
+                  <View testID="report-late-top" style={styles.stackGap}>
+                    <Banner
+                      tone="info"
+                      text={t(summary.lateTop.late === 1 ? 'report.lateTopLine.once' : 'report.lateTopLine', {
+                        name: nameFor(lateMitzvah),
+                        count: summary.lateTop.late,
+                      })}
+                      onPress={() => router.push({ pathname: '/mitzvah/[id]', params: { id: lateMitzvah.id } })}
+                    />
+                  </View>
+                ) : null}
               </>
             ) : null}
           </>
@@ -245,5 +260,8 @@ const styles = StyleSheet.create({
   },
   cardGap: {
     marginBottom: spacing.lg,
+  },
+  stackGap: {
+    marginTop: spacing.sm,
   },
 });

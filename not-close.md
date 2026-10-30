@@ -305,6 +305,16 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Done:** 2026-10-30. Verified: typecheck, lint, check:dox, the home and guide suites and the whole `pnpm test:tz` (222 suites, 5,748 tests in each of the four zones) pass. Not checked: on a phone.
   - **Status:** Version: OTA `1.0.21-6` · Committed: no · Pushed: no · Live: production `1.0.21-6` (group `5226dac2-a39e-49ca-afea-265dbdc64856`, built from the uncommitted tree on top of `4c62f3c`) and preview `1.0.21-25` (group `f0145073-9fbd-4901-8adf-d43d3a48a509`) · Channel: `production`, `preview`
 
+### High — Late marks count as done, 2026-10-30
+
+- [ ] Count a late mark as done, with in-time figures and three badges
+  - **Flag:** `OTA`.
+  - **Requested:** the owner, 2026-10-30: a late mark counts as done everywhere; new badges for a week and a month on time and for fewer late marks; in-time shares, per-mitzvah late counts, a 12-week late chart and a To improve card in Tracking; the weekly report names the mitzvah marked late most often.
+  - **What it is:** `countsAsDone()` in `src/utils/historyStats.ts` is the one rule; the badge fold is rescanned once under `FOLD_RULE` 2; the screens are `src/app/(tabs)/history.tsx` and `src/app/report.tsx`; the search finds the new cards, figures and badges.
+  - **Expected result:** a late mark raises every percentage and keeps every run and badge; the in-time lines, late counts, chart, card, report line and the three badges show as specified; the guide's `1.0.21-7` entry names it.
+  - **Done:** 2026-10-30. Verified: typecheck, lint, the full suite in four zones (5,766 tests; `history.reveal` passed alone in all four and its calendar wait was raised to 10 s after a timeout under the full parallel load); the web preview with a real late mark: the dialog caption, the in-time lines under the rings, the To improve card and the 12-week late chart. Not checked: on a phone, and the new badges earned on real data.
+  - **Status:** Version: OTA, `1.0.21-7` · Committed: no · Pushed: no · Live: no · Channel: none
+
 ## Bugs
 
 - [ ] A Hebrew Android phone shows the app's English name

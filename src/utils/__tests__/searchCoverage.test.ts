@@ -133,7 +133,14 @@ describe('search coverage', () => {
       ...STREAK_BADGE_DAYS.map((days) => `badge:streak${days}`),
       'badge:fullWeek',
       'badge:fullMonth',
+      'badge:punctualWeek',
+      'badge:punctualMonth',
+      'badge:fewerLate',
       'badge:thousandMarks',
+      'stat:card:onTime',
+      'stat:card:improve',
+      'stat:card:lateWeeks',
+      'stat:lateTotal',
       ...MITZVOT.map((mitzvah) => `badge:hundred:${mitzvah.id}`),
       ...SEARCH_SCREENS.map((screen) => `screen:${screen.id}`),
     ];
@@ -161,6 +168,30 @@ describe('search results', () => {
     expect(close('הרצף הארוך')).toContain('stat:bestStreak');
     expect(close('חודש מלא')).toContain('badge:fullMonth');
     expect(close('הישגים')).toContain('screen:history:achievements');
+  });
+
+  it('finds the in-time cards, the late chart and the new badges', () => {
+    expect(close('שבוע בזמן')).toContain('badge:punctualWeek');
+    expect(close('פחות איחורים')).toContain('badge:fewerLate');
+    expect(close('לשיפור')).toContain('stat:card:improve');
+    expect(close('on time')).toContain('stat:card:onTime');
+    expect(close('איחורים')).toContain('stat:card:lateWeeks');
+    expect(close('late marks')).toContain('stat:lateTotal');
+  });
+
+  it('shows the late marks total with its value', () => {
+    const items = content(true, {
+      achievements: null,
+      totals: { total: 0, byMitzvah: {} },
+      mitzvot: MITZVOT,
+      lateTotal: 3,
+    });
+    const item = items.find((i) => i.id === 'stat:lateTotal') as SettingsSearchItem & {
+      caption: { he: string };
+      href: unknown;
+    };
+    expect(item.caption.he).toBe('3 סימונים באיחור');
+    expect(item.href).toEqual({ pathname: '/(tabs)/history', params: { tab: 'summary' } });
   });
 
   it('shows a badge as earned with its date, or what is left', () => {

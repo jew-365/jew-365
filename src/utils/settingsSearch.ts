@@ -855,6 +855,7 @@ export type SearchStats = {
   achievements: Achievements | null;
   totals: MarkTotals;
   mitzvot: readonly Mitzvah[];
+  lateTotal?: number;
 };
 
 export type AppContentInput = {
@@ -1064,9 +1065,27 @@ const HISTORY_CARDS: readonly HistoryCard[] = [
     id: 'perMitzvah',
     titleKey: 'history.perMitzvah',
     tab: 'summary',
-    terms: ['עקביות', 'לפי מצווה', 'consistency', 'per mitzvah'],
+    terms: ['עקביות', 'לפי מצווה', 'איחורים', 'consistency', 'per mitzvah', 'late'],
+  },
+  {
+    id: 'onTime',
+    titleKey: 'settings.search.stat.onTime',
+    tab: 'summary',
+    terms: ['בזמן', 'אחוז בזמן', 'דייקנות', 'איחורים', 'on time', 'punctual', 'punctuality', 'late'],
+  },
+  {
+    id: 'improve',
+    titleKey: 'history.improve.title',
+    tab: 'summary',
+    terms: ['לשיפור', 'שיפור', 'איחור', 'איחורים', 'באיחור', 'improve', 'late', 'late marks'],
   },
   { id: 'weeks', titleKey: 'history.weeks.title', tab: 'trends', terms: ['שבועות', 'גרף', 'weeks', 'chart'] },
+  {
+    id: 'lateWeeks',
+    titleKey: 'history.lateWeeks.title',
+    tab: 'trends',
+    terms: ['איחורים', 'איחור', 'גרף איחורים', 'שבועות', 'late', 'late marks', 'chart'],
+  },
   {
     id: 'weekday',
     titleKey: 'history.weekday.title',
@@ -1238,7 +1257,10 @@ const toAchievements = (tab: HistoryTab = 'achievements'): SettingsSearchHref =>
   params: { tab },
 });
 
-function statItems(name: SearchNamer, { achievements, totals, mitzvot }: SearchStats): SettingsSearchContentItem[] {
+function statItems(
+  name: SearchNamer,
+  { achievements, totals, mitzvot, lateTotal = 0 }: SearchStats,
+): SettingsSearchContentItem[] {
   const best = achievements?.bestStreak?.days ?? 0;
   const week = achievements?.bestWeek;
   const items: SettingsSearchContentItem[] = [
@@ -1268,6 +1290,15 @@ function statItems(name: SearchNamer, { achievements, totals, mitzvot }: SearchS
       caption: name('settings.search.stat.marksCaption', { count: totals.total }),
       terms: ['סימונים', 'כמה', 'סך הכל', 'בוצע', 'marks', 'total', 'done', 'count'],
       href: toAchievements(),
+    },
+    {
+      id: 'stat:lateTotal',
+      kind: 'stat',
+      icon: 'calendar',
+      title: name('settings.search.stat.lateTotal'),
+      caption: name(lateTotal === 1 ? 'late.total.once' : 'late.total', { count: lateTotal }),
+      terms: ['איחור', 'איחורים', 'באיחור', 'סימונים באיחור', 'late', 'late marks'],
+      href: toAchievements('summary'),
     },
   ];
   for (const mitzvah of mitzvot) {
@@ -1320,7 +1351,10 @@ function badgeItems(name: SearchNamer, { achievements, totals, mitzvot }: Search
       badge(`streak${days}`, 'history.badge.streak.title', 'history.badge.streak.description', { count: days }, null),
     ),
     badge('fullWeek', 'history.badge.fullWeek.title', 'history.badge.fullWeek.description', {}, null),
+    badge('punctualWeek', 'history.badge.punctualWeek.title', 'history.badge.punctualWeek.description', {}, null),
     badge('fullMonth', 'history.badge.fullMonth.title', 'history.badge.fullMonth.description', {}, null),
+    badge('punctualMonth', 'history.badge.punctualMonth.title', 'history.badge.punctualMonth.description', {}, null),
+    badge('fewerLate', 'history.badge.fewerLate.title', 'history.badge.fewerLate.description', {}, null),
     badge(
       'thousandMarks',
       'history.badge.thousand.title',

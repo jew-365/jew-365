@@ -12,13 +12,14 @@ import {
   isArchivedDay,
 } from '@/stores/useCompletionsStore';
 import { calendarDay } from '@/utils/checkIn';
-import { DayJudge, HistoryInput, addDays, verdictOf } from '@/utils/historyStats';
+import { DayJudge, HistoryInput, JudgedState, addDays, countsAsDone, verdictOf } from '@/utils/historyStats';
 import { appDay, appDayKey } from '@/utils/locationDay';
 import { previousWeekEnd, weekEndOnOrBefore, weekStartFor } from '@/utils/weeklyReport';
 
 export const STREAK_BADGE_DAYS = [7, 30, 100, 365] as const;
 export const FOLD_LAG_DAYS = 7;
 export const WEEK_RESCAN_DAYS = 14;
+export const FOLD_RULE = 2;
 
 const HUNDRED_MARKS = 100;
 const THOUSAND_MARKS = 1000;
@@ -28,6 +29,9 @@ export type BadgeKind =
   | { kind: 'streak'; days: 7 | 30 | 100 | 365 }
   | { kind: 'fullWeek' }
   | { kind: 'fullMonth' }
+  | { kind: 'punctualWeek' }
+  | { kind: 'punctualMonth' }
+  | { kind: 'fewerLate' }
   | { kind: 'thousand' }
   | { kind: 'hundred'; mitzvahId: string };
 
@@ -36,18 +40,19 @@ export function badgeKind(id: BadgeId): BadgeKind {
   if (id.startsWith('streak')) return { kind: 'streak', days: Number(id.slice('streak'.length)) as 7 | 30 | 100 | 365 };
   if (id === 'fullWeek') return { kind: 'fullWeek' };
   if (id === 'fullMonth') return { kind: 'fullMonth' };
+  if (id === 'punctualWeek') return { kind: 'punctualWeek' };
+  if (id === 'punctualMonth') return { kind: 'punctualMonth' };
+  if (id === 'fewerLate') return { kind: 'fewerLate' };
   return { kind: 'thousand' };
 }
 
 export type MarkTotals = { total: number; byMitzvah: Record<string, number> };
 
-// A late mark keeps the day but never counts as a mark here.
-export function markTotals(completions: Completions, archived: MarkCounts, late: Completions = {}): MarkTotals {
+export function markTotals(completions: Completions, archived: MarkCounts): MarkTotals {
   const byMitzvah = { ...archived.byMitzvah };
   let total = archived.total;
-  for (const [key, day] of Object.entries(completions)) {
+  for (const day of Object.values(completions)) {
     for (const id of Object.keys(day)) {
-      if (late[key]?.[id]) continue;
       total += 1;
       byMitzvah[id] = (byMitzvah[id] ?? 0) + 1;
     }
@@ -60,7 +65,6 @@ export function markBadges(
   archived: MarkCounts,
   fallbackKey: string = dateKey(),
   knownIds?: string[],
-  late: Completions = {},
 ): Partial<Record<BadgeId, string>> {
   const keys = Object.keys(completions).sort();
   const earliest = keys[0] ?? fallbackKey;
@@ -75,7 +79,6 @@ export function markBadges(
   }
   for (const key of keys) {
     for (const id of Object.keys(completions[key])) {
-      if (late[key]?.[id]) continue;
       total += 1;
       counts[id] = (counts[id] ?? 0) + 1;
       if (total >= THOUSAND_MARKS && !badges.thousandMarks) badges.thousandMarks = key;
@@ -130,7 +133,7 @@ export function foldAchievements(
   const today = appDay(now, location);
   const todayKey = dateKey(today);
   const floor = [earliest, dateKey(addDays(today, -RETENTION_DAYS))].reduce((a, b) => (a > b ? a : b));
-  const fold = stored?.fold ?? null;
+  const fold = stored?.fold?.rule === FOLD_RULE ? stored.fold : null;
   const resumeKey = fold ? nextKey(fold.through) : null;
   const resumed = fold !== null && resumeKey !== null && resumeKey >= floor;
   const startKey = resumed ? resumeKey! : floor;
@@ -150,11 +153,11 @@ export function foldAchievements(
   let pendingSeen = false;
   let snapshot: { through: string; runs: Runs } | null = null;
 
-  const settled = (days: Date[]): boolean => {
+  const settled = (days: Date[], accept: (state: JudgedState) => boolean): boolean => {
     let due = 0;
     for (const day of days) {
       for (const { state } of judge(day).items) {
-        if (state !== 'done') {
+        if (!accept(state)) {
           return false;
         }
         due += 1;
@@ -162,6 +165,7 @@ export function foldAchievements(
     }
     return due > 0;
   };
+  const isOnTime = (state: JudgedState) => state === 'done';
   const rangeDays = (end: Date, length: number) =>
     Array.from({ length }, (_, index) => addDays(end, index - length + 1));
 
@@ -190,13 +194,17 @@ export function foldAchievements(
     for (const goal of STREAK_BADGE_DAYS) {
       if (runs.run.days === goal && !badges[`streak${goal}`]) badges[`streak${goal}`] = key;
     }
-    if (day.getDay() === 6 && dateKey(addDays(day, -6)) >= earliest && settled(rangeDays(day, 7))) {
+    if (day.getDay() === 6 && dateKey(addDays(day, -6)) >= earliest && settled(rangeDays(day, 7), countsAsDone)) {
       badges.fullWeek ??= key;
+      if (settled(rangeDays(day, 7), isOnTime)) badges.punctualWeek ??= key;
     }
     const hd = new HDate(day);
     if (hd.next().getDate() === 1) {
       const length = hd.getDate();
-      if (dateKey(addDays(day, 1 - length)) >= earliest && settled(rangeDays(day, length))) badges.fullMonth ??= key;
+      if (dateKey(addDays(day, 1 - length)) >= earliest) {
+        if (settled(rangeDays(day, length), countsAsDone)) badges.fullMonth ??= key;
+        if (settled(rangeDays(day, length), isOnTime)) badges.punctualMonth ??= key;
+      }
     }
     if (verdict.pending.length) pendingSeen = true;
     else if (!pendingSeen && key <= lagKey) snapshot = { through: key, runs: cloneRuns(runs) };
@@ -212,18 +220,21 @@ export function foldAchievements(
 
   const weeksFromKey = fold ? dateKey(addDays(calendarDay(fold.through), -WEEK_RESCAN_DAYS)) : earliest;
   let bestWeek: BestWeek | null = null;
+  const scannedWeeks: { end: string; late: number; settled: boolean }[] = [];
   let end = weekEndOnOrBefore(today, location, now);
-  for (let scanned = 0; end && dateKey(end) >= weeksFromKey && scanned < MAX_WEEK_SCAN; scanned++) {
+  for (let scanCount = 0; end && dateKey(end) >= weeksFromKey && scanCount < MAX_WEEK_SCAN; scanCount++) {
     const start = weekStartFor(end, location, now);
     let done = 0;
     let due = 0;
     let unsettled = 0;
+    let late = 0;
     for (let day = start; day.getTime() <= end.getTime(); day = addDays(day, 1)) {
       for (const { state } of judge(day).items) {
         if (state === 'waiting' || state === 'later' || state === 'open') unsettled += 1;
         else {
           due += 1;
-          if (state === 'done') done += 1;
+          if (countsAsDone(state)) done += 1;
+          if (state === 'late') late += 1;
         }
       }
     }
@@ -233,15 +244,21 @@ export function foldAchievements(
         bestWeek = { weekStart: dateKey(start), weekEnd: dateKey(end), done, due, percent };
       }
     }
+    scannedWeeks.push({ end: dateKey(end), late, settled: unsettled === 0 && due > 0 });
     end = previousWeekEnd(end, location, now);
+  }
+  for (let i = scannedWeeks.length - 2; i >= 0; i--) {
+    const cur = scannedWeeks[i];
+    const prev = scannedWeeks[i + 1];
+    if (cur.settled && prev.settled && prev.late >= 1 && cur.late < prev.late) badges.fewerLate ??= cur.end;
   }
 
   const nextFold = snapshot
-    ? { through: snapshot.through, run: snapshot.runs.run, mitzvahRuns: snapshot.runs.mitzvahRuns }
-    : (stored?.fold ?? null);
+    ? { through: snapshot.through, run: snapshot.runs.run, mitzvahRuns: snapshot.runs.mitzvahRuns, rule: FOLD_RULE }
+    : fold;
   return {
     next: {
-      badges: { ...badges, ...markBadges(input.completions, archived, appDayKey(now, location), knownIds, input.late) },
+      badges: { ...badges, ...markBadges(input.completions, archived, appDayKey(now, location), knownIds) },
       bestStreak,
       bestWeek,
       mitzvahBest,
@@ -280,7 +297,10 @@ const KIND_ORDER: BadgeId[] = [
   'streak100',
   'streak365',
   'fullWeek',
+  'punctualWeek',
   'fullMonth',
+  'punctualMonth',
+  'fewerLate',
   'thousandMarks',
 ];
 

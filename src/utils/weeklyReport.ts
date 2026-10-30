@@ -15,7 +15,7 @@ export type WeekDay = { key: string; done: number; missed: number; pending: numb
 
 export type MitzvahWeek = { id: string; done: number; missed: number; pending: number };
 
-// `missed` counts a late mark too, which scores as a miss; `late` says how many of them were marked late.
+// A late mark counts in `done`; `late` says how many of the done marks were late.
 export type WeekSummary = {
   weekEnd: string;
   days: WeekDay[];
@@ -28,6 +28,7 @@ export type WeekSummary = {
   bestDay: string | null;
   streak: number;
   improve: { id: string; missed: number } | null;
+  lateTop: { id: string; late: number } | null;
 };
 
 export type WeekEvent = { key: string; labels: string[] };
@@ -120,6 +121,14 @@ export function weekSummary(input: HistoryInput, weekStart: Date, weekEnd: Date,
   const perMitzvah = [...mitzvot.values()].sort(byMissedThenId);
   const best = days.reduce((top, day) => (day.done > top.done ? day : top), days[0]);
   const worst = perMitzvah[0];
+  const lateCounts = new Map<string, number>();
+  for (const day of judged) {
+    for (const { id, state } of day.items) if (state === 'late') lateCounts.set(id, (lateCounts.get(id) ?? 0) + 1);
+  }
+  let lateTop: WeekSummary['lateTop'] = null;
+  for (const [id, late] of lateCounts) {
+    if (!lateTop || late > lateTop.late || (late === lateTop.late && id < lateTop.id)) lateTop = { id, late };
+  }
   return {
     weekEnd: dateKey(weekEnd),
     days,
@@ -132,6 +141,7 @@ export function weekSummary(input: HistoryInput, weekStart: Date, weekEnd: Date,
     bestDay: best.done > 0 ? best.key : null,
     streak: computeStreak(input, now),
     improve: worst && worst.missed > 0 ? { id: worst.id, missed: worst.missed } : null,
+    lateTop,
   };
 }
 

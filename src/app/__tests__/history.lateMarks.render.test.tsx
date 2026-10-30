@@ -56,22 +56,28 @@ describe('history with late marks', () => {
 
   afterEach(() => jest.useRealTimers());
 
-  it('scores a late mark as a miss and opens the late marks report from Summary', async () => {
+  it('counts a late mark as done and opens the late marks report from the To improve card', async () => {
     useCompletionsStore.setState({ completions: marks, late: { '2026-10-27': { shacharit: 1 } } });
     renderWithTheme(<HistoryScreen />);
-    const link = await screen.findByTestId('history-late-link');
-    expect(within(link).getByText('מצווה אחת סומנה אחרי שעבר הזמן')).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: /^תפילת שחרית, 50%$/ })).toBeOnTheScreen();
-    fireEvent.press(within(link).getByRole('button'));
+    const card = await screen.findByTestId('history-improve-card');
+    expect(screen.queryByTestId('history-late-link')).toBeNull();
+    expect(within(card).getByText('תפילת שחרית: איחור אחד ב-30 הימים האחרונים')).toBeOnTheScreen();
+    expect(within(card).getByText('סך הכל סימון אחד באיחור')).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: /^תפילת שחרית, 100% · איחור אחד$/ })).toBeOnTheScreen();
+    expect(screen.getByTestId('history-late-shacharit')).toHaveTextContent('איחור אחד');
+    expect(screen.getByTestId('history-period-ontime-week')).toHaveTextContent('בזמן 75% · איחור אחד');
+    expect(screen.queryByTestId('history-period-ontime-day')).toBeNull();
+    fireEvent.press(within(card).getByRole('button'));
     expect(mockPush).toHaveBeenCalledWith('/late-marks');
   });
 
-  it('shows no link while nothing was marked late', async () => {
+  it('shows no To improve card while nothing was marked late', async () => {
     useCompletionsStore.setState({ completions: marks });
     renderWithTheme(<HistoryScreen />);
     await screen.findByTestId('history-achievements-link');
-    expect(screen.queryByTestId('history-late-link')).toBeNull();
+    expect(screen.queryByTestId('history-improve-card')).toBeNull();
     expect(screen.getByRole('button', { name: /^תפילת שחרית, 100%$/ })).toBeOnTheScreen();
+    expect(screen.getByTestId('history-period-ontime-week')).toHaveTextContent('בזמן 100%');
   });
 
   it('names a late mark in the day sheet', async () => {
@@ -80,5 +86,15 @@ describe('history with late marks', () => {
     fireEvent.press(await screen.findByTestId('history-day-2026-10-27'));
     expect(within(screen.getByTestId('history-day-item-shacharit')).getByText(/^באיחור · /)).toBeOnTheScreen();
     expect(within(screen.getByTestId('history-day-item-tefillin')).getByText(/^בוצע · /)).toBeOnTheScreen();
+  });
+
+  it('charts the late marks of the last 12 weeks in Trends', async () => {
+    useCompletionsStore.setState({ completions: marks, late: { '2026-10-27': { shacharit: 1 } } });
+    renderWithTheme(<HistoryScreen />);
+    await screen.findByTestId('history-improve-card');
+    fireEvent.press(screen.getAllByRole('radio', { name: 'מגמות' })[0]);
+    expect(await screen.findByTestId('history-late-chart')).toBeOnTheScreen();
+    expect(screen.getByTestId('history-late-week-label-2026-10-31')).toHaveTextContent('1');
+    expect(screen.getByText('סימון אחד באיחור ב-12 השבועות האחרונים')).toBeOnTheScreen();
   });
 });

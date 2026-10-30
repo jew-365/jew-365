@@ -119,16 +119,15 @@ describe('late marks in the completions store', () => {
       current,
     );
     expect(merged.late).toEqual({ [recent]: { shacharit: 1 } });
-    expect(merged.archivedMarks.total).toBe(0);
+    expect(merged.archivedMarks.total).toBe(1);
   });
 
-  it('never archives a late mark as a mark', () => {
+  it('archives a late mark as a mark', () => {
     const counts = archiveMarkCounts(
       EMPTY_MARK_COUNTS,
       { '2020-01-01': { shacharit: 1, mincha: 1 } },
       new Date(2026, 4, 6),
-      { '2020-01-01': { mincha: 1 } },
     );
-    expect(counts).toEqual({ lastKey: '2020-01-01', total: 1, byMitzvah: { shacharit: 1 } });
+    expect(counts).toEqual({ lastKey: '2020-01-01', total: 2, byMitzvah: { shacharit: 1, mincha: 1 } });
   });
 });

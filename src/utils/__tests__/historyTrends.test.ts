@@ -14,9 +14,13 @@ import {
   hebrewDayLabel,
   hebrewRangeLabel,
   holyDayName,
+  lateByMitzvah,
+  lateWeeksInsight,
   leaderInsight,
   mitzvahTrends,
+  onTimePercent,
   periodPercents,
+  tallyOf,
   trendInsight,
   weekName,
   weekSeries,
@@ -53,6 +57,7 @@ function point(percent: number | null, over: Partial<WeekPoint> = {}): WeekPoint
     done: percent ?? 0,
     due: percent === null ? 0 : 100,
     waiting: 0,
+    late: 0,
     percent,
     ...over,
   };
@@ -70,9 +75,9 @@ describe('historyTrends on the fixture month', () => {
   it('periodPercents counts due as done, missed, skipped and open', () => {
     const { judge } = setup();
     expect(periodPercents(input, now, judge)).toEqual({
-      day: { done: 0, due: 1, percent: 0 },
-      week: { done: 3, due: 4, percent: 75 },
-      month: { done: 13, due: 15, percent: 87 },
+      day: { done: 0, due: 1, late: 0, percent: 0 },
+      week: { done: 3, due: 4, late: 0, percent: 75 },
+      month: { done: 13, due: 15, late: 0, percent: 87 },
     });
   });
 
@@ -113,6 +118,7 @@ describe('historyTrends on the fixture month', () => {
       done: 3,
       due: 4,
       waiting: 0,
+      late: 0,
       percent: 75,
       name: { kind: 'parasha', he: 'וירא', en: 'Vayera' },
     });
@@ -165,7 +171,7 @@ describe('historyTrends on the fixture month', () => {
   it('a week closed by the exit has no judged days in the new current week', () => {
     const moment = at(J, '2026-10-24T21:00');
     const judge = createDayJudge(input, moment);
-    expect(periodPercents(input, moment, judge).week).toEqual({ done: 0, due: 0, percent: null });
+    expect(periodPercents(input, moment, judge).week).toEqual({ done: 0, due: 0, late: 0, percent: null });
     expect(weekSeries(input, moment, judge).at(-1)).toMatchObject({ done: 0, due: 0, percent: null });
   });
 
@@ -319,5 +325,74 @@ describe('labels', () => {
     expect(weekName(new Date(2027, 3, 24), J)).toMatchObject({ kind: 'festival', he: 'פסח', en: 'Pesach' });
     expect(holyDayName(new Date(2026, 9, 24), J)).toMatchObject({ kind: 'shabbat', name: { en: 'Lech-Lecha' } });
     expect(holyDayName(new Date(2026, 9, 28), J)).toBeNull();
+  });
+});
+
+describe('late marks in the tallies', () => {
+  const item = (state: 'done' | 'late' | 'missed' | 'waiting') => ({
+    id: 'tefillin',
+    state,
+    window: { start: new Date(0), end: new Date(0) },
+    markedAt: null,
+    inCheckIn: false,
+  });
+
+  it('tallyOf counts a late item as done and as late', () => {
+    expect(tallyOf({ key: 'k', items: [item('done'), item('late'), item('missed'), item('waiting')] })).toEqual({
+      key: 'k',
+      done: 2,
+      due: 3,
+      waiting: 1,
+      later: 0,
+      late: 1,
+    });
+  });
+
+  it('periodPercents carries the late count of the period', () => {
+    const late = { '2026-10-27': { tefillin: 1 } };
+    const withLate: HistoryInput = { ...input, late };
+    const judge = createDayJudge(withLate, now);
+    expect(periodPercents(withLate, now, judge).week).toEqual({ done: 3, due: 4, late: 1, percent: 75 });
+  });
+
+  it('onTimePercent is the share of done marks made in time', () => {
+    expect(onTimePercent(4, 1)).toBe(75);
+    expect(onTimePercent(3, 0)).toBe(100);
+    expect(onTimePercent(3, 3)).toBe(0);
+    expect(onTimePercent(0, 0)).toBeNull();
+  });
+
+  it('lateByMitzvah counts the late items of the last days only', () => {
+    const withLate: HistoryInput = {
+      ...input,
+      completions: { ...input.completions, '2026-09-20': { tefillin: 1 } },
+      late: { '2026-10-21': { tefillin: 1 }, '2026-10-22': { tefillin: 1 }, '2026-09-20': { tefillin: 1 } },
+    };
+    expect(lateByMitzvah(withLate, now, createDayJudge(withLate, now))).toEqual({ tefillin: 2 });
+  });
+
+  describe('lateWeeksInsight', () => {
+    const finished = (lates: number[]) => lates.map((late) => point(50, { late }));
+
+    it('has nothing to say without a week that came due', () => {
+      expect(lateWeeksInsight([])).toBeNull();
+      expect(lateWeeksInsight([point(null), point(null, { current: true })])).toBeNull();
+    });
+
+    it('says none when no week holds a late mark', () => {
+      expect(lateWeeksInsight([point(50), point(1, { current: true })])).toEqual({ kind: 'none' });
+    });
+
+    it('compares the last four finished weeks with the four before them', () => {
+      const falling = [...finished([0, 3, 1, 1, 1, 0, 0, 1, 0]), point(1, { current: true, late: 2 })];
+      expect(lateWeeksInsight(falling)).toEqual({ kind: 'falling', recent: 1, before: 6 });
+      const rising = [...finished([0, 1, 0, 0, 1, 1, 1, 3, 0]), point(1, { current: true, late: 2 })];
+      expect(lateWeeksInsight(rising)).toEqual({ kind: 'rising', recent: 5, before: 2 });
+    });
+
+    it('falls back to the total with fewer than eight finished weeks', () => {
+      const weeks = [...finished([1, 0, 1]), point(1, { current: true, late: 1 })];
+      expect(lateWeeksInsight(weeks)).toEqual({ kind: 'total', count: 3 });
+    });
   });
 });

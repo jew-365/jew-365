@@ -12,11 +12,26 @@ export type CheckIns = Record<string, number>;
 export type ArchivedDays = [string, string][];
 
 export type BadgeId =
-  'streak7' | 'streak30' | 'streak100' | 'streak365' | 'fullWeek' | 'fullMonth' | 'thousandMarks' | `hundred:${string}`;
+  | 'streak7'
+  | 'streak30'
+  | 'streak100'
+  | 'streak365'
+  | 'fullWeek'
+  | 'fullMonth'
+  | 'punctualWeek'
+  | 'punctualMonth'
+  | 'fewerLate'
+  | 'thousandMarks'
+  | `hundred:${string}`;
 export type StreakRun = { days: number; from: string | null; to: string | null };
 export type DayRange = { days: number; from: string; to: string };
 export type BestWeek = { weekStart: string; weekEnd: string; done: number; due: number; percent: number };
-export type AchievementFold = { through: string; run: StreakRun; mitzvahRuns: Record<string, StreakRun> };
+export type AchievementFold = {
+  through: string;
+  run: StreakRun;
+  mitzvahRuns: Record<string, StreakRun>;
+  rule?: number;
+};
 export type Achievements = {
   badges: Partial<Record<BadgeId, string>>;
   bestStreak: DayRange | null;
@@ -158,13 +173,7 @@ export function mergeAchievements(prev: Achievements | null, next: Achievements)
   };
 }
 
-// A late mark never counts toward the mark totals, so it is not archived as one.
-export function archiveMarkCounts(
-  counts: MarkCounts,
-  completions: Completions,
-  today: Date = new Date(),
-  late: Completions = {},
-): MarkCounts {
+export function archiveMarkCounts(counts: MarkCounts, completions: Completions, today: Date = new Date()): MarkCounts {
   const cutoffKey = retentionCutoffKey(today);
   const keys = Object.keys(completions)
     .filter((key) => key < cutoffKey && (counts.lastKey === null || key > counts.lastKey))
@@ -174,7 +183,6 @@ export function archiveMarkCounts(
   let total = counts.total;
   for (const key of keys) {
     for (const id of Object.keys(completions[key])) {
-      if (late[key]?.[id]) continue;
       total += 1;
       byMitzvah[id] = (byMitzvah[id] ?? 0) + 1;
     }
@@ -325,7 +333,7 @@ export const useCompletionsStore = create<CompletionsState>()(
         return {
           ...current,
           ...saved,
-          archivedMarks: archiveMarkCounts(saved?.archivedMarks ?? EMPTY_MARK_COUNTS, completions, new Date(), late),
+          archivedMarks: archiveMarkCounts(saved?.archivedMarks ?? EMPTY_MARK_COUNTS, completions),
           archivedDays: archiveMarkedDays(saved?.archivedDays ?? [], completions),
           completions: pruneCompletions(completions),
           skipped: pruneCompletions(saved?.skipped ?? {}),

@@ -31,7 +31,7 @@ describe('foldAchievements', () => {
   it('seeds the records and badges from the kept history', () => {
     expect(first.next.bestStreak).toEqual({ days: 8, from: '2026-10-11', to: '2026-10-19' });
     expect(first.next.mitzvahBest.tefillin).toEqual({ days: 8, from: '2026-10-11', to: '2026-10-19' });
-    expect(first.next.badges).toEqual({ streak7: '2026-10-18', fullWeek: '2026-10-17' });
+    expect(first.next.badges).toEqual({ streak7: '2026-10-18', fullWeek: '2026-10-17', punctualWeek: '2026-10-17' });
     expect(first.next.bestWeek).toEqual({
       weekStart: '2026-10-11',
       weekEnd: '2026-10-17',
@@ -169,12 +169,17 @@ describe('nextBadges and earnedBadgeList', () => {
 
   it('orders earned badges by day, then by kind', () => {
     const achievements = {
-      badges: { streak30: '2026-09-30', fullWeek: '2026-09-14', streak7: '2026-09-14' },
+      badges: { streak30: '2026-09-30', fullWeek: '2026-09-14', streak7: '2026-09-14', punctualWeek: '2026-09-14' },
       bestStreak: null,
       bestWeek: null,
       mitzvahBest: {},
       fold: null,
     };
-    expect(earnedBadgeList(achievements).map((badge) => badge.id)).toEqual(['streak7', 'fullWeek', 'streak30']);
+    expect(earnedBadgeList(achievements).map((badge) => badge.id)).toEqual([
+      'streak7',
+      'fullWeek',
+      'punctualWeek',
+      'streak30',
+    ]);
   });
 });

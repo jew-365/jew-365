@@ -51,7 +51,6 @@ export function dayRingCounts(entries: readonly DayEntry[]): {
   total: number;
 } {
   const count = (...statuses: DayEntryStatus[]) => entries.filter((e) => statuses.includes(e.status)).length;
-  // Home counts a late mark as done; only history scores it as a miss.
   const done = count('done', 'late');
   const open = count('active', 'upcoming');
   const missed = count('missed');

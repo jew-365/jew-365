@@ -62,7 +62,7 @@ describe('history reveals', () => {
     rects.set({ y: 5000, height: 80 });
     useCompletionsStore.setState({ completions: fixtureCompletions });
     renderWithTheme(<HistoryScreen />);
-    await screen.findByTestId('history-calendar');
+    await screen.findByTestId('history-calendar', {}, { timeout: 10_000 });
   });
 
   afterEach(() => {

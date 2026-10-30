@@ -2,21 +2,23 @@ import { CITIES } from '@/data/cities';
 import { THEMES, THEME_NAMES, contrastRatio, lateTone } from '@/theme/colors';
 import { Mitzvah } from '@/types/mitzvah';
 import { at } from '@/testing/zmanim';
-import { foldAchievements, markBadges, markTotals } from '../badges';
+import { FOLD_RULE, foldAchievements, markBadges, markTotals } from '../badges';
 import { dayWindow } from '../buildDayTimeline';
 import { calendarDay } from '../checkIn';
 import {
   computeStats,
   computeStreak,
+  countsAsDone,
   createDayJudge,
   judgeDayItems,
   verdictOf,
   type HistoryInput,
 } from '../historyStats';
 import { DayEntry, dayEntryStatusText, dayRingCounts, orderDayEntries } from '../homeDay';
-import { ON_TIME_LEAD_MS, countLateMarks, lateMarkReport, onTimeMarkAt, windowClosed } from '../lateMarks';
+import { ON_TIME_LEAD_MS, countLateMarks, lateImprove, lateMarkReport, onTimeMarkAt, windowClosed } from '../lateMarks';
 import { weekSummary } from '../weeklyReport';
-import { EMPTY_MARK_COUNTS, type Completions } from '@/stores/useCompletionsStore';
+import { HDate, months } from '@hebcal/core';
+import { EMPTY_MARK_COUNTS, dateKey, type Achievements, type Completions } from '@/stores/useCompletionsStore';
 
 const JERUSALEM = CITIES[0];
 const settings = { nusach: 'ashkenaz' as const, halachicOpinions: { ksSofZman: 'GRA' as const }, inIsrael: true };
@@ -37,6 +39,7 @@ function morning(id: string): Mitzvah {
 }
 
 const DAILY = morning('daily');
+const OTHER = morning('other');
 
 function input(completions: Completions, late: Completions): HistoryInput {
   return { mitzvot: [DAILY], completions, late, location: JERUSALEM, settings };
@@ -70,10 +73,10 @@ describe('judging a late mark', () => {
   const day = new Date(2026, 4, 6);
   const now = at(JERUSALEM, '2026-05-07T12:00');
 
-  it('is late, and scores as a miss', () => {
+  it('is late, and counts as done', () => {
     const judged = judgeDayItems(day, input({ '2026-05-06': { daily: 5 } }, { '2026-05-06': { daily: 5 } }), now);
     expect(judged.items.map((item) => [item.id, item.state, item.markedAt])).toEqual([['daily', 'late', 5]]);
-    expect(verdictOf(judged)).toEqual({ key: '2026-05-06', done: [], missed: ['daily'], pending: [] });
+    expect(verdictOf(judged)).toEqual({ key: '2026-05-06', done: ['daily'], missed: [], pending: [] });
   });
 
   it('is done when no late flag sits beside the mark', () => {
@@ -81,11 +84,16 @@ describe('judging a late mark', () => {
     expect(judged.items[0].state).toBe('done');
   });
 
-  it('counts against the percentage but keeps the day in the streak', () => {
+  it('tells which states count as done', () => {
+    const states = ['done', 'late', 'missed', 'skipped', 'waiting', 'open', 'later'] as const;
+    expect(states.map(countsAsDone)).toEqual([true, true, false, false, false, false, false]);
+  });
+
+  it('counts toward the percentage and keeps the day in the streak', () => {
     const completions = marked(['2026-05-05', '2026-05-06', '2026-05-07']);
     const late = { '2026-05-06': { daily: 1 } };
     const stats = computeStats([DAILY], completions, JERUSALEM, settings, 3, now, { late });
-    expect(stats.perMitzvah.daily).toEqual({ done: 2, eligible: 3, pending: 0, percent: 67 });
+    expect(stats.perMitzvah.daily).toEqual({ done: 3, eligible: 3, pending: 0, percent: 100 });
     expect(stats.streak).toBe(3);
     expect(computeStreak(input(marked(['2026-05-06']), { '2026-05-06': { daily: 1 } }), now)).toBe(1);
     expect(computeStreak(input(marked(['2026-05-06', '2026-05-07']), { '2026-05-06': { daily: 1 } }), now)).toBe(2);
@@ -93,52 +101,131 @@ describe('judging a late mark', () => {
 });
 
 describe('badges and records', () => {
-  it('leaves a late mark out of the mark totals', () => {
-    const totals = markTotals({ '2026-05-05': { a: 1, b: 1 }, '2026-05-06': { a: 1 } }, EMPTY_MARK_COUNTS, {
-      '2026-05-05': { a: 1 },
-    });
-    expect(totals).toEqual({ total: 2, byMitzvah: { a: 1, b: 1 } });
+  const week = keysFrom('2026-05-03', 7);
+  const now = at(JERUSALEM, '2026-05-20T12:00');
+  const foldOf = (completions: Completions, late: Completions, when = now, stored: Achievements | null = null) => {
+    const history = input(completions, late);
+    return foldAchievements(history, stored, EMPTY_MARK_COUNTS, 0, when, createDayJudge(history, when)).next;
+  };
+
+  it('counts a late mark in the mark totals', () => {
+    const totals = markTotals({ '2026-05-05': { a: 1, b: 1 }, '2026-05-06': { a: 1 } }, EMPTY_MARK_COUNTS);
+    expect(totals).toEqual({ total: 3, byMitzvah: { a: 2, b: 1 } });
   });
 
-  it('needs a hundred marks in time for the hundred badge', () => {
+  it('counts every mark toward the hundred badge', () => {
     const keys = keysFrom('2026-01-01', 100);
     expect(markBadges(marked(keys), EMPTY_MARK_COUNTS, '2026-05-06')['hundred:daily']).toBe(keys[99]);
-    expect(
-      markBadges(marked(keys), EMPTY_MARK_COUNTS, '2026-05-06', undefined, { [keys[10]]: { daily: 1 } })[
-        'hundred:daily'
-      ],
-    ).toBeUndefined();
   });
 
-  it('breaks the mitzvah run and the full week, and keeps the day streak', () => {
-    const week = keysFrom('2026-05-03', 7);
-    const now = at(JERUSALEM, '2026-05-20T12:00');
-    const fold = (late: Completions) => {
-      const history = input(marked(week), late);
-      return foldAchievements(history, null, EMPTY_MARK_COUNTS, 0, now, createDayJudge(history, now)).next;
-    };
-    const onTime = fold({});
+  it('keeps the mitzvah run and the full week, and takes the week on time away', () => {
+    const onTime = foldOf(marked(week), {});
     expect(onTime.badges.fullWeek).toBe('2026-05-09');
+    expect(onTime.badges.punctualWeek).toBe('2026-05-09');
     expect(onTime.mitzvahBest.daily.days).toBe(7);
     expect(onTime.bestStreak?.days).toBe(7);
 
-    const withLate = fold({ '2026-05-06': { daily: 1 } });
-    expect(withLate.badges.fullWeek).toBeUndefined();
-    expect(withLate.mitzvahBest.daily.days).toBe(3);
+    const withLate = foldOf(marked(week), { '2026-05-06': { daily: 1 } });
+    expect(withLate.badges.fullWeek).toBe('2026-05-09');
+    expect(withLate.badges.punctualWeek).toBeUndefined();
+    expect(withLate.mitzvahBest.daily.days).toBe(7);
     expect(withLate.bestStreak?.days).toBe(7);
+    if (withLate.fold) expect(withLate.fold.rule).toBe(FOLD_RULE);
+  });
+
+  it('gives the month on time only when no mark of the month was late', () => {
+    const first = new HDate(1, months.IYYAR, 5786).greg();
+    const length = HDate.daysInMonth(months.IYYAR, 5786);
+    const keys = keysFrom(dateKey(first), length);
+    const last = keys[length - 1];
+    const when = at(JERUSALEM, `${keysFrom(last, 11)[10]}T12:00`);
+    const onTime = foldOf(marked(keys), {}, when);
+    expect(onTime.badges.fullMonth).toBe(last);
+    expect(onTime.badges.punctualMonth).toBe(last);
+    const withLate = foldOf(marked(keys), { [keys[14]]: { daily: 1 } }, when);
+    expect(withLate.badges.fullMonth).toBe(last);
+    expect(withLate.badges.punctualMonth).toBeUndefined();
+  });
+
+  it('gives fewer late marks for a week with fewer late marks than the week before', () => {
+    const keys = keysFrom('2026-05-03', 14);
+    const lateOn = (...days: string[]) => Object.fromEntries(days.map((key) => [key, { daily: 1 }]));
+    expect(foldOf(marked(keys), lateOn('2026-05-05', '2026-05-06', '2026-05-12')).badges.fewerLate).toBe('2026-05-16');
+    expect(foldOf(marked(keys), lateOn('2026-05-05', '2026-05-12', '2026-05-13')).badges.fewerLate).toBeUndefined();
+    expect(foldOf(marked(keys), {}).badges.fewerLate).toBeUndefined();
+  });
+
+  it('rescans a checkpoint saved under another rule', () => {
+    const stored = (rule?: number): Achievements => ({
+      badges: {},
+      bestStreak: null,
+      bestWeek: null,
+      mitzvahBest: { daily: { days: 3, from: '2026-05-03', to: '2026-05-05' } },
+      fold: {
+        through: '2026-05-08',
+        run: { days: 6, from: '2026-05-03', to: '2026-05-08' },
+        mitzvahRuns: { daily: { days: 0, from: null, to: null } },
+        ...(rule === undefined ? {} : { rule }),
+      },
+    });
+    const late = { '2026-05-06': { daily: 1 } };
+    expect(foldOf(marked(week), late, now, stored()).mitzvahBest.daily.days).toBe(7);
+    expect(foldOf(marked(week), late, now, stored(FOLD_RULE)).mitzvahBest.daily.days).toBe(3);
   });
 });
 
 describe('the weekly report', () => {
-  it('scores a late mark as a miss and counts it as late', () => {
-    const week = keysFrom('2026-05-03', 7);
-    const summary = weekSummary(
-      input(marked(week), { '2026-05-06': { daily: 1 } }),
+  const week = keysFrom('2026-05-03', 7);
+  const report = (late: Completions) =>
+    weekSummary(
+      input(marked(week), late),
       calendarDay(week[0]),
       calendarDay(week[6]),
       at(JERUSALEM, '2026-05-20T12:00'),
     );
-    expect(summary).toMatchObject({ done: 6, missed: 1, late: 1, improve: { id: 'daily', missed: 1 } });
+
+  it('counts a late mark as done and names the mitzvah marked late', () => {
+    expect(report({ '2026-05-06': { daily: 1 } })).toMatchObject({
+      done: 7,
+      missed: 0,
+      late: 1,
+      improve: null,
+      lateTop: { id: 'daily', late: 1 },
+    });
+    expect(report({}).lateTop).toBeNull();
+  });
+});
+
+describe('lateImprove', () => {
+  const now = at(JERUSALEM, '2026-05-07T12:00');
+  const find = (id: string) => ({ daily: DAILY, other: OTHER })[id as 'daily' | 'other'];
+  const run = (late: Completions) => {
+    const completions: Completions = {};
+    for (const [key, day] of Object.entries(late)) {
+      completions[key] = Object.fromEntries(Object.keys(day).map((id) => [id, 1]));
+    }
+    return lateImprove({ find, completions, late, location: JERUSALEM }, now);
+  };
+
+  it('names the mitzvah marked late most often in the recent days', () => {
+    expect(
+      run({
+        '2026-05-01': { daily: 1 },
+        '2026-05-02': { daily: 1 },
+        '2026-05-05': { other: 1 },
+        '2026-03-01': { daily: 1, other: 1 },
+        '2026-05-06': { gone: 1 },
+      }),
+    ).toEqual({ top: { id: 'daily', count: 2 }, total: 5, days: 30 });
+  });
+
+  it('breaks a tie toward the later day', () => {
+    expect(run({ '2026-05-01': { daily: 1 }, '2026-05-03': { other: 1 } })?.top?.id).toBe('other');
+  });
+
+  it('has no top when every late mark is old, and nothing without any', () => {
+    expect(run({ '2026-03-01': { daily: 1 } })).toEqual({ top: null, total: 1, days: 30 });
+    expect(run({})).toBeNull();
   });
 });
 

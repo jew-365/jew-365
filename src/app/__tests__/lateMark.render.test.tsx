@@ -231,15 +231,21 @@ describe('the late marks report', () => {
     expect(screen.queryByText('כל הסימונים')).toBeNull();
   });
 
-  it('is reached from the weekly report, which counts the late mark apart', () => {
+  it('is reached from the weekly report, which counts the late mark as done and names the mitzvah', () => {
     useCompletionsStore.setState({
       completions: { '2026-10-21': { shacharit: 1, tefillin: 1 } },
       late: { '2026-10-21': { shacharit: 1 } },
     });
     renderWithTheme(<ReportScreen />);
-    const line = screen.getByText('אחת סומנה באיחור ולא נספרה');
+    const line = screen.getByText('מתוכן אחת סומנה באיחור');
     fireEvent.press(line);
     expect(mockPush).toHaveBeenCalledWith('/late-marks');
+    const top = within(screen.getByTestId('report-late-top'));
+    expect(
+      top.getByText('תפילת שחרית סומנה באיחור פעם אחת השבוע. אפשר להקדים את התזכורת שלה במסך המצווה.'),
+    ).toBeOnTheScreen();
+    fireEvent.press(top.getByRole('button'));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/mitzvah/[id]', params: { id: 'shacharit' } });
   });
 });
 

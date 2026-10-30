@@ -99,3 +99,39 @@ export function lateMarkReport(input: LateMarkInput, now: Date): LateMarkReport 
     averageDelayMs: averageOf(entries.flatMap((entry) => (entry.delayMs === null ? [] : [entry.delayMs]))),
   };
 }
+
+export type LateImprove = { top: { id: string; count: number } | null; total: number; days: number };
+
+// The history tab's To improve card: the total, and the mitzvah marked late most often in the recent days.
+export function lateImprove(
+  input: Pick<LateMarkInput, 'find' | 'completions' | 'late' | 'location'>,
+  now: Date,
+): LateImprove | null {
+  const total = countLateMarks(input);
+  if (total === 0) return null;
+  const recentFrom = dateKey(addDays(appDay(now, input.location), 1 - LATE_RECENT_DAYS));
+  const stats = new Map<string, { count: number; lastKey: string }>();
+  for (const [key, day] of Object.entries(input.late)) {
+    if (key < recentFrom) continue;
+    for (const id of Object.keys(day)) {
+      if (!input.completions[key]?.[id] || !input.find(id)) continue;
+      const stat = stats.get(id) ?? { count: 0, lastKey: key };
+      stat.count += 1;
+      if (key > stat.lastKey) stat.lastKey = key;
+      stats.set(id, stat);
+    }
+  }
+  let top: LateImprove['top'] = null;
+  let topKey = '';
+  for (const [id, stat] of stats) {
+    const better =
+      !top ||
+      stat.count > top.count ||
+      (stat.count === top.count && (stat.lastKey > topKey || (stat.lastKey === topKey && id < top.id)));
+    if (better) {
+      top = { id, count: stat.count };
+      topKey = stat.lastKey;
+    }
+  }
+  return { top, total, days: LATE_RECENT_DAYS };
+}

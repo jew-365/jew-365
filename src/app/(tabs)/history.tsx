@@ -86,8 +86,11 @@ import {
   hebrewDayLabel,
   hebrewRangeLabel,
   holyDayName,
+  lateByMitzvah,
+  lateWeeksInsight,
   leaderInsight,
   mitzvahTrends,
+  onTimePercent,
   periodPercents,
   tallyOf,
   trendInsight,
@@ -97,7 +100,7 @@ import {
   weekdayInsight,
   weeksInsight,
 } from '@/utils/historyTrends';
-import { countLateMarks } from '@/utils/lateMarks';
+import { lateImprove, type LateImprove } from '@/utils/lateMarks';
 import { appDay, appDayKey } from '@/utils/locationDay';
 import { firstName } from '@/utils/homeDay';
 import { nextStreakGoal } from '@/utils/streakGoal';
@@ -133,7 +136,8 @@ type ViewModel = {
   live: LiveRuns;
   achievements: Achievements | null;
   totals: MarkTotals;
-  lateCount: number;
+  improve: LateImprove | null;
+  lateByMitzvah: Record<string, number>;
   periods: PeriodPercents;
   month: CalendarMonth;
   weeks: WeekPoint[];
@@ -621,6 +625,7 @@ type ConsistencyItem = {
   summary: string;
   percent: number | null;
   streak: number;
+  lateText: string | null;
 };
 
 function ConsistencyRow({
@@ -668,6 +673,11 @@ function ConsistencyRow({
         ) : (
           <ProgressBar testID={`history-bar-${item.id}`} percent={item.percent} delay={start} active={active} />
         )}
+        {item.percent !== null && item.lateText ? (
+          <Text testID={`history-late-${item.id}`} style={[typography.small, { color: lateTone(colors).ink }]}>
+            {item.lateText}
+          </Text>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -678,11 +688,13 @@ function SelectionDetail({
   title,
   caption,
   percent,
+  value,
 }: {
   id: string;
   title: string;
   caption: string;
   percent: number | null;
+  value?: string;
 }) {
   const { colors } = useTheme();
   const { t } = useI18n();
@@ -694,7 +706,7 @@ function SelectionDetail({
           <Text style={[typography.caption, { color: colors.textSub }]}>{caption}</Text>
         </View>
         <Text style={[typography.heading, { color: colors.goldText }]}>
-          {percent === null ? t('history.percentNone') : `${percent}%`}
+          {value ?? (percent === null ? t('history.percentNone') : `${percent}%`)}
         </Text>
       </View>
     </Reveal>
@@ -708,6 +720,8 @@ function WeekBar({
   selected,
   labelled,
   onSelect,
+  metric = 'percent',
+  max = 1,
 }: {
   week: WeekPoint;
   title: string;
@@ -715,21 +729,38 @@ function WeekBar({
   selected: boolean;
   labelled: boolean;
   onSelect: () => void;
+  metric?: 'percent' | 'late';
+  max?: number;
 }) {
   const { colors } = useTheme();
   const { t } = useI18n();
   const view = useInView();
   const progress = useEntrance(index * motion.weekBarStagger, motion.barMs, view.inView);
   const grow = useAnimatedStyle(() => ({ transform: [{ scaleY: progress.value }] }));
-  if (week.percent === null) return <View style={styles.weekColumn} />;
+  const isLate = metric === 'late';
+  if (isLate ? week.due === 0 : week.percent === null) return <View style={styles.weekColumn} />;
+  const tone = lateTone(colors);
+  const label = isLate ? String(week.late) : `${week.percent}%`;
+  const height = isLate
+    ? (WEEK_CHART_HEIGHT * week.late) / Math.max(1, max)
+    : (WEEK_CHART_HEIGHT * (week.percent ?? 0)) / 100;
+  const fill = isLate ? tone.fill : colors.goldLight;
+  const ring = isLate ? tone.ring : colors.gold;
+  const solid = ring;
+  const ink = isLate ? tone.ink : colors.goldText;
+  const prefix = isLate ? 'history-late-week' : 'history-week';
   return (
     <Pressable
       ref={view.ref}
       onLayout={view.onLayout}
-      testID={`history-week-${week.weekEnd}`}
+      testID={`${prefix}-${week.weekEnd}`}
       onPress={onSelect}
       accessibilityRole="button"
-      accessibilityLabel={t('history.weeks.barLabel', { title, percent: week.percent })}
+      accessibilityLabel={
+        isLate
+          ? t('history.lateWeeks.barLabel', { title, count: week.late })
+          : t('history.weeks.barLabel', { title, percent: week.percent })
+      }
       accessibilityState={{ selected }}
       hitSlop={{ top: spacing.md, bottom: spacing.md, left: spacing.xs / 2, right: spacing.xs / 2 }}
       style={styles.weekColumn}
@@ -737,28 +768,30 @@ function WeekBar({
       {labelled ? (
         <View style={styles.weekLabelSlot}>
           <Text
-            testID={`history-week-label-${week.weekEnd}`}
+            testID={`${prefix}-label-${week.weekEnd}`}
             numberOfLines={1}
             style={[
               selected ? typography.captionBold : typography.micro,
               styles.weekLabel,
-              { color: selected || week.current ? colors.goldText : colors.textSub },
+              { color: selected || week.current ? ink : colors.textSub },
             ]}
-          >{`${week.percent}%`}</Text>
+          >
+            {label}
+          </Text>
         </View>
       ) : null}
       <Animated.View
         style={[
           styles.weekBar,
-          { height: (WEEK_CHART_HEIGHT * week.percent) / 100 },
+          { height },
           week.current
             ? {
-                backgroundColor: colors.goldLight,
+                backgroundColor: fill,
                 borderWidth: selected ? 2 : 1.5,
-                borderColor: colors.gold,
+                borderColor: ring,
                 borderStyle: 'dashed',
               }
-            : { backgroundColor: colors.gold, opacity: selected ? 1 : MUTED_BAR_OPACITY },
+            : { backgroundColor: solid, opacity: selected ? 1 : MUTED_BAR_OPACITY },
           grow,
         ]}
       />
@@ -928,6 +961,7 @@ export default function HistoryScreen() {
   const [openDay, setOpenDay] = useState<OpenDay | null>(null);
   const [badge, setBadge] = useState<BadgeInfo | null>(null);
   const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
+  const [selectedLateWeek, setSelectedLateWeek] = useState<string | null>(null);
   const [selectedWeekday, setSelectedWeekday] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const scrollY = useRef(0);
@@ -994,8 +1028,9 @@ export default function HistoryScreen() {
         stats,
         live: fold.live,
         achievements: useCompletionsStore.getState().achievements,
-        totals: markTotals(completions, store.archivedMarks, late),
-        lateCount: countLateMarks({ find: findAnyMitzvah, completions, late }),
+        totals: markTotals(completions, store.archivedMarks),
+        improve: lateImprove({ find: findAnyMitzvah, completions, late, location }, now),
+        lateByMitzvah: lateByMitzvah(input, now, judge, HISTORY_DAYS),
         periods: periodPercents(input, now, judge),
         month: calendarMonth(null, input, now, judge),
         weeks,
@@ -1096,6 +1131,30 @@ export default function HistoryScreen() {
         description: t('history.badge.fullMonth.description'),
       };
     }
+    if (kind.kind === 'punctualWeek') {
+      return {
+        id,
+        icon: 'sun',
+        title: t('history.badge.punctualWeek.title'),
+        description: t('history.badge.punctualWeek.description'),
+      };
+    }
+    if (kind.kind === 'punctualMonth') {
+      return {
+        id,
+        icon: 'night',
+        title: t('history.badge.punctualMonth.title'),
+        description: t('history.badge.punctualMonth.description'),
+      };
+    }
+    if (kind.kind === 'fewerLate') {
+      return {
+        id,
+        icon: 'undo',
+        title: t('history.badge.fewerLate.title'),
+        description: t('history.badge.fewerLate.description'),
+      };
+    }
     if (kind.kind === 'thousand') {
       return {
         id,
@@ -1156,6 +1215,13 @@ export default function HistoryScreen() {
             left: leftText(upcoming.id, upcoming.goal - upcoming.done),
           })
         : undefined;
+    const onTimeText = (done: number, lateCount: number) => {
+      const percent = onTimePercent(done, lateCount);
+      if (lateCount === 0) return t('history.period.onTime', { percent });
+      return lateCount === 1
+        ? t('history.period.onTimeLate.once', { percent })
+        : t('history.period.onTimeLate', { percent, count: lateCount });
+    };
     const periods: { id: 'day' | 'week' | 'month'; tally: PeriodPercents['day']; caption: string }[] = [
       { id: 'day', tally: data.periods.day, caption: t('history.period.dayCaption') },
       { id: 'week', tally: data.periods.week, caption: t('history.period.weekCaption') },
@@ -1171,6 +1237,16 @@ export default function HistoryScreen() {
         return stat && isTrackedInRange(stat) ? [{ mitzvah, stat }] : [];
       })
       .sort((a, b) => Number(a.stat.eligible === 0) - Number(b.stat.eligible === 0) || a.stat.percent - b.stat.percent);
+    const topMitzvah = data.improve?.top ? findAnyMitzvah(data.improve.top.id) : undefined;
+    const improveTitle = !data.improve
+      ? ''
+      : data.improve.top
+        ? t(data.improve.top.count === 1 ? 'history.improve.top.once' : 'history.improve.top', {
+            name: topMitzvah ? nameFor(topMitzvah) : data.improve.top.id,
+            count: data.improve.top.count,
+            days: data.improve.days,
+          })
+        : t('history.improve.noneRecent', { days: data.improve.days });
     const leader = leaderInsight(
       data.stats.perMitzvah,
       enabled.map((m) => m.id),
@@ -1190,6 +1266,14 @@ export default function HistoryScreen() {
               </View>
               <Text style={[typography.bodyBold, { color: colors.text }]}>{t(`history.period.${period.id}`)}</Text>
               <Text style={[typography.small, styles.center, { color: colors.textSub }]}>{period.caption}</Text>
+              {period.tally.done > 0 ? (
+                <Text
+                  testID={`history-period-ontime-${period.id}`}
+                  style={[typography.small, styles.center, { color: colors.textSub }]}
+                >
+                  {onTimeText(period.tally.done, period.tally.late)}
+                </Text>
+              ) : null}
             </View>
           ))}
         </View>
@@ -1207,20 +1291,26 @@ export default function HistoryScreen() {
               onPress={() => changeTab('achievements')}
             />
           </View>
-          {data.lateCount ? (
-            <View testID="history-late-link">
-              <ListRow
-                icon="calendar"
-                title={t('late.title')}
-                caption={t(data.lateCount === 1 ? 'history.lateLink.once' : 'history.lateLink', {
-                  count: data.lateCount,
-                })}
-                chevron
-                onPress={() => router.push('/late-marks')}
-              />
-            </View>
-          ) : null}
         </Card>
+
+        {data.improve ? (
+          <>
+            <SectionLabel text={t('history.improve.title')} />
+            <Card divided>
+              <View testID="history-improve-card">
+                <ListRow
+                  icon={topMitzvah ? iconFor(topMitzvah.icon) : 'calendar'}
+                  title={improveTitle}
+                  caption={t(data.improve.total === 1 ? 'history.improve.total.once' : 'history.improve.total', {
+                    count: data.improve.total,
+                  })}
+                  chevron
+                  onPress={() => router.push('/late-marks')}
+                />
+              </View>
+            </Card>
+          </>
+        ) : null}
 
         <MonthCalendar
           month={shownMonth}
@@ -1241,21 +1331,37 @@ export default function HistoryScreen() {
           {t('history.perMitzvahHint')}
         </Text>
         <Card divided>
-          {rows.map(({ mitzvah, stat }) => (
-            <ConsistencyRow
-              key={mitzvah.id}
-              takeSlot={takeSlot}
-              onPress={() => router.push({ pathname: '/mitzvah/[id]', params: { id: mitzvah.id } })}
-              item={{
-                id: mitzvah.id,
-                name: nameFor(mitzvah),
-                summary:
-                  stat.eligible === 0 ? t('history.newMitzvah') : t('history.percent', { percent: stat.percent }),
-                percent: stat.eligible === 0 ? null : stat.percent,
-                streak: data.live.mitzvahRuns[mitzvah.id]?.days ?? 0,
-              }}
-            />
-          ))}
+          {rows.map(({ mitzvah, stat }) => {
+            const lateCount = data.lateByMitzvah[mitzvah.id] ?? 0;
+            const summary =
+              stat.eligible === 0
+                ? t('history.newMitzvah')
+                : lateCount
+                  ? t(lateCount === 1 ? 'history.percentLate.once' : 'history.percentLate', {
+                      percent: stat.percent,
+                      count: lateCount,
+                    })
+                  : t('history.percent', { percent: stat.percent });
+            return (
+              <ConsistencyRow
+                key={mitzvah.id}
+                takeSlot={takeSlot}
+                onPress={() => router.push({ pathname: '/mitzvah/[id]', params: { id: mitzvah.id } })}
+                item={{
+                  id: mitzvah.id,
+                  name: nameFor(mitzvah),
+                  summary,
+                  percent: stat.eligible === 0 ? null : stat.percent,
+                  streak: data.live.mitzvahRuns[mitzvah.id]?.days ?? 0,
+                  lateText: lateCount
+                    ? t(lateCount === 1 ? 'history.perMitzvah.late.once' : 'history.perMitzvah.late', {
+                        count: lateCount,
+                      })
+                    : null,
+                }}
+              />
+            );
+          })}
           {!rows.length ? (
             <Text style={[typography.body, styles.emptyText, { color: colors.textMuted }]}>{t('history.empty')}</Text>
           ) : null}
@@ -1324,6 +1430,25 @@ export default function HistoryScreen() {
     const currentWeek = weeks[weeks.length - 1];
     const openReport = (weekEnd: string) => router.push({ pathname: '/report', params: { week: weekEnd } });
     const rangeOf = (w: WeekPoint) => civilRangeLabel(w.weekStart, w.weekEnd, false);
+    const lateMax = Math.max(1, ...weeks.map((w) => w.late));
+    const mostLate = weeks.reduce<WeekPoint | null>(
+      (top, w) => (!w.current && w.due > 0 && w.late > 0 && (top === null || w.late >= top.late) ? w : top),
+      null,
+    );
+    const chosenLate =
+      weeks.find((w) => w.weekEnd === selectedLateWeek && w.due > 0) ?? mostLate ?? weeks[weeks.length - 1];
+    const lateInsight = lateWeeksInsight(weeks);
+    const lateText = !lateInsight
+      ? null
+      : lateInsight.kind === 'none'
+        ? t('history.insight.lateNone')
+        : lateInsight.kind === 'falling'
+          ? t('history.insight.lateFalling', { recent: lateInsight.recent, before: lateInsight.before })
+          : lateInsight.kind === 'rising'
+            ? t('history.insight.lateRising', { recent: lateInsight.recent, before: lateInsight.before })
+            : t(lateInsight.count === 1 ? 'history.insight.lateTotal.once' : 'history.insight.lateTotal', {
+                count: lateInsight.count,
+              });
 
     return (
       <>
@@ -1376,6 +1501,56 @@ export default function HistoryScreen() {
             {weeksText ? (
               <Reveal>
                 <Insight text={weeksText} />
+              </Reveal>
+            ) : null}
+
+            <SectionLabel text={t('history.lateWeeks.title')} />
+            <Text style={[typography.small, styles.sectionHint, { color: colors.textSub }]}>
+              {t('history.lateWeeks.hint')}
+            </Text>
+            <Card padded>
+              <View testID="history-late-chart" style={styles.weekChart}>
+                <View style={[styles.gridLine, { top: 0, backgroundColor: colors.border }]} />
+                <View style={[styles.gridLine, { top: WEEK_CHART_HEIGHT / 2, backgroundColor: colors.border }]} />
+                <View style={[styles.gridLine, { bottom: 0, backgroundColor: colors.border }]} />
+                {weeks.map((w, i) => (
+                  <WeekBar
+                    key={w.weekEnd}
+                    week={w}
+                    title={weekTitle(w)}
+                    index={i}
+                    metric="late"
+                    max={lateMax}
+                    selected={w.weekEnd === chosenLate.weekEnd}
+                    labelled={w.weekEnd === chosenLate.weekEnd}
+                    onSelect={() => setSelectedLateWeek(w.weekEnd)}
+                  />
+                ))}
+                <Text style={[typography.micro, styles.axisTop, { color: colors.textSub }]}>{String(lateMax)}</Text>
+              </View>
+              <View style={styles.axisRow}>
+                <Text style={[typography.small, { color: colors.textSub }]}>{weeks[0].name[language]}</Text>
+                <Text style={[typography.small, { color: colors.goldText }]}>{t('history.weeks.nowLabel')}</Text>
+              </View>
+              <SelectionDetail
+                id={`late-${chosenLate.weekEnd}`}
+                title={
+                  chosenLate.current
+                    ? t('history.week.currentWithName', { title: weekTitleOf(chosenLate.name) })
+                    : weekTitleOf(chosenLate.name)
+                }
+                caption={t('history.lateWeeks.detail', {
+                  range: rangeOf(chosenLate),
+                  late: chosenLate.late,
+                  done: chosenLate.done,
+                })}
+                percent={null}
+                value={String(chosenLate.late)}
+              />
+            </Card>
+            {lateText ? (
+              <Reveal>
+                <Insight text={lateText} />
               </Reveal>
             ) : null}
 

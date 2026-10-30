@@ -5,28 +5,37 @@ import { RETENTION_DAYS, dateKey } from '@/stores/useCompletionsStore';
 import type { Location } from '@/types/zmanim';
 import { calendarDay } from '@/utils/checkIn';
 import { chokWeekName } from '@/utils/chok';
-import { DayJudge, HistoryInput, HistoryStats, JudgedDay, addDays, verdictOf } from '@/utils/historyStats';
+import {
+  DayJudge,
+  HistoryInput,
+  HistoryStats,
+  JudgedDay,
+  addDays,
+  countsAsDone,
+  verdictOf,
+} from '@/utils/historyStats';
 import { appDay, locationNoon } from '@/utils/locationDay';
 import { previousWeekEnd, shabbatOf, weekEndFor, weekStartFor } from '@/utils/weeklyReport';
 
 type Language = 'he' | 'en';
 
-export type DayTally = { key: string; done: number; due: number; waiting: number; later: number };
+export type DayTally = { key: string; done: number; due: number; waiting: number; later: number; late: number };
 
 export function tallyOf(judged: JudgedDay): DayTally {
-  const tally: DayTally = { key: judged.key, done: 0, due: 0, waiting: 0, later: 0 };
+  const tally: DayTally = { key: judged.key, done: 0, due: 0, waiting: 0, later: 0, late: 0 };
   for (const { state } of judged.items) {
     if (state === 'waiting') tally.waiting += 1;
     else if (state === 'later') tally.later += 1;
     else {
       tally.due += 1;
-      if (state === 'done') tally.done += 1;
+      if (countsAsDone(state)) tally.done += 1;
+      if (state === 'late') tally.late += 1;
     }
   }
   return tally;
 }
 
-export type PeriodTally = { done: number; due: number; percent: number | null };
+export type PeriodTally = { done: number; due: number; late: number; percent: number | null };
 export type PeriodPercents = { day: PeriodTally; week: PeriodTally; month: PeriodTally };
 
 function percentOf(done: number, due: number): number | null {
@@ -45,20 +54,25 @@ function daysBetween(first: Date, last: Date): Date[] {
   return days;
 }
 
-function sumRange(first: Date, last: Date, judge: DayJudge): { done: number; due: number; waiting: number } {
-  const sum = { done: 0, due: 0, waiting: 0 };
+function sumRange(
+  first: Date,
+  last: Date,
+  judge: DayJudge,
+): { done: number; due: number; waiting: number; late: number } {
+  const sum = { done: 0, due: 0, waiting: 0, late: 0 };
   for (const day of daysBetween(first, last)) {
     const tally = tallyOf(judge(day));
     sum.done += tally.done;
     sum.due += tally.due;
     sum.waiting += tally.waiting;
+    sum.late += tally.late;
   }
   return sum;
 }
 
 function periodOf(first: Date, last: Date, judge: DayJudge): PeriodTally {
-  const { done, due } = sumRange(first, last, judge);
-  return { done, due, percent: percentOf(done, due) };
+  const { done, due, late } = sumRange(first, last, judge);
+  return { done, due, late, percent: percentOf(done, due) };
 }
 
 function hebrewMonthStart(day: Date): Date {
@@ -129,6 +143,7 @@ export type WeekPoint = {
   done: number;
   due: number;
   waiting: number;
+  late: number;
   percent: number | null;
 };
 
@@ -136,7 +151,7 @@ export function weekSeries(input: HistoryInput, now: Date, judge: DayJudge, coun
   const { location } = input;
   const today = appDay(now, location);
   const point = (start: Date, sumEnd: Date, weekEnd: Date, name: WeekName, current: boolean): WeekPoint => {
-    const { done, due, waiting } = sumRange(start, sumEnd, judge);
+    const { done, due, waiting, late } = sumRange(start, sumEnd, judge);
     return {
       weekStart: dateKey(start),
       weekEnd: dateKey(weekEnd),
@@ -145,6 +160,7 @@ export function weekSeries(input: HistoryInput, now: Date, judge: DayJudge, coun
       done,
       due,
       waiting,
+      late,
       percent: percentOf(done, due),
     };
   };
@@ -430,4 +446,41 @@ export function holyDayName(
 
 export function formatCount(n: number): string {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+export function onTimePercent(done: number, late: number): number | null {
+  return done > 0 ? Math.round(((done - late) / done) * 100) : null;
+}
+
+export function lateByMitzvah(input: HistoryInput, now: Date, judge: DayJudge, daysBack = 30): Record<string, number> {
+  const today = appDay(now, input.location);
+  const counts: Record<string, number> = {};
+  for (let offset = daysBack - 1; offset >= 0; offset--) {
+    for (const { id, state } of judge(addDays(today, -offset)).items) {
+      if (state === 'late') counts[id] = (counts[id] ?? 0) + 1;
+    }
+  }
+  return counts;
+}
+
+export type LateWeeksInsight =
+  | { kind: 'none' }
+  | { kind: 'falling'; recent: number; before: number }
+  | { kind: 'rising'; recent: number; before: number }
+  | { kind: 'total'; count: number }
+  | null;
+
+export function lateWeeksInsight(weeks: WeekPoint[]): LateWeeksInsight {
+  if (weeks.every((week) => week.due === 0)) return null;
+  const total = weeks.reduce((sum, week) => sum + week.late, 0);
+  if (total === 0) return { kind: 'none' };
+  const finished = weeks.filter((week) => !week.current && week.due > 0);
+  if (finished.length >= 8) {
+    const sumLate = (list: WeekPoint[]) => list.reduce((sum, week) => sum + week.late, 0);
+    const recent = sumLate(finished.slice(-4));
+    const before = sumLate(finished.slice(-8, -4));
+    if (recent < before) return { kind: 'falling', recent, before };
+    if (recent > before) return { kind: 'rising', recent, before };
+  }
+  return { kind: 'total', count: total };
 }

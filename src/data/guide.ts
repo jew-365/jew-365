@@ -271,8 +271,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'The streak counts days in a row with at least one mitzvah marked. A day with nothing marked and something missed breaks it; a Shabbat or Yom Tov still waiting for its check-in does not.',
       },
       {
-        he: 'מצווה שהזמן שלה נגמר אפשר עדיין לסמן: ב״היום שלי״ בבית, במסך המצווה, בסידור ובצ׳ק־אין אחרי שבת. האפליקציה שואלת מתי עשית. ״עשיתי בזמן ולא סימנתי״ נספר כמו סימון בזמן. ״עשיתי אחרי שעבר הזמן״ מסומן בכתום: הוא שומר על היום בבית ועל הרצף, אבל לא נספר באחוזים, בלוח החודש, במגמות, בדוח השבועי ובהישגים. כל הסימונים באיחור מרוכזים ב״סימונים באיחור״, שנפתח מ״סיכום״ ומהדוח השבועי: איזו מצווה, באיזה יום, מתי נגמר הזמן ומתי סימנת, וסיכום לפי מצווה.',
-        en: 'A mitzvah whose time has ended can still be marked: in My day on Home, on the mitzvah\'s screen, in the siddur and in the check-in after Shabbat. The app asks when you did it. "I did it in time and didn\'t mark it" counts like a mark made in time. "I did it after the time passed" shows in orange: it keeps the day on Home and your streak, but does not count toward percentages, the month calendar, Trends, the weekly report or badges. Every late mark is listed in Late marks, opened from Summary and the weekly report: which mitzvah, on which day, when its time ended and when you marked it, with a summary per mitzvah.',
+        he: 'מצווה שהזמן שלה נגמר אפשר עדיין לסמן: ב״היום שלי״ בבית, במסך המצווה, בסידור ובצ׳ק־אין אחרי שבת. האפליקציה שואלת מתי עשית. ״עשיתי בזמן ולא סימנתי״ נספר כמו סימון בזמן. ״עשיתי אחרי שעבר הזמן״ נספר כבוצע בכל מקום, באחוזים, בלוח החודש, במגמות, בדוח השבועי ובהישגים, ומסומן בכתום. ב״סיכום״ מופיע כמה מהסימונים היו בזמן בכל תקופה, כמה איחורים היו לכל מצווה, וכרטיס ״לשיפור״ עם המצווה שאיחרת בה הכי הרבה ב-30 הימים האחרונים, שפותח את ״סימונים באיחור״: איזו מצווה, באיזה יום, מתי נגמר הזמן ומתי סימנת. ״מגמות״ מציג את האיחורים ב-12 השבועות האחרונים, והדוח השבועי את המצווה שאיחרת בה הכי הרבה השבוע. ההישגים ״שבוע בזמן״ ו״חודש בזמן״ דורשים שכל הסימונים יהיו בזמן, ו״פחות איחורים״ ניתן על שבוע עם פחות איחורים מהשבוע שלפניו.',
+        en: 'A mitzvah whose time has ended can still be marked: in My day on Home, on the mitzvah\'s screen, in the siddur and in the check-in after Shabbat. The app asks when you did it. "I did it in time and didn\'t mark it" counts like a mark made in time. "I did it after the time passed" counts as done everywhere, in percentages, the month calendar, Trends, the weekly report and badges, and shows in orange. Summary shows how many marks were on time in each period, the late marks of each mitzvah, and a To improve card with the mitzvah you were late on most in the last 30 days, which opens Late marks: which mitzvah, on which day, when its time ended and when you marked it. Trends shows the late marks of the last 12 weeks, and the weekly report the mitzvah you were late on most that week. The badges A week on time and A month on time need every mark in time, and Fewer late marks is given for a week with fewer late marks than the week before it.',
       },
       {
         he: 'דוח שבועי נפתח מרשימת הדוחות בלשונית מגמות: מה סומן, היום הכי טוב, איזו מצווה כדאי לחזק ומה מחכה בשבוע הבא, ומעבר בין השבועות. כ־45 דקות אחרי צאת השבת מגיעה התראה שהסיכום מוכן; אפשר לכבות אותה בהגדרות ← מכשיר והתראות.',
@@ -405,6 +405,20 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 ];
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
+  {
+    label: '1.0.21-7',
+    date: '2026-10-30',
+    items: [
+      {
+        he: 'סימון באיחור נספר עכשיו כבוצע בכל מקום: באחוזים, בלוח החודש, במגמות, בדוח השבועי ובהישגים. הוא עדיין מסומן בכתום.',
+        en: 'A late mark now counts as done everywhere: percentages, the month calendar, Trends, the weekly report and badges. It is still shown in orange.',
+      },
+      {
+        he: 'במעקב: כמה מהסימונים היו בזמן בכל תקופה, איחורים לכל מצווה, כרטיס ״לשיפור״, גרף איחורים ב-12 השבועות, ושלושה הישגים חדשים: שבוע בזמן, חודש בזמן ופחות איחורים.',
+        en: 'In Tracking: how many marks were on time in each period, late marks per mitzvah, a To improve card, a 12-week chart of late marks, and three new badges: A week on time, A month on time and Fewer late marks.',
+      },
+    ],
+  },
   {
     label: '1.0.21-6',
     date: '2026-10-29',
