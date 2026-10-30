@@ -321,7 +321,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it is:** `src/components/DayLooks.tsx` draws a `late` entry exactly as a `done` one (`looksDone()`: fill, ink, ring, node and check) and adds an orange pill `home.day.lateBadge` ("בוצע באיחור" / "Done late") on `LATE_BADGE` from `src/theme/colors.ts`, in all three looks; `dayEntryStatusText()` words it as done. Other screens (history, the mitzvah screen, the check-in) keep their late tone.
   - **Expected result:** a late mark in My day has the done green card, status line, ring and check, and under the status line an orange "בוצע באיחור" pill; screen readers hear it too; the guide's `1.0.21-7` entry says it.
   - **Done:** 2026-10-30. Verified: typecheck, lint, the DayLooks suite (a late entry's colours equal a done entry's plus the label's, in each look; the new cases fail on the old component), the label's contrast (5.9:1), the full suite in four zones (5,771 tests; the three home cases of `lateMark.render` that pinned the yellow look were updated and rerun in all four), and the web build at 375 points in Hebrew and English with a real late mark in each look: the green card, check and ring, and the orange label. Not checked: on a phone.
-  - **Status:** Version: OTA, `1.0.21-7` · Committed: no · Pushed: no · Live: no · Channel: —
+  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `afec520` feat(home): late marks green like done, with an orange late label · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: preview `1.0.21-27` (group `95931d6c-e7c2-459f-8561-1d83dda86ffe`), production not yet · Channel: preview
 
 ## Bugs
 
