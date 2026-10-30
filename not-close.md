@@ -315,6 +315,17 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Done:** 2026-10-30. Verified: typecheck, lint, the full suite in four zones (5,766 tests; `history.reveal` passed alone in all four and its calendar wait was raised to 10 s after a timeout under the full parallel load); the web preview with a real late mark: the dialog caption, the in-time lines under the rings, the To improve card and the 12-week late chart. Not checked: on a phone, and the new badges earned on real data.
   - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `898ed4a` feat(history): count late marks as done, with in-time stats and badges · Pushed: no · Live: preview `1.0.21-26` (group `bb747076-6b89-4277-a54e-07ff79ee2272`), production not yet · Channel: preview
 
+### Low — Design and records skills, 2026-10-30
+
+- [ ] Add the web designer skills and the project manager skill to the repo
+  - **Flag:** none, tooling only.
+  - **Requested:** the owner, 2026-10-30: install `dox-installer`, `project-manager` and `webapp-designer`, then complete what `webapp-designer` is missing and keep it for good.
+  - **What it is:** [.claude/skills/](.claude/skills) gains [webapp-designer](.claude/skills/webapp-designer/SKILL.md) (the owner's file) and the three specialists it composes, copied as published with their licenses: [design-taste-frontend](.claude/skills/design-taste-frontend/SKILL.md) 2.1.5, [impeccable](.claude/skills/impeccable/SKILL.md) 4.8.0 and [emil-design-eng](.claude/skills/emil-design-eng/SKILL.md); and [project-manager](.claude/skills/project-manager/SKILL.md) (the owner's folder, byte for byte). `dox-installer` is not copied, because the owner's account already syncs the identical file. The Source Map of root [AGENTS.md](AGENTS.md) names them.
+  - **What it solves:** `webapp-designer` named three skills that no session of this repo had, and the records had no skill to keep them. A cloud session starts from a fresh clone, so only files in the repo reach it.
+  - **Expected result:** a session on a branch that holds these files lists all five skills, and `webapp-designer` finds each specialist beside it.
+  - **Done:** 2026-10-30. Verified: every copied file byte-identical to its published source (`pbakaus/impeccable` `df3a4ab`, `Leonxlnx/taste-skill` `12af471`, `emilkowalski/skill` `a81dbca`); strict YAML frontmatter, with the name equal to the folder, for all seven skills; every `.js` and `.mjs` passes `node --check`; the hosts the scripts contact read and found as documented; no instruction-injection phrases in any text; `pnpm check:dox`; the three skills appeared in the session's skill list. Not checked: any third-party script run (see Other Open Items).
+  - **Status:** Version: none, tooling · Committed: yes, in the commit that adds this item (a commit cannot name itself) · Pushed: yes, branch `claude/magical-bohr-6d7962` · Live: not applicable, reaches no user · Channel: none
+
 ## Bugs
 
 - [ ] A Hebrew Android phone shows the app's English name
@@ -404,6 +415,10 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
 Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were answered by the owner on 2026-10-26 and became the tasks "Add an English (U.K.) localization on the App Store" and "Ask for a store rating inside the app". Q3 to Q7, from the app requests of 2026-10-26, were answered the same day and are written into their tasks (App requests of 2026-10-26 — batch rules). None is open.
 
 ## Other Open Items
+
+- **The design skills have not run here, and `webapp-designer` describes an older `design-taste-frontend`.** Found 2026-10-30, while adding them (the task Add the web designer skills and the project manager skill to the repo).
+  - Nothing third-party was executed: the session's auto mode refused to run the downloaded scripts. `design-taste-frontend`'s `lint.mjs`, `draw.mjs` and `inspect.mjs` and `impeccable`'s launcher (it downloads engine 0.1.18 from the `pbakaus/impeccable` releases and checks it against `engine-checksums.txt`) have never run on this repo. They get their first run in a design task, or on the owner's word: `lint.mjs` on a sample page and `sh .claude/skills/impeccable/scripts/impeccable engine-probe`.
+  - [webapp-designer](.claude/skills/webapp-designer/SKILL.md) was written against the earlier dial-driven `design-taste-frontend` (DESIGN_VARIANCE, MOTION_INTENSITY, a final pre-flight, GSAP skeletons, landing pages only). The published 2.1.5 replaces it with an inventory, a drawn direction, a lint-and-inspect gate and a look-and-fix loop, and also covers app screens. The earlier file is still published as `design-taste-frontend-v2-experimental` (`Leonxlnx/taste-skill-classics`). The owner chooses: keep 2.1.5 and reword the orchestrator's pre-flight and dial lines, or vendor the earlier file under the name the orchestrator expects.
 
 - **The owner's pick of a home screen direction**: picked on 2026-10-29 (board Final of [design/lab/studies/2026-10-28-home-mix/](design/lab/studies/2026-10-28-home-mix/AGENTS.md)); built by the task Build the approved home screen.
 
