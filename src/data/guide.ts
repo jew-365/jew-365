@@ -407,7 +407,7 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
   {
     label: '1.0.21-7',
-    date: '2026-10-30',
+    date: '2026-10-31',
     items: [
       {
         he: 'סימון באיחור נספר עכשיו כבוצע בכל מקום: באחוזים, בלוח החודש, במגמות, בדוח השבועי ובהישגים. ב״היום שלי״ בבית הוא מוצג בירוק כמו כל מה שבוצע, עם תווית כתומה ״בוצע באיחור״.',
