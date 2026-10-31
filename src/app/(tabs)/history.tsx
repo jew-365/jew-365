@@ -1293,25 +1293,6 @@ export default function HistoryScreen() {
           </View>
         </Card>
 
-        {data.improve ? (
-          <>
-            <SectionLabel text={t('history.improve.title')} />
-            <Card divided>
-              <View testID="history-improve-card">
-                <ListRow
-                  icon={topMitzvah ? iconFor(topMitzvah.icon) : 'calendar'}
-                  title={improveTitle}
-                  caption={t(data.improve.total === 1 ? 'history.improve.total.once' : 'history.improve.total', {
-                    count: data.improve.total,
-                  })}
-                  chevron
-                  onPress={() => router.push('/late-marks')}
-                />
-              </View>
-            </Card>
-          </>
-        ) : null}
-
         <MonthCalendar
           month={shownMonth}
           travel={travel}
@@ -1370,6 +1351,25 @@ export default function HistoryScreen() {
           <Reveal>
             <Insight text={t('history.insight.leader', { name: nameForId(leader.id), percent: leader.percent })} />
           </Reveal>
+        ) : null}
+
+        {data.improve ? (
+          <>
+            <SectionLabel text={t('history.improve.title')} />
+            <Card divided>
+              <View testID="history-improve-card">
+                <ListRow
+                  icon={topMitzvah ? iconFor(topMitzvah.icon) : 'calendar'}
+                  title={improveTitle}
+                  caption={t(data.improve.total === 1 ? 'history.improve.total.once' : 'history.improve.total', {
+                    count: data.improve.total,
+                  })}
+                  chevron
+                  onPress={() => router.push('/late-marks')}
+                />
+              </View>
+            </Card>
+          </>
         ) : null}
       </>
     );

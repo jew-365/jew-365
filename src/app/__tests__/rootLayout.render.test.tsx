@@ -33,6 +33,8 @@ jest.mock('@expo-google-fonts/noto-serif-hebrew', () => ({}));
 jest.mock('@/services/NotificationScheduler', () => ({ initNotificationHandlers: () => () => {} }));
 jest.mock('@/services/ChokContentService', () => ({ reconcileChokInstall: () => {} }));
 jest.mock('@/services/SelichotContentService', () => ({ reconcileSelichotInstall: () => {} }));
+const mockFollow = jest.fn(async () => false);
+jest.mock('@/services/locationFollow', () => ({ followDeviceLocation: () => mockFollow() }));
 jest.mock('@/services/notificationResponseHandler', () => ({
   initNotificationResponseHandler: () => ({ remove: () => {} }),
   consumePendingNotificationRoute: () => {},
@@ -126,6 +128,46 @@ describe('the root layout and the ended custom mitzvot', () => {
     act(() => listeners.forEach((listener) => listener('active')));
 
     await waitFor(() => expect(enabled(ENDING_TODAY)).toBe(false));
+  });
+});
+
+describe('the root layout and the location', () => {
+  let listeners: ((state: string) => void)[] = [];
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: at(J, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: J, inIsrael: true, nusach: 'ashkenaz', isOnboarded: true });
+    mockFollow.mockClear();
+    listeners = [];
+    jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) => {
+      listeners.push(listener as (state: string) => void);
+      return { remove: jest.fn() } as never;
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.useRealTimers();
+  });
+
+  it('follows the phone when the app opens and again on every return to it', async () => {
+    renderWithTheme(<RootLayout />);
+    await screen.findByTestId('stack');
+    await waitFor(() => expect(mockFollow).toHaveBeenCalledTimes(1));
+
+    jest.setSystemTime(at(J, '2026-10-28T09:00'));
+    act(() => listeners.forEach((listener) => listener('active')));
+    await waitFor(() => expect(mockFollow).toHaveBeenCalledTimes(2));
+  });
+
+  it('never follows before onboarding', async () => {
+    useUserStore.setState({ isOnboarded: false });
+    renderWithTheme(<RootLayout />);
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    expect(mockFollow).not.toHaveBeenCalled();
   });
 });
 

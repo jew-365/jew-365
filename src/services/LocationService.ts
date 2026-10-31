@@ -168,6 +168,11 @@ export const LocationService = {
     }
   },
 
+  // A fix as a saved location: a nearby city's details with the fix's own coordinates (resolvedLocation()).
+  locationAt(lat: number, lng: number): Location {
+    return resolvedLocation(lat, lng);
+  },
+
   getFallbackCities(): Location[] {
     return CITIES;
   },

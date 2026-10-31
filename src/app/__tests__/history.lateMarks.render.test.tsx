@@ -71,6 +71,18 @@ describe('history with late marks', () => {
     expect(mockPush).toHaveBeenCalledWith('/late-marks');
   });
 
+  it('places the To improve card after the consistency per mitzvah, not above the calendar', async () => {
+    useCompletionsStore.setState({ completions: marks, late: { '2026-10-27': { shacharit: 1 } } });
+    renderWithTheme(<HistoryScreen />);
+    await screen.findByTestId('history-improve-card');
+    const order = screen.UNSAFE_root.findAll(
+      (node: { type: unknown; props: { testID?: string } }) =>
+        typeof node.type === 'string' && /^history-(calendar|bar-|improve-card)/.test(String(node.props.testID ?? '')),
+    ).map((node: { props: { testID?: string } }) => String(node.props.testID).replace(/^history-bar-.*/, 'bar'));
+    expect(order.indexOf('history-calendar')).toBeLessThan(order.indexOf('bar'));
+    expect(order.lastIndexOf('bar')).toBeLessThan(order.indexOf('history-improve-card'));
+  });
+
   it('shows no To improve card while nothing was marked late', async () => {
     useCompletionsStore.setState({ completions: marks });
     renderWithTheme(<HistoryScreen />);

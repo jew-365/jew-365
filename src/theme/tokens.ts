@@ -54,6 +54,7 @@ export const motion = {
   todayRingMs: 260,
   todayRingFrom: 1.15,
   lineMs: 220,
+  sheetMs: 300,
   lineShift: 6,
   chipFrom: 0.9,
   visibleShare: 0.5,

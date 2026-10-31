@@ -97,6 +97,18 @@ describe('Settings cards, icons and actions', () => {
     });
   });
 
+  it('says whether the location follows the phone or is a city picked by hand', async () => {
+    const jerusalem = useUserStore.getState().location;
+    useUserStore.getState().setLocationState(jerusalem, 'ready', 'gps');
+    await renderSettings();
+    openSection('settings.device');
+    expect(screen.getByText(he('settings.locationFollows'))).toBeOnTheScreen();
+    act(() => useUserStore.getState().setLocationState(jerusalem, 'ready', 'manual'));
+    expect(screen.getByText(he('settings.locationFixed'))).toBeOnTheScreen();
+    act(() => useUserStore.getState().setLocationStatus('denied'));
+    expect(screen.getByText(he('settings.locationStatus.denied'))).toBeOnTheScreen();
+  });
+
   it('labels fields as field labels and keeps the device sub-headings as headings', async () => {
     await renderSettings();
     openSection('settings.prayer');

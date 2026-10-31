@@ -100,6 +100,9 @@ function renderRealTabs() {
     displayOf,
     displays: () => Object.fromEntries(names.map((name) => [name, displayOf(name)])),
     goTo: (name: string) => testingLibrary.act(() => router.navigate(`/${name}` as never)),
+    canGoBack: () => router.canGoBack(),
+    back: () => testingLibrary.act(() => router.back()),
+    focused: () => names.find((name) => displayOf(name) === 'flex'),
     advance: (ms: number) => testingLibrary.act(() => jest.advanceTimersByTime(ms)),
   };
 }
@@ -179,6 +182,21 @@ describe('tab visibility under the installed bottom-tabs', () => {
       tabs.goTo(name);
       tabs.advance(1000);
       expect(tabs.displays()).toEqual(onlyDisplayed(tabs.names, name));
+    });
+  });
+
+  it('back from home leaves the app, and back from any other tab returns home', () => {
+    const tabs = renderRealTabs();
+    // Nothing to go back to on home, so Android's back button closes the app instead of opening the hidden index tab.
+    expect(tabs.canGoBack()).toBe(false);
+    ['more', 'siddur', 'history', 'settings'].forEach((name) => {
+      tabs.goTo(name);
+      tabs.advance(1000);
+      expect(tabs.canGoBack()).toBe(true);
+      tabs.back();
+      tabs.advance(1000);
+      expect(tabs.focused()).toBe('home');
+      expect(tabs.canGoBack()).toBe(false);
     });
   });
 

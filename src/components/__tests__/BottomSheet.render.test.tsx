@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, Modal, Platform, Text } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, StyleSheet, Text } from 'react-native';
 import { fireEvent, screen, userEvent, within } from '@testing-library/react-native';
 import { BottomSheet, SheetAction } from '../BottomSheet';
 import { QuietBlockContext } from '../ShabbatScreen';
@@ -30,6 +30,19 @@ describe('BottomSheet', () => {
     expect(screen.getByText('Pick a city')).toBeOnTheScreen();
     expect(screen.getByText('Used for the times')).toBeOnTheScreen();
     expect(screen.getByText('Jerusalem')).toBeOnTheScreen();
+  });
+
+  it('fades the backdrop in place and slides only the sheet', () => {
+    renderWithTheme(
+      <BottomSheet visible title="Pick a city" onClose={jest.fn()}>
+        <Text>Jerusalem</Text>
+      </BottomSheet>,
+    );
+    // A sliding Modal carried the backdrop up with the sheet (the owner's report, 2026-10-31).
+    expect(screen.UNSAFE_getByType(Modal).props.animationType).toBe('fade');
+    const sheet = screen.getByTestId('bottom-sheet');
+    expect(StyleSheet.flatten(sheet.props.style).transform).toEqual([{ translateY: expect.any(Number) }]);
+    expect(StyleSheet.flatten(findBackdrop().props.style).transform).toBeUndefined();
   });
 
   it('draws no heading when it has neither title nor caption', () => {

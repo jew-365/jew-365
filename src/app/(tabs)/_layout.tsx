@@ -9,6 +9,9 @@ export default function TabsLayout() {
   return (
     <Tabs
       initialRouteName="home"
+      // Back returns to home and, on home, leaves the app; the default ('firstRoute') went to the hidden index tab,
+      // whose redirect sent it straight back, so Android's back button never closed the app.
+      backBehavior="initialRoute"
       detachInactiveScreens={false}
       tabBar={(props) => <BottomTabs {...props} />}
       screenOptions={{

@@ -83,6 +83,7 @@ const INTERACTION_MOTION: Record<string, string> = {
   'components/MarkStamp.tsx': 'the stamp answers a mark',
   'components/SegmentedControl.tsx': 'the indicator follows the choice',
   'components/ConfirmDialog.tsx': 'the countdown bar is a timer, not an entrance',
+  'components/BottomSheet.tsx': 'the sheet rises when a press opens it, over a backdrop that fades in place',
   'app/compass.tsx': 'the sweep, pulse and waves follow the live heading',
   'app/siddur/[id].tsx': 'a fold opens and closes on a tap',
 };

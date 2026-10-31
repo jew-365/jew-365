@@ -64,8 +64,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'תחילת הדרך', en: 'Getting started' },
     body: [
       {
-        he: 'בפתיחה הראשונה האפליקציה שואלת כמה שאלות קצרות: שם וטלפון (אפשר לדלג), מגדר ומצב משפחתי, נוסח התפילה, אחרי אילו מצוות לעקוב, ועיר או מיקום לפי GPS לחישוב הזמנים, ואז מסך הרשאות שמראה מה כבר מאושר ומאפשר לאשר את השאר. אחרי אישור ההתראות מצוות היום כבר מחכות בדף הבית.',
-        en: "The first time the app opens it asks a few short questions: name and phone (optional), gender and marital status, your nusach, which mitzvot to track, and a city or a GPS location for the zmanim, then a permissions screen that shows what is already allowed and lets you allow the rest. Once notifications are allowed, today's mitzvot are waiting on Home.",
+        he: 'בפתיחה הראשונה האפליקציה שואלת כמה שאלות קצרות: שם וטלפון (אפשר לדלג), מגדר ומצב משפחתי, נוסח התפילה, אחרי אילו מצוות לעקוב, ועיר או מיקום לפי GPS לחישוב הזמנים (מיקום לפי GPS מתעדכן לבד בכל פתיחה של האפליקציה, כך שהזמנים תמיד של המקום שבו הטלפון נמצא; עיר שנבחרה ידנית נשארת קבועה), ואז מסך הרשאות שמראה מה כבר מאושר ומאפשר לאשר את השאר. אחרי אישור ההתראות מצוות היום כבר מחכות בדף הבית.',
+        en: "The first time the app opens it asks a few short questions: name and phone (optional), gender and marital status, your nusach, which mitzvot to track, and a city or a GPS location for the zmanim (a GPS location updates itself every time the app opens, so the times are always those of where the phone is; a city picked by hand stays fixed), then a permissions screen that shows what is already allowed and lets you allow the rest. Once notifications are allowed, today's mitzvot are waiting on Home.",
       },
       {
         he: 'במעבר לטלפון חדש מקישים במסך הפתיחה על ״יש לי קובץ גיבוי״ ומשחזרים את הקובץ שיוצא בטלפון הקודם.',
@@ -424,6 +424,22 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: 'במסך ״מה עשית בשבת?״ סימון נספר כסימון בזמן, בלי השאלה מתי עשית.',
         en: 'In the "What did you do on Shabbat?" check-in a mark counts as made in time, with no question about when.',
+      },
+      {
+        he: 'המיקום מתעדכן לבד לפי המקום שבו הטלפון נמצא, בכל פתיחה של האפליקציה, והזמנים וההתראות זזים איתו. עיר שנבחרה ידנית בהגדרות נשארת קבועה.',
+        en: 'The location now follows where the phone is, every time the app opens, and the times and notifications move with it. A city picked by hand in Settings stays fixed.',
+      },
+      {
+        he: 'במעקב, כרטיס ״לשיפור״ עבר לסוף ״סיכום״, אחרי העקביות לפי מצווה.',
+        en: 'In Tracking, the To improve card moved to the end of Summary, after the consistency per mitzvah.',
+      },
+      {
+        he: 'באנדרואיד, כפתור החזרה בדף הבית יוצא מהאפליקציה, ומכל לשונית אחרת חוזר לדף הבית.',
+        en: 'On Android, the back button on Home leaves the app, and on any other tab returns to Home.',
+      },
+      {
+        he: 'כשמגירה נפתחת, הרקע מאחוריה מופיע במקומו ורק המגירה עולה מלמטה.',
+        en: 'When a drawer opens, the backdrop behind it appears in place and only the drawer rises from the bottom.',
       },
     ],
   },

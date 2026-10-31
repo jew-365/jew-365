@@ -1,8 +1,19 @@
-import React from 'react';
-import { KeyboardAvoidingView, Modal, Pressable, StyleSheet, Text, View, ViewProps } from 'react-native';
+import React, { useLayoutEffect } from 'react';
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  ViewProps,
+  useWindowDimensions,
+} from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { EASE_OUT, useReduceMotion } from '@/hooks/useMotion';
 import { useTheme } from '@/theme/ThemeProvider';
 import { scaled } from '@/theme/scale';
-import { radius, spacing } from '@/theme/tokens';
+import { motion, radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
 import { useQuietBlock } from './ShabbatScreen';
@@ -19,13 +30,28 @@ export function BottomSheet({ visible, title, caption, onClose, children }: Bott
   const { colors } = useTheme();
   const { t } = useI18n();
   const quiet = useQuietBlock() !== null;
+  const shown = visible && !quiet;
+  const { height } = useWindowDimensions();
+  const reduce = useReduceMotion();
+  // The modal fades, so the backdrop appears in place; only the sheet rises from the bottom (the owner's call, 2026-10-31).
+  const rise = useSharedValue(reduce ? 0 : height);
+  useLayoutEffect(() => {
+    if (!shown) return;
+    if (reduce) {
+      rise.value = 0;
+      return;
+    }
+    rise.value = height;
+    rise.value = withTiming(0, { duration: motion.sheetMs, easing: EASE_OUT });
+  }, [shown, reduce, height, rise]);
+  const sheetMotion = useAnimatedStyle(() => ({ transform: [{ translateY: rise.value }] }));
 
   return (
-    <Modal visible={visible && !quiet} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={shown} transparent animationType="fade" onRequestClose={onClose}>
       <KeyboardAvoidingView style={styles.fill} behavior="padding">
         <View style={[styles.backdrop, { backgroundColor: colors.overlay }]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessible={false} />
-          <View style={[styles.sheet, { backgroundColor: colors.surface }]}>
+          <Animated.View testID="bottom-sheet" style={[styles.sheet, { backgroundColor: colors.surface }, sheetMotion]}>
             {title || caption ? (
               <View style={styles.heading}>
                 {title ? <Text style={[typography.heading, { color: colors.text }]}>{title}</Text> : null}
@@ -42,7 +68,7 @@ export function BottomSheet({ visible, title, caption, onClose, children }: Bott
             >
               <Text style={[typography.bodyBold, { color: colors.text }]}>{t('common.close')}</Text>
             </Pressable>
-          </View>
+          </Animated.View>
         </View>
       </KeyboardAvoidingView>
     </Modal>

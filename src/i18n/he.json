@@ -347,6 +347,8 @@
   "settings.gpsUpdated": "המיקום עודכן לפי GPS.",
   "settings.gpsFallback": "לא נמצא GPS. נשארת העיר השמורה.",
   "settings.locationStatus.ready": "מוכן",
+  "settings.locationFollows": "מתעדכן לבד לפי המקום שבו הטלפון נמצא, בכל פתיחה של האפליקציה",
+  "settings.locationFixed": "עיר שנבחרה ידנית: הזמנים לא זזים כשהטלפון זז. ״אתר לפי המיקום שלי״ מחזיר את העדכון האוטומטי",
   "settings.locationStatus.denied": "גישה למיקום נדחתה",
   "settings.locationStatus.timeout": "זמן החיפוש פג",
   "settings.locationStatus.missing": "לא הוגדר מיקום",

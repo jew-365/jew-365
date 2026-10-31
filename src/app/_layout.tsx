@@ -33,6 +33,7 @@ import { reconcileChokInstall } from '@/services/ChokContentService';
 import { reconcileSelichotInstall } from '@/services/SelichotContentService';
 import { afterPaint } from '@/utils/afterPaint';
 import { reconcileEndedCustomMitzvot } from '@/stores/customMitzvahLifecycle';
+import { followDeviceLocation } from '@/services/locationFollow';
 import {
   initNotificationResponseHandler,
   consumePendingNotificationRoute,
@@ -156,6 +157,13 @@ function RootInner() {
     const task = afterPaint(() => reconcileEndedCustomMitzvot(new Date(now)));
     return () => task.cancel();
   }, [now]);
+
+  // The zmanim follow the phone: on launch and on every return to the app (`now` turns on both).
+  useEffect(() => {
+    if (quiet || !isOnboarded) return;
+    const task = afterPaint(() => void followDeviceLocation());
+    return () => task.cancel();
+  }, [quiet, isOnboarded, now]);
 
   // Unwind everything stacked under the Shabbat screen — when the block starts, and again after any
   // navigation inside it — so nothing stale stays mounted for a day, above all the reader, which

@@ -135,6 +135,7 @@ export default function SettingsScreen() {
       location: s.location,
       inIsrael: s.inIsrael,
       locationStatus: s.locationStatus,
+      locationSource: s.locationSource,
       theme: s.theme,
       uiScale: s.uiScale,
       language: s.language,
@@ -599,7 +600,13 @@ export default function SettingsScreen() {
                     {getLocationName(user.location, language)}
                   </Text>
                   <Text style={[typography.small, styles.hint, { color: colors.textMuted }]}>
-                    {t(`settings.locationStatus.${user.locationStatus}`)}
+                    {t(
+                      user.locationStatus !== 'ready'
+                        ? `settings.locationStatus.${user.locationStatus}`
+                        : user.locationSource === 'gps'
+                          ? 'settings.locationFollows'
+                          : 'settings.locationFixed',
+                    )}
                   </Text>
                   <Button label={t('settings.useCurrentLocation')} onPress={refreshLocation} style={styles.buttonGap} />
                   {statusText ? (

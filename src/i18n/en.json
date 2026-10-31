@@ -347,6 +347,8 @@
   "settings.gpsUpdated": "Location updated from GPS.",
   "settings.gpsFallback": "GPS unavailable. Kept saved city.",
   "settings.locationStatus.ready": "Ready",
+  "settings.locationFollows": "Follows where the phone is, every time the app opens",
+  "settings.locationFixed": "A city picked by hand: the times stay put when the phone moves. \"Refresh current location\" turns automatic updates back on",
   "settings.locationStatus.denied": "Location denied",
   "settings.locationStatus.timeout": "Timed out",
   "settings.locationStatus.missing": "Missing",
