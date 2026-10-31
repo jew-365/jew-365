@@ -104,7 +104,7 @@ describe('Settings cards, icons and actions', () => {
     openSection('settings.device');
     expect(screen.getByText(he('settings.locationFollows'))).toBeOnTheScreen();
     act(() => useUserStore.getState().setLocationState(jerusalem, 'ready', 'manual'));
-    expect(screen.getByText(he('settings.locationFixed'))).toBeOnTheScreen();
+    expect(screen.getByText(he('settings.locationPicked'))).toBeOnTheScreen();
     act(() => useUserStore.getState().setLocationStatus('denied'));
     expect(screen.getByText(he('settings.locationStatus.denied'))).toBeOnTheScreen();
   });

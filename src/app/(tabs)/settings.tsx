@@ -605,7 +605,7 @@ export default function SettingsScreen() {
                         ? `settings.locationStatus.${user.locationStatus}`
                         : user.locationSource === 'gps'
                           ? 'settings.locationFollows'
-                          : 'settings.locationFixed',
+                          : 'settings.locationPicked',
                     )}
                   </Text>
                   <Button label={t('settings.useCurrentLocation')} onPress={refreshLocation} style={styles.buttonGap} />

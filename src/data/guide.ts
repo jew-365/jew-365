@@ -64,8 +64,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'תחילת הדרך', en: 'Getting started' },
     body: [
       {
-        he: 'בפתיחה הראשונה האפליקציה שואלת כמה שאלות קצרות: שם וטלפון (אפשר לדלג), מגדר ומצב משפחתי, נוסח התפילה, אחרי אילו מצוות לעקוב, ועיר או מיקום לפי GPS לחישוב הזמנים (מיקום לפי GPS מתעדכן לבד בכל פתיחה של האפליקציה, כך שהזמנים תמיד של המקום שבו הטלפון נמצא; עיר שנבחרה ידנית נשארת קבועה), ואז מסך הרשאות שמראה מה כבר מאושר ומאפשר לאשר את השאר. אחרי אישור ההתראות מצוות היום כבר מחכות בדף הבית.',
-        en: "The first time the app opens it asks a few short questions: name and phone (optional), gender and marital status, your nusach, which mitzvot to track, and a city or a GPS location for the zmanim (a GPS location updates itself every time the app opens, so the times are always those of where the phone is; a city picked by hand stays fixed), then a permissions screen that shows what is already allowed and lets you allow the rest. Once notifications are allowed, today's mitzvot are waiting on Home.",
+        he: 'בפתיחה הראשונה האפליקציה שואלת כמה שאלות קצרות: שם וטלפון (אפשר לדלג), מגדר ומצב משפחתי, נוסח התפילה, אחרי אילו מצוות לעקוב, ועיר או מיקום לפי GPS לחישוב הזמנים (כשיש הרשאת מיקום, המיקום מתעדכן לבד בכל פתיחה של האפליקציה, כך שהזמנים תמיד של המקום שבו הטלפון נמצא, וגם עיר שנבחרה ידנית מתחלפת במקום שבו הטלפון נמצא; בלי הרשאה העיר שנבחרה נשארת), ואז מסך הרשאות שמראה מה כבר מאושר ומאפשר לאשר את השאר. אחרי אישור ההתראות מצוות היום כבר מחכות בדף הבית.',
+        en: "The first time the app opens it asks a few short questions: name and phone (optional), gender and marital status, your nusach, which mitzvot to track, and a city or a GPS location for the zmanim (with location access allowed, the location updates itself every time the app opens, so the times are always those of where the phone is, and a city picked by hand also gives way to where the phone is; without access the city picked stays), then a permissions screen that shows what is already allowed and lets you allow the rest. Once notifications are allowed, today's mitzvot are waiting on Home.",
       },
       {
         he: 'במעבר לטלפון חדש מקישים במסך הפתיחה על ״יש לי קובץ גיבוי״ ומשחזרים את הקובץ שיוצא בטלפון הקודם.',
@@ -405,6 +405,16 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 ];
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
+  {
+    label: '1.0.21-8',
+    date: '2026-10-31',
+    items: [
+      {
+        he: 'גם עיר שנבחרה ידנית בהגדרות מתעדכנת עכשיו לפי המקום שבו הטלפון נמצא, בפתיחה הבאה של האפליקציה, כשיש הרשאת מיקום. בלי הרשאה העיר שנבחרה נשארת.',
+        en: 'A city picked by hand in Settings now also moves to where the phone is the next time the app opens, when location access is allowed. Without access the city picked stays.',
+      },
+    ],
+  },
   {
     label: '1.0.21-7',
     date: '2026-10-31',

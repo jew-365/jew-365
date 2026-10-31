@@ -59,12 +59,42 @@ describe('followDeviceLocation', () => {
     expect(useUserStore.getState().location).toBe(before);
   });
 
-  it('keeps a city the user picked by hand, and never reads the phone for it', async () => {
+  it('moves a city picked by hand to where the phone is, as a GPS place', async () => {
     startAt('manual');
+    expect(await followDeviceLocation()).toBe(true);
+    expect(useUserStore.getState()).toMatchObject({ locationSource: 'gps', locationStatus: 'ready' });
+    expect(useUserStore.getState().location.cityId).toBe('tel-aviv');
+  });
+
+  it('keeps a city picked by hand while the phone is within a kilometre of it', async () => {
+    startAt('manual');
+    const before = useUserStore.getState().location;
+    mockGetCurrentPosition.mockResolvedValue(fix(JERUSALEM.lat + 0.004, JERUSALEM.lng));
     expect(await followDeviceLocation()).toBe(false);
+    expect(useUserStore.getState().location).toBe(before);
+    expect(useUserStore.getState().locationSource).toBe('manual');
+  });
+
+  it('keeps a city picked by hand without the permission', async () => {
+    startAt('manual');
+    mockGetForeground.mockResolvedValue({ granted: false, canAskAgain: false });
+    expect(await followDeviceLocation()).toBe(false);
+    expect(useUserStore.getState()).toMatchObject({ locationSource: 'manual' });
     expect(useUserStore.getState().location.cityId).toBe('jerusalem');
     expect(mockGetCurrentPosition).not.toHaveBeenCalled();
-    expect(mockGetLastKnown).not.toHaveBeenCalled();
+  });
+
+  it('lets a city picked while the fix is on its way win over that fix', async () => {
+    startAt('gps');
+    let deliver!: (value: unknown) => void;
+    mockGetCurrentPosition.mockReturnValue(new Promise((resolve) => (deliver = resolve)));
+    const following = followDeviceLocation();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    useUserStore.getState().setLocationState(findCityById('haifa')!, 'ready', 'manual');
+    deliver(fix(TEL_AVIV.lat, TEL_AVIV.lng));
+    expect(await following).toBe(false);
+    expect(useUserStore.getState()).toMatchObject({ locationSource: 'manual' });
+    expect(useUserStore.getState().location.cityId).toBe('haifa');
   });
 
   it('replaces the default place nobody confirmed', async () => {
