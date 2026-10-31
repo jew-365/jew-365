@@ -11,7 +11,6 @@ import { MitzvahCard } from '@/components/MitzvahCard';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
 import { useDayModel } from '@/hooks/useDayModel';
-import { useLateMarkDialog } from '@/hooks/useLateMarkDialog';
 import { useViewport, ViewportContext } from '@/hooks/useInView';
 import { StorageService } from '@/services/StorageService';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
@@ -28,6 +27,7 @@ import {
   latestCheckIn,
 } from '@/utils/checkIn';
 import { clockOf } from '@/utils/clock';
+import { onTimeMarkAt, windowClosed } from '@/utils/lateMarks';
 import { formatDate, useI18n } from '@/i18n';
 
 // Marks for the days of a Shabbat / Yom Tov block, written after it ends. The one route allowed to
@@ -42,7 +42,7 @@ export default function CheckInRoute() {
   const skipped = useCompletionsStore((s) => s.skipped);
   const late = useCompletionsStore((s) => s.late);
   const unmark = useCompletionsStore((s) => s.unmark);
-  const lateMark = useLateMarkDialog();
+  const markDone = useCompletionsStore((s) => s.markDone);
   const finishCheckIn = useCompletionsStore((s) => s.finishCheckIn);
 
   // The block whose check-in was open on arrival. It stays on screen after the last mark, which
@@ -75,19 +75,18 @@ export default function CheckInRoute() {
   );
 
   // Past the deadline a mark would rewrite a day that is already decided — and revive a broken streak.
-  // Nearly every window here has closed with the block, so the mark asks when it was done.
+  // Nothing could be marked during the block, so a closed window is filed as a mark in time, never asked about
+  // (the owner's call, 2026-10-31).
   const mark = (item: CheckInItem, date: Date) => {
     if (!checkIn || Date.now() >= checkIn.deadline.getTime()) {
       close();
       return;
     }
-    lateMark.mark({
-      id: item.mitzvah.id,
-      name: nameFor(item.mitzvah),
+    markDone(
+      item.mitzvah.id,
       date,
-      window: item.window,
-      until: checkIn.deadline,
-    });
+      windowClosed(item.window, new Date()) ? { at: onTimeMarkAt(item.window) } : undefined,
+    );
   };
 
   const close = () => {
@@ -172,7 +171,6 @@ export default function CheckInRoute() {
           {t('checkin.empty')}
         </Text>
       )}
-      {lateMark.dialog}
     </SafeAreaView>
   );
 }

@@ -75,25 +75,26 @@ describe('check-in', () => {
     expect(cards.some((card) => card.props.icon === 'custom')).toBe(false);
   });
 
-  it("lists Friday night's bedtime Shema with the night icon and files its mark under Friday", async () => {
+  it("lists Friday night's bedtime Shema with the night icon and files its mark under Friday, in time, without asking", async () => {
     renderWithTheme(<CheckInRoute />);
     await screen.findByText(/מה עשית בשבת/);
     const card = screen.UNSAFE_getAllByType(MitzvahCard).find((node) => node.props.name === 'קריאת שמע על המיטה');
     expect(card?.props.icon).toBe('night');
     act(() => card!.props.onComplete());
-    expect(useCompletionsStore.getState().completions['2026-11-13']).toBeUndefined();
-    fireEvent.press(screen.getByText('עשיתי בזמן ולא סימנתי'));
-    expect(useCompletionsStore.getState().completions['2026-11-13']?.krias_shma_al_hamita).toBeTruthy();
+    expect(screen.queryByText('מתי עשית?')).toBeNull();
+    const filed = useCompletionsStore.getState().completions['2026-11-13']?.krias_shma_al_hamita;
+    // One minute before the window closed at Saturday's alot: a mark in time, never a late one.
+    expect(filed).toBeGreaterThan(at(JERUSALEM, '2026-11-14T04:00').getTime());
+    expect(filed).toBeLessThan(at(JERUSALEM, '2026-11-14T06:00').getTime());
     expect(useCompletionsStore.getState().late).toEqual({});
   });
 
-  it('writes nothing when the question is answered after the deadline', async () => {
+  it('writes nothing after the deadline', async () => {
     renderWithTheme(<CheckInRoute />);
     await screen.findByText(/מה עשית בשבת/);
     const card = screen.UNSAFE_getAllByType(MitzvahCard).find((node) => node.props.name === 'קריאת שמע על המיטה');
-    act(() => card!.props.onComplete());
     jest.setSystemTime(at(JERUSALEM, '2026-11-16T07:00'));
-    fireEvent.press(screen.getByText('עשיתי אחרי שעבר הזמן'));
+    act(() => card!.props.onComplete());
     expect(useCompletionsStore.getState().completions).toEqual({});
     expect(useCompletionsStore.getState().late).toEqual({});
   });

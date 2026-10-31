@@ -15,8 +15,10 @@ import { MarkStamp } from './MarkStamp';
 import type { IconName } from './MitzvahIcon';
 
 const TILE_SIZE = scaled(44);
-const RING_SIZE = scaled(60);
+const RING_SIZE = scaled(68);
 const RING_LENGTH = 157.08;
+// The ring does not grow with the phone's font size, so its text stops growing at this share of it.
+const RING_TEXT_MAX_SCALE = 1.15;
 
 type Props = {
   name: string;
@@ -99,8 +101,15 @@ export const NowCard = React.memo(function NowCard({
               />
             </Svg>
             <View style={styles.ringText}>
-              <Text style={[typography.bodyBold, { color: urgent ? colors.urgent : colors.text }]}>{parts.value}</Text>
-              <Text style={[typography.micro, { color: colors.textSub }]}>{t(`time.unit.${parts.unit}`)}</Text>
+              <Text
+                maxFontSizeMultiplier={RING_TEXT_MAX_SCALE}
+                style={[typography.captionBold, { color: urgent ? colors.urgent : colors.text }]}
+              >
+                {parts.value}
+              </Text>
+              <Text maxFontSizeMultiplier={RING_TEXT_MAX_SCALE} style={[typography.micro, { color: colors.textSub }]}>
+                {t(`time.unit.${parts.unit}`)}
+              </Text>
             </View>
           </View>
         </Pressable>

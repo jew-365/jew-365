@@ -305,6 +305,18 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Done:** 2026-10-30. Verified: typecheck, lint, check:dox, the home and guide suites and the whole `pnpm test:tz` (222 suites, 5,748 tests in each of the four zones) pass. Not checked: on a phone.
   - **Status:** Version: OTA `1.0.21-6` · Committed: no · Pushed: no · Live: production `1.0.21-6` (group `5226dac2-a39e-49ca-afea-265dbdc64856`, built from the uncommitted tree on top of `4c62f3c`) and preview `1.0.21-25` (group `f0145073-9fbd-4901-8adf-d43d3a48a509`) · Channel: `production`, `preview`
 
+- [ ] Keep the time left clear of the ring in Open now
+  - **Flag:** `OTA`.
+  - **Requested:** the owner, 2026-10-31, with a phone screenshot: in the ring of the time left the text sometimes touches the ring (`11:07` under Maariv and the bedtime Shema); a slightly larger ring and slightly smaller text.
+  - **What it is:** `src/components/NowCard.tsx`: the ring grows from 60 to 68 points, the figures go from `bodyBold` (15) to `captionBold` (13), and both lines stop growing at 1.15 times the phone's font size (`RING_TEXT_MAX_SCALE`), since the ring does not grow with it.
+  - **Expected result:** measured on Heebo, the widest value (`47:59`) stays 5.3 points inside the ring at the default font size and 2.4 at 1.15 times it (it was 0.1 point past the ring's inner edge, and `11:07` about one point inside it); the guide's `1.0.21-7` entry says it.
+
+- [ ] Mark the check-in in time, without the late question
+  - **Flag:** `OTA`.
+  - **Requested:** the owner, 2026-10-31, with a screenshot of the "מתי עשית?" sheet over "מה עשית בשבת?": no late-mark logic in the check-in; a mark there behaves as a mark made in time, with no question.
+  - **What it is:** `src/app/checkin.tsx` no longer uses `useLateMarkDialog()`: a closed window is filed at `onTimeMarkAt()` (one minute before it closed, as "עשיתי בזמן ולא סימנתי" was), an open one is a plain mark, and nothing is written past the check-in's deadline. The other surfaces still ask.
+  - **Expected result:** a tap on a check-in card marks it at once, never as late; the guide's check-in and late-mark paragraphs and its `1.0.21-7` entry say so.
+
 ### High — Late marks count as done, 2026-10-30
 
 - [ ] Count a late mark as done, with in-time figures and three badges

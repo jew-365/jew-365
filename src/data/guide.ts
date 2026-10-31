@@ -174,8 +174,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'An hour before candle lighting a notification gives the lighting and exit times and, as switched on, the Omer count, hilulot, Rosh Chodesh and the Ushpizin of the nights inside the Shabbat or Yom Tov.',
       },
       {
-        he: 'אחרי השבת או החג האפליקציה פותחת מסך סימון למה שנעשה בזמן הזה, ובדף הבית מופיע פס שמזכיר לסמן. התראות מזכירות בצאת השבת, שעתיים אחר כך ובערב שלמחרת. אפשר לסמן עד עלות השחר שאחרי היום הראשון בחול, ומה שלא סומן עד אז נחשב כלא בוצע. שבתות וחגים נספרים בהיסטוריה וברצף כמו כל יום.',
-        en: 'After Shabbat or Yom Tov the app opens a check-in to mark what was done in that time, and a strip on Home reminds you to mark. Notifications remind you at the exit, two hours later and the next evening. You can mark until dawn after the first weekday; anything unmarked by then counts as missed. Shabbat and Yom Tov count in history and the streak like any other day.',
+        he: 'אחרי השבת או החג האפליקציה פותחת מסך סימון למה שנעשה בזמן הזה, ובדף הבית מופיע פס שמזכיר לסמן. התראות מזכירות בצאת השבת, שעתיים אחר כך ובערב שלמחרת. סימון כאן נספר כסימון בזמן, בלי שאלה. אפשר לסמן עד עלות השחר שאחרי היום הראשון בחול, ומה שלא סומן עד אז נחשב כלא בוצע. שבתות וחגים נספרים בהיסטוריה וברצף כמו כל יום.',
+        en: 'After Shabbat or Yom Tov the app opens a check-in to mark what was done in that time, and a strip on Home reminds you to mark. Notifications remind you at the exit, two hours later and the next evening. A mark there counts as made in time, with no question. You can mark until dawn after the first weekday; anything unmarked by then counts as missed. Shabbat and Yom Tov count in history and the streak like any other day.',
       },
     ],
     routes: ['/checkin'],
@@ -271,8 +271,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'The streak counts days in a row with at least one mitzvah marked. A day with nothing marked and something missed breaks it; a Shabbat or Yom Tov still waiting for its check-in does not.',
       },
       {
-        he: 'מצווה שהזמן שלה נגמר אפשר עדיין לסמן: ב״היום שלי״ בבית, במסך המצווה, בסידור ובצ׳ק־אין אחרי שבת. האפליקציה שואלת מתי עשית. ״עשיתי בזמן ולא סימנתי״ נספר כמו סימון בזמן. ״עשיתי אחרי שעבר הזמן״ נספר כבוצע בכל מקום, באחוזים, בלוח החודש, במגמות, בדוח השבועי ובהישגים, וב״היום שלי״ בבית מוצג בירוק כמו כל מה שבוצע, עם תווית כתומה ״בוצע באיחור״. ב״סיכום״ מופיע כמה מהסימונים היו בזמן בכל תקופה, כמה איחורים היו לכל מצווה, וכרטיס ״לשיפור״ עם המצווה שאיחרת בה הכי הרבה ב-30 הימים האחרונים, שפותח את ״סימונים באיחור״: איזו מצווה, באיזה יום, מתי נגמר הזמן ומתי סימנת. ״מגמות״ מציג את האיחורים ב-12 השבועות האחרונים, והדוח השבועי את המצווה שאיחרת בה הכי הרבה השבוע. ההישגים ״שבוע בזמן״ ו״חודש בזמן״ דורשים שכל הסימונים יהיו בזמן, ו״פחות איחורים״ ניתן על שבוע עם פחות איחורים מהשבוע שלפניו.',
-        en: 'A mitzvah whose time has ended can still be marked: in My day on Home, on the mitzvah\'s screen, in the siddur and in the check-in after Shabbat. The app asks when you did it. "I did it in time and didn\'t mark it" counts like a mark made in time. "I did it after the time passed" counts as done everywhere, in percentages, the month calendar, Trends, the weekly report and badges, and in My day on Home it shows in green like everything done, with an orange Done late label. Summary shows how many marks were on time in each period, the late marks of each mitzvah, and a To improve card with the mitzvah you were late on most in the last 30 days, which opens Late marks: which mitzvah, on which day, when its time ended and when you marked it. Trends shows the late marks of the last 12 weeks, and the weekly report the mitzvah you were late on most that week. The badges A week on time and A month on time need every mark in time, and Fewer late marks is given for a week with fewer late marks than the week before it.',
+        he: 'מצווה שהזמן שלה נגמר אפשר עדיין לסמן: ב״היום שלי״ בבית, במסך המצווה, ובסידור. האפליקציה שואלת מתי עשית. ״עשיתי בזמן ולא סימנתי״ נספר כמו סימון בזמן. ״עשיתי אחרי שעבר הזמן״ נספר כבוצע בכל מקום, באחוזים, בלוח החודש, במגמות, בדוח השבועי ובהישגים, וב״היום שלי״ בבית מוצג בירוק כמו כל מה שבוצע, עם תווית כתומה ״בוצע באיחור״. ב״סיכום״ מופיע כמה מהסימונים היו בזמן בכל תקופה, כמה איחורים היו לכל מצווה, וכרטיס ״לשיפור״ עם המצווה שאיחרת בה הכי הרבה ב-30 הימים האחרונים, שפותח את ״סימונים באיחור״: איזו מצווה, באיזה יום, מתי נגמר הזמן ומתי סימנת. ״מגמות״ מציג את האיחורים ב-12 השבועות האחרונים, והדוח השבועי את המצווה שאיחרת בה הכי הרבה השבוע. ההישגים ״שבוע בזמן״ ו״חודש בזמן״ דורשים שכל הסימונים יהיו בזמן, ו״פחות איחורים״ ניתן על שבוע עם פחות איחורים מהשבוע שלפניו.',
+        en: 'A mitzvah whose time has ended can still be marked: in My day on Home, on the mitzvah\'s screen and in the siddur. The app asks when you did it. "I did it in time and didn\'t mark it" counts like a mark made in time. "I did it after the time passed" counts as done everywhere, in percentages, the month calendar, Trends, the weekly report and badges, and in My day on Home it shows in green like everything done, with an orange Done late label. Summary shows how many marks were on time in each period, the late marks of each mitzvah, and a To improve card with the mitzvah you were late on most in the last 30 days, which opens Late marks: which mitzvah, on which day, when its time ended and when you marked it. Trends shows the late marks of the last 12 weeks, and the weekly report the mitzvah you were late on most that week. The badges A week on time and A month on time need every mark in time, and Fewer late marks is given for a week with fewer late marks than the week before it.',
       },
       {
         he: 'דוח שבועי נפתח מרשימת הדוחות בלשונית מגמות: מה סומן, היום הכי טוב, איזו מצווה כדאי לחזק ומה מחכה בשבוע הבא, ומעבר בין השבועות. כ־45 דקות אחרי צאת השבת מגיעה התראה שהסיכום מוכן; אפשר לכבות אותה בהגדרות ← מכשיר והתראות.',
@@ -416,6 +416,14 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: 'במעקב: כמה מהסימונים היו בזמן בכל תקופה, איחורים לכל מצווה, כרטיס ״לשיפור״, גרף איחורים ב-12 השבועות, ושלושה הישגים חדשים: שבוע בזמן, חודש בזמן ופחות איחורים.',
         en: 'In Tracking: how many marks were on time in each period, late marks per mitzvah, a To improve card, a 12-week chart of late marks, and three new badges: A week on time, A month on time and Fewer late marks.',
+      },
+      {
+        he: 'העיגול של הזמן שנשאר ב״פתוח עכשיו״ גדל מעט והמספרים בו קטנו מעט, כך שהם לא נוגעים בעיגול.',
+        en: 'The time-left ring in Open now is a little larger and its figures a little smaller, so they never touch it.',
+      },
+      {
+        he: 'במסך ״מה עשית בשבת?״ סימון נספר כסימון בזמן, בלי השאלה מתי עשית.',
+        en: 'In the "What did you do on Shabbat?" check-in a mark counts as made in time, with no question about when.',
       },
     ],
   },

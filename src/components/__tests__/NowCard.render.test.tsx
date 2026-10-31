@@ -1,10 +1,12 @@
+import { StyleSheet } from 'react-native';
 import { fireEvent, screen } from '@testing-library/react-native';
-import { Circle } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg';
 import { NowCard } from '../NowCard';
 import { CITIES } from '@/data/cities';
 import { renderWithTheme } from '@/testing/render';
 import { at } from '@/testing/zmanim';
 import { THEMES } from '@/theme/colors';
+import { typography } from '@/theme/typography';
 
 const J = CITIES[0];
 const NAME = 'קריאת שמע של שחרית';
@@ -43,6 +45,17 @@ describe('NowCard', () => {
     expect(screen.getByText('08:38 - סוף')).toBeOnTheScreen();
     expect(screen.getByText('23', { includeHiddenElements: true })).toBeOnTheScreen();
     expect(screen.getByText("דק'", { includeHiddenElements: true })).toBeOnTheScreen();
+  });
+
+  it('keeps the time left clear of the ring: a 68-point ring, 13-point figures, a capped font scale', () => {
+    setup({ now: at(J, '2026-10-29T06:00') });
+    const ring = screen.UNSAFE_getAllByType(Svg).find((svg) => svg.findAllByType(Circle).length > 0);
+    expect(ring?.props.width).toBe(68);
+    const value = screen.getByText('2:38', { includeHiddenElements: true });
+    expect(StyleSheet.flatten(value.props.style).fontSize).toBe(typography.captionBold.fontSize);
+    for (const text of [value, screen.getByText('שעות', { includeHiddenElements: true })]) {
+      expect(text.props.maxFontSizeMultiplier).toBe(1.15);
+    }
   });
 
   it('draws the progress ring in urgent', () => {
