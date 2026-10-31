@@ -295,96 +295,6 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
 
 ### High — App requests of 2026-10-28
 
-### High — Home screen of 2026-10-29
-- [ ] Put home's messages below My day
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-30: the messages block after My day, not before it.
-  - **What it solves:** the day list comes first and the information rows after it.
-  - **What it is:** in `src/app/(tabs)/home.tsx` the `home.messages` block now follows the `home.myDay` block and precedes the taharah card; the guide's what's-new entry of `1.0.21-6` names it.
-  - **Expected result:** on home the order is the hero, open now, My day, messages, taharah card.
-  - **Done:** 2026-10-30. Verified: typecheck, lint, check:dox, the home and guide suites and the whole `pnpm test:tz` (222 suites, 5,748 tests in each of the four zones) pass. Not checked: on a phone.
-  - **Status:** Version: OTA `1.0.21-6` · Committed: no · Pushed: no · Live: production `1.0.21-6` (group `5226dac2-a39e-49ca-afea-265dbdc64856`, built from the uncommitted tree on top of `4c62f3c`) and preview `1.0.21-25` (group `f0145073-9fbd-4901-8adf-d43d3a48a509`) · Channel: `production`, `preview`
-
-- [ ] Keep the time left clear of the ring in Open now
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-31, with a phone screenshot: in the ring of the time left the text sometimes touches the ring (`11:07` under Maariv and the bedtime Shema); a slightly larger ring and slightly smaller text.
-  - **What it is:** `src/components/NowCard.tsx`: the ring grows from 60 to 68 points, the figures go from `bodyBold` (15) to `captionBold` (13), and both lines stop growing at 1.15 times the phone's font size (`RING_TEXT_MAX_SCALE`), since the ring does not grow with it.
-  - **Expected result:** measured on Heebo, the widest value (`47:59`) stays 5.3 points inside the ring at the default font size and 2.4 at 1.15 times it (it was 0.1 point past the ring's inner edge, and `11:07` about one point inside it); the guide's `1.0.21-7` entry says it.
-  - **Done:** 2026-10-31. Verified: the clearances above measured with canvas text metrics on the bundled Heebo Bold and Regular; the NowCard suite (the new case fails on the old card); the web build in Jerusalem after Shabbat at 411 points in Hebrew and English, where `10:56` sits in the 68-point ring at 13 px with its line box 2.1 points inside the ring; typecheck, lint and the full suite in four zones (5,772 tests). Not checked: on a phone.
-  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `c52e059` feat(home, check-in): roomier time-left ring; check-in marks count in time · Pushed: yes, `main` (merged 2026-10-31) · Live: preview `1.0.21-28` (group `6d61ba0d-284a-4fd7-bf52-fc7ac6ce145d`, from `54003b6`), production not yet · Channel: preview
-
-- [ ] Mark the check-in in time, without the late question
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-31, with a screenshot of the "מתי עשית?" sheet over "מה עשית בשבת?": no late-mark logic in the check-in; a mark there behaves as a mark made in time, with no question.
-  - **What it is:** `src/app/checkin.tsx` no longer uses `useLateMarkDialog()`: a closed window is filed at `onTimeMarkAt()` (one minute before it closed, as "עשיתי בזמן ולא סימנתי" was), an open one is a plain mark, and nothing is written past the check-in's deadline. The other surfaces still ask.
-  - **Expected result:** a tap on a check-in card marks it at once, never as late; the guide's check-in and late-mark paragraphs and its `1.0.21-7` entry say so.
-  - **Done:** 2026-10-31. Verified: the check-in suite (a closed window is filed one minute before it closed with no sheet and no late flag, and nothing is written past the deadline; the case fails on the old screen, which opened the sheet), typecheck, lint, and the check-in, guide, smoke, design-system, i18n and late-mark suites in four zones. Not checked: on a phone.
-  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `c52e059` feat(home, check-in): roomier time-left ring; check-in marks count in time · Pushed: yes, `main` (merged 2026-10-31) · Live: preview `1.0.21-28` (group `6d61ba0d-284a-4fd7-bf52-fc7ac6ce145d`, from `54003b6`), production not yet · Channel: preview
-
-### High — Requests of 2026-10-31
-
-- [ ] Move the To improve card below the consistency per mitzvah
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-31, with a screen recording: in Tracking, the לשיפור heading and card belong after the consistency per mitzvah.
-  - **What it is:** `src/app/(tabs)/history.tsx`: the `history-improve-card` block moves from above the calendar to the end of סיכום, after the per-mitzvah card and its leader insight.
-  - **Expected result:** סיכום reads rings, achievements link, calendar, consistency per mitzvah, then לשיפור.
-  - **Done:** 2026-10-31. Verified: a history suite case that reads the order (calendar, the per-mitzvah bars, then the card), typecheck, lint, check:dox and the full suite in four zones (5,787 tests each). Not checked: on a phone.
-  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `411b0d5` feat: active location, back exits home, To improve below consistency, drawer backdrop fades · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: preview `1.0.21-29` (group `f5e14c58-36d2-4e5e-bd65-a105d540e6ef`, from `0cf80f7`), production not yet · Channel: preview
-
-- [ ] Leave the app with Android's back button on home
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-31: back on home does not leave the app; check the iPhone too.
-  - **What it is:** `src/app/(tabs)/_layout.tsx` sets `backBehavior="initialRoute"`. The default, `firstRoute`, sent back to the hidden `index` tab, whose redirect returned to home at once, so back never left. iOS has no back button and a swipe does nothing on a tab, so nothing changes there.
-  - **Expected result:** back on home closes the app; back on any other tab returns to home.
-  - **Done:** 2026-10-31. Verified: a tab layout case through the real expo-router (on home `canGoBack()` is false; from each other tab back lands on home), which failed on the old layout, typecheck, lint, check:dox and the full suite in four zones (5,787 tests each). Not checked: on an Android phone.
-  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `411b0d5` feat: active location, back exits home, To improve below consistency, drawer backdrop fades · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: preview `1.0.21-29` (group `f5e14c58-36d2-4e5e-bd65-a105d540e6ef`, from `0cf80f7`), production not yet · Channel: preview
-
-- [ ] Follow the phone's location for the zmanim
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-31: the location should be active, and the zmanim those of where the user is now.
-  - **What it is:** `followDeviceLocation()` in `src/services/locationFollow.ts`, run by the root layout at launch and on every return to the app: with the permission already granted it takes the phone's fix and, when it moved 1 km or more, writes it as the location (city details within 25 km), which rebuilds the schedule. A city picked by hand in Settings stays fixed ("אתר לפי המיקום שלי" turns following back on); the default place nobody confirmed is replaced. Settings says which of the two holds (`settings.locationFollows` / `settings.locationFixed`), and the guide says it.
-  - **Expected result:** after travelling, opening the app shows that place's zmanim and reminders, without any prompt.
-  - **Done:** 2026-10-31. Verified: nine `followDeviceLocation()` cases (a move, a jitter under 1 km, a hand-picked city, the unconfirmed default, no permission and no prompt, no fix, one lookup at a time, a far fix), the root layout calling it at launch and on return but not before onboarding, the Settings line for each state, typecheck, lint, check:dox and the full suite in four zones (5,787 tests each). Not checked: on a phone that travelled.
-  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `411b0d5` feat: active location, back exits home, To improve below consistency, drawer backdrop fades · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: preview `1.0.21-29` (group `f5e14c58-36d2-4e5e-bd65-a105d540e6ef`, from `0cf80f7`), production not yet · Channel: preview
-  - **Open decision for the owner:** a city picked by hand stays fixed. Say if it should follow the phone too.
-
-- [ ] Fade the drawer's backdrop in place
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-31, with a screen recording: the grey backdrop of a drawer slides up together with it.
-  - **What it is:** `src/components/BottomSheet.tsx`: the `Modal` fades (the backdrop appears in place) and only the sheet rises from the bottom (`translateY`, `motion.sheetMs` 300 ms, ease-out; at once under reduced motion). Every drawer of the app uses it.
-  - **Expected result:** opening any drawer darkens the whole screen at once while the drawer slides up.
-  - **Done:** 2026-10-31. Verified: the BottomSheet suite (a fading Modal, a `translateY` on the sheet only), the web build at 60, 140 and 600 ms after opening the halacha hotline drawer (the backdrop covers the whole screen from the first frame), typecheck, lint, check:dox and the full suite in four zones (5,787 tests each). Not checked: on a phone.
-  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `411b0d5` feat: active location, back exits home, To improve below consistency, drawer backdrop fades · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: preview `1.0.21-29` (group `f5e14c58-36d2-4e5e-bd65-a105d540e6ef`, from `0cf80f7`), production not yet · Channel: preview
-
-### High — Late marks count as done, 2026-10-30
-
-- [ ] Count a late mark as done, with in-time figures and three badges
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-30: a late mark counts as done everywhere; new badges for a week and a month on time and for fewer late marks; in-time shares, per-mitzvah late counts, a 12-week late chart and a To improve card in Tracking; the weekly report names the mitzvah marked late most often.
-  - **What it is:** `countsAsDone()` in `src/utils/historyStats.ts` is the one rule; the badge fold is rescanned once under `FOLD_RULE` 2; the screens are `src/app/(tabs)/history.tsx` and `src/app/report.tsx`; the search finds the new cards, figures and badges.
-  - **Expected result:** a late mark raises every percentage and keeps every run and badge; the in-time lines, late counts, chart, card, report line and the three badges show as specified; the guide's `1.0.21-7` entry names it.
-  - **Done:** 2026-10-30. Verified: typecheck, lint, the full suite in four zones (5,766 tests; `history.reveal` passed alone in all four and its calendar wait was raised to 10 s after a timeout under the full parallel load); the web preview with a real late mark: the dialog caption, the in-time lines under the rings, the To improve card and the 12-week late chart. Not checked: on a phone, and the new badges earned on real data.
-  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `898ed4a` feat(history): count late marks as done, with in-time stats and badges · Pushed: yes, `main` · Live: preview `1.0.21-26` (group `bb747076-6b89-4277-a54e-07ff79ee2272`), production not yet · Channel: preview
-
-- [ ] Show a late mark on home in green, with an orange late label
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-30: in My day on home a late mark showed yellow with a late caption; it is to be green like everything done, with a label on an orange background saying it was done late.
-  - **What it is:** `src/components/DayLooks.tsx` draws a `late` entry exactly as a `done` one (`looksDone()`: fill, ink, ring, node and check) and adds an orange pill `home.day.lateBadge` ("בוצע באיחור" / "Done late") on `LATE_BADGE` from `src/theme/colors.ts`, in all three looks; `dayEntryStatusText()` words it as done. Other screens (history, the mitzvah screen, the check-in) keep their late tone.
-  - **Expected result:** a late mark in My day has the done green card, status line, ring and check, and under the status line an orange "בוצע באיחור" pill; screen readers hear it too; the guide's `1.0.21-7` entry says it.
-  - **Done:** 2026-10-30. Verified: typecheck, lint, the DayLooks suite (a late entry's colours equal a done entry's plus the label's, in each look; the new cases fail on the old component), the label's contrast (5.9:1), the full suite in four zones (5,771 tests; the three home cases of `lateMark.render` that pinned the yellow look were updated and rerun in all four), and the web build at 375 points in Hebrew and English with a real late mark in each look: the green card, check and ring, and the orange label. Not checked: on a phone.
-  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `afec520` feat(home): late marks green like done, with an orange late label · Pushed: yes, `main` (merged 2026-10-31) · Live: preview `1.0.21-27` (group `95931d6c-e7c2-459f-8561-1d83dda86ffe`), production not yet · Channel: preview
-
-### Low — Design and records skills, 2026-10-30
-
-- [ ] Add the web designer skills and the project manager skill to the repo
-  - **Flag:** none, tooling only.
-  - **Requested:** the owner, 2026-10-30: install `dox-installer`, `project-manager` and `webapp-designer`, then complete what `webapp-designer` is missing and keep it for good.
-  - **What it is:** [.claude/skills/](.claude/skills) gains [webapp-designer](.claude/skills/webapp-designer/SKILL.md) (the owner's file) and the three specialists it composes, copied as published with their licenses: [design-taste-frontend](.claude/skills/design-taste-frontend/SKILL.md) 2.1.5, [impeccable](.claude/skills/impeccable/SKILL.md) 4.8.0 and [emil-design-eng](.claude/skills/emil-design-eng/SKILL.md); and [project-manager](.claude/skills/project-manager/SKILL.md) (the owner's folder, byte for byte). `dox-installer` is not copied, because the owner's account already syncs the identical file. The Source Map of root [AGENTS.md](AGENTS.md) names them.
-  - **What it solves:** `webapp-designer` named three skills that no session of this repo had, and the records had no skill to keep them. A cloud session starts from a fresh clone, so only files in the repo reach it.
-  - **Expected result:** a session on a branch that holds these files lists all five skills, and `webapp-designer` finds each specialist beside it.
-  - **Done:** 2026-10-30. Verified: every copied file byte-identical to its published source (`pbakaus/impeccable` `df3a4ab`, `Leonxlnx/taste-skill` `12af471`, `emilkowalski/skill` `a81dbca`); strict YAML frontmatter, with the name equal to the folder, for all seven skills; every `.js` and `.mjs` passes `node --check`; the hosts the scripts contact read and found as documented; no instruction-injection phrases in any text; `pnpm check:dox` reports the same three dead `out/` links of the design lab studies as on the untouched HEAD, none from this change; the three skills appeared in the session's skill list. Not checked: any third-party script run (see Other Open Items).
-  - **Status:** Version: none, tooling · Committed: yes, in the commit that adds this item (a commit cannot name itself) · Pushed: yes, `main` · Live: not applicable, reaches no user · Channel: none
-
 ## Bugs
 
 - [ ] A Hebrew Android phone shows the app's English name
@@ -472,6 +382,8 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
 ### For the owner
 
 Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were answered by the owner on 2026-10-26 and became the tasks "Add an English (U.K.) localization on the App Store" and "Ask for a store rating inside the app". Q3 to Q7, from the app requests of 2026-10-26, were answered the same day and are written into their tasks (App requests of 2026-10-26 — batch rules). None is open.
+
+- **Q8 — Should a city picked by hand follow the phone too?** Since production `1.0.21-7` the location follows the phone at every launch and return to the app ([src/services/locationFollow.ts](src/services/locationFollow.ts)), but a city picked by hand in Settings stays fixed until "אתר לפי המיקום שלי" is pressed. Asked on 2026-10-31; open.
 
 ## Other Open Items
 
