@@ -310,12 +310,16 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Requested:** the owner, 2026-10-31, with a phone screenshot: in the ring of the time left the text sometimes touches the ring (`11:07` under Maariv and the bedtime Shema); a slightly larger ring and slightly smaller text.
   - **What it is:** `src/components/NowCard.tsx`: the ring grows from 60 to 68 points, the figures go from `bodyBold` (15) to `captionBold` (13), and both lines stop growing at 1.15 times the phone's font size (`RING_TEXT_MAX_SCALE`), since the ring does not grow with it.
   - **Expected result:** measured on Heebo, the widest value (`47:59`) stays 5.3 points inside the ring at the default font size and 2.4 at 1.15 times it (it was 0.1 point past the ring's inner edge, and `11:07` about one point inside it); the guide's `1.0.21-7` entry says it.
+  - **Done:** 2026-10-31. Verified: the clearances above measured with canvas text metrics on the bundled Heebo Bold and Regular; the NowCard suite (the new case fails on the old card); the web build in Jerusalem after Shabbat at 411 points in Hebrew and English, where `10:56` sits in the 68-point ring at 13 px with its line box 2.1 points inside the ring; typecheck, lint and the full suite in four zones (5,772 tests). Not checked: on a phone.
+  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `c52e059` feat(home, check-in): roomier time-left ring; check-in marks count in time · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: no · Channel: —
 
 - [ ] Mark the check-in in time, without the late question
   - **Flag:** `OTA`.
   - **Requested:** the owner, 2026-10-31, with a screenshot of the "מתי עשית?" sheet over "מה עשית בשבת?": no late-mark logic in the check-in; a mark there behaves as a mark made in time, with no question.
   - **What it is:** `src/app/checkin.tsx` no longer uses `useLateMarkDialog()`: a closed window is filed at `onTimeMarkAt()` (one minute before it closed, as "עשיתי בזמן ולא סימנתי" was), an open one is a plain mark, and nothing is written past the check-in's deadline. The other surfaces still ask.
   - **Expected result:** a tap on a check-in card marks it at once, never as late; the guide's check-in and late-mark paragraphs and its `1.0.21-7` entry say so.
+  - **Done:** 2026-10-31. Verified: the check-in suite (a closed window is filed one minute before it closed with no sheet and no late flag, and nothing is written past the deadline; the case fails on the old screen, which opened the sheet), typecheck, lint, and the check-in, guide, smoke, design-system, i18n and late-mark suites in four zones. Not checked: on a phone.
+  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `c52e059` feat(home, check-in): roomier time-left ring; check-in marks count in time · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: no · Channel: —
 
 ### High — Late marks count as done, 2026-10-30
 
