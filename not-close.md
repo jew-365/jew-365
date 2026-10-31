@@ -328,18 +328,24 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Requested:** the owner, 2026-10-31, with a screen recording: in Tracking, the לשיפור heading and card belong after the consistency per mitzvah.
   - **What it is:** `src/app/(tabs)/history.tsx`: the `history-improve-card` block moves from above the calendar to the end of סיכום, after the per-mitzvah card and its leader insight.
   - **Expected result:** סיכום reads rings, achievements link, calendar, consistency per mitzvah, then לשיפור.
+  - **Done:** 2026-10-31. Verified: a history suite case that reads the order (calendar, the per-mitzvah bars, then the card), typecheck, lint, check:dox and the full suite in four zones (5,787 tests each). Not checked: on a phone.
+  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `411b0d5` feat: active location, back exits home, To improve below consistency, drawer backdrop fades · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: no · Channel: —
 
 - [ ] Leave the app with Android's back button on home
   - **Flag:** `OTA`.
   - **Requested:** the owner, 2026-10-31: back on home does not leave the app; check the iPhone too.
   - **What it is:** `src/app/(tabs)/_layout.tsx` sets `backBehavior="initialRoute"`. The default, `firstRoute`, sent back to the hidden `index` tab, whose redirect returned to home at once, so back never left. iOS has no back button and a swipe does nothing on a tab, so nothing changes there.
   - **Expected result:** back on home closes the app; back on any other tab returns to home.
+  - **Done:** 2026-10-31. Verified: a tab layout case through the real expo-router (on home `canGoBack()` is false; from each other tab back lands on home), which failed on the old layout, typecheck, lint, check:dox and the full suite in four zones (5,787 tests each). Not checked: on an Android phone.
+  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `411b0d5` feat: active location, back exits home, To improve below consistency, drawer backdrop fades · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: no · Channel: —
 
 - [ ] Follow the phone's location for the zmanim
   - **Flag:** `OTA`.
   - **Requested:** the owner, 2026-10-31: the location should be active, and the zmanim those of where the user is now.
   - **What it is:** `followDeviceLocation()` in `src/services/locationFollow.ts`, run by the root layout at launch and on every return to the app: with the permission already granted it takes the phone's fix and, when it moved 1 km or more, writes it as the location (city details within 25 km), which rebuilds the schedule. A city picked by hand in Settings stays fixed ("אתר לפי המיקום שלי" turns following back on); the default place nobody confirmed is replaced. Settings says which of the two holds (`settings.locationFollows` / `settings.locationFixed`), and the guide says it.
   - **Expected result:** after travelling, opening the app shows that place's zmanim and reminders, without any prompt.
+  - **Done:** 2026-10-31. Verified: nine `followDeviceLocation()` cases (a move, a jitter under 1 km, a hand-picked city, the unconfirmed default, no permission and no prompt, no fix, one lookup at a time, a far fix), the root layout calling it at launch and on return but not before onboarding, the Settings line for each state, typecheck, lint, check:dox and the full suite in four zones (5,787 tests each). Not checked: on a phone that travelled.
+  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `411b0d5` feat: active location, back exits home, To improve below consistency, drawer backdrop fades · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: no · Channel: —
   - **Open decision for the owner:** a city picked by hand stays fixed. Say if it should follow the phone too.
 
 - [ ] Fade the drawer's backdrop in place
@@ -347,6 +353,8 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Requested:** the owner, 2026-10-31, with a screen recording: the grey backdrop of a drawer slides up together with it.
   - **What it is:** `src/components/BottomSheet.tsx`: the `Modal` fades (the backdrop appears in place) and only the sheet rises from the bottom (`translateY`, `motion.sheetMs` 300 ms, ease-out; at once under reduced motion). Every drawer of the app uses it.
   - **Expected result:** opening any drawer darkens the whole screen at once while the drawer slides up.
+  - **Done:** 2026-10-31. Verified: the BottomSheet suite (a fading Modal, a `translateY` on the sheet only), the web build at 60, 140 and 600 ms after opening the halacha hotline drawer (the backdrop covers the whole screen from the first frame), typecheck, lint, check:dox and the full suite in four zones (5,787 tests each). Not checked: on a phone.
+  - **Status:** Version: OTA, `1.0.21-7` · Committed: yes, `411b0d5` feat: active location, back exits home, To improve below consistency, drawer backdrop fades · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: no · Channel: —
 
 ### High — Late marks count as done, 2026-10-30
 
