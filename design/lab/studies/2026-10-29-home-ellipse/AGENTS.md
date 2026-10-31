@@ -19,7 +19,7 @@
 
 ## Local Contracts
 
-- Published as one private gallery Artifact, with just the phones (now three) and no canvas (the owner's call, 2026-10-29): https://claude.ai/artifact/BJyh4f3EFDZ6USrPpg9wQB, from the build folder [out/site](out/site) (its file [out/site/index.html](out/site/index.html)); republish to the same link after a change. It was created in the Akeyless claude.ai account, so after that account is gone the next publish creates a new link: record it here.
+- Published as one private gallery Artifact, with just the phones (now three) and no canvas (the owner's call, 2026-10-29): https://claude.ai/artifact/BJyh4f3EFDZ6USrPpg9wQB, from the build folder `out/site`, its page `out/site/index.html` (build output, never committed); republish to the same link after a change. It was created in the Akeyless claude.ai account, so after that account is gone the next publish creates a new link: record it here.
 - `HomeNow` follows the app, not the older [Final.html](../2026-10-28-home-mix/boards/Final.html). The values it pins, each read from the app code and checked on the running app at 390 x 844 (hero 358.2 points, top chip 350 x 58, logo 52, block gap 17, scene 192, chips 55 high, NowCard 152):
   - the top row is one glass chip across the hero (the bare icon with its white halo at the physical left, the date line and greeting at the right); there is no next-zman pill;
   - the back control is centred over the block, 44 points high, glass at 0.6 with a gold border, and appears only while a time is previewed; it never moves the layout;
