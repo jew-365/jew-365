@@ -302,8 +302,8 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Requested:** the owner, 2026-10-31, answering Q8: a city picked by hand in Settings follows the phone too ("כן גם היא").
   - **What it is:** `followDeviceLocation()` in `src/services/locationFollow.ts` no longer skips a city picked by hand: with the location permission granted, a confirmed place (GPS or picked) gives way to the phone's fix once the phone is 1 km or more from it; without the permission nothing changes, and a place written while the fix was on its way (a city picked, "locate me") wins over that fix. Settings' line for a picked city is `settings.locationPicked`; the guide's start topic and its `1.0.21-8` entry say it.
   - **Expected result:** after picking a city far from the phone, the next launch or return to the app shows the phone's place and its zmanim; with the permission off the picked city stays.
-  - **Done:** 2026-10-31. Verified: twelve `followDeviceLocation()` cases (a picked city moved, kept within 1 km, kept without the permission, a city picked during the lookup winning; the first fails on the old code), the Settings line, guide, i18n, root layout and search suites in four zones, typecheck, lint, check:dox. Not checked: on a phone.
-  - **Status:** Version: OTA, `1.0.21-8` · Committed: no · Pushed: no · Live: no · Channel: —
+  - **Done:** 2026-10-31. Verified: twelve `followDeviceLocation()` cases (a picked city moved, kept within 1 km, kept without the permission, a city picked during the lookup winning; the first fails on the old code), the Settings line, guide, i18n, root layout and search suites, and the whole `pnpm test:tz` (5,790 tests in each of the four zones), typecheck, lint, check:dox. Not checked: on a phone.
+  - **Status:** Version: OTA, `1.0.21-8` · Committed: yes, `04d0c87` feat(location): a city picked by hand follows the phone too · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: no · Channel: —
 
 ## Bugs
 

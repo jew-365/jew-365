@@ -52,7 +52,7 @@ Every other EAS build is superseded, and no other AAB was uploaded to Play ([act
 
 ## Not in production yet
 
-- **Over the air:** nothing; everything finished over the air through 2026-10-31 is in production `1.0.21-7` ([action-log.md](action-log.md)).
+- **Over the air:** a city picked by hand following the phone too (committed in `04d0c87`, on the branch `ccr-6355d3b5-w7recj`, not published), for `1.0.21-8`; everything before it is in production `1.0.21-7` ([action-log.md](action-log.md)).
 - **Waits for the store production release** (finished, committed and pushed; [not-close.md](not-close.md), High — the 1.0.21 store release, and Bugs): the Jew 365 identity, the native half of the redesign, the four-symbol icons, the iOS build fixes, the store copy, the no-promise copy, the China mainland availability, and the Hebrew Android app name.
 - **Waits for the next native build:** the Selichot space saving (about 5.5 MB), the fresh-install stamps in the embedded bundle, the Hebrew Android app name in production, and the Build tasks (arm-only direct APK, R8). A build that raises `version` cuts installs off from updates until they install it, so it also needs a version decision.
 
