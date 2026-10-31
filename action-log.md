@@ -17,6 +17,17 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-10-31 — production update 1.0.21-8: a city picked by hand follows the phone
+
+- **Requested:** the owner, 2026-10-31, answering Q8 ("כן גם היא"); the production and preview updates were asked for the same day: "תפרסם לפרודקשן ולפריויו ואז קומיט ומרג למאין ופוש".
+- **Commits:** `04d0c87` feat(location): a city picked by hand follows the phone too; pushed to `main`.
+- **Version:** all JS, production `1.0.21-8` (group `43dda2e6-7103-41f7-8e9f-8f7ce6554084`, 2026-10-31, Android and iOS, from `f97038d`), and preview `1.0.21-30` (group `cbcbe9bb-4a4e-4eca-afab-cc633ee8e6bb`) from the same commit.
+- **Verification:** the whole `pnpm test:tz` green with 5,790 tests in each of the four zones on `04d0c87`; typecheck, lint, check:dox.
+
+- **Let a city picked by hand follow the phone too** — `followDeviceLocation()` in [src/services/locationFollow.ts](src/services/locationFollow.ts) no longer skips a hand-picked city: with the location permission granted, a confirmed place (GPS or picked) gives way to the phone's fix once the phone is 1 km or more from it; without the permission nothing changes, and a place written while the fix was on its way wins over that fix. Settings' line for a picked city is `settings.locationPicked`; the guide's start topic and its `1.0.21-8` entry say it.
+  - Requested: the owner, 2026-10-31. Verified: twelve `followDeviceLocation()` cases (a picked city moved, kept within 1 km, kept without the permission, a city picked during the lookup winning; the first fails on the old code), the Settings line, guide, i18n, root layout and search suites, and the whole suite in four zones. Not checked: on a phone that travelled.
+  - Version: OTA `1.0.21-8` · Committed: yes, `04d0c87` · Pushed: yes, `main` · Live: production `1.0.21-8` (group `43dda2e6-7103-41f7-8e9f-8f7ce6554084`, 2026-10-31, Android and iOS, from `f97038d`); preview `1.0.21-30` (group `cbcbe9bb-4a4e-4eca-afab-cc633ee8e6bb`) · Channel: production, preview
+
 ## 2026-10-31 — production update 1.0.21-7: late marks as done, location follows the phone, Android back
 
 - **Requested:** the owner, 2026-10-30 and 2026-10-31; the production update was asked for on 2026-10-31 after checking preview `1.0.21-29` on the phone: "בדקתי את השינויים הכל מעולה, תעשה עדכון לפרודקשן ואז תעדכן תיעוד ואז קומיט ופוש למאין".

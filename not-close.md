@@ -295,16 +295,6 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
 
 ### High — App requests of 2026-10-28
 
-### High — Requests of 2026-10-31
-
-- [ ] Let a city picked by hand follow the phone too
-  - **Flag:** `OTA`.
-  - **Requested:** the owner, 2026-10-31, answering Q8: a city picked by hand in Settings follows the phone too ("כן גם היא").
-  - **What it is:** `followDeviceLocation()` in `src/services/locationFollow.ts` no longer skips a city picked by hand: with the location permission granted, a confirmed place (GPS or picked) gives way to the phone's fix once the phone is 1 km or more from it; without the permission nothing changes, and a place written while the fix was on its way (a city picked, "locate me") wins over that fix. Settings' line for a picked city is `settings.locationPicked`; the guide's start topic and its `1.0.21-8` entry say it.
-  - **Expected result:** after picking a city far from the phone, the next launch or return to the app shows the phone's place and its zmanim; with the permission off the picked city stays.
-  - **Done:** 2026-10-31. Verified: twelve `followDeviceLocation()` cases (a picked city moved, kept within 1 km, kept without the permission, a city picked during the lookup winning; the first fails on the old code), the Settings line, guide, i18n, root layout and search suites, and the whole `pnpm test:tz` (5,790 tests in each of the four zones), typecheck, lint, check:dox. Not checked: on a phone.
-  - **Status:** Version: OTA, `1.0.21-8` · Committed: yes, `04d0c87` feat(location): a city picked by hand follows the phone too · Pushed: yes, branch `ccr-6355d3b5-w7recj` (not on `main`) · Live: no · Channel: —
-
 ## Bugs
 
 - [ ] A Hebrew Android phone shows the app's English name
@@ -394,7 +384,7 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
 Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were answered by the owner on 2026-10-26 and became the tasks "Add an English (U.K.) localization on the App Store" and "Ask for a store rating inside the app". Q3 to Q7, from the app requests of 2026-10-26, were answered the same day and are written into their tasks (App requests of 2026-10-26 — batch rules). None is open.
 
 
-Q8 (should a city picked by hand follow the phone too) was answered by the owner on 2026-10-31 ("כן גם היא") and became the task "Let a city picked by hand follow the phone too".
+Q8 (should a city picked by hand follow the phone too) was answered by the owner on 2026-10-31 ("כן גם היא") and became the task "Let a city picked by hand follow the phone too", in production `1.0.21-8` ([action-log.md](action-log.md)).
 
 ## Other Open Items
 
