@@ -40,7 +40,11 @@ h1 { font-size: 30px; font-weight: 800; margin: 0 0 6px; text-wrap: balance; }
 header p { margin: 0; color: var(--sub); font-size: 16px; line-height: 1.6; max-width: 72ch; }
 h2 { font-size: 20px; font-weight: 700; margin: 0; }
 .bars { display: grid; gap: 10px; }
-.bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.bar { display: flex; flex-wrap: nowrap; gap: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.bar::-webkit-scrollbar { display: none; }
+.bar > * { flex: none; white-space: nowrap; }
+/* On a phone the controls would cover the screens, so each row is one swipeable line and the block scrolls away. */
+@media (max-width: 900px) { .bars { position: static; } }
 .bar > span { font-size: 14px; color: var(--sub); min-width: 56px; }
 .bar button { font: 600 15px var(--font); min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
 .bar button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }

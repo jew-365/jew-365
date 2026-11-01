@@ -1,6 +1,6 @@
 // Writes out/packs/index.html: the real app's screens (shot by shoot-packs.cjs with the Jewish icons hidden and
 // their boxes recorded) with a switch that draws every icon in any pack: today's, א colour, ב theme tones,
-// ג lines and ד lines with a soft fill (the one in the app), in each of the app's six palettes.
+// ג lines and ד lines with a soft fill, in each of the app's six palettes; ב is the one in the app.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
@@ -23,7 +23,7 @@ const he = JSON.parse(readFileSync(join(here, '../../../../src/i18n/he.json'), '
 const PALETTES = ['gold', 'pink', 'purple', 'blue', 'dark', 'plum'];
 for (const theme of PALETTES) {
   for (const [file, title] of SCREENS) {
-    const base = `/tmp/packs/${file}-${theme}`;
+    const base = `${process.env.SHOTS_DIR || '/tmp/packs'}/${file}-${theme}`;
     if (!existsSync(`${base}.png`)) throw new Error(`missing ${base}.png: run shoot-packs.cjs first`);
     const small = `${base}.1x.png`;
     execFileSync('python3', ['-c', `from PIL import Image; im=Image.open('${base}.png'); im.resize((390, 844)).save('${small}', optimize=True)`]);
@@ -49,7 +49,11 @@ body { margin: 0; background: var(--page); color: var(--ink); font-family: "Rubi
 .wrap { max-width: 1320px; margin: 0 auto; padding: 24px 20px 60px; display: grid; gap: 18px; }
 h1 { margin: 0; font-size: 28px; text-wrap: balance; } p { margin: 0; color: var(--sub); line-height: 1.6; max-width: 74ch; }
 .bars { position: sticky; top: 0; z-index: 5; background: var(--page); padding: 10px 0; display: grid; gap: 8px; border-bottom: 1px solid var(--line); }
-.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.bar { display: flex; flex-wrap: nowrap; gap: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.bar::-webkit-scrollbar { display: none; }
+.bar > * { flex: none; white-space: nowrap; }
+/* On a phone the controls would cover the screens, so each row is one swipeable line and the block scrolls away. */
+@media (max-width: 900px) { .bars { position: static; } }
 .bar > span { min-width: 64px; font-size: 14px; color: var(--sub); }
 .bar button { font: 600 15px "Rubik", sans-serif; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
 .bar button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
@@ -63,14 +67,14 @@ figure { margin: 0; display: grid; gap: 8px; justify-items: center; }
 figcaption { font-weight: 600; }
 </style></head><body><div class="wrap">
 <h1>חבילות האייקונים על מסכי האפליקציה</h1>
-<p>אלה המסכים האמיתיים של האפליקציה, צולמו מגרסת הדפדפן עם רוביק. כל אייקון יהודי מצויר במקומו המדויק ובצבע שהאפליקציה נותנת לו, לפי החבילה שבוחרים, בכל שש ערכות הצבעים של האפליקציה. ד׳ היא החבילה שכבר נמצאת באפליקציה.</p>
+<p>אלה המסכים האמיתיים של האפליקציה, צולמו מגרסת הדפדפן עם רוביק. כל אייקון יהודי מצויר במקומו המדויק ובצבע שהאפליקציה נותנת לו, לפי החבילה שבוחרים, בכל שש ערכות הצבעים של האפליקציה. ב׳ היא החבילה שנמצאת באפליקציה.</p>
 <div class="bars">
   <div class="bar" role="group" aria-label="חבילת אייקונים"><span>חבילה</span>
     <button type="button" data-pack="today" aria-pressed="false">היום (הישנה)</button>
     <button type="button" data-pack="color" aria-pressed="false">א. צבעוני</button>
-    <button type="button" data-pack="tonal" aria-pressed="false">ב. בגווני הערכה</button>
+    <button type="button" data-pack="tonal" aria-pressed="true">ב. בגווני הערכה</button>
     <button type="button" data-pack="line" aria-pressed="false">ג. קווים</button>
-    <button type="button" data-pack="lineFill" aria-pressed="true">ד. קווים עם מילוי עדין</button>
+    <button type="button" data-pack="lineFill" aria-pressed="false">ד. קווים עם מילוי עדין</button>
   </div>
   <div class="bar" role="group" aria-label="ערכת צבעים"><span>צבעים</span>
 ${PALETTES.map((p, i) => `    <button type="button" data-palette="${p}" aria-pressed="${i === 0}">${he[`settings.theme.${p}`]}</button>`).join('\n')}
@@ -81,7 +85,7 @@ ${PALETTES.map((p, i) => `    <button type="button" data-palette="${p}" aria-pre
 <script>
 const SCREENS = ${JSON.stringify(screens)};
 const ART = ${JSON.stringify(art)};
-let pack = 'lineFill', theme = 'gold', uid = 0;
+let pack = 'tonal', theme = 'gold', uid = 0;
 const svg = (box, inner, extra = '') => \`<svg viewBox="\${box}" fill="none" aria-hidden="true" \${extra}>\${inner}</svg>\`;
 function draw(id, color) {
   const a = ART[id];

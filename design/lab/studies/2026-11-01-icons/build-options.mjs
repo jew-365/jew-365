@@ -19,7 +19,7 @@ const SCREENS = [
 const screens = [];
 for (const theme of PALETTES) {
   for (const [file, title] of SCREENS) {
-    const base = `/tmp/packs/${file}-${theme}`;
+    const base = `${process.env.SHOTS_DIR || '/tmp/packs'}/${file}-${theme}`;
     if (!existsSync(`${base}.png`)) throw new Error(`missing ${base}.png: run shoot-packs.cjs first`);
     const small = `${base}.1x.png`;
     execFileSync('python3', ['-c', `from PIL import Image; im=Image.open('${base}.png'); im.resize((390, 844)).save('${small}', optimize=True)`]);
@@ -58,7 +58,12 @@ body { margin: 0; background: var(--page); color: var(--ink); font-family: "Rubi
 .wrap { max-width: 1320px; margin: 0 auto; padding: 24px 20px 60px; display: grid; gap: 18px; }
 h1 { margin: 0; font-size: 28px; text-wrap: balance; } h2 { margin: 0; font-size: 19px; } p { margin: 0; color: var(--sub); line-height: 1.6; max-width: 76ch; }
 .bars { position: sticky; top: 0; z-index: 5; background: var(--page); padding: 10px 0; display: grid; gap: 8px; border-bottom: 1px solid var(--line); }
-.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.bar { display: flex; flex-wrap: nowrap; gap: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.bar::-webkit-scrollbar { display: none; }
+.bar > * { flex: none; white-space: nowrap; }
+/* On a phone the controls would cover the screens, so each row is one swipeable line and the block scrolls away. */
+@media (max-width: 900px) { .bars { position: static; } }
+.group { display: contents; }
 .bar > span { min-width: 64px; font-size: 14px; color: var(--sub); }
 .bar button { font: 600 15px "Rubik", sans-serif; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
 .bar button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
@@ -75,8 +80,8 @@ figcaption { font-weight: 600; }
 <h1>אייקוני הסידור והתפילות</h1>
 <p>כל האייקונים נשארים בחבילה ב׳. כאן אפשר לבחור אייקון אחר לסידור ואייקונים אחרים לשלוש התפילות, ולראות אותם במקומם המדויק על המסכים האמיתיים, בכל שש ערכות הצבעים.</p>
 <div class="bars">
-  <div class="bar" role="group" aria-label="אייקון הסידור"><span>סידור</span><span id="siddur-bar" class="bar"></span></div>
-  <div class="bar" role="group" aria-label="אייקוני התפילות"><span>תפילות</span><span id="prayer-bar" class="bar"></span></div>
+  <div class="bar" role="group" aria-label="אייקון הסידור"><span>סידור</span><span id="siddur-bar" class="group"></span></div>
+  <div class="bar" role="group" aria-label="אייקוני התפילות"><span>תפילות</span><span id="prayer-bar" class="group"></span></div>
   <div class="bar" role="group" aria-label="ערכת צבעים"><span>צבעים</span>
 ${PALETTES.map((p, i) => `    <button type="button" data-palette="${p}" aria-pressed="${i === 0}">${he[`settings.theme.${p}`]}</button>`).join('\n')}
   </div>

@@ -40,6 +40,7 @@
 - Agents who test boards in headless Edge close every browser they start. Leftover instances once reached about 480 processes and dropped several agents' connections. To clean up, filter with WQL on the temporary profile (`CommandLine LIKE '%user-data-dir=%Temp%'`).
 - A hidden browser pane never loads lazy iframes: show the pane before checking a gallery page.
 - Never name a page's own attribute `data-theme`: the claude.ai viewer sets `data-theme` on the root element, so a `[data-theme]` selector also catches `<html>`, whose click handler then resets every choice (the palette switch of the 2026-11-01 icon pages broke this way). Use another name, such as `data-palette`, and test a page with `data-theme` already on its root.
+- A page's controls never stay pinned on a phone: the owner opens Artifacts on a phone, where a sticky block of wrapping buttons covered the whole screen (the icon pages, 2026-11-01). Each row of controls is one line that scrolls sideways, and a sticky block is sticky only above 900 points wide; check the page at 430 points before publishing.
 
 ## Verification
 

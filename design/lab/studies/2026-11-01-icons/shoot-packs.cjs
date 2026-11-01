@@ -10,7 +10,7 @@ const path = require('path');
 const { chromium } = require('playwright');
 
 const root = '/tmp/webdist';
-const outDir = '/tmp/packs';
+const outDir = process.env.SHOTS_DIR || '/tmp/packs';
 fs.mkdirSync(outDir, { recursive: true });
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.ttf': 'font/ttf', '.png': 'image/png', '.json': 'application/json' };
 // The first element of each generated drawing identifies the icon in the DOM.
