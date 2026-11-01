@@ -17,6 +17,12 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-11-01 — the owner's pick of a home screen direction, closed
+
+- **The owner's pick of a home screen direction** — the home screen study's open item, closed: the owner picked board Final of [design/lab/studies/2026-10-28-home-mix/](design/lab/studies/2026-10-28-home-mix/AGENTS.md) on 2026-10-29, and the entry Build the approved home screen of 2026-10-30 in this log carries it to production.
+  - Requested: the owner, 2026-10-27 (the home screen study). Verified: the picks recorded in the study's AGENTS.md, and `4c62f3c`, the build's commit, an ancestor of `origin/main` (`git merge-base --is-ancestor`), in production `1.0.21-6` per that entry.
+  - Version: OTA `1.0.21-6` · Committed: yes, `4c62f3c` feat(home): one-circle hero, middle softness for missed and done, timeline by time · Pushed: yes · Live: production `1.0.21-6` (group `5226dac2-a39e-49ca-afea-265dbdc64856`) · Channel: production
+
 ## 2026-11-01 — the Apple Developer Program License Agreement
 
 - **Accept the updated Apple Developer Program License Agreement** — the Account Holder accepted the agreement Apple asked for by 2026-11-14, without which App Store Connect, its API, EAS's iOS signing and new submissions would stop ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-11-01).
