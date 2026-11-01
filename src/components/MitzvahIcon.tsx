@@ -1,8 +1,8 @@
-import React from 'react';
-import Svg, { Circle, Ellipse, G, Line, Path, Rect } from 'react-native-svg';
+import React, { useId } from 'react';
+import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import type { AppLanguage } from '@/i18n';
 import { scaled } from '@/theme/scale';
-import { JEWISH_ICONS, type JewishIconNode } from './jewishIcons.generated';
+import { JEWISH_ICONS, JEWISH_TONES, type JewishColor, type JewishIconNode } from './jewishIcons.generated';
 
 export const ICON_NAMES = [
   'tefillin',
@@ -184,38 +184,67 @@ type Props = {
   strokeWidth?: number;
 };
 
-// The Jewish icons: the owner's pick of 2026-11-01 (option ד of the icon study), rounded lines at 2 units of a
-// 48-unit box with the main shapes softly filled in the icon colour. The view box trims their 3.5-unit margin, so
-// they fill the icon's size as the study's 28-of-44 tile showed.
-const JEWISH_STROKE = 2;
-const SOFT_FILL = 0.26;
+// The Jewish icons: the owner's pick of 2026-11-01 (option ב of the icon study), the coloured illustrations drawn in
+// tones of the icon colour, so they follow every palette and tile tone. Each colour role is a share of the icon colour
+// mixed with white or a deep brown (JEWISH_TONES); the view box trims the 48-unit art's 2-unit margin.
+const hex = (value: string) => {
+  const h = value.replace('#', '');
+  const full = h.length === 3 ? [...h].map((d) => d + d).join('') : h.slice(0, 6);
+  return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
+};
 
-function JewishNodes({ nodes, color }: { nodes: JewishIconNode[]; color: string }) {
-  return nodes.map(({ t, soft, noStroke, c, ...attrs }, i) => {
-    const props = {
+export function toneOf(color: string, role: string): string {
+  const tone = JEWISH_TONES[role];
+  const base = hex(color);
+  if (!tone || base.some(Number.isNaN)) return color;
+  const other = hex(tone.with);
+  return `#${base
+    .map((c, i) =>
+      Math.round(c * tone.share + other[i] * (1 - tone.share))
+        .toString(16)
+        .padStart(2, '0'),
+    )
+    .join('')}`;
+}
+
+function JewishNodes({ nodes, color, gradient }: { nodes: JewishIconNode[]; color: string; gradient: string }) {
+  const paint = (value: JewishColor | undefined) =>
+    value === undefined || value === 'none' ? value : 'url' in value ? `url(#${gradient})` : toneOf(color, value.role);
+  return nodes.map(({ t, c, id, fill, stroke, stopColor, ...attrs }, i) => {
+    const paints = { fill: paint(fill), stroke: paint(stroke), stopColor: paint(stopColor) };
+    const props: Record<string, unknown> = {
       ...attrs,
-      ...(soft ? { fill: color, fillOpacity: SOFT_FILL } : {}),
-      ...(noStroke ? { stroke: 'none' } : {}),
+      ...Object.fromEntries(Object.entries(paints).filter(([, v]) => v !== undefined)),
     };
-    if (t === 'g')
-      return (
-        <G key={i} {...props}>
-          {c && <JewishNodes nodes={c} color={color} />}
-        </G>
-      );
-    const Shape = { path: Path, rect: Rect, circle: Circle, ellipse: Ellipse }[t];
-    return <Shape key={i} {...(props as object)} />;
+    if (id) props.id = gradient;
+    const children = c && <JewishNodes nodes={c} color={color} gradient={gradient} />;
+    const Shape = (
+      {
+        path: Path,
+        rect: Rect,
+        circle: Circle,
+        ellipse: Ellipse,
+        g: G,
+        defs: Defs,
+        linearGradient: LinearGradient,
+        stop: Stop,
+      } as Record<JewishIconNode['t'], React.ComponentType<Record<string, unknown>>>
+    )[t];
+    return (
+      <Shape key={i} {...(props as object)}>
+        {children}
+      </Shape>
+    );
   });
 }
 
 export function MitzvahIcon({ name, size = scaled(22), color, tint, variant = ICON_VARIANT, strokeWidth }: Props) {
   const jewish = JEWISH_ICONS[name];
+  const gradient = `jewish-${useId().replace(/:/g, '')}`;
   if (jewish) {
     return (
-      <Svg width={size} height={size} viewBox="3.5 3.5 41 41" fill="none">
-        <G stroke={color} strokeWidth={JEWISH_STROKE} strokeLinecap="round" strokeLinejoin="round" fill="none">
-          <JewishNodes nodes={jewish} color={color} />
-        </G>
+      <Svg width={size} height={size} viewBox="2 2 44 44">
+        <JewishNodes nodes={jewish} color={color} gradient={gradient} />
       </Svg>
     );
   }

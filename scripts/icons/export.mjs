@@ -1,17 +1,32 @@
-// Writes the owner's pick of the 2026-11-01 icon study, option ד (the rounded line set with a soft fill, the
-// study's icons-line.mjs), into the app as src/components/jewishIcons.generated.ts: per icon id, its elements as
-// plain data that MitzvahIcon draws with react-native-svg. Run `node scripts/icons/export.mjs` after changing a
-// line drawing.
-import { writeFileSync } from 'node:fs';
+// Writes the owner's pick of the 2026-11-01 icon study, option ב (the coloured illustrations in the theme's tones),
+// into the app as src/components/jewishIcons.generated.ts: per icon id, its elements as plain data, and the tone of
+// each colour role as a mix of the icon colour, all of which MitzvahIcon draws with react-native-svg. Sources: the
+// study's icons.mjs (the drawings) and roles.css (the `.tonal` block). Run `node scripts/icons/export.mjs` after
+// changing either.
+import { readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LINE_ICONS } from '../../design/lab/studies/2026-11-01-icons/icons-line.mjs';
+import { ICONS } from '../../design/lab/studies/2026-11-01-icons/icons.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = join(here, '..', '..');
+const study = join(repo, 'design', 'lab', 'studies', '2026-11-01-icons');
 const out = join(repo, 'src', 'components', 'jewishIcons.generated.ts');
-const FILL = '__FILL__';
+const UID = '__UID__';
+
+// `--i-ink: color-mix(in srgb, var(--gold) 55%, #2a1405)` -> { share: 0.55, with: '#2a1405' }; `var(--gold)` -> 1.
+const css = readFileSync(join(study, 'roles.css'), 'utf8');
+const tonal = css.slice(css.indexOf('.tonal {'));
+const TONES = {};
+for (const [, role, value] of tonal.matchAll(/--i-([\w-]+):\s*([^;]+);/g)) {
+  const mix = value.match(/^color-mix\(in srgb, var\(--gold\) (\d+)%, (#[0-9a-f]{3,6})\)$/i);
+  if (mix) TONES[role] = { share: Number(mix[1]) / 100, with: mix[2] };
+  else if (value === 'var(--gold)') TONES[role] = { share: 1, with: '#fff' };
+  else if (/^#[0-9a-f]{3,6}$/i.test(value)) TONES[role] = { share: 0, with: value };
+  else throw new Error(`unsupported tone for ${role}: ${value}`);
+}
+
 const ATTRS = {
   d: 'd',
   x: 'x',
@@ -23,13 +38,27 @@ const ATTRS = {
   cx: 'cx',
   cy: 'cy',
   r: 'r',
+  x1: 'x1',
+  y1: 'y1',
+  x2: 'x2',
+  y2: 'y2',
+  offset: 'offset',
+  id: 'id',
   transform: 'transform',
-  'stroke-width': 'strokeWidth',
+  opacity: 'opacity',
+  gradientUnits: 'gradientUnits',
   fill: 'fill',
   stroke: 'stroke',
+  'stop-color': 'stopColor',
+  'stroke-width': 'strokeWidth',
+  'stroke-linecap': 'strokeLinecap',
+  'stroke-linejoin': 'strokeLinejoin',
+  'stroke-dasharray': 'strokeDasharray',
 };
+const TAGS = ['path', 'rect', 'circle', 'ellipse', 'g', 'defs', 'linearGradient', 'stop'];
+const COLOR = new Set(['fill', 'stroke', 'stopColor']);
 
-// Parses the drawings' small SVG subset: self-closing path, rect, circle and ellipse, and <g transform>…</g>.
+// Parses the drawings' small SVG subset into nodes whose colours are role names and whose gradient is `url`.
 function parse(markup) {
   const root = [];
   const stack = [root];
@@ -38,26 +67,30 @@ function parse(markup) {
       stack.pop();
       continue;
     }
-    const a = {};
+    if (!TAGS.includes(tag)) throw new Error(`unsupported element ${tag}`);
+    const node = { t: tag };
     for (const [, k, v] of attrs.matchAll(/([\w-]+)="([^"]*)"/g)) {
-      if (!ATTRS[k]) throw new Error(`unsupported attribute ${k} on ${tag}`);
       const key = ATTRS[k];
-      if (key === 'fill') {
-        if (v === FILL) a.soft = true;
-        else if (v !== 'none') throw new Error(`fill ${v}`);
+      if (!key) throw new Error(`unsupported attribute ${k} on ${tag}`);
+      if (key === 'id') {
+        if (v !== UID) throw new Error(`id ${v}`);
+        node.id = true;
         continue;
       }
-      if (key === 'stroke') {
-        if (v !== 'none') throw new Error(`stroke ${v}`);
-        a.noStroke = true;
+      if (COLOR.has(key)) {
+        const role = v.match(/^var\(--i-([\w-]+)\)$/);
+        if (role) {
+          if (!TONES[role[1]]) throw new Error(`no tone for ${role[1]}`);
+          node[key] = { role: role[1] };
+        } else if (v === `url(#${UID})`) node[key] = { url: true };
+        else if (v === 'none') node[key] = 'none';
+        else throw new Error(`colour ${v} on ${tag}`);
         continue;
       }
-      a[key] = /^-?[\d.]+$/.test(v) ? Number(v) : v;
+      node[key] = /^-?[\d.]+$/.test(v) ? Number(v) : v;
     }
-    if (!['path', 'rect', 'circle', 'ellipse', 'g'].includes(tag)) throw new Error(`unsupported element ${tag}`);
-    const node = { t: tag, ...a };
     stack.at(-1).push(node);
-    if (tag === 'g' && !self) {
+    if (!self && ['g', 'defs', 'linearGradient'].includes(tag)) {
       node.c = [];
       stack.push(node.c);
     }
@@ -65,21 +98,27 @@ function parse(markup) {
   return root;
 }
 
-const data = Object.fromEntries(Object.entries(LINE_ICONS).map(([id, draw]) => [id, parse(draw(FILL))]));
+const data = Object.fromEntries(ICONS.map((icon) => [icon.id, parse(icon.draw(UID))]));
 writeFileSync(
   out,
-  `// Generated by scripts/icons/export.mjs from the 2026-11-01 icon study's line set (the owner's pick, option ד:
-// rounded lines with a soft fill). Do not edit by hand: change the study's icons-line.mjs and rerun the script.
+  `// Generated by scripts/icons/export.mjs from the 2026-11-01 icon study (the owner's pick, option ב: the coloured
+// illustrations in the theme's tones). Do not edit by hand: change the study's icons.mjs or roles.css and rerun.
+export type JewishColor = 'none' | { role: string } | { url: true };
 export type JewishIconNode = {
-  t: 'path' | 'rect' | 'circle' | 'ellipse' | 'g';
-  soft?: true;
-  noStroke?: true;
+  t: 'path' | 'rect' | 'circle' | 'ellipse' | 'g' | 'defs' | 'linearGradient' | 'stop';
   c?: JewishIconNode[];
+  id?: true;
+  fill?: JewishColor;
+  stroke?: JewishColor;
+  stopColor?: JewishColor;
   [attr: string]: unknown;
 };
+
+// Each role's tone: \`share\` of the icon colour mixed with \`with\` (sRGB, channel by channel).
+export const JEWISH_TONES: Record<string, { share: number; with: string }> = ${JSON.stringify(TONES)};
 
 export const JEWISH_ICONS: Record<string, JewishIconNode[]> = ${JSON.stringify(data)};
 `,
 );
 execFileSync(join(repo, 'node_modules', '.bin', 'prettier'), ['--write', out], { stdio: 'inherit' });
-console.log(`wrote ${out}: ${Object.keys(data).length} icons`);
+console.log(`wrote ${out}: ${Object.keys(data).length} icons, ${Object.keys(TONES).length} tones`);
