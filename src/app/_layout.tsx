@@ -10,7 +10,9 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 // eslint-disable-next-line import/no-duplicates
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useFonts } from 'expo-font';
+// The font package's own hook, not expo-font's: under the static web export expo-font's reports the fonts loaded
+// during the server render, and every deep link (a stack screen such as /mitzvah/[id]) then landed on home.
+import { useFonts } from '@expo-google-fonts/rubik/useFonts';
 // Each weight from its own entry: the package index requires every weight and style, which put all 14 Rubik and
 // 9 Noto Serif Hebrew files into every update's assets although the app loads 7.
 import { Rubik_400Regular } from '@expo-google-fonts/rubik/400Regular';

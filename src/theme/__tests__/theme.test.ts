@@ -386,6 +386,9 @@ describe('Typography', () => {
     expect(source).not.toContain('@expo-google-fonts/heebo');
     // Only the weights in use reach the bundle: never a package index, which requires every weight.
     expect(source).not.toMatch(/from '@expo-google-fonts\/[\w-]+'/);
+    // The package's hook: expo-font's reports the fonts loaded during the static web render, which broke deep links.
+    expect(source).toContain("import { useFonts } from '@expo-google-fonts/rubik/useFonts';");
+    expect(source).not.toContain("from 'expo-font'");
     for (const font of APP_FONTS) {
       const weight = font.slice(font.indexOf('_') + 1);
       expect(source).toMatch(new RegExp(`import \\{ ${font} \\} from '@expo-google-fonts/[\\w-]+/${weight}';`));

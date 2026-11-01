@@ -34,8 +34,10 @@ function setup(overrides: Partial<React.ComponentProps<typeof NowCard>> = {}) {
   return props;
 }
 
+// The ring by its own geometry: the icon tile beside it may draw circles too (a sun over the open siddur).
 function progressStroke() {
-  return screen.UNSAFE_getAllByType(Circle)[1].props.stroke;
+  return screen.UNSAFE_getAllByType(Circle).find((circle) => circle.props.r === 25 && circle.props.strokeDasharray)
+    ?.props.stroke;
 }
 
 describe('NowCard', () => {
@@ -49,7 +51,7 @@ describe('NowCard', () => {
 
   it('keeps the time left clear of the ring: a 68-point ring, 13-point figures, a capped font scale', () => {
     setup({ now: at(J, '2026-10-29T06:00') });
-    const ring = screen.UNSAFE_getAllByType(Svg).find((svg) => svg.findAllByType(Circle).length > 0);
+    const ring = screen.UNSAFE_getAllByType(Svg).find((svg) => svg.props.viewBox === '0 0 60 60');
     expect(ring?.props.width).toBe(68);
     const value = screen.getByText('2:38', { includeHiddenElements: true });
     expect(StyleSheet.flatten(value.props.style).fontSize).toBe(typography.captionBold.fontSize);
