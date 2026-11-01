@@ -55,3 +55,4 @@
 - [studies/2026-10-28-home-mix/AGENTS.md](studies/2026-10-28-home-mix/AGENTS.md) - The home screen study of 2026-10-28, round 4: five mixes of the owner's likes, for him to pick two (a default and an alternative).
 - [studies/2026-10-29-home-ellipse/AGENTS.md](studies/2026-10-29-home-ellipse/AGENTS.md) - The home screen study of 2026-10-29: the app's home exactly as it is today, beside the same screen with the day arc and the night arc joined into one horizontal ellipse or one circle; a gallery of three phones, no canvas.
 - [studies/2026-11-01-fonts/AGENTS.md](studies/2026-11-01-fonts/AGENTS.md) - The font study of 2026-11-01: eight font directions for the app outside the siddur, on one gallery page.
+- [studies/2026-11-01-icons/AGENTS.md](studies/2026-11-01-icons/AGENTS.md) - The icon study of 2026-11-01: a drawn Jewish icon set of 21 mitzvah and siddur icons in three styles beside today's.

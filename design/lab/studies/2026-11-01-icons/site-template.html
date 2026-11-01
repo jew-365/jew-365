@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>אייקונים יהודיים ליהודי 365</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap">
+<style>
+:root {
+  /* The app's gold palette (src/theme/colors.ts) and its Rubik type. Layout: style switches, a comparison table, the set in the app's rows. */
+  --bg: #F6F1E8; --surface: #FFFDF9; --surface2: #F1EADF; --text: #1D2240; --sub: #69645D;
+  --border: #EBE3D6; --gold: #F08A3C; --on-gold: #2B1608; --gold-light: #FDE9D5; --gold-text: #A04A0C; --muted: #6A655E;
+  --font: "Rubik", "Heebo", system-ui, sans-serif;
+  color-scheme: light;
+}
+.app-dark {
+  --bg: #0E1626; --surface: #172238; --surface2: #222F4A; --text: #EEF1F7; --sub: #9DA9BF;
+  --border: #28354F; --gold: #F59A4A; --on-gold: #2B1608; --gold-light: #3A2D26; --gold-text: #F7A65E; --muted: #A3AEC3;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; display: grid; gap: 26px; }
+h1 { font-size: 30px; font-weight: 800; margin: 0 0 6px; text-wrap: balance; }
+header p { margin: 0; color: var(--sub); font-size: 16px; line-height: 1.6; max-width: 72ch; }
+h2 { font-size: 20px; font-weight: 700; margin: 0; }
+.bars { display: grid; gap: 10px; }
+.bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.bar > span { font-size: 14px; color: var(--sub); min-width: 56px; }
+.bar button { font: 600 15px var(--font); min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+.bar button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }
+button:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px; }
+
+.tile { width: 44px; height: 44px; border-radius: 18px; background: var(--gold-light); display: grid; place-items: center; flex: none; }
+.tile.big { width: 76px; height: 76px; border-radius: 30px; }
+.tile.old { background: var(--surface2); }
+
+.table { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
+.row { display: grid; grid-template-columns: minmax(150px, 1.3fr) repeat(4, minmax(64px, 1fr)); align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--border); }
+.row:first-child { border-top: 0; }
+.row.head { font-size: 13px; color: var(--sub); font-weight: 600; background: var(--surface2); }
+.row .name b { display: block; font-size: 15px; font-weight: 600; }
+.row .name small { font-size: 13px; color: var(--sub); line-height: 1.4; }
+.row .c { display: grid; justify-items: center; }
+.row .c.sel .tile { box-shadow: 0 0 0 2px var(--gold); }
+
+.big-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px; }
+.big-cell { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 14px 8px; display: grid; justify-items: center; gap: 8px; text-align: center; font-size: 13px; line-height: 1.35; }
+
+.phones { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.phone { background: var(--bg); border: 6px solid var(--text); border-radius: 30px; padding: 16px 12px; display: grid; gap: 10px; align-content: start; }
+.phone h3 { margin: 0 4px; font-size: 22px; font-weight: 700; }
+.label { font-size: 13px; color: var(--sub); font-weight: 600; margin: 4px 4px 0; }
+.card { background: var(--surface); border-radius: 20px; padding: 2px 12px; }
+.li { display: flex; align-items: center; gap: 12px; min-height: 60px; border-top: 1px solid var(--border); }
+.li:first-child { border-top: 0; }
+.li .t { flex: 1; display: grid; }
+.li .t b { font-weight: 500; font-size: 15px; }
+.li .t small { font-size: 13px; color: var(--sub); }
+.sw { width: 40px; height: 24px; border-radius: 12px; background: var(--gold); position: relative; flex: none; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; }
+.sw.off { background: var(--border); }
+.sw.off::after { left: auto; right: 3px; }
+.note { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px 18px; font-size: 15px; line-height: 1.7; max-width: 80ch; }
+.note p { margin: 0 0 6px; }
+@media (max-width: 640px) { .row { grid-template-columns: 1fr repeat(4, 50px); padding: 10px; } .row .name small { display: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>אייקונים יהודיים ליהודי 365</h1>
+    <p>סט חדש ומקורי של 21 אייקונים למצוות, לתפילות ולקבוצות הסידור, מצויר במיוחד לאפליקציה. אייקוני הממשק (חיצים, וי, פעמון וכדומה) נשארים כמו שהם. הציור אחד, ויש שלושה סגנונות לבחירה. כל אייקון מוצג בתוך האריח של האפליקציה, ליד האייקון של היום.</p>
+  </header>
+
+  <div class="bars">
+    <div class="bar" role="group" aria-label="סגנון"><span>סגנון</span>
+      <button type="button" data-style="thin" aria-pressed="false">א. קו דק</button>
+      <button type="button" data-style="bold" aria-pressed="false">ב. קו מודגש</button>
+      <button type="button" data-style="duo" aria-pressed="true">ג. דו-גוני</button>
+    </div>
+    <div class="bar" role="group" aria-label="צבעים"><span>צבעים</span>
+      <button type="button" data-theme="light" aria-pressed="true">זהב (בהיר)</button>
+      <button type="button" data-theme="dark" aria-pressed="false">לילה (כהה)</button>
+    </div>
+  </div>
+
+  <section class="note" aria-label="מה לבחור">
+    <p><b>מה צריך לבחור:</b> סגנון אחד (א, ב או ג), ואם יש אייקון שלא מתאים לך, פשוט תגיד איזה ומה היית רוצה במקומו.</p>
+    <p>ההמלצה שלי היא <b>ג, דו-גוני</b>: הקו נקי כמו היום, והמילוי העדין נותן לכל אייקון נוכחות גם בגודל הקטן ובערכה הכהה.</p>
+  </section>
+
+  <section aria-labelledby="h-big" style="display:grid;gap:12px">
+    <h2 id="h-big">הסט החדש</h2>
+    <div class="big-grid" id="big"></div>
+  </section>
+
+  <section aria-labelledby="h-cmp" style="display:grid;gap:12px">
+    <h2 id="h-cmp">היום מול שלושת הסגנונות</h2>
+    <div class="table" id="table"></div>
+  </section>
+
+  <section aria-labelledby="h-ctx" style="display:grid;gap:12px">
+    <h2 id="h-ctx">בתוך האפליקציה</h2>
+    <div class="phones" id="phones"></div>
+  </section>
+</div>
+<script>
+const ICONS = __ICONS__;
+const by = Object.fromEntries(ICONS.map((i) => [i.id, i]));
+const STYLES = { thin: { sw: 1.6, duo: false }, bold: { sw: 2.1, duo: false }, duo: { sw: 1.6, duo: true } };
+let style = 'duo';
+
+const svg = (inner, size, sw, fill, color) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" fill="none">${inner.replaceAll('__FILL__', fill)}</g></svg>`;
+const fresh = (i, st, size = 24) => {
+  const s = STYLES[st];
+  return svg(i.next, size, s.sw, s.duo ? 'color-mix(in srgb, var(--gold) 28%, transparent)' : 'none', 'var(--gold)');
+};
+const tile = (i, st, big) => `<span class="tile${big ? ' big' : ''}">${fresh(i, st, big ? 42 : 24)}</span>`;
+const oldTile = (i) => `<span class="tile old">${svg(i.now, 24, 1.8, 'none', 'var(--muted)')}</span>`;
+
+function render() {
+  document.getElementById('big').innerHTML = ICONS.map((i) => `<div class="big-cell">${tile(i, style, true)}<b>${i.he}</b><span style="color:var(--sub)">${i.idea}</span></div>`).join('');
+  document.getElementById('table').innerHTML =
+    `<div class="row head"><span>אייקון</span><span class="c">היום</span><span class="c">א. דק</span><span class="c">ב. מודגש</span><span class="c">ג. דו-גוני</span></div>` +
+    ICONS.map((i) => `<div class="row"><span class="name"><b>${i.he}</b><small>${i.idea}</small></span>
+      <span class="c">${oldTile(i)}</span>
+      ${['thin', 'bold', 'duo'].map((st) => `<span class="c${st === style ? ' sel' : ''}">${tile(i, st)}</span>`).join('')}</div>`).join('');
+  const li = (id, name, cap, on) => `<div class="li">${tile(by[id], style)}<span class="t"><b>${name}</b><small>${cap}</small></span>${on === undefined ? '' : `<span class="sw${on ? '' : ' off'}"></span>`}</div>`;
+  document.getElementById('phones').innerHTML = `
+    <div class="phone" aria-label="ספריית המצוות">
+      <h3>מצוות</h3>
+      <div class="label">תפילות</div>
+      <div class="card">${li('shacharit', 'תפילת שחרית', 'בוקר', true)}${li('mincha', 'תפילת מנחה', 'אחר הצהריים', true)}${li('maariv', 'תפילת ערבית', 'ערב', true)}</div>
+      <div class="label">יומי</div>
+      <div class="card">${li('tefillin', 'הנחת תפילין', 'בוקר', true)}${li('shema', 'קריאת שמע שחרית', 'בוקר', true)}${li('brachot', 'ברכות השחר', 'בוקר', false)}${li('night', 'קריאת שמע על המיטה', 'לילה', true)}</div>
+      <div class="label">שבועי ועונתי</div>
+      <div class="card">${li('candles', 'הדלקת נרות שבת', 'שבועי', false)}${li('havdalah', 'הבדלה', 'שבועי', false)}${li('omer', 'ספירת העומר', 'עונתי', false)}${li('chanukiah', 'נרות חנוכה', 'עונתי', true)}${li('shofar', 'סליחות', 'עונתי', true)}${li('sukkah', 'אושפיזין', 'עונתי', true)}</div>
+    </div>
+    <div class="phone" aria-label="לשונית הסידור">
+      <h3>סידור</h3>
+      <div class="label">סעודות</div>
+      <div class="card">${li('meals', 'ברכת המזון', 'אחרי סעודה')}</div>
+      <div class="label">כללי</div>
+      <div class="card">${li('general', 'תיקון הכללי', 'כללי')}${li('tehillim', 'תהילים', 'כללי')}${li('night', 'קריאת שמע על המיטה', 'כללי')}${li('moon', 'קידוש לבנה', 'כללי')}</div>
+      <div class="label">חגים ושמחות</div>
+      <div class="card">${li('chanukiah', 'נרות חנוכה', 'בלילות חנוכה')}${li('shofar', 'סליחות', 'בעונת הסליחות')}${li('sukkah', 'אושפיזין', 'בלילות סוכות')}</div>
+    </div>
+    <div class="phone" aria-label="לשונית עוד">
+      <h3>עוד</h3>
+      <div class="card">${li('chok', 'חק לישראל', 'לימוד יומי')}${li('shofar', 'סליחות', 'תוסף להורדה')}${li('tehillim', 'תהילים', 'מחולק לפי ימי השבוע')}${li('hilula', 'הילולות צדיקים', 'ימי פטירה של צדיקים, לפי הלוח העברי')}</div>
+    </div>`;
+  document.querySelectorAll('[data-style]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.style === style)));
+}
+document.querySelectorAll('[data-style]').forEach((b) => (b.onclick = () => { style = b.dataset.style; render(); }));
+document.querySelectorAll('[data-theme]').forEach((b) => (b.onclick = () => {
+  const dark = b.dataset.theme === 'dark';
+  document.documentElement.classList.toggle('app-dark', dark);
+  document.querySelectorAll('[data-theme]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+}));
+render();
+</script>
+</body>
+</html>

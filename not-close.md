@@ -317,12 +317,12 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Expected result:** every screen but the reader's prayer text shows Rubik at every weight, and nothing is cut or overflows.
 
 - [ ] Replace the mitzvah icons with a Jewish icon set (tefillin, tallit, siddur and the like)
-  - **Requested:** the user, 2026-11-01: today's icons do not fit; a Jewish icon pack with tefillin, tallit, siddur and similar, or word that one has to be made.
+  - **Requested:** the user, 2026-11-01: today's icons do not fit; a Jewish icon pack with tefillin, tallit, siddur and similar, or word that one has to be made. On being told none exists: "start drawing the set".
   - **Flag:** `OTA` (the icons are `react-native-svg` drawings in [src/components/MitzvahIcon.tsx](src/components/MitzvahIcon.tsx)).
-  - **Found, 2026-11-01:** no open icon set has a Jewish set. 19 Iconify sets (mdi, Font Awesome 6, Tabler, Phosphor, Material Symbols, Fluent, Lucide, Game Icons, Streamline, Carbon, Icon Park, the emoji sets and others) were searched by name. They hold only a menorah or chanukiah, a Star of David, a synagogue, a Torah scroll, candles and the moon. None has tefillin, a tallit, a siddur, a shofar, a kiddush cup, havdalah, a lulav or a sukkah. Paid stock packs (Flaticon, Noun Project) could not be checked from the session; they mix artists and require attribution or a paid licence. So the set has to be drawn.
-  - **What it is:** waiting for the owner's go-ahead. Then a design lab study draws every mitzvah, category and siddur icon of `ICON_NAMES` in one line style matched to the logo. The owner picks a style, and the drawings replace those in `MitzvahIcon`.
+  - **Found, 2026-11-01:** no open icon set has a Jewish set. 19 Iconify sets (mdi, Font Awesome 6, Tabler, Phosphor, Material Symbols, Fluent, Lucide, Game Icons, Streamline, Carbon, Icon Park, the emoji sets and others) were searched by name. They hold only a menorah or chanukiah, a Star of David, a synagogue, a Torah scroll, candles and the moon. None has tefillin, a tallit, a siddur, a shofar, a kiddush cup, havdalah, a lulav or a sukkah. Paid stock packs (Flaticon, Noun Project) could not be checked from the session.
+  - **What it is:** the icon study [design/lab/studies/2026-11-01-icons/](design/lab/studies/2026-11-01-icons/AGENTS.md), published as https://claude.ai/artifact/Ghusk1YmPNfTaExY11gs8F. It holds 21 original drawings (tefillin, a tallit after the logo's, the open siddur with the sun or the moon, a ש on a klaf, a washing cup, a bed and moon, Shabbat candles, havdalah, an omer sheaf, a chanukiah, a sukkah, a shofar, the moon, a learning book, a siddur with a Magen David, David's harp, a challah, a Torah scroll, a pomegranate and a memorial candle) in three styles, beside today's. It waits for the owner's pick of a style and any icon to redraw. Then the drawings replace those in `MitzvahIcon`, and the UI icons stay.
   - **What it solves:** icons that read as the mitzvah they stand for.
-  - **Expected result:** every mitzvah, category and siddur icon is from the new set, the UI icons (arrows, check, bell and the like) stay, and the full gate passes.
+  - **Expected result:** every mitzvah, category and siddur icon is from the new set in the chosen style, the UI icons stay, and the full gate passes.
 
 ## Bugs
 
