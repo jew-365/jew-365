@@ -41,27 +41,12 @@ describe('MitzvahIcon', () => {
         Path,
       );
 
-    it('is one crescent path, unfilled in outline and tinted in duotone', () => {
-      expect(pathsOf('moon', 'outline').map((path) => path.props.fill)).toEqual(['none']);
-      expect(pathsOf('moon', 'duotone').map((path) => path.props.fill)).toEqual(['#eeeeee']);
-    });
-
     it('is drawn apart from the night icon', () => {
       expect(pathsOf('moon', 'outline')[0].props.d).not.toBe(pathsOf('night', 'outline')[0].props.d);
     });
   });
 
   describe('the general icon', () => {
-    const fills = (variant: IconVariant) =>
-      render(createElement(MitzvahIcon, { name: 'general', color: '#111111', tint: '#eeeeee', variant }))
-        .UNSAFE_getAllByType(Path)
-        .map((path) => path.props.fill);
-
-    it('draws three sparkles, unfilled in outline and tinted in duotone', () => {
-      expect(fills('outline')).toEqual(['none', 'none', 'none']);
-      expect(fills('duotone')).toEqual(['#eeeeee', '#eeeeee', '#eeeeee']);
-    });
-
     it('replaces the retired prayers and blessings icon names', () => {
       expect(ICON_NAMES).not.toContain('prayers');
       expect(ICON_NAMES).not.toContain('blessings');
@@ -93,19 +78,6 @@ describe('MitzvahIcon', () => {
   describe('the chok icon', () => {
     const drawing = (name: IconName, variant: IconVariant) =>
       render(createElement(MitzvahIcon, { name, color: '#111111', tint: '#eeeeee', variant }));
-    const fills = (variant: IconVariant) =>
-      drawing('chok', variant)
-        .UNSAFE_getAllByType(Path)
-        .map((path) => path.props.fill);
-
-    it('is two pages, unfilled in outline and tinted in duotone', () => {
-      expect(fills('outline')).toEqual(['none', 'none']);
-      expect(fills('duotone')).toEqual(['#eeeeee', '#eeeeee']);
-    });
-
-    it('carries two text lines on each page', () => {
-      expect(drawing('chok', 'outline').UNSAFE_getAllByType(Line)).toHaveLength(4);
-    });
 
     it('is drawn apart from the siddur icon', () => {
       const pages = (name: IconName) => drawing(name, 'outline').UNSAFE_getAllByType(Path)[0].props.d;
@@ -284,38 +256,8 @@ describe('MitzvahIcon', () => {
   });
 
   describe("the new mitzvot's icons", () => {
-    const drawing = (name: IconName, variant: IconVariant) =>
-      render(createElement(MitzvahIcon, { name, color: '#111111', tint: '#eeeeee', variant }));
-    const pathFills = (name: IconName, variant: IconVariant) =>
-      drawing(name, variant)
-        .UNSAFE_getAllByType(Path)
-        .map((shape) => shape.props.fill);
-    const rectFills = (name: IconName, variant: IconVariant) =>
-      drawing(name, variant)
-        .UNSAFE_getAllByType(Rect)
-        .map((shape) => shape.props.fill);
-
     it("names the new mitzvot's icons", () => {
       expect(ICON_NAMES).toEqual(expect.arrayContaining(['chanukiah', 'sukkah', 'shofar', 'night', 'moon']));
-    });
-
-    it('draws the chanukiah as a flame, a stem with a base and two arms, only the flame taking the tint', () => {
-      expect(pathFills('chanukiah', 'outline')).toEqual(['none', undefined, undefined]);
-      expect(pathFills('chanukiah', 'duotone')).toEqual(['#eeeeee', undefined, undefined]);
-      expect(drawing('chanukiah', 'outline').UNSAFE_getAllByType(Line)).toHaveLength(2);
-    });
-
-    it('draws the sukkah as a hut with a door, a beam and a wavy roof, only the hut taking the tint', () => {
-      expect(rectFills('sukkah', 'outline')).toEqual(['none']);
-      expect(rectFills('sukkah', 'duotone')).toEqual(['#eeeeee']);
-      expect(pathFills('sukkah', 'outline')).toEqual([undefined, undefined]);
-      expect(drawing('sukkah', 'outline').UNSAFE_getAllByType(Line)).toHaveLength(1);
-    });
-
-    it('draws the shofar as a closed horn and its rim, only the horn taking the tint', () => {
-      expect(pathFills('shofar', 'outline')).toEqual(['none', undefined]);
-      expect(pathFills('shofar', 'duotone')).toEqual(['#eeeeee', undefined]);
-      expect(String(drawing('shofar', 'outline').UNSAFE_getAllByType(Path)[0].props.d).endsWith('Z')).toBe(true);
     });
   });
 

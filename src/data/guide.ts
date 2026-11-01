@@ -413,6 +413,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         he: 'גופן חדש לכל האפליקציה, רוביק: עגול, חם וקריא, עם ספרות ברורות לזמנים. הסידור נשאר בגופן שלו.',
         en: 'A new typeface across the app, Rubik: rounded, warm and easy to read, with clear figures for the times. The siddur keeps its own typeface.',
       },
+      {
+        he: 'אייקונים חדשים למצוות, לתפילות ולסידור, שצוירו במיוחד לאפליקציה: תפילין, טלית, סידור, מזוזה, נרות שבת, הבדלה, חנוכייה, סוכה, שופר ועוד, בקו דק ומעוגל עם מילוי עדין.',
+        en: 'New icons for the mitzvot, the prayers and the siddur, drawn for the app: tefillin, a tallit, a siddur, a mezuzah, Shabbat candles, havdalah, a chanukiah, a sukkah, a shofar and more, in a thin rounded line with a soft fill.',
+      },
     ],
   },
   {

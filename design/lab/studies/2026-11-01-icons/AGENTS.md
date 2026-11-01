@@ -16,6 +16,8 @@
 
 ## Local Contracts
 
+- The owner's pick, 2026-11-01: ד, the rounded line set with a soft fill. [../../../../scripts/icons/export.mjs](../../../../scripts/icons/export.mjs) writes it into the app ([../../../../src/components/jewishIcons.generated.ts](../../../../src/components/jewishIcons.generated.ts), drawn by `MitzvahIcon`).
+- On the owner's word "create screens for me" the same day, [shoot-app.cjs](shoot-app.cjs) shot the real app (a web export, an onboarded user, 390 x 844, light and dark) and [build-screens.mjs](build-screens.mjs) put the shots on one page, published as https://claude.ai/artifact/Jb3riBt4ECfre483mnYKTY from the build output's `screens` folder.
 - Published as one gallery Artifact (the owner has since shared it publicly, so a republish passes `shared_live` `public` and the title): https://claude.ai/artifact/Ghusk1YmPNfTaExY11gs8F, from the page the build writes. Republish to the same link after a change.
 - The UI icons (chevrons, check, close, plus, minus, bell, search and the like), `custom`, `calendar` and `sun` stay as they are.
 - The owner's pick moves into `DRAWINGS` of [../../../../src/components/MitzvahIcon.tsx](../../../../src/components/MitzvahIcon.tsx) as `react-native-svg` elements, which ships as an over-the-air update.
@@ -26,6 +28,8 @@
 - In the app the roles become fixed colours (or theme tokens for the tonal option) passed to `react-native-svg`, and the art needs its own size in `IconTile` (30 of 44 points, not the line icons' 24).
 
 ## Verification
+
+- The screens: `npx expo export --platform web --output-dir /tmp/webdist` from the repository, then `node shoot-app.cjs light <routes>` and `node shoot-app.cjs dark <routes>` with Playwright, then `node build-screens.mjs`.
 
 - `node gen-today.mjs` (only when today's icons change), then `node build.mjs`, in this folder.
 
