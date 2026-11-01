@@ -2,6 +2,8 @@
 
 Default listing language: Hebrew (`iw-IL`, the code Play uses for Hebrew), the user's call on 2026-10-20. English (`en-US`) is a translation. Release notes use the same codes: `<iw-IL>…</iw-IL>` and `<en-US>…</en-US>`.
 
+The short and full descriptions below are the draft of 2026-11-01, held by the owner ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-01). The Play Console still holds the listing last published on 2026-10-22, with short descriptions of 56 and 75 characters.
+
 ## App Name
 
 - Hebrew (iw-IL, default): יהודי 365
@@ -9,9 +11,9 @@ Default listing language: Hebrew (`iw-IL`, the code Play uses for Hebrew), the u
 
 ## Short Description
 
-English: Every mitzvah in its time: zmanim, reminders and a siddur in four nusachim.
+English: Siddur, Tehillim, Chok LeYisrael, Tikkun HaKlali and reminders for every mitzvah
 
-Hebrew: כל מצווה בזמנה: זמני הלכה, תזכורות וסידור בארבעה נוסחים.
+Hebrew: סידור, תהילים, חק לישראל, תיקון הכללי וזמני הלכה: כל מצווה בזמנה
 
 ## Full Description
 
@@ -25,42 +27,44 @@ Mitzvot, on time
 - Seasonal and monthly mitzvot that appear only in their time, such as the Omer, Chanukah candles, Selichot, Kiddush Levana and Ushpizin
 - A mitzvah library that grows with updates, each mitzvah on its own switch
 - Your own mitzvot: set the hours, schedule them by weekdays, a date range or a number of days in a row, and add the reminders you want
-- A home screen sorted by urgency: what is open now, what comes next, what has passed
+- A home screen with the day-and-night arc and the day's halachic times: what is open now and how much time is left
 - Hebrew calendar, parasha, holidays and halachic opinions, set for Israel or the Diaspora
 
 Reminders
-- As many reminders as you like for each mitzvah: from the start of its window, before the end or at a set time
+- As many reminders as you like for each mitzvah: before its window opens, from its start, before its end or at a set time
 - Two buttons on the notification itself: "Done" marks the mitzvah without opening the app, and "Open text" opens its text
 - For your own mitzvot, a reminder after the window ends if the mitzvah is not marked yet
+- Quiet hours: no notifications before or after the times you choose
 
 A siddur in four nusachim
-Ashkenaz, Sefard, Edot HaMizrach or Chabad, adjusted to the day: the prayers with each day's additions, blessings and prayers for meals, the home, the road, festivals and celebrations, and the whole of Tehillim divided by the days of the week. A man's or a woman's wording, following your profile. Auto-scroll so you can read without touching the screen, bookmarks, and a return to where you left off. In English, the translation appears under the Hebrew wherever the source has one. Selichot download in your nusach, offered ahead of their season. The siddur keeps growing with updates.
+Ashkenaz, Sefard, Edot HaMizrach or Chabad, adjusted to the day: the prayers with each day's additions, blessings and prayers for meals, the home, the road, festivals and celebrations, Tikkun HaKlali, and the whole of Tehillim divided by the days of the week. A man's or a woman's wording, following your profile. Auto-scroll, bookmarks, and a return to where you left off. In English, the translation appears under the Hebrew wherever the source has one. Selichot download in your nusach. The siddur keeps growing with updates.
 
-Chok LeYisrael
+Chok LeYisrael (Hok LeIsrael)
 An optional add-on downloaded from within the app: the day's portion of the week's parasha, with a mark for each day and make-ups for the days you missed that week.
 
 Shabbat and Yom Tov
 The app rests on Shabbat and Yom Tov: no notifications and a quiet screen. When it ends, mark what you did so your streak holds. An hour before it begins, a notice gives candle-lighting and exit times.
 
 Rosh Chodesh and hilulot of tzaddikim
-Optional notices for Rosh Chodesh and for the hilulot of tzaddikim, on the days and at the times you choose.
+Optional Rosh Chodesh and hilula notices, on the days and times you choose. Each tzaddik has a page: his life, lessons, stories and the way to his resting place.
 
-History and the weekly report
-A history with a day streak and consistency for each mitzvah, and a day, week and month schedule. After Shabbat, a notification opens your report for the week: what you marked, what to improve and what the coming week holds. Past reports are in the history tab. On by default, and you can switch it off in Settings.
+Tracking and the weekly report
+A tracking tab with your streak, consistency per mitzvah, trends, achievements and on-time marks, and a day, week and month schedule. After Shabbat, a notification opens your weekly report: what you marked, what to improve and what the coming week holds.
 
 Family purity tracking (optional)
 Track the count, the bedikot and the mikveh night, with reminders by halachic times and the minhag you choose. Offered to married users only and off until you turn it on. Notification wording is discreet, the screens are locked with biometrics, and the data is kept encrypted. The app does not rule on halacha; in any doubt, ask a rav.
 
 And more
+- Prayer compass: the direction of the Kotel from where you stand
 - Halacha hotline: call a rav on a line that follows your nusach's rulings, some by WhatsApp too
-- A search in Settings that also finds mitzvot, siddur texts and the sections inside them
+- A search that finds everything: settings, mitzvot, siddur texts and their sections, tzaddikim and screens, even with a typo
 - A user guide inside the app, with what's new in each update
 
 Private by design
 - No account and no sign-up
-- Cities in Israel and around the world, or GPS
+- Cities in Israel and around the world, and times that follow your phone's location
 - Backup and restore: automatic backup to your Google account, and a backup file you can export and restore on any phone
-- Hebrew and English, and themes in several colors, light and dark
+- Hebrew and English, themes in several colors, light and dark, and a display size of your choice
 - Crash reports are technical, with no personal information
 
 Hebrew:
@@ -73,42 +77,44 @@ Hebrew:
 - מצוות עונתיות וחודשיות שמופיעות רק בזמנן, כמו ספירת העומר, נרות חנוכה, סליחות, קידוש לבנה ואושפיזין
 - ספריית המצוות גדלה עם העדכונים, ולכל מצווה מתג משלה
 - מצוות אישיות משלך: שעות, תזמון לפי ימי השבוע, טווח תאריכים או מספר ימים ברצף, ותזכורות שאתה קובע
-- מסך בית לפי דחיפות: מה פתוח עכשיו, מה בא אחר כך ומה עבר
+- מסך בית עם מעגל היום והלילה וזמני ההלכה של היום: מה פתוח עכשיו, כמה זמן נשאר ומה כבר בוצע
 - לוח עברי, פרשת השבוע, חגים ודעות הלכתיות, לפי ישראל או חוץ לארץ
 
 תזכורות
-- כמה תזכורות לכל מצווה: מתחילת הזמן, לפני סופו או בשעה קבועה
+- כמה תזכורות לכל מצווה: לפני תחילת הזמן, מתחילתו, לפני סופו או בשעה קבועה
 - בהתראה עצמה: ״עשיתי״ מסמן את המצווה בלי לפתוח את האפליקציה, ו״פתח נוסח״ פותח את הנוסח שלה
 - במצווה אישית אפשר גם תזכורת אחרי סוף הזמן, אם המצווה עוד לא סומנה
+- שעות שקטות: בלי התראות לפני שעה ואחרי שעה שתבחר
 
 סידור בארבעה נוסחים
-אשכנז, ספרד, עדות המזרח או חב״ד, מותאם ליום: התפילות עם התוספות של כל יום, ברכות ותפילות לסעודה, לבית, לדרך, למועדים ולשמחות, וספר תהילים השלם בחלוקה לימי השבוע. הנוסח בלשון גבר או אישה, לפי הפרופיל. גלילה אוטומטית לקריאה בלי לגעת במסך, סימניות, והמשך מהמקום שבו עצרת. הסליחות יורדות בנוסח שלך, והאפליקציה מציעה להוריד אותן לקראת העונה. הסידור ממשיך לגדול עם העדכונים.
+אשכנז, ספרד, עדות המזרח או חב״ד, מותאם ליום: התפילות עם התוספות של כל יום, ברכות ותפילות לסעודה, לבית, לדרך, למועדים ולשמחות, תיקון הכללי, וספר תהילים השלם בחלוקה לימי השבוע. הנוסח בלשון גבר או אישה, לפי הפרופיל. גלילה אוטומטית לקריאה בלי לגעת במסך, סימניות, והמשך מהמקום שבו עצרת. הסליחות יורדות בנוסח שלך, והאפליקציה מציעה להוריד אותן לקראת העונה. הסידור ממשיך לגדול עם העדכונים.
 
-חק לישראל
+חק לישראל (חוק לישראל)
 תוסף אופציונלי שיורד מתוך האפליקציה: הלימוד היומי מפרשת השבוע, עם סימון של כל יום והשלמה לימים שהוחמצו באותו שבוע.
 
 שבת וחג
 האפליקציה נחה בשבת וביום טוב: אין התראות והמסך שקט. בצאת השבת או החג תוכל לסמן מה עשית, כדי שהרצף לא יישבר. שעה לפני הכניסה תגיע התראה עם זמני הדלקת הנרות והיציאה.
 
 ראש חודש והילולות צדיקים
-התראות אופציונליות על ראש חודש ועל הילולות צדיקים, בימים ובשעות שתבחר.
+התראות אופציונליות על ראש חודש ועל הילולות צדיקים, בימים ובשעות שתבחר. לכל צדיק דף משלו: תולדות חייו, לימוד ממנו, סיפורים, ספריו, וניווט לציון כשאפשר להגיע אליו.
 
-היסטוריה וסיכום שבועי
-היסטוריה עם רצף ימים ועקביות לפי מצווה, ולוח זמנים יומי, שבועי וחודשי. במוצאי שבת מגיעה התראה שפותחת את סיכום השבוע: מה סימנת, במה להשתפר ומה מחכה בשבוע הבא. דוחות קודמים נמצאים בלשונית ההיסטוריה. פעיל כברירת מחדל וניתן לכבות בהגדרות.
+מעקב וסיכום שבועי
+לשונית מעקב עם רצף ימים, עקביות לפי מצווה, מגמות והישגים, וכמה סומן בזמן וכמה באיחור, ולוח זמנים יומי, שבועי וחודשי. במוצאי שבת מגיעה התראה שפותחת את סיכום השבוע: מה סימנת, במה להשתפר ומה מחכה בשבוע הבא. דוחות קודמים נמצאים בלשונית המעקב. פעיל כברירת מחדל וניתן לכבות בהגדרות.
 
 טהרת המשפחה (אופציונלי)
 מעקב אחר הספירה, הבדיקות והטבילה, עם תזכורות לפי זמני ההלכה והמנהג שתבחר. התכונה מוצעת רק למשתמשים נשואים וכבויה עד שתפעיל אותה. נוסח ההתראות דיסקרטי, המסכים נעולים בזיהוי ביומטרי והנתונים נשמרים מוצפנים. האפליקציה אינה פוסקת הלכה; בכל ספק יש לשאול רב.
 
 ועוד
+- מצפן תפילה: כיוון הכותל והמרחק אליו מהמקום שבו אתה עומד, גם מתוך שחרית, מנחה וערבית
 - קו ההלכה: חיוג לשאלה לרב לפי פסקי הנוסח שלך, ובחלק מהקווים גם בוואטסאפ
-- חיפוש בהגדרות שמוצא גם מצוות, טקסטים בסידור ופרקים בתוכם
+- חיפוש שמוצא הכל: הגדרות, מצוות, טקסטים ופרקים בסידור, צדיקים ומסכים, גם עם שגיאת כתיב
 - מדריך למשתמש בתוך האפליקציה, עם מה שחדש בכל עדכון
 
 פרטיות והתאמה
 - בלי חשבון ובלי הרשמה
-- ערים בישראל ובעולם לבחירה, או מיקום לפי GPS
+- ערים בישראל ובעולם, וזמנים שמתעדכנים לבד לפי מיקום הטלפון
 - גיבוי ושחזור: גיבוי אוטומטי לחשבון Google, וקובץ גיבוי שאפשר לייצא ולשחזר בכל טלפון
-- עברית ואנגלית, וערכות נושא בכמה צבעים, בהירות וכהות
+- עברית ואנגלית, ערכות נושא בכמה צבעים, בהירות וכהות, וגודל תצוגה לבחירה
 - דיווחי קריסה הם טכניים בלבד, בלי מידע אישי
 
 ## Data Safety Answers

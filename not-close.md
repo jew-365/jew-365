@@ -142,6 +142,7 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
   - **Expected result:** Both consoles carry the new copy.
   - **Status 2026-10-25:** the copy in [release/](release) and [docs/index.html](docs/index.html) is rewritten to name kinds of features, so the batch's additions are covered; left: re-enter it in both consoles (the owner's approval) and a [RELEASE_LOG](release/RELEASE_LOG.md) entry.
   - **Status 2026-10-26:** the description submitted with App Store 1.0.21 still reads "תשע מצוות תלויות זמן" (read in App Store Connect). The re-entry also takes the copy of the task "Add the search terms to the Play listing and the store copy", so each console is filled once.
+  - **Status 2026-11-01:** the copy in [release/](release) and [docs/index.html](docs/index.html) is rewritten for the features of production `1.0.21-8` (uncommitted); the console re-entry is held by the owner ([Store listings of 2026-10-26 — batch rules](#store-listings-of-2026-10-26--batch-rules)).
 
 ### Medium — Chok LeYisrael source defects
 
@@ -165,6 +166,7 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
 - **Decisions taken:** the store name stays `יהודי 365` / `Jew 365` (the owner, 2026-10-26). The subtitle's content was left to Claude (the owner, 2026-10-26: "תכניס מה שהכי חזק והכי צריך"): the two most searched terms the owner named and the least contested one, `סידור, תהילים, חק לישראל`, since the subtitle weighs most after the name and the low-competition terms rank from the keyword field; the tagline moves to the promotional text.
 - **Declined:** renaming the app in the stores to carry keywords (the owner, 2026-10-26: "לא רוצה לשנות שם").
 - **Done means:** the value saved in the console and read back after a reload, recorded in [release/APP_STORE_METADATA_HE.md](release/APP_STORE_METADATA_HE.md), [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md) or [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md), and in [release/RELEASE_LOG.md](release/RELEASE_LOG.md), in the same pass ([store-console skill](.claude/skills/store-console/SKILL.md)); each console step runs only after the owner's go-ahead for it.
+- **On hold (the owner, 2026-11-01: "לחכות עם שתיהן"):** nothing of this batch goes into either console until the owner lifts the hold. The builds the stores review predate most of the features the new copy names (iOS build 4 from `04500e7`, Play versionCode 8 from `11be1c8`; the rest reaches installs over the air, after the first launch), the App Store screenshots and new localizations are locked while 1.0.21 waits for review, and removing it from review restarts the review ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-11-01). The copy in [release/](release) and the screenshots are ready.
 
 ### High — Store listings of 2026-10-26
 
@@ -177,6 +179,7 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
     - When: while 1.0.21 waits for review. On 2026-10-26 the name, subtitle, keyword and description fields were open in that state, and App Information says its changes go out with the next app version, which is 1.0.21. Once 1.0.21 is released, the subtitle and the keywords change only with a new version, that is a new build that raises `version` (root [AGENTS.md](AGENTS.md), Never raise `version` for a JS change).
     - The names-and-tagline rule of [release/AGENTS.md](release/AGENTS.md) changes in the same edit: the subtitles become the ones above.
   - **What it solves:** today's subtitle and keywords carry none of תהילים, חק לישראל or תיקון הכללי, and the English name is not read in Israel.
+  - **Status 2026-11-01:** held by the owner (batch rules above). The fields are still open while 1.0.21 waits for review, but the Hebrew subtitle names Chok LeYisrael, which build 4 does not hold, and App Information's changes may join 1.0.21 itself.
   - **Expected result:** after a reload, App Store Connect shows each value with its counter within the limit; within days of the release, the iTunes Search API (`https://itunes.apple.com/search?country=il&entity=software&term=<term>`) returns the app for `jew 365`, `יהודי 365`, `חק לישראל` and `תיקון הכללי`, and its rank for `תהילים` and `סידור` is recorded.
 
 - [ ] Add the search terms to the Play listing and the store copy
@@ -197,6 +200,7 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
     - In the same pass, the Hebrew keyword field drops `jew,`: the U.K. name carries it in Israel.
     - When: with the subtitle and keywords task, while 1.0.21 waits for review, because after the release the U.K. name, subtitle and keywords reach the store only with a new version. First check that App Store Connect lets a language be added in the Waiting for Review state (not checked on 2026-10-26); if it does not, stop and ask the owner whether to withdraw the submission to add it (the review starts over) or to add it with the next version.
     - Record the localization in the App Record and Version Page sections of [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md), and the step in [release/RELEASE_LOG.md](release/RELEASE_LOG.md).
+  - **Status 2026-11-01:** checked: App Store Connect offers no new language while 1.0.21 waits for review (the language menus list only Hebrew and English (U.S.)), so English (U.K.) joins the next version; until then the Hebrew keywords keep `jew,`.
   - **What it solves:** today no English copy or English keyword is read in Israel, and the Hebrew field spends a keyword on `jew`.
   - **Expected result:** after a reload, App Information lists English (U.K.) with the name `Jew 365` and the subtitle within 30, and its version page shows the keywords within 100; within days of the release, the iTunes Search API with `country=il` returns the app for `jew 365`, `tehillim` and `siddur`, and its rank for each is recorded.
 
@@ -220,6 +224,7 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
     - An English set in the order of the Hebrew one (Home, Siddur tab, Reader, History, Settings): 1206x2622 for the English (U.S.) and English (U.K.) App Store pages and 1080x1920 for the Play English translation, made the way the Hebrew set was (Screenshot Plan in [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md)).
     - One screenshot per language of a mitzvah reminder in the notification shade with its two buttons ("עשיתי" / "פתח נוסח", "Done" / "Open text"), taken on the Android emulator ([android-native-verify](.claude/skills/android-native-verify/SKILL.md)), since the web build shows no notification; it goes second in each set.
     - Uploads go through Chrome, each file under 10 MB.
+  - **Status 2026-11-01:** the Hebrew and English sets are made by the new `pnpm store:screenshots` ([scripts/store/screenshots.mjs](scripts/store/screenshots.mjs), uncommitted): seven screens each (Home, Siddur tab, Reader on Ashrei, History, Settings, a tzaddik page, the weekly report), 1206x2622 for the App Store and 1080x2160 for Play, kept in the owner's Downloads folder `jew365-store-assets-2026-11`. Left: the reminder shot, and the uploads, held by the owner (batch rules above; the App Store screenshots are locked until 1.0.21 leaves review).
   - **What it solves:** English visitors see Hebrew screens today, and no screenshot shows the reminder buttons, the app's own feature.
   - **Expected result:** after a reload, the English pages of both consoles show the English set and both languages show the reminder shot; the Screenshot Plan sections and the Store Graphics section of [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md) list the new files.
 
