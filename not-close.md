@@ -310,7 +310,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
 - [ ] Switch the app's font to Rubik, the siddur excepted
   - **Requested:** the user, 2026-11-01: change the project's fonts except the siddur's; after the font study (https://claude.ai/artifact/TwZBkoqrLdwdDL2QnaUcmp, [design/lab/studies/2026-11-01-fonts/](design/lab/studies/2026-11-01-fonts/AGENTS.md)) the owner picked Rubik.
   - **Done:** 2026-11-01. Verified: `pnpm typecheck`, `pnpm lint`, the full `pnpm test` (223 suites, 5790 tests), `pnpm check:dox`; widths re-measured on the Rubik files with fontTools (the reader's "Minyan" 45.8 and "Commentary" 82.9 points in `captionBold`, inside their pills; the ring's `47:59` at the new 1.1 cap about 2 points inside). Not checked yet: a phone.
-  - **Status:** Version: 1.0.21, expected as production update `1.0.21-9` · Committed: yes, feat(theme): Rubik for every face but the siddur · Pushed: yes, `main` · Live: no · Channel: none
+  - **Status:** Version: 1.0.21, expected as production update `1.0.21-9` · Committed: yes, `279001c` feat(theme): Rubik for every face but the siddur · Pushed: yes, `main` · Live: no · Channel: none
   - **Flag:** `OTA` (`@expo-google-fonts/rubik` is font assets only).
   - **What it is:** `fontFamilies.heebo` became `fontFamilies.ui` on five Rubik weights, each role one weight lighter than its name (400, 500, 600, 700, 800), loaded by the root layout; `@expo-google-fonts/heebo` is gone; the siddur keeps Noto Serif Hebrew; `RING_TEXT_MAX_SCALE` on home's time-left ring went from 1.15 to 1.1 because Rubik's figures are 7% wider; a `WHATS_NEW` entry for `1.0.21-9`.
   - **What it solves:** the app gets a warmer, rounder typeface with its own character instead of the very common Heebo.
