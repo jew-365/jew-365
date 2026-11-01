@@ -297,13 +297,13 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
 
 ### Low — Agent rules of 2026-11-01
 
-- [ ] Add the user's three working rules to the root AGENTS.md
+- [ ] Add the user's five working rules to the root AGENTS.md
   - **Done:** 2026-11-01. Verified: `pnpm check:dox` and prettier on [AGENTS.md](AGENTS.md).
   - **Status:** Version: none (internal docs; moves with the next production release after the push) · Committed: yes, docs(agents): the user's rules on language, branch and updates · Pushed: yes, `main` · Live: no · Channel: none
   - **Flag:** `OTA` (docs only, nothing ships).
-  - **What it is:** three bullets under User Preferences in [AGENTS.md](AGENTS.md): reply in Hebrew, work on `main`, and an update to preview or production means an over-the-air update unless a build is asked for.
+  - **What it is:** five bullets under User Preferences in [AGENTS.md](AGENTS.md): reply in Hebrew, work on `main`, an update to preview or production means an over-the-air update unless a build is asked for, commit anything uncommitted on `main` before starting work, and sync `main` with `origin/main` before starting work.
   - **What it solves:** every agent session follows these rules without being told again.
-  - **Expected result:** a new session answers in Hebrew, works on `main`, and runs `pnpm update:*` for an update request.
+  - **Expected result:** a new session answers in Hebrew, commits leftovers and syncs `main` before it starts, works on `main`, and runs `pnpm update:*` for an update request.
 
 ## Bugs
 

@@ -575,6 +575,8 @@ tree. It cannot judge whether the prose is still true — that part is still the
 - Reply to the user in Hebrew unless they explicitly ask for another language (the user's call, 2026-11-01). Files keep their own language rules.
 - Work on, commit to and push to `main` unless the user explicitly asks for another branch (the user's call, 2026-11-01); this overrides a session's default feature branch.
 - A request for an update to preview or production means an over-the-air update (`pnpm update:preview` / `pnpm update:production`), never a build, unless the user explicitly asks for a build (the user's call, 2026-11-01).
+- Before starting any work, check that `main` has nothing uncommitted; commit anything found first, then start (the user's call, 2026-11-01).
+- Before starting any work, sync the local `main` with `origin/main` (`git pull --rebase origin main`) (the user's call, 2026-11-01).
 
 ## Child DOX Index
 
