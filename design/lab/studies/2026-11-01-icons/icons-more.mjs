@@ -513,5 +513,132 @@ export const TOPICS = [
   { icon: 'meals', he: 'סעודה', options: MEALS },
 ];
 
+// Round 8, the same day, on the owner's word ("give me the festivals and celebrations too"): an icon of its own for
+// every text of the siddur tab's festivals group, which all show the group's pomegranate today. Each list opens with
+// the icon the text's mitzvah already has, where it has one.
+// A wine cup centred on x, its rim at y, at scale k.
+const cup = (x, y, k = 1) => {
+  const p = (dx, dy) => `${r(x + dx * k)},${r(y + dy * k)}`;
+  return `<path d="M${p(-6.5, 0)}L${p(6.5, 0)}L${p(5.4, 10.4)}Q${p(0, 14.6)} ${p(-5.4, 10.4)}Z" fill="${c('gold')}"/>
+    <ellipse cx="${r(x)}" cy="${r(y + 0.7 * k)}" rx="${r(6.4 * k)}" ry="${r(1.4 * k)}" fill="${c('wine')}"/>
+    <rect x="${r(x - 1 * k)}" y="${r(y + 12.6 * k)}" width="${r(2 * k)}" height="${r(6.8 * k)}" fill="${c('gold2')}"/>
+    <path d="M${p(-4.6, 22)}L${p(4.6, 22)}L${p(3, 19.2)}L${p(-3, 19.2)}Z" fill="${c('gold2')}"/>
+    <rect x="${r(x - 4.2 * k)}" y="${r(y + 2.4 * k)}" width="${r(1.4 * k)}" height="${r(6 * k)}" rx="${r(0.7 * k)}" fill="${c('white')}" opacity="0.45"/>`;
+};
+// Seven small stars on an arc of radius R about (x, y), from -165 to -15 degrees.
+const sevenStars = (x, y, R, s = 1.9) =>
+  Array.from({ length: 7 }, (_, i) => {
+    const a = ((-165 + i * 25) * Math.PI) / 180;
+    return star(r(x + R * Math.cos(a)), r(y + R * Math.sin(a)), i === 3 ? s * 1.35 : s, c('gold'));
+  }).join('');
+
+export const OCCASIONS = [
+  {
+    text: 'sheva_berachot',
+    options: [
+      {
+        key: 'chuppah',
+        he: 'חופה',
+        idea: 'חופה על ארבעה עמודים, מכוסה טלית, וכוס של ברכה מתחתיה',
+        draw: () => `
+          <rect x="13.4" y="16" width="1.8" height="26" fill="${c('wood2')}"/>
+          <rect x="32.8" y="16" width="1.8" height="26" fill="${c('wood2')}"/>
+          <rect x="7.6" y="14.4" width="2.8" height="28.6" rx="1" fill="${c('wood')}"/>
+          <rect x="37.6" y="14.4" width="2.8" height="28.6" rx="1" fill="${c('wood')}"/>
+          <path d="M5,14.6Q24,5 43,14.6L41.4,18.6Q36.6,21.4 31.6,18.8Q27.8,21.8 24,19.2Q20.2,21.8 16.4,18.8Q11.4,21.4 6.6,18.6Z" fill="${c('paper')}" stroke="${c('paper2')}" stroke-width="1"/>
+          <path d="M8.4,15.4Q24,7.6 39.6,15.4" stroke="${c('blue')}" stroke-width="1.3" fill="none"/>
+          <path d="M7.4,17.2Q24,9.6 40.6,17.2" stroke="${c('blue')}" stroke-width="0.9" fill="none"/>
+          <circle cx="6.6" cy="19.6" r="1.4" fill="${c('gold')}"/><circle cx="41.4" cy="19.6" r="1.4" fill="${c('gold')}"/>
+          ${cup(24, 26.6, 0.62)}
+          <rect x="4" y="42.6" width="40" height="3" rx="1.5" fill="${c('wood2')}"/>`,
+      },
+      {
+        key: 'cups',
+        he: 'שתי כוסות',
+        idea: 'שתי כוסות יין: כוס ברכת המזון וכוס שבע הברכות',
+        draw: () => `${cup(15.4, 16.4)}${cup(32.6, 16.4)}${star(24, 9.6, 2.6, c('gold'))}${star(29.4, 6, 1.6, c('gold'))}${star(18.6, 6.4, 1.4, c('gold'))}`,
+      },
+      {
+        key: 'rings',
+        he: 'טבעות',
+        idea: 'שתי טבעות נישואין שלובות',
+        draw: () => `
+          <circle cx="19" cy="28.6" r="9.6" stroke="${c('gold2')}" stroke-width="3.6" fill="none"/>
+          <circle cx="29" cy="23.4" r="9.6" stroke="${c('gold')}" stroke-width="3.6" fill="none"/>
+          <path d="M26.4,32.6A9.6,9.6 0 0 0 28.4,28.8" stroke="${c('gold2')}" stroke-width="3.6" fill="none"/>
+          <path d="M14.4,22.4A7,7 0 0 1 18.4,20.4" stroke="${c('white')}" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.6"/>
+          ${star(38.6, 9.4, 3, c('gold'))}${star(9.6, 11.6, 1.8, c('gold'))}`,
+      },
+      {
+        key: 'sevenStars',
+        he: 'כוס ושבעה כוכבים',
+        idea: 'כוס של ברכה ושבעה כוכבים מעליה: שבע הברכות',
+        draw: () => `${sevenStars(24, 21, 15.4)}${cup(24, 21.4, 1.05)}`,
+      },
+    ],
+  },
+  {
+    text: 'chanukah_candles',
+    options: [
+      { key: 'chanukiah', he: 'חנוכייה', idea: 'החנוכייה של מצוות נרות חנוכה', icon: 'chanukiah' },
+      {
+        key: 'window',
+        he: 'חנוכייה בחלון',
+        idea: 'חנוכייה דולקת בחלון בלילה: פרסומי ניסא',
+        draw: () => {
+          const xs = [11.6, 14.6, 17.6, 20.6, 27.4, 30.4, 33.4, 36.4];
+          return `
+            <rect x="5.5" y="5.5" width="37" height="34.5" rx="2.4" fill="${c('wood')}"/>
+            <rect x="8.6" y="8.6" width="30.8" height="31.4" fill="${c('ink')}"/>
+            ${crescent(14.4, 14.6, 3.6, 16.4, 13.2, 3.1, c('gold'))}
+            ${star(33.6, 13.4, 1.6, c('white'))}${star(26.6, 16.6, 1.1, c('white'))}
+            <path d="M10.6,31.6H37.4" stroke="${c('gold')}" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M24,25.6V39.4M19.6,39.6H28.4" stroke="${c('gold')}" stroke-width="1.8" stroke-linecap="round"/>
+            ${xs.map((x) => `<rect x="${r(x - 0.75)}" y="27.6" width="1.5" height="4" fill="${c('white')}"/>${flame(x, 23.4, 4)}`).join('')}
+            <rect x="23.25" y="21.6" width="1.5" height="4" fill="${c('white')}"/>${flame(24, 17.4, 4)}
+            <rect x="3" y="39.6" width="42" height="4.2" rx="1.6" fill="${c('wood2')}"/>`;
+        },
+      },
+      {
+        key: 'jar',
+        he: 'פך השמן',
+        idea: 'פך השמן הקטן שדלק שמונה ימים',
+        draw: () => `
+          <circle cx="24" cy="10" r="7.4" fill="${c('flame')}" opacity="0.3"/>
+          ${flame(24, 2.6, 11)}
+          <path d="M31.4,24.6Q38.4,25 37,32.4" stroke="${c('wood2')}" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+          <path d="M16.4,22.4Q11.2,29.6 14.6,38.2Q24,43.4 33.4,38.2Q36.8,29.6 31.6,22.4Q28,19.8 24,20.2Q20,19.8 16.4,22.4Z" fill="${c('wood')}"/>
+          <rect x="20.2" y="14" width="7.6" height="8" rx="1.6" fill="${c('wood')}"/>
+          <rect x="18.8" y="12.4" width="10.4" height="3.2" rx="1.6" fill="${c('wood2')}"/>
+          <rect x="20.2" y="18.4" width="7.6" height="2.2" fill="${c('gold')}"/>
+          <path d="M17.4,29Q24,32 30.6,29" stroke="${c('gold')}" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+          <ellipse cx="18.6" cy="27" rx="1.8" ry="4" transform="rotate(14 18.6 27)" fill="${c('white')}" opacity="0.3"/>`,
+      },
+    ],
+  },
+  {
+    text: 'selichot',
+    options: [
+      { key: 'shofar', he: 'שופר', idea: 'השופר של מצוות סליחות', icon: 'shofar' },
+      {
+        key: 'gate',
+        he: 'שערי רחמים',
+        idea: 'שער פתוח ואור יוצא ממנו: ״פתח לנו שער בעת נעילת שער״',
+        draw: () => `
+          <path d="M7,44V20Q7,5 24,5Q41,5 41,20V44Z" fill="${c('ink2')}"/>
+          <path d="M11.6,44V20.8Q11.6,9.6 24,9.6Q36.4,9.6 36.4,20.8V44Z" fill="${c('flame')}"/>
+          <circle cx="24" cy="25" r="8.6" fill="${c('flame2')}" opacity="0.45"/>
+          <path d="M11.6,20.8Q11.6,13.6 16.2,11.6L17,44H11.6ZM36.4,20.8Q36.4,13.6 31.8,11.6L31,44H36.4Z" fill="${c('wood')}"/>
+          <path d="M14,26V30M34,26V30" stroke="${c('gold')}" stroke-width="1.4" stroke-linecap="round"/>
+          <rect x="3.5" y="43" width="41" height="2.8" rx="1.4" fill="${c('ink3')}"/>`,
+      },
+    ],
+  },
+  {
+    text: 'ushpizin',
+    options: [{ key: 'table', he: 'שולחן וכיסא לאורח', idea: 'האייקון של מצוות אושפיזין', draw: USHPIZIN.find((o) => o.key === 'table').draw }],
+  },
+];
+
 // The markup of an option: its own drawing, or the drawing of the app icon it reuses.
 export const artOf = (option, uid = '__UID__') => (option.icon ? today(option.icon) : option.draw)(uid);

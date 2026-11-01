@@ -336,6 +336,13 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** icons that say what each item is: a mezuzah stood for Kriat Shema, and ten different texts shared one scroll.
   - **Expected result:** every picked icon shows on every screen and palette, the general group's rows each with its own icon, and the full gate passes.
 
+- [ ] An icon of its own for every text of the siddur's festivals and celebrations group
+  - **Requested:** the user, 2026-11-01, after the round 7 icons: "give me the festivals and celebrations too" (Sheva Berachot, the Chanukah candles, Selichot and Ushpizin all show the group's pomegranate).
+  - **Flag:** `OTA` (drawings in [src/components/jewishIcons.generated.ts](src/components/jewishIcons.generated.ts) and an `icon` per text in `STANDALONE_TEXTS`, no native change).
+  - **What it is:** round 8 of the icon study [design/lab/studies/2026-11-01-icons/](design/lab/studies/2026-11-01-icons/AGENTS.md), published as https://claude.ai/artifact/6rjnotaGD5h83GaDuCcBUh: four options for Sheva Berachot (a chuppah, two cups, wedding rings, a cup under seven stars), the chanukiah, a chanukiah in a window or the jar of oil for the Chanukah candles, the shofar or the gates of mercy for Selichot, and the Ushpizin table, each on the siddur tab's real screen in the six palettes. Waiting for the owner's picks; then [scripts/icons/export.mjs](scripts/icons/export.mjs) writes them into the app and each festival text gets its `icon`.
+  - **What it solves:** four different texts no longer share one pomegranate.
+  - **Expected result:** each festival text shows its picked icon in the siddur tab and the search, in every palette, and the full gate passes.
+
 ### Medium — Completion animation of 2026-11-01
 
 - [ ] A new animation for "עשיתי" on home's open cards

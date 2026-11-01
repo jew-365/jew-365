@@ -6,7 +6,7 @@
 //   -> /tmp/packs/<route>-<palette>.png and .json; with ids, only those icons are hidden and recorded. A route may add
 //   +<text> for each element to tap first (a siddur group's title opens it), then @<testID>: the screen scrolls that
 //   element to its top, less one row, before the shot. An icon inside a siddur tab
-//   row (testID siddur-row-<text>) records the text as its `row`.
+//   row (testID siddur-row-<text>) records the text as its `row`, and any other icon the text of its button (`label`).
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -69,7 +69,10 @@ const server = http
     await page.goto(`http://localhost:8099${route}`);
     await page.waitForTimeout(3500);
     for (const text of taps) {
-      await page.getByText(text, { exact: true }).first().click();
+      // A group that is absent at this hour (the now group) is skipped.
+      const target = page.getByText(text, { exact: true }).first();
+      if (!(await target.count())) continue;
+      await target.click();
       await page.waitForTimeout(700);
     }
     if (anchor) {
@@ -121,7 +124,9 @@ const server = http
         const color = candidates.find((c) => tone(c, probe[id].tone).every((v, i) => Math.abs(v - seen[i]) <= 2));
         if (!color) throw new Error(`no palette colour gives ${id} its fill ${seen}`);
         const row = svg.closest('[data-testid^="siddur-row-"]')?.getAttribute('data-testid').slice('siddur-row-'.length);
-        found.push({ id, x: box.left, y: box.top, size: box.width, shown, color, ...(row ? { row } : {}) });
+        // A row with no testID (the Selichot download offer) is told apart by the text of its button.
+        const label = row ? undefined : svg.closest('[role="button"]')?.textContent?.trim().slice(0, 40);
+        found.push({ id, x: box.left, y: box.top, size: box.width, shown, color, ...(row ? { row } : {}), ...(label ? { label } : {}) });
         svg.style.visibility = 'hidden';
       }
       return found;
