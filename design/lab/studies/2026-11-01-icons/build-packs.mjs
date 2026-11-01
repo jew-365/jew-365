@@ -1,6 +1,6 @@
 // Writes out/packs/index.html: the real app's screens (shot by shoot-packs.cjs with the Jewish icons hidden and
 // their boxes recorded) with a switch that draws every icon in any pack: today's, א colour, ב theme tones,
-// ג lines and ד lines with a soft fill (the one in the app), in the light and the dark palette.
+// ג lines and ד lines with a soft fill (the one in the app), in each of the app's six palettes.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
@@ -18,7 +18,10 @@ const SCREENS = [
   ['_mitzvah_tefillin', 'הנחת תפילין'],
 ];
 const screens = [];
-for (const theme of ['light', 'dark']) {
+// The app's six palettes (THEME_NAMES of src/theme/colors.ts), named as Settings names them.
+const he = JSON.parse(readFileSync(join(here, '../../../../src/i18n/he.json'), 'utf8'));
+const PALETTES = ['gold', 'pink', 'purple', 'blue', 'dark', 'plum'];
+for (const theme of PALETTES) {
   for (const [file, title] of SCREENS) {
     const base = `/tmp/packs/${file}-${theme}`;
     if (!existsSync(`${base}.png`)) throw new Error(`missing ${base}.png: run shoot-packs.cjs first`);
@@ -60,7 +63,7 @@ figure { margin: 0; display: grid; gap: 8px; justify-items: center; }
 figcaption { font-weight: 600; }
 </style></head><body><div class="wrap">
 <h1>חבילות האייקונים על מסכי האפליקציה</h1>
-<p>אלה המסכים האמיתיים של האפליקציה, צולמו מגרסת הדפדפן עם רוביק. כל אייקון יהודי מצויר במקומו המדויק ובצבע שהאפליקציה נותנת לו, לפי החבילה שבוחרים. ד׳ היא החבילה שכבר נמצאת באפליקציה.</p>
+<p>אלה המסכים האמיתיים של האפליקציה, צולמו מגרסת הדפדפן עם רוביק. כל אייקון יהודי מצויר במקומו המדויק ובצבע שהאפליקציה נותנת לו, לפי החבילה שבוחרים, בכל שש ערכות הצבעים של האפליקציה. ד׳ היא החבילה שכבר נמצאת באפליקציה.</p>
 <div class="bars">
   <div class="bar" role="group" aria-label="חבילת אייקונים"><span>חבילה</span>
     <button type="button" data-pack="today" aria-pressed="false">היום (הישנה)</button>
@@ -70,8 +73,7 @@ figcaption { font-weight: 600; }
     <button type="button" data-pack="lineFill" aria-pressed="true">ד. קווים עם מילוי עדין</button>
   </div>
   <div class="bar" role="group" aria-label="ערכת צבעים"><span>צבעים</span>
-    <button type="button" data-palette="light" aria-pressed="true">זהב (בהיר)</button>
-    <button type="button" data-palette="dark" aria-pressed="false">לילה (כהה)</button>
+${PALETTES.map((p, i) => `    <button type="button" data-palette="${p}" aria-pressed="${i === 0}">${he[`settings.theme.${p}`]}</button>`).join('\n')}
   </div>
 </div>
 <div class="grid" id="grid"></div>
@@ -79,7 +81,7 @@ figcaption { font-weight: 600; }
 <script>
 const SCREENS = ${JSON.stringify(screens)};
 const ART = ${JSON.stringify(art)};
-let pack = 'lineFill', theme = 'light', uid = 0;
+let pack = 'lineFill', theme = 'gold', uid = 0;
 const svg = (box, inner, extra = '') => \`<svg viewBox="\${box}" fill="none" aria-hidden="true" \${extra}>\${inner}</svg>\`;
 function draw(id, color) {
   const a = ART[id];

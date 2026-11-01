@@ -1,7 +1,8 @@
 // Shoots the real app for the icon-pack switcher: serves a web export (npx expo export --platform web --output-dir
 // /tmp/webdist), seeds an onboarded user, and on each route records every Jewish icon's box, id and colour, hides
 // those icons and takes the screenshot, so the page can draw any pack in their place.
-// node shoot-packs.cjs <light|dark> <comma-separated routes>  -> /tmp/packs/<route>-<theme>.png and .json
+// node shoot-packs.cjs <palette: gold|pink|purple|blue|dark|plum> <comma-separated routes>
+//   -> /tmp/packs/<route>-<palette>.png and .json
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -33,9 +34,9 @@ const server = http
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'he-IL', timezoneId: 'Asia/Jerusalem' });
   const page = await ctx.newPage();
   await page.goto('http://localhost:8099/');
-  await page.evaluate((dark) => {
-    localStorage.setItem('jew-365\\user-store', JSON.stringify({ state: { isOnboarded: true, gender: 'male', maritalStatus: 'married', theme: dark ? 'dark' : 'gold' }, version: 1 }));
-  }, theme === 'dark');
+  await page.evaluate((palette) => {
+    localStorage.setItem('jew-365\\user-store', JSON.stringify({ state: { isOnboarded: true, gender: 'male', maritalStatus: 'married', theme: palette }, version: 1 }));
+  }, theme);
   for (const route of process.argv[3].split(',')) {
     await page.goto(`http://localhost:8099${route}`);
     await page.waitForTimeout(3500);

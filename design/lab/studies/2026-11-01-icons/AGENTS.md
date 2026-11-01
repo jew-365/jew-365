@@ -4,7 +4,7 @@
 
 - The icon study of 2026-11-01, for the owner's request: today's icons do not fit; a Jewish icon set with tefillin, tallit, siddur and the like. No open icon set has one (19 Iconify sets searched, [../../../../not-close.md](../../../../not-close.md)), so the set is drawn here.
 - Round 1 (line icons on the app's 24-unit grid in three line styles) was rejected by the owner the same day ("the icons look awful, give me something beautiful") and replaced in place.
-- Round 2, the current one: one gallery page shows 21 flat, coloured illustrations, one per icon id of [../../../../src/components/MitzvahIcon.tsx](../../../../src/components/MitzvahIcon.tsx) that stands for a mitzvah, a siddur group or a Jewish topic, beside today's drawing, in the app's `IconTile` (the art at 30 points in the 44-point tile) and in mock rows of the library, the siddur tab and the More tab, in the gold and dark palettes, in two options: א full colour, ב the same drawings in the accent's tones only.
+- Round 2, the current one: one gallery page shows 21 flat, coloured illustrations, one per icon id of [../../../../src/components/MitzvahIcon.tsx](../../../../src/components/MitzvahIcon.tsx) that stands for a mitzvah, a siddur group or a Jewish topic, beside today's drawing, in the app's `IconTile` (the art at 30 points in the 44-point tile) and in mock rows of the library, the siddur tab and the More tab, in each of the app's six palettes (their tokens read by [build.mjs](build.mjs) from `src/theme/colors.ts`), in two options: א full colour, ב the same drawings in the accent's tones only.
 - Round 3, the same day, on the owner's word ("I want line icons too, rounded and beautiful"): a line family drawn on the same shapes is added beside the illustrations as ג rounded lines and ד rounded lines with a soft accent fill, so the page offers four options.
 
 ## Ownership
@@ -18,7 +18,7 @@
 
 - The owner's pick, 2026-11-01: ד, the rounded line set with a soft fill. [../../../../scripts/icons/export.mjs](../../../../scripts/icons/export.mjs) writes it into the app ([../../../../src/components/jewishIcons.generated.ts](../../../../src/components/jewishIcons.generated.ts), drawn by `MitzvahIcon`).
 - On the owner's word "create screens for me" the same day, [shoot-app.cjs](shoot-app.cjs) shot the real app (a web export, an onboarded user, 390 x 844, light and dark) and [build-screens.mjs](build-screens.mjs) put the shots on one page, published as https://claude.ai/artifact/Jb3riBt4ECfre483mnYKTY from the build output's `screens` folder.
-- On the owner's word "make me interactive screens that change with the icon pack" the same day, [shoot-packs.cjs](shoot-packs.cjs) shot the real app with the Jewish icons hidden, recording each one's box, id, colour and the part that shows above the tab bar, and [build-packs.mjs](build-packs.mjs) draws any pack in their place (today's, א, ב, ג, ד), light and dark, with [roles.css](roles.css) holding the colour roles: https://claude.ai/artifact/9WvdLpFUH25TvMSibgyvdF, from the build output's `packs` folder.
+- On the owner's word "make me interactive screens that change with the icon pack" the same day, [shoot-packs.cjs](shoot-packs.cjs) shot the real app with the Jewish icons hidden, recording each one's box, id, colour and the part that shows above the tab bar, and [build-packs.mjs](build-packs.mjs) draws any pack in their place (today's, א, ב, ג, ד), in each of the app's six palettes (the owner's word, "give me all the palettes", the same day), with [roles.css](roles.css) holding the colour roles: https://claude.ai/artifact/9WvdLpFUH25TvMSibgyvdF, from the build output's `packs` folder.
 - Published as one gallery Artifact (the owner has since shared it publicly, so a republish passes `shared_live` `public` and the title): https://claude.ai/artifact/Ghusk1YmPNfTaExY11gs8F, from the page the build writes. Republish to the same link after a change.
 - The UI icons (chevrons, check, close, plus, minus, bell, search and the like), `custom`, `calendar` and `sun` stay as they are.
 - The owner's pick moves into `DRAWINGS` of [../../../../src/components/MitzvahIcon.tsx](../../../../src/components/MitzvahIcon.tsx) as `react-native-svg` elements, which ships as an over-the-air update.
@@ -30,7 +30,7 @@
 
 ## Verification
 
-- The screens: `npx expo export --platform web --output-dir /tmp/webdist` from the repository, then `node shoot-app.cjs light <routes>` and `node shoot-app.cjs dark <routes>` with Playwright, then `node build-screens.mjs`. The pack switcher: `node shoot-packs.cjs <light|dark> /home,/siddur,/more,/mitzvot,/mitzvah/tefillin` for both themes, then `node build-packs.mjs`.
+- The screens: `npx expo export --platform web --output-dir /tmp/webdist` from the repository, then `node shoot-app.cjs light <routes>` and `node shoot-app.cjs dark <routes>` with Playwright, then `node build-screens.mjs`. The pack switcher: `node shoot-packs.cjs <gold|pink|purple|blue|dark|plum> /home,/siddur,/mitzvot,/more,/mitzvah/tefillin` for each palette, then `node build-packs.mjs`.
 
 - `node gen-today.mjs` (only when today's icons change), then `node build.mjs`, in this folder.
 

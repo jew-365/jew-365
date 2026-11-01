@@ -33,11 +33,6 @@
   --i-leaf: color-mix(in srgb, var(--gold) 90%, #fff); --i-leaf2: var(--gold); --i-wine: var(--gold); --i-wine2: color-mix(in srgb, var(--gold) 70%, #2a1405);
   --i-water: color-mix(in srgb, var(--gold) 35%, #fff); --i-blue: color-mix(in srgb, var(--gold) 70%, #2a1405);
 }
-.app-dark {
-  --bg: #0E1626; --surface: #172238; --surface2: #222F4A; --text: #EEF1F7; --sub: #9DA9BF;
-  --border: #28354F; --gold: #F59A4A; --on-gold: #2B1608; --gold-light: #3A2D26; --gold-text: #F7A65E; --muted: #A3AEC3;
-  color-scheme: dark;
-}
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); }
 .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; display: grid; gap: 26px; }
@@ -84,6 +79,7 @@ button:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px;
 .note { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px 18px; font-size: 15px; line-height: 1.7; max-width: 80ch; }
 .note p { margin: 0 0 6px; }
 @media (max-width: 640px) { .row { grid-template-columns: 1fr repeat(5, 48px); padding: 10px; } .row .name small { display: none; } }
+__PALETTE_CSS__
 </style>
 </head>
 <body>
@@ -101,8 +97,7 @@ button:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px;
       <button type="button" data-style="lineFill" aria-pressed="false">ד. קווים עם מילוי עדין</button>
     </div>
     <div class="bar" role="group" aria-label="צבעים"><span>צבעים</span>
-      <button type="button" data-palette="light" aria-pressed="true">זהב (בהיר)</button>
-      <button type="button" data-palette="dark" aria-pressed="false">לילה (כהה)</button>
+__PALETTE_BUTTONS__
     </div>
   </div>
 
@@ -179,8 +174,7 @@ function render() {
 }
 document.querySelectorAll('[data-style]').forEach((b) => (b.onclick = () => { style = b.dataset.style; render(); }));
 document.querySelectorAll('[data-palette]').forEach((b) => (b.onclick = () => {
-  const dark = b.dataset.palette === 'dark';
-  document.documentElement.classList.toggle('app-dark', dark);
+  document.documentElement.className = `pal-${b.dataset.palette}`;
   document.querySelectorAll('[data-palette]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
 }));
 render();
