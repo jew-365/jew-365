@@ -108,7 +108,7 @@ export function MitzvahCard({
             {done && (
               <View style={styles.iconLine}>
                 <MitzvahIcon name="check" size={DONE_LINE_ICON_SIZE} color={doneInk} />
-                <Text style={[typography.micro, { color: doneInk, fontFamily: fontFamilies.heebo.semibold }]}>
+                <Text style={[typography.micro, { color: doneInk, fontFamily: fontFamilies.ui.semibold }]}>
                   {doneLabel}
                 </Text>
               </View>
@@ -117,7 +117,7 @@ export function MitzvahCard({
               <Text
                 style={[
                   typography.micro,
-                  { color: statusColor, fontFamily: fontFamilies.heebo.semibold, marginTop: LINE_GAP },
+                  { color: statusColor, fontFamily: fontFamilies.ui.semibold, marginTop: LINE_GAP },
                 ]}
               >
                 {statusText}
@@ -131,7 +131,7 @@ export function MitzvahCard({
                   color={colors.urgent}
                   strokeWidth={URGENT_LINE_ICON_STROKE}
                 />
-                <Text style={[typography.micro, { color: colors.urgent, fontFamily: fontFamilies.heebo.semibold }]}>
+                <Text style={[typography.micro, { color: colors.urgent, fontFamily: fontFamilies.ui.semibold }]}>
                   {t('state.urgentSoon')}
                 </Text>
               </View>
@@ -140,7 +140,7 @@ export function MitzvahCard({
               <Text
                 style={[
                   typography.micro,
-                  { color: colors.textMuted, fontFamily: fontFamilies.heebo.semibold, marginTop: LINE_GAP },
+                  { color: colors.textMuted, fontFamily: fontFamilies.ui.semibold, marginTop: LINE_GAP },
                 ]}
               >
                 {t('state.readOnly')}

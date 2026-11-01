@@ -12,12 +12,12 @@ import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-c
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   useFonts,
-  Heebo_400Regular,
-  Heebo_600SemiBold,
-  Heebo_700Bold,
-  Heebo_800ExtraBold,
-  Heebo_900Black,
-} from '@expo-google-fonts/heebo';
+  Rubik_400Regular,
+  Rubik_500Medium,
+  Rubik_600SemiBold,
+  Rubik_700Bold,
+  Rubik_800ExtraBold,
+} from '@expo-google-fonts/rubik';
 import { NotoSerifHebrew_400Regular, NotoSerifHebrew_700Bold } from '@expo-google-fonts/noto-serif-hebrew';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { BRAND, T_LIGHT } from '@/theme/colors';
@@ -277,7 +277,7 @@ const errorStyles = StyleSheet.create({
     padding: spacing.xxl,
     backgroundColor: BRAND.parchment,
   },
-  title: { fontFamily: fontFamilies.heebo.bold, fontSize: scaled(20), color: BRAND.navy, textAlign: 'center' },
+  title: { fontFamily: fontFamilies.ui.bold, fontSize: scaled(20), color: BRAND.navy, textAlign: 'center' },
   body: {
     fontSize: scaled(15),
     color: T_LIGHT.textSub,
@@ -293,18 +293,18 @@ const errorStyles = StyleSheet.create({
     paddingHorizontal: spacing.xxxl,
     backgroundColor: BRAND.gold,
   },
-  buttonLabel: { fontFamily: fontFamilies.heebo.bold, fontSize: scaled(16), color: BRAND.onGold },
+  buttonLabel: { fontFamily: fontFamilies.ui.bold, fontSize: scaled(16), color: BRAND.onGold },
 });
 
 function RootLayout() {
   // A failed font fetch must not brick the app: `loaded` would stay false forever, leaving a bare
   // spinner behind an un-hidden splash with notifications never initialised and no way out.
   const [loaded, fontError] = useFonts({
-    Heebo_400Regular,
-    Heebo_600SemiBold,
-    Heebo_700Bold,
-    Heebo_800ExtraBold,
-    Heebo_900Black,
+    Rubik_400Regular,
+    Rubik_500Medium,
+    Rubik_600SemiBold,
+    Rubik_700Bold,
+    Rubik_800ExtraBold,
     NotoSerifHebrew_400Regular,
     NotoSerifHebrew_700Bold,
   });

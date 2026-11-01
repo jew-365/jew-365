@@ -255,8 +255,7 @@ export default function ScheduleScreen() {
                                 : item.type === 'zman'
                                   ? colors.textSub
                                   : colors.text,
-                            fontFamily:
-                              item.type === 'mitzvah' ? fontFamilies.heebo.semibold : fontFamilies.heebo.regular,
+                            fontFamily: item.type === 'mitzvah' ? fontFamilies.ui.semibold : fontFamilies.ui.regular,
                             textDecorationLine: item.done ? 'line-through' : 'none',
                           },
                         ]}
@@ -268,7 +267,7 @@ export default function ScheduleScreen() {
                           style={[
                             typography.micro,
                             styles.statusText,
-                            { color: statusColor, fontFamily: fontFamilies.heebo.semibold },
+                            { color: statusColor, fontFamily: fontFamilies.ui.semibold },
                           ]}
                         >
                           {statusText}
@@ -371,7 +370,7 @@ export default function ScheduleScreen() {
                   <View style={styles.monthBadgeRow}>
                     {cell.openCount > 0 ? (
                       <View style={[styles.monthBadge, { backgroundColor: colors.gold }]}>
-                        <Text style={[typography.micro, { color: colors.onGold, fontFamily: fontFamilies.heebo.bold }]}>
+                        <Text style={[typography.micro, { color: colors.onGold, fontFamily: fontFamilies.ui.bold }]}>
                           {cell.openCount}
                         </Text>
                       </View>

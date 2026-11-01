@@ -283,7 +283,7 @@ function Radar({ size, heading, angle, distance, facing, live }: RadarProps) {
                 y={CENTER + r - 7}
                 textAnchor="middle"
                 fontSize={10}
-                fontFamily={fontFamilies.heebo.semibold}
+                fontFamily={fontFamilies.ui.semibold}
                 fill={ink}
               >
                 {t('compass.ringKm', { km })}

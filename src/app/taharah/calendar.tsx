@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: BRAND.white,
-    fontFamily: fontFamilies.heebo.bold,
+    fontFamily: fontFamilies.ui.bold,
   },
   marks: {
     flexDirection: 'row',

@@ -18,7 +18,7 @@ const TILE_SIZE = scaled(44);
 const RING_SIZE = scaled(68);
 const RING_LENGTH = 157.08;
 // The ring does not grow with the phone's font size, so its text stops growing at this share of it.
-const RING_TEXT_MAX_SCALE = 1.15;
+const RING_TEXT_MAX_SCALE = 1.1;
 
 type Props = {
   name: string;

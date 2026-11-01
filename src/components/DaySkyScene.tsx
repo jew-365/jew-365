@@ -279,7 +279,7 @@ export function DaySkyScene({
             <Text
               testID="home-arc-clock"
               style={{
-                fontFamily: previewing ? fontFamilies.heebo.semibold : fontFamilies.heebo.regular,
+                fontFamily: previewing ? fontFamilies.ui.semibold : fontFamilies.ui.regular,
                 fontSize: CLOCK_SIZE,
                 lineHeight: CLOCK_LINE,
                 color: ink.ink,

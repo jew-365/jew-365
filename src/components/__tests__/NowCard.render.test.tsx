@@ -54,7 +54,7 @@ describe('NowCard', () => {
     const value = screen.getByText('2:38', { includeHiddenElements: true });
     expect(StyleSheet.flatten(value.props.style).fontSize).toBe(typography.captionBold.fontSize);
     for (const text of [value, screen.getByText('שעות', { includeHiddenElements: true })]) {
-      expect(text.props.maxFontSizeMultiplier).toBe(1.15);
+      expect(text.props.maxFontSizeMultiplier).toBe(1.1);
     }
   });
 

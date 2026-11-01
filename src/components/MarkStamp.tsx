@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   },
   stampText: {
     fontSize: scaled(21),
-    fontFamily: fontFamilies.heebo.black,
+    fontFamily: fontFamilies.ui.black,
     letterSpacing: scaled(3),
   },
 });

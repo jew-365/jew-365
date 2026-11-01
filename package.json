@@ -36,8 +36,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@expo-google-fonts/heebo": "^0.2.3",
     "@expo-google-fonts/noto-serif-hebrew": "^0.4.2",
+    "@expo-google-fonts/rubik": "0.4.2",
     "@hebcal/core": "^5.4.0",
     "@react-navigation/bottom-tabs": "7.18.8",
     "@sentry/react-native": "~7.2.0",

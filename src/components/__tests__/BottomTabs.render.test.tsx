@@ -135,7 +135,7 @@ describe('BottomTabs', () => {
       expect(filled[0]).toBe(screen.UNSAFE_getByType(MitzvahIcon).parent);
       expect(screen.getByText('סידור')).toHaveStyle({
         color: THEMES[name].goldText,
-        fontFamily: fontFamilies.heebo.bold,
+        fontFamily: fontFamilies.ui.bold,
       });
       expect(underlines().filter((line) => fillOf(line) === THEMES[name].gold)).toHaveLength(1);
       expect(underlines()).toHaveLength(5);
@@ -146,7 +146,7 @@ describe('BottomTabs', () => {
     renderWithTheme(<BottomTabs {...tabBarProps('siddur').props} />);
     expect(screen.getByText('בית')).toHaveStyle({
       color: THEMES.gold.textMuted,
-      fontFamily: fontFamilies.heebo.regular,
+      fontFamily: fontFamilies.ui.regular,
     });
     const fills = pills().map(fillOf);
     expect(fills.filter((fill) => fill === THEMES.gold.goldLight)).toHaveLength(1);

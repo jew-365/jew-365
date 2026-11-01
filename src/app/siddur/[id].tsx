@@ -2338,7 +2338,7 @@ function SegmentView({
   }, [key, layouts]);
   const runStyle = (run: Run) => {
     if (run.s === 'n') {
-      return { fontFamily: fontFamilies.heebo.regular, fontSize: Math.round(fontSize * 0.62), color: colors.textMuted };
+      return { fontFamily: fontFamilies.ui.regular, fontSize: Math.round(fontSize * 0.62), color: colors.textMuted };
     }
     if (run.s === 'b') return { fontFamily: fontFamilies.siddur.bold };
     if (run.s === 't') return { fontSize: Math.round(fontSize * 0.82), color: colors.textSub };
@@ -2513,7 +2513,7 @@ const styles = StyleSheet.create({
     writingDirection: 'rtl',
   },
   english: {
-    fontFamily: fontFamilies.heebo.regular,
+    fontFamily: fontFamilies.ui.regular,
     textAlign: LEFT_EDGE,
     writingDirection: 'ltr',
     marginTop: spacing.xs,

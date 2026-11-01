@@ -28,7 +28,7 @@ jest.mock('expo-updates', () => ({
   isEnabled: false,
 }));
 jest.mock('@sentry/react-native', () => ({ wrap: (component: unknown) => component }));
-jest.mock('@expo-google-fonts/heebo', () => ({ useFonts: () => [true, null] }));
+jest.mock('@expo-google-fonts/rubik', () => ({ useFonts: () => [true, null] }));
 jest.mock('@expo-google-fonts/noto-serif-hebrew', () => ({}));
 jest.mock('@/services/NotificationScheduler', () => ({ initNotificationHandlers: () => () => {} }));
 jest.mock('@/services/ChokContentService', () => ({ reconcileChokInstall: () => {} }));

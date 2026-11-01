@@ -367,21 +367,22 @@ describe('Typography', () => {
   it('every family the app styles with is a loaded font', () => {
     const families = [
       ...Object.values(typography).map((style) => style.fontFamily),
-      ...Object.values(fontFamilies.heebo),
+      ...Object.values(fontFamilies.ui),
       ...Object.values(fontFamilies.siddur),
     ];
     expect(families.filter((family) => !loaded.includes(family as string))).toEqual([]);
   });
 
-  it('the unused Heebo weights are not loaded', () => {
-    expect(loaded).not.toContain('Heebo_300Light');
-    expect(loaded).not.toContain('Heebo_500Medium');
+  it('the unused Rubik weights are not loaded', () => {
+    expect(loaded).not.toContain('Rubik_300Light');
+    expect(loaded).not.toContain('Rubik_900Black');
   });
 
   it('the root layout loads exactly APP_FONTS', () => {
     const source = fs.readFileSync(path.join(__dirname, '..', '..', 'app', '_layout.tsx'), 'utf8');
     expect(APP_FONTS.filter((font) => !source.includes(font))).toEqual([]);
-    expect(source).not.toContain('Heebo_300Light');
-    expect(source).not.toContain('Heebo_500Medium');
+    expect(source).not.toContain('Rubik_300Light');
+    expect(source).not.toContain('Rubik_900Black');
+    expect(source).not.toContain('@expo-google-fonts/heebo');
   });
 });

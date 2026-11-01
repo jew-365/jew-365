@@ -138,12 +138,12 @@ describe('design system tripwires', () => {
     );
   });
 
-  it('no fontWeight; Heebo weights are font families from typography', () => {
+  it('no fontWeight; Rubik weights are font families from typography', () => {
     expect(offenders(allFiles, ({ source }) => source.includes('fontWeight:'))).toEqual([]);
   });
 
-  it('no Heebo font-name literal outside the useFonts map in the root layout', () => {
-    expect(offenders(allFiles, ({ rel, source }) => rel !== 'app/_layout.tsx' && source.includes('Heebo_'))).toEqual(
+  it('no Rubik font-name literal outside the useFonts map in the root layout', () => {
+    expect(offenders(allFiles, ({ rel, source }) => rel !== 'app/_layout.tsx' && source.includes('Rubik_'))).toEqual(
       [],
     );
   });

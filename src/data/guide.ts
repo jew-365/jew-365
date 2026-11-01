@@ -406,6 +406,16 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
   {
+    label: '1.0.21-9',
+    date: '2026-11-01',
+    items: [
+      {
+        he: 'גופן חדש לכל האפליקציה, רוביק: עגול, חם וקריא, עם ספרות ברורות לזמנים. הסידור נשאר בגופן שלו.',
+        en: 'A new typeface across the app, Rubik: rounded, warm and easy to read, with clear figures for the times. The siddur keeps its own typeface.',
+      },
+    ],
+  },
+  {
     label: '1.0.21-8',
     date: '2026-10-31',
     items: [

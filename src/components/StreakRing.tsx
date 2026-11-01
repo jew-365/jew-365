@@ -235,6 +235,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   number: {
-    fontFamily: fontFamilies.heebo.black,
+    fontFamily: fontFamilies.ui.black,
   },
 });

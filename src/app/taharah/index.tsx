@@ -278,7 +278,7 @@ export default function TaharahDashboard() {
                       accessibilityRole="button"
                       style={[styles.undoBtn, { backgroundColor: colors.goldLight }]}
                     >
-                      <Text style={[typography.small, { color: colors.goldText, fontFamily: fontFamilies.heebo.bold }]}>
+                      <Text style={[typography.small, { color: colors.goldText, fontFamily: fontFamilies.ui.bold }]}>
                         {t('taharah.log.undo')}
                       </Text>
                     </Pressable>
@@ -391,7 +391,7 @@ function TaskRow({ task, onPress }: { task: TaharahTask; onPress?: () => void })
           <Text
             style={[
               typography.micro,
-              { color: task.required ? colors.text : colors.textSub, fontFamily: fontFamilies.heebo.bold },
+              { color: task.required ? colors.text : colors.textSub, fontFamily: fontFamilies.ui.bold },
             ]}
           >
             {task.required ? t('taharah.task.required') : t('taharah.task.recommended')}

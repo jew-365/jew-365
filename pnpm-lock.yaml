@@ -16,11 +16,11 @@ importers:
 
   .:
     dependencies:
-      '@expo-google-fonts/heebo':
-        specifier: ^0.2.3
-        version: 0.2.3
       '@expo-google-fonts/noto-serif-hebrew':
         specifier: ^0.4.2
+        version: 0.4.2
+      '@expo-google-fonts/rubik':
+        specifier: 0.4.2
         version: 0.4.2
       '@hebcal/core':
         specifier: ^5.4.0
@@ -768,11 +768,11 @@ packages:
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@expo-google-fonts/heebo@0.2.3':
-    resolution: {integrity: sha512-OcHS880/2o6m66Fw+w7PptjQEA938aiV2YjzKdJ6KZnG9XpSViqomztY+9Oi7vjy4ecmxlv+syMFyc9uM9hsOg==}
-
   '@expo-google-fonts/noto-serif-hebrew@0.4.2':
     resolution: {integrity: sha512-rgsdLstcIV5j5kAfou7RjaUU4bwl+dXpaavQezbcKCb6gmOO5ipfBb4AeUQOxQkV3UWbPZlCora2wpZRW544qw==}
+
+  '@expo-google-fonts/rubik@0.4.2':
+    resolution: {integrity: sha512-WJtpQEw4lDKjCVnVIBF9qiZn+BTOB3juWvSchpZ+mnHFFV0gh4PyOvLLJCOMmKVgSj/pzFDtNe4apqexrD0+pA==}
 
   '@expo/cli@54.0.27':
     resolution: {integrity: sha512-BxKOr6e8wmUwhGSyEVKY+CHWgS3Cre9ibgx1QWcdCenKTVKAz62qGmYL51q0lCcKg6vQY+4Usw9RK5Il4ZFaIA==}
@@ -6074,9 +6074,9 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
-  '@expo-google-fonts/heebo@0.2.3': {}
-
   '@expo-google-fonts/noto-serif-hebrew@0.4.2': {}
+
+  '@expo-google-fonts/rubik@0.4.2': {}
 
   '@expo/cli@54.0.27(expo-router@6.0.24)(expo@54.0.37)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(typescript@5.9.3)':
     dependencies:

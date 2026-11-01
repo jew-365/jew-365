@@ -132,7 +132,7 @@ export function BottomTabs({ state, descriptors, navigation, insets }: BottomTab
                   typography.micro,
                   {
                     color: focused ? colors.goldText : colors.textMuted,
-                    fontFamily: focused ? fontFamilies.heebo.bold : fontFamilies.heebo.regular,
+                    fontFamily: focused ? fontFamilies.ui.bold : fontFamilies.ui.regular,
                   },
                 ]}
               >
