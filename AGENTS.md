@@ -572,6 +572,9 @@ tree. It cannot judge whether the prose is still true — that part is still the
 - Task queues, PRDs, planning files, and similar planning artifacts must be written in English unless the user explicitly asks for another language.
 - In coding tasks, apply YAGNI: favor simple, concise solutions, including one-liners when they genuinely improve clarity without sacrificing quality, readability, maintainability, or design.
 - DOX indexes and durable file references should use Markdown links to the referenced files whenever practical.
+- Reply to the user in Hebrew unless they explicitly ask for another language (the user's call, 2026-11-01). Files keep their own language rules.
+- Work on, commit to and push to `main` unless the user explicitly asks for another branch (the user's call, 2026-11-01); this overrides a session's default feature branch.
+- A request for an update to preview or production means an over-the-air update (`pnpm update:preview` / `pnpm update:production`), never a build, unless the user explicitly asks for a build (the user's call, 2026-11-01).
 
 ## Child DOX Index
 
