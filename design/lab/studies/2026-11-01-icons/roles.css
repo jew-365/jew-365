@@ -1,0 +1,20 @@
+:root {
+  /* The icons' colour roles (icons.mjs): full colour by default. */
+  --i-ink: #26305E; --i-ink2: #3E4C86; --i-ink3: #18204A; --i-acc: #F08A3C; --i-acc2: #C9631B;
+  --i-paper: #FFF4E3; --i-paper2: #E3CDB0; --i-white: #FFFFFF; --i-line: #B9A88F; --i-line2: #FFF1D0;
+  --i-gold: #F5B83D; --i-gold2: #D18E22; --i-flame: #FFC93C; --i-flame2: #FF7B1C; --i-metal: #DCE3EC; --i-metal2: #A3AFC2;
+  --i-wood: #A8673A; --i-wood2: #6E3E1C; --i-horn: #EED3A6; --i-leaf: #6CAF62; --i-leaf2: #4A8A48;
+  --i-wine: #D23E4F; --i-wine2: #9E2738; --i-water: #7CC6EE; --i-blue: #3F73D0;
+}
+/* The same drawings in the accent's tones only, so they follow every palette. */
+.tonal {
+  --i-ink: color-mix(in srgb, var(--gold) 55%, #2a1405); --i-ink2: color-mix(in srgb, var(--gold) 75%, #2a1405); --i-ink3: color-mix(in srgb, var(--gold) 40%, #2a1405);
+  --i-acc: var(--gold); --i-acc2: color-mix(in srgb, var(--gold) 70%, #2a1405);
+  --i-paper: color-mix(in srgb, var(--gold) 12%, #fff); --i-paper2: color-mix(in srgb, var(--gold) 40%, #fff); --i-white: #fff;
+  --i-line: color-mix(in srgb, var(--gold) 55%, #fff); --i-line2: color-mix(in srgb, var(--gold) 15%, #fff);
+  --i-gold: color-mix(in srgb, var(--gold) 85%, #fff); --i-gold2: var(--gold); --i-flame: color-mix(in srgb, var(--gold) 45%, #fff); --i-flame2: var(--gold);
+  --i-metal: color-mix(in srgb, var(--gold) 22%, #fff); --i-metal2: color-mix(in srgb, var(--gold) 60%, #fff);
+  --i-wood: color-mix(in srgb, var(--gold) 80%, #2a1405); --i-wood2: color-mix(in srgb, var(--gold) 55%, #2a1405); --i-horn: color-mix(in srgb, var(--gold) 35%, #fff);
+  --i-leaf: color-mix(in srgb, var(--gold) 90%, #fff); --i-leaf2: var(--gold); --i-wine: var(--gold); --i-wine2: color-mix(in srgb, var(--gold) 70%, #2a1405);
+  --i-water: color-mix(in srgb, var(--gold) 35%, #fff); --i-blue: color-mix(in srgb, var(--gold) 70%, #2a1405);
+}
