@@ -184,6 +184,32 @@ describe('the siddur tab’s catalog', () => {
     });
   });
 
+  describe('the icons', () => {
+    it('draws each text of the meals and general groups with its own icon, and the festivals with their group’s', () => {
+      open(WEDNESDAY);
+      const expected = {
+        birkat_hamazon: 'challah',
+        al_hamichya: 'sevenSpecies',
+        borei_nefashot: 'waterGlass',
+        tikkun_haklali: 'lyre',
+        tehillim: 'tehillim',
+        nishmat: 'eagle',
+        kriat_shema_al_hamita: 'night',
+        tefilat_haderech: 'suitcase',
+        asher_yatzar: 'washingCup',
+        birchot_hanehenin: 'apple',
+        birchot_hareiya: 'storm',
+        mezuzah: 'mezuzah',
+        kiddush_levana: 'moon',
+        sheva_berachot: 'occasions',
+        chanukah_candles: 'occasions',
+        ushpizin: 'occasions',
+      };
+      const drawn = Object.fromEntries(Object.keys(expected).map((id) => [id, listRowOf(id).props.icon]));
+      expect(drawn).toEqual(expected);
+    });
+  });
+
   describe('the mitzvot group', () => {
     it('lists the mitzvah texts that are not prayers, in registry order, right after the prayers', () => {
       open(WEDNESDAY);

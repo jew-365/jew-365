@@ -17,6 +17,7 @@ import {
   siddurPlace,
   siddurTextPresent,
   standaloneAvailability,
+  standaloneIcon,
   standalonePeriodEnded,
   standaloneTextDay,
   standaloneTextsIn,
@@ -786,14 +787,14 @@ export function settingsContentItems({
   const place = siddurPlace(location, inIsrael);
   for (const id of SIDDUR_GROUPS.flatMap((group) => standaloneTextsIn(group, nusach))) {
     if (!catalogListsText(id, voice) || !siddurTextPresent(nusach, id)) continue;
-    const { name, group } = STANDALONE_TEXTS[id];
+    const { name } = STANDALONE_TEXTS[id];
     const open =
       hasStandaloneText(id, nusach, dayFeatures(standaloneTextDay(id, now, location), place)) &&
       !standalonePeriodEnded(id, nusach, now, location);
     texts.push({
       id,
       title: name,
-      icon: group,
+      icon: iconFor(standaloneIcon(id)),
       chapters: SIDDUR_CHAPTERS[id]?.[nusach] ?? [],
       notToday: open ? undefined : { label: standaloneAvailability(id, nusach).availableLabel ?? null },
     });

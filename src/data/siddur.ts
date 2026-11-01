@@ -71,6 +71,8 @@ type TextHours = (day: Zmanim, next: Zmanim, location: Location) => { start: Dat
 export type StandaloneEntry = Availability & {
   name: { he: string; en: string };
   group: SiddurGroup;
+  /** The text's own icon (an icon name of MitzvahIcon); a text without one shows its group's. */
+  icon?: string;
   evening?: boolean;
   availableIn?: Partial<Record<Nusach, Availability>>;
   hours?: TextHours | 'mitzvah';
@@ -95,26 +97,36 @@ const kiddushLevanaOn = (nusach: Nusach, he: string, en: string): Availability =
 });
 
 export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
-  birkat_hamazon: { name: { he: 'ברכת המזון', en: 'Grace After Meals' }, group: 'meals' },
-  al_hamichya: { name: { he: 'ברכה מעין שלוש', en: "Me'ein Shalosh" }, group: 'meals' },
-  borei_nefashot: { name: { he: 'בורא נפשות', en: 'Borei Nefashot' }, group: 'meals' },
-  tikkun_haklali: { name: { he: 'תיקון הכללי', en: 'Tikkun HaKlali' }, group: 'general' },
-  tehillim: { name: { he: 'תהילים', en: 'Tehillim' }, group: 'general' },
-  nishmat: { name: { he: 'נשמת כל חי', en: 'Nishmat Kol Chai' }, group: 'general' },
+  birkat_hamazon: { name: { he: 'ברכת המזון', en: 'Grace After Meals' }, group: 'meals', icon: 'challah' },
+  al_hamichya: { name: { he: 'ברכה מעין שלוש', en: "Me'ein Shalosh" }, group: 'meals', icon: 'sevenSpecies' },
+  borei_nefashot: { name: { he: 'בורא נפשות', en: 'Borei Nefashot' }, group: 'meals', icon: 'waterGlass' },
+  tikkun_haklali: { name: { he: 'תיקון הכללי', en: 'Tikkun HaKlali' }, group: 'general', icon: 'lyre' },
+  tehillim: { name: { he: 'תהילים', en: 'Tehillim' }, group: 'general', icon: 'tehillim' },
+  nishmat: { name: { he: 'נשמת כל חי', en: 'Nishmat Kol Chai' }, group: 'general', icon: 'eagle' },
   kriat_shema_al_hamita: {
     name: { he: 'קריאת שמע על המיטה', en: 'Bedtime Shema' },
     group: 'general',
+    icon: 'night',
     evening: true,
     hours: TONIGHT_TO_DAWN,
   },
-  tefilat_haderech: { name: { he: 'תפילת הדרך', en: "The Traveler's Prayer" }, group: 'general' },
-  asher_yatzar: { name: { he: 'אשר יצר', en: 'Asher Yatzar' }, group: 'general' },
-  birchot_hanehenin: { name: { he: 'ברכות הנהנין', en: 'Blessings on Food and Fragrance' }, group: 'general' },
-  birchot_hareiya: { name: { he: 'ברכות הראייה', en: 'Blessings on Sights and Sounds' }, group: 'general' },
-  mezuzah: { name: { he: 'קביעת מזוזה', en: 'Affixing a Mezuzah' }, group: 'general' },
+  tefilat_haderech: { name: { he: 'תפילת הדרך', en: "The Traveler's Prayer" }, group: 'general', icon: 'suitcase' },
+  asher_yatzar: { name: { he: 'אשר יצר', en: 'Asher Yatzar' }, group: 'general', icon: 'washingCup' },
+  birchot_hanehenin: {
+    name: { he: 'ברכות הנהנין', en: 'Blessings on Food and Fragrance' },
+    group: 'general',
+    icon: 'apple',
+  },
+  birchot_hareiya: {
+    name: { he: 'ברכות הראייה', en: 'Blessings on Sights and Sounds' },
+    group: 'general',
+    icon: 'storm',
+  },
+  mezuzah: { name: { he: 'קביעת מזוזה', en: 'Affixing a Mezuzah' }, group: 'general', icon: 'mezuzah' },
   kiddush_levana: {
     name: { he: 'קידוש לבנה', en: 'Kiddush Levana' },
     group: 'general',
+    icon: 'moon',
     evening: true,
     ...kiddushLevanaOn(
       'ashkenaz',
@@ -187,6 +199,9 @@ export const MITZVAH_STANDALONE_TEXT: Partial<Record<string, StandaloneTextId>> 
 const CHOK_DAYS: Condition = { none: ['shabbat', 'yomTov', 'yomKippur'] };
 
 export const SIDDUR_GROUPS: readonly SiddurGroup[] = ['meals', 'general', 'occasions'];
+
+/** The icon a standalone text is drawn with: its own, else its group's (the owner's picks of 2026-11-01). */
+export const standaloneIcon = (id: StandaloneTextId): string => STANDALONE_TEXTS[id].icon ?? STANDALONE_TEXTS[id].group;
 
 export const SIDDUR_TEXT_IDS: readonly SiddurTextId[] = [
   ...(Object.keys(SIDDUR_TEXTS) as MitzvahTextId[]),

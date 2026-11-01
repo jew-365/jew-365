@@ -27,6 +27,16 @@ const JEWISH = [
   'general',
   'occasions',
   'hilula',
+  'mezuzah',
+  'washingCup',
+  'challah',
+  'sevenSpecies',
+  'waterGlass',
+  'lyre',
+  'eagle',
+  'suitcase',
+  'apple',
+  'storm',
 ] as const;
 
 // react-native-svg wraps its children in a group of its own, so the icon's group is the one carrying the stroke.
@@ -41,7 +51,7 @@ describe('MitzvahIcon', () => {
     expect(shapes(UNSAFE_root).length).toBeGreaterThan(0);
   });
 
-  it('draws the 21 Jewish icons from the generated set, every one an icon name', () => {
+  it('draws the 31 Jewish icons from the generated set, every one an icon name', () => {
     expect(Object.keys(JEWISH_ICONS).sort()).toEqual([...JEWISH].sort());
     for (const name of JEWISH) expect(ICON_NAMES).toContain(name);
   });

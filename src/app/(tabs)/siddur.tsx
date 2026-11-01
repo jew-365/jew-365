@@ -19,6 +19,7 @@ import {
   standaloneHoursAt,
   standalonePeriodEnded,
   standaloneTextDay,
+  standaloneIcon,
   standaloneTextsIn,
 } from '@/data/siddur';
 import { Card } from '@/components/Card';
@@ -298,12 +299,12 @@ export default function SiddurScreen() {
         />
       );
     }
-    const { id, group, hours } = entry.standalone;
+    const { id, hours } = entry.standalone;
     return (
       <CatalogRow
         key={id}
         id={id}
-        icon={group}
+        icon={iconFor(standaloneIcon(id))}
         iconTone="accent"
         title={label(STANDALONE_TEXTS[id].name)}
         caption={t('siddur.now.until', { time: clockOf(hours.end) })}
@@ -320,13 +321,13 @@ export default function SiddurScreen() {
     void selichotFlow.prepare();
   };
 
-  const row = (id: StandaloneTextId, group: SiddurGroup) => {
+  const row = (id: StandaloneTextId) => {
     const { name } = STANDALONE_TEXTS[id];
     if (id === SELICHOT_TEXT_ID && !selichotInstalled) {
       return (
         <Card key={id}>
           <ListRow
-            icon={group}
+            icon={iconFor(standaloneIcon(id))}
             iconTone="muted"
             title={label(name)}
             caption={selichotAddonCaption(selichotDownload, t(`nusach.${nusach}`), t)}
@@ -344,7 +345,7 @@ export default function SiddurScreen() {
         key={id}
         testID={`siddur-row-${id}`}
         id={id}
-        icon={group}
+        icon={iconFor(standaloneIcon(id))}
         iconTone={saidToday ? 'accent' : 'muted'}
         title={label(name)}
         caption={saidToday ? undefined : availableLabel ? label(availableLabel) : t('siddur.catalog.notToday')}
@@ -362,7 +363,7 @@ export default function SiddurScreen() {
       icon={group}
       open={open}
       onToggle={toggle}
-      render={() => ids.map((id) => row(id, group))}
+      render={() => ids.map((id) => row(id))}
     />
   );
   const mealGroups = groups.filter(({ group }) => group === 'meals');

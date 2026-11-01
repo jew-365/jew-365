@@ -299,8 +299,8 @@ describe('content search', () => {
       textName: { he: 'תפילת מנחה', en: 'Mincha' },
       href: { pathname: '/siddur/[id]', params: { id: 'mincha', section: 'אשרי' } },
     });
-    expect(itemOf('siddur:birkat_hamazon')?.icon).toBe('meals');
-    expect(itemOf('chapter:tehillim:ליום ראשון')?.icon).toBe('general');
+    expect(itemOf('siddur:birkat_hamazon')?.icon).toBe('challah');
+    expect(itemOf('chapter:tehillim:ליום ראשון')?.icon).toBe('tehillim');
     expect(content().some((item) => item.id.startsWith('chapter:asher_yatzar:'))).toBe(false);
   });
 
