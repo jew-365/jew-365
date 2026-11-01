@@ -136,7 +136,7 @@ const svg = (inner, size, sw, fill, color) =>
   `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" fill="none">${inner.replaceAll('__FILL__', fill)}</g></svg>`;
 const art = (i, size) => `<svg width="${size}" height="${size}" viewBox="0 0 48 48" aria-hidden="true">${i.next.replaceAll('__UID__', `g${uid++}`)}</svg>`;
 const line = (i, size, filled) =>
-  `<svg width="${size}" height="${size}" viewBox="0 0 48 48" fill="none" aria-hidden="true"><g stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none">${i.line.replaceAll('__FILL__', filled ? 'color-mix(in srgb, var(--gold) 26%, transparent)' : 'none')}</g></svg>`;
+  `<svg width="${size}" height="${size}" viewBox="0 0 48 48" fill="none" aria-hidden="true"><g stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">${i.line.replaceAll('__FILL__', filled ? 'color-mix(in srgb, var(--gold) 26%, transparent)' : 'none')}</g></svg>`;
 const tile = (i, st, big) => {
   const size = big ? 54 : 30;
   const inner = st === 'line' || st === 'lineFill' ? line(i, big ? 50 : 28, st === 'lineFill') : art(i, size);

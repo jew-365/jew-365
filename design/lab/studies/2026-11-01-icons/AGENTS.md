@@ -11,12 +11,12 @@
 
 - [icons.mjs](icons.mjs) is the new set: per icon its id, Hebrew name, idea and `draw(uid)`, SVG markup on a 48-unit viewBox whose every colour is a role variable (`--i-ink`, `--i-gold`, `--i-paper`, `--i-flame`, `--i-wood`, `--i-wine` and the rest; `uid` names the shofar's gradient). [site-template.html](site-template.html) sets the roles: full colour in `:root`, the accent's tones under `.tonal`. Shared helpers draw a flame, a four-point star, a crescent from two circles and the open book.
 - [gen-today.mjs](gen-today.mjs) renders today's drawings from the app source into [today.json](today.json) (sucrase and `react-dom/server` from the repo's `node_modules`); rerun it when `MitzvahIcon.tsx` changes.
-- [icons-line.mjs](icons-line.mjs) is the line set: `LINE_ICONS`, one `draw(f)` per id on the same 48-unit box and shapes as [icons.mjs](icons.mjs), stroked in one colour at 3 units with round caps and joins (details at 2 to 2.6), where `f` fills the main shapes (`none`, or the accent at 26% for ד). The build throws on an id with no line drawing.
+- [icons-line.mjs](icons-line.mjs) is the line set: `LINE_ICONS`, one `draw(f)` per id on the same 48-unit box and shapes as [icons.mjs](icons.mjs), stroked in one colour at 2 units with round caps and joins (details at 1.2 to 1.7; thinned by a third from 3 on the owner's word, "I want thinner lines", 2026-11-01), where `f` fills the main shapes (`none`, or the accent at 26% for ד). The build throws on an id with no line drawing.
 - [site-template.html](site-template.html) is the page and [build.mjs](build.mjs) writes it into the build output (`out/`, never committed); the build throws on an icon id `MitzvahIcon.tsx` lacks.
 
 ## Local Contracts
 
-- Published as one private gallery Artifact: https://claude.ai/artifact/Ghusk1YmPNfTaExY11gs8F, from the page the build writes. Republish to the same link after a change.
+- Published as one gallery Artifact (the owner has since shared it publicly, so a republish passes `shared_live` `public` and the title): https://claude.ai/artifact/Ghusk1YmPNfTaExY11gs8F, from the page the build writes. Republish to the same link after a change.
 - The UI icons (chevrons, check, close, plus, minus, bell, search and the like), `custom`, `calendar` and `sun` stay as they are.
 - The owner's pick moves into `DRAWINGS` of [../../../../src/components/MitzvahIcon.tsx](../../../../src/components/MitzvahIcon.tsx) as `react-native-svg` elements, which ships as an over-the-air update.
 
