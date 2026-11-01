@@ -67,7 +67,7 @@ Every other EAS build is superseded, and no other AAB was uploaded to Play ([act
 
 ## Next steps
 
-0. The owner answers Q9 to Q15 of the nagging batch in [not-close.md](not-close.md) (the level table, the nag's limits, a repeat's text, the three-state control, a level-5 follow-up, iOS at high levels, the other notice kinds); the batch's logic tasks can start meanwhile on the assumptions of [.claude/specs/nagging-levels.md](.claude/specs/nagging-levels.md), and its three screens wait for the design study's pick.
+0. The owner answers Q12 (a reminder's opt-out from the level) and Q14 (iOS at high levels) of the nagging batch in [not-close.md](not-close.md); Q9 to Q11, Q13 and Q15 were answered on 2026-11-01 (a level's repeats come before the reminder's time, no follow-up at the end of the time). The batch's logic tasks can start now on [.claude/specs/nagging-levels.md](.claude/specs/nagging-levels.md), and its three screens wait for the design study's pick.
 
 1. The owner picks a home screen direction from the gallery (up to three, ranked); then the open product decisions in the study's AGENTS.md come first, and the implementation ships over the air.
 

@@ -303,17 +303,18 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
 ### Nagging levels and reminder nags, 2026-11-01 — batch rules
 
 - **Requested:** the user, 2026-11-01, in a Claude Code session, in Hebrew: a nagging level (רמת נודניקיות) from 1 to 5 for the whole app and per mitzvah, where today's defaults are level 1 and every level up means more notifications for a mitzvah; and a nag (נודניק) on every reminder, registry and custom mitzvot alike: how many times it repeats, every how many minutes (3 or 5 were named) and whether before the reminder's time, after it or half and half; the UI, the UX and the logic all to be designed; planning and tasks only for now.
+- **Answered by the owner, 2026-11-01:** Q9 (the level table), Q10 (a count of 1 to 5, intervals of 3, 5, 10 and 15 minutes), Q11 (a repeat's suffix "תזכורת k מתוך n") and Q15 (mitzvah reminders only) approved as proposed; Q13 answered no, "אין שום תזכורת בסוף הזמן", with the rule that a level's automatic repeats come before the reminder's time, never after it, so a reminder's own time is the last notification of its chain (a user may still choose after or half and half on one reminder, as asked at the start); Q12 and Q14 wait for an answer (Open Questions).
 - **Spec:** [.claude/specs/nagging-levels.md](.claude/specs/nagging-levels.md) holds the design: the model, every rule, each surface, the data, the i18n keys, the tests and the docs. A task below names the spec section it implements; the spec is the contract, this file the queue.
 - **Flag:** every task carries `OTA`: pure JavaScript, no native module, no field of [app.json](app.json), no change to the Android notification plugin; a task that turns out to need one stops and says so.
 - **Decisions taken** (Claude's, cheap to reverse, the owner may overrule): a level is a preset nag applied to every reminder that has no explicit nag of its own, never a set of extra reminders at fractions of the window (spec 3.1: a "last call" on a window that ends at alot would fire at 04:30); an explicit nag beats the level, and `null` on a reminder means no nag whatever the level says; a repeat is judged by the same `reminderFires()` as its main, so it never crosses the window's end, never falls more than 180 minutes before it and never inside a holy block; repeats count from the main's final instant, after a quiet-hours move; a repeat that lands on another notification of the same mitzvah at the same instant is dropped; thinning keeps mains only; the ids are `…__<idx>[.<occurrence>]~<k>` and `parseId()` is unchanged; `SCHEDULE_FORMAT` goes to 11; "חזרה לברירת מחדל" keeps the mitzvah's level; the custom form also offers the mitzvah's level; the per-day estimate the screens print is the sum of 1 plus each reminder's repeats.
-- **Open:** Q9 to Q15 under [For the owner](#for-the-owner), each with the assumption built until it is answered. The logic tasks start on the assumptions; the three surface tasks wait for the design study's pick.
+- **Open:** Q12 and Q14 under [For the owner](#for-the-owner), each with the assumption built until it is answered. The logic tasks start now; the three surface tasks wait for the design study's pick.
 - **Done means:** both dictionaries updated with every key the task adds, a DOX pass on every touched AGENTS.md, the spec section the task names implemented as written or the deviation written back into the spec, a new store field with a default, a merge repair and a reset, the preview and the plan from one function, the search finding every new setting, and `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green. No OTA without the owner's per-action approval.
 
 ### High — Nagging levels and reminder nags
 
 - [ ] Add the nag model and the level presets
   - **Flag:** `OTA`.
-  - **What it is:** `src/utils/nagging.ts` (new, pure): `NagLevel`, `NagPlacement`, `ReminderNag`, `NAG_LEVELS` (the table of spec 3.2: 1 none; 2 one repeat 10 minutes after; 3 two every 5; 4 three every 5; 5 five every 3), `NAG_MAX_COUNT` (5), `NAG_INTERVALS_MIN` (3, 5, 10, 15), `isNagLevel()`, `isReminderNag()`, `nagFor(reminder, level)` (spec 3.3: an object wins, `null` means none, absent takes the level's preset, a malformed value reads as absent), `repeatOffsets(nag)` (spec 3.4: `before`, `after`, or `around` with `floor(count/2)` before and the rest after) and `remindersPerDay(reminders, level)`; `Reminder.nag?: ReminderNag | null` in [src/types/mitzvah.ts](src/types/mitzvah.ts). Docs: [src/utils/AGENTS.md](src/utils/AGENTS.md), [src/types/AGENTS.md](src/types/AGENTS.md), root [AGENTS.md](AGENTS.md) (Mitzvah Data Model).
+  - **What it is:** `src/utils/nagging.ts` (new, pure): `NagLevel`, `NagPlacement`, `ReminderNag`, `NAG_LEVELS` (the table of spec 3.2: 1 none; 2 one repeat 10 minutes before the main; 3 two every 5; 4 three every 5; 5 five every 3; every preset before the main, the owner's call of 2026-11-01), `NAG_MAX_COUNT` (5), `NAG_INTERVALS_MIN` (3, 5, 10, 15), `isNagLevel()`, `isReminderNag()`, `nagFor(reminder, level)` (spec 3.3: an object wins, `null` means none, absent takes the level's preset, a malformed value reads as absent), `repeatOffsets(nag)` (spec 3.4: `before`, `after`, or `around` with `floor(count/2)` before and the rest after) and `remindersPerDay(reminders, level)`; `Reminder.nag?: ReminderNag | null` in [src/types/mitzvah.ts](src/types/mitzvah.ts). Docs: [src/utils/AGENTS.md](src/utils/AGENTS.md), [src/types/AGENTS.md](src/types/AGENTS.md), root [AGENTS.md](AGENTS.md) (Mitzvah Data Model).
   - **What it solves:** One home for the shape the two features share (spec 3.1 to 3.4), so the planner, the editors and the screens never carry a copy.
   - **Expected result:** `src/utils/__tests__/nagging.test.ts` pins the table, the three-way resolution (object, `null`, absent) and a malformed nag read as absent, the offsets of every placement for counts 1 to 5 (`around` with 3 is one before and two after; `around` with 1 equals `after`) and the per-day estimate; `pnpm typecheck` green.
 
@@ -327,7 +328,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Flag:** `OTA`.
   - **What it is:** In [src/services/notifications/planners/mitzvot.ts](src/services/notifications/planners/mitzvot.ts): `WindowTrigger.repeat` (0 for a main), the repeats of each main per spec 3.5 (from the main's final instant, each through `quietHoursTrigger()` and `reminderFires()` with the reminder's anchor; no main, no repeats), `withoutDuplicates()` (a group of one mitzvah at one instant is reduced when a member moved or is a repeat: a main first, then the later day, the lower index, the lower `k`), `thinned()` over mains only, a repeat's candidate (the main's body and `notifications.nag.repeat`, `data.repeat = { k, of }`, `buildId(…, repeat)`), `nextReminderAt()` reading `scope.nagLevel` and the new `nagPreview(mitzvah, draft, scope)`; in [ids.ts](src/services/notifications/ids.ts) the `repeat` argument of `buildId()` (`…__<idx>[.<occurrence>]~<k>`), `PendingNotificationMeta.repeat` and `SCHEDULE_FORMAT` 11; `nagPreview` exported by [NotificationScheduler.ts](src/services/NotificationScheduler.ts) and [NotificationScheduler.web.ts](src/services/NotificationScheduler.web.ts); `notifications.nag.repeat` in both dictionaries. Spec 3.5 and 3.6. Docs: [src/services/notifications/AGENTS.md](src/services/notifications/AGENTS.md), [src/services/AGENTS.md](src/services/AGENTS.md) (the id grammar), root [AGENTS.md](AGENTS.md) (Notification Engine).
   - **What it solves:** The nag and the level become notifications under every rule the engine already keeps (holy blocks, quiet hours, marks, thinning), and every preview agrees with the plan.
-  - **Expected result:** `src/services/notifications/__tests__/nag.mitzvot.test.ts`, green under `pnpm test:tz` too, pins through `buildPlan()`: a level-3 Shacharit day yields each main and two repeats at +5 and +10 with ids `shacharit__<day>__0~1` and `…~2` and bodies ending in "תזכורת 1 מתוך 2"; an explicit `around` nag of 3 every 5 minutes; a main moved to 07:00 by the quiet hours nags at 07:05 and 07:10, and two repeats moved onto one instant become one; a repeat after the window's end and one inside a holy block (candle lighting, `after`) are absent while a `before` one on candle lighting is kept; a marked day has nothing; a `followUp` reminder's repeats stay inside its 720 minutes; a `blockExit` occurrence's repeats carry `.1~1`; thinning from day 3 leaves one main per window; `nextReminderAt()` equals the first candidate and `nagPreview()` lists exactly the plan's repeats with the dropped one flagged. [schedulerWebParity.test.ts](src/services/__tests__/schedulerWebParity.test.ts), [NotificationScheduler.nextReminder.test.ts](src/services/__tests__/NotificationScheduler.nextReminder.test.ts) and [reminderLogic.test.ts](src/services/__tests__/reminderLogic.test.ts) stay green, the last two under `pnpm test:tz`.
+  - **Expected result:** `src/services/notifications/__tests__/nag.mitzvot.test.ts`, green under `pnpm test:tz` too, pins through `buildPlan()`: a level-3 Shacharit day yields each main and two repeats at -10 and -5 minutes with ids `shacharit__<day>__0~1` and `…~2` and bodies ending in "תזכורת 1 מתוך 2", and nothing after a main; an explicit `around` nag of 3 every 5 minutes (one before, two after); a main moved to 07:00 by the quiet hours keeps no level repeat (they move to 07:00 too and collapse into it) while an explicit `after` nag on it fires at 07:05 and 07:10; an explicit `after` repeat past the window's end and one inside a holy block (candle lighting) are absent while the level's countdown before candle lighting is kept; a marked day has nothing; a `followUp` reminder's repeats stay inside its 720 minutes; a `blockExit` occurrence's repeats carry `.1~1`; thinning from day 3 leaves one main per window; `nextReminderAt()` equals the first candidate and `nagPreview()` lists exactly the plan's repeats with the dropped one flagged. [schedulerWebParity.test.ts](src/services/__tests__/schedulerWebParity.test.ts), [NotificationScheduler.nextReminder.test.ts](src/services/__tests__/NotificationScheduler.nextReminder.test.ts) and [reminderLogic.test.ts](src/services/__tests__/reminderLogic.test.ts) stay green, the last two under `pnpm test:tz`.
 
 - [ ] Keep the schedule inside the cap when nags are on
   - **Flag:** `OTA`.
@@ -470,49 +471,19 @@ Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were
 
 Q8 (should a city picked by hand follow the phone too) was answered by the owner on 2026-10-31 ("כן גם היא") and became the task "Let a city picked by hand follow the phone too", in production `1.0.21-8` ([action-log.md](action-log.md)).
 
-Q9 to Q15 come from the nagging batch of 2026-11-01 (Nagging levels and reminder nags — batch rules; [.claude/specs/nagging-levels.md](.claude/specs/nagging-levels.md), section 10). Each assumption is what its tasks build until the owner answers.
+Q9 (the level table), Q10 (a count of 1 to 5 and intervals of 3, 5, 10 and 15 minutes), Q11 (a repeat's suffix "תזכורת k מתוך n") and Q15 (mitzvah reminders only) of the nagging batch were approved by the owner on 2026-11-01 as proposed and are written into its tasks and [.claude/specs/nagging-levels.md](.claude/specs/nagging-levels.md). Q13 (a level-5 follow-up after the window) was answered no the same day, "אין שום תזכורת בסוף הזמן", with the rule that a level's automatic repeats come before the reminder's time and nothing automatic is sent after it (spec 3.2). Two remain, each with the assumption its tasks build until the owner answers:
 
-- **Q9 — The nagging level table**
-  - **Question:** Do the five levels stand as proposed: 1 רגיל, no repeats (today); 2 עדין, one repeat 10 minutes after each reminder; 3 בינוני, two every 5 minutes; 4 נמרץ, three every 5; 5 נודניק, five every 3, with those names?
-  - **Assumption:** Yes, as proposed.
-  - **Lives in:** Not built yet: `NAG_LEVELS` in `src/utils/nagging.ts` and the `nag.level.*` keys of both dictionaries (task "Add the nag model and the level presets").
-  - **What it affects:** Every mitzvah reminder of a user who raises the level, and the per-day estimates printed in Settings and on the mitzvah screen.
-
-- **Q10 — The nag's limits**
-  - **Question:** A count of 1 to 5 repeats, and an interval of 3, 5, 10 or 15 minutes (3 and 5 were named; 10 and 15 are added for a gentler nag)?
-  - **Assumption:** Yes.
-  - **Lives in:** Not built yet: `NAG_MAX_COUNT` and `NAG_INTERVALS_MIN` in `src/utils/nagging.ts`.
-  - **What it affects:** The editor's stepper and chips, the level table's ceiling, and the cap steps of the iOS ladder.
-
-- **Q11 — A repeat's text**
-  - **Question:** Does a repeat's body end with "תזכורת k מתוך n", or read exactly like the reminder it repeats?
-  - **Assumption:** The suffix, so the user sees the chain is intentional and how many are left.
-  - **Lives in:** Not built yet: `notifications.nag.repeat` in both dictionaries and the repeat's candidate in `candidatesFor()` (task "Plan the repeats").
-  - **What it affects:** Every repeat notification.
-
-- **Q12 — The per-reminder control**
-  - **Question:** Three states on a reminder (by the level / none / custom), so one reminder can be exempted from a level, or two (by the level / custom)?
+- **Q12 — A reminder's opt-out from the level**
+  - **Question:** May one reminder opt out of the level? Three states on each reminder (by the level / none / custom) allow it; two (by the level / custom) do not. Example: at level 4 the bedtime Shema's 23:00 reminder gets a countdown at 22:45, 22:50 and 22:55; a user who wants that one reminder to stay a single notification while the rest of the app nags needs "none", or else must set the whole mitzvah to level 1. The owner asked on 2026-11-01 what the question means; explained again in the chat of that day.
   - **Assumption:** Three.
   - **Lives in:** Not built yet: `Reminder.nag` accepting `null` and the `ReminderNagFields` control (tasks "Add the nag model and the level presets" and "Reminder editor: the nag block with its preview").
-  - **What it affects:** The editor and the custom form; a user at level 4 who wants the bedtime Shema's 23:00 reminder to stay a single notification can only do so with the third state.
-
-- **Q13 — Level 5 after the window**
-  - **Question:** Should level 5 also send a follow-up 15 minutes after the window ends while the day is unmarked, registry mitzvot included (today only a custom mitzvah offers a follow-up, the user's call of 2026-10-24)?
-  - **Assumption:** No; nothing is built for it.
-  - **Lives in:** Not built yet: a `followUpMin` entry of `NAG_LEVELS[5]` read by `windowTriggers()` (spec 3.8).
-  - **What it affects:** A level-5 user would get one more notification after each window, answered by the late-mark question on the mitzvah screen.
+  - **What it affects:** The editor and the custom form.
 
 - **Q14 — iOS at high levels**
-  - **Question:** Accept the ladder (today's mains always kept, tomorrow's repeats dropped first, today's nags capped to what fits) and the note shown on iOS from level 3 up?
+  - **Question:** Accept the ladder (today's mains always kept, tomorrow's repeats dropped first, today's nags capped to what fits) and the note shown on iOS from level 3 up? The owner's answer of 2026-11-01 arrived as the digit "6" alone; asked again.
   - **Assumption:** Yes, built as written.
   - **Lives in:** `buildPlan()` in `src/services/notifications/plan.ts` (task "Keep the schedule inside the cap when nags are on") and `settings.nagLevelIosNote`.
   - **What it affects:** Every iPhone user at levels 3 to 5; nobody on Android, whose cap of 400 holds a level-5 month.
-
-- **Q15 — The other notice kinds**
-  - **Question:** Does the app level also apply to the hilula and Rosh Chodesh notices, the weekly report, the check-in nudges, the pre-block notice and the taharah reminders?
-  - **Assumption:** No: mitzvah reminders only, custom mitzvot included (spec 3.9).
-  - **Lives in:** The planners the level never reaches; a yes is a new rule in each planner under `src/services/notifications/planners/`.
-  - **What it affects:** Which notifications repeat; today the check-in nudges already come three times and the taharah reminders keep their own quiet policy.
 
 ## Other Open Items
 
