@@ -10,15 +10,16 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 // eslint-disable-next-line import/no-duplicates
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import {
-  useFonts,
-  Rubik_400Regular,
-  Rubik_500Medium,
-  Rubik_600SemiBold,
-  Rubik_700Bold,
-  Rubik_800ExtraBold,
-} from '@expo-google-fonts/rubik';
-import { NotoSerifHebrew_400Regular, NotoSerifHebrew_700Bold } from '@expo-google-fonts/noto-serif-hebrew';
+import { useFonts } from 'expo-font';
+// Each weight from its own entry: the package index requires every weight and style, which put all 14 Rubik and
+// 9 Noto Serif Hebrew files into every update's assets although the app loads 7.
+import { Rubik_400Regular } from '@expo-google-fonts/rubik/400Regular';
+import { Rubik_500Medium } from '@expo-google-fonts/rubik/500Medium';
+import { Rubik_600SemiBold } from '@expo-google-fonts/rubik/600SemiBold';
+import { Rubik_700Bold } from '@expo-google-fonts/rubik/700Bold';
+import { Rubik_800ExtraBold } from '@expo-google-fonts/rubik/800ExtraBold';
+import { NotoSerifHebrew_400Regular } from '@expo-google-fonts/noto-serif-hebrew/400Regular';
+import { NotoSerifHebrew_700Bold } from '@expo-google-fonts/noto-serif-hebrew/700Bold';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { BRAND, T_LIGHT } from '@/theme/colors';
 import { scaled } from '@/theme/scale';

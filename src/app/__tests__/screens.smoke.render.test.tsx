@@ -149,8 +149,7 @@ jest.mock('expo-updates', () => ({
   isEnabled: false,
 }));
 jest.mock('@sentry/react-native', () => ({ wrap: (component: unknown) => component }));
-jest.mock('@expo-google-fonts/rubik', () => ({ useFonts: () => [true, null] }));
-jest.mock('@expo-google-fonts/noto-serif-hebrew', () => ({}));
+jest.mock('expo-font', () => ({ ...jest.requireActual('expo-font'), useFonts: () => [true, null] }));
 jest.mock('@/services/NotificationScheduler', () => ({
   ...(jest.requireActual('@/services/NotificationScheduler') as object),
   initNotificationHandlers: () => () => {},

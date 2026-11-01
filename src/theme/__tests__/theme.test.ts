@@ -384,5 +384,11 @@ describe('Typography', () => {
     expect(source).not.toContain('Rubik_300Light');
     expect(source).not.toContain('Rubik_900Black');
     expect(source).not.toContain('@expo-google-fonts/heebo');
+    // Only the weights in use reach the bundle: never a package index, which requires every weight.
+    expect(source).not.toMatch(/from '@expo-google-fonts\/[\w-]+'/);
+    for (const font of APP_FONTS) {
+      const weight = font.slice(font.indexOf('_') + 1);
+      expect(source).toMatch(new RegExp(`import \\{ ${font} \\} from '@expo-google-fonts/[\\w-]+/${weight}';`));
+    }
   });
 });
