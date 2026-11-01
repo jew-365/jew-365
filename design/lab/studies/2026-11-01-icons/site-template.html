@@ -56,7 +56,7 @@ button:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px;
 .tile.old { background: var(--surface2); }
 
 .table { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
-.row { display: grid; grid-template-columns: minmax(150px, 1.6fr) repeat(3, minmax(64px, 1fr)); align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--border); }
+.row { display: grid; grid-template-columns: minmax(150px, 1.6fr) repeat(5, minmax(56px, 1fr)); align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--border); }
 .row:first-child { border-top: 0; }
 .row.head { font-size: 13px; color: var(--sub); font-weight: 600; background: var(--surface2); }
 .row .name b { display: block; font-size: 15px; font-weight: 600; }
@@ -83,20 +83,22 @@ button:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px;
 .sw.off::after { left: auto; right: 3px; }
 .note { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px 18px; font-size: 15px; line-height: 1.7; max-width: 80ch; }
 .note p { margin: 0 0 6px; }
-@media (max-width: 640px) { .row { grid-template-columns: 1fr repeat(3, 56px); padding: 10px; } .row .name small { display: none; } }
+@media (max-width: 640px) { .row { grid-template-columns: 1fr repeat(5, 48px); padding: 10px; } .row .name small { display: none; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>אייקונים יהודיים ליהודי 365</h1>
-    <p>סבב 2: 21 איורים צבעוניים ומקוריים למצוות, לתפילות ולקבוצות הסידור, בכחול ובכתום של הלוגו, עם זהב, קלף, כסף, עץ ויין. אייקוני הממשק (חיצים, וי, פעמון וכדומה) נשארים כמו שהם. כל איור מוצג בתוך האריח של האפליקציה, ליד האייקון של היום, בשתי גרסאות: צבעוני מלא, או בגווני צבע ההדגשה של ערכת הנושא.</p>
+    <p>21 אייקונים מקוריים למצוות, לתפילות ולקבוצות הסידור, בשתי משפחות שמצוירות על אותן צורות: איורים צבעוניים בכחול ובכתום של הלוגו (א, ב), וקווים מעוגלים ורכים (ג, ד). אייקוני הממשק (חיצים, וי, פעמון וכדומה) נשארים כמו שהם. כל אייקון מוצג בתוך האריח של האפליקציה, ליד האייקון של היום.</p>
   </header>
 
   <div class="bars">
     <div class="bar" role="group" aria-label="סגנון"><span>סגנון</span>
       <button type="button" data-style="color" aria-pressed="true">א. צבעוני</button>
       <button type="button" data-style="tonal" aria-pressed="false">ב. בגווני ערכת הנושא</button>
+      <button type="button" data-style="line" aria-pressed="false">ג. קווים מעוגלים</button>
+      <button type="button" data-style="lineFill" aria-pressed="false">ד. קווים עם מילוי עדין</button>
     </div>
     <div class="bar" role="group" aria-label="צבעים"><span>צבעים</span>
       <button type="button" data-theme="light" aria-pressed="true">זהב (בהיר)</button>
@@ -105,8 +107,8 @@ button:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px;
   </div>
 
   <section class="note" aria-label="מה לבחור">
-    <p><b>מה צריך לבחור:</b> א או ב, ואם יש איור שלא מתאים לך, פשוט תגיד איזה ומה היית רוצה במקומו.</p>
-    <p>ההמלצה שלי היא <b>א, צבעוני</b>: כל מצווה מזוהה במבט אחד (תפילין שחורות, טלית לבנה, נרות דולקים, רימון אדום), והוא נראה טוב על כל ערכות הנושא, גם הכהות.</p>
+    <p><b>מה צריך לבחור:</b> אחת מארבע האפשרויות, או שתיים: למשל צבעוני ברשימות הגדולות וקווים בשורות הקטנות. ואם יש אייקון שלא מתאים לך, פשוט תגיד איזה.</p>
+    <p>ההמלצה שלי: <b>א, צבעוני</b>, למצוות ולסידור, כי כל מצווה מזוהה בו במבט אחד. אם רוצים מראה שקט שמתאים לשאר הממשק, <b>ד, קווים עם מילוי עדין</b>.</p>
   </section>
 
   <section aria-labelledby="h-big" style="display:grid;gap:12px">
@@ -133,16 +135,22 @@ let uid = 0;
 const svg = (inner, size, sw, fill, color) =>
   `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" fill="none">${inner.replaceAll('__FILL__', fill)}</g></svg>`;
 const art = (i, size) => `<svg width="${size}" height="${size}" viewBox="0 0 48 48" aria-hidden="true">${i.next.replaceAll('__UID__', `g${uid++}`)}</svg>`;
-const tile = (i, st, big) => `<span class="tile${big ? ' big' : ''}${st === 'tonal' ? ' tonal' : ''}">${art(i, big ? 54 : 30)}</span>`;
+const line = (i, size, filled) =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 48 48" fill="none" aria-hidden="true"><g stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none">${i.line.replaceAll('__FILL__', filled ? 'color-mix(in srgb, var(--gold) 26%, transparent)' : 'none')}</g></svg>`;
+const tile = (i, st, big) => {
+  const size = big ? 54 : 30;
+  const inner = st === 'line' || st === 'lineFill' ? line(i, big ? 50 : 28, st === 'lineFill') : art(i, size);
+  return `<span class="tile${big ? ' big' : ''}${st === 'tonal' ? ' tonal' : ''}">${inner}</span>`;
+};
 const oldTile = (i) => `<span class="tile old">${svg(i.now, 24, 1.8, 'none', 'var(--muted)')}</span>`;
 
 function render() {
   document.getElementById('big').innerHTML = ICONS.map((i) => `<div class="big-cell">${tile(i, style, true)}<b>${i.he}</b><span style="color:var(--sub)">${i.idea}</span></div>`).join('');
   document.getElementById('table').innerHTML =
-    `<div class="row head"><span>אייקון</span><span class="c">היום</span><span class="c">א. צבעוני</span><span class="c">ב. גווני ערכה</span></div>` +
+    `<div class="row head"><span>אייקון</span><span class="c">היום</span><span class="c">א. צבעוני</span><span class="c">ב. גווני ערכה</span><span class="c">ג. קווים</span><span class="c">ד. קווים ומילוי</span></div>` +
     ICONS.map((i) => `<div class="row"><span class="name"><b>${i.he}</b><small>${i.idea}</small></span>
       <span class="c">${oldTile(i)}</span>
-      ${['color', 'tonal'].map((st) => `<span class="c${st === style ? ' sel' : ''}">${tile(i, st)}</span>`).join('')}</div>`).join('');
+      ${['color', 'tonal', 'line', 'lineFill'].map((st) => `<span class="c${st === style ? ' sel' : ''}">${tile(i, st)}</span>`).join('')}</div>`).join('');
   const li = (id, name, cap, on) => `<div class="li">${tile(by[id], style)}<span class="t"><b>${name}</b><small>${cap}</small></span>${on === undefined ? '' : `<span class="sw${on ? '' : ' off'}"></span>`}</div>`;
   document.getElementById('phones').innerHTML = `
     <div class="phone" aria-label="ספריית המצוות">
