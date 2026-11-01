@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>אנימציית "עשיתי"</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap">
+<style>
+:root {
+  /* The page chrome in the gold palette; the phone takes the palette chosen below. Layout: controls, then the phone
+     beside the list of variants (stacked on a phone). */
+  --page: #F6F1E8; --card: #FFFDF9; --ink: #1D2240; --sub: #69645D; --line: #EBE3D6; --accent: #F08A3C; --on-accent: #2B1608;
+  --font: "Rubik", system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--font); }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 22px 16px 60px; display: grid; gap: 16px; }
+h1 { margin: 0; font-size: 26px; font-weight: 800; text-wrap: balance; }
+.intro { margin: 0; color: var(--sub); line-height: 1.6; max-width: 72ch; }
+.bars { display: grid; gap: 8px; }
+.bar { display: flex; flex-wrap: nowrap; gap: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.bar::-webkit-scrollbar { display: none; }
+.bar > * { flex: none; white-space: nowrap; }
+.bar > span { min-width: 58px; font-size: 14px; color: var(--sub); }
+.bar button { font: 600 15px var(--font); min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.bar button:active { transform: scale(0.97); }
+.bar button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+button:focus-visible { outline: 3px solid #A04A0C; outline-offset: 2px; }
+.stage { display: grid; grid-template-columns: 410px 1fr; gap: 24px; align-items: start; }
+@media (max-width: 860px) { .stage { grid-template-columns: 1fr; justify-items: center; } }
+.notes { display: grid; gap: 10px; align-content: start; width: 100%; }
+.note { background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 4px; cursor: pointer; text-align: start; font: inherit; color: inherit; }
+.note[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.note b { font-size: 16px; }
+.note span { color: var(--sub); font-size: 14px; line-height: 1.5; }
+.note em { font-style: normal; font-size: 13px; color: #A04A0C; font-weight: 600; }
+
+/* The phone, drawn with the app's tokens (src/theme): cards radius 20, tiles 44 with radius 18, buttons radius 16. */
+.phone { width: 100%; max-width: 410px; border: 8px solid var(--ink); border-radius: 36px; overflow: hidden; background: var(--p-bg); color: var(--p-text); }
+.screen { padding: 18px 16px 22px; display: grid; gap: 14px; min-height: 700px; align-content: start; }
+.top { background: var(--p-surface); border-radius: 20px; padding: 12px 16px; display: grid; gap: 2px; }
+.top b { font-size: 20px; font-weight: 800; }
+.top small { font-size: 13px; color: var(--p-textSub); }
+.h { font-size: 17px; font-weight: 600; margin: 4px 2px 0; }
+.list { display: block; }
+.cardwrap { margin-bottom: 12px; }
+.card { position: relative; background: var(--p-surface); border-radius: 20px; padding: 16px; display: grid; gap: 14px; box-shadow: 0 2px 10px color-mix(in srgb, var(--p-text) 7%, transparent); overflow: hidden; }
+.body { display: flex; align-items: center; gap: 12px; }
+.tile { width: 44px; height: 44px; border-radius: 18px; background: var(--p-goldLight); display: grid; place-items: center; flex: none; position: relative; }
+.tile svg { width: 24px; height: 24px; }
+.badge { position: absolute; inset-inline-start: -4px; bottom: -4px; width: 20px; height: 20px; border-radius: 50%; background: var(--p-safe); display: grid; place-items: center; opacity: 0; box-shadow: 0 0 0 2px var(--p-surface); }
+.meta { flex: 1; display: grid; gap: 1px; min-width: 0; }
+.meta b { font-size: 17px; font-weight: 600; }
+.meta small { font-size: 13px; color: var(--p-textSub); }
+.ring { position: relative; width: 68px; height: 68px; flex: none; }
+.ring svg { width: 68px; height: 68px; display: block; }
+.ringtext, .ringcheck { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.ringtext b { font-size: 13px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.ringtext small { font-size: 11px; color: var(--p-textSub); }
+.ringcheck { opacity: 0; }
+.actions { display: flex; gap: 8px; }
+.btn { flex: 1; min-height: 48px; border-radius: 16px; border: 0; font: 600 15px var(--font); display: inline-flex; align-items: center; justify-content: center; gap: 6px; position: relative; overflow: hidden; cursor: pointer; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.btn:active { transform: scale(0.97); }
+.btn.primary { background: var(--p-gold); color: var(--p-onGold); flex: 1.6; }
+.btn.secondary { background: var(--p-surface2); color: var(--p-text); }
+.btn .lbl { display: inline-flex; align-items: center; gap: 6px; }
+.btn svg { width: 18px; height: 18px; }
+.btn .done { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; }
+.fx { position: absolute; inset: 0; pointer-events: none; }
+.doneRow { position: absolute; inset: 0; display: flex; align-items: center; gap: 12px; padding: 0 16px; opacity: 0; pointer-events: none; }
+.doneRow .dot { width: 28px; height: 28px; border-radius: 50%; background: var(--p-safe); display: grid; place-items: center; flex: none; }
+.doneRow .t { flex: 1; display: grid; }
+.doneRow .t b { font-size: 15px; font-weight: 600; }
+.doneRow .t small { font-size: 13px; color: var(--p-textSub); }
+.doneRow button { font: 600 13px var(--font); border: 0; border-radius: 999px; background: var(--p-goldLight); color: var(--p-goldText); min-height: 32px; padding: 0 14px; cursor: pointer; }
+.cardwrap { position: relative; }
+.particle { position: absolute; width: 9px; height: 9px; border-radius: 50%; pointer-events: none; z-index: 2; }
+.day { background: var(--p-surface); border-radius: 20px; padding: 4px 16px; }
+.row { display: flex; align-items: center; gap: 12px; min-height: 56px; border-top: 1px solid var(--p-border); border-radius: 10px; margin: 0 -8px; padding: 0 8px; }
+.row:first-child { border-top: 0; }
+.row .node { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--p-border); display: grid; place-items: center; flex: none; }
+.row.done .node { background: var(--p-safe); border-color: var(--p-safe); }
+.row.open .node { border-color: var(--p-gold); }
+.row .t { flex: 1; display: grid; }
+.row .t b { font-size: 15px; font-weight: 500; }
+.row .t small { font-size: 13px; color: var(--p-textSub); }
+.row.done .t b { color: var(--p-textSub); }
+.check path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+@media (prefers-reduced-motion: reduce) { .btn, .bar button { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>אנימציית "עשיתי" במסך הבית</h1>
+  <p class="intro">מסך הבית ב-13:00, יום חמישי, י״ח חשון תשפ״ז, ירושלים, עם הזמנים של אותו יום. לחיצה על "עשיתי" בכרטיס מפעילה את האנימציה שנבחרה. הכרטיס יוצא מ"פתוח עכשיו", והשורה שלו ב"היום שלי" מסומנת כבוצעה. "איפוס" מחזיר את הכרטיסים, ו"איטי" מאט פי ארבעה כדי לראות כל שלב.</p>
+  <div class="bars">
+    <div class="bar" role="group" aria-label="אנימציה" id="variantBar"><span>אנימציה</span></div>
+    <div class="bar" role="group" aria-label="מהירות ואיפוס"><span>הפעלה</span>
+      <button type="button" id="slow" aria-pressed="false">איטי ×4</button>
+      <button type="button" id="reset">איפוס</button>
+    </div>
+    <div class="bar" role="group" aria-label="ערכת צבעים" id="paletteBar"><span>צבעים</span></div>
+  </div>
+  <div class="stage">
+    <div class="phone" id="phone"><div class="screen" id="screen"></div></div>
+    <div class="notes" id="notes"></div>
+  </div>
+</div>
+<script>
+const ICONS = __ICONS__;
+const TONES = __TONES__;
+const PALETTES = __PALETTES__;
+const S_ = __STRINGS__;
+const OUT = 'cubic-bezier(0.23, 1, 0.32, 1)';
+const IN_OUT = 'cubic-bezier(0.77, 0, 0.175, 1)';
+const POP = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+const DONE_AT = '13:00';
+const RING = 157.08;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let variant = 'stamp', palette = 'gold', slow = 1, uid = 0, busy = new Set();
+const P = () => PALETTES[palette];
+
+// The app's icons, painted as MitzvahIcon paints them: each colour role a tone of the icon colour.
+const hex = (v) => { const h = v.replace('#', ''); const f = h.length === 3 ? [...h].map((d) => d + d).join('') : h.slice(0, 6); return [0, 2, 4].map((i) => parseInt(f.slice(i, i + 2), 16)); };
+const toneOf = (color, role) => { const t = TONES[role]; if (!t) return color; const o = hex(t.with); return '#' + hex(color).map((c, i) => Math.round(c * t.share + o[i] * (1 - t.share)).toString(16).padStart(2, '0')).join(''); };
+const ATTR = { strokeWidth: 'stroke-width', strokeLinecap: 'stroke-linecap', strokeLinejoin: 'stroke-linejoin', strokeDasharray: 'stroke-dasharray', stopColor: 'stop-color' };
+function nodes(list, color, gid) {
+  return list.map(({ t, c, id, ...a }) => {
+    const attrs = Object.entries(a).map(([k, v]) => {
+      const name = ATTR[k] || k;
+      const val = v && typeof v === 'object' ? ('url' in v ? `url(#${gid})` : toneOf(color, v.role)) : v;
+      return `${name}="${val}"`;
+    });
+    if (id) attrs.push(`id="${gid}"`);
+    return `<${t} ${attrs.join(' ')}>${c ? nodes(c, color, gid) : ''}</${t}>`;
+  }).join('');
+}
+const icon = (name, color) => `<svg viewBox="2 2 44 44" aria-hidden="true">${nodes(ICONS[name], color, 'g' + uid++)}</svg>`;
+const check = (color, w = 2.4) => `<svg class="check" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5,12.5L9.5,17.5L19.5,6.5" stroke="${color}" stroke-width="${w}"/></svg>`;
+
+// Zmanim of Thursday 29 October 2026 in Jerusalem: misheyakir 05:01, mincha gedola 11:50, shkia 16:52, tzeit 17:22.
+const CARDS = [
+  { id: 'tefillin', name: 'הנחת תפילין', start: '05:01', end: '16:52', left: 0.33 },
+  { id: 'mincha', name: 'תפילת מנחה', start: '11:50', end: '16:52', left: 0.77 },
+];
+const DAY = [
+  { id: 'shema', name: 'קריאת שמע שחרית', state: 'done', text: 'בוצע ב-07:12' },
+  { id: 'shacharit', name: 'תפילת שחרית', state: 'done', text: 'בוצע ב-07:40' },
+  { id: 'tefillin', name: 'הנחת תפילין', state: 'open', text: 'עד 16:52' },
+  { id: 'mincha', name: 'תפילת מנחה', state: 'open', text: 'עד 16:52' },
+  { id: 'maariv', name: 'תפילת ערבית', state: 'later', text: 'מ-17:22' },
+];
+
+const A = (el, frames, ms, easing = OUT, opts = {}) =>
+  el.animate(frames, { duration: ms * slow, easing, fill: 'forwards', ...opts, delay: (opts.delay || 0) * slow }).finished;
+const wait = (ms) => new Promise((r) => setTimeout(r, ms * slow));
+
+function render() {
+  const p = P();
+  const phone = document.getElementById('phone');
+  for (const [k, v] of Object.entries(p)) phone.style.setProperty(`--p-${k}`, v);
+  busy = new Set();
+  const cardHtml = (c) => `
+    <div class="cardwrap" data-id="${c.id}"><div class="card">
+      <div class="body">
+        <div class="tile">${icon(c.id, p.gold)}<span class="badge">${check('#fff', 3.2)}</span></div>
+        <div class="meta"><b>${c.name}</b><small>${c.start} - התחלה</small><small class="endline">${c.end} - סוף</small></div>
+        <div class="ring"><svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="25" stroke="${p.border}" stroke-width="4" fill="none"/>
+          <circle class="arc" cx="30" cy="30" r="25" stroke="${p.gold}" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="${RING}" stroke-dashoffset="${(RING * (1 - c.left)).toFixed(1)}" transform="rotate(-90 30 30)"/></svg>
+          <div class="ringtext"><b>3:52</b><small>${S_['time.unit.hours']}</small></div>
+          <div class="ringcheck">${check(p.safe, 3)}</div></div>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn primary" data-done="${c.id}"><span class="lbl">${check(p.onGold)}${S_['notifications.markDone']}</span><span class="done">${check('#fff', 3)}</span></button>
+        <button type="button" class="btn secondary"><span class="lbl">${icon('siddur', p.text)}${S_['home.now.openText']}</span></button>
+      </div>
+      <div class="fx"></div>
+    </div></div>`;
+  const rowHtml = (r) => `<div class="row ${r.state}" data-row="${r.id}"><span class="node">${r.state === 'done' ? check('#fff', 3.2) : ''}</span><span class="t"><b>${r.name}</b><small>${r.text}</small></span></div>`;
+  document.getElementById('screen').innerHTML = `
+    <div class="top"><b>${S_['home.greeting.afternoonNeutral']}</b><small>יום חמישי · י״ח חשון תשפ״ז · ירושלים</small></div>
+    <div class="h" id="openTitle">${S_['home.openNow']} (2)</div>
+    <div class="list">${CARDS.map(cardHtml).join('')}</div>
+    <div class="h">${S_['home.myDay']}</div>
+    <div class="day">${DAY.map(rowHtml).join('')}</div>`;
+  document.querySelectorAll('[data-done]').forEach((b) => (b.onclick = () => complete(b.dataset.done)));
+}
+
+// The card leaves "open now": its height, gap and opacity close together, so the list below moves up as one.
+function collapse(wrap, ms = 280) {
+  const h = wrap.offsetHeight;
+  wrap.style.overflow = 'hidden';
+  return A(wrap, [{ height: `${h}px`, marginBottom: '12px', opacity: 1 }, { height: '0px', marginBottom: '0px', opacity: 0 }], ms, IN_OUT).then(() => wrap.remove());
+}
+// Its row in "my day" turns done; `flash` lights it briefly so the eye follows the mark there.
+function land(id, flash = true) {
+  const row = document.querySelector(`[data-row="${id}"]`);
+  const p = P();
+  row.className = 'row done';
+  row.querySelector('small').textContent = `בוצע ב-${DONE_AT}`;
+  const node = row.querySelector('.node');
+  node.innerHTML = check('#fff', 3.2);
+  const left = document.querySelectorAll('.cardwrap:not([data-leaving])').length;
+  document.getElementById('openTitle').textContent = `${S_['home.openNow']} (${left})`;
+  if (!flash) return Promise.resolve();
+  A(node, [{ transform: 'scale(0.6)' }, { transform: 'scale(1)' }], 320, POP);
+  return A(row, [{ backgroundColor: `${p.safe}29` }, { backgroundColor: `${p.safe}00` }], 900, OUT);
+}
+
+const swapToCheck = (card, ms = 160) => {
+  const p = P();
+  const btn = card.querySelector('.primary');
+  A(btn.querySelector('.lbl'), [{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(3px)' }], ms * 0.75);
+  A(btn, [{ backgroundColor: p.gold }, { backgroundColor: p.safe }], ms);
+  const done = btn.querySelector('.done');
+  const path = done.querySelector('path');
+  const len = path.getTotalLength();
+  path.style.strokeDasharray = len;
+  A(done, [{ opacity: 0 }, { opacity: 1 }], 1);
+  return A(path, [{ strokeDashoffset: len }, { strokeDashoffset: 0 }], 240, OUT, { delay: ms * 0.5 });
+};
+const fillRing = (card, ms) => {
+  const p = P();
+  A(card.querySelector('.ringtext'), [{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(3px)' }], 140);
+  A(card.querySelector('.ringcheck'), [{ opacity: 0, transform: 'scale(0.85)' }, { opacity: 1, transform: 'scale(1)' }], 220, POP, { delay: ms * 0.6 });
+  const arc = card.querySelector('.arc');
+  return A(arc, [{ strokeDashoffset: arc.getAttribute('stroke-dashoffset'), stroke: p.gold }, { strokeDashoffset: 0, stroke: p.safe }], ms, IN_OUT);
+};
+
+const VARIANTS = [
+  {
+    key: 'stamp', chip: 'היום: חותמת', name: 'היום באפליקציה: חותמת', total: '1.3 שניות',
+    idea: 'חותמת "נעשה!" נוחתת על הכרטיס מגודל פי 2.8 ומסתובבת, נשארת, נעלמת, ואז הכרטיס נעלם בבת אחת.',
+    async run(card, wrap, id) {
+      const p = P();
+      const fx = card.querySelector('.fx');
+      fx.style.background = `${p.surface}BB`;
+      fx.style.display = 'grid'; fx.style.placeItems = 'center';
+      fx.innerHTML = `<div style="border:3px solid ${p.goldText};border-radius:8px;padding:4px 20px;color:${p.goldText};font-size:21px;font-weight:800;letter-spacing:3px">${S_['state.stamped']}</div>`;
+      const s = fx.firstChild;
+      await A(s, [
+        { opacity: 0, transform: 'scale(2.8) rotate(-18deg)', offset: 0 },
+        { opacity: 1, transform: 'scale(1.06) rotate(-12deg)', offset: 0.2 },
+        { opacity: 1, transform: 'scale(1) rotate(-12deg)', offset: 0.7 },
+        { opacity: 0, transform: 'scale(0.96) rotate(-12deg)', offset: 1 },
+      ], 1300, 'linear');
+      wrap.remove(); land(id, false);
+    },
+  },
+  {
+    key: 'morph', chip: '1. וי בכפתור', name: '1. הכפתור הופך לוי', total: 'כשנייה',
+    idea: 'הכיתוב "עשיתי" מיטשטש, הכפתור נצבע ירוק ווי נמשך בתוכו. הטבעת מתמלאת בירוק ובמרכזה וי. רגע לראות, והכרטיס נסגר בעדינות והשורה ב"היום שלי" נדלקת.',
+    async run(card, wrap, id) {
+      swapToCheck(card, 180); fillRing(card, 320);
+      await wait(700);
+      await Promise.all([collapse(wrap), land(id)]);
+    },
+  },
+  {
+    key: 'ring', chip: '2. הטבעת מתמלאת', name: '2. הטבעת מתמלאת', total: 'כ-1.2 שניות',
+    idea: 'הטבעת של הזמן שנשאר מסתובבת עד הסוף בירוק, וי קופץ במרכזה, וגל ירוק עדין מתפשט מהטבעת על כל הכרטיס. שורת הסוף מתחלפת ל"בוצע ב-13:00", והכרטיס נסגר.',
+    async run(card, wrap, id) {
+      const p = P();
+      const fx = card.querySelector('.fx');
+      const ring = card.querySelector('.ring').getBoundingClientRect();
+      const box = card.getBoundingClientRect();
+      const x = ring.left + ring.width / 2 - box.left, y = ring.top + ring.height / 2 - box.top;
+      fx.style.background = `${p.safe}1F`;
+      A(fx, [{ clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${box.width * 1.2}px at ${x}px ${y}px)` }], 520, OUT, { delay: 120 });
+      const end = card.querySelector('.endline');
+      A(end, [{ opacity: 1 }, { opacity: 0 }], 120, OUT, { delay: 300 }).then(() => { end.textContent = `בוצע ב-${DONE_AT}`; end.style.color = p.safe; A(end, [{ opacity: 0 }, { opacity: 1 }], 160); });
+      await fillRing(card, 420);
+      await wait(520);
+      await Promise.all([collapse(wrap), land(id)]);
+    },
+  },
+  {
+    key: 'slide', chip: '3. החלקה ליומן', name: '3. החלקה אל "היום שלי"', total: 'כ-0.8 שניות',
+    idea: 'וי ירוק קופץ על אריח האייקון, והכרטיס מחליק החוצה לצד ונסגר. השורה שלו ב"היום שלי" נדלקת באותו רגע, כך שרואים לאן הוא הלך.',
+    async run(card, wrap, id) {
+      await A(card.querySelector('.badge'), [{ opacity: 0, transform: 'scale(0.6)' }, { opacity: 1, transform: 'scale(1)' }], 280, POP);
+      await wait(120);
+      A(card, [{ transform: 'translateX(0)', opacity: 1 }, { transform: 'translateX(-108%)', opacity: 0 }], 340, IN_OUT);
+      await wait(160);
+      await Promise.all([collapse(wrap, 300), land(id)]);
+    },
+  },
+  {
+    key: 'fold', chip: '4. מתקפל לשורה', name: '4. מתקפל לשורה עם ביטול', total: 'כ-0.4 שניות, ואז שתי שניות לביטול',
+    idea: 'תוכן הכרטיס מיטשטש והכרטיס מתקפל לשורה צרה: וי ירוק, "בוצע ב-13:00" וכפתור "בטל". אחרי שתי שניות השורה נסגרת. לחיצה על "בטל" מחזירה את הכרטיס.',
+    async run(card, wrap, id) {
+      const p = P();
+      const h = card.offsetHeight;
+      const parts = [card.querySelector('.body'), card.querySelector('.actions')];
+      const fx = card.querySelector('.fx');
+      fx.innerHTML = `<div class="doneRow"><span class="dot">${check('#fff', 3)}</span><span class="t"><b>${CARDS.find((c) => c.id === id).name}</b><small>בוצע ב-${DONE_AT}</small></span><button type="button">${S_['home.undo']}</button></div>`;
+      const row = fx.firstChild;
+      let undone = false;
+      row.querySelector('button').onclick = () => { undone = true; };
+      fx.style.pointerEvents = 'auto'; row.style.pointerEvents = 'auto';
+      parts.forEach((el) => A(el, [{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(4px)' }], 140));
+      A(card, [{ height: `${h}px` }, { height: '64px' }], 280, IN_OUT);
+      await A(row, [{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'translateY(0)' }], 200, OUT, { delay: 160 });
+      for (let t = 0; t < 2000 && !undone; t += 50) await wait(50);
+      if (undone) {
+        A(row, [{ opacity: 1 }, { opacity: 0 }], 140);
+        await A(card, [{ height: '64px' }, { height: `${h}px` }], 260, IN_OUT);
+        parts.forEach((el) => A(el, [{ opacity: 0, filter: 'blur(4px)' }, { opacity: 1, filter: 'blur(0px)' }], 180));
+        await wait(200); card.getAnimations().forEach((a) => a.cancel()); fx.innerHTML = ''; fx.style.pointerEvents = 'none';
+        parts.forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
+        return 'undone';
+      }
+      await Promise.all([collapse(wrap, 260), land(id)]);
+    },
+  },
+  {
+    key: 'sparks', chip: '5. ניצוצות', name: '5. ניצוצות של שמחה', total: 'כ-0.9 שניות',
+    idea: 'הכפתור הופך לוי ירוק, ומתוכו מתפזרים ניצוצות קטנים בזהב ובירוק ונמוגים. הכרטיס "נושם" לרגע, ואז נסגר והשורה ב"היום שלי" נדלקת.',
+    async run(card, wrap, id) {
+      const p = P();
+      const btn = card.querySelector('.primary').getBoundingClientRect();
+      const box = card.getBoundingClientRect();
+      const cx = btn.left + btn.width / 2 - box.left, cy = btn.top + btn.height / 2 - box.top;
+      // The sparks fly from the button and may leave the card, so they live on its wrapper, which does not clip.
+      swapToCheck(card, 150);
+      A(card, [{ transform: 'scale(1)' }, { transform: 'scale(1.015)' }, { transform: 'scale(1)' }], 360, OUT);
+      for (let i = 0; i < 16; i += 1) {
+        const dot = document.createElement('span');
+        dot.className = 'particle';
+        dot.style.background = [p.gold, p.safe, p.goldText][i % 3];
+        if (i % 4 === 0) { dot.style.borderRadius = '2px'; dot.style.transform = 'rotate(45deg)'; }
+        dot.style.left = `${cx - 4.5}px`; dot.style.top = `${cy - 4.5}px`;
+        wrap.appendChild(dot);
+        const a = (i / 16) * Math.PI * 2 + (i % 2 ? 0.15 : -0.1);
+        const d = 58 + (i % 3) * 16;
+        A(dot, [{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d * 0.7}px) scale(0.35)`, opacity: 0 }], 600, OUT, { delay: (i % 3) * 20 });
+      }
+      await wait(560);
+      await Promise.all([collapse(wrap), land(id)]);
+    },
+  },
+];
+
+async function complete(id) {
+  if (busy.has(id)) return;
+  busy.add(id);
+  const wrap = document.querySelector(`.cardwrap[data-id="${id}"]`);
+  const card = wrap.querySelector('.card');
+  wrap.dataset.leaving = '1';
+  if (reduced) { await A(card, [{ opacity: 1 }, { opacity: 0 }], 200); wrap.remove(); land(id, false); return; }
+  const result = await VARIANTS.find((v) => v.key === variant).run(card, wrap, id);
+  if (result === 'undone') { busy.delete(id); delete wrap.dataset.leaving; }
+}
+
+function controls() {
+  document.getElementById('variantBar').insertAdjacentHTML('beforeend', VARIANTS.map((v) => `<button type="button" data-variant="${v.key}" aria-pressed="${v.key === variant}">${v.chip}</button>`).join(''));
+  document.getElementById('paletteBar').insertAdjacentHTML('beforeend', Object.keys(PALETTES).map((k) => `<button type="button" data-palette="${k}" aria-pressed="${k === palette}">${S_[`settings.theme.${k}`]}</button>`).join(''));
+  document.getElementById('notes').innerHTML = VARIANTS.map((v) => `<button type="button" class="note" data-variant="${v.key}" aria-pressed="${v.key === variant}"><b>${v.name}</b><span>${v.idea}</span><em>${v.total}</em></button>`).join('');
+  const sync = () => {
+    document.querySelectorAll('[data-variant]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.variant === variant)));
+    document.querySelectorAll('[data-palette]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.palette === palette)));
+    document.getElementById('slow').setAttribute('aria-pressed', String(slow > 1));
+  };
+  document.querySelectorAll('[data-variant]').forEach((b) => (b.onclick = () => { variant = b.dataset.variant; sync(); render(); }));
+  document.querySelectorAll('[data-palette]').forEach((b) => (b.onclick = () => { palette = b.dataset.palette; sync(); render(); }));
+  document.getElementById('slow').onclick = () => { slow = slow > 1 ? 1 : 4; sync(); };
+  document.getElementById('reset').onclick = render;
+}
+controls();
+render();
+</script>
+</body>
+</html>

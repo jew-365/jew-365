@@ -327,6 +327,15 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** icons that read as the mitzvah they stand for.
   - **Expected result:** every mitzvah, category and siddur icon is from the new set on every screen and palette, the UI icons unchanged, and the full gate passes.
 
+### Medium — Completion animation of 2026-11-01
+
+- [ ] A new animation for "עשיתי" on home's open cards
+  - **Requested:** the user, 2026-11-01: on home, pressing "עשיתי" on an open mitzvah lays a "נעשה!" stamp on the card and removes it; five other animations for closing the task.
+  - **Flag:** `OTA` (reanimated work in `NowCard` and home, no native change).
+  - **What it is:** the study [design/lab/studies/2026-11-01-done-animation/](design/lab/studies/2026-11-01-done-animation/AGENTS.md), published as https://claude.ai/artifact/NQ6K7uCD9NXQ2se1c9C2He: today's stamp beside five variants (the button turns into a check, the ring fills, the card slides to My day, the card folds into a row with undo, sparks), on home's real cards, in the six palettes, with a slow-motion switch. Waiting for the owner's pick; then the pick replaces [src/components/MarkStamp.tsx](src/components/MarkStamp.tsx) and home's stamping timing.
+  - **What it solves:** marking a mitzvah feels like finishing it, and the eye follows it into My day instead of seeing the card vanish.
+  - **Expected result:** pressing "עשיתי" on home plays the chosen animation, the card closes smoothly and its My day row turns done, with a fade only under reduced motion.
+
 ## Bugs
 
 - [ ] A Hebrew Android phone shows the app's English name
