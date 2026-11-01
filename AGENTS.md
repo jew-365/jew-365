@@ -34,6 +34,7 @@ pnpm siddur:build                  # rebuild the bundled nusach texts and docs/s
 pnpm chok:build                    # rebuild docs/chok, the downloadable Chok LeYisrael add-on, from scripts/chok/source
 pnpm guide:build                   # rebuild docs/guide, the web copy of the user guide in src/data/guide.ts
 pnpm logo:build                    # redraw the logo SVGs and export every PNG in assets/ and assets/preview/ and src/components/logo.generated.ts (needs Chrome or Edge)
+pnpm store:screenshots --out <dir> # App Store and Google Play screenshots, Hebrew and English, from a web export with a seeded install (needs Chrome or Edge)
 pnpm doctor                        # expo-doctor
 pnpm build:android:production:aab  # EAS production AAB for the Play Store
 pnpm build:android:production:apk  # EAS production APK for direct install

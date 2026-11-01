@@ -33,6 +33,7 @@
     "chok:build": "node scripts/chok/build.js",
     "guide:build": "node scripts/guide/build.js",
     "logo:build": "node design/jew365-concepts/vector/build.mjs && node scripts/logo/export.mjs",
+    "store:screenshots": "node scripts/store/screenshots.mjs",
     "prepare": "husky"
   },
   "dependencies": {
