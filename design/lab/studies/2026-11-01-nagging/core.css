@@ -1,0 +1,164 @@
+/* The app's look in CSS: tokens from src/theme/colors.ts (build.mjs puts them in place of the marker below), the type scale of
+   src/theme/typography.ts in Rubik, spacing and radii of src/theme/tokens.ts, and the shared components each board
+   reuses (SegmentedControl, ChipRow, ListRow, Card, BottomSheet + SheetAction, OptionSelect, ChoiceRow, the steppers,
+   Switch, Button). Text is never under 12px and every control reaches 44px, a few through an invisible hit area. */
+/*PALETTES*/
+body{margin:0}
+.ph{font-family:'Rubik',system-ui,sans-serif;font-size:15px;line-height:22px;-webkit-font-smoothing:antialiased}
+.ph.tall{height:auto!important;min-height:844px;overflow:visible!important}
+.ph.tall .scroll{position:relative!important;inset:auto!important;overflow:visible!important;height:auto!important}
+.ph.tall .sheetwrap{position:absolute!important}
+.ph *{box-sizing:border-box}
+:where(.ph) :is(p,h1,h2,h3,h4,ul,ol,li){margin:0;padding:0;font-weight:inherit;list-style:none}
+:where(.ph) button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;-webkit-tap-highlight-color:transparent;text-align:inherit}
+:where(.ph) input{font:inherit;color:inherit}
+.ph button:focus-visible,.ph input:focus-visible{outline:3px solid var(--goldText);outline-offset:2px}
+.scroll{scrollbar-width:none}.scroll::-webkit-scrollbar{display:none}
+.num{font-variant-numeric:tabular-nums}
+.pvh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* type scale (typography.ts): one Rubik weight lighter than the role's name */
+.t-display{font-size:28px;line-height:34px;font-weight:800}
+.t-title{font-size:22px;line-height:28px;font-weight:700}
+.t-heading{font-size:17px;line-height:24px;font-weight:600}
+.t-sub{font-size:15px;line-height:22px;font-weight:500}
+.t-body{font-size:15px;line-height:22px;font-weight:400}
+.t-bodyb{font-size:15px;line-height:22px;font-weight:600}
+.t-cap{font-size:13px;line-height:18px;font-weight:400}
+.t-capb{font-size:13px;line-height:18px;font-weight:600}
+.t-small{font-size:12px;line-height:16px;font-weight:400}
+.c-text{color:var(--text)}.c-sub{color:var(--sub)}.c-muted{color:var(--muted)}.c-gold{color:var(--goldText)}.c-urgent{color:var(--urgent)}
+
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.s16{width:16px;height:16px;stroke-width:2.5}
+.ic.s14{width:14px;height:14px;stroke-width:2.4}
+.tile{width:44px;height:44px;border-radius:18px;background:var(--goldLight);display:grid;place-items:center;flex:none}
+.tile.muted{background:var(--surface2)}
+.tile>.img{width:24px;height:24px;display:block;background:center/contain no-repeat}
+.tile>.ic{color:var(--gold);width:24px;height:24px}
+.tile.big{width:46px;height:46px}
+
+/* Card */
+.card{background:var(--surface);border-radius:20px;box-shadow:0 2px 12px var(--shadowC)}
+.card.pad{padding:16px}
+.divided>*+*{border-top:1px solid var(--border)}
+
+/* NavBar (a tab) and ScreenHeader (a stack screen) */
+.navbar{display:grid;justify-items:center;padding:12px 16px 8px;text-align:center}
+.sheader{padding:8px 16px 12px}
+.sh-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.backpill{display:inline-flex;align-items:center;gap:4px;padding:8px 12px;border-radius:999px;background:var(--surface);box-shadow:0 2px 12px var(--shadowC);min-height:44px;font-size:13px;font-weight:600}
+.backpill>.ic{color:var(--sub)}
+.sh-title{display:grid;justify-items:center;text-align:center}
+.sh-title>.tile{margin-bottom:8px}
+.sh-extra{margin-top:12px;text-align:center}
+
+/* SectionLabel */
+.flabel{display:block;font-size:13px;line-height:18px;font-weight:600;color:var(--sub);margin-bottom:8px}
+.subhead{font-size:17px;line-height:24px;font-weight:600;color:var(--goldText);margin:20px 0 12px;padding-top:16px;border-top:1px solid var(--border)}
+.subhead.first{margin-top:0;padding-top:0;border-top:0}
+.hint{display:block;font-size:12px;line-height:16px;color:var(--muted);margin-top:4px}
+
+/* SegmentedControl: 36px drawn, 44px to the touch */
+.seg{display:flex;gap:4px}
+.seg>button{position:relative;flex:1;min-width:0;display:flex;align-items:center;justify-content:center;border-radius:12px;padding:9px 4px;min-height:40px;background:var(--surface2);color:var(--text);font-size:13px;line-height:18px;font-weight:600;transition:background-color 200ms cubic-bezier(.77,0,.175,1),color 200ms}
+.seg>button::after{content:"";position:absolute;inset:-4px 0}
+.seg>button[aria-checked="true"]{background:var(--gold);color:var(--onGold)}
+
+/* ChipRow */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative;border-radius:999px;padding:9px 14px;min-height:36px;background:var(--surface2);color:var(--text);font-size:13px;line-height:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.chip::after{content:"";position:absolute;inset:-4px -2px}
+.chip[aria-pressed="true"]{background:var(--gold);color:var(--onGold)}
+
+/* ListRow */
+.listrow{display:flex;align-items:center;gap:12px;padding:16px;width:100%;text-align:start;min-height:76px}
+.lr-meta{flex:1;min-width:0;display:grid;gap:2px}
+.lr-title{font-size:17px;line-height:24px;font-weight:600;color:var(--text)}
+.lr-cap{font-size:13px;line-height:18px;color:var(--sub)}
+.listrow>.chev{color:var(--muted)}
+
+/* Switch row (settings.tsx SwitchRow) */
+.swrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.swrow>.sw-meta{flex:1;min-width:0}
+.switch{position:relative;width:51px;height:44px;flex:none;display:grid;place-items:center}
+.switch>i{display:block;width:51px;height:31px;border-radius:999px;background:var(--border);position:relative;transition:background-color 200ms}
+.switch>i::after{content:"";position:absolute;top:2px;inset-inline-end:2px;width:27px;height:27px;border-radius:50%;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:inset-inline-end 200ms cubic-bezier(.23,1,.32,1)}
+.switch[aria-checked="true"]>i{background:var(--gold)}
+.switch[aria-checked="true"]>i::after{inset-inline-end:22px}
+
+/* Button */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:16px;padding:12px 20px;font-size:15px;line-height:22px;font-weight:600;width:100%}
+.btn.primary{background:var(--gold);color:var(--onGold)}
+.btn.secondary{background:var(--surface2);color:var(--text)}
+.btn.danger{background:var(--urgentBg);color:var(--urgent);border:1px solid var(--urgent);min-height:44px;padding:8px;font-size:13px;line-height:18px}
+
+/* inputs, the minutes stepper and the count stepper */
+.input{display:block;width:100%;border:1px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);padding:12px;min-height:46px}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper>button{width:54px;height:48px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);display:grid;place-items:center;font-size:15px;font-weight:600;color:var(--text);flex:none}
+.stepper>button[aria-disabled="true"]{opacity:.4;cursor:default}
+.stepper>.val{flex:1;min-width:0;height:48px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);display:grid;place-items:center;font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+
+/* OptionSelect: a select box (sheet) and the inline radio list (ChoiceRow) */
+.select{display:flex;align-items:center;gap:8px;width:100%;border:1px solid var(--border);border-radius:12px;background:var(--surface2);padding:12px;min-height:48px;text-align:start}
+.select>.sel-t{flex:1;min-width:0;display:grid}
+.select>.ic{color:var(--muted)}
+.choices{display:grid;gap:8px}
+.choice{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;border-radius:16px;border:1.5px solid transparent;background:var(--surface);box-shadow:0 2px 12px var(--shadowC);padding:12px 16px;min-height:48px;text-align:start}
+.choice>.ch-t{flex:1;min-width:0;display:grid;gap:2px}
+.choice[aria-checked="true"]{border-color:var(--gold);background:var(--goldLight)}
+.choice[aria-checked="true"] .ch-name{color:var(--goldText)}
+.tick{width:22px;height:22px;border-radius:50%;background:var(--gold);color:var(--onGold);display:none;place-items:center;flex:none}
+.choice[aria-checked="true"]>.tick{display:grid}
+
+/* BottomSheet + SheetAction */
+.sheetwrap{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end;padding:16px}
+.scrim{position:absolute;inset:0;background:var(--overlay);animation:fade 300ms ease both}
+.sheet{position:relative;background:var(--surface);border-radius:24px;padding:20px 16px 12px;display:flex;flex-direction:column;max-height:100%;animation:rise 300ms cubic-bezier(.23,1,.32,1) both}
+.sheet-h{margin-bottom:16px}
+.sheet-body{overflow-y:auto;scrollbar-width:none;min-height:0}
+.sheet-body::-webkit-scrollbar{display:none}
+.sheet-close{display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--surface2);min-height:46px;margin-top:16px;font-size:15px;font-weight:600;color:var(--text);width:100%;flex:none}
+.saction{display:block;width:100%;padding:4px 0;border-bottom:1px solid var(--border);text-align:start}
+.saction>span{display:grid;gap:2px;padding:12px;border-radius:16px;min-height:44px}
+.saction[aria-pressed="true"]>span{background:var(--goldLight)}
+.sa-label{font-size:15px;line-height:22px;font-weight:500;color:var(--text)}
+.sa-cap{font-size:13px;line-height:18px;color:var(--sub)}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes rise{from{transform:translateY(110%)}to{transform:none}}
+
+/* the mitzvah screen's reminder rows */
+.rrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.rrow>.rr-main{flex:1;min-width:0;display:grid;gap:2px;text-align:start;min-height:44px}
+.rr-del{position:relative;width:24px;height:24px;border-radius:12px;background:var(--surface2);display:grid;place-items:center;color:var(--muted);flex:none}
+.rr-del::after{content:"";position:absolute;inset:-10px}
+.nagline{display:flex;align-items:center;gap:4px;font-size:12px;line-height:16px;color:var(--goldText)}
+.nagline.none{color:var(--muted)}
+.nagline>.ic{width:14px;height:14px;stroke-width:2}
+.addrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1.5px solid color-mix(in srgb,var(--gold) 27%,transparent);width:100%;min-height:50px;font-size:15px;font-weight:600;color:var(--goldText)}
+.plus{width:26px;height:26px;border-radius:16px;background:var(--goldLight);display:grid;place-items:center;color:var(--gold)}
+
+/* the nag block (ReminderNagFields) */
+.nag{display:grid;gap:0;border-top:1px solid var(--border);padding-top:16px;margin-top:4px}
+.nag .flabel.mt{margin-top:16px}
+.nag-cap{font-size:12px;line-height:16px;color:var(--sub);margin-top:8px}
+.nag-only{font-size:13px;line-height:18px;color:var(--sub);background:var(--surface2);border-radius:12px;padding:10px 12px}
+.preview{margin-top:16px;display:grid;gap:4px}
+.preview>.pv-ok{font-size:12px;line-height:16px;color:var(--goldText)}
+.preview>.pv-ok>b{font-weight:600}
+.preview>.pv-drop{font-size:12px;line-height:16px;color:var(--urgent);display:flex;gap:4px;align-items:flex-start}
+
+/* Toast */
+.toast{position:absolute;inset-inline:16px;bottom:24px;z-index:30;display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 16px;border-radius:16px;background:var(--text);color:var(--bg);font-size:13px;line-height:18px;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast.ta{animation:toastA 260ms cubic-bezier(.23,1,.32,1) both}.toast.tb{animation:toastB 260ms cubic-bezier(.23,1,.32,1) both}
+@keyframes toastA{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes toastB{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* the floating tab bar */
+.tabs{position:absolute;inset-inline:16px;bottom:14px;height:68px;display:flex;align-items:center;justify-content:space-around;background:var(--tab);border-radius:26px;box-shadow:0 2px 16px var(--shadowC);padding:0 6px;z-index:10}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:56px;min-height:56px;border-radius:18px;color:var(--muted);font-size:12px;line-height:16px;font-weight:500}
+.tab.on{color:var(--goldText)}
+.tab.on>.ic{color:var(--gold)}
+
+@media (prefers-reduced-motion:reduce){.ph *,.ph *::before,.ph *::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}

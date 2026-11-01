@@ -1,0 +1,90 @@
+<!--board title="ג · דוגמה חיה"-->
+<style>
+/* The level on a four-stop slider (every name below it is a button too), and under it a live example: today's
+   Shacharit and bedtime Shema reminders at the chosen level, as the times they would go out, the main filled and each
+   repeat outlined. The times come from the app's zmanim and the planner's rules (data.json). */
+.sl-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.sl-head>.flabel{margin:0}
+.sl-name{font-size:17px;line-height:24px;font-weight:600;color:var(--goldText)}
+.slider{position:relative;height:44px;margin-top:4px}
+.slider>.track{position:absolute;inset-inline:14px;top:20px;height:4px;border-radius:2px;background:var(--surface2)}
+.slider>.track>b{position:absolute;inset-block:0;inset-inline-start:0;border-radius:2px;background:var(--gold);transition:width 200ms cubic-bezier(.77,0,.175,1)}
+.slider>.stops{position:absolute;inset-inline:14px;top:16px;height:12px;pointer-events:none}
+.slider>.stops>i{position:absolute;top:0;width:12px;height:12px;margin-inline-start:-6px;border-radius:50%;background:var(--surface);border:2px solid var(--border)}
+.slider>.stops>i.full{background:var(--gold);border-color:var(--gold)}
+.slider>input{position:absolute;inset:0;width:100%;height:44px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer}
+.slider>input::-webkit-slider-runnable-track{height:44px;background:transparent}
+.slider>input::-moz-range-track{height:44px;background:transparent}
+.slider>input::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px var(--surface),0 2px 8px var(--shadowC)}
+.slider>input::-moz-range-thumb{width:28px;height:28px;border:0;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px var(--surface)}
+.names{display:flex;justify-content:space-between;margin-top:2px}
+.names>button{min-height:44px;min-width:56px;padding:0 4px;font-size:12px;line-height:16px;color:var(--muted);text-align:center}
+.names>button:first-child{text-align:start}.names>button:last-child{text-align:end}
+.names>button[aria-pressed="true"]{color:var(--goldText);font-weight:600}
+.example{margin-top:12px;border-radius:16px;background:var(--surface2);padding:12px;display:grid;gap:10px}
+.ex-row{display:grid;gap:6px}
+.ex-times{display:flex;flex-wrap:wrap;gap:6px}
+.ex-times>span{font-size:13px;line-height:18px;font-weight:600;font-variant-numeric:tabular-nums;border-radius:999px;padding:3px 10px;border:1.5px solid var(--gold);color:var(--goldText);background:var(--surface)}
+.ex-times>span.main{background:var(--gold);color:var(--onGold)}
+.ex-times>span.off{border-style:dashed;border-color:var(--urgent);color:var(--urgent)}
+.legend{display:flex;gap:12px;font-size:12px;line-height:16px;color:var(--sub)}
+.legend>span{display:inline-flex;align-items:center;gap:4px}
+.legend i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--gold);display:inline-block}
+.legend i.main{background:var(--gold)}
+</style>
+<template>
+<!--SETTINGS_TOP-->
+<div class="nagset" id="nagLevel" style="margin-top:16px">
+<div class="sl-head"><label class="flabel" for="nl-range">{{nlLabel}}</label><b class="sl-name" aria-live="polite">{{nlName}}</b></div>
+<div class="slider">
+<span class="track" aria-hidden="true"><b style="{{trackStyle}}"></b></span>
+<span class="stops" aria-hidden="true"><sc-for list="{{stops}}" as="st" hint-placeholder-count="4"><i class="{{st.cls}}" style="{{st.style}}"></i></sc-for></span>
+<input id="nl-range" type="range" min="1" max="4" step="1" value="{{nlLevel}}" onChange="{{onRange}}" aria-valuetext="{{rangeText}}">
+</div>
+<div class="names"><sc-for list="{{nlLevels}}" as="l" hint-placeholder-count="4"><button aria-pressed="{{l.on}}" onClick="{{l.pick}}">{{l.name}}</button></sc-for></div>
+<p class="t-cap c-text" style="margin-top:4px">{{nlDesc}}</p>
+<div class="example" aria-live="polite">
+<p class="t-capb c-text">{{exTitle}}</p>
+<sc-for list="{{examples}}" as="ex" hint-placeholder-count="3"><div class="ex-row"><span class="t-small c-sub">{{ex.label}}</span><span class="ex-times"><sc-for list="{{ex.times}}" as="tt" hint-placeholder-count="3"><span class="{{tt.cls}}">{{tt.time}}</span></sc-for></span></div></sc-for>
+<div class="legend" aria-hidden="true"><span><i class="main"></i>{{legendMain}}</span><span><i></i>{{legendRepeat}}</span></div>
+</div>
+<p class="t-small c-sub num" style="margin-top:8px">{{nlPerDay}}</p>
+<p class="hint">{{nlHint}}</p>
+</div>
+<!--SETTINGS_BOTTOM-->
+<!--TOAST-->
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  example(id, index) {
+    const m = this.mitzvah(id);
+    const r = m.reminders[index];
+    const ch = this.chain(id, r, this.appLevel());
+    if (!ch) return null;
+    const times = [{ t: ch.main, cls: 'main' }]
+      .concat(ch.repeats.map((x) => ({ t: x.t, cls: x.drop ? 'off' : '' })))
+      .sort((a, b) => a.t - b.t)
+      .map((x) => ({ time: this.hm(x.t), cls: x.cls }));
+    return { label: m.name + ' · ' + this.summary(r), times };
+  }
+
+  renderVals() {
+    const s = this.settingsVals();
+    const level = s.nlLevel;
+    const pct = (l) => ((l - 1) / 3) * 100;
+    return Object.assign(this.core(), s, {
+      onRange: (e) => this.setAppLevel(Math.round(Number(e.target.value)) || 1),
+      rangeText: this.levelOf(level).label,
+      trackStyle: 'width: ' + pct(level).toFixed(2) + '%',
+      stops: [1, 2, 3, 4].map((l) => ({ cls: l <= level ? 'full' : '', style: 'inset-inline-start: ' + pct(l).toFixed(2) + '%' })),
+      nlDesc: this.levelOf(level).desc + '.',
+      exTitle: 'כך זה ייראה היום, ' + this.data().dateLine.split(',')[0] + ', ב' + this.data().city,
+      examples: [this.example('shacharit', 0), this.example('shacharit', 1), this.example('krias_shma_al_hamita', 0)].filter(Boolean),
+      legendMain: 'התזכורת',
+      legendRepeat: 'חזרה',
+    });
+  }
+}
+</script>

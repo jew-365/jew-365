@@ -489,7 +489,7 @@
   "custom.hint.skip": "On: the mitzvah is absent that day and never counts as missed. Off: it waits to be marked in the check-in after Shabbat or Yom Tov",
   "custom.reminders": "Reminders",
   "custom.nagLevel": "The mitzvah's nagging level",
-  "custom.hint.reminders": "Each reminder is one notification a day, at a time derived from the active hours",
+  "custom.hint.reminders": "Each reminder goes out at a time derived from the active hours, once a day unless it has a nag",
   "custom.contentBlocks": "Rich content",
   "custom.hint.content": "Shown on the mitzvah screen. Text and blessing blocks also appear in the reader, and in the notification while 'Include content in notification' is on",
   "custom.addContentBlock": "Add content block",

@@ -1,0 +1,56 @@
+<!--board title="ב · מד ארבע נקודות"-->
+<style>
+/* A four-dot meter: the dots fill up to the level like a signal meter, the chosen level's name stands beside the label,
+   and the scale's two ends are named under the first and last dot. Each dot is a 44px radio. */
+.dots-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px}
+.dots-head>.flabel{margin:0}
+.dots-name{font-size:17px;line-height:24px;font-weight:600;color:var(--goldText)}
+.meter{position:relative;display:flex;justify-content:space-between;align-items:center;height:48px}
+.meter::before{content:"";position:absolute;inset-inline:22px;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:var(--surface2)}
+.meter>.fill{position:absolute;inset-inline-start:22px;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:var(--gold);transition:width 250ms cubic-bezier(.77,0,.175,1)}
+.dot{position:relative;width:44px;height:44px;display:grid;place-items:center;border-radius:50%}
+.dot>i{display:block;border-radius:50%;background:var(--surface);border:2px solid var(--border);transition:transform 200ms cubic-bezier(.23,1,.32,1),background-color 200ms,border-color 200ms}
+.dot.d1>i{width:14px;height:14px}.dot.d2>i{width:17px;height:17px}.dot.d3>i{width:20px;height:20px}.dot.d4>i{width:23px;height:23px}
+.dot.full>i{background:var(--gold);border-color:var(--gold)}
+.dot[aria-checked="true"]>i{box-shadow:0 0 0 4px var(--goldLight);transform:scale(1.08)}
+.ends{display:flex;justify-content:space-between;margin-top:2px}
+.ends>span{font-size:12px;line-height:16px;color:var(--muted);width:72px}
+.ends>span:last-child{text-align:end}
+</style>
+<template>
+<!--SETTINGS_TOP-->
+<div class="nagset" id="nagLevel" style="margin-top:16px">
+<div class="dots-head"><span class="flabel" id="nl-l">{{nlLabel}}</span><b class="dots-name" aria-live="polite">{{nlName}}</b></div>
+<div class="meter" role="radiogroup" aria-labelledby="nl-l">
+<span class="fill" style="{{fillStyle}}" aria-hidden="true"></span>
+<sc-for list="{{dots}}" as="d" hint-placeholder-count="4"><button class="{{d.cls}}" role="radio" aria-checked="{{d.on}}" aria-label="{{d.aria}}" onClick="{{d.pick}}"><i></i></button></sc-for>
+</div>
+<div class="ends" aria-hidden="true"><span>{{endFirst}}</span><span>{{endLast}}</span></div>
+<p class="t-cap c-text" style="margin-top:8px">{{nlDesc}}</p>
+<p class="t-small c-sub num" style="margin-top:4px">{{nlPerDay}}</p>
+<p class="hint">{{nlHint}}</p>
+</div>
+<!--SETTINGS_BOTTOM-->
+<!--TOAST-->
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  renderVals() {
+    const s = this.settingsVals();
+    const level = s.nlLevel;
+    return Object.assign(this.core(), s, {
+      dots: s.nlLevels.map((l) => ({
+        cls: 'dot d' + l.level + (l.filled ? ' full' : ''),
+        on: l.on,
+        aria: l.aria,
+        pick: l.pick,
+      })),
+      fillStyle: 'width: calc((100% - 44px) * ' + ((level - 1) / 3).toFixed(4) + ')',
+      endFirst: s.nlLevels[0].name,
+      endLast: s.nlLevels[3].name,
+    });
+  }
+}
+</script>

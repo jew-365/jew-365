@@ -1,0 +1,325 @@
+<!--board title="טופס מצווה אישית · נודניק"-->
+<style>
+/* Spec 4.4: the custom mitzvah form's reminders section with the level OptionSelect ("רמת נודניקיות למצווה") and, in
+   each reminder card, the nag block under the timing fields with a preview printed as clocks (nagClockPreview(): the
+   bounds of reminderClock(), checked against the app by gen-data.mjs). A custom mitzvah has no bedtime-Shema rule, and
+   its follow-up reminder takes all three placements. The form's fields between the hours and the reminders (category,
+   schedule, skip switches) are left out. */
+.form{display:grid;gap:0;padding:0 16px 32px}
+.hours{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sec{font-size:15px;line-height:22px;font-weight:500;color:var(--text);margin-top:20px}
+.affects{font-size:12px;line-height:16px;color:var(--goldText);margin:4px 0 12px}
+.rcard{margin-top:12px}
+.rc-h{font-size:15px;line-height:22px;font-weight:500;color:var(--text);margin-bottom:12px}
+.clockline{font-size:12px;line-height:16px;margin-top:8px}
+.rcard .nag{margin-top:12px}
+</style>
+<template>
+<div class="mscreen" style="position:absolute;inset:0;display:flex;flex-direction:column">
+<header class="sheader">
+<div class="sh-top"><button class="backpill" aria-label="{{back}}">[[ic:chevronRight:s16]]<span>{{back}}</span></button></div>
+<div class="sh-title"><h1 class="t-title c-text">{{fTitle}}</h1></div>
+</header>
+<div class="scroll" id="form-scroll" style="flex:1;min-height:0;overflow-y:auto">
+<div class="form">
+<label class="flabel" for="f-name">{{fNameLabel}}</label>
+<input id="f-name" class="input" type="text" value="{{fName}}" onChange="{{onName}}">
+<div class="hours" style="margin-top:12px">
+<div><label class="flabel" for="f-start">{{fStartLabel}}</label><input id="f-start" class="input num" type="text" inputmode="numeric" maxlength="5" dir="ltr" placeholder="HH:MM" value="{{fStart}}" onChange="{{onStart}}"></div>
+<div><label class="flabel" for="f-end">{{fEndLabel}}</label><input id="f-end" class="input num" type="text" inputmode="numeric" maxlength="5" dir="ltr" placeholder="HH:MM" value="{{fEnd}}" onChange="{{onEnd}}"></div>
+</div>
+<p class="hint">{{fHoursHint}}</p>
+<h2 class="sec" id="f-rem">{{fRemTitle}}</h2>
+<p class="hint">{{fRemHint}}</p>
+<p class="affects">{{fAffects}}</p>
+<span class="flabel" id="f-lv-l">{{fLevelLabel}}</span>
+<button class="select" onClick="{{openLevel}}" aria-label="{{fLevelAria}}"><span class="sel-t"><b class="t-bodyb c-text">{{fLevelTitle}}</b><span class="t-small c-sub num">{{fLevelCaption}}</span></span>[[ic:chevronDown:s16]]</button>
+<sc-for list="{{cards}}" as="c" hint-placeholder-count="2">
+<section class="card pad rcard" aria-label="{{c.heading}}">
+<h3 class="rc-h">{{c.heading}}</h3>
+<span class="flabel">{{c.textLabel}}</span>
+<input class="input" type="text" value="{{c.label}}" placeholder="{{c.placeholder}}" onChange="{{c.onLabel}}" aria-label="{{c.textLabel}}" style="margin-bottom:12px">
+<span class="flabel">{{c.timingLabel}}</span>
+<button class="select" onClick="{{c.openTiming}}" aria-label="{{c.timingAria}}"><span class="sel-t"><b class="t-bodyb c-text">{{c.timingTitle}}</b><span class="t-small c-sub">{{c.timingCaption}}</span></span>[[ic:chevronDown:s16]]</button>
+<div style="margin-top:12px">
+<sc-if value="{{c.isMinutes}}" hint-placeholder-val="{{ true }}"><span class="flabel">{{c.minutesLabel}}</span><div class="stepper"><button onClick="{{c.minLess}}" aria-label="{{c.minLessLabel}}"><span dir="ltr">-5</span></button><span class="val">{{c.minutes}}</span><button onClick="{{c.minMore}}" aria-label="{{c.minMoreLabel}}"><span dir="ltr">+5</span></button></div></sc-if>
+<sc-if value="{{c.isClock}}" hint-placeholder-val="{{ false }}"><span class="flabel">{{c.timeLabel}}</span><input class="input num" type="text" inputmode="numeric" maxlength="5" dir="ltr" placeholder="HH:MM" value="{{c.time}}" onChange="{{c.onTime}}" aria-label="{{c.timeLabel}}"></sc-if>
+</div>
+<p class="{{c.clockCls}}">{{c.clockText}}</p>
+<!--NAG:c.nb-->
+<button class="btn danger" style="margin-top:16px" onClick="{{c.remove}}">{{c.removeLabel}}</button>
+</section>
+</sc-for>
+<button class="btn secondary" style="margin-top:12px" onClick="{{addCard}}">[[ic:plus:s16]]<span>{{fAddLabel}}</span></button>
+<button class="btn primary" style="margin-top:20px" onClick="{{save}}">{{fSaveLabel}}</button>
+</div>
+</div>
+</div>
+<sc-if value="{{fsOn}}" hint-placeholder-val="{{ false }}">
+<div class="sheetwrap">
+<button class="scrim" onClick="{{fsClose}}" aria-label="{{closeLabel}}" tabindex="-1"></button>
+<section class="sheet" role="dialog" aria-modal="true" aria-labelledby="fs-t">
+<div class="sheet-h"><h2 id="fs-t" class="t-heading c-text">{{fsTitle}}</h2></div>
+<div class="sheet-body"><sc-for list="{{fsItems}}" as="it" hint-placeholder-count="5"><button class="saction" aria-pressed="{{it.on}}" onClick="{{it.pick}}"><span><b class="sa-label">{{it.label}}</b><small class="sa-cap num">{{it.caption}}</small></span></button></sc-for></div>
+<button class="sheet-close" onClick="{{fsClose}}">{{closeLabel}}</button>
+</section>
+</div>
+</sc-if>
+<!--TOAST-->
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  boardState() {
+    return {
+      fName: 'לימוד יומי',
+      fStart: '21:00',
+      fEnd: '22:00',
+      fLevel: null,
+      fSheet: null,
+      cards: [
+        { label: '', anchor: 'start', offsetMin: 0, mode: 'level', count: 2, every: 5, placement: 'after' },
+        { label: '', anchor: 'followUp', offsetMin: 30, mode: 'custom', count: 2, every: 15, placement: 'before' },
+      ],
+    };
+  }
+
+  // The board opens scrolled to the reminders section (the name and hours stay one scroll up).
+  boardMount() {
+    this.scrollTimer = setTimeout(() => {
+      const sc = document.getElementById('form-scroll');
+      const h = document.getElementById('f-rem');
+      if (sc && h) sc.scrollTop = Math.max(0, h.offsetTop - sc.offsetTop - 8);
+    }, 60);
+  }
+
+  boardUnmount() {
+    clearTimeout(this.scrollTimer);
+  }
+
+  toMin(s) {
+    return /^([01]\d|2[0-3]):[0-5]\d$/.test(s) ? Number(s.slice(0, 2)) * 60 + Number(s.slice(3)) : null;
+  }
+
+  // windowMinutes(): an end before the start runs into the next day; equal times are a whole day.
+  duration() {
+    const s = this.toMin(this.state.fStart);
+    const e = this.toMin(this.state.fEnd);
+    if (s === null || e === null) return null;
+    const d = (e - s + 1440) % 1440;
+    return d === 0 ? 1440 : d;
+  }
+
+  timingOfCard(c) {
+    if (c.anchor === 'start') return c.offsetMin < 0 ? 'beforeStart' : 'fromStart';
+    if (c.anchor === 'end') return 'beforeEnd';
+    return c.anchor;
+  }
+
+  // The card's main as minutes from the hours' start (reminderClock()'s fromStart).
+  fromStart(c) {
+    const start = this.toMin(this.state.fStart);
+    const duration = this.duration();
+    if (c.anchor === 'clock') {
+      const after = (c.offsetMin - start + 1440) % 1440;
+      return after > duration && after >= 1440 - this.data().headsUpMax ? after - 1440 : after;
+    }
+    return (c.anchor === 'start' ? 0 : duration) + c.offsetMin;
+  }
+
+  // The clock a trigger at `at` minutes from the start prints, or why it does not go out.
+  clockAt(at, anchor) {
+    const D = this.data();
+    const duration = this.duration();
+    const [lo, hi] = anchor === 'followUp' ? [duration + 1, duration + D.followUpMax] : [-D.headsUpMax, duration];
+    const time = this.mm((((this.toMin(this.state.fStart) + at) % 1440) + 1440) % 1440);
+    if (at < lo) return { time, drop: anchor === 'followUp' ? 'inWindow' : 'early' };
+    if (at > hi) return { time, drop: anchor === 'followUp' ? 'late' : 'end' };
+    return { time, drop: null };
+  }
+
+  levelNow() {
+    return this.state.fLevel || this.appLevel();
+  }
+
+  nagOfCard(c) {
+    if (c.mode === 'none') return null;
+    if (c.mode === 'custom') return { count: c.count, everyMin: c.every, placement: c.placement };
+    const lv = this.levelOf(this.levelNow());
+    if (!lv.count) return null;
+    const allowed = this.placementsFor('custom', c.anchor);
+    return { count: lv.count, everyMin: lv.every, placement: allowed.includes('after') ? 'after' : allowed[0] };
+  }
+
+  patchCard(i, patch) {
+    const cards = this.state.cards.slice();
+    const c = Object.assign({}, cards[i], patch);
+    const allowed = this.placementsFor('custom', c.anchor);
+    if (!allowed.includes(c.placement)) c.placement = allowed[0];
+    cards[i] = c;
+    this.setState({ cards });
+  }
+
+  setTiming(i, timing) {
+    const c = this.state.cards[i];
+    const n = c.anchor === 'clock' ? 0 : Math.abs(c.offsetMin);
+    const map = {
+      beforeStart: { anchor: 'start', offsetMin: -Math.min(n, this.data().headsUpMax) || 0 },
+      fromStart: { anchor: 'start', offsetMin: n },
+      beforeEnd: { anchor: 'end', offsetMin: -n || 0 },
+      clock: { anchor: 'clock', offsetMin: c.anchor === 'clock' ? c.offsetMin : this.toMin(this.state.fStart) || 0 },
+      followUp: { anchor: 'followUp', offsetMin: Math.max(1, n || 60) },
+    };
+    this.patchCard(i, Object.assign({ timeText: undefined }, map[timing]));
+    this.setState({ fSheet: null });
+  }
+
+  perDayForm(level) {
+    return this.state.cards.reduce((n, c) => {
+      const nag = c.mode === 'none' ? null : c.mode === 'custom' ? { count: c.count } : { count: this.levelOf(level).count };
+      return n + 1 + (nag ? nag.count : 0);
+    }, 0);
+  }
+
+  sheetVals() {
+    const s = this.state.fSheet;
+    if (!s) return { fsOn: false, fsItems: [] };
+    if (s.kind === 'level') {
+      const app = this.levelOf(this.appLevel());
+      const cur = this.state.fLevel;
+      return {
+        fsOn: true,
+        fsTitle: this.str('custom.nagLevel'),
+        fsClose: () => this.setState({ fSheet: null }),
+        fsItems: [
+          {
+            label: this.str('detail.nagLevelApp', { name: app.name, level: app.level }),
+            caption: this.str('detail.nagLevelPerDay', { n: this.perDayForm(app.level) }),
+            on: cur === null,
+            pick: () => this.setState({ fLevel: null, fSheet: null }),
+          },
+        ].concat(
+          [1, 2, 3, 4].map((l) => {
+            const lv = this.levelOf(l);
+            return {
+              label: lv.label,
+              caption: lv.desc + ' · ' + this.str('detail.nagLevelPerDay', { n: this.perDayForm(l) }),
+              on: cur === l,
+              pick: () => this.setState({ fLevel: l, fSheet: null }),
+            };
+          }),
+        ),
+      };
+    }
+    const c = this.state.cards[s.index];
+    const cur = this.timingOfCard(c);
+    return {
+      fsOn: true,
+      fsTitle: this.str('reminder.timing'),
+      fsClose: () => this.setState({ fSheet: null }),
+      fsItems: ['beforeStart', 'fromStart', 'beforeEnd', 'clock', 'followUp'].map((k) => ({
+        label: this.str('reminder.timing.' + k),
+        caption: this.str('reminder.timing.' + k + '.caption', { max: this.data().headsUpMax }),
+        on: cur === k,
+        pick: () => this.setTiming(s.index, k),
+      })),
+    };
+  }
+
+  cardVals(c, i) {
+    const timing = this.timingOfCard(c);
+    const valid = this.duration() !== null;
+    const at = valid ? this.fromStart(c) : null;
+    const main = valid ? this.clockAt(at, c.anchor) : null;
+    const nag = this.nagOfCard(c);
+    const preview = main && !main.drop && nag ? this.offsets(nag).map((off) => this.clockAt(at + off, c.anchor)) : [];
+    const ranges = { beforeStart: [0, this.data().headsUpMax], fromStart: [0, 720], beforeEnd: [0, 720], followUp: [1, this.data().followUpMax] };
+    const n = c.anchor === 'clock' ? 0 : Math.abs(c.offsetMin);
+    const setN = (v) => {
+      const [lo, hi] = ranges[timing];
+      const x = Math.min(hi, Math.max(lo, v));
+      this.patchCard(i, { offsetMin: timing === 'beforeStart' || timing === 'beforeEnd' ? -x : x });
+    };
+    const followName = this.str('reminder.followUp.label', { name: this.state.fName || this.str('custom.title') });
+    return {
+      heading: this.str('custom.reminderN', { n: i + 1 }),
+      textLabel: this.str('custom.reminderText'),
+      label: c.label,
+      placeholder: c.anchor === 'followUp' ? followName : this.str('custom.reminderLabelPlaceholder'),
+      onLabel: (e) => this.patchCard(i, { label: e.target.value }),
+      timingLabel: this.str('reminder.timing'),
+      timingTitle: this.str('reminder.timing.' + timing),
+      timingCaption: this.str('reminder.timing.' + timing + '.caption', { max: this.data().headsUpMax }),
+      timingAria: this.str('reminder.timing') + ': ' + this.str('reminder.timing.' + timing),
+      openTiming: () => this.setState({ fSheet: { kind: 'timing', index: i } }),
+      isMinutes: timing !== 'clock',
+      isClock: timing === 'clock',
+      minutesLabel: timing === 'clock' ? '' : this.str('reminder.minutes.' + timing),
+      minutes: n,
+      minLess: () => setN(n - 5),
+      minMore: () => setN(n + 5),
+      minLessLabel: this.str('reminder.minutes.less'),
+      minMoreLabel: this.str('reminder.minutes.more'),
+      timeLabel: this.str('reminder.time'),
+      time: c.timeText !== undefined ? c.timeText : c.anchor === 'clock' ? this.mm(c.offsetMin) : '',
+      onTime: (e) => {
+        const raw = String(e.target.value || '').slice(0, 5);
+        const v = this.toMin(raw);
+        this.patchCard(i, v !== null && v < 1440 ? { timeText: raw, offsetMin: v } : { timeText: raw });
+      },
+      clockCls: 'clockline num ' + (main && !main.drop ? 'c-gold' : 'c-urgent'),
+      clockText: !valid
+        ? ''
+        : main.drop
+          ? this.str('custom.reminderOutsideWindow', { hours: this.data().headsUpMax / 60 })
+          : this.str('custom.reminderPreview', { time: main.time }),
+      nb: this.nagBlock(c, {
+        level: this.levelNow(),
+        allowed: this.placementsFor('custom', c.anchor),
+        preview,
+        set: (patch) => this.patchCard(i, patch),
+      }),
+      remove: () => {
+        if (this.state.cards.length <= 1) return this.showToast('צריך להשאיר לפחות התראה אחת');
+        this.setState({ cards: this.state.cards.filter((_, j) => j !== i) });
+      },
+      removeLabel: this.str('custom.deleteReminder'),
+    };
+  }
+
+  renderVals() {
+    const app = this.levelOf(this.appLevel());
+    const level = this.levelNow();
+    const own = this.state.fLevel ? this.levelOf(this.state.fLevel) : null;
+    const title = own ? own.label : this.str('detail.nagLevelApp', { name: app.name, level: app.level });
+    const caption = (own ? own.desc + ' · ' : '') + this.str('detail.nagLevelPerDay', { n: this.perDayForm(level) });
+    return Object.assign(this.core(), this.sheetVals(), {
+      fTitle: this.str('custom.editTitle'),
+      fNameLabel: this.str('custom.name'),
+      fName: this.state.fName,
+      onName: (e) => this.setState({ fName: e.target.value }),
+      fStartLabel: this.str('custom.startTime'),
+      fEndLabel: this.str('custom.endTime'),
+      fStart: this.state.fStart,
+      fEnd: this.state.fEnd,
+      onStart: (e) => this.setState({ fStart: String(e.target.value || '').slice(0, 5) }),
+      onEnd: (e) => this.setState({ fEnd: String(e.target.value || '').slice(0, 5) }),
+      fHoursHint: this.str('custom.hint.time'),
+      fRemTitle: this.str('custom.reminders'),
+      fRemHint: this.str('custom.hint.reminders'),
+      fAffects: this.str('custom.affects', { surfaces: this.str('custom.surface.notifications') }),
+      fLevelLabel: this.str('custom.nagLevel'),
+      fLevelTitle: title,
+      fLevelCaption: caption,
+      fLevelAria: this.str('custom.nagLevel') + ': ' + title,
+      openLevel: () => this.setState({ fSheet: { kind: 'level' } }),
+      cards: this.state.cards.map((c, i) => this.cardVals(c, i)),
+      fAddLabel: this.str('custom.addReminder'),
+      addCard: () => this.setState({ cards: this.state.cards.concat([{ label: '', anchor: 'start', offsetMin: 0, mode: 'level', count: 2, every: 5, placement: 'after' }]) }),
+      fSaveLabel: this.str('custom.save'),
+      save: () => this.showToast('נשמר'),
+    });
+  }
+}
+</script>

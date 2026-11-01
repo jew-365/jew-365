@@ -1,0 +1,50 @@
+<!--board title="מסך המצווה · רמה ושורות"-->
+<style>
+/* Spec 4.2: in the reminders card, under its title, one ListRow (bell, chevron) for the mitzvah's level that opens a
+   BottomSheet of "like the app" and the four levels; each reminder row gains a nag line. The board opens with the
+   mitzvah at level 3 (an override), so the rows show the level's repeats; a tap on a row opens the editor. */
+.lvrow{padding:12px 0;min-height:68px;border-bottom:1px solid var(--border)}
+</style>
+<template>
+<!--MITZVAH-->
+<!--LEVELSHEET-->
+<!--EDITOR-->
+<!--TOAST-->
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  mid() {
+    const m = String(this.opt('m') || 'shacharit');
+    return this.data().mitzvot[m] ? m : 'shacharit';
+  }
+
+  // demo: (none) the mitzvah at level 3; "app" no override; "mixed" one reminder with its own nag and one exempt.
+  seed() {
+    const id = this.mid();
+    const demo = String(this.opt('demo') || '');
+    const levels = demo === 'app' ? {} : { [id]: 3 };
+    const rem = {};
+    if (demo === 'mixed') {
+      const list = this.seedReminders(id);
+      list[0].nag = { count: 3, everyMin: 5, placement: 'around' };
+      if (list[1]) list[1].nag = null;
+      rem[id] = list;
+    }
+    return { levels, rem, sheet: null, editor: null };
+  }
+
+  boardState() {
+    return this.seed();
+  }
+
+  afterHash() {
+    this.setState(this.seed());
+  }
+
+  renderVals() {
+    return Object.assign(this.core(), this.mitzvahVals(this.mid()));
+  }
+}
+</script>

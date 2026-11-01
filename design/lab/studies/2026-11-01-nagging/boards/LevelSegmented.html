@@ -1,0 +1,27 @@
+<!--board title="א · שורת ארבע מדרגות"-->
+<style>
+/* Spec 4.1 exactly: the field label, a SegmentedControl of the four levels named by their names, the chosen level's
+   name and description, the per-day estimate over the default daily set, the hint. */
+.nl-name{font-weight:600}
+</style>
+<template>
+<!--SETTINGS_TOP-->
+<div class="nagset" id="nagLevel" style="margin-top:16px">
+<span class="flabel" id="nl-l">{{nlLabel}}</span>
+<div class="seg" role="radiogroup" aria-labelledby="nl-l"><sc-for list="{{nlLevels}}" as="l" hint-placeholder-count="4"><button role="radio" aria-checked="{{l.on}}" aria-label="{{l.aria}}" onClick="{{l.pick}}">{{l.name}}</button></sc-for></div>
+<p class="t-cap c-text" style="margin-top:8px" aria-live="polite"><b class="nl-name">{{nlName}}:</b> {{nlDesc}}</p>
+<p class="t-small c-sub num" style="margin-top:4px">{{nlPerDay}}</p>
+<p class="hint">{{nlHint}}</p>
+</div>
+<!--SETTINGS_BOTTOM-->
+<!--TOAST-->
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  renderVals() {
+    return Object.assign(this.core(), this.settingsVals());
+  }
+}
+</script>

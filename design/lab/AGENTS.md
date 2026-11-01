@@ -59,3 +59,4 @@
 - [studies/2026-11-01-fonts/AGENTS.md](studies/2026-11-01-fonts/AGENTS.md) - The font study of 2026-11-01: eight font directions for the app outside the siddur, on one gallery page.
 - [studies/2026-11-01-icons/AGENTS.md](studies/2026-11-01-icons/AGENTS.md) - The icon study of 2026-11-01: a drawn Jewish icon set of 21 mitzvah and siddur icons in three styles beside today's, and the later rounds of options for single icons.
 - [studies/2026-11-01-done-animation/AGENTS.md](studies/2026-11-01-done-animation/AGENTS.md) - The study of 2026-11-01: five completion animations for home's open cards beside today's stamp.
+- [studies/2026-11-01-nagging/AGENTS.md](studies/2026-11-01-nagging/AGENTS.md) - The nagging study of 2026-11-01: three directions for the Settings level control, the mitzvah screen's level row and sheet, the reminder editor's nag block, the custom form and a notification tray chain, on real Jerusalem data.
