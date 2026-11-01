@@ -17,6 +17,12 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-11-01 — the Apple Developer Program License Agreement
+
+- **Accept the updated Apple Developer Program License Agreement** — the Account Holder accepted the agreement Apple asked for by 2026-11-14, without which App Store Connect, its API, EAS's iOS signing and new submissions would stop ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-11-01).
+  - Found: a store status read, 2026-11-01. Verified: the owner's word, 2026-11-01: "אישרתי את ההסכם". Not read back by an agent yet (Other Open Items in [not-close.md](not-close.md)).
+  - Version: none (an Apple account step, no repository change) · Committed: n/a · Pushed: n/a · Live: in effect on the Apple Developer account from 2026-11-01, per the owner · Channel: —
+
 ## 2026-11-01 — production update 1.0.21-9: Rubik, the Jewish icons and the completion animation
 
 - **Requested:** the owner, 2026-11-01, through the font, icon and completion-animation studies; the production update was asked for the same day, after preview `1.0.21-36`: "תוציא עדכון לפרודקשן ותעדכן תיעוד ואז קומיט ופוש".
