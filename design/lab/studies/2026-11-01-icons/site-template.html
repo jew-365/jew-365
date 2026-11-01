@@ -13,7 +13,25 @@
   --bg: #F6F1E8; --surface: #FFFDF9; --surface2: #F1EADF; --text: #1D2240; --sub: #69645D;
   --border: #EBE3D6; --gold: #F08A3C; --on-gold: #2B1608; --gold-light: #FDE9D5; --gold-text: #A04A0C; --muted: #6A655E;
   --font: "Rubik", "Heebo", system-ui, sans-serif;
+  /* The icons' colour roles (icons.mjs): full colour by default. */
+  --i-ink: #26305E; --i-ink2: #3E4C86; --i-ink3: #18204A; --i-acc: #F08A3C; --i-acc2: #C9631B;
+  --i-paper: #FFF4E3; --i-paper2: #E3CDB0; --i-white: #FFFFFF; --i-line: #B9A88F; --i-line2: #FFF1D0;
+  --i-gold: #F5B83D; --i-gold2: #D18E22; --i-flame: #FFC93C; --i-flame2: #FF7B1C; --i-metal: #DCE3EC; --i-metal2: #A3AFC2;
+  --i-wood: #A8673A; --i-wood2: #6E3E1C; --i-horn: #EED3A6; --i-leaf: #6CAF62; --i-leaf2: #4A8A48;
+  --i-wine: #D23E4F; --i-wine2: #9E2738; --i-water: #7CC6EE; --i-blue: #3F73D0;
   color-scheme: light;
+}
+/* The same drawings in the accent's tones only, so they follow every palette. */
+.tonal {
+  --i-ink: color-mix(in srgb, var(--gold) 55%, #2a1405); --i-ink2: color-mix(in srgb, var(--gold) 75%, #2a1405); --i-ink3: color-mix(in srgb, var(--gold) 40%, #2a1405);
+  --i-acc: var(--gold); --i-acc2: color-mix(in srgb, var(--gold) 70%, #2a1405);
+  --i-paper: color-mix(in srgb, var(--gold) 12%, #fff); --i-paper2: color-mix(in srgb, var(--gold) 40%, #fff); --i-white: #fff;
+  --i-line: color-mix(in srgb, var(--gold) 55%, #fff); --i-line2: color-mix(in srgb, var(--gold) 15%, #fff);
+  --i-gold: color-mix(in srgb, var(--gold) 85%, #fff); --i-gold2: var(--gold); --i-flame: color-mix(in srgb, var(--gold) 45%, #fff); --i-flame2: var(--gold);
+  --i-metal: color-mix(in srgb, var(--gold) 22%, #fff); --i-metal2: color-mix(in srgb, var(--gold) 60%, #fff);
+  --i-wood: color-mix(in srgb, var(--gold) 80%, #2a1405); --i-wood2: color-mix(in srgb, var(--gold) 55%, #2a1405); --i-horn: color-mix(in srgb, var(--gold) 35%, #fff);
+  --i-leaf: color-mix(in srgb, var(--gold) 90%, #fff); --i-leaf2: var(--gold); --i-wine: var(--gold); --i-wine2: color-mix(in srgb, var(--gold) 70%, #2a1405);
+  --i-water: color-mix(in srgb, var(--gold) 35%, #fff); --i-blue: color-mix(in srgb, var(--gold) 70%, #2a1405);
 }
 .app-dark {
   --bg: #0E1626; --surface: #172238; --surface2: #222F4A; --text: #EEF1F7; --sub: #9DA9BF;
@@ -38,7 +56,7 @@ button:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px;
 .tile.old { background: var(--surface2); }
 
 .table { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
-.row { display: grid; grid-template-columns: minmax(150px, 1.3fr) repeat(4, minmax(64px, 1fr)); align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--border); }
+.row { display: grid; grid-template-columns: minmax(150px, 1.6fr) repeat(3, minmax(64px, 1fr)); align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--border); }
 .row:first-child { border-top: 0; }
 .row.head { font-size: 13px; color: var(--sub); font-weight: 600; background: var(--surface2); }
 .row .name b { display: block; font-size: 15px; font-weight: 600; }
@@ -65,21 +83,20 @@ button:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px;
 .sw.off::after { left: auto; right: 3px; }
 .note { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px 18px; font-size: 15px; line-height: 1.7; max-width: 80ch; }
 .note p { margin: 0 0 6px; }
-@media (max-width: 640px) { .row { grid-template-columns: 1fr repeat(4, 50px); padding: 10px; } .row .name small { display: none; } }
+@media (max-width: 640px) { .row { grid-template-columns: 1fr repeat(3, 56px); padding: 10px; } .row .name small { display: none; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>אייקונים יהודיים ליהודי 365</h1>
-    <p>סט חדש ומקורי של 21 אייקונים למצוות, לתפילות ולקבוצות הסידור, מצויר במיוחד לאפליקציה. אייקוני הממשק (חיצים, וי, פעמון וכדומה) נשארים כמו שהם. הציור אחד, ויש שלושה סגנונות לבחירה. כל אייקון מוצג בתוך האריח של האפליקציה, ליד האייקון של היום.</p>
+    <p>סבב 2: 21 איורים צבעוניים ומקוריים למצוות, לתפילות ולקבוצות הסידור, בכחול ובכתום של הלוגו, עם זהב, קלף, כסף, עץ ויין. אייקוני הממשק (חיצים, וי, פעמון וכדומה) נשארים כמו שהם. כל איור מוצג בתוך האריח של האפליקציה, ליד האייקון של היום, בשתי גרסאות: צבעוני מלא, או בגווני צבע ההדגשה של ערכת הנושא.</p>
   </header>
 
   <div class="bars">
     <div class="bar" role="group" aria-label="סגנון"><span>סגנון</span>
-      <button type="button" data-style="thin" aria-pressed="false">א. קו דק</button>
-      <button type="button" data-style="bold" aria-pressed="false">ב. קו מודגש</button>
-      <button type="button" data-style="duo" aria-pressed="true">ג. דו-גוני</button>
+      <button type="button" data-style="color" aria-pressed="true">א. צבעוני</button>
+      <button type="button" data-style="tonal" aria-pressed="false">ב. בגווני ערכת הנושא</button>
     </div>
     <div class="bar" role="group" aria-label="צבעים"><span>צבעים</span>
       <button type="button" data-theme="light" aria-pressed="true">זהב (בהיר)</button>
@@ -88,8 +105,8 @@ button:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px;
   </div>
 
   <section class="note" aria-label="מה לבחור">
-    <p><b>מה צריך לבחור:</b> סגנון אחד (א, ב או ג), ואם יש אייקון שלא מתאים לך, פשוט תגיד איזה ומה היית רוצה במקומו.</p>
-    <p>ההמלצה שלי היא <b>ג, דו-גוני</b>: הקו נקי כמו היום, והמילוי העדין נותן לכל אייקון נוכחות גם בגודל הקטן ובערכה הכהה.</p>
+    <p><b>מה צריך לבחור:</b> א או ב, ואם יש איור שלא מתאים לך, פשוט תגיד איזה ומה היית רוצה במקומו.</p>
+    <p>ההמלצה שלי היא <b>א, צבעוני</b>: כל מצווה מזוהה במבט אחד (תפילין שחורות, טלית לבנה, נרות דולקים, רימון אדום), והוא נראה טוב על כל ערכות הנושא, גם הכהות.</p>
   </section>
 
   <section aria-labelledby="h-big" style="display:grid;gap:12px">
@@ -98,7 +115,7 @@ button:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px;
   </section>
 
   <section aria-labelledby="h-cmp" style="display:grid;gap:12px">
-    <h2 id="h-cmp">היום מול שלושת הסגנונות</h2>
+    <h2 id="h-cmp">היום מול הסט החדש</h2>
     <div class="table" id="table"></div>
   </section>
 
@@ -110,25 +127,22 @@ button:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px;
 <script>
 const ICONS = __ICONS__;
 const by = Object.fromEntries(ICONS.map((i) => [i.id, i]));
-const STYLES = { thin: { sw: 1.6, duo: false }, bold: { sw: 2.1, duo: false }, duo: { sw: 1.6, duo: true } };
-let style = 'duo';
+let style = 'color';
+let uid = 0;
 
 const svg = (inner, size, sw, fill, color) =>
   `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" fill="none">${inner.replaceAll('__FILL__', fill)}</g></svg>`;
-const fresh = (i, st, size = 24) => {
-  const s = STYLES[st];
-  return svg(i.next, size, s.sw, s.duo ? 'color-mix(in srgb, var(--gold) 28%, transparent)' : 'none', 'var(--gold)');
-};
-const tile = (i, st, big) => `<span class="tile${big ? ' big' : ''}">${fresh(i, st, big ? 42 : 24)}</span>`;
+const art = (i, size) => `<svg width="${size}" height="${size}" viewBox="0 0 48 48" aria-hidden="true">${i.next.replaceAll('__UID__', `g${uid++}`)}</svg>`;
+const tile = (i, st, big) => `<span class="tile${big ? ' big' : ''}${st === 'tonal' ? ' tonal' : ''}">${art(i, big ? 54 : 30)}</span>`;
 const oldTile = (i) => `<span class="tile old">${svg(i.now, 24, 1.8, 'none', 'var(--muted)')}</span>`;
 
 function render() {
   document.getElementById('big').innerHTML = ICONS.map((i) => `<div class="big-cell">${tile(i, style, true)}<b>${i.he}</b><span style="color:var(--sub)">${i.idea}</span></div>`).join('');
   document.getElementById('table').innerHTML =
-    `<div class="row head"><span>אייקון</span><span class="c">היום</span><span class="c">א. דק</span><span class="c">ב. מודגש</span><span class="c">ג. דו-גוני</span></div>` +
+    `<div class="row head"><span>אייקון</span><span class="c">היום</span><span class="c">א. צבעוני</span><span class="c">ב. גווני ערכה</span></div>` +
     ICONS.map((i) => `<div class="row"><span class="name"><b>${i.he}</b><small>${i.idea}</small></span>
       <span class="c">${oldTile(i)}</span>
-      ${['thin', 'bold', 'duo'].map((st) => `<span class="c${st === style ? ' sel' : ''}">${tile(i, st)}</span>`).join('')}</div>`).join('');
+      ${['color', 'tonal'].map((st) => `<span class="c${st === style ? ' sel' : ''}">${tile(i, st)}</span>`).join('')}</div>`).join('');
   const li = (id, name, cap, on) => `<div class="li">${tile(by[id], style)}<span class="t"><b>${name}</b><small>${cap}</small></span>${on === undefined ? '' : `<span class="sw${on ? '' : ' off'}"></span>`}</div>`;
   document.getElementById('phones').innerHTML = `
     <div class="phone" aria-label="ספריית המצוות">

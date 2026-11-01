@@ -1,217 +1,324 @@
-// The new Jewish icon set: one drawing per icon id of src/components/MitzvahIcon.tsx that stands for a
-// mitzvah, a siddur group or a Jewish topic. 24-unit viewBox, round caps and joins, stroked in the icon
-// colour; `f` is the fill of the main shape: 'none' in the outline styles, the tile's tint in duotone.
+// Round 2 of the icon study: flat, coloured illustrations on a 48-unit box, drawn in the logo's navy and
+// orange with gold, parchment, silver, wood, leaf and wine. Every colour is a role variable (--i-*), so
+// one drawing renders in full colour or in the accent's tones (see ROLES and TONAL in site-template.html).
+const c = (role) => `var(--i-${role})`;
+const r = (n) => Math.round(n * 100) / 100;
+
+// A flame: an outer teardrop and a yellow core, its tip at (x, top), `h` tall.
+const flame = (x, top, h) => {
+  const w = h * 0.36;
+  const b = top + h;
+  const ci = top + h * 0.38;
+  return `<path d="M${r(x)},${r(top)}C${r(x + w * 1.25)},${r(top + h * 0.45)} ${r(x + w)},${r(b - h * 0.08)} ${r(x)},${r(b)}C${r(x - w)},${r(b - h * 0.08)} ${r(x - w * 1.25)},${r(top + h * 0.45)} ${r(x)},${r(top)}Z" fill="${c('flame2')}"/>
+    <path d="M${r(x)},${r(ci)}C${r(x + w * 0.7)},${r(ci + h * 0.3)} ${r(x + w * 0.6)},${r(b - h * 0.1)} ${r(x)},${r(b - h * 0.04)}C${r(x - w * 0.6)},${r(b - h * 0.1)} ${r(x - w * 0.7)},${r(ci + h * 0.3)} ${r(x)},${r(ci)}Z" fill="${c('flame')}"/>`;
+};
+// A four-point star of radius s at (x, y).
+const star = (x, y, s, fill) => {
+  const k = s * 0.28;
+  return `<path d="M${r(x)},${r(y - s)}L${r(x + k)},${r(y - k)}L${r(x + s)},${r(y)}L${r(x + k)},${r(y + k)}L${r(x)},${r(y + s)}L${r(x - k)},${r(y + k)}L${r(x - s)},${r(y)}L${r(x - k)},${r(y - k)}Z" fill="${fill}"/>`;
+};
+// A crescent: the disc (cx, cy, R) less the disc (ox, oy, R2), traced through their two crossings.
+const crescent = (cx, cy, R, ox, oy, R2, fill) => {
+  const dx = ox - cx;
+  const dy = oy - cy;
+  const d = Math.hypot(dx, dy);
+  const a = (R * R - R2 * R2 + d * d) / (2 * d);
+  const h = Math.sqrt(R * R - a * a);
+  const mx = cx + (a * dx) / d;
+  const my = cy + (a * dy) / d;
+  const p1 = [mx + (h * dy) / d, my - (h * dx) / d];
+  const p2 = [mx - (h * dy) / d, my + (h * dx) / d];
+  return `<path d="M${r(p1[0])},${r(p1[1])}A${R},${R} 0 1 0 ${r(p2[0])},${r(p2[1])}A${R2},${R2} 0 0 1 ${r(p1[0])},${r(p1[1])}Z" fill="${fill}"/>`;
+};
+// An open book: the navy cover under two parchment pages, with text lines.
+const openBook = (top, lines = true) => {
+  const b = top + 26;
+  const text = lines
+    ? [0, 4, 8].map((o) => `<path d="M9,${top + 6 + o}Q14,${top + 5 + o} 20,${top + 6.8 + o}M28,${top + 6.8 + o}Q34,${top + 5 + o} 39,${top + 6 + o}"/>`).join('')
+    : '';
+  return `<path d="M3,${top + 2}V${b + 2}Q14,${b - 1} 24,${b + 3}Q34,${b - 1} 45,${b + 2}V${top + 2}Z" fill="${c('ink')}"/>
+    <path d="M5,${top}Q14,${top - 3} 24,${top + 1}V${b}Q14,${b - 3.5} 5,${b - 1}Z" fill="${c('paper')}"/>
+    <path d="M43,${top}Q34,${top - 3} 24,${top + 1}V${b}Q34,${b - 3.5} 43,${b - 1}Z" fill="${c('white')}"/>
+    <path d="M24,${top + 1}V${b}" stroke="${c('paper2')}" stroke-width="1"/>
+    <g stroke="${c('line')}" stroke-width="1.4" stroke-linecap="round" fill="none">${text}</g>`;
+};
+
 export const ICONS = [
   {
     id: 'tefillin',
     he: 'הנחת תפילין',
-    idea: 'תפילין של ראש: הבית עם ש׳, התיתורא והרצועות',
-    draw: (f) => `
-      <path d="M5,8L8,5H18L15,8Z" fill="${f}"/>
-      <path d="M15,8L18,5V15L15,18Z" fill="${f}"/>
-      <rect x="5" y="8" width="10" height="10" rx="0.6" fill="${f}"/>
-      <path d="M7.4,11V14.6Q7.4,15.6 8.4,15.6H11.6Q12.6,15.6 12.6,14.6V11M10,11.3V15.4"/>
-      <path d="M3,18H17"/>
-      <path d="M6,18C5.6,19.8 4.6,21 3.2,21.8M14,18C14.4,19.8 15.4,21 16.8,21.8"/>`,
+    idea: 'בית תפילין שחור עם ש׳ מוזהבת, תיתורא ורצועות',
+    draw: () => `
+      <path d="M14,39C12.5,42.5 9.5,44.5 6,45.5M34,39C35.5,42.5 38.5,44.5 42,45.5" stroke="${c('ink')}" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <rect x="8" y="34" width="32" height="6" rx="1.6" fill="${c('ink')}"/>
+      <path d="M12,15L18,9H38L32,15Z" fill="${c('ink2')}"/>
+      <path d="M32,15L38,9V29L32,35Z" fill="${c('ink3')}"/>
+      <rect x="12" y="15" width="20" height="20" rx="1.2" fill="${c('ink')}"/>
+      <path d="M16.6,19.6V26.6Q16.6,30 20,30H24Q27.4,30 27.4,26.6V19.6M22,20.2V29.8" stroke="${c('gold')}" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
   },
   {
     id: 'shacharit',
     he: 'תפילת שחרית',
-    idea: 'טלית מקופלת עם פסים וציציות, כמו בלוגו',
-    draw: (f) => `
-      <path d="M8,1.76L16.12,4.56L20.32,18L13.6,19.4L13.88,15.48L4.08,11Z" fill="${f}"/>
-      <path d="M15.28,5.96L13.6,19.4M6.99,6.24L14.55,10.72M6.15,9.04L14.16,13.24M13.88,14.64L19.2,13.8M13.74,17.16L19.76,16.04"/>
-      <path d="M5.06,11.45L4.5,14.64M7.22,12.43L6.66,15.62M9.37,13.41L8.81,16.6M11.53,14.42L10.97,17.61M14.72,19.18L14.72,21.92M16.96,18.7L16.96,21.44M19.2,18.22L19.2,20.97"/>`,
+    idea: 'טלית לבנה נופלת בקפלים, עטרה מוזהבת, פסים כחולים וציציות קשורות',
+    draw: () => `
+      <path d="M8,13.5H40L41.4,35.4Q37,38 32.4,35.8Q28.2,38 24,35.8Q19.8,38 15.6,35.8Q11,38 6.6,35.4Z" fill="${c('white')}" stroke="${c('paper2')}" stroke-width="1.1" stroke-linejoin="round"/>
+      <path d="M14.6,14V35.6Q15.2,36.2 15.6,35.8L17.6,14Z M30.4,14L32.4,35.8Q32.8,36.2 33.4,35.6V14Z" fill="${c('paper')}"/>
+      <path d="M7.4,25.6Q24,27.6 40.6,25.6L40.8,29Q24,31 7.2,29Z" fill="${c('ink')}"/>
+      <path d="M7.1,31.2Q24,33.2 40.9,31.2L41,32.8Q24,34.8 7,32.8Z" fill="${c('ink')}"/>
+      <rect x="7" y="9.5" width="34" height="5.6" rx="1.6" fill="${c('gold')}"/>
+      <path d="M10,12.3H38" stroke="${c('gold2')}" stroke-width="1.2" stroke-dasharray="2 1.6"/>
+      ${[8.6, 39.4].map((x) => `
+        <rect x="${x - 1.6}" y="35" width="3.2" height="3.2" rx="1" fill="${c('metal2')}"/>
+        <path d="M${x - 1},38V45.4M${x},38V46M${x + 1},38V45.4" stroke="${c('metal2')}" stroke-width="0.9" stroke-linecap="round"/>
+        <rect x="${x - 1.4}" y="40.6" width="2.8" height="1.4" rx="0.7" fill="${c('metal2')}"/>`).join('')}`,
   },
   {
     id: 'mincha',
     he: 'תפילת מנחה',
-    idea: 'סידור פתוח והשמש של אחר הצהריים',
-    draw: (f) => `
-      <path d="M3,14.5Q7.5,13 12,15Q16.5,13 21,14.5V20.5Q16.5,19 12,21Q7.5,19 3,20.5Z" fill="${f}"/>
-      <path d="M12,15V21"/>
-      <circle cx="15.5" cy="7.5" r="2.6" fill="${f}"/>
-      <path d="M15.5,2.6V3.4M19.9,7.5H20.7M10.3,7.5H11.1M18.6,4.4L19.2,3.8M18.6,10.6L19.2,11.2M12.4,4.4L11.8,3.8"/>`,
+    idea: 'סידור פתוח ושמש של אחר הצהריים',
+    draw: () => `
+      <circle cx="31" cy="14" r="10" fill="${c('flame')}" opacity="0.28"/>
+      <circle cx="31" cy="14" r="6.6" fill="${c('flame')}"/>
+      <circle cx="31" cy="14" r="6.6" fill="${c('flame2')}" opacity="0.35"/>
+      ${openBook(19)}`,
   },
   {
     id: 'maariv',
     he: 'תפילת ערבית',
-    idea: 'סידור פתוח, ירח וכוכב',
-    draw: (f) => `
-      <path d="M3,14.5Q7.5,13 12,15Q16.5,13 21,14.5V20.5Q16.5,19 12,21Q7.5,19 3,20.5Z" fill="${f}"/>
-      <path d="M12,15V21"/>
-      <path d="M11.2,4.2A4.3,4.3 0 1 0 15.3,10.1A3.4,3.4 0 0 1 11.2,4.2Z" fill="${f}"/>
-      <path d="M18,3.6L18.5,5L19.9,5.5L18.5,6L18,7.4L17.5,6L16.1,5.5L17.5,5Z"/>`,
+    idea: 'סידור פתוח, ירח וכוכבים',
+    draw: () => `
+      ${crescent(21, 12, 8.5, 25.5, 9, 7.4, c('gold'))}
+      ${star(35, 8, 3, c('gold'))}
+      ${star(39.5, 15.5, 1.8, c('gold'))}
+      ${openBook(21)}`,
   },
   {
     id: 'shema',
     he: 'קריאת שמע',
-    idea: 'קלף עם האות ש׳',
-    draw: (f) => `
-      <path d="M5,5.5Q5,3.5 7,3.5H17Q19,3.5 19,5.5V18.5Q19,20.5 17,20.5H7Q5,20.5 5,18.5Z" fill="${f}"/>
-      <path d="M7.4,7.8H9M11,8H12.6M15.4,7.8H17"/>
-      <path d="M8.2,7.8L10,15.2Q10.3,16.4 11.6,16.4H16.2V7.8"/>
-      <path d="M11.8,8L13.6,13.4"/>`,
+    idea: 'מזוזה מוזהבת עם ש׳ (קריאת שמע כתובה בה)',
+    draw: () => `
+      <g transform="rotate(20 24 24)">
+        <rect x="18.5" y="4.5" width="11" height="39" rx="5.5" fill="${c('gold')}"/>
+        <rect x="18.5" y="4.5" width="5.5" height="39" rx="2.75" fill="${c('gold2')}" opacity="0.5"/>
+        <rect x="25.2" y="8" width="1.8" height="32" rx="0.9" fill="${c('white')}" opacity="0.55"/>
+        <path d="M20.8,13V17.8Q20.8,20 23,20H25Q27.2,20 27.2,17.8V13M24,13.4V19.8" stroke="${c('ink')}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="24" cy="8" r="1.1" fill="${c('gold2')}"/>
+        <circle cx="24" cy="40" r="1.1" fill="${c('gold2')}"/>
+      </g>`,
   },
   {
     id: 'brachot',
     he: 'ברכות השחר',
-    idea: 'נטלה לנטילת ידיים, הדבר הראשון בבוקר',
-    draw: (f) => `
-      <path d="M7,6H17L15.6,18.6Q12,20.2 8.4,18.6Z" fill="${f}"/>
-      <path d="M7.3,8.6H4.6V12.6H7.7M16.7,8.6H19.4V12.6H16.3"/>
-      <path d="M6.6,6H17.4"/>
-      <path d="M8.2,9.6Q10.1,8.7 12,9.6Q13.9,10.5 15.8,9.6"/>`,
+    idea: 'נטלה מלאה מים לנטילת ידיים',
+    draw: () => `
+      <path d="M14.4,18H9.5V28H15.2M33.6,18H38.5V28H32.8" stroke="${c('metal2')}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M13.5,12H34.5L31.8,38.5Q24,41.6 16.2,38.5Z" fill="${c('metal')}"/>
+      <path d="M24,12H34.5L31.8,38.5Q28,40 24,40.4Z" fill="${c('metal2')}" opacity="0.55"/>
+      <rect x="16.5" y="15" width="2.2" height="20" rx="1.1" fill="${c('white')}" opacity="0.7"/>
+      <rect x="12" y="9.6" width="24" height="4.4" rx="2.2" fill="${c('metal2')}"/>
+      <ellipse cx="24" cy="11.8" rx="10" ry="1.4" fill="${c('water')}"/>`,
   },
   {
     id: 'night',
     he: 'קריאת שמע על המיטה',
-    idea: 'מיטה, כרית וירח',
-    draw: (f) => `
-      <path d="M8.5,15V12.5Q8.5,11.2 9.8,11.2H19.7Q21,11.2 21,12.5V15Z" fill="${f}"/>
-      <rect x="4.2" y="11.6" width="3.6" height="3.4" rx="1.2" fill="${f}"/>
-      <path d="M3,8.5V19.5M3,15H21V19.5"/>
-      <path d="M17,2.8A2.7,2.7 0 1 0 19.9,6.4A2.1,2.1 0 0 1 17,2.8Z"/>`,
+    idea: 'מיטה עם כרית ושמיכה, וירח',
+    draw: () => `
+      ${crescent(35, 11, 6.5, 38.5, 8.6, 5.6, c('gold'))}
+      ${star(25, 9, 2, c('gold'))}
+      <rect x="5" y="19" width="5.5" height="25" rx="2" fill="${c('wood')}"/>
+      <rect x="40" y="36" width="3.5" height="8" rx="1.2" fill="${c('wood2')}"/>
+      <rect x="10" y="33" width="34" height="5" rx="1.5" fill="${c('wood')}"/>
+      <rect x="11.5" y="25" width="11" height="7.5" rx="3.6" fill="${c('white')}" stroke="${c('paper2')}" stroke-width="1"/>
+      <path d="M20,28.5Q20,26.5 22,26.5H41Q43,26.5 43,28.5V33H20Z" fill="${c('acc')}"/>
+      <path d="M20,30.5H43V33H20Z" fill="${c('acc2')}" opacity="0.6"/>`,
   },
   {
     id: 'candles',
     he: 'הדלקת נרות שבת',
-    idea: 'שני נרות בפמוטים',
-    draw: (f) => `
-      <rect x="6.5" y="9.5" width="3" height="8.5" rx="0.6" fill="${f}"/>
-      <rect x="14.5" y="9.5" width="3" height="8.5" rx="0.6" fill="${f}"/>
-      <path d="M8,3.6Q9.9,6 8,7.4Q6.1,6 8,3.6Z M16,3.6Q17.9,6 16,7.4Q14.1,6 16,3.6Z" fill="${f}"/>
-      <path d="M5,18H11M8,18V20.6M5.6,20.8H10.4M13,18H19M16,18V20.6M13.6,20.8H18.4"/>`,
+    idea: 'שני נרות דולקים בפמוטי כסף',
+    draw: () => {
+      const one = (x) => `
+        <circle cx="${x}" cy="10.5" r="6.5" fill="${c('flame')}" opacity="0.25"/>
+        ${flame(x, 4, 10.5)}
+        <path d="M${x},14.4V16.2" stroke="${c('ink')}" stroke-width="1.2" stroke-linecap="round"/>
+        <rect x="${x - 2.8}" y="16" width="5.6" height="16.5" rx="1.2" fill="${c('white')}" stroke="${c('paper2')}" stroke-width="1"/>
+        <path d="M${x - 5.2},32.5H${x + 5.2}L${x + 3.2},35.6H${x - 3.2}Z" fill="${c('metal')}"/>
+        <rect x="${x - 1.3}" y="35.4" width="2.6" height="5.8" fill="${c('metal2')}"/>
+        <rect x="${x - 5.6}" y="40.6" width="11.2" height="3.2" rx="1.6" fill="${c('metal')}"/>`;
+      return one(16) + one(32);
+    },
   },
   {
     id: 'havdalah',
     he: 'הבדלה',
-    idea: 'נר קלוע וכוס יין',
-    draw: (f) => `
-      <rect x="4.5" y="8" width="4.4" height="12.5" rx="1" fill="${f}"/>
-      <path d="M4.5,10.5L8.9,12.6M4.5,13.6L8.9,15.7M4.5,16.7L8.9,18.8"/>
-      <path d="M6.7,2.8Q8.6,5.2 6.7,6.6Q4.8,5.2 6.7,2.8Z" fill="${f}"/>
-      <path d="M12.5,9H20V11Q20,15 16.25,15Q12.5,15 12.5,11Z" fill="${f}"/>
-      <path d="M16.25,15V19M13.8,19.8H18.7"/>`,
+    idea: 'נר הבדלה קלוע בכחול ולבן וגביע יין',
+    draw: () => `
+      <circle cx="13" cy="9" r="7" fill="${c('flame')}" opacity="0.25"/>
+      ${flame(13, 2.2, 12.5)}
+      <rect x="8" y="15" width="10" height="28" rx="2" fill="${c('white')}" stroke="${c('paper2')}" stroke-width="1"/>
+      <path d="M8.5,19L17.5,23.6V27.4L8.5,22.8ZM8.5,26.6L17.5,31.2V35L8.5,30.4ZM8.5,34.2L17.5,38.8V42.5H16L8.5,38Z" fill="${c('blue')}"/>
+      <path d="M24,17H42V20.5Q42,30 33,30Q24,30 24,20.5Z" fill="${c('metal')}"/>
+      <path d="M25.6,20.2H40.4Q40.4,28.2 33,28.4Q25.6,28.2 25.6,20.2Z" fill="${c('wine')}"/>
+      <rect x="31.7" y="29.6" width="2.6" height="9.6" fill="${c('metal2')}"/>
+      <rect x="27" y="39" width="12" height="3.6" rx="1.8" fill="${c('metal')}"/>`,
   },
   {
     id: 'omer',
     he: 'ספירת העומר',
-    idea: 'אלומת שעורים קשורה',
-    draw: (f) => `
-      <ellipse cx="12" cy="6" rx="1.5" ry="2.8" fill="${f}"/>
-      <ellipse cx="7" cy="8.6" rx="1.4" ry="2.6" transform="rotate(-32 7 8.6)" fill="${f}"/>
-      <ellipse cx="17" cy="8.6" rx="1.4" ry="2.6" transform="rotate(32 17 8.6)" fill="${f}"/>
-      <path d="M12,8.8V21M12,21Q10.6,15.6 8.2,10.9M12,21Q13.4,15.6 15.8,10.9"/>
-      <path d="M9.6,16.2Q12,17.4 14.4,16.2"/>`,
+    idea: 'אלומת שעורים מוזהבת קשורה בסרט',
+    draw: () => {
+      const ear = `
+        <path d="M24,33V11" stroke="${c('gold2')}" stroke-width="1.6" stroke-linecap="round"/>
+        <ellipse cx="24" cy="7.6" rx="1.9" ry="3.2" fill="${c('gold')}"/>
+        ${[11.4, 15.4, 19.4].map((y) => `<ellipse cx="21.6" cy="${y}" rx="1.8" ry="3" transform="rotate(-32 21.6 ${y})" fill="${c('gold')}"/><ellipse cx="26.4" cy="${y}" rx="1.8" ry="3" transform="rotate(32 26.4 ${y})" fill="${c('gold')}"/>`).join('')}`;
+      return `
+        <g transform="rotate(-24 24 33)">${ear}</g>
+        <g transform="rotate(24 24 33)">${ear}</g>
+        ${ear}
+        <path d="M24,34L19,45M24,34L24,45.5M24,34L29,45" stroke="${c('gold2')}" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M18.6,31.4Q24,34 29.4,31.4L30,35.4Q24,38 18,35.4Z" fill="${c('acc')}"/>`;
+    },
   },
   {
     id: 'chanukiah',
     he: 'נרות חנוכה',
-    idea: 'חנוכייה עם שמונה קנים ושמש',
-    draw: (f) => `
-      <path d="M3,10.5H21"/>
-      <path d="M3.5,10.5V7.5M5.8,10.5V7.5M8.1,10.5V7.5M10.4,10.5V7.5M13.6,10.5V7.5M15.9,10.5V7.5M18.2,10.5V7.5M20.5,10.5V7.5"/>
-      <path d="M12,10.5V5.6"/>
-      <path d="M12,1.9Q13.3,3.6 12,4.5Q10.7,3.6 12,1.9Z" fill="${f}"/>
-      <path d="M12,10.5V18.5"/>
-      <path d="M8.5,21.2Q8.5,18.5 12,18.5Q15.5,18.5 15.5,21.2Z" fill="${f}"/>`,
+    idea: 'חנוכייה מוזהבת עם שמונה נרות דולקים ושמש',
+    draw: () => {
+      const xs = [5.5, 9.8, 14.1, 18.4, 29.6, 33.9, 38.2, 42.5];
+      const candle = (x, y) => `
+        ${flame(x, y - 6.4, 6)}
+        <rect x="${r(x - 0.95)}" y="${y}" width="1.9" height="5.2" fill="${c('white')}" stroke="${c('paper2')}" stroke-width="0.6"/>
+        <rect x="${r(x - 1.8)}" y="${y + 5}" width="3.6" height="2.6" rx="0.8" fill="${c('gold2')}"/>`;
+      return `
+        ${xs.map((x) => candle(x, 15)).join('')}
+        ${candle(24, 8.5)}
+        <rect x="22.6" y="18" width="2.8" height="6" fill="${c('gold')}"/>
+        <rect x="3.5" y="22.4" width="41" height="3.2" rx="1.6" fill="${c('gold')}"/>
+        <rect x="22.4" y="25" width="3.2" height="11" fill="${c('gold')}"/>
+        <path d="M13.5,43.6Q13.5,36 24,36Q34.5,36 34.5,43.6Z" fill="${c('gold2')}"/>
+        <rect x="23.2" y="26" width="1" height="9.4" fill="${c('white')}" opacity="0.5"/>`;
+    },
   },
   {
     id: 'sukkah',
     he: 'אושפיזין',
-    idea: 'סוכה עם סכך ופרי תלוי',
-    draw: (f) => `
-      <path d="M2.8,9.6Q4.6,6.8 6.4,9.6Q8.2,6.8 10,9.6Q11.8,6.8 13.6,9.6Q15.4,6.8 17.2,9.6Q19,6.8 21.2,9.6Z" fill="${f}"/>
-      <path d="M6,7.4L5,4.6M12,7.2L12.6,4.2M18,7.4L19.2,4.8"/>
-      <path d="M4.5,9.6V20.5M19.5,9.6V20.5M3,20.5H21"/>
-      <path d="M9,9.6V12.4M15,9.6V13.4"/>
-      <circle cx="9" cy="13.6" r="1.2"/>
-      <path d="M15,13.4L16,14.6L15,15.8L14,14.6Z"/>`,
+    idea: 'סוכה מעץ עם סכך ירוק וקישוטים',
+    draw: () => `
+      <rect x="9.5" y="18" width="29" height="24" fill="${c('paper')}"/>
+      <rect x="7" y="16.5" width="3.4" height="27" rx="1" fill="${c('wood')}"/>
+      <rect x="37.6" y="16.5" width="3.4" height="27" rx="1" fill="${c('wood')}"/>
+      <rect x="4" y="42" width="40" height="3.4" rx="1.7" fill="${c('wood2')}"/>
+      <rect x="5.5" y="15.6" width="37" height="2.8" rx="1" fill="${c('wood')}"/>
+      <ellipse cx="10.5" cy="13.5" rx="6.5" ry="4.2" fill="${c('leaf')}"/>
+      <ellipse cx="20" cy="11.6" rx="7.5" ry="4.8" fill="${c('leaf2')}"/>
+      <ellipse cx="29" cy="12" rx="7.5" ry="4.6" fill="${c('leaf')}"/>
+      <ellipse cx="38" cy="13.6" rx="6.5" ry="4.2" fill="${c('leaf2')}"/>
+      <ellipse cx="24.5" cy="14.4" rx="6" ry="2.8" fill="${c('leaf')}"/>
+      <path d="M17,18.4V24M31,18.4V22.4M24,18.4V27" stroke="${c('wood2')}" stroke-width="1" fill="none"/>
+      <circle cx="17" cy="26.4" r="2.6" fill="${c('wine')}"/>
+      <circle cx="31" cy="24.8" r="2.5" fill="${c('gold')}"/>
+      ${star(24, 29.6, 2.8, c('acc'))}`,
   },
   {
     id: 'shofar',
     he: 'סליחות',
-    idea: 'שופר',
-    draw: (f) => `
-      <path d="M2.8,19.4C7,15.4 11,14.8 14.8,11.8C16.4,10.6 17.2,8.6 17.4,6.4L21.2,4.8C21.2,10.2 19.2,14.2 15,15.8C11,17.3 7,17.7 2.8,19.4Z" fill="${f}"/>
-      <ellipse cx="19.3" cy="5.6" rx="2" ry="0.8" transform="rotate(-23 19.3 5.6)"/>
-      <path d="M13.2,12.8L14.4,16.2M9.6,14.6L10.3,17.2"/>`,
+    idea: 'שופר של איל, מהקצה הכהה אל הפה הבהיר',
+    draw: (uid) => `
+      <defs><linearGradient id="${uid}" x1="6" y1="42" x2="42" y2="9" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="${c('wood2')}"/><stop offset="0.55" stop-color="${c('wood')}"/><stop offset="1" stop-color="${c('horn')}"/>
+      </linearGradient></defs>
+      <path d="M5.5,42C9.5,31.5 19,30.6 27.4,25.4C33.6,21.6 36.6,15.6 37.6,7.6L44.6,10.2C44,20.2 40,27.6 32.2,31.8C23.8,36.2 13,35 7.6,43.6Z" fill="url(#${uid})"/>
+      <ellipse cx="41.1" cy="8.9" rx="3.7" ry="1.7" transform="rotate(20 41.1 8.9)" fill="${c('wood2')}"/>
+      <path d="M29,25.2Q31.6,28.6 32.2,31.6M21,29.2Q23,31.8 23.4,34.6M13.6,33.4Q15,35.4 15.2,37.6" stroke="${c('wood2')}" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.6"/>`,
   },
   {
     id: 'moon',
     he: 'קידוש לבנה',
-    idea: 'ירח מתמלא וכוכבים',
-    draw: (f) => `
-      <path d="M13.5,3.5A8.5,8.5 0 1 0 20.5,17A7,7 0 0 1 13.5,3.5Z" fill="${f}"/>
-      <path d="M6,3L6.5,4.5L8,5L6.5,5.5L6,7L5.5,5.5L4,5L5.5,4.5Z"/>
-      <path d="M19.5,8.4L19.8,9.2L20.6,9.5L19.8,9.8L19.5,10.6L19.2,9.8L18.4,9.5L19.2,9.2Z"/>`,
+    idea: 'ירח מוזהב בשמי לילה עם כוכבים',
+    draw: () => `
+      <circle cx="24" cy="24" r="20" fill="${c('ink')}"/>
+      ${crescent(22, 25, 12, 28, 20, 10.6, c('gold'))}
+      ${star(34, 13, 2.6, c('white'))}
+      ${star(37.5, 26, 1.6, c('white'))}
+      ${star(13, 13, 1.4, c('white'))}`,
   },
   {
     id: 'chok',
     he: 'חק לישראל',
-    idea: 'ספר לימוד פתוח עם סימנייה',
-    draw: (f) => `
-      <path d="M3,5.5Q7.5,4 12,6Q16.5,4 21,5.5V18.5Q16.5,17 12,19Q7.5,17 3,18.5Z" fill="${f}"/>
-      <path d="M12,6V19"/>
-      <path d="M5.6,9.4H9.6M5.6,12.4H9.6M14.4,9.4H18.4M14.4,12.4H18.4"/>
-      <path d="M15.6,17.7V21.4L16.8,20.4L18,21.4V17.4"/>`,
+    idea: 'ספר לימוד פתוח עם סימנייה כתומה',
+    draw: () => `
+      ${openBook(12)}
+      <path d="M31,10.6V25L33.2,22.6L35.4,25V10.2Z" fill="${c('acc')}"/>`,
   },
   {
     id: 'siddur',
     he: 'סידור',
-    idea: 'סידור סגור עם מגן דוד',
-    draw: (f) => `
-      <path d="M5,4.5Q5,3 6.5,3H19V21H6.5Q5,21 5,19.5Z" fill="${f}"/>
-      <path d="M8,3V21"/>
-      <path d="M13.5,8.2L16.1,12.7H10.9Z M13.5,15.2L10.9,10.7H16.1Z"/>`,
+    idea: 'סידור כחול עם מגן דוד מוזהב',
+    draw: () => `
+      <rect x="9" y="8.5" width="27" height="34" rx="2" fill="${c('paper')}" stroke="${c('paper2')}" stroke-width="1"/>
+      <rect x="12" y="5.5" width="27" height="35.5" rx="3" fill="${c('ink')}"/>
+      <rect x="34" y="5.5" width="5" height="35.5" rx="2.2" fill="${c('ink3')}"/>
+      <rect x="15" y="8.6" width="16" height="29.2" rx="1.4" stroke="${c('gold2')}" stroke-width="1" fill="none"/>
+      <path d="M23,16.4L29.24,27.2H16.76Z M23,30.8L16.76,20H29.24Z" stroke="${c('gold')}" stroke-width="1.8" stroke-linejoin="round" fill="none"/>`,
   },
   {
     id: 'tehillim',
     he: 'תהילים',
-    idea: 'כינור של דוד המלך',
-    draw: (f) => `
-      <path d="M6,20V5Q6,3.4 7.6,3.9Q14.2,6.2 18,13Q19.6,16.2 18,19.2Z" fill="${f}"/>
-      <path d="M9,5V19.7M12,6.6V19.5M15,9.3V19.3"/>`,
+    idea: 'כינור מוזהב של דוד המלך',
+    draw: () => `
+      <path d="M12,10C21,10 31,17 39.5,34" stroke="${c('gold')}" stroke-width="4.2" stroke-linecap="round" fill="none"/>
+      <path d="M12,41.5L39.5,34" stroke="${c('gold2')}" stroke-width="5" stroke-linecap="round"/>
+      <g stroke="${c('line2')}" stroke-width="1.1" stroke-linecap="round">
+        <path d="M16.5,10.8V40.3M21.5,12.4V38.9M26.5,15.2V37.6M31.5,19.6V36.2M35.8,25.4V35"/>
+      </g>
+      <rect x="8.4" y="8" width="5.6" height="35.5" rx="2.8" fill="${c('gold2')}"/>
+      <circle cx="11.2" cy="7.4" r="3" fill="${c('gold')}"/>`,
   },
   {
     id: 'meals',
     he: 'סעודות וברכת המזון',
-    idea: 'חלה קלועה',
-    draw: (f) => `
-      <path d="M3,14.5Q3,10 7.6,10.6Q12,8.4 16.4,10.6Q21,10 21,14.5Q21,18 12,18Q3,18 3,14.5Z" fill="${f}"/>
-      <path d="M7.4,10.9Q8.8,14.2 7.6,17.7M12,9.7Q13.6,13.6 12,18M16.6,10.9Q17.6,14.2 16.4,17.7"/>
-      <path d="M2.5,20.5H21.5"/>`,
+    idea: 'חלה קלועה על קרש',
+    draw: () => `
+      <rect x="3.5" y="35.5" width="41" height="5.5" rx="2.75" fill="${c('wood')}"/>
+      <ellipse cx="24" cy="29" rx="19" ry="7.6" fill="${c('gold2')}"/>
+      ${[[11.5, 28, -28], [19.2, 25.6, -28], [27.4, 25.6, 28], [35.6, 28, 28]].map(([x, y, a]) => `<ellipse cx="${x}" cy="${y}" rx="5.4" ry="7.4" transform="rotate(${a} ${x} ${y})" fill="${c('gold')}"/>`).join('')}
+      ${[[10.4, 25.4], [18.4, 22.4], [26.4, 22.4], [34.4, 25.4]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="2" ry="1.2" fill="${c('white')}" opacity="0.45"/>`).join('')}`,
   },
   {
     id: 'general',
     he: 'תפילות כלליות',
-    idea: 'ספר תורה עם עמודי העץ',
-    draw: (f) => `
-      <path d="M6.5,6H17.5V18H6.5Z" fill="${f}"/>
-      <rect x="3.5" y="5" width="3" height="14" rx="1.5" fill="${f}"/>
-      <rect x="17.5" y="5" width="3" height="14" rx="1.5" fill="${f}"/>
-      <path d="M5,5V2.6M5,19V21.4M19,5V2.6M19,19V21.4"/>
-      <path d="M9.2,9.5H14.8M9.2,12H14.8M9.2,14.5H14.8"/>`,
+    idea: 'ספר תורה עם עצי חיים וכתרים',
+    draw: () => `
+      <rect x="12" y="9" width="24" height="30" fill="${c('paper')}"/>
+      ${[13.4, 17, 20.6, 24.2, 27.8, 31.4, 35].map((y) => `<path d="M16,${y}H22.6M25.4,${y}H32" stroke="${c('line')}" stroke-width="1.3" stroke-linecap="round"/>`).join('')}
+      ${[10, 38].map((x) => `
+        <rect x="${x - 1.2}" y="2.5" width="2.4" height="6" fill="${c('wood2')}"/>
+        <rect x="${x - 1.2}" y="39.5" width="2.4" height="6" fill="${c('wood2')}"/>
+        <rect x="${x - 4}" y="7" width="8" height="34" rx="4" fill="${c('wood')}"/>
+        <rect x="${x - 2.4}" y="9" width="1.8" height="30" rx="0.9" fill="${c('white')}" opacity="0.3"/>
+        <circle cx="${x}" cy="2.8" r="2.2" fill="${c('gold')}"/>`).join('')}`,
   },
   {
     id: 'occasions',
     he: 'חגים ומועדים',
-    idea: 'רימון',
-    draw: (f) => `
-      <path d="M12,7.2C6.4,7.2 4.6,12 5.5,15.5C6.5,19.2 9.5,20.6 12,20.6C14.5,20.6 17.5,19.2 18.5,15.5C19.4,12 17.6,7.2 12,7.2Z" fill="${f}"/>
-      <path d="M9.4,7.6L8.9,4.2L10.9,5.5L12,3.4L13.1,5.5L15.1,4.2L14.6,7.6"/>
-      <path d="M9.4,15.6Q10.4,17.6 12.4,17.8"/>`,
+    idea: 'רימון עם כתר ועלה',
+    draw: () => `
+      <path d="M31,9Q37.5,4.6 42,8.6Q36.6,13.2 31,9Z" fill="${c('leaf')}"/>
+      <path d="M18,14.5L16.8,6.8L20.6,10L24,5L27.4,10L31.2,6.8L30,14.5Z" fill="${c('wine2')}"/>
+      <circle cx="24" cy="28" r="15.5" fill="${c('wine')}"/>
+      ${crescent(24, 28, 15.5, 19, 23, 15.5, c('wine2'))}
+      <ellipse cx="17.6" cy="21.4" rx="4.2" ry="2.4" transform="rotate(-38 17.6 21.4)" fill="${c('white')}" opacity="0.35"/>`,
   },
   {
     id: 'hilula',
     he: 'הילולות',
-    idea: 'נר נשמה בכוס',
-    draw: (f) => `
-      <path d="M7,9.5H17V19.5Q17,21 15.5,21H8.5Q7,21 7,19.5Z" fill="${f}"/>
-      <path d="M7,12.5H17"/>
-      <path d="M12,10.4V8.2"/>
-      <path d="M12,2.6Q14.4,5.6 12,7.4Q9.6,5.6 12,2.6Z" fill="${f}"/>
-      <path d="M12,14.4L13.4,16.8H10.6Z M12,18L10.6,15.6H13.4Z"/>`,
+    idea: 'נר נשמה דולק בכוס זכוכית',
+    draw: () => `
+      <circle cx="24" cy="11" r="8" fill="${c('flame')}" opacity="0.25"/>
+      ${flame(24, 3.6, 13)}
+      <path d="M12.5,19H35.5L33.8,42.4Q24,45 14.2,42.4Z" fill="${c('metal')}" opacity="0.65" stroke="${c('metal2')}" stroke-width="1.2"/>
+      <path d="M14,26H34L33.2,41.4Q24,43.6 14.8,41.4Z" fill="${c('white')}"/>
+      <path d="M24,16.6V26" stroke="${c('ink')}" stroke-width="1.3" stroke-linecap="round"/>
+      <rect x="16" y="21" width="2.2" height="18.6" rx="1.1" fill="${c('white')}" opacity="0.8"/>`,
   },
 ];
