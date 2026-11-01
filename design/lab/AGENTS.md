@@ -39,6 +39,7 @@
   - `onPointerDown`, `onPointerMove`, `onPointerUp` and the range input's `onChange` work.
 - Agents who test boards in headless Edge close every browser they start. Leftover instances once reached about 480 processes and dropped several agents' connections. To clean up, filter with WQL on the temporary profile (`CommandLine LIKE '%user-data-dir=%Temp%'`).
 - A hidden browser pane never loads lazy iframes: show the pane before checking a gallery page.
+- Never name a page's own attribute `data-theme`: the claude.ai viewer sets `data-theme` on the root element, so a `[data-theme]` selector also catches `<html>`, whose click handler then resets every choice (the palette switch of the 2026-11-01 icon pages broke this way). Use another name, such as `data-palette`, and test a page with `data-theme` already on its root.
 
 ## Verification
 

@@ -70,8 +70,8 @@ figcaption { font-weight: 600; }
     <button type="button" data-pack="lineFill" aria-pressed="true">ד. קווים עם מילוי עדין</button>
   </div>
   <div class="bar" role="group" aria-label="ערכת צבעים"><span>צבעים</span>
-    <button type="button" data-theme="light" aria-pressed="true">זהב (בהיר)</button>
-    <button type="button" data-theme="dark" aria-pressed="false">לילה (כהה)</button>
+    <button type="button" data-palette="light" aria-pressed="true">זהב (בהיר)</button>
+    <button type="button" data-palette="dark" aria-pressed="false">לילה (כהה)</button>
   </div>
 </div>
 <div class="grid" id="grid"></div>
@@ -95,10 +95,10 @@ function render() {
       \${s.icons.map((i) => \`<span class="icon\${pack === 'tonal' ? ' tonal' : ''}" style="--gold:\${i.color};left:\${i.x / 3.9}%;top:\${i.y / 8.44}%;width:\${i.size / 3.9}%;height:\${i.shown / 8.44}%">\${draw(i.id, i.color)}</span>\`).join('')}
     </div><figcaption>\${s.title}</figcaption></figure>\`).join('');
   document.querySelectorAll('[data-pack]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.pack === pack)));
-  document.querySelectorAll('[data-theme]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.theme === theme)));
+  document.querySelectorAll('[data-palette]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.palette === theme)));
 }
 document.querySelectorAll('[data-pack]').forEach((b) => (b.onclick = () => { pack = b.dataset.pack; render(); }));
-document.querySelectorAll('[data-theme]').forEach((b) => (b.onclick = () => { theme = b.dataset.theme; render(); }));
+document.querySelectorAll('[data-palette]').forEach((b) => (b.onclick = () => { theme = b.dataset.palette; render(); }));
 render();
 </script></body></html>
 `,

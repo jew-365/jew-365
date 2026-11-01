@@ -101,8 +101,8 @@ button:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 2px;
       <button type="button" data-style="lineFill" aria-pressed="false">ד. קווים עם מילוי עדין</button>
     </div>
     <div class="bar" role="group" aria-label="צבעים"><span>צבעים</span>
-      <button type="button" data-theme="light" aria-pressed="true">זהב (בהיר)</button>
-      <button type="button" data-theme="dark" aria-pressed="false">לילה (כהה)</button>
+      <button type="button" data-palette="light" aria-pressed="true">זהב (בהיר)</button>
+      <button type="button" data-palette="dark" aria-pressed="false">לילה (כהה)</button>
     </div>
   </div>
 
@@ -178,10 +178,10 @@ function render() {
   document.querySelectorAll('[data-style]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.style === style)));
 }
 document.querySelectorAll('[data-style]').forEach((b) => (b.onclick = () => { style = b.dataset.style; render(); }));
-document.querySelectorAll('[data-theme]').forEach((b) => (b.onclick = () => {
-  const dark = b.dataset.theme === 'dark';
+document.querySelectorAll('[data-palette]').forEach((b) => (b.onclick = () => {
+  const dark = b.dataset.palette === 'dark';
   document.documentElement.classList.toggle('app-dark', dark);
-  document.querySelectorAll('[data-theme]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  document.querySelectorAll('[data-palette]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
 }));
 render();
 </script>
