@@ -6,11 +6,13 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChokAddonCard } from '@/components/ChokAddonCard';
+import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { IconTile } from '@/components/IconTile';
 import { MitzvahIcon, iconFor } from '@/components/MitzvahIcon';
 import { ListRow } from '@/components/ListRow';
 import { ReminderEditor } from '@/components/ReminderEditor';
+import { nagEffect, nagModeOf } from '@/components/ReminderNagFields';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SelichotAddonCard } from '@/components/SelichotAddonCard';
 import { CHOK_TEXT_ID } from '@/data/chok';
@@ -48,6 +50,7 @@ import { windowClosed } from '@/utils/lateMarks';
 import { mitzvahName, reminderLabel } from '@/utils/mitzvahName';
 import { quietHoursOf } from '@/utils/quietHours';
 import { timingSummary } from '@/utils/reminderTiming';
+import { NAG_LEVEL_IDS, nagFor, remindersPerDay } from '@/utils/nagging';
 import { buildTriggerTime, nextReminderAt } from '@/services/NotificationScheduler';
 import { useI18n } from '@/i18n';
 
@@ -71,6 +74,7 @@ export default function MitzvahDetailScreen() {
   const inIsrael = useUserStore((s) => s.inIsrael);
   const quietBefore = useUserStore((s) => s.quietBefore);
   const quietAfter = useUserStore((s) => s.quietAfter);
+  const appNagLevel = useUserStore((s) => s.nagLevel);
   const completions = useCompletionsStore((s) => s.completions);
   const skipped = useCompletionsStore((s) => s.skipped);
   const late = useCompletionsStore((s) => s.late);
@@ -80,6 +84,8 @@ export default function MitzvahDetailScreen() {
   const active = useMitzvotStore(selectActive(params.id));
   const setReminders = useMitzvotStore((s) => s.setReminders);
   const resetToDefault = useMitzvotStore((s) => s.resetToDefault);
+  const setNagLevel = useMitzvotStore((s) => s.setNagLevel);
+  const [levelSheetVisible, setLevelSheetVisible] = useState(false);
   const [editorVisible, setEditorVisible] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
@@ -100,6 +106,8 @@ export default function MitzvahDetailScreen() {
     [nusach, ksSofZman, inIsrael],
   );
   const quietHours = useMemo(() => quietHoursOf(quietBefore, quietAfter), [quietBefore, quietAfter]);
+  // The mitzvah's own nagging level, else the app's: every preview on the screen counts its repeats.
+  const nagLevel = active.nagLevel ?? appNagLevel;
   const window = useMemo(
     () => (mitzvah && !addonMissing ? currentOrNextWindow(mitzvah, location, settings) : null),
     [mitzvah, addonMissing, location, settings],
@@ -122,9 +130,10 @@ export default function MitzvahDetailScreen() {
             completions,
             skipped,
             quietHours,
+            nagLevel,
           })
         : null,
-    [mitzvah, showNext, reminders, location, settings, completions, skipped, quietHours],
+    [mitzvah, showNext, reminders, location, settings, completions, skipped, quietHours, nagLevel],
   );
   // The mark of the window home shows today: offered once it has opened, and asked about once it has closed.
   const todayMark = useMemo(() => {
@@ -148,7 +157,7 @@ export default function MitzvahDetailScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ticked re-runs the memo on purpose, it reads the clock itself
   }, [mitzvah, addonMissing, active.enabled, active.enabledAt, location, settings, completions, skipped, late, ticked]);
   const reminderRows = useMemo(() => {
-    const scope = { now: new Date(), location, settings, completions, skipped, quietHours };
+    const scope = { now: new Date(), location, settings, completions, skipped, quietHours, nagLevel };
     return reminders
       .map((reminder, index) => ({
         reminder,
@@ -157,7 +166,7 @@ export default function MitzvahDetailScreen() {
         order: window ? buildTriggerTime(reminder, window, location).getTime() : index,
       }))
       .sort((a, b) => a.order - b.order || a.index - b.index);
-  }, [mitzvah, showNext, reminders, window, location, settings, completions, skipped, quietHours]);
+  }, [mitzvah, showNext, reminders, window, location, settings, completions, skipped, quietHours, nagLevel]);
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
 
@@ -234,6 +243,22 @@ export default function MitzvahDetailScreen() {
     } else if (anytimeTextId) open({ id: anytimeTextId });
   };
   const pendingDeleteReminder = deleteIndex === null ? null : (reminders[deleteIndex] ?? null);
+  const perDay = (level: typeof nagLevel) =>
+    t('detail.nagLevelPerDay', { n: remindersPerDay(mitzvah.id, reminders, level) });
+  const appLevelLabel = t('detail.nagLevelApp', { name: t(`nag.level.${appNagLevel}.name`), level: appNagLevel });
+  const levelLabel = (level: typeof nagLevel) => t('nag.level.title', { name: t(`nag.level.${level}.name`), level });
+  const chooseNagLevel = (level: typeof nagLevel | null) => {
+    setNagLevel(mitzvah.id, level);
+    setLevelSheetVisible(false);
+  };
+  // A row's third line: its own nag, "no nag" when it opts out of a level that would nag, or the level's.
+  const nagLine = (reminder: Reminder): string | null => {
+    const mode = nagModeOf(reminder.nag);
+    const nag = nagFor(mitzvah.id, reminder, nagLevel);
+    if (mode === 'custom') return t('nag.row.custom', { effect: nagEffect(nag, t) });
+    if (mode === 'none') return nagFor(mitzvah.id, { anchor: reminder.anchor }, nagLevel) ? t('nag.row.none') : null;
+    return nag ? t('nag.row.fromLevel', { effect: nagEffect(nag, t) }) : null;
+  };
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
@@ -396,6 +421,19 @@ export default function MitzvahDetailScreen() {
         </Card>
 
         {!awaitingAddon ? (
+          <Card>
+            <ListRow
+              icon="bell"
+              title={t('detail.nagLevel')}
+              caption={`${active.nagLevel ? levelLabel(active.nagLevel) : appLevelLabel} · ${perDay(nagLevel)}`}
+              chevron
+              onPress={() => setLevelSheetVisible(true)}
+              accessibilityLabel={t('detail.nagLevel')}
+            />
+          </Card>
+        ) : null}
+
+        {!awaitingAddon ? (
           <Card padded>
             <Text style={[typography.subheading, { color: colors.text, marginBottom: spacing.md }]}>
               {t('detail.reminders')}
@@ -416,6 +454,14 @@ export default function MitzvahDetailScreen() {
                   <Text style={[typography.micro, { color: colors.textMuted, marginTop: scaled(2) }]}>
                     {timingSummary(reminder, t)}
                   </Text>
+                  {nagLine(reminder) ? (
+                    <Text
+                      testID={`reminder-nag-${index}`}
+                      style={[typography.micro, { color: colors.textSub, marginTop: scaled(2) }]}
+                    >
+                      {nagLine(reminder)}
+                    </Text>
+                  ) : null}
                   {next ? (
                     <Text style={[typography.micro, { color: colors.goldText, marginTop: scaled(2) }]}>
                       {t('detail.reminderNextAt', { time: fireTimeText(next, location.tz) })}
@@ -477,12 +523,35 @@ export default function MitzvahDetailScreen() {
         location={location}
         settings={settings}
         mitzvahName={name}
+        nagLevel={nagLevel}
         onClose={() => {
           setEditorVisible(false);
           setEditIndex(null);
         }}
         onSave={saveReminder}
       />
+      <BottomSheet
+        visible={levelSheetVisible}
+        title={t('detail.nagLevel')}
+        caption={name}
+        onClose={() => setLevelSheetVisible(false)}
+      >
+        <SheetAction
+          label={appLevelLabel}
+          caption={perDay(appNagLevel)}
+          selected={!active.nagLevel}
+          onPress={() => chooseNagLevel(null)}
+        />
+        {NAG_LEVEL_IDS.map((level) => (
+          <SheetAction
+            key={level}
+            label={levelLabel(level)}
+            caption={`${t(`nag.level.${level}.desc`)} · ${perDay(level)}`}
+            selected={active.nagLevel === level}
+            onPress={() => chooseNagLevel(level)}
+          />
+        ))}
+      </BottomSheet>
       <ConfirmDialog
         visible={deleteIndex !== null}
         title={t('reminder.deleteConfirmTitle')}

@@ -120,7 +120,13 @@ function setClock(typed: string) {
   typeTime(typed);
 }
 
-const radioStates = () => screen.getAllByRole('radio').map((radio) => radio.props.accessibilityState.selected);
+// The timing radios alone: the nag block below them has radios of its own.
+const NAG_MODE_NAMES = (['level', 'none', 'custom'] as const).map((mode) => t(`nag.mode.${mode}`));
+const timingRadios = () => {
+  const nagRadios = new Set(NAG_MODE_NAMES.map((name) => screen.getByRole('radio', { name })));
+  return screen.getAllByRole('radio').filter((radio) => !nagRadios.has(radio));
+};
+const radioStates = () => timingRadios().map((radio) => radio.props.accessibilityState.selected);
 
 describe('ReminderEditor', () => {
   beforeEach(() => {
@@ -156,14 +162,14 @@ describe('ReminderEditor', () => {
 
     it('offers the four kinds for a registry mitzvah and no follow-up', () => {
       renderEditor({ mitzvah: SHACHARIT });
-      expect(screen.getAllByRole('radio')).toHaveLength(4);
+      expect(timingRadios()).toHaveLength(4);
       expect(screen.queryByRole('radio', { name: t('reminder.timing.followUp') })).toBeNull();
       expect(screen.queryByRole('radio', { name: t('reminder.timing.blockExit') })).toBeNull();
     });
 
     it('adds the follow-up for a custom mitzvah', () => {
       renderEditor({ mitzvah: CUSTOM });
-      expect(screen.getAllByRole('radio')).toHaveLength(5);
+      expect(timingRadios()).toHaveLength(5);
       expect(timingOption('clock')).toBeOnTheScreen();
       expect(timingOption('followUp')).toBeOnTheScreen();
       expect(screen.queryByRole('radio', { name: t('reminder.timing.blockExit') })).toBeNull();
@@ -171,7 +177,7 @@ describe('ReminderEditor', () => {
 
     it('adds the exit of Shabbat and Yom Tov, and no follow-up, for a multi-day mitzvah', () => {
       renderEditor({ mitzvah: LEVANA });
-      expect(screen.getAllByRole('radio')).toHaveLength(5);
+      expect(timingRadios()).toHaveLength(5);
       expect(timingOption('blockExit')).toBeOnTheScreen();
       expect(screen.queryByRole('radio', { name: t('reminder.timing.followUp') })).toBeNull();
     });
@@ -1076,5 +1082,105 @@ describe('ReminderEditor', () => {
       save();
       expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ anchor: 'start', offsetMin: 30 }));
     });
+  });
+});
+
+describe('ReminderEditor › the nag', () => {
+  const nagMode = (mode: 'level' | 'none' | 'custom') =>
+    fireEvent.press(screen.getByRole('radio', { name: t(`nag.mode.${mode}`) }));
+  const chip = (label: string) => screen.getByRole('button', { name: label });
+  const savedReminder = (onSave: jest.Mock) => onSave.mock.calls[0][0] as Reminder;
+
+  beforeEach(() => {
+    useUserStore.getState().reset();
+    jest.useFakeTimers({ now: WEDNESDAY, doNotFake: [...ONLY_DATE] });
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  it('follows the level by default, names its effect and saves no nag', () => {
+    const { onSave } = renderEditor({ mitzvah: SHACHARIT, nagLevel: 3 });
+    expect(screen.getByRole('radio', { name: t('nag.mode.level') }).props.accessibilityState.selected).toBe(true);
+    expect(
+      screen.getByText(
+        t('nag.mode.levelCaption', {
+          name: t('nag.level.3.name'),
+          level: 3,
+          effect: t('nag.effect', { count: 2, every: 5, placement: t('nag.effect.placement.after') }),
+        }),
+      ),
+    ).toBeOnTheScreen();
+    save();
+    expect('nag' in savedReminder(onSave)).toBe(false);
+  });
+
+  it('saves none as null', () => {
+    const { onSave } = renderEditor({ mitzvah: SHACHARIT, nagLevel: 4 });
+    nagMode('none');
+    expect(screen.getByText(t('nag.mode.noneCaption'))).toBeOnTheScreen();
+    save();
+    expect(savedReminder(onSave).nag).toBeNull();
+  });
+
+  it('saves a custom nag, previews its times and flags the one after the end', () => {
+    const { onSave } = renderEditor({ mitzvah: CUSTOM });
+    setMinutes('fromStart', 50);
+    nagMode('custom');
+    fireEvent.press(chip('3'));
+    fireEvent.press(screen.getByRole('radio', { name: t('nag.placement.after') }));
+    expect(screen.getByText(t('nag.preview', { times: '09:55 · 10:00' }))).toBeOnTheScreen();
+    expect(screen.getByText(t('nag.previewDropped', { time: '10:05' }))).toBeOnTheScreen();
+    save();
+    expect(savedReminder(onSave).nag).toEqual({ count: 3, everyMin: 5, placement: 'after' });
+  });
+
+  it('offers three placements on a start or set-time reminder', () => {
+    renderEditor({ mitzvah: SHACHARIT });
+    nagMode('custom');
+    for (const placement of ['before', 'after', 'around'] as const) {
+      expect(screen.getByRole('radio', { name: t(`nag.placement.${placement}`) })).toBeOnTheScreen();
+    }
+    setClock('08:00');
+    expect(screen.getByRole('radio', { name: t('nag.placement.around') })).toBeOnTheScreen();
+  });
+
+  it('offers only before on a before-the-end reminder and on the bedtime Shema', () => {
+    const { onSave } = renderEditor({ mitzvah: SHACHARIT });
+    setMinutes('beforeEnd', 30);
+    nagMode('custom');
+    expect(screen.getByText(t('nag.placement.beforeOnly'))).toBeOnTheScreen();
+    expect(screen.queryByRole('radio', { name: t('nag.placement.after') })).toBeNull();
+    save();
+    expect(savedReminder(onSave).nag?.placement).toBe('before');
+    screen.unmount();
+
+    renderEditor({
+      mitzvah: findMitzvah('krias_shma_al_hamita')!,
+      initialValue: findMitzvah('krias_shma_al_hamita')!.defaultReminders[0],
+    });
+    nagMode('custom');
+    expect(screen.getByText(t('nag.placement.beforeOnly'))).toBeOnTheScreen();
+  });
+
+  it('still saves a nag whose every repeat falls after the end, with the warning', () => {
+    const { onSave } = renderEditor({ mitzvah: CUSTOM });
+    setMinutes('fromStart', 60);
+    nagMode('custom');
+    fireEvent.press(screen.getByRole('radio', { name: t('nag.placement.after') }));
+    expect(screen.getByText(t('nag.previewAllDropped'))).toBeOnTheScreen();
+    save();
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(savedReminder(onSave).nag).toEqual({ count: 2, everyMin: 5, placement: 'after' });
+  });
+
+  it('seeds the fields from a stored nag', () => {
+    renderEditor({
+      mitzvah: SHACHARIT,
+      initialValue: { ...SHACHARIT.defaultReminders[0], nag: { count: 4, everyMin: 10, placement: 'around' } },
+    });
+    expect(screen.getByRole('radio', { name: t('nag.mode.custom') }).props.accessibilityState.selected).toBe(true);
+    expect(chip('4').props.accessibilityState.selected).toBe(true);
+    expect(chip(t('nag.every.option', { n: 10 })).props.accessibilityState.selected).toBe(true);
+    expect(screen.getByRole('radio', { name: t('nag.placement.around') }).props.accessibilityState.selected).toBe(true);
   });
 });

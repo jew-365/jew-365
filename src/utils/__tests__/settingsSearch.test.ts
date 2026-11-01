@@ -101,6 +101,11 @@ const SETTING_QUERIES: [string, string][] = [
   ['הרשאות', 'permissions'],
   ['battery', 'permissions'],
   ['דוח שבועי', 'weeklyReport'],
+  ['נודניק', 'nagLevel'],
+  ['רמת נודניקיות', 'nagLevel'],
+  ['תזכורות חוזרות', 'nagLevel'],
+  ['nag', 'nagLevel'],
+  ['nagging', 'nagLevel'],
   ['שעות שקטות', 'quietBefore'],
   ['quiet hours', 'quietBefore'],
   ['לא להפריע', 'quietBefore'],
@@ -152,6 +157,7 @@ describe('searchSettings', () => {
     expect(top('התראת')).toBe('notifications');
     expect(top('נסוח')).toBe('nusach');
     expect(top('notifcations')).toBe('notifications');
+    expect(top('נודינק')).toBe('nagLevel');
   });
 
   it('matches a word with a Hebrew prefix letter', () => {

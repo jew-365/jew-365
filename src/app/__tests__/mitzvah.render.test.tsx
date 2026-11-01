@@ -485,6 +485,17 @@ describe('Mitzvah screen', () => {
 
   describe('the reminder editor', () => {
     const CUSTOM_ID = 'custom_1800000000000_abc';
+    // The editor's timing radios alone: its nag block has radios of its own.
+    const timingRadios = () => {
+      const nagRadios = new Set(
+        (['level', 'none', 'custom'] as const).map((mode) =>
+          editor().getByRole('radio', { name: t(`nag.mode.${mode}`) }),
+        ),
+      );
+      return editor()
+        .getAllByRole('radio')
+        .filter((radio) => !nagRadios.has(radio));
+    };
     const editor = () => within(screen.UNSAFE_getAllByType(Modal).find((modal) => modal.props.visible)!);
     const openEditor = () => fireEvent.press(screen.getByText(t('detail.addReminder')));
     const timingRadio = (timing: string) => editor().getByRole('radio', { name: t(`reminder.timing.${timing}`) });
@@ -515,7 +526,7 @@ describe('Mitzvah screen', () => {
       renderMitzvah({ id: 'shacharit' });
       openEditor();
 
-      expect(editor().getAllByRole('radio')).toHaveLength(4);
+      expect(timingRadios()).toHaveLength(4);
       (['beforeStart', 'fromStart', 'beforeEnd', 'clock'] as const).forEach((timing) => {
         expect(timingRadio(timing)).toBeOnTheScreen();
       });
@@ -528,7 +539,7 @@ describe('Mitzvah screen', () => {
       renderMitzvah({ id: CUSTOM_ID });
       openEditor();
 
-      expect(editor().getAllByRole('radio')).toHaveLength(5);
+      expect(timingRadios()).toHaveLength(5);
       expect(timingRadio('followUp')).toBeOnTheScreen();
     });
 
@@ -536,7 +547,7 @@ describe('Mitzvah screen', () => {
       renderMitzvah({ id: 'kiddush_levana' });
       openEditor();
 
-      expect(editor().getAllByRole('radio')).toHaveLength(5);
+      expect(timingRadios()).toHaveLength(5);
       expect(timingRadio('blockExit')).toBeOnTheScreen();
       expect(editor().queryByRole('radio', { name: t('reminder.timing.followUp') })).toBeNull();
     });

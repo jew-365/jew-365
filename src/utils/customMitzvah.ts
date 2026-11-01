@@ -5,6 +5,7 @@ import { formatDate } from '@/i18n';
 import { TIME_PATTERN, minutesToTime, timeToMinutes } from '@/utils/clock';
 import { mitzvahName } from '@/utils/mitzvahName';
 import { FOLLOW_UP_MAX_MIN, HEADS_UP_MAX_MIN } from '@/utils/skipRules';
+import { nagFor, repeatOffsets, type NagClockEntry, type NagLevel } from '@/utils/nagging';
 import {
   ContentBlock,
   CustomMitzvah,
@@ -169,11 +170,14 @@ export function scheduleDateLabel(key: string, language: 'he' | 'en'): string {
   return formatDate(DateTime.fromISO(key), SCHEDULE_DATE_PATTERN[language], language);
 }
 
-export function reminderClock(
+// Where a reminder of these hours fires, in minutes from the start, and the range a trigger of its
+// anchor may take: from `HEADS_UP_MAX_MIN` before the start through the end, or for a follow-up the
+// `FOLLOW_UP_MAX_MIN` minutes after the end.
+function reminderMinutes(
   startHHMM: string,
   endHHMM: string,
   reminder: Pick<Reminder, 'anchor' | 'offsetMin'>,
-): string | null {
+): { start: number; fromStart: number; earliest: number; latest: number } | null {
   if (!TIME_PATTERN.test(startHHMM) || !TIME_PATTERN.test(endHHMM)) return null;
   const start = timeToMinutes(startHHMM);
   const duration = windowMinutes(startHHMM, endHHMM);
@@ -183,8 +187,44 @@ export function reminderClock(
       : (reminder.anchor === 'start' ? 0 : duration) + reminder.offsetMin;
   const [earliest, latest] =
     reminder.anchor === 'followUp' ? [duration + 1, duration + FOLLOW_UP_MAX_MIN] : [-HEADS_UP_MAX_MIN, duration];
-  if (!(fromStart >= earliest && fromStart <= latest)) return null;
-  return minutesToTime((((start + fromStart) % DAY_MIN) + DAY_MIN) % DAY_MIN);
+  return { start, fromStart, earliest, latest };
+}
+
+const clockAt = (start: number, fromStart: number) =>
+  minutesToTime((((start + fromStart) % DAY_MIN) + DAY_MIN) % DAY_MIN);
+
+export function reminderClock(
+  startHHMM: string,
+  endHHMM: string,
+  reminder: Pick<Reminder, 'anchor' | 'offsetMin'>,
+): string | null {
+  const at = reminderMinutes(startHHMM, endHHMM, reminder);
+  if (!at || !(at.fromStart >= at.earliest && at.fromStart <= at.latest)) return null;
+  return clockAt(at.start, at.fromStart);
+}
+
+// The repeats of a custom reminder's nag as clocks, for the custom form, which may hold a mitzvah not
+// saved yet: the same bounds as `reminderClock()`, a repeat outside them flagged as not sent. A custom
+// mitzvah has no before-only exception, so the placements follow the anchor alone. Empty when the
+// reminder itself falls outside the hours or has no nag at `level`.
+export function nagClockPreview(
+  startHHMM: string,
+  endHHMM: string,
+  reminder: Pick<Reminder, 'anchor' | 'offsetMin' | 'nag'>,
+  level: NagLevel | undefined,
+): NagClockEntry[] {
+  const at = reminderMinutes(startHHMM, endHHMM, reminder);
+  if (!at || !(at.fromStart >= at.earliest && at.fromStart <= at.latest)) return [];
+  const nag = nagFor('', reminder, level);
+  if (!nag) return [];
+  return repeatOffsets(nag).map((offset) => {
+    const minute = at.fromStart + offset;
+    return {
+      time: clockAt(at.start, minute),
+      fires: minute >= at.earliest && minute <= at.latest,
+      afterEnd: minute > at.latest,
+    };
+  });
 }
 
 function clockFromStart(minutesAfterMidnight: number, start: number, duration: number): number {

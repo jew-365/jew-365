@@ -10,6 +10,7 @@ import { ChipRow } from '@/components/ChipRow';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { ListRow } from '@/components/ListRow';
 import { OptionSelect } from '@/components/OptionSelect';
+import { ReminderNagFields } from '@/components/ReminderNagFields';
 import { ReminderTimingFields } from '@/components/ReminderTimingFields';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
@@ -36,6 +37,7 @@ import {
   categoryForWindow,
   cleanContentBlocks,
   currentSchedule,
+  nagClockPreview,
   reminderClock,
   scheduleDateLabel,
   scheduleOnSave,
@@ -57,10 +59,13 @@ import {
   withTiming,
 } from '@/utils/reminderTiming';
 import { FOLLOW_UP_MAX_MIN, HEADS_UP_MAX_MIN } from '@/utils/skipRules';
-import { CustomSchedule, Nusach, Reminder, SkipContext, Weekday } from '@/types/mitzvah';
+import { NAG_LEVEL_IDS, isNagLevel, nagFor } from '@/utils/nagging';
+import { CustomSchedule, NagLevel, Nusach, Reminder, SkipContext, Weekday } from '@/types/mitzvah';
 import { MitzvahTextId, SiddurTextId } from '@/types/siddur';
 
 type ScheduleMode = CustomSchedule['mode'];
+// The mitzvah's own nagging level, or `app` to follow the app's.
+type NagChoice = 'app' | `${NagLevel}`;
 
 const CONTENT_TYPES: DraftBlock['type'][] = ['text', 'blessing', 'link', 'siddur'];
 const REMINDER_TIMINGS = timingKinds({ custom: true, multiDay: false });
@@ -139,6 +144,24 @@ export default function CustomMitzvahScreen() {
   );
   const [reminders, setReminders] = useState<Reminder[]>(initialReminders);
   const [timings, setTimings] = useState<ReminderTiming[]>(() => initialReminders.map(timingOf));
+  const appNagLevel = useUserStore((s) => s.nagLevel);
+  const [nagChoice, setNagChoice] = useState<NagChoice>(() => {
+    const own = existing ? useMitzvotStore.getState().activeMitzvot[existing.id]?.nagLevel : undefined;
+    return isNagLevel(own) ? `${own}` : 'app';
+  });
+  const nagLevel: NagLevel = nagChoice === 'app' ? appNagLevel : (Number(nagChoice) as NagLevel);
+  const nagOptions = [
+    {
+      value: 'app' as NagChoice,
+      title: t('detail.nagLevelApp', { name: t(`nag.level.${appNagLevel}.name`), level: appNagLevel }),
+      caption: t(`nag.level.${appNagLevel}.desc`),
+    },
+    ...NAG_LEVEL_IDS.map((level) => ({
+      value: `${level}` as NagChoice,
+      title: t('nag.level.title', { name: t(`nag.level.${level}.name`), level }),
+      caption: t(`nag.level.${level}.desc`),
+    })),
+  ];
   const [contentBlocks, setContentBlocks] = useState<DraftBlock[]>(existing?.contentBlocks ?? []);
   const [pickingBlockIndex, setPickingBlockIndex] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -230,9 +253,11 @@ export default function CustomMitzvahScreen() {
       setError(t('custom.errors.reminderRequired'));
       return;
     }
+    // An own nag is kept with a placement the reminder's timing allows; `null` and absent as they are.
     const cleanedReminders = reminders.map(({ bodyVariants: _dropped, ...r }) => ({
       ...r,
       label: r.label.trim(),
+      ...(r.nag ? { nag: nagFor(editingId ?? '', r, nagLevel) } : {}),
     }));
     if (cleanedReminders.some((r) => r.anchor !== 'followUp' && !r.label)) {
       setError(t('custom.errors.reminderLabelRequired'));
@@ -253,13 +278,16 @@ export default function CustomMitzvahScreen() {
       reminders: cleanedReminders,
       contentBlocks: cleanContentBlocks(contentBlocks),
     };
+    const ownLevel = nagChoice === 'app' ? null : nagLevel;
     if (editingId && existing) {
       updateCustom(editingId, fields);
       useMitzvotStore.getState().resetToDefault(editingId);
+      useMitzvotStore.getState().setNagLevel(editingId, ownLevel);
     } else {
       const id = makeCustomMitzvahId();
       addCustom({ id, ...fields, createdAt: Date.now() });
       setEnabled(id, true);
+      useMitzvotStore.getState().setNagLevel(id, ownLevel);
     }
     leave();
   };
@@ -279,6 +307,16 @@ export default function CustomMitzvahScreen() {
   };
   const updateReminder = (idx: number, patch: Partial<Reminder>) => {
     setReminders((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+  };
+  // Absent follows the level, so "by the level" drops the key rather than storing `undefined`.
+  const updateNag = (idx: number, nag: Reminder['nag']) => {
+    setReminders((prev) =>
+      prev.map((r, i) => {
+        if (i !== idx) return r;
+        const { nag: _previous, ...rest } = r;
+        return nag === undefined ? rest : { ...rest, nag };
+      }),
+    );
   };
   const changeTiming = (idx: number, next: ReminderTiming) => {
     const current = timings[idx];
@@ -456,6 +494,13 @@ export default function CustomMitzvahScreen() {
         <Text style={[typography.subheading, styles.section, { color: colors.text }]}>{t('custom.reminders')}</Text>
         <Hint text={t('custom.hint.reminders')} style={styles.tightHint} />
         <Affects surfaces={REMINDER_SURFACES} style={styles.headingAffects} />
+        <OptionSelect
+          label={t('custom.nagLevel')}
+          options={nagOptions}
+          value={nagChoice}
+          onChange={setNagChoice}
+          style={styles.nagLevel}
+        />
         {reminders.map((r, idx) => {
           const clock = reminderClock(startTime, endTime, r);
           const timing = timings[idx];
@@ -503,6 +548,15 @@ export default function CustomMitzvahScreen() {
                   {outsideCopy(r, 'custom.reminderOutsideWindow')}
                 </Text>
               ) : null}
+              <ReminderNagFields
+                mitzvahId={editingId ?? ''}
+                anchor={r.anchor}
+                nag={r.nag}
+                level={nagLevel}
+                onChange={(nag) => updateNag(idx, nag)}
+                preview={nagClockPreview(startTime, endTime, r, nagLevel)}
+                style={styles.nagBlock}
+              />
               <Button
                 variant="danger"
                 size="compact"
@@ -677,6 +731,12 @@ export default function CustomMitzvahScreen() {
 }
 
 const styles = StyleSheet.create({
+  nagLevel: {
+    marginBottom: spacing.md,
+  },
+  nagBlock: {
+    marginTop: spacing.md,
+  },
   safe: { flex: 1 },
   content: { padding: spacing.lg, paddingBottom: spacing.xxxl },
   section: { marginTop: spacing.xl },

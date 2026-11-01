@@ -52,7 +52,7 @@ import {
   setTaharahTracking,
   taharahOffered,
 } from '@/stores/taharahOptIn';
-import { useMitzvotStore, type ActiveMitzvahState } from '@/stores/useMitzvotStore';
+import { remindersOf, useMitzvotStore, type ActiveMitzvahState } from '@/stores/useMitzvotStore';
 import { useUserStore, type Gender, type PrayerMode } from '@/stores/useUserStore';
 import { useShallow } from 'zustand/react/shallow';
 import { BRAND } from '@/theme/colors';
@@ -72,6 +72,7 @@ import { TimeField } from '@/components/TimeField';
 import { SettingsSearchBox, SettingsSearchResults, useSettingsSearch } from '@/components/SettingsSearch';
 import { SettingsSection } from '@/components/SettingsSection';
 import { ScrollSpeedStepper } from '@/components/ScrollSpeedStepper';
+import { SegmentedControl } from '@/components/SegmentedControl';
 import { UI_SCALES, rescaled, scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -79,7 +80,9 @@ import { useI18n } from '@/i18n';
 import { CITIES, cityOf, getLocationName } from '@/data/cities';
 import type { ChokThuNightDay } from '@/types/chok';
 import { findMitzvah } from '@/data/mitzvot';
-import { Nusach } from '@/types/mitzvah';
+import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
+import { NagLevel, Nusach } from '@/types/mitzvah';
+import { NAG_LEVEL_IDS, countsInDayEstimate, remindersPerDay } from '@/utils/nagging';
 import type { SiddurVoice } from '@/types/siddur';
 import { minutesToTime, timeToMinutes } from '@/utils/clock';
 import { quietBoundsValid, type QuietBound } from '@/utils/quietHours';
@@ -105,6 +108,19 @@ const selectEnabledCount =
     Object.entries(state.activeMitzvot).filter(
       ([id, active]) => active.enabled && (findMitzvah(id)?.nuschaotSupported.includes(nusach) ?? true),
     ).length;
+
+// About how many notifications a day the enabled mitzvot send: each everyday mitzvah's reminders once
+// plus their repeats, at its own nagging level or the app's.
+const selectDayEstimate =
+  (nusach: Nusach, appLevel: NagLevel) =>
+  (state: { activeMitzvot: Record<string, ActiveMitzvahState> }): number =>
+    Object.entries(state.activeMitzvot).reduce((sum, [id, active]) => {
+      const mitzvah = active.enabled ? findAnyMitzvah(id) : undefined;
+      if (!mitzvah || !mitzvah.nuschaotSupported.includes(nusach) || !countsInDayEstimate(mitzvah.category)) {
+        return sum;
+      }
+      return sum + remindersPerDay(id, remindersOf(active, mitzvah), active.nagLevel ?? appLevel);
+    }, 0);
 
 export default function SettingsScreen() {
   const { colors } = useTheme();
@@ -132,6 +148,7 @@ export default function SettingsScreen() {
       weeklyReportEnabled: s.weeklyReportEnabled,
       quietBefore: s.quietBefore,
       quietAfter: s.quietAfter,
+      nagLevel: s.nagLevel,
       location: s.location,
       inIsrael: s.inIsrael,
       locationStatus: s.locationStatus,
@@ -155,6 +172,7 @@ export default function SettingsScreen() {
       setWeeklyReportEnabled: s.setWeeklyReportEnabled,
       setQuietBefore: s.setQuietBefore,
       setQuietAfter: s.setQuietAfter,
+      setNagLevel: s.setNagLevel,
       setTheme: s.setTheme,
       setUiScale: s.setUiScale,
       setLanguage: s.setLanguage,
@@ -162,6 +180,7 @@ export default function SettingsScreen() {
     })),
   );
   const enabledMitzvotCount = useMitzvotStore(selectEnabledCount(user.nusach));
+  const dayEstimate = useMitzvotStore(selectDayEstimate(user.nusach, user.nagLevel));
   const savedCityId = cityOf(user.location)?.cityId;
   // Held locally and committed on blur. Bound straight to the store, every keystroke serialised
   // the whole user store to MMKV and re-rendered the entire settings tree.
@@ -635,6 +654,36 @@ export default function SettingsScreen() {
                     value={user.notificationsEnabled}
                     onValueChange={onToggleNotifications}
                   />
+                </Anchor>
+                <Anchor {...anchor('nagLevel')}>
+                  <SectionLabel variant="field" text={t('settings.nagLevel')} style={styles.fieldLabel} />
+                  <View accessibilityRole="radiogroup" accessibilityLabel={t('settings.nagLevel')}>
+                    <SegmentedControl
+                      options={NAG_LEVEL_IDS.map((level) => ({
+                        value: String(level),
+                        label: t(`nag.level.${level}.name`),
+                        accessibilityLabel: t('nag.level.title', { name: t(`nag.level.${level}.name`), level }),
+                      }))}
+                      value={String(user.nagLevel)}
+                      onChange={(value) => user.setNagLevel(Number(value) as NagLevel)}
+                    />
+                  </View>
+                  <Text style={[typography.small, styles.note, { color: colors.textSub }]} testID="settings-nag-line">
+                    {t('nag.level.line', {
+                      name: t(`nag.level.${user.nagLevel}.name`),
+                      level: user.nagLevel,
+                      desc: t(`nag.level.${user.nagLevel}.desc`),
+                    })}
+                  </Text>
+                  <Text
+                    style={[typography.small, styles.hint, { color: colors.goldText }]}
+                    testID="settings-nag-estimate"
+                  >
+                    {t('settings.nagLevelPerDay', { n: dayEstimate })}
+                  </Text>
+                  <Text style={[typography.small, styles.hint, { color: colors.textMuted }]}>
+                    {t('settings.nagLevelHint')}
+                  </Text>
                 </Anchor>
                 <Anchor {...anchor('weeklyReport')}>
                   <SwitchRow

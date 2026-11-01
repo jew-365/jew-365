@@ -809,7 +809,7 @@ describe('the schedule it saves', () => {
 
     expect(screen.getByText('תזמון המצווה')).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: `תזמון המצווה: ${WEEKDAYS_MODE}` })).toBeOnTheScreen();
-    expect(screen.queryAllByRole('radio')).toHaveLength(0);
+    expect(screen.queryByRole('radiogroup', { name: 'תזמון המצווה' })).toBeNull();
     expect(screen.getAllByRole('checkbox')).toHaveLength(7);
     expect(screen.queryByText('ימי פעילות')).toBeNull();
 
@@ -1031,5 +1031,77 @@ describe('the schedule it saves', () => {
     renderForm({ id: STORED_ID });
 
     expect(screen.getByText('Was active from Oct 1, 2026 to Oct 10, 2026 and has ended')).toBeOnTheScreen();
+  });
+});
+
+describe('the nag in the custom form', () => {
+  const nagLevelSelect = () => screen.getByRole('button', { name: new RegExp(`^${t('custom.nagLevel')}: `) });
+  const nagMode = (mode: 'level' | 'none' | 'custom', index = 0) =>
+    fireEvent.press(screen.getAllByRole('radio', { name: t(`nag.mode.${mode}`) })[index]);
+
+  beforeEach(() => {
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he' });
+    useCustomMitzvotStore.getState().reset();
+    useMitzvotStore.getState().reset();
+    mockBack.mockReset();
+    mockReplace.mockReset();
+    mockCanGoBack = true;
+  });
+
+  it('saves a reminder card’s own nag into that reminder and previews it as clocks', () => {
+    storeCustom([{ anchor: 'end', offsetMin: -10, label: 'סוף' }, ONE]);
+    renderForm({ id: STORED_ID });
+    nagMode('custom', 0);
+    // 11:50 before the end at 12:00, two repeats before it.
+    expect(screen.getByText(t('nag.preview', { times: '11:40 · 11:45' }))).toBeOnTheScreen();
+    expect(screen.getAllByText(t('nag.placement.beforeOnly')).length).toBe(1);
+    nagMode('none', 1);
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+    expect(list()[0].reminders).toEqual([
+      { anchor: 'end', offsetMin: -10, label: 'סוף', nag: { count: 2, everyMin: 5, placement: 'before' } },
+      { ...ONE, nag: null },
+    ]);
+  });
+
+  it('flags a repeat that falls past the hours', () => {
+    storeCustom([{ anchor: 'start', offsetMin: 235, label: 'מאוחר' }]);
+    renderForm({ id: STORED_ID });
+    nagMode('custom');
+    // 11:55, then 12:00 at the end, then 12:05 after it.
+    fireEvent.press(screen.getByRole('button', { name: '2' }));
+    expect(screen.getByText(t('nag.preview', { times: '12:00' }))).toBeOnTheScreen();
+    expect(screen.getByText(t('nag.previewDropped', { time: '12:05' }))).toBeOnTheScreen();
+  });
+
+  it('writes the mitzvah’s level on save, and a save that leaves it alone keeps it', () => {
+    storeCustom([ONE]);
+    renderForm({ id: STORED_ID });
+    expect(nagLevelSelect()).toHaveAccessibleName(
+      `${t('custom.nagLevel')}: ${t('detail.nagLevelApp', { name: t('nag.level.1.name'), level: 1 })}`,
+    );
+    fireEvent.press(nagLevelSelect());
+    fireEvent.press(openSheet().getByText(t('nag.level.title', { name: t('nag.level.3.name'), level: 3 })));
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+    expect(useMitzvotStore.getState().activeMitzvot[STORED_ID].nagLevel).toBe(3);
+    screen.unmount();
+
+    renderForm({ id: STORED_ID });
+    expect(nagLevelSelect()).toHaveAccessibleName(
+      `${t('custom.nagLevel')}: ${t('nag.level.title', { name: t('nag.level.3.name'), level: 3 })}`,
+    );
+    fireEvent.changeText(screen.getByDisplayValue('א'), 'אב');
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+    expect(useMitzvotStore.getState().activeMitzvot[STORED_ID].nagLevel).toBe(3);
+  });
+
+  it('gives a new mitzvah no level of its own unless one is chosen', () => {
+    renderForm();
+    fireEvent.changeText(screen.getByPlaceholderText('לדוגמה: לימוד יומי'), 'לימוד');
+    fireEvent.changeText(screen.getByPlaceholderText(LABEL_PLACEHOLDER), 'עשר');
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+    const [saved] = list();
+    expect(useMitzvotStore.getState().activeMitzvot[saved.id]).toEqual(expect.objectContaining({ enabled: true }));
+    expect(useMitzvotStore.getState().activeMitzvot[saved.id].nagLevel).toBeUndefined();
   });
 });

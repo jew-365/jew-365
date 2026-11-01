@@ -120,6 +120,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'In When to send you choose when the reminder goes out: before the time starts (up to three hours before), at the start or after it, before the time ends or at a set time, and below it how many minutes. Skip if already done drops it once the mitzvah is marked. A custom mitzvah also offers After the end, if not marked, and Kiddush Levana offers After Shabbat or Yom Tov ends.',
       },
       {
+        he: 'רמת נודניקיות קובעת כמה פעמים כל תזכורת חוזרת: רגיל (פעם אחת), עדין, בינוני או נודניק (עוד שלוש התראות, כל 5 דקות). בוחרים אותה בהגדרות ← מכשיר והתראות, ובמסך של כל מצווה אפשר לקבוע לה רמה משלה. בעורך התזכורת ובמצווה אישית אפשר לתת לתזכורת אחת נודניק משלה (כמה פעמים, כל כמה דקות ומתי) או לפטור אותה מהרמה. החזרות באות לפני תזכורת של תחילת הזמן או של שעה קבועה, או אחריה, לפי הבחירה; לפני תזכורת של סוף הזמן ושל קריאת שמע על המיטה הן באות רק לפניה, ואף פעם לא אחרי שהזמן נגמר. ״עשיתי״ על אחת מהן מבטל את כל השאר.',
+        en: 'The nagging level sets how many times each reminder repeats: Regular (once), Gentle, Medium or Nagging (three more, every 5 minutes). Choose it in Settings → Device and notifications, and any mitzvah can have a level of its own on its screen. In the reminder editor and in a custom mitzvah one reminder can have a nag of its own (how many times, every how many minutes and when) or be exempt from the level. The repeats come before or after a reminder at the start of the time or at a set time, as chosen; for a reminder before the end and for the bedtime Shema they come only before it, and never after the time has ended. Done on any of them cancels the rest.',
+      },
+      {
         he: 'מצווה פעילה נשארת תמיד עם תזכורת אחת לפחות: את האחרונה אי אפשר למחוק, והפעלה של מצווה בלי תזכורות מבקשת קודם להגדיר אחת.',
         en: 'A mitzvah that is on always keeps at least one reminder: the last one cannot be deleted, and switching on a mitzvah with none asks you to set one first.',
       },
@@ -405,6 +409,20 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 ];
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
+  {
+    label: '1.0.21-10',
+    date: '2026-11-01',
+    items: [
+      {
+        he: 'רמת נודניקיות: בהגדרות ← מכשיר והתראות בוחרים כמה פעמים כל תזכורת חוזרת, מרגיל ועד נודניק, ובמסך של כל מצווה אפשר לקבוע לה רמה משלה.',
+        en: 'Nagging level: in Settings → Device and notifications choose how many times each reminder repeats, from Regular to Nagging, and any mitzvah can have a level of its own on its screen.',
+      },
+      {
+        he: 'נודניק לתזכורת: בעורך התזכורת ובמצווה אישית בוחרים כמה פעמים התזכורת חוזרת, כל כמה דקות, ולפניה או אחריה, ורואים מראש באילו שעות. ״עשיתי״ על אחת מהן מבטל את כל השאר.',
+        en: 'A nag on a reminder: in the reminder editor and in a custom mitzvah choose how many times a reminder repeats, every how many minutes, and before or after it, and see the times in advance. Done on any of them cancels the rest.',
+      },
+    ],
+  },
   {
     label: '1.0.21-9',
     date: '2026-11-01',

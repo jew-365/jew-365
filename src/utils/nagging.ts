@@ -1,4 +1,4 @@
-import type { NagLevel, NagPlacement, Reminder, ReminderNag } from '@/types/mitzvah';
+import type { MitzvahCategory, NagLevel, NagPlacement, Reminder, ReminderNag } from '@/types/mitzvah';
 
 export type { NagLevel, NagPlacement, ReminderNag };
 
@@ -14,6 +14,7 @@ export const NAG_LEVELS: Readonly<Record<NagLevel, { count: number; everyMin: nu
 };
 
 export const NAG_MAX_COUNT = 5;
+export const NAG_COUNTS: readonly number[] = [1, 2, 3, 4, 5];
 export const NAG_INTERVALS_MIN = [3, 5, 10, 15] as const;
 // Every reminder of these mitzvot nags only before itself (the owner's call: the bedtime Shema).
 export const BEFORE_ONLY_MITZVOT: readonly string[] = ['krias_shma_al_hamita'];
@@ -84,3 +85,11 @@ export const remindersPerDay = (
   reminders: readonly Pick<Reminder, 'anchor' | 'nag'>[],
   level: NagLevel | undefined,
 ): number => reminders.reduce((sum, reminder) => sum + 1 + repeatsPerReminder(mitzvahId, reminder, level), 0);
+
+// A mitzvah counted in the app's per-day estimate: one with a window on a plain weekday, not a weekly
+// or seasonal one (candle lighting, Kiddush Levana, Selichot) that would inflate it.
+export const countsInDayEstimate = (category: MitzvahCategory): boolean =>
+  category.startsWith('daily') || category === 'learning';
+
+// A repeat as a preview prints it: the clock, whether it is sent, and whether it falls after the end.
+export type NagClockEntry = { time: string; fires: boolean; afterEnd: boolean };
