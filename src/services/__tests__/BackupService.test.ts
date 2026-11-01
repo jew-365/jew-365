@@ -281,6 +281,20 @@ describe('BackupService', () => {
       expect(useUserStore.getState().quietAfter).toEqual({ enabled: true, minutes: 1290 });
     });
 
+    it('carries the app’s and each mitzvah’s nagging level', async () => {
+      fillSource();
+      useUserStore.getState().setNagLevel(3);
+      useMitzvotStore.getState().setNagLevel('mincha', 4);
+      const backup = createBackup(CREATED);
+      resetAll();
+      expect(useUserStore.getState().nagLevel).toBe(1);
+
+      await restoreBackup(parseBackup(JSON.stringify(backup)));
+
+      expect(useUserStore.getState().nagLevel).toBe(3);
+      expect(useMitzvotStore.getState().activeMitzvot.mincha.nagLevel).toBe(4);
+    });
+
     it('restores the defaults from a backup that predates the quiet hours', async () => {
       fillSource();
       const backup = createBackup(CREATED);

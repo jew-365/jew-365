@@ -59,7 +59,12 @@ import {
   type PlanScope,
 } from '@/services/notifications/snapshot';
 import { checkInInputOf } from '@/services/notifications/planners/checkIn';
-import { bodyForReminder, buildTriggerTime, nextReminderAt } from '@/services/notifications/planners/mitzvot';
+import {
+  bodyForReminder,
+  buildTriggerTime,
+  nagPreview,
+  nextReminderAt,
+} from '@/services/notifications/planners/mitzvot';
 import { bedikotMissingIn } from '@/services/notifications/planners/taharah';
 
 const REBUILD_HOUR = 0;
@@ -511,6 +516,7 @@ export function initNotificationHandlers(): () => void {
         state.roshChodeshNotices !== prev.roshChodeshNotices ||
         state.quietBefore !== prev.quietBefore ||
         state.quietAfter !== prev.quietAfter ||
+        state.nagLevel !== prev.nagLevel ||
         state.weeklyReportEnabled !== prev.weeklyReportEnabled
       ) {
         NotificationScheduler.rebuild().catch(reportScheduleError);
@@ -569,8 +575,8 @@ export function setSchedulingSuspended(value: boolean): void {
 }
 
 function mitzvotConfigChanged(
-  next: Record<string, { enabled: boolean; customReminders?: Reminder[] }>,
-  prev: Record<string, { enabled: boolean; customReminders?: Reminder[] }>,
+  next: Record<string, { enabled: boolean; customReminders?: Reminder[]; nagLevel?: number }>,
+  prev: Record<string, { enabled: boolean; customReminders?: Reminder[]; nagLevel?: number }>,
 ): boolean {
   const keys = new Set([...Object.keys(next), ...Object.keys(prev)]);
   for (const id of keys) {
@@ -578,12 +584,13 @@ function mitzvotConfigChanged(
     const b = prev[id];
     if ((a?.enabled ?? false) !== (b?.enabled ?? false)) return true;
     if (a?.customReminders !== b?.customReminders) return true;
+    if (a?.nagLevel !== b?.nagLevel) return true;
   }
   return false;
 }
 
 export type { PendingNotificationMeta };
-export { buildTriggerTime, nextReminderAt, notificationTargetFromData, pendingNotificationMetaFromContent };
+export { buildTriggerTime, nagPreview, nextReminderAt, notificationTargetFromData, pendingNotificationMetaFromContent };
 
 export {
   ANDROID_CHANNELS,

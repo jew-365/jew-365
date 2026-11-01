@@ -8,6 +8,7 @@ import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import type { PlanInput } from '@/services/notifications/types';
 import { quietHoursOf } from '@/utils/quietHours';
+import type { NagLevel } from '@/utils/nagging';
 
 // What a plan is made for: the horizon's start, the mitzvot to plan, and the place and settings they
 // are computed at. A rebuild takes all four from the stores; a caller may hand in its own.
@@ -48,6 +49,16 @@ function reminderOverridesFor(mitzvot: Mitzvah[]): Record<string, Reminder[]> {
   return overrides;
 }
 
+function nagLevelsFor(mitzvot: Mitzvah[]): Record<string, NagLevel> {
+  const { activeMitzvot } = useMitzvotStore.getState();
+  const levels: Record<string, NagLevel> = {};
+  for (const { id } of mitzvot) {
+    const level = activeMitzvot[id]?.nagLevel;
+    if (level) levels[id] = level;
+  }
+  return levels;
+}
+
 // The one place a plan reads the stores: planners and `buildPlan()` see only what is returned here.
 export function readPlanInput(now: Date, scope: PlanScope = currentScope(now)): PlanInput {
   const user = useUserStore.getState();
@@ -63,6 +74,8 @@ export function readPlanInput(now: Date, scope: PlanScope = currentScope(now)): 
     settings: scope.settings,
     mitzvot: scope.mitzvot,
     reminderOverrides: reminderOverridesFor(scope.mitzvot),
+    nagLevel: user.nagLevel,
+    nagLevels: nagLevelsFor(scope.mitzvot),
     completions,
     skipped,
     checkIns,

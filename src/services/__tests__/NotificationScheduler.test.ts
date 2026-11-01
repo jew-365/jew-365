@@ -322,7 +322,7 @@ describe('NotificationScheduler', () => {
     const running = NotificationScheduler.rebuild();
     expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBeUndefined();
     await running;
-    expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(10);
+    expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(11);
   });
 
   it('6.3 cancelAll empties pending', async () => {
@@ -362,6 +362,27 @@ describe('NotificationScheduler', () => {
 
     rebuild.mockRestore();
     cancelAll.mockRestore();
+  });
+
+  it('6.4d a change of the app’s or a mitzvah’s nagging level drives a rebuild; a refused one does not', () => {
+    const rebuild = jest.spyOn(NotificationScheduler, 'rebuild').mockResolvedValue();
+    const teardown = initNotificationHandlers();
+    rebuild.mockClear();
+
+    useUserStore.getState().setNagLevel(3);
+    expect(rebuild).toHaveBeenCalledTimes(1);
+    useUserStore.getState().setNagLevel(9 as never);
+    expect(rebuild).toHaveBeenCalledTimes(1);
+
+    useMitzvotStore.getState().setNagLevel('shacharit', 4);
+    expect(rebuild).toHaveBeenCalledTimes(2);
+    useMitzvotStore.getState().setNagLevel('shacharit', null);
+    expect(rebuild).toHaveBeenCalledTimes(3);
+
+    teardown();
+    useUserStore.getState().setNagLevel(1);
+    expect(rebuild).toHaveBeenCalledTimes(3);
+    rebuild.mockRestore();
   });
 
   it('6.4b installing or deleting the Chok LeYisrael add-on drives a rebuild, and only that', () => {

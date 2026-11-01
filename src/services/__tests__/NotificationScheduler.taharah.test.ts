@@ -887,7 +887,7 @@ ${t('taharah.disputed')}`,
   describe('rebuilds', () => {
     it('12 raises the schedule format stamp so an update rebuilds once', async () => {
       await NotificationScheduler.rebuild();
-      expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(10);
+      expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(11);
     });
 
     it('13 the taharah store and the opt-in drive a rebuild, and the teardown unsubscribes them', () => {

@@ -8,6 +8,7 @@ import type { HilulaNotices, RoshChodeshNotices } from '@/stores/useUserStore';
 import type { TaharahLeads } from '@/stores/useTaharahStore';
 import type { ANDROID_CHANNELS, PendingNotificationMeta } from '@/services/notifications/ids';
 import type { QuietHours } from '@/utils/quietHours';
+import type { NagLevel } from '@/utils/nagging';
 
 export type ChannelKey = keyof typeof ANDROID_CHANNELS;
 
@@ -37,6 +38,10 @@ export type PlanInput = {
   mitzvot: Mitzvah[];
   // A mitzvah's own reminders when the user edited them; absent means its defaults.
   reminderOverrides: Record<string, Reminder[]>;
+  // The app's nagging level, and the level of each planned mitzvah that sets its own. Optional so a
+  // hand-built input without them plans no repeat (level 1).
+  nagLevel?: NagLevel;
+  nagLevels?: Record<string, NagLevel>;
   completions: Completions;
   skipped: Completions;
   checkIns: CheckIns;

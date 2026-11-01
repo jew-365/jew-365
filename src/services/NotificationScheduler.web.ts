@@ -70,7 +70,7 @@ export const NotificationScheduler = {
   async rebuildForNewDay(): Promise<void> {},
 };
 
-export { buildTriggerTime, nextReminderAt } from '@/services/notifications/planners/mitzvot';
+export { buildTriggerTime, nagPreview, nextReminderAt } from '@/services/notifications/planners/mitzvot';
 
 export function setSchedulingSuspended(_value: boolean): void {}
 

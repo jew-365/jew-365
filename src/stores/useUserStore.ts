@@ -20,6 +20,7 @@ import {
   quietBoundsValid,
   type QuietBound,
 } from '@/utils/quietHours';
+import { DEFAULT_NAG_LEVEL, isNagLevel, type NagLevel } from '@/utils/nagging';
 
 export type Language = 'he' | 'en';
 export type NotificationPermissionStatus = 'unknown' | 'granted' | 'denied';
@@ -132,6 +133,7 @@ type UserState = {
   weeklyReportEnabled: boolean;
   quietBefore: QuietBound;
   quietAfter: QuietBound;
+  nagLevel: NagLevel;
   chokDoubleChoice: ChokDoubleChoice | null;
   chokCommentaryOpen: boolean;
   chokThuNightDay: ChokThuNightDay | null;
@@ -166,6 +168,7 @@ type UserState = {
   setWeeklyReportEnabled: (v: boolean) => void;
   setQuietBefore: (bound: QuietBound) => void;
   setQuietAfter: (bound: QuietBound) => void;
+  setNagLevel: (level: NagLevel) => void;
   setChokDoubleChoice: (choice: ChokDoubleChoice) => void;
   setChokCommentaryOpen: (open: boolean) => void;
   setChokThuNightDay: (day: ChokThuNightDay) => void;
@@ -211,6 +214,7 @@ const mergeSavedUserState = (persisted: unknown, current: UserState): UserState 
     merged.quietBefore = { ...merged.quietBefore, enabled: false };
     merged.quietAfter = { ...merged.quietAfter, enabled: false };
   }
+  if (!isNagLevel(merged.nagLevel)) merged.nagLevel = DEFAULT_NAG_LEVEL;
   return merged;
 };
 
@@ -245,6 +249,7 @@ export const useUserStore = create<UserState>()(
       weeklyReportEnabled: true,
       quietBefore: DEFAULT_QUIET_BEFORE,
       quietAfter: DEFAULT_QUIET_AFTER,
+      nagLevel: DEFAULT_NAG_LEVEL,
       chokDoubleChoice: null,
       chokCommentaryOpen: false,
       chokThuNightDay: null,
@@ -302,6 +307,7 @@ export const useUserStore = create<UserState>()(
             ? { quietAfter: { enabled: bound.enabled, minutes: bound.minutes } }
             : s,
         ),
+      setNagLevel: (level) => set((s) => (isNagLevel(level) ? { nagLevel: level } : s)),
       setChokDoubleChoice: (choice) => set({ chokDoubleChoice: choice }),
       setChokCommentaryOpen: (open) => set({ chokCommentaryOpen: open }),
       setChokThuNightDay: (day) => set({ chokThuNightDay: day }),
@@ -338,6 +344,7 @@ export const useUserStore = create<UserState>()(
           weeklyReportEnabled: true,
           quietBefore: DEFAULT_QUIET_BEFORE,
           quietAfter: DEFAULT_QUIET_AFTER,
+          nagLevel: DEFAULT_NAG_LEVEL,
           chokDoubleChoice: null,
           chokCommentaryOpen: false,
           chokThuNightDay: null,

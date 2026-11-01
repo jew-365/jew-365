@@ -6,6 +6,7 @@ import { useUserStore } from './useUserStore';
 import { MITZVOT } from '@/data/mitzvot';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { Mitzvah, Reminder } from '@/types/mitzvah';
+import { isNagLevel, type NagLevel } from '@/utils/nagging';
 
 export type ActiveMitzvahState = {
   enabled: boolean;
@@ -13,6 +14,8 @@ export type ActiveMitzvahState = {
   // When it was last switched on. Missing means since before this was recorded, so a history that
   // predates it is judged as before; a later switch-on never turns earlier days into misses.
   enabledAt?: number;
+  // The mitzvah's own nagging level; absent means like the app (`useUserStore.nagLevel`).
+  nagLevel?: NagLevel;
 };
 
 function switchedTo(current: ActiveMitzvahState | undefined, enabled: boolean): ActiveMitzvahState {
@@ -43,6 +46,7 @@ type MitzvotState = {
   toggleEnabled: (id: string) => void;
   setReminders: (id: string, reminders: Reminder[]) => void;
   resetToDefault: (id: string) => void;
+  setNagLevel: (id: string, level: NagLevel | null) => void;
   getEnabledIds: () => string[];
   removeMitzvah: (id: string) => void;
   reset: () => void;
@@ -88,6 +92,14 @@ const withoutEmptyReminders = (active: Record<string, ActiveMitzvahState>) =>
     ]),
   );
 
+const withoutInvalidNagLevels = (active: Record<string, ActiveMitzvahState>) =>
+  Object.fromEntries(
+    Object.entries(active).map(([id, { nagLevel, ...state }]) => [
+      id,
+      isNagLevel(nagLevel) ? { ...state, nagLevel } : state,
+    ]),
+  );
+
 for (const m of MITZVOT) {
   if (!(m.id in DEFAULT_ACTIVE)) DEFAULT_ACTIVE[m.id] = { enabled: false };
 }
@@ -128,8 +140,18 @@ export const useMitzvotStore = create<MitzvotState>()(
       resetToDefault: (id) =>
         set((s) => {
           const next = { ...s.activeMitzvot };
-          next[id] = { enabled: next[id]?.enabled ?? false, enabledAt: next[id]?.enabledAt };
+          const { enabled = false, enabledAt, nagLevel } = next[id] ?? {};
+          next[id] = { enabled, enabledAt, ...(nagLevel ? { nagLevel } : {}) };
           return { activeMitzvot: next };
+        }),
+      setNagLevel: (id, level) =>
+        set((s) => {
+          const current = s.activeMitzvot[id];
+          if ((level !== null && !isNagLevel(level)) || (current?.nagLevel ?? null) === level) return s;
+          const entry: ActiveMitzvahState = { ...(current ?? { enabled: false }) };
+          if (level === null) delete entry.nagLevel;
+          else entry.nagLevel = level;
+          return { activeMitzvot: { ...s.activeMitzvot, [id]: entry } };
         }),
       getEnabledIds: () =>
         Object.entries(get().activeMitzvot)
@@ -154,7 +176,9 @@ export const useMitzvotStore = create<MitzvotState>()(
       // default-on one is stamped now, so the days before this hydrate are never judged as missed.
       merge: (persisted: unknown, current: MitzvotState): MitzvotState => {
         const saved = persisted as Partial<MitzvotState> | undefined;
-        const kept = withoutEmptyReminders(withoutRetired(saved?.activeMitzvot ?? unsavedStart()));
+        const kept = withoutInvalidNagLevels(
+          withoutEmptyReminders(withoutRetired(saved?.activeMitzvot ?? unsavedStart())),
+        );
         addedOnHydrate = defaultsOnMissingFrom(kept);
         const stampedAt = Date.now();
         const added = Object.fromEntries(addedOnHydrate.map((id) => [id, { enabled: true, enabledAt: stampedAt }]));
