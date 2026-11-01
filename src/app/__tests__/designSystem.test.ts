@@ -81,6 +81,7 @@ function ungatedEntrances(source: string): string[] {
 
 const INTERACTION_MOTION: Record<string, string> = {
   'components/MarkStamp.tsx': 'the stamp answers a mark',
+  'components/NowCard.tsx': "home's completion answers a mark: the check, the sparks, the ring, the wash and the close",
   'components/SegmentedControl.tsx': 'the indicator follows the choice',
   'components/ConfirmDialog.tsx': 'the countdown bar is a timer, not an entrance',
   'components/BottomSheet.tsx': 'the sheet rises when a press opens it, over a backdrop that fades in place',

@@ -417,6 +417,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         he: 'אייקונים חדשים למצוות, לתפילות ולסידור, שצוירו במיוחד לאפליקציה: תפילין, טלית, סידור, מזוזה, נרות שבת, הבדלה, חנוכייה, סוכה, שופר ועוד, באיורים בגווני ערכת הצבעים שבחרתם.',
         en: 'New icons for the mitzvot, the prayers and the siddur, drawn for the app: tefillin, a tallit, a siddur, a mezuzah, Shabbat candles, havdalah, a chanukiah, a sukkah, a shofar and more, as illustrations in the tones of the chosen colour theme.',
       },
+      {
+        he: 'סימון ״עשיתי״ על מצווה שפתוחה עכשיו בבית: הכפתור הופך לווי ירוק עם ניצוצות, הטבעת מתמלאת בירוק, השורה מתחלפת ל״בוצע ב-״ והכרטיס נסגר בעדינות. במקום החותמת ״נעשה!״.',
+        en: 'Marking a mitzvah that is open now on Home: the button turns into a green check with sparks, the ring fills in green, the line reads "Done at" and the card closes gently, instead of the "Done!" stamp.',
+      },
     ],
   },
   {

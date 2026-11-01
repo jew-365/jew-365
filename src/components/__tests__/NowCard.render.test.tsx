@@ -99,9 +99,39 @@ describe('NowCard', () => {
     expect(props.onLongPress).toHaveBeenCalledTimes(1);
   });
 
-  it('shows the stamp while stamping', () => {
+  it('answers a mark with the done button, the sparks, the green arc, the ring check and the done line, not the old stamp', () => {
     setup({ stamping: true });
-    expect(screen.getByText('נעשה!')).toBeOnTheScreen();
+    expect(screen.getByTestId('now-card-done-button')).toBeOnTheScreen();
+    // The sparks wait for the actions row's box, which they copy over the card.
+    expect(screen.queryAllByTestId('now-card-spark')).toHaveLength(0);
+    fireEvent(screen.getByTestId('now-card-actions'), 'layout', {
+      nativeEvent: { layout: { x: 0, y: 120, width: 320, height: 48 } },
+    });
+    expect(screen.getAllByTestId('now-card-spark')).toHaveLength(16);
+    // The green arc fades in over the ring with the same dash, so the ring turns green on every platform.
+    const [rest, doneArc] = screen
+      .UNSAFE_getAllByType(Circle)
+      .filter((c) => c.props.r === 25 && c.props.strokeDasharray);
+    expect(doneArc.props.testID).toBe('now-card-done-arc');
+    expect(doneArc.props.stroke).toBe(THEMES.gold.safe);
+    expect([doneArc.props.strokeDasharray, doneArc.props.strokeDashoffset]).toEqual([
+      rest.props.strokeDasharray,
+      rest.props.strokeDashoffset,
+    ]);
+    expect(screen.getByTestId('now-card-ring-check', { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(screen.getByText(/^בוצע ב-\d{2}:\d{2}$/)).toBeOnTheScreen();
+    expect(screen.queryByText('נעשה!')).toBeNull();
+  });
+
+  it('draws none of it while not stamping', () => {
+    setup();
+    expect(screen.queryByTestId('now-card-done-button')).toBeNull();
+    expect(screen.queryByTestId('now-card-ring-check', { includeHiddenElements: true })).toBeNull();
+    expect(screen.queryByText(/^בוצע ב-/)).toBeNull();
+    expect(screen.queryAllByTestId('now-card-spark')).toHaveLength(0);
+    expect(screen.UNSAFE_getAllByType(Circle).some((circle) => circle.props.testID === 'now-card-done-arc')).toBe(
+      false,
+    );
   });
 
   it('prints hours and minutes from an hour left', () => {

@@ -72,10 +72,10 @@ describe('home on a mark', () => {
     expect(settled).toBeGreaterThan(0);
 
     fireEvent.press(screen.getByRole('button', { name: 'סמן תפילת ערבית כהושלם' }));
-    expect(screen.getByText('נעשה!')).toBeOnTheScreen();
+    expect(screen.getByTestId('now-card-done-button')).toBeOnTheScreen();
     expect(windows.mock.calls.length - settled).toBe(1);
 
-    await waitFor(() => expect(screen.queryByText('נעשה!')).toBeNull(), { timeout: 3000 });
+    await waitFor(() => expect(screen.queryByTestId('now-card-done-button')).toBeNull(), { timeout: 3000 });
     expect(windows.mock.calls.length - settled).toBe(1);
     expect(screen.getByRole('button', { name: 'ביטול סימון - תפילת ערבית' })).toBeOnTheScreen();
   });
