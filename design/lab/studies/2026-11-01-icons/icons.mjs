@@ -1,11 +1,11 @@
 // Round 2 of the icon study: flat, coloured illustrations on a 48-unit box, drawn in the logo's navy and
 // orange with gold, parchment, silver, wood, leaf and wine. Every colour is a role variable (--i-*), so
 // one drawing renders in full colour or in the accent's tones (see ROLES and TONAL in site-template.html).
-const c = (role) => `var(--i-${role})`;
-const r = (n) => Math.round(n * 100) / 100;
+export const c = (role) => `var(--i-${role})`;
+export const r = (n) => Math.round(n * 100) / 100;
 
 // A flame: an outer teardrop and a yellow core, its tip at (x, top), `h` tall.
-const flame = (x, top, h) => {
+export const flame = (x, top, h) => {
   const w = h * 0.36;
   const b = top + h;
   const ci = top + h * 0.38;
@@ -13,12 +13,12 @@ const flame = (x, top, h) => {
     <path d="M${r(x)},${r(ci)}C${r(x + w * 0.7)},${r(ci + h * 0.3)} ${r(x + w * 0.6)},${r(b - h * 0.1)} ${r(x)},${r(b - h * 0.04)}C${r(x - w * 0.6)},${r(b - h * 0.1)} ${r(x - w * 0.7)},${r(ci + h * 0.3)} ${r(x)},${r(ci)}Z" fill="${c('flame')}"/>`;
 };
 // A four-point star of radius s at (x, y).
-const star = (x, y, s, fill) => {
+export const star = (x, y, s, fill) => {
   const k = s * 0.28;
   return `<path d="M${r(x)},${r(y - s)}L${r(x + k)},${r(y - k)}L${r(x + s)},${r(y)}L${r(x + k)},${r(y + k)}L${r(x)},${r(y + s)}L${r(x - k)},${r(y + k)}L${r(x - s)},${r(y)}L${r(x - k)},${r(y - k)}Z" fill="${fill}"/>`;
 };
 // A crescent: the disc (cx, cy, R) less the disc (ox, oy, R2), traced through their two crossings.
-const crescent = (cx, cy, R, ox, oy, R2, fill) => {
+export const crescent = (cx, cy, R, ox, oy, R2, fill) => {
   const dx = ox - cx;
   const dy = oy - cy;
   const d = Math.hypot(dx, dy);
