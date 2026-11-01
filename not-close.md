@@ -309,6 +309,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
 
 - [ ] Choose a new font for the app outside the siddur
   - **Requested:** the user, 2026-11-01: change the project's fonts except the siddur's, starting with ideas and examples.
+  - **Status:** Version: none (study only) · Committed: yes, `cdd720c` design(lab): font study of eight directions for the app outside the siddur · Pushed: yes, `main` · Live: no · Channel: none
   - **Flag:** `OTA` (every candidate has an `@expo-google-fonts` package).
   - **What it is:** the font study [design/lab/studies/2026-11-01-fonts/](design/lab/studies/2026-11-01-fonts/AGENTS.md), published as https://claude.ai/artifact/TwZBkoqrLdwdDL2QnaUcmp: eight directions on home at the app's sizes, Rubik recommended. Waiting for the owner's pick; then `fontFamilies` and `APP_FONTS` in [src/theme/typography.ts](src/theme/typography.ts), the font loading in [src/app/_layout.tsx](src/app/_layout.tsx) and the few direct `fontFamily` uses change, and the siddur keeps Noto Serif Hebrew.
   - **What it solves:** the app gets a typeface with its own character instead of the very common Heebo.
