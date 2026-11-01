@@ -1,5 +1,5 @@
 // Writes out/options/index.html: the real app's screens (shot by shoot-packs.cjs with the siddur and prayer icons
-// hidden) with pickers that draw icons-options.mjs's options in their place, in pack ב's theme tones, in each of
+// hidden) with pickers that draw icons-options.mjs's open-siddur options in their place, in pack ב's theme tones, in each of
 // the app's six palettes, beside a strip of every option as a tile.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -48,7 +48,7 @@ writeFileSync(
   join(here, 'out', 'options', 'index.html'),
   `<!DOCTYPE html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>אייקוני הסידור והתפילות</title>
+<title>אייקוני הסידור הפתוח</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700&display=swap">
 <style>
 ${readFileSync(join(here, 'roles.css'), 'utf8')}
@@ -77,8 +77,8 @@ figure { margin: 0; display: grid; gap: 8px; justify-items: center; }
 figcaption { font-weight: 600; }
 .ideas { display: grid; gap: 4px; font-size: 14px; color: var(--sub); }
 </style></head><body><div class="wrap">
-<h1>אייקוני הסידור והתפילות</h1>
-<p>כל האייקונים נשארים בחבילה ב׳. כאן אפשר לבחור אייקון אחר לסידור ואייקונים אחרים לשלוש התפילות, ולראות אותם במקומם המדויק על המסכים האמיתיים, בכל שש ערכות הצבעים.</p>
+<h1>אייקוני הסידור הפתוח</h1>
+<p>רק בכיוון הסידור הפתוח, בסגנון של חבילה ב׳. השורה הראשונה בוחרת את אייקון הסידור, והשנייה את שלוש התפילות: אותו סידור פתוח, קטן יותר, עם שמש עולה לשחרית, שמש של אחר הצהריים למנחה וירח לערבית. כל בחירה מוצגת במקומה המדויק על המסכים האמיתיים, בכל שש ערכות הצבעים.</p>
 <div class="bars">
   <div class="bar" role="group" aria-label="אייקון הסידור"><span>סידור</span><span id="siddur-bar" class="group"></span></div>
   <div class="bar" role="group" aria-label="אייקוני התפילות"><span>תפילות</span><span id="prayer-bar" class="group"></span></div>
@@ -94,7 +94,7 @@ const SCREENS = ${JSON.stringify(screens)};
 const SIDDUR = ${JSON.stringify(siddur)};
 const PRAYERS = ${JSON.stringify(prayers)};
 const TILES = ${JSON.stringify(tiles)};
-let siddur = 'now', prayer = 'now', theme = 'gold', uid = 0;
+let siddur = SIDDUR[0].key, prayer = PRAYERS[0].key, theme = 'gold', uid = 0;
 const svg = (inner) => \`<svg viewBox="2 2 44 44" aria-hidden="true">\${inner.replaceAll('__UID__', 'u' + uid++)}</svg>\`;
 const artFor = (id) => (id === 'siddur' ? SIDDUR.find((o) => o.key === siddur) : PRAYERS.find((o) => o.key === prayer)).art[id];
 const chip = (art) => \`<span class="t tonal" style="--gold:\${TILES[theme].gold};background:\${TILES[theme].tile}">\${svg(art)}</span>\`;
