@@ -3,7 +3,10 @@
 // those icons and takes the screenshot, so a page can draw any drawing in their place. It reads the icons the app
 // draws today (pack ב, src/components/jewishIcons.generated.ts): a 2 2 44 44 view box, identified by the first shape.
 // node shoot-packs.cjs <palette: gold|pink|purple|blue|dark|plum> <comma-separated routes> [comma-separated ids]
-//   -> /tmp/packs/<route>-<palette>.png and .json; with ids, only those icons are hidden and recorded.
+//   -> /tmp/packs/<route>-<palette>.png and .json; with ids, only those icons are hidden and recorded. A route may add
+//   +<text> for each element to tap first (a siddur group's title opens it), then @<testID>: the screen scrolls that
+//   element to its top, less one row, before the shot. An icon inside a siddur tab
+//   row (testID siddur-row-<text>) records the text as its `row`.
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -60,9 +63,29 @@ const server = http
   await page.evaluate((palette) => {
     localStorage.setItem('jew-365\\user-store', JSON.stringify({ state: { isOnboarded: true, gender: 'male', maritalStatus: 'married', theme: palette }, version: 1 }));
   }, theme);
-  for (const route of process.argv[3].split(',')) {
+  for (const spec of process.argv[3].split(',')) {
+    const [path_, anchor] = spec.split('@');
+    const [route, ...taps] = path_.split('+');
     await page.goto(`http://localhost:8099${route}`);
     await page.waitForTimeout(3500);
+    for (const text of taps) {
+      await page.getByText(text, { exact: true }).first().click();
+      await page.waitForTimeout(700);
+    }
+    if (anchor) {
+      await page.evaluate((id) => {
+        const el = document.querySelector(`[data-testid="${id}"]`);
+        if (!el) throw new Error(`no ${id}`);
+        el.scrollIntoView({ block: 'start' });
+        for (let box = el.parentElement; box; box = box.parentElement) {
+          if (box.scrollHeight > box.clientHeight && /auto|scroll/.test(getComputedStyle(box).overflowY)) {
+            box.scrollTop -= 72;
+            break;
+          }
+        }
+      }, anchor);
+      await page.waitForTimeout(800);
+    }
     const icons = await page.evaluate(({ sigs, probe, candidates, only }) => {
       const hex = (v) => { const h = v.replace('#', ''); const f = h.length === 3 ? [...h].map((d) => d + d).join('') : h.slice(0, 6); return [0, 2, 4].map((i) => parseInt(f.slice(i, i + 2), 16)); };
       const tone = (colour, t) => { const o = hex(t.with); return hex(colour).map((c, i) => Math.round(c * t.share + o[i] * (1 - t.share))); };
@@ -97,12 +120,13 @@ const server = http
         const seen = rgb(getComputedStyle(all[probe[id].index]).fill);
         const color = candidates.find((c) => tone(c, probe[id].tone).every((v, i) => Math.abs(v - seen[i]) <= 2));
         if (!color) throw new Error(`no palette colour gives ${id} its fill ${seen}`);
-        found.push({ id, x: box.left, y: box.top, size: box.width, shown, color });
+        const row = svg.closest('[data-testid^="siddur-row-"]')?.getAttribute('data-testid').slice('siddur-row-'.length);
+        found.push({ id, x: box.left, y: box.top, size: box.width, shown, color, ...(row ? { row } : {}) });
         svg.style.visibility = 'hidden';
       }
       return found;
     }, { sigs: SIGS, probe: PROBE, candidates: paletteColours(theme), only: (process.argv[4] || '').split(',').filter(Boolean) });
-    const name = `${route.replace(/\//g, '_')}-${theme}`;
+    const name = `${spec.replace(/[/?=@+]/g, '_')}-${theme}`;
     await page.screenshot({ path: path.join(outDir, `${name}.png`) });
     fs.writeFileSync(path.join(outDir, `${name}.json`), JSON.stringify(icons));
     console.log(name, icons.length, 'icons');

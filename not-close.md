@@ -327,6 +327,13 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** icons that read as the mitzvah they stand for.
   - **Expected result:** every mitzvah, category and siddur icon is from the new set on every screen and palette, the UI icons unchanged, and the full gate passes.
 
+- [ ] New icons for Kriat Shema of Shacharit, Birchot HaShachar, Ushpizin, the meals and every text of the general group
+  - **Requested:** the user, 2026-11-01: "give me an icon for Kriat Shema of Shacharit, a mezuzah does not fit there; a new icon for Birchot HaShachar too; I did not like Ushpizin's, give me more variations; more variations for the meal too; and try to fit icons to all of the general group, because everything there has a scroll icon".
+  - **Flag:** `OTA` (drawings in [src/components/jewishIcons.generated.ts](src/components/jewishIcons.generated.ts); the general group's texts would need an icon per text in the siddur tab, no native change).
+  - **What it is:** round 7 of the icon study [design/lab/studies/2026-11-01-icons/](design/lab/studies/2026-11-01-icons/AGENTS.md), published as https://claude.ai/artifact/6rjnotaGD5h83GaDuCcBUh (the link of round 6's options): four Kriat Shema options, four for Birchot HaShachar, five for Ushpizin, five for the meals and one icon per blessing, and two options for most texts of the general group (Tikkun HaKlali, Nishmat Kol Chai, the traveler's prayer, the food and fragrance blessings, the blessings on sights, the mezuzah), the rest taking an icon the app already has (Tehillim's harp, the bed and moon, the washing cup, the moon); each on the real screens of the siddur tab, the library and the mitzvah screens, in the six palettes. Waiting for the owner's picks; then [scripts/icons/export.mjs](scripts/icons/export.mjs) writes them into the app, and the siddur tab gives each general text its own icon.
+  - **What it solves:** icons that say what each item is: a mezuzah stood for Kriat Shema, and ten different texts shared one scroll.
+  - **Expected result:** every picked icon shows on every screen and palette, the general group's rows each with its own icon, and the full gate passes.
+
 ### Medium — Completion animation of 2026-11-01
 
 - [ ] A new animation for "עשיתי" on home's open cards
