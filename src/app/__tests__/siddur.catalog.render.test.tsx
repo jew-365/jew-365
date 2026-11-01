@@ -185,7 +185,7 @@ describe('the siddur tab’s catalog', () => {
   });
 
   describe('the icons', () => {
-    it('draws each text of the meals and general groups with its own icon, and the festivals with their group’s', () => {
+    it('draws every text with its own icon, the Selichot download offer included', () => {
       open(WEDNESDAY);
       const expected = {
         birkat_hamazon: 'challah',
@@ -201,12 +201,15 @@ describe('the siddur tab’s catalog', () => {
         birchot_hareiya: 'storm',
         mezuzah: 'mezuzah',
         kiddush_levana: 'moon',
-        sheva_berachot: 'occasions',
-        chanukah_candles: 'occasions',
-        ushpizin: 'occasions',
+        sheva_berachot: 'rings',
+        chanukah_candles: 'chanukiah',
+        ushpizin: 'sukkah',
       };
       const drawn = Object.fromEntries(Object.keys(expected).map((id) => [id, listRowOf(id).props.icon]));
       expect(drawn).toEqual(expected);
+      // Selichot is a download offer until its nusach file is installed: a row with no testID of its own.
+      const selichot = screen.UNSAFE_getAllByType(ListRow).find((row) => row.props.title === 'סליחות');
+      expect(selichot?.props.icon).toBe('shofar');
     });
   });
 

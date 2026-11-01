@@ -418,8 +418,8 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: 'New icons for the mitzvot, the prayers and the siddur, drawn for the app: tefillin, a tallit, a siddur, a mezuzah, Shabbat candles, havdalah, a chanukiah, a sukkah, a shofar and more, as illustrations in the tones of the chosen colour theme.',
       },
       {
-        he: 'עוד אייקונים חדשים: שמש עולה מעל ״שמע״ לקריאת שמע של שחרית, חלון של שחר לברכות השחר ושולחן ערוך עם כיסא לאורח לאושפיזין. בסידור, לכל טקסט בקבוצות ״סעודה״ ו״כללי״ אייקון משלו: חלה לברכת המזון, כינור לתיקון הכללי, נשר לנשמת כל חי, מזוודה לתפילת הדרך ועוד.',
-        en: 'More new icons: the sun rising over "Shema" for the morning Shema, a dawn window for Birchot HaShachar and a set table with a chair for the guest for Ushpizin. In the siddur, every text of the Meals and General groups has an icon of its own: a challah for Birkat HaMazon, a lyre for Tikkun HaKlali, an eagle for Nishmat Kol Chai, a suitcase for the traveler\'s prayer and more.',
+        he: 'עוד אייקונים חדשים: שמש עולה מעל ״שמע״ לקריאת שמע של שחרית, חלון של שחר לברכות השחר ושולחן ערוך עם כיסא לאורח לאושפיזין. בסידור, לכל טקסט אייקון משלו: חלה לברכת המזון, כינור לתיקון הכללי, נשר לנשמת כל חי, מזוודה לתפילת הדרך, טבעות לשבע ברכות ועוד.',
+        en: 'More new icons: the sun rising over "Shema" for the morning Shema, a dawn window for Birchot HaShachar and a set table with a chair for the guest for Ushpizin. In the siddur, every text has an icon of its own: a challah for Birkat HaMazon, a lyre for Tikkun HaKlali, an eagle for Nishmat Kol Chai, a suitcase for the traveler\'s prayer, rings for Sheva Berachot and more.',
       },
       {
         he: 'סימון ״עשיתי״ על מצווה שפתוחה עכשיו בבית: הכפתור הופך לווי ירוק עם ניצוצות, הטבעת מתמלאת בירוק, השורה מתחלפת ל״בוצע ב-״ והכרטיס נסגר בעדינות. במקום החותמת ״נעשה!״.',

@@ -71,8 +71,8 @@ type TextHours = (day: Zmanim, next: Zmanim, location: Location) => { start: Dat
 export type StandaloneEntry = Availability & {
   name: { he: string; en: string };
   group: SiddurGroup;
-  /** The text's own icon (an icon name of MitzvahIcon); a text without one shows its group's. */
-  icon?: string;
+  /** The text's own icon, an icon name of MitzvahIcon (the owner's picks of 2026-11-01). */
+  icon: string;
   evening?: boolean;
   availableIn?: Partial<Record<Nusach, Availability>>;
   hours?: TextHours | 'mitzvah';
@@ -153,10 +153,11 @@ export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
     hours: TONIGHT_TO_DAWN,
     periodEnd: (night, nusach, location) => kiddushLevanaPeriod(night, nusach, location).end,
   },
-  sheva_berachot: { name: { he: 'שבע ברכות', en: 'Sheva Berachot' }, group: 'occasions' },
+  sheva_berachot: { name: { he: 'שבע ברכות', en: 'Sheva Berachot' }, group: 'occasions', icon: 'rings' },
   chanukah_candles: {
     name: { he: 'הדלקת נרות חנוכה', en: 'Chanukah Candle Lighting' },
     group: 'occasions',
+    icon: 'chanukiah',
     evening: true,
     available: { all: ['chanukah'] },
     availableLabel: { he: 'בחנוכה', en: 'On Chanukah' },
@@ -166,6 +167,7 @@ export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
   selichot: {
     name: { he: 'סליחות', en: 'Selichot' },
     group: 'occasions',
+    icon: 'shofar',
     available: { all: ['selichotAshkenazi'] },
     hours: MIDNIGHT_TO_MORNING_PRAYER,
     availableLabel: { he: 'ממוצאי שבת הסליחות עד ערב יום הכיפורים', en: 'From Leil Selichot to Erev Yom Kippur' },
@@ -180,6 +182,7 @@ export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
   ushpizin: {
     name: { he: 'אושפיזין', en: 'Ushpizin' },
     group: 'occasions',
+    icon: 'sukkah',
     evening: true,
     available: { all: ['sukkotNight'] },
     availableLabel: { he: 'בלילות סוכות', en: 'On the nights of Sukkot' },
@@ -199,9 +202,6 @@ export const MITZVAH_STANDALONE_TEXT: Partial<Record<string, StandaloneTextId>> 
 const CHOK_DAYS: Condition = { none: ['shabbat', 'yomTov', 'yomKippur'] };
 
 export const SIDDUR_GROUPS: readonly SiddurGroup[] = ['meals', 'general', 'occasions'];
-
-/** The icon a standalone text is drawn with: its own, else its group's (the owner's picks of 2026-11-01). */
-export const standaloneIcon = (id: StandaloneTextId): string => STANDALONE_TEXTS[id].icon ?? STANDALONE_TEXTS[id].group;
 
 export const SIDDUR_TEXT_IDS: readonly SiddurTextId[] = [
   ...(Object.keys(SIDDUR_TEXTS) as MitzvahTextId[]),

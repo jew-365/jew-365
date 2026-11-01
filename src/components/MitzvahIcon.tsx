@@ -28,7 +28,7 @@ export const ICON_NAMES = [
   'chanukiah',
   'sukkah',
   'shofar',
-  // Round 7 (2026-11-01): the siddur tab's texts that have an icon of their own.
+  // Rounds 7 and 8 (2026-11-01): icons drawn for the siddur tab's texts.
   'mezuzah',
   'washingCup',
   'challah',
@@ -39,6 +39,7 @@ export const ICON_NAMES = [
   'suitcase',
   'apple',
   'storm',
+  'rings',
   'chevronLeft',
   'chevronRight',
   'chevronDown',

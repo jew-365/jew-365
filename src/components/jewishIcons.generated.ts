@@ -1074,4 +1074,28 @@ export const JEWISH_ICONS: Record<string, JewishIconNode[]> = {
       strokeLinecap: 'round',
     },
   ],
+  rings: [
+    { t: 'circle', cx: 19, cy: 28.6, r: 9.6, stroke: { role: 'gold2' }, strokeWidth: 3.6, fill: 'none' },
+    { t: 'circle', cx: 29, cy: 23.4, r: 9.6, stroke: { role: 'gold' }, strokeWidth: 3.6, fill: 'none' },
+    { t: 'path', d: 'M26.4,32.6A9.6,9.6 0 0 0 28.4,28.8', stroke: { role: 'gold2' }, strokeWidth: 3.6, fill: 'none' },
+    {
+      t: 'path',
+      d: 'M14.4,22.4A7,7 0 0 1 18.4,20.4',
+      stroke: { role: 'white' },
+      strokeWidth: 1.2,
+      strokeLinecap: 'round',
+      fill: 'none',
+      opacity: 0.6,
+    },
+    {
+      t: 'path',
+      d: 'M38.6,6.4L39.44,8.56L41.6,9.4L39.44,10.24L38.6,12.4L37.76,10.24L35.6,9.4L37.76,8.56Z',
+      fill: { role: 'gold' },
+    },
+    {
+      t: 'path',
+      d: 'M9.6,9.8L10.1,11.1L11.4,11.6L10.1,12.1L9.6,13.4L9.1,12.1L7.8,11.6L9.1,11.1Z',
+      fill: { role: 'gold' },
+    },
+  ],
 };

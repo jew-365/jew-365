@@ -12,7 +12,7 @@ import {
   type IconVariant,
 } from '../MitzvahIcon';
 import { MITZVOT } from '@/data/mitzvot';
-import { SIDDUR_GROUPS, STANDALONE_TEXTS, standaloneIcon } from '@/data/siddur';
+import { SIDDUR_GROUPS, STANDALONE_TEXTS } from '@/data/siddur';
 import type { StandaloneTextId } from '@/types/siddur';
 
 describe('MitzvahIcon', () => {
@@ -33,12 +33,7 @@ describe('MitzvahIcon', () => {
   });
 
   it.each(Object.keys(STANDALONE_TEXTS) as StandaloneTextId[])('draws the %s text with a registered icon', (id) => {
-    expect(iconFor(standaloneIcon(id))).toBe(standaloneIcon(id));
-  });
-
-  it('draws a text with no icon of its own with its group’s', () => {
-    expect(standaloneIcon('sheva_berachot')).toBe('occasions');
-    expect(standaloneIcon('selichot')).toBe('occasions');
+    expect(iconFor(STANDALONE_TEXTS[id].icon)).toBe(STANDALONE_TEXTS[id].icon);
   });
 
   it('uses a known variant', () => {

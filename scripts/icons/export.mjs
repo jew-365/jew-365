@@ -1,7 +1,7 @@
 // Writes the owner's pick of the 2026-11-01 icon study, option ב (the coloured illustrations in the theme's tones),
 // into the app as src/components/jewishIcons.generated.ts, with the siddur and the three prayers taken from round 6's
 // open-siddur options (icons-options.mjs, the pick named by PICK) and four icons and ten new ones taken from round 7's
-// options (icons-more.mjs, the picks named by ROUND7 and TEXT_ICONS): per icon id, its elements as plain data, and the
+// options and one from round 8's (icons-more.mjs, the picks named by ROUND7 and TEXT_ICONS): per icon id, its elements as plain data, and the
 // tone of each colour role as a mix of the icon colour, all of which MitzvahIcon draws with react-native-svg. Sources:
 // the study's drawings and roles.css (the `.tonal` block). Run `node scripts/icons/export.mjs` after changing either.
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -10,7 +10,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ICONS } from '../../design/lab/studies/2026-11-01-icons/icons.mjs';
 import { PRAYER_OPTIONS, SIDDUR_OPTIONS } from '../../design/lab/studies/2026-11-01-icons/icons-options.mjs';
-import { GENERAL, TOPICS, artOf } from '../../design/lab/studies/2026-11-01-icons/icons-more.mjs';
+import { GENERAL, OCCASIONS, TOPICS, artOf } from '../../design/lab/studies/2026-11-01-icons/icons-more.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = join(here, '..', '..');
@@ -113,11 +113,12 @@ const topic = (id, key) => {
   if (!option) throw new Error(`no round 7 option ${id}:${key}`);
   return option;
 };
-// The icons of the siddur tab's texts that have one of their own: the general group's picks (a general text and its
-// option) and the meals group's icon per blessing. Three keep a drawing an id above held before round 7.
+// The icons of the siddur tab's texts that need a drawing no id above has: the general group's picks (round 7) and the
+// festivals group's (round 8), each a text and its option, and the meals group's icon per blessing. Three keep a
+// drawing an id above held before round 7.
 const general = (text, key) => {
-  const option = GENERAL.find((g) => g.text === text)?.options.find((o) => o.key === key);
-  if (!option) throw new Error(`no round 7 option ${text}:${key}`);
+  const option = [...GENERAL, ...OCCASIONS].find((g) => g.text === text)?.options.find((o) => o.key === key);
+  if (!option) throw new Error(`no option ${text}:${key}`);
   return (uid) => artOf(option, uid);
 };
 const perText = topic('meals', 'perText').byText;
@@ -132,6 +133,7 @@ const TEXT_ICONS = {
   suitcase: general('tefilat_haderech', 'suitcase'),
   apple: general('birchot_hanehenin', 'apple'),
   storm: general('birchot_hareiya', 'storm'),
+  rings: general('sheva_berachot', 'rings'),
 };
 const drawOf = (icon) =>
   icon.id === 'siddur'

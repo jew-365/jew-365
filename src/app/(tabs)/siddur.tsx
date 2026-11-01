@@ -19,7 +19,6 @@ import {
   standaloneHoursAt,
   standalonePeriodEnded,
   standaloneTextDay,
-  standaloneIcon,
   standaloneTextsIn,
 } from '@/data/siddur';
 import { Card } from '@/components/Card';
@@ -304,7 +303,7 @@ export default function SiddurScreen() {
       <CatalogRow
         key={id}
         id={id}
-        icon={iconFor(standaloneIcon(id))}
+        icon={iconFor(STANDALONE_TEXTS[id].icon)}
         iconTone="accent"
         title={label(STANDALONE_TEXTS[id].name)}
         caption={t('siddur.now.until', { time: clockOf(hours.end) })}
@@ -327,7 +326,7 @@ export default function SiddurScreen() {
       return (
         <Card key={id}>
           <ListRow
-            icon={iconFor(standaloneIcon(id))}
+            icon={iconFor(STANDALONE_TEXTS[id].icon)}
             iconTone="muted"
             title={label(name)}
             caption={selichotAddonCaption(selichotDownload, t(`nusach.${nusach}`), t)}
@@ -345,7 +344,7 @@ export default function SiddurScreen() {
         key={id}
         testID={`siddur-row-${id}`}
         id={id}
-        icon={iconFor(standaloneIcon(id))}
+        icon={iconFor(STANDALONE_TEXTS[id].icon)}
         iconTone={saidToday ? 'accent' : 'muted'}
         title={label(name)}
         caption={saidToday ? undefined : availableLabel ? label(availableLabel) : t('siddur.catalog.notToday')}
