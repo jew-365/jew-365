@@ -61,6 +61,7 @@ button:focus-visible { outline: 3px solid #A04A0C; outline-offset: 2px; }
 .ringtext b { font-size: 13px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .ringtext small { font-size: 11px; color: var(--p-textSub); }
 .ringcheck { opacity: 0; }
+.ringcheck svg { width: 24px; height: 24px; }
 .actions { display: flex; gap: 8px; }
 .btn { flex: 1; min-height: 48px; border-radius: 16px; border: 0; font: 600 15px var(--font); display: inline-flex; align-items: center; justify-content: center; gap: 6px; position: relative; overflow: hidden; cursor: pointer; transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
 .btn:active { transform: scale(0.97); }
@@ -120,7 +121,7 @@ const POP = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
 const DONE_AT = '13:00';
 const RING = 157.08;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-let variant = 'stamp', palette = 'gold', slow = 1, uid = 0, busy = new Set();
+let variant = 'combo', palette = 'gold', slow = 1, uid = 0, busy = new Set();
 const P = () => PALETTES[palette];
 
 // The app's icons, painted as MitzvahIcon paints them: each colour role a tone of the icon colour.
@@ -155,7 +156,8 @@ const DAY = [
 ];
 
 const A = (el, frames, ms, easing = OUT, opts = {}) =>
-  el.animate(frames, { duration: ms * slow, easing, fill: 'forwards', ...opts, delay: (opts.delay || 0) * slow }).finished;
+  // `both`: an animation holds its first frame through its delay, so a wash or a check never shows early.
+  el.animate(frames, { duration: ms * slow, easing, fill: 'both', ...opts, delay: (opts.delay || 0) * slow }).finished;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms * slow));
 
 function render() {
@@ -171,7 +173,7 @@ function render() {
         <div class="ring"><svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="25" stroke="${p.border}" stroke-width="4" fill="none"/>
           <circle class="arc" cx="30" cy="30" r="25" stroke="${p.gold}" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="${RING}" stroke-dashoffset="${(RING * (1 - c.left)).toFixed(1)}" transform="rotate(-90 30 30)"/></svg>
           <div class="ringtext"><b>3:52</b><small>${S_['time.unit.hours']}</small></div>
-          <div class="ringcheck">${check(p.safe, 3)}</div></div>
+          <div class="ringcheck">${check(p.safe, 2.2)}</div></div>
       </div>
       <div class="actions">
         <button type="button" class="btn primary" data-done="${c.id}"><span class="lbl">${check(p.onGold)}${S_['notifications.markDone']}</span><span class="done">${check('#fff', 3)}</span></button>
@@ -222,15 +224,77 @@ const swapToCheck = (card, ms = 160) => {
   A(done, [{ opacity: 0 }, { opacity: 1 }], 1);
   return A(path, [{ strokeDashoffset: len }, { strokeDashoffset: 0 }], 240, OUT, { delay: ms * 0.5 });
 };
+// The ring fills to the end in green; a small, thin check is drawn in its middle, with no jump (the owner's call,
+// 2026-11-01: the popping check was too much).
 const fillRing = (card, ms) => {
   const p = P();
   A(card.querySelector('.ringtext'), [{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(3px)' }], 140);
-  A(card.querySelector('.ringcheck'), [{ opacity: 0, transform: 'scale(0.85)' }, { opacity: 1, transform: 'scale(1)' }], 220, POP, { delay: ms * 0.6 });
+  const ringCheck = card.querySelector('.ringcheck');
+  const path = ringCheck.querySelector('path');
+  const len = path.getTotalLength();
+  path.style.strokeDasharray = len;
+  path.style.strokeDashoffset = len;
+  A(ringCheck, [{ opacity: 0 }, { opacity: 0.9 }], 200, OUT, { delay: ms * 0.55 });
+  A(path, [{ strokeDashoffset: len }, { strokeDashoffset: 0 }], 360, OUT, { delay: ms * 0.55 });
   const arc = card.querySelector('.arc');
   return A(arc, [{ strokeDashoffset: arc.getAttribute('stroke-dashoffset'), stroke: p.gold }, { strokeDashoffset: 0, stroke: p.safe }], ms, IN_OUT);
 };
 
+// A soft green wash spreads over the card from the ring's centre.
+function ringWash(card, delay = 120) {
+  const p = P();
+  const fx = card.querySelector('.fx');
+  const ring = card.querySelector('.ring').getBoundingClientRect();
+  const box = card.getBoundingClientRect();
+  const x = ring.left + ring.width / 2 - box.left, y = ring.top + ring.height / 2 - box.top;
+  fx.style.background = `${p.safe}1F`;
+  return A(fx, [{ clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${box.width * 1.2}px at ${x}px ${y}px)` }], 520, OUT, { delay });
+}
+// The end line turns into "done at".
+function endLineDone(card, delay = 300) {
+  const p = P();
+  const end = card.querySelector('.endline');
+  return A(end, [{ opacity: 1 }, { opacity: 0 }], 120, OUT, { delay }).then(() => {
+    end.textContent = `בוצע ב-${DONE_AT}`;
+    end.style.color = p.safe;
+    return A(end, [{ opacity: 0 }, { opacity: 1 }], 160);
+  });
+}
+// Sparks fly from the button. They may leave the card, so they live on its wrapper, which does not clip.
+function sparks(card, wrap) {
+  const p = P();
+  const btn = card.querySelector('.primary').getBoundingClientRect();
+  const box = card.getBoundingClientRect();
+  const cx = btn.left + btn.width / 2 - box.left, cy = btn.top + btn.height / 2 - box.top;
+  for (let i = 0; i < 16; i += 1) {
+    const dot = document.createElement('span');
+    dot.className = 'particle';
+    dot.style.background = [p.gold, p.safe, p.goldText][i % 3];
+    if (i % 4 === 0) { dot.style.borderRadius = '2px'; dot.style.transform = 'rotate(45deg)'; }
+    dot.style.left = `${cx - 4.5}px`; dot.style.top = `${cy - 4.5}px`;
+    wrap.appendChild(dot);
+    const a = (i / 16) * Math.PI * 2 + (i % 2 ? 0.15 : -0.1);
+    const d = 58 + (i % 3) * 16;
+    A(dot, [{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d * 0.7}px) scale(0.35)`, opacity: 0 }], 600, OUT, { delay: (i % 3) * 20 });
+  }
+  return A(card, [{ transform: 'scale(1)' }, { transform: 'scale(1.015)' }, { transform: 'scale(1)' }], 360, OUT);
+}
+
 const VARIANTS = [
+  {
+    key: 'combo', chip: '6. שילוב 2 ו-5', name: '6. הטבעת מתמלאת עם ניצוצות', total: 'כ-1.3 שניות',
+    idea: 'הכפתור הופך לוי ירוק וניצוצות מתפזרים ממנו. באותו רגע הטבעת מתמלאת בירוק, וי דק ועדין נמשך במרכזה, וגל ירוק רך מתפשט על הכרטיס. במקום שעת הסוף כתוב "בוצע ב-13:00", והכרטיס נסגר.',
+    async run(card, wrap, id) {
+      swapToCheck(card, 150);
+      sparks(card, wrap);
+      ringWash(card, 140);
+      endLineDone(card, 320);
+      await wait(80);
+      await fillRing(card, 440);
+      await wait(620);
+      await Promise.all([collapse(wrap), land(id)]);
+    },
+  },
   {
     key: 'stamp', chip: 'היום: חותמת', name: 'היום באפליקציה: חותמת', total: '1.3 שניות',
     idea: 'חותמת "נעשה!" נוחתת על הכרטיס מגודל פי 2.8 ומסתובבת, נשארת, נעלמת, ואז הכרטיס נעלם בבת אחת.',
@@ -252,7 +316,7 @@ const VARIANTS = [
   },
   {
     key: 'morph', chip: '1. וי בכפתור', name: '1. הכפתור הופך לוי', total: 'כשנייה',
-    idea: 'הכיתוב "עשיתי" מיטשטש, הכפתור נצבע ירוק ווי נמשך בתוכו. הטבעת מתמלאת בירוק ובמרכזה וי. רגע לראות, והכרטיס נסגר בעדינות והשורה ב"היום שלי" נדלקת.',
+    idea: 'הכיתוב "עשיתי" מיטשטש, הכפתור נצבע ירוק ווי נמשך בתוכו. הטבעת מתמלאת בירוק ובמרכזה וי דק. רגע לראות, והכרטיס נסגר בעדינות והשורה ב"היום שלי" נדלקת.',
     async run(card, wrap, id) {
       swapToCheck(card, 180); fillRing(card, 320);
       await wait(700);
@@ -261,17 +325,10 @@ const VARIANTS = [
   },
   {
     key: 'ring', chip: '2. הטבעת מתמלאת', name: '2. הטבעת מתמלאת', total: 'כ-1.2 שניות',
-    idea: 'הטבעת של הזמן שנשאר מסתובבת עד הסוף בירוק, וי קופץ במרכזה, וגל ירוק עדין מתפשט מהטבעת על כל הכרטיס. שורת הסוף מתחלפת ל"בוצע ב-13:00", והכרטיס נסגר.',
+    idea: 'הטבעת של הזמן שנשאר מסתובבת עד הסוף בירוק, וי דק נמשך במרכזה, וגל ירוק עדין מתפשט מהטבעת על כל הכרטיס. שורת הסוף מתחלפת ל"בוצע ב-13:00", והכרטיס נסגר.',
     async run(card, wrap, id) {
-      const p = P();
-      const fx = card.querySelector('.fx');
-      const ring = card.querySelector('.ring').getBoundingClientRect();
-      const box = card.getBoundingClientRect();
-      const x = ring.left + ring.width / 2 - box.left, y = ring.top + ring.height / 2 - box.top;
-      fx.style.background = `${p.safe}1F`;
-      A(fx, [{ clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${box.width * 1.2}px at ${x}px ${y}px)` }], 520, OUT, { delay: 120 });
-      const end = card.querySelector('.endline');
-      A(end, [{ opacity: 1 }, { opacity: 0 }], 120, OUT, { delay: 300 }).then(() => { end.textContent = `בוצע ב-${DONE_AT}`; end.style.color = p.safe; A(end, [{ opacity: 0 }, { opacity: 1 }], 160); });
+      ringWash(card);
+      endLineDone(card);
       await fillRing(card, 420);
       await wait(520);
       await Promise.all([collapse(wrap), land(id)]);
@@ -320,24 +377,8 @@ const VARIANTS = [
     key: 'sparks', chip: '5. ניצוצות', name: '5. ניצוצות של שמחה', total: 'כ-0.9 שניות',
     idea: 'הכפתור הופך לוי ירוק, ומתוכו מתפזרים ניצוצות קטנים בזהב ובירוק ונמוגים. הכרטיס "נושם" לרגע, ואז נסגר והשורה ב"היום שלי" נדלקת.',
     async run(card, wrap, id) {
-      const p = P();
-      const btn = card.querySelector('.primary').getBoundingClientRect();
-      const box = card.getBoundingClientRect();
-      const cx = btn.left + btn.width / 2 - box.left, cy = btn.top + btn.height / 2 - box.top;
-      // The sparks fly from the button and may leave the card, so they live on its wrapper, which does not clip.
       swapToCheck(card, 150);
-      A(card, [{ transform: 'scale(1)' }, { transform: 'scale(1.015)' }, { transform: 'scale(1)' }], 360, OUT);
-      for (let i = 0; i < 16; i += 1) {
-        const dot = document.createElement('span');
-        dot.className = 'particle';
-        dot.style.background = [p.gold, p.safe, p.goldText][i % 3];
-        if (i % 4 === 0) { dot.style.borderRadius = '2px'; dot.style.transform = 'rotate(45deg)'; }
-        dot.style.left = `${cx - 4.5}px`; dot.style.top = `${cy - 4.5}px`;
-        wrap.appendChild(dot);
-        const a = (i / 16) * Math.PI * 2 + (i % 2 ? 0.15 : -0.1);
-        const d = 58 + (i % 3) * 16;
-        A(dot, [{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d * 0.7}px) scale(0.35)`, opacity: 0 }], 600, OUT, { delay: (i % 3) * 20 });
-      }
+      sparks(card, wrap);
       await wait(560);
       await Promise.all([collapse(wrap), land(id)]);
     },
