@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -38,463 +38,173 @@ function enclosingCircle(points) {
   return c;
 }
 
-const T = 42;
-const RH = 160;
-const RG = 16;
-const ROW_GAP = 28;
-const RING_W = 30;
-const HALO = 9;
-const PIVOT_R = 19;
-let maskSeq = 0;
-
 const at = (c, r, a) => [c[0] + r * Math.cos(deg(a)), c[1] + r * Math.sin(deg(a))];
-const clockDir = (a) => [Math.sin(deg(a)), -Math.cos(deg(a))];
 
-function trace(subpaths, [ox, oy]) {
-  let d = '';
-  const pts = [];
-  for (const segs of subpaths) {
-    let cur;
-    for (const s of segs) {
-      if (s[0] === 'M' || s[0] === 'L') {
-        const p = [s[1], s[2]];
-        if (s[0] === 'L') for (let t = 0.1; t < 1; t += 0.1) pts.push([cur[0] + (p[0] - cur[0]) * t, cur[1] + (p[1] - cur[1]) * t]);
-        d += `${s[0]}${p[0] + ox} ${p[1] + oy}`;
-        pts.push(p);
-        cur = p;
-        continue;
-      }
-      const [, cx, cy, r, aEnd, cw] = s;
-      const a0 = (Math.atan2(cur[1] - cy, cur[0] - cx) * 180) / Math.PI;
-      let delta = cw ? (aEnd - a0 + 720) % 360 : -((a0 - aEnd + 720) % 360);
-      if (Math.abs(delta) < 1e-6) delta = cw ? 360 : -360;
-      const steps = Math.ceil(Math.abs(delta) / 90);
-      for (let k = 1; k <= steps; k++) {
-        const aPrev = a0 + (delta * (k - 1)) / steps;
-        const a = a0 + (delta * k) / steps;
-        for (let t = 0.125; t <= 1; t += 0.125) pts.push(at([cx, cy], r, aPrev + (a - aPrev) * t));
-        const p = at([cx, cy], r, a);
-        d += `A${r} ${r} 0 0 ${cw ? 1 : 0} ${p[0] + ox} ${p[1] + oy}`;
-        cur = p;
-      }
-    }
-  }
-  return { d, pts: pts.map(([x, y]) => [x + ox, y + oy]) };
-}
-
-function tangentFrom(q, c, r, side) {
-  const d = Math.hypot(q[0] - c[0], q[1] - c[1]);
-  const base = (Math.atan2(q[1] - c[1], q[0] - c[0]) * 180) / Math.PI;
-  return base + side * ((Math.acos(r / d) * 180) / Math.PI);
-}
-
-const ROUND = {
-  j: { w: 96, path: (w) => [[['M', w * 0.42, 0], ['L', w, 0], ['L', w, RH - w / 2], ['O', w / 2, RH - w / 2, w / 2, 180, true]]] },
-  e: {
-    w: 88,
-    path: (w, link) => [
-      [['M', w, 0], ['L', 0, 0], ['L', 0, RH + link]],
-      [['M', 0, RH / 2], ['L', w * 0.8, RH / 2]],
-      [['M', 0, RH], ['L', w, RH]],
+/* The owner's logo of 2026-11-02 (design/references/2026-11-02/logo.jpg), in its own pixels: every unit below is one
+   pixel of that 1254 px image. Letters, bell and book are filled outlines traced from it (even-odd, holes included),
+   and the ring is the smooth curve fitted to its traced centre line; trace/trace.py writes them to
+   trace/source-paths.json. The ticks, the stopwatch button, the degree sign and the white square are measured. */
+const SOURCE = {
+  ring: { c: [579.4, 668.5], r: 451, w: 33.5 },
+  ticks: {
+    w: 30.5,
+    segs: [
+      [[589.7, 366], [589.8, 293]],
+      [[393.8, 408.5], [365.2, 368.2]],
+      [[265.3, 540.4], [222, 520]],
+      [[232, 694.8], [181, 694.8]],
+      [[265.6, 856.6], [233.2, 877.6]],
+      [[392.7, 949], [364.8, 990.1]],
+      [[588.6, 992.5], [588.6, 1051.5]],
     ],
   },
-  three: {
-    w: 96,
-    path: (w) => {
-      const rb = 47;
-      const c = [w - rb, RH - rb];
-      const start = at(c, rb, 250);
-      return [
-        [['M', 0, 0], ['L', w, 0]],
-        [['M', w, 0], ['L', ...start], ['O', ...c, rb, 150, true]],
-      ];
-    },
-  },
-  six: {
-    w: 100,
-    path: (w) => {
-      const r = 47;
-      const c = [w / 2, RH - r];
-      const top = [w * 0.72, 0];
-      const a = tangentFrom(top, c, r, -1);
-      return [[['M', ...top], ['L', ...at(c, r, a)], ['O', ...c, r, a, false]]];
-    },
-  },
-  five: {
-    w: 96,
-    path: (w) => {
-      const rb = 50;
-      const c = [w - rb, RH - rb];
-      const join = at(c, rb, 215);
-      return [[['M', w, 0], ['L', join[0], 0], ['L', ...join], ['O', ...c, rb, 135, true]]];
-    },
-  },
-  w: {
-    w: 150,
-    path: (w) => [[['M', 0, 0], ['L', w * 0.25, RH], ['L', w * 0.5, RH * 0.3], ['L', w * 0.75, RH], ['L', w, 0]]],
-  },
+  crown: { w: 40, bar: [[559, 169], [657, 169]], stem: [[607, 169], [607, 226]] },
+  degree: { c: [814.7, 725.2], r: 31.7, w: 25 },
+  square: [67, 73, 1112, 1112],
+};
+const SOURCE_PATHS = JSON.parse(readFileSync(join(OUT, 'trace', 'source-paths.json'), 'utf8'));
+
+const LETTER_ROWS = { top: ['j', 'e', 'w'], bottom: ['three', 'six', 'five'] };
+
+function samplePath(d) {
+  const pts = [];
+  let cur;
+  let start;
+  for (const [, cmd, args] of d.matchAll(/([MLQCZ])([^MLQCZ]*)/g)) {
+    const nums = args.trim() ? args.trim().split(/[\s,]+/).map(Number) : [];
+    const P = Array.from({ length: nums.length / 2 }, (_, i) => [nums[2 * i], nums[2 * i + 1]]);
+    if (cmd === 'Z') P.push(start);
+    if (cmd === 'M') {
+      start = P[0];
+      pts.push(start);
+    } else {
+      for (let u = 0.125; u <= 1.0001; u += 0.125) {
+        let q = [cur, ...P];
+        while (q.length > 1) q = q.slice(1).map((p, i) => [q[i][0] + (p[0] - q[i][0]) * u, q[i][1] + (p[1] - q[i][1]) * u]);
+        pts.push(q[0]);
+      }
+    }
+    cur = P.at(-1);
+  }
+  return pts;
+}
+
+const boxOf = (pts) => {
+  const xs = pts.map(([x]) => x);
+  const ys = pts.map(([, y]) => y);
+  return { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
 };
 
-const ICON_W = 9;
-const ICON_SIZE = 33;
-const ICON_STROKE = 6.5;
-const iconScale = (key, size = ICON_SIZE) => size / ICONS[key].r;
-const ICONS = {
-  tefillinPair: {
-    r: 54,
-    d: 'M-46 -28L-38 -36H-10L-18 -28M-18 0L-10 -8V-36M-10 -12L-2 -20H26L18 -12M18 16L26 8V-20M-32 0C-32 12 -24 16 -10 16M26 2C38 2 42 12 36 20C30 28 38 36 46 34',
-    fill: 'M-46 -28H-18V0H-46ZM-10 -12H18V16H-10Z',
-  },
-  torah: {
-    r: 52,
-    d: 'M-25 -26V-37M-25 26V37M25 -26V-37M25 26V37M-18 -20H18M-18 20H18M-9 -9H9M-9 0H9M-9 9H9',
-    fill: 'M-32 -26H-18V26H-32ZM18 -26H32V26H18ZM-25 -37A5 5 0 1 0 -25 -47A5 5 0 1 0 -25 -37ZM-25 47A5 5 0 1 0 -25 37A5 5 0 1 0 -25 47ZM25 -37A5 5 0 1 0 25 -47A5 5 0 1 0 25 -37ZM25 47A5 5 0 1 0 25 37A5 5 0 1 0 25 47Z',
-  },
-  shofar: {
-    r: 52,
-    d: 'M47.08 -16.31A18 6 18.43 1 0 12.92 -27.69A18 6 18.43 1 0 47.08 -16.31',
-    fill: 'M-44.09 32.5L-37.07 32.79L-30.28 32.79L-23.7 32.43L-17.3 31.66L-11.07 30.45L-5 28.78L0.92 26.61L6.66 23.92L12.22 20.69L17.57 16.9L22.7 12.55L27.57 7.65L32.17 2.21L36.49 -3.77L40.51 -10.26L44.23 -17.26L15.77 -26.74L14.69 -20.68L13.32 -14.98L11.66 -9.64L9.68 -4.65L7.38 0.01L4.74 4.35L1.73 8.38L-1.66 12.08L-5.46 15.45L-9.69 18.47L-14.35 21.11L-19.45 23.34L-24.97 25.14L-30.9 26.46L-37.23 27.27L-43.91 27.5Z',
-  },
-};
-
-const HALO_GAP = 4.5;
-const HALO_LINE = 4.5;
+const segD = (segs) => segs.map(([p0, p1]) => `M${p0[0]} ${p0[1]}L${p1[0]} ${p1[1]}`).join('');
+const segPts = (segs, r) => segs.flat().map(([x, y]) => [x, y, r]);
 const GRADIENT_AXIS = [Math.sin(deg(150)), -Math.cos(deg(150))];
-
-const CHECK = {
-  r: 52,
-  parts: [
-    { d: 'M-31 -1.5L-11 24.5L31 -24.5', w: 22, solid: false },
-    { d: 'M-31 -1.5L-11 24.5L31 -24.5Z', w: 22, solid: true, knockOnly: true },
-  ],
-};
-const BELL = {
-  r: 53,
-  parts: [
-    {
-      d: 'M0 -35C-20 -35 -26 -17 -27 3C-28 13 -34 19 -40 24V27H40V24C34 19 28 13 27 3C26 -17 20 -35 0 -35Z',
-      w: 6,
-      fill: true,
-      solid: true,
-    },
-    { d: 'M-8 -35V-40A8 8 0 0 1 8 -40V-35', w: 5, solid: true },
-    { d: 'M-12 38H12A12 12 0 0 1 -12 38Z', w: 5, solid: true },
-  ],
-};
-
-const placeGlyph = (def, p, size) => {
-  const k = size / def.r;
-  return { def, p, k, size, tf: `translate(${p[0]} ${p[1]}) scale(${k})` };
-};
-
-const glyphInk = (g, color) =>
-  `<g transform="${g.tf}" fill="none" stroke="${color}" stroke-linecap="round" stroke-linejoin="round">${g.def.parts
-    .filter((p) => !p.knockOnly)
-    .map((p) => `<path d="${p.d}" stroke-width="${p.w}"${p.fill ? ` fill="${color}"` : ''}/>`)
-    .join('')}</g>`;
 
 const gradientDef = (id, [x1, y1], [x2, y2], stops) =>
   `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">${stops
     .map(([o, col]) => `<stop offset="${o}" stop-color="${col}"/>`)
     .join('')}</linearGradient>`;
 
-function haloSet(parts, id, region, color) {
-  const line = color ? HALO_LINE : 0;
-  const draw = (extra, paint, knock = false) =>
-    parts
-      .filter((p) => knock || !p.knockOnly)
-      .map((p) => {
-        const k = p.k ?? 1;
-        const tf = p.tf ? ` transform="${p.tf}"` : '';
-        return `<path d="${p.d}"${tf} fill="${p.solid ? paint : 'none'}" stroke="${paint}" stroke-width="${p.w + extra / k}"/>`;
-      })
-      .join('');
-  const wrap = (body) => `<g stroke-linecap="round" stroke-linejoin="round">${body}</g>`;
-  const mask = (mid, extra, knock = false) =>
-    `<mask id="${mid}" maskUnits="userSpaceOnUse" x="${region.x}" y="${region.y}" width="${region.w}" height="${region.h}"><rect x="${region.x}" y="${region.y}" width="${region.w}" height="${region.h}" fill="#fff"/>${wrap(draw(extra, '#000', knock))}</mask>`;
-  return {
-    masks: `${mask(`${id}g`, 2 * HALO_GAP)}${mask(`${id}k`, 2 * (HALO_GAP + line / 2), true)}`,
-    pale: color ? `<g mask="url(#${id}g)">${wrap(draw(2 * (HALO_GAP + HALO_LINE), color))}</g>` : '',
-    knock: `url(#${id}k)`,
-  };
-}
+let renderSeq = 0;
 
-function openClockMark({
-  gapFrom = 22,
-  gapTo = 128,
-  minute = 66,
-  hour = 285,
-  hands: withHands = true,
-  icons = [],
-  span = [40, 140],
-  ringW = RING_W,
-  link: withLink = true,
-  ticks: tickSpec = { angles: [180, 270], len: 34, w: 20, inset: 18, grow: false },
-  ringFrom = null,
-  iconSize = ICON_SIZE,
-  iconStroke = ICON_STROKE,
-  iconOutline = false,
-  stroke: t = T,
-  letterGap: rg = RG,
-  clearPad = 14,
-  tickPad = 16,
-  ringGap = 26,
-  crownThick = 0.065,
-  crownLen = 0.21,
-  styled = false,
-  bare = false,
-  rows = 'both',
-  degreeOn = true,
-  closed = false,
-  crown = false,
-  ends = null,
-  check = false,
-  bell = false,
-  glyphSize = 60,
-} = {}) {
-  const adv = (g) => ROUND[g].w + t + rg;
-  const y2 = RH + t + ROW_GAP;
-  const link = withLink ? y2 - RH : 0;
-  const xE = adv('j');
-  const xW = xE + adv('e');
-  const row2Width = adv('three') + adv('six') + ROUND.five.w;
-  const x3 = withLink ? xE - ROUND.three.w : (xW + ROUND.w.w - row2Width) / 2;
-  const x6 = x3 + adv('three');
-  const x5 = x6 + adv('six');
-  const every = [
-    ['j', 0, 0],
-    ['e', xE, 0],
-    ['w', xW, 0],
-    ['three', x3, y2],
-    ['six', x6, y2],
-    ['five', x5, y2],
-  ];
-  const placed = (rows === 'bottom' ? every.slice(3) : every).map(([g, x, y]) => trace(ROUND[g].path(ROUND[g].w, link), [x, y]));
-  const degree = { r: 15, sw: 11, c: [x5 + ROUND.five.w + t / 2 + 10 + 20.5, y2 - t / 2 + 2] };
-  const ink = [
-    ...placed.flatMap((p) => p.pts),
-    ...(degreeOn ? Array.from({ length: 36 }, (_, k) => at(degree.c, degree.r, k * 10)) : []),
-  ];
-  const mec = enclosingCircle(ink);
-  const c = [mec.x, mec.y];
-  const onRing = (R, a) => [c[0] + clockDir(a)[0] * R, c[1] + clockDir(a)[1] * R];
-  const iconAngles = ends
-    ? icons.map((_, i) => ends[0] + ((ends[1] - ends[0]) * (i + 1)) / (icons.length + 1))
-    : icons.map((_, i) => span[0] + ((span[1] - span[0]) * i) / Math.max(1, icons.length - 1));
-  const marks = [
-    ...icons.map((_, i) => ({ a: iconAngles[i], size: iconSize })),
-    ...(ends && check ? [{ a: ends[0], size: glyphSize }] : []),
-    ...(ends && bell ? [{ a: ends[1], size: glyphSize }] : []),
-  ];
-  const iconsClear = (R) =>
-    marks.every(({ a, size }) => {
-      const p = onRing(R, a);
-      return ink.every(([x, y]) => Math.hypot(x - p[0], y - p[1]) >= t / 2 + size + clearPad);
-    });
-  const tickSegs = (R, angles = tickSpec.angles) =>
-    angles.map((a) => {
-      const outer = R - ringW / 2 - tickSpec.inset;
-      const len = tickSpec.major?.includes(a) ? tickSpec.majorLen : tickSpec.len;
-      return [onRing(outer - len, a), onRing(outer, a)];
-    });
-  const tickHits = ([p0, p1]) =>
-    ink.some(([x, y]) =>
-      [0, 0.25, 0.5, 0.75, 1].some(
-        (u) => Math.hypot(x - (p0[0] + (p1[0] - p0[0]) * u), y - (p0[1] + (p1[1] - p0[1]) * u)) < t / 2 + tickSpec.w / 2 + tickPad,
-      ),
-    );
-  let R = mec.r + t / 2 + ringGap + ringW / 2;
-  while (!iconsClear(R) || (tickSpec.grow && tickSegs(R).some(tickHits))) R += 4;
-  const placedIcons = icons.map((key, i) => ({ key, p: onRing(R, iconAngles[i]) }));
-  const glyphs = [
-    ...(ends && check ? [placeGlyph(CHECK, onRing(R, ends[0]), glyphSize)] : []),
-    ...(ends && bell ? [placeGlyph(BELL, onRing(R, ends[1]), glyphSize)] : []),
-  ];
-  const margin = (key) => (Math.asin(Math.min(1, (iconSize + 18) / R)) * 180) / Math.PI;
-  const arcFrom = ends ? ends[0] : (ringFrom ?? (icons.length ? iconAngles[0] - margin(icons[0]) : gapFrom));
-  const arcTo = ends ? ends[1] : icons.length ? iconAngles[icons.length - 1] + margin(icons[icons.length - 1]) : gapTo;
-  const pivot = [x6 + ROUND.six.w * 0.72, y2];
-  const inner = icons.length ? R - 74 : R - ringW / 2 - 34;
-  const reachTo = (a) => {
-    const u = clockDir(a);
-    const v = [pivot[0] - c[0], pivot[1] - c[1]];
-    const b = u[0] * v[0] + u[1] * v[1];
-    return -b + Math.sqrt(b * b - (v[0] * v[0] + v[1] * v[1] - inner * inner));
-  };
-  const minuteLen = reachTo(minute);
-  const others = [...placed.filter((_, i) => i !== 4).flatMap((p) => p.pts), ...ink.slice(-36)];
-  const freeLen = (a, w, max) => {
-    const u = clockDir(a);
-    for (let s = PIVOT_R; s <= max; s += 2) {
-      const q = [pivot[0] + u[0] * s, pivot[1] + u[1] * s];
-      if (others.some(([x, y]) => Math.hypot(x - q[0], y - q[1]) < t / 2 + w / 2 + HALO)) return s - 2;
-    }
-    return max;
-  };
-  const hands = withHands
-    ? [
-        { a: hour, len: freeLen(hour, 24, minuteLen * 0.46), w: 24 },
-        { a: minute, len: minuteLen, w: 20 },
-      ].map((h) => ({ ...h, end: [pivot[0] + clockDir(h.a)[0] * h.len, pivot[1] + clockDir(h.a)[1] * h.len] }))
-    : [];
-  const ticks = bare ? [] : [...tickSegs(R), ...tickSegs(R, tickSpec.optional ?? [])].filter((seg) => !tickHits(seg));
-  const ringStart = onRing(R, arcTo);
-  const ringEnd = onRing(R, arcFrom + 360);
-  const ringSweep = 360 - (arcTo - arcFrom);
-  const ringD = closed
-    ? `M${c[0] - R} ${c[1]}A${R} ${R} 0 1 1 ${c[0] + R} ${c[1]}A${R} ${R} 0 1 1 ${c[0] - R} ${c[1]}`
-    : `M${ringStart[0]} ${ringStart[1]}A${R} ${R} 0 ${ringSweep > 180 ? 1 : 0} 1 ${ringEnd[0]} ${ringEnd[1]}`;
-  const crownGeo = (() => {
-    const b = Math.round(R * crownThick);
-    return { b, half: (R * crownLen - b) / 2, yBar: c[1] - R - ringW / 2 - b * 0.8 - b / 2 };
-  })();
-  const haloExt = styled ? HALO_GAP + HALO_LINE : 0;
+function scene({ letters, degree = null, ring = null, ticks = null, crown = null, glyphs = [] }) {
+  const lettersD = letters.join('');
   const extents = [
-    ...ink.map(([x, y]) => [x, y, t / 2 + haloExt]),
-    ...(bare ? [] : [[c[0], c[1], R + ringW / 2]]),
-    ...placedIcons.map(({ key, p }) => [p[0], p[1], iconSize]),
-    ...glyphs.map((g) => [g.p[0], g.p[1], g.size + haloExt]),
-    ...(crown && !bare
-      ? [
-          [c[0] - crownGeo.half, crownGeo.yBar, crownGeo.b / 2],
-          [c[0] + crownGeo.half, crownGeo.yBar, crownGeo.b / 2],
-        ]
-      : []),
+    ...samplePath(lettersD).map(([x, y]) => [x, y, 0]),
+    ...(degree ? Array.from({ length: 36 }, (_, i) => [...at(degree.c, degree.r + degree.w / 2, i * 10), 0]) : []),
+    ...(ring ? (ring.pts ?? samplePath(ring.d)).map(([x, y]) => [x, y, ring.w / 2]) : []),
+    ...(ticks ? segPts(ticks.segs, ticks.w / 2) : []),
+    ...(crown ? segPts([crown.bar, crown.stem], crown.w / 2) : []),
+    ...glyphs.flatMap((g) => samplePath(g.d).map(([x, y]) => [x, y, 0])),
   ];
   const x0 = Math.min(...extents.map(([x, , r]) => x - r));
   const y0 = Math.min(...extents.map(([, y, r]) => y - r));
   const x1 = Math.max(...extents.map(([x, , r]) => x + r));
   const y1 = Math.max(...extents.map(([, y, r]) => y + r));
-  const line = (p0, p1, w, color) => `<path d="M${p0[0]} ${p0[1]}L${p1[0]} ${p1[1]}" stroke="${color}" stroke-width="${w}"/>`;
-  const iconsSvg = (sun) =>
-    placedIcons
-      .map(({ key, p }) => `<path transform="translate(${p[0]} ${p[1]}) scale(${iconScale(key, iconSize)})" stroke-width="${iconStroke / iconScale(key, iconSize)}" d="${ICONS[key].d}"/>${ICONS[key].fill ? `<path transform="translate(${p[0]} ${p[1]}) scale(${iconScale(key, iconSize)})" d="${ICONS[key].fill}" ${iconOutline ? `fill="none" stroke-width="${iconStroke / iconScale(key, iconSize)}"` : `fill="${sun}" stroke="none"`}/>` : ""}`)
-      .join('');
-  const lettersD = placed.map((p) => p.d).join('');
-  const plain = ({ ink: inkColor, sun }) => {
-    const accents = `<g fill="none" stroke="${sun}" stroke-linecap="round" stroke-linejoin="round"><circle cx="${degree.c[0]}" cy="${degree.c[1]}" r="${degree.r}" stroke-width="${degree.sw}"/><g stroke-width="${ICON_W}">${iconsSvg(sun)}</g>${hands.map((h) => line(pivot, h.end, h.w, sun)).join('')}</g>${withHands ? `<circle cx="${pivot[0]}" cy="${pivot[1]}" r="${PIVOT_R}" fill="${sun}"/>` : ''}`;
-    const body = `<path d="${ringD}" stroke-width="${ringW}"/>${ticks.map(([p0, p1]) => line(p0, p1, tickSpec.w, inkColor)).join('')}<path d="${lettersD}" stroke-width="${t}"/>`;
-    if (!withHands) {
-      return `<g fill="none" stroke="${inkColor}" stroke-linecap="round" stroke-linejoin="round">${body}</g>${accents}`;
-    }
-    const id = `ko${++maskSeq}`;
-    const knock = hands.map((h) => line(pivot, h.end, h.w + HALO * 2, '#000')).join('');
-    const mask = `<mask id="${id}" maskUnits="userSpaceOnUse" x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}"><rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="#fff"/><g stroke-linecap="round">${knock}</g><circle cx="${pivot[0]}" cy="${pivot[1]}" r="${PIVOT_R + HALO}" fill="#000"/></mask>`;
-    return `<defs>${mask}</defs><g mask="url(#${id})" fill="none" stroke="${inkColor}" stroke-linecap="round" stroke-linejoin="round">${body}</g>${accents}`;
-  };
-  const fancy = ({ ink: inkColor, sun, ring: ringStops, ticks: tickStops, halo }) => {
-    const id = `og${++maskSeq}`;
-    const region = { x: x0 - 12, y: y0 - 12, w: x1 - x0 + 24, h: y1 - y0 + 24 };
-    const ringPaint = ringStops ? `url(#${id}r)` : inkColor;
-    const tickPaint = tickStops ? `url(#${id}t)` : ringPaint;
+  const glyphBoxes = glyphs.map((g) => boxOf(samplePath(g.box ?? g.d)));
+  const render = (colors) => {
+    const id = `og${++renderSeq}`;
     const defs = [];
-    if (ringStops && !bare) {
+    const paint = (key, stops, from, to) => {
+      if (!stops) return colors[key] ?? colors.sun;
+      defs.push(gradientDef(`${id}g${defs.length}`, from, to, stops));
+      return `url(#${id}g${defs.length - 1})`;
+    };
+    const els = [];
+    if (crown) {
+      const crownPaint = colors.crown ?? colors.ink;
+      els.push(
+        `<path d="${segD([crown.stem])}" stroke="${crownPaint}" stroke-width="${crown.w}"/><path d="${segD([crown.bar])}" stroke="${crownPaint}" stroke-width="${crown.w}" stroke-linecap="round"/>`,
+      );
+    }
+    if (ring) {
       const [ax, ay] = GRADIENT_AXIS;
-      defs.push(gradientDef(`${id}r`, [c[0] - R * ax, c[1] - R * ay], [c[0] + R * ax, c[1] + R * ay], ringStops));
+      const ringPaint = paint('ink', colors.ring, [ring.c[0] - ring.r * ax, ring.c[1] - ring.r * ay], [ring.c[0] + ring.r * ax, ring.c[1] + ring.r * ay]);
+      els.push(`<path d="${ring.d}" fill="none" stroke="${ringPaint}" stroke-width="${ring.w}" stroke-linecap="round"/>`);
     }
-    if (tickStops && ticks.length) {
-      const ys = ticks.flatMap(([p0, p1]) => [p0[1], p1[1]]);
-      defs.push(gradientDef(`${id}t`, [c[0], Math.min(...ys)], [c[0], Math.max(...ys)], tickStops));
+    if (ticks) {
+      const ys = ticks.segs.flat().map(([, y]) => y);
+      const tickPaint = paint('ink', colors.ticks, [0, Math.min(...ys)], [0, Math.max(...ys)]);
+      els.push(`<path d="${segD(ticks.segs)}" fill="none" stroke="${tickPaint}" stroke-width="${ticks.w}" stroke-linecap="round"/>`);
     }
-    const letterHalo = halo ? haloSet([{ d: lettersD, w: t }], `${id}l`, region, halo) : null;
-    const glyphHalo = glyphs.length
-      ? haloSet(
-          glyphs.flatMap((g) => g.def.parts.map((p) => ({ ...p, tf: g.tf, k: g.k }))),
-          `${id}c`,
-          region,
-          halo,
-        )
-      : null;
-    const ringEl = bare
-      ? ''
-      : `<path d="${ringD}" fill="none" stroke="${ringPaint}" stroke-width="${ringW}" stroke-linecap="round"${glyphHalo ? ` mask="${glyphHalo.knock}"` : ''}/>`;
-    const crownEl =
-      crown && !bare
-        ? `<g fill="none" stroke="${ringPaint}" stroke-width="${crownGeo.b}"><path d="M${c[0]} ${c[1] - R}V${crownGeo.yBar}"/><path d="M${c[0] - crownGeo.half} ${crownGeo.yBar}H${c[0] + crownGeo.half}" stroke-linecap="round"/></g>`
-        : '';
-    const tickEl = ticks.length
-      ? `<g fill="none" stroke="${tickPaint}" stroke-width="${tickSpec.w}" stroke-linecap="round">${ticks.map(([p0, p1]) => `<path d="M${p0[0]} ${p0[1]}L${p1[0]} ${p1[1]}"/>`).join('')}</g>`
-      : '';
-    const lettersEl = `<path d="${lettersD}" fill="none" stroke="${inkColor}" stroke-width="${t}" stroke-linecap="round" stroke-linejoin="round"/>`;
-    const accents = `<g fill="none" stroke="${sun}" stroke-linecap="round" stroke-linejoin="round">${degreeOn ? `<circle cx="${degree.c[0]}" cy="${degree.c[1]}" r="${degree.r}" stroke-width="${degree.sw}"/>` : ''}<g stroke-width="${ICON_W}">${iconsSvg(sun)}</g></g>`;
-    const glyphEl = glyphs.map((g) => glyphInk(g, g.def === CHECK ? inkColor : sun)).join('');
-    const defsAll = `${defs.join('')}${letterHalo ? letterHalo.masks : ''}${glyphHalo ? glyphHalo.masks : ''}`;
-    return `${defsAll ? `<defs>${defsAll}</defs>` : ''}${letterHalo ? letterHalo.pale : ''}${ringEl}${crownEl}${tickEl}${lettersEl}${accents}${glyphHalo ? glyphHalo.pale : ''}${glyphEl}`;
-  };
-  const shape = styled
-    ? enclosingCircle(extents.flatMap(([x, y, r]) => Array.from({ length: 24 }, (_, k) => at([x, y], r, k * 15))))
-    : null;
-  return {
-    custom: true,
-    R,
-    box: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 },
-    center: shape ? [shape.x, shape.y] : c,
-    reach: (cx, cy) => Math.max(...extents.map(([x, y, r]) => Math.hypot(x - cx, y - cy) + r)),
-    render: (colors) => (styled ? fancy(colors) : plain(colors)),
-  };
-}
-
-function shawlPath() {
-  const seg = (x0, y0, x1, y1) => `M${x0} ${y0}L${x1} ${y1}`;
-  const dot = (x, y) => `M${x - 1.8} ${y}A1.8 1.8 0 1 0 ${x + 1.8} ${y}A1.8 1.8 0 1 0 ${x - 1.8} ${y}`;
-  const outline = 'M-15 -38L14 -28L29 20L5 25L6 11L-29 -5Z';
-  const fold = seg(11, -23, 5, 25);
-  const stripes = [seg(-18.6, -22, 8.4, -6), seg(-21.6, -12, 7, 3), seg(6, 8, 25, 5), seg(5.5, 17, 27, 13)];
-  const hang = (x, y, dx, len) => seg(x, y, x + dx, y + len) + dot(x + dx, y + len + 1.8);
-  const left = [0.1, 0.32, 0.54, 0.76, 0.97].map((t) => hang(-29 + 35 * t, -5 + 16 * t, -2, 9));
-  const right = [9, 17, 25].map((x) => hang(x, 25 - (5 * (x - 5)) / 24, 0, 8));
-  return [outline, fold, ...stripes, ...left, ...right].join('');
-}
-ICONS.tallitShawl = { r: 44, d: shawlPath() };
-const MITZVOT_SYMBOLS_O = ['tefillinPair', 'tallitShawl', 'torah', 'shofar'];
-
-function scaledMark(opts, { icon = 0, glyph = 0 }) {
-  let layout = openClockMark(opts);
-  for (let i = 0; i < 8; i++) {
-    layout = openClockMark({
-      ...opts,
-      ...(icon ? { iconSize: icon * layout.R, iconStroke: icon * layout.R * 0.094 } : {}),
-      ...(glyph ? { glyphSize: glyph * layout.R } : {}),
+    els.push(`<path d="${lettersD}" fill="${colors.ink}" fill-rule="evenodd"/>`);
+    if (degree) {
+      els.push(`<circle cx="${degree.c[0]}" cy="${degree.c[1]}" r="${degree.r}" fill="none" stroke="${colors.degree ?? colors.sun}" stroke-width="${degree.w}"/>`);
+    }
+    glyphs.forEach((g, i) => {
+      const b = glyphBoxes[i];
+      const fill = paint('sun', colors[g.paint], [b.x, b.y], [b.x + b.w, b.y + b.h]);
+      els.push(`<path d="${g.d}" fill="${fill}" fill-rule="evenodd"/>`);
     });
-  }
-  return layout;
+    return `${defs.length ? `<defs>${defs.join('')}</defs>` : ''}${els.join('')}`;
+  };
+  const shape = enclosingCircle(extents.flatMap(([x, y, r]) => (r ? Array.from({ length: 24 }, (_, k) => at([x, y], r, k * 15)) : [[x, y]])));
+  return {
+    box: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 },
+    center: [shape.x, shape.y],
+    reach: (cx, cy) => Math.max(...extents.map(([x, y, r]) => Math.hypot(x - cx, y - cy) + r)),
+    render,
+  };
 }
 
-const O_TICKS = { angles: [0, 330, 300, 270, 240, 210, 180], major: [0, 270, 180], len: 46, majorLen: 76, w: 24, inset: 24, grow: true };
-const O_CORE = {
-  hands: false,
-  link: false,
-  styled: true,
-  stroke: 48,
-  letterGap: 20,
-  ringW: 18,
-  ticks: O_TICKS,
-  tickPad: 36,
-  clearPad: 16,
-  iconSize: 47,
-  iconStroke: 4.4,
-  iconOutline: true,
-  glyphSize: 50,
-  crown: true,
-};
-const O_ENDS = [28, 134];
-const NO_TICKS = { angles: [], len: 0, w: 0, inset: 0, grow: false };
-const O_ICON = {
-  ...O_CORE,
-  stroke: 58,
-  ringW: 26,
-  tickPad: 39,
-  ticks: { ...O_TICKS, w: 28, len: 50, majorLen: 82, major: [0, 270, 180, 90], optional: [30, 60, 90, 120, 150] },
-};
-const O_OUTPUTS = {
-  icon: () =>
-    scaledMark({ ...O_ICON, ticks: { ...O_ICON.ticks, major: [0, 270, 180], optional: [] }, ends: O_ENDS, check: true, bell: true }, { glyph: 0.18 }),
-  notif: () =>
-    openClockMark({ ...O_CORE, rows: 'bottom', degreeOn: false, ticks: NO_TICKS, closed: true, stroke: 70, letterGap: 24, ringW: 92, ringGap: 6, crownThick: 0.2, crownLen: 0.56 }),
-  word: () => openClockMark({ ...O_CORE, bare: true, ticks: NO_TICKS, crown: false }),
-};
+const lettersOf = (rows) => rows.flatMap((row) => LETTER_ROWS[row]).map((key) => SOURCE_PATHS.letters[key]);
 
-const markO = scaledMark({ ...O_CORE, icons: MITZVOT_SYMBOLS_O, ends: O_ENDS, check: true, bell: true }, { icon: 0.116, glyph: 0.104 });
+const markO = scene({
+  letters: lettersOf(['top', 'bottom']),
+  degree: SOURCE.degree,
+  ring: { ...SOURCE.ring, d: SOURCE_PATHS.ring },
+  ticks: SOURCE.ticks,
+  crown: SOURCE.crown,
+  glyphs: [
+    { d: SOURCE_PATHS.bell, paint: 'bell' },
+    { d: SOURCE_PATHS.book, paint: 'book' },
+    { d: SOURCE_PATHS.bookLines, paint: 'lines', box: SOURCE_PATHS.book },
+  ],
+});
+
+function notifMark({ ringW = 78, ringGap = 5, crownThick = 0.2, crownLen = 0.56, crownGap = 0.8 } = {}) {
+  const letters = lettersOf(['bottom']);
+  const ink = samplePath(letters.join(''));
+  const mec = enclosingCircle(ink);
+  const c = [mec.x, mec.y];
+  const R = Math.max(...ink.map(([x, y]) => Math.hypot(x - c[0], y - c[1]))) + ringGap + ringW / 2;
+  const b = Math.round(R * crownThick);
+  const half = (R * crownLen - b) / 2;
+  const yBar = c[1] - R - ringW / 2 - b * crownGap - b / 2;
+  const ring = {
+    c,
+    r: R,
+    w: ringW,
+    d: `M${c[0] - R} ${c[1]}A${R} ${R} 0 1 1 ${c[0] + R} ${c[1]}A${R} ${R} 0 1 1 ${c[0] - R} ${c[1]}`,
+    pts: Array.from({ length: 72 }, (_, i) => at(c, R, i * 5)),
+  };
+  return scene({ letters, ring, crown: { w: b, bar: [[c[0] - half, yBar], [c[0] + half, yBar]], stem: [[c[0], yBar], [c[0], c[1] - R]] } });
+}
+
+const oOut = {
+  icon: markO,
+  notif: notifMark(),
+  word: scene({ letters: lettersOf(['top', 'bottom']), degree: SOURCE.degree }),
+};
 
 function markSvg(layout, colors, { pad = 0, bg, title, attrs = '' } = {}) {
   const b = layout.box;
@@ -519,32 +229,25 @@ const BLUE_ORANGE = {
   id: 'blue-orange',
   label: 'כחול הדרגתי וכתום',
   bg: '#FFFFFF',
-  ink: '#012B97',
+  ink: '#002767',
   sun: '#FF3B03',
+  crown: '#0060FC',
   ring: [
-    [0, '#0022AE'],
-    [0.07, '#0038CE'],
-    [0.14, '#014AE1'],
-    [0.185, '#0068FD'],
-    [0.27, '#1F8AFD'],
-    [0.37, '#3E9DFA'],
-    [0.475, '#48A0FE'],
-    [0.68, '#4DA5FD'],
-    [0.85, '#63B2FE'],
-    [0.93, '#78BFFD'],
-    [1, '#87C8FE'],
+    [0, '#0069FD'],
+    [0.07, '#0070FC'],
+    [0.25, '#0086FB'],
+    [0.5, '#1C98FC'],
+    [0.75, '#33A5FC'],
+    [0.93, '#65C1FC'],
+    [1, '#80CEFD'],
   ],
   ticks: [
-    [0, '#0037C8'],
-    [0.12, '#002AAA'],
-    [0.3, '#0030BE'],
-    [0.52, '#0038D0'],
-    [0.64, '#1A6EF0'],
-    [0.73, '#2F94FE'],
-    [0.9, '#459FFD'],
-    [1, '#5DAEFE'],
+    [0, '#0085FC'],
+    [0.3, '#0F8DFC'],
+    [0.53, '#1F9AFC'],
+    [0.76, '#2DA1FC'],
+    [1, '#3AA9FC'],
   ],
-  halo: '#B9DCF9',
   hero: '#0E1626',
   heroInk: '#F4F7FF',
   heroSun: '#FF8A5C',
@@ -557,7 +260,6 @@ const BLUE_ORANGE = {
     [0, '#6F9BFF'],
     [1, '#BFE0FF'],
   ],
-  heroHalo: null,
 };
 const hexToHsl = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
@@ -584,38 +286,58 @@ const toRed = (hex) => {
   return hslToHex((h + RED_ROTATION) % 360, s, l);
 };
 const toRedStops = (stops) => stops.map(([offset, hex]) => [offset, toRed(hex)]);
+const tone = (hex, dh, dl) => {
+  const [h, s, l] = hexToHsl(hex);
+  return hslToHex((h + dh) % 360, s, Math.min(0.95, l + dl));
+};
+const sunTones = (sun) => ({
+  degree: tone(sun, 5, 0),
+  bell: [
+    [0, tone(sun, 14, 0.06)],
+    [0.45, tone(sun, 12, 0.01)],
+    [1, sun],
+  ],
+  book: [
+    [0, tone(sun, 13, 0.02)],
+    [0.5, tone(sun, 4, 0)],
+    [0.7, sun],
+    [1, sun],
+  ],
+  lines: [
+    [0, tone(sun, 15, 0.21)],
+    [1, tone(sun, 12, 0.17)],
+  ],
+});
 
 const RED_ORANGE = {
   ...BLUE_ORANGE,
   id: 'red-orange',
   label: 'אדום הדרגתי וכתום',
   ink: toRed(BLUE_ORANGE.ink),
+  crown: toRed(BLUE_ORANGE.crown),
   ring: toRedStops(BLUE_ORANGE.ring),
   ticks: toRedStops(BLUE_ORANGE.ticks),
-  halo: toRed(BLUE_ORANGE.halo),
   heroRing: toRedStops(BLUE_ORANGE.heroRing),
   heroTicks: toRedStops(BLUE_ORANGE.heroTicks),
 };
 
-const lightColors = (p) => ({ ink: p.ink, sun: p.sun, ring: p.ring, ticks: p.ticks, halo: p.halo });
-const darkColors = (p) => ({ ink: p.heroInk, sun: p.heroSun, ring: p.heroRing, ticks: p.heroTicks, halo: p.heroHalo });
+const lightColors = (p) => ({ ink: p.ink, sun: p.sun, crown: p.crown, ring: p.ring, ticks: p.ticks, ...sunTones(p.sun) });
+const darkColors = (p) => ({ ink: p.heroInk, sun: p.heroSun, crown: p.heroRing[0][1], ring: p.heroRing, ticks: p.heroTicks, ...sunTones(p.heroSun) });
 
 const O_LIGHT = lightColors(BLUE_ORANGE);
 const O_DARK = darkColors(BLUE_ORANGE);
 const P_LIGHT = lightColors(RED_ORANGE);
 const P_DARK = darkColors(RED_ORANGE);
-const O_ICON_LIGHT = { ...O_LIGHT, halo: null };
 const O_SILHOUETTE = { ink: '#000000', sun: '#000000' };
-const oOut = Object.fromEntries(Object.entries(O_OUTPUTS).map(([k, f]) => [k, f()]));
 const oSvgs = {
-  'mark-o.svg': markSvg(markO, O_LIGHT, { pad: 24, title: 'Jew 365 mark o' }),
-  'mark-o-mono.svg': markSvg(markO, O_SILHOUETTE, { pad: 24, title: 'Jew 365 mark o mono' }),
-  'mark-o-dark.svg': markSvg(markO, O_DARK, { pad: 24, title: 'Jew 365 mark o on dark' }),
-  'mark-o-icon.svg': markSvg(oOut.icon, O_ICON_LIGHT, { pad: 24, title: 'Jew 365 launcher icon' }),
-  'mark-o-icon-mono.svg': markSvg(oOut.icon, O_SILHOUETTE, { pad: 24, title: 'Jew 365 launcher icon, single colour' }),
-  'mark-o-notif.svg': markSvg(oOut.notif, O_SILHOUETTE, { pad: 8, title: 'Jew 365 notification silhouette' }),
-  'wordmark-o.svg': markSvg(oOut.word, O_LIGHT, { pad: 12, title: 'JEW 365 wordmark o' }),
-  'wordmark-o-dark.svg': markSvg(oOut.word, O_DARK, { pad: 12, title: 'JEW 365 wordmark o on dark' }),
+  'mark-o.svg': markSvg(markO, O_LIGHT, { pad: 20, title: 'Jew 365 mark o' }),
+  'mark-o-mono.svg': markSvg(markO, O_SILHOUETTE, { pad: 20, title: 'Jew 365 mark o mono' }),
+  'mark-o-dark.svg': markSvg(markO, O_DARK, { pad: 20, title: 'Jew 365 mark o on dark' }),
+  'mark-o-icon.svg': markSvg(oOut.icon, O_LIGHT, { pad: 20, title: 'Jew 365 launcher icon' }),
+  'mark-o-icon-mono.svg': markSvg(oOut.icon, O_SILHOUETTE, { pad: 20, title: 'Jew 365 launcher icon, single colour' }),
+  'mark-o-notif.svg': markSvg(oOut.notif, O_SILHOUETTE, { pad: 7, title: 'Jew 365 notification silhouette' }),
+  'wordmark-o.svg': markSvg(oOut.word, O_LIGHT, { pad: 10, title: 'JEW 365 wordmark o' }),
+  'wordmark-o-dark.svg': markSvg(oOut.word, O_DARK, { pad: 10, title: 'JEW 365 wordmark o on dark' }),
 };
 for (const [name, svg] of Object.entries(oSvgs)) writeFileSync(join(OUT, name), svg + '\n');
 const round2 = (n) => Number(n.toFixed(2));
@@ -625,7 +347,7 @@ const metaOf = (layout) => {
 };
 writeFileSync(
   join(OUT, 'mark-o-meta.json'),
-  JSON.stringify({ mark: metaOf(markO), icon: metaOf(oOut.icon), notif: metaOf(oOut.notif), wordmark: metaOf(oOut.word) }, null, 2) + '\n',
+  JSON.stringify({ mark: metaOf(markO), icon: { ...metaOf(oOut.icon), frame: SOURCE.square }, notif: metaOf(oOut.notif), wordmark: metaOf(oOut.word) }, null, 2) + '\n',
 );
 
 const MONO = { ink: '#000', sun: '#000' };
@@ -667,14 +389,13 @@ const iconRows = (entries) =>
 
 const CREAM = '#F6F1E8';
 const NIGHT = '#0E1626';
-const O_ICON_DARK = { ...O_DARK, halo: null };
 const oIconEntries = [
   {
-    name: 'אייקון משגר · צ׳ק ופעמון',
+    name: 'אייקון משגר · פעמון וספר',
     layout: oOut.icon,
-    light: O_ICON_LIGHT,
-    main: { colors: O_ICON_LIGHT, bg: CREAM },
-    alt: { colors: O_ICON_DARK, bg: NIGHT, label: 'רקע לילה' },
+    light: O_LIGHT,
+    main: { colors: O_LIGHT, bg: BLUE_ORANGE.bg },
+    alt: { colors: O_DARK, bg: NIGHT, label: 'רקע לילה' },
   },
 ];
 const oNotifEntry = { name: 'התראה · טבעת וכתר', layout: oOut.notif, light: { ink: '#111111', sun: '#111111' } };
@@ -738,7 +459,7 @@ const html = `<!doctype html>
   <p class="lead">הסימן המלא שנוצר מהקוד ליד הרפרנס שהבעלים בחר, ועל רקע לילה. בהמשך: אייקון המשגר, צללית ההתראה והלוגוטייפ.</p>
   <div class="o-pair">
     <figure><div class="o-tile" style="background:#FFFFFF">${markSvg(markO, O_LIGHT, { attrs: 'class="mk"' })}</div><figcaption>הסימן שנוצר</figcaption></figure>
-    <figure><div class="o-tile" style="background:#FFFFFF"><img class="o-ref" src="../../references/2026-10-21/logo.jpg" alt="הרפרנס שנבחר"></div><figcaption>הרפרנס</figcaption></figure>
+    <figure><div class="o-tile" style="background:#FFFFFF"><img class="o-ref" src="../../references/2026-11-02/logo.jpg" alt="הרפרנס שנבחר"></div><figcaption>הרפרנס</figcaption></figure>
     <figure><div class="o-tile" style="background:${NIGHT}">${markSvg(markO, O_DARK, { attrs: 'class="mk"' })}</div><figcaption>על רקע לילה</figcaption></figure>
   </div>
   <h3 class="o-sub">צללית</h3>
@@ -765,8 +486,8 @@ const html = `<!doctype html>
 writeFileSync(join(OUT, 'index.html'), html);
 
 const previewSvgs = {
-  'mark-o-preview.svg': markSvg(markO, P_LIGHT, { pad: 24, title: 'Jew 365 P mark o' }),
-  'mark-o-preview-dark.svg': markSvg(markO, P_DARK, { pad: 24, title: 'Jew 365 P mark o on dark' }),
+  'mark-o-preview.svg': markSvg(markO, P_LIGHT, { pad: 20, title: 'Jew 365 P mark o' }),
+  'mark-o-preview-dark.svg': markSvg(markO, P_DARK, { pad: 20, title: 'Jew 365 P mark o on dark' }),
 };
 for (const [name, svg] of Object.entries(previewSvgs)) writeFileSync(join(OUT, name), svg + '\n');
 console.log('wrote', [...Object.keys(oSvgs), ...Object.keys(previewSvgs)].join(', '), 'mark-o-meta.json index.html');

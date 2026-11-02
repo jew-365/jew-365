@@ -28,7 +28,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "monochromeImage": "./assets/adaptive-monochrome.png",
-        "backgroundColor": "#F6F1E8"
+        "backgroundColor": "#FFFFFF"
       },
       "package": "com.jew365.app",
       "allowBackup": true,
@@ -75,7 +75,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#012B97"
+          "color": "#002767"
         }
       ],
       "./scripts/withMitzvahNotificationAction",

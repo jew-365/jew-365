@@ -7,7 +7,7 @@ const PREVIEW = {
   adaptiveForeground: './assets/preview/adaptive-icon.png',
   splash: './assets/preview/splash.png',
   splashDark: './assets/preview/splash-dark.png',
-  notificationColor: '#970901',
+  notificationColor: '#670005',
   locales: { he: './locales/preview/he.json', en: './locales/preview/en.json' },
 };
 

@@ -98,7 +98,7 @@ describe('app.config.js with APP_VARIANT=preview', () => {
     expect(rest).toEqual(productionRest);
     expect(color).not.toBe(productionColor);
     const mark = fs.readFileSync(path.join(ROOT, 'design/jew365-concepts/vector/mark-o-preview.svg'), 'utf8');
-    expect(mark).toContain(`stroke="${color}"`);
+    expect(mark).toContain(`fill="${color}"`);
   });
 
   it('changes nothing else: every other key equals production', () => {

@@ -425,6 +425,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         he: 'מסך הפתיחה נפתח בשפת הטלפון, עם מעבר בין עברית לאנגלית, ומסמן שהשם והטלפון אינם חובה.',
         en: "The welcome screen opens in your phone's language, with a switch between Hebrew and English, and marks the name and phone as optional.",
       },
+      {
+        he: 'לוגו חדש: השעון עם פעמון וספר פתוח. סימון ״עשיתי״ על מצווה פתוחה סוגר את הכרטיס בתנועה אחת, בלי קפיצות במסך.',
+        en: 'A new logo: the stopwatch with a bell and an open book. Marking an open mitzvah done closes its card in one motion, with no jumps on the screen.',
+      },
     ],
   },
   {

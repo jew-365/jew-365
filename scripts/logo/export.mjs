@@ -28,7 +28,7 @@ const ASSETS = join(ROOT, 'assets');
 const PREVIEW = join(ASSETS, 'preview');
 const GENERATED = join(ROOT, 'src', 'components', 'logo.generated.ts');
 
-const CREAM = '#F6F1E8';
+const ICON_BACKGROUND = '#FFFFFF';
 const SIZE = 1024;
 const EDGE_INSET = 1.2;
 
@@ -246,6 +246,11 @@ function place(svg, [cx, cy], reach, centre, diameter) {
   return svg.replace('<svg ', `<svg style="${style}" `);
 }
 
+function framed({ center, reach, frame: [fx, fy, fw] }) {
+  const k = SIZE / fw;
+  return { centre: [(center[0] - fx) * k, (center[1] - fy) * k], diameter: 2 * reach * k };
+}
+
 function fitBox(svg, [bx, by, bw, bh], size, padding) {
   const [vx, vy, vw, vh] = viewBoxOf(svg);
   const k = Math.min((size - 2 * padding) / bw, (size - 2 * padding) / bh);
@@ -323,9 +328,11 @@ function main() {
     const adaptiveFill = 0.255 * SIZE;
     const splashRadius = 0.48 * SIZE;
 
+    const icon = framed(meta.icon);
+
     const writeMarks = (outDir, light, dark) => {
-      write('icon', place(light, meta.mark.center, meta.mark.reach, centre, 0.78 * SIZE), SIZE, {
-        background: CREAM,
+      write('icon', place(light, meta.icon.center, meta.icon.reach, icon.centre, icon.diameter), SIZE, {
+        background: ICON_BACKGROUND,
         opaque: true,
         outDir,
       });

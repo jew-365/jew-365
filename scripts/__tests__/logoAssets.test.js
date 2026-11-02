@@ -76,12 +76,12 @@ describe('app.json logo wiring', () => {
     expect(names.indexOf('expo-splash-screen')).toBe(names.indexOf('expo-font') + 1);
   });
 
-  it('gives the adaptive icon its foreground, a monochrome layer and the cream background', () => {
+  it('gives the adaptive icon its foreground, a monochrome layer and the white background', () => {
     const { adaptiveIcon } = appConfig.expo.android;
     expect(adaptiveIcon).toMatchObject({
       foregroundImage: './assets/adaptive-icon.png',
       monochromeImage: './assets/adaptive-monochrome.png',
-      backgroundColor: '#F6F1E8',
+      backgroundColor: '#FFFFFF',
     });
     expect(fs.existsSync(resolveAsset(adaptiveIcon.foregroundImage))).toBe(true);
     expect(fs.existsSync(resolveAsset(adaptiveIcon.monochromeImage))).toBe(true);
@@ -91,7 +91,7 @@ describe('app.json logo wiring', () => {
     const notifications = appConfig.expo.plugins.find(
       (plugin) => Array.isArray(plugin) && plugin[0] === 'expo-notifications',
     );
-    expect(notifications[1]).toMatchObject({ icon: './assets/notification-icon.png', color: '#012B97' });
+    expect(notifications[1]).toMatchObject({ icon: './assets/notification-icon.png', color: '#002767' });
     expect(fs.existsSync(resolveAsset(notifications[1].icon))).toBe(true);
   });
 
