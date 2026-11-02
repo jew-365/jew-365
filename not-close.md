@@ -353,6 +353,31 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** The Jest suites cannot show the OS delivering three separate notifications, or the Kotlin mark-done service and `cancelForMitzvah()` clearing a chain's presented repeats.
   - **Expected result:** Screenshots of the tray with the main and its three repeats three minutes apart, each with both buttons; a mark-done from the first removes the other pending ones and dismisses the presented ones; under the quiet hours the main and its repeats arrive from the chosen hour on; the mitzvah screen named the same times beforehand.
 
+### Nusach Teiman, 2026-11-02 — batch rules
+
+- **Requested:** the user, 2026-11-02, in a Claude Code session, in Hebrew: add nusach Teiman to the siddur and to everything it is relevant for.
+- **Decisions taken:** the owner's call, 2026-11-02: Baladi only, one new nusach; Shami is not added.
+- **Blocked:** the cloud environment of that session denies `www.sefaria.org` and `he.wikisource.org`, the two hosts [scripts/siddur/build.js](scripts/siddur/build.js) fetches, so no source can be read or built there; the owner is opening network access (Other Open Items).
+- **Done means:** the standing rule above (every siddur text ships for all nuschaot or not at all), so the nusach reaches the app only together with all its texts; every halachic choice listed under [For the rav](#for-the-rav); both dictionaries, the search, the guide and a `WHATS_NEW` item; a DOX pass; `pnpm siddur:build` twice with no change on the second run; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, `pnpm test:tz` green.
+
+### High — Nusach Teiman
+
+- [ ] Pin and map the Baladi source
+  - **Flag:** none (research; the pinned source lands with the next task).
+  - **What it is:** Verify the candidate source, the Hebrew Wikisource transcription of "תכלאל עם פירוש עץ חיים" (Jerusalem 1894-1898, ed. R. Avraham Alnadaf, named by HaMichlol's "תכלאל" article; not yet opened): its license, its completeness for every text in `SIDDUR_TEXTS` and `STANDALONE_TEXTS` of [src/data/siddur.ts](src/data/siddur.ts), and a revision to pin; then map each text to its pages or headings with `--inspect`, naming every text it lacks and the source proposed for it.
+  - **What it solves:** The build pins an exact revision with a credit per source ([scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md)); no Baladi source is pinned today.
+  - **Expected result:** A table of every siddur text against its Baladi source page, revision and range, and the gaps, reported to the owner before any text is built.
+- [ ] Build every siddur text in nusach Teiman Baladi
+  - **Flag:** `OTA` (bundled assets).
+  - **What it is:** `teiman` specs for every text in [scripts/siddur/manifest.js](scripts/siddur/manifest.js), with conditions, labels, voice marks and chapters as the other nuschaot carry them, split into one task per text once the source is mapped.
+  - **What it solves:** The reader shows nothing for a nusach without assets.
+  - **Expected result:** `pnpm siddur:build` writes a `teiman` asset per text, and the siddur suites pass with `teiman` among the nuschaot.
+- [ ] Add nusach Teiman to the app
+  - **Flag:** `OTA`.
+  - **What it is:** `teiman` in `Nusach` ([src/types/mitzvah.ts](src/types/mitzvah.ts)) and `NUSCHAOT` ([src/data/nuschaot.ts](src/data/nuschaot.ts)), the onboarding and Settings choices, both dictionaries, the search, and every `Record<Nusach, …>` and nusach switch (`KIDDUSH_LEVANA_START_DAYS` and the Kiddush Levana period, the Chanukah lighting time, `nuschaotSupported` (Ushpizin), the taharah preset, the halacha lines, the Chok LeYisrael mapping, the Selichot season), each value a choice for the rav.
+  - **What it solves:** A Yemenite user can pick the nusach and every nusach-dependent rule follows it.
+  - **Expected result:** A user who picks Teiman in onboarding reads every text in Teiman; the smoke, search and siddur suites cover it.
+
 ## Bugs
 
 - [ ] A Hebrew Android phone shows the app's English name
@@ -448,6 +473,7 @@ Q9 to Q15, the seven questions of the nagging batch, were all answered by the ow
 
 ## Other Open Items
 
+- **Network access for the siddur sources in the cloud environment.** Found 2026-11-02, starting the nusach Teiman batch: the session's proxy refused `www.sefaria.org` and `he.wikisource.org` (403 on CONNECT), and the build cache `scripts/siddur/.cache/` is gitignored, so `pnpm siddur:build` cannot run there for any nusach. The owner adds both hosts under Allowed domains in the environment's network settings; the check is that `curl -sI https://www.sefaria.org/` and `curl -sI https://he.wikisource.org/` answer from the session.
 - **Check production `1.0.21-9` on a phone.** Found 2026-11-01, when it was published: the completion animation on home (the green check and sparks, the ring filling green, "בוצע ב-" and the card closing) and the icons of rounds 7 and 8 (the Kriat Shema sun, the dawn window, the Ushpizin table, the meals plate and every siddur text's own icon, the rings for Sheva Berachot among them) were checked only on the web build. The owner saw the Rubik font and pack ב on the preview app (`1.0.21-32`: "everything looks great, but the siddur and prayer icon do not look good"), whose siddur and prayer icons were then redrawn. The check: open home, the siddur tab's groups and the library in the production app (Settings shows `1.0.21-9`), mark an open mitzvah, and read the launches with `npx eas-cli update:insights c81e2ade-932f-4a0b-ab3a-b5fad0c22fa8`. On 2026-11-02 the owner checked build 1.0.21 (5) on an iPhone through TestFlight ("בדקתי הכל מצויין") and the Android preview app on `1.0.21-38` ("בדקתי עובד מצויין"); both run code from after `d2fc443`, the commit of `1.0.21-9`, so they cover its content, but neither is the production app. Production is now `1.0.21-10`, which carries everything of `1.0.21-9` (Settings shows `1.0.21-10`): the owner decides whether this item closes.
 
 - **The design skills have not run here, and `webapp-designer` describes an older `design-taste-frontend`.** Found 2026-10-30, while adding them (the task Add the web designer skills and the project manager skill to the repo).
