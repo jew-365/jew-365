@@ -56,6 +56,8 @@ The page was last edited on 2026-11-02 and is being written:
 
 ## 4. Build work the sources need
 
+Done on 2026-11-02 (`c66bf4a`): the build reads these templates for a source with `params`, and `teiman` is a staged nusach. The list stays as the record of what the pages use.
+
 - [scripts/siddur/build.js](../../scripts/siddur/build.js) knows a dozen Wikisource templates and fails on any other. The Baladi pages use about thirty more:
   - layout and size: `ג`, `גדול`, `גדול-מודגש`, `מודגש`, `ק`, `קטן`, `ר1`, `ש-רווח`, `טורים שווים ממורכז`, `שמאל`, `ססס`, `טקסט מנוקד`;
   - instructions and labels: `גפ`, `סי`, `רן`, `מילת קבע`, `מקורות לסידור`, `יהיו לרצון`;

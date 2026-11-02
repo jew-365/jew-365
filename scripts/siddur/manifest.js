@@ -2247,6 +2247,85 @@ function ashkenaziSelichot(sources, days) {
   );
 }
 
+// Nusach Teiman Baladi (the batch of 2026-11-02): Hebrew Wikisource, Hebrew only. The pages print the
+// divine name as יְיָ, and a few lines as an unpointed יי, which reads as the pointed form.
+function baladiName(html) {
+  return html.replace(/(^|[\s>])יי(?=[\s,.:;<]|$)/g, '$1יְיָ');
+}
+const BALADI_SHACHARIT = { he: 'wikiBaladiShacharit', transform: baladiName };
+const BALADI_MODEH = {
+  from: 'מוֹדֶה <small>[/מוֹדָה]</small>',
+  to: '<if voice="male,unset">מוֹדֶה</if><if voice="female">מוֹדָה</if><if voice="unset"> <small>[/מוֹדָה]</small></if>',
+};
+const baladiVoiceNote = (seg, printed, feminine) => ({
+  seg,
+  from: `${printed} <small>[/${feminine}]</small>`,
+  to: `<if voice="male,unset">${printed}</if><if voice="female">${feminine}</if><if voice="unset"> <small>[/${feminine}]</small></if>`,
+});
+
+function teimanBirchot() {
+  return [
+    { ...BALADI_SHACHARIT, title: T.modehAni, path: '# מודה אני', edits: [{ seg: 0, ...BALADI_MODEH }], reviewed: [0] },
+    { ...BALADI_SHACHARIT, title: T.morningBlessings, path: '# על נטילת ידים' },
+    { ...BALADI_SHACHARIT, title: T.morningBlessings, path: '# אשר יצר' },
+    { ...BALADI_SHACHARIT, title: T.morningBlessings, path: '# אלהי הנשמה', edits: [modeh(0)] },
+    {
+      ...BALADI_SHACHARIT,
+      title: T.morningBlessings,
+      path: '# ברכות השחר',
+      at: { 1: NOT_FASTING_BAREFOOT },
+      reviewed: [0],
+      edits: [
+        {
+          seg: 0,
+          from: '<small>ביום הכפורים ובתשעה באב מדלגים על הברכה הבאה.</small> <br> בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, שֶׁעָשָׂה לִי כָּל צְרָכָי.',
+          to: '<if none="tishaBav,yomKippur">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, שֶׁעָשָׂה לִי כָּל צְרָכָי.</if>',
+        },
+        baladiVoiceNote(0, 'גּוֹי', 'גּוֹיָה'),
+        baladiVoiceNote(0, 'עָבֶד', 'שִׁפְחָה'),
+        {
+          seg: 0,
+          from: '<small>אנשים מברכים:</small> בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, שֶׁלֹּא עָשַׂנִי אִשָּׁה.',
+          to: '<if voice="male,unset"><small>אנשים מברכים:</small> בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, שֶׁלֹּא עָשַׂנִי אִשָּׁה.</if>',
+        },
+        {
+          seg: 0,
+          from: '<small>נשים אומרות:</small> בָּרוּךְ שֶׁעָשַׂנִי כִּרְצוֹנוֹ.',
+          to: '<if voice="female,unset"><small>נשים אומרות:</small> בָּרוּךְ שֶׁעָשַׂנִי כִּרְצוֹנוֹ.</if>',
+        },
+        { seg: 1, from: '<small>ביום הכפורים ובתשעה באב מדלגים על הברכה הבאה.</small><br> ', to: '' },
+      ],
+    },
+    { ...BALADI_SHACHARIT, title: T.torahBlessings, path: '# ברכות התורה' },
+  ];
+}
+
+const TEIMAN_TEFILLIN = { ...BALADI_SHACHARIT, path: '# ברכות ציצית ותפילין', voice: NOT_FOR_WOMEN };
+const TEIMAN_SHEMA = { ...BALADI_SHACHARIT, path: '# קריאת שמע' };
+
+function teimanShevaBerachot() {
+  const blessings = [
+    'בּוֹרֵא פְּרִי הַגָּפֶן :',
+    'שֶׁהַכֹּל בָּרָא לִכְבוֹדוֹ:',
+    'מְשַֹמֵּחַ צִיּוֹן בְּבָנֶיהָ:',
+    'מְשַֹמֵּחַ חָתָן וְכַלָּה:',
+  ];
+  return [
+    {
+      he: 'wikiBaladiShevaBerachot',
+      title: T.shevaBerachot,
+      path: '*',
+      edits: [
+        { seg: 0, from: 'המברך אומר:', to: '<small>המברך אומר:</small>' },
+        { seg: 0, from: ' ועונים: לְחַיֵי', to: '<br><small>ועונים:</small> לְחַיֵי<br>' },
+        ...blessings.map((ending) => ({ seg: 0, from: `${ending} `, to: `${ending}<br>` })),
+        { seg: 0, from: 'יוֹצֵר הָאָדָם: ', to: 'יוֹצֵר הָאָדָם:<br>', count: 2 },
+      ],
+      minyanParts: [{ from: 0, paragraph: 3, label: SAID_BY.withMinyan }],
+    },
+  ];
+}
+
 const TEXTS = {
   tefillin: {
     ashkenaz: [
@@ -2277,12 +2356,17 @@ const TEXTS = {
         optionalParts: [{ from: 6, label: SOME_SAY.kadeshVehaya }],
       },
     ],
+    teiman: [
+      { ...TEIMAN_TEFILLIN, title: T.tefillin },
+      { ...TEIMAN_SHEMA, title: T.shema, to: 4 },
+    ],
   },
   birchot_hashachar: {
     ashkenaz: ashkenazBirchot(),
     sefard: sefardBirchot(),
     edot_hamizrach: edotBirchot(),
     chabad: chabadBirchot(),
+    teiman: teimanBirchot(),
   },
   krias_shma_shacharit: {
     ashkenaz: [
@@ -2315,6 +2399,7 @@ const TEXTS = {
       },
     ],
     chabad: [{ ...SHEMA.chabad, title: T.shema, from: 9, to: 13 }],
+    teiman: [{ ...TEIMAN_SHEMA, title: T.shema, minyanParts: [{ from: 5, label: SAID_BY.chazzan }] }],
   },
   candle_lighting: {
     ashkenaz: candles(),
@@ -2476,6 +2561,7 @@ const TEXTS = {
     sefard: [{ ...TORAT_EMET, title: T.boreiNefashot, path: 'Blessings > Borei Nefashot', from: 1 }],
     edot_hamizrach: [{ ...EDOT, title: T.boreiNefashot, path: 'Blessings on Enjoyments', from: 11, to: 12 }],
     chabad: [{ ...CHABAD, title: T.boreiNefashot, path: 'Blessings > Berakha Acharona', from: 14, to: 15 }],
+    teiman: [{ he: 'wikiBoreiNefashot', title: T.boreiNefashot, path: '*', from: 2, to: 2 }],
   },
   tefilat_haderech: {
     ashkenaz: [
@@ -2564,6 +2650,7 @@ const TEXTS = {
       },
     ],
     chabad: [{ ...CHABAD, title: T.asherYatzar, path: 'Shacharit > Morning Blessings', from: 3, to: 3 }],
+    teiman: [{ ...BALADI_SHACHARIT, title: T.asherYatzar, path: '# אשר יצר' }],
   },
   birchot_hanehenin: {
     ashkenaz: ashkenazBirchotHanehenin(),
@@ -2639,6 +2726,7 @@ const TEXTS = {
         minyanParts: [{ from: 0, to: 5, label: SAID_BY.withMinyan }],
       },
     ],
+    teiman: teimanShevaBerachot(),
   },
   chanukah_candles: {
     ashkenaz: ashkenazChanukahCandles(),

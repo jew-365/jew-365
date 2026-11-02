@@ -1584,6 +1584,10 @@ function writeOutputs(outputs) {
 async function inspect(sourceKey, nodePath) {
   const segments = await segmentsOf(sourceKey, nodePath);
   segments.forEach((html, index) => {
+    if (process.env.RAW) {
+      console.log(`${String(index).padStart(3)} ${html.normalize('NFC')}`);
+      return;
+    }
     const classified = classifySmall(html.normalize('NFC'));
     const he = parseHebrew(classified.html);
     if (!he.length) return;
