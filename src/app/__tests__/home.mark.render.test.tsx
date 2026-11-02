@@ -69,9 +69,13 @@ function seedStores(enabled: string[]) {
 }
 
 describe('home on a mark', () => {
+  // The stamp's hold runs on fake timers, so its end is a step of the test, never a race with a real-time deadline.
   beforeEach(() => {
     seedStores(['maariv']);
-    jest.useFakeTimers({ now: at(JERUSALEM, '2027-06-15T00:20'), doNotFake: [...ONLY_DATE] });
+    jest.useFakeTimers({
+      now: at(JERUSALEM, '2027-06-15T00:20'),
+      doNotFake: ['nextTick', 'queueMicrotask', 'setImmediate', 'clearImmediate'],
+    });
   });
 
   afterEach(() => {
@@ -79,7 +83,7 @@ describe('home on a mark', () => {
     jest.useRealTimers();
   });
 
-  it('computes the day model once for a mark, the stamp start and the stamp end included', async () => {
+  it('computes the day model once for a mark, the stamp start and the stamp end included', () => {
     const windows = jest.spyOn(timeline, 'appDayWindow');
     renderWithTheme(<HomeScreen />);
     const settled = windows.mock.calls.length;
@@ -89,7 +93,10 @@ describe('home on a mark', () => {
     expect(screen.getByTestId('now-card-done-button')).toBeOnTheScreen();
     expect(windows.mock.calls.length - settled).toBe(1);
 
-    await waitFor(() => expect(screen.queryByTestId('now-card-done-button')).toBeNull(), { timeout: 3000 });
+    act(() => jest.advanceTimersByTime(durations.stamp - 1));
+    expect(screen.getByTestId('now-card-done-button')).toBeOnTheScreen();
+    act(() => jest.advanceTimersByTime(1));
+    expect(screen.queryByTestId('now-card-done-button')).toBeNull();
     expect(windows.mock.calls.length - settled).toBe(1);
     expect(screen.getByRole('button', { name: 'ביטול סימון - תפילת ערבית' })).toBeOnTheScreen();
   });
