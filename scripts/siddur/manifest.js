@@ -2250,7 +2250,10 @@ function ashkenaziSelichot(sources, days) {
 // Nusach Teiman Baladi (the batch of 2026-11-02): Hebrew Wikisource, Hebrew only. The pages print the
 // divine name as יְיָ, and a few lines as an unpointed יי, which reads as the pointed form.
 function baladiName(html) {
-  return html.replace(/(^|[\s>])יי(?=[\s,.:;<]|$)/g, '$1יְיָ');
+  return html
+    .replace(/(^|[\s>])יי(?=[\s,.:;<]|$)/g, '$1יְיָ')
+    .replace(/יְהֹוָה/g, 'יְיָ')
+    .replace(/יהֹוָה/g, 'ייָ');
 }
 const BALADI_SHACHARIT = { he: 'wikiBaladiShacharit', transform: baladiName };
 const BALADI_MODEH = {
@@ -2297,6 +2300,26 @@ function teimanBirchot() {
       ],
     },
     { ...BALADI_SHACHARIT, title: T.torahBlessings, path: '# ברכות התורה' },
+  ];
+}
+
+function teimanBedtimeShema() {
+  const page = { he: 'wikiBaladiBedtimeShema', transform: baladiName };
+  return [
+    { ...page, title: T.hamapil, path: '# המפיל' },
+    {
+      ...page,
+      title: T.shema,
+      path: '# קריאת שמע',
+      drop: [1],
+      reviewed: [0],
+      optionalParts: [{ from: 2, to: 3, label: SOME_SAY.some }],
+    },
+    { ...page, title: T.bedtimePsalms, path: '# יושב בסתר', reviewed: [0] },
+    { ...page, title: T.bedtimePsalms, path: '# אתה סתר לי', reviewed: [0] },
+    { ...page, title: T.anaBekoach, path: '# אנא בכח' },
+    { ...page, title: T.protectionVerses, path: '# למנצח בנגינות .. # בשלום יחדיו' },
+    { ...page, title: T.protectionVerses, path: '# בשלום יחדיו' },
   ];
 }
 
@@ -2663,6 +2686,7 @@ const TEXTS = {
     sefard: sefardBedtimeShema(),
     edot_hamizrach: edotBedtimeShema(),
     chabad: chabadBedtimeShema(),
+    teiman: teimanBedtimeShema(),
   },
   birchot_hareiya: {
     ashkenaz: ashkenazBirchotHareiya(),
@@ -2746,6 +2770,7 @@ const TEXTS = {
     sefard: sefardNishmat(),
     edot_hamizrach: edotNishmat(),
     chabad: sefardNishmat(),
+    teiman: [{ he: 'wikiNishmat', title: T.nishmat, path: '*', transform: baladiName }],
   },
   selichot: {
     ashkenaz: ashkenaziSelichot({ he: 'selichotLitaHe', en: 'selichotLitaEn' }, SELICHOT_LITA),
