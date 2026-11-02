@@ -13,14 +13,14 @@ Created on 2026-10-22 under Avraham Shimon Sason (Individual, Team `KQ5K8G9ANH`)
 Saved on 2026-10-22 on the Hebrew version page; the English (U.S.) localization was added the same day with the English copy of this file and the English Privacy Policy URL. It reuses the Hebrew screenshots ("Using Existing Assets").
 
 - Copyright: `2026 Avraham Shimon Sason`.
-- Build: 1.0.21 (4), EAS build `72c51b1e`.
+- Build: 1.0.21 (5), EAS build `7bbb9c15`, App Store Connect build `c193622a` (attached on 2026-11-02 in place of 1.0.21 (4), EAS `72c51b1e`, which App Review rejected under Guideline 2.1(a) on 2026-11-01).
 - App Review Information: sign-in required off; contact Avraham Sason, +972546559314, 365jew@gmail.com; no attachment.
-- App Review notes, as submitted:
+- App Review notes, as resubmitted on 2026-11-02 (the 2026-10-22 text pointed to a language switch reachable only after onboarding):
 
 ```
 No account, login or payment anywhere in the app; every screen opens without signing in.
 
-The app is Hebrew-first. To review it in English: Settings > Device and notifications > Language > English.
+The app opens in the device's language: English on an English device. The first screen also has a Hebrew / English switch, and its name and phone fields are optional (they only prefill the contact form); tap Continue to go on with them empty.
 
 Optional family purity tracker: Settings > Profile, set Gender and Marital status: Married, then turn on Family purity tracking. Its screens open with the device's own Face ID, Touch ID or passcode; on a device without biometrics the lock is off, and it can also be turned off in the tracker's settings. Its data is kept on the device, encrypted.
 
@@ -31,12 +31,12 @@ By design the app rests on Shabbat and Jewish holidays at the chosen city: from 
 
 - Release option: Manually release this version (saved 2026-10-23), so an approved version waits for the owner's Release.
 - TestFlight: internal group Team (Expo) (365jew@gmail.com); external group Beta testers with build 1.0.21 (4), public link https://testflight.apple.com/join/cZeSqPzG (open to anyone, no limit), Test Information: feedback 365jew@gmail.com, beta review contact Avraham Sason, +972546559314, 365jew@gmail.com, sign-in not required. The Beta App Review passed on 2026-10-23; that day the group listed 7 testers: moshechaim22@gmail.com invited, and 6 anonymous public-link installs of 1.0.21 (4) on iOS 26 and 27.
-- App Information: primary category Lifestyle, no secondary category. Content Rights: yes, third-party content with the necessary rights (the siddur texts, under Public Domain, CC0, CC-BY and CC-BY-SA, credited in the reader).
+- App Information: primary category Lifestyle, secondary category Reference (set on 2026-11-02). Content Rights: yes, third-party content with the necessary rights (the siddur texts, under Public Domain, CC0, CC-BY and CC-BY-SA, credited in the reader).
 - Pricing and Availability: free ($0.00, base country United States), available in 174 countries or regions and future ones: every storefront but China mainland, removed on 2026-10-26 (the owner's call: Chinese law requires apps with religious content to hold a permit). iPhone only on the App Store: Apple Silicon Mac and Apple Vision Pro availability off.
 
 ## Draft Status
 
-The subtitle, promotional text, description and keywords below are the draft of 2026-11-01, held by the owner ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-01). App Store Connect still holds the copy submitted with 1.0.21 on 2026-10-22: the subtitle `Every mitzvah in its time` and the earlier description and keywords. English (U.K.) does not exist yet: App Store Connect offers no new language while 1.0.21 waits for review.
+The subtitle, promotional text, description and keywords below were entered in App Store Connect on 2026-11-02 and read back, on the English (U.S.) page and on the English (U.K.) page created that day (name `Jew 365`, the same subtitle, the English Privacy Policy URL, support and marketing URLs `https://jew-365.github.io/jew-365/`), with build 1.0.21 (5); the version was resubmitted the same day ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-02).
 
 ## App Name
 
@@ -147,7 +147,7 @@ Age rating as saved in App Store Connect on 2026-10-22 (the owner's approval), f
 
 ## Screenshot Plan
 
-Phone screenshots in use, 1206x2622 (iPhone 6.3 inch) from the web build, uploaded to the Hebrew version page on 2026-10-22, in the same order as Google Play: Home, Siddur tab, Reader, History, Settings. They were taken on 2026-10-22 in headless Edge at a 402x874 viewport with a device scale of 3, Hebrew, the gold palette, a seeded 30-day history, and the clock set to 19:10 in Jerusalem so the evening prayer is current; the web build's notification-permission banner is hidden, as on a device that granted it. The mitzvah detail screen is left out because the web build renders its switches broken. Local copies: `Downloads/jew365-appstore-assets/iphone-6.3` (a 1320x2868 set made first is in `iphone-6.9`, unused).
+Phone screenshots in use since 2026-11-02, 1206x2622 (iPhone 6.3 inch, the `APP_IPHONE_61` set), seven per page in this order: Home, Siddur tab, Reader (on Ashrei), History, Settings, a tzaddik page, the weekly report. Made by `pnpm store:screenshots --sets appstore-he,appstore-en` ([../scripts/store/screenshots.mjs](../scripts/store/screenshots.mjs)) from the tree of `00b6fa8` (the new logo, Rubik and the drawn icons): a seeded married man in Jerusalem, Sefard, the gold palette, a 15-day streak, the clock at Wednesday 2026-11-04 15:40 in Jerusalem. The Hebrew set replaced the five shots of 2026-10-22 on the Hebrew page; the English set went to the English (U.S.) and English (U.K.) pages (`asc screenshots upload --replace`), each read back `COMPLETE`. Local copies: the owner's Downloads folder `jew365-store-assets-2026-11`, `appstore-he` and `appstore-en` (the uploaded sets; its `play-*` folders still hold the 2026-11-01 sets with the old logo).
 
 Sizes (Apple scales down from the largest of each family):
 

@@ -114,6 +114,8 @@ Finished, committed and pushed, and native or store-side: each reaches users onl
   - **Expected result:** the owner approves the render; `pnpm logo:build` passes its ink and transparency checks; `scripts/__tests__/logoAssets.test.js` and `scripts/__tests__/appConfig.test.js` pass; the new icon shows on the emulator's launcher. The Play listing's 512 icon and the store graphics follow with the store copy.
   - **Requested:** the owner, 2026-11-02 (D4 of "Answer App Review's 2.1(a) on 1.0.21").
 - [ ] Answer App Review's 2.1(a) on 1.0.21
+  - **Done:** 2026-11-02. Build 1.0.21 (5) attached in place of (4), the App Review notes replaced, the owner-approved reply sent to App Review (Messages 2) and the submission resubmitted after "Update Review" on the version page; `asc review status`: `WAITING_FOR_REVIEW`, submitted 2026-11-02 11:02 UTC ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-11-02).
+  - **Status:** Version: App Store submission of 1.0.21 (5) · Committed: n/a (records in this pass) · Pushed: n/a · Live: in App Store review with 1.0.21 (5), resubmitted 2026-11-02, public from the App Store release · Channel: App Store review
   - **Ships as:** App Store Connect: a reply to App Review and a resubmission with a new 1.0.21 build (the owner's choice, 2026-11-02).
   - **What it is:** App Review rejected 1.0.21 (4) on 2026-11-01 under Guideline 2.1(a), Information Needed: it could not reach "all or part of the app" and asks for a demo account with content, or a demonstration mode; a demo video is not enough ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-11-02). The app has no account at all, so the answer explains how every part opens without one. Its steps:
     - Read Apple's attachment `Screenshot-1101-141317.png` (App Store Connect › App Review › the submission; a download, the owner's approval), which shows the screen the reviewer could not pass. Done 2026-11-02 on the owner's approval: it is the first onboarding step of build 4, in Hebrew (the app starts in Hebrew whatever the device language, `language: 'he'` in [src/stores/useUserStore.ts](src/stores/useUserStore.ts)), with the name and phone fields, Continue and "יש לי קובץ גיבוי". Both fields are optional, but nothing on the screen says so in English, and the language switch the App Review notes point to (Settings › Device and notifications › Language) is out of reach until onboarding ends. The reviewer read it as a sign-up. The English copy of the step says "Enter your details to begin" (Bugs, "The English welcome step tells the user the name and phone are required").
@@ -139,6 +141,7 @@ Finished, committed and pushed, and native or store-side: each reaches users onl
   - **What it solves:** the store copy follows the owner's rule of 2026-10-25 ([release/AGENTS.md](release/AGENTS.md)): kinds of features, never counts.
   - **Expected result:** both consoles show the rewritten copy after a reload, and the store production release carries it.
   - **Requested:** the owner's rule of 2026-10-25.
+  - **Status 2026-11-02:** re-entered in App Store Connect (Hebrew, English (U.S.) and (U.K.)), in review with 1.0.21 (5); the Play listing not yet (held by the owner).
 - [ ] No promise of no server, no database or offline only, anywhere
   - **Done:** 2026-10-21. Verified: the Play descriptions edited to match.
   - **Status:** Version: store copy and the 1.0.21 builds, expected with the store production release (the site part is on Pages) · Committed: yes, `dcf802a` docs: drop every promise of no server, no database or offline only · Pushed: yes · Live: the site; both listings, public only from the store production release, not yet · Channel: production (Pages); closed testing (listings)
@@ -170,6 +173,7 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
   - **Status 2026-10-26:** the description submitted with App Store 1.0.21 still reads "תשע מצוות תלויות זמן" (read in App Store Connect). The re-entry also takes the copy of the task "Add the search terms to the Play listing and the store copy", so each console is filled once.
   - **Status 2026-11-01:** the copy in [release/](release) and [docs/index.html](docs/index.html) is rewritten for the features of production `1.0.21-8` (committed in `89f94d5` docs(store): store copy for 1.0.21-8, held by the owner; pushed to `main`); the console re-entry is held by the owner ([Store listings of 2026-10-26 — batch rules](#store-listings-of-2026-10-26--batch-rules)).
 
+  - **Status 2026-11-02:** the App Store copy is entered on all three pages and in review with 1.0.21 (5); the Play listing stays held by the owner.
 ### Medium — Chok LeYisrael source defects
 
 - [ ] Decide on the Torat Emet text defects
@@ -192,11 +196,13 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
 - **Decisions taken:** the store name stays `יהודי 365` / `Jew 365` (the owner, 2026-10-26). The subtitle's content was left to Claude (the owner, 2026-10-26: "תכניס מה שהכי חזק והכי צריך"): the two most searched terms the owner named and the least contested one, `סידור, תהילים, חק לישראל`, since the subtitle weighs most after the name and the low-competition terms rank from the keyword field; the tagline moves to the promotional text.
 - **Declined:** renaming the app in the stores to carry keywords (the owner, 2026-10-26: "לא רוצה לשנות שם").
 - **Done means:** the value saved in the console and read back after a reload, recorded in [release/APP_STORE_METADATA_HE.md](release/APP_STORE_METADATA_HE.md), [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md) or [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md), and in [release/RELEASE_LOG.md](release/RELEASE_LOG.md), in the same pass ([store-console skill](.claude/skills/store-console/SKILL.md)); each console step runs only after the owner's go-ahead for it.
-- **On hold (the owner, 2026-11-01: "לחכות עם שתיהן"):** nothing of this batch goes into either console until the owner lifts the hold. On 2026-11-01 App Review rejected 1.0.21, and App Store Connect says "You can make edits to your app version below" until it is resubmitted (which fields open was not checked field by field); the hold stands until the owner's word. The builds the stores review predate most of the features the new copy names (iOS build 4 from `04500e7`, Play versionCode 8 from `11be1c8`; the rest reaches installs over the air, after the first launch), the App Store screenshots and new localizations are locked while 1.0.21 waits for review, and removing it from review restarts the review ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-11-01). The copy in [release/](release) and the screenshots are ready.
+- **On hold (the owner, 2026-11-01: "לחכות עם שתיהן"):** nothing of this batch goes into either console until the owner lifts the hold. On 2026-11-02 the owner lifted the hold for the App Store ("כן שלח כולל כל הטקסטים והתיקונים והצילומים"): the copy, the subtitles, English (U.K.), the secondary category and the screenshots went in with build 1.0.21 (5), which carries the features they name. Google Play stays held ("לאנדרואיד אל תעשה לא בילד ולא כלום"). The builds the stores review predate most of the features the new copy names (iOS build 4 from `04500e7`, Play versionCode 8 from `11be1c8`; the rest reaches installs over the air, after the first launch), the App Store screenshots and new localizations are locked while 1.0.21 waits for review, and removing it from review restarts the review ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-11-01). The copy in [release/](release) and the screenshots are ready.
 
 ### High — Store listings of 2026-10-26
 
 - [ ] Set the App Store subtitle and keywords for search
+  - **Done:** 2026-11-02, read back through `asc`: Hebrew subtitle `סידור, תהילים, חק לישראל`, English (U.S.) and (U.K.) `Siddur, Tehillim & Zmanim`; keywords Hebrew 93, English 99 (the owner lifted the App Store hold that day).
+  - **Status:** Version: App Store Connect, with 1.0.21 · Committed: n/a · Pushed: n/a · Live: in App Store review with 1.0.21 (5), resubmitted 2026-11-02, public from the App Store release · Channel: App Store review
   - **Ships as:** a console change in App Store Connect, no build.
   - **What it is:**
     - Hebrew localization: subtitle `סידור, תהילים, חק לישראל` (24 of 30); keywords `jew,תיקון,הכללי,התיקון,חוק,תהלים,זמני הלכה,מצוות,תפילין,ברכת המזון,קריאת שמע,לוח עברי,טהרה,סליחות` (97 of 100). `jew` with the `365` of the name answers "jew 365" in Israel until the English (U.K.) localization carries the name `Jew 365` there: once that localization is saved, the Hebrew field drops `jew,` (93 of 100) in the same pass (task "Add an English (U.K.) localization on the App Store"); `חוק` and `תהלים` are the spellings people type; no word repeats one of the name or the subtitle, which Apple counts as waste.
@@ -218,6 +224,8 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
   - **Expected result:** the Play listing, reloaded, shows both short descriptions within 80 and the full descriptions with each term once; the copy files match what the consoles show. The console re-entry runs with the task "Add Chok LeYisrael to the store listings", so each console is filled once.
 
 - [ ] Add an English (U.K.) localization on the App Store
+  - **Done:** 2026-11-02, read back: App Information `en-GB` (name `Jew 365`, the subtitle, the English Privacy Policy URL) and its version page (the English description, promotional text, keywords, support and marketing URLs, the seven English screenshots); the Hebrew keywords dropped `jew,` in the same pass. It could be added once the rejection reopened the version.
+  - **Status:** Version: App Store Connect, with 1.0.21 · Committed: n/a · Pushed: n/a · Live: in App Store review with 1.0.21 (5), resubmitted 2026-11-02, public from the App Store release · Channel: App Store review
   - **Ships as:** a console change in App Store Connect, no build.
   - **Decided:** the owner, 2026-10-26 (Q1, "מאשר"). The Israel storefront reads only the Hebrew and English (U.K.) localizations, so an English (U.K.) page puts the English name and a second keyword field in front of Israeli searches.
   - **What it is:**
@@ -233,6 +241,8 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
 ### Medium — Store listings of 2026-10-26
 
 - [ ] Set the App Store secondary category to Reference
+  - **Done:** 2026-11-02: `asc categories set --primary LIFESTYLE --secondary REFERENCE`, read back `REFERENCE`.
+  - **Status:** Version: App Store Connect · Committed: n/a · Pushed: n/a · Live: in App Store review with 1.0.21 (5), resubmitted 2026-11-02, public from the App Store release · Channel: App Store review
   - **Ships as:** a console change in App Store Connect, no build.
   - **What it is:** App Information → Category → Secondary: Reference; the primary stays Lifestyle. Apple's search reads both categories.
   - **What it solves:** the secondary category is empty, and Reference fits a siddur and a halachic-times tool.
@@ -254,6 +264,7 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
   - **What it solves:** English visitors see Hebrew screens today, and no screenshot shows the reminder buttons, the app's own feature.
   - **Expected result:** after a reload, the English pages of both consoles show the English set and both languages show the reminder shot; the Screenshot Plan sections and the Store Graphics section of [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md) list the new files.
 
+  - **Status 2026-11-02:** the App Store part is live in review: seven Hebrew and seven English shots (re-rendered with the new logo) on the Hebrew, English (U.S.) and English (U.K.) pages of 1.0.21. Left: the reminder shot and Play's English set, held by the owner ("לאנדרואיד אל תעשה לא בילד ולא כלום", 2026-11-02).
 ### Low — Store listings of 2026-10-26
 
 - [ ] Ask for a store rating inside the app

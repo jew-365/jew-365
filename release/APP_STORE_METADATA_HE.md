@@ -4,7 +4,7 @@
 
 The record is shared by both languages: see [APP_STORE_METADATA_EN.md](APP_STORE_METADATA_EN.md) (Apple ID `6825802248`, primary language Hebrew, name `יהודי 365`). The version page's language-independent fields (copyright, build, App Review information and notes, release option, TestFlight), the App Privacy answers and the pricing and availability (174 storefronts, every one but China mainland) are recorded there too.
 
-The subtitle, promotional text, description and keywords below are the draft of 2026-11-01, held by the owner ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-01). App Store Connect still holds the copy submitted with 1.0.21 on 2026-10-22: the subtitle `כל מצווה בזמנה` and the earlier description and keywords.
+The subtitle, promotional text, description and keywords below were entered in App Store Connect on 2026-11-02 and read back, with build 1.0.21 (5), and the version was resubmitted the same day ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-02; the owner: "כן שלח כולל כל הטקסטים והתיקונים והצילומים").
 
 ## App Name
 
@@ -74,7 +74,7 @@ The two most searched terms the owner named and the least contested one (the own
 
 תיקון,הכללי,התיקון,חוק,תהלים,זמני הלכה,מצוות,תפילין,ברכת המזון,קריאת שמע,לוח עברי,טהרה,סליחות
 
-The 2026-10-26 set without `jew,`, which the English (U.K.) localization's name `Jew 365` answers in Israel; with no English (U.K.) page the field starts with `jew,` (97 of 100). `חוק` and `תהלים` are the spellings people type; no word repeats the name or the subtitle, which Apple counts as waste.
+The 2026-10-26 set without `jew,`, which the English (U.K.) localization's name `Jew 365` answers in Israel (that localization exists since 2026-11-02). `חוק` and `תהלים` are the spellings people type; no word repeats the name or the subtitle, which Apple counts as waste.
 
 ## Support URL
 
@@ -104,7 +104,7 @@ https://jew-365.github.io/jew-365/privacy/
 
 ## Screenshot Plan
 
-Phone screenshots in use, 1206x2622 (iPhone 6.3 inch) from the web build, uploaded to the Hebrew version page on 2026-10-22, in the same order as Google Play: Home, Siddur tab, Reader, History, Settings. They were taken on 2026-10-22 in headless Edge at a 402x874 viewport with a device scale of 3, Hebrew, the gold palette, a seeded 30-day history, and the clock set to 19:10 in Jerusalem so the evening prayer is current; the web build's notification-permission banner is hidden, as on a device that granted it. The mitzvah detail screen is left out because the web build renders its switches broken. Local copies: `Downloads/jew365-appstore-assets/iphone-6.3` (a 1320x2868 set made first is in `iphone-6.9`, unused).
+Phone screenshots in use since 2026-11-02, 1206x2622 (iPhone 6.3 inch, the `APP_IPHONE_61` set), seven per page in this order: Home, Siddur tab, Reader (on Ashrei), History, Settings, a tzaddik page, the weekly report. Made by `pnpm store:screenshots --sets appstore-he,appstore-en` ([../scripts/store/screenshots.mjs](../scripts/store/screenshots.mjs)) from the tree of `00b6fa8` (the new logo, Rubik and the drawn icons): a seeded married man in Jerusalem, Sefard, the gold palette, a 15-day streak, the clock at Wednesday 2026-11-04 15:40 in Jerusalem. The Hebrew set replaced the five shots of 2026-10-22 on the Hebrew page; the English set went to the English (U.S.) and English (U.K.) pages (`asc screenshots upload --replace`), each read back `COMPLETE`. Local copies: the owner's Downloads folder `jew365-store-assets-2026-11`, `appstore-he` and `appstore-en` (the uploaded sets; its `play-*` folders still hold the 2026-11-01 sets with the old logo).
 
 Target sizes (Apple scales down from the largest of each family):
 
