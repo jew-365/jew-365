@@ -23,6 +23,27 @@ const METSUDAH_YOM_KIPPUR = {
   url: `${SEFARIA}/Machzor_Yom_Kippur_Ashkenaz_Linear`,
 };
 
+// Hebrew Wikisource pages read as nusach Teiman Baladi: a page that prints several nuschaot at once
+// gives its Baladi wording through `params` (`{{{נוסח}}}` is בלדי).
+function baladiSources(pages) {
+  return Object.fromEntries(
+    Object.entries(pages).map(([key, [page, revision, title]]) => [
+      key,
+      {
+        wikisource: page,
+        revision,
+        lang: 'he',
+        params: { נוסח: 'בלדי' },
+        credit: {
+          title: `${title} — Hebrew Wikisource`,
+          license: 'CC-BY-SA',
+          url: `https://he.wikisource.org/w/index.php?oldid=${revision}`,
+        },
+      },
+    ]),
+  );
+}
+
 const SOURCES = {
   metsudahAshkenazHe: {
     title: 'Siddur Ashkenaz',
@@ -208,6 +229,27 @@ const SOURCES = {
       url: 'https://he.wikisource.org/w/index.php?oldid=1390004',
     },
   },
+  ...baladiSources({
+    wikiBaladiShacharit: ['סידור/נוסח תימן בלדי/שחרית לחול', 3101141, 'Siddur Nusach Teiman Baladi, Weekday Shacharit'],
+    wikiBaladiMincha: ['סידור/נוסח תימן בלדי/מנחה לחול', 1076941, 'Siddur Nusach Teiman Baladi, Weekday Mincha'],
+    wikiBaladiMaariv: ['סידור/נוסח תימן בלדי/חול/ערבית', 2896952, 'Siddur Nusach Teiman Baladi, Weekday Maariv'],
+    wikiBaladiBedtimeShema: [
+      'סידור/נוסח תימן בלדי/קריאת שמע שעל המיטה',
+      3081614,
+      'Siddur Nusach Teiman Baladi, Bedtime Shema',
+    ],
+    wikiBaladiBirkatHamazon: ['ברכת המזון/בלדי 2', 2929770, 'Birkat HaMazon, Nusach Teiman Baladi'],
+    wikiBaladiAlHamichya: ['ברכת מעין שלוש - נוסח תימן בלדי', 2896943, "Me'ein Shalosh, Nusach Teiman Baladi"],
+    wikiBaladiShevaBerachot: ['שבע ברכות (בלדי)', 2903948, 'Sheva Berachot, Nusach Teiman Baladi'],
+    wikiBoreiNefashot: ['ברכת בורא נפשות', 2896941, 'Borei Nefashot'],
+    wikiNishmat: ['נשמת', 2972652, 'Nishmat Kol Chai'],
+    wikiAdonHaolamim: ['אדון העולמים', 3081615, 'Adon HaOlamim'],
+    wikiHamehulal: ['המהולל', 3081625, 'HaMehulal'],
+    wikiLefanechaAniKoreia: ['לפניך אני כורע', 3095956, "Lefanecha Ani Kore'a"],
+    wikiAnaBechoach: ['אנא בכח', 3085666, 'Ana BeKoach'],
+    wikiYihyuLeratzonTemplate: ['תבנית:יהיו לרצון', 3003259, 'Yihyu LeRatzon (template)'],
+    wikiRepeatTemplate: ['תבנית:גפ', 3017024, 'Repeated verse (template)'],
+  }),
   wikiBeforePsalms: {
     wikisource: 'תפילה לפני אמירת תהלים',
     revision: 1386519,
@@ -947,13 +989,15 @@ function loose(text) {
 }
 
 function rule(name, pattern, replace) {
-  const entry = { name, hits: 0 };
+  const entry = { name, hits: 0, applied: false };
   RULES.push(entry);
-  return (html) =>
-    html.replace(pattern, (...match) => {
+  return (html) => {
+    entry.applied = true;
+    return html.replace(pattern, (...match) => {
       entry.hits++;
       return replace(...match);
     });
+  };
 }
 
 const PAREN_NOTE = '\\(\\s*<small>[^<]*</small>\\s*';
@@ -6844,4 +6888,5 @@ module.exports = {
   RULES,
   MINYAN_ONLY_TITLES,
   HEBREW_ONLY_TEXTS,
+  tanachReading,
 };

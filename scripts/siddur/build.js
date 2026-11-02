@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { Buffer } = require('buffer');
-const { gzipSync } = require('fflate');
+const { gzipSync, gunzipSync } = require('fflate');
 const { HDate, OmerEvent } = require('@hebcal/core');
 const {
   SOURCES,
@@ -13,6 +13,7 @@ const {
   RULES,
   MINYAN_ONLY_TITLES,
   HEBREW_ONLY_TEXTS,
+  tanachReading,
 } = require('./manifest');
 
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -20,7 +21,11 @@ const CACHE_DIR = path.join(__dirname, '.cache');
 const OUT_DIR = path.join(ROOT, 'assets', 'siddur');
 const ASSET_MAP = path.join(ROOT, 'src', 'data', 'siddurAssets.generated.ts');
 const CHAPTER_INDEX = path.join(ROOT, 'src', 'data', 'siddurChapters.generated.ts');
-const NUSCHAOT = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const NUSCHAOT = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
+// A staged nusach is built and written to assets/siddur/<nusach>/ like any other, but stays out of the
+// generated map and chapter index, so the app neither bundles nor offers it until every text exists.
+const STAGED_NUSCHAOT = ['teiman'];
+const APP_NUSCHAOT = NUSCHAOT.filter((nusach) => !STAGED_NUSCHAOT.includes(nusach));
 const DOWNLOADED_TEXTS = { selichot: path.join(ROOT, 'docs', 'selichot') };
 const GZIP_OPTIONS = { level: 9, mtime: 0 };
 const SEGMENT_KEY_LENGTH = 10;
@@ -55,16 +60,29 @@ function wikitextOf(data, source, key) {
   return revision.slots.main['*'];
 }
 
+// Wikimedia asks every client to name itself, and answers a busy shared address with 429 and Retry-After.
+const USER_AGENT = 'jew365-siddur-build/1.0 (https://github.com/jew-365/jew-365; 365jew@gmail.com)';
+const DOWNLOAD_ATTEMPTS = 8;
+
+async function download(url, key) {
+  for (let attempt = 1; ; attempt++) {
+    const response = await fetch(url, { headers: { 'User-Agent': USER_AGENT } });
+    if (response.ok) return response.text();
+    const retryable = response.status === 429 || response.status >= 500;
+    if (!retryable || attempt === DOWNLOAD_ATTEMPTS)
+      throw new Error(`download failed for ${key}: HTTP ${response.status}`);
+    const seconds = Math.max(Number(response.headers.get('retry-after')) || 0, 30) * attempt;
+    console.log(`${key}: HTTP ${response.status}, retrying in ${seconds}s`);
+    await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+  }
+}
+
 async function loadSource(key) {
   const source = SOURCES[key];
   if (!source) throw new Error(`unknown source ${key}`);
   fs.mkdirSync(CACHE_DIR, { recursive: true });
   const cached = path.join(CACHE_DIR, `${key}.json`);
-  if (!fs.existsSync(cached)) {
-    const response = await fetch(sourceUrl(source));
-    if (!response.ok) throw new Error(`download failed for ${key}: HTTP ${response.status}`);
-    fs.writeFileSync(cached, await response.text());
-  }
+  if (!fs.existsSync(cached)) fs.writeFileSync(cached, await download(sourceUrl(source), key));
   const data = JSON.parse(fs.readFileSync(cached, 'utf8'));
   if (source.wikisource) {
     if (source.patches) throw new Error(`${key}: patches apply only to a Sefaria source`);
@@ -220,8 +238,83 @@ const WIKI_TEMPLATES = {
   סוף: () => '',
 };
 
-function expandTemplate(body, key) {
+// The templates and parser functions of pages that print several nuschaot at once, read only from a
+// source that names its nusach (`params`), so no other Wikisource source changes how it reads.
+const NUSACH_FALLBACK = { בלדי: ['בלדי', 'תימן', 'כל השאר'], תימן: ['תימן', 'כל השאר'] };
+
+function nusachVariant(_, named) {
+  // The same selector also picks by day (`יום`), and a weekday text reads its "other days" wording.
+  if (!('נוסח' in named) && 'יום' in named) return named['שאר הימים'] ?? '';
+  const chain = NUSACH_FALLBACK[(named['נוסח'] ?? '').trim()];
+  if (!chain) throw new Error(`nusach selector without a known נוסח: "${named['נוסח']}"`);
+  const key = chain.find((name) => name in named);
+  return key === undefined ? '' : named[key];
+}
+
+const PARAM_TEMPLATES = {
+  ג: ([text]) => text,
+  גדול: ([text]) => text,
+  'גדול-מודגש': ([text]) => text,
+  מודגש: ([text]) => text,
+  סי: ([text]) => text,
+  רן: ([text]) => text,
+  שמאל: ([text]) => text,
+  ק: ([text]) => `<small>${text}</small>`,
+  קטן: ([text]) => `<small>${text}</small>`,
+  // A grey box around a passage (the chazzan's Kedushah, a Ten Days insert) keeps the passage.
+  'רקע אפור': (content) => content.join('|'),
+  ססס: () => ' ',
+  ר1: () => ' ',
+  'רווח קשיח': () => ' ',
+  'ש-רווח': () => '<br>',
+  'טקסט מנוקד': () => '',
+  'הצגת נוסחי תפילה': () => '',
+  ממס1: () => '',
+  ממ: () => '',
+  'מ"מ': () => '',
+  מקור: () => '',
+  'מקורות לסידור': () => '',
+  'טורים שווים ממורכז': (columns) => columns.join('\n\n'),
+  'נוסחי תפילה קצרים': nusachVariant,
+  'נוסחי תפילה ארוכים': nusachVariant,
+};
+
+function namedArgs(args) {
+  return Object.fromEntries(
+    args
+      .filter((arg) => /^[^=]+=/.test(arg))
+      .map((arg) => arg.split(/=(.*)/s).slice(0, 2))
+      .map(([name, value]) => [name.trim(), value]),
+  );
+}
+
+function parserFunction(name, args) {
+  const [fn, first] = name.split(/:(.*)/s);
+  if (fn.trim() === '#תנאי') return (first.trim() ? args[0] : args[1]) ?? '';
+  if (fn.trim() !== '#בחר') throw new Error(`unsupported parser function {{${fn.trim()}:}}`);
+  const value = first.trim();
+  let fallthrough = false;
+  for (const arg of args) {
+    const [label, result] = /^[^=]+=/.test(arg) ? arg.split(/=(.*)/s) : [arg, undefined];
+    if (result === undefined) {
+      if (label.trim() === value) fallthrough = true;
+      continue;
+    }
+    if (fallthrough || label.trim() === value) return result.trim();
+  }
+  const fallback = args.filter((arg) => !/^[^=]+=/.test(arg));
+  return fallback.length ? fallback[fallback.length - 1].trim() : '';
+}
+
+function expandTemplate(body, key, withParams = false) {
   const [name, ...args] = body.split('|');
+  if (withParams && name.trim().startsWith('#')) return parserFunction(name, args);
+  if (withParams && PARAM_TEMPLATES[name.trim()]) {
+    return PARAM_TEMPLATES[name.trim()](
+      args.filter((arg) => !/^[^=]+=/.test(arg)),
+      namedArgs(args),
+    );
+  }
   const expand = WIKI_TEMPLATES[name.trim()];
   if (!expand) throw new Error(`${key}: unsupported template {{${name.trim()}}}`);
   const named = Object.fromEntries(
@@ -239,7 +332,116 @@ function pinnedPage(page, key) {
   return sourceKey;
 }
 
-async function wikiToHtml(wikitext, key, used) {
+// Hebrew numerals as Wikisource writes chapter and verse: טו and טז are 15 and 16 like any sum.
+function fromGematriya(numeral) {
+  const values = { א: 1, ב: 2, ג: 3, ד: 4, ה: 5, ו: 6, ז: 7, ח: 8, ט: 9, י: 10, כ: 20, ל: 30, מ: 40, נ: 50 };
+  Object.assign(values, {
+    ס: 60,
+    ע: 70,
+    פ: 80,
+    צ: 90,
+    ק: 100,
+    ר: 200,
+    ש: 300,
+    ת: 400,
+    ך: 20,
+    ם: 40,
+    ן: 50,
+    ף: 80,
+    ץ: 90,
+  });
+  const letters = numeral.replace(/["'׳״\s]/g, '');
+  if (!letters || [...letters].some((letter) => !values[letter])) throw new Error(`not a Hebrew numeral: "${numeral}"`);
+  return [...letters].reduce((sum, letter) => sum + values[letter], 0);
+}
+
+// A psalm a page transcludes ({{צת}}, {{צתס}}, {{צת לעיצוב}}, {{פתל}}) is read from the pinned
+// Sefaria Psalms, as the qere is read: one verse inline, several each on its own paragraph.
+const PSALM_TEMPLATES = /\{\{(צתס|צת לעיצוב|צת|פתל)\|([^{}]*)\}\}/;
+
+async function psalmText(name, args, key, used) {
+  const positional = args.filter((arg) => !/^[^=]+=/.test(arg)).map((arg) => arg.trim());
+  const [book, chapter, from, to] = name === 'פתל' ? ['תהלים', ...positional] : positional;
+  if (book !== 'תהלים') throw new Error(`${key}: {{${name}}} quotes "${book}", and only Psalms is pinned`);
+  used.add('tanachNikkudHe');
+  const verses = (await loadSource('tanachNikkudHe'))[fromGematriya(chapter) - 1];
+  if (!verses) throw new Error(`${key}: no Psalm ${chapter}`);
+  const first = from === undefined ? 1 : fromGematriya(from);
+  const last = to === undefined ? (from === undefined ? verses.length : first) : fromGematriya(to);
+  const picked = verses.slice(first - 1, last).map((verse) => tanachReading(verse).trim());
+  if (picked.length !== last - first + 1) throw new Error(`${key}: Psalm ${chapter} has no verses ${first}-${last}`);
+  return picked.join(picked.length > 1 ? '\n\n' : ' ');
+}
+
+function substituteParams(wikitext, params) {
+  let out = wikitext;
+  for (let previous = ''; previous !== out;) {
+    previous = out;
+    out = out.replace(
+      /\{\{\{([^{}|]+)(?:\|([^{}]*))?\}\}\}/g,
+      (_, name, fallback) => params[name.trim()] ?? fallback ?? '',
+    );
+  }
+  return out;
+}
+
+// A wiki table becomes its rows, one line each, and its cells joined by a space.
+function withoutTables(wikitext) {
+  return wikitext
+    .replace(/\{\|.*$/gm, '')
+    .replace(/^[ \t]*\|-.*$/gm, '<br>')
+    .replace(/^[ \t]*\|\}|\|\}/gm, '')
+    .replace(/^[ \t]*\|/gm, '')
+    .replace(/\|\|/g, ' ');
+}
+
+async function wikiToHtml(wikitext, key, used, params = null) {
+  if (params) {
+    wikitext = withoutTables(
+      substituteParams(wikitext.replace(/<noinclude>[\s\S]*?<\/noinclude>/g, ''), params)
+        .replace(/<\/?includeonly>/g, '')
+        .replace(/\[\[קטגוריה:[^\]]*\]\]/g, '')
+        .replace(/\[\[(?:[^\]|]*\|)?([^\]]*)\]\]/g, '$1')
+        .replace(/'''([\s\S]+?)'''/g, '<b>$1</b>')
+        .replace(/''([\s\S]+?)''/g, '$1')
+        .replace(/'{2,}/g, ''),
+    );
+    for (let found = PSALM_TEMPLATES.exec(wikitext); found; found = PSALM_TEMPLATES.exec(wikitext)) {
+      const verses = await psalmText(found[1], found[2].split('|'), key, used);
+      wikitext = wikitext.slice(0, found.index) + verses + wikitext.slice(found.index + found[0].length);
+    }
+    for (
+      let found = /\{\{:([^|{}]+)\|([^{}]*)\}\}/.exec(wikitext);
+      found;
+      found = /\{\{:([^|{}]+)\|([^{}]*)\}\}/.exec(wikitext)
+    ) {
+      const sourceKey = pinnedPage(found[1].trim(), key);
+      used.add(sourceKey);
+      const included = await wikiToHtml(withoutWrappers(await loadSource(sourceKey), sourceKey), sourceKey, used, {
+        ...params,
+        ...namedArgs(found[2].split('|')),
+      });
+      wikitext = wikitext.slice(0, found.index) + included + wikitext.slice(found.index + found[0].length);
+    }
+    // A template that is itself a pinned page ({{גפ|…}} as תבנית:גפ) is read like a transclusion with
+    // its arguments, numbered from 1 as MediaWiki numbers them.
+    const templates = Object.values(SOURCES)
+      .map((source) => source.wikisource)
+      .filter((page) => page?.startsWith('תבנית:'))
+      .map((page) => escapeRegExp(page.slice('תבנית:'.length)));
+    const pinnedTemplate = new RegExp(`\\{\\{(${templates.join('|')})(\\|[^{}]*)?\\}\\}`);
+    for (let found = templates.length && pinnedTemplate.exec(wikitext); found; found = pinnedTemplate.exec(wikitext)) {
+      const args = (found[2] ?? '').split('|').slice(1);
+      const positional = args.filter((arg) => !/^[^=]+=/.test(arg));
+      const sourceKey = pinnedPage(`תבנית:${found[1]}`, key);
+      used.add(sourceKey);
+      const included = await wikiToHtml(withoutWrappers(await loadSource(sourceKey), sourceKey), sourceKey, used, {
+        ...Object.fromEntries(positional.map((arg, index) => [String(index + 1), arg])),
+        ...namedArgs(args),
+      });
+      wikitext = wikitext.slice(0, found.index) + included + wikitext.slice(found.index + found[0].length);
+    }
+  }
   let html = wikitext
     .replace(/<noinclude>[\s\S]*?<\/noinclude>/g, '')
     .replace(/<!--[\s\S]*?-->/g, '')
@@ -253,24 +455,33 @@ async function wikiToHtml(wikitext, key, used) {
     const [page, label] = [found[1].trim(), found[2].trim()];
     const sourceKey = pinnedPage(page, key);
     used.add(sourceKey);
-    const included = await wikiToHtml(labeledText(await loadSource(sourceKey), label, sourceKey), sourceKey, used);
+    const included = await wikiToHtml(
+      labeledText(await loadSource(sourceKey), label, sourceKey),
+      sourceKey,
+      used,
+      params,
+    );
     html = html.slice(0, found.index) + included + html.slice(found.index + found[0].length);
   }
   for (let found = /\{\{:([^|{}]+)\}\}/.exec(html); found; found = /\{\{:([^|{}]+)\}\}/.exec(html)) {
     const sourceKey = pinnedPage(found[1].trim(), key);
     used.add(sourceKey);
-    const included = await wikiToHtml(withoutWrappers(await loadSource(sourceKey), sourceKey), sourceKey, used);
+    const included = await wikiToHtml(withoutWrappers(await loadSource(sourceKey), sourceKey), sourceKey, used, params);
     html = html.slice(0, found.index) + included + html.slice(found.index + found[0].length);
   }
   for (let previous = ''; previous !== html;) {
     previous = html;
-    html = html.replace(/\{\{([^{}]*)\}\}/g, (_, body) => expandTemplate(body, key));
+    html = html.replace(/\{\{([^{}]*)\}\}/g, (_, body) => expandTemplate(body, key, Boolean(params)));
   }
   html = html
     .replace(/'''(.+?)'''/g, '<b>$1</b>')
     .replace(/\[\[(?:[^\]|]*\|)?([^\]]*)\]\]/g, '$1')
     .replace(/^:+/gm, '');
-  if (/\{\{|\}\}|\{\||\[\[|''/.test(html)) throw new Error(`${key}: unconverted wiki markup in "${html.slice(0, 80)}"`);
+  const markup = /\{\{|\}\}|\{\||\[\[|''/.exec(html);
+  if (markup) {
+    const near = html.slice(Math.max(0, markup.index - 40), markup.index + 160);
+    throw new Error(`${key}: unconverted wiki markup in "${near}"`);
+  }
   return html;
 }
 
@@ -284,7 +495,7 @@ async function wikisourceSegments(key, nodePath, used) {
     if (part === '*') raw = wikitext;
     else if (part.startsWith('#')) raw = headingText(wikitext, part, key);
     else raw = before === undefined ? labeledText(wikitext, part, key) : textBetween(wikitext, after, before, key);
-    const html = await wikiToHtml(raw, key, used);
+    const html = await wikiToHtml(raw, key, used, SOURCES[key].params ?? null);
     segments.push(
       ...html
         .split(/\n[ \t]*\n/)
@@ -1124,7 +1335,7 @@ const SHARED_DIR = 'shared';
 
 function assetMapSource(built, shared) {
   const lines = ['export const SIDDUR_ASSETS = {'];
-  for (const nusach of NUSCHAOT) {
+  for (const nusach of APP_NUSCHAOT) {
     lines.push(`  ${nusach}: {`);
     for (const id of built[nusach] ?? []) {
       const folder = shared.includes(id) ? SHARED_DIR : nusach;
@@ -1186,7 +1397,7 @@ function chapterIndexSource(chapters) {
   ];
   for (const textId of Object.keys(TEXTS)) {
     lines.push(`  ${textId}: {`);
-    for (const nusach of NUSCHAOT) {
+    for (const nusach of APP_NUSCHAOT) {
       if (chapters[textId]?.[nusach]) lines.push(`    ${nusach}: ${JSON.stringify(chapters[textId][nusach])},`);
     }
     lines.push('  },');
@@ -1236,10 +1447,11 @@ async function buildText(textId, specs, nusach, run) {
 }
 
 function addonOutputs(textId, dir, byNusach, outputs) {
-  const missing = NUSCHAOT.filter((nusach) => !(nusach in byNusach));
+  const missing = NUSCHAOT.filter((nusach) => TEXTS[textId][nusach] && !(nusach in byNusach));
   if (missing.length) throw new Error(`${textId}: not built for ${missing.join(', ')}`);
+  const packedNuschaot = APP_NUSCHAOT.filter((nusach) => nusach in byNusach);
   const gz = {};
-  for (const nusach of NUSCHAOT) {
+  for (const nusach of packedNuschaot) {
     const packed = Buffer.from(gzipSync(Buffer.from(byNusach[nusach], 'utf8'), GZIP_OPTIONS));
     const sha256 = crypto.createHash('sha256').update(packed).digest('hex');
     const file = `${nusach}.${sha256.slice(0, 8)}.siddur.gz`;
@@ -1250,8 +1462,8 @@ function addonOutputs(textId, dir, byNusach, outputs) {
   const previous = fs.existsSync(manifestFile) ? JSON.parse(fs.readFileSync(manifestFile, 'utf8')) : null;
   const unchanged =
     previous !== null &&
-    Object.keys(previous.gz).length === NUSCHAOT.length &&
-    NUSCHAOT.every((nusach) => previous.gz[nusach]?.sha256 === gz[nusach].sha256);
+    Object.keys(previous.gz).length === packedNuschaot.length &&
+    packedNuschaot.every((nusach) => previous.gz[nusach]?.sha256 === gz[nusach].sha256);
   const manifest = {
     format: 1,
     version: previous === null ? 1 : unchanged ? previous.version : previous.version + 1,
@@ -1261,7 +1473,45 @@ function addonOutputs(textId, dir, byNusach, outputs) {
   outputs.set(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
-async function main() {
+// `--nusach a,b` rebuilds only those nuschaot. Every other nusach and the shared texts are read back
+// from their committed outputs, unchanged, so a source that changed upstream since they were built
+// cannot touch them; the outputs of the whole build are then written as usual.
+function keptText(textId, nusach, run) {
+  const label = `${nusach ?? SHARED_DIR}/${textId}`;
+  let content;
+  if (textId in DOWNLOADED_TEXTS) {
+    const manifest = JSON.parse(fs.readFileSync(path.join(DOWNLOADED_TEXTS[textId], 'manifest.json'), 'utf8'));
+    const entry = manifest.gz[nusach];
+    if (!entry) throw new Error(`${label}: kept, but the published manifest has no file for it`);
+    content = Buffer.from(gunzipSync(fs.readFileSync(path.join(DOWNLOADED_TEXTS[textId], entry.path)))).toString(
+      'utf8',
+    );
+    (run.downloaded[textId] ??= {})[nusach] = content;
+  } else {
+    const file = path.join(OUT_DIR, nusach ?? SHARED_DIR, `${textId}.siddur`);
+    if (!fs.existsSync(file)) throw new Error(`${label}: kept, but ${path.relative(ROOT, file)} does not exist`);
+    content = fs.readFileSync(file, 'utf8');
+    run.outputs.set(file, content);
+  }
+  const { sections } = JSON.parse(content);
+  for (const section of sections) if (section.minyanOnly) run.minyanOnlyTitles.add(section.title.he);
+  run.chapters[textId] ??= {};
+  const entries = chapterEntries(sections, label);
+  for (const target of nusach ? [nusach] : NUSCHAOT) run.chapters[textId][target] = entries;
+  run.report.push(`${label}: kept`);
+}
+
+function selectedNuschaot(args) {
+  const at = args.indexOf('--nusach');
+  if (at === -1) return null;
+  const selected = (args[at + 1] ?? '').split(',').filter(Boolean);
+  const unknown = selected.filter((nusach) => !NUSCHAOT.includes(nusach));
+  if (!selected.length || unknown.length) throw new Error(`--nusach takes a list of ${NUSCHAOT.join(', ')}`);
+  return selected;
+}
+
+async function main(args) {
+  const only = selectedNuschaot(args);
   const memory = await buildTranslationMemory();
   const unreviewed = [];
   const minyanOnlyTitles = new Set();
@@ -1279,15 +1529,20 @@ async function main() {
       }
       const specs = byNusach[nusach];
       if (!specs) continue;
-      await buildText(textId, specs, nusach, run);
+      if (only && !only.includes(nusach)) keptText(textId, nusach, run);
+      else await buildText(textId, specs, nusach, run);
       if (!(textId in DOWNLOADED_TEXTS)) built[nusach].push(textId);
     }
   }
-  for (const textId of shared) await buildText(textId, TEXTS[textId].shared, null, run);
+  for (const textId of shared) {
+    if (only) keptText(textId, null, run);
+    else await buildText(textId, TEXTS[textId].shared, null, run);
+  }
   if (unreviewed.length) {
     throw new Error(`conditional instructions without a condition or review:\n${unreviewed.join('\n')}`);
   }
-  const unused = RULES.filter((entry) => !entry.hits).map((entry) => entry.name);
+  // A partial build applies only its own nuschaot's rules; one never applied there is not judged.
+  const unused = RULES.filter((entry) => !entry.hits && (!only || entry.applied)).map((entry) => entry.name);
   if (unused.length) throw new Error(`manifest rules that never matched:\n${unused.join('\n')}`);
   const missing = MINYAN_ONLY_TITLES.filter((title) => !minyanOnlyTitles.has(title));
   if (missing.length) throw new Error(`minyan-only titles that no section carries:\n${missing.join('\n')}`);
@@ -1341,7 +1596,7 @@ async function inspect(sourceKey, nodePath) {
 }
 
 const [mode, ...args] = process.argv.slice(2);
-(mode === '--inspect' ? inspect(...args) : main()).catch((error) => {
+(mode === '--inspect' ? inspect(...args) : main(process.argv.slice(2))).catch((error) => {
   console.error(error.message);
   process.exit(1);
 });
