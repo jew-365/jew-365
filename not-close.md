@@ -357,14 +357,14 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
 
 - **Requested:** the user, 2026-11-02, in a Claude Code session, in Hebrew: add nusach Teiman to the siddur and to everything it is relevant for.
 - **Decisions taken:** the owner's call, 2026-11-02: Baladi only, one new nusach; Shami is not added.
-- **Blocked:** the cloud environment of that session denies `www.sefaria.org` and `he.wikisource.org`, the two hosts [scripts/siddur/build.js](scripts/siddur/build.js) fetches, so no source can be read or built there; the owner is opening network access (Other Open Items).
+- **Blocked:** the cloud environment of that session denies `www.sefaria.org` and `he.wikisource.org`, the two hosts [scripts/siddur/build.js](scripts/siddur/build.js) fetches, so no source can be read or built there; the owner is opening network access (Other Open Items). A second session the same day found both still denied (403 on CONNECT; WebFetch could not resolve `www.sefaria.org` either), and recorded the source candidates and [R14](#for-the-rav) without building anything.
 - **Done means:** the standing rule above (every siddur text ships for all nuschaot or not at all), so the nusach reaches the app only together with all its texts; every halachic choice listed under [For the rav](#for-the-rav); both dictionaries, the search, the guide and a `WHATS_NEW` item; a DOX pass; `pnpm siddur:build` twice with no change on the second run; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, `pnpm test:tz` green.
 
 ### High — Nusach Teiman
 
 - [ ] Pin and map the Baladi source
   - **Flag:** none (research; the pinned source lands with the next task).
-  - **What it is:** Verify the candidate source, the Hebrew Wikisource transcription of "תכלאל עם פירוש עץ חיים" (Jerusalem 1894-1898, ed. R. Avraham Alnadaf, named by HaMichlol's "תכלאל" article; not yet opened): its license, its completeness for every text in `SIDDUR_TEXTS` and `STANDALONE_TEXTS` of [src/data/siddur.ts](src/data/siddur.ts), and a revision to pin; then map each text to its pages or headings with `--inspect`, naming every text it lacks and the source proposed for it.
+  - **What it is:** Verify the candidate source, the Hebrew Wikisource transcription of "תכלאל עם פירוש עץ חיים" (Jerusalem 1894-1898, ed. R. Avraham Alnadaf, named by HaMichlol's "תכלאל" article; not yet opened). A web search on 2026-11-02 found its pages under two prefixes, `סידור/נוסח תימן בלדי/` (`שחרית לחול`, `שחרית לחול/תפילת עמידה`, `מפתח הפיוטים`) and `תכלאל עץ חיים/` (`שחרית תשעה באב`), so [scripts/siddur/build.js](scripts/siddur/build.js) can read it through the MediaWiki API it already uses for Wikisource; no Yemenite Selichot page was found. Check its license, its completeness for every text in `SIDDUR_TEXTS` and `STANDALONE_TEXTS` of [src/data/siddur.ts](src/data/siddur.ts), and a revision to pin; then map each text to its pages or headings with `--inspect`, naming every text it lacks and the source proposed for it.
   - **What it solves:** The build pins an exact revision with a credit per source ([scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md)); no Baladi source is pinned today.
   - **Expected result:** A table of every siddur text against its Baladi source page, revision and range, and the gaps, reported to the owner before any text is built.
 - [ ] Build every siddur text in nusach Teiman Baladi
@@ -374,7 +374,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Expected result:** `pnpm siddur:build` writes a `teiman` asset per text, and the siddur suites pass with `teiman` among the nuschaot.
 - [ ] Add nusach Teiman to the app
   - **Flag:** `OTA`.
-  - **What it is:** `teiman` in `Nusach` ([src/types/mitzvah.ts](src/types/mitzvah.ts)) and `NUSCHAOT` ([src/data/nuschaot.ts](src/data/nuschaot.ts)), the onboarding and Settings choices, both dictionaries, the search, and every `Record<Nusach, …>` and nusach switch (`KIDDUSH_LEVANA_START_DAYS` and the Kiddush Levana period, the Chanukah lighting time, `nuschaotSupported` (Ushpizin), the taharah preset, the halacha lines, the Chok LeYisrael mapping, the Selichot season), each value a choice for the rav.
+  - **What it is:** `teiman` in `Nusach` ([src/types/mitzvah.ts](src/types/mitzvah.ts)) and `NUSCHAOT` ([src/data/nuschaot.ts](src/data/nuschaot.ts)), the onboarding and Settings choices, both dictionaries, the search, and every `Record<Nusach, …>` and nusach switch (`KIDDUSH_LEVANA_START_DAYS` and the Kiddush Levana period, the Chanukah lighting time, `nuschaotSupported` (Ushpizin), the taharah preset, the halacha lines, the Chok LeYisrael mapping, the Selichot season, `keepsCholHamoed()`, the default Shema opinion, `TEXTS_NOT_SHIPPED`), each value as [R14](#for-the-rav) assumes it until the rav answers.
   - **What it solves:** A Yemenite user can pick the nusach and every nusach-dependent rule follows it.
   - **Expected result:** A user who picks Teiman in onboarding reads every text in Teiman; the smoke, search and siddur suites cover it.
 
@@ -461,6 +461,20 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
   - **Question:** Is his hilula on 29 Tevet or 28 Tevet?
   - **Assumption:** 29 Tevet: he died after nightfall on motzaei Shabbat, 28 January 2006, already 29 Tevet 5766 (Hebrew Wikipedia, Chabad.org, Kikar HaShabbat). JDN and a breslev.com listing give 28 Tevet.
   - **Lives in:** the `yitzchak_kaduri` entry of `HILULOT` in [src/data/hilulot.ts](src/data/hilulot.ts) and the date in his page in [src/data/hilulaPages.ts](src/data/hilulaPages.ts).
+- **R14 — Nusach Teiman Baladi.** (the batch Nusach Teiman, 2026-11-02; nothing is implemented yet, and each answer sets the `teiman` value the first time it is written)
+  - **Question:** Which value does each nusach-dependent rule take for a Baladi user?
+  - **Assumption**, each marked with what supports it; a web search on 2026-11-02 found no Yemenite source for the items marked "unsourced":
+    - Selichot (R2): from 2 Elul, as Edot HaMizrach. The Yeshiva wiki's "סליחות" says Edot HaMizrach and Teiman rise for Selichot from Rosh Chodesh Elul, and JDN says Sephardim and Teiman start on the night of 2 Elul. Whether Baladi say Selichot on a Shabbat night is unsourced; the app keeps none then, as for every nusach.
+    - Chanukah candles (R4): from shkia, as Chabad, because the Rambam (Hilchot Chanukah 4:5) lights "עם שקיעתה". That the Baladi custom follows him here is unsourced.
+    - Ushpizin (R5, R10): not offered, as for Chabad, because the formula is kabbalistic. Unsourced; the Baladi pages are checked for it once they can be read.
+    - Kiddush Levana (R1): as Edot HaMizrach, 7 days after the molad to 15 days after it. Unsourced; the Rambam (Hilchot Berachot 10:16) gives the blessing, not its days.
+    - Tefillin on Chol HaMoed: never in Israel, as for every nusach; abroad not either, as for every nusach but Ashkenaz. Unsourced for Teiman.
+    - The default Shema opinion: GRA, as for every nusach but Chabad.
+    - The halacha line (`halachaRulingFor()`): the Sephardi poskim, as for Edot HaMizrach. The owner's call as much as the rav's.
+    - Chok LeYisrael's haftarah: the Sephardi one, as for Edot HaMizrach; the Yemenite haftarot are their own custom.
+    - The taharah preset a Baladi user starts from: `sephardi_ovadia`, as for Edot HaMizrach. The user can pick another; the Baladi follow the Rambam on rules no preset models, so a preset of their own needs the rav.
+    - The women's liturgy (R8): written per text once the source is mapped.
+  - **Lives in:** each rule's place in R1 to R10, `halachaRulingFor()` in [src/data/halachaLines.ts](src/data/halachaLines.ts), `HAFTARAH_VARIANT` in [src/utils/chok.ts](src/utils/chok.ts), `presetForNusach()` in [src/data/taharahPresets.ts](src/data/taharahPresets.ts), `keepsCholHamoed()` in [src/utils/skipRules.ts](src/utils/skipRules.ts) and `NUSCHAOT` in [src/data/nuschaot.ts](src/data/nuschaot.ts).
 
 ### For the owner
 
