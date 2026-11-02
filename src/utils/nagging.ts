@@ -14,7 +14,6 @@ export const NAG_LEVELS: Readonly<Record<NagLevel, { count: number; everyMin: nu
 };
 
 export const NAG_MAX_COUNT = 5;
-export const NAG_COUNTS: readonly number[] = [1, 2, 3, 4, 5];
 export const NAG_INTERVALS_MIN = [3, 5, 10, 15] as const;
 // Every reminder of these mitzvot nags only before itself (the owner's call: the bedtime Shema).
 export const BEFORE_ONLY_MITZVOT: readonly string[] = ['krias_shma_al_hamita'];

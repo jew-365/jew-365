@@ -1126,7 +1126,7 @@ describe('ReminderEditor › the nag', () => {
     const { onSave } = renderEditor({ mitzvah: CUSTOM });
     setMinutes('fromStart', 50);
     nagMode('custom');
-    fireEvent.press(chip('3'));
+    fireEvent.press(screen.getByRole('button', { name: t('nag.count.more') }));
     fireEvent.press(screen.getByRole('radio', { name: t('nag.placement.after') }));
     expect(screen.getByText(t('nag.preview', { times: '09:55 · 10:00' }))).toBeOnTheScreen();
     expect(screen.getByText(t('nag.previewDropped', { time: '10:05' }))).toBeOnTheScreen();
@@ -1179,7 +1179,7 @@ describe('ReminderEditor › the nag', () => {
       initialValue: { ...SHACHARIT.defaultReminders[0], nag: { count: 4, everyMin: 10, placement: 'around' } },
     });
     expect(screen.getByRole('radio', { name: t('nag.mode.custom') }).props.accessibilityState.selected).toBe(true);
-    expect(chip('4').props.accessibilityState.selected).toBe(true);
+    expect(screen.getByLabelText(`${t('nag.count')}: 4`)).toBeOnTheScreen();
     expect(chip(t('nag.every.option', { n: 10 })).props.accessibilityState.selected).toBe(true);
     expect(screen.getByRole('radio', { name: t('nag.placement.around') }).props.accessibilityState.selected).toBe(true);
   });

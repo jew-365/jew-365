@@ -52,6 +52,7 @@ export type WindowTrigger = {
 // A repeat of a nag as the preview shows it: `fires` false when the plan drops it, `afterEnd` when that
 // is because it falls after the end of the time.
 export type NagPreviewEntry = { trigger: Date; fires: boolean; afterEnd: boolean };
+export type NagChain = { main: Date; repeats: NagPreviewEntry[] };
 
 type PlannedCandidate = { candidate: ScheduleCandidate; moved: boolean };
 
@@ -385,11 +386,11 @@ export function planMitzvot(input: PlanInput, horizon: Horizon, thinFrom?: Date)
   return withoutDuplicates(candidates);
 }
 
-// The repeats of `draft`'s next main as the plan would send them, for the reminder editor: the first
-// main after `scope.now` over the same days `nextReminderAt()` walks, each repeat flagged when the
-// plan drops it (outside the time, inside a holy block, or folded into the main or an earlier repeat
-// by the quiet hours). Empty when the draft never fires or has no nag at `scope.nagLevel`.
-export function nagPreview(mitzvah: Mitzvah, draft: Reminder, scope: ReminderScope): NagPreviewEntry[] {
+// The chain of `draft`'s next main as the plan would send it: the first main after `scope.now` over the
+// same days `nextReminderAt()` walks, and its repeats, each flagged when the plan drops it (outside the
+// time, in a holy block, or folded into the main or an earlier repeat by the quiet hours). `null` when the
+// draft never fires. The reminder editor previews its repeats and Settings' example the whole chain.
+export function nagChain(mitzvah: Mitzvah, draft: Reminder, scope: ReminderScope): NagChain | null {
   const [today] = horizonDays(scope.now, scope.location);
   const ahead = mitzvah.multiDay ? MULTI_DAY_LOOKAHEAD_DAYS : NEXT_REMINDER_LOOKAHEAD_DAYS;
   let next: { main: WindowTrigger; window: { start: Date; end: Date } } | null = null;
@@ -402,15 +403,21 @@ export function nagPreview(mitzvah: Mitzvah, draft: Reminder, scope: ReminderSco
       }
     }
   }
-  if (!next) return [];
+  if (!next) return null;
   const { main, window } = next;
   const latest = draft.anchor === 'followUp' ? new Date(window.end.getTime() + FOLLOW_UP_MAX_MIN * 60_000) : window.end;
   const seen = new Set([main.trigger.getTime()]);
-  return repeatsOf(mitzvah.id, draft, main.trigger, window, latest, scope).map(({ planned, trigger, fires }) => {
-    const at = trigger ?? planned;
-    const kept = fires && !seen.has(at.getTime());
-    if (kept) seen.add(at.getTime());
-    const afterEnd = at.getTime() > latest.getTime();
-    return { trigger: at, fires: kept, afterEnd };
-  });
+  const repeats = repeatsOf(mitzvah.id, draft, main.trigger, window, latest, scope).map(
+    ({ planned, trigger, fires }) => {
+      const at = trigger ?? planned;
+      const kept = fires && !seen.has(at.getTime());
+      if (kept) seen.add(at.getTime());
+      const afterEnd = at.getTime() > latest.getTime();
+      return { trigger: at, fires: kept, afterEnd };
+    },
+  );
+  return { main: main.trigger, repeats };
 }
+
+export const nagPreview = (mitzvah: Mitzvah, draft: Reminder, scope: ReminderScope): NagPreviewEntry[] =>
+  nagChain(mitzvah, draft, scope)?.repeats ?? [];

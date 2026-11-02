@@ -56,6 +56,7 @@ import { useI18n } from '@/i18n';
 
 const LEGEND_DOT_SIZE = scaled(8);
 const DELETE_ICON_SIZE = scaled(16);
+const NAG_ICON_SIZE = scaled(14);
 const ADD_ICON_SIZE = scaled(18);
 const RIBBON_HEIGHT = scaled(10);
 const TIME_LABEL_WIDTH = scaled(40);
@@ -421,7 +422,8 @@ export default function MitzvahDetailScreen() {
         </Card>
 
         {!awaitingAddon ? (
-          <Card>
+          <Card padded>
+            <Text style={[typography.subheading, { color: colors.text }]}>{t('detail.reminders')}</Text>
             <ListRow
               icon="bell"
               title={t('detail.nagLevel')}
@@ -429,15 +431,8 @@ export default function MitzvahDetailScreen() {
               chevron
               onPress={() => setLevelSheetVisible(true)}
               accessibilityLabel={t('detail.nagLevel')}
+              style={[styles.levelRow, { borderBottomColor: colors.border }]}
             />
-          </Card>
-        ) : null}
-
-        {!awaitingAddon ? (
-          <Card padded>
-            <Text style={[typography.subheading, { color: colors.text, marginBottom: spacing.md }]}>
-              {t('detail.reminders')}
-            </Text>
             {reminderRows.map(({ reminder, index, next }) => (
               <View
                 key={`${index}-${reminder.anchor}-${reminder.offsetMin}`}
@@ -455,12 +450,24 @@ export default function MitzvahDetailScreen() {
                     {timingSummary(reminder, t)}
                   </Text>
                   {nagLine(reminder) ? (
-                    <Text
-                      testID={`reminder-nag-${index}`}
-                      style={[typography.micro, { color: colors.textSub, marginTop: scaled(2) }]}
-                    >
-                      {nagLine(reminder)}
-                    </Text>
+                    <View style={styles.nagLine}>
+                      <MitzvahIcon
+                        name="repeat"
+                        size={NAG_ICON_SIZE}
+                        color={reminder.nag === null ? colors.textMuted : colors.goldText}
+                        strokeWidth={2}
+                      />
+                      <Text
+                        testID={`reminder-nag-${index}`}
+                        style={[
+                          typography.small,
+                          styles.nagText,
+                          { color: reminder.nag === null ? colors.textMuted : colors.goldText },
+                        ]}
+                      >
+                        {nagLine(reminder)}
+                      </Text>
+                    </View>
                   ) : null}
                   {next ? (
                     <Text style={[typography.micro, { color: colors.goldText, marginTop: scaled(2) }]}>
@@ -673,6 +680,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  // The level row inside the reminders card, under its title (the owner's pick of 2026-11-02, board ד).
+  levelRow: {
+    paddingHorizontal: 0,
+    paddingVertical: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  nagLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: scaled(2),
+  },
+  nagText: {
+    flexShrink: 1,
   },
   reminderRow: {
     flexDirection: 'row',

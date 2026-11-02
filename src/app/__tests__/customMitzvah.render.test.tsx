@@ -1069,7 +1069,7 @@ describe('the nag in the custom form', () => {
     renderForm({ id: STORED_ID });
     nagMode('custom');
     // 11:55, then 12:00 at the end, then 12:05 after it.
-    fireEvent.press(screen.getByRole('button', { name: '2' }));
+    // The custom nag starts on two every five, after.
     expect(screen.getByText(t('nag.preview', { times: '12:00' }))).toBeOnTheScreen();
     expect(screen.getByText(t('nag.previewDropped', { time: '12:05' }))).toBeOnTheScreen();
   });

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Keyboard,
   Linking,
@@ -72,7 +72,7 @@ import { TimeField } from '@/components/TimeField';
 import { SettingsSearchBox, SettingsSearchResults, useSettingsSearch } from '@/components/SettingsSearch';
 import { SettingsSection } from '@/components/SettingsSection';
 import { ScrollSpeedStepper } from '@/components/ScrollSpeedStepper';
-import { SegmentedControl } from '@/components/SegmentedControl';
+import { NagLevelExample, NagLevelPicker } from '@/components/NagLevelPicker';
 import { UI_SCALES, rescaled, scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
@@ -82,10 +82,10 @@ import type { ChokThuNightDay } from '@/types/chok';
 import { findMitzvah } from '@/data/mitzvot';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { NagLevel, Nusach } from '@/types/mitzvah';
-import { NAG_LEVEL_IDS, countsInDayEstimate, remindersPerDay } from '@/utils/nagging';
+import { countsInDayEstimate, remindersPerDay } from '@/utils/nagging';
 import type { SiddurVoice } from '@/types/siddur';
 import { minutesToTime, timeToMinutes } from '@/utils/clock';
-import { quietBoundsValid, type QuietBound } from '@/utils/quietHours';
+import { quietBoundsValid, quietHoursOf, type QuietBound } from '@/utils/quietHours';
 import { SETTINGS_SEARCH_ITEMS, type SettingsSearchItem, type SettingsSectionKey } from '@/utils/settingsSearch';
 
 const NUSACHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
@@ -181,6 +181,14 @@ export default function SettingsScreen() {
   );
   const enabledMitzvotCount = useMitzvotStore(selectEnabledCount(user.nusach));
   const dayEstimate = useMitzvotStore(selectDayEstimate(user.nusach, user.nagLevel));
+  const nagQuietHours = useMemo(
+    () => quietHoursOf(user.quietBefore, user.quietAfter),
+    [user.quietBefore, user.quietAfter],
+  );
+  const nagSettings = useMemo(
+    () => ({ nusach: user.nusach, halachicOpinions: user.halachicOpinions, inIsrael: user.inIsrael }),
+    [user.nusach, user.halachicOpinions, user.inIsrael],
+  );
   const savedCityId = cityOf(user.location)?.cityId;
   // Held locally and committed on blur. Bound straight to the store, every keystroke serialised
   // the whole user store to MMKV and re-rendered the entire settings tree.
@@ -656,27 +664,15 @@ export default function SettingsScreen() {
                   />
                 </Anchor>
                 <Anchor {...anchor('nagLevel')}>
-                  <SectionLabel variant="field" text={t('settings.nagLevel')} style={styles.fieldLabel} />
-                  <View accessibilityRole="radiogroup" accessibilityLabel={t('settings.nagLevel')}>
-                    <SegmentedControl
-                      options={NAG_LEVEL_IDS.map((level) => ({
-                        value: String(level),
-                        label: t(`nag.level.${level}.name`),
-                        accessibilityLabel: t('nag.level.title', { name: t(`nag.level.${level}.name`), level }),
-                      }))}
-                      value={String(user.nagLevel)}
-                      onChange={(value) => user.setNagLevel(Number(value) as NagLevel)}
-                    />
-                  </View>
-                  <Text style={[typography.small, styles.note, { color: colors.textSub }]} testID="settings-nag-line">
-                    {t('nag.level.line', {
-                      name: t(`nag.level.${user.nagLevel}.name`),
-                      level: user.nagLevel,
-                      desc: t(`nag.level.${user.nagLevel}.desc`),
-                    })}
-                  </Text>
+                  <NagLevelPicker level={user.nagLevel} onChange={user.setNagLevel} style={styles.fieldLabel} />
+                  <NagLevelExample
+                    level={user.nagLevel}
+                    location={user.location}
+                    settings={nagSettings}
+                    quietHours={nagQuietHours}
+                  />
                   <Text
-                    style={[typography.small, styles.hint, { color: colors.goldText }]}
+                    style={[typography.small, styles.note, { color: colors.textSub }]}
                     testID="settings-nag-estimate"
                   >
                     {t('settings.nagLevelPerDay', { n: dayEstimate })}

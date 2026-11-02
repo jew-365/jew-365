@@ -4,10 +4,11 @@
 
 - The design study of 2026-11-01 for the nagging levels and reminder nags (the item "Design study: the nagging controls"
   in [../../../../not-close.md](../../../../not-close.md); spec [../../../../.claude/specs/nagging-levels.md](../../../../.claude/specs/nagging-levels.md),
-  section 4): the surfaces the owner picks. The app's screens were built the same night on the baseline, direction א
-  with boards ד to ו, before the pick (the owner's word: carry out every task that needs no decision of theirs); a different
-  pick changes them. The app differs from the boards in two places, each cheap to change: the count is a row of chips 1 to
-  5, not a stepper, and the mitzvah screen's level row is its own card right above the reminders card.
+  section 4): the surfaces the owner picks. The app's screens were first built on the baseline (direction א with boards ד
+  to ו); after the owner's picks of 2026-11-02 (ג for Settings, the other boards approved) they follow the boards: the
+  slider with its live example in Settings, the level row inside the reminders card with the repeat icon on each nag line,
+  and the count's stepper in the editor and the custom form. The app keeps its own copy where it differs from spec §7
+  (listed under Work Guidance).
 - Seven live boards on real Jerusalem data:
   - Settings, Device and notifications (spec 4.1), three directions for the level control, the owner picks one:
     - א שורת ארבע מדרגות ([boards/LevelSegmented.html](boards/LevelSegmented.html)): spec 4.1 exactly, the baseline the app is built on: the field label, a SegmentedControl of the four levels named by their names, the chosen level's name and description, the per-day estimate and the hint;
@@ -36,15 +37,15 @@
   - canvas: https://claude.ai/artifact/Mz4HEjiCxcUXd3AeLqB2Ct (the Design type: `root` the build output's canvas folder, `file_path` its `project/canvas.json`, each board beside it under `project/`);
   - gallery site: https://claude.ai/artifact/C6sFq2YZkkj4Lj2YVCaoXK (`root` the build output's site folder, `file_path` its `index.html`, the boards and `support.js` under `boards/`).
 - The owner's pick, per surface (the gallery's "הבחירה שלך" copies it as text):
-  - Settings level control (א, ב or ג): not yet.
-  - The mitzvah screen (ד): not yet.
-  - The reminder editor (ה): not yet.
-  - The custom mitzvah form (ו): not yet.
-  - The notification tray (ז): not yet.
+  - Settings level control (א, ב or ג): ג דוגמה חיה (the owner, 2026-11-02, from the gallery: "הגדרות: ג · דוגמה חיה").
+  - The mitzvah screen (ד): approved (the owner, 2026-11-02: "מסך המצווה: מאשר").
+  - The reminder editor (ה): approved (the owner, 2026-11-02: "עורך התזכורת: מאשר").
+  - The custom mitzvah form (ו): approved (the owner, 2026-11-02: "מצווה אישית: מאשר").
+  - The notification tray (ז): approved (the owner, 2026-11-02: "מגש ההתראות: מאשר").
 - The data: Monday 2 November 2026 (כ״ב חשון תשפ״ז) in Jerusalem, seen at 05:30, nusach Sefard, the Shema by the GRA. Shacharit 05:56 to 09:33, Maariv and the bedtime Shema from 17:19 to 04:43 the next morning. The custom form's sample (לימוד יומי, 21:00 to 22:00, a reminder at the start by the level and a follow-up 30 minutes after the end with its own nag of 2 every 15 minutes before) is the user's input, not a zman.
-- Copy: the table of spec section 7 for every key it lists, the app's [../../../../src/i18n/he.json](../../../../src/i18n/he.json) for every other key. While the study was built, the app's he.json gained its own wording of seven of those keys (`copyDiffs` in [data.json](data.json)), which the study does not show: `nag.level.2.desc` to `nag.level.4.desc` (one line per level; level 2 reads "עוד התראה אחת, במרחק 10 דקות" where the spec's shared line prints "עוד 1 התראות, כל 10 דקות"), `nag.effect` (a comma before the placement), `nag.previewAllDropped`, and `nag.row.fromLevel` / `nag.row.custom` (one `%{effect}`). The owner's pick decides which wording ships.
+- Copy: the table of spec section 7 for every key it lists, the app's [../../../../src/i18n/he.json](../../../../src/i18n/he.json) for every other key. While the study was built, the app's he.json gained its own wording of seven of those keys (`copyDiffs` in [data.json](data.json)), which the study does not show: `nag.level.2.desc` to `nag.level.4.desc` (one line per level; level 2 reads "עוד התראה אחת, במרחק 10 דקות" where the spec's shared line prints "עוד 1 התראות, כל 10 דקות"), `nag.effect` (a comma before the placement), `nag.previewAllDropped`, and `nag.row.fromLevel` / `nag.row.custom` (one `%{effect}`). After the owner's picks of 2026-11-02 the app keeps its own wording of these keys, which also fixes the spec's "עוד 1 התראות".
 - Copy the study proposes, with no key in the spec: a repeat that does not go out for a reason other than "after the end" reads "%{time} מוקדם ביותר משלוש שעות לפני תחילת הזמן, לא תישלח" (before the heads-up limit), "%{time} כבר עבר, לא תישלח" (already past), "%{time} עוד לפני סוף הזמן, לא תישלח" (a follow-up's repeat at or before the end) and "%{time} יותר מ-12 שעות אחרי הסוף, לא תישלח" (a follow-up's repeat past its 720 minutes); the app's he.json now has `nag.previewSkipped` ("%{time} לא תישלח") for these.
-- Two notes for the spec: `custom.hint.reminders` ("כל התראה היא הודעה אחת ביום…", shown on the form) contradicts the nag and needs new wording; and a repeat is numbered in time order, so a before chain reads "תזכורת 1 מתוך 2", "תזכורת 2 מתוך 2" and then the main with no suffix.
+- Two notes for the spec: `custom.hint.reminders` contradicted the nag and now reads "כל התראה נשלחת בשעה שנגזרת משעות הפעילות, ופעם אחת ביום אם לא נבחר לה נודניק" (`a149819`); and a repeat is numbered in time order, so a before chain reads "תזכורת 1 מתוך 2", "תזכורת 2 מתוך 2" and then the main with no suffix.
 - The per-day estimate is `Σ (1 + count)` (spec `remindersPerDay()`): in Settings over the default daily set at the app's level (12, 24, 36, 48), on the mitzvah screen and in the form over that mitzvah's reminders at its level.
 - What the boards leave out on purpose: on the mitzvah screen, the cards between the active card and the reminders card (today's window, content, settings); on the form, the fields between the hours and the reminders (category, schedule, skip switches); in Settings, the location block beyond the city name and everything after the quiet hours. The tray is Android's shade; the demo bar under it is the study's, not the app's.
 

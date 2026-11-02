@@ -74,12 +74,29 @@ describe('ReminderNagFields', () => {
   it('changes the count, the interval and the placement of its own nag', () => {
     const nag: Reminder['nag'] = { count: 2, everyMin: 5, placement: 'after' };
     const onChange = renderFields({ nag });
-    fireEvent.press(screen.getByRole('button', { name: '5' }));
-    expect(onChange).toHaveBeenLastCalledWith({ ...nag, count: 5 });
+    fireEvent.press(screen.getByRole('button', { name: t('nag.count.more') }));
+    expect(onChange).toHaveBeenLastCalledWith({ ...nag, count: 3 });
+    fireEvent.press(screen.getByRole('button', { name: t('nag.count.less') }));
+    expect(onChange).toHaveBeenLastCalledWith({ ...nag, count: 1 });
     fireEvent.press(screen.getByRole('button', { name: t('nag.every.option', { n: 15 }) }));
     expect(onChange).toHaveBeenLastCalledWith({ ...nag, everyMin: 15 });
     fireEvent.press(radio(t('nag.placement.around')));
     expect(onChange).toHaveBeenLastCalledWith({ ...nag, placement: 'around' });
+  });
+
+  it('stops the count’s stepper at 1 and at 5', () => {
+    const onChange = renderFields({ nag: { count: 1, everyMin: 5, placement: 'after' } });
+    const less = screen.getByRole('button', { name: t('nag.count.less') });
+    expect(less.props.accessibilityState.disabled).toBe(true);
+    fireEvent.press(less);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByLabelText(`${t('nag.count')}: 1`)).toBeOnTheScreen();
+    screen.unmount();
+    const atTop = renderFields({ nag: { count: 5, everyMin: 5, placement: 'after' } });
+    const more = screen.getByRole('button', { name: t('nag.count.more') });
+    expect(more.props.accessibilityState.disabled).toBe(true);
+    fireEvent.press(more);
+    expect(atTop).not.toHaveBeenCalled();
   });
 
   it('names the one placement a block exit and a before-the-end reminder allow', () => {

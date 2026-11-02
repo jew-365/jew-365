@@ -1,12 +1,13 @@
 import React from 'react';
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import type { NagLevel, NagPlacement, Reminder, ReminderNag } from '@/types/mitzvah';
 import { useTheme } from '@/theme/ThemeProvider';
-import { spacing } from '@/theme/tokens';
+import { scaled } from '@/theme/scale';
+import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
 import {
-  NAG_COUNTS,
+  NAG_MAX_COUNT,
   NAG_INTERVALS_MIN,
   NAG_LEVELS,
   nagFor,
@@ -15,6 +16,7 @@ import {
   type NagClockEntry,
 } from '@/utils/nagging';
 import { ChipRow } from './ChipRow';
+import { MitzvahIcon } from './MitzvahIcon';
 import { SectionLabel } from './SectionLabel';
 import { SegmentedControl } from './SegmentedControl';
 
@@ -71,6 +73,25 @@ export function ReminderNagFields({ mitzvahId, anchor, nag, level, onChange, pre
     }
   };
   const update = (patch: Partial<ReminderNag>) => own && onChange({ ...own, ...patch });
+  // The count's stepper (the owner's pick of 2026-11-02, board ה): one fewer and one more, 1 to NAG_MAX_COUNT.
+  const step = (icon: 'minus' | 'plus', label: string, count: number) => {
+    const disabled = count < 1 || count > NAG_MAX_COUNT;
+    return (
+      <Pressable
+        onPress={() => update({ count })}
+        disabled={disabled}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ disabled }}
+        style={({ pressed }) => [
+          styles.stepButton,
+          { backgroundColor: colors.surface2, borderColor: colors.border, opacity: disabled ? 0.4 : pressed ? 0.7 : 1 },
+        ]}
+      >
+        <MitzvahIcon name={icon} size={STEP_ICON_SIZE} color={colors.text} strokeWidth={2.5} />
+      </Pressable>
+    );
+  };
 
   const kept = preview?.filter((entry) => entry.fires) ?? [];
   const dropped = preview?.filter((entry) => !entry.fires) ?? [];
@@ -100,12 +121,18 @@ export function ReminderNagFields({ mitzvahId, anchor, nag, level, onChange, pre
       {own ? (
         <>
           <SectionLabel variant="field" text={t('nag.count')} style={styles.field} />
-          <ChipRow
-            values={NAG_COUNTS}
-            selected={own.count}
-            onSelect={(count) => update({ count })}
-            renderLabel={String}
-          />
+          <View style={styles.stepper}>
+            {step('minus', t('nag.count.less'), own.count - 1)}
+            <View style={[styles.stepValue, { backgroundColor: colors.surface2, borderColor: colors.border }]}>
+              <Text
+                style={[typography.heading, { color: colors.text }]}
+                accessibilityLabel={`${t('nag.count')}: ${own.count}`}
+              >
+                {own.count}
+              </Text>
+            </View>
+            {step('plus', t('nag.count.more'), own.count + 1)}
+          </View>
           <SectionLabel variant="field" text={t('nag.every')} style={styles.field} />
           <ChipRow<number>
             values={NAG_INTERVALS_MIN}
@@ -151,7 +178,32 @@ export function ReminderNagFields({ mitzvahId, anchor, nag, level, onChange, pre
   );
 }
 
+const STEP_ICON_SIZE = scaled(18);
+const STEP_WIDTH = scaled(54);
+const STEP_HEIGHT = scaled(48);
+
 const styles = StyleSheet.create({
+  stepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  stepButton: {
+    width: STEP_WIDTH,
+    height: STEP_HEIGHT,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepValue: {
+    flex: 1,
+    height: STEP_HEIGHT,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   caption: {
     marginTop: spacing.sm,
   },

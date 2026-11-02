@@ -62,6 +62,7 @@ export const ICON_NAMES = [
   'chat',
   'guide',
   'compass',
+  'repeat',
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];
@@ -115,6 +116,15 @@ const DRAWINGS: Partial<Record<IconName, (p: Drawing) => React.ReactElement>> = 
     <>
       <Circle cx={12} cy={12} r={4.5} fill={fill} />
       <Path d="M19.5,12H21.8M17.3,6.7L18.93,5.07M12,4.5V2.2M6.7,6.7L5.07,5.07M4.5,12H2.2M6.7,17.3L5.07,18.93M12,19.5V21.8M17.3,17.3L18.93,18.93" />
+    </>
+  ),
+  // Two arrows round a loop: a reminder's nag (the owner's pick of 2026-11-02, the nagging study's board ד).
+  repeat: () => (
+    <>
+      <Path d="M17,2.5L20,5.5L17,8.5" />
+      <Path d="M4,11.5V10.5A5,5 0 0 1 9,5.5H20" />
+      <Path d="M7,21.5L4,18.5L7,15.5" />
+      <Path d="M20,12.5V13.5A5,5 0 0 1 15,18.5H4" />
     </>
   ),
   undo: () => (
