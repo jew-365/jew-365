@@ -34,6 +34,14 @@ jest.mock('@/services/ChokContentService', () => ({ reconcileChokInstall: () => 
 jest.mock('@/services/SelichotContentService', () => ({ reconcileSelichotInstall: () => {} }));
 const mockFollow = jest.fn(async () => false);
 jest.mock('@/services/locationFollow', () => ({ followDeviceLocation: () => mockFollow() }));
+const mockWatchRating = jest.fn();
+const mockStopRating = jest.fn();
+jest.mock('@/services/storeReview', () => ({
+  watchForRatingMoment: () => {
+    mockWatchRating();
+    return mockStopRating;
+  },
+}));
 jest.mock('@/services/notificationResponseHandler', () => ({
   initNotificationResponseHandler: () => ({ remove: () => {} }),
   consumePendingNotificationRoute: () => {},
@@ -219,5 +227,65 @@ describe('the root layout and the Chok LeYisrael prompt', () => {
     renderWithTheme(<RootLayout />);
     await screen.findByTestId('stack');
     expect(screen.queryByText(TITLE)).toBeNull();
+  });
+});
+
+describe('the root layout and the store rating', () => {
+  const OPENED = at(J, '2026-10-28T07:00').getTime();
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: at(J, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: J, inIsrael: true, nusach: 'ashkenaz', isOnboarded: true });
+    mockWatchRating.mockClear();
+    mockStopRating.mockClear();
+    jest.spyOn(AppState, 'addEventListener').mockImplementation(() => ({ remove: jest.fn() }) as never);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.useRealTimers();
+  });
+
+  it('stamps the first open on the first mount that finds none', async () => {
+    expect(useUserStore.getState().firstOpenedAt).toBeNull();
+    renderWithTheme(<RootLayout />);
+    await screen.findByTestId('stack');
+    expect(useUserStore.getState().firstOpenedAt).toBe(OPENED);
+  });
+
+  it('stamps it before onboarding too, and keeps a stamp that is already there', async () => {
+    useUserStore.setState({ isOnboarded: false });
+    renderWithTheme(<RootLayout />);
+    await waitFor(() => expect(useUserStore.getState().firstOpenedAt).toBe(OPENED));
+    screen.unmount();
+
+    jest.setSystemTime(at(J, '2026-10-29T07:00'));
+    renderWithTheme(<RootLayout />);
+    await screen.findByTestId('stack');
+    expect(useUserStore.getState().firstOpenedAt).toBe(OPENED);
+  });
+
+  it('watches for the rating moment only once onboarded, and stops on unmount', async () => {
+    renderWithTheme(<RootLayout />);
+    await screen.findByTestId('stack');
+    expect(mockWatchRating).toHaveBeenCalledTimes(1);
+    expect(mockStopRating).not.toHaveBeenCalled();
+
+    screen.unmount();
+    expect(mockStopRating).toHaveBeenCalledTimes(1);
+  });
+
+  it('never watches before onboarding, starts when onboarding ends and stops if it flips off', async () => {
+    useUserStore.setState({ isOnboarded: false });
+    renderWithTheme(<RootLayout />);
+    await screen.findByTestId('stack');
+    expect(mockWatchRating).not.toHaveBeenCalled();
+
+    act(() => useUserStore.setState({ isOnboarded: true }));
+    expect(mockWatchRating).toHaveBeenCalledTimes(1);
+
+    act(() => useUserStore.setState({ isOnboarded: false }));
+    expect(mockStopRating).toHaveBeenCalledTimes(1);
   });
 });

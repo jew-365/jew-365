@@ -8,6 +8,8 @@ jest.mock('@/services/notifications/ids', () => ({
   HORIZON_MAX_DAYS: 2,
 }));
 jest.mock('@/services/notifications/planners/horizonEnd', () => ({ planHorizonEnd: () => [] }));
+const mockNoteNotificationMark = jest.fn();
+jest.mock('@/services/storeReview', () => ({ noteNotificationMark: () => mockNoteNotificationMark() }));
 
 type ScheduleInput = {
   identifier: string;
@@ -569,6 +571,14 @@ ${t('taharah.disputed')}`,
       expect(mockDismiss).toHaveBeenCalledWith(`taharah:bedikaMorning:${today()}`);
       expect(shouldSuppressForCompletion(morning())).toBe(true);
       expect(shouldSuppressForCompletion(evening())).toBe(false);
+    });
+
+    it('9a1 never notes a completion, because a bedika is not one', async () => {
+      record(...SHIVA_NEKIIM);
+      mockNoteNotificationMark.mockClear();
+
+      await markDoneFromNotificationData(morning(), `taharah:bedikaMorning:${today()}`);
+      expect(mockNoteNotificationMark).not.toHaveBeenCalled();
     });
 
     it('9b does not record the same bedika twice', async () => {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Easing,
   useAnimatedReaction,
@@ -26,14 +26,17 @@ export function useReduceMotion(): boolean {
 export function useEntrance(delay: number, duration: number, active = true, playKey: unknown = 0): SharedValue<number> {
   const reduce = useReduceMotion();
   const progress = useSharedValue(reduce ? 1 : 0);
+  const timing = useRef({ delay, duration });
+  timing.current = { delay, duration };
   useEffect(() => {
     if (reduce) {
       progress.value = 1;
       return;
     }
     progress.value = 0;
-    if (active) progress.value = withDelay(delay, withTiming(1, { duration, easing: EASE_OUT }));
-  }, [delay, duration, active, reduce, playKey, progress]);
+    const { delay: wait, duration: ms } = timing.current;
+    if (active) progress.value = withDelay(wait, withTiming(1, { duration: ms, easing: EASE_OUT }));
+  }, [active, reduce, playKey, progress]);
   return progress;
 }
 
@@ -67,17 +70,20 @@ export function usePop(delay: number, from: number, active: boolean, playKey: un
   const reduce = useReduceMotion();
   const scale = useSharedValue(reduce ? 1 : from);
   const opacity = useSharedValue(reduce ? 1 : 0);
+  const timing = useRef({ delay, from });
+  timing.current = { delay, from };
   useEffect(() => {
     if (reduce) {
       scale.value = 1;
       opacity.value = 1;
       return;
     }
-    scale.value = from;
+    const { delay: wait, from: start } = timing.current;
+    scale.value = start;
     opacity.value = 0;
     if (!active) return;
-    scale.value = withDelay(delay, withSpring(1, motion.badgeSpring));
-    opacity.value = withDelay(delay, withTiming(1, { duration: motion.badgeFadeMs, easing: EASE_OUT }));
-  }, [delay, from, active, reduce, playKey, scale, opacity]);
+    scale.value = withDelay(wait, withSpring(1, motion.badgeSpring));
+    opacity.value = withDelay(wait, withTiming(1, { duration: motion.badgeFadeMs, easing: EASE_OUT }));
+  }, [active, reduce, playKey, scale, opacity]);
   return useAnimatedStyle(() => ({ opacity: opacity.value, transform: [{ scale: scale.value }] }));
 }

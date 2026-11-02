@@ -421,6 +421,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         he: 'נודניק לתזכורת: בעורך התזכורת ובמצווה אישית בוחרים כמה פעמים התזכורת חוזרת, כל כמה דקות, ולפניה או אחריה, ורואים מראש באילו שעות. ״עשיתי״ על אחת מהן מבטל את כל השאר.',
         en: 'A nag on a reminder: in the reminder editor and in a custom mitzvah choose how many times a reminder repeats, every how many minutes, and before or after it, and see the times in advance. Done on any of them cancels the rest.',
       },
+      {
+        he: 'מסך הפתיחה נפתח בשפת הטלפון, עם מעבר בין עברית לאנגלית, ומסמן שהשם והטלפון אינם חובה.',
+        en: "The welcome screen opens in your phone's language, with a switch between Hebrew and English, and marks the name and phone as optional.",
+      },
     ],
   },
   {

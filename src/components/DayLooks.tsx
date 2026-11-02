@@ -83,12 +83,6 @@ function statusInk(status: DayEntryStatus, colors: ThemeColors, tones: Tones): s
   return colors.textSub;
 }
 
-function chunk<T>(list: readonly T[], size: number): T[][] {
-  const rows: T[][] = [];
-  for (let i = 0; i < list.length; i += size) rows.push(list.slice(i, i + size));
-  return rows;
-}
-
 export const DayLooks = React.memo(function DayLooks({
   look,
   entries,
@@ -269,17 +263,16 @@ export const DayLooks = React.memo(function DayLooks({
     </Reveal>
   );
 
-  const grid = (cell: (e: DayLookEntry) => React.ReactNode) =>
-    chunk(entries, 2).map((row, rowIndex) => (
-      <View key={row[0].id} style={styles.gridRow}>
-        {row.map((e, i) => (
-          <View key={e.id} style={styles.gridCell}>
-            {reveal(e, rowIndex * 2 + i, renderCard(e, cell(e)))}
-          </View>
-        ))}
-        {row.length === 1 ? <View style={styles.gridCell} /> : null}
-      </View>
-    ));
+  const grid = (cell: (e: DayLookEntry) => React.ReactNode) => (
+    <View style={styles.grid}>
+      {entries.map((e, index) => (
+        <View key={e.id} style={styles.gridCell}>
+          {reveal(e, index, renderCard(e, cell(e)))}
+        </View>
+      ))}
+      {entries.length % 2 ? <View key="grid-filler" style={styles.gridCell} /> : null}
+    </View>
+  );
 
   const summary = () => {
     const counts = dayRingCounts(entries);
@@ -443,8 +436,8 @@ const styles = StyleSheet.create({
   legendRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   legendDot: { width: LEGEND_DOT_SIZE, height: LEGEND_DOT_SIZE, borderRadius: radius.full },
   legendLabel: { flex: 1 },
-  gridRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
-  gridCell: { flex: 1 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
+  gridCell: { flexGrow: 1, flexBasis: '40%' },
   ringCell: { alignItems: 'center', gap: spacing.xs },
   miniRing: { width: MINI_RING_SIZE, height: MINI_RING_SIZE, alignItems: 'center', justifyContent: 'center' },
   miniIcon: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },

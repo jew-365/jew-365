@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { fireEvent, screen, within } from '@testing-library/react-native';
+import { getAnimatedStyle } from 'react-native-reanimated';
+import { act, fireEvent, screen, within } from '@testing-library/react-native';
 import { DayLooks, type DayLookEntry } from '../DayLooks';
 import { Reveal } from '../Reveal';
 import { CITIES } from '@/data/cities';
@@ -158,6 +159,32 @@ describe('DayLooks', () => {
       'home-day-U',
     ]);
     expect(screen.getByText('עכשיו 12:30')).toBeOnTheScreen();
+  });
+
+  // A mark moves an entry from the open group to the done group: every entry keeps its element, so none enters again.
+  it.each(['rings', 'cards', 'rail'] as const)('%s: keeps every entry on screen when a mark reorders them', (look) => {
+    jest.useFakeTimers();
+    const handlers = { onPress: jest.fn(), onLongPress: jest.fn(), onMark: jest.fn(), onUndo: jest.fn() };
+    const looks = (entries: DayLookEntry[]) => (
+      <DayLooks look={look} entries={entries} now={NOW} nowLabel="12:30" playKey={0} {...handlers} />
+    );
+    const opacities = () =>
+      screen
+        .UNSAFE_getAllByType(Reveal)
+        .map((reveal) =>
+          Number(getAnimatedStyle(reveal.findAll((node: Node) => typeof node.type === 'string')[1]).opacity),
+        );
+    try {
+      const view = renderWithTheme(looks([A, B, U, D1, M]));
+      act(() => jest.advanceTimersByTime(1000));
+      expect(opacities()).toEqual([1, 1, 1, 1, 1]);
+      view.rerender(looks([B, U, D1, entry('A', 'done', '05:53', '08:38', '12:30'), M]));
+      act(() => jest.advanceTimersByTime(16));
+      expect(dayIds()).toEqual(look === 'rail' ? ['D1', 'A', 'M', 'B', 'U'] : ['B', 'U', 'D1', 'A', 'M']);
+      expect(opacities()).toEqual([1, 1, 1, 1, 1]);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('wraps each entry in a Reveal with the stagger', () => {

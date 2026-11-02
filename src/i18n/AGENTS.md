@@ -9,6 +9,7 @@
 - [he.json](he.json) is the primary Hebrew dictionary.
 - [en.json](en.json) is the English dictionary.
 - [index.ts](index.ts) owns `setLocale()`, `translate()`, `t()`, `interpolate()` (the `%{key}` filling `translate()` applies, which the notification planner also applies to a registry reminder body), `formatDate()` and `useI18n()`.
+- [deviceLanguage.ts](deviceLanguage.ts) owns `deviceLanguage()`, the language a fresh install and a reset start in ([../stores/useUserStore.ts](../stores/useUserStore.ts)): Hebrew when the device's first language is Hebrew or `iw`, English for any other, Hebrew when nothing is readable or the read throws. It reads only `react-native` core APIs (`navigator` on web, `Settings.get('AppleLanguages')` then `I18nManager` on iOS, `I18nManager` elsewhere), never `expo-localization` or another package, because it ships over the air to installed binaries that carry no new native module.
 - Translation parity tests live in [__tests__/](__tests__/).
 
 ## Local Contracts
@@ -29,6 +30,7 @@
 ## Verification
 
 - Run `pnpm test -- src/i18n/__tests__/i18n.test.ts` after any dictionary or locale wrapper change; it pins key parity, non-empty values, the `.f` lookup and interpolation, and that `app.name` matches the native names: `expo.name` and `ios.infoPlist.CFBundleDisplayName` in [../../app.json](../../app.json) and both files in [../../locales/](../../locales), with an Xcode target name that keeps a Latin letter.
+- Run `pnpm test -- src/i18n/__tests__/deviceLanguage.test.ts src/stores/__tests__/userLanguage.store.test.ts` after a change to [deviceLanguage.ts](deviceLanguage.ts).
 - Run `pnpm typecheck` after [index.ts](index.ts) changes.
 - Run `pnpm test:tz -- src/i18n/__tests__/i18n.test.ts` after changing `formatDate()` or a weekday or month key.
 

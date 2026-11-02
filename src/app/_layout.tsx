@@ -37,6 +37,7 @@ import { reconcileSelichotInstall } from '@/services/SelichotContentService';
 import { afterPaint } from '@/utils/afterPaint';
 import { reconcileEndedCustomMitzvot } from '@/stores/customMitzvahLifecycle';
 import { followDeviceLocation } from '@/services/locationFollow';
+import { watchForRatingMoment } from '@/services/storeReview';
 import {
   initNotificationResponseHandler,
   consumePendingNotificationRoute,
@@ -127,8 +128,18 @@ function RootInner() {
   const isOnboarded = useUserStore((s) => s.isOnboarded);
   const language = useUserStore((s) => s.language);
   const location = useUserStore((s) => s.location);
+  const firstOpenedAt = useUserStore((s) => s.firstOpenedAt);
   const { block: quietBlock, now } = useCurrentQuietBlock(location, isOnboarded);
   const quiet = quietBlock !== null;
+
+  useEffect(() => {
+    if (firstOpenedAt === null) useUserStore.getState().setFirstOpenedAt(Date.now());
+  }, [firstOpenedAt]);
+
+  useEffect(() => {
+    if (!isOnboarded) return undefined;
+    return watchForRatingMoment();
+  }, [isOnboarded]);
 
   // The first time the app is open after a block ends, it opens that block's check-in by itself.
   // Re-checked when the block ends, on every return to the foreground, and once onboarding has

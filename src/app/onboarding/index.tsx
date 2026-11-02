@@ -7,7 +7,8 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ONBOARDING_STEPS, OnboardingDots } from '@/components/OnboardingDots';
 import { SectionLabel } from '@/components/SectionLabel';
-import { useUserStore } from '@/stores/useUserStore';
+import { SegmentedControl } from '@/components/SegmentedControl';
+import { useUserStore, type Language } from '@/stores/useUserStore';
 import { backupFailureKey, pickBackup, reloadIfScaleChanged, restoreBackup } from '@/services/BackupService';
 import { NotificationScheduler, requestNotificationPermissions } from '@/services/NotificationScheduler';
 import { reportError } from '@/services/errors';
@@ -18,6 +19,7 @@ import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
 
 const WELCOME_LOGO_SIZE = scaled(112);
+const LANGUAGE_SWITCH_WIDTH = scaled(220);
 
 export default function WelcomeScreen() {
   const { colors } = useTheme();
@@ -27,6 +29,7 @@ export default function WelcomeScreen() {
   const profilePhone = useUserStore((s) => s.profilePhone);
   const setProfileName = useUserStore((s) => s.setProfileName);
   const setProfilePhone = useUserStore((s) => s.setProfilePhone);
+  const setLanguage = useUserStore((s) => s.setLanguage);
   const [name, setName] = useState(profileName);
   const [phone, setPhone] = useState(profilePhone);
   const [error, setError] = useState('');
@@ -39,6 +42,14 @@ export default function WelcomeScreen() {
     setProfileName(name.trim());
     setProfilePhone(phone.trim());
     router.push('/onboarding/profile');
+  };
+
+  // The root layout reloads the app on native when the direction changes, so what was typed is saved first.
+  const chooseLanguage = (value: Language) => {
+    if (value === language) return;
+    setProfileName(name.trim());
+    setProfilePhone(phone.trim());
+    setLanguage(value);
   };
 
   // A new phone with a backup file skips the questions: the restored profile is already onboarded,
@@ -74,6 +85,21 @@ export default function WelcomeScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <View
+            accessibilityRole="radiogroup"
+            accessibilityLabel={t('settings.language')}
+            testID="welcome-language"
+            style={styles.language}
+          >
+            <SegmentedControl
+              options={[
+                { value: 'he', label: t('language.native.he') },
+                { value: 'en', label: t('language.native.en') },
+              ]}
+              value={language}
+              onChange={chooseLanguage}
+            />
+          </View>
           <View style={styles.header}>
             <AppLogo size={WELCOME_LOGO_SIZE} />
             <Text style={[typography.display, { color: colors.text, marginTop: spacing.md }]}>
@@ -87,7 +113,7 @@ export default function WelcomeScreen() {
             <Text style={[typography.body, styles.registerBody, { color: colors.textSub }]}>
               {t('onboarding.registerBody')}
             </Text>
-            <SectionLabel variant="field" text={t('settings.profileName')} />
+            <SectionLabel variant="field" text={t('onboarding.nameLabel')} />
             <TextInput
               value={name}
               onChangeText={(v) => {
@@ -103,7 +129,7 @@ export default function WelcomeScreen() {
               <Text style={[typography.small, { color: colors.urgent, marginTop: spacing.xs }]}>{error}</Text>
             ) : null}
 
-            <SectionLabel variant="field" text={t('settings.profilePhone')} style={styles.secondLabel} />
+            <SectionLabel variant="field" text={t('onboarding.phoneLabel')} style={styles.secondLabel} />
             <TextInput
               value={phone}
               onChangeText={setPhone}
@@ -151,6 +177,10 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     paddingBottom: spacing.lg,
+  },
+  language: {
+    alignSelf: 'center',
+    width: LANGUAGE_SWITCH_WIDTH,
   },
   header: {
     alignItems: 'center',

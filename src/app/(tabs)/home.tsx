@@ -200,12 +200,12 @@ export default function HomeScreen() {
   const [tick, setTick] = useState(0);
   // Only a memo dependency: each tick re-runs the memo, which reads the time itself.
   const tickedAt = useNow();
-  const [stampingId, setStampingId] = useState<string | null>(null);
+  const [stampingIds, setStampingIds] = useState<readonly string[]>([]);
+  const stampTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [scrubbing, setScrubbing] = useState(false);
   const lastError = useLastError();
   const [introDismissed, setIntroDismissed] = useState(() => StorageService.get<boolean>(PROFILE_INTRO_KEY) === true);
-  const stampTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const skySetter = useRef<(next: SkyTop | null) => void>(() => {});
 
   const {
@@ -367,25 +367,24 @@ export default function HomeScreen() {
     [streak, now, location, language, inIsrael, hilulotEnabled, t],
   );
 
+  const stamping = useMemo(() => new Set(stampingIds), [stampingIds]);
   const current = useMemo(
-    () => allCurrent.filter((item) => !item.marked || item.mitzvah.id === stampingId),
-    [allCurrent, stampingId],
+    () => allCurrent.filter((item) => !item.marked || stamping.has(item.mitzvah.id)),
+    [allCurrent, stamping],
   );
-  const completed = useMemo(() => allCompleted.filter((item) => item.id !== stampingId), [allCompleted, stampingId]);
+  const completed = useMemo(() => allCompleted.filter((item) => !stamping.has(item.id)), [allCompleted, stamping]);
   const doneCount = completed.filter((item) => !item.wasSkipped).length;
 
   const entries = useMemo(() => {
     const raw: DayEntry[] = [
-      ...allCurrent
-        .filter((item) => !item.marked)
-        .map((item) => ({
-          id: item.mitzvah.id,
-          status: 'active' as const,
-          start: item.window.start,
-          end: item.window.end,
-          markedAt: null,
-          date: item.window.date,
-        })),
+      ...current.map((item) => ({
+        id: item.mitzvah.id,
+        status: 'active' as const,
+        start: item.window.start,
+        end: item.window.end,
+        markedAt: null,
+        date: item.window.date,
+      })),
       ...upcoming.map((item) => ({
         id: item.mitzvah.id,
         status: 'upcoming' as const,
@@ -395,7 +394,7 @@ export default function HomeScreen() {
         date: item.window.date,
       })),
       ...allMissed
-        .filter((item) => !item.marked || item.mitzvah.id === stampingId)
+        .filter((item) => !item.marked || stamping.has(item.mitzvah.id))
         .map((item) => ({
           id: item.mitzvah.id,
           status: 'missed' as const,
@@ -434,7 +433,7 @@ export default function HomeScreen() {
         endLabel: entry.end ? clockOf(entry.end, location.tz) : null,
       };
     });
-  }, [allCurrent, upcoming, allMissed, completed, stampingId, now, location.tz, t]);
+  }, [current, allCurrent, upcoming, allMissed, completed, stamping, now, location.tz, t]);
 
   const name = firstName(profileName);
   const greeting = t(greetingKey(now, location.tz, name !== ''), { name });
@@ -464,20 +463,39 @@ export default function HomeScreen() {
   });
 
   // Persist first — the stamp is decoration. Deferring the write behind the 1.3s animation meant
-  // leaving the screen mid-animation silently discarded the completion, and the `stampingId` gate
-  // dropped every other card tapped during it. The card is held on screen while it animates.
+  // leaving the screen mid-animation silently discarded the completion, and a single stamping gate
+  // dropped every other card tapped during it. Each card is held on screen while it animates.
   const dayFor = (id: string) => windowDays.get(id) ?? today;
 
   const stamp = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     setSelectedId(null);
-    setStampingId(id);
-    if (stampTimeoutRef.current) clearTimeout(stampTimeoutRef.current);
-    stampTimeoutRef.current = setTimeout(() => {
-      setStampingId((current) => (current === id ? null : current));
-      stampTimeoutRef.current = null;
-    }, durations.stamp);
+    setStampingIds((ids) => (ids.includes(id) ? ids : [...ids, id]));
   };
+
+  // Each hold is timed from the commit that starts its card's own close, never from the tap: the render between them
+  // would end the stamp before the card has closed, and a second tap would hold it after.
+  useEffect(() => {
+    const timers = stampTimers.current;
+    for (const id of stampingIds) {
+      if (timers.has(id)) continue;
+      timers.set(
+        id,
+        setTimeout(() => {
+          timers.delete(id);
+          setStampingIds((ids) => ids.filter((other) => other !== id));
+        }, durations.stamp),
+      );
+    }
+  }, [stampingIds]);
+
+  useEffect(() => {
+    const timers = stampTimers.current;
+    return () => {
+      timers.forEach(clearTimeout);
+      timers.clear();
+    };
+  }, []);
 
   // An open card is marked at once; one whose window closed since the last tick asks first, as a missed entry does.
   const completeOpen = (item: LiveItem) =>
@@ -602,14 +620,6 @@ export default function HomeScreen() {
   const selectedName = selectedMitzvah ? nameFor(selectedMitzvah) : undefined;
 
   useEffect(() => {
-    return () => {
-      if (stampTimeoutRef.current) {
-        clearTimeout(stampTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     syncNotificationPermissionStatus().catch((error) => reportError('schedule', error));
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
@@ -662,7 +672,7 @@ export default function HomeScreen() {
                     tz={location.tz}
                     pct={item.pct}
                     urgent={item.urgent}
-                    stamping={stampingId === item.mitzvah.id}
+                    stamping={stamping.has(item.mitzvah.id)}
                     onComplete={() => completeOpen(item)}
                     onOpenText={openText(item)}
                     onPress={() => openDetail(item.mitzvah.id)}

@@ -12,6 +12,7 @@ import type { LocationSource, LocationStatus } from '@/services/LocationService'
 import type { HilulaWhen, RoshChodeshWhen } from '@/services/notifications/ids';
 import { THEME_NAMES, ThemeName } from '@/theme/colors';
 import { DEFAULT_UI_SCALE, isUiScale } from '@/theme/scale';
+import { deviceLanguage } from '@/i18n/deviceLanguage';
 import {
   DEFAULT_QUIET_AFTER,
   DEFAULT_QUIET_BEFORE,
@@ -141,6 +142,8 @@ type UserState = {
   gender: Gender | null;
   maritalStatus: MaritalStatus | null;
   taharahEnabled: boolean;
+  ratingAskedAt: number | null;
+  firstOpenedAt: number | null;
   setNusach: (n: Nusach) => void;
   setLocation: (l: Location) => void;
   setLocationState: (l: Location, status: LocationStatus, source: LocationSource) => void;
@@ -176,6 +179,8 @@ type UserState = {
   setGender: (g: Gender | null) => void;
   setMaritalStatus: (m: MaritalStatus | null) => void;
   setTaharahEnabled: (v: boolean) => void;
+  setRatingAskedAt: (at: number) => void;
+  setFirstOpenedAt: (at: number) => void;
   reset: () => void;
 };
 
@@ -228,7 +233,7 @@ export const useUserStore = create<UserState>()(
       locationSource: 'manual',
       theme: DEFAULT_THEME,
       uiScale: DEFAULT_UI_SCALE,
-      language: 'he',
+      language: deviceLanguage(),
       notificationPermission: 'unknown',
       notificationsEnabled: true,
       profileName: '',
@@ -257,6 +262,8 @@ export const useUserStore = create<UserState>()(
       gender: null,
       maritalStatus: null,
       taharahEnabled: false,
+      ratingAskedAt: null,
+      firstOpenedAt: null,
       setNusach: (n) => set({ nusach: n }),
       setLocation: (l) => set({ location: l, inIsrael: l.inIsrael }),
       setLocationState: (l, status, source) =>
@@ -315,6 +322,8 @@ export const useUserStore = create<UserState>()(
       setGender: (g) => set({ gender: g }),
       setMaritalStatus: (m) => set({ maritalStatus: m }),
       setTaharahEnabled: (v) => set({ taharahEnabled: v }),
+      setRatingAskedAt: (at) => set({ ratingAskedAt: at }),
+      setFirstOpenedAt: (at) => set({ firstOpenedAt: at }),
       reset: () =>
         set({
           nusach: 'ashkenaz',
@@ -323,7 +332,7 @@ export const useUserStore = create<UserState>()(
           locationSource: 'manual',
           theme: DEFAULT_THEME,
           uiScale: DEFAULT_UI_SCALE,
-          language: 'he',
+          language: deviceLanguage(),
           notificationPermission: 'unknown',
           notificationsEnabled: true,
           profileName: '',
@@ -352,6 +361,8 @@ export const useUserStore = create<UserState>()(
           gender: null,
           maritalStatus: null,
           taharahEnabled: false,
+          ratingAskedAt: null,
+          firstOpenedAt: null,
         }),
     }),
     {

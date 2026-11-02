@@ -8,6 +8,8 @@ jest.mock('@/services/notifications/ids', () => ({
   HORIZON_MAX_DAYS: 2,
 }));
 jest.mock('@/services/notifications/planners/horizonEnd', () => ({ planHorizonEnd: () => [] }));
+const mockNoteNotificationMark = jest.fn();
+jest.mock('@/services/storeReview', () => ({ noteNotificationMark: () => mockNoteNotificationMark() }));
 
 // The trigger is the one thing a reminder app must get right, so the mock records it (and the
 // user-visible text) rather than only identifiers, and it replaces on duplicate identifier the way
@@ -93,6 +95,7 @@ import {
   PENDING_LIMIT,
   registerDailyRebuildTask,
   registerNotificationActionTask,
+  markDoneFromNotificationData,
   shouldSuppressForCompletion,
   initNotificationHandlers,
   syncNotificationPermissionStatus,
@@ -635,6 +638,47 @@ describe('NotificationScheduler', () => {
     expect(useCompletionsStore.getState().isDone('shacharit', new Date(2026, 4, 6))).toBe(true);
     expect(mockGetAll).toHaveBeenCalled();
     expect(mockDismiss).toHaveBeenCalledWith('shacharit__2026-05-06__0');
+  });
+
+  it('6.9c1 notes a notification mark right before the mark is written, on the response path and in the background task', async () => {
+    const shacharitDone = () => useCompletionsStore.getState().isDone('shacharit', new Date(2026, 4, 6));
+    const doneAtNote: boolean[] = [];
+    mockNoteNotificationMark.mockReset();
+    mockNoteNotificationMark.mockImplementation(() => doneAtNote.push(shacharitDone()));
+
+    expect(
+      await markDoneFromNotificationData({ mitzvahId: 'shacharit', dateKey: '2026-05-06' }, 'shacharit__2026-05-06__0'),
+    ).toBe(true);
+    expect(mockNoteNotificationMark).toHaveBeenCalledTimes(1);
+    expect(doneAtNote).toEqual([false]);
+    expect(shacharitDone()).toBe(true);
+
+    useCompletionsStore.getState().reset();
+    const tm = require('expo-task-manager');
+    const task = tm.defineTask.mock.calls.find(([name]: [string]) => name === NOTIFICATION_ACTION_TASK)?.[1];
+    await task!({
+      data: {
+        actionIdentifier: MARK_DONE_ACTION,
+        notification: {
+          request: {
+            identifier: 'shacharit__2026-05-06__0',
+            content: { data: { mitzvahId: 'shacharit', dateKey: '2026-05-06' } },
+          },
+        },
+      },
+      error: null,
+      executionInfo: { taskName: NOTIFICATION_ACTION_TASK },
+    });
+    expect(mockNoteNotificationMark).toHaveBeenCalledTimes(2);
+    expect(doneAtNote).toEqual([false, false]);
+    expect(shacharitDone()).toBe(true);
+  });
+
+  it('6.9c2 notes nothing for a notification that names no mitzvah', async () => {
+    mockNoteNotificationMark.mockReset();
+
+    expect(await markDoneFromNotificationData({}, 'blockNotice:2026-05-08')).toBe(false);
+    expect(mockNoteNotificationMark).not.toHaveBeenCalled();
   });
 
   it('6.9d background notification action reads native dataString payloads', async () => {

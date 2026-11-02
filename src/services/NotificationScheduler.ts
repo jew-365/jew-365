@@ -5,6 +5,7 @@ import type { Mitzvah, Reminder, UserSettings } from '@/types/mitzvah';
 import type { Location } from '@/types/zmanim';
 import { StorageService } from '@/services/StorageService';
 import { downloadNewUpdate, isUpdateApplied } from '@/services/appUpdates';
+import { noteNotificationMark } from '@/services/storeReview';
 import { clearLastError, getLastError, reportError } from '@/services/errors';
 import { afterPaint } from '@/utils/afterPaint';
 import { isQuietAt } from '@/utils/skipRules';
@@ -258,6 +259,7 @@ export async function markDoneFromNotificationData(
   if (data.kind === TAHARAH_KIND) return markTaharahBedikaDone(data, notificationId);
   const target = notificationTargetFromData(data, notificationId);
   if (!target) return false;
+  noteNotificationMark();
   useCompletionsStore.getState().markDone(target.mitzvahId, target.date);
   await Promise.all([
     NotificationScheduler.cancelForMitzvah(target.mitzvahId, target.date).catch(() => {}),

@@ -11,6 +11,7 @@
 - Every screen `Modal` closes while `useQuietBlock()` holds: a native modal would sit above the in-tree Shabbat screen.
 - [_layout.tsx](_layout.tsx) mounts [UpdateBanner](../components/UpdateBanner.tsx) once onboarded, between the `Stack` and the Shabbat screen, so the ready-update strip floats over every route and the update check runs on every return to the foreground.
 - [_layout.tsx](_layout.tsx) mounts [ChokEnablePrompt](../components/ChokEnablePrompt.tsx) once onboarded, beside the update banner, so the question after a Chok LeYisrael download shows on whatever route is open when it ends (pinned by [__tests__/rootLayout.render.test.tsx](__tests__/rootLayout.render.test.tsx)).
+- [_layout.tsx](_layout.tsx) stamps `useUserStore.firstOpenedAt` with `Date.now()` whenever it is `null` (the first mount of an install, an existing install after this change, and again after a reset or a restore from a file without it), before onboarding too, and runs `watchForRatingMoment()` from [../services/storeReview.ts](../services/storeReview.ts) while onboarded, tearing it down on unmount and when onboarding turns off (pinned by [__tests__/rootLayout.render.test.tsx](__tests__/rootLayout.render.test.tsx)).
 - [index.tsx](index.tsx) owns root redirects.
 - [(tabs)/AGENTS.md](<(tabs)/AGENTS.md>) owns the main tab screens.
 - [onboarding/AGENTS.md](onboarding/AGENTS.md) owns onboarding flow screens.
