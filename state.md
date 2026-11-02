@@ -47,6 +47,7 @@ Rollback from production `1.0.21-9` to `1.0.21-8` is `npx eas-cli update:republi
 | --- | --- | --- | --- | --- |
 | Android AAB | `cc56fee1` | 1.0.21, versionCode 8 | Google Play, `Closed testing - Alpha` | release `8 (1.0.21)` approved 2026-10-22, available to the testers group |
 | Android APK | `d54afeab` | 1.0.21, versionCode 9 | direct install (`jew365-1.0.21-9.apk`) | universal, 125 MB; signed with the Play key, so it replaces a Play install and the reverse |
+| iOS | `7bbb9c15` | 1.0.21, buildNumber 5 | App Store Connect (build `c193622a`, `VALID`, 2026-11-02) | uploaded, not yet attached to the 1.0.21 version or TestFlight; carries the welcome step in the device's language, the store rating, the smooth mark collapse and the new logo |
 | iOS | `72c51b1e` | 1.0.21, buildNumber 4 | TestFlight and App Store Connect | TestFlight testing (public link); App Store: rejected 2026-11-01, Guideline 2.1(a) (submitted 2026-10-23), manual release |
 | Android APK, preview app | `c625eaa5` | 1.0.21, versionCode 1 of `com.jew365.app.preview` | direct install (`jew365-preview-1.0.21-1.apk`), channel `preview` | built 2026-10-25 from the uncommitted working tree, its own keystore; installed on the emulator only |
 
