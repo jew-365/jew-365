@@ -217,6 +217,32 @@ describe('useInView', () => {
     );
     expect(screen.getByText('out')).toBeOnTheScreen();
   });
+
+  it.each([
+    [620, 'out'],
+    [40, 'out'],
+    [300, 'in'],
+  ])('measures against the scroll view: an element at %d is %s', (y, expected) => {
+    rects.setContainer({ y: 100, height: 500 });
+    rects.set({ y, height: 50 });
+    render(
+      <ViewportHarness scroll>
+        <Probe />
+      </ViewportHarness>,
+    );
+    expect(screen.getByText(expected)).toBeOnTheScreen();
+  });
+
+  it('falls back to the window while the scroll view has no height', () => {
+    rects.setContainer({ y: 0, height: 0 });
+    rects.set({ y: 700, height: 50 });
+    render(
+      <ViewportHarness scroll>
+        <Probe />
+      </ViewportHarness>,
+    );
+    expect(screen.getByText('in')).toBeOnTheScreen();
+  });
 });
 
 describe('useViewport', () => {

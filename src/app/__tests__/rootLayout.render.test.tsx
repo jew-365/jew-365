@@ -52,13 +52,14 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { AppState } from 'react-native';
 import RootLayout from '../_layout';
 import { CITIES } from '@/data/cities';
+import { HebcalService } from '@/services/HebcalService';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useChokStore } from '@/stores/useChokStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { renderWithTheme } from '@/testing/render';
-import { at } from '@/testing/zmanim';
+import { at, zmanimFor } from '@/testing/zmanim';
 import { CustomMitzvah } from '@/types/mitzvah';
 
 const J = CITIES[0];
@@ -287,5 +288,36 @@ describe('the root layout and the store rating', () => {
 
     act(() => useUserStore.setState({ isOnboarded: false }));
     expect(mockStopRating).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('the root layout and the Shabbat screen', () => {
+  beforeEach(() => {
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: J, inIsrael: true, nusach: 'ashkenaz', isOnboarded: true });
+    jest.spyOn(AppState, 'addEventListener').mockImplementation(() => ({ remove: jest.fn() }) as never);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.useRealTimers();
+  });
+
+  it('turns the Hebrew date under the title at the shkia that opens the next day', async () => {
+    const shkia = zmanimFor(at(J, '2026-10-30T12:00'), J).shkia;
+    const before = new Date(shkia.getTime() - 10 * 60_000);
+    jest.useFakeTimers({ now: before, doNotFake: ['nextTick', 'queueMicrotask', 'setImmediate', 'clearImmediate'] });
+    const friday = HebcalService.getHebrewDateAt(before, J).hebrewDateStr;
+    const motzei = HebcalService.getHebrewDateAt(new Date(shkia.getTime() + 60_000), J).hebrewDateStr;
+    expect(friday).not.toBe(motzei);
+
+    renderWithTheme(<RootLayout />);
+    await act(async () => {});
+    expect(screen.getByText('שבת שלום')).toBeOnTheScreen();
+    expect(screen.getByText(friday)).toBeOnTheScreen();
+
+    act(() => jest.advanceTimersByTime(12 * 60_000));
+    expect(screen.getByText(motzei)).toBeOnTheScreen();
+    expect(screen.queryByText(friday)).toBeNull();
   });
 });

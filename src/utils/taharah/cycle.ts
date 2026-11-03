@@ -261,7 +261,7 @@ export function deriveCycle(
   const tonight = today.kind === 'night' ? today.abs : today.abs + 1;
   const night = nextTevilaNight(tonight, location);
   const stage = today.kind === 'night' && night === today.abs ? 'tevilaNight' : 'awaitingTevila';
-  return { ...base, stage, tevilaDay: night, tevilaDeferred: night !== firstTevila };
+  return { ...base, stage, tevilaDay: night, tevilaDeferred: night === scheduled && scheduled !== firstTevila };
 }
 
 // The first night a tevila may follow the recorded hefsek, for a screen that must refuse an

@@ -783,6 +783,62 @@ describe('ReminderEditor', () => {
     });
   });
 
+  describe('the fields the sheet does not show', () => {
+    const saved = (onSave: jest.Mock) => onSave.mock.calls[0][0] as Reminder;
+
+    it("keeps the Omer reminder's content in its notification when only the label is edited, without its body variants", () => {
+      const { onSave } = renderEditor({
+        mitzvah: OMER,
+        mitzvahName: 'ספירת העומר',
+        initialValue: OMER.defaultReminders[0],
+      });
+      fireEvent.changeText(screen.getByLabelText(t('reminder.label')), 'חדש');
+      save();
+      expect(onSave).toHaveBeenCalledTimes(1);
+      expect(saved(onSave)).toEqual({
+        anchor: 'start',
+        offsetMin: 0,
+        label: 'חדש',
+        skipIfDone: false,
+        includeContentInBody: true,
+      });
+      expect('bodyVariants' in saved(onSave)).toBe(false);
+    });
+
+    it('keeps it through a change of timing', () => {
+      const { onSave } = renderEditor({ mitzvah: OMER, initialValue: OMER.defaultReminders[0] });
+      setClock('2100');
+      save();
+      expect(saved(onSave)).toEqual({
+        anchor: 'clock',
+        offsetMin: 1260,
+        label: 'זמן ספירת העומר',
+        skipIfDone: false,
+        includeContentInBody: true,
+      });
+    });
+
+    it('keeps a stored false as false', () => {
+      const { onSave } = renderEditor({
+        mitzvah: OMER,
+        initialValue: { anchor: 'start', offsetMin: 0, label: 'x', includeContentInBody: false },
+      });
+      save();
+      expect(saved(onSave).includeContentInBody).toBe(false);
+    });
+
+    it('adds no content flag to a new reminder or to one stored without it', () => {
+      const { onSave } = renderEditor({ mitzvah: OMER });
+      save();
+      expect('includeContentInBody' in saved(onSave)).toBe(false);
+
+      screen.unmount();
+      const second = renderEditor({ mitzvah: OMER, initialValue: { anchor: 'start', offsetMin: 0, label: 'x' } });
+      save();
+      expect('includeContentInBody' in saved(second.onSave)).toBe(false);
+    });
+  });
+
   describe('the line that says when the reminder goes out', () => {
     const NEXT_LINE = /^ההתראה הבאה תישלח ב-/;
     const nextLine = (date: Date) => t('detail.previewNext', { time: fireTimeText(date, JERUSALEM.tz) });

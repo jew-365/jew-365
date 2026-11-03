@@ -86,7 +86,3 @@ export function noticeDayLabel(opens: DateTime, from: DateTime, language: AppLan
   const far = civilDay(opens).diff(civilDay(from), 'days').days >= NOTICE_WEEKDAY_RANGE_DAYS;
   return formatDate(opens, far ? (language === 'he' ? 'cccc d LLLL' : 'cccc, LLL d') : 'cccc', language);
 }
-
-export function formatClock(instant: Date): string {
-  return DateTime.fromJSDate(instant).toFormat('HH:mm');
-}

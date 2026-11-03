@@ -15,7 +15,7 @@ jest.mock('@/services/NotificationScheduler', () => ({
   refreshSchedulingOnForeground: async () => {},
 }));
 
-import { fireEvent, screen, within } from '@testing-library/react-native';
+import { act, fireEvent, screen, within } from '@testing-library/react-native';
 import HomeScreen from '../(tabs)/home';
 import { CITIES } from '@/data/cities';
 import { findMitzvah } from '@/data/mitzvot';
@@ -25,6 +25,7 @@ import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { renderWithTheme } from '@/testing/render';
 import { at } from '@/testing/zmanim';
+import { durations } from '@/theme/tokens';
 import { dayWindow } from '@/utils/buildDayTimeline';
 import { ON_TIME_LEAD_MS } from '@/utils/lateMarks';
 
@@ -39,6 +40,7 @@ const ONLY_DATE = [
   'setTimeout',
   'clearTimeout',
 ] as const;
+const KEEP_REAL = ['nextTick', 'queueMicrotask', 'setImmediate', 'clearImmediate'] as const;
 const SETTINGS = { nusach: 'ashkenaz' as const, halachicOpinions: { ksSofZman: 'GRA' as const }, inIsrael: true };
 const WINDOW = dayWindow(findMitzvah('shacharit')!, new Date(2026, 9, 28), JERUSALEM, SETTINGS)!;
 const state = () => useCompletionsStore.getState();
@@ -95,5 +97,41 @@ describe('home on a mark after the window closed', () => {
     fireEvent.press(screen.getByText('עשיתי בזמן ולא סימנתי'));
     expect(state().completions['2026-10-28'].shacharit).toBe(WINDOW.end.getTime() - ON_TIME_LEAD_MS);
     expect(state().late).toEqual({});
+  });
+
+  it('keeps a card marked late after its window closed as a stamping card, then shows it done late', () => {
+    jest.useFakeTimers({ now: new Date(WINDOW.end.getTime() - 10_000), doNotFake: [...KEEP_REAL] });
+    renderWithTheme(<HomeScreen />);
+    jest.setSystemTime(new Date(WINDOW.end.getTime() + 20_000));
+    fireEvent.press(within(screen.getByTestId('home-now-shacharit')).getByText('עשיתי'));
+    fireEvent.press(screen.getByText('עשיתי אחרי שעבר הזמן'));
+    const markedAt = state().late['2026-10-28'].shacharit;
+
+    expect(screen.getByTestId('now-card-done-button')).toBeOnTheScreen();
+    expect(within(screen.getByTestId('home-day-shacharit')).queryByText('עשיתי')).toBeNull();
+
+    fireEvent.press(within(screen.getByTestId('home-now-shacharit')).getByText('עשיתי'));
+    expect(screen.queryByText('מתי עשית?')).toBeNull();
+    expect(state().late['2026-10-28'].shacharit).toBe(markedAt);
+    expect(state().completions['2026-10-28'].shacharit).toBe(markedAt);
+
+    act(() => jest.advanceTimersByTime(durations.stamp));
+    expect(screen.queryByTestId('home-now-shacharit')).toBeNull();
+    expect(within(screen.getByTestId('home-day-shacharit')).getByText(/^בוצע ב-/)).toBeOnTheScreen();
+    expect(screen.getByTestId('home-day-late-shacharit')).toBeOnTheScreen();
+  });
+
+  it('asks nothing on a second tap of a missed entry while it is stamped, and keeps the first answer', () => {
+    jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T12:00'), doNotFake: [...KEEP_REAL] });
+    renderWithTheme(<HomeScreen />);
+    fireEvent.press(within(screen.getByTestId('home-day-shacharit')).getByText('עשיתי'));
+    fireEvent.press(screen.getByText('עשיתי אחרי שעבר הזמן'));
+    const markedAt = state().late['2026-10-28'].shacharit;
+    jest.setSystemTime(new Date(markedAt + 5_000));
+
+    fireEvent.press(within(screen.getByTestId('home-day-shacharit')).getByText('עשיתי'));
+    expect(screen.queryByText('מתי עשית?')).toBeNull();
+    expect(state().late['2026-10-28'].shacharit).toBe(markedAt);
+    expect(state().completions['2026-10-28'].shacharit).toBe(markedAt);
   });
 });

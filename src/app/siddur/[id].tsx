@@ -897,6 +897,7 @@ export default function SiddurScreen() {
   const chokWeek = useMemo(() => (chokWeekKey ? chokWeekKey.split('|') : []), [chokWeekKey]);
   const shownSlot = chokPortion?.slot ?? null;
   const [asking, setAsking] = useState(false);
+  const [parashaPickerOpen, setParashaPickerOpen] = useState(false);
   const [askingThuNight, setAskingThuNight] = useState(false);
   const asked = useRef(false);
   const features = useMemo(() => dayFeatures(hebrewDay, place), [hebrewDay, place]);
@@ -1564,6 +1565,8 @@ export default function SiddurScreen() {
       !screenReader &&
       !body &&
       !pickerOpen &&
+      !asking &&
+      !parashaPickerOpen &&
       !quiet &&
       !bookmarksOpen &&
       saving === null &&
@@ -1820,6 +1823,7 @@ export default function SiddurScreen() {
                   onChoice={chooseDouble}
                   asking={asking}
                   onAskClose={() => setAsking(false)}
+                  onPickingChange={setParashaPickerOpen}
                 />
               ) : null}
               {placeholder || hasCommentaryPassages || (picker.length > 1 && currentEntry) ? (

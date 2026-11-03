@@ -84,6 +84,22 @@ export function chooseNusach(next: Nusach): void {
   stampNewlyOffered(previous, next);
 }
 
+export type TaharahProfile = { taharahEnabled: boolean; gender: Gender | null; nusach: Nusach };
+
+// The taharah store never rides a backup file, so after a restore its role and preset follow the restored profile
+// the way the opt-in calls would have moved them from this device's profile.
+export function applyRestoredTaharahProfile(before: TaharahProfile): void {
+  const { taharahEnabled, gender, nusach } = useUserStore.getState();
+  if (!taharahEnabled || !gender) return;
+  const taharah = useTaharahStore.getState();
+  if (!before.taharahEnabled) {
+    taharah.startTracking(gender, nusach);
+    return;
+  }
+  if (before.gender !== gender) taharah.setRoleForGender(gender);
+  if (before.nusach !== nusach) taharah.adoptPresetFor(nusach);
+}
+
 export function applyGenderDefaultsToNew(): string[] {
   const added = takeAddedOnHydrate();
   if (useUserStore.getState().gender === 'female') {

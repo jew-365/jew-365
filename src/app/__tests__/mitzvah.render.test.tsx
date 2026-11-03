@@ -609,6 +609,61 @@ describe('Mitzvah screen', () => {
       expect(timingRadio('beforeStart')).toBeChecked();
       expect(minutesField('beforeStart')).toHaveDisplayValue('60');
     });
+
+    it('keeps the blessing in the notification of the Omer reminder it edits', () => {
+      const contentSwitch = () =>
+        screen.getAllByRole('switch').find((node) => node.props.accessibilityLabel !== SETTINGS_SWITCH)!;
+      renderMitzvah({ id: 'sefirat_haomer' });
+      expect(contentSwitch()).toBeChecked();
+
+      fireEvent.press(screen.getByText('זמן ספירת העומר'));
+      fireEvent.changeText(editor().getByLabelText(t('reminder.label')), 'חדש');
+      saveEditor();
+
+      expect(saved('sefirat_haomer')).toEqual([
+        { anchor: 'start', offsetMin: 0, label: 'חדש', skipIfDone: false, includeContentInBody: true },
+        { anchor: 'start', offsetMin: 60, label: 'תזכורת - ספירת העומר', skipIfDone: true },
+      ]);
+      expect(contentSwitch()).toBeChecked();
+    });
+  });
+
+  describe('the screen follows the clock', () => {
+    const pinClock = (instant: Date) =>
+      jest.useFakeTimers({ now: instant, doNotFake: ['nextTick', 'queueMicrotask', 'setImmediate', 'clearImmediate'] });
+    const passMinutes = (minutes: number) => {
+      act(() => jest.advanceTimersByTime(minutes * 60_000));
+    };
+    const rowTimes = () => screen.getAllByText(/^הבאה ב-/).map((node) => node.props.children);
+
+    it('moves the header line and every row past a reminder that has fired while the screen stays open', () => {
+      useMitzvotStore.getState().setReminders('shacharit', [
+        { anchor: 'clock', offsetMin: 480, label: 'שמונה' },
+        { anchor: 'clock', offsetMin: 510, label: 'שמונה וחצי' },
+      ]);
+      pinClock(at(JERUSALEM, '2026-10-28T07:55'));
+      renderMitzvah({ id: 'shacharit' });
+
+      expect(screen.getByText('ההתראה הבאה תישלח ב-28/10 08:00')).toBeOnTheScreen();
+      expect(rowTimes()).toEqual(['הבאה ב-28/10 08:00', 'הבאה ב-28/10 08:30']);
+
+      passMinutes(10);
+
+      expect(screen.getByText('ההתראה הבאה תישלח ב-28/10 08:30')).toBeOnTheScreen();
+      expect(rowTimes()).toEqual(['הבאה ב-29/10 08:00', 'הבאה ב-28/10 08:30']);
+    });
+
+    it('moves the window shown to the next one once the open window has ended', () => {
+      pinClock(at(JERUSALEM, '2026-10-26T03:39'));
+      renderMitzvah({ id: 'kiddush_levana' });
+
+      expect(screen.getByText(/^עונתי · 14\/10 \d\d:\d\d עד 26\/10 03:44$/)).toBeOnTheScreen();
+
+      passMinutes(10);
+
+      expect(screen.queryByText(/ עד 26\/10 03:44$/)).toBeNull();
+      expect(screen.getByText(/^עונתי · \d\d\/\d\d \d\d:\d\d עד \d\d\/\d\d \d\d:\d\d$/)).toBeOnTheScreen();
+    });
   });
 
   describe('the window shown', () => {

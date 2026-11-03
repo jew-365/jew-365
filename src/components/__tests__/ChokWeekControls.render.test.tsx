@@ -19,6 +19,7 @@ type Overrides = Partial<{
   choice: ChokDoubleChoice;
   onChoice: (choice: ChokDoubleChoice) => void;
   asking: boolean;
+  onPickingChange: (open: boolean) => void;
 }>;
 
 function renderControls(overrides: Overrides = {}) {
@@ -167,6 +168,19 @@ describe('ChokWeekControls', () => {
       expect(onBrowse).toHaveBeenCalledTimes(1);
       expect(onBrowse).toHaveBeenCalledWith('Noach');
       expect(screen.queryByText('שמות')).toBeNull();
+    });
+
+    it('reports the sheet opening, a parasha chosen and the close button', () => {
+      const onPickingChange = jest.fn();
+      renderControls({ onPickingChange });
+      openSheet();
+      expect(onPickingChange).toHaveBeenLastCalledWith(true);
+      fireEvent.press(screen.getByRole('button', { name: 'נח' }));
+      expect(onPickingChange).toHaveBeenLastCalledWith(false);
+      openSheet();
+      fireEvent.press(screen.getByRole('button', { name: 'סגור' }));
+      expect(onPickingChange).toHaveBeenLastCalledWith(false);
+      expect(onPickingChange).toHaveBeenCalledTimes(4);
     });
 
     it('goes back to the week when a parasha of this week is chosen, also from a browsed one', () => {

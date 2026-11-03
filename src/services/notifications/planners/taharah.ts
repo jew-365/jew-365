@@ -3,6 +3,7 @@ import type { HolyBlock, Location } from '@/types/zmanim';
 import type { CycleState, OnahKind, TaharahTask } from '@/types/taharah';
 import { quietBlockAt, quietHoursTrigger } from '@/utils/skipRules';
 import { checkInPhraseKey } from '@/utils/checkIn';
+import { clockOf } from '@/utils/clock';
 import { calendarDayEnd, locationNoon } from '@/utils/locationDay';
 import { deriveCycle } from '@/utils/taharah/cycle';
 import { civilHebrewDayAt, hebrewDay } from '@/utils/taharah/onot';
@@ -12,7 +13,7 @@ import { dateKey } from '@/stores/useCompletionsStore';
 import type { TaharahLeads } from '@/stores/useTaharahStore';
 import { TAHARAH_BEDIKA_CATEGORY, TAHARAH_KIND, type PendingNotificationMeta } from '@/services/notifications/ids';
 import type { PlanInput, ScheduleCandidate } from '@/services/notifications/types';
-import { formatClock, holyBlocksWithin, type Horizon } from '@/services/notifications/planners/horizon';
+import { holyBlocksWithin, type Horizon } from '@/services/notifications/planners/horizon';
 
 const TAHARAH_BEDIKA_MORNING_DELAY_MIN = 30;
 const TAHARAH_BEDIKA_VESET_LEAD_MIN = 60;
@@ -117,7 +118,7 @@ function taharahDraftsFor(
     disputed: task.disputed,
     ...extra,
   });
-  const until = formatClock(task.end);
+  const until = clockOf(task.end, location.tz);
 
   switch (task.kind) {
     case 'hefsek':
@@ -143,10 +144,15 @@ function taharahDraftsFor(
       const block = quietBlockAt(task.start, location);
       if (block) {
         return [
-          draft('tevilaPrep', prep, formatClock(block.start), { bodyKey: 'taharah.notify.body.tevilaPrepShabbat' }),
+          draft('tevilaPrep', prep, clockOf(block.start, location.tz), {
+            bodyKey: 'taharah.notify.body.tevilaPrepShabbat',
+          }),
         ];
       }
-      return [draft('tevilaPrep', prep, formatClock(task.start)), draft('tevila', task.start, formatClock(task.start))];
+      return [
+        draft('tevilaPrep', prep, clockOf(task.start, location.tz)),
+        draft('tevila', task.start, clockOf(task.start, location.tz)),
+      ];
     }
     case 'perisha':
       return [draft('perisha', task.start, until)];

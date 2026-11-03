@@ -1,10 +1,15 @@
 const mockPush = jest.fn();
+const mockFocusEffects: (() => void)[] = [];
 jest.mock('expo-router', () => {
   const React = require('react');
   return {
     useRouter: () => ({ push: mockPush, replace: jest.fn() }),
     useLocalSearchParams: () => ({}),
-    useFocusEffect: (effect: () => void) => React.useEffect(effect, [effect]),
+    useFocusEffect: (effect: () => void) =>
+      React.useEffect(() => {
+        mockFocusEffects.push(effect);
+        effect();
+      }, [effect]),
   };
 });
 jest.mock('@/services/NotificationScheduler', () => ({
@@ -20,7 +25,9 @@ import { Card } from '@/components/Card';
 import { IconTile } from '@/components/IconTile';
 import { ListRow } from '@/components/ListRow';
 import { translate } from '@/i18n';
+import { LocationService } from '@/services/LocationService';
 import { renderWithTheme } from '@/testing/render';
+import { CITIES } from '@/data/cities';
 import { findMitzvah } from '@/data/mitzvot';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
@@ -128,5 +135,66 @@ describe('Settings cards, icons and actions', () => {
     const results = screen.UNSAFE_getAllByType(ListRow);
     expect(results.length).toBeGreaterThan(0);
     expect(within(cards[1]).UNSAFE_getAllByType(ListRow)).toHaveLength(results.length);
+  });
+});
+
+describe('Settings › the locate line', () => {
+  beforeEach(() => {
+    mockFocusEffects.length = 0;
+    useUserStore.getState().reset();
+    useUserStore.setState({ isOnboarded: true, gender: 'male', maritalStatus: 'single' });
+  });
+
+  afterEach(() => jest.restoreAllMocks());
+
+  const openDevice = async () => {
+    openSection('settings.device');
+    await act(async () => {});
+  };
+  const locate = async () => {
+    await act(async () => {
+      fireEvent.press(screen.getByRole('button', { name: he('settings.useCurrentLocation') }));
+    });
+  };
+  const otherCity = () => CITIES.find((city) => city.cityId !== useUserStore.getState().location.cityId)!;
+  const focusAgain = () => act(() => mockFocusEffects.forEach((effect) => effect()));
+  const unavailable = () =>
+    jest
+      .spyOn(LocationService, 'getCurrentLocation')
+      .mockResolvedValue({ location: null, status: 'timeout', source: 'manual' });
+
+  it('drops the GPS-unavailable line once the location changes', async () => {
+    unavailable();
+    await renderSettings();
+    await openDevice();
+    await locate();
+    expect(screen.getByText(he('settings.gpsFallback'))).toBeOnTheScreen();
+
+    act(() => useUserStore.getState().setLocationState(otherCity(), 'ready', 'gps'));
+    expect(screen.queryByText(he('settings.gpsFallback'))).toBeNull();
+  });
+
+  it('drops the line on the next visit', async () => {
+    unavailable();
+    await renderSettings();
+    await openDevice();
+    await locate();
+    expect(screen.getByText(he('settings.gpsFallback'))).toBeOnTheScreen();
+
+    focusAgain();
+    await openDevice();
+    expect(screen.queryByText(he('settings.gpsFallback'))).toBeNull();
+  });
+
+  it('keeps the line a successful lookup wrote after moving the location', async () => {
+    const moved = otherCity();
+    jest
+      .spyOn(LocationService, 'getCurrentLocation')
+      .mockResolvedValue({ location: moved, status: 'ready', source: 'gps' });
+    await renderSettings();
+    await openDevice();
+    await locate();
+    expect(useUserStore.getState().location).toBe(moved);
+    expect(screen.getByText(he('settings.gpsUpdated'))).toBeOnTheScreen();
   });
 });

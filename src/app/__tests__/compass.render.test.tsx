@@ -34,7 +34,7 @@ jest.mock('expo-haptics', () => ({
   ImpactFeedbackStyle: { Light: 'light' },
 }));
 
-import { Linking, Platform } from 'react-native';
+import { AppState, Linking, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { act, fireEvent, screen } from '@testing-library/react-native';
 import CompassScreen, { radarColors, radarRadius, signedOffset } from '../compass';
@@ -316,6 +316,60 @@ describe('Compass screen', () => {
     expect(screen.getByText(NO_SENSOR)).toBeOnTheScreen();
     expect(mockWatch).not.toHaveBeenCalled();
     platform.restore();
+  });
+
+  describe('on the return to the app', () => {
+    let listeners: ((state: string) => void)[];
+    let appStateSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      listeners = [];
+      appStateSpy = jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) => {
+        listeners.push(listener as (state: string) => void);
+        return { remove: jest.fn() } as never;
+      });
+    });
+
+    afterEach(() => {
+      appStateSpy.mockImplementation(() => ({ remove: jest.fn() }) as never);
+    });
+
+    const returnToApp = () =>
+      act(async () => {
+        listeners.forEach((listener) => listener('active'));
+      });
+
+    it('picks up a permission granted in the system settings', async () => {
+      mockPermission.mockResolvedValue({ granted: false, canAskAgain: false });
+      await renderScreen();
+      expect(screen.getByText(NEEDS_PERMISSION)).toBeOnTheScreen();
+      expect(mockWatch).not.toHaveBeenCalled();
+
+      mockPermission.mockResolvedValue({ granted: true, canAskAgain: true });
+      mockPosition.mockResolvedValue({ coords: { latitude: 32.0853, longitude: 34.7818 } });
+      await returnToApp();
+      expect(screen.queryByText(NEEDS_PERMISSION)).toBeNull();
+      expect(mockWatch).toHaveBeenCalledTimes(1);
+      expect(mockPosition).toHaveBeenCalledTimes(1);
+      expect(screen.getByText('לפי המיקום הנוכחי שלך')).toBeOnTheScreen();
+    });
+
+    it('takes no new fix on a return with the permission still granted', async () => {
+      mockPosition.mockResolvedValue({ coords: { latitude: 32.0853, longitude: 34.7818 } });
+      await renderScreen();
+      await returnToApp();
+      expect(mockPosition).toHaveBeenCalledTimes(1);
+      expect(mockWatch).toHaveBeenCalledTimes(1);
+      expect(mockRemove).not.toHaveBeenCalled();
+    });
+
+    it('returns to the permission request when the permission was withdrawn', async () => {
+      await renderScreen();
+      mockPermission.mockResolvedValue({ granted: false, canAskAgain: false });
+      await returnToApp();
+      expect(screen.getByText(NEEDS_PERMISSION)).toBeOnTheScreen();
+      expect(mockRemove).toHaveBeenCalled();
+    });
   });
 
   it.each(THEME_NAMES)('draws the radar in the %s palette with readable ink', (name) => {

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Linking, Platform, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { AppState, Linking, Platform, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import * as ExpoLocation from 'expo-location';
@@ -20,7 +20,7 @@ import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { getLocationName } from '@/data/cities';
 import { EASE_OUT, useReduceMotion } from '@/hooks/useMotion';
-import { LocationService } from '@/services/LocationService';
+import { LocationService, type LocationStatus } from '@/services/LocationService';
 import { useUserStore } from '@/stores/useUserStore';
 import { blendHex, readableOn, type ThemeColors } from '@/theme/colors';
 import { scaled } from '@/theme/scale';
@@ -408,29 +408,42 @@ export default function CompassScreen() {
     setLost(!last && !precise);
   }, []);
 
+  const grantedRef = useRef<boolean | null>(null);
+  const applyStatus = useCallback(
+    (status: LocationStatus) => {
+      const ready = status === 'ready';
+      const was = grantedRef.current;
+      grantedRef.current = ready;
+      setGranted(ready);
+      if (ready && was !== true) void locate();
+    },
+    [locate],
+  );
+
   useEffect(() => {
     let active = true;
-    LocationService.getPermissionStatus()
-      .then((status) => {
-        if (!active) return;
-        setGranted(status === 'ready');
-        if (status === 'ready') void locate();
-      })
-      .catch(() => {
-        if (active) setGranted(false);
-      });
+    const read = () =>
+      LocationService.getPermissionStatus()
+        .then((status) => {
+          if (active) applyStatus(status);
+        })
+        .catch(() => {
+          if (active && grantedRef.current === null) applyStatus('missing');
+        });
+    void read();
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void read();
+    });
     return () => {
       active = false;
+      sub.remove();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [applyStatus]);
 
   const askPermission = async () => {
     const status = await LocationService.requestPermission();
-    if (status === 'ready') {
-      setGranted(true);
-      void locate();
-    } else if (status === 'denied') {
+    if (status === 'ready') applyStatus(status);
+    else if (status === 'denied') {
       Linking.openSettings().catch(() => {});
     }
   };

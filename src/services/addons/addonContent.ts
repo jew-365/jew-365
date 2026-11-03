@@ -324,7 +324,7 @@ export function createAddonContent<M extends AddonManifest>(config: AddonConfig)
   async function checkUpdate(now: number = Date.now()): Promise<void> {
     const { installed, download, checkedAt } = store.getState();
     if (!addonDownloadSupported() || installed === null || download.status === 'downloading') return;
-    if (checkedAt !== null && now - checkedAt < ADDON_CHECK_INTERVAL_MS) return;
+    if (checkedAt !== null && checkedAt <= now && now - checkedAt < ADDON_CHECK_INTERVAL_MS) return;
     try {
       const manifest = await fetchManifest();
       store.getState().setChecked(manifest.version, now);

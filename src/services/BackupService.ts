@@ -14,7 +14,7 @@ import { reloadApp } from '@/services/appReload';
 import { reportError } from '@/services/errors';
 import { formatDate, type AppLanguage } from '@/i18n';
 import { useUserStore } from '@/stores/useUserStore';
-import { applyGenderDefaultsToNew } from '@/stores/taharahOptIn';
+import { applyGenderDefaultsToNew, applyRestoredTaharahProfile } from '@/stores/taharahOptIn';
 import { UI_SCALE } from '@/theme/scale';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
@@ -108,28 +108,28 @@ export function parseBackup(text: string): Backup {
   return { app: BACKUP_APP, format: parsed.format, createdAt: parsed.createdAt, stores };
 }
 
-// Replaces, never merges: every store in the file takes the file's state through the store's own
-// migrate and merge, and a store the file lacks hydrates from nothing. The user store, which every file
-// carries, goes first, so a file without the mitzvot store hydrates it as the onboarded install it came
-// from: the five original defaults unstamped and the newer default-on mitzvot stamped at the restore.
-// Scheduling is held for the whole swap and rebuilt once, and the schedule stamp is dropped first, so a
-// reload part-way (a language change reloads the app for RTL) still rebuilds on the next launch.
+// Replaces, never merges: every store is reset first, so a field the file predates takes its default rather than this
+// device's value, then takes the file's state through its own migrate and merge; a store the file lacks stays reset.
+// The reset, the write and the rehydrate run in one synchronous stretch, so no render sees the defaults. The user
+// store, which every file carries, goes first, so a file without the mitzvot store hydrates it as the onboarded
+// install it came from: the five original defaults unstamped and the newer default-on mitzvot stamped at the restore.
+// Scheduling is held for the whole swap and rebuilt once, and the schedule stamp is dropped first, so a reload part-way
+// (a language change reloads the app for RTL) still rebuilds on the next launch.
 export async function restoreBackup(backup: Backup, options?: { reload?: boolean }): Promise<void> {
+  const { taharahEnabled, gender, nusach } = useUserStore.getState();
   setSchedulingSuspended(true);
   try {
     StorageService.delete(SCHEDULE_FORMAT_KEY);
     for (const name of BACKUP_STORES) {
       const raw = backup.stores[name];
       const store = STORES[name];
-      if (raw === undefined) {
-        store.getState().reset();
-        storage.delete(name);
-      } else {
-        storage.set(name, raw);
-      }
+      store.getState().reset();
+      if (raw === undefined) storage.delete(name);
+      else storage.set(name, raw);
       await store.persist.rehydrate();
     }
     applyGenderDefaultsToNew();
+    applyRestoredTaharahProfile({ taharahEnabled, gender, nusach });
     reconcileChokInstall();
     reconcileSelichotInstall();
     await syncNotificationPermissionStatus().catch((error) => reportError('schedule', error));

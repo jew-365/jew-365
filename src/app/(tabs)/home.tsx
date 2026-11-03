@@ -114,11 +114,11 @@ function taharahCardFor(
     concealed: false,
     title: t(`taharah.stage.${visibleStage(state, settings.role, currentOnah(now, location), location)}`),
     caption: task
-      ? `${t(`taharah.task.${task.kind}`)} · ${t('taharah.task.until', { time: clockOf(task.end) })}`
+      ? `${t(`taharah.task.${task.kind}`)} · ${t('taharah.task.until', { time: clockOf(task.end, location.tz) })}`
       : renderHint(
           stageHint(state, events, settings.rules, settings.role, location, now, {
             date: (civil) => formatDate(civil, 'd LLLL', language),
-            clock: clockOf,
+            clock: (instant) => clockOf(instant, location.tz),
           }),
           t,
         ),
@@ -201,6 +201,7 @@ export default function HomeScreen() {
   // Only a memo dependency: each tick re-runs the memo, which reads the time itself.
   const tickedAt = useNow();
   const [stampingIds, setStampingIds] = useState<readonly string[]>([]);
+  const [heldOpenIds, setHeldOpenIds] = useState<readonly string[]>([]);
   const stampTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [scrubbing, setScrubbing] = useState(false);
@@ -368,12 +369,17 @@ export default function HomeScreen() {
   );
 
   const stamping = useMemo(() => new Set(stampingIds), [stampingIds]);
+  const heldOpen = useMemo(() => new Set(heldOpenIds), [heldOpenIds]);
   const current = useMemo(
-    () => allCurrent.filter((item) => !item.marked || stamping.has(item.mitzvah.id)),
-    [allCurrent, stamping],
+    () =>
+      [
+        ...allCurrent.filter((item) => !item.marked || stamping.has(item.mitzvah.id)),
+        ...allMissed.filter((item) => heldOpen.has(item.mitzvah.id)),
+      ].sort((a, b) => a.window.end.getTime() - b.window.end.getTime()),
+    [allCurrent, allMissed, stamping, heldOpen],
   );
   const completed = useMemo(() => allCompleted.filter((item) => !stamping.has(item.id)), [allCompleted, stamping]);
-  const doneCount = completed.filter((item) => !item.wasSkipped).length;
+  const doneCount = completed.filter((item) => !item.wasSkipped && windowDays.has(item.id)).length;
 
   const entries = useMemo(() => {
     const raw: DayEntry[] = [
@@ -394,7 +400,7 @@ export default function HomeScreen() {
         date: item.window.date,
       })),
       ...allMissed
-        .filter((item) => !item.marked || stamping.has(item.mitzvah.id))
+        .filter((item) => !heldOpen.has(item.mitzvah.id) && (!item.marked || stamping.has(item.mitzvah.id)))
         .map((item) => ({
           id: item.mitzvah.id,
           status: 'missed' as const,
@@ -433,7 +439,7 @@ export default function HomeScreen() {
         endLabel: entry.end ? clockOf(entry.end, location.tz) : null,
       };
     });
-  }, [current, allCurrent, upcoming, allMissed, completed, stamping, now, location.tz, t]);
+  }, [current, allCurrent, upcoming, allMissed, completed, stamping, heldOpen, now, location.tz, t]);
 
   const name = firstName(profileName);
   const greeting = t(greetingKey(now, location.tz, name !== ''), { name });
@@ -467,10 +473,11 @@ export default function HomeScreen() {
   // dropped every other card tapped during it. Each card is held on screen while it animates.
   const dayFor = (id: string) => windowDays.get(id) ?? today;
 
-  const stamp = (id: string) => {
+  const stamp = (id: string, fromOpen: boolean) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     setSelectedId(null);
     setStampingIds((ids) => (ids.includes(id) ? ids : [...ids, id]));
+    if (fromOpen) setHeldOpenIds((ids) => (ids.includes(id) ? ids : [...ids, id]));
   };
 
   // Each hold is timed from the commit that starts its card's own close, never from the tap: the render between them
@@ -484,6 +491,7 @@ export default function HomeScreen() {
         setTimeout(() => {
           timers.delete(id);
           setStampingIds((ids) => ids.filter((other) => other !== id));
+          setHeldOpenIds((ids) => ids.filter((other) => other !== id));
         }, durations.stamp),
       );
     }
@@ -498,13 +506,16 @@ export default function HomeScreen() {
   }, []);
 
   // An open card is marked at once; one whose window closed since the last tick asks first, as a missed entry does.
-  const completeOpen = (item: LiveItem) =>
+  const completeOpen = (item: LiveItem) => {
+    if (stamping.has(item.mitzvah.id)) return;
     lateMark.mark({ id: item.mitzvah.id, name: item.name, date: item.window.date, window: item.window }, () =>
-      stamp(item.mitzvah.id),
+      stamp(item.mitzvah.id, true),
     );
+  };
 
   // A missed entry's window has closed, so the dialog asks when it was done before marking it.
-  const completeMissed = (entry: DayLookEntry) =>
+  const completeMissed = (entry: DayLookEntry) => {
+    if (stamping.has(entry.id)) return;
     lateMark.mark(
       {
         id: entry.id,
@@ -512,8 +523,9 @@ export default function HomeScreen() {
         date: entry.date,
         window: entry.start && entry.end ? { start: entry.start, end: entry.end } : null,
       },
-      () => stamp(entry.id),
+      () => stamp(entry.id, false),
     );
+  };
 
   const skipToday = async (id: string) => {
     await CompletionService.markSkipped(id, dayFor(id)).catch(() => {});
@@ -641,6 +653,7 @@ export default function HomeScreen() {
     <SkyFrame setterRef={skySetter} focused={focused} quiet={quiet}>
       <ViewportContext.Provider value={viewport.bus}>
         <ScrollView
+          ref={viewport.ref}
           scrollEnabled={!scrubbing}
           contentContainerStyle={[styles.content, { backgroundColor: colors.bg }]}
           onScroll={viewport.notify}

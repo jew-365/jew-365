@@ -410,6 +410,36 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
   {
+    label: '1.0.21-12',
+    date: '2026-11-03',
+    items: [
+      {
+        he: 'טהרת המשפחה: פסיקה שנרשמת בערב מסירה את הספק כבר באותו לילה, וההודעה ״הטבילה נדחתה בגלל צום״ מופיעה רק כשיש צום.',
+        en: 'Family purity: a ruling recorded in the evening clears the doubt that same night, and "the immersion was deferred for a fast" shows only when there is a fast.',
+      },
+      {
+        he: 'שחזור מגיבוי מחזיר גם את התפקיד ואת המנהג בטהרת המשפחה, וכל הגדרה שאין בקובץ חוזרת לברירת המחדל.',
+        en: 'Restoring a backup also brings back the family purity role and minhag, and every setting the file lacks returns to its default.',
+      },
+      {
+        he: 'עריכת תזכורת שומרת את ״תוכן בהתראה״, כך שהברכה נשארת בהתראת ספירת העומר.',
+        en: 'Editing a reminder keeps "Content in the notification", so the blessing stays in the Omer notification.',
+      },
+      {
+        he: 'התראות: לא נשלחת תזכורת לפני סיום ההגדרה הראשונה, סימון בזמן רענון התזכורות לא משאיר תזכורות למצווה שבוצעה, וכיבוי ההתראות תופס מיד.',
+        en: 'Notifications: no reminder is sent before the first setup is finished, a mark made while the reminders refresh leaves none for that mitzvah, and turning notifications off takes effect at once.',
+      },
+      {
+        he: 'השעות בהודעה לפני שבת, בצ׳ק־אין, בסידור, בלוח הזמנים ובמסך השבת מוצגות לפי העיר שנבחרה גם כשהטלפון באזור זמן אחר.',
+        en: 'The times in the pre-Shabbat notice, the check-in, the siddur, the schedule and the Shabbat screen follow the chosen city even when the phone is in another time zone.',
+      },
+      {
+        he: 'תיקונים קטנים: לחיצה כפולה על ״עשיתי״ לא מסמנת פעמיים, רמת הנודניקיות משתנה רק בהקשה או בגרירה הצידה, תצוגת יום מראה מתי מצווה נפתחת ומתי פוספסה, והמצפן קולט הרשאת מיקום שניתנה בהגדרות הטלפון.',
+        en: "Small fixes: a double tap on Done no longer marks twice, the nagging level changes only on a tap or a sideways drag, the day view shows when a mitzvah opens and when it was missed, and the compass picks up a location permission granted in the phone's settings.",
+      },
+    ],
+  },
+  {
     label: '1.0.21-11',
     date: '2026-11-03',
     items: [

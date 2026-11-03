@@ -167,11 +167,13 @@ export function ReminderEditor({
       return;
     }
     const { anchor, offsetMin } = withTiming(timing, read.value);
+    const includeContentInBody = initialValue?.includeContentInBody;
     const reminder: Reminder = {
       anchor,
       offsetMin,
       label: label.trim() || (timing === 'followUp' ? '' : mitzvahName || t('detail.addReminder')),
       skipIfDone: skipsIfDone({ anchor, skipIfDone }),
+      ...(includeContentInBody === undefined ? {} : { includeContentInBody }),
       // An own nag is stored with a placement this timing allows; `null` exempts it; absent follows the level.
       ...(nag === undefined ? {} : { nag: nag && nagFor(mitzvah.id, { anchor, nag }, nagLevel) }),
     };

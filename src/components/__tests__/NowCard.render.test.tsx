@@ -6,6 +6,7 @@ import { CITIES } from '@/data/cities';
 import { renderWithTheme } from '@/testing/render';
 import { at } from '@/testing/zmanim';
 import { THEMES } from '@/theme/colors';
+import { shadowPresets } from '@/theme/shadowStyle';
 import { typography } from '@/theme/typography';
 
 const J = CITIES[0];
@@ -132,6 +133,23 @@ describe('NowCard', () => {
     expect(screen.UNSAFE_getAllByType(Circle).some((circle) => circle.props.testID === 'now-card-done-arc')).toBe(
       false,
     );
+  });
+
+  it('ignores the mark button while the card is stamping', () => {
+    const props = setup({ stamping: true });
+    fireEvent.press(screen.getByRole('button', { name: `סמן ${NAME} כהושלם` }));
+    expect(props.onComplete).not.toHaveBeenCalled();
+  });
+
+  it('lays the sparks over the actions row at its own offset, above the card', () => {
+    setup({ stamping: true });
+    fireEvent(screen.getByTestId('now-card-actions'), 'layout', {
+      nativeEvent: { layout: { x: 0, y: 120, width: 320, height: 48 } },
+    });
+    const row = StyleSheet.flatten(screen.getByTestId('now-card-spark-row').props.style);
+    expect([row.top, row.height]).toEqual([120, 48]);
+    expect(row.elevation).toBe(shadowPresets.cardSoft.elevation + 1);
+    expect(row.zIndex).toBe(1);
   });
 
   it('prints hours and minutes from an hour left', () => {

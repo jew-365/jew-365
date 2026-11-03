@@ -292,7 +292,7 @@ export default function SiddurScreen() {
           icon={iconFor(mitzvah.icon)}
           iconTone="accent"
           title={nameFor(mitzvah)}
-          caption={t('siddur.now.until', { time: clockOf(window!.end) })}
+          caption={t('siddur.now.until', { time: clockOf(window!.end, location.tz) })}
           date={dateKey(window!.date)}
           onOpen={openText}
         />
@@ -306,7 +306,7 @@ export default function SiddurScreen() {
         icon={iconFor(STANDALONE_TEXTS[id].icon)}
         iconTone="accent"
         title={label(STANDALONE_TEXTS[id].name)}
-        caption={t('siddur.now.until', { time: clockOf(hours.end) })}
+        caption={t('siddur.now.until', { time: clockOf(hours.end, location.tz) })}
         onOpen={openText}
       />
     );

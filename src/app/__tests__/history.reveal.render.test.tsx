@@ -102,4 +102,39 @@ describe('history reveals', () => {
     await scrollIntoView();
     await waitFor(() => expect(bars().some((args) => args[2] === true)).toBe(true));
   });
+
+  it('fills the bar of a badge sheet that opens below the scroll view', async () => {
+    rects.setContainer({ y: 0, height: 600 });
+    rects.set({ y: 700, height: 8 });
+    fireEvent.press(screen.getByRole('radio', { name: 'הישגים' }));
+    const [row] = await screen.findAllByTestId(/^history-next-/);
+    const start = entranceCalls().length;
+    fireEvent.press(row);
+    const sheetBar = () =>
+      entranceCalls()
+        .slice(start)
+        .filter((args) => args[0] === 0 && args[1] === motion.barMs);
+    await waitFor(() => expect(sheetBar().some((args) => args[2] === true)).toBe(true));
+  });
+
+  it('keeps the week bars still while they sit below the scroll view', async () => {
+    const start = entranceCalls().length;
+    fireEvent.press(screen.getByRole('radio', { name: 'מגמות' }));
+    await screen.findByText('12 השבועות האחרונים');
+    const bars = () =>
+      entranceCalls()
+        .slice(start)
+        .filter((args) => args[1] === motion.barMs);
+    const scroll = () =>
+      fireEvent.scroll(screen.getByTestId('history-scroll'), { nativeEvent: { contentOffset: { y: 0 } } });
+    rects.setContainer({ y: 0, height: 600 });
+    rects.set({ y: 650, height: 80 });
+    scroll();
+    expect(bars().length).toBeGreaterThan(0);
+    expect(bars().every((args) => args[2] === false)).toBe(true);
+    jest.setSystemTime(Date.now() + motion.inViewThrottleMs);
+    rects.setContainer({ y: 0, height: 800 });
+    scroll();
+    expect(bars().some((args) => args[2] === true)).toBe(true);
+  });
 });

@@ -35,7 +35,7 @@ import { formatDate, useI18n } from '@/i18n';
 export default function CheckInRoute() {
   const { colors } = useTheme();
   const { t } = useI18n();
-  const { language, nameFor, checkInInput } = useDayModel();
+  const { language, nameFor, checkInInput, location } = useDayModel();
   const router = useRouter();
   const viewport = useViewport();
   const completions = useCompletionsStore((s) => s.completions);
@@ -114,6 +114,7 @@ export default function CheckInRoute() {
         <>
           <ViewportContext.Provider value={viewport.bus}>
             <ScrollView
+              ref={viewport.ref}
               contentContainerStyle={styles.content}
               onScroll={viewport.notify}
               onContentSizeChange={viewport.notify}
@@ -149,8 +150,8 @@ export default function CheckInRoute() {
                             name={nameFor(item.mitzvah)}
                             time={
                               late[day.key]?.[item.mitzvah.id]
-                                ? `${clockOf(item.window.start)} · ${t('state.markedLate')}`
-                                : clockOf(item.window.start)
+                                ? `${clockOf(item.window.start, location.tz)} · ${t('state.markedLate')}`
+                                : clockOf(item.window.start, location.tz)
                             }
                             onUndo={() => unmark(item.mitzvah.id, day.date)}
                             undoLabel={t('home.undo')}

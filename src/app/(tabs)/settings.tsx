@@ -84,6 +84,7 @@ import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { NagLevel, Nusach } from '@/types/mitzvah';
 import { countsInDayEstimate, remindersPerDay } from '@/utils/nagging';
 import type { SiddurVoice } from '@/types/siddur';
+import type { Location } from '@/types/zmanim';
 import { minutesToTime, timeToMinutes } from '@/utils/clock';
 import { quietBoundsValid, quietHoursOf, type QuietBound } from '@/utils/quietHours';
 import { SETTINGS_SEARCH_ITEMS, type SettingsSearchItem, type SettingsSectionKey } from '@/utils/settingsSearch';
@@ -194,7 +195,7 @@ export default function SettingsScreen() {
   // the whole user store to MMKV and re-rendered the entire settings tree.
   const [nameDraft, setNameDraft] = useState(user.profileName);
   const [phoneDraft, setPhoneDraft] = useState(user.profilePhone);
-  const [statusText, setStatusText] = useState('');
+  const [locateStatus, setLocateStatus] = useState<{ text: string; location: Location } | null>(null);
   const [resetVisible, setResetVisible] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [backupBusy, setBackupBusy] = useState(false);
@@ -223,6 +224,7 @@ export default function SettingsScreen() {
     useCallback(() => {
       setOpen(new Set());
       setQuery('');
+      setLocateStatus(null);
       scrollRef.current?.scrollTo({ y: 0, animated: false });
       focusCount.current += 1;
       setFocusTarget(null);
@@ -403,7 +405,10 @@ export default function SettingsScreen() {
       } else {
         user.setLocationStatus(resolved.status);
       }
-      setStatusText(resolved.location ? t('settings.gpsUpdated') : t('settings.gpsFallback'));
+      setLocateStatus({
+        text: resolved.location ? t('settings.gpsUpdated') : t('settings.gpsFallback'),
+        location: useUserStore.getState().location,
+      });
     } finally {
       setLocating(false);
     }
@@ -636,8 +641,10 @@ export default function SettingsScreen() {
                     )}
                   </Text>
                   <Button label={t('settings.useCurrentLocation')} onPress={refreshLocation} style={styles.buttonGap} />
-                  {statusText ? (
-                    <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>{statusText}</Text>
+                  {locateStatus && locateStatus.location === user.location ? (
+                    <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>
+                      {locateStatus.text}
+                    </Text>
                   ) : null}
                   <SectionLabel variant="field" text={t('settings.pickCity')} style={styles.fieldLabel} />
                   <ChipRow

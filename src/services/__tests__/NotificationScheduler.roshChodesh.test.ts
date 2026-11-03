@@ -126,6 +126,7 @@ describe('NotificationScheduler Rosh Chodesh notices', () => {
     mockSchedule.mockClear();
     useCompletionsStore.setState({ completions: {}, skipped: {}, checkIns: {}, archivedDays: [] });
     useUserStore.getState().reset();
+    useUserStore.getState().setOnboarded(true);
     useUserStore.getState().setNotificationPermission('granted');
     useUserStore.getState().setLocation(JERUSALEM);
     useUserStore.getState().setRoshChodeshEnabled(true);

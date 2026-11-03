@@ -224,6 +224,11 @@ describe('deriveCycle', () => {
       expect(result.tevilaDay).toBe(O + 13);
     });
 
+    it('does not call a night after a missed first night deferred', () => {
+      expect(state(complete(), '2026-11-01T12:00').tevilaDeferred).toBe(false);
+      expect(state(complete(), '2026-11-01T22:00').tevilaDeferred).toBe(false);
+    });
+
     it('is tahor once the tevila is recorded', () => {
       const result = state(
         log(onset(), hefsek(O + 4), bedika(O + 5, 'morning'), bedika(O + 11, 'evening'), tevila(O + 12)),
@@ -256,6 +261,13 @@ describe('deriveCycle', () => {
       const result = state(events(), '2026-09-21T20:00');
       expect(result.stage).toBe('tevilaNight');
       expect(result.tevilaDay).toBe(absOf(2026, 9, 22));
+    });
+
+    it('keeps the deferral from the fast night through the night after it, and drops it once that night passes', () => {
+      expect(state(events(), '2026-09-20T20:00').tevilaDeferred).toBe(true);
+      expect(state(events(), '2026-09-21T12:00').tevilaDeferred).toBe(true);
+      expect(state(events(), '2026-09-21T20:00').tevilaDeferred).toBe(true);
+      expect(state(events(), '2026-09-22T12:00').tevilaDeferred).toBe(false);
     });
   });
 

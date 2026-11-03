@@ -38,6 +38,10 @@ const he = (key: string, params?: Record<string, unknown>) => translate(key, par
 const title = (level: number) => he('nag.level.title', { name: he(`nag.level.${level}.name`), level });
 const nameButton = (level: number) => screen.getByRole('button', { name: title(level) });
 const slider = () => screen.getByTestId('nag-level-slider');
+const touch = (locationX: number, pageX: number, pageY: number) => ({ nativeEvent: { locationX, pageX, pageY } });
+const level = () => useUserStore.getState().nagLevel;
+// The track runs from 14 to 300 of a 314-wide slider: a third of the way is level 2, the far end level 4.
+const layout = () => fireEvent(slider(), 'layout', { nativeEvent: { layout: { width: 314, height: 44 } } });
 const pills = (kind: 'main' | 'repeat' | 'dropped') => screen.queryAllByTestId(`nag-example-${kind}`);
 const pillTimes = () =>
   within(screen.getByTestId('nag-example'))
@@ -111,16 +115,45 @@ describe('Settings › the nagging level', () => {
     expect(useUserStore.getState().nagLevel).toBe(4);
   });
 
-  it('picks the stop nearest a touch on the slider', async () => {
+  it('picks the stop nearest a tap when the finger lifts, not when it lands', async () => {
     await renderDevice();
-    fireEvent(slider(), 'layout', { nativeEvent: { layout: { width: 314, height: 44 } } });
-    // The track runs from 14 to 300; a third of the way is level 2, the far end level 4.
-    fireEvent(slider(), 'responderGrant', { nativeEvent: { locationX: 14 + 286 / 3 } });
-    expect(useUserStore.getState().nagLevel).toBe(2);
-    fireEvent(slider(), 'responderMove', { nativeEvent: { locationX: 312 } });
-    expect(useUserStore.getState().nagLevel).toBe(4);
-    fireEvent(slider(), 'responderMove', { nativeEvent: { locationX: 0 } });
-    expect(useUserStore.getState().nagLevel).toBe(1);
+    layout();
+    fireEvent(slider(), 'responderGrant', touch(14 + 286 / 3, 200, 500));
+    expect(level()).toBe(1);
+    fireEvent(slider(), 'responderMove', touch(14 + 286 / 3, 205, 503));
+    expect(level()).toBe(1);
+    fireEvent(slider(), 'responderRelease', touch(14 + 286 / 3, 205, 503));
+    expect(level()).toBe(2);
+  });
+
+  it('follows a horizontal drag to the nearest stop', async () => {
+    await renderDevice();
+    layout();
+    fireEvent(slider(), 'responderGrant', touch(20, 106, 500));
+    fireEvent(slider(), 'responderMove', touch(312, 398, 506));
+    expect(level()).toBe(4);
+    fireEvent(slider(), 'responderMove', touch(0, 86, 510));
+    expect(level()).toBe(1);
+    fireEvent(slider(), 'responderMove', touch(14 + (286 * 2) / 3, 290, 512));
+    expect(level()).toBe(3);
+    fireEvent(slider(), 'responderRelease', touch(14 + (286 * 2) / 3, 290, 512));
+    expect(level()).toBe(3);
+  });
+
+  it('changes nothing when a vertical scroll starts on the slider, or the scroll view takes the touch', async () => {
+    await renderDevice();
+    layout();
+    fireEvent(slider(), 'responderGrant', touch(312, 398, 500));
+    expect(level()).toBe(1);
+    fireEvent(slider(), 'responderMove', touch(310, 396, 540));
+    expect(level()).toBe(1);
+    fireEvent(slider(), 'responderMove', touch(100, 186, 545));
+    expect(level()).toBe(1);
+    fireEvent(slider(), 'responderRelease', touch(100, 186, 545));
+    expect(level()).toBe(1);
+    fireEvent(slider(), 'responderGrant', touch(312, 398, 500));
+    fireEvent(slider(), 'responderTerminate', touch(312, 398, 500));
+    expect(level()).toBe(1);
   });
 
   it('shows today’s Shacharit and bedtime Shema reminders at the chosen level as their send times', async () => {

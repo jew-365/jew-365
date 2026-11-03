@@ -13,6 +13,8 @@ import {
   watchForRatingMoment,
 } from '../storeReview';
 import { CITIES } from '@/data/cities';
+import { storage } from '@/services/StorageService';
+import { STORE_VERSION } from '@/stores/persistOptions';
 import { useCompletionsStore, type Completions } from '@/stores/useCompletionsStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { RATING_MARKED_DAYS } from '@/utils/rating';
@@ -164,6 +166,25 @@ describe('watchForRatingMoment', () => {
     useCompletionsStore.setState((state) => ({ completions: { ...state.completions } }));
     await pass(RATING_DELAY_MS);
     expect(isAvailable).not.toHaveBeenCalled();
+  });
+
+  it('asks nothing for the marks a restore brings back, and the next in-app mark asks', async () => {
+    const restored: Completions = {};
+    for (let day = 1; day <= RATING_MARKED_DAYS; day += 1) restored[dayKey(day)] = { tefillin: 1 };
+    stop = watchForRatingMoment();
+
+    useCompletionsStore.getState().reset();
+    storage.set('completions-store', JSON.stringify({ state: { completions: restored }, version: STORE_VERSION }));
+    await useCompletionsStore.persist.rehydrate();
+    await pass(RATING_DELAY_MS);
+
+    expect(Object.keys(useCompletionsStore.getState().completions)).toHaveLength(RATING_MARKED_DAYS);
+    expect(isAvailable).not.toHaveBeenCalled();
+    expect(useUserStore.getState().ratingAskedAt).toBeNull();
+
+    mark(RATING_MARKED_DAYS + 1);
+    await pass(RATING_DELAY_MS);
+    expect(requestReview).toHaveBeenCalledTimes(1);
   });
 
   it('asks nothing for a mark made on the install first app day', async () => {

@@ -963,7 +963,6 @@ export default function HistoryScreen() {
   const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
   const [selectedLateWeek, setSelectedLateWeek] = useState<string | null>(null);
   const [selectedWeekday, setSelectedWeekday] = useState<string | null>(null);
-  const scrollRef = useRef<ScrollView>(null);
   const scrollY = useRef(0);
   const takeSlot = useBatchSlot();
   const playKey = useReplayKey(() => {
@@ -971,6 +970,7 @@ export default function HistoryScreen() {
     setMonthStart(null);
   });
   const viewport = useViewport();
+  const scrollRef = viewport.ref;
 
   useEffect(() => {
     setDayKey(appDayKey(ticked, location));
@@ -1066,7 +1066,7 @@ export default function HistoryScreen() {
         requestAnimationFrame(() => scrollRef.current?.scrollTo({ y: HERO_HEIGHT, animated: false }));
       }
     },
-    [tab],
+    [tab, scrollRef],
   );
   // The search sends a card or a figure here as `tab`: switch to it once, then drop the param.
   const tabParam = useLocalSearchParams<{ tab?: string }>().tab;
@@ -1891,9 +1891,9 @@ export default function HistoryScreen() {
   ];
 
   return (
-    <ViewportContext.Provider value={viewport.bus}>
-      <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
-        <View style={styles.flex}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
+      <View style={styles.flex}>
+        <ViewportContext.Provider value={viewport.bus}>
           <ScrollView
             ref={scrollRef}
             testID="history-scroll"
@@ -1938,32 +1938,32 @@ export default function HistoryScreen() {
               ) : null}
             </View>
           </ScrollView>
-          {tabsPinned ? (
-            <View
-              testID="history-tabs-pinned"
-              accessibilityRole="radiogroup"
-              accessibilityLabel={t('history.tabs')}
-              style={[styles.tabs, styles.tabsPinned, { backgroundColor: colors.bg }]}
-            >
-              <SegmentedControl animated options={tabOptions} value={tab} onChange={changeTab} />
-            </View>
-          ) : null}
-        </View>
-        <BadgeSheet badge={badge} onClose={() => setBadge(null)} />
-        <DaySheet
-          day={openDay}
-          onClose={() => setOpenDay(null)}
-          onFullDay={(key) => {
-            setOpenDay(null);
-            router.push({ pathname: '/day/[date]', params: { date: key } });
-          }}
-          onOpenMitzvah={(id) => {
-            setOpenDay(null);
-            router.push({ pathname: '/mitzvah/[id]', params: { id } });
-          }}
-        />
-      </SafeAreaView>
-    </ViewportContext.Provider>
+        </ViewportContext.Provider>
+        {tabsPinned ? (
+          <View
+            testID="history-tabs-pinned"
+            accessibilityRole="radiogroup"
+            accessibilityLabel={t('history.tabs')}
+            style={[styles.tabs, styles.tabsPinned, { backgroundColor: colors.bg }]}
+          >
+            <SegmentedControl animated options={tabOptions} value={tab} onChange={changeTab} />
+          </View>
+        ) : null}
+      </View>
+      <BadgeSheet badge={badge} onClose={() => setBadge(null)} />
+      <DaySheet
+        day={openDay}
+        onClose={() => setOpenDay(null)}
+        onFullDay={(key) => {
+          setOpenDay(null);
+          router.push({ pathname: '/day/[date]', params: { date: key } });
+        }}
+        onOpenMitzvah={(id) => {
+          setOpenDay(null);
+          router.push({ pathname: '/mitzvah/[id]', params: { id } });
+        }}
+      />
+    </SafeAreaView>
   );
 }
 

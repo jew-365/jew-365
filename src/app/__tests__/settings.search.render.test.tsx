@@ -475,6 +475,19 @@ describe('Settings search', () => {
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/siddur/[id]', params: { id: 'chok_leyisrael' } });
   });
 
+  it('lists Selichot as a text once the nusach file is installed while Settings is open', async () => {
+    pinDate('2026-09-08T12:00');
+    await renderSettings();
+    await search('סליחות');
+    expect(screen.queryByText(he('settings.search.kind.siddur'))).toBeNull();
+
+    act(() => {
+      installSelichotFixture();
+    });
+    fireEvent.press(screen.getByText(he('settings.search.kind.siddur')));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/siddur/[id]', params: { id: 'selichot' } });
+  });
+
   it('lists Selichot off season as the siddur tab does: with its availability caption, and a way in', async () => {
     installSelichotFixture();
     pinDate('2026-10-28T07:00');

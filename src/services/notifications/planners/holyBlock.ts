@@ -2,10 +2,11 @@ import { DateTime } from 'luxon';
 import type { HolyBlock, Location } from '@/types/zmanim';
 import { omerDayFor, ushpizOfEvening } from '@/data/mitzvot';
 import { holyBlockLabelKeys } from '@/utils/skipRules';
+import { clockOf } from '@/utils/clock';
 import { formatDate, t } from '@/i18n';
 import { BLOCK_NOTICE_KIND } from '@/services/notifications/ids';
 import type { PlanInput, ScheduleCandidate } from '@/services/notifications/types';
-import { formatClock, holyBlocksWithin, type Horizon } from '@/services/notifications/planners/horizon';
+import { holyBlocksWithin, type Horizon } from '@/services/notifications/planners/horizon';
 import { hilulaLines } from '@/services/notifications/planners/hilulot';
 import { roshChodeshLines } from '@/services/notifications/planners/roshChodesh';
 
@@ -59,7 +60,11 @@ function blockNoticeCandidate(block: HolyBlock, input: PlanInput, countsOmer: bo
   if (trigger.getTime() <= input.now.getTime()) return null;
   const labels = holyBlockLabelKeys(block);
   const lines = [
-    t('holyBlock.notice.body', { start: formatClock(block.start), exit: t(labels.exit), end: formatClock(block.end) }),
+    t('holyBlock.notice.body', {
+      start: clockOf(block.start, input.location.tz),
+      exit: t(labels.exit),
+      end: clockOf(block.end, input.location.tz),
+    }),
   ];
   const omer = countsOmer ? omerLine(block, omerNightsWithin(block, input.location), input.language === 'en') : null;
   if (omer) lines.push(omer);

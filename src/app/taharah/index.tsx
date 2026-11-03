@@ -106,16 +106,14 @@ export default function TaharahDashboard() {
 
   const stage = visibleStage(state, settings.role, onah, location);
   // The safek banner below already carries the safek line.
-  const hint =
+  const stageLine =
     stage === 'safek'
-      ? ''
-      : renderHint(
-          stageHint(state, events, settings.rules, settings.role, location, now, {
-            date: (civil) => formatDayLine(civil, language),
-            clock: clockOf,
-          }),
-          t,
-        );
+      ? null
+      : stageHint(state, events, settings.rules, settings.role, location, now, {
+          date: (civil) => formatDayLine(civil, language),
+          clock: (instant) => clockOf(instant, location.tz),
+        });
+  const hint = renderHint(stageLine, t);
   const goLog = (type: string) => router.push({ pathname: '/taharah/log', params: { type } });
   const close = () => {
     if (router.canGoBack()) router.back();
@@ -159,7 +157,7 @@ export default function TaharahDashboard() {
           {hint ? (
             <Text style={[typography.body, { color: colors.textSub, marginTop: spacing.xs }]}>{hint}</Text>
           ) : null}
-          {state.tevilaDeferred ? (
+          {state.tevilaDeferred && stageLine?.key !== 'taharah.tevilaDeferred' ? (
             <Text style={[typography.captionBold, { color: colors.warning, marginTop: spacing.sm }]}>
               {t('taharah.tevilaDeferred')}
             </Text>
@@ -176,7 +174,7 @@ export default function TaharahDashboard() {
                   variant="danger"
                   size="compact"
                   label={t(`taharah.ruling.${decision}`)}
-                  onPress={() => addEvent({ type: 'ruling', day: todayAbs, decision })}
+                  onPress={() => addEvent({ type: 'ruling', day: onah.abs, decision })}
                   style={styles.ruling}
                 />
               ))}
@@ -205,6 +203,7 @@ export default function TaharahDashboard() {
                 <TaskRow
                   key={`${task.kind}-${task.day}-${index}`}
                   task={task}
+                  zone={location.tz}
                   onPress={isActionable(task) ? () => openTask(task) : undefined}
                 />
               ))
@@ -347,13 +346,13 @@ export default function TaharahDashboard() {
   );
 }
 
-function TaskRow({ task, onPress }: { task: TaharahTask; onPress?: () => void }) {
+function TaskRow({ task, zone, onPress }: { task: TaharahTask; zone: string; onPress?: () => void }) {
   const { colors } = useTheme();
   const { t } = useI18n();
   const timeLine =
     task.kind === 'tevila'
-      ? t('taharah.task.from', { time: clockOf(task.start) })
-      : t('taharah.task.until', { time: clockOf(task.end) });
+      ? t('taharah.task.from', { time: clockOf(task.start, zone) })
+      : t('taharah.task.until', { time: clockOf(task.end, zone) });
   const details = [
     timeLine,
     task.cleanDayIndex ? t('taharah.cleanDays.day', { index: task.cleanDayIndex }) : null,

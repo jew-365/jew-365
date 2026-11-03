@@ -136,7 +136,7 @@ const absOn = (iso: string) => {
 };
 const zmanimOn = (iso: string) => zmanimFor(at(JERUSALEM, `${iso}T12:00`), JERUSALEM);
 const blockOn = (iso: string) => HebcalService.holyBlockOn(at(JERUSALEM, `${iso}T12:00`), JERUSALEM)!;
-const clock = (instant: Date) => DateTime.fromJSDate(instant).toFormat('HH:mm');
+const clock = (instant: Date) => DateTime.fromJSDate(instant, { zone: JERUSALEM.tz }).toFormat('HH:mm');
 const minutes = (instant: Date, delta: number) => instant.getTime() + delta * 60_000;
 
 const O = absOf(2026, 11, 8); // Sunday 28 Cheshvan 5787
@@ -176,6 +176,7 @@ describe('NotificationScheduler taharah reminders', () => {
     mockSetCategory.mockClear();
     useCompletionsStore.setState({ completions: {}, skipped: {}, checkIns: {}, archivedDays: [] });
     useUserStore.getState().reset();
+    useUserStore.getState().setOnboarded(true);
     useUserStore.getState().setNotificationPermission('granted');
     useUserStore.getState().setLocation(JERUSALEM);
     useUserStore.getState().setTaharahEnabled(true);

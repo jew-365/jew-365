@@ -73,7 +73,8 @@ export function watchForRatingMoment(): () => void {
     const count = markCount(state.completions);
     const grew = count > marks;
     marks = count;
-    if (!grew || takeNotificationMark()) return;
+    // A hydrate (a backup restore) brings marks back; it never makes one.
+    if (!grew || !useCompletionsStore.persist.hasHydrated() || takeNotificationMark()) return;
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => {
       timer = null;

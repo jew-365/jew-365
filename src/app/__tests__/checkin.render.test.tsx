@@ -14,17 +14,31 @@ jest.mock('@/services/NotificationScheduler', () => ({
   },
 }));
 
+jest.mock('react-native-reanimated', () => ({
+  ...jest.requireActual('react-native-reanimated'),
+  __esModule: true,
+  useReducedMotion: jest.fn(() => false),
+}));
+
 import { act, fireEvent, screen } from '@testing-library/react-native';
+import { getAnimatedStyle } from 'react-native-reanimated';
 import CheckInRoute from '../checkin';
+import { CompletedRow } from '@/components/CompletedRow';
 import { MitzvahCard } from '@/components/MitzvahCard';
+import { Reveal } from '@/components/Reveal';
 import { CITIES } from '@/data/cities';
+import { findMitzvah } from '@/data/mitzvot';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { renderWithTheme } from '@/testing/render';
+import { mockWindowRects } from '@/testing/viewport';
 import { at } from '@/testing/zmanim';
+import { dayWindow } from '@/utils/buildDayTimeline';
+import { clockOf } from '@/utils/clock';
 
 const JERUSALEM = CITIES[0];
+const NEW_YORK = CITIES.find((c) => c.cityId === 'new-york')!;
 const SUNDAY_AFTER_SHABBAT = '2026-11-15T10:00';
 const ONLY_DATE = [
   'nextTick',
@@ -97,5 +111,44 @@ describe('check-in', () => {
     act(() => card!.props.onComplete());
     expect(useCompletionsStore.getState().completions).toEqual({});
     expect(useCompletionsStore.getState().late).toEqual({});
+  });
+
+  it.each([
+    [600, 0],
+    [800, 1],
+  ])('plays a done row only once it is inside the scroll view (scroll view %d high)', (height, opacity) => {
+    jest.useFakeTimers({ now: at(JERUSALEM, SUNDAY_AFTER_SHABBAT) });
+    useCompletionsStore.setState({
+      completions: { '2026-11-14': { shacharit: at(JERUSALEM, '2026-11-14T08:00').getTime() } },
+    });
+    const rects = mockWindowRects(800);
+    try {
+      rects.set({ y: 650, height: 100 });
+      rects.setContainer({ y: 0, height });
+      renderWithTheme(<CheckInRoute />);
+      act(() => jest.advanceTimersByTime(1000));
+      const row = screen.UNSAFE_getAllByType(CompletedRow).find((node) => node.props.name === 'תפילת שחרית')!;
+      const surface = row.findByType(Reveal).findAll((node: { type: unknown }) => typeof node.type === 'string')[1];
+      expect(Number(getAnimatedStyle(surface).opacity)).toBe(opacity);
+    } finally {
+      rects.restore();
+    }
+  });
+
+  it("prints a done row's time on the location's clock", async () => {
+    jest.useFakeTimers({ now: at(NEW_YORK, SUNDAY_AFTER_SHABBAT), doNotFake: [...ONLY_DATE] });
+    useUserStore.setState({ location: NEW_YORK, inIsrael: false });
+    useCompletionsStore.setState({
+      completions: { '2026-11-14': { shacharit: at(NEW_YORK, '2026-11-14T08:00').getTime() } },
+    });
+    const shacharit = dayWindow(findMitzvah('shacharit')!, new Date(2026, 10, 14), NEW_YORK, {
+      nusach: 'ashkenaz',
+      halachicOpinions: useUserStore.getState().halachicOpinions,
+      inIsrael: false,
+    })!;
+    renderWithTheme(<CheckInRoute />);
+    await screen.findByText(/מה עשית בשבת/);
+    const row = screen.UNSAFE_getAllByType(CompletedRow).find((node) => node.props.name === 'תפילת שחרית')!;
+    expect(row.props.time).toBe(clockOf(shacharit.start, NEW_YORK.tz));
   });
 });

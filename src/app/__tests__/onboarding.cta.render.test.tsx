@@ -24,6 +24,7 @@ import ReadyScreen from '../onboarding/ready';
 import { ONBOARDING_STEPS, OnboardingDots } from '@/components/OnboardingDots';
 import { CITIES, getLocationName } from '@/data/cities';
 import { translate } from '@/i18n';
+import { NotificationScheduler } from '@/services/NotificationScheduler';
 import { renderWithTheme } from '@/testing/render';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
@@ -89,6 +90,20 @@ describe('Onboarding Continue buttons', () => {
     fireEvent.press(screen.getByText(he('onboarding.readyEdit')));
     expect(mockPush).toHaveBeenCalledTimes(1);
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/onboarding/mitzvot', params: { from: 'ready' } });
+  });
+
+  it('the ready step marks onboarding done before it rebuilds the schedule', async () => {
+    const seen: boolean[] = [];
+    jest.mocked(NotificationScheduler.rebuild).mockImplementationOnce(async () => {
+      seen.push(useUserStore.getState().isOnboarded);
+    });
+    renderWithTheme(<ReadyScreen />);
+
+    await act(async () => {
+      fireEvent.press(screen.getByRole('button', { name: he('onboarding.finish') }));
+    });
+
+    expect(seen).toEqual([true]);
   });
 
   it.each<[string, ComponentType, number]>([

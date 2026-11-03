@@ -24,6 +24,7 @@ type Props = {
   onChoice: (choice: ChokDoubleChoice) => void;
   asking: boolean;
   onAskClose: () => void;
+  onPickingChange?: (open: boolean) => void;
 };
 
 const CHOICES: readonly ChokDoubleChoice[] = ['first', 'second', 'both'];
@@ -43,10 +44,15 @@ export function ChokWeekControls({
   onChoice,
   asking,
   onAskClose,
+  onPickingChange,
 }: Props) {
   const { language, t } = useI18n();
   const { height: windowHeight } = useWindowDimensions();
   const [picking, setPicking] = useState(false);
+  const setOpen = (open: boolean) => {
+    setPicking(open);
+    onPickingChange?.(open);
+  };
   const listRef = useRef<ScrollView>(null);
   const double = names.length > 1;
   const choiceLabel = (value: ChokDoubleChoice) =>
@@ -58,7 +64,7 @@ export function ChokWeekControls({
   const isSelected = (parasha: string) => (browsing === null ? shown.includes(parasha) : browsing === parasha);
   const firstSelected = CHOK_PARASHIYOT.find((parasha) => offered.includes(parasha) && isSelected(parasha));
   const choose = (parasha: string) => {
-    setPicking(false);
+    setOpen(false);
     onBrowse(shown.includes(parasha) ? null : parasha);
   };
   return (
@@ -66,7 +72,7 @@ export function ChokWeekControls({
       <PickerCard
         title={title}
         accessibilityLabel={`${t('chok.parashaPicker')}: ${title}`}
-        onPress={() => setPicking(true)}
+        onPress={() => setOpen(true)}
       />
       <View accessibilityRole="radiogroup" accessibilityLabel={t('chok.slotPicker')}>
         <SegmentedControl
@@ -88,7 +94,7 @@ export function ChokWeekControls({
           />
         </View>
       ) : null}
-      <BottomSheet visible={picking} title={t('chok.parashaPicker')} onClose={() => setPicking(false)}>
+      <BottomSheet visible={picking} title={t('chok.parashaPicker')} onClose={() => setOpen(false)}>
         <ScrollView ref={listRef} style={{ maxHeight: windowHeight * BODY_HEIGHT_SHARE }}>
           {CHOK_BOOKS.flatMap((book) => {
             const parashiyot = book.parashiyot.filter((parasha) => offered.includes(parasha));

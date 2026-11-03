@@ -590,6 +590,20 @@ describe('the Chok LeYisrael reader parasha choice', () => {
     expect(scrolled).toBeLessThan(500);
   });
 
+  it('holds auto-scroll while the parasha picker shows, and scrolls once a parasha is picked', async () => {
+    useUserStore.setState({ siddurAutoScroll: true });
+    await openAt('2026-11-18T12:00');
+    scrollTo(0);
+    openPicker();
+    await runFrames(60);
+    expect(autoScrolledTo()).toBeUndefined();
+
+    fireEvent.press(screen.getByRole('button', { name: 'בראשית' }));
+    await shows('פרשת בראשית');
+    await runFrames(60);
+    expect(autoScrolledTo()).toBeGreaterThan(0);
+  });
+
   it('opens on this week each time, whatever was read before', async () => {
     await openAt('2026-11-18T12:00');
     await pickParasha('בראשית');
@@ -609,6 +623,19 @@ describe('the Chok LeYisrael reader parasha choice', () => {
     fireEvent.press(screen.getByRole('button', { name: 'בראשית' }));
     await shows('פרשת בראשית');
     expect(screen.queryByLabelText('פרשות מחוברות')).toBeNull();
+  });
+
+  it('holds auto-scroll while the double-week question shows, and scrolls once it is answered', async () => {
+    useUserStore.setState({ siddurAutoScroll: true });
+    await openAt('2028-03-22T12:00');
+    scrollTo(0);
+    expect(screen.getByText('השבוע שתי פרשיות')).toBeOnTheScreen();
+    await runFrames(60);
+    expect(autoScrolledTo()).toBeUndefined();
+
+    fireEvent.press(screen.getByRole('button', { name: 'שתיהן, זו אחר זו' }));
+    await runFrames(60);
+    expect(autoScrolledTo()).toBeGreaterThan(0);
   });
 });
 

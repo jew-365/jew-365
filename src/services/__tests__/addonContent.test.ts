@@ -364,6 +364,21 @@ describe.each(CASES)('the add-on core with $name', (c) => {
     expect(selectAddonUpdateAvailable(state())).toBe(true);
   });
 
+  it('checks again when the last check is stamped in the future, and stamps the real time', async () => {
+    const NOW = 1_800_000_000_000;
+    await c.install(v1.manifest);
+    hits = [];
+    c.store.setState({ checkedAt: NOW + 365 * ADDON_CHECK_INTERVAL_MS });
+    route = serve(v2);
+    await c.check(NOW);
+    expect(hits).toHaveLength(1);
+    expect(state().latestVersion).toBe(2);
+    expect(state().checkedAt).toBe(NOW);
+    hits = [];
+    await c.check(NOW + 1000);
+    expect(hits).toEqual([]);
+  });
+
   it('supports no download on the web, and reconciles without throwing', async () => {
     const replaced = jest.replaceProperty(Platform, 'OS', 'web');
     await expect(c.prepare()).resolves.toBeNull();

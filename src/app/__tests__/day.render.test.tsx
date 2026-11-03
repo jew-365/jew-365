@@ -20,11 +20,12 @@ jest.mock('@/services/NotificationScheduler', () => ({
   refreshSchedulingOnForeground: async () => {},
 }));
 
-import { fireEvent, screen } from '@testing-library/react-native';
+import { act, fireEvent, screen } from '@testing-library/react-native';
 import { DateTime } from 'luxon';
 import DayRoute from '../day/[date]';
 import { MitzvahCard } from '@/components/MitzvahCard';
 import { CITIES } from '@/data/cities';
+import { findMitzvah } from '@/data/mitzvot';
 import { formatDate } from '@/i18n';
 import { RETENTION_DAYS, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -34,6 +35,7 @@ import { HIDDEN_INTL_NAMES, hideIntlDateNames } from '@/testing/intl';
 import { renderWithTheme } from '@/testing/render';
 import { installSelichotFixture } from '@/testing/selichot';
 import { at, zmanimFor } from '@/testing/zmanim';
+import { dayWindow } from '@/utils/buildDayTimeline';
 
 const JERUSALEM = CITIES[0];
 const ONLY_DATE = [
@@ -46,6 +48,10 @@ const ONLY_DATE = [
   'setTimeout',
   'clearTimeout',
 ] as const;
+
+const SETTINGS = { nusach: 'ashkenaz' as const, halachicOpinions: { ksSofZman: 'GRA' as const }, inIsrael: true };
+const REAL_TICKS = ['nextTick', 'queueMicrotask', 'setImmediate', 'clearImmediate'] as const;
+const minchaOn28 = () => dayWindow(findMitzvah('mincha')!, new Date(2026, 9, 28), JERUSALEM, SETTINGS)!;
 
 const october = (day: number) => DateTime.fromObject({ year: 2026, month: 10, day });
 const title = (day: number) => formatDate(october(day), 'cccc d LLLL yyyy', 'he');
@@ -214,6 +220,51 @@ describe('day view', () => {
     mockParams.date = '2025-09-15';
     renderWithTheme(<DayRoute />);
     expect(screen.getByText(`${start} עד ${end} למחרת`)).toBeOnTheScreen();
+  });
+
+  it("names when today's card opens before its window, with no time left", () => {
+    useMitzvotStore.setState({ activeMitzvot: { mincha: { enabled: true } } });
+    mockParams.date = '2026-10-28';
+    renderWithTheme(<DayRoute />);
+    const opens = DateTime.fromJSDate(minchaOn28().start, { zone: JERUSALEM.tz }).toFormat('HH:mm');
+    expect(screen.getByText(`נפתח ב-${opens}`)).toBeOnTheScreen();
+    expect(screen.queryByText(/^נותר:/)).toBeNull();
+    expect(screen.queryByText('לא בוצע')).toBeNull();
+  });
+
+  it('calls an unmarked window that ended today missed, and keeps its mark button', () => {
+    useMitzvotStore.setState({ activeMitzvot: { shacharit: { enabled: true } } });
+    mockParams.date = '2026-10-28';
+    renderWithTheme(<DayRoute />);
+    const card = screen.UNSAFE_getAllByType(MitzvahCard)[0];
+    expect(card.props.statusText).toBe('לא בוצע');
+    expect(card.props.urgent).toBe(true);
+    expect(card.props.hideProgress).toBe(true);
+    expect(typeof card.props.onComplete).toBe('function');
+    expect(screen.queryByText(/^נותר:/)).toBeNull();
+  });
+
+  it('says a card skipped for today is skipped, never missed', () => {
+    useMitzvotStore.setState({ activeMitzvot: { shacharit: { enabled: true } } });
+    useCompletionsStore.setState({ skipped: { '2026-10-28': { shacharit: Date.now() } } });
+    mockParams.date = '2026-10-28';
+    renderWithTheme(<DayRoute />);
+    expect(screen.getByText('דולג להיום')).toBeOnTheScreen();
+    expect(screen.queryByText('לא בוצע')).toBeNull();
+    expect(screen.queryByText(/^נותר:/)).toBeNull();
+  });
+
+  it("turns today's card from the time left to missed as the clock passes its end", () => {
+    jest.useFakeTimers({ now: minchaOn28().end.getTime() - 5 * 60_000, doNotFake: [...REAL_TICKS] });
+    useMitzvotStore.setState({ activeMitzvot: { mincha: { enabled: true } } });
+    mockParams.date = '2026-10-28';
+    renderWithTheme(<DayRoute />);
+    expect(screen.getByText("נותר: 5 דק'")).toBeOnTheScreen();
+    expect(screen.queryByText('לא בוצע')).toBeNull();
+
+    act(() => jest.advanceTimersByTime(6 * 60_000));
+    expect(screen.getByText('לא בוצע')).toBeOnTheScreen();
+    expect(screen.queryByText(/^נותר:/)).toBeNull();
   });
 
   describe.each(HIDDEN_INTL_NAMES)('without Intl weekday and month names (%s, Hermes on iOS)', (mode) => {

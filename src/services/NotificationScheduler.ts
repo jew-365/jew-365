@@ -269,8 +269,13 @@ export async function markDoneFromNotificationData(
   return true;
 }
 
+// Until onboarding is done the location and the mitzvot are only defaults: nothing is scheduled for them.
+function schedulingAllowed(): boolean {
+  return useUserStore.getState().isOnboarded && hasNotificationPermission();
+}
+
 async function scheduleAllImpl(scope: PlanScope, onlyDifference = false): Promise<void> {
-  if (!hasNotificationPermission()) return;
+  if (!schedulingAllowed()) return;
   await os.ensureCategories();
   const plan = buildPlan(readPlanInput(new Date(), scope));
   await (onlyDifference ? os.sync(plan) : os.schedule(plan));
@@ -332,11 +337,16 @@ export const NotificationScheduler = {
     return this.withLock(() => scheduleAllImpl({ fromDate, mitzvot: activeMitzvot, location, settings }));
   },
 
-  async cancelAll(): Promise<void> {
+  // From outside the lock (notifications switched off, a reset) a running rebuild would still finish its
+  // plan: the lock re-runs it once and the re-run reads the new state. The rebuild's own cancel passes true.
+  async cancelAll(fromRebuild = false): Promise<void> {
+    if (!fromRebuild && this.inFlight) this.rerunQueued = true;
     await os.cancelAll();
   },
 
   async cancelForMitzvah(mitzvahId: string, date: Date = new Date()): Promise<void> {
+    // A rebuild already running may have planned this day before the mark: the lock re-runs it once with the mark.
+    if (this.inFlight) this.rerunQueued = true;
     const key = dateKey(date);
     const pending = await readScheduled();
     const matching = pending.filter(({ identifier, data }) => {
@@ -362,8 +372,13 @@ export const NotificationScheduler = {
     const block = blockForDay(date, useUserStore.getState().location);
     if (!block || !checkInSettled(block.days[0])) return;
     const prefix = `${CHECK_IN_KIND}:${block.days[0]}:`;
-    const pending = await readScheduled().catch(() => []);
-    if (pending.some(({ identifier }) => identifier.startsWith(prefix))) await this.cancelCheckIn(block.days[0]);
+    const [pending, presented] = await Promise.all([
+      readScheduled().catch(() => []),
+      os.getPresented().catch(() => []),
+    ]);
+    if ([...pending, ...presented].some(({ identifier }) => identifier.startsWith(prefix))) {
+      await this.cancelCheckIn(block.days[0]);
+    }
   },
 
   async rebuild(replace = false): Promise<void> {
@@ -373,9 +388,9 @@ export const NotificationScheduler = {
       const staleFormat = StorageService.get<number>(SCHEDULE_FORMAT_KEY) !== SCHEDULE_FORMAT;
       StorageService.delete(SCHEDULE_FORMAT_KEY);
       const androidFirst = Platform.OS === 'android' && !this.replacedInProcess;
-      const onlyDifference = !staleFormat && !forced && !androidFirst && hasNotificationPermission();
+      const onlyDifference = !staleFormat && !forced && !androidFirst && schedulingAllowed();
       forced = false;
-      if (!onlyDifference) await this.cancelAll();
+      if (!onlyDifference) await this.cancelAll(true);
       await scheduleAllImpl(currentScope(), onlyDifference);
       if (!onlyDifference) this.replacedInProcess = true;
       StorageService.set(SCHEDULE_FORMAT_KEY, SCHEDULE_FORMAT);
@@ -490,7 +505,7 @@ export function initNotificationHandlers(): () => void {
   os.setForegroundHandler(shouldSuppressForCompletion);
   os.ensureCategories().catch(() => {});
   registerNotificationActionTask().catch(() => {});
-  afterPaint(() => {
+  const launch = afterPaint(() => {
     syncNotificationPermissionStatus().catch(reportScheduleError);
     dismissCompletedPresentedNotifications().catch(() => {});
     refreshSchedulingOnForeground().catch(reportScheduleError);
@@ -559,6 +574,7 @@ export function initNotificationHandlers(): () => void {
   ];
   registerDailyRebuildTask().catch(() => {});
   teardownHandlers = () => {
+    launch.cancel();
     unsubscribers.forEach((unsubscribe) => unsubscribe());
     teardownHandlers = null;
   };

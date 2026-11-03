@@ -91,11 +91,19 @@ import { useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { DEFAULT_UI_SCALE, __setUiScaleForTests } from '@/theme/scale';
 import { CITIES } from '@/data/cities';
+import { rulesFor } from '@/data/taharahPresets';
 import type { CustomMitzvah } from '@/types/mitzvah';
 
 const MARK_DAY = new Date(2026, 9, 12, 12);
 const CREATED = new Date('2026-10-14T09:30:00Z');
 const custom = { id: 'custom_1_ab', name: 'לימוד', start: '08:00', end: '09:00' } as unknown as CustomMitzvah;
+const ACHIEVEMENTS = {
+  badges: { streak7: '2026-10-18' as const, fullWeek: '2026-10-17' as const },
+  bestStreak: { days: 8, from: '2026-10-11', to: '2026-10-19' },
+  bestWeek: { weekStart: '2026-10-11', weekEnd: '2026-10-17', done: 6, due: 6, percent: 100 },
+  mitzvahBest: { tefillin: { days: 8, from: '2026-10-11', to: '2026-10-19' } },
+  fold: { through: '2026-10-21', run: { days: 1, from: '2026-10-21', to: '2026-10-21' }, mitzvahRuns: {} },
+};
 const ENTRY = {
   textId: 'tehillim',
   nusach: null,
@@ -249,22 +257,15 @@ describe('BackupService', () => {
 
     it('carries the achievements and the archived mark counts', async () => {
       fillSource();
-      const achievements = {
-        badges: { streak7: '2026-10-18' as const, fullWeek: '2026-10-17' as const },
-        bestStreak: { days: 8, from: '2026-10-11', to: '2026-10-19' },
-        bestWeek: { weekStart: '2026-10-11', weekEnd: '2026-10-17', done: 6, due: 6, percent: 100 },
-        mitzvahBest: { tefillin: { days: 8, from: '2026-10-11', to: '2026-10-19' } },
-        fold: { through: '2026-10-21', run: { days: 1, from: '2026-10-21', to: '2026-10-21' }, mitzvahRuns: {} },
-      };
       const archivedMarks = { lastKey: '2025-01-02', total: 3, byMitzvah: { a: 2, b: 1 } };
-      useCompletionsStore.setState({ achievements, archivedMarks });
+      useCompletionsStore.setState({ achievements: ACHIEVEMENTS, archivedMarks });
       const backup = createBackup(CREATED);
       resetAll();
       expect(useCompletionsStore.getState().achievements).toBeNull();
 
       await restoreBackup(parseBackup(JSON.stringify(backup)));
 
-      expect(useCompletionsStore.getState().achievements).toEqual(achievements);
+      expect(useCompletionsStore.getState().achievements).toEqual(ACHIEVEMENTS);
       expect(useCompletionsStore.getState().archivedMarks).toEqual(archivedMarks);
     });
 
@@ -449,6 +450,48 @@ describe('BackupService', () => {
       expect(activeMitzvot.shacharit).toEqual({ enabled: true });
       expect(activeMitzvot.havdalah).toEqual({ enabled: false });
       expect(JSON.parse(storage.getString('mitzvot-store')!).state.activeMitzvot.krias_shma_al_hamita).toEqual(stamped);
+    });
+
+    it('starts family purity tracking for a file that switches it on: the role from the gender, the preset from the nusach', async () => {
+      fillSource();
+      const user = useUserStore.getState();
+      user.setGender('male');
+      user.setMaritalStatus('married');
+      user.setNusach('edot_hamizrach');
+      user.setTaharahEnabled(true);
+      const backup = createBackup(CREATED);
+      resetAll();
+      jest.spyOn(NotificationScheduler, 'rebuild').mockResolvedValue();
+
+      await restoreBackup(parseBackup(JSON.stringify(backup)));
+
+      expect(useUserStore.getState().taharahEnabled).toBe(true);
+      expect(useTaharahStore.getState().settings.role).toBe('husband');
+      expect(useTaharahStore.getState().settings.preset).toBe('sephardi_ovadia');
+      expect(useTaharahStore.getState().settings.rules).toEqual(rulesFor('sephardi_ovadia'));
+    });
+
+    it('gives a field the file predates its default, never this device’s value', async () => {
+      fillSource();
+      const backup = createBackup(CREATED);
+      for (const [name, field] of [
+        ['user-store', 'nagLevel'],
+        ['completions-store', 'achievements'],
+        ['siddur-bookmarks-store', 'lastPositions'],
+      ] as const) {
+        const file = JSON.parse(backup.stores[name]!);
+        delete file.state[field];
+        backup.stores[name] = JSON.stringify(file);
+      }
+      useUserStore.getState().setNagLevel(3);
+      useCompletionsStore.setState({ achievements: ACHIEVEMENTS });
+
+      await restoreBackup(parseBackup(JSON.stringify(backup)));
+
+      expect(useUserStore.getState().nagLevel).toBe(1);
+      expect(useCompletionsStore.getState().achievements).toBeNull();
+      expect(useSiddurBookmarksStore.getState().lastPositions).toEqual({});
+      expect(useUserStore.getState().nusach).toBe('sefard');
     });
 
     it('keeps the taharah log on the phone untouched', async () => {

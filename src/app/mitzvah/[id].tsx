@@ -111,7 +111,8 @@ export default function MitzvahDetailScreen() {
   const nagLevel = active.nagLevel ?? appNagLevel;
   const window = useMemo(
     () => (mitzvah && !addonMissing ? currentOrNextWindow(mitzvah, location, settings) : null),
-    [mitzvah, addonMissing, location, settings],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ticked re-runs the memo on purpose, it reads the clock itself
+    [mitzvah, addonMissing, location, settings, ticked],
   );
   const place = siddurPlace(location, inIsrael);
   const textNow = Boolean(mitzvah && window && hasSiddurText(mitzvah, nusach, window.date, place));
@@ -134,7 +135,8 @@ export default function MitzvahDetailScreen() {
             nagLevel,
           })
         : null,
-    [mitzvah, showNext, reminders, location, settings, completions, skipped, quietHours, nagLevel],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ticked re-runs the memo on purpose, it reads the clock itself
+    [mitzvah, showNext, reminders, location, settings, completions, skipped, quietHours, nagLevel, ticked],
   );
   // The mark of the window home shows today: offered once it has opened, and asked about once it has closed.
   const todayMark = useMemo(() => {
@@ -167,7 +169,8 @@ export default function MitzvahDetailScreen() {
         order: window ? buildTriggerTime(reminder, window, location).getTime() : index,
       }))
       .sort((a, b) => a.order - b.order || a.index - b.index);
-  }, [mitzvah, showNext, reminders, window, location, settings, completions, skipped, quietHours, nagLevel]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ticked re-runs the memo on purpose, it reads the clock itself
+  }, [mitzvah, showNext, reminders, window, location, settings, completions, skipped, quietHours, nagLevel, ticked]);
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
 

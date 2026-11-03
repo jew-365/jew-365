@@ -238,6 +238,18 @@ describe('home when its two open cards are marked', () => {
     expect(openCount()).toBe(ONE_OPEN);
   });
 
+  it.each([
+    [600, 0],
+    [800, 1],
+  ])('plays an open card only once it is inside the scroll view (scroll view %d high)', (height, opacity) => {
+    jest.useFakeTimers({ now: at(JERUSALEM, '2027-06-15T07:00') });
+    rects.set({ y: 650, height: 100 });
+    rects.setContainer({ y: 0, height });
+    renderWithTheme(<HomeScreen />);
+    act(() => jest.advanceTimersByTime(1000));
+    expect(revealOpacity(`home-now-${KS}`)).toBe(opacity);
+  });
+
   // Marking the second card while the first still closes must not cut the first short: each card holds for its own
   // stamp, and the count and My day follow each one's end.
   it.each([false, true])('two cards marked 400 ms apart each close on their own (reduced motion: %s)', (reduce) => {

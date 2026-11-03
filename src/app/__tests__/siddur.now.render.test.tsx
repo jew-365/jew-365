@@ -17,6 +17,7 @@ import { Card } from '@/components/Card';
 import { ListRow } from '@/components/ListRow';
 import { SettingsSection } from '@/components/SettingsSection';
 import { CITIES } from '@/data/cities';
+import { siddurPlace, standaloneHoursAt } from '@/data/siddur';
 import { HebcalService } from '@/services/HebcalService';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
@@ -28,6 +29,7 @@ import type { Nusach } from '@/types/mitzvah';
 import { clockOf } from '@/utils/clock';
 
 const JERUSALEM = CITIES[0];
+const NEW_YORK = CITIES.find((city) => city.cityId === 'new-york')!;
 const ONLY_DATE = [
   'nextTick',
   'queueMicrotask',
@@ -146,6 +148,31 @@ describe('the siddur tab’s "now" card', () => {
     renderWithTheme(<SiddurScreen />);
     expect(screen.queryByTestId('siddur-now')).toBeNull();
     expect(screen.queryByText('עכשיו')).toBeNull();
+  });
+
+  it('prints the end of each open window on the location’s clock, whatever the device zone', () => {
+    useUserStore.setState({ location: NEW_YORK, inIsrael: false, nusach: 'ashkenaz' });
+    const captionOf = (wallClock: string, title: string) => {
+      jest.useFakeTimers({ now: at(NEW_YORK, wallClock), doNotFake: [...ONLY_DATE] });
+      const view = renderWithTheme(<SiddurScreen />);
+      const row = within(screen.getByTestId('siddur-now'))
+        .UNSAFE_getAllByType(ListRow)
+        .find((entry) => entry.props.title === title)!;
+      const caption = row.props.caption;
+      view.unmount();
+      return caption;
+    };
+    const shkia = zmanimFor(at(NEW_YORK, '2027-06-15T12:00'), NEW_YORK).shkia;
+    expect(captionOf('2027-06-15T14:00', MINCHA)).toBe(`עד ${clockOf(shkia, NEW_YORK.tz)}`);
+    const night = at(NEW_YORK, '2027-06-15T23:00');
+    const hours = standaloneHoursAt(
+      'kriat_shema_al_hamita',
+      'ashkenaz',
+      night,
+      NEW_YORK,
+      siddurPlace(NEW_YORK, false),
+    )!;
+    expect(captionOf('2027-06-15T23:00', BEDTIME)).toBe(`עד ${clockOf(hours.end, NEW_YORK.tz)}`);
   });
 
   it('offers Selichot from midnight through the morning prayer in its season, by each nusach’s first day', () => {
@@ -272,7 +299,7 @@ describe('the Chanukah candle-lighting text in the now card', () => {
     const row = within(screen.getByTestId('siddur-now'))
       .UNSAFE_getAllByType(ListRow)
       .find((entry) => entry.props.title === CANDLES)!;
-    expect(row.props.caption).toBe(`עד ${clockOf(lighting)}`);
+    expect(row.props.caption).toBe(`עד ${clockOf(lighting, JERUSALEM.tz)}`);
   });
 
   it('leaves it out after candle lighting on Friday, though the night runs on to alot', () => {
@@ -353,6 +380,6 @@ describe('the Kiddush Levana row', () => {
     const row = within(screen.getByTestId('siddur-now'))
       .UNSAFE_getAllByType(ListRow)
       .find((entry) => entry.props.title === LEVANA)!;
-    expect(row.props.caption).toBe(`עד ${clockOf(new Date('2026-10-26T01:44:10.171Z'))}`);
+    expect(row.props.caption).toBe(`עד ${clockOf(new Date('2026-10-26T01:44:10.171Z'), JERUSALEM.tz)}`);
   });
 });

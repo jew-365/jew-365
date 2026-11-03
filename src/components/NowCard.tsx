@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react
 import Animated, {
   Extrapolation,
   interpolate,
+  ReduceMotion,
   useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
@@ -16,6 +17,7 @@ import { useI18n } from '@/i18n';
 import { BRAND, doneTone } from '@/theme/colors';
 import { useTheme } from '@/theme/ThemeProvider';
 import { scaled } from '@/theme/scale';
+import { shadowPresets } from '@/theme/shadowStyle';
 import { durations, radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { clockOf, formatRemaining, remainingParts } from '@/utils/clock';
@@ -152,9 +154,14 @@ export const NowCard = React.memo(function NowCard({
       value.value = withDelay(step.delay, withTiming(1, { duration: step.ms, easing }));
     };
     if (reduce) {
-      // Under reduced motion the card shows its done state at once and only fades as it closes.
+      // Under reduced motion the card shows its done state at once and only fades as it closes; the fade opts out of
+      // Reanimated's own reduced motion, which would skip both the wait and the fade.
       [button, fill, check, line].forEach((value) => (value.value = 1));
-      close.value = withDelay(DONE.close.delay, withTiming(1, { duration: DONE.close.ms }));
+      close.value = withDelay(
+        DONE.close.delay,
+        withTiming(1, { duration: DONE.close.ms, reduceMotion: ReduceMotion.Never }),
+        ReduceMotion.Never,
+      );
       return undefined;
     }
     run(button, DONE.button);
@@ -308,7 +315,9 @@ export const NowCard = React.memo(function NowCard({
               icon="check"
               label={t('notifications.markDone')}
               accessibilityLabel={t('state.completeAction', { name })}
-              onPress={onComplete}
+              onPress={() => {
+                if (!stamping) onComplete();
+              }}
             />
             {stamping ? (
               <Animated.View
@@ -334,8 +343,13 @@ export const NowCard = React.memo(function NowCard({
       </Card>
       {stamping && !reduce && actions ? (
         // The sparks' layer copies the actions row over the card (the card clips, this layer does not): the same
-        // insets, gap and flex shares, so its first cell sits over the "done" button in either direction.
-        <View pointerEvents="none" style={[styles.sparkRow, { top: spacing.lg + actions.y, height: actions.height }]}>
+        // insets, gap and flex shares, so its first cell sits over the "done" button in either direction. It sits one
+        // elevation step above the card, which Android would otherwise draw over it.
+        <View
+          testID="now-card-spark-row"
+          pointerEvents="none"
+          style={[styles.sparkRow, { top: actions.y, height: actions.height }]}
+        >
           <View style={[styles.primary, styles.sparkCell]}>
             {Array.from({ length: SPARK_COUNT }, (_, index) => (
               <Spark
@@ -371,7 +385,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   wash: { position: 'absolute' },
-  sparkRow: { position: 'absolute', start: spacing.lg, end: spacing.lg, flexDirection: 'row', gap: spacing.sm },
+  sparkRow: {
+    position: 'absolute',
+    start: spacing.lg,
+    end: spacing.lg,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    zIndex: 1,
+    elevation: shadowPresets.cardSoft.elevation + 1,
+  },
   sparkCell: { alignItems: 'center', justifyContent: 'center' },
   spark: { position: 'absolute', width: SPARK_SIZE, height: SPARK_SIZE },
 });

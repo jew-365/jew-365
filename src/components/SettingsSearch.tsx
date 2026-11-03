@@ -16,6 +16,7 @@ import { useChokStore } from '@/stores/useChokStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { enabledSinceOf, useMitzvotStore } from '@/stores/useMitzvotStore';
+import { selectSelichotInstalledFor, useSelichotStore } from '@/stores/useSelichotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -78,6 +79,7 @@ export function useSettingsSearch(visit: number) {
     })),
   );
   const chokInstalled = useChokStore((s) => s.installed !== null);
+  const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(user.nusach));
   const customMitzvot = useCustomMitzvotStore((s) => s.items);
   const [query, setQuery] = useState('');
   const searching = query.trim().length > 0;
@@ -102,6 +104,7 @@ export function useSettingsSearch(visit: number) {
       user.location,
       user.inIsrael,
       chokInstalled,
+      selichotInstalled,
       customMitzvot,
       appDayKey(now, user.location),
       HebcalService.hebrewDayAt(now, user.location).abs(),
@@ -154,7 +157,7 @@ export function useSettingsSearch(visit: number) {
   const instant = useMemo(
     () => (searching ? searchTiers(query, indexFor(), context) : EMPTY_TIERS),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- indexFor reads the profile and custom mitzvot; its own cache decides when to rebuild
-    [query, searching, taharah, user, chokInstalled, customMitzvot],
+    [query, searching, taharah, user, chokInstalled, selichotInstalled, customMitzvot],
   );
 
   const [deep, setDeep] = useState<{ query: string; tiers: SearchTiers } | null>(null);
@@ -207,7 +210,7 @@ export function useSettingsSearch(visit: number) {
       clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- indexFor and namer read the same profile the instant pass reads
-  }, [query, searching, taharah, user, chokInstalled, customMitzvot]);
+  }, [query, searching, taharah, user, chokInstalled, selichotInstalled, customMitzvot]);
 
   const pending = searching && deep?.query !== query;
   const tiers = useMemo(() => {

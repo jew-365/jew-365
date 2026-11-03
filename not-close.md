@@ -454,6 +454,181 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
 
 ## Bugs
 
+- [ ] Family purity: an evening ruling never cleared a missed-bedika safek
+  - **Done:** 2026-11-03. Verified: [src/app/__tests__/taharahDashboard.render.test.tsx](src/app/__tests__/taharahDashboard.render.test.tsx) (rulings at 20:00 and on the seventh evening), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #2).
+  - **What it is:** [src/app/taharah/index.tsx](src/app/taharah/index.tsx) files the ruling under `currentOnah(now).abs`, the engine's day after tzeit, not the civil Hebrew day; a ruling between tzeit and midnight left the safek open, and on clean day 7 no tevila reminder went out.
+
+- [ ] Family purity: a false "immersion deferred for a fast" line
+  - **Done:** 2026-11-03. Verified: [src/utils/__tests__/taharah.cycle.test.ts](src/utils/__tests__/taharah.cycle.test.ts) and the dashboard suite, each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #14).
+  - **What it is:** `tevilaDeferred` in [src/utils/taharah/cycle.ts](src/utils/taharah/cycle.ts) compared the chosen night with the first possible one, so every night after a missed first night read as deferred for a fast.
+
+- [ ] A backup restore did not restore the family purity role and preset
+  - **Done:** 2026-11-03. Verified: [src/services/__tests__/BackupService.test.ts](src/services/__tests__/BackupService.test.ts) and [src/stores/__tests__/taharahOptIn.test.ts](src/stores/__tests__/taharahOptIn.test.ts), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #3).
+  - **What it is:** [src/services/BackupService.ts](src/services/BackupService.ts) now calls `applyRestoredTaharahProfile()` of [src/stores/taharahOptIn.ts](src/stores/taharahOptIn.ts); before, a husband got the woman's log and a Sephardi woman the Ashkenaz preset.
+
+- [ ] A backup restore kept this phone's values for fields the file predates
+  - **Done:** 2026-11-03. Verified: [src/services/__tests__/BackupService.test.ts](src/services/__tests__/BackupService.test.ts), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #10).
+  - **What it is:** `restoreBackup()` resets every store before it rehydrates it, so a field an older file lacks takes its default (the documented rule: a restore replaces, never merges).
+
+- [ ] A backup restore spent the one-time rating ask
+  - **Done:** 2026-11-03. Verified: [src/services/__tests__/storeReview.test.ts](src/services/__tests__/storeReview.test.ts), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #6).
+  - **What it is:** [src/services/storeReview.ts](src/services/storeReview.ts) ignores the growth of the mark count while the completions store hydrates.
+
+- [ ] Editing a reminder dropped its "content in the notification"
+  - **Done:** 2026-11-03. Verified: [src/components/__tests__/ReminderEditor.render.test.tsx](src/components/__tests__/ReminderEditor.render.test.tsx) and [src/app/__tests__/mitzvah.render.test.tsx](src/app/__tests__/mitzvah.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #4).
+  - **What it is:** [src/components/ReminderEditor.tsx](src/components/ReminderEditor.tsx) carries `includeContentInBody` into the saved reminder, so the Omer blessing stays in its notification after an edit.
+
+- [ ] A mark or a switch-off during a rebuild left reminders armed
+  - **Done:** 2026-11-03. Verified: [src/services/__tests__/NotificationScheduler.test.ts](src/services/__tests__/NotificationScheduler.test.ts), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #5).
+  - **What it is:** `cancelForMitzvah()` and `cancelAll()` in [src/services/NotificationScheduler.ts](src/services/NotificationScheduler.ts) queue the lock's rerun when a rebuild is in flight, so the stale plan cannot re-arm a done mitzvah or a switched-off schedule.
+
+- [ ] Reminders were scheduled before onboarding finished
+  - **Done:** 2026-11-03. Verified: [src/services/__tests__/NotificationScheduler.test.ts](src/services/__tests__/NotificationScheduler.test.ts) and [src/app/__tests__/onboarding.cta.render.test.tsx](src/app/__tests__/onboarding.cta.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #7).
+  - **What it is:** `rebuild()` and the hourly task schedule nothing while `isOnboarded` is false (the owner's call, 2026-11-03); Android 12 and older grant the notification permission without asking.
+
+- [ ] A check-in nudge already shown stayed in the tray
+  - **Done:** 2026-11-03. Verified: [src/services/__tests__/NotificationScheduler.test.ts](src/services/__tests__/NotificationScheduler.test.ts), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #13).
+  - **What it is:** `settleCheckIn()` in [src/services/NotificationScheduler.ts](src/services/NotificationScheduler.ts) also dismisses the presented `checkin:` notifications of the settled block.
+
+- [ ] Times printed on the phone's clock, not the chosen city's
+  - **Done:** 2026-11-03. Verified: the scheduler, check-in, siddur tab, schedule, Shabbat screen and taharah suites under `pnpm test:tz`, each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #11).
+  - **What it is:** The pre-block notice and the taharah notifications ([src/services/notifications/planners/](src/services/notifications/planners); `formatClock()` removed), the check-in, home's taharah card, the siddur tab, the schedule, the Shabbat screen and the taharah dashboard pass `location.tz` to `clockOf()`.
+
+- [ ] A second tap on a closing card marked again
+  - **Done:** 2026-11-03. Verified: [src/app/__tests__/home.mark.render.test.tsx](src/app/__tests__/home.mark.render.test.tsx), [src/app/__tests__/home.lateMark.render.test.tsx](src/app/__tests__/home.lateMark.render.test.tsx) and [src/components/__tests__/NowCard.render.test.tsx](src/components/__tests__/NowCard.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #9).
+  - **What it is:** Home ignores a mark while its card is stamping and keeps a card stamped from "open now" in place for its close ([src/app/(tabs)/home.tsx](<src/app/(tabs)/home.tsx>)); [src/components/NowCard.tsx](src/components/NowCard.tsx) ignores its button while stamping.
+
+- [ ] Home's empty state counted switched-off mitzvot as done
+  - **Done:** 2026-11-03. Verified: [src/app/__tests__/home.render.test.tsx](src/app/__tests__/home.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #15).
+  - **What it is:** `doneCount` in [src/app/(tabs)/home.tsx](<src/app/(tabs)/home.tsx>) counts only the marks of mitzvot tracked today, so "all done" no longer shows while windows are still ahead.
+
+- [ ] The mitzvah screen's next reminder froze
+  - **Done:** 2026-11-03. Verified: [src/app/__tests__/mitzvah.render.test.tsx](src/app/__tests__/mitzvah.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #16).
+  - **What it is:** The header line, each row's next time and the window in [src/app/mitzvah/[id].tsx](<src/app/mitzvah/[id].tsx>) move on with the `useNow` tick.
+
+- [ ] The day view counted time left from the window's end alone
+  - **Done:** 2026-11-03. Verified: [src/app/__tests__/day.render.test.tsx](src/app/__tests__/day.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #17).
+  - **What it is:** [src/app/day/[date].tsx](<src/app/day/[date].tsx>) ticks with `useNow()`, shows when a window opens before it opens and shows an ended unmarked window as missed.
+
+- [ ] The Shabbat screen's Hebrew date turned up to 40 minutes late
+  - **Done:** 2026-11-03. Verified: [src/app/__tests__/rootLayout.render.test.tsx](src/app/__tests__/rootLayout.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #18).
+  - **What it is:** The root layout ([src/app/_layout.tsx](src/app/_layout.tsx)) also wakes at the day's shkia while a block is open.
+
+- [ ] The search missed Selichot downloaded in place
+  - **Done:** 2026-11-03. Verified: [src/app/__tests__/settings.search.render.test.tsx](src/app/__tests__/settings.search.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #19).
+  - **What it is:** [src/components/SettingsSearch.tsx](src/components/SettingsSearch.tsx) keys its index on the Selichot install too.
+
+- [ ] Auto-scroll kept running behind the Chok LeYisrael sheets
+  - **Done:** 2026-11-03. Verified: [src/app/__tests__/chokReader.render.test.tsx](src/app/__tests__/chokReader.render.test.tsx) and [src/components/__tests__/ChokWeekControls.render.test.tsx](src/components/__tests__/ChokWeekControls.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #20).
+  - **What it is:** The reader holds auto-scroll while the double-week question or the parasha picker is open (`onPickingChange` of [src/components/ChokWeekControls.tsx](src/components/ChokWeekControls.tsx)).
+
+- [ ] The compass missed a permission granted in the phone's settings
+  - **Done:** 2026-11-03. Verified: [src/app/__tests__/compass.render.test.tsx](src/app/__tests__/compass.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #21).
+  - **What it is:** [src/app/compass.tsx](src/app/compass.tsx) reads the location permission again on every return to the app.
+
+- [ ] The schedule's week view printed holiday names with nikud, in Hebrew in the English UI
+  - **Done:** 2026-11-03. Verified: [src/app/__tests__/schedule.render.test.tsx](src/app/__tests__/schedule.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #22).
+  - **What it is:** [src/app/schedule.tsx](src/app/schedule.tsx) asks hebcal in the UI's calendar locale.
+
+- [ ] Settings kept an old GPS status line
+  - **Done:** 2026-11-03. Verified: [src/app/__tests__/settings.sections.render.test.tsx](src/app/__tests__/settings.sections.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #23).
+  - **What it is:** [src/app/(tabs)/settings.tsx](<src/app/(tabs)/settings.tsx>) clears the locate result once the location changes.
+
+- [ ] The nagging slider changed the level on a scroll
+  - **Done:** 2026-11-03. Verified: [src/app/__tests__/settings.nagLevel.render.test.tsx](src/app/__tests__/settings.nagLevel.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #8).
+  - **What it is:** [src/components/NagLevelPicker.tsx](src/components/NagLevelPicker.tsx) changes the level only on a tap or a horizontal drag (the owner's call, 2026-11-03).
+
+- [ ] A future check date blocked add-on update checks
+  - **Done:** 2026-11-03. Verified: [src/services/__tests__/addonContent.test.ts](src/services/__tests__/addonContent.test.ts), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #12).
+  - **What it is:** The once-a-day gate in [src/services/addons/addonContent.ts](src/services/addons/addonContent.ts) treats a check date after now as due, for Chok LeYisrael and Selichot alike.
+
+- [ ] Under reduced motion a marked card vanished at once
+  - **Done:** 2026-11-03. Verified: [src/components/__tests__/NowCard.reducedMotion.render.test.tsx](src/components/__tests__/NowCard.reducedMotion.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #24).
+  - **What it is:** [src/components/NowCard.tsx](src/components/NowCard.tsx) keeps the done state visible for its second before the fade (`ReduceMotion.Never` on the delayed fade).
+
+- [ ] Entrances played behind the tab bar
+  - **Done:** 2026-11-03. Verified: [src/hooks/__tests__/useInView.render.test.tsx](src/hooks/__tests__/useInView.render.test.tsx) and [src/app/__tests__/history.reveal.render.test.tsx](src/app/__tests__/history.reveal.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #25).
+  - **What it is:** `useInView()` in [src/hooks/useInView.ts](src/hooks/useInView.ts) measures against the scroll container's bounds, not the window, on home, history and the check-in. History's provider now wraps its scroll view alone: the first version left the badge sheet's bar inside it, measured against the scroll view and never filled (caught before release by the case "fills the bar of a badge sheet that opens below the scroll view").
+
+- [ ] The done sparks drew behind the card on Android, 16 pt low
+  - **Done:** 2026-11-03. Verified: [src/components/__tests__/NowCard.render.test.tsx](src/components/__tests__/NowCard.render.test.tsx), each new case failing on the old code; an independent verifier passed the group.
+  - **Status:** Version: OTA, the next production update `1.0.21-12` · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Flag:** `OTA`.
+  - **Found:** the bug hunt of 2026-11-03 (finding #26).
+  - **What it is:** [src/components/NowCard.tsx](src/components/NowCard.tsx) lifts the sparks layer above the card's elevation and drops the double padding from its top.
+
 - [ ] The zmanim follow a depression-angle method, not the Ohr HaChaim luach
   - **Found:** the owner's report, 2026-11-02, in chat ("יש באג בזמנים ההלכתיים"); measured the same day in the cloud session ([.claude/specs/ohr-hachaim-zmanim.md](.claude/specs/ohr-hachaim-zmanim.md), section 4). The owner's own case (which zman, date and city, and the luach's value) is unknown: Q26.
   - **What it is:** [src/services/ZmanimService.ts](src/services/ZmanimService.ts) computes alot at 16.1°, misheyakir at 11.5°, tzeit at 7.083°, the MGA day in 72 fixed minutes, sunrise and sunset at sea level, the exit at tzeit + 10 and candles 18 minutes before sunset outside Jerusalem; the luach computes in seasonal minutes from the city's height, with the exit 30 minutes after sunset. Measured: Tel Aviv, Saturday 2026-10-03, the app's exit 19:03 against the luach's printed 18:55; Jerusalem 2026-11-02, tzeit 17:19 against 17:06, misheyakir 05:04 against 04:51, plag 15:41 against 15:57.

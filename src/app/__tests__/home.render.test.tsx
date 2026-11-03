@@ -50,6 +50,7 @@ import { useChokStore } from '@/stores/useChokStore';
 import { useCompletionsStore, dateKey } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
+import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { installChokFixture } from '@/testing/chok';
 import { HIDDEN_INTL_NAMES, hideIntlDateNames } from '@/testing/intl';
@@ -58,8 +59,11 @@ import { at, zmanimFor } from '@/testing/zmanim';
 import type { CustomMitzvah } from '@/types/mitzvah';
 import { chokReaderPortion } from '@/utils/chok';
 import { clockOf } from '@/utils/clock';
+import { locationNoon } from '@/utils/locationDay';
+import { civilHebrewDayAt } from '@/utils/taharah/onot';
 
 const JERUSALEM = CITIES[0];
+const NEW_YORK = CITIES.find((c) => c.cityId === 'new-york')!;
 const ONLY_DATE = [
   'nextTick',
   'queueMicrotask',
@@ -206,6 +210,22 @@ describe('home between midnight and alot', () => {
     expect(summary.getAllByText('1')[0]).toBeOnTheScreen();
     expect(summary.getByText('מתוך 2')).toBeOnTheScreen();
     expect(screen.queryByText(/^פוספס · /)).toBeNull();
+  });
+
+  it('reads all done only when every tracked window is marked, whatever a switched-off mitzvah holds', () => {
+    enableOnly('shacharit', 'maariv');
+    useCompletionsStore.setState({
+      completions: {
+        '2027-06-14': {
+          shacharit: at(JERUSALEM, '2027-06-14T08:00').getTime(),
+          mincha: at(JERUSALEM, '2027-06-14T13:30').getTime(),
+        },
+      },
+    });
+    renderAt('2027-06-14T14:00');
+    expect(screen.getByText('אין מצווה פתוחה ברגע זה')).toBeOnTheScreen();
+    expect(screen.queryByText('כל המצוות של היום בוצעו')).toBeNull();
+    expect(within(dayCard('mincha')).getByText(/^בוצע ב-/)).toBeOnTheScreen();
   });
 
   it("files an undo under the window's day", () => {
@@ -509,5 +529,46 @@ describe('home between midnight and alot', () => {
       view.unmount();
       expect(mockListeners).toEqual([]);
     });
+  });
+});
+
+describe("home's taharah card", () => {
+  beforeEach(() => {
+    mockFocused = true;
+    mockTabIndex = 0;
+    useUserStore.getState().reset();
+    useUserStore.setState({
+      language: 'he',
+      location: NEW_YORK,
+      inIsrael: false,
+      nusach: 'ashkenaz',
+      isOnboarded: true,
+      locationStatus: 'ready',
+      locationSource: 'manual',
+      notificationsEnabled: true,
+      notificationPermission: 'granted',
+      gender: 'female',
+      maritalStatus: 'married',
+      taharahEnabled: true,
+    });
+    useCompletionsStore.getState().reset();
+    useCustomMitzvotStore.getState().reset();
+    useTaharahStore.getState().reset();
+    useTaharahStore.setState({ lockEnabled: false });
+    enableOnly();
+  });
+
+  afterEach(() => {
+    act(() => useTaharahStore.getState().reset());
+    jest.useRealTimers();
+  });
+
+  it("prints the task's end on the location's clock", () => {
+    jest.useFakeTimers({ now: at(NEW_YORK, '2026-10-28T05:00'), doNotFake: [...ONLY_DATE] });
+    const hefsekDay = civilHebrewDayAt(locationNoon(new Date(2026, 9, 28), NEW_YORK), NEW_YORK).abs();
+    useTaharahStore.getState().addEvent({ type: 'onset', onah: { abs: hefsekDay - 4, kind: 'day' } });
+    renderWithTheme(<HomeScreen />);
+    const shkia = zmanimFor(at(NEW_YORK, '2026-10-28T12:00'), NEW_YORK).shkia;
+    expect(screen.getByText(new RegExp(`עד ${clockOf(shkia, NEW_YORK.tz)}$`))).toBeOnTheScreen();
   });
 });

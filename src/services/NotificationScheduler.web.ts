@@ -62,7 +62,7 @@ export const NotificationScheduler = {
     await task();
   },
   async scheduleAll(): Promise<void> {},
-  async cancelAll(): Promise<void> {},
+  async cancelAll(_fromRebuild?: boolean): Promise<void> {},
   async cancelForMitzvah(): Promise<void> {},
   async cancelCheckIn(_blockId?: string): Promise<void> {},
   async settleCheckIn(_date?: Date): Promise<void> {},

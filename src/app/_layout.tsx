@@ -6,6 +6,7 @@ import { AppState, I18nManager, View, ActivityIndicator, Platform, Pressable, St
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Sentry from '@sentry/react-native';
+import { DateTime } from 'luxon';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 // eslint-disable-next-line import/no-duplicates
@@ -46,6 +47,7 @@ import {
 import { setLocale, t } from '@/i18n';
 import { StorageService } from '@/services/StorageService';
 import { HebcalService } from '@/services/HebcalService';
+import { ZmanimService } from '@/services/ZmanimService';
 import { QuietBlockContext, ShabbatScreen } from '@/components/ShabbatScreen';
 import { UpdateBanner } from '@/components/UpdateBanner';
 import { ChokEnablePrompt } from '@/components/ChokEnablePrompt';
@@ -96,20 +98,32 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const QUIET_RECHECK_MS = 60 * 60_000;
 
-// The Shabbat / Yom Tov block the app is inside right now, re-read the moment candle lighting or
-// tzeit passes while the app is open, and on every return to the foreground — JS timers do not run
-// while the app is in the background. Before onboarding the location is only a default guess, so
-// it cannot decide that the user is inside Shabbat.
+function nextShkia(now: Date, location: Location): Date | null {
+  const noon = DateTime.fromJSDate(now, { zone: location.tz }).startOf('day').set({ hour: 12 });
+  for (const days of [0, 1]) {
+    const shkia = ZmanimService.getZmanim(noon.plus({ days }).toJSDate(), location)?.shkia;
+    if (shkia && shkia.getTime() > now.getTime()) return shkia;
+  }
+  return null;
+}
+
+// The Shabbat / Yom Tov block the app is inside right now, re-read the moment candle lighting, tzeit or,
+// inside a block, shkia (where the Hebrew date under the Shabbat screen's title turns) passes while the
+// app is open, and on every return to the foreground — JS timers do not run while the app is in the
+// background. Before onboarding the location is only a default guess, so it cannot decide that the user
+// is inside Shabbat.
 function useCurrentQuietBlock(location: Location, enabled: boolean): { block: HolyBlock | null; now: number } {
   const [now, setNow] = useState(() => Date.now());
   const block = useMemo(() => (enabled ? quietBlockAt(new Date(now), location) : null), [now, location, enabled]);
 
   useEffect(() => {
     const boundary = nextQuietBoundary(new Date(now), location);
-    const untilBoundary = boundary ? boundary.getTime() - Date.now() + 1000 : QUIET_RECHECK_MS;
-    const timer = setTimeout(() => setNow(Date.now()), Math.max(1000, Math.min(untilBoundary, QUIET_RECHECK_MS)));
+    const shkia = block ? nextShkia(new Date(now), location) : null;
+    const untilWake = (wake: Date | null) => (wake ? wake.getTime() - Date.now() + 1000 : QUIET_RECHECK_MS);
+    const delay = Math.min(untilWake(boundary), untilWake(shkia), QUIET_RECHECK_MS);
+    const timer = setTimeout(() => setNow(Date.now()), Math.max(1000, delay));
     return () => clearTimeout(timer);
-  }, [now, location]);
+  }, [now, location, block]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
@@ -256,7 +270,8 @@ function RootInner() {
         {isOnboarded ? <ChokEnablePrompt /> : null}
         <ShabbatScreen
           block={quietBlock}
-          subtitle={quietBlock ? HebcalService.getHebrewDateAt(new Date(), location).hebrewDateStr : undefined}
+          tz={location.tz}
+          subtitle={quietBlock ? HebcalService.getHebrewDateAt(new Date(now), location).hebrewDateStr : undefined}
         />
       </View>
     </QuietBlockContext.Provider>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   GestureResponderEvent,
   LayoutChangeEvent,
@@ -38,6 +38,8 @@ const THUMB_RING = scaled(4);
 const NAME_MIN_WIDTH = scaled(56);
 const LEGEND_DOT = scaled(10);
 const LAST = NAG_LEVEL_IDS.length - 1;
+// A finger-distance gesture threshold, not a drawn size, so it stays unscaled.
+const DRAG_SLOP = 8;
 
 const share = (level: NagLevel) => NAG_LEVEL_IDS.indexOf(level) / LAST;
 
@@ -50,16 +52,19 @@ function along(fraction: number, mirrored: boolean, offset = 0): ViewStyle {
   return offset ? { ...style, transform: [{ translateX: (mirrored ? 1 : -1) * offset }] } : style;
 }
 
+type Gesture = { x: number; y: number; mode: 'pending' | 'drag' | 'scroll' };
+
 type PickerProps = { level: NagLevel; onChange: (level: NagLevel) => void; style?: StyleProp<ViewStyle> };
 
 // The app's nagging level (the owner's pick of 2026-11-02, board ג of the nagging study): the field label with
-// the chosen level's name, a four-stop slider (a tap or a drag picks the nearest stop), the names under it as
-// buttons too, and the chosen level's description.
+// the chosen level's name, a four-stop slider (a tap, when the finger lifts, or a horizontal drag picks the nearest
+// stop; a touch-down or a vertical scroll changes nothing), the names under it as buttons too, and the chosen level's description.
 export function NagLevelPicker({ level, onChange, style }: PickerProps) {
   const { colors } = useTheme();
   const { t } = useI18n();
   const mirrored = useRowMirrored();
   const [width, setWidth] = useState(0);
+  const gesture = useRef<Gesture | null>(null);
   const name = (l: NagLevel) => t(`nag.level.${l}.name`);
   const title = (l: NagLevel) => t('nag.level.title', { name: name(l), level: l });
 
@@ -69,6 +74,25 @@ export function NagLevelPicker({ level, onChange, style }: PickerProps) {
     const physical = Math.min(1, Math.max(0, (event.nativeEvent.locationX - INSET) / span));
     const next = NAG_LEVEL_IDS[Math.round((mirrored ? 1 - physical : physical) * LAST)];
     if (next !== level) onChange(next);
+  };
+  const startGesture = (event: GestureResponderEvent) => {
+    gesture.current = { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY, mode: 'pending' };
+  };
+  const moveGesture = (event: GestureResponderEvent) => {
+    const current = gesture.current;
+    if (!current || current.mode === 'scroll') return;
+    if (current.mode === 'pending') {
+      const dx = Math.abs(event.nativeEvent.pageX - current.x);
+      const dy = Math.abs(event.nativeEvent.pageY - current.y);
+      if (dx <= DRAG_SLOP && dy <= DRAG_SLOP) return;
+      current.mode = dx > dy ? 'drag' : 'scroll';
+    }
+    if (current.mode === 'drag') pickAt(event);
+  };
+  const endGesture = (event: GestureResponderEvent) => {
+    const mode = gesture.current?.mode;
+    gesture.current = null;
+    if (mode === 'pending' || mode === 'drag') pickAt(event);
   };
   const step = (delta: number) => {
     const next = NAG_LEVEL_IDS[NAG_LEVEL_IDS.indexOf(level) + delta];
@@ -89,8 +113,12 @@ export function NagLevelPicker({ level, onChange, style }: PickerProps) {
         onLayout={(event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width)}
         onStartShouldSetResponder={() => true}
         onMoveShouldSetResponder={() => true}
-        onResponderGrant={pickAt}
-        onResponderMove={pickAt}
+        onResponderGrant={startGesture}
+        onResponderMove={moveGesture}
+        onResponderRelease={endGesture}
+        onResponderTerminate={() => {
+          gesture.current = null;
+        }}
         accessible
         accessibilityRole="adjustable"
         accessibilityLabel={t('settings.nagLevel')}

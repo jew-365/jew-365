@@ -1,13 +1,23 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
-import { Dimensions, type View } from 'react-native';
+import { Dimensions, type ScrollView, type View } from 'react-native';
 import { useReduceMotion } from '@/hooks/useMotion';
 import { motion } from '@/theme/tokens';
 
-export type ViewportBus = { tracked: boolean; subscribe: (listener: () => void) => () => void };
+export type ViewportBounds = { top: number; height: number };
+export type ViewportBus = {
+  tracked: boolean;
+  subscribe: (listener: () => void) => () => void;
+  measure: (callback: (bounds: ViewportBounds) => void) => void;
+};
 export type InViewOptions = { share?: number; resetKey?: unknown; enabled?: boolean };
 export type InView = { ref: RefObject<View | null>; inView: boolean; onLayout: (() => void) | undefined };
 
-const UNTRACKED: ViewportBus = { tracked: false, subscribe: () => () => {} };
+const windowBounds = (): ViewportBounds => ({ top: 0, height: Dimensions.get('window').height });
+const UNTRACKED: ViewportBus = {
+  tracked: false,
+  subscribe: () => () => {},
+  measure: (callback) => callback(windowBounds()),
+};
 export const ViewportContext = createContext<ViewportBus>(UNTRACKED);
 
 export function isInViewport(top: number, height: number, viewport: number, share: number): boolean {
@@ -20,7 +30,8 @@ export function isOutOfViewport(top: number, height: number, viewport: number): 
   return height <= 0 || top >= viewport || top + height <= 0;
 }
 
-export function useViewport(): { bus: ViewportBus; notify: () => void } {
+export function useViewport(): { bus: ViewportBus; notify: () => void; ref: RefObject<ScrollView | null> } {
+  const container = useRef<ScrollView>(null);
   const listeners = useRef(new Set<() => void>());
   const last = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,10 +61,18 @@ export function useViewport(): { bus: ViewportBus; notify: () => void } {
           listeners.current.delete(listener);
         };
       },
+      measure: (callback) => {
+        const node = container.current as unknown as View | null;
+        if (!node) {
+          callback(windowBounds());
+          return;
+        }
+        node.measureInWindow((_x, y, _width, height) => callback(height > 0 ? { top: y, height } : windowBounds()));
+      },
     }),
     [],
   );
-  return { bus, notify };
+  return { bus, notify, ref: container };
 }
 
 export function useInView({ share = motion.visibleShare, resetKey = 0, enabled = true }: InViewOptions = {}): InView {
@@ -67,19 +86,23 @@ export function useInView({ share = motion.visibleShare, resetKey = 0, enabled =
   const inView = enabled && (free || (seen !== null && seen.visible && Object.is(seen.key, resetKey)));
   const check = useCallback(() => {
     const key = keyRef.current;
-    ref.current?.measureInWindow((_x, y, _width, height) => {
-      const viewport = Dimensions.get('window').height;
-      const visible = isInViewport(y, height, viewport, share)
-        ? true
-        : isOutOfViewport(y, height, viewport)
-          ? false
-          : null;
-      if (visible === null) return;
-      setSeen((previous) =>
-        previous !== null && previous.visible === visible && Object.is(previous.key, key) ? previous : { key, visible },
-      );
+    bus.measure((bounds) => {
+      ref.current?.measureInWindow((_x, y, _width, height) => {
+        const top = y - bounds.top;
+        const visible = isInViewport(top, height, bounds.height, share)
+          ? true
+          : isOutOfViewport(top, height, bounds.height)
+            ? false
+            : null;
+        if (visible === null) return;
+        setSeen((previous) =>
+          previous !== null && previous.visible === visible && Object.is(previous.key, key)
+            ? previous
+            : { key, visible },
+        );
+      });
     });
-  }, [share]);
+  }, [share, bus]);
   const watching = enabled && !free;
   useEffect(() => {
     if (!watching) return;

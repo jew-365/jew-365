@@ -20,6 +20,7 @@ import { buildDayTimeline, windowStillOpen } from '@/utils/buildDayTimeline';
 import { latestCheckIn, pendingCheckInIds } from '@/utils/checkIn';
 import { clockOf } from '@/utils/clock';
 import { appDay } from '@/utils/locationDay';
+import { calendarLocale } from '@/utils/weeklyReport';
 import { formatDate, useI18n } from '@/i18n';
 import { afterPaint } from '@/utils/afterPaint';
 
@@ -87,7 +88,7 @@ export default function ScheduleScreen() {
         enabledSince,
       ).filter((item) => item.type === 'mitzvah');
       const count = items.length;
-      const holidays = HebcalService.getHolidays(day.toJSDate(), location);
+      const holidays = HebcalService.getHolidays(day.toJSDate(), location, calendarLocale(language));
       return { day, count, holidays, items: items.slice(0, 4) };
     });
   }, [view, enabled, completions, cursor, location, settings, language, t, enabledSince]);
@@ -218,7 +219,7 @@ export default function ScheduleScreen() {
                   >
                     {highlight ? <View style={[styles.nowLine, { backgroundColor: colors.urgent }]} /> : null}
                     <Text style={[typography.small, styles.timeCol, { color: colors.textMuted }]}>
-                      {clockOf(item.time)}
+                      {clockOf(item.time, location.tz)}
                     </Text>
                     <View style={styles.dotCol}>
                       <View

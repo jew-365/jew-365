@@ -208,6 +208,7 @@ describe('NotificationScheduler', () => {
     mockRegisterNotificationTask.mockClear();
     useCompletionsStore.setState({ completions: {}, skipped: {}, checkIns: {}, archivedDays: [] });
     useUserStore.getState().reset();
+    useUserStore.getState().setOnboarded(true);
     useUserStore.getState().setNotificationPermission('granted');
     useUserStore.getState().setLocation(CITIES[0]);
     setupEnabled([]);
@@ -441,6 +442,14 @@ describe('NotificationScheduler', () => {
 
     useSelichotStore.getState().reset();
     rebuild.mockRestore();
+  });
+
+  it('6.4e the teardown also cancels the launch work still waiting for the first paint', async () => {
+    mockGetPresented.mockClear();
+    const teardown = initNotificationHandlers();
+    teardown();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(mockGetPresented).not.toHaveBeenCalled();
   });
 
   it('reports the permission state from status and canAskAgain', async () => {
@@ -1004,7 +1013,7 @@ describe('NotificationScheduler', () => {
       expect(triggerOf(notice)).toBe(block.start.getTime() - 60 * 60_000);
       expect(notice.identifier).toBe(`blockNotice:${block.days[0]}`);
       expect(notice.content.title).toBe(t('holyBlock.title.shabbat'));
-      const clock = (instant: Date) => DateTime.fromJSDate(instant).toFormat('HH:mm');
+      const clock = (instant: Date) => DateTime.fromJSDate(instant, { zone: jerusalem.tz }).toFormat('HH:mm');
       expect(notice.content.body).toBe(
         t('holyBlock.notice.body', {
           start: clock(block.start),
@@ -1015,6 +1024,22 @@ describe('NotificationScheduler', () => {
       // Not a mitzvah reminder: no category, so no "done" button can mark a fake mitzvah.
       expect(notice.content.categoryIdentifier).toBeUndefined();
       expect(notice.content.data.mitzvahId).toBeUndefined();
+    });
+
+    it("prints the lighting and exit times on the location's clock, not the device's", async () => {
+      const newYork = CITIES.find((c) => c.nameEn === 'New York')!;
+      useUserStore.getState().setLocation(newYork);
+      await scheduleAt(at(newYork, '2026-11-13T06:00'));
+
+      const block = HebcalService.holyBlockOn(at(newYork, '2026-11-14T12:00'), newYork)!;
+      const clock = (instant: Date) => DateTime.fromJSDate(instant, { zone: newYork.tz }).toFormat('HH:mm');
+      expect(noticesOf()[0].content.body).toBe(
+        t('holyBlock.notice.body', {
+          start: clock(block.start),
+          exit: t('holyBlock.exit.shabbat'),
+          end: clock(block.end),
+        }),
+      );
     });
 
     it("names the Omer counts that fall on the block's nights", async () => {
@@ -1540,6 +1565,75 @@ describe('NotificationScheduler', () => {
     expect(mockState.pending.some((p) => p.identifier.startsWith('shacharit__'))).toBe(true);
   });
 
+  it('6.11c a mark made while a rebuild is scheduling leaves none of that day’s reminders pending', async () => {
+    setupEnabled(['shacharit', 'mincha']);
+    const record = mockSchedule.getMockImplementation()!;
+    let marking: Promise<void> = Promise.resolve();
+    mockSchedule.mockImplementationOnce(async (input) => {
+      const id = await record(input);
+      useCompletionsStore.setState({ completions: { '2026-11-11': { mincha: Date.now() } } });
+      marking = NotificationScheduler.cancelForMitzvah('mincha', new Date(2026, 10, 11));
+      return id;
+    });
+
+    await NotificationScheduler.rebuild();
+    await marking;
+    while (NotificationScheduler.inFlight) await NotificationScheduler.inFlight;
+
+    expect(mockSchedule.mock.calls.some(([input]) => input.identifier.startsWith('mincha__2026-11-11__'))).toBe(true);
+    expect(idsFor('mincha', '2026-11-11')).toEqual([]);
+    expect(idsFor('mincha', '2026-11-12').length).toBeGreaterThan(0);
+  });
+
+  it('6.11d switching notifications off while a rebuild is scheduling leaves nothing pending', async () => {
+    setupEnabled(['shacharit', 'mincha']);
+    const record = mockSchedule.getMockImplementation()!;
+    let cancelling: Promise<void> = Promise.resolve();
+    mockSchedule.mockImplementationOnce(async (input) => {
+      const id = await record(input);
+      useUserStore.getState().setNotificationsEnabled(false);
+      cancelling = NotificationScheduler.cancelAll();
+      return id;
+    });
+
+    await NotificationScheduler.rebuild();
+    await cancelling;
+    while (NotificationScheduler.inFlight) await NotificationScheduler.inFlight;
+
+    expect(mockSchedule.mock.calls.length).toBeGreaterThan(1);
+    expect(mockState.pending.map((p) => p.identifier)).toEqual([]);
+  });
+
+  it('6.11e schedules nothing before onboarding is finished: a rebuild, the permission sync and the hourly task only clear', async () => {
+    useUserStore.getState().setOnboarded(false);
+    setupEnabled(['shacharit', 'mincha']);
+    mockState.pending = [
+      { identifier: 'shacharit__2026-11-11__0', content: { data: { mitzvahId: 'shacharit', dateKey: '2026-11-11' } } },
+    ];
+
+    await NotificationScheduler.rebuild();
+    expect(mockState.pending).toEqual([]);
+    expect(mockSchedule).not.toHaveBeenCalled();
+
+    useUserStore.getState().setNotificationPermission('denied');
+    await syncNotificationPermissionStatus();
+    while (NotificationScheduler.inFlight) await NotificationScheduler.inFlight;
+    expect(useUserStore.getState().notificationPermission).toBe('granted');
+    expect(mockSchedule).not.toHaveBeenCalled();
+
+    StorageService.delete(LAST_REBUILD_KEY);
+    const tm = require('expo-task-manager');
+    const task = tm.defineTask.mock.calls.find(([name]: [string]) => name === DAILY_REBUILD_TASK)?.[1];
+    await expect(task!()).resolves.toBe(1);
+    expect(StorageService.get(LAST_REBUILD_KEY)).toBe(dateKey(new Date()));
+    expect(mockSchedule).not.toHaveBeenCalled();
+    expect(mockState.pending).toEqual([]);
+
+    useUserStore.getState().setOnboarded(true);
+    await NotificationScheduler.rebuild();
+    expect(mockState.pending.some((p) => p.identifier.startsWith('mincha__'))).toBe(true);
+  });
+
   describe('check-in reminders', () => {
     const jerusalem = CITIES[0];
     // Lets the store's queued side effects run, then waits out the rebuild they started.
@@ -1597,6 +1691,25 @@ describe('NotificationScheduler', () => {
       expect(shouldSuppressForCompletion({ kind: 'checkin', blockId: '2026-11-14' }, 'checkin:2026-11-14:1')).toBe(
         true,
       );
+    });
+
+    it('a mark that settles the check-in clears a nudge already in the tray when none is left pending', async () => {
+      setupEnabled(['shacharit']);
+      jest.setSystemTime(at(jerusalem, '2026-11-14T20:00'));
+      mockState.presented = [
+        {
+          request: {
+            identifier: 'checkin:2026-11-14:0',
+            content: { data: { kind: 'checkin', blockId: '2026-11-14' } },
+          },
+        },
+      ];
+
+      useCompletionsStore.setState({ completions: { '2026-11-14': { shacharit: 1 } } });
+      await NotificationScheduler.settleCheckIn(new Date(2026, 10, 14));
+      await settled();
+
+      expect(mockDismiss).toHaveBeenCalledWith('checkin:2026-11-14:0');
     });
 
     it('a mitzvah skipped on the erev is settled, not waiting', async () => {

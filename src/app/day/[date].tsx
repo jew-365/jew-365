@@ -9,13 +9,14 @@ import { MitzvahCard } from '@/components/MitzvahCard';
 import { CounterPill, HeaderPill, ScreenHeader } from '@/components/ScreenHeader';
 import { useDayModel } from '@/hooks/useDayModel';
 import { useLateMarkDialog } from '@/hooks/useLateMarkDialog';
+import { useNow } from '@/hooks/useNow';
 import { Completions, RETENTION_DAYS, dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { buildDayTimeline, windowStillOpen } from '@/utils/buildDayTimeline';
 import { latestCheckIn, pendingCheckInIds } from '@/utils/checkIn';
-import { clockRange, formatRemaining } from '@/utils/clock';
+import { clockOf, clockRange, formatRemaining } from '@/utils/clock';
 import { appDay } from '@/utils/locationDay';
 import { formatDate, useI18n } from '@/i18n';
 
@@ -30,13 +31,14 @@ export default function DayRoute() {
   const completions = useCompletionsStore((s) => s.completions);
   const late = useCompletionsStore((s) => s.late);
   const lateMark = useLateMarkDialog();
+  const now = useNow();
 
   const routeDate = typeof params.date === 'string' ? params.date : '';
   const [dateParam, setDateParam] = useState(routeDate);
   useEffect(() => setDateParam(routeDate), [routeDate]);
   const parsed = useMemo(() => DateTime.fromISO(dateParam).startOf('day'), [dateParam]);
   const valid = Boolean(dateParam.match(/^\d{4}-\d{2}-\d{2}$/)) && parsed.isValid;
-  const today = DateTime.fromJSDate(appDay(new Date(), location)).startOf('day');
+  const today = DateTime.fromJSDate(appDay(now, location)).startOf('day');
   const oldest = today.minus({ days: RETENTION_DAYS });
   const isToday = valid && parsed.hasSame(today, 'day');
   const isPast = valid && parsed < today;
@@ -52,7 +54,8 @@ export default function DayRoute() {
             (item) => item.type === 'mitzvah',
           )
         : [],
-    [valid, date, enabled, displayCompletions, location, settings, language, t, enabledSince],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- now re-runs the memo on purpose: buildDayTimeline reads the clock for each card's urgency
+    [valid, date, enabled, displayCompletions, location, settings, language, t, enabledSince, now],
   );
 
   const checkIns = useCompletionsStore((s) => s.checkIns);
@@ -117,33 +120,43 @@ export default function DayRoute() {
             <Banner tone="info" text={bannerText} />
           ) : null}
           {items.map((item) => {
-            const totalMs = item.windowEnd ? item.windowEnd.getTime() - item.time.getTime() : 1;
-            const remainingMs = item.windowEnd ? item.windowEnd.getTime() - Date.now() : 0;
-            const pct = totalMs > 0 ? Math.max(0, Math.min(1, remainingMs / totalMs)) : 0;
-            const timeRange = clockRange(item.time, item.windowEnd ?? item.time, t, location.tz, date);
+            const start = item.time.getTime();
+            const end = item.windowEnd?.getTime() ?? start;
             const waiting = !item.done && Boolean(item.mitzvahId && pending.has(item.mitzvahId));
-            const missed = isPast && !item.done && !waiting && !windowStillOpen(item);
+            const skippedToday =
+              isToday && !item.done && Boolean(item.mitzvahId && skipped[dateKey(date)]?.[item.mitzvahId]);
+            const missed =
+              (isPast || isToday) && !item.done && !waiting && !skippedToday && !windowStillOpen(item, now);
+            const upcoming = isToday && !item.done && !waiting && !skippedToday && start > now.getTime();
+            const open = isToday && !item.done && !waiting && !skippedToday && !missed && !upcoming;
+            const remainingMs = end - now.getTime();
+            const pct = end > start ? Math.max(0, Math.min(1, remainingMs / (end - start))) : 0;
+            const timeRange = clockRange(item.time, item.windowEnd ?? item.time, t, location.tz, date);
             const statusText = waiting
               ? t('checkin.pending')
               : missed
                 ? t('day.missed')
-                : isFuture
-                  ? timeRange
-                  : undefined;
+                : skippedToday
+                  ? t('state.skipped')
+                  : upcoming
+                    ? t('home.day.status.upcoming', { time: clockOf(item.time, location.tz) })
+                    : isFuture
+                      ? timeRange
+                      : undefined;
             return (
               <MitzvahCard
                 key={item.id}
                 icon={iconFor(enabled.find((mitzvah) => mitzvah.id === item.mitzvahId)?.icon ?? 'custom')}
                 name={item.name}
-                timeLeft={missed ? t('day.missed') : isFuture ? timeRange : formatRemaining(remainingMs, t)}
-                pct={missed ? 0 : pct}
-                urgent={missed || (isToday && item.urgent)}
+                timeLeft={open ? formatRemaining(remainingMs, t) : ''}
+                pct={pct}
+                urgent={missed || (open && Boolean(item.urgent))}
                 done={item.done}
                 late={Boolean(item.done && item.mitzvahId && late[dateKey(date)]?.[item.mitzvahId])}
                 readOnly={readOnly}
                 statusText={statusText}
                 statusTone={missed ? 'urgent' : 'muted'}
-                hideProgress={!isToday}
+                hideProgress={!open}
                 onComplete={
                   isToday && item.mitzvahId
                     ? () =>

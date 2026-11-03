@@ -5,6 +5,7 @@ jest.mock('react-native-mmkv', () => {
 
 import {
   MENS_MITZVOT,
+  applyRestoredTaharahProfile,
   chooseGender,
   chooseMaritalStatus,
   chooseNusach,
@@ -337,6 +338,74 @@ describe('taharahOptIn', () => {
 
       expect(user().nusach).toBe('chabad');
       expect(taharah().settings.preset).toBe('ashkenaz');
+    });
+  });
+
+  describe('applyRestoredTaharahProfile', () => {
+    it('starts tracking when the restore switches it on: the role from the gender and the preset from the nusach', () => {
+      user().setGender('male');
+      user().setMaritalStatus('married');
+      user().setNusach('edot_hamizrach');
+      user().setTaharahEnabled(true);
+
+      applyRestoredTaharahProfile({ taharahEnabled: false, gender: null, nusach: 'ashkenaz' });
+
+      expect(taharah().settings.role).toBe('husband');
+      expect(taharah().settings.preset).toBe('sephardi_ovadia');
+      expect(taharah().settings.rules).toEqual(rulesFor('sephardi_ovadia'));
+    });
+
+    it('keeps a preset the user already worked on', () => {
+      taharah().setPreset('chabad');
+      taharah().addEvent({ type: 'onset', onah: { abs: 740000, kind: 'night' } });
+      user().setGender('female');
+      user().setMaritalStatus('married');
+      user().setNusach('edot_hamizrach');
+      user().setTaharahEnabled(true);
+
+      applyRestoredTaharahProfile({ taharahEnabled: false, gender: null, nusach: 'ashkenaz' });
+
+      expect(taharah().settings.preset).toBe('chabad');
+      expect(taharah().settings.role).toBe('woman');
+    });
+
+    it('with tracking already on, keeps the role chosen on this device while the gender is unchanged', () => {
+      user().setGender('male');
+      user().setMaritalStatus('married');
+      user().setNusach('sefard');
+      user().setTaharahEnabled(true);
+      taharah().setRole('woman');
+
+      applyRestoredTaharahProfile({ taharahEnabled: true, gender: 'male', nusach: 'sefard' });
+
+      expect(taharah().settings.role).toBe('woman');
+      expect(taharah().settings.preset).toBe('ashkenaz');
+    });
+
+    it('with tracking already on, follows a changed gender and nusach as chooseGender and chooseNusach do', () => {
+      user().setGender('male');
+      user().setMaritalStatus('married');
+      user().setNusach('chabad');
+      user().setTaharahEnabled(true);
+
+      applyRestoredTaharahProfile({ taharahEnabled: true, gender: 'female', nusach: 'ashkenaz' });
+
+      expect(taharah().settings.role).toBe('husband');
+      expect(taharah().settings.preset).toBe('chabad');
+      expect(taharah().settings.rules).toEqual(rulesFor('chabad'));
+    });
+
+    it.each([
+      ['tracking off', false, 'male'],
+      ['no gender', true, null],
+    ] as const)('touches nothing with %s in the restored profile', (_label, enabled, gender) => {
+      user().setTaharahEnabled(enabled);
+      user().setGender(gender);
+      user().setNusach('chabad');
+
+      applyRestoredTaharahProfile({ taharahEnabled: false, gender: null, nusach: 'ashkenaz' });
+
+      expect(taharah().settings).toEqual(useTaharahStore.getInitialState().settings);
     });
   });
 

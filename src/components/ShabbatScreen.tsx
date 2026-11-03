@@ -22,12 +22,12 @@ export function useQuietBlock(): HolyBlock | null {
   return useContext(QuietBlockContext);
 }
 
-type Props = { block: HolyBlock | null; subtitle?: string };
+type Props = { block: HolyBlock | null; tz: string; subtitle?: string };
 
 // An overlay above the whole navigator rather than a Modal, so it can never fail to present
 // because a screen's own modal got there first. Android back closes the app instead of reaching a
 // route underneath.
-export function ShabbatScreen({ block, subtitle }: Props) {
+export function ShabbatScreen({ block, tz, subtitle }: Props) {
   const { colors } = useTheme();
   const { language, t } = useI18n();
 
@@ -44,7 +44,7 @@ export function ShabbatScreen({ block, subtitle }: Props) {
   const labels = holyBlockLabelKeys(block);
   const until = t('holyBlock.screen.until', {
     exit: t(labels.exit),
-    time: clockOf(block.end),
+    time: clockOf(block.end, tz),
   });
 
   return (
