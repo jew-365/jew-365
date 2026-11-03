@@ -410,6 +410,16 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
   {
+    label: '1.0.21-11',
+    date: '2026-11-03',
+    items: [
+      {
+        he: 'תוקנה קריסה באנדרואיד: סימון מצווה, ב״עשיתי״ בבית, ב״סיימתי״ בסוף הנוסח או במסך המצווה, הציג מסך שחור וסגר את האפליקציה.',
+        en: 'Fixed a crash on Android: marking a mitzvah, with Done on home, at the end of a text or on the mitzvah screen, showed a black screen and closed the app.',
+      },
+    ],
+  },
+  {
     label: '1.0.21-10',
     date: '2026-11-01',
     items: [

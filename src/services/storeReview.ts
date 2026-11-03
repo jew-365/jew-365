@@ -1,4 +1,5 @@
 import { AppState, Platform } from 'react-native';
+import { requireOptionalNativeModule } from 'expo';
 import { useCompletionsStore, type Completions } from '@/stores/useCompletionsStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { shouldAskForRating } from '@/utils/rating';
@@ -26,16 +27,17 @@ function markCount(completions: Completions): number {
   return Object.values(completions).reduce((total, marks) => total + Object.keys(marks).length, 0);
 }
 
+// A binary built before this module lacks ExpoStoreReview, and requiring the package there throws while Metro loads it,
+// which a release build reports as fatal before any catch around the require runs: ask for the native half first.
 function loadStoreReview(): StoreReview | null {
   if (nativeMissing) return null;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports -- call time only: a binary built before this module lacks ExpoStoreReview and its import throws
-    return require('expo-store-review') as StoreReview;
-  } catch (error) {
+  if (!requireOptionalNativeModule('ExpoStoreReview')) {
     nativeMissing = true;
-    console.warn('[storeReview] unavailable in this build', error);
+    console.warn('[storeReview] unavailable in this build');
     return null;
   }
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- call time only, once the native module is known to be in the binary
+  return require('expo-store-review') as StoreReview;
 }
 
 async function askIfDue(): Promise<void> {

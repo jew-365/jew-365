@@ -1,4 +1,6 @@
 jest.mock('expo-store-review', () => ({ isAvailableAsync: jest.fn(), requestReview: jest.fn() }), { virtual: false });
+const mockNativeModule = jest.fn<object | null, [string]>();
+jest.mock('expo', () => ({ requireOptionalNativeModule: (name: string) => mockNativeModule(name) }));
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -56,6 +58,7 @@ describe('watchForRatingMoment', () => {
     useUserStore.setState({ location: J, inIsrael: true, firstOpenedAt: OPENED });
     isAvailable.mockResolvedValue(true);
     requestReview.mockResolvedValue(undefined);
+    mockNativeModule.mockImplementation(() => ({}));
     seedMarkedDays(RATING_MARKED_DAYS - 1);
     setAppState('active');
     stop = () => {};
@@ -258,10 +261,13 @@ describe('watchForRatingMoment', () => {
   });
 });
 
+// On a device, Metro reports a throw while it loads a module as fatal before a catch around the require runs, so
+// the package must never be required on a binary without its native half.
 describe('a binary without the ExpoStoreReview native module', () => {
   beforeEach(() => {
     jest.useFakeTimers({ now: NOW });
     jest.spyOn(console, 'warn').mockImplementation(() => {});
+    mockNativeModule.mockImplementation(() => null);
   });
 
   afterEach(() => {
@@ -269,13 +275,15 @@ describe('a binary without the ExpoStoreReview native module', () => {
     jest.useRealTimers();
   });
 
-  it('stamps nothing, throws nothing and warns once', async () => {
+  it('never loads the package, stamps nothing and warns once', async () => {
+    const mockLoads = jest.fn();
     let stop: () => void = () => {};
     let completions!: typeof useCompletionsStore;
     let user!: typeof useUserStore;
     jest.resetModules();
     jest.isolateModules(() => {
       jest.doMock('expo-store-review', () => {
+        mockLoads();
         throw new Error("Cannot find native module 'ExpoStoreReview'");
       });
       completions = require('@/stores/useCompletionsStore').useCompletionsStore;
@@ -293,9 +301,11 @@ describe('a binary without the ExpoStoreReview native module', () => {
     await jest.advanceTimersByTimeAsync(RATING_DELAY_MS);
     stop();
 
+    expect(mockNativeModule).toHaveBeenCalledWith('ExpoStoreReview');
+    expect(mockLoads).not.toHaveBeenCalled();
     expect(user.getState().ratingAskedAt).toBeNull();
     expect(console.warn).toHaveBeenCalledTimes(1);
-    expect(console.warn).toHaveBeenCalledWith('[storeReview] unavailable in this build', expect.any(Error));
+    expect(console.warn).toHaveBeenCalledWith('[storeReview] unavailable in this build');
   });
 });
 
@@ -331,11 +341,15 @@ describe('the store review module is only ever loaded at call time', () => {
     expect(files.filter(({ source }) => STATIC_IMPORT.test(source) || DYNAMIC_IMPORT.test(source))).toEqual([]);
   });
 
-  it('is required in one place only, inside a function', () => {
+  it('is required in one place only, inside a function, after the native module check', () => {
     const requires = files.flatMap(({ rel, source }) =>
       [...source.matchAll(REQUIRE_LINE)].map(([line]) => ({ rel, line })),
     );
     expect(requires.map(({ rel }) => rel)).toEqual([HOME]);
-    expect(requires[0].line).toMatch(/^\s{4,}\S/);
+    expect(requires[0].line).toMatch(/^\s{2,}\S/);
+    const home = files.find(({ rel }) => rel === HOME)?.source ?? '';
+    const check = home.indexOf("requireOptionalNativeModule('ExpoStoreReview')");
+    expect(check).toBeGreaterThan(-1);
+    expect(check).toBeLessThan(home.indexOf(`require('${MODULE}')`));
   });
 });
