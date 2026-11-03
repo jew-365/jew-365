@@ -383,7 +383,82 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Order:** after the texts: while `teiman` is staged in the build, the generated map and chapter index carry no `teiman` entry, so the `Nusach` type and every `Record<Nusach, …>` change in the same commit that takes `teiman` out of `STAGED_NUSCHAOT` ([scripts/siddur/build.js](scripts/siddur/build.js)).
   - **Expected result:** A user who picks Teiman in onboarding reads every text in Teiman; the smoke, search and siddur suites cover it.
 
+### Zmanim per the Ohr HaChaim luach, 2026-11-03 — batch rules
+
+- **Requested:** the owner, 2026-11-02, in chat, in Hebrew: "יש באג בזמנים ההלכתיים, אני רוצה שכל הזמנים יהיו לפי זמני אור החיים, בוא נאפיין ביחד"; characterized that day in a cloud session, and on 2026-11-03 the owner asked for the findings as this batch, to be carried out in a session on their own computer.
+- **Spec:** [.claude/specs/ohr-hachaim-zmanim.md](.claude/specs/ohr-hachaim-zmanim.md): what the app computes today, the luach's definitions with their evidence, the Jerusalem differences (2 to 24 minutes, both ways), the target design, and section 11, the handover: everything the cloud session could not do. Read it before any task.
+- **Flag:** every task is `OTA` (pure JavaScript; no native change, no `SCHEDULE_FORMAT` raise: a moved trigger changes `contentHash`).
+- **Decisions taken:** the luach's definitions as listed in the spec's section 3 (seasonal minutes of the GRA day from sunrise and sunset at the city's height; alot 72, tzeit 13.5, MGA 72 seasonal, mincha gedola the larger of 30 fixed and 30 seasonal; the exit 30 minutes after sunset in Israel and 40 abroad; Rabbeinu Tam 72 seasonal); technical calls: `tzeitShabbat` as a new `Zmanim` field beside `tzeitHakochavim`, chatzot halayla stays `getSolarMidnight()`, sof zman tefila stays GRA, the fixed-minute fallbacks go, no new setting.
+- **Pending:** Q17 to Q26 under [For the owner](#for-the-owner) and R15 under [For the rav](#for-the-rav); each task names the question it waits on, and a task that names none may start.
+- **Verified so far:** the luach's printed Tel Aviv Shabbat of 2026-10-02/03 (candles 18:05, exit 18:55, Rabbeinu Tam 19:36) reproduced to the minute by the definitions, with a dependency-free calculator ([.claude/specs/ohr-hachaim-zmanim-compare.mjs](.claude/specs/ohr-hachaim-zmanim-compare.mjs)); `kosher-zmanim` itself never ran (the cloud environment reaches no npm registry).
+- **Done means:** the calibration suite green against the luach's printed values within a minute; every suite that pinned minutes of the old method re-pinned; the rav page's section 1, R15 and `RULES_VERSION` 3, the taharah page's two "7.083" lines, the three AGENTS.md, the guide topic and a `WHATS_NEW` item, `pnpm guide:build`; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, `pnpm test:tz` green; a preview update checked on a phone against the luach before production; commits to `main`, an OTA only on the owner's per-action approval.
+
+### High — Zmanim per the Ohr HaChaim luach
+
+- [ ] Pin the luach's printed zmanim in a calibration suite
+  - **Flag:** `OTA` (tests only).
+  - **What it is:** A new suite `src/services/__tests__/ZmanimService.ohrHachaim.test.ts` over `ZmanimService.getZmanim()`, `getCandleLighting()` and `getHavdalah()`: a table of the luach's printed values (Q26: Jerusalem and one more city, a winter and a summer date; already in hand: Tel Aviv, Friday 2026-10-02 candles 18:05, Saturday 2026-10-03 exit 18:55 and Rabbeinu Tam 19:36), each within one minute, since the luach rounds. Before the table is filled, read the KosherKotlin PR #27 diff and its tests and the Rabbi Ovadiah Yosef Calendar README (spec, section 11), which the cloud session could not open.
+  - **What it solves:** The only proof that the definitions match the luach; every other task of the batch is checked against it (spec, sections 3 and 4).
+  - **Expected result:** The suite fails on today's code (tzeit 7.083°, the exit at tzeit + 10, candles 18 in Tel Aviv) and passes once the batch is done, under `pnpm test:tz`.
+- [ ] Give every city its height and settle the GPS rule
+  - **Flag:** `OTA`.
+  - **What it is:** `elevation` on every entry of `CITIES` ([src/data/cities.ts](src/data/cities.ts); 14 of 20 lack one), from the luach's own heights where it prints them, else a geographic source, each noted; `refreshSavedLocation()` already carries the value to every install and `resolvedLocation()` copies it to a fix within 25 km; a far fix keeps 0 (Q17). The zmanim cache key already includes the elevation.
+  - **What it solves:** The luach's sunrise and sunset are taken at the city's height, 4 to 5 minutes from sea level in Jerusalem (spec, sections 3 and 4).
+  - **Expected result:** [src/data/__tests__/cities.test.ts](src/data/__tests__/cities.test.ts) pins an elevation on every city; a fix 10 km from Jerusalem computes Jerusalem's sunset.
+- [ ] Compute the zmanim by the luach's definitions
+  - **Flag:** `OTA`.
+  - **What it is:** [src/services/ZmanimService.ts](src/services/ZmanimService.ts) per the spec's section 5.1: sunrise and sunset at the city's height (`getSunrise()` / `getSunset()`, or `setUseElevation(true)` where the installed `kosher-zmanim` has it: read its `.d.ts` first), alot 72 seasonal minutes before sunrise, misheyakir 66 (Q25), Shema MGA over the 72-seasonal day, mincha gedola the larger of 30 fixed and 30 seasonal minutes after chatzot, tzeit 13.5 seasonal minutes after sunset, plag 1.25 seasonal hours before tzeit (Q22); chatzot, the GRA times, mincha ketana and chatzot halayla unchanged; the fixed-minute fallbacks (`ALOT_FALLBACK_MIN`, `MISHEYAKIR_FALLBACK_MIN`, `TZEIT_FALLBACK_MIN`, the misheyakir clamp) removed, `null` kept for a day with no sunrise or sunset.
+  - **What it solves:** The method itself: every window and every strip value (spec, sections 1 to 4).
+  - **Expected result:** The calibration suite is green; [src/services/__tests__/ZmanimService.test.ts](src/services/__tests__/ZmanimService.test.ts) (its "Jerusalem 2026-04-23 matches published zmanim" case re-pinned to the luach) and `ZmanimService.extra.test.ts` pass under `pnpm test:tz -- src/services`.
+- [ ] Separate the Shabbat and Yom Tov exit from the weekday tzeit
+  - **Flag:** `OTA`.
+  - **What it is:** `Zmanim.tzeitShabbat` ([src/types/zmanim.ts](src/types/zmanim.ts)): sunset + 30 minutes in Israel, + 40 abroad; `holyBlockExit()` returns it plus the margin Q19 leaves (`HOLY_BLOCK_EXIT_MIN` becomes that margin, 0 if dropped), so `getHavdalah()`, `HebcalService.nightfall()` on a block's last day, `holyBlockAround()`, the pre-block notice, the check-in nudges and the Shabbat screen follow; `hebrewDaysAt()` keeps shkia to tzeit (13.5 seasonal minutes) as the doubtful span; the Sunday Tisha B'Av havdalah keeps tzeit until the luach's fast-end rule is known (Q26).
+  - **What it solves:** Today the exit is tzeit (7.083°) + 10, 5 to 14 minutes after the luach's (Tel Aviv 2026-10-03: 19:03 against 18:55), and a tzeit of 13.5 seasonal minutes plus 10 would end Shabbat far too early (spec, section 5.2).
+  - **Expected result:** Tel Aviv 2026-10-03 exits at 18:55 within a minute in the calibration suite; [src/utils/__tests__/checkIn.test.ts](src/utils/__tests__/checkIn.test.ts), [src/services/__tests__/HebcalService.test.ts](src/services/__tests__/HebcalService.test.ts), [src/utils/__tests__/weeklyReport.test.ts](src/utils/__tests__/weeklyReport.test.ts) and [src/services/notifications/__tests__/notices.test.ts](src/services/notifications/__tests__/notices.test.ts) re-pinned and green under `pnpm test:tz`.
+- [ ] Light candles by the luach's minutes
+  - **Flag:** `OTA`.
+  - **What it is:** `candleLightingMinutes()` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts): Jerusalem 40, every other Israeli city 20 (today 18), abroad 18 (today 20), and `candleLightingMinutes` on the city entries the luach prints with their own value (Haifa 30, per Q20); the line in `docs/halacha-review.html` section 1.
+  - **What it solves:** The block's start, the `candle_lighting` window and the pre-block notice differ from the luach by two minutes everywhere but Jerusalem (spec, section 3).
+  - **Expected result:** Tel Aviv 2026-10-02 lights at 18:05 in the calibration suite; the block start of `holyBlockOn()` and the `candle_lighting` window agree on it.
+
+### Medium — Zmanim per the Ohr HaChaim luach
+
+- [ ] Settle the Shema time's default and its labels
+  - **Flag:** `OTA`.
+  - **What it is:** The `ksSofZman` setting stays; its default for a new install per Q21; the home strip's `sofShma` keeps following the setting, and the schedule's row ([src/utils/buildDayTimeline.ts](src/utils/buildDayTimeline.ts), label `zman.sofZmanShmaGra`) follows the setting too, or shows both as the luach prints them (Q21), with both dictionaries' labels.
+  - **What it solves:** The MGA time becomes the luach's (72 seasonal minutes), and the schedule today shows GRA whatever the setting (spec, section 2).
+  - **Expected result:** The Shema window, the strip and the schedule name the same time for the chosen opinion; [src/utils/__tests__/buildDayTimeline.test.ts](src/utils/__tests__/buildDayTimeline.test.ts) and the day-view render suite pass.
+- [ ] Re-pin the suites that assert minutes of the old method
+  - **Flag:** `OTA` (tests only).
+  - **What it is:** The suites the spec's section 7 lists (found by `grep -rln "7.083\|7Point083\|getAlosHashachar\|16.1\|11.5\|Geonim\|MGA\|zmanis" src`): each pinned minute recomputed from the new `ZmanimService` and checked against the calibration suite's values, never adjusted to whatever the code prints.
+  - **What it solves:** About 28 suites encode the old definitions as expected minutes; `pnpm test:tz` stays red until they are re-pinned (spec, section 7).
+  - **Expected result:** `pnpm test:tz` green in all four zones.
+- [ ] Update the documents that state the zmanim
+  - **Flag:** `OTA` for the guide; docs for the pages.
+  - **What it is:** `docs/halacha-review.html` section 1 rewritten to the spec's section 3, a new item R15 and `RULES_VERSION` 3; the two "7.083 מעלות" lines of `docs/taharah-review.html`; the root [AGENTS.md](AGENTS.md) (Zmanim and Calendar), [src/services/AGENTS.md](src/services/AGENTS.md) and [src/data/AGENTS.md](src/data/AGENTS.md); the home topic of [src/data/guide.ts](src/data/guide.ts) names the luach and a `WHATS_NEW` item under the next production label; the FAQ line of [docs/index.html](docs/index.html); `pnpm guide:build`.
+  - **What it solves:** The rav and the users read the method the app uses (spec, section 8).
+  - **Expected result:** `pnpm check:dox` and [src/data/__tests__/guide.test.ts](src/data/__tests__/guide.test.ts) pass; the review page states the luach's definitions and version 3.
+- [ ] Ship the luach's zmanim as an update and check them on a phone
+  - **Flag:** `OTA`.
+  - **What it is:** `pnpm update:preview`, then on the preview app against the luach: the home strip of the day, a Friday's candles and the Saturday's exit on the schedule, and a mitzvah screen's next reminder; then `pnpm update:production` with the `WHATS_NEW` entry, each on the owner's approval.
+  - **What it solves:** The batch reaches installs only as an update (root [AGENTS.md](AGENTS.md), Release and Updates).
+  - **Expected result:** The preview app shows the luach's values within a minute on the day checked; the production update's group id in [state.md](state.md) and the entries moved to [action-log.md](action-log.md).
+
+### Low — Zmanim per the Ohr HaChaim luach
+
+- [ ] Show Rabbeinu Tam on the strip and the schedule
+  - **Flag:** `OTA`.
+  - **What it is:** Only on a yes to Q24: a `rabbeinuTam` field (sunset + 72 seasonal minutes, abroad at most 72 fixed), a row in `ZMAN_KEYS` and a tick on the strip, labels in both dictionaries, and the search's zman items if the strip's names are searchable.
+  - **What it solves:** The luach prints it beside tzeit; the app computes it nowhere (spec, section 3).
+  - **Expected result:** Tel Aviv 2026-10-03 shows 19:36 within a minute; unknown until Q24 is answered.
+
 ## Bugs
+
+- [ ] The zmanim follow a depression-angle method, not the Ohr HaChaim luach
+  - **Found:** the owner's report, 2026-11-02, in chat ("יש באג בזמנים ההלכתיים"); measured the same day in the cloud session ([.claude/specs/ohr-hachaim-zmanim.md](.claude/specs/ohr-hachaim-zmanim.md), section 4). The owner's own case (which zman, date and city, and the luach's value) is unknown: Q26.
+  - **What it is:** [src/services/ZmanimService.ts](src/services/ZmanimService.ts) computes alot at 16.1°, misheyakir at 11.5°, tzeit at 7.083°, the MGA day in 72 fixed minutes, sunrise and sunset at sea level, the exit at tzeit + 10 and candles 18 minutes before sunset outside Jerusalem; the luach computes in seasonal minutes from the city's height, with the exit 30 minutes after sunset. Measured: Tel Aviv, Saturday 2026-10-03, the app's exit 19:03 against the luach's printed 18:55; Jerusalem 2026-11-02, tzeit 17:19 against 17:06, misheyakir 05:04 against 04:51, plag 15:41 against 15:57.
+  - **What it solves:** Every window that opens at tzeit opens 11 to 16 minutes after the luach, tefillin 6 to 24 minutes after it, the Shabbat exit 5 to 10 minutes after it, plag 16 to 20 minutes before it, and the users who follow the luach see other times than their calendar.
+  - **Expected result:** The calibration suite of the batch "Zmanim per the Ohr HaChaim luach" passes; the batch is the fix.
 
 - [ ] A Hebrew Android phone shows the app's English name
   - **Done:** 2026-10-25. Verified: [scripts/__tests__/androidLegacyHebrewLocale.test.js](scripts/__tests__/androidLegacyHebrewLocale.test.js) (the file equals Expo's `values-b+he`), prebuild of both variants, `aapt2 compile` of `values-b+iw`, and `application-label-iw:'יהודי 365 P'` in build `c625eaa5`. Not checked: a phone set to Hebrew (the emulator went into a boot loop when its language was switched to Hebrew).
@@ -481,6 +556,11 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
     - The women's liturgy (R8): written per text once the source is mapped.
   - **Lives in:** each rule's place in R1 to R10, `halachaRulingFor()` in [src/data/halachaLines.ts](src/data/halachaLines.ts), `HAFTARAH_VARIANT` in [src/utils/chok.ts](src/utils/chok.ts), `presetForNusach()` in [src/data/taharahPresets.ts](src/data/taharahPresets.ts), `keepsCholHamoed()` in [src/utils/skipRules.ts](src/utils/skipRules.ts) and `NUSCHAOT` in [src/data/nuschaot.ts](src/data/nuschaot.ts).
 
+- **R15 — The zmanim follow the Ohr HaChaim luach.**
+  - **Question:** May every user, of every nusach, in Israel and abroad, be given the zmanim of לוח אור החיים (seasonal minutes of the GRA day from sunrise and sunset at the city's height: alot 72 and misheyakir 66 before sunrise, tzeit 13.5 after sunset, the MGA day 72 each side, mincha gedola the larger of 30 fixed and 30 seasonal minutes after chatzot, plag 1.25 hours before tzeit, Shabbat out 30 minutes after sunset in Israel and 40 abroad)?
+  - **Assumption:** Yes, for everyone, with no setting for another method (the owner's call, 2026-11-02; the open points are Q17 to Q26 under For the owner).
+  - **Lives in:** [src/services/ZmanimService.ts](src/services/ZmanimService.ts) once the batch "Zmanim per the Ohr HaChaim luach" is built; until then the method of section 1 of [docs/halacha-review.html](docs/halacha-review.html).
+
 ### For the owner
 
 Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were answered by the owner on 2026-10-26 and became the tasks "Add an English (U.K.) localization on the App Store" and "Ask for a store rating inside the app". Q3 to Q7, from the app requests of 2026-10-26, were answered the same day and are written into their tasks (App requests of 2026-10-26 — batch rules). None is open.
@@ -500,10 +580,63 @@ Q9 to Q15, the seven questions of the nagging batch, were all answered by the ow
   - **Owner's word, 2026-11-02:** "ולך על ההמלצות שלך" (go with your recommendations), leaving for the night. The recommendation is (c) with (b): the one-line blessings from the Rambam's wording once the rav approves, and a typed source for the long orders. Until then Teiman stays staged, so nothing incomplete reaches users.
   - **Still the owner's:** who types the long orders (Hallel, Musaf of Rosh Chodesh and Chol HaMoed, the end of Shacharit, Havdalah, Kiddush Levana, Tefilat HaDerech) from a printed Tiklal into Wikisource, or another source the owner names; and whether the rav approves the Rambam's wording for the one-line blessings.
 
+Q17 to Q26 are the open points of the batch "Zmanim per the Ohr HaChaim luach, 2026-11-03" ([.claude/specs/ohr-hachaim-zmanim.md](.claude/specs/ohr-hachaim-zmanim.md), section 10). The owner answers them before the batch is built; each task names the one it waits on.
+
+- **Q17 — Sunrise and sunset at the city's height.**
+  - **Question:** Take sunrise and sunset at the city's height, as the luach does (Jerusalem's sunset 4 to 5 minutes after the sea-level one), and give a GPS fix far from every city a height of 0?
+  - **Assumption:** Yes to both.
+  - **Lives in:** `buildCalendar()` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts) and `elevation` in [src/data/cities.ts](src/data/cities.ts).
+  - **What it affects:** Every zman, candle lighting, the exit, the Hebrew date's turn.
+- **Q18 — The luach's visible sunrise is out of reach.**
+  - **Question:** The luach prints the visible sunrise of the Bechoray Yosef tables, which depend on the hills around each city and cannot be reproduced; the app would use the astronomical sunrise at the city's height, a few minutes before the printed one in Jerusalem. Acceptable?
+  - **Assumption:** Yes.
+  - **Lives in:** the same `buildCalendar()`.
+  - **What it affects:** The start of shacharit and the Shema, and the GRA times by a minute or two.
+- **Q19 — The exit's margin.**
+  - **Question:** The luach ends Shabbat and Yom Tov 30 minutes after sunset in Israel and 40 abroad. Show and use that time exactly, or keep the 10-minute margin of 2026-10-10 on top of it (40 and 50)?
+  - **Assumption:** The luach's time exactly, the margin dropped (`HOLY_BLOCK_EXIT_MIN` 0).
+  - **Lives in:** `holyBlockExit()` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts).
+  - **What it affects:** The Shabbat screen, havdalah, the pre-block notice's exit line, the check-in nudges, every night window of a block's last day.
+- **Q20 — Candle lighting minutes per city.**
+  - **Question:** What does the luach print for each city of `CITIES`? Known customs: Jerusalem 40, Haifa 30, most Israeli cities 20, and 18 for a city abroad the luach does not print; today the app uses 18 in Israel outside Jerusalem and 20 abroad.
+  - **Assumption:** Jerusalem 40, Haifa 30, every other Israeli city 20, abroad 18.
+  - **Lives in:** `candleLightingMinutes()` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts) and `candleLightingMinutes` on the entries of [src/data/cities.ts](src/data/cities.ts).
+  - **What it affects:** The block's start, the `candle_lighting` window, the pre-block notice.
+- **Q21 — The Shema time's default and the schedule's row.**
+  - **Question:** Keep the GRA / MGA choice in Settings; which is the default for a new install (the luach prints both; Rav Ovadia holds MGA lechatchila), and should the schedule show both rows as the luach does, or the chosen one?
+  - **Assumption:** The choice stays, the default stays GRA for every install, and the schedule's row follows the setting.
+  - **Lives in:** `halachicOpinions.ksSofZman` in [src/stores/useUserStore.ts](src/stores/useUserStore.ts) and `ZMAN_KEYS` in [src/utils/buildDayTimeline.ts](src/utils/buildDayTimeline.ts).
+  - **What it affects:** The Shema window's end, the strip, the schedule.
+- **Q22 — Plag hamincha.**
+  - **Question:** Plag 1.25 seasonal hours before tzeit, as Yalkut Yosef and the luach have it (12 to 20 minutes later than today), rather than before sunset (the Halacha Berurah)?
+  - **Assumption:** Before tzeit.
+  - **Lives in:** `plagHaMincha` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts).
+  - **What it affects:** The Chanukah candles on the erev of a holy block, the strip, the schedule.
+- **Q23 — Scope.**
+  - **Question:** The luach for every user, every nusach (Ashkenaz, Sefard and Chabad included), in Israel and abroad, with no setting for another method?
+  - **Assumption:** Yes.
+  - **Lives in:** [src/services/ZmanimService.ts](src/services/ZmanimService.ts), the one method.
+  - **What it affects:** Every user.
+- **Q24 — Rabbeinu Tam.**
+  - **Question:** Show Rabbeinu Tam (72 seasonal minutes after sunset) on the home strip and the schedule, as the luach prints it beside tzeit?
+  - **Assumption:** Not shown; the Low task waits.
+  - **Lives in:** not built yet: task "Show Rabbeinu Tam on the strip and the schedule".
+  - **What it affects:** The strip and the schedule only; no window reads it.
+- **Q25 — Misheyakir.**
+  - **Question:** The luach's "טלית ותפילין" is alot plus 6 seasonal minutes (66 before sunrise)? KosherKotlin's set of the luach also carries a 60-minute variant.
+  - **Assumption:** 66.
+  - **Lives in:** `misheyakir` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts).
+  - **What it affects:** The tefillin window's start and its first reminder.
+- **Q26 — The calibration material.**
+  - **Question:** The printed pages of the luach (or the values of the לוח המאור app) for Jerusalem and one more city, a winter day and a summer day, every zman of the day and a Shabbat's candles and exit; the owner's own bug case (the zman, the date and city, the luach's value); what the luach uses its 20 fixed minutes after sunset for, and when a fast ends by it.
+  - **Assumption:** Until they arrive, the calibration suite holds only the Tel Aviv Shabbat of 2026-10-02/03 and the fast's end stays at tzeit.
+  - **Lives in:** not built yet: task "Pin the luach's printed zmanim in a calibration suite".
+  - **What it affects:** The proof of every task of the batch.
+
 ## Other Open Items
 
 - **The full siddur build no longer reproduces the shipped assets from today's Sefaria.** Found 2026-11-02, in a cloud session with an empty `scripts/siddur/.cache/`: `node scripts/siddur/build.js` stops at `edot_hamizrach/shacharit` (the edit "יש אומרים תפילת רב מגמרה ברכות ט"ז ע"ב…" matched 0x), because Sefaria corrected text inside a pinned version title after the assets were built, and the cache that built them lives only on the owner's machine. Rebuilding everything would change shipped texts unreviewed, so the session builds with `--nusach teiman`, which keeps every other output byte-identical. The check: a full build from an empty cache runs green with `git status` clean, after the manifest is brought up to the current Sefaria text and each change is reviewed.
-- **Network access for the siddur sources in the cloud environment.** Found 2026-11-02, starting the nusach Teiman batch: the session's proxy refused `www.sefaria.org` and `he.wikisource.org` (403 on CONNECT), and the build cache `scripts/siddur/.cache/` is gitignored, so `pnpm siddur:build` cannot run there for any nusach. The owner adds both hosts under Allowed domains in the environment's network settings; the check is that `curl -sI https://www.sefaria.org/` and `curl -sI https://he.wikisource.org/` answer from the session. **Done:** 2026-11-02, the owner opened both hosts; from the session `curl` answered 200 from the Wikisource API and Sefaria's `/api/index/Psalms`. Wikisource rate-limits the shared address (HTTP 429 with `retry-after`), so a fetch waits and retries.
+- **Network access for the siddur sources in the cloud environment.** Found 2026-11-02, starting the nusach Teiman batch: the session's proxy refused `www.sefaria.org` and `he.wikisource.org` (403 on CONNECT), and the build cache `scripts/siddur/.cache/` is gitignored, so `pnpm siddur:build` cannot run there for any nusach. The owner adds both hosts under Allowed domains in the environment's network settings; the check is that `curl -sI https://www.sefaria.org/` and `curl -sI https://he.wikisource.org/` answer from the session. Found again on 2026-11-02, in the session of the Ohr HaChaim zmanim batch: the same environment resolves no address for `registry.npmjs.org` (`ENOTFOUND`, so `pnpm install` fails and no typecheck, lint or test can run there) nor for `github.com`, `maor.orhachaim.org`, `calendar.2net.co.il`, `skyview2020.co.il` and `blog.calj.net` (the luach's sources); the owner continues that batch on their own computer ([.claude/specs/ohr-hachaim-zmanim.md](.claude/specs/ohr-hachaim-zmanim.md), section 11). **Done:** 2026-11-02, the owner opened both hosts; from the session `curl` answered 200 from the Wikisource API and Sefaria's `/api/index/Psalms`. Wikisource rate-limits the shared address (HTTP 429 with `retry-after`), so a fetch waits and retries.
 - **Check production `1.0.21-9` on a phone.** Found 2026-11-01, when it was published: the completion animation on home (the green check and sparks, the ring filling green, "בוצע ב-" and the card closing) and the icons of rounds 7 and 8 (the Kriat Shema sun, the dawn window, the Ushpizin table, the meals plate and every siddur text's own icon, the rings for Sheva Berachot among them) were checked only on the web build. The owner saw the Rubik font and pack ב on the preview app (`1.0.21-32`: "everything looks great, but the siddur and prayer icon do not look good"), whose siddur and prayer icons were then redrawn. The check: open home, the siddur tab's groups and the library in the production app (Settings shows `1.0.21-9`), mark an open mitzvah, and read the launches with `npx eas-cli update:insights c81e2ade-932f-4a0b-ab3a-b5fad0c22fa8`. On 2026-11-02 the owner checked build 1.0.21 (5) on an iPhone through TestFlight ("בדקתי הכל מצויין") and the Android preview app on `1.0.21-38` ("בדקתי עובד מצויין"); both run code from after `d2fc443`, the commit of `1.0.21-9`, so they cover its content, but neither is the production app. Production is now `1.0.21-10`, which carries everything of `1.0.21-9` (Settings shows `1.0.21-10`): the owner decides whether this item closes.
 
 - **The design skills have not run here, and `webapp-designer` describes an older `design-taste-frontend`.** Found 2026-10-30, while adding them (the task Add the web designer skills and the project manager skill to the repo).
