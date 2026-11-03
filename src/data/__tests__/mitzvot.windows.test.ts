@@ -143,7 +143,7 @@ describe('mitzvot windows extra', () => {
         category: 'daily-evening',
         group: 'daily',
         skipOn: [],
-        nuschaotSupported: ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'],
+        nuschaotSupported: ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'],
         description: { he: 'לכתחילה לפני חצות הלילה', en: 'Ideally before chatzot (halachic midnight)' },
       });
       expect(bedtime().defaultReminders).toEqual([

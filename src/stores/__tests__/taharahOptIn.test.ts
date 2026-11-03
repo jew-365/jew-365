@@ -286,6 +286,19 @@ describe('taharahOptIn', () => {
       }
     });
 
+    it('stamps Ushpizin when a Teiman user moves to a nusach that offers it (R14.3)', () => {
+      const now = jest.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-11-02T10:00:00Z'));
+      try {
+        chooseNusach('teiman');
+        expect(ushpizin()).toEqual({ enabled: true });
+
+        chooseNusach('edot_hamizrach');
+        expect(ushpizin()).toEqual({ enabled: true, enabledAt: Date.parse('2026-11-02T10:00:00Z') });
+      } finally {
+        now.mockRestore();
+      }
+    });
+
     it('leaves a switched-off Ushpizin off and unstamped after a move from Chabad', () => {
       chooseNusach('chabad');
       useMitzvotStore.getState().setEnabled('ushpizin', false);
@@ -311,6 +324,16 @@ describe('taharahOptIn', () => {
       chooseNusach('edot_hamizrach');
 
       expect(taharah().settings.preset).toBe('sephardi_ovadia');
+    });
+
+    it('adopts the Sephardi preset for Teiman (R14.6)', () => {
+      user().setTaharahEnabled(true);
+
+      chooseNusach('teiman');
+
+      expect(user().nusach).toBe('teiman');
+      expect(taharah().settings.preset).toBe('sephardi_ovadia');
+      expect(taharah().settings.rules).toEqual(rulesFor('sephardi_ovadia'));
     });
 
     it('keeps the preset once an event is recorded', () => {

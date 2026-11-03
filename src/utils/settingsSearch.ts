@@ -6,6 +6,7 @@ import { HALACHA_LINES, phoneLabel, type HalachaRuling } from '@/data/halachaLin
 import { hilulaPage } from '@/data/hilulaPages';
 import { HILULOT, hilulaDateLabel, upcomingHilulot } from '@/data/hilulot';
 import { LIBRARY_GROUPS } from '@/data/mitzvot';
+import { NUSACH_IDS } from '@/data/nuschaot';
 import type { Achievements, BadgeId } from '@/stores/useCompletionsStore';
 import { STREAK_BADGE_DAYS, type MarkTotals } from './badges';
 import {
@@ -243,7 +244,7 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
     id: 'nusach',
     icon: 'siddur',
     titleKey: 'settings.nusach',
-    labelKeys: ['nusach.ashkenaz', 'nusach.sefard', 'nusach.edot_hamizrach', 'nusach.chabad'],
+    labelKeys: NUSACH_IDS.map((id) => `nusach.${id}`),
     section: 'prayer',
     terms: [
       'נוסח',
@@ -254,10 +255,18 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
       'עדות',
       'חבד',
       'חסידי',
+      'תימן',
+      'תימני',
+      'תימנים',
+      'בלדי',
       'nusach',
       'sephardi',
       'ashkenazi',
       'chabad',
+      'teiman',
+      'teimani',
+      'yemenite',
+      'baladi',
       'rite',
     ],
   },

@@ -69,12 +69,13 @@ const VAYAKHEL = asset('Vayakhel');
 const PEKUDEI = asset('Pekudei');
 
 describe('HAFTARAH_VARIANT', () => {
-  it('gives Edot HaMizrach the Sephardi haftarah and every other nusach the Ashkenazi one', () => {
+  it('gives Edot HaMizrach and Teiman (R14.6) the Sephardi haftarah and every other nusach the Ashkenazi one', () => {
     expect(HAFTARAH_VARIANT).toEqual({
       ashkenaz: 'ashkenazi',
       sefard: 'ashkenazi',
       edot_hamizrach: 'sephardi',
       chabad: 'ashkenazi',
+      teiman: 'sephardi',
     });
   });
 });

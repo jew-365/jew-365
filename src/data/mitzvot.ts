@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import { ComputeContext, LibraryGroup, Mitzvah, MitzvahWindow, Nusach } from '@/types/mitzvah';
 import { Location, Zmanim } from '@/types/zmanim';
 import { CHOK_TEXT_ID, hasChokContent } from '@/data/chok';
+import { NUSACH_IDS } from '@/data/nuschaot';
 import { hasSelichotContent } from '@/data/selichot';
 import { MIDNIGHT_TO_MORNING_PRAYER, siddurPlace, standaloneAvailability } from '@/data/siddur';
 import { HebcalService } from '@/services/HebcalService';
@@ -20,7 +21,9 @@ import {
   ushpizinNight,
 } from '@/utils/siddur';
 
-const ALL_NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const ALL_NUSCHAOT: Nusach[] = [...NUSACH_IDS];
+// Chabad and Teiman (R14.2) light the Chanukah candles at shkia, the other nuschaot at nightfall.
+const CHANUKAH_FROM_SHKIA: readonly Nusach[] = ['chabad', 'teiman'];
 const SUNDAY = 0;
 
 function win(start: Date, end: Date): MitzvahWindow {
@@ -405,7 +408,7 @@ export const MITZVOT: Mitzvah[] = [
       const day = dayOf(ctx.zmanim, ctx.location);
       const block = HebcalService.holyBlockOn(day.plus({ days: 1 }).toJSDate(), ctx.location);
       if (block) return win(ctx.zmanim.plagHaMincha, block.start);
-      const fromShkia = ctx.settings.nusach === 'chabad' && !closesHolyBlock(day, ctx.location);
+      const fromShkia = CHANUKAH_FROM_SHKIA.includes(ctx.settings.nusach) && !closesHolyBlock(day, ctx.location);
       return win(fromShkia ? ctx.zmanim.shkia : nightfall(ctx.zmanim, ctx.location), nextAlot(ctx));
     },
   },

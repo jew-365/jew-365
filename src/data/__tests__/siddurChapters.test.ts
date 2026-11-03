@@ -12,7 +12,7 @@ import { chapterVisible, forMaritalStatus, forVoice, pickerEntries } from '@/uti
 import type { Nusach } from '@/types/mitzvah';
 import type { SiddurSection } from '@/types/siddur';
 
-const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
 
 function titles(sections: SiddurSection[]): { he: string; en: string }[] {
   const seen = new Set<string>();

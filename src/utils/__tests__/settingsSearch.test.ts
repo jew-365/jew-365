@@ -75,6 +75,12 @@ const SETTING_QUERIES: [string, string][] = [
   ['נוסח', 'nusach'],
   ['ספרדי', 'nusach'],
   ['חבד', 'nusach'],
+  ['תימן', 'nusach'],
+  ['תימני', 'nusach'],
+  ['בלדי', 'nusach'],
+  ['Teiman', 'nusach'],
+  ['Yemenite', 'nusach'],
+  ['Baladi', 'nusach'],
   ['גרא', 'opinion'],
   ['דעת זמן ק"ש', 'opinion'],
   ['קריאת שמע', 'opinion'],
@@ -405,7 +411,7 @@ describe('content search', () => {
 
   const OUTRANKED_BY_CONTENT = ['קריאת שמע', 'ירושלים', 'רש"י'];
 
-  it.each<Nusach>(['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'])(
+  it.each<Nusach>(['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'])(
     'keeps every setting query on its setting, bar the ones a content title matches better, with mitzvot, texts and chapters indexed for %s',
     (nusach) => {
       const combined = buildSettingsSearchIndex(
@@ -564,6 +570,8 @@ describe('content search', () => {
     const chabad = { nusach: 'chabad' as const, mitzvot: getAllMitzvot('chabad') };
     expect(content(chabad).filter((item) => item.id.includes('ushpizin'))).toEqual([]);
     expect(find('אושפיזין', chabad).filter((id) => id.includes('ushpizin'))).toEqual([]);
+    const teiman = { nusach: 'teiman' as const, mitzvot: getAllMitzvot('teiman') };
+    expect(content(teiman).filter((item) => item.id.includes('ushpizin'))).toEqual([]);
   });
 
   it('orders ties as a setting, a mitzvah, a text and then a chapter', () => {

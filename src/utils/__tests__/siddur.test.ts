@@ -603,9 +603,9 @@ describe('selichot days', () => {
     ]);
   });
 
-  it('runs the Ashkenazi season from Leil Selichot and the Sephardi one from 2 Elul, both through Erev Yom Kippur, never on Shabbat or a holy day', () => {
+  it('runs the Ashkenazi season from Leil Selichot, the Sephardi one from 2 Elul and the Teiman one from 1 Elul, all through Erev Yom Kippur, never on Shabbat or a holy day', () => {
     for (const year of [5785, 5786, 5787, 5790]) {
-      const from = new HDate(1, months.ELUL, year - 1).abs();
+      const from = new HDate(29, months.AV, year - 1).abs();
       const to = new HDate(12, months.TISHREI, year).abs();
       for (let abs = from; abs <= to; abs++) {
         const hd = new HDate(abs);
@@ -619,6 +619,10 @@ describe('selichot days', () => {
           (hd.getMonth() === months.TISHREI && hd.getDate() <= 9);
         expect(flags.has('selichotSephardi')).toBe(inSephardiSeason && !holy);
         if (flags.has('selichotAshkenazi')) expect(flags.has('selichotSephardi')).toBe(true);
+        // R14.1: from the night of Rosh Chodesh Elul, the Hebrew day 1 Elul, never 30 Av.
+        const inTeimanSeason = hd.getMonth() === months.ELUL || (hd.getMonth() === months.TISHREI && hd.getDate() <= 9);
+        expect(flags.has('selichotTeiman')).toBe(inTeimanSeason && !holy);
+        if (flags.has('selichotSephardi')) expect(flags.has('selichotTeiman')).toBe(true);
       }
     }
   });

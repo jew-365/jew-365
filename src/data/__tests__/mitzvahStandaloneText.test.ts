@@ -17,7 +17,7 @@ import { useSelichotStore } from '@/stores/useSelichotStore';
 import { installSelichotFixture } from '@/testing/selichot';
 import type { Mitzvah, Nusach } from '@/types/mitzvah';
 
-const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
 const ISRAEL = siddurPlace(CITIES[0], true);
 
 const linked = (id: string): Mitzvah => ({ ...findMitzvah('maariv')!, id });

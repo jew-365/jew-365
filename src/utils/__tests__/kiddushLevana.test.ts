@@ -17,7 +17,7 @@ import {
 
 const JERUSALEM = CITIES[0];
 const LOS_ANGELES = findCityById('los-angeles')!;
-const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
 const placeJ: Place = { inIsrael: true, jerusalem: true, location: JERUSALEM };
 
 const fastEndOn = (location: Location, iso: string) => zmanimFor(at(location, `${iso}T12:00`), location).tzeitTaanit;
@@ -64,10 +64,13 @@ describe('kiddushLevanaPeriod', () => {
     for (const nusach of ['sefard', 'chabad'] as const) {
       expect(periodOf(month, nusach, location)).toEqual({ start: '2026-10-18T07:22:10.171Z', end: toMidMonth });
     }
-    expect(periodOf(month, 'edot_hamizrach', location)).toEqual({
-      start: '2026-10-18T07:22:10.171Z',
-      end: '2026-10-26T07:22:10.171Z',
-    });
+    // R14.4: Teiman reads Edot HaMizrach's period, 7 to 15 days after the molad.
+    for (const nusach of ['edot_hamizrach', 'teiman'] as const) {
+      expect(periodOf(month, nusach, location)).toEqual({
+        start: '2026-10-18T07:22:10.171Z',
+        end: '2026-10-26T07:22:10.171Z',
+      });
+    }
   });
 
   it.each([
@@ -80,7 +83,9 @@ describe('kiddushLevanaPeriod', () => {
     for (const nusach of NUSCHAOT) {
       const { start, end } = kiddushLevanaPeriod(month, nusach, location);
       expect(start).toEqual(exit);
-      expect(iso(end)).toBe(nusach === 'edot_hamizrach' ? '2026-09-26T18:38:06.837Z' : '2026-09-26T13:00:06.837Z');
+      expect(iso(end)).toBe(
+        nusach === 'edot_hamizrach' || nusach === 'teiman' ? '2026-09-26T18:38:06.837Z' : '2026-09-26T13:00:06.837Z',
+      );
     }
   });
 
@@ -95,7 +100,9 @@ describe('kiddushLevanaPeriod', () => {
         const { start, end } = kiddushLevanaPeriod(av, nusach, location);
         expect(start).toEqual(fastEndOn(location, '2026-07-23'));
         expect(start.getTime()).toBeGreaterThan(nightfallOn(location, '2026-07-23').getTime());
-        expect(iso(end)).toBe(nusach === 'edot_hamizrach' ? '2026-07-29T17:10:00.171Z' : '2026-07-29T11:32:00.171Z');
+        expect(iso(end)).toBe(
+          nusach === 'edot_hamizrach' || nusach === 'teiman' ? '2026-07-29T17:10:00.171Z' : '2026-07-29T11:32:00.171Z',
+        );
       }
       const deferred = new HDate(1, months.AV, 5789);
       expect(new HDate(9, months.AV, 5789).getDay()).toBe(6);
@@ -118,7 +125,7 @@ describe('kiddushLevanaNightOpen', () => {
     ['Los Angeles', LOS_ANGELES],
   ])('opens the nights whose nightfall lies in the period, in %s', (_name, location) => {
     expect(openNights('ashkenaz', location)).toEqual(range(4, 15));
-    for (const nusach of ['sefard', 'edot_hamizrach', 'chabad'] as const) {
+    for (const nusach of ['sefard', 'edot_hamizrach', 'chabad', 'teiman'] as const) {
       expect(openNights(nusach, location)).toEqual(range(8, 15));
     }
   });

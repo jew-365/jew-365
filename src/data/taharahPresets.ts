@@ -56,7 +56,8 @@ export const TAHARAH_PRESETS: Record<TaharahPresetId, TaharahRules> = {
 export const TAHARAH_PRESET_IDS = Object.keys(TAHARAH_PRESETS) as TaharahPresetId[];
 
 // The prayer nusach only suggests a starting point: nusach Sefard is the chassidic rite, and the
-// Edot HaMizrach default follows Rav Ovadia Yosef as the most widely followed Sephardi posek.
+// Edot HaMizrach default follows Rav Ovadia Yosef as the most widely followed Sephardi posek, as
+// Teiman's does until the rav answers (R14.6).
 export function presetForNusach(nusach: Nusach): TaharahPresetId {
   switch (nusach) {
     case 'ashkenaz':
@@ -66,6 +67,7 @@ export function presetForNusach(nusach: Nusach): TaharahPresetId {
     case 'chabad':
       return 'chabad';
     case 'edot_hamizrach':
+    case 'teiman':
       return 'sephardi_ovadia';
   }
 }

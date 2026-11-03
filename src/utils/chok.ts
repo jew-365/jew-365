@@ -62,6 +62,7 @@ export const HAFTARAH_VARIANT: Readonly<Record<Nusach, HaftarahVariant>> = {
   sefard: 'ashkenazi',
   edot_hamizrach: 'sephardi',
   chabad: 'ashkenazi',
+  teiman: 'sephardi',
 };
 
 export const CHOK_COMMENTARY_LABELS: readonly string[] = ['Rashi', 'Bartenura'];

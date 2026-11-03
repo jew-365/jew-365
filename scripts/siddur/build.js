@@ -24,7 +24,7 @@ const CHAPTER_INDEX = path.join(ROOT, 'src', 'data', 'siddurChapters.generated.t
 const NUSCHAOT = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
 // A staged nusach is built and written to assets/siddur/<nusach>/ like any other, but stays out of the
 // generated map and chapter index, so the app neither bundles nor offers it until every text exists.
-const STAGED_NUSCHAOT = ['teiman'];
+const STAGED_NUSCHAOT = [];
 const APP_NUSCHAOT = NUSCHAOT.filter((nusach) => !STAGED_NUSCHAOT.includes(nusach));
 const DOWNLOADED_TEXTS = { selichot: path.join(ROOT, 'docs', 'selichot') };
 const GZIP_OPTIONS = { level: 9, mtime: 0 };
@@ -83,14 +83,15 @@ async function loadSource(key) {
   const source = SOURCES[key];
   if (!source) throw new Error(`unknown source ${key}`);
   // A transcription committed under source/ is pinned by the commit that holds it.
-  if (source.local) return fs.readFileSync(path.join(LOCAL_SOURCE_DIR, source.local), 'utf8');
+  if (source.local) return fs.readFileSync(path.join(LOCAL_SOURCE_DIR, source.local), 'utf8').replace(/\r\n/g, '\n');
   fs.mkdirSync(CACHE_DIR, { recursive: true });
   const cached = path.join(CACHE_DIR, `${key}.json`);
   if (!fs.existsSync(cached)) fs.writeFileSync(cached, await download(sourceUrl(source), key));
   const data = JSON.parse(fs.readFileSync(cached, 'utf8'));
   if (source.wikisource) {
     if (source.patches) throw new Error(`${key}: patches apply only to a Sefaria source`);
-    return wikitextOf(data, source, key);
+    const wikitext = wikitextOf(data, source, key);
+    return source.prepare ? source.prepare(wikitext, key) : wikitext;
   }
   return source.patches ? patchedTree(data.text, source.patches, key) : data.text;
 }
@@ -160,6 +161,8 @@ function textBetween(wikitext, after, before, key) {
 }
 
 const TRANSPARENT_TEMPLATES = ['עם-ניקוד'];
+// An unclosed <noinclude> runs to the end of the page, as MediaWiki reads it.
+const NOINCLUDE = /<noinclude>[\s\S]*?(?:<\/noinclude>|$)/g;
 const HEADING_LINE = /^(={1,6})[ \t]*(.+?)[ \t]*\1[ \t]*$/;
 
 function withoutVowels(text) {
@@ -244,7 +247,11 @@ const WIKI_TEMPLATES = {
 
 // The templates and parser functions of pages that print several nuschaot at once, read only from a
 // source that names its nusach (`params`), so no other Wikisource source changes how it reads.
-const NUSACH_FALLBACK = { בלדי: ['בלדי', 'תימן', 'כל השאר'], תימן: ['תימן', 'כל השאר'] };
+const NUSACH_FALLBACK = {
+  בלדי: ['בלדי', 'תימן', 'כל השאר'],
+  תימן: ['תימן', 'כל השאר'],
+  מזרח: ['מזרח', 'כל השאר'],
+};
 
 function nusachVariant(_, named) {
   // The same selector also picks by day (`יום`), and a weekday text reads its "other days" wording.
@@ -255,6 +262,18 @@ function nusachVariant(_, named) {
   return key === undefined ? '' : named[key];
 }
 
+// {{נוסחי אשכנז}} picks the western or eastern Ashkenazi wording; any other נוסח prints both, labeled.
+const ASHKENAZ_FALLBACK = { מערבי: ['מערבי'], מזרחי: ['מזרחי'], פולין: ['פולין', 'מזרחי'], ליטא: ['ליטא', 'מזרחי'] };
+function ashkenazVariant(_, named) {
+  const chain = ASHKENAZ_FALLBACK[(named['נוסח'] ?? '').trim()];
+  if (chain) return named[chain.find((name) => name in named)] ?? '';
+  const variants = ['מערבי', 'מזרחי', 'פולין', 'ליטא'].filter((name) => named[name]);
+  return `[${variants.map((name) => `<small>נוסח ${name}:</small> ${named[name]}`).join(' ')}]`;
+}
+
+// <poem> and the templates built on it ({{שורות}}) break a line at every newline.
+const poemLines = (text) => text.trim().replace(/\n/g, '<br>\n');
+
 const PARAM_TEMPLATES = {
   ג: ([text]) => text,
   גדול: ([text]) => text,
@@ -262,6 +281,7 @@ const PARAM_TEMPLATES = {
   מודגש: ([text]) => text,
   סי: ([text]) => text,
   רן: ([text]) => text,
+  רפרן: (lines) => lines.map((line) => `<br><small><b>${line}</b></small>`).join(''),
   שמאל: ([text]) => text,
   ק: ([text]) => `<small>${text}</small>`,
   קטן: ([text]) => `<small>${text}</small>`,
@@ -281,6 +301,25 @@ const PARAM_TEMPLATES = {
   'טורים שווים ממורכז': (columns) => columns.join('\n\n'),
   'נוסחי תפילה קצרים': nusachVariant,
   'נוסחי תפילה ארוכים': nusachVariant,
+  'נוסחי תפילה מוסתר': nusachVariant,
+  'נוסחי אשכנז': ashkenazVariant,
+  ע: ([text]) => `<small><b>${text}</b></small>`,
+  'מילת קבע': ([text]) => text,
+  מר: ([text = '']) => text,
+  ממורכז: ([text]) => text,
+  'צבע גופן': ([, text = '']) => text,
+  'כתב עילי': ([text]) => `<small>${text}</small>`,
+  ר2: () => ' ',
+  // A non-breaking space, so a {{#בחר}} that ends in one keeps it.
+  רווח: () => '&nbsp;',
+  שורות: ([text = '']) => poemLines(text),
+  החלף: ([source = '', from = '', to = '']) => (from ? source.split(from).join(to) : source),
+  'בעשרת ימי תשובה': () => '<br><small><b>בעשרת ימי תשובה:</b></small> ',
+  'בעשרת ימי תשובה סוף': () => '<br>',
+  טת: (cells, named) => {
+    if (named['טבלה']?.trim() === 'כן') throw new Error('{{טת}} in a table is not read');
+    return `${cells.join(named['בשורה']?.trim() === 'כן' ? ' / ' : '<br>')}<br>`;
+  },
 };
 
 function namedArgs(args) {
@@ -389,26 +428,51 @@ function substituteParams(wikitext, params) {
   return out;
 }
 
-// A wiki table becomes its rows, one line each, and its cells joined by a space.
+// A wiki table becomes its rows, one line each, and its cells joined by a space, a cell's attributes
+// (`colspan="2" |`) dropped. A pipe outside a table belongs to a template and stays.
 function withoutTables(wikitext) {
-  return wikitext
-    .replace(/\{\|.*$/gm, '')
-    .replace(/^[ \t]*\|-.*$/gm, '<br>')
-    .replace(/^[ \t]*\|\}|\|\}/gm, '')
-    .replace(/^[ \t]*\|/gm, '')
-    .replace(/\|\|/g, ' ');
+  return wikitext.replace(/^[ \t:]*\{\|.*$([\s\S]*?)^[ \t]*\|\}/gm, (_, rows) =>
+    rows
+      .replace(/^[ \t]*\|-.*$/gm, '<br>')
+      .replace(/^[ \t]*\|(?:(?:\s*[\w-]+\s*=\s*"[^"\n]*")+\s*\|(?!\|))?/gm, '')
+      .replace(/\|\|/g, ' '),
+  );
+}
+
+// A template that is itself a pinned page ({{גפ|…}} as תבנית:גפ) is read like a transclusion with
+// its arguments, numbered from 1 as MediaWiki numbers them.
+async function withPinnedTemplates(wikitext, key, used) {
+  const templates = Object.values(SOURCES)
+    .map((source) => source.wikisource)
+    .filter((page) => page?.startsWith('תבנית:'))
+    .map((page) => escapeRegExp(page.slice('תבנית:'.length)));
+  const pinnedTemplate = new RegExp(`\\{\\{(${templates.join('|')})(\\|[^{}]*)?\\}\\}`);
+  let out = wikitext;
+  for (let found = templates.length && pinnedTemplate.exec(out); found; found = pinnedTemplate.exec(out)) {
+    const args = (found[2] ?? '').split('|').slice(1);
+    const positional = args.filter((arg) => !/^[^=]+=/.test(arg));
+    const sourceKey = pinnedPage(`תבנית:${found[1]}`, key);
+    used.add(sourceKey);
+    const included = await wikiToHtml(withoutWrappers(await loadSource(sourceKey), sourceKey), sourceKey, used, {
+      ...Object.fromEntries(positional.map((arg, index) => [String(index + 1), arg])),
+      ...namedArgs(args),
+    });
+    out = out.slice(0, found.index) + included + out.slice(found.index + found[0].length);
+  }
+  return out;
 }
 
 async function wikiToHtml(wikitext, key, used, params = null) {
   if (params) {
     wikitext = withoutTables(
-      substituteParams(wikitext.replace(/<noinclude>[\s\S]*?<\/noinclude>/g, ''), params)
+      substituteParams(wikitext.replace(NOINCLUDE, ''), params)
         .replace(/<\/?includeonly>/g, '')
         .replace(/\[\[קטגוריה:[^\]]*\]\]/g, '')
         .replace(/\[\[(?:[^\]|]*\|)?([^\]]*)\]\]/g, '$1')
         .replace(/'''([\s\S]+?)'''/g, '<b>$1</b>')
         .replace(/''([\s\S]+?)''/g, '$1')
-        .replace(/'{2,}/g, ''),
+        .replace(/'{2,}/g, '')
+        .replace(/<poem>([\s\S]*?)<\/poem>/g, (_, body) => poemLines(body)),
     );
     for (let found = PSALM_TEMPLATES.exec(wikitext); found; found = PSALM_TEMPLATES.exec(wikitext)) {
       const verses = await psalmText(found[1], found[2].split('|'), key, used);
@@ -427,27 +491,10 @@ async function wikiToHtml(wikitext, key, used, params = null) {
       });
       wikitext = wikitext.slice(0, found.index) + included + wikitext.slice(found.index + found[0].length);
     }
-    // A template that is itself a pinned page ({{גפ|…}} as תבנית:גפ) is read like a transclusion with
-    // its arguments, numbered from 1 as MediaWiki numbers them.
-    const templates = Object.values(SOURCES)
-      .map((source) => source.wikisource)
-      .filter((page) => page?.startsWith('תבנית:'))
-      .map((page) => escapeRegExp(page.slice('תבנית:'.length)));
-    const pinnedTemplate = new RegExp(`\\{\\{(${templates.join('|')})(\\|[^{}]*)?\\}\\}`);
-    for (let found = templates.length && pinnedTemplate.exec(wikitext); found; found = pinnedTemplate.exec(wikitext)) {
-      const args = (found[2] ?? '').split('|').slice(1);
-      const positional = args.filter((arg) => !/^[^=]+=/.test(arg));
-      const sourceKey = pinnedPage(`תבנית:${found[1]}`, key);
-      used.add(sourceKey);
-      const included = await wikiToHtml(withoutWrappers(await loadSource(sourceKey), sourceKey), sourceKey, used, {
-        ...Object.fromEntries(positional.map((arg, index) => [String(index + 1), arg])),
-        ...namedArgs(args),
-      });
-      wikitext = wikitext.slice(0, found.index) + included + wikitext.slice(found.index + found[0].length);
-    }
+    wikitext = await withPinnedTemplates(wikitext, key, used);
   }
   let html = wikitext
-    .replace(/<noinclude>[\s\S]*?<\/noinclude>/g, '')
+    .replace(NOINCLUDE, '')
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<קטע (?:התחלה|סוף)=[^>]*\/>/g, '')
     .replace(new RegExp(HEADING_LINE.source, 'gm'), (_, __, heading) => `<small>${withoutVowels(heading)}</small>`);
@@ -475,6 +522,8 @@ async function wikiToHtml(wikitext, key, used, params = null) {
   }
   for (let previous = ''; previous !== html;) {
     previous = html;
+    // A pinned template whose arguments held templates is read once those are expanded.
+    if (params) html = await withPinnedTemplates(html, key, used);
     html = html.replace(/\{\{([^{}]*)\}\}/g, (_, body) => expandTemplate(body, key, Boolean(params)));
   }
   html = html
@@ -490,7 +539,7 @@ async function wikiToHtml(wikitext, key, used, params = null) {
 }
 
 async function wikisourceSegments(key, nodePath, used) {
-  const wikitext = withoutWrappers((await loadSource(key)).replace(/<noinclude>[\s\S]*?<\/noinclude>/g, ''), key);
+  const wikitext = withoutWrappers((await loadSource(key)).replace(NOINCLUDE, ''), key);
   const segments = [];
   used.add(key);
   for (const part of nodePath.split(' | ')) {

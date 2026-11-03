@@ -363,6 +363,8 @@ async function mountCase(smokeCase: SmokeCase, language: Locale) {
   await act(async () => {});
 }
 
+const teiman = () => useUserStore.setState({ nusach: 'teiman' });
+
 const husband = () => {
   useUserStore.setState({ gender: 'male' });
   useTaharahStore.getState().setRole('husband');
@@ -575,6 +577,17 @@ const CASES: SmokeCase[] = [
     },
     check: text(/מותקן בנוסח אשכנז/, /Installed for Ashkenaz/),
   },
+  {
+    file: 'mitzvah/[id]',
+    label: 'Selichot with nusach Teiman installed',
+    Screen: MitzvahScreen,
+    params: { id: 'selichot' },
+    setup: () => {
+      teiman();
+      installSelichotFixture(['teiman']);
+    },
+    check: text(/מותקן בנוסח תימן בלדי/, /Installed for Teiman Baladi/),
+  },
   { file: 'late-marks', label: 'default', Screen: LateMarksScreen, check: text('סימונים באיחור', 'Late marks') },
   { file: 'mitzvot', label: 'default', Screen: MitzvotScreen, check: text('המצוות שלי', 'My mitzvot') },
   { file: 'report', label: 'latest week', Screen: ReportScreen, check: text('סיכום שבועי', 'Weekly report') },
@@ -610,6 +623,14 @@ const CASES: SmokeCase[] = [
       text('תפילת שחרית', 'Shacharit'),
       text('מוֹדֶה אֲנִי', /I give thanks to You living and everlasting King/),
     ),
+  },
+  {
+    file: 'siddur/[id]',
+    label: 'a mitzvah text in nusach Teiman',
+    Screen: SiddurReaderScreen,
+    params: { id: 'shacharit' },
+    setup: teiman,
+    check: both(text('תפילת שחרית', 'Shacharit'), text(/תימן בלדי/, /Teiman Baladi/)),
   },
   {
     file: 'siddur/[id]',
@@ -711,6 +732,13 @@ const CASES: SmokeCase[] = [
   { file: '(tabs)/settings', label: 'default', Screen: SettingsScreen, check: text('הגדרות', 'Settings') },
   { file: '(tabs)/siddur', label: 'default', Screen: SiddurTabScreen, check: text('סידור', 'Siddur') },
   {
+    file: '(tabs)/siddur',
+    label: 'in nusach Teiman',
+    Screen: SiddurTabScreen,
+    setup: teiman,
+    check: text(/תימן בלדי/, /Teiman Baladi/),
+  },
+  {
     file: 'onboarding/index',
     label: 'welcome',
     Screen: OnboardingWelcomeScreen,
@@ -736,7 +764,7 @@ const CASES: SmokeCase[] = [
     label: 'nusach',
     Screen: OnboardingNusachScreen,
     fresh: true,
-    check: text('מה הנוסח שלך?', 'Which nusach are you?'),
+    check: both(text('מה הנוסח שלך?', 'Which nusach are you?'), text('תימן בלדי', 'Teiman Baladi')),
   },
   {
     file: 'onboarding/permissions',

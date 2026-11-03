@@ -94,6 +94,9 @@ describe('skipRules', () => {
       expect(keepsCholHamoed(DIASPORA_SEFARD)).toBe(false);
       expect(keepsCholHamoed({ nusach: 'edot_hamizrach', inIsrael: false })).toBe(false);
       expect(keepsCholHamoed({ nusach: 'chabad', inIsrael: false })).toBe(false);
+      // R14.5: Teiman never keeps tefillin on chol hamoed, in Israel or abroad.
+      expect(keepsCholHamoed({ nusach: 'teiman', inIsrael: true })).toBe(false);
+      expect(keepsCholHamoed({ nusach: 'teiman', inIsrael: false })).toBe(false);
     });
 
     it('skips tefillin in Israel and for non-Ashkenazim abroad, keeps it for Ashkenazim abroad', () => {

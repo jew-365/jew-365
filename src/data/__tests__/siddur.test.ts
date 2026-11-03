@@ -58,11 +58,22 @@ import { useSelichotStore } from '@/stores/useSelichotStore';
 import { installSelichotFixture } from '@/testing/selichot';
 import { TEXTS_NOT_SHIPPED, readSiddurText, shippedTextIds, shipsText, siddurAssetFolder } from '@/testing/siddur';
 
-const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
+// The four nuschaot whose texts carry a passage Teiman's do not hold yet; each such passage is pinned for Teiman
+// as an expected failure in 'nusach Teiman: passages not built yet' at the end of this file.
+const BUILT_BEFORE_TEIMAN: Nusach[] = NUSCHAOT.filter((nusach) => nusach !== 'teiman');
 const TEXT_IDS = SIDDUR_TEXT_IDS;
 const MITZVAH_TEXT_IDS = Object.keys(SIDDUR_TEXTS) as MitzvahTextId[];
 const STANDALONE_IDS = Object.keys(STANDALONE_TEXTS) as StandaloneTextId[];
 const ASSET_DIR = path.join(__dirname, '..', '..', '..', 'assets', 'siddur');
+// The 1894 Tiklal Etz Chaim, the print the Teiman texts no Wikisource page holds are transcribed from.
+const TIKLAL_SCAN = 'https://archive.org/details/Tiklal_Eiz_Hayyim_Jerusalem_1894';
+// The Baladi Ten Days Kedushah quotes the verse "and the holy God is sanctified in righteousness" before its seal,
+// so only the weekday seals tell the days apart there.
+const TEIMAN_WEEKDAY_SEALS = /ברוך אתה \S+ האל הקדוש|מלך או?הב צדקה ומשפט/;
+// The Baladi Maariv, the Rambam's formula, separates Shabbat or Yom Tov from the week in Chonen HaDaat with "Ve'ata
+// hivdalta", where the other nuschaot say "Ata chonantanu".
+const BALADI_HAVDALAH = /ואתה הבדלת בין קדש לחול/;
 
 function load(nusach: Nusach, id: SiddurTextId): SiddurText {
   return readSiddurText(nusach, id);
@@ -126,7 +137,7 @@ function erev(day: number, month: number, year: number): Date {
 
 describe('siddur content', () => {
   it('ships every registered text for every nusach but the named exceptions, in step with the generated asset map', () => {
-    expect(TEXTS_NOT_SHIPPED).toEqual({ ushpizin: ['chabad'] });
+    expect(TEXTS_NOT_SHIPPED).toEqual({ ushpizin: ['chabad', 'teiman'] });
     for (const nusach of NUSCHAOT) {
       for (const id of TEXT_IDS.filter((candidate) => !shipsText(nusach, candidate))) {
         expect((SIDDUR_ASSETS[nusach] as Record<string, unknown>)[id]).toBeUndefined();
@@ -147,7 +158,9 @@ describe('siddur content', () => {
         expect(text.credits.length).toBeGreaterThan(0);
         for (const credit of text.credits) {
           expect(credit.license).toMatch(/^(CC|Public Domain$)/);
-          expect(credit.url).toMatch(/^https:\/\/(www\.sefaria\.org|he\.wikisource\.org)\//);
+          if (credit.url !== TIKLAL_SCAN)
+            expect(credit.url).toMatch(/^https:\/\/(www\.sefaria\.org|he\.wikisource\.org)\//);
+          else expect({ nusach, license: credit.license }).toEqual({ nusach: 'teiman', license: 'Public Domain' });
         }
         for (const segment of text.sections.flatMap((section) => section.segments)) {
           expect(segment.he.length).toBeGreaterThan(0);
@@ -199,7 +212,7 @@ describe('siddur content', () => {
         const label = letters(`${gematriya(hd.getDate())} ${monthName[hd.getMonth()]}`);
         const shown = letters(counted.flatMap((segment) => segment.he.flat().map((run) => run.t)).join(' '));
         expect(shown).toContain(label);
-        expect(shown).toContain('היום');
+        expect(shown).toContain(nusach === 'teiman' ? 'האידאנא' : 'היום');
       }
       const outside = resolveSiddurText(text, { flags: new Set(), omerDay: null });
       expect(
@@ -221,6 +234,16 @@ describe('siddur content', () => {
       const shabbat = saidOn(nusach, 'candle_lighting', eveningOf(regularFriday));
       expect(shabbat).toMatch(/נר של שבת/);
       expect(shabbat).not.toMatch(/יום טוב|הכפורים|שהחינו/);
+      if (nusach === 'teiman') {
+        // R14.7: the Tiklal prints the Shabbat blessing alone, so every other evening shows only that note.
+        for (const evening of [erevPesach, erevLastDayPesach, erevYomKippur, erevRoshHashanaOnShabbat]) {
+          expect(saidOn(nusach, 'candle_lighting', eveningOf(evening))).toBe('');
+          expect(shownOn(nusach, 'candle_lighting', eveningOf(evening))).toMatch(
+            /^ ?בתכלאל נדפסה ברכת הדלקת הנר לשבת בלבד$/,
+          );
+        }
+        continue;
+      }
 
       const pesach = saidOn(nusach, 'candle_lighting', eveningOf(erevPesach));
       expect(pesach).toMatch(/נר של יום טוב/);
@@ -285,11 +308,20 @@ describe('siddur content', () => {
       expect(afterYomKippur).toMatch(/מאורי האש/);
       expect(afterYomKippur).toMatch(/המבדיל בין קדש לחול/);
       expect(afterYomKippur).not.toMatch(/בשמים/);
-      expect(shownOn(nusach, 'havdalah', eveningOf(yomKippur))).toMatch(/נר ששבת/);
+      expect(shownOn(nusach, 'havdalah', eveningOf(yomKippur))).toMatch(
+        nusach === 'teiman' ? /ואין מברכין על הנר אלא על אור ששבת/ : /נר ששבת/,
+      );
 
       const afterYomKippurOnShabbat = saidOn(nusach, 'havdalah', eveningOf(yomKippurOnShabbat));
-      expect(afterYomKippurOnShabbat).toMatch(/בשמים/);
       expect(afterYomKippurOnShabbat).toMatch(/מאורי האש/);
+      if (nusach !== 'teiman') expect(afterYomKippurOnShabbat).toMatch(/בשמים/);
+      else {
+        // The Tiklal's own note: no spices after Yom Kippur even when it falls on Shabbat.
+        expect(afterYomKippurOnShabbat).not.toMatch(/בשמים/);
+        expect(shownOn(nusach, 'havdalah', eveningOf(yomKippurOnShabbat))).toMatch(
+          /ואין מברכין על הבשמים אפילו חל בשבת/,
+        );
+      }
 
       const afterTheFast = saidOn(nusach, 'havdalah', eveningOf(deferredTishaBav));
       expect(afterTheFast).toMatch(/בורא פרי הג[פג]ן/);
@@ -304,13 +336,17 @@ describe('siddur content', () => {
         eveningOf(yomKippur),
         eveningOf(deferredTishaBav),
       ]) {
-        expect(shownOn(nusach, 'havdalah', withoutSpices)).not.toMatch(/בשמים/);
+        const shown = shownOn(nusach, 'havdalah', withoutSpices);
+        // The Tiklal's Yom Kippur note names the spices only to say they are not blessed.
+        expect(nusach === 'teiman' ? shown.replace('ואין מברכין על הבשמים', '') : shown).not.toMatch(/בשמים/);
       }
       expect(shownOn(nusach, 'havdalah', eveningOf(new Date(2026, 9, 10)))).toMatch(/בשמים/);
 
       const tishaBavNight = shownOn(nusach, 'havdalah', eveningOf(new HDate(9, months.AV, 5782).greg()));
-      expect(tishaBavNight).toMatch(/בצאת הצום/);
-      expect(shownOn(nusach, 'havdalah', eveningOf(new Date(2026, 9, 10)))).not.toMatch(/נר ששבת|בצאת הצום/);
+      expect(tishaBavNight).toMatch(nusach === 'teiman' ? /ומוצאי טב מבדיל על הכוס/ : /בצאת הצום/);
+      expect(shownOn(nusach, 'havdalah', eveningOf(new Date(2026, 9, 10)))).not.toMatch(
+        /נר ששבת|אור ששבת|בצאת הצום|מוצאי טב/,
+      );
     }
   });
 
@@ -382,7 +418,7 @@ describe('weekday mincha', () => {
       expect(ten).toMatch(/המלך הקדוש/);
       expect(ten).toMatch(/המלך המשפט/);
       expect(ten).toMatch(/זכרנו לחיים/);
-      expect(ten).not.toMatch(/האל הקדוש|מלך או?הב צדקה ומשפט/);
+      expect(ten).not.toMatch(nusach === 'teiman' ? TEIMAN_WEEKDAY_SEALS : /האל הקדוש|מלך או?הב צדקה ומשפט/);
 
       const plain = saidOn(nusach, 'mincha', weekday);
       expect(plain).toMatch(/האל הקדוש/);
@@ -393,8 +429,10 @@ describe('weekday mincha', () => {
 
   it('says Aneinu only on a public fast', () => {
     for (const nusach of NUSCHAOT) {
-      expect(saidOn(nusach, 'mincha', tammuzFast)).toMatch(/עננו \S+ עננו/);
-      expect(saidOn(nusach, 'mincha', weekday)).not.toMatch(/עננו \S+ עננו/);
+      // The Baladi Aneinu adds "our God" after the Name, in the chazzan's and in the individual's.
+      const aneinu = nusach === 'teiman' ? /עננו \S+ אלהינו (עננו )?ביום צום התענית הזה/ : /עננו \S+ עננו/;
+      expect(saidOn(nusach, 'mincha', tammuzFast)).toMatch(aneinu);
+      expect(saidOn(nusach, 'mincha', weekday)).not.toMatch(aneinu);
     }
     expect(saidOn('ashkenaz', 'mincha', tammuzFast)).toMatch(/שים שלום/);
     expect(saidOn('ashkenaz', 'mincha', tammuzFast)).not.toMatch(/שלום רב/);
@@ -405,6 +443,17 @@ describe('weekday mincha', () => {
   it('closes Boneh Yerushalayim with Nachem on Tisha B’Av instead of the ordinary ending', () => {
     for (const nusach of NUSCHAOT) {
       const fast = saidOn(nusach, 'mincha', tishaBav);
+      if (nusach === 'teiman') {
+        // The Tiklal says Rachem in place of Tishkon on Tisha B'Av and keeps the seal Boneh Yerushalayim.
+        const plain = saidOn(nusach, 'mincha', weekday);
+        expect(fast).toMatch(/רחם \S+ אלהינו עלינו ועל ישראל עמך ועל ירושלי?ם עירך העיר האבלה/);
+        expect(fast).not.toMatch(/תשכון בתוך ירושלי?ם/);
+        expect(count(fast, /ברוך אתה \S+ בונה ירושלי?ם/)).toBe(1);
+        expect(plain).toMatch(/תשכון בתוך ירושלי?ם/);
+        expect(plain).not.toMatch(/העיר האבלה/);
+        expect(count(plain, /ברוך אתה \S+ בונה ירושלי?ם/)).toBe(1);
+        continue;
+      }
       expect(fast).toMatch(/אבלי ציון/);
       expect(fast).toMatch(/מנחם ציון/);
       expect(count(fast, /ברוך אתה \S+ בונה ירושלי?ם/)).toBe(0);
@@ -447,7 +496,12 @@ describe('weekday mincha', () => {
   });
 
   it('says Avinu Malkeinu in the Ten Days and on fasts, with the lines that match the day', () => {
-    for (const nusach of NUSCHAOT) {
+    // Teiman's Mincha, from the Tiklal, prints no long Avinu Malkeinu: only the four lines its daily Tachanun holds.
+    for (const features of [tenDays, tzomGedaliah, tammuzFast, weekday]) {
+      expect(saidOn('teiman', 'mincha', features)).not.toMatch(avinuMalkeinu);
+      expect(saidOn('teiman', 'mincha', features)).toMatch(/אבינו מלכנו אבינו אתה/);
+    }
+    for (const nusach of NUSCHAOT.filter((candidate) => candidate !== 'teiman')) {
       for (const tenDaysOrBoth of [tenDays, tzomGedaliah]) {
         const said = saidOn(nusach, 'mincha', tenDaysOrBoth);
         expect(said).toMatch(avinuMalkeinu);
@@ -514,7 +568,7 @@ describe('weekday maariv', () => {
   });
 
   it('adds Ata Chonantanu, Vihi Noam and Ve’ata Kadosh after an ordinary Shabbat, with the full Kaddish after them', () => {
-    for (const nusach of NUSCHAOT) {
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       const said = saidOn(nusach, 'maariv', afterShabbat);
       expect(said).toMatch(/אתה חוננתנו/);
       expect(said).toMatch(viHiNoam);
@@ -532,7 +586,7 @@ describe('weekday maariv', () => {
   it('keeps Ata Chonantanu but drops Vihi Noam and Ve’ata Kadosh before a week with Yom Kippur', () => {
     for (const nusach of NUSCHAOT) {
       const said = saidOn(nusach, 'maariv', afterShabbatBeforeYomKippur);
-      expect(said).toMatch(/אתה חוננתנו/);
+      expect(said).toMatch(nusach === 'teiman' ? BALADI_HAVDALAH : /אתה חוננתנו/);
       expect(said).not.toMatch(viHiNoam);
       expect(said).not.toMatch(/ואתה קדוש/);
       expect(count(said, /תתקבל/)).toBe(1);
@@ -542,11 +596,12 @@ describe('weekday maariv', () => {
   it('after Yom Tov into Chol HaMoed Pesach says Ata Chonantanu, the festival and the first omer count', () => {
     for (const nusach of NUSCHAOT) {
       const said = saidOn(nusach, 'maariv', afterYomTovIntoCholHamoed);
-      expect(said).toMatch(/אתה חוננתנו/);
+      expect(said).toMatch(nusach === 'teiman' ? BALADI_HAVDALAH : /אתה חוננתנו/);
       expect(said).toMatch(/חג המצות הזה/);
       expect(said).not.toMatch(viHiNoam);
       expect(said).toMatch(/ספירת העמר/);
-      expect(said).toMatch(/היום יום אחד/);
+      // The Baladi count is the Aramaic one.
+      expect(said).toMatch(nusach === 'teiman' ? /האידאנא חד יומא בעמרא/ : /היום יום אחד/);
     }
   });
 
@@ -564,7 +619,7 @@ describe('weekday maariv', () => {
   });
 
   it('says Ve’ata Kadosh after Eichah on Tisha B’Av night, without Vihi Noam', () => {
-    for (const nusach of NUSCHAOT) {
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       for (const night of [tishaBav, tishaBavAfterShabbat]) {
         const shown = shownOn(nusach, 'maariv', night);
         expect(shown).toMatch(/איכה/);
@@ -588,7 +643,7 @@ describe('weekday maariv', () => {
       const said = saidOn(nusach, 'maariv', tenDays);
       expect(said).toMatch(/המלך הקדוש/);
       expect(said).toMatch(/המלך המשפט/);
-      expect(said).not.toMatch(/האל הקדוש|מלך או?הב צדקה ומשפט/);
+      expect(said).not.toMatch(nusach === 'teiman' ? TEIMAN_WEEKDAY_SEALS : /האל הקדוש|מלך או?הב צדקה ומשפט/);
       expect(saidOn(nusach, 'maariv', weeknight)).not.toMatch(/המלך הקדוש|המלך המשפט/);
     }
   });
@@ -650,6 +705,7 @@ describe('weekday shacharit', () => {
       sefard: /הבט משמים וראה/,
       edot_hamizrach: /אל מלך יושב על כסא רחמים/,
       chabad: /הבט משמים וראה/,
+      teiman: /הפותח יד בתשובה לקבל פושעים/,
     };
     for (const nusach of NUSCHAOT) {
       expect(titles(nusach, tuesday)).toContain('תחנון');
@@ -692,6 +748,16 @@ describe('weekday shacharit', () => {
     }
     expect(saidOn('edot_hamizrach', 'shacharit', chanukah)).toMatch(/לגמור את ההלל/);
     expect(saidOn('edot_hamizrach', 'shacharit', roshChodesh)).not.toMatch(/לגמור את ההלל|לקרוא את ההלל/);
+    // The Tiklal blesses before and after Hallel on the days it says it whole, and on no other.
+    const closing = /יהללוך \S+ אלהינו כל מעשיך/;
+    for (const whole of [chanukah, cholHamoedSukkot]) {
+      expect(saidOn('teiman', 'shacharit', whole)).toMatch(/לגמור את ההלל/);
+      expect(saidOn('teiman', 'shacharit', whole)).toMatch(closing);
+    }
+    for (const half of [roshChodesh, cholHamoedPesach]) {
+      expect(saidOn('teiman', 'shacharit', half)).not.toMatch(/לגמור את ההלל/);
+      expect(saidOn('teiman', 'shacharit', half)).not.toMatch(closing);
+    }
   });
 
   it('takes the lulav on Chol HaMoed Sukkot only', () => {
@@ -704,8 +770,21 @@ describe('weekday shacharit', () => {
   it('names the day in Musaf, with the Sukkot offerings of the day and of the doubtful day abroad', () => {
     for (const nusach of NUSCHAOT) {
       expect(saidOn(nusach, 'shacharit', roshChodesh)).toMatch(/ראשי חדשים לעמך נתת/);
-      expect(saidOn(nusach, 'shacharit', cholHamoedPesach)).toMatch(/מוסף יום \S*\s?חג המצות/);
-      expect(saidOn(nusach, 'shacharit', cholHamoedSukkot)).toMatch(/מוסף יום \S*\s?חג הסכות/);
+      // The Tiklal's festival Musaf, said on Chol HaMoed with the day's line its Maariv prints, names "musfei".
+      const musafOf = (festival: string) =>
+        nusach === 'teiman'
+          ? new RegExp(`מוספי יום מקרא קדש הזה יום מועד חג ${festival} הזה נעשה`)
+          : new RegExp(`מוסף יום \\S*\\s?חג ${festival}`);
+      expect(saidOn(nusach, 'shacharit', cholHamoedPesach)).toMatch(musafOf('המצות'));
+      expect(saidOn(nusach, 'shacharit', cholHamoedSukkot)).toMatch(musafOf(nusach === 'teiman' ? 'הסוכות' : 'הסכות'));
+    }
+    for (const [features, festival] of [
+      [cholHamoedPesach, 'המצות'],
+      [cholHamoedSukkot, 'הסוכות'],
+    ] as const) {
+      const said = saidOn('teiman', 'shacharit', features);
+      expect(said).toMatch(new RegExp(`את יום מקרא קדש הזה את יום מועד חג ${festival} הזה זמן`));
+      expect(said).not.toMatch(/יום טוב מקרא קדש|יום חג השבועות|יום חג שמיני עצרת|יום המנוח/);
     }
     for (const nusach of ['ashkenaz', 'sefard', 'chabad'] as const) {
       const israel = saidOn(nusach, 'shacharit', cholHamoedSukkot);
@@ -795,7 +874,8 @@ describe('weekday shacharit', () => {
     }
     for (const nusach of ['ashkenaz', 'sefard', 'chabad'] as const)
       expect(saidOn(nusach, 'shacharit', tammuzFast)).toMatch(avinuMalkeinu);
-    expect(saidOn('edot_hamizrach', 'shacharit', tammuzFast)).not.toMatch(avinuMalkeinu);
+    for (const nusach of ['edot_hamizrach', 'teiman'] as const)
+      expect(saidOn(nusach, 'shacharit', tammuzFast)).not.toMatch(avinuMalkeinu);
   });
 
   it('skips Lamnatzeach on the days the nusach does', () => {
@@ -809,7 +889,11 @@ describe('weekday shacharit', () => {
   });
 
   it('drops the covenant verse and Titkabel on Tisha B’Av', () => {
-    for (const nusach of NUSCHAOT) {
+    // Neither Baladi source gives a Tisha B'Av rule for them, so Teiman says both, pending the rav (R16).
+    const teimanFast = saidOn('teiman', 'shacharit', tishaBav);
+    expect(teimanFast).toMatch(/ואני זאת בריתי/);
+    expect(teimanFast).toMatch(/תתקבל/);
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       const fast = saidOn(nusach, 'shacharit', tishaBav);
       expect(fast).not.toMatch(/ואני זאת בריתי/);
       expect(fast).not.toMatch(/תתקבל/);
@@ -820,7 +904,10 @@ describe('weekday shacharit', () => {
   });
 
   it('says Mizmor LeToda except on erev Pesach and Chol HaMoed Pesach', () => {
-    for (const nusach of NUSCHAOT) {
+    // The Baladi page gives Mizmor LeToda no day rule, so Teiman says it every day (R16).
+    for (const features of [tuesday, erevPesach, cholHamoedPesach])
+      expect(saidOn('teiman', 'shacharit', features)).toMatch(/מזמור לתודה/);
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       expect(saidOn(nusach, 'shacharit', tuesday)).toMatch(/מזמור לתודה/);
       expect(saidOn(nusach, 'shacharit', erevPesach)).not.toMatch(/מזמור לתודה/);
       expect(saidOn(nusach, 'shacharit', cholHamoedPesach)).not.toMatch(/מזמור לתודה/);
@@ -894,7 +981,9 @@ describe('tallit and tefillin in shacharit', () => {
         expect(said).toMatch(TEFILLIN_HEAD);
         const { titles } = neighbours(nusach, features);
         expect(titles.filter((title) => title === TITLE)).toHaveLength(1);
-        expect(titles.indexOf(TITLE)).toBeLessThan(titles.indexOf('קרבנות'));
+        // Teiman's Shacharit says the Tamid within the Torah blessings and has no Korbanot section.
+        if (nusach === 'teiman') expect(titles).not.toContain('קרבנות');
+        else expect(titles.indexOf(TITLE)).toBeLessThan(titles.indexOf('קרבנות'));
         expect(titles.indexOf(TITLE)).toBeLessThan(titles.indexOf('פסוקי דזמרה'));
       }
     }
@@ -902,7 +991,7 @@ describe('tallit and tefillin in shacharit', () => {
 
   it('says Baruch Shem after the head tefillin where the nusach prints it', () => {
     for (const nusach of ['ashkenaz', 'sefard'] as const) expect(saidIn(nusach, weekday)).toMatch(BARUCH_SHEM);
-    for (const nusach of ['edot_hamizrach', 'chabad'] as const)
+    for (const nusach of ['edot_hamizrach', 'chabad', 'teiman'] as const)
       expect(saidIn(nusach, weekday)).not.toMatch(BARUCH_SHEM);
   });
 
@@ -911,6 +1000,7 @@ describe('tallit and tefillin in shacharit', () => {
     expect(neighbours('sefard', weekday)).toMatchObject({ before: 'ברכות התורה', after: 'מה טובו' });
     expect(neighbours('edot_hamizrach', weekday)).toMatchObject({ before: 'פתח אליהו', after: 'תפילת חנה' });
     expect(neighbours('chabad', weekday)).toMatchObject({ before: 'ברכות התורה', after: 'מה טובו' });
+    expect(neighbours('teiman', weekday)).toMatchObject({ before: 'לעולם יהא אדם', after: 'פסוקי דזמרה' });
   });
 
   it('leaves both out on Tisha B’Av', () => {
@@ -965,13 +1055,16 @@ describe('tallit and tefillin in shacharit', () => {
           .filter((candidate) => candidate.title.he === 'הנחת תפילין')
           .flatMap((candidate) => candidate.segments)
           .filter((segment) => segment.he.flat().some((run) => run.s !== 'n'))
-          .slice(nusach === 'edot_hamizrach' ? 0 : TALLIT_KATAN_SAID_SEGMENTS[nusach])
+          .slice(nusach === 'edot_hamizrach' || nusach === 'teiman' ? 0 : TALLIT_KATAN_SAID_SEGMENTS[nusach])
           .flatMap((segment) => segment.he.flat())
           .filter((run) => run.s !== 'n')
           .map((run) => run.t)
           .join(' '),
       );
-    for (const nusach of NUSCHAOT) {
+    // Teiman's standalone text opens with the same tallit blessing, so the two read alike from the first word.
+    expect(standalone('teiman')).toMatch(TALLIT);
+    expect(saidIn('teiman', weekdayAbroad)).toBe(standalone('teiman'));
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       const inShacharit = saidIn(nusach, weekdayAbroad);
       const tefillin = standalone(nusach);
       expect(tefillin.length).toBeGreaterThan(0);
@@ -1342,9 +1435,12 @@ describe('passages only some say', () => {
       expect(labelOf(nusach, 'shacharit', monday, /^למנצח לבני ?קרח מזמור שמעו ?זאת/)).toBe('בבית האבל אומרים');
     }
     expect(labelOf('sefard', 'mincha', monday, /^למנצח לבני ?קרח מזמור שמעו ?זאת/)).toBe('בבית האבל אומרים');
-    for (const nusach of NUSCHAOT) {
+    // The Tiklal's Torah reading prints no Birkat HaGomel; Teiman's is among the blessings of sight.
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       expect(labelOf(nusach, 'shacharit', monday, /הגומל לחיבים טובות/)).toBe('מי שחייב להודות מברך הגומל');
     }
+    expect(saidOn('teiman', 'shacharit', monday)).not.toMatch(/הגומל לחיבים טובות/);
+    expect(saidOn('teiman', 'birchot_hareiya', weekday)).toMatch(/הגומל לחיבים טובות שגמלני טוב/);
     for (const nusach of ['edot_hamizrach', 'chabad'] as const) {
       expect(labelOf(nusach, 'tefillin', weekday, /וצונו להניח תפלין/)).toBeNull();
       expect(labelOf(nusach, 'tefillin', weekday, /וצונו על מצות תפלין/)).toBe(
@@ -1449,8 +1545,13 @@ describe('passages said only with a minyan', () => {
           const text = said(segment);
           if (/תתקבל צלות/.test(text))
             expect({ nusach, id, label: segment.minyan?.he }).toEqual({ nusach, id, label: 'רק שליח הציבור אומר' });
+          // The Baladi sources give Kaddish DeRabbanan to the chazzan, as every other Kaddish (R16).
           if (/על ישראל ועל רבנן/.test(text))
-            expect({ nusach, id, label: segment.minyan?.he }).toEqual({ nusach, id, label: 'אבלים אומרים' });
+            expect({ nusach, id, label: segment.minyan?.he }).toEqual({
+              nusach,
+              id,
+              label: nusach === 'teiman' ? 'רק שליח הציבור אומר' : 'אבלים אומרים',
+            });
         }
       }
     }
@@ -1465,8 +1566,11 @@ describe('passages said only with a minyan', () => {
         label: null,
         first: expect.stringMatching(/^אתה קדוש/),
       });
+      // The Baladi Modim goes on from the Name to "Rock of our lives", without "and God of our fathers forever".
       expect(before('מודים דרבנן — הקהל אומר בחזרת הש״ץ').all).toMatch(
-        /מודים אנחנו לך שאתה הוא \S+ אלהינו ואלהי אבותינו לעולם ועד/,
+        nusach === 'teiman'
+          ? /מודים אנחנו לך שאתה הוא \S+ אלהינו צור חיינו מגן ישענו/
+          : /מודים אנחנו לך שאתה הוא \S+ אלהינו ואלהי אבותינו לעולם ועד/,
       );
       expect(after('ברכת כהנים — רק בחזרת הש״ץ')).toMatchObject({
         label: null,
@@ -1479,7 +1583,9 @@ describe('passages said only with a minyan', () => {
     for (const nusach of NUSCHAOT) {
       const labels = (features: DayFeatures) =>
         minyanBlocks(nusach, 'mincha', features, 'תפילת העמידה').map((block) => block.label);
-      expect(labels(tammuzFast)).toContain('ברכת כהנים — רק בחזרת הש״ץ');
+      // The Tiklal: no Priestly Blessing at Mincha, a fast included.
+      if (nusach === 'teiman') expect(labels(tammuzFast)).not.toContain('ברכת כהנים — רק בחזרת הש״ץ');
+      else expect(labels(tammuzFast)).toContain('ברכת כהנים — רק בחזרת הש״ץ');
       expect(labels(weekday)).not.toContain('ברכת כהנים — רק בחזרת הש״ץ');
       expect(labels(weekday)).toContain('קדושה — נאמרת רק בחזרת הש״ץ');
     }
@@ -1494,7 +1600,9 @@ describe('passages said only with a minyan', () => {
         true,
       );
       const amidah = minyanBlocks(nusach, 'mincha', weekday, 'תפילת העמידה').filter((block) => block.label === null);
-      expect(amidah.map((block) => block.all).join(' ')).toMatch(/רפאנו \S+ ונרפא/);
+      expect(amidah.map((block) => block.all).join(' ')).toMatch(
+        nusach === 'teiman' ? /רפאנו \S+ אלהינו ונרפא/ : /רפאנו \S+ ונרפא/,
+      );
     }
   });
 });
@@ -1874,7 +1982,9 @@ describe('standalone texts', () => {
       expect(onRoshChodesh).toMatch(/יעלה ויבא/);
       expect(onRoshChodesh).toMatch(/ראש ה?חדש הזה/);
       expect(onRoshChodesh).not.toMatch(/חג המצות|חג הסכות/);
-      expect(onRoshChodesh).toMatch(/יחדש עלינו את החדש הזה/);
+      // The Baladi Birkat HaMazon prints no Harachaman of its own for Rosh Chodesh.
+      if (nusach === 'teiman') expect(onRoshChodesh).not.toMatch(/יחדש עלינו/);
+      else expect(onRoshChodesh).toMatch(/יחדש עלינו את החדש הזה/);
 
       const onCholHamoed = openText(nusach, 'birkat_hamazon', cholHamoedSukkot);
       expect(onCholHamoed).toMatch(/יעלה ויבא/);
@@ -1915,8 +2025,10 @@ describe('standalone texts', () => {
       expect(openText(nusach, 'birkat_hamazon', afterPurim)).not.toMatch(/על הנסים/);
       expect(foldedText(nusach, 'birkat_hamazon', chanukah, MEAL_BEGAN_AH)).toBe('');
 
-      expect(foldedText(nusach, 'al_hamichya', afterRoshChodesh, MEAL_BEGAN_YV)).toMatch(/ראש ה?חדש הזה/);
       expect(openText(nusach, 'al_hamichya', afterRoshChodesh)).not.toMatch(/ראש ה?חדש הזה/);
+      // The Baladi Me'ein Shalosh has no Rosh Chodesh or festival insert at all (R16).
+      if (nusach !== 'teiman')
+        expect(foldedText(nusach, 'al_hamichya', afterRoshChodesh, MEAL_BEGAN_YV)).toMatch(/ראש ה?חדש הזה/);
     }
   });
 
@@ -2100,7 +2212,17 @@ describe('standalone texts', () => {
     });
 
     it('leaves the regular Harachaman lines of every nusach unlabeled, with the Messiah line and the closing verses open', () => {
-      for (const nusach of NUSCHAOT) {
+      // The Baladi Harachaman lines close the fourth blessing itself, with only the guest's lines folded.
+      const teiman = section('teiman', 'ברכת המזון').segments;
+      const teimanOpen = saidIn(teiman.filter((segment) => !segment.optional));
+      expect(teimanOpen).toMatch(/הרחמן יפרנסנו בכבוד/);
+      expect(teimanOpen).toMatch(/הרחמן הוא יזכנו לימות המשיח|הרחמן יזכנו לימות המשיח/);
+      expect(teimanOpen).toMatch(/מגדיל .* ישועות מלכו/);
+      expect(teimanOpen).not.toMatch(/יברך בעל הבית/);
+      expect(teiman.filter((segment) => segment.optional).map((segment) => segment.optional!.he)).toEqual([
+        'אורח אומר',
+      ]);
+      for (const nusach of BUILT_BEFORE_TEIMAN) {
         const harachaman = section(nusach, 'הרחמן');
         expect(harachaman.optional).toBeUndefined();
         const open = harachaman.segments.filter((segment) => !segment.optional);
@@ -2119,11 +2241,18 @@ describe('standalone texts', () => {
       expect(inIsrael).toBe(abroad);
       expect(inIsrael).toMatch(/על הארץ ועל המחיה/);
       expect(inIsrael).toMatch(/על פרי הגפן/);
-      expect(inIsrael).toMatch(/על הפרות/);
+      // The Rambam's wording the Baladi page prints seals with "the fruits" spelled plene.
+      expect(inIsrael).toMatch(nusach === 'teiman' ? /הפירות$/ : /על הפרות/);
       expect(inIsrael).not.toMatch(/גפנה|פרותיה|מחיתה|כלכלתה/);
       expect(shownOn(nusach, 'al_hamichya', weekday)).not.toMatch(/בחול|בא"י|של ארץ ישראל/);
-      expect(openText(nusach, 'al_hamichya', roshChodesh)).toMatch(/ראש ה?חדש הזה/);
-      expect(openText(nusach, 'al_hamichya', cholHamoedSukkot)).toMatch(/הסכות הזה/);
+      if (nusach === 'teiman') {
+        // No Rosh Chodesh or festival insert: the page prints none (R16).
+        for (const features of [roshChodesh, cholHamoedSukkot])
+          expect(openText(nusach, 'al_hamichya', features)).toBe(inIsrael);
+      } else {
+        expect(openText(nusach, 'al_hamichya', roshChodesh)).toMatch(/ראש ה?חדש הזה/);
+        expect(openText(nusach, 'al_hamichya', cholHamoedSukkot)).toMatch(/הסכות הזה/);
+      }
       expect(inIsrael).not.toMatch(/ראש ה?חדש הזה|הסכות הזה|המצות הזה|השבת הזה|הזכרון הזה/);
     }
   });
@@ -2140,7 +2269,9 @@ describe('standalone texts', () => {
       const folded = letters(folds[0].segments.flatMap((segment) => segment.he.flat().map((run) => run.t)).join(' '));
       expect(folded).toMatch(/^על פירות ארץ ישראל מסיימים/);
       expect(folded).toMatch(/ברוך אתה \S+ על הארץ/);
-      expect(folded).toMatch(/פרי גפנה/);
+      // The Baladi page names the fruit only, with no ending of its own for wine.
+      if (nusach === 'teiman') expect(folded).not.toMatch(/גפנה/);
+      else expect(folded).toMatch(/פרי גפנה/);
       expect(folded).toMatch(/פרותיה/);
       expect(folded).not.toMatch(/על הפרות/);
     }
@@ -2153,7 +2284,19 @@ describe('standalone texts', () => {
   });
 
   it('says Borei Nefashot and opens the Traveler’s Prayer with "Yehi Ratzon" in every nusach', () => {
-    for (const nusach of NUSCHAOT) {
+    // The Rambam's Borei Nefashot, which the Baladi page marks as its own, has no "and their needs"; the Tiklal
+    // calls the thanks on leaving a city the traveler's prayer, after the folded prayers on entering one.
+    expect(saidOn('teiman', 'borei_nefashot', weekday)).toMatch(
+      /^ ?ברוך אתה \S+ אלהינו מלך העולם בורא נפשות רבות על כל מה שברא חי העולמים ?$/,
+    );
+    expect(sections('teiman', 'tefilat_haderech', weekday).map((section) => section.title.he)).toEqual([
+      'בכניסה לעיר וביציאה ממנה',
+      'תפילת הדרך',
+    ]);
+    expect(saidOn('teiman', 'tefilat_haderech', weekday)).toMatch(
+      /מודה אני לפניך \S+ אלהי שהוצאתני מכרך זה לשלום .* ותצילני מכף כל אויב ואורב בדרך ?$/,
+    );
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       expect(saidOn(nusach, 'borei_nefashot', weekday)).toMatch(/בורא נפשות רבות וחסרונן/);
       const derech = saidOn(nusach, 'tefilat_haderech', weekday).trim();
       expect(derech).toMatch(/^יהי רצון מלפניך/);
@@ -2211,7 +2354,8 @@ describe('asher_yatzar', () => {
       expect(sections.map((section) => section.title.he)).toEqual(['אשר יצר']);
       expect(shownOn(nusach, 'asher_yatzar', weekday)).not.toMatch(/נטילת ידים|נשמה שנתת/);
       const english = sections[0].segments.map((segment) => segment.en ?? '').join(' ');
-      if (nusach !== 'chabad') expect(english).toMatch(/Who formed man with wisdom/);
+      // The Baladi sources carry no English.
+      if (nusach !== 'chabad' && nusach !== 'teiman') expect(english).toMatch(/Who formed man with wisdom/);
     }
   });
 
@@ -2324,7 +2468,11 @@ describe('birchot_hanehenin', () => {
   it('says each food blessing once, with no day condition or minyan label, and folds only the two Edot HaMizrach customs', () => {
     for (const nusach of NUSCHAOT) {
       const said = saidOn(nusach, 'birchot_hanehenin', weekday);
-      for (const [, formula] of FORMULAS) expect(count(said, formula)).toBe(1);
+      // The Tiklal rules food by food, so a blessing recurs under every food that takes it.
+      for (const [, formula] of FORMULAS) {
+        if (nusach === 'teiman') expect(count(said, formula)).toBeGreaterThanOrEqual(1);
+        else expect(count(said, formula)).toBe(1);
+      }
       const folded = new Set<string>();
       for (const segment of load(nusach, 'birchot_hanehenin').sections.flatMap((section) => section.segments)) {
         expect(segment.when).toBeUndefined();
@@ -2352,7 +2500,10 @@ describe('birchot_hanehenin', () => {
   });
 
   it('ends with Shehecheyanu in every nusach', () => {
-    for (const nusach of NUSCHAOT) expect(saidInSection(nusach, 'שהחיינו')).toMatch(/שהחינו וקימנו והגיענו לזמן הזה/);
+    for (const nusach of NUSCHAOT)
+      expect(saidInSection(nusach, 'שהחיינו')).toMatch(
+        nusach === 'teiman' ? /שהחיינו וקימנו והגיענו לזמן הזה/ : /שהחינו וקימנו והגיענו לזמן הזה/,
+      );
   });
 
   it('writes the divine name as each nusach does', () => {
@@ -2360,8 +2511,10 @@ describe('birchot_hanehenin', () => {
       expect(saidOn(nusach, 'birchot_hanehenin', weekday)).toMatch(/ברוך אתה יהוה אלהינו/);
       expect(saidOn(nusach, 'birchot_hanehenin', weekday)).not.toMatch(/(^| )יי( |$)|\u2011/);
     }
-    expect(saidOn('chabad', 'birchot_hanehenin', weekday)).toMatch(/ברוך אתה יי אלהינו/);
-    expect(saidOn('chabad', 'birchot_hanehenin', weekday)).not.toMatch(/יהוה/);
+    for (const nusach of ['chabad', 'teiman'] as Nusach[]) {
+      expect(saidOn(nusach, 'birchot_hanehenin', weekday)).toMatch(/ברוך אתה יי אלהינו/);
+      expect(saidOn(nusach, 'birchot_hanehenin', weekday)).not.toMatch(/יהוה/);
+    }
   });
 
   it('keeps each source’s note on what takes the blessing as an instruction, never as said text', () => {
@@ -2528,7 +2681,7 @@ describe('kriat_shema_al_hamita', () => {
   it('says the Hamapil blessing and the three paragraphs of the Shema in every nusach', () => {
     for (const nusach of NUSCHAOT) {
       const said = saidOn(nusach, ID, weekday);
-      expect(said).toMatch(/המפיל חבלי שנה/);
+      expect(said).toMatch(nusach === 'teiman' ? /המפיל חבלי שינה/ : /המפיל חבלי שנה/);
       expect(said).toMatch(/שמע ישראל \S+ אלהינו \S+ (\| )?אחד/);
       expect(said).toMatch(/ואהבת את \S+ אלהיך/);
       expect(said).toMatch(OPEN_SHEMA);
@@ -2698,7 +2851,13 @@ describe('kriat_shema_al_hamita', () => {
             .map((run) => run.t),
         ),
       );
-      expect(said.join(' ')).not.toMatch(/[[\]]/);
+      // The Baladi page brackets the verse Vihi No'am before Psalm 91, and the text keeps it as printed (R16).
+      const bracketed = said.join(' ').match(/\[[^\]]*\]/g) ?? [];
+      if (nusach === 'teiman') {
+        expect(bracketed.map(letters)).toEqual([
+          '[ויהי נעם אדני אלהינו עלינו ומעשה ידינו כוננה עלינו ומעשה ידינו כוננהו]',
+        ]);
+      } else expect(said.join(' ')).not.toMatch(/[[\]]/);
     }
   });
 
@@ -2793,6 +2952,8 @@ describe('birchot_hareiya', () => {
     sefard: TITLES,
     edot_hamizrach: WITHOUT_SEA,
     chabad: WITHOUT_SEA,
+    // In the order the Tiklal prints them.
+    teiman: ['ברכות שבח והודאה', 'ברכת האילנות', 'ברק ורעם', 'הרים, ימים ונהרות', 'הים הגדול', 'ברכת החמה', 'הקשת'],
   };
   const sectionsOf = (nusach: Nusach, features: DayFeatures = weekday) =>
     resolveSiddurText(load(nusach, 'birchot_hareiya'), features);
@@ -2838,7 +2999,17 @@ describe('birchot_hareiya', () => {
   });
 
   it('says the lightning, thunder, rainbow and tree blessings once each, in every nusach', () => {
-    for (const nusach of NUSCHAOT) {
+    // The Tiklal prints the Rambam's short forms: "Oseh Bereshit", "shekocho male olam", and the trees without
+    // "and good trees".
+    const lightning = saidInSection('teiman', 'ברק ורעם');
+    expect(count(lightning, /עושה בראשית/)).toBe(1);
+    expect(count(lightning, /שכחו מלא עולם/)).toBe(1);
+    expect(count(saidInSection('teiman', 'הקשת'), /זוכר הברית נאמן בבריתו וקים במאמרו/)).toBe(1);
+    expect(
+      count(saidInSection('teiman', 'ברכת האילנות'), /שלא חיסר בעולמו כלום וברא בו בריות טובות כדי להתנאות בהם/),
+    ).toBe(1);
+    expect(saidInSection('teiman', 'הים הגדול')).toMatch(/שעשה את הים הגדול/);
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       const lightning = saidInSection(nusach, 'ברק ורעם');
       expect(count(lightning, /עושה מעשה בראשית/)).toBe(1);
       expect(count(lightning, /שכחו וגבורתו מלא עולם/)).toBe(1);
@@ -2909,7 +3080,15 @@ describe('birchot_hareiya', () => {
   });
 
   it('says Hatov Vehametiv and Dayan Ha’emet under their instructions in every nusach, and the further blessings only where a source has them', () => {
-    for (const nusach of NUSCHAOT) {
+    // The Tiklal rules case by case, so Hatov Vehametiv and Dayan Ha'emet recur, as on the death of a father.
+    const teiman = saidInSection('teiman', 'ברכות שבח והודאה');
+    expect(teiman).toMatch(/ברוך אתה \S+ אלהינו מלך העולם הטוב והמטיב|באי אמה הטוב והמטיב/);
+    expect(teiman).toMatch(/דיי?ן האמת/);
+    expect(shownInSection('teiman', 'ברכות שבח והודאה')).toMatch(/ואם שמע שמועה רעה מברך/);
+    expect(teiman).toMatch(/אשר יצר אתכם בדין .* מחיה המתים/);
+    expect(teiman).toMatch(/שנתן מכבודו לבשר ודם/);
+    expect(teiman).toMatch(/מודים אנחנו לך \S+ אלהינו על כל טיפה וטיפה/);
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       expect(count(saidInSection(nusach, 'ברכות שבח והודאה'), /הטוב והמטיב/)).toBe(1);
       expect(count(saidInSection(nusach, 'ברכות שבח והודאה'), /דין האמת/)).toBe(1);
       expect(shownInSection(nusach, 'ברכות שבח והודאה')).toMatch(/על שמועות רעות מברך/);
@@ -3012,8 +3191,10 @@ describe('birchot_hareiya', () => {
         new RegExp(`(^| )יי( |$)|${String.fromCharCode(0x2011)}`),
       );
     }
-    expect(saidOn('chabad', 'birchot_hareiya', weekday)).toMatch(/ברוך אתה יי אלהינו/);
-    expect(saidOn('chabad', 'birchot_hareiya', weekday)).not.toMatch(/יהוה/);
+    for (const nusach of ['chabad', 'teiman'] as Nusach[]) {
+      expect(saidOn(nusach, 'birchot_hareiya', weekday)).toMatch(/ברוך אתה יי אלהינו/);
+      expect(saidOn(nusach, 'birchot_hareiya', weekday)).not.toMatch(/יהוה/);
+    }
     expect(JSON.stringify(load('ashkenaz', 'birchot_hareiya').sections)).not.toContain(
       String.fromCharCode(0x5e9, 0x5b9),
     );
@@ -3102,7 +3283,7 @@ describe('kiddush_levana', () => {
       hasStandaloneText('kiddush_levana', nusach, day(date, months.CHESHVAN, 5787, IL_PLACE));
     const nights = [3, 4, 8, 15, 16];
     expect(nights.map((date) => offered('ashkenaz', date))).toEqual([false, true, true, true, false]);
-    for (const nusach of ['sefard', 'edot_hamizrach', 'chabad'] as const) {
+    for (const nusach of ['sefard', 'edot_hamizrach', 'chabad', 'teiman'] as const) {
       expect(nights.map((date) => offered(nusach, date))).toEqual([false, false, true, true, false]);
     }
     const labels = {
@@ -3110,6 +3291,7 @@ describe('kiddush_levana', () => {
       sefard: 'משבעה ימים אחרי המולד עד חצי החודש',
       edot_hamizrach: 'משבעה עד חמישה עשר ימים אחרי המולד',
       chabad: 'משבעה ימים אחרי המולד עד חצי החודש',
+      teiman: 'משבעה עד חמישה עשר ימים אחרי המולד',
     };
     for (const nusach of NUSCHAOT) {
       expect(standaloneAvailability('kiddush_levana', nusach).availableLabel?.he).toBe(labels[nusach]);
@@ -3152,7 +3334,12 @@ describe('kiddush_levana', () => {
   });
 
   it('adds the Tishrei note on the Ten Days of Repentance only, and the Av note before Tisha B’Av only, in every nusach', () => {
-    for (const nusach of NUSCHAOT) {
+    // The Tiklal prints neither note.
+    for (const features of [thirdOfMonth, saturdayNight, tenDays, avBeforeTishaBav, avAfterTishaBav]) {
+      expect(shownOn('teiman', 'kiddush_levana', features)).not.toMatch(TISHREI_NOTE);
+      expect(shownOn('teiman', 'kiddush_levana', features)).not.toMatch(AV_NOTE);
+    }
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       expect(shownOn(nusach, 'kiddush_levana', tenDays)).toMatch(TISHREI_NOTE);
       for (const features of [thirdOfMonth, saturdayNight, avBeforeTishaBav, avAfterTishaBav]) {
         expect(shownOn(nusach, 'kiddush_levana', features)).not.toMatch(TISHREI_NOTE);
@@ -3181,7 +3368,16 @@ describe('kiddush_levana', () => {
   });
 
   it('labels every line of the Kaddish after it as said by mourners, in every nusach', () => {
-    for (const nusach of NUSCHAOT) {
+    // The Tiklal only names Kaddish DeRabbanan in its closing instruction, and prints no Kaddish here.
+    expect(sections('teiman', thirdOfMonth).map((section) => section.title.he)).toEqual([
+      'פתיחה',
+      'ברכת הלבנה',
+      'פסוקים ומזמורים',
+      'סיום',
+    ]);
+    expect(saidOn('teiman', 'kiddush_levana', thirdOfMonth)).not.toMatch(/יתגדל ויתקדש/);
+    expect(shownOn('teiman', 'kiddush_levana', thirdOfMonth)).toMatch(/וקדיש דרבנן ואומר לחבירו גפ שלום עליכם/);
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       const kaddish = kaddishSection(nusach);
       expect(kaddish.segments.length).toBeGreaterThan(0);
       expect(
@@ -3377,7 +3573,8 @@ describe('kiddush_levana', () => {
   });
 
   it('ends each Hebrew note with a full stop and spells Tisha B’Av in the Av note as the other notes do', () => {
-    for (const nusach of NUSCHAOT) {
+    // The Tiklal's notes are its own, as printed; none of them is about when the blessing may be said.
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       const notes = segmentsOf(nusach).filter(
         (segment) =>
           segment.he.flat().every((run) => run.s === 'n') && /לקדש את הלבנה|מקדשים את הלבנה/.test(plainOf(segment)),
@@ -3397,7 +3594,7 @@ describe('kiddush_levana', () => {
 
 describe('mezuzah', () => {
   const weekday = day(3, months.CHESHVAN, 5787);
-  const nameOf = (nusach: Nusach) => (nusach === 'chabad' ? 'יי' : 'יהוה');
+  const nameOf = (nusach: Nusach) => (nusach === 'chabad' || nusach === 'teiman' ? 'יי' : 'יהוה');
   const sectionsOf = (nusach: Nusach, features: DayFeatures = weekday) =>
     resolveSiddurText(load(nusach, 'mezuzah'), features);
   const englishOf = (nusach: Nusach) =>
@@ -3556,13 +3753,22 @@ describe('sheva_berachot', () => {
       expect(positions[0]).toBeGreaterThanOrEqual(0);
       expect(positions).toEqual([...positions].sort((a, b) => a - b));
       const hagafen = said.search(/בורא פרי הגפן/);
-      if (nusach === 'edot_hamizrach') expect(hagafen).toBeLessThan(positions[0]);
+      if (nusach === 'edot_hamizrach' || nusach === 'teiman') expect(hagafen).toBeLessThan(positions[0]);
       else expect(hagafen).toBeGreaterThan(positions[6]);
     }
   });
 
   it('says the six wedding blessings only with a minyan, and not the wine blessing or the call before it', () => {
-    for (const nusach of NUSCHAOT) {
+    // The Baladi page prints the six wedding blessings as the lines of one passage, which carries the label.
+    const [wineSegment, weddingSegment, ...rest] = segmentsOf('teiman');
+    expect(rest).toEqual([]);
+    expect(wineSegment.minyan).toBeUndefined();
+    expect(saidBy(wineSegment)).toMatch(/^סברי מרנן לחיי ברוך אתה \S+ אלהינו מלך העולם בורא פרי הגפן$/);
+    expect(weddingSegment.minyan?.he).toBe(WITH_MINYAN);
+    expect(weddingSegment.he).toHaveLength(6);
+    for (const blessing of IN_ORDER) expect(saidBy(weddingSegment)).toMatch(blessing);
+    expect(saidBy(weddingSegment)).not.toMatch(HAGAFEN);
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       const segments = segmentsOf(nusach);
       const blessings = segments.filter((segment) => /ברוך אתה/.test(saidBy(segment)));
       expect(blessings).toHaveLength(7);
@@ -3591,6 +3797,9 @@ describe('sheva_berachot', () => {
     expect(unlabeled('sefard')).toEqual(['בשבע ברכות שלאחר ברכת המזון מתחילים כאן ומסיימים בבורא פרי הגפן', wine]);
     expect(unlabeled('edot_hamizrach')).toEqual([expect.stringMatching(/^סברי מרנן/), wine]);
     expect(unlabeled('chabad')).toEqual([wine]);
+    expect(unlabeled('teiman')).toEqual([
+      expect.stringMatching(/^המברך אומר סברי מרנן ועונים לחיי ברוך אתה .*בורא פרי הגפן$/),
+    ]);
   });
 
   it('is the same on every day, and leaves out the wedding ceremony and the zimun', () => {
@@ -3833,6 +4042,7 @@ describe('chanukah_candles', () => {
       'מעוז צור',
     ],
     chabad: ['ברכות הדלקת נרות חנוכה', 'הנרות הללו'],
+    teiman: ['ברכות הדלקת נרות חנוכה', 'הנרות הללו'],
   };
   const SHEHECHEYANU = /שהחי+נו וקימנו והגיענו לזמן הזה/;
   const FIRST_NIGHT_NOTE: Record<Nusach, RegExp> = {
@@ -3840,13 +4050,19 @@ describe('chanukah_candles', () => {
     sefard: /ובערב הראשון מוסיפים ברכת שהחיינו[\s\S]*רק בלילה הראשון/,
     edot_hamizrach: /בליל ראשון מברך גם ברכה זו/,
     chabad: /ובלילה ראשונה יברך גם כן שהחיינו/,
+    teiman: /והמדליק בלילה הראשון מברך שלש ברכות/,
   };
   const LIGHTING_NOTE: Record<Nusach, RegExp> = {
     ashkenaz: /לפני ההדלקה מברכים/,
     sefard: /אחרי שהדליק הנר הראשון משמאל יאמר זאת/,
     edot_hamizrach: /אחר שידליק נר אחד יאמר/,
     chabad: /המנהג הנכון לדבק הנרות או לתלות המנורה בעובי המזוזה בחלל הפתח/,
+    // The Tiklal's rule that sets the Teiman lighting at shkia (R14.2).
+    teiman: /ומדליקים נר חנוכה בשקיעת החמה לא קודם ולא אחר כך/,
   };
+  // The Tiklal prints its Chanukah instructions whole, for every night: the first-night rule and the line that
+  // drops Shehecheyanu on the other nights included.
+  const FIRST_NIGHT_ONLY = BUILT_BEFORE_TEIMAN;
   const CHABAD_PLACING =
     'ואין להדליק עד שיגמור כל הברכות. המנהג הנכון לדבק הנרות או לתלות המנורה בעובי המזוזה בחלל הפתח.';
   const paragraphsOf = (nusach: Nusach, features: DayFeatures) =>
@@ -3895,7 +4111,9 @@ describe('chanukah_candles', () => {
     for (const nusach of NUSCHAOT) {
       for (const night of eightNights) {
         const said = saidOn(nusach, ID, night);
-        expect(said).toMatch(/אשר קדשנו במצותיו וצונו להדליק נר חנכה/);
+        expect(said).toMatch(
+          nusach === 'teiman' ? /אשר קדשנו במצותיו וצונו להדליק נר של חנוכה/ : /אשר קדשנו במצותיו וצונו להדליק נר חנכה/,
+        );
         expect(said).toMatch(/שעשה נסים לאבותינו בימים ההם בזמן הזה/);
         expect(count(said, /ברוך אתה/)).toBe(night === eightNights[0] ? 3 : 2);
       }
@@ -3908,10 +4126,13 @@ describe('chanukah_candles', () => {
       expect(shownOn(nusach, ID, firstNight)).toMatch(FIRST_NIGHT_NOTE[nusach]);
       expect(saidOn(nusach, ID, firstNight)).not.toMatch(FIRST_NIGHT_NOTE[nusach]);
       for (const night of otherNights) {
+        expect(saidOn(nusach, ID, night)).not.toMatch(/שהחי/);
+        if (!FIRST_NIGHT_ONLY.includes(nusach)) continue;
         expect(shownOn(nusach, ID, night)).not.toMatch(/שהחי/);
         expect(shownOn(nusach, ID, night)).not.toMatch(FIRST_NIGHT_NOTE[nusach]);
       }
     }
+    for (const night of eightNights) expect(shownOn('teiman', ID, night)).toMatch(/ובשאר הלילות משמיט שהחיינו/);
   });
 
   it('says Hanerot Hallalu on every night, in every nusach', () => {
@@ -3919,7 +4140,11 @@ describe('chanukah_candles', () => {
       for (const night of eightNights) {
         const said = saidInSection(nusach, night, 'הנרות הללו');
         expect(said).toMatch(/^הנרות הללו (שאנו|אנו|אנחנו) מדליקין על /);
-        expect(said).toMatch(/שעשית לאבותינו[\s\S]*על ידי כהניך הקדושים/);
+        expect(said).toMatch(
+          nusach === 'teiman'
+            ? /שעשית עם אבותינו[\s\S]*על ידי כהניך הקדושים/
+            : /שעשית לאבותינו[\s\S]*על ידי כהניך הקדושים/,
+        );
         expect(said).toMatch(/אין לנו רשות להשתמש ב(הם|הן) אלא לראות(ם|ן) בלבד/);
         expect(count(said, /הנרות הללו/)).toBe(2);
       }
@@ -4325,17 +4550,19 @@ describe('selichot', () => {
     resolveSiddurText(load(nusach, ID), features).map((section) => section.title.he);
   // Rosh Hashana 5786 fell on a Tuesday, so its season used every day the Ashkenazi books print.
   const season5786 = () => Array.from({ length: 45 }, (_, offset) => civilDay(new Date(2025, 7, 20 + offset)));
-  const NONE = { ashkenaz: false, sefard: false, edot_hamizrach: false, chabad: false };
-  const ALL = { ashkenaz: true, sefard: true, edot_hamizrach: true, chabad: true };
+  const NONE = { ashkenaz: false, sefard: false, edot_hamizrach: false, chabad: false, teiman: false };
+  const ALL = { ashkenaz: true, sefard: true, edot_hamizrach: true, chabad: true, teiman: true };
 
-  it('is filed with the occasions, by each nusach’s season: Edot HaMizrach from 2 Elul, the others from Leil Selichot, through Erev Yom Kippur', () => {
+  it('is filed with the occasions, by each nusach’s season: Teiman from 1 Elul, Edot HaMizrach from 2 Elul, the others from Leil Selichot, through Erev Yom Kippur', () => {
     installSelichotFixture();
     expect(STANDALONE_TEXTS[ID]).toMatchObject({ name: { he: 'סליחות', en: 'Selichot' }, group: 'occasions' });
     expect(STANDALONE_TEXTS[ID].evening).toBeUndefined();
+    // R14.1: Teiman from the night of Rosh Chodesh Elul, taken as the night before 1 Elul, never 30 Av.
     const cases: [DayFeatures, Record<Nusach, boolean>][] = [
-      [day(1, months.ELUL, 5785), NONE],
-      [day(2, months.ELUL, 5785), { ...NONE, edot_hamizrach: true }],
-      [civilDay(new Date(2025, 8, 12)), { ...NONE, edot_hamizrach: true }],
+      [day(30, months.AV, 5785), NONE],
+      [day(1, months.ELUL, 5785), { ...NONE, teiman: true }],
+      [day(2, months.ELUL, 5785), { ...NONE, edot_hamizrach: true, teiman: true }],
+      [civilDay(new Date(2025, 8, 12)), { ...NONE, edot_hamizrach: true, teiman: true }],
       [civilDay(new Date(2025, 8, 13)), NONE],
       [civilDay(new Date(2025, 8, 14)), ALL],
       [day(29, months.ELUL, 5785), ALL],
@@ -4354,6 +4581,10 @@ describe('selichot', () => {
       }
     }
     expect(standaloneAvailability(ID, 'edot_hamizrach').availableLabel?.he).toBe('מב׳ באלול עד ערב יום הכיפורים');
+    expect(standaloneAvailability(ID, 'teiman').availableLabel).toEqual({
+      he: 'מראש חודש אלול עד ערב יום הכיפורים',
+      en: 'From Rosh Chodesh Elul to Erev Yom Kippur',
+    });
     for (const nusach of ['ashkenaz', 'sefard', 'chabad'] as const) {
       expect(standaloneAvailability(ID, nusach).availableLabel?.he).toBe('ממוצאי שבת הסליחות עד ערב יום הכיפורים');
     }
@@ -4489,6 +4720,31 @@ describe('selichot', () => {
     ]);
     expect(shownOn('edot_hamizrach', ID, tenDays)).not.toMatch(/יש מוסיפים|יש אומרים|יש נוהגים|ואומר השליח/);
   });
+
+  it('says the Teiman Ashmurot every night of its season, its Ten Days rows only then, with the minyan’s passages labeled', () => {
+    const elul = day(15, months.ELUL, 5786);
+    const tenDays = day(5, months.TISHREI, 5787);
+    expect(titlesOn('teiman', elul)).toEqual(titlesOn('teiman', tenDays));
+    expect(titlesOn('teiman', elul).slice(0, 5)).toEqual([
+      'מזמורי תהלים',
+      'ישן אל תרדם',
+      'יעירוני רעיוני',
+      'בן אדם',
+      'אשרי',
+    ]);
+    expect(saidOn('teiman', ID, tenDays)).not.toBe(saidOn('teiman', ID, elul));
+    const labels = resolveSiddurText(load('teiman', ID), elul)
+      .flatMap((section) => section.segments)
+      .map((segment) => segment.minyan?.he)
+      .filter(Boolean);
+    expect(new Set(labels)).toEqual(new Set([WITH_MINYAN, 'רק שליח הציבור אומר']));
+    // Passages the page says only "if there is time" fold closed (R16).
+    expect(
+      resolveSiddurText(load('teiman', ID), elul)
+        .filter((section) => section.optional)
+        .map((section) => section.title.he),
+    ).toEqual(['רשות לשליח הציבור', 'תהלים יז', 'ה׳ אלהי הצבאות', 'אנא כעב']);
+  });
 });
 
 describe('nishmat', () => {
@@ -4509,8 +4765,14 @@ describe('nishmat', () => {
     for (const nusach of NUSCHAOT) {
       const shown = shownOn(nusach, ID, weekday).trim();
       expect(shown).toMatch(/^נשמת כל ?חי תברך את שמך/);
-      if (nusach !== 'edot_hamizrach') expect(shown).toMatch(/ברכי נפשי את \S+ וכל קרבי את שם קדשו/);
-      expect(shown).toMatch(/במקהלות רבבות עמך בית ישראל/);
+      if (nusach !== 'edot_hamizrach' && nusach !== 'teiman')
+        expect(shown).toMatch(/ברכי נפשי את \S+ וכל קרבי את שם קדשו/);
+      // The Tiklal (V1 284) prints "כל" before "בית ישראל" and goes on without "ברנה" or "מלכנו".
+      expect(shown).toMatch(
+        nusach === 'teiman'
+          ? /ובמקהלות רבבות עמך כל בית ישראל יתפאר שמך \S+ אלהינו שכן חובת/
+          : /במקהלות רבבות עמך בית ישראל/,
+      );
       expect(shown).toMatch(/דוד בן ?ישי עבדך משיחך$/);
       expect(shown).not.toMatch(/ישתבח|ובכן|שבת|יום טוב|❖/);
     }
@@ -4832,6 +5094,14 @@ describe('shacharit chapters', () => {
       'בית יעקב',
       'קוה אל ה׳',
     ],
+    teiman: [
+      'ברכות השחר',
+      'עטיפת טלית והנחת תפילין',
+      'פסוקי דזמרה',
+      'קריאת שמע וברכותיה',
+      'תפילת העמידה',
+      'אשרי ובא לציון',
+    ],
   };
 
   it.each(NUSCHAOT)('%s lists the weekday chapters in order, on Monday as on Tuesday', (nusach) => {
@@ -5121,7 +5391,8 @@ describe('the women’s liturgy by siddur voice (R8, R9)', () => {
       };
       expect(counts('female')).toEqual([2, 0]);
       expect(counts('male')).toEqual([0, 2]);
-      expect(counts(null)).toEqual([edot ? 2 : 0, 2]);
+      // The Baladi page notes the feminine form in brackets beside Modeh Ani only.
+      expect(counts(null)).toEqual([edot ? 2 : nusach === 'teiman' ? 1 : 0, 2]);
     }
     const notes = READERS.map((voice) =>
       occurrences(hebrewOf(readFor('edot_hamizrach', 'birchot_hashachar', WEEKDAY, voice)), 'האשה אומרת'),
@@ -5130,7 +5401,22 @@ describe('the women’s liturgy by siddur voice (R8, R9)', () => {
   }, 60000);
 
   it('hides "she-lo asani isha" from a woman and shows her "she-asani kirtzono" open, with the Name and kingship except in Edot HaMizrach, and hides that blessing from a man', () => {
-    for (const nusach of NUSCHAOT) {
+    // The Baladi page prints both blessings as lines of the morning blessings' passage, each under its own note,
+    // and the women's one without the Name and kingship.
+    const lines = (voice: SiddurVoice | null) =>
+      readFor('teiman', 'birchot_hashachar', WEEKDAY, voice).flatMap((section) =>
+        section.segments.flatMap((segment) =>
+          segment.he.map((runs) => letters(runs.map((run) => run.t).join('')).trim()),
+        ),
+      );
+    const MEN = 'אנשים מברכים ברוך אתה יי אלהינו מלך העולם שלא עשני אשה';
+    const WOMEN = 'נשים אומרות ברוך שעשני כרצונו';
+    expect(lines('female')).toContain(WOMEN);
+    expect(lines('female').join(' ')).not.toMatch(/שלא עשני אשה/);
+    expect(lines('male')).toContain(MEN);
+    expect(lines('male').join(' ')).not.toMatch(/שעשני כרצונו/);
+    expect(lines(null)).toEqual(expect.arrayContaining([MEN, WOMEN]));
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       const female = readFor(nusach, 'birchot_hashachar', WEEKDAY, 'female');
       const male = readFor(nusach, 'birchot_hashachar', WEEKDAY, 'male');
       const unset = readFor(nusach, 'birchot_hashachar', WEEKDAY, null);
@@ -5180,6 +5466,12 @@ describe('the women’s liturgy by siddur voice (R8, R9)', () => {
       expect(female).toMatch(/שלא עשני עבד(?=\s|$)/);
       expect(female).not.toMatch(/גויה|שפחה/);
     }
+    // The Baladi page marks the feminine forms in brackets, kept as notes for a reader with no voice.
+    const teiman = (voice: SiddurVoice | null) => lettersAll(readFor('teiman', 'birchot_hashachar', WEEKDAY, voice));
+    expect(teiman('female')).toMatch(/שלא עשני גויה .*שלא עשני שפחה/);
+    expect(teiman('male')).toMatch(/שלא עשני גוי(?=\s|$).*שלא עשני עבד(?=\s|$)/);
+    expect(teiman('male')).not.toMatch(/גויה|שפחה/);
+    expect(teiman(null)).toMatch(/שלא עשני גוי \[\/גויה\].*שלא עשני עבד \[\/שפחה\]/);
   }, 60000);
 
   it('reads Shacharit’s morning blessings exactly as the birchot hashachar text, for every voice', () => {
@@ -5192,7 +5484,21 @@ describe('the women’s liturgy by siddur voice (R8, R9)', () => {
         const shacharit = readFor(nusach, 'shacharit', WEEKDAY, voice).filter((section) =>
           titles.has(section.title.he),
         );
-        expect(byTitle(shacharit)).toEqual(byTitle(birchot));
+        if (nusach !== 'teiman') {
+          expect(byTitle(shacharit)).toEqual(byTitle(birchot));
+          continue;
+        }
+        // Teiman's Shacharit keeps what its page prints between the blessings (the chazzan's Adon HaOlamim, the
+        // Ribbon HaOlamim before the Tamid); every line of the standalone text is still there, in order.
+        const inShacharit = byTitle(shacharit);
+        for (const [title, text] of Object.entries(byTitle(birchot))) {
+          const shacharitLines = inShacharit[title].split('\n');
+          let at = 0;
+          for (const line of text.split('\n')) {
+            at = shacharitLines.indexOf(line, at) + 1;
+            expect({ title, line, found: at > 0 }).toEqual({ title, line, found: true });
+          }
+        }
       }
     }
   }, 60000);
@@ -5305,7 +5611,7 @@ describe('the women’s liturgy by siddur voice (R8, R9)', () => {
   }, 60000);
 
   it('leaves every verse as printed for every voice', () => {
-    for (const nusach of NUSCHAOT) {
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       for (const voice of READERS) {
         expect(lettersAll(readFor(nusach, 'shacharit', HALLEL_DAY, voice))).toMatch(/עבדך בן ?אמתך/);
       }
@@ -5355,7 +5661,7 @@ describe('the women’s liturgy by siddur voice (R8, R9)', () => {
         expect(occurrences(single, 'וְאֶת־בַּעֲלִי')).toBe(0);
       }
     }
-    for (const nusach of ['edot_hamizrach', 'chabad'] as const) {
+    for (const nusach of ['edot_hamizrach', 'chabad', 'teiman'] as const) {
       const printed = read(nusach, null, null);
       for (const voice of READERS) {
         for (const status of ['married', 'single', null] as const) expect(read(nusach, voice, status)).toBe(printed);
@@ -5389,7 +5695,8 @@ describe('the women’s liturgy by siddur voice (R8, R9)', () => {
         expect(edot(voice)?.optional).toBeUndefined();
       }
     }
-    for (const nusach of ['ashkenaz', 'sefard', 'chabad'] as const) {
+    // The Tiklal folds no blessing for a woman, as Teiman's Omer blessing (R16).
+    for (const nusach of ['ashkenaz', 'sefard', 'chabad', 'teiman'] as const) {
       const hallel = (voice: SiddurVoice | null) =>
         readFor(nusach, 'shacharit', HALLEL_DAY, voice).filter((section) => section.title.he === 'הלל');
       expect(hallel('female')).toEqual(hallel(null));
@@ -5400,8 +5707,11 @@ describe('the women’s liturgy by siddur voice (R8, R9)', () => {
   it('keeps "ve’al britcha… ve’al toratcha" in Birkat HaMazon for every voice', () => {
     for (const nusach of NUSCHAOT) {
       for (const voice of READERS) {
+        // The Baladi wording, the Rambam's, reads "brit vetorah" in the land's praise.
         expect(lettersAll(readFor(nusach, 'birkat_hamazon', WEEKDAY, voice))).toMatch(
-          /ועל ?בריתך שחתמת בבשרנו ועל תורתך שלמדתנו/,
+          nusach === 'teiman'
+            ? /ארץ חמדה טובה ורחבה ברית ותורה ועל שהוצאתנו מארץ מצרים ופדיתנו מבית עבדים ועל תורתך שלמדתנו/
+            : /ועל ?בריתך שחתמת בבשרנו ועל תורתך שלמדתנו/,
         );
       }
     }
@@ -5409,7 +5719,8 @@ describe('the women’s liturgy by siddur voice (R8, R9)', () => {
 
   it('keeps the English of a segment whose Hebrew changes form, and hides it with a hidden segment', () => {
     const modeh = /אני לפניך מלך חי וקים/;
-    for (const nusach of NUSCHAOT) {
+    // The Baladi sources carry no English.
+    for (const nusach of BUILT_BEFORE_TEIMAN) {
       const printed = findSegment(readFor(nusach, 'birchot_hashachar', WEEKDAY, null), modeh)!;
       expect(printed.en).toBeTruthy();
       for (const voice of ['female', 'male'] as const) {
@@ -5425,4 +5736,81 @@ describe('the women’s liturgy by siddur voice (R8, R9)', () => {
     expect(english('female')).not.toMatch(/did not make me a woman/);
     expect(english('female')).not.toMatch(/A man blesses/);
   }, 60000);
+});
+
+// Passages the other four nuschaot carry, which Teiman's texts take from the 1894 Tiklal.
+describe('nusach Teiman: the Tiklal passages', () => {
+  const weekday = day(9, months.CHESHVAN, 5787);
+  const afterShabbat = civilDay(new Date(2026, 9, 11));
+  const afterShabbatBeforeYomKippur = civilDay(new Date(2026, 8, 20));
+  const afterYomTovIntoCholHamoed = day(16, months.NISAN, 5786);
+  const tishaBav = day(9, months.AV, 5786);
+  const tishaBavAfterShabbat = day(10, months.AV, 5782);
+  const roshChodesh = day(1, months.CHESHVAN, 5787);
+  const cholHamoedPesach = day(18, months.NISAN, 5786);
+  const cholHamoedSukkot = day(18, months.TISHREI, 5787);
+  const chanukah = day(27, months.KISLEV, 5787);
+  const yomHaatzmaut = day(5, months.IYYAR, 5786);
+  const titles = (id: SiddurTextId, features: DayFeatures) =>
+    resolveSiddurText(load('teiman', id), features).map((section) => section.title.he);
+
+  it('runs on the nights and days its fixtures claim', () => {
+    expect(afterShabbat.flags.has('viHiNoam')).toBe(true);
+    expect(afterShabbatBeforeYomKippur.flags.has('motzaeiShabbat')).toBe(true);
+    expect(afterYomTovIntoCholHamoed.flags.has('motzaei')).toBe(true);
+    expect(tishaBavAfterShabbat.flags.has('motzaeiShabbat')).toBe(true);
+    expect(saidOn('teiman', 'maariv', weekday)).toMatch(/השכיבנו/);
+  });
+
+  it('separates Shabbat or Yom Tov from the week in Maariv’s Chonen HaDaat, in the Baladi wording', () => {
+    for (const night of [afterShabbat, afterShabbatBeforeYomKippur, afterYomTovIntoCholHamoed, tishaBavAfterShabbat])
+      expect(saidOn('teiman', 'maariv', night)).toMatch(BALADI_HAVDALAH);
+    expect(saidOn('teiman', 'maariv', weekday)).not.toMatch(BALADI_HAVDALAH);
+  });
+
+  it('adds Vihi Noam and Ve’ata Kadosh to Maariv after an ordinary Shabbat', () => {
+    const said = saidOn('teiman', 'maariv', afterShabbat);
+    expect(said).toMatch(/ישב בסתר עליון/);
+    expect(said).toMatch(/ואתה קדוש/);
+    const plain = saidOn('teiman', 'maariv', weekday);
+    expect(plain).not.toMatch(/ישב בסתר עליון/);
+    expect(plain).not.toMatch(/ואתה קדוש/);
+  });
+
+  it('says Rachem for Tishkon and reads Eichah in Maariv on Tisha B’Av night, with Vihi Noam and Ve’ata Kadosh only after Shabbat', () => {
+    for (const night of [tishaBav, tishaBavAfterShabbat]) {
+      expect(shownOn('teiman', 'maariv', night)).toMatch(/איכה/);
+      const said = saidOn('teiman', 'maariv', night);
+      expect(said).toMatch(/רחם \S+ אלהינו עלינו ועל ישראל עמך ועל ירושלם עירך/);
+      expect(said).not.toMatch(/תשכון/);
+    }
+    const afterShabbatSaid = saidOn('teiman', 'maariv', tishaBavAfterShabbat);
+    expect(afterShabbatSaid).toMatch(/ואתה קדוש/);
+    expect(afterShabbatSaid).toMatch(/ישב בסתר עליון/);
+    const weeknightSaid = saidOn('teiman', 'maariv', tishaBav);
+    expect(weeknightSaid).not.toMatch(/ואתה קדוש/);
+    expect(weeknightSaid).not.toMatch(/ישב בסתר עליון/);
+  });
+
+  it('says Hallel in Shacharit, whole on Chanukah and Chol HaMoed Sukkot and half on Rosh Chodesh and Chol HaMoed Pesach', () => {
+    for (const features of [chanukah, cholHamoedSukkot, roshChodesh, cholHamoedPesach]) {
+      expect(titles('shacharit', features)).toContain('הלל');
+      expect(saidOn('teiman', 'shacharit', features)).toMatch(/הללו עבדי \S+ הללו את ?שם/);
+    }
+    expect(titles('shacharit', yomHaatzmaut)).toContain('הלל');
+  });
+
+  it('takes the lulav on Chol HaMoed Sukkot', () => {
+    expect(saidOn('teiman', 'shacharit', cholHamoedSukkot)).toMatch(/על נטילת לולב/);
+  });
+
+  it('says Nishmat with ובמקהלות, as the Tiklal prints it', () => {
+    expect(saidOn('teiman', 'nishmat', weekday)).toMatch(/ובמקהלות רבבות עמך כל בית ישראל יתפאר שמך/);
+  });
+
+  it('says Musaf in Shacharit on Rosh Chodesh and Chol HaMoed, naming the day', () => {
+    for (const features of [roshChodesh, cholHamoedPesach, cholHamoedSukkot])
+      expect(titles('shacharit', features)).toContain('מוסף');
+    expect(saidOn('teiman', 'shacharit', roshChodesh)).toMatch(/ראשי חדשים לעמך נתת/);
+  });
 });

@@ -13,6 +13,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { HDate } from '@hebcal/core';
+import { NUSACH_IDS } from '@/data/nuschaot';
 import { Nusach } from '@/types/mitzvah';
 import { Place, SiddurTextId } from '@/types/siddur';
 import { readSiddurText } from '@/testing/siddur';
@@ -36,7 +37,7 @@ const run = process.env.SIDDUR_DUMP ? it : it.skip;
 
 run('dumps resolved siddur texts', () => {
   const texts = (process.env.DUMP_TEXTS ?? '').split(',').filter(Boolean) as SiddurTextId[];
-  const nuschaot = (process.env.DUMP_NUSACH ?? 'ashkenaz,sefard,edot_hamizrach,chabad').split(',') as Nusach[];
+  const nuschaot = (process.env.DUMP_NUSACH ?? NUSACH_IDS.join(',')).split(',') as Nusach[];
   const days = (process.env.DUMP_DAYS ?? '').split(',').filter(Boolean);
   const place = PLACES[process.env.DUMP_PLACE ?? 'israel'];
   const width = Number(process.env.DUMP_WIDTH ?? 140);

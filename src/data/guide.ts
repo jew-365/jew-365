@@ -202,8 +202,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "The star button saves the current place as a bookmark; when the text already has bookmarks it asks whether to add a new one or move one of them here, and Bookmarks shows Where you left off and the text's bookmarks, to jump to or delete. Next time the reader offers to continue where you left off: for a mitzvah's text (the prayers, candle lighting, havdalah, the Omer) on the same day only, for every other text always. Done at the end of the text marks its mitzvah, and in a mitzvah's text the settings button at the top opens the mitzvah's screen.",
       },
       {
-        he: 'בהגדרות ← תפילה וסידור בוחרים נוסח, דעת זמן ק״ש (הגר״א או המגן אברהם, שקובעת מתי נגמר חלון קריאת שמע של שחרית), במניין או ביחיד, ״נוסח הסידור״ לגבר או לאישה, וגלילה. נוסח הסידור מתעדכן לפי המגדר בפרופיל: אישה קוראת את ״מודה אני״, את ברכות השחר ואת שאר הנוסחים בלשון אישה.',
-        en: "Settings → Prayer and siddur sets the nusach, the Shema opinion (Gra or Magen Avraham, which decides when the morning Shema window ends), Minyan or Alone, the Siddur wording for a man or a woman, and scrolling. The siddur wording follows the gender in your profile: a woman reads Modeh Ani, the morning blessings and the other women's forms.",
+        he: 'בהגדרות ← תפילה וסידור בוחרים נוסח (אשכנז, ספרד, עדות המזרח, חב״ד או תימן בלדי), דעת זמן ק״ש (הגר״א או המגן אברהם, שקובעת מתי נגמר חלון קריאת שמע של שחרית), במניין או ביחיד, ״נוסח הסידור״ לגבר או לאישה, וגלילה. נוסח הסידור מתעדכן לפי המגדר בפרופיל: אישה קוראת את ״מודה אני״, את ברכות השחר ואת שאר הנוסחים בלשון אישה.',
+        en: "Settings → Prayer and siddur sets the nusach (Ashkenaz, Sefard, Edot HaMizrach, Chabad or Teiman Baladi), the Shema opinion (Gra or Magen Avraham, which decides when the morning Shema window ends), Minyan or Alone, the Siddur wording for a man or a woman, and scrolling. The siddur wording follows the gender in your profile: a woman reads Modeh Ani, the morning blessings and the other women's forms.",
       },
       {
         he: 'הסליחות יורדות כתוסף בנוסח שלך: עד שהן מותקנות, השורה בסידור, מסך המצווה ולשונית עוד מציעים להוריד אותן, ושבוע לפני תחילת העונה מופיעה גם בדף הבית הצעה להוריד. החלפת נוסח מציעה את הסליחות של הנוסח החדש.',
@@ -396,8 +396,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "Settings → About and contact holds the version, a contact form (name, phone and message, sent to us through Formspree with the app version and device type), the email 365jew@gmail.com, and links to the support page, the privacy policy, the app's store page and the Chok LeYisrael credit.",
       },
       {
-        he: 'לשאלה הלכתית, ״קו ההלכה״ בלשונית עוד מחייג לקו לפי הנוסח שבהגדרות: קווים אשכנזיים, ולעדות המזרח קו לפי פסקי מרן, גם בוואטסאפ.',
-        en: 'For a halachic question, the halacha hotline in the More tab dials a line by the nusach in Settings: Ashkenazi lines, and for Edot HaMizrach a line following Maran, by WhatsApp too.',
+        he: 'לשאלה הלכתית, ״קו ההלכה״ בלשונית עוד מחייג לקו לפי הנוסח שבהגדרות: קווים אשכנזיים, ולעדות המזרח ולתימן קו לפי פסקי מרן, גם בוואטסאפ.',
+        en: 'For a halachic question, the halacha hotline in the More tab dials a line by the nusach in Settings: Ashkenazi lines, and for Edot HaMizrach and Teiman a line following Maran, by WhatsApp too.',
       },
       {
         he: 'האפליקציה אינה פוסקת הלכה. הזמנים והכללים שהיא מיישמת נמסרים לעיון רב, וכל תשובה שלו משנה את הכלל שלה. בכל ספק יש לשאול רב.',
@@ -424,6 +424,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: 'לוח הזמנים מציג את סוף זמן קריאת שמע לפי המג״א ולפי הגר״א, כמו בלוח.',
         en: 'The schedule shows the latest Shema both by the Magen Avraham and by the Gra, as the luach does.',
+      },
+      {
+        he: 'נוסח תימן בלדי: אפשר לבחור אותו בפתיחה הראשונה או בהגדרות ← תפילה וסידור. נוסחי הסידור מגיעים בנוסח הבלדי, מוויקיטקסט ומהתכלאל שנדפס בירושלים בשנת תרנ״ד, בעברית בלבד, והסליחות, קידוש לבנה, נרות חנוכה ושאר הכללים שתלויים בנוסח הולכים אחריו.',
+        en: 'Nusach Teiman Baladi: choose it when the app first opens or in Settings → Prayer and siddur. The siddur texts come in the Baladi wording, from Hebrew Wikisource and the Tiklal printed in Jerusalem in 1894, in Hebrew only, and Selichot, Kiddush Levana, the Chanukah candles and the other rules that depend on the nusach follow it.',
       },
     ],
   },

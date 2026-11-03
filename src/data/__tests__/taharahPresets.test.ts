@@ -66,6 +66,8 @@ describe('taharahPresets', () => {
     expect(presetForNusach('sefard')).toBe('chassidic');
     expect(presetForNusach('chabad')).toBe('chabad');
     expect(presetForNusach('edot_hamizrach')).toBe('sephardi_ovadia');
+    // R14.6: Teiman starts from the same Sephardi preset until the rav answers.
+    expect(presetForNusach('teiman')).toBe('sephardi_ovadia');
   });
 
   it('hands out a copy of the rules, so editing one never touches the preset', () => {

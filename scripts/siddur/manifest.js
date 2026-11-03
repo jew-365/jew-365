@@ -27,13 +27,14 @@ const METSUDAH_YOM_KIPPUR = {
 // gives its Baladi wording through `params` (`{{{נוסח}}}` is בלדי).
 function baladiSources(pages) {
   return Object.fromEntries(
-    Object.entries(pages).map(([key, [page, revision, title]]) => [
+    Object.entries(pages).map(([key, [page, revision, title, prepare]]) => [
       key,
       {
         wikisource: page,
         revision,
         lang: 'he',
         params: { נוסח: 'בלדי' },
+        ...(prepare && { prepare }),
         credit: {
           title: `${title} — Hebrew Wikisource`,
           license: 'CC-BY-SA',
@@ -42,6 +43,48 @@ function baladiSources(pages) {
       },
     ]),
   );
+}
+
+// The 1894 Tiklal Etz Chaim transcribed under source/tiklal-1894/ (spec nusach-teiman.md, section 5): wikitext
+// read as a Baladi page, pinned by the commit that holds it.
+function tiklalSources(units) {
+  return Object.fromEntries(
+    Object.entries(units).map(([key, [unit, title]]) => [
+      key,
+      {
+        local: `tiklal-1894/${unit}.wiki`,
+        lang: 'he',
+        params: { נוסח: 'בלדי' },
+        credit: {
+          title: `${title} — Tiklal Etz Chaim, Jerusalem 1894 (transcription)`,
+          license: 'Public Domain',
+          url: 'https://archive.org/details/Tiklal_Eiz_Hayyim_Jerusalem_1894',
+        },
+      },
+    ]),
+  );
+}
+
+// A source's `prepare` rewrites its wikitext before it is read, each replacement matching exactly once,
+// for markup the build does not read: a call on today's date in a branch the Baladi reading drops.
+function rewrite(...replacements) {
+  return (wikitext, key) =>
+    replacements.reduce((text, [from, to]) => {
+      const count = text.split(from).length - 1;
+      if (count !== 1) throw new Error(`${key}: prepare "${from.slice(0, 60)}" matched ${count}x, expected 1`);
+      return text.replace(from, () => to);
+    }, wikitext);
+}
+
+// A {{#בחר}} on today's date becomes every one of its cases, each a paragraph that opens with its label.
+function allCases(count) {
+  return (wikitext, key) => {
+    const cases = [...wikitext.matchAll(/^\|([^=\n]+)=(.+)$/gm)];
+    if (cases.length !== count) throw new Error(`${key}: expected ${count} cases, found ${cases.length}`);
+    return cases
+      .map(([, label, text]) => `<small>${label.trim()}</small> ${text.replace(/\}\}$/, '').trim()}`)
+      .join('\n\n');
+  };
 }
 
 const SOURCES = {
@@ -230,7 +273,19 @@ const SOURCES = {
     },
   },
   ...baladiSources({
-    wikiBaladiShacharit: ['סידור/נוסח תימן בלדי/שחרית לחול', 3101141, 'Siddur Nusach Teiman Baladi, Weekday Shacharit'],
+    wikiBaladiShacharit: [
+      'סידור/נוסח תימן בלדי/שחרית לחול',
+      3101143,
+      'Siddur Nusach Teiman Baladi, Weekday Shacharit',
+      rewrite(
+        [
+          '<div class="NavFrame" style="width:{{{רוחב|100%}}};">\n<div class="NavHead" style="text-align:center; float:{{{יישור|auto}}}">לעשרת ימי תשובה</div>\n<div class="NavContent" style="display:block; text-align:right">\n',
+          '',
+        ],
+        ['{{מגירה|לשני וחמישי|\n', ''],
+        ['סְלַח לָנוּ.}}\n}}\n', 'סְלַח לָנוּ.}}\n'],
+      ),
+    ],
     wikiBaladiMincha: ['סידור/נוסח תימן בלדי/מנחה לחול', 1076941, 'Siddur Nusach Teiman Baladi, Weekday Mincha'],
     wikiBaladiMaariv: ['סידור/נוסח תימן בלדי/חול/ערבית', 2896952, 'Siddur Nusach Teiman Baladi, Weekday Maariv'],
     wikiBaladiBedtimeShema: [
@@ -239,16 +294,81 @@ const SOURCES = {
       'Siddur Nusach Teiman Baladi, Bedtime Shema',
     ],
     wikiBaladiBirkatHamazon: ['ברכת המזון/בלדי 2', 2929770, 'Birkat HaMazon, Nusach Teiman Baladi'],
+    wikiBaladiZimun: ['ברכת המזון/בלדי', 2929642, 'Birkat HaMazon with the Zimun, Nusach Teiman Baladi'],
     wikiBaladiAlHamichya: ['ברכת מעין שלוש - נוסח תימן בלדי', 2896943, "Me'ein Shalosh, Nusach Teiman Baladi"],
     wikiBaladiShevaBerachot: ['שבע ברכות (בלדי)', 2903948, 'Sheva Berachot, Nusach Teiman Baladi'],
     wikiBoreiNefashot: ['ברכת בורא נפשות', 2896941, 'Borei Nefashot'],
-    wikiNishmat: ['נשמת', 2972652, 'Nishmat Kol Chai'],
+    wikiOmer: [
+      'סדר ספירת העומר',
+      2929975,
+      'The Order of Counting the Omer',
+      rewrite(
+        [
+          "'''{{נוסחי תפילה קצרים|נוסח={{{נוסח|}}}|בלדי={{ספירת העומר/בלדי|יום={{תאריך עברי נוכחי|יח}}}}|כל השאר={{ספירת העומר|יום={{תאריך עברי נוכחי|יח}}|נוסח={{{נוסח|}}}}}}}'''",
+          '{{ספירת העומר/בלדי}}',
+        ],
+        [' {{רגיל|({{ספירת העומר|ספירה={{תאריך עברי נוכחי|יח}}}})}}', ''],
+      ),
+    ],
+    wikiBaladiOmerCount: [
+      'תבנית:ספירת העומר/בלדי',
+      400058,
+      'The Omer Count, Nusach Teiman Baladi (template)',
+      allCases(49),
+    ],
     wikiAdonHaolamim: ['אדון העולמים', 3081615, 'Adon HaOlamim'],
     wikiHamehulal: ['המהולל', 3081625, 'HaMehulal'],
     wikiLefanechaAniKoreia: ['לפניך אני כורע', 3095956, "Lefanecha Ani Kore'a"],
     wikiAnaBechoach: ['אנא בכח', 3085666, 'Ana BeKoach'],
     wikiYihyuLeratzonTemplate: ['תבנית:יהיו לרצון', 3003259, 'Yihyu LeRatzon (template)'],
     wikiRepeatTemplate: ['תבנית:גפ', 3017024, 'Repeated verse (template)'],
+    wikiBaladiSelichot: ['סידור/נוסח תימן בלדי/אשמורות', 3088391, 'Siddur Nusach Teiman Baladi, Ashmurot (Selichot)'],
+    wikiYashenAlTeradam: ['ישן אל תרדם', 3086114, 'Yashen Al Teradam'],
+    wikiYeiruniRayonai: ['יעירוני רעיוני', 3086118, 'Ye’iruni Ra’ayonai'],
+    wikiBenAdamNirdam: ['בן אדם מה לך נרדם', 3086121, 'Ben Adam Mah Lecha Nirdam'],
+    wikiKamtiVatidad: ['קמתי ותדד שנתי', 3086125, 'Kamti Vatidad Shenati'],
+    wikiElokeiHatzevaot: ["ה' אלהי הצבאות יושב הכרובים", 3086128, 'Hashem Elokei HaTzeva’ot Yoshev HaKeruvim'],
+    wikiEdotLechaHashem: [
+      "סידור/נוסח עדות המזרח/סליחות לימי התשובה/לך ה' הצדקה",
+      3089026,
+      'Siddur Nusach Edot HaMizrach, Selichot for the Days of Repentance: Lecha Hashem HaTzedakah',
+    ],
+    wikiEleichaEkra: ["אליך ה' אקרא משגב לעתות בצרה", 3086142, 'Elecha Hashem Ekra Misgav LeItot BaTzarah'],
+    wikiShevetYehuda: ['שבט יהודה בדוחק ובצער', 3083194, 'Shevet Yehudah BeDochak UveTza’ar'],
+    wikiElMelechYoshev: ['אל מלך יושב על כיסא רחמים', 3037672, 'El Melech Yoshev Al Kisei Rachamim'],
+    wikiBeetRatzon: ['בעת רצון תחנתי', 3086144, 'Be’et Ratzon Techinati'],
+    wikiRachamanaIdkar: ['רחמנא אידכר לן', 3088017, 'Rachamana Idkar Lan'],
+    wikiAnaKaav: ['אנא כעב זדוני תמחהו', 3086152, 'Ana Ka’av Zedoni Timcheihu'],
+    wikiTamahnu: ['תמהנו מרעות', 3086155, 'Tamahnu MeRa’ot'],
+    wikiAlTaasImanu: ['אל תעש עמנו כלה', 3086163, 'Al Ta’as Imanu Chalah'],
+    wikiElokeinuShebashamayim: ['אלהינו שבשמים', 3088000, 'Elokeinu SheBashamayim'],
+    wikiElokimAtaYadata: ['אלהים אתה ידעת', 3086171, 'Elokim Atah Yadata'],
+    wikiAdonHaselichot: ['אדון הסליחות', 3087997, 'Adon HaSelichot'],
+    wikiShomerYisrael: ['שומר ישראל', 3076936, 'Shomer Yisrael'],
+    wikiMacheiUmasei: ['מחי ומסי', 3024318, 'Machei UMasei'],
+    wikiErelei: ['אראלי מרומים', 3076717, 'Er’elei Meromim'],
+    wikiMibeitMeloni: ['מבית מלוני קמתי בצוקי', 2999945, 'MiBeit Meloni Kamti BeTzuki'],
+    wikiImTeehav: ['אם תאהב דרך', 2993381, 'Im Te’ehav Derech'],
+    wikiMaranotTemplate: ['תבנית:מרנות', 3080265, 'Maranot (template)'],
+  }),
+  ...tiklalSources({
+    tiklalTefilatHaderech: ['tefilat_haderech', "The Traveler's Prayer"],
+    tiklalBirchotHanehenin: ['birchot_hanehenin', 'Blessings over Food and Fragrance'],
+    tiklalBirchotHareiya: ['birchot_hareiya', 'Blessings of Sight and Praise'],
+    tiklalCandleLighting: ['candle_lighting', 'Shabbat Candle Lighting'],
+    tiklalMezuzah: ['mezuzah', 'Affixing a Mezuzah'],
+    tiklalChanukahCandles: ['chanukah_candles', 'Lighting the Chanukah Candles'],
+    tiklalKiddushLevana: ['kiddush_levana', 'Blessing of the Moon'],
+    tiklalHavdalah: ['havdalah', 'Havdalah'],
+    tiklalShacharitTorah: ['shacharit_torah', 'Weekday Shacharit: the Torah Reading and Uva LeTzion'],
+    tiklalShacharitClose: ['shacharit_close', 'Weekday Shacharit: the Song of the Day to Aleinu'],
+    tiklalMincha: ['mincha', 'Weekday Mincha'],
+    tiklalHallel: ['hallel', 'Weekday Hallel'],
+    tiklalMusaf: ['musaf', 'Musaf of Rosh Chodesh and the Festivals'],
+    tiklalNishmat: ['nishmat', 'Nishmat Kol Chai'],
+    tiklalVihiNoam: ['vihi_noam', "Maariv after Shabbat: Vihi No'am and V'Atah Kadosh"],
+    tiklalTishaBavMaariv: ['tisha_bav_maariv', "Maariv of Tisha B'Av"],
+    tiklalLulav: ['lulav', 'Taking the Lulav'],
   }),
   wikiBeforePsalms: {
     wikisource: 'תפילה לפני אמירת תהלים',
@@ -383,6 +503,7 @@ const T = {
   havdalahFire: { he: 'על הנר', en: 'Over the Flame' },
   havdalahBlessing: { he: 'ברכת המבדיל', en: 'The Havdalah Blessing' },
   havdalah: { he: 'סדר הבדלה', en: 'Havdalah' },
+  hachelAleinu: { he: 'החל עלינו', en: 'Hachel Aleinu' },
   korbanot: { he: 'קרבנות', en: 'Offerings' },
   ashrei: { he: 'אשרי', en: 'Ashrei' },
   amidah: { he: 'תפילת העמידה', en: 'The Amidah' },
@@ -396,12 +517,15 @@ const T = {
   barchu: { he: 'ברכו', en: 'Barchu' },
   shemaBlessings: { he: 'קריאת שמע וברכותיה', en: 'The Shema and its Blessings' },
   motzaeiShabbat: { he: 'ויהי נועם ואתה קדוש', en: "Vihi No'am and V'Atah Kadosh" },
+  alNaharotBavel: { he: 'על נהרות בבל', en: 'Al Naharot Bavel' },
   ledavid: { he: 'לדוד ה׳ אורי', en: 'LeDavid' },
   mournersHouse: { he: 'בבית האבל', en: 'In a House of Mourning' },
   shirLamaalot: { he: 'שיר למעלות', en: 'Song of Ascents' },
   closingBarchu: { he: 'ברכו לסיום', en: 'Closing Barchu' },
   yehiShem: { he: 'יהי שם', en: 'Yehi Shem' },
   psalm: { he: 'מזמור', en: 'Psalm' },
+  afterMaarivPsalms: { he: 'מזמורים לאחר התפילה', en: 'Psalms After the Prayer' },
+  rabbiChananya: { he: 'רבי חנניא בן עקשיא', en: 'Rabbi Chananya ben Akashya' },
   barchiNafshi: { he: 'ברכי נפשי', en: 'Barchi Nafshi' },
   shirHamaalot: { he: 'שיר המעלות', en: 'A Song of Ascents' },
   alTira: { he: 'אל תירא', en: 'Al Tira' },
@@ -421,6 +545,7 @@ const T = {
   musaf: { he: 'מוסף', en: 'Musaf' },
   songOfDay: { he: 'שיר של יום', en: 'Song of the Day' },
   einKelokeinu: { he: 'אין כאלהינו', en: 'Ein Keloheinu' },
+  ketoret: { he: 'פטום הקטורת', en: 'Pitum HaKetoret' },
   tachanunConclusion: { he: 'סיום התחנון', en: 'Conclusion of Tachanun' },
   returningTorah: { he: 'הכנסת ספר התורה', en: 'Returning the Torah' },
   beitYaakov: { he: 'בית יעקב', en: 'Beit Yaakov' },
@@ -499,6 +624,8 @@ const T = {
   sea: { he: 'הים הגדול', en: 'The Great Sea' },
   trees: { he: 'ברכת האילנות', en: 'Trees in Blossom' },
   praise: { he: 'ברכות שבח והודאה', en: 'Further Blessings of Praise' },
+  mountainsAndSeas: { he: 'הרים, ימים ונהרות', en: 'Mountains, Seas and Rivers' },
+  sun: { he: 'ברכת החמה', en: 'Blessing of the Sun' },
   levanaOpening: { he: 'פתיחה', en: 'Opening' },
   levanaBlessing: { he: 'ברכת הלבנה', en: 'Blessing of the Moon' },
   levanaPsalms: { he: 'פסוקים ומזמורים', en: 'Verses and Psalms' },
@@ -524,6 +651,36 @@ const T = {
   sittingInSukkah: { he: 'בישיבה בסוכה', en: 'Sitting in the Sukkah' },
   sukkahDayVerses: { he: 'פסוקי היום בסוכה', en: "The Day's Verses in the Sukkah" },
   ushpizinChair: { he: 'כסא האושפיזין', en: "The Ushpizin's Chair" },
+  selichotPsalms: { he: 'מזמורי תהלים', en: 'Psalms' },
+  yashenAlTeradam: { he: 'ישן אל תרדם', en: 'Yashen Al Teradam' },
+  yeiruniRayonai: { he: 'יעירוני רעיוני', en: "Ye'iruni Ra'ayonai" },
+  reshut: { he: 'רשות לשליח הציבור', en: "The Chazzan's Reshut" },
+  psalm17: { he: 'תהלים יז', en: 'Psalm 17' },
+  elokeiHatzevaot: { he: 'ה׳ אלהי הצבאות', en: "Hashem Elokei HaTzeva'ot" },
+  elechaEkra: { he: 'אליך ה׳ אקרא', en: 'Elecha Hashem Ekra' },
+  shevetYehuda: { he: 'שבט יהודה', en: 'Shevet Yehudah' },
+  beetRatzon: { he: 'בעת רצון תחנתי', en: "Be'et Ratzon Techinati" },
+  rachamanaIdkar: { he: 'רחמנא אידכר לן', en: 'Rachamana Idkar Lan' },
+  anaKaav: { he: 'אנא כעב', en: "Ana Ka'av" },
+  ansheiEmuna: { he: 'אנשי אמונה', en: 'Anshei Emunah' },
+  tamahnu: { he: 'תמהנו מרעות', en: "Tamahnu MeRa'ot" },
+  alTaasImanu: { he: 'אל תעש עמנו כלה', en: "Al Ta'as Imanu Chalah" },
+  chatanuTzurenu: { he: 'חטאנו צורנו', en: 'Chatanu Tzurenu' },
+  elokimAtaYadata: { he: 'אלהים אתה ידעת', en: 'Elokim Atah Yadata' },
+  adonHaselichot: { he: 'אדון הסליחות', en: 'Adon HaSelichot' },
+  asehLemaan: { he: 'עשה למען שמך', en: "Aseh Lema'an Shemach" },
+  deaneiLaaniyei: { he: 'דעני לעניי', en: "De'anei La'aniyei" },
+  imAfes: { he: 'אם אפס', en: 'Im Afes' },
+  lemitvadeh: { he: 'למתודה חטאתיו', en: "LeMitvadeh Chata'av" },
+  elokeiYisrael: { he: 'ה׳ אלהי ישראל', en: 'Hashem Elokei Yisrael' },
+  imAshamenu: { he: 'אם אשמנו', en: 'Im Ashamenu' },
+  atanu: { he: 'אתאנו לחלות פניך', en: 'Atanu Lechalot Panecha' },
+  maranot: { he: 'מרנות', en: 'Maranot' },
+  erelei: { he: 'אראלי מרומים', en: "Er'elei Meromim" },
+  avinuAvHarachaman: { he: 'אבינו אב הרחמן', en: 'Avinu Av HaRachaman' },
+  elErechApayim: { he: 'אל ארך אפים', en: 'El Erech Apayim' },
+  mibeitMeloni: { he: 'מבית מלוני', en: 'MiBeit Meloni' },
+  imTeehav: { he: 'אם תאהב', en: "Im Te'ehav" },
 };
 
 const NOT_TISHA_BAV = { none: ['tishaBav'] };
@@ -716,6 +873,11 @@ const NOTES = {
     en: "On the night of Tisha B'Av, Eichah and kinot are read here, followed by V'Atah Kadosh.",
     when: TISHA_BAV,
   },
+  tishaBavEichahKinot: {
+    he: '<small>בליל תשעה באב קוראים כאן מגילת איכה ואומרים קינות.</small>',
+    en: "On the night of Tisha B'Av, Eichah and kinot are read here.",
+    when: TISHA_BAV,
+  },
   tachanunDisputedShacharit: {
     he: '<small>יש קהילות שאינן אומרות תחנון היום.</small>',
     en: 'Some communities do not say Tachanun today.',
@@ -847,6 +1009,8 @@ const WHEN_SAID = {
     en: 'For one who did not recite the Shema on time, and by some custom every night: also the paragraph "Vehaya Im Shamoa"',
   },
   maritalRelations: { he: 'בלילה שיש בו תשמיש המטה', en: 'On a night of marital relations', marriedOnly: true },
+  timePermits: { he: 'אם יש פנאי אומרים', en: 'Said when there is time' },
+  plague: { he: 'כשיש, חס ושלום, מגפה בעיר אומרים', en: 'Said when, God forbid, there is a plague in the town' },
 };
 
 // Women's liturgy (R8, R9): every patch is listed in AGENTS.md.
@@ -955,6 +1119,7 @@ const SOME_SAY = {
     he: 'יש אומרים אחר הקדיש "והיה אור הלבנה"',
     en: 'After the Kaddish, some say "Vehaya Or HaLevana"',
   },
+  beforeHavdalah: { he: 'במקצת מקומות אומרים לפני ההבדלה', en: 'In some places this is said before Havdalah' },
   sukkahDayVerses: { he: 'יש נוהגים לומר פסוקים אלה בסוכה', en: 'Some say these verses in the sukkah' },
 };
 
@@ -1549,14 +1714,14 @@ function chapter(label, specs) {
   return { ...specs, chapter: label };
 }
 
-function tallitAndTefillin(nusach) {
+function tallitAndTefillin(nusach, { tallitGadol = TALLIT_GADOL[nusach], tefillin = TEFILLIN[nusach] } = {}) {
   const title = T.tallitAndTefillin;
   const ordinaryDay = { none: ['tishaBav', ...CHOL_HAMOED.any] };
   const tallitKatan = TALLIT_KATAN[nusach];
   const specs = [
     ...(tallitKatan ? [{ ...tallitKatan, title, when: NOT_TISHA_BAV }] : []),
-    { ...TALLIT_GADOL[nusach], title, when: NOT_TISHA_BAV },
-    { ...TEFILLIN[nusach], title, when: ordinaryDay },
+    { ...tallitGadol, title, when: NOT_TISHA_BAV },
+    { ...tefillin, title, when: ordinaryDay },
   ];
   if (nusach === 'ashkenaz') {
     specs.push({
@@ -2251,6 +2416,7 @@ function ashkenaziSelichot(sources, days) {
 // divine name as יְיָ, and a few lines as an unpointed יי, which reads as the pointed form.
 function baladiName(html) {
   return html
+    .replace(/י"י/g, 'יְיָ')
     .replace(/(^|[\s>])יי(?=[\s,.:;<]|$)/g, '$1יְיָ')
     .replace(/יְהֹוָה/g, 'יְיָ')
     .replace(/יהֹוָה/g, 'ייָ');
@@ -2296,7 +2462,7 @@ function teimanBirchot() {
           from: '<small>נשים אומרות:</small> בָּרוּךְ שֶׁעָשַׂנִי כִּרְצוֹנוֹ.',
           to: '<if voice="female,unset"><small>נשים אומרות:</small> בָּרוּךְ שֶׁעָשַׂנִי כִּרְצוֹנוֹ.</if>',
         },
-        { seg: 1, from: '<small>ביום הכפורים ובתשעה באב מדלגים על הברכה הבאה.</small><br> ', to: '' },
+        { seg: 1, from: '<small>ביום הכפורים ובתשעה באב מדלגים על הברכה הבאה.</small> <br> ', to: '' },
       ],
     },
     { ...BALADI_SHACHARIT, title: T.torahBlessings, path: '# ברכות התורה' },
@@ -2325,6 +2491,376 @@ function teimanBedtimeShema() {
 
 const TEIMAN_TEFILLIN = { ...BALADI_SHACHARIT, path: '# ברכות ציצית ותפילין', voice: NOT_FOR_WOMEN };
 const TEIMAN_SHEMA = { ...BALADI_SHACHARIT, path: '# קריאת שמע' };
+const TEIMAN_MORNING_SHEMA = { ...TEIMAN_SHEMA, minyanParts: [{ from: 5, label: SAID_BY.chazzan }] };
+
+// A page that prints its instructions as plain text: every run of unvocalized words outside small print
+// becomes an instruction. Run it after `baladiName()`, which vocalizes the divine name.
+const UNVOCALIZED_WORD =
+  '[^\\s\\u05B0-\\u05BC\\u05C1\\u05C2\\u05C7]*[\\u05D0-\\u05EA][^\\s\\u05B0-\\u05BC\\u05C1\\u05C2\\u05C7]*';
+const UNVOCALIZED_RUN = new RegExp(`(?<=^|\\s)${UNVOCALIZED_WORD}(?:\\s+${UNVOCALIZED_WORD})*(?=\\s|$)`, 'g');
+function plainNotes(html) {
+  let depth = 0;
+  return html
+    .split(/(<[^>]+>)/)
+    .map((token) => {
+      if (/^<small\b/i.test(token)) depth++;
+      else if (/^<\/small/i.test(token)) depth = Math.max(0, depth - 1);
+      return depth || token.startsWith('<')
+        ? token
+        : token
+            .replace(UNVOCALIZED_RUN, (run) => `<small>${run}</small>`)
+            .replace(/<\/small>(\s*[–\-:,.]\s*)<small>/g, '$1');
+    })
+    .join('');
+}
+
+const TEN_DAYS = { all: [AYT] };
+const inTenDays = (seg, from, to) => ({ seg, from, to: `<if all="${AYT}">${to}</if>` });
+
+// The Baladi weekday Maariv with the Tiklal's two nights of its own. Motzaei Shabbat (V1 315-319): after the Amidah a
+// half Kaddish, Vihi Noam with Psalm 91, Ve'ata Kadosh from the Tiklal's Uva LeTzion, then Kaddish Titkabel and the
+// weekday close. Tisha B'Av night (V2 204-205): the chazzan's kinah stanza and Psalm 137 before Maariv, Rachem for
+// Tishkon and the individual's Aneinu (the Shacharit page's, as in Mincha) in Shema Koleinu, then only Kaddish
+// Titkabel and Aleinu, and the kinot; on motzaei Shabbat the additions come first (V2 221).
+const TEIMAN_MOTZAEI_ADDITIONS = { all: ['motzaeiShabbat'], any: ['viHiNoam', 'tishaBav'] };
+const TISHA_BAV_AFTER_SHABBAT = { all: ['tishaBav', 'motzaeiShabbat'] };
+function teimanMaariv() {
+  const transform = compose(baladiName, plainNotes);
+  const page = { he: 'wikiBaladiMaariv', path: '*', transform };
+  const tishaBav = { ...TIKLAL, he: 'tiklalTishaBavMaariv', when: TISHA_BAV };
+  const vihiNoam = { ...TIKLAL, he: 'tiklalVihiNoam', title: T.motzaeiShabbat, when: TEIMAN_MOTZAEI_ADDITIONS };
+  const beforeMaariv = { ...tishaBav, title: T.alNaharotBavel };
+  // V2 204's instruction is cut at Psalm 137, which it names, so the psalm stands where it is said.
+  const toPsalm137 = 'ואם ירצה להשלים הקינה הלא היא כתובה לקמן בקינות דשחרית: ואומרים על נהרות בבל עד סופו.';
+  const afterPsalm137 = `ועומד ש"ץ ומתפלל ערבית כבחול ובהכנעה וקול נמוך כאבל ואומר והוא רחום וכו'. ועומדים ומתפללים י"ח.`;
+  const insteadOfTishkon = `וענד מא יצאל אלי' משען ומבטח לצדיקים יקול עוץ' תשכון רחם ה' אלהינו והד'י נוסחו וחית' יצאל אלי' שמע קולנו יקול עננו:`;
+  const kaddish = { ...page, title: T.kaddish, minyan: SAID_BY.chazzan };
+  const afterAmidah = (from, to, title) => ({ ...page, title, from, to, when: NOT_TISHA_BAV });
+  return [
+    {
+      ...beforeMaariv,
+      to: 3,
+      edits: [{ seg: 3, from: ` ${afterPsalm137} ${insteadOfTishkon}</small>`, to: '</small>' }],
+      minyanParts: [{ from: 2, to: 2, label: SAID_BY.chazzan }],
+    },
+    { ...teimanPsalm(T.alNaharotBavel, 137), when: TISHA_BAV },
+    {
+      ...beforeMaariv,
+      from: 3,
+      to: 3,
+      edits: [
+        { seg: 3, from: `${toPsalm137} `, to: '' },
+        tiklalNote(
+          3,
+          `${afterPsalm137} ${insteadOfTishkon}`,
+          `${afterPsalm137} וכשמגיע למשען ומבטח לצדיקים אומר במקום תשכון רחם ה' אלהינו, וכשמגיע לשמע קולנו אומר עננו:`,
+        ),
+      ],
+    },
+    { ...page, title: T.vehuRachum, from: 1, to: 1 },
+    { ...page, title: T.barchu, from: 2, to: 3, minyan: SAID_BY.chazzanAndCongregation },
+    {
+      ...page,
+      title: T.shemaBlessings,
+      from: 4,
+      to: 14,
+      edits: [
+        { seg: 14, from: 'יש מוסיפים: ', to: '' },
+        { seg: 14, from: 'לַ י"י', to: 'לַי"י' },
+        { seg: 14, from: 'בַּ י"י', to: 'בַּי"י' },
+      ],
+      optionalParts: [{ from: 14, label: SOME_SAY.someAdd }],
+    },
+    { ...page, title: T.halfKaddish, from: 15, to: 15, minyan: SAID_BY.chazzan },
+    {
+      ...page,
+      title: T.amidah,
+      from: 16,
+      to: 36,
+      at: { 18: TEN_DAYS, 23: TEN_DAYS, 25: MOTZAEI, 30: NO_RAIN, 31: RAIN, 36: NOT_TISHA_BAV },
+      edits: [
+        { seg: 20, from: '<small>בקיץ אומר</small>', to: '<if none="winter"><small>בקיץ אומר</small>' },
+        { seg: 20, from: ' <small>בחורף אומר</small>', to: '</if> <if all="winter"><small>בחורף אומר</small>' },
+        { seg: 20, from: 'הַגֶּשֶׁם', to: 'הַגֶּשֶׁם</if>' },
+        { seg: 18, from: '(<small>בעשי"ת אומר</small> ', to: '<small>בעשי"ת אומר</small> ' },
+        { seg: 18, from: 'חָי.)', to: 'חָי.' },
+        { seg: 21, from: '(בעשי"ת אומר ', to: `<if all="${AYT}"><small>בעשי"ת אומר</small> ` },
+        { seg: 21, from: 'לְחַיִּים.)', to: 'לְחַיִּים.</if>' },
+        { seg: 25, from: '(למוצאי שבת ויו"ט- ', to: '<small>למוצאי שבת ויו"ט:</small> ' },
+        { seg: 25, from: 'הַכֹּל)', to: 'הַכֹּל' },
+        { seg: 22, from: '(בעשי"ת אומר וּבכֵן *) ', to: `<if none="${AYT}">` },
+        { seg: 22, from: 'הַקָּדוֹשׁ:', to: 'הַקָּדוֹשׁ:</if>' },
+        { seg: 23, from: '*) ', to: '<small>בעשי"ת אומר:</small> ' },
+        { seg: 33, from: 'מֶלֶךְ אוֹהֵב', to: `<if none="${AYT}">מֶלֶךְ אוֹהֵב` },
+        { seg: 33, from: '. (בעשי"ת אומרים ', to: `</if><if all="${AYT}">` },
+        { seg: 33, from: 'הַמִּשׁפָּט):', to: 'הַמִּשׁפָּט</if>:' },
+      ],
+    },
+    {
+      ...tishaBav,
+      title: T.amidah,
+      from: 4,
+      to: 5,
+      groups: [[4, 5]],
+      edits: [{ seg: 5, from: ' <small>ומשלים תפלתו ואומר קדיש תתקבל ועלינו לשבח.</small>', to: '' }],
+    },
+    {
+      ...page,
+      title: T.amidah,
+      from: 37,
+      to: 38,
+      transform: compose(excerpt(38, 'שְׁמַע קוֹלֵנוּ', 'אַל תְּשִׁיבֵנוּ.'), transform),
+    },
+    { ...TEIMAN_AMIDAH, from: 38, to: 38, when: TISHA_BAV },
+    {
+      ...page,
+      title: T.amidah,
+      from: 38,
+      to: 55,
+      transform: compose(excerpt(38, 'כִּי אַתָּה שׁוֹמֵעַ', 'שׁוֹמֵעַ הַתְּפִלָּה:'), transform),
+      at: {
+        40: YAALEH_VEYAVO,
+        41: YAALEH_VEYAVO,
+        44: AL_HANISSIM,
+        45: CHANUKAH,
+        46: PURIM,
+        48: TEN_DAYS,
+        51: TEN_DAYS,
+      },
+      edits: [
+        { seg: 48, from: '(בעשי"ת אומר ', to: '<small>בעשי"ת אומר</small> ' },
+        { seg: 48, from: 'בְרִיתָךְ.)', to: 'בְרִיתָךְ.' },
+        { seg: 40, from: 'בראש חדש ', to: '<if all="roshChodesh"><small>בראש חדש</small> ' },
+        {
+          seg: 40,
+          from: ' בחוה"מ של פסח ',
+          to: '</if><if all="cholHamoedPesach"> <small>בחוה"מ של פסח</small> ',
+        },
+        {
+          seg: 40,
+          from: ' בחוה"מ של סכות ',
+          to: '</if><if all="cholHamoedSukkot"> <small>בחוה"מ של סכות</small> ',
+        },
+        { seg: 40, from: 'הַסֻּכּוֹת הַזֶּה.', to: 'הַסֻּכּוֹת הַזֶּה.</if>' },
+      ],
+    },
+    { ...kaddish, from: 57, to: 57 },
+    { ...kaddish, from: 58, to: 58, when: { none: ['viHiNoam', 'tishaBav'] } },
+    { ...kaddish, from: 58, to: 58, when: { all: ['tishaBav'], none: ['motzaeiShabbat'] } },
+    {
+      ...vihiNoam,
+      to: 17,
+      groups: [[1, 2]],
+      edits: [
+        tiklalNote(
+          0,
+          `ויתם עלי' אלנצ'אם אלי' אכ'ר שים שלום ויקול ש"צ קדיש ויקרו בעד'ה הד'א אלמזמור.`,
+          'ומשלים התפלה על סדרה עד אחר שים שלום, ואומר ש"צ קדיש, ואחריו קוראים מזמור זה:',
+        ),
+      ],
+    },
+    { ...teimanPsalm(T.motzaeiShabbat, 91), from: 15, to: 15, when: TEIMAN_MOTZAEI_ADDITIONS },
+    // On Tisha B'Av the cup waits for the end of the fast (V2 221), so V1 319's havdalah clause is left out then.
+    {
+      ...vihiNoam,
+      from: 18,
+      to: 19,
+      groups: [[18, 19]],
+      edits: [
+        tiklalNote(18, `אורך וכו' ויקול ש"צ`, 'ואומר ש"צ:'),
+        tiklalNote(
+          19,
+          `ואתה קדוש יושב וכו' ואומרים סדר הקדושה ומשלימין כמו בחול ומבדיל על הכוס ויצ'י שמעה או סראג ויבהדי אד'א כאן כוס יין יברך.`,
+          `ואתה קדוש יושב וכו' ואומרים סדר הקדושה ומשלימין כמו בחול<if none="tishaBav">, ומבדיל על הכוס, ומדליק נר של שעווה או של שמן, ומתחיל. אם הוא כוס של יין, מברך</if>.`,
+        ),
+      ],
+    },
+    {
+      ...TIKLAL,
+      he: 'tiklalShacharitTorah',
+      title: T.motzaeiShabbat,
+      when: TEIMAN_MOTZAEI_ADDITIONS,
+      from: 42,
+      to: 47,
+      groups: [
+        [42, 45],
+        [46, 47],
+      ],
+      transform: compose(excerpt(42, 'וְאַתָּה קָדוֹשׁ', 'עַל אַרְעָא עוֹבָד'), tiklalName),
+    },
+    { ...kaddish, title: T.kaddishAfterAdditions, from: 57, to: 58, when: TEIMAN_MOTZAEI_ADDITIONS },
+    teimanOmer({ when: OMER }),
+    afterAmidah(60, 61, T.afterMaarivPsalms),
+    afterAmidah(62, 62, T.rabbiChananya),
+    { ...afterAmidah(64, 65, T.kaddishDerabbanan), minyan: SAID_BY.chazzan },
+    { ...afterAmidah(66, 67, T.closingBarchu), minyan: SAID_BY.chazzanAndCongregation },
+    {
+      ...page,
+      title: T.aleinu,
+      from: 68,
+      to: 69,
+      edits: [
+        inTenDays(68, '(בעשי"ת אומר כָּהֵם ולא וכו\')', '(בעשי"ת אומר כָּהֵם ולא וכו\')'),
+        inTenDays(68, '(בעשי"ת אומר לְלֹא יוֹעִיל ואנחנו וכו\')', '(בעשי"ת אומר לְלֹא יוֹעִיל ואנחנו וכו\')'),
+      ],
+    },
+    { ...tishaBav, title: T.aleinu, from: 7, to: 7, when: TISHA_BAV_AFTER_SHABBAT },
+    { ...tishaBav, title: T.aleinu, from: 6, to: 6, insert: [{ at: 7, ...NOTES.tishaBavEichahKinot }] },
+  ];
+}
+
+// The count is the Aramaic one of the Baladi template, every day of it through `allCases()`; the page's
+// note that Baladi say no Leshem Yichud is cut to what it tells the reader.
+function teimanOmer(extra = {}) {
+  return {
+    he: 'wikiOmer',
+    title: T.omer,
+    path: '*',
+    from: 1,
+    omer: { first: 3, stride: 1 },
+    transform: baladiName,
+    edits: [{ seg: 1, from: 'לא אומרים "לְשֵׁם יִחוּד קוּדְשָׁא בְרִיךְ הוּא וּשְׁכִינְתֵּיהּ", לפני', to: 'לפני' }],
+    ...extra,
+  };
+}
+
+// The body is "בלדי 2", whose Yaaleh Veyavo names only Rosh Chodesh and Chol HaMoed and which prints Al
+// HaNissim for Purim too; "בלדי" adds what it lacks: the psalms named before the meal's grace and the zimun.
+function teimanBirkatHamazon() {
+  const opening = {
+    he: 'wikiBaladiZimun',
+    transform: compose(baladiName, plainNotes),
+    path: '# ברכת המזון בלדי .. # ברכת הזן',
+  };
+  const body = { he: 'wikiBaladiBirkatHamazon', transform: baladiName, path: '*' };
+  const psalm = (number) => teimanPsalm(T.beforeBirkat, number);
+  const zimunEdits = (prefixes, first) =>
+    Object.entries(prefixes).flatMap(([seg, prefix]) => [
+      { seg: Number(seg), from: prefix, to: '' },
+      ...(Number(seg) === first + 1 ? [] : [{ seg: Number(seg), from: '(בעשרה: ', to: '(<small>בעשרה:</small> ' }]),
+    ]);
+  const responses = (first) => [
+    { from: first, label: SAID_BY.mezamen },
+    { from: first + 1, label: SAID_BY.diners },
+    { from: first + 2, label: SAID_BY.mezamen },
+    { from: first + 3, label: SAID_BY.diners },
+    { from: first + 4, label: SAID_BY.mezamen },
+  ];
+  const prefixes = (first) => ({
+    [first]: 'אם מברכין בזימון אומר המברך: ',
+    [first + 1]: 'המסובים עונים: ',
+    [first + 2]: 'המזמן אומר: ',
+    [first + 3]: 'המסובים עונים: ',
+    [first + 4]: 'המזמן חוזר ואומר: ',
+  });
+  const yaalehVeyavoNote = '<br> <small>בראש חדש, יום טוב, חול המועד, מוסיף</small>';
+  return [
+    { ...opening, title: T.beforeBirkat, from: 1, to: 1 },
+    psalm(23),
+    { ...opening, title: T.beforeBirkat, from: 2, to: 2, edits: [{ seg: 2, from: '* ', to: '' }] },
+    psalm(67),
+    { ...opening, title: T.beforeBirkat, from: 3, to: 3 },
+    {
+      ...opening,
+      title: T.zimun,
+      from: 4,
+      to: 10,
+      edits: [
+        { seg: 4, from: '<small>זימון</small> ', to: '' },
+        { seg: 5, from: 'ויש נוהגים להוסיף: ', to: '' },
+        ...zimunEdits(prefixes(6), 6),
+      ],
+      optionalParts: [{ from: 5, label: SOME_SAY.someAdd }],
+      minyanParts: responses(6),
+    },
+    {
+      ...opening,
+      title: T.zimunShevaBerachot,
+      optional: WHEN_SAID.shevaBerachotMeal,
+      from: 12,
+      to: 17,
+      edits: zimunEdits(prefixes(12), 12),
+      minyanParts: responses(12),
+    },
+    {
+      ...body,
+      title: T.birkatHamazon,
+      from: 1,
+      edits: [
+        {
+          seg: 2,
+          from: '<br> <small> <small>בחנוכה אומר</small>',
+          to: `<br><if any="${anyOf(CHANUKAH_OR_YESTERDAY)}"> <small> <small>בחנוכה אומר</small>`,
+        },
+        { seg: 2, from: 'בָּעֵת וּבָעוֹנָה הַזֹּאת: </small><br>', to: 'בָּעֵת וּבָעוֹנָה הַזֹּאת: </small></if><br>' },
+        {
+          seg: 5,
+          from: yaalehVeyavoNote,
+          to: `<br><if any="${anyOf(YAALEH_VEYAVO_OR_YESTERDAY)}"> <small>בראש חדש וחול המועד מוסיף</small>`,
+        },
+        { seg: 5, from: 'לְחֶֽסֶד וּלְרַחֲמִים.', to: 'לְחֶֽסֶד וּלְרַחֲמִים.</if>' },
+        {
+          seg: 6,
+          from: '<small>בראש חדש:</small>',
+          to: `<if any="${anyOf(ROSH_CHODESH_OR_YESTERDAY)}"><small>בראש חדש:</small>`,
+        },
+        {
+          seg: 6,
+          from: ' <small>בחוהמ״ע פסח:</small>',
+          to: `</if> <if any="${anyOf(CHOL_HAMOED_PESACH_OR_YESTERDAY)}"><small>בחוהמ״ע פסח:</small>`,
+        },
+        {
+          seg: 6,
+          from: ' <small>בחוהמ״ע סוכות:</small>',
+          to: `</if> <if any="${anyOf(CHOL_HAMOED_SUKKOT_OR_YESTERDAY)}"><small>בחוהמ״ע סוכות:</small>`,
+        },
+        { seg: 6, from: 'הַסֻּכּוֹת הַזֶּה, לְרַחֵם', to: 'הַסֻּכּוֹת הַזֶּה,</if> לְרַחֵם' },
+        { seg: 8, from: ' (<small>ברכת האורח הקצרה</small> ', to: '<br>' },
+        { seg: 8, from: 'יַצִּילֵֽהוּ:)<br>', to: 'יַצִּילֵֽהוּ:<br>' },
+      ],
+      at: { 3: PURIM_OR_YESTERDAY, 6: YAALEH_VEYAVO_OR_YESTERDAY },
+      reviewed: [2],
+      optionalParts: [
+        { from: 2, paragraph: 1, to: 3, label: WHEN_SAID.mealBeganAlHanissim },
+        { from: 5, paragraph: 1, to: 6, label: WHEN_SAID.mealBeganYaalehVeyavo },
+        { from: 8, paragraph: 1, until: 2, label: WHEN_SAID.guest },
+      ],
+    },
+  ];
+}
+
+// The page prints the Rambam's wording: a Shabbat line, which the app never shows, and no Rosh Chodesh
+// or festival insert. Its one Land of Israel wording is the fruit's, kept in the closed fold. The seal prints
+// the grain's ending and then the fruit's on a line of its own, which wine ends with too (the page's opening
+// note), so a short note names what each ends.
+function teimanAlHamichya() {
+  const page = { he: 'wikiBaladiAlHamichya', transform: baladiName, path: '*' };
+  const shabbat =
+    '<br> <small><b>בשבת</b>:</small> וְהָנַח לָנוּ אָבִינוּ וְאַל תְּהִי צָרָה וְיָגוֹן בְּיוֹם מְנוּחָתֵנוּ.';
+  const israelFruit = '<br><small>(על פירות הארץ: <b>פֵּרוֹתֶיהָ</b>)</small>';
+  return [
+    {
+      ...page,
+      title: T.alHamichya,
+      edits: [
+        { seg: 5, from: shabbat, to: '' },
+        { seg: 6, from: israelFruit, to: '' },
+        { seg: 6, from: '<b>הַפֵּירוֹת</b>', to: '<small>על היין ועל הפירות:</small> <b>הַפֵּירוֹת</b>' },
+      ],
+    },
+    {
+      ...page,
+      title: T.alHamichyaIsrael,
+      optional: WHEN_SAID.israelProduce,
+      from: 5,
+      edits: [
+        { seg: 5, from: shabbat, to: '' },
+        { seg: 6, from: `<b>הַפֵּירוֹת</b>${israelFruit}`, to: '<small>על הפירות:</small> <b>פֵּרוֹתֶיהָ</b>' },
+      ],
+      insert: [{ at: 5, ...ISRAEL_PRODUCE_NOTE }],
+    },
+  ];
+}
 
 function teimanShevaBerachot() {
   const blessings = [
@@ -2346,6 +2882,1488 @@ function teimanShevaBerachot() {
       ],
       minyanParts: [{ from: 0, paragraph: 3, label: SAID_BY.withMinyan }],
     },
+  ];
+}
+
+// The Tiklal follows the divine name with a geresh or gershayim (יְיָ', יְיָ", an unpointed יי') and prints
+// יְהֹוָה too, once without its holam (יְהוָה, in a verse of the havdalah supplication); every form reads יְיָ.
+const tiklalName = compose(
+  (html) => html.replace(/(יְיָ|(?<![א-ת])יי)['"]/g, '$1').replace(/יְהוָה/g, 'יְיָ'),
+  baladiName,
+);
+const TIKLAL = { path: '*', transform: tiklalName };
+// A psalm a Baladi page or the Tiklal names by its opening words, read from the pinned Sefaria Psalms.
+const teimanPsalm = (title, number) => ({
+  ...psalmVerses(title, number),
+  transform: compose(tanachReading, baladiName),
+});
+// The print's rule for Shehecheyanu (V1 366-367), which its blessings of sight open with.
+const TIKLAL_NEW_THINGS = 'הבונה בית חדש או הקונה כלים חדשים, והרואה את חברו אחר שלשים יום, והלובש בגד חדש,';
+// The Tiklal's instructions are Judeo-Arabic: each becomes a Hebrew one that says what it says.
+const tiklalNote = (seg, printed, hebrew, count) => ({
+  seg,
+  from: `<small>${printed}</small>`,
+  to: `<small>${hebrew}</small>`,
+  ...(count ? { count } : {}),
+});
+
+// The print calls the thanks on leaving a city the traveler's prayer, with a label after it that the section
+// title replaces; the prayers on entering a city and before leaving it fold as Sefard's do.
+function teimanTefilatHaderech() {
+  const page = { ...TIKLAL, he: 'tiklalTefilatHaderech' };
+  return [
+    {
+      ...page,
+      title: T.enteringCity,
+      optional: WHEN_SAID.enteringCity,
+      to: 2,
+      edits: [
+        tiklalNote(0, "אלד'י ידכ'ל מדינה יקול", 'הנכנס לעיר אומר:'),
+        tiklalNote(1, "פאד'א דכ'ל בסלאם יקול", 'וכשנכנס בשלום אומר:'),
+        tiklalNote(2, "וענד אן יטלב אלכ'רוג יקול", 'וכשבא לצאת אומר:'),
+      ],
+    },
+    {
+      ...page,
+      title: T.tefilatHaderech,
+      from: 3,
+      to: 3,
+      edits: [tiklalNote(3, "פאד'א כ'רג בסלאם יקול", 'וכשיצא בשלום אומר:')],
+    },
+  ];
+}
+
+// The print lists the blessings by food; each rule goes under the section of its first blessing, in the order the
+// other nuschaot print them. The full after-blessings (#7 Me'ein Shalosh, #9 Borei Nefashot) are their own texts.
+// Shehecheyanu, which the print only names, is read from its Chanukah lighting, under the print's own rule.
+function teimanBirchotHanehenin() {
+  const page = { ...TIKLAL, he: 'tiklalBirchotHanehenin' };
+  const afterwards = (seg, printed = 'ובעדה', count) => tiklalNote(seg, printed, 'ואחר כך', count);
+  return [
+    {
+      ...page,
+      title: T.handWashing,
+      from: 0,
+      to: 1,
+      edits: [
+        tiklalNote(
+          0,
+          "כ'ל מן אכל כ'בז בר או שעיר פיחתאג נטילת ידים קבל ולו אכל כ'בז יאבס ויברך",
+          'כל האוכל פת חטים או שעורים צריך נטילת ידיים לפני כן, ואפילו אוכל פת יבשה, ומברך:',
+        ),
+      ],
+    },
+    {
+      ...page,
+      title: T.hamotzi,
+      from: 2,
+      to: 5,
+      reviewed: [4],
+      edits: [
+        tiklalNote(2, "ובעד יברך עלי' אלכ'בז מן קבל", 'ואחר כך מברך על הפת לפני האכילה:'),
+        tiklalNote(
+          4,
+          "ואלאצלח אן יברך עלי' קרץ צחיח ופי אלסבות ואלאעיאד יברך עלי' קרצין צחאח. פאד'א פרג' מן אלמאכל יגסל ידה מן אגל אלמלח ויברך ברכת המזון והי ד' ברכות והאולי הם:",
+          'ומן המובחר לברך על ככר שלם, ובשבתות ובימים טובים מברך על שני ככרות שלמים. וכשגומר לאכול רוחץ ידיו מפני המלח ומברך ברכת המזון, והיא ארבע ברכות.',
+        ),
+        tiklalNote(
+          5,
+          "אלברכה אלד'י תגב עלי' חמשת מיני דגן והו אלבר ואלשעיר ואלסאפה ואלעלס וסנבלה' אלתעלב מא צנע מנהם כ'בזא מכ'בוזא פאליבארך קבלה",
+          'על חמשת מיני דגן, כל מה שעשו מהם פת אפויה, מברך לפניו:',
+        ),
+        tiklalNote(5, 'ובעדה ברכת המזון:', 'ואחר כך ברכת המזון.'),
+      ],
+    },
+    {
+      ...page,
+      title: T.mezonot,
+      from: 6,
+      to: 6,
+      edits: [
+        tiklalNote(
+          6,
+          "ואן צנע מנהם עציד או הריס או סויק ואכ'יץ' במא או כ'בז ממלול ובקט ומכעך אלקצד מא כאנת צורתה משונה מצורת הפת ולם יקבע סעודתו עליו יבארך קבל ד'אלך",
+          'ואם עשה מחמשת מיני הדגן דייסה וכיוצא בה, או כעכים וכיוצא בהם, הכלל: כל שצורתו משונה מצורת הפת ולא קבע סעודתו עליו, מברך לפניו:',
+        ),
+        tiklalNote(6, 'ובעדה', 'ואחר כך ברכה מעין שלוש.'),
+      ],
+    },
+    {
+      ...page,
+      title: T.mezonot,
+      from: 11,
+      to: 11,
+      edits: [
+        tiklalNote(
+          11,
+          "אלברכה אלד'י עלי' אללסיס ואלקלי אן כאן בר או שעיר יבארך קבלה",
+          'על הלסיס ועל הקלי, אם הם מחטים או משעורים, מברך לפניהם:',
+        ),
+        afterwards(11, 'ובעדה', 2),
+        tiklalNote(
+          11,
+          "אלרז מא עמל מנה כ'בז או גירה יבארך קבלה",
+          'על האורז, כל מה שעשו ממנו, פת או זולתה, מברך לפניו:',
+        ),
+      ],
+    },
+    {
+      ...page,
+      title: T.hagafen,
+      from: 16,
+      to: 16,
+      edits: [
+        tiklalNote(
+          16,
+          "אלברכה אלד'י עלי' כ'מר אלענב ומא עמל מן אלזביב אלד'י עאד פיה אלרטובה אלענבייה",
+          'על יין ענבים, ועל מה שנעשה מצימוקים שעדיין יש בהם לחלוחית הענבים, מברך לפניו:',
+        ),
+        afterwards(16),
+      ],
+    },
+    {
+      ...page,
+      title: T.haetz,
+      from: 12,
+      to: 14,
+      groups: [[13, 14]],
+      edits: [
+        tiklalNote(
+          12,
+          "אלברכה אלד'י עלי' ת'מר אלשגר עלי' ה' מנהא והי אלענב ואלתין ואלרמאן ואלזיתון ואלתמר קבלהא",
+          'על פירות האילן, על חמשה מהם, והם ענבים ותאנים ורמונים וזיתים ותמרים, מברך לפניהם:',
+        ),
+        afterwards(12),
+        tiklalNote(13, "ועלי' באקי ת'מאר אלאשגאר מת'ל אלכ'וך ואלספרגל", 'ועל שאר פירות האילן, כגון חבושים'),
+        tiklalNote(
+          14,
+          'ואלתפאח ואלענברוד ואלאנגאץ ואלנבק ואלאתרנג ומא ישבההם קבלהא',
+          'ותפוחים ואתרוגים וכיוצא בהם, מברך לפניהם:',
+        ),
+        afterwards(14, 'ובעדהא'),
+      ],
+    },
+    {
+      ...page,
+      title: T.haadama,
+      from: 15,
+      to: 15,
+      edits: [
+        tiklalNote(
+          15,
+          "ועלי' אלקת'א ואלבטיך' ואלבקול ואלגזר וסאיר ת'מאר אלארץ' קבלהא",
+          'ועל קישואים ואבטיחים וירקות וגזר ושאר פירות האדמה, מברך לפניהם:',
+        ),
+        afterwards(15, 'ובעדהא'),
+      ],
+    },
+    {
+      ...page,
+      title: T.haadama,
+      from: 17,
+      to: 17,
+      edits: [
+        tiklalNote(17, 'ואלפלפל ואלזנגביל אן כאן רטבא יבארך עליה', 'ועל פלפל וזנגביל, אם הם לחים, מברך:'),
+        afterwards(17),
+        tiklalNote(
+          17,
+          "ואן כאן יאבס פלא יחתאג ברכה: ומן שרב מן ג'יר עטש פלא יבארך עליה:",
+          'ואם הם יבשים, אינם צריכים ברכה. והשותה שלא לצמאו אינו מברך.',
+        ),
+      ],
+    },
+    {
+      ...page,
+      title: T.shehakol,
+      from: 8,
+      to: 8,
+      edits: [
+        tiklalNote(
+          8,
+          "אלברכה אלד'י עלי' אנואע אלקטאני מת'ל אלד'רה ואלד'כ'ן ואלעדס כיף מא עמלת יבארך מן קבל",
+          'על מיני הקטניות, כגון דורה ודוחן ועדשים, בכל אופן שנעשו, מברך לפניהם:',
+        ),
+        tiklalNote(8, 'מן בעד', 'ואחר כך בורא נפשות.'),
+      ],
+    },
+    {
+      ...page,
+      title: T.shehakol,
+      from: 10,
+      to: 10,
+      edits: [
+        tiklalNote(
+          10,
+          "וכד'אלך אללבן ואלעסל ואללחם ואלביץ' ואלגבן ואלסמך ואלמא אלד'י ישרב וקת אלעטש קבלהא",
+          'וכן חלב ודבש ובשר וביצים וגבינה ודגים, ומים ששותה בשעת צמא, לפניהם:',
+        ),
+        tiklalNote(10, "ובעדהא בורא נפשות רבות וכל מא אשבה ד'אלך.", 'ואחר כך בורא נפשות רבות. וכן כל הדומה להם.'),
+      ],
+    },
+    {
+      ...page,
+      title: T.fragrance,
+      from: 18,
+      to: 26,
+      edits: [
+        tiklalNote(
+          18,
+          "ברכות הבשמים כמא אן חראם אן ידוק שיי אלא אן יבארך. כד'אלך חראם אן ישתם במשמום אלא אן יבארך קבלה: פאן כאן אלמשמום מן אלאשגאר כמת'ל אלעוד אלטייב ואלצנדל ואלקצט ואלמצתכא ואלורד ומא אלורד ואלבלסאן ושבהה פאלברכה עליה",
+          'ברכות הבשמים. כשם שאסור לטעום כלום אלא אם כן בירך, כך אסור להריח ריח טוב אלא אם כן בירך לפניו. אם הריח מן העצים, כגון עצי אהלים וסנדל וקושט ומסטיכי וורד ומי ורדים ואפרסמון וכיוצא בהם, ברכתו:',
+        ),
+        tiklalNote(
+          20,
+          'ומא כאן מן אלאעשאב כאלרנגס ומא ישבהה פאלברכה',
+          'ומה שהוא מן העשבים, כגון נרקיס וכיוצא בו, ברכתו:',
+        ),
+        tiklalNote(
+          22,
+          'ואן כאן מן אלחיואנאת כאלמסך ואלזבאד ונחוה פאלברכה',
+          'ואם הוא מבעלי חיים, כגון מושק וכיוצא בו, ברכתו:',
+        ),
+        tiklalNote(23, 'ודהן אלבלסאן יבארך', 'ועל שמן אפרסמון מברך:'),
+        tiklalNote(25, "וכל טיב מכ'לוט מן אנואע כת'ירה פאלברכה עליה", 'וכל בושם מעורב ממינים הרבה, ברכתו:'),
+        tiklalNote(
+          25,
+          "וכד'אלך עלי' מא אשתך עליה ולם ידרי פאלברכה עליה",
+          'וכן על מה שנסתפק בו ואינו יודע מה הוא, ברכתו:',
+        ),
+        tiklalNote(
+          25,
+          "ואלאת'מאר אלטייבה כאלתפאח ואלאתרנג ושבההם פאלברכה עליהם",
+          'ופירות שריחם טוב, כגון תפוח ואתרוג וכיוצא בהם, ברכתם:',
+        ),
+        tiklalNote(
+          26,
+          "ואלמשמום אלחראם לא יברך עליה מת'ל אלמאכול אלחראם כמת'ל רואיח בית ע\"ז או אלטיב אלד'י עלי' ערוה מן העריות וכד'אלך אלמשמום אלד'י עמל לאזאלה' אלריאחה אלרדייה פלא יברך עליה מת'ל אלריאחה אלד'י בבית הכסא ואלד'י תעמל לאלאמואת. וכל טיב יעמל לאזאלה' אלרואיח אלרדייה מן אלגסם פלא יברך עליה: וכד'אלך כל ראיחה לם תעמל לישתם בהא אלא לתבכ'יר אלת'יאב ואלאואני פלא יברך עליהא לכון לם תעמל לאלשם:",
+          'ריח של איסור אין מברכים עליו, כמו על מאכל אסור, כגון ריח בית עבודה זרה, או בושם שעל ערוה מן העריות. וכן ריח שנעשה להעביר ריח רע אין מברכים עליו, כגון הריח שבבית הכסא ושנעשה למתים. וכל בושם שנעשה להעביר ריח רע מן הגוף אין מברכים עליו. וכן כל ריח שלא נעשה להריח בו אלא לגמר בו בגדים וכלים אין מברכים עליו, לפי שלא נעשה להריח.',
+        ),
+      ],
+    },
+    {
+      ...TIKLAL,
+      he: 'tiklalChanukahCandles',
+      title: T.shehecheyanu,
+      from: 5,
+      to: 5,
+      insert: [{ at: 5, he: `<small>${TIKLAL_NEW_THINGS} והרואה פרי ופרח חדשים, מברך:</small>` }],
+    },
+  ];
+}
+
+// The print's order: the blessings of praise and thanks, then the sights. Its pointer to Kiddush Levana for the new
+// moon ("כבר נכתב לעיל", #55) is left out.
+function teimanBirchotHareiya() {
+  const page = { ...TIKLAL, he: 'tiklalBirchotHareiya' };
+  return [
+    {
+      ...page,
+      title: T.praise,
+      from: 0,
+      to: 42,
+      groups: [
+        [0, 1],
+        [5, 6],
+        [11, 12],
+        [26, 27],
+      ],
+      edits: [
+        tiklalNote(
+          0,
+          "מן בנא בית גדיד או מלך אנייה גדידה ואלד'י ינצ'ר צאחבה בעד ל' יום ואלד'י ילבס מלבוס גדיד",
+          TIKLAL_NEW_THINGS,
+        ),
+        tiklalNote(
+          1,
+          "ואלד'י ינצ'ר תמר וזהר גדיד יברך שהחיינו ואן ראי' צאחבה בעד סנה יברך",
+          'והרואה פרי ופרח חדשים, מברך שהחיינו. ואם ראה את חברו אחר שנה, מברך:',
+        ),
+        tiklalNote(2, "אלד'י יסמע שמועה טובה יברך", 'השומע שמועה טובה מברך:'),
+        tiklalNote(3, 'ואן סמע שמועה רעה יברך', 'ואם שמע שמועה רעה מברך:'),
+        tiklalNote(4, "סמע במות אביה אן כ'לף לה מאל יבארך באלאבתדא", 'שמע שמת אביו, אם הניח לו ממון, מברך תחילה:'),
+        tiklalNote(4, 'ובעד', 'ואחר כך'),
+        tiklalNote(
+          4,
+          "הד'א אן מעה אכ'וה אמא אן כאן אלוארת' וחדה מברך שהחיינו:",
+          'זה כשיש עמו אחים, אבל אם הוא היורש לבדו, מברך שהחיינו.',
+        ),
+        tiklalNote(
+          5,
+          "אד'א נזלת אלאמטאר וכת'ר אלמא עלי' אלארץ' אד'א נזלת אלנקטה אנעמלת",
+          'כשיורדים גשמים ורבו המים על הארץ, שכשיורדת טיפה נעשית',
+        ),
+        tiklalNote(
+          6,
+          "אלנפאכ'ה וצאר אלנפאכ'את עלי' וגה אלמא ימשו תלקא בעצ'הם בעץ' אן בלגת לחד מא הנא אן כאן לה צ'יעה מלכה יברך שהחיינו ואן כאנת שרכה לה ולגירה יברך הטוב והמטיב ואן לם יכון לה צ'יעה יברך הכד'א",
+          'בועה, והבועות שעל פני המים הולכות זו לקראת זו, אם הגיעו לשיעור הזה: אם יש לו שדה משלו מברך שהחיינו, ואם היא בשותפות לו ולאחר מברך הטוב והמטיב, ואם אין לו שדה מברך כך:',
+        ),
+        tiklalNote(7, "וכו' אלי'", "וכו' עד"),
+        tiklalNote(
+          8,
+          "ארבעה צריכים להודות והם מריץ' אד'א תעאפא; ומחבוס אד'א כ'רג מן אלחבס. ומסאפר אלבחר אד'א וצל באלסלאם: וצפה' ד'אלך אן יקף קדאם י' מישראל לא אקל מן ד'אלך ואת'נין מנהם חכמים לא בד מנהם. ת'ם יקול",
+          'ארבעה צריכים להודות, והם: חולה כשנתרפא, וחבוש כשיצא מבית האסורים, ויורד הים כשהגיע בשלום. וסדר הדבר: עומד לפני עשרה מישראל, לא פחות מזה, ושנים מהם חכמים בהכרח, ואחר כך אומר:',
+        ),
+        tiklalNote(10, 'וגמיע אלסאמעין יקולון לה', 'וכל השומעים אומרים לו:'),
+        tiklalNote(
+          11,
+          "אלד'י ינצ'ר אלמואצ'ע אלד'י אנעמל פיהא נס לישראל כמתל ים סוף ואלירדן וסור יריחו ומא ישבההם",
+          'הרואה מקומות שנעשה בהם נס לישראל, כגון ים סוף והירדן וחומת יריחו וכיוצא בהם,',
+        ),
+        tiklalNote(
+          13,
+          "אמא אלמואצ'ע אלד'י עמל פיה נס ליחיד פלא יברך אלא ד'אך אליחיד ואבנה ואבן אבנה מתא מא וצ'ל אליה יקול בעל הנס עצמו",
+          'אבל מקום שנעשה בו נס ליחיד, אין מברך אלא אותו היחיד ובנו ובן בנו, כשמגיע אליו. בעל הנס עצמו אומר:',
+        ),
+        tiklalNote(15, "ואן כאן אבנה וכו' יקול", "ואם הוא בנו וכו' אומר:"),
+        tiklalNote(
+          16,
+          "אלד'י ינצ'ר גוב אריות אלד'י רמי פיה דניאל. וכבשן האש אלד'י רמי פיה חנניה מישאל ועזריה יבארך",
+          'הרואה את גוב האריות שהושלך בו דניאל, ואת כבשן האש שהושלכו בו חנניה מישאל ועזריה, מברך:',
+        ),
+        tiklalNote(18, "אלד'י ינצ'ר מוצ'ע יעבד פיה ע\"ז יבארך", 'הרואה מקום שעובדים בו עבודה זרה מברך:'),
+        tiklalNote(
+          20,
+          "אלד'י ינצ'ר מוצ'ע קלעת מנה ע\"ז אן כאן בארץ ישראל יבארך",
+          'הרואה מקום שנעקרה ממנו עבודה זרה, אם הוא בארץ ישראל, מברך:',
+        ),
+        tiklalNote(21, 'ואן כאן בחוצה לארץ יבארך', 'ואם הוא בחוצה לארץ מברך:'),
+        tiklalNote(22, "ויכ'תם בכלאהמא", 'ובשתיהן מסיים:'),
+        tiklalNote(23, "אלד'י ינצ'ר ביות ישראל בעמארהם יבארך", 'הרואה בתי ישראל בישובם מברך:'),
+        tiklalNote(
+          25,
+          "ובכ'ראבהם יברך דיין האמת: אלד'י ינצ'ר ביות אלגוים באעמארהם יקול",
+          'ובחורבנם מברך דיין האמת. הרואה בתי הגויים בישובם אומר:',
+        ),
+        tiklalNote(25, "ובכ'ראבהם", 'ובחורבנם:'),
+        tiklalNote(25, "אלד'י ינצ'ר קברי ישראל יברך", 'הרואה קברי ישראל מברך:'),
+        tiklalNote(28, "אלד'י ינצ'ר קבור אלגוים יקול", 'הרואה קברי הגויים אומר:'),
+        tiklalNote(
+          30,
+          "אלד'י ינצ'ר סת מאיה' אלף שכ'ץ מן אלנאס מעא. אן כאנו גוים יקול בושה אמכם מאד. ואן כאנו ישראל והם פי ארץ ישראל כ'צוץ יבארך",
+          'הרואה שש מאות אלף איש יחד: אם הם גויים אומר "בושה אמכם מאד", ואם הם ישראל, והם בארץ ישראל דווקא, מברך:',
+        ),
+        tiklalNote(32, "אלד'י ינצ'ר עלמא אומות העולם יברך", 'הרואה חכמי אומות העולם מברך:'),
+        tiklalNote(34, "ואלד'י ינצ'ר עלמא ישראל יברך", 'והרואה חכמי ישראל מברך:'),
+        tiklalNote(36, "אלד'י ינצ'ר סלאטין ישראל יברך", 'הרואה מלכי ישראל מברך:'),
+        tiklalNote(38, 'ואן כאנו סלאטין אלגוים יברך', 'ואם הם מלכי הגויים מברך:'),
+        tiklalNote(
+          39,
+          "אלד'י ינצ'ר אלסודאן ואלמג'יירין בצוור וגוההם ואעצ'אהם יברך",
+          'הרואה את הכושים ואת המשונים בצורת פניהם ואבריהם מברך:',
+        ),
+        tiklalNote(
+          40,
+          "אלד'י ינצ'ר אלאעמא ואלאקטע ואלאגדם ואלאבחק ושבההם אן כאן חדת' פיהם ד'אלך מן בטן אמהם פיבארך",
+          'הרואה את הסומא ואת הקיטע ואת המצורע ואת הבוהקן וכיוצא בהם, אם היה בהם הדבר מבטן אמם, מברך:',
+        ),
+        tiklalNote(
+          41,
+          "ואן חדת' פיהם ד'אלך בעד פיבארך דיין האמת: אלד'י ינצ'ר אלפיל ואלקנפוד' ואלרבאח יברך",
+          'ואם נעשה בהם אחר כך, מברך דיין האמת. הרואה את הפיל ואת הקיפוד ואת הקוף מברך:',
+        ),
+        tiklalNote(
+          42,
+          "אלד'י ינצ'ר אלצוור אלחסנה באלג'איה ואלאשגאר גמילה' אלמנצ'ר יברך",
+          'הרואה בריות נאות ביותר ואילנות נאים למראה מברך:',
+        ),
+      ],
+    },
+    {
+      ...page,
+      title: T.trees,
+      from: 43,
+      to: 44,
+      reviewed: [43],
+      edits: [
+        tiklalNote(
+          43,
+          "אלד'י ינצ'ר תנוור אלגנאן ואלבאסתין באיאם ניסן יבארך",
+          'הרואה את הגנות והפרדסים בפריחתם בימי ניסן מברך:',
+        ),
+      ],
+    },
+    {
+      ...page,
+      title: T.lightningThunder,
+      from: 45,
+      to: 46,
+      edits: [
+        tiklalNote(
+          45,
+          "עלי' אלריאח אלקוייה ועלי' אלברק ואלרעד ואלזלאזל ואלשהב וד'ואת אלאד'נאב אלד'י תתשכל באלג'ו יבארך",
+          'על הרוחות החזקות, ועל הברקים והרעמים והזוועות והזיקים, והכוכבים בעלי הזנב הנראים באויר, מברך:',
+        ),
+      ],
+    },
+    {
+      ...page,
+      title: T.mountainsAndSeas,
+      from: 47,
+      to: 48,
+      edits: [
+        tiklalNote(
+          47,
+          "עלי' אלגבאל ואליפאע ואלבראר' ואלבחאר ואלאנהאר אן נצ'ר ואחד מנהם בעד ל' יום יבארך",
+          'על ההרים והגבעות והמדבריות והימים והנהרות, אם ראה אחד מהם אחר שלשים יום, מברך:',
+        ),
+      ],
+    },
+    {
+      ...page,
+      title: T.sea,
+      from: 49,
+      to: 50,
+      edits: [
+        tiklalNote(
+          49,
+          "ואלד'י ינצ'ר אלבחר אלכביר מן ל' יום או אזיד יבארך",
+          'והרואה את הים הגדול אחר שלשים יום או יותר מברך:',
+        ),
+      ],
+    },
+    {
+      ...page,
+      title: T.sun,
+      from: 51,
+      to: 52,
+      reviewed: [51],
+      edits: [
+        tiklalNote(
+          51,
+          "אלד'י ינצ'ר אלשמס יום תקופת ניסן פי סנה' אוול מחזור התקופה אלד'י אלתקופה פיה פי לילה' אלרבוע לעולם ענד מא ינצ'ר אלשמס צבאחיה' ד'אלך אלנהאר יברך",
+          'הרואה את החמה ביום תקופת ניסן, בשנה הראשונה של מחזור התקופה, שהתקופה בה לעולם בליל רביעי, כשרואה את החמה בבוקר אותו היום, מברך:',
+        ),
+        tiklalNote(
+          51,
+          "וכד'א באקי אלסבעה אלכואכב אלסיארה מתא מא וצלת לברג' אלחמל ווקפת בנקטה' אלאעתדאל ולא תמיל לא אלי' אלשמאל ולא אלי' אלגנוב פיברך ענד נצ'רהם:",
+          'וכן שאר שבעת כוכבי הלכת, כשמגיעים למזל טלה ועומדים בנקודת השוויון ואינם נוטים לא לצפון ולא לדרום, מברך כשרואה אותם:',
+        ),
+      ],
+    },
+    {
+      ...page,
+      title: T.rainbow,
+      from: 53,
+      to: 54,
+      edits: [tiklalNote(53, "אלד'י ינצ'ר אלקשת בענן יברך", 'הרואה את הקשת בענן מברך:')],
+    },
+  ];
+}
+
+// The print has the Shabbat blessing only (R14.7): on an erev Yom Tov or Yom Kippur the text says so and
+// nothing else, under the titles and conditions of the other nuschaot's lighting.
+function teimanCandleLighting() {
+  const page = { ...TIKLAL, he: 'tiklalCandleLighting' };
+  const shabbatOnly = (title, when) => ({
+    ...page,
+    title,
+    when,
+    to: 0,
+    drop: [0],
+    insert: [{ at: 1, he: '<small>בתכלאל נדפסה ברכת הדלקת הנר לשבת בלבד.</small>' }],
+  });
+  return [
+    {
+      ...page,
+      title: T.candlesShabbat,
+      when: { all: ['shabbat'], none: ['yomTov', 'yomKippur'] },
+      edits: [
+        tiklalNote(
+          0,
+          "נר שבת מצוה מד\"ס אן תשעל אלסרג לילה' אלסבת פי כל בית ולא יסרג באלאדהאן אלכדרה אלג'ליצ'ה מת'ל אלשמע ושחם אלבטן ומא אשבההא ללא יתלכ'ד ויאול אן ימ'ד אלפתילה לילה' אלסבת פלא ישעל אלא באלאדהאן אלצאפייה אלרקיקה' אלקואם כאלזית ואלסירג ודהן אלפגל ואלבקולאת ומא ישבההם וכד'אלך אלפתילה לא תכון מן אלאשגאר או מן צופה' אלבחר אלד'י יתשייט באלנאר ולא יקד באעתדאל בל מן אלעטב (אלקטן) ואלכתאן ומא שאבהה. ויברך קבל אן ישעל",
+          'נר שבת מצוה מדברי סופרים, להדליק נר בליל שבת בכל בית. ואין מדליקים בשמנים עכורים ועבים, כגון שעווה וחלב, שמא יבוא למשוך את הפתילה בליל שבת, אלא בשמנים צלולים ודקים, כגון שמן זית ושמן שומשום ושמן צנון וכיוצא בהם. וכן הפתילה לא תהיה מן העצים או מצמר הים, שמתחרך באש ואינו דולק כראוי, אלא מצמר גפן ומפשתן וכיוצא בהם. ומברך קודם שידליק:',
+        ),
+      ],
+    },
+    shabbatOnly(T.candlesYomTov, { all: ['yomTov'], none: ['shabbat'] }),
+    shabbatOnly(T.candlesShabbatYomTov, { all: ['shabbat', 'yomTov'] }),
+    shabbatOnly(T.candlesYomKippur, { all: ['yomKippur'], none: ['shabbat'] }),
+    shabbatOnly(T.candlesShabbatYomKippur, { all: ['yomKippur', 'shabbat'] }),
+  ];
+}
+
+// The print's havdalah is motzaei Shabbat's: wine, spices, flame and Hamavdil, then a supplication it says
+// some places say before the havdalah, folded there. Its rules for the other nights are notes under their
+// nights. After Yom Kippur it says no spices "even when it fell on Shabbat", so its spices are one night
+// narrower than the shared rule; a clause of an instruction that names the spices or the flame keeps the
+// nights of their blessing.
+function teimanHavdalah() {
+  const page = { ...TIKLAL, he: 'tiklalHavdalah' };
+  const spices = { any: ['motzaeiShabbat'], none: ['tishaBav', 'dayAfterYomKippur'] };
+  const inline = (condition) => (text) =>
+    `<if ${Object.entries(condition)
+      .map(([key, flags]) => `${key}="${flags.join(',')}"`)
+      .join(' ')}>${text}</if>`;
+  const onSpiceNights = inline(spices);
+  const onFlameNights = inline(HAVDALAH_FLAME);
+  // The night that ends Rosh Hashana: the only night after a holy day in the Ten Days that is neither
+  // Yom Tov nor after Shabbat (Rosh Hashana never ends on Friday).
+  const motzaeiRoshHashana = { all: [AYT, 'motzaei'], none: ['yomTov', 'motzaeiShabbat'] };
+  const intoCholHamoedPesach = { all: ['cholHamoedPesach', 'motzaei'], none: ['motzaeiShabbat'] };
+  return [
+    {
+      ...page,
+      title: T.hachelAleinu,
+      optional: SOME_SAY.beforeHavdalah,
+      from: 9,
+      to: 10,
+      groups: [[9, 10]],
+      when: NOT_TISHA_BAV,
+    },
+    {
+      ...page,
+      title: T.havdalah,
+      from: 11,
+      to: 14,
+      at: {
+        11: { all: ['dayAfterYomKippur'] },
+        12: motzaeiRoshHashana,
+        13: intoCholHamoedPesach,
+        14: { all: ['tishaBav', 'motzaeiShabbat'] },
+      },
+    },
+    {
+      ...page,
+      title: T.havdalah,
+      from: 0,
+      to: 7,
+      at: { ...each(0, 2, NOT_TISHA_BAV), 3: spices, ...each(4, 5, HAVDALAH_FLAME), ...each(6, 7, NOT_TISHA_BAV) },
+      edits: [
+        tiklalNote(
+          0,
+          "ומבדיל על הכוס ויצ'י שמעה או סראג ויבהדי אד'א כאן כוס יין יברך .",
+          `ומבדיל על הכוס${onFlameNights(', ומדליק נר של שעווה או של שמן')}, ומתחיל. אם הוא כוס של יין, מברך:`,
+        ),
+        tiklalNote(
+          2,
+          "או שהכל , ויתנאול אלכוס אלי' אליד אליסרא וימסך אלבשמים באלימנא ויברך .",
+          `ואם אינו יין, מברך שהכל.${onSpiceNights(' ומעביר את הכוס ליד שמאל, ואוחז את הבשמים בימין, ומברך:')}`,
+        ),
+        tiklalNote(4, 'ויברך עלי אלנר .', 'ומברך על הנר:'),
+        tiklalNote(6, 'וירד אלכוס אלא אליד אלימנא ויבדיל .', `${onSpiceNights('ומחזיר את הכוס ליד ימין, ')}ומבדיל:`),
+      ],
+    },
+    // The print names "ויתן לך" and its verses after the havdalah of motzaei Shabbat (V1 324) and prints none.
+    {
+      ...TIKLAL,
+      he: 'tiklalVihiNoam',
+      title: T.havdalah,
+      from: 20,
+      to: 20,
+      when: { all: ['motzaeiShabbat'], none: ['tishaBav'] },
+    },
+  ];
+}
+
+// Psalms 121 and 150, which the print names by their opening words, are read in place from the Sefaria Psalms;
+// "קול דודי", printed in the instruction type, stays inside the instruction. The heading (#0) is the title.
+function teimanKiddushLevana() {
+  const page = { ...TIKLAL, he: 'tiklalKiddushLevana' };
+  const psalm121 = "שיר למעלות אשא עיני אל ההרים וכו' עד סופו .";
+  const psalm150 = "הללויה הללו אל בקדשו וכו' עד סופו .";
+  const ending =
+    'וי"א קול דודי הנה זה בא מדלג על ההרים מקפץ על הגבעות : דומה דודי לצבי או לעפר האילים הנה זה עומד אחר כתלנו משגיח מן החלונות מציץ מן החרכים : וקדיש דרבנן ואומר לחבירו ג"פ שלום עליכם וילך לביתו בלב טוב כאלו קיבל פני שכינה :';
+  const instruction = (title, part) => ({
+    ...page,
+    title,
+    from: 14,
+    to: 14,
+    edits: [{ seg: 14, from: `<small>${psalm121} ${psalm150} ${ending}</small>`, to: `<small>${part}</small>` }],
+  });
+  return [
+    {
+      ...page,
+      title: T.levanaOpening,
+      from: 1,
+      to: 2,
+      edits: [
+        tiklalNote(
+          1,
+          "אלד'י ינצ'ר אלקמר ענד מא יהל באוול כל שהר יבארך ויקול קבל אלברכה.",
+          'הרואה את הלבנה בחידושה בתחילת כל חודש מברך, ואומר קודם הברכה:',
+        ),
+      ],
+    },
+    {
+      ...page,
+      title: T.levanaBlessing,
+      from: 3,
+      to: 13,
+      groups: [
+        [3, 4],
+        [8, 9],
+      ],
+    },
+    instruction(T.levanaPsalms, psalm121),
+    teimanPsalm(T.levanaPsalms, 121),
+    instruction(T.levanaPsalms, psalm150),
+    teimanPsalm(T.levanaPsalms, 150),
+    instruction(T.levanaEnding, ending),
+  ];
+}
+
+// Shehecheyanu on the first night only, as the print says, and with it the rule's last sentence, which names the
+// three blessings of the first night; Hanerot Halalu, which it introduces as the custom "now", stays with that
+// note. The heading (#0) is the title.
+function teimanChanukahCandles() {
+  const page = { ...TIKLAL, he: 'tiklalChanukahCandles' };
+  return [
+    {
+      ...page,
+      title: T.chanukahBlessings,
+      from: 1,
+      to: 5,
+      groups: [[1, 2]],
+      reviewed: [1],
+      at: { 5: CHANUKAH_FIRST_NIGHT },
+      edits: [
+        tiklalNote(
+          1,
+          "מצוה מדברי סופרים אן ת'סרג אלסרג עלי' אלאבואב פי ת'מאן ליאלי אלחנוכה אוולהן לילה' כ\"ה",
+          'מצוה מדברי סופרים להדליק נרות על הפתחים בשמונה לילות חנוכה, הראשון שבהם ליל כ"ה',
+        ),
+        tiklalNote(
+          2,
+          "בכסליו ואלסימן כ\"ה תברכו את בני ישראל ואלסנה אלממתדה אן ישעלו פי כל בית פי אללילה אלאוולה סראג ופי אללילה אלת'אנייה סראגין. והכד'א יזידו פי כל לילה סראג חת'י' יציר יסרג פי אלילה אלת'אמנה ת'מאנייה סרג סוא כאנו אהל אלבית קליל או כת'יר ולמה חייבו חכמים תמניא יומין משום דפכא חד דמספיק לליליא אתעביד ביה ניסא וסיפק לתמניא לילי ואסור להשתמש לנר חנוכה ומן אלוגוב אן יכון נר חנוכה על שמאל הנכנס לבית כדי שתהא מזוזה מימין ונר חנוכה משמאל. ואסראג אלחנוכה ענד מג'יב אלשמס לא קבל ולא בעד ומקדאר אלד'הן אלד'י יג'על פי אלסראג קדר מא ישעל אלי' נצ'ף סאעה מן בעד מג'יב אלשמס ואלד'י ישעל באללילה אלאוולה יברך ג' ברכות:",
+          'בכסלו, וסימנך "כ"ה תברכו את בני ישראל". והמנהג הפשוט שמדליקים בכל בית בלילה הראשון נר אחד ובלילה השני שני נרות, וכך מוסיפים בכל לילה נר, עד שמדליקים בלילה השמיני שמונה נרות, בין שבני הבית מועטים בין שהם מרובים. ולמה חייבו חכמים תמניא יומין, משום דפכא חד דמספיק לליליא אתעביד ביה ניסא וסיפק לתמניא לילי. ואסור להשתמש לנר חנוכה. ומן החובה שיהא נר חנוכה על שמאל הנכנס לבית, כדי שתהא מזוזה מימין ונר חנוכה משמאל. ומדליקים נר חנוכה בשקיעת החמה, לא קודם ולא אחר כך, ונותנים בנר שמן כשיעור שידלק עד חצי שעה אחר שקיעת החמה. והמדליק בלילה הראשון מברך שלש ברכות:',
+        ),
+        {
+          seg: 2,
+          from: ' והמדליק בלילה הראשון מברך שלש ברכות:</small>',
+          to: `</small>${onChanukahFirstNight(' <small>והמדליק בלילה הראשון מברך שלש ברכות:</small>')}`,
+        },
+      ],
+    },
+    {
+      ...page,
+      title: T.hanerotHallalu,
+      from: 6,
+      to: 7,
+      edits: [
+        tiklalNote(6, "ובאקי אללילי יכ'תצר שהחיינו ועכשיו נהגו לומר", 'ובשאר הלילות משמיט שהחיינו. ועכשיו נהגו לומר:'),
+      ],
+    },
+  ];
+}
+
+function teimanMezuzah() {
+  return [
+    {
+      ...TIKLAL,
+      he: 'tiklalMezuzah',
+      title: T.mezuzah,
+      edits: [
+        tiklalNote(
+          0,
+          "פאד'א פרג' מן כתאבתהא טואהא מת'ל ספר תורה וחפר להא בכ'ד' אלבאב ואדכ'להא או ידכ'להא בכ'שבה ויסמרהא בכ'ד' אלבאב וענד מא יסמרהא בכ'ד' אלבאב יברך:",
+          'כשגומר לכתבה, כורכה כספר תורה, וחופר לה במזוזת הפתח ומכניסה בה, או מכניסה בעץ, וקובעה במסמר במזוזת הפתח. ובשעה שקובעה במזוזת הפתח מברך:',
+        ),
+      ],
+    },
+  ];
+}
+
+// Nishmat as the print gives it (V1 281-285), every word and vowel kept; the instruction before it (V1 280) places
+// it inside the Shabbat service and is left out, as the other nuschaot leave their notes out.
+function teimanNishmat() {
+  return [{ ...TIKLAL, he: 'tiklalNishmat', title: T.nishmat, from: 1, groups: [[1, 5]] }];
+}
+
+// The Shacharit page prints each Ten Days insert as a note and its text ({{הור1}}).
+const BALADI_TEN_DAYS = rule(
+  'Baladi Ten Days insert',
+  /<small>([^<]*)<\/small><opt>([\s\S]*?)<\/opt>/g,
+  (_, note, text) => `<if all="${AYT}"><small>${note}:</small> ${text}</if>`,
+);
+// The small letters the Tiklal prints beside the Name in the Amidah (אדני, יאהדונהי, and pairs such as יא, הר,
+// הד, הי, וג, ונ, and one after "שים" the scan leaves unreadable) are kabbalistic marks, and "טו)" points to the
+// commentary: none is read.
+const TIKLAL_AMIDAH_MARKS = rule(
+  'Tiklal Amidah marks',
+  / ?<small>(?:אדני|יאהדונהי|יא|הר|הד|הי|וג|ונ|⟦\?\?\?⟧|טו\))<\/small>/g,
+  () => '',
+);
+const TIKLAL_TEN_DAYS = rule(
+  'Tiklal Ten Days insert',
+  /\(<small>(בעי"ת(?: אומר)?)<\/small> ([^()]*)\)/g,
+  (_, note, text) => `<if all="${AYT}"><small>${note}</small> ${text}</if>`,
+);
+// The Tiklal's Gevurot prints the summer and the winter wording in parentheses, each under its note.
+const tiklalSeasons = (seg) => [
+  { seg, from: '(<small>בקיץ אומר</small>', to: '<if none="winter"><small>בקיץ אומר</small>' },
+  { seg, from: ') (<small>בחורף אומר</small>', to: '</if><if all="winter"><small>בחורף אומר</small>' },
+  { seg, from: 'הַגֶּשֶׁם)', to: 'הַגֶּשֶׁם</if>' },
+];
+// One segment of a Tiklal page cut to the text from `first` through `last`, then read as the page reads.
+const tiklalCut = (page, seg, first, last) => compose(excerpt(seg, first, last), page.transform);
+
+// Passages of the Shacharit page and of the Tiklal's close of Shacharit that Mincha points to as well.
+const TEIMAN_AMIDAH = { ...BALADI_SHACHARIT, title: T.amidah, path: '# תפילת עמידה' };
+const BALADI_ATAH_KADOSH = 'אַתָּה קָדוֹשׁ וְשִׁמְךָ קָדוֹשׁ, וּקְדוֹשִׁים בְּכָל יוֹם יְהַלְלוּךָ סֶּלָה.';
+const BALADI_KEDUSHA_ONLY = { seg: 6, from: `<br> ${BALADI_ATAH_KADOSH} <small>בחזרת הש"ץ:</small> `, to: '' };
+const TEIMAN_HALF_KADDISH = { ...BALADI_SHACHARIT, path: '# חצי קדיש', minyan: SAID_BY.chazzan };
+const TEIMAN_ASHREI = { ...BALADI_SHACHARIT, path: '# סדר היום .. # למנצח', drop: [0] };
+const TEIMAN_NO_KOHANIM = { seg: 52, from: '<small>כשאין כהנים אומר החזן:</small> <br>', to: '' };
+const teimanFestivalLine = (note, text, flag) => ({
+  seg: 42,
+  from: ` <small>${note}:</small> ${text} <br>`,
+  to: `<if all="${flag}"><small>${note}:</small> ${text}</if><br>`,
+});
+const TEIMAN_YAALEH_VEYAVO_DAYS = [
+  teimanFestivalLine('בראש חודש', 'בְּיוֹם רֹאשׁ הַחֹדֶשׁ הַזֶּה.', 'roshChodesh'),
+  teimanFestivalLine(
+    'בפסח',
+    'בְּיוֹם מִקְרָא קֹדֶשׁ הַזֶּה, בְּיוֹם מוֹעֵד חַג הַמַּצּוֹת הַזֶּה.',
+    'cholHamoedPesach',
+  ),
+  teimanFestivalLine(
+    'בסוכות',
+    'בְּיוֹם מִקְרָא קֹדֶשׁ הַזֶּה, בְּיוֹם מוֹעֵד חַג הַסֻּכּוֹת הַזֶּה.',
+    'cholHamoedSukkot',
+  ),
+];
+const TIKLAL_SHACHARIT_CLOSE = { ...TIKLAL, he: 'tiklalShacharitClose' };
+const TIKLAL_TITKABEL = { ...TIKLAL_SHACHARIT_CLOSE, title: T.kaddish, from: 107, to: 107, minyan: SAID_BY.chazzan };
+const TIKLAL_RABBI_CHANANYA = {
+  ...TIKLAL_SHACHARIT_CLOSE,
+  title: T.rabbiChananya,
+  from: 121,
+  to: 123,
+  groups: [[122, 123]],
+  edits: [{ seg: 123, from: ' <small>ואומר ש"צ קדיש דרבנן וזה נוסחו:</small>', to: '' }],
+};
+const TIKLAL_KADDISH_DEATID = {
+  ...TIKLAL_SHACHARIT_CLOSE,
+  title: T.kaddishDerabbanan,
+  from: 124,
+  to: 125,
+  groups: [[124, 125]],
+  minyan: SAID_BY.chazzan,
+};
+const TEIMAN_MODIM_DERABBANAN = {
+  ...TEIMAN_AMIDAH,
+  from: 45,
+  to: 45,
+  transform: compose(
+    excerpt(45, 'מוֹדִים אֲנַחְנוּ לָךְ, שֶׁאַתָּה הוּא יְיָ אֱלֹהֵינוּ, אֱלֹהֵי', 'בָּרוּךְ אֵל הַהוֹדָאוֹת.'),
+    baladiName,
+  ),
+  minyan: SAID_BY.modimDeRabbanan,
+};
+const TIKLAL_MINCHA = {
+  ...TIKLAL,
+  he: 'tiklalMincha',
+  transform: compose(TIKLAL_AMIDAH_MARKS, TIKLAL_TEN_DAYS, tiklalName),
+};
+const TIKLAL_HALLEL = { ...TIKLAL, he: 'tiklalHallel' };
+const TIKLAL_MUSAF = { ...TIKLAL, he: 'tiklalMusaf', transform: compose(TIKLAL_AMIDAH_MARKS, tiklalName) };
+// The Rosh Chodesh order after Hallel (V1 330): Kaddish Titkabel, the Torah reading, Seder HaYom and the song of
+// the day, then the Rosh Chodesh psalm. The print gives it in one instruction; its two parts stand where they apply.
+const TIKLAL_ROSH_CHODESH_ORDER =
+  "ויקול קדיש תתקבל ומוציאין ספר תורה ויקול בפתח ההיכל, יהי ה' אלהינו עמנו וכו' ויהי בנסוע וכו' וקורין בו ד' גוברי ראשו' קורא בפ' צו את בני ישראל ג' פסוקים עד ואמרת להם ולוי חוזר וקורא ואמרת להם עם שני פסוקים אחריו וג' קורא עולת תמיד ופ' וביום השבת והד' קורא ובראשי חדשיכם עד סוף הסדר ואומר קדיש, מה רב טובך וכו' ומברך למלך ולקהל ומחזיר ס\"ת למקומו ואומר יהללו את שם ה' וכו' ומתחילין סדר היום והוא רחום תהלה לדוד עד סופו ואין אומרים למנצח יענך ואומר ובא לציון וגומר הסדר ואומר מזמור של יום ובעדה יגיב מזמור ראש חדש והו הדא:";
+const ROSH_CHODESH_PSALM_LEAD = ' ובעדה יגיב מזמור ראש חדש והו הדא:';
+const HALF_HALLEL_ROSH_CHODESH = { all: ['roshChodesh', 'hallelHalf'] };
+const ROSH_CHODESH_ON_CHANUKAH = { all: ['roshChodesh', 'chanukah'] };
+const NOT_ROSH_CHODESH = { none: ['roshChodesh'] };
+
+// Hallel from the Tiklal (V1 327-330), printed once with the passages half Hallel skips in smaller type. The
+// print's days: Rosh Chodesh (V1 327) and Chol HaMoed Pesach (V2 93) half and without a blessing, Chanukah (V1
+// 344) and Chol HaMoed Sukkot (V2 131) whole, with the blessings before and after. It gives no rule for the days
+// some congregations add (`hallelDisputed`); there Hallel folds as in the other four nuschaot, whole, and its
+// blessings follow the print's rule for a day it does not list as a whole-Hallel day. The repeat cues (אודך, אבן
+// ...) stay as printed; the two markers of the small type do not.
+function teimanHallel() {
+  const page = { ...TIKLAL_HALLEL, title: T.hallel, optional: SOME_SAY.hallel };
+  return [
+    {
+      ...page,
+      from: 0,
+      to: 0,
+      when: HALF_HALLEL_ROSH_CHODESH,
+      edits: [
+        tiklalNote(
+          0,
+          "ואח\"כ קורין ההלל בדילוג. וצפה' אלדילוג הכדא. יקרא מן אוול ההלל אלי' חלמיש למעינו מים וידלג ויקול ה' זכרנו יברך אלי' ואנחנו נברך יה וידלג ויקול מה אשיב לה' אלי' בתוככי ירושלם הללויה וידלג ויקול מן המצר קראתי יה אלי' אכר ההלל, וחאל אן יצאל אלי' אודך יבדע להם ש\"צ והם יגיבון בעדה כל פצל ולא יבארך לא קבלה ולא בעדה. ואין נופלין על פניהם.",
+          'ואח"כ קורין ההלל בדילוג. וזהו סדר הדילוג: קורא מתחילת ההלל עד חלמיש למעינו מים, ומדלג ואומר ה\' זכרנו יברך עד ואנחנו נברך יה, ומדלג ואומר מה אשיב לה\' עד בתוככי ירושלם הללויה, ומדלג ואומר מן המצר קראתי יה עד סוף ההלל. וכשמגיע לאודך, ש"צ מתחיל להם והם עונים אחריו כל פסוק. ואינו מברך לא לפניו ולא לאחריו. ואין נופלין על פניהם.',
+        ),
+      ],
+    },
+    {
+      ...page,
+      from: 101,
+      to: 101,
+      when: CHANUKAH,
+      edits: [
+        tiklalNote(
+          101,
+          'ואדא פרג ש"צ מן צלוה\' אלתמיד פיקרא אלהלל כאמלא ויברך קבלה ובעדה כמא נדכרה בסדר לילי הפסח',
+          'וכשגומר ש"צ תפלת התמיד קורא את ההלל שלם, ומברך לפניו ולאחריו, כמו שנזכיר בסדר לילי הפסח.',
+        ),
+      ],
+    },
+    {
+      ...page,
+      from: 102,
+      to: 102,
+      when: CHOL_HAMOED_PESACH,
+      edits: [
+        {
+          seg: 102,
+          from: '<small>יום ג\' ראשון דחה"מ שחרית מנחה וערבית כמו בחול ויעלה בעבודה כדלעיל וקורין',
+          to: '<small>וקורין',
+        },
+      ],
+    },
+    {
+      ...page,
+      from: 1,
+      to: 80,
+      when: HALLEL,
+      drop: [18, 30, 38, 48, 57, 62],
+      groups: [
+        [4, 5],
+        [44, 45],
+      ],
+      at: {
+        1: WHOLE_HALLEL,
+        2: WHOLE_HALLEL,
+        ...each(19, 29, WHOLE_HALLEL_ONLY),
+        ...each(39, 47, WHOLE_HALLEL_ONLY),
+        ...each(58, 61, WHOLE_HALLEL_ONLY),
+        80: WHOLE_HALLEL,
+      },
+      edits: [
+        tiklalNote(11, '*) יעידה', 'חוזר עליו'),
+        tiklalNote(39, '*) יעידה', 'חוזר עליו'),
+        tiklalNote(58, '*) יעידוה', 'חוזרים עליו'),
+        tiklalNote(59, '**) יעידוה', 'חוזרים עליו'),
+        { seg: 79, from: '<small>*) ועונים הקהל:</small>', to: '<small>ועונים הקהל:</small>' },
+      ],
+      insert: [{ at: 1, ...NOTES.hallelDisputed }],
+    },
+    {
+      ...page,
+      from: 81,
+      to: 81,
+      when: HALF_HALLEL_ROSH_CHODESH,
+      edits: [
+        tiklalNote(
+          81,
+          TIKLAL_ROSH_CHODESH_ORDER,
+          `${TIKLAL_ROSH_CHODESH_ORDER.replace(/ויקול/g, 'ואומר').replace(ROSH_CHODESH_PSALM_LEAD, '')}.`,
+        ),
+      ],
+    },
+    { ...TEIMAN_HALF_KADDISH, title: T.hallel, optional: SOME_SAY.hallel, when: UNDISPUTED_HALLEL },
+    { ...TIKLAL_TITKABEL, title: T.hallel, optional: SOME_SAY.hallel, when: UNDISPUTED_HALLEL },
+  ];
+}
+
+// Musaf from the Tiklal: Rosh Chodesh (V1 332-335) and, on Chol HaMoed, the festival Musaf (V2 85-89), which the
+// print says is said as on Yom Tov but for the day's line (V2 93, and spelled out for Sukkot on V2 131, its Musaf
+// line included). That line is pointed as the same print points the Chol HaMoed Pesach line of Maariv the V2 93
+// pointer names (in havdalah.wiki). Neither Musaf prints the offering verses. The Rosh Chodesh Musaf only points
+// to its Keter, which is the festival Musaf's (V2 86), and to Al HaNissim on folio 87b, which is Mincha's (V1 195);
+// the festival Musaf points to Modim DeRabbanan, the Shacharit page's as in Mincha, and both repetitions say it.
+// The Shabbat and Yom Tov lines are left out, as the app is never open then. The V1 333 reading "בְחֵי רָצוֹן"
+// stays as printed: no other leaf of the print has the passage.
+function teimanMusaf() {
+  const page = { ...TIKLAL_MUSAF, title: T.musaf };
+  const roshChodesh = { ...page, when: ROSH_CHODESH };
+  const cholHamoed = { ...page, when: CHOL_HAMOED };
+  const festival = (pesach, sukkot) =>
+    `<if all="cholHamoedPesach">${pesach}</if><if all="cholHamoedSukkot">${sukkot}</if>`;
+  return chapter(T.musaf, [
+    { ...roshChodesh, from: 1, to: 3, edits: tiklalSeasons(3) },
+    { ...roshChodesh, from: 23, to: 23, minyan: SAID_BY.kedusha },
+    { ...roshChodesh, from: 4, to: 7, groups: [[5, 6]] },
+    { ...TEIMAN_MODIM_DERABBANAN, title: T.musaf, when: ROSH_CHODESH },
+    { ...roshChodesh, from: 8, to: 8, transform: tiklalCut(page, 8, 'מוֹדִים', 'וְצָהֳרָיִם') },
+    ...[
+      ['עַל הַנִּסִּים', 'הַזּוֹאת:'],
+      ['וְעַל כּוּלָּם', 'מוֹדִים לָךְ'],
+    ].map(([first, last]) => ({
+      ...TIKLAL_MINCHA,
+      title: T.musaf,
+      from: 46,
+      to: 46,
+      when: ROSH_CHODESH_ON_CHANUKAH,
+      transform: tiklalCut(TIKLAL_MINCHA, 46, first, last),
+    })),
+    {
+      ...roshChodesh,
+      from: 8,
+      to: 12,
+      groups: [[8, 9]],
+      transform: tiklalCut(page, 8, 'הַטּוֹב', 'הַגָּדוֹל כִּי'),
+    },
+    {
+      ...cholHamoed,
+      from: 18,
+      to: 31,
+      drop: [22],
+      groups: [[19, 20]],
+      edits: [
+        ...tiklalSeasons(21),
+        { seg: 26, from: ' (<small>לשבת</small> שַׁבָּתוֹת לִמְנוּחָה וּ)', to: '' },
+        { seg: 26, from: ' (<small>לשבת</small> אֶת יוֹם הַמָּנוֹחַ הַזֶּה)', to: '' },
+        {
+          seg: 26,
+          from: 'אֶת יוֹם טוֹב מִקְרָא קֹדֶשׁ הַזֶּה אֶת יוֹם חַג הַמַּצוֹת הַזֶּה זְמַן חֵירוּתֵנוּ <small>בשבועות</small> אֶת יוֹם חַג הַשָּׁבוּעוֹת הַזֶּה זְמַן מַתַּן תּוֹרָתֵנוּ <small>בסוכות</small> אֶת יוֹם חַג הַסּוּכּוֹת הַזֶּה זְמַן שִׂמְחָתֵנוּ. <small>בש"ע</small> אֶת יוֹם חַג שְׁמִינִי עֲצֶרֶת הַזֶּה זְמַן שִׂמְחָתֵנוּ',
+          to: `אֶת יוֹם מִקְרָא קֹדֶשׁ הַזֶּה אֶת יוֹם מוֹעֵד חַג ${festival('הַמַּצּוֹת הַזֶּה זְמַן חֵירוּתֵנוּ', 'הַסּוּכּוֹת הַזֶּה זְמַן שִׂמְחָתֵנוּ')}`,
+        },
+        {
+          seg: 27,
+          from: ' (<small>בשבת</small> יום הַמָּנוֹחַ הַזֶּה) יוֹם טוֹב מִקְרָא קֹדֶשׁ הַזֶּה יוֹם חַג הַמַּצּוֹת הַזֶּה (<small>בשבועות</small> יום חג השבועות הזה. <small>בסוכות</small> יום חג הסוכות הזה. <small>בשמיני עצרת</small> יום חג שמיני עצרת הזה)',
+          to: ` יוֹם מִקְרָא קֹדֶשׁ הַזֶּה יוֹם מוֹעֵד חַג ${festival('הַמַּצּוֹת הַזֶּה', 'הַסּוּכּוֹת הַזֶּה')}`,
+        },
+        { seg: 30, from: ' (<small>בשבת</small> הַשַּׁבָּת וְ)', to: '' },
+        { seg: 31, from: ' <small>בחזרת הש"ץ אומרים הקהל כאן מודים דרבנן:</small>', to: '' },
+      ],
+      minyanParts: [{ from: 23, label: SAID_BY.kedusha }],
+    },
+    { ...TEIMAN_MODIM_DERABBANAN, title: T.musaf, when: CHOL_HAMOED },
+    { ...cholHamoed, from: 32, to: 36, groups: [[32, 33]] },
+    { ...TEIMAN_HALF_KADDISH, title: T.musaf, when: MUSAF },
+    { ...TIKLAL_TITKABEL, title: T.musaf, when: MUSAF },
+  ]);
+}
+
+// Weekday Shacharit from the page, its empty headings filled from the 1894 Tiklal in the print's order: on Chol
+// HaMoed Sukkot the lulav blessing, with the Shehecheyanu of the Chanukah page on its first day, then Hallel
+// with its Kaddish Titkabel after the Amidah, the Torah service before "סדר היום", then Uva LeTzion, the songs
+// of the day with the Rosh Chodesh psalm, Ein Keloheinu, the Kaddish, Musaf with its Kaddish Titkabel, the
+// Ketoret, Kaddish DeAtid, Barchu and Aleinu. Where the print points to a passage, the passage is the one this
+// text already holds: the page's half Kaddish for "קדיש לעילא", and Psalm 25 and "אמר רבי אלעזר", printed
+// once, after every day's song. On Rosh Chodesh the print opens the ark with another verse and calls four, as
+// its order after Hallel says, so the weekday opening and the call of three stay out. The parts the page lacks
+// are never taken from another nusach.
+function teimanShacharit() {
+  const page = BALADI_SHACHARIT;
+  const [modehAni, washing, asherYatzar, elokaiNeshama, blessings, torahBlessings] = teimanBirchot();
+  const pesukei = (path, extra) => ({ ...page, title: T.pesukeiDezimra, path, ...extra });
+  const shema = (path, extra) => ({ ...page, title: T.shemaBlessings, path, ...extra });
+  const tachanun = (path, extra) => ({ ...page, title: T.tachanun, path, ...extra });
+  const techina = (day) => ({ from: `;תחינה ל${day}:`, to: `<small>תחינה ל${day}:</small>` });
+  const halfKaddish = TEIMAN_HALF_KADDISH;
+  const torah = { ...TIKLAL, he: 'tiklalShacharitTorah' };
+  const close = TIKLAL_SHACHARIT_CLOSE;
+  const onDay = (from, to, weekday) => each(from, to, { all: [weekday] });
+  return [
+    ...chapter(T.morningBlessings, [
+      modehAni,
+      washing,
+      { ...page, title: T.morningBlessings, path: '# אדון העולמים' },
+      asherYatzar,
+      elokaiNeshama,
+      blessings,
+      { ...page, title: T.torahBlessings, path: '# תפילה לפני פרשת התמיד' },
+      torahBlessings,
+    ]),
+    { ...page, title: T.sovereignty, path: '# לעולם יהא אדם .. # ברכות ציצית ותפילין' },
+    ...chapter(
+      T.tallitAndTefillin,
+      tallitAndTefillin('teiman', {
+        tallitGadol: { ...TEIMAN_TEFILLIN, to: 0 },
+        tefillin: { ...TEIMAN_TEFILLIN, from: 1 },
+      }),
+    ),
+    chapter(T.pesukeiDezimra, pesukei('# המהולל')),
+    pesukei('# ברוך שאמר'),
+    pesukei('# מזמור לתודה'),
+    pesukei('# יהי כבוד .. # פרקי הללויה', { drop: [1] }),
+    pesukei('# פרקי הללויה'),
+    pesukei('# ויברך דוד'),
+    pesukei('# שירת הים'),
+    pesukei('# רפאני'),
+    pesukei('# ישתבח'),
+    chapter(
+      T.shemaBlessings,
+      shema('# חצי קדיש וברכו', {
+        minyanParts: [
+          { from: 0, to: 1, label: SAID_BY.chazzan },
+          { from: 2, label: SAID_BY.chazzanAndCongregation },
+        ],
+      }),
+    ),
+    shema('# ברכה ראשונה'),
+    shema('# ברכה שנייה'),
+    { ...TEIMAN_MORNING_SHEMA, title: T.shemaBlessings },
+    shema('# ברכה שלישית'),
+    chapter(T.amidah, {
+      ...TEIMAN_AMIDAH,
+      transform: compose(baladiName, BALADI_TEN_DAYS),
+      drop: [0, 3, 5, 8, 10, 12, 14, 16, 18, 20, 23, 25, 27, 29, 31, 34, 36, 40, 44, 46, 53, 56],
+      at: { 17: FAST, 21: NO_RAIN, 22: RAIN, 32: TISHA_BAV, 33: NOT_TISHA_BAV, 38: FAST, 42: YAALEH_VEYAVO },
+      reviewed: [6, 50, 52],
+      edits: [
+        {
+          seg: 4,
+          from: '<small>בקיץ:</small> מוֹרִיד הַטָּל. <small>בחורף:</small> מַשִּׁיב הָרוּחַ מוֹרִיד הַגֶּשֶׁם.',
+          to: '<if none="winter"><small>בקיץ:</small> מוֹרִיד הַטָּל.</if> <if all="winter"><small>בחורף:</small> מַשִּׁיב הָרוּחַ מוֹרִיד הַגֶּשֶׁם.</if>',
+        },
+        BALADI_KEDUSHA_ONLY,
+        { seg: 6, from: 'גָּדוֹל וְקָדוֹשׁ אָתָּה.', to: `גָּדוֹל וְקָדוֹשׁ אָתָּה.<br>${BALADI_ATAH_KADOSH}` },
+        { seg: 7, from: '<br> בָּרוּךְ', to: `<br> <if none="${AYT}">בָּרוּךְ` },
+        {
+          seg: 7,
+          from: 'הָאֵל הַקָּדוֹשׁ. <small>בעשי"ת:</small> <small>',
+          to: `הָאֵל הַקָּדוֹשׁ.</if><if all="${AYT}"><small>בעשי"ת:</small> `,
+        },
+        { seg: 7, from: 'הַמֶּלֶךְ הַקָּדוֹשׁ.</small>', to: 'הַמֶּלֶךְ הַקָּדוֹשׁ.</if>' },
+        { seg: 17, from: '<small>בחזרת הש"ץ בתענית ציבור:</small> <br> ', to: '' },
+        {
+          seg: 26,
+          from: 'מֶלֶךְ אוֹהֵב צְדָקָה וּמִשְׁפָּט. <small>בעשרת ימי תשובה</small><opt>הַמֶּלֶךְ הַמִּשְׁפָּט.</opt>',
+          to: `<if none="${AYT}">מֶלֶךְ אוֹהֵב צְדָקָה וּמִשְׁפָּט.</if><if all="${AYT}">הַמֶּלֶךְ הַמִּשְׁפָּט.</if>`,
+        },
+        ...TEIMAN_YAALEH_VEYAVO_DAYS,
+        { seg: 45, from: ' <small>בחזרת הש"ץ, הקהל אומר:</small> <br>', to: '<br>' },
+        {
+          seg: 45,
+          from: 'בָּרוּךְ אֵל הַהוֹדָאוֹת. <small>בחנוכה:</small> <small>',
+          to: 'בָּרוּךְ אֵל הַהוֹדָאוֹת.<br><if all="chanukah"><small>בחנוכה:</small> ',
+        },
+        {
+          seg: 45,
+          from: 'אָנוּ מוֹדִים לָךְ.</small> <br><small>בפורים:</small> <small>',
+          to: 'אָנוּ מוֹדִים לָךְ.</if><br><if all="purim"><small>בפורים:</small> ',
+        },
+        { seg: 45, from: 'אָנוּ מוֹדִים לָךְ.</small> הַטּוֹב', to: 'אָנוּ מוֹדִים לָךְ.</if><br>הַטּוֹב' },
+        TEIMAN_NO_KOHANIM,
+      ],
+      optionalParts: [{ from: 52, label: WHEN_SAID.noKohanim }],
+      minyanParts: [
+        { from: 6, until: 1, label: SAID_BY.kedusha },
+        { from: 17, label: SAID_BY.aneinu },
+        { from: 45, paragraph: 1, until: 2, label: SAID_BY.modimDeRabbanan },
+        { from: 47, to: 52, label: SAID_BY.birkatKohanim },
+      ],
+    }),
+    {
+      ...TIKLAL_HALLEL,
+      title: T.lulav,
+      from: 103,
+      to: 103,
+      when: CHOL_HAMOED_SUKKOT,
+      edits: [
+        {
+          seg: 103,
+          from: '<small>שחרית כתפלת החול ומוסיף יעלה ויבא בעבודה. ויקול פי יעלה ביום מקרא קדש הזה ביום מועד חג הסוכות הזה. וכשגומר',
+          to: '<small>וכשגומר',
+        },
+      ],
+    },
+    {
+      ...TIKLAL,
+      he: 'tiklalLulav',
+      title: T.lulav,
+      to: 0,
+      when: CHOL_HAMOED_SUKKOT,
+      edits: [
+        { seg: 0, from: "<small>מן צלאתה' אלצ'בח יברך</small> ", to: '' },
+        {
+          seg: 0,
+          from: '<small>וביום ראשון לנטילה יברך שהחיינו:</small>',
+          to: '<if all="lulavShehecheyanu"><small>וביום ראשון לנטילה יברך שהחיינו:</small></if>',
+        },
+      ],
+    },
+    {
+      ...TIKLAL,
+      he: 'tiklalChanukahCandles',
+      title: T.lulav,
+      from: 5,
+      to: 5,
+      when: CHOL_HAMOED_SUKKOT,
+      at: { 5: { all: ['lulavShehecheyanu'] } },
+    },
+    { ...TIKLAL, he: 'tiklalLulav', title: T.lulav, from: 4, to: 4, when: { all: ['hoshanaRabba'] } },
+    ...chapter(T.hallel, teimanHallel()),
+    tachanun('# נפילת אפים', {
+      when: TACHANUN_SHACHARIT,
+      insert: [{ at: 0, ...NOTES.tachanunDisputedShacharit }],
+    }),
+    tachanun('# אבינו מלכנו', {
+      when: AYT_TACHANUN_SHACHARIT,
+      edits: [{ seg: 0, from: 'אָבִינוּ מַלְכֵּנוּ <br>   ', to: 'אָבִינוּ מַלְכֵּנוּ ', count: 29 }],
+    }),
+    tachanun('# וידוי וי"ג מידות', { when: LONG_TACHANUN, minyanParts: [{ from: 2, label: SAID_BY.withMinyan }] }),
+    tachanun('# והוא רחום', { when: LONG_TACHANUN }),
+    tachanun("# ה' אלהי ישראל", {
+      when: LONG_TACHANUN,
+      at: { ...each(1, 3, { all: ['monday'] }), ...each(4, 5, { all: ['thursday'] }) },
+      edits: [
+        { seg: 1, ...techina('שני') },
+        { seg: 4, ...techina('חמישי') },
+      ],
+    }),
+    tachanun('# אבינו מלכנו אבינו אתה', { when: TACHANUN_SHACHARIT }),
+    { ...halfKaddish, title: T.halfKaddish, when: NO_UNDISPUTED_HALLEL },
+    {
+      ...torah,
+      title: T.torahReading,
+      when: TORAH_READING,
+      to: 30,
+      groups: [
+        [1, 2],
+        [6, 7],
+        [22, 24],
+        [28, 29],
+      ],
+      at: { ...each(0, 2, NOT_ROSH_CHODESH), 30: NOT_ROSH_CHODESH },
+      edits: [{ seg: 30, from: ' ואומרים הקהל</small>', to: '</small>' }],
+      minyanParts: [{ from: 25, to: 29, label: SAID_BY.chazzanAndCongregation }],
+    },
+    { ...halfKaddish, title: T.torahReading, when: TORAH_READING },
+    {
+      ...torah,
+      title: T.torahReading,
+      when: TORAH_READING,
+      from: 31,
+      to: 34,
+      groups: [[31, 32]],
+      insert: [{ at: 31, he: '<small>ואומרים הקהל</small>' }],
+    },
+    {
+      ...torah,
+      title: T.returningTorah,
+      when: TORAH_READING,
+      from: 35,
+      to: 39,
+      minyan: SAID_BY.chazzanAndCongregation,
+    },
+    chapter(T.uvaLetzion, { ...TEIMAN_ASHREI, title: T.uvaLetzion }),
+    { ...page, title: T.uvaLetzion, path: '# למנצח', when: TACHANUN_SHACHARIT },
+    {
+      ...torah,
+      title: T.uvaLetzion,
+      from: 40,
+      to: 47,
+      groups: [
+        [41, 45],
+        [46, 47],
+      ],
+    },
+    { ...close, title: T.songOfDay, to: 9, at: onDay(0, 9, 'sunday') },
+    {
+      ...close,
+      title: T.songOfDay,
+      from: 33,
+      to: 103,
+      drop: [48, 80, 98],
+      at: {
+        ...onDay(33, 47, 'monday'),
+        ...onDay(49, 56, 'tuesday'),
+        ...onDay(57, 79, 'wednesday'),
+        ...onDay(81, 97, 'thursday'),
+        ...onDay(99, 103, 'friday'),
+      },
+      edits: [{ seg: 56, from: ` <small>לדוד אליך ה' וכו' א"ר אלעזר וכו':</small>`, to: '' }],
+    },
+    {
+      ...TIKLAL_HALLEL,
+      title: T.songOfDay,
+      from: 81,
+      to: 99,
+      when: ROSH_CHODESH,
+      edits: [tiklalNote(81, TIKLAL_ROSH_CHODESH_ORDER, 'ואחריו מביא מזמור ראש חודש, וזה הוא:')],
+    },
+    { ...close, title: T.songOfDay, from: 10, to: 32 },
+    {
+      ...close,
+      title: T.einKelokeinu,
+      from: 105,
+      to: 106,
+      groups: [[105, 106]],
+      edits: [{ seg: 106, from: ' <small>תם יקול יתגדל עד לעילא ואומר:</small>', to: '' }],
+    },
+    { ...halfKaddish, title: T.kaddish },
+    { ...TIKLAL_TITKABEL, when: NOT_MUSAF },
+    ...teimanMusaf(),
+    {
+      ...close,
+      title: T.ketoret,
+      from: 108,
+      to: 120,
+      drop: [115],
+      groups: [
+        [109, 114],
+        [119, 120],
+      ],
+      optionalParts: [{ from: 116, to: 117, label: WHEN_SAID.plague }],
+    },
+    TIKLAL_RABBI_CHANANYA,
+    TIKLAL_KADDISH_DEATID,
+    { ...close, title: T.closingBarchu, from: 126, to: 127, minyan: SAID_BY.chazzanAndCongregation },
+    {
+      ...close,
+      title: T.aleinu,
+      from: 128,
+      groups: [
+        [128, 129],
+        [130, 131],
+        [132, 133],
+      ],
+    },
+  ];
+}
+
+// One segment of a source cut to the text from `first` through `last`, each found there exactly once.
+function excerpt(seg, first, last) {
+  const [start, end] = [first.normalize('NFC'), last.normalize('NFC')];
+  return (html, index) => {
+    if (index !== seg) return html;
+    const from = html.indexOf(start);
+    const to = html.indexOf(end, from) + end.length;
+    if (from < 0 || to < end.length || html.includes(start, from + 1) || html.includes(end, to))
+      throw new Error(`excerpt #${seg}: "${first}" .. "${last}" must match once`);
+    return html.slice(from, to);
+  };
+}
+
+// Weekday Mincha from the 1894 Tiklal (V1 190-197), in the print's order. Each passage the print points to is
+// the one this nusach already builds: the Tamid of the Shacharit page, the Tiklal's Ketoret cut at "מפני הכבוד",
+// the page's Ashrei with its verses, half Kaddish, Kedushah, Modim DeRabbanan and daily Tachanun, and the
+// Tiklal's Titkabel, R. Chananya and Kaddish DeAtid; what it says only "when there is time" folds. The print
+// keeps other days' inserts in their own sections, so Chol HaMoed's Yaaleh Veyavo, Rachem on Tisha B'Av, the
+// individual's Aneinu and a fast's Priestly Blessing are the Shacharit page's. Evident misprints are corrected to
+// the reading the print gives in the same passage elsewhere: הֶאֵל (V1 192; V1 105), מְחַיֶה and הָאַל (V1 193;
+// V1 106, 107), נְדְחֵי (V1 194; V1 111), יַרָאֶה and בו (V1 195; V2 20, V1 233), מָגַן (V1 195; V1 115).
+function teimanMincha() {
+  const page = TIKLAL_MINCHA;
+  const cut = (seg, first, last) => tiklalCut(page, seg, first, last);
+  const amidah = (from, to, extra) => ({ ...page, title: T.amidah, from, to, ...extra });
+  const timePermits = { optional: WHEN_SAID.timePermits };
+  const foldAll = (from, to) => ({ optionalParts: [{ from, to, label: WHEN_SAID.timePermits }] });
+  const pointer = `<small>ואומר פ' התמיד ע"ס וערבה וכו' ופטום הקטרת עד מפני הכבוד וחותם</small>`;
+  const closing = ' והקטיר והשׁתחוה ויצא.';
+  const [, , , , , torahBlessings] = teimanBirchot();
+  return [
+    {
+      ...page,
+      title: T.korbanot,
+      from: 1,
+      to: 15,
+      groups: [[1, 2]],
+      edits: [{ seg: 2, from: ' ועכשיו נהגו לומר כשיש שהות:', to: '' }],
+      ...foldAll(3, 15),
+    },
+    { ...torahBlessings, title: T.korbanot, from: 4, to: 5, ...foldAll(4, 5) },
+    {
+      ...TIKLAL_SHACHARIT_CLOSE,
+      title: T.korbanot,
+      from: 109,
+      to: 113,
+      groups: [[109, 113]],
+      transform: compose(excerpt(113, 'אֵינוּ אֵלָא', 'מִפְּנֵי הַכָּבוֹד:'), tiklalName),
+      ...foldAll(109, 113),
+    },
+    {
+      ...page,
+      title: T.korbanot,
+      from: 16,
+      to: 16,
+      edits: [
+        { seg: 16, from: pointer, to: '<small>וחותם</small>' },
+        {
+          seg: 16,
+          from: ` <small>והוא רחום וכו'. תהלה לדוד וכו' ע"ס וחצי קדיש ועומדין ומתפללין י"ט ברכות בלחש:</small>`,
+          to: '',
+        },
+      ],
+      ...foldAll(16, 16),
+    },
+    { ...TEIMAN_ASHREI, title: T.ashrei, insert: [{ at: 23, ...NOTES.fastTorahReading }] },
+    { ...TEIMAN_HALF_KADDISH, title: T.halfKaddish },
+    amidah(16, 19, {
+      groups: [[18, 19]],
+      edits: [
+        { seg: 16, from: `${pointer}${closing} `, to: '' },
+        { seg: 16, from: `והוא רחום וכו'. תהלה לדוד וכו' ע"ס וחצי קדיש `, to: '' },
+        { seg: 17, from: 'הֶאֵל', to: 'הָאֵל' },
+        ...tiklalSeasons(18),
+        { seg: 18, from: '(<small>בעי"ת אומר</small>', to: `<if all="${AYT}"><small>בעי"ת אומר</small>` },
+        { seg: 18, from: 'כָמוֹךָ אָב', to: 'כָמוֹךָ אָב</if>' },
+        { seg: 19, from: 'הָרַחֲמָן', to: `<if all="${AYT}">הָרַחֲמָן` },
+        { seg: 19, from: 'לְחַיִּים)', to: 'לְחַיִּים</if>' },
+        { seg: 19, from: 'מְחַיֶה', to: 'מְחַיֶּה' },
+      ],
+    }),
+    { ...TEIMAN_AMIDAH, from: 6, to: 6, reviewed: [6], edits: [BALADI_KEDUSHA_ONLY], minyan: SAID_BY.kedusha },
+    amidah(20, 20, { transform: cut(20, 'אַתָּה קָדוֹשׁ', 'סֶלָה') }),
+    {
+      ...TEIMAN_AMIDAH,
+      from: 7,
+      to: 7,
+      when: IN_AYT,
+      edits: [
+        {
+          seg: 7,
+          from: '<br> בָּרוּךְ אַתָּה יְיָ, הָאֵל הַקָּדוֹשׁ. <small>בעשי"ת:</small> <small>',
+          to: '<small>בעשי"ת:</small> ',
+        },
+        { seg: 7, from: 'הַמֶּלֶךְ הַקָּדוֹשׁ.</small>', to: 'הַמֶּלֶךְ הַקָּדוֹשׁ.' },
+      ],
+    },
+    amidah(20, 36, {
+      drop: [22, 23, 27],
+      at: { 20: NOT_AYT, 28: FAST, 30: NO_RAIN, 31: NO_RAIN, 32: RAIN },
+      groups: [[30, 31]],
+      transform: cut(20, 'בָּרוּךְ אַתָּה', 'הַקָּדוֹשׁ:'),
+      edits: [
+        { seg: 20, from: 'הָאַל', to: 'הָאֵל' },
+        { seg: 33, from: 'נְדְחֵי', to: 'נִדְחֵי' },
+        { seg: 34, from: 'מֶלֶךְ אוֹהֵב', to: `<if none="${AYT}">מֶלֶךְ אוֹהֵב` },
+        { seg: 34, from: ': (<small>בעי"ת אומר</small>', to: `:</if><if all="${AYT}"><small>בעי"ת אומר</small>` },
+        { seg: 34, from: 'הַמִּשְׁפָּט):', to: 'הַמִּשְׁפָּט:</if>' },
+      ],
+      minyanParts: [{ from: 28, label: SAID_BY.aneinu }],
+    }),
+    { ...TEIMAN_AMIDAH, from: 32, to: 32, when: TISHA_BAV },
+    amidah(37, 39, {
+      at: { 37: NOT_TISHA_BAV },
+      reviewed: [39],
+      edits: [{ seg: 39, from: '</small>) כִּי', to: '</small>)' }],
+    }),
+    { ...TEIMAN_AMIDAH, from: 38, to: 38, when: FAST },
+    amidah(40, 42, {
+      at: { 42: ROSH_CHODESH },
+      edits: [
+        { seg: 40, from: 'אַתָּה שׁוֹמֵעַ', to: 'כִּי אַתָּה שׁוֹמֵעַ' },
+        {
+          seg: 41,
+          from: ' (<small>בר"ח אומר כאן יעלה ויבוא</small>)',
+          to: '<if all="roshChodesh"> (<small>בר"ח אומר כאן יעלה ויבוא</small>)</if>',
+        },
+        { seg: 42, from: 'יַרָאֶה', to: 'יֵרָאֶה' },
+        { seg: 42, from: 'בו שִׂמְחָה', to: 'בוֹ שִׂמְחָה' },
+        { seg: 42, from: " <small>ותרצנו וכו'</small>", to: '' },
+      ],
+    }),
+    { ...TEIMAN_AMIDAH, from: 42, to: 42, when: CHOL_HAMOED, edits: TEIMAN_YAALEH_VEYAVO_DAYS },
+    amidah(43, 44, {
+      edits: [
+        { seg: 44, from: 'מָגַן', to: 'מָגֵן' },
+        {
+          seg: 44,
+          from: ' (<small>כאן אומרים על הנסים</small>)',
+          to: '<if any="chanukah,purim"> (<small>כאן אומרים על הנסים</small>)</if>',
+        },
+      ],
+    }),
+    TEIMAN_MODIM_DERABBANAN,
+    amidah(45, 48, {
+      at: { 45: CHANUKAH, 46: CHANUKAH, 47: PURIM, 48: PURIM },
+      transform: cut(46, 'עַל הַנִּסִּים', 'הַזּוֹאת:'),
+      edits: [
+        { seg: 45, from: '<small>לחנוכה *)</small>', to: '<small>לחנוכה</small>' },
+        { seg: 48, from: " <small>ועל כולם וכו'</small>", to: '' },
+      ],
+    }),
+    amidah(46, 46, { when: AL_HANISSIM, transform: cut(46, 'וְעַל כּוּלָּם', 'מוֹדִים לָךְ') }),
+    amidah(50, 50),
+    amidah(51, 53, { groups: [[52, 53]], insert: [{ at: 54, ...NOTES.erevYomKippurVidui }] }),
+    {
+      ...BALADI_SHACHARIT,
+      title: T.tachanun,
+      path: '# נפילת אפים',
+      when: MINCHA_TACHANUN,
+      insert: [{ at: 0, ...NOTES.tachanunDisputed }],
+    },
+    { ...BALADI_SHACHARIT, title: T.tachanun, path: '# אבינו מלכנו אבינו אתה', when: MINCHA_TACHANUN },
+    { ...TEIMAN_HALF_KADDISH, title: T.kaddish },
+    TIKLAL_TITKABEL,
+    { ...teimanPsalm(T.afterMaarivPsalms, 141), ...timePermits },
+    { ...teimanPsalm(T.afterMaarivPsalms, 142), ...timePermits },
+    { ...TIKLAL_RABBI_CHANANYA, from: 122, ...timePermits },
+    { ...TIKLAL_KADDISH_DEATID, ...timePermits },
+  ];
+}
+
+// The Ashmurot page, the same every night of the season but for its Ten Days rows and one Elul / Ten
+// Days word. What it says to skip when there is no time folds; its 13 Middot are the minyan's. The
+// small vocalized print `reviewed` lists is said: the refrains, the congregation's responses, and the
+// two passages of Aseh Lema'an that the page sets in small type.
+function teimanSelichot() {
+  const page = (path, title, extra) => ({ he: 'wikiBaladiSelichot', transform: baladiName, path, title, ...extra });
+  const said = (from, to = from) => Array.from({ length: to - from + 1 }, (_, index) => from + index);
+  const timePermits = { optional: WHEN_SAID.timePermits };
+  const middot = (from, to = from) => ({ minyanParts: [{ from, to, label: SAID_BY.withMinyan }] });
+  const tenDaysLabel = '<br><small><b>בעשרת ימי תשובה:</b></small>';
+  return [
+    ...['לב', 'נא', 'סה', 'פה', 'קב', 'יז', 'כז', 'לג'].map((psalm) => page(`# ${psalm}`, T.selichotPsalms)),
+    page('# ישן אל תרדם', T.yashenAlTeradam, { reviewed: said(1, 6) }),
+    page('# יעירוני רעיוני', T.yeiruniRayonai, { reviewed: said(1, 5) }),
+    page('# בן אדם', T.benAdam, { reviewed: said(0, 1) }),
+    page('# תהלה לדוד', T.ashrei),
+    page('# קדיש לעילא', T.halfKaddish, { minyan: SAID_BY.chazzan }),
+    page('# רשות לש"ץ', T.reshut, {
+      ...timePermits,
+      edits: [{ seg: 0, from: "<small>אם אין פנאי מדלגים עד לך ה' הצדקה.</small> ", to: '' }],
+    }),
+    page('# תהלים יז', T.psalm17, timePermits),
+    page("# ה' אלהי הצבאות", T.elokeiHatzevaot, timePermits),
+    page("# לך ה' הצדקה", T.lechaHashemTzedaka),
+    page("# אליך ה' אקרא", T.elechaEkra),
+    page('# שבט יהודה .. # בעת רצון תחנתי', T.shevetYehuda, middot(3)),
+    page('# בעת רצון תחנתי', T.beetRatzon),
+    page('# רחמנא אידכר לן', T.rachamanaIdkar, {
+      at: { 1: IN_AYT, 2: IN_AYT },
+      enDrop: [1],
+      reviewed: [0, 4],
+      ...middot(6, 8),
+    }),
+    page('# אנא כעב', T.anaKaav, { ...timePermits, drop: [0], reviewed: said(2, 8) }),
+    page('# אנשי אמונה', T.ansheiEmuna, middot(4)),
+    page('# תמהנו מרעות', T.tamahnu, middot(4)),
+    page('# אל תעש עמנו כלה', T.alTaasImanu),
+    page('# וידוי', T.selichotVidui),
+    page('# חטאנו צורנו', T.chatanuTzurenu, { reviewed: [7, 8, 10] }),
+    page('# אלהינו שבשמים', T.elokeinuShebashamayim, {
+      at: { 2: IN_AYT, 3: IN_AYT },
+      enDrop: [2],
+      reviewed: [1, 5],
+    }),
+    page('# אלהים אתה ידעת', T.elokimAtaYadata, { reviewed: [3] }),
+    page('# עננו אבינו', T.aneinu, { reviewed: [1] }),
+    page('# אדון הסליחות', T.adonHaselichot, { reviewed: said(1, 6) }),
+    page('# עשה למען שמך', T.asehLemaan, {
+      at: { 1: IN_AYT },
+      reviewed: [3, 7],
+      edits: [{ seg: 0, from: tenDaysLabel, to: `<if all="${AYT}">${tenDaysLabel}</if>` }],
+    }),
+    page('# דעני לעניי', T.deaneiLaaniyei, { reviewed: [0, 1], ...middot(4, 6) }),
+    page('# אם אפס', T.imAfes, { reviewed: said(1, 16), ...middot(20) }),
+    page('# למתודה חטאתיו', T.lemitvadeh, {
+      reviewed: said(1, 4),
+      edits: [
+        {
+          seg: 2,
+          from: '<small>באלול:</small> יוֹם דִּינִי <small>בעשי"ת</small><opt>כִּפּוּר עֲוֹנִי</opt>',
+          to: `<if none="${AYT}"><small>באלול:</small> יוֹם דִּינִי</if><if all="${AYT}"><small>בעשי"ת:</small> כִּפּוּר עֲוֹנִי</if>`,
+        },
+      ],
+    }),
+    page('# נפילת אפים', T.tachanun),
+    page("# ה' אלהי ישראל .. # ה' איה חסדיך הראשונים", T.elokeiYisrael),
+    page("# ה' איה חסדיך הראשונים", T.elokeiYisrael),
+    page("# ה' שארית פליטת אריאל", T.elokeiYisrael),
+    page("# ה' מושיב יחידים", T.elokeiYisrael),
+    page('# אם אשמנו', T.imAshamenu, { reviewed: said(0, 5) }),
+    page('# אתאנו לחלות פניך', T.atanu, { reviewed: said(0, 1) }),
+    page("# מרנות .. # אליך ה' נשאתי", T.maranot, { reviewed: said(0, 6) }),
+    page("# אליך ה' נשאתי", T.maranot, { reviewed: [3] }),
+    page('# אראלי מרומים', T.erelei),
+    page('# אבינו אב הרחמן', T.avinuAvHarachaman, { reviewed: [1] }),
+    page('# אבינו מלכנו', T.avinuMalkeinu, { reviewed: [0] }),
+    page('# ואנחנו לא נדע', T.vaanachnuLoNeda),
+    page('# אל ארך אפים', T.elErechApayim),
+    page('# קדיש', T.kaddish, { minyan: SAID_BY.chazzan, reviewed: [1] }),
+    page('# שיר המעלות', T.shirHamaalot),
+    page('# מבית מלוני', T.mibeitMeloni),
+    page('# אם תאהב', T.imTeehav, { reviewed: said(1, 3) }),
+    page('# אנא בכח', T.anaBekoach),
   ];
 }
 
@@ -2422,7 +4440,7 @@ const TEXTS = {
       },
     ],
     chabad: [{ ...SHEMA.chabad, title: T.shema, from: 9, to: 13 }],
-    teiman: [{ ...TEIMAN_SHEMA, title: T.shema, minyanParts: [{ from: 5, label: SAID_BY.chazzan }] }],
+    teiman: [{ ...TEIMAN_MORNING_SHEMA, title: T.shema }],
   },
   candle_lighting: {
     ashkenaz: candles(),
@@ -2466,6 +4484,7 @@ const TEXTS = {
         { seg: 6, from: 'to kindle the Shabbos light.', to: 'to kindle the light of the holy Shabbos.' },
       ],
     }),
+    teiman: teimanCandleLighting(),
   },
   havdalah: {
     ashkenaz: linearHavdalah({ versesNote: HAVDALAH_WEEKDAY_YOM_KIPPUR_NOTE }),
@@ -2499,6 +4518,7 @@ const TEXTS = {
       },
     ],
     chabad: linearHavdalah({ transform: chabadName }),
+    teiman: teimanHavdalah(),
   },
   sefirat_haomer: {
     ashkenaz: [
@@ -2536,36 +4556,42 @@ const TEXTS = {
         transform: withoutOmerNumber,
       },
     ],
+    teiman: [teimanOmer()],
   },
   shacharit: {
     ashkenaz: ashkenazShacharit(),
     sefard: sefardShacharit(),
     edot_hamizrach: edotShacharit(),
     chabad: chabadShacharit(),
+    teiman: teimanShacharit(),
   },
   mincha: {
     ashkenaz: ashkenazMincha(),
     sefard: sefardMincha(),
     edot_hamizrach: edotMincha(),
     chabad: chabadMincha(),
+    teiman: teimanMincha(),
   },
   maariv: {
     ashkenaz: ashkenazMaariv(),
     sefard: sefardMaariv(),
     edot_hamizrach: edotMaariv(),
     chabad: chabadMaariv(),
+    teiman: teimanMaariv(),
   },
   birkat_hamazon: {
     ashkenaz: ashkenazBirkatHamazon(),
     sefard: sefardBirkatHamazon(),
     edot_hamizrach: edotBirkatHamazon(),
     chabad: chabadBirkatHamazon(),
+    teiman: teimanBirkatHamazon(),
   },
   al_hamichya: {
     ashkenaz: ashkenazAlHamichya(),
     sefard: sefardAlHamichya(),
     edot_hamizrach: edotAlHamichya(),
     chabad: chabadAlHamichya(),
+    teiman: teimanAlHamichya(),
   },
   borei_nefashot: {
     ashkenaz: [
@@ -2658,6 +4684,7 @@ const TEXTS = {
       },
     ],
     chabad: [{ ...CHABAD, title: T.tefilatHaderech, path: "Blessings > The Travelers' Prayer" }],
+    teiman: teimanTefilatHaderech(),
   },
   asher_yatzar: {
     ashkenaz: [{ ...ASHKENAZ, title: T.asherYatzar, path: ashkenazPrep('Asher Yatzar') }],
@@ -2680,6 +4707,7 @@ const TEXTS = {
     sefard: sefardBirchotHanehenin(),
     edot_hamizrach: edotBirchotHanehenin(),
     chabad: chabadBirchotHanehenin(),
+    teiman: teimanBirchotHanehenin(),
   },
   kriat_shema_al_hamita: {
     ashkenaz: ashkenazBedtimeShema(),
@@ -2693,12 +4721,14 @@ const TEXTS = {
     sefard: sefardBirchotHareiya(),
     edot_hamizrach: edotBirchotHareiya(),
     chabad: chabadBirchotHareiya(),
+    teiman: teimanBirchotHareiya(),
   },
   kiddush_levana: {
     ashkenaz: ashkenazKiddushLevana(),
     sefard: sefardKiddushLevana(),
     edot_hamizrach: edotKiddushLevana(),
     chabad: chabadKiddushLevana(),
+    teiman: teimanKiddushLevana(),
   },
   mezuzah: {
     ashkenaz: [
@@ -2737,6 +4767,7 @@ const TEXTS = {
       },
     ],
     chabad: [{ ...CHABAD, title: T.mezuzah, path: 'Blessings > Various Blessings', from: 16, to: 17 }],
+    teiman: teimanMezuzah(),
   },
   sheva_berachot: {
     ashkenaz: ashkenazShevaBerachot(),
@@ -2757,6 +4788,7 @@ const TEXTS = {
     sefard: sefardChanukahCandles(),
     edot_hamizrach: edotChanukahCandles(),
     chabad: chabadChanukahCandles(),
+    teiman: teimanChanukahCandles(),
   },
   ushpizin: {
     ashkenaz: ashkenazUshpizin(),
@@ -2770,7 +4802,7 @@ const TEXTS = {
     sefard: sefardNishmat(),
     edot_hamizrach: edotNishmat(),
     chabad: sefardNishmat(),
-    teiman: [{ he: 'wikiNishmat', title: T.nishmat, path: '*', transform: baladiName }],
+    teiman: teimanNishmat(),
   },
   selichot: {
     ashkenaz: ashkenaziSelichot({ he: 'selichotLitaHe', en: 'selichotLitaEn' }, SELICHOT_LITA),
@@ -2783,6 +4815,7 @@ const TEXTS = {
         Object.fromEntries(CHABAD_SELICHOT_FROM_LITA.map((day) => [day, SELICHOT_LITA[day]])),
       ),
     ],
+    teiman: teimanSelichot(),
   },
 };
 

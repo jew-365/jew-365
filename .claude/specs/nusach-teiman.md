@@ -19,35 +19,35 @@ Revisions as read on 2026-11-02. "Gap" means that neither Wikisource nor Sefaria
 
 | Text | Baladi source | Revision | State |
 | --- | --- | --- | --- |
-| `shacharit` | `סידור/נוסח תימן בלדי/שחרית לחול` | 3101141 | Partial: see section 3 |
+| `shacharit` | `סידור/נוסח תימן בלדי/שחרית לחול` to Lamenatzeach (section 3); the Torah reading through Aleinu, Hallel, Musaf and the lulav from the 1894 Tiklal, V1 144-186, 327-337, 344 and V2 85-89, 93, 127-156, transcribed (section 5) | 3101143; local | Built 2026-11-03 |
 | `birchot_hashachar` | the same page, השכמת הבוקר to ברכות התורה; also `ברכות השחר (בלדי)` | 3101141; 2858337 | Ready |
 | `asher_yatzar` | the same page, "אשר יצר" | 3101141 | Ready |
 | `krias_shma_shacharit` | the same page, "קריאת שמע" | 3101141 | Ready |
 | `tefillin` | the same page, "ברכות ציצית ותפילין" (להתעטף בציצית, להניח תפילין, על מצות תפילין), then its Shema | 3101141 | Ready |
-| `mincha` | `סידור/נוסח תימן בלדי/מנחה לחול` (opens with the Ketoret, closes with the Kaddish) | 1076941 | Ready |
-| `maariv` | `סידור/נוסח תימן בלדי/חול/ערבית` | 2896952 | Ready |
+| `mincha` | `סידור/נוסח תימן בלדי/מנחה לחול` (opens with the Ketoret, closes with the Kaddish) | 1076941 | Not usable: it prints other nuschaot's alternatives as plain text ("נוסח עדות המזרח: … כל השאר: …"); transcribed from the Tiklal, V1 190-197 (section 5), the page kept as a cross-check; built 2026-11-03 |
+| `maariv` | `סידור/נוסח תימן בלדי/חול/ערבית`; motzaei Shabbat (Vihi Noam, Ve'ata Kadosh) and Tisha B'Av night from the 1894 Tiklal, V1 315-324 and V2 204-205, 221, transcribed (section 5) | 2896952; local | Built 2026-11-03 |
 | `kriat_shema_al_hamita` | `סידור/נוסח תימן בלדי/קריאת שמע שעל המיטה` (transcludes `אנא בכח`) | 3081614 | Ready |
-| `birkat_hamazon` | `ברכת המזון/בלדי` or `ברכת המזון/בלדי 2` (one to be chosen) | 2929642; 2929770 | Ready |
-| `al_hamichya` | `ברכת מעין שלוש - נוסח תימן בלדי` | 2896943 | Ready |
+| `birkat_hamazon` | the body from `ברכת המזון/בלדי 2`; the psalms' instruction, the zimun and the sheva berachot zimun from `ברכת המזון/בלדי`, which lacks the Purim insert. They differ in "זן (ומזין)" and "(בקרוב)", which the Tiklal decides; its brit zimun reads "(חסר)" | 2929770; 2929642 | Built 2026-11-03 |
+| `al_hamichya` | `ברכת מעין שלוש - נוסח תימן בלדי` | 2896943 | Built 2026-11-03 |
 | `borei_nefashot` | `ברכת בורא נפשות`, the Baladi paragraph only | 2896941 | Ready |
 | `sheva_berachot` | `שבע ברכות (בלדי)` | 2903948 | Ready |
-| `sefirat_haomer` | `סדר ספירת העומר`, Baladi variant, and the template `ספירת העומר/בלדי` | 2929975 | Ready, needs the multi-nusach templates |
-| `nishmat` | `נשמת`, Baladi variant | 2972652 | Ready, needs the multi-nusach templates |
-| `selichot` | `סידור/נוסח תימן בלדי/אשמורות` (21 transcluded piyut pages, each to be pinned; one from the Edot HaMizrach Selichot) | 3088391 | Ready, built to the downloadable add-on |
+| `sefirat_haomer` | `סדר ספירת העומר`, Baladi variant, and the template `ספירת העומר/בלדי`, both read through `prepare` (section 4) | 2929975; 400058 | Built 2026-11-03 |
+| `nishmat` | the 1894 Tiklal, V1 281-285, transcribed (section 5); the Baladi branch of `נשמת` (revision 2972652) lacks "וּבְמַקְהֲלוֹת … יִתְפָּאַר שִׁמְךָ" | local | Built 2026-11-03 |
+| `selichot` | `סידור/נוסח תימן בלדי/אשמורות` (21 transcluded piyut pages, each to be pinned; one from the Edot HaMizrach Selichot) | 3088391 | Built 2026-11-03, with the 22 transcluded pages pinned; in the add-on since Teiman left the staging the same day |
 | `tikkun_haklali`, `tehillim` | the shared texts | — | Ready |
 | `ushpizin` | not offered for Teiman (R14) | — | Not shipped, as for Chabad |
-| `candle_lighting` | — | — | Gap |
-| `havdalah` | — | — | Gap |
-| `kiddush_levana` | — | — | Gap |
-| `chanukah_candles` | — | — | Gap |
-| `tefilat_haderech` | — | — | Gap |
-| `birchot_hanehenin` | — | — | Gap |
-| `birchot_hareiya` | — | — | Gap |
-| `mezuzah` | — | — | Gap |
+| `candle_lighting` | the 1894 Tiklal, V1 395 (the Shabbat blessing only), transcribed (section 5) | local | Built 2026-11-03 |
+| `havdalah` | the 1894 Tiklal, V1 319-322; instruction-only variants V2 93, 221, 372, 459, transcribed (section 5) | local | Built 2026-11-03 |
+| `kiddush_levana` | the 1894 Tiklal, V1 337-340, transcribed (section 5) | local | Built 2026-11-03 |
+| `chanukah_candles` | the 1894 Tiklal, V1 340-342, transcribed (section 5) | local | Built 2026-11-03 |
+| `tefilat_haderech` | the 1894 Tiklal, V1 375, transcribed (section 5) | local | Built 2026-11-03 |
+| `birchot_hanehenin` | the 1894 Tiklal, V1 354-355, 363-366, transcribed (section 5) | local | Built 2026-11-03 |
+| `birchot_hareiya` | the 1894 Tiklal, V1 366-374, transcribed (section 5) | local | Built 2026-11-03 |
+| `mezuzah` | the 1894 Tiklal, V1 391, transcribed (section 5) | local | Built 2026-11-03 |
 
 ## 3. Shacharit
 
-The page was last edited on 2026-11-02 and is being written:
+Built on 2026-11-03 from revision 3101143, which added the Monday and Thursday Tachanun (Vidui, the 13 Middot with their Targum, והוא רחום and ה׳ אלהי ישראל) and a half Kaddish after Tachanun; the list below is the 2026-11-02 reading, and of its empty headings only those two are now filled. The page was last edited on 2026-11-02 and is being written:
 
 - **Present:** the morning blessings, the Torah blessings with the Tamid, the tzitzit and tefillin blessings, the Zemirot, the Shema and its blessings, the Amidah with its inserts (Yaaleh Veyavo, Al HaNisim, Aneinu, the seasons, the Ten Days), Nefilat Apayim and Avinu Malkeinu, Ashrei and Lamenatzeach.
 - **Empty:** headings with no text under them: והוא רחום and ה׳ אלהי ישראל of Monday and Thursday, קריאת התורה ("…"), קדושה דסדרא, שיר של יום, קדיש תתקבל, פטום הקטורת, קדיש דעתיד and עלינו לשבח.
@@ -69,10 +69,11 @@ Done on 2026-11-02 (`c66bf4a`): the build reads these templates for a source wit
   - plus the transclusions of other pages.
 - A psalm the pages transclude (`צתס`, `פתל`) comes from the pinned Sefaria Psalms, as `{{צת}}` does today.
 - The build also needs a `teiman` entry in every per-nusach table, and the `teiman` specs of every text in [scripts/siddur/manifest.js](../../scripts/siddur/manifest.js).
+- Added on 2026-11-03: a source's `prepare` rewrites its wikitext before it is read, for the Omer page's calls on today's date (`rewrite()`) and the Baladi count template's `{{#בחר}}` on today's date (`allCases()`, all 49 days); `plainNotes()` makes a page's plain-text instructions into notes (the Maariv page, the zimun page); `baladiName()` reads `י"י` as יְיָ.
 
 ## 5. The 1894 Tiklal, for the texts Wikisource lacks
 
-Found on 2026-11-03: archive.org item `Tiklal_Eiz_Hayyim_Jerusalem_1894` is the first printed Tiklal Etz Chaim (Jerusalem 1894, two volumes, eds. R. Shalom Yosef Araqi and R. Avraham Al-Naddaf, with Maharitz's commentary), scanned by the National Library of Israel from its copy NNL_ALEPH990011795220205171, "Public Domain, all use permitted". Each leaf is a 1802x2367 JPEG 2000 in the item's `_jp2.zip`. Its archive.org OCR is too poor to use. It prints every text section 2 lists as a gap, and Hallel, Musaf, the end of Shacharit and the Selichot of Elul.
+Found on 2026-11-03: archive.org item `Tiklal_Eiz_Hayyim_Jerusalem_1894` is the first printed Tiklal Etz Chaim (Jerusalem 1894, two volumes, eds. R. Shalom Yosef Araqi and R. Avraham Al-Naddaf, with Maharitz's commentary), scanned by the National Library of Israel from its copy NNL_ALEPH990011795220205171, "Public Domain, all use permitted". Each leaf is a 1802x2367 JPEG 2000 in the item's `_jp2.zip`. Its archive.org OCR is too poor to use. It prints every text section 2 lists as a gap, and Hallel, Musaf, the end of Shacharit and the Selichot of Elul. Weekday Mincha joins the list on 2026-11-03, because its Wikisource page is not a Baladi source (section 2).
 
 The owner's call of 2026-11-03 (Q16): Claude transcribes the missing texts from this print, "with high scrutiny so as not to err", and the rav reviews the transcription (R15). The Rambam's wording is no longer needed for the short blessings, because the print has the Baladi wording itself.
 

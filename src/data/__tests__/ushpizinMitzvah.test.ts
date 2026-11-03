@@ -150,7 +150,9 @@ describe('the Ushpizin registry entry', () => {
       'ushpizin',
     ]);
     for (const nusach of SAID_IN) expect(getAllMitzvot(nusach).map((mitzvah) => mitzvah.id)).toContain('ushpizin');
-    expect(getAllMitzvot('chabad').map((mitzvah) => mitzvah.id)).not.toContain('ushpizin');
+    // R5 and R14.3: neither Chabad nor Teiman says the Ushpizin.
+    for (const nusach of ['chabad', 'teiman'] as const)
+      expect(getAllMitzvot(nusach).map((mitzvah) => mitzvah.id)).not.toContain('ushpizin');
   });
 });
 
@@ -215,7 +217,8 @@ describe('the Ushpizin window', () => {
     for (const iso of ['2026-09-24', '2026-10-02']) {
       expect(hasSiddurText(USHPIZIN, nusach, calendarDay(iso), place)).toBe(false);
     }
-    expect(hasSiddurText(USHPIZIN, 'chabad', calendarDay('2026-09-28'), place)).toBe(false);
+    for (const nusach of ['chabad', 'teiman'] as const)
+      expect(hasSiddurText(USHPIZIN, nusach, calendarDay('2026-09-28'), place)).toBe(false);
   });
 });
 
@@ -355,6 +358,9 @@ describe('the Ushpizin reminders', () => {
     const chabad = settingsFor('chabad');
     expect(
       noticeBody('2026-09-26', { now, settings: chabad, mitzvot: getAllMitzvot('chabad') }).join('\n'),
+    ).not.toContain('אושפיזין');
+    expect(
+      noticeBody('2026-09-26', { now, settings: settingsFor('teiman'), mitzvot: getAllMitzvot('teiman') }).join('\n'),
     ).not.toContain('אושפיזין');
     expect(noticeBody('2026-09-26', { now, mitzvot: getAllMitzvot('ashkenaz') }).join('\n')).toContain(
       'הלילה אושפיזין: אברהם',

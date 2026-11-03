@@ -30,7 +30,7 @@ import { dayFeatures, kiddushLevanaPeriod } from '@/utils/siddur';
 
 const JERUSALEM = CITIES[0];
 const NEW_YORK = findCityById('new-york')!;
-const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
 const MINUTE = 60_000;
 const DAY = 24 * 60 * MINUTE;
 const BRUTE_FORCE_DAYS = 400;

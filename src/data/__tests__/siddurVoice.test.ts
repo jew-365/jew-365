@@ -13,7 +13,7 @@ import { dayFeatures, forVoice, resolveSiddurText } from '@/utils/siddur';
 import type { Nusach } from '@/types/mitzvah';
 import type { DayFeatures, PassageLabel, Run, SiddurSection, SiddurText } from '@/types/siddur';
 
-const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
 const ISRAEL = { inIsrael: true, jerusalem: false };
 const DIASPORA = { inIsrael: false, jerusalem: false };
 
@@ -96,6 +96,9 @@ const VOICED: Record<string, string[]> = {
   'chabad/tefillin': ['runs'],
   'chabad/kriat_shema_al_hamita': ['runs'],
   'shared/tikkun_haklali': ['runs'],
+  'teiman/birchot_hashachar': ['runs'],
+  'teiman/shacharit': ['runs'],
+  'teiman/tefillin': ['runs'],
 };
 
 const printedLabel = (label?: PassageLabel) =>

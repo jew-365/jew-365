@@ -117,7 +117,7 @@ describe('the chok_leyisrael registry entry', () => {
     expect(CHOK.category).toBe('learning');
     expect(iconFor(CHOK.icon)).toBe('chok');
     expect(CHOK.skipOn).toEqual(['shabbat', 'yomtov']);
-    expect(CHOK.nuschaotSupported).toEqual(['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad']);
+    expect(CHOK.nuschaotSupported).toEqual(['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman']);
     expect(useMitzvotStore.getState().activeMitzvot.chok_leyisrael).toEqual({ enabled: false });
   });
 

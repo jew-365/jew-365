@@ -38,7 +38,7 @@ import { dayFeatures, kiddushLevanaPeriod } from '@/utils/siddur';
 
 const JERUSALEM = CITIES[0];
 const LOS_ANGELES = findCityById('los-angeles')!;
-const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
 const MINUTE = 60_000;
 
 const settingsFor = (nusach: Nusach, inIsrael = true): UserSettings => ({
@@ -167,10 +167,13 @@ describe('the Kiddush Levana window', () => {
       start: nightfallOn(JERUSALEM, '2026-10-14'),
       end: new Date('2026-10-26T01:44:10.171Z'),
     });
-    expect(windowOn(JERUSALEM, '2026-10-18', settingsFor('edot_hamizrach'))).toEqual({
-      start: nightfallOn(JERUSALEM, '2026-10-18'),
-      end: new Date('2026-10-26T07:22:10.171Z'),
-    });
+    // R14.4: Teiman's window is Edot HaMizrach's, to 15 days after the molad.
+    for (const nusach of ['edot_hamizrach', 'teiman'] as const) {
+      expect(windowOn(JERUSALEM, '2026-10-18', settingsFor(nusach))).toEqual({
+        start: nightfallOn(JERUSALEM, '2026-10-18'),
+        end: new Date('2026-10-26T07:22:10.171Z'),
+      });
+    }
     expect(windowOn(JERUSALEM, '2026-09-21', A)!.start).toEqual(blockEndOn(JERUSALEM, '2026-09-21'));
     expect(windowDays(JERUSALEM, A, '2026-11-08', 10)).toEqual(['2026-11-14']);
     expect(windowOn(JERUSALEM, '2026-11-14', A)!.start).toEqual(blockEndOn(JERUSALEM, '2026-11-14'));
@@ -463,6 +466,6 @@ describe('the siddur tab closes Kiddush Levana when its period ends', () => {
         }
       }
     }
-    expect(pastEnd).toBe(2 * 4 * 12 * 13);
+    expect(pastEnd).toBe(2 * NUSCHAOT.length * 12 * 13);
   });
 });

@@ -55,10 +55,12 @@ export const HALACHA_LINES: Record<HalachaRuling, readonly HalachaLine[]> = {
   ],
 };
 
-// Edot HaMizrach follows the Sephardi poskim; Ashkenaz, Sefard and Chabad the Ashkenazi ones
-// (the user's call, 2026-10-14).
+// Edot HaMizrach follows the Sephardi poskim, and so does Teiman until the rav answers (R14.6);
+// Ashkenaz, Sefard and Chabad the Ashkenazi ones (the user's call, 2026-10-14).
+const SEPHARDI_RULING: readonly Nusach[] = ['edot_hamizrach', 'teiman'];
+
 export const halachaRulingFor = (nusach: Nusach): HalachaRuling =>
-  nusach === 'edot_hamizrach' ? 'sephardi' : 'ashkenazi';
+  SEPHARDI_RULING.includes(nusach) ? 'sephardi' : 'ashkenazi';
 
 export const phoneLabel = (digits: string): string =>
   digits.length === 10

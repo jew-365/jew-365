@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "version": 1,
-  "gzipBytes": 1426413,
+  "version": 2,
+  "gzipBytes": 1466384,
   "gz": {
     "ashkenaz": {
       "path": "ashkenaz.7a8f16e5.siddur.gz",
@@ -22,6 +22,11 @@
       "path": "chabad.06dcb3f2.siddur.gz",
       "sha256": "06dcb3f242680da8fedc94e873927264e9d7e60774c0f5248ccfde9b717ad11c",
       "bytes": 414292
+    },
+    "teiman": {
+      "path": "teiman.ed9dda54.siddur.gz",
+      "sha256": "ed9dda54f72935dd9454369e1dadeec39e29e1408eb66f81e8fb1a4ad33ea380",
+      "bytes": 39971
     }
   }
 }

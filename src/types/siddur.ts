@@ -1,7 +1,7 @@
 import { Nusach } from './mitzvah';
 import type { Location } from './zmanim';
 
-export type KiddushLevanaFlag = `kiddushLevana${'Ashkenaz' | 'Sefard' | 'EdotHamizrach' | 'Chabad'}`;
+export type KiddushLevanaFlag = `kiddushLevana${'Ashkenaz' | 'Sefard' | 'EdotHamizrach' | 'Chabad' | 'Teiman'}`;
 
 export type SukkotOfferingFlag = `sukkotOffering${2 | 3 | 4 | 5 | 6 | 7}`;
 
@@ -70,6 +70,7 @@ export type DayFlag =
   | 'erevRoshHashana'
   | 'selichotAshkenazi'
   | 'selichotSephardi'
+  | 'selichotTeiman'
   | SelichotDayFlag
   | SelichotTeshuvaFlag
   | SukkotOfferingFlag

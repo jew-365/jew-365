@@ -1,13 +1,14 @@
 import { DateTime } from 'luxon';
 import { CustomMitzvah, Mitzvah, MitzvahWindow, Nusach } from '@/types/mitzvah';
 import { MITZVOT, findMitzvah as findStaticMitzvah } from '@/data/mitzvot';
+import { NUSACH_IDS } from '@/data/nuschaot';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { dateKey } from '@/stores/useCompletionsStore';
 import { appliesOn, categoryForWindow, windowMinutes } from '@/utils/customMitzvah';
 import { HebcalService } from '@/services/HebcalService';
 import { Location } from '@/types/zmanim';
 
-const ALL_NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const ALL_NUSCHAOT: Nusach[] = [...NUSACH_IDS];
 
 function parseHHMM(value: string): { h: number; m: number } {
   const [hStr, mStr] = (value ?? '').split(':');

@@ -149,6 +149,11 @@ export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
         'משבעה ימים אחרי המולד עד חצי החודש',
         'From seven days after the molad to mid-month',
       ),
+      teiman: kiddushLevanaOn(
+        'teiman',
+        'משבעה עד חמישה עשר ימים אחרי המולד',
+        'From seven to fifteen days after the molad',
+      ),
     },
     hours: TONIGHT_TO_DAWN,
     periodEnd: (night, nusach, location) => kiddushLevanaPeriod(night, nusach, location).end,
@@ -175,6 +180,13 @@ export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
       edot_hamizrach: {
         available: { all: ['selichotSephardi'] },
         availableLabel: { he: 'מב׳ באלול עד ערב יום הכיפורים', en: 'From 2 Elul to Erev Yom Kippur' },
+      },
+      teiman: {
+        available: { all: ['selichotTeiman'] },
+        availableLabel: {
+          he: 'מראש חודש אלול עד ערב יום הכיפורים',
+          en: 'From Rosh Chodesh Elul to Erev Yom Kippur',
+        },
       },
     },
     season: (year) => new HDate(1, months.ELUL, year),

@@ -80,6 +80,7 @@ import { useI18n } from '@/i18n';
 import { CITIES, cityOf, getLocationName } from '@/data/cities';
 import type { ChokThuNightDay } from '@/types/chok';
 import { findMitzvah } from '@/data/mitzvot';
+import { NUSACH_IDS } from '@/data/nuschaot';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { NagLevel, Nusach } from '@/types/mitzvah';
 import { countsInDayEstimate, remindersPerDay } from '@/utils/nagging';
@@ -89,7 +90,6 @@ import { minutesToTime, timeToMinutes } from '@/utils/clock';
 import { quietBoundsValid, quietHoursOf, type QuietBound } from '@/utils/quietHours';
 import { SETTINGS_SEARCH_ITEMS, type SettingsSearchItem, type SettingsSectionKey } from '@/utils/settingsSearch';
 
-const NUSACHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
 const LANGS = ['he', 'en'] as const;
 const OPINIONS = ['GRA', 'MA'] as const;
 const GENDERS = ['male', 'female'] as const;
@@ -539,7 +539,7 @@ export default function SettingsScreen() {
                 <Anchor {...anchor('nusach')}>
                   <SectionLabel variant="field" text={t('settings.nusach')} />
                   <ChipRow
-                    values={NUSACHAOT}
+                    values={NUSACH_IDS}
                     selected={user.nusach}
                     onSelect={chooseNusach}
                     renderLabel={(value) => t(`nusach.${value}`)}

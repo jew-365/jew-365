@@ -12,7 +12,7 @@ import { dayFeatures, resolveSiddurText } from '@/utils/siddur';
 import type { Nusach } from '@/types/mitzvah';
 import type { SiddurSection, SiddurText } from '@/types/siddur';
 
-const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
 const ISRAEL = { inIsrael: true, jerusalem: false };
 const KEY = /^[A-Za-z0-9_-]{10}(\.[1-9]\d*)?$/;
 const DAYS = [

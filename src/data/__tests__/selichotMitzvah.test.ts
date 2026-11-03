@@ -21,7 +21,7 @@ import { appDayKey } from '@/utils/locationDay';
 
 const JERUSALEM = CITIES[0];
 const NEW_YORK = CITIES.find((city) => city.cityId === 'new-york')!;
-const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
 const MINUTE = 60_000;
 
 const settingsFor = (nusach: Nusach, inIsrael = true): UserSettings => ({
@@ -83,6 +83,10 @@ const E_2025 = [
   '2025-09-11',
   ...A_2025,
 ];
+// R14.1: Teiman from the night of Rosh Chodesh Elul, the evening of 30 Av that opens 1 Elul.
+const T_2025 = ['2025-08-24', ...E_2025];
+const NIGHTS_2025: Partial<Record<Nusach, string[]>> = { edot_hamizrach: E_2025, teiman: T_2025 };
+const FIRST_NIGHT_2025: Partial<Record<Nusach, string>> = { edot_hamizrach: '2025-08-25', teiman: '2025-08-24' };
 const A_2024 = [
   '2024-09-28',
   '2024-09-29',
@@ -132,6 +136,7 @@ describe('the Selichot mitzvah', () => {
     ['sefard', A_2025],
     ['chabad', A_2025],
     ['edot_hamizrach', E_2025],
+    ['teiman', T_2025],
   ])('%s keeps the 2025 nights, none into Shabbat or Yom Tov', (nusach, expected) => {
     for (const [location, inIsrael] of [
       [JERUSALEM, true],
@@ -159,7 +164,7 @@ describe('the Selichot mitzvah', () => {
           first: calendarDay(nights[0]),
           last: calendarDay(nights[nights.length - 1]),
         });
-        expect(nights[0]).toBe(nusach === 'edot_hamizrach' ? '2025-08-25' : '2025-09-13');
+        expect(nights[0]).toBe(FIRST_NIGHT_2025[nusach] ?? '2025-09-13');
         expect(nights[nights.length - 1]).toBe('2025-09-30');
       }
     }
@@ -185,6 +190,14 @@ describe('the Selichot mitzvah', () => {
       last: calendarDay('2025-09-30'),
       begun: false,
     });
+    expect(offerOn('teiman', '2025-08-16')).toBeNull();
+    expect(offerOn('teiman', '2025-08-17')).toEqual({
+      year: 5786,
+      first: calendarDay('2025-08-24'),
+      last: calendarDay('2025-09-30'),
+      begun: false,
+    });
+    expect(offerOn('teiman', '2025-08-24')).toMatchObject({ begun: true });
   });
 
   it('follows Rosh Hashana on a Thursday in 2024, with Tzom Gedaliah deferred past the Shabbat after it', () => {
@@ -202,6 +215,8 @@ describe('the Selichot mitzvah', () => {
       ]),
       ['edot first, the night of 2 Elul', 'edot_hamizrach', '2025-08-25', '2025-08-26'],
       ['edot last', 'edot_hamizrach', '2025-09-30', '2025-10-01'],
+      ['teiman first, the night of 1 Elul', 'teiman', '2025-08-24', '2025-08-25'],
+      ['teiman last', 'teiman', '2025-09-30', '2025-10-01'],
     ])(
       "%s runs from chatzot halayla to the next morning's end of the time for Shacharit",
       (_label, nusach, day, next) => {
@@ -222,7 +237,7 @@ describe('the Selichot mitzvah', () => {
           expect(offered).toEqual(windowOn(location, iso, settings));
           return offered !== null;
         });
-        expect(nights).toEqual(nusach === 'edot_hamizrach' ? E_2025 : A_2025);
+        expect(nights).toEqual(NIGHTS_2025[nusach] ?? A_2025);
       },
     );
   });

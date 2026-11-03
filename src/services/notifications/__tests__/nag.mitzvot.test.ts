@@ -20,11 +20,12 @@ import { MITZVOT } from '@/data/mitzvot';
 import { rulesFor } from '@/data/taharahPresets';
 import { DEFAULT_HILULA_NOTICES, DEFAULT_ROSH_CHODESH_NOTICES } from '@/stores/useUserStore';
 import { at } from '@/testing/zmanim';
+import { NUSACH_IDS } from '@/data/nuschaot';
 import type { Mitzvah, NagLevel, Reminder, ReminderNag, UserSettings } from '@/types/mitzvah';
 import type { QuietHours } from '@/utils/quietHours';
 
 const J = CITIES[0];
-const ALL_NUSCHAOT: Mitzvah['nuschaotSupported'] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const ALL_NUSCHAOT: Mitzvah['nuschaotSupported'] = [...NUSACH_IDS];
 const SETTINGS: UserSettings = { nusach: 'ashkenaz', halachicOpinions: { ksSofZman: 'GRA' }, inIsrael: true };
 // Wednesday 2026-11-11, a plain weekday in Jerusalem.
 const NIGHT_BEFORE = at(J, '2026-11-11T00:30');

@@ -8,7 +8,7 @@ import { SiddurText, SiddurTextId } from '@/types/siddur';
 const ASSET_DIR = path.join(__dirname, '..', '..', 'assets', 'siddur');
 const DOCS_DIR = path.join(__dirname, '..', '..', 'docs');
 
-export const TEXTS_NOT_SHIPPED: Partial<Record<SiddurTextId, readonly Nusach[]>> = { ushpizin: ['chabad'] };
+export const TEXTS_NOT_SHIPPED: Partial<Record<SiddurTextId, readonly Nusach[]>> = { ushpizin: ['chabad', 'teiman'] };
 
 export function shipsText(nusach: Nusach, id: SiddurTextId): boolean {
   return !TEXTS_NOT_SHIPPED[id]?.includes(nusach);

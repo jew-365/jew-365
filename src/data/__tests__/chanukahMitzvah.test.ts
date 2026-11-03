@@ -14,8 +14,10 @@ import { appDayKey } from '@/utils/locationDay';
 
 const JERUSALEM = CITIES[0];
 const NEW_YORK = CITIES.find((city) => city.cityId === 'new-york')!;
-const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
 const FROM_TZEIT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach'];
+// R14.2: Teiman lights at shkia, as Chabad does.
+const FROM_SHKIA: Nusach[] = ['chabad', 'teiman'];
 const MINUTE = 60_000;
 const MAQAF = '־';
 
@@ -115,12 +117,12 @@ describe('the Chanukah candles mitzvah', () => {
       }
     });
 
-    it('chabad lights a weeknight from shkia to the next alot', () => {
+    it.each(FROM_SHKIA)('%s lights a weeknight from shkia to the next alot', (nusach) => {
       for (const [day, next] of [
         ['2025-12-15', '2025-12-16'],
         ['2026-12-08', '2026-12-09'],
       ]) {
-        expect(windowOn(location, day, settings('chabad'))).toEqual({
+        expect(windowOn(location, day, settings(nusach))).toEqual({
           start: zmanimOn(location, day).shkia,
           end: zmanimOn(location, next).alotHaShachar,
         });
@@ -242,9 +244,10 @@ describe('the Chanukah candles mitzvah', () => {
       }
     });
 
-    it('open at shkia + 5 min on a weekday for Chabad only, and at tzeit + 5 min for the others', () => {
+    it('open at shkia + 5 min on a weekday for Chabad and Teiman only, and at tzeit + 5 min for the others', () => {
       const weekday = zmanimOn(location, '2026-12-08');
-      expect(hoursAt('chabad', plus(weekday.shkia, 5))).toMatchObject({ start: weekday.shkia });
+      for (const nusach of FROM_SHKIA)
+        expect(hoursAt(nusach, plus(weekday.shkia, 5))).toMatchObject({ start: weekday.shkia });
       for (const nusach of FROM_TZEIT) {
         expect(hoursAt(nusach, plus(weekday.shkia, 5))).toBeNull();
         expect(hoursAt(nusach, plus(weekday.tzeitHakochavim, 5))).toMatchObject({ start: weekday.tzeitHakochavim });

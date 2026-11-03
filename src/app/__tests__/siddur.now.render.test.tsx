@@ -255,7 +255,7 @@ describe('the Chanukah candle-lighting text in the now card', () => {
   const CANDLES = 'הדלקת נרות חנוכה';
   const FRIDAY = '2026-12-04';
   const WEEKDAY = '2026-12-08';
-  const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+  const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
   const zmanimOn = (iso: string) => zmanimFor(at(JERUSALEM, `${iso}T12:00`), JERUSALEM);
   const plus = (instant: Date, minutes: number) => new Date(instant.getTime() + minutes * 60_000);
 

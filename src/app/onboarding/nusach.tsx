@@ -5,14 +5,13 @@ import { Stack, useRouter } from 'expo-router';
 import { Button } from '@/components/Button';
 import { ChoiceRow } from '@/components/ChoiceRow';
 import { ONBOARDING_STEPS, OnboardingDots } from '@/components/OnboardingDots';
+import { NUSACH_IDS } from '@/data/nuschaot';
 import { chooseNusach } from '@/stores/taharahOptIn';
 import { useUserStore } from '@/stores/useUserStore';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
-
-const OPTIONS = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'] as const;
 
 export default function NusachScreen() {
   const { colors } = useTheme();
@@ -29,7 +28,7 @@ export default function NusachScreen() {
       </Text>
       <ScrollView contentContainerStyle={styles.list}>
         <View accessibilityRole="radiogroup" accessibilityLabel={t('onboarding.nusachTitle')} style={styles.group}>
-          {OPTIONS.map((option) => (
+          {NUSACH_IDS.map((option) => (
             <ChoiceRow
               key={option}
               label={t(`nusach.${option}`)}

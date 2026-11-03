@@ -1,3 +1,4 @@
 scripts/chok/source/** -text -diff
 docs/chok/** -text
 docs/selichot/** -text
+scripts/siddur/source/** -text

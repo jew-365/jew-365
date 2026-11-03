@@ -30,12 +30,13 @@ import { DEFAULT_HILULA_NOTICES, DEFAULT_ROSH_CHODESH_NOTICES } from '@/stores/u
 import { installSelichotFixture } from '@/testing/selichot';
 import { at, zmanimFor } from '@/testing/zmanim';
 import { setLocale, t } from '@/i18n';
+import { NUSACH_IDS } from '@/data/nuschaot';
 import type { Mitzvah } from '@/types/mitzvah';
 import type { Location } from '@/types/zmanim';
 import { checkInDeadline } from '@/utils/checkIn';
 
 const JERUSALEM = CITIES[0];
-const ALL_NUSCHAOT: Mitzvah['nuschaotSupported'] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
+const ALL_NUSCHAOT: Mitzvah['nuschaotSupported'] = [...NUSACH_IDS];
 
 // Tuesday, 2 Cheshvan 5787: the hilula of 3 Cheshvan opens that evening.
 const TUESDAY = at(JERUSALEM, '2026-10-13T05:00');

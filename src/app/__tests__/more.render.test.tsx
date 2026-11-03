@@ -361,6 +361,15 @@ describe('Halacha hotline', () => {
     expect(openURL).toHaveBeenLastCalledWith('https://wa.me/972737860860');
   });
 
+  it('offers Teiman the Sephardi line too (R14.6)', () => {
+    useUserStore.setState({ nusach: 'teiman' });
+    renderAt('2026-11-16T12:00');
+    expect(screen.getByText('שאלה לרב, לפי פסקי מרן')).toBeOnTheScreen();
+    fireEvent.press(screen.getByText('קו ההלכה'));
+    expect(screen.queryByText('חיוג: 072-215-2222')).toBeNull();
+    expect(screen.getByText('חיוג: 073-786-0860')).toBeOnTheScreen();
+  });
+
   it('names the hotline in English', () => {
     useUserStore.setState({ language: 'en', nusach: 'edot_hamizrach' });
     renderAt('2026-11-16T12:00');

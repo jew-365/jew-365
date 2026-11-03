@@ -1,7 +1,7 @@
 import type { SiddurTextId } from './siddur';
 import { Location, Zmanim } from './zmanim';
 
-export type Nusach = 'ashkenaz' | 'sefard' | 'edot_hamizrach' | 'chabad';
+export type Nusach = 'ashkenaz' | 'sefard' | 'edot_hamizrach' | 'chabad' | 'teiman';
 
 export type HalachicOpinion = 'GRA' | 'MA';
 

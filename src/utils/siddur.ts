@@ -117,12 +117,20 @@ const HALF_MONTH_MS = ((14 * 24 + 18) * 60 + 22) * 60_000;
 const MOLAD_SEARCH_DAYS_BEFORE = 3;
 const FIRST_NIGHT_SEARCH_NIGHTS = 16;
 const FIRST_NIGHT_CACHE_LIMIT = 64;
-const KIDDUSH_LEVANA_START_DAYS: Record<Nusach, number> = { ashkenaz: 3, sefard: 7, edot_hamizrach: 7, chabad: 7 };
+// Teiman reads Edot HaMizrach's period until the rav answers (R14.4).
+const KIDDUSH_LEVANA_START_DAYS: Record<Nusach, number> = {
+  ashkenaz: 3,
+  sefard: 7,
+  edot_hamizrach: 7,
+  chabad: 7,
+  teiman: 7,
+};
 const KIDDUSH_LEVANA_END_MS: Record<Nusach, number> = {
   ashkenaz: HALF_MONTH_MS,
   sefard: HALF_MONTH_MS,
   edot_hamizrach: 15 * DAY_MS,
   chabad: HALF_MONTH_MS,
+  teiman: 15 * DAY_MS,
 };
 
 export const KIDDUSH_LEVANA_FLAGS: Readonly<Record<Nusach, KiddushLevanaFlag>> = {
@@ -130,6 +138,7 @@ export const KIDDUSH_LEVANA_FLAGS: Readonly<Record<Nusach, KiddushLevanaFlag>> =
   sefard: 'kiddushLevanaSefard',
   edot_hamizrach: 'kiddushLevanaEdotHamizrach',
   chabad: 'kiddushLevanaChabad',
+  teiman: 'kiddushLevanaTeiman',
 };
 
 export type KiddushLevanaPeriod = { start: Date; end: Date };
@@ -256,16 +265,23 @@ function selichotFlags(hd: HDate, holy: boolean): DayFlag[] {
   const date = hd.getDate();
   if (month === months.ELUL) {
     const roshHashana = new HDate(1, months.TISHREI, hd.getFullYear() + 1);
-    const sephardi: DayFlag[] = date >= SEPHARDI_SELICHOT_FROM_ELUL ? ['selichotSephardi'] : [];
-    if (hd.abs() === roshHashana.abs() - 1) return [...sephardi, 'selichotAshkenazi', 'erevRoshHashana'];
+    // Teiman from the night of 1 Elul (R14.1), Edot HaMizrach from the night of 2 Elul.
+    const early: DayFlag[] =
+      date >= SEPHARDI_SELICHOT_FROM_ELUL ? ['selichotTeiman', 'selichotSephardi'] : ['selichotTeiman'];
+    if (hd.abs() === roshHashana.abs() - 1) return [...early, 'selichotAshkenazi', 'erevRoshHashana'];
     const start = leilSelichot(roshHashana);
-    if (hd.abs() < start) return sephardi;
-    return [...sephardi, 'selichotAshkenazi', `selichotDay${weekdaysFrom(start, hd.abs())}` as DayFlag];
+    if (hd.abs() < start) return early;
+    return [...early, 'selichotAshkenazi', `selichotDay${weekdaysFrom(start, hd.abs())}` as DayFlag];
   }
   if (month !== months.TISHREI || date < 3 || date > 9) return [];
-  if (date === 9) return ['selichotSephardi', 'selichotAshkenazi'];
+  if (date === 9) return ['selichotTeiman', 'selichotSephardi', 'selichotAshkenazi'];
   const nth = weekdaysFrom(new HDate(3, months.TISHREI, hd.getFullYear()).abs(), hd.abs());
-  return ['selichotSephardi', 'selichotAshkenazi', ...(nth > 1 ? [`selichotTeshuva${nth}` as DayFlag] : [])];
+  return [
+    'selichotTeiman',
+    'selichotSephardi',
+    'selichotAshkenazi',
+    ...(nth > 1 ? [`selichotTeshuva${nth}` as DayFlag] : []),
+  ];
 }
 
 function purimName(place: Place): string {
