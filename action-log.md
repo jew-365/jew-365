@@ -17,6 +17,19 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-11-03 — production update 1.0.21-11: a mark no longer crashes the app on Android
+
+- **Requested:** the owner, 2026-11-03, in a Claude Code session: "כאשר אני מסמן סיימתי במצווה אני מקבל מסך שחור ולפעמים האפליקציה קורסת, תתקן את זה", then approved the release the same day.
+- **Commits:** `9342cc6` fix(rating): never require expo-store-review on a binary without it.
+- **Version:** JS only, production `1.0.21-11` (group `fa926828-9b41-44a1-a5da-e475191094b6`, 2026-11-03, Android and iOS, from `9342cc6`, pushed to `origin/main`; the working tree also held the uncommitted nusach Teiman staging, which no bundle imports), which replaced `1.0.21-10` (group `54b1c45d-16f8-4cc3-b2dc-7e52b7dbfab2`); the guide's what's-new entry `1.0.21-11` names the fix.
+- **Verification:** CI green on `9342cc6` (run 41629338722); the full suite in four zones before the commit, 6,098 tests in each. Not checked: a phone running `1.0.21-11`.
+
+### Bugs
+
+- **Marking a mitzvah on Android shows a black screen and closes the app** — [src/services/storeReview.ts](src/services/storeReview.ts) asks `requireOptionalNativeModule('ExpoStoreReview')` before it requires `expo-store-review`, so a binary without the native module never loads the package; the contract is in [src/services/AGENTS.md](src/services/AGENTS.md).
+  - Found: the owner's report, 2026-11-03, on Android in the production and the preview app, from "עשיתי" on home, "סיימתי" at the end of a text and the mitzvah screen. Cause: the store rating of `cad5197` (production `1.0.21-10`) required the package inside a `try` 1.5 s after a mark once the rating was due (seven marked app days, the first open on an earlier day); Metro's `guardedLoadModule` reports a throw while it loads a module as fatal before the `catch` runs, and no Android binary carries the module, so every mark crashed, and so did a restore that brought seven marked days. Verified: reproduced on the emulator with the preview APK `c625eaa5` on `1.0.21-38` after a backup restore with 44 marked days (logcat `Cannot find native module 'ExpoStoreReview'`, `ReactHost.handleHostException`); on the 2026-10-29 dev client against Metro the fixed bundle survived the restore and a mark (`[storeReview] unavailable in this build`) and the old bundle raised `Uncaught Error` on the same mark; [src/services/__tests__/storeReview.test.ts](src/services/__tests__/storeReview.test.ts) fails on the old code and passes on the fix.
+  - Version: OTA `1.0.21-11` · Committed: yes, `9342cc6` · Pushed: yes, `main` · Live: production `1.0.21-11` (group `fa926828-9b41-44a1-a5da-e475191094b6`, 2026-11-03, Android and iOS, from `9342cc6`) · Channel: production
+
 ## 2026-11-02 — production update 1.0.21-10: the nagging levels and reminder nags, the welcome step in the device's language and the smooth mark collapse
 
 - **Requested:** the owner, 2026-11-01 and 2026-11-02, in Claude Code sessions. Before the publish the owner checked build 1.0.21 (5) on an iPhone through TestFlight ("בדקתי הכל מצויין") and the Android preview app on `1.0.21-38` ("בדקתי עובד מצויין"), then asked: "תדחוף ותעדכן רשומות".
