@@ -398,6 +398,12 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it is:** R16 (the texts and how they are read) as items of [docs/halacha-review.html](docs/halacha-review.html) beside R14.1 to R14.7, which the page carries since 2026-11-03, each with what the app does, its source and its place in the code, and `RULES_VERSION` raised in the same change: to 5, since the zmanim batch made it 4 with R15 on 2026-11-03.
   - **What it solves:** The owner's answer to Q16 on 2026-11-03: "כן קח ותוסיף את זה בשאלון לאישור רב"; the page has the rules (R14) but not the texts.
   - **Expected result:** The page lists R16 and its form sends its answers; R16 gains the transcribed texts as they are built.
+- [ ] Transcribe the Teiman Hoshanot and Psalm 30 for Chanukah
+  - **Flag:** `OTA` (bundled assets).
+  - **Requested:** the owner, 2026-11-03, in chat, answering Q28: "אם יש חוסר אז כן"; recorded only, not started ("אל תבצע עוד כלום רק תכתוב את זה במשימות הפתוחות").
+  - **What it is:** Two units of the 1894 Tiklal by the double-typing contract of [.claude/specs/nusach-teiman.md](.claude/specs/nusach-teiman.md) section 5: the Hoshanot of Sukkot (V2 131, and Hoshana Rabba V2 156) and Psalm 30 said on Chanukah (V1 345), pinned under `scripts/siddur/source/tiklal-1894/` and built into the Teiman `shacharit` on their days.
+  - **What it solves:** A Baladi user on Chol HaMoed Sukkot, Hoshana Rabba and Chanukah reads only the print's pointer where the other nuschaot carry the text.
+  - **Expected result:** Both passages in the Teiman `shacharit` on their days, dated cases in [src/data/__tests__/siddur.test.ts](src/data/__tests__/siddur.test.ts), R16 on the review page updated with `RULES_VERSION` raised, and the build, siddur suites and `pnpm test:tz` green.
 - [ ] Say five nuschaot on the public site and in the store copy
   - **Flag:** `docs` for the site; the store copy waits for the owner.
   - **What it is:** [docs/index.html](docs/index.html) says "ארבעה נוסחים" / "four nusachim" in three places and [docs/testers/index.html](docs/testers/index.html) once; the store copy in [release/](release) and [release/AGENTS.md](release/AGENTS.md) say four nuschaot.
@@ -722,6 +728,7 @@ Q27 and Q28 are the batch "Nusach Teiman, 2026-11-02", found while building its 
   - **Lives in:** the source each `teiman` spec names in [scripts/siddur/manifest.js](scripts/siddur/manifest.js) (`baladiSources()` or `tiklalSources()`).
   - **What it affects:** The wording of Me'ein Shalosh, Birkat HaMazon and the Amidah; today a Baladi user reads two Amidah wordings, one at Mincha and another at Shacharit and Maariv.
   - **Why it is not a structural change:** Both witnesses are pinned, so a switch is a manifest edit and a rebuild.
+  - **Answered, 2026-11-03:** the owner chose "כל טקסט נשאר לפי המקור שממנו נבנה (כך היום)": each text follows the source it is built from, as the Assumption says; nothing changes.
 
 - **Q28 — Nusach Teiman: what the print does not give.**
   - **Question:** The Tiklal prints only instructions for the weekday Torah reading (no oleh blessings, no Mi Sheberach, no blessing for the government), for the Chanukah and Chol HaMoed readings, and for "ויתן לך" after havdalah ("ויתן לך האלהים … ופסוקים אחרים כמו שנהגו", V1 324, no list anywhere in either volume). The Hoshanot (V2 131) and Psalm 30 on Chanukah (V1 345) are printed but not yet transcribed. Should the app fill the first group from another Baladi source the rav approves, from the Edot HaMizrach texts, or leave the instructions, and should the second group be transcribed now?
@@ -729,6 +736,7 @@ Q27 and Q28 are the batch "Nusach Teiman, 2026-11-02", found while building its 
   - **Lives in:** `teimanShacharit()` and `teimanHavdalah()` in [scripts/siddur/manifest.js](scripts/siddur/manifest.js).
   - **What it affects:** A Baladi user called to the Torah, the Sukkot and Chanukah mornings, and motzaei Shabbat.
   - **Why it is not a structural change:** A filled passage is one more pinned source or transcription unit and a spec in the same builder.
+  - **Partly answered, 2026-11-03:** on transcribing the Hoshanot and Psalm 30, "אם יש חוסר אז כן": transcribe them, the task "Transcribe the Teiman Hoshanot and Psalm 30 for Chanukah". On the passages the print gives only as an instruction (the oleh's blessings, Mi Sheberach and the blessing for the government, the Chanukah and Chol HaMoed readings, "ויתן לך"), given those examples, the owner chose "או להשאיר רק את ההוראה כמו היום": the instruction stays as printed and nothing is borrowed, as the Assumption says.
 
 ## Other Open Items
 
