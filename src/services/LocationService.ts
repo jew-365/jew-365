@@ -1,5 +1,5 @@
 import * as ExpoLocation from 'expo-location';
-import { CITIES, City } from '@/data/cities';
+import { CITIES, City, heightAt } from '@/data/cities';
 import { Location } from '@/types/zmanim';
 
 export type LocationStatus = 'ready' | 'denied' | 'timeout' | 'missing';
@@ -70,7 +70,7 @@ function resolvedLocation(lat: number, lng: number): Location {
     lng,
     tz: closeEnough ? nearest.tz : deviceTz,
     inIsrael: closeEnough ? nearest.inIsrael : isInIsrael(lat, lng),
-    elevation: closeEnough ? nearest.elevation : undefined,
+    elevation: closeEnough ? heightAt(nearest, { lat, lng }) : undefined,
     candleLightingMinutes: closeEnough ? nearest.candleLightingMinutes : undefined,
   };
 }

@@ -33,6 +33,19 @@ describe('cities', () => {
     }
   });
 
+  it('every city carries the height its zmanim are taken at, the printed luach cities their fitted one', () => {
+    for (const c of CITIES) {
+      expect({ city: c.cityId, elevation: typeof c.elevation === 'number' && c.elevation >= 0 }).toEqual({
+        city: c.cityId,
+        elevation: true,
+      });
+    }
+    const height = (id: string) => findCityById(id)?.elevation;
+    expect([height('jerusalem'), height('tel-aviv'), height('haifa'), height('beer-sheva')]).toEqual([
+      1150, 75, 390, 300,
+    ]);
+  });
+
   it('5.x findCityByName works for Hebrew name', () => {
     expect(findCityByName('ירושלים')).toEqual(CITIES[0]);
     expect(findCityByName('xyz_unknown')).toBeUndefined();
@@ -158,9 +171,19 @@ describe('cityOf and refreshSavedLocation', () => {
     expect(refreshSavedLocation({ ...fix, cityId: 'tel-aviv' }, 'gps')).toEqual({ ...telAviv, lat: 32.1, lng: 34.8 });
   });
 
+  it("a GPS fix takes the city's height only inside the city", () => {
+    const inside = refreshSavedLocation({ ...staleJerusalem, cityId: 'jerusalem', lat: 31.78, lng: 35.2 }, 'gps');
+    expect(inside.elevation).toBe(jerusalem.elevation);
+    const beitShemesh = refreshSavedLocation(
+      { ...staleJerusalem, cityId: 'jerusalem', lat: 31.7469, lng: 34.9886 },
+      'gps',
+    );
+    expect(beitShemesh.elevation).toBeUndefined();
+  });
+
   it('a GPS fix drops a stale elevation and candle-lighting override the city no longer has', () => {
     const refreshed = refreshSavedLocation({ ...staleJerusalem, cityId: 'jerusalem' }, 'gps');
-    expect(refreshed.elevation).toBe(jerusalem.elevation);
+    expect(refreshed.elevation).toBeUndefined();
     expect(refreshed.candleLightingMinutes).toBeUndefined();
     expect(refreshed.lat).toBe(31.5);
     expect(refreshed.lng).toBe(35.0);

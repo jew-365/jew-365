@@ -1,5 +1,7 @@
+import { ComplexZmanimCalendar, GeoLocation } from 'kosher-zmanim';
+import { DateTime } from 'luxon';
 import { ZmanimService, antimeridianAdjustment } from '../ZmanimService';
-import { zmanimFor } from '@/testing/zmanim';
+import { at, zmanimFor } from '@/testing/zmanim';
 import { CITIES } from '@/data/cities';
 import { Location } from '@/types/zmanim';
 
@@ -28,24 +30,6 @@ const NEW_YORK: Location = {
 };
 
 const DATES = [new Date('2026-04-23T12:00:00Z'), new Date('2026-06-21T12:00:00Z'), new Date('2026-12-21T12:00:00Z')];
-
-function toLocalHHMM(d: Date, tz: string): string {
-  return new Intl.DateTimeFormat('en-GB', {
-    timeZone: tz,
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(d);
-}
-
-function hhmmToMinutes(s: string): number {
-  const [h, m] = s.split(':').map(Number);
-  return h * 60 + m;
-}
-
-function diffMinutes(a: Date, tz: string, expected: string): number {
-  return Math.abs(hhmmToMinutes(toLocalHHMM(a, tz)) - hhmmToMinutes(expected));
-}
 
 // The day a zman falls on, on the location's own clock.
 function localDate(d: Date, tz: string): string {
@@ -142,9 +126,6 @@ describe('ZmanimService accuracy', () => {
     }
   });
 
-  // Regression: getAlosHashachar (16.1°) and getMisheyakir11Point5Degrees have no solution above
-  // ~50°N around midsummer. London, Antwerp and Moscow are all shipped, and getZmanim used to
-  // throw for them — crashing every screen and wiping every scheduled notification.
   it('returns a complete zmanim set for every shipped city across the whole year', () => {
     for (const city of CITIES) {
       for (let offset = 0; offset < 365; offset += 7) {
@@ -167,28 +148,24 @@ describe('ZmanimService accuracy', () => {
     ['London', '2026-06-21'],
     ['Antwerp', '2026-06-21'],
     ['Moscow', '2026-06-21'],
-  ])('%s midsummer falls back to fixed-minute alot/misheyakir instead of throwing', (nameEn, iso) => {
+  ])('%s midsummer counts alot and misheyakir in seasonal minutes of its long day', (nameEn, iso) => {
     const city = CITIES.find((c) => c.nameEn === nameEn)!;
-    const [y, m, d] = iso.split('-').map(Number);
-    const z = zmanimFor(new Date(y, m - 1, d), city);
-    const minutesBeforeNetz = (value: Date) => (z.netzHaChama.getTime() - value.getTime()) / 60_000;
-    expect(minutesBeforeNetz(z.alotHaShachar)).toBeCloseTo(72, 0);
-    // Misheyakir must land inside (alot, netz) even when its own degree value is unsolvable or,
-    // as in London/Antwerp, still solvable but earlier than the fixed-minute alot.
-    expect(minutesBeforeNetz(z.misheyakir)).toBeCloseTo(52, 0);
+    const noon = at(city, `${iso}T12:00`);
+    const z = zmanimFor(noon, city);
+    const cal = new ComplexZmanimCalendar(new GeoLocation(city.name, city.lat, city.lng, city.elevation ?? 0, city.tz));
+    cal.setDate(DateTime.fromJSDate(noon).setZone(city.tz));
+    const sunrise = cal.getSunrise()!.toMillis();
+    const seasonalMinute = (cal.getSunset()!.toMillis() - sunrise) / 12 / 60;
+    expect(seasonalMinute / 60_000).toBeGreaterThan(1.2);
+    expect(z.alotHaShachar.getTime()).toBeLessThan(z.misheyakir.getTime());
+    expect(z.misheyakir.getTime()).toBeLessThan(z.netzHaChama.getTime());
+    expect(Math.abs(z.alotHaShachar.getTime() - (sunrise - 72 * seasonalMinute))).toBeLessThanOrEqual(60_000);
+    expect(Math.abs(z.misheyakir.getTime() - (sunrise - 66 * seasonalMinute))).toBeLessThanOrEqual(60_000);
   });
 
   it('returns null (never throws) where the sun neither rises nor sets', () => {
     const tromso: Location = { name: 'Tromso', lat: 69.6492, lng: 18.9553, tz: 'Europe/Oslo', inIsrael: false };
     expect(() => ZmanimService.getZmanim(new Date(2026, 5, 21), tromso)).not.toThrow();
     expect(ZmanimService.getZmanim(new Date(2026, 5, 21), tromso)).toBeNull();
-  });
-
-  it('Jerusalem 2026-04-23 matches published zmanim within 2 minutes', () => {
-    const z = zmanimFor(DATES[0], JERUSALEM);
-    expect(diffMinutes(z.misheyakir, JERUSALEM.tz, '05:08')).toBeLessThanOrEqual(2);
-    expect(diffMinutes(z.netzHaChama, JERUSALEM.tz, '06:01')).toBeLessThanOrEqual(2);
-    expect(diffMinutes(z.shkia, JERUSALEM.tz, '19:13')).toBeLessThanOrEqual(2);
-    expect(diffMinutes(z.sofZmanShmaGra, JERUSALEM.tz, '09:19')).toBeLessThanOrEqual(2);
   });
 });

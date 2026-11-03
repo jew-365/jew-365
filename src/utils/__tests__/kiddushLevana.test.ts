@@ -20,6 +20,7 @@ const LOS_ANGELES = findCityById('los-angeles')!;
 const NUSCHAOT: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad'];
 const placeJ: Place = { inIsrael: true, jerusalem: true, location: JERUSALEM };
 
+const fastEndOn = (location: Location, iso: string) => zmanimFor(at(location, `${iso}T12:00`), location).tzeitTaanit;
 const nightfallOn = (location: Location, iso: string) =>
   HebcalService.nightfall(zmanimFor(at(location, `${iso}T12:00`), location), location);
 const blockEndOn = (location: Location, iso: string) =>
@@ -87,18 +88,19 @@ describe('kiddushLevanaPeriod', () => {
     ['Jerusalem', JERUSALEM],
     ['Los Angeles', LOS_ANGELES],
   ])(
-    "starts no earlier than the night after Tisha B'Av, deferred when the 9th is Shabbat, in %s",
+    "starts no earlier than the end of the Tisha B'Av fast, 20 minutes after shkia, deferred when the 9th is Shabbat, in %s",
     (_name, location) => {
       const av = new HDate(1, months.AV, 5786);
       for (const nusach of NUSCHAOT) {
         const { start, end } = kiddushLevanaPeriod(av, nusach, location);
-        expect(start).toEqual(nightfallOn(location, '2026-07-23'));
+        expect(start).toEqual(fastEndOn(location, '2026-07-23'));
+        expect(start.getTime()).toBeGreaterThan(nightfallOn(location, '2026-07-23').getTime());
         expect(iso(end)).toBe(nusach === 'edot_hamizrach' ? '2026-07-29T17:10:00.171Z' : '2026-07-29T11:32:00.171Z');
       }
       const deferred = new HDate(1, months.AV, 5789);
       expect(new HDate(9, months.AV, 5789).getDay()).toBe(6);
       for (const nusach of NUSCHAOT) {
-        expect(kiddushLevanaPeriod(deferred, nusach, location).start).toEqual(nightfallOn(location, '2029-07-22'));
+        expect(kiddushLevanaPeriod(deferred, nusach, location).start).toEqual(fastEndOn(location, '2029-07-22'));
       }
     },
   );

@@ -109,8 +109,16 @@ describe('Services', () => {
       lng: 34.8,
       tz: 'Asia/Jerusalem',
       inIsrael: true,
-      elevation: 5,
+      elevation: CITIES[1].elevation,
     });
+  });
+
+  it("5.3d GPS 20 km from Jerusalem carries its id but not its height, which is the city's own", async () => {
+    mockGetForeground.mockResolvedValue({ granted: true, canAskAgain: true });
+    mockGetCurrentPosition.mockResolvedValue({ coords: { latitude: 31.7469, longitude: 34.9886 } });
+    const r = await LocationService.getCurrentLocation();
+    expect(r.location).toMatchObject({ cityId: 'jerusalem', lat: 31.7469, lng: 34.9886 });
+    expect(r.location!.elevation).toBeUndefined();
   });
 
   it("5.3c GPS near a city takes that city's candle-lighting minutes when it has them", async () => {

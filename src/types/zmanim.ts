@@ -26,6 +26,9 @@ export type Zmanim = {
   plagHaMincha: Date;
   shkia: Date;
   tzeitHakochavim: Date;
+  // The exit of Shabbat and Yom Tov, and the end of a fast other than Yom Kippur.
+  tzeitShabbat: Date;
+  tzeitTaanit: Date;
   candleLighting?: Date;
   havdalah?: Date;
 };
@@ -35,7 +38,7 @@ export type ZmanimKey = keyof Zmanim;
 export type HolyBlockKind = 'shabbat' | 'yomTov' | 'shabbatYomTov' | 'yomKippur';
 
 // A maximal run of consecutive Shabbat / Yom Tov days at one location, from candle lighting on the
-// erev until the exit of the last day (`holyBlockExit()`, a margin after its tzeit). `days` are the
+// erev until the exit of the last day (`holyBlockExit()`, a fixed time after its shkia). `days` are the
 // location's calendar dates (YYYY-MM-DD) whose daytime is holy.
 export type HolyBlock = {
   start: Date;

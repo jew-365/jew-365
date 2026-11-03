@@ -59,6 +59,6 @@ describe('ZmanimService extra', () => {
     const friday = new Date('2026-04-24T12:00:00Z');
     const z = zmanimFor(friday, JERUSALEM);
     const candle = ZmanimService.getCandleLighting(friday, JERUSALEM, { isFriday: true, isErevYomTov: false })!;
-    expect(z.shkia.getTime() - candle.getTime()).toBe(18 * 60_000);
+    expect(z.shkia.getTime() - candle.getTime()).toBe(20 * 60_000);
   });
 });

@@ -3,7 +3,7 @@ import { at, zmanimFor } from '@/testing/zmanim';
 import { Location } from '@/types/zmanim';
 import { CITIES } from '@/data/cities';
 import { candleLightingMinutes } from '@/data/mitzvot';
-import { HOLY_BLOCK_EXIT_MIN, ZmanimService } from '@/services/ZmanimService';
+import { ZmanimService } from '@/services/ZmanimService';
 
 // Boundary instants are derived from the zmanim themselves rather than written as clock times, so
 // the fixtures cannot silently mean a different moment than the one they claim.
@@ -243,19 +243,21 @@ describe('HebcalService holy blocks', () => {
   const lightingOn = (loc: Location, date: string) =>
     minutesFrom(zmanimFor(noonAt(loc, date), loc).shkia, -candleLightingMinutes(loc));
   const tzeitOn = (loc: Location, date: string) => zmanimFor(noonAt(loc, date), loc).tzeitHakochavim;
-  const exitOn = (loc: Location, date: string) => minutesFrom(tzeitOn(loc, date), HOLY_BLOCK_EXIT_MIN);
+  const exitOn = (loc: Location, date: string) => zmanimFor(noonAt(loc, date), loc).tzeitShabbat;
 
-  it('a plain Shabbat runs from candle lighting on Friday to ten minutes after tzeit on Saturday', () => {
+  it('a plain Shabbat runs from candle lighting on Friday to the exit, 30 minutes after shkia in Israel, on Saturday', () => {
     const block = HebcalService.holyBlockOn(noonAt(JERUSALEM_CITY, '2026-04-25'), JERUSALEM_CITY)!;
     expect(block.days).toEqual(['2026-04-25']);
     expect(block.kind).toBe('shabbat');
     expect(block.start).toEqual(lightingOn(JERUSALEM_CITY, '2026-04-24'));
     expect(block.end).toEqual(exitOn(JERUSALEM_CITY, '2026-04-25'));
-    expect(block.end.getTime() - tzeitOn(JERUSALEM_CITY, '2026-04-25').getTime()).toBe(10 * 60_000);
-    // Jerusalem lights 40 minutes before shkia.
+    const shkia = zmanimFor(noonAt(JERUSALEM_CITY, '2026-04-25'), JERUSALEM_CITY).shkia;
+    const afterShkia = (block.end.getTime() - shkia.getTime()) / 60_000;
+    expect(afterShkia).toBeGreaterThanOrEqual(30);
+    expect(afterShkia).toBeLessThanOrEqual(31);
     expect(
       zmanimFor(noonAt(JERUSALEM_CITY, '2026-04-24'), JERUSALEM_CITY).shkia.getTime() - block.start.getTime(),
-    ).toBe(40 * 60_000);
+    ).toBe(20 * 60_000);
   });
 
   it('Rosh Hashana on Thursday-Friday merges with Shabbat into one three-day block', () => {
@@ -307,7 +309,7 @@ describe('HebcalService holy blocks', () => {
     expect(HebcalService.holyBlockAt(minutesFrom(block.start, -1), JERUSALEM_CITY)).toBeNull();
     expect(HebcalService.holyBlockAt(block.start, JERUSALEM_CITY)).toEqual(block);
     expect(HebcalService.holyBlockAt(at(JERUSALEM_CITY, '2026-04-24T23:00'), JERUSALEM_CITY)).toEqual(block);
-    // Tzeit itself is still inside: Shabbat leaves ten minutes later.
+    // Tzeit itself is still inside: Shabbat leaves at its own exit, later.
     expect(HebcalService.holyBlockAt(tzeitOn(JERUSALEM_CITY, '2026-04-25'), JERUSALEM_CITY)).toEqual(block);
     expect(HebcalService.holyBlockAt(block.end, JERUSALEM_CITY)).toEqual(block);
     expect(HebcalService.holyBlockAt(minutesFrom(block.end, 1), JERUSALEM_CITY)).toBeNull();

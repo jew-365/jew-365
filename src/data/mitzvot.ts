@@ -13,6 +13,7 @@ import {
   chanukahNightOn,
   dayFeatures,
   kiddushLevanaFirstNight,
+  kiddushLevanaOpening,
   kiddushLevanaPeriod,
   liturgicalDay,
   matchesCondition,
@@ -335,10 +336,11 @@ export const MITZVOT: Mitzvah[] = [
       // Havdalah closes a Shabbat / Yom Tov block, so it is due only on the block's last day:
       // Shabbat that flows into Yom Tov is separated in kiddush instead, and a Yom Tov that ends on
       // a weekday still needs it. When the Tisha B'Av fast falls on Sunday, motzaei Shabbat has only
-      // the flame and the cup waits for the end of the fast on Sunday night, at tzeit itself.
+      // the flame and the cup waits for the end of the fast on Sunday night (`tzeitTaanit`).
       const day = dayOf(zmanim, location);
-      if (!closesHolyBlock(day, location) && !isSundayTishaBav(day)) return null;
-      const start = nightfall(zmanim, location);
+      const closesBlock = closesHolyBlock(day, location);
+      if (!closesBlock && !isSundayTishaBav(day)) return null;
+      const start = closesBlock ? nightfall(zmanim, location) : zmanim.tzeitTaanit;
       return win(start, new Date(start.getTime() + 90 * 60_000));
     },
   },
@@ -503,10 +505,9 @@ export const MITZVOT: Mitzvah[] = [
         siddurPlace(ctx.location, ctx.settings.inIsrael),
       );
       if (!first || first.abs() !== night.abs()) return null;
-      return win(
-        nightfall(ctx.zmanim, ctx.location),
-        kiddushLevanaPeriod(night, ctx.settings.nusach, ctx.location).end,
-      );
+      const opens = kiddushLevanaOpening(night, ctx.location);
+      if (!opens) return null;
+      return win(opens, kiddushLevanaPeriod(night, ctx.settings.nusach, ctx.location).end);
     },
   },
   CHOK_LEYISRAEL,

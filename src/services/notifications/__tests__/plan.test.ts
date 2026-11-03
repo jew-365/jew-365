@@ -31,6 +31,7 @@ import { installSelichotFixture } from '@/testing/selichot';
 import { at, zmanimFor } from '@/testing/zmanim';
 import { setLocale, t } from '@/i18n';
 import type { Mitzvah } from '@/types/mitzvah';
+import type { Location } from '@/types/zmanim';
 import { checkInDeadline } from '@/utils/checkIn';
 
 const JERUSALEM = CITIES[0];
@@ -498,30 +499,37 @@ describe('buildPlan', () => {
       expect(notice(withBedtime)).toEqual(notice(buildPlan(planInput({ now: FRIDAY, mitzvot: weekdayMitzvot }))));
     });
 
-    describe('where nightfall is after 23:00, Antwerp at the summer solstice', () => {
-      const antwerp = CITIES.find((city) => city.nameEn === 'Antwerp')!;
+    describe('where nightfall is after 23:00, Helsinki at the summer solstice', () => {
+      const helsinki: Location = {
+        name: 'הלסינקי',
+        nameEn: 'Helsinki',
+        lat: 60.1699,
+        lng: 24.9384,
+        tz: 'Europe/Helsinki',
+        inIsrael: false,
+      };
       const settings = { nusach: 'ashkenaz', halachicOpinions: { ksSofZman: 'GRA' }, inIsrael: false } as const;
       const nightfallOn = (iso: string) =>
-        HebcalService.nightfall(zmanimFor(at(antwerp, `${iso}T12:00`), antwerp), antwerp);
+        HebcalService.nightfall(zmanimFor(at(helsinki, `${iso}T12:00`), helsinki), helsinki);
       const planFrom = (iso: string) =>
-        bedtimeOf(buildPlan(planInput({ now: at(antwerp, iso), location: antwerp, settings, mitzvot: [bedtime()] })));
+        bedtimeOf(buildPlan(planInput({ now: at(helsinki, iso), location: helsinki, settings, mitzvot: [bedtime()] })));
 
       it('fires at 23:00 before the window opens, as a heads-up', () => {
         const plan = planFrom('2027-06-22T05:00');
         expect(summary(plan)).toEqual([
-          ['krias_shma_al_hamita__2027-06-22__0', at(antwerp, '2027-06-22T23:00').getTime()],
-          ['krias_shma_al_hamita__2027-06-23__0', at(antwerp, '2027-06-23T23:00').getTime()],
+          ['krias_shma_al_hamita__2027-06-22__0', at(helsinki, '2027-06-22T23:00').getTime()],
+          ['krias_shma_al_hamita__2027-06-23__0', at(helsinki, '2027-06-23T23:00').getTime()],
         ]);
         expect(plan[0].trigger.getTime()).toBeLessThan(nightfallOn('2027-06-22').getTime());
       });
 
       it('sends nothing on a motzaei Shabbat whose exit is after 23:00, when 23:00 falls inside the block', () => {
-        const { start, end } = HebcalService.holyBlockAt(at(antwerp, '2027-06-19T12:00'), antwerp)!;
+        const { start, end } = HebcalService.holyBlockAt(at(helsinki, '2027-06-19T12:00'), helsinki)!;
         const plan = planFrom('2027-06-18T06:00');
-        expect(at(antwerp, '2027-06-19T23:00').getTime()).toBeGreaterThan(start.getTime());
-        expect(at(antwerp, '2027-06-19T23:00').getTime()).toBeLessThan(end.getTime());
+        expect(at(helsinki, '2027-06-19T23:00').getTime()).toBeGreaterThan(start.getTime());
+        expect(at(helsinki, '2027-06-19T23:00').getTime()).toBeLessThan(end.getTime());
         expect(summary(plan)).toEqual([
-          ['krias_shma_al_hamita__2027-06-20__0', at(antwerp, '2027-06-20T23:00').getTime()],
+          ['krias_shma_al_hamita__2027-06-20__0', at(helsinki, '2027-06-20T23:00').getTime()],
         ]);
       });
     });

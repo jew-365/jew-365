@@ -798,7 +798,7 @@ describe('useUserStore saved city', () => {
     expect(merged.location).toEqual({ ...TEL_AVIV, lat: 32.1, lng: 34.8 });
     expect(merged.location.cityId).toBe('tel-aviv');
     expect(merged.location.tz).toBe('Asia/Jerusalem');
-    expect(merged.location.elevation).toBe(5);
+    expect(merged.location.elevation).toBe(TEL_AVIV.elevation);
   });
 
   it('a location that matches no city is untouched', () => {

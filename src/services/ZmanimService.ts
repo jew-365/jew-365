@@ -2,35 +2,30 @@ import { ComplexZmanimCalendar, GeoLocation } from 'kosher-zmanim';
 import { DateTime } from 'luxon';
 import { Location, Zmanim } from '@/types/zmanim';
 
-// Jerusalem's near-universal minhag is 40 minutes, and it is the app's default city — 18 minutes
-// there is simply the wrong time.
-const JERUSALEM_CANDLE_MINUTES = 40;
+// The zmanim of the Ohr HaChaim luach (the owner's call, 2026-11-03): seasonal minutes of the day
+// from sunrise to sunset at the city's height, each rounded to the minute the way the luach prints
+// it, and fixed minutes only for candle lighting, the exit of Shabbat and Yom Tov and a fast's end.
+const CANDLE_LIGHTING_MIN = 20;
+const EXIT_MIN_IN_ISRAEL = 30;
+const EXIT_MIN_ABROAD = 40;
+const FAST_END_MIN = 20;
+const MINUTE = 60_000;
 
 export function isJerusalem(location: Location): boolean {
   return location.cityId === 'jerusalem';
 }
 
 export function candleLightingMinutes(location: Location): number {
-  if (location.candleLightingMinutes) return location.candleLightingMinutes;
-  if (location.inIsrael) return isJerusalem(location) ? JERUSALEM_CANDLE_MINUTES : 18;
-  return 20;
+  return location.candleLightingMinutes ?? CANDLE_LIGHTING_MIN;
 }
 
-// Shabbat and Yom Tov end a margin after tzeit (the user's call, 2026-10-10): the block, havdalah,
-// the exit time every surface shows and the night windows that open at the exit all read it here.
-export const HOLY_BLOCK_EXIT_MIN = 10;
-
-export function holyBlockExit(zmanim: Pick<Zmanim, 'tzeitHakochavim'>): Date {
-  return new Date(zmanim.tzeitHakochavim.getTime() + HOLY_BLOCK_EXIT_MIN * 60_000);
+export function holyBlockExit(zmanim: Pick<Zmanim, 'tzeitShabbat'>): Date {
+  return new Date(zmanim.tzeitShabbat);
 }
 
 const ZMANIM_CACHE_LIMIT = 400;
 const DAY_KEY_BUCKET_MS = 15 * 60_000;
 const DAY_KEY_BUCKET_LIMIT = 4000;
-const ALOT_FALLBACK_MIN = 72;
-const MISHEYAKIR_FALLBACK_MIN = 52;
-const TZEIT_FALLBACK_MIN = 30;
-const MGA_OFFSET_MIN = 72;
 const zmanimCache = new Map<string, Zmanim>();
 const dayKeysByZone = new Map<string, Map<number, string>>();
 
@@ -45,9 +40,12 @@ function toDateOrNull(value: unknown): Date | null {
   return candidate instanceof Date && !Number.isNaN(candidate.getTime()) ? candidate : null;
 }
 
-function shift(base: Date, minutes: number): Date {
-  return new Date(base.getTime() + minutes * 60_000);
-}
+const after = (base: Date, ms: number) => new Date(base.getTime() + ms);
+
+// The luach rounds every zman to the minute on its stringent side: a start later, an end earlier.
+const earlier = (date: Date) => new Date(Math.floor(date.getTime() / MINUTE) * MINUTE);
+const later = (date: Date) => new Date(Math.ceil(date.getTime() / MINUTE) * MINUTE);
+const nearest = (date: Date) => new Date(Math.round(date.getTime() / MINUTE) * MINUTE);
 
 // kosher-zmanim 0.9.0 reads the raw offset of any zone that keeps DST with the wrong sign, so its
 // antimeridian check takes Sydney or New Zealand for a zone 20 hours ahead of local mean time and
@@ -94,7 +92,7 @@ function civilDayKey(date: Date, tz: string): string {
 }
 
 function cacheKey(date: Date, loc: Location): string {
-  return [civilDayKey(date, loc.tz), loc.lat, loc.lng, loc.elevation ?? 0, loc.tz].join('|');
+  return [civilDayKey(date, loc.tz), loc.lat, loc.lng, loc.elevation ?? 0, loc.tz, loc.inIsrael].join('|');
 }
 
 function cloneZmanim(zmanim: Zmanim): Zmanim {
@@ -112,6 +110,8 @@ function cloneZmanim(zmanim: Zmanim): Zmanim {
     plagHaMincha: new Date(zmanim.plagHaMincha),
     shkia: new Date(zmanim.shkia),
     tzeitHakochavim: new Date(zmanim.tzeitHakochavim),
+    tzeitShabbat: new Date(zmanim.tzeitShabbat),
+    tzeitTaanit: new Date(zmanim.tzeitTaanit),
   };
 }
 
@@ -131,9 +131,6 @@ export type CandleLightingOptions = {
 
 export const ZmanimService = {
   // Returns null only when the sun does not rise or set at all on this date (polar day/night).
-  // Depression-angle zmanim (alot 16.1°, misheyakir 11.5°/11°) have no solution above ~50°N
-  // around midsummer — London, Antwerp and Moscow all hit this — so each falls back to its
-  // fixed-minutes shita rather than failing the whole day.
   getZmanim(date: Date, loc: Location): Zmanim | null {
     const key = cacheKey(date, loc);
     const cached = zmanimCache.get(key);
@@ -144,48 +141,37 @@ export const ZmanimService = {
     }
 
     const cal = buildCalendar(date, loc);
-    const sunrise = cal.getSeaLevelSunrise();
-    const sunset = cal.getSeaLevelSunset();
-    const netzHaChama = toDateOrNull(sunrise);
-    const shkia = toDateOrNull(sunset);
-    if (!netzHaChama || !shkia) return null;
+    const sunrise = toDateOrNull(cal.getSunrise());
+    const sunset = toDateOrNull(cal.getSunset());
+    // The luach prints the visible sunrise, which no formula gives; sea level stands in for it.
+    const visibleSunrise = toDateOrNull(cal.getSeaLevelSunrise());
+    const transit = toDateOrNull(cal.getSunTransit());
+    if (!sunrise || !sunset || !visibleSunrise || !transit) return null;
 
-    const proportionalHour = (shkia.getTime() - netzHaChama.getTime()) / 12;
-    const fromNetz = (hours: number) => new Date(netzHaChama.getTime() + hours * proportionalHour);
-    const mgaStart = shift(netzHaChama, -MGA_OFFSET_MIN);
-    const mgaHour = (shift(shkia, MGA_OFFSET_MIN).getTime() - mgaStart.getTime()) / 12;
-
-    const alotHaShachar =
-      toDateOrNull(cal.getAlosHashachar()) ?? toDateOrNull(cal.getAlos72()) ?? shift(netzHaChama, -ALOT_FALLBACK_MIN);
-    // Once alot falls back to fixed minutes, a still-solvable depression angle for misheyakir can
-    // land before it. Misheyakir must sit between alot and sunrise, so fall back there too.
-    const misheyakirCandidate =
-      toDateOrNull(cal.getMisheyakir11Point5Degrees()) ?? toDateOrNull(cal.getMisheyakir11Degrees());
-    const misheyakir =
-      misheyakirCandidate &&
-      misheyakirCandidate.getTime() >= alotHaShachar.getTime() &&
-      misheyakirCandidate.getTime() < netzHaChama.getTime()
-        ? misheyakirCandidate
-        : shift(netzHaChama, -MISHEYAKIR_FALLBACK_MIN);
+    const hour = (sunset.getTime() - sunrise.getTime()) / 12;
+    const zmaniyot = (minutes: number) => (minutes * hour) / 60;
+    const alot = after(sunrise, -zmaniyot(72));
+    const tzeit = after(sunset, zmaniyot(13.5));
+    const mgaHour = (after(sunset, zmaniyot(72)).getTime() - alot.getTime()) / 12;
 
     const zmanim: Zmanim = {
-      alotHaShachar,
-      misheyakir,
-      netzHaChama,
-      sofZmanShmaGra: toDateOrNull(cal.getSofZmanShmaGRA()) ?? fromNetz(3),
-      sofZmanShmaMA: toDateOrNull(cal.getSofZmanShmaMGA()) ?? new Date(mgaStart.getTime() + 3 * mgaHour),
-      sofZmanTfilaGra: toDateOrNull(cal.getSofZmanTfilaGRA()) ?? fromNetz(4),
-      chatzot: toDateOrNull(cal.getChatzos()) ?? fromNetz(6),
+      alotHaShachar: earlier(alot),
+      misheyakir: later(after(sunrise, -zmaniyot(66))),
+      netzHaChama: later(visibleSunrise),
+      sofZmanShmaGra: earlier(after(sunrise, 3 * hour)),
+      sofZmanShmaMA: earlier(after(alot, 3 * mgaHour)),
+      sofZmanTfilaGra: earlier(after(sunrise, 4 * hour)),
+      chatzot: nearest(transit),
       // Chatzot halayla — the solar midnight of the night that FOLLOWS this day, so it belongs to
       // the next civil date. Never derive it by adding a calendar day to midday chatzot.
-      chatzotLayla:
-        toDateOrNull(cal.getSolarMidnight()) ??
-        new Date((toDateOrNull(cal.getChatzos()) ?? fromNetz(6)).getTime() + 12 * 3_600_000),
-      minchaGedola: toDateOrNull(cal.getMinchaGedola()) ?? fromNetz(6.5),
-      minchaKetana: toDateOrNull(cal.getMinchaKetana(sunrise, sunset)) ?? fromNetz(9.5),
-      plagHaMincha: toDateOrNull(cal.getPlagHamincha(sunrise, sunset)) ?? fromNetz(10.75),
-      shkia,
-      tzeitHakochavim: toDateOrNull(cal.getTzaisGeonim7Point083Degrees()) ?? shift(shkia, TZEIT_FALLBACK_MIN),
+      chatzotLayla: later(toDateOrNull(cal.getSolarMidnight()) ?? after(transit, 12 * 3_600_000)),
+      minchaGedola: later(after(transit, Math.max(30 * MINUTE, zmaniyot(30)))),
+      minchaKetana: later(after(sunrise, 9.5 * hour)),
+      plagHaMincha: later(after(tzeit, -1.25 * hour)),
+      shkia: earlier(sunset),
+      tzeitHakochavim: later(tzeit),
+      tzeitShabbat: later(after(sunset, (loc.inIsrael ? EXIT_MIN_IN_ISRAEL : EXIT_MIN_ABROAD) * MINUTE)),
+      tzeitTaanit: later(after(sunset, FAST_END_MIN * MINUTE)),
     };
 
     cacheZmanim(key, zmanim);
@@ -193,16 +179,13 @@ export const ZmanimService = {
   },
 
   getCandleLighting(date: Date, loc: Location, opts: CandleLightingOptions): Date | null {
-    const shkia = toDateOrNull(buildCalendar(date, loc).getSeaLevelSunset());
+    const shkia = ZmanimService.getZmanim(date, loc)?.shkia;
     if (!shkia) return null;
-    return shift(shkia, -(opts.minutesBefore ?? candleLightingMinutes(loc)));
+    return after(shkia, -(opts.minutesBefore ?? candleLightingMinutes(loc)) * MINUTE);
   },
 
   getHavdalah(date: Date, loc: Location): Date | null {
-    const cal = buildCalendar(date, loc);
-    const shkia = toDateOrNull(cal.getSeaLevelSunset());
-    if (!shkia) return null;
-    const tzeitHakochavim = toDateOrNull(cal.getTzaisGeonim7Point083Degrees()) ?? shift(shkia, TZEIT_FALLBACK_MIN);
-    return holyBlockExit({ tzeitHakochavim });
+    const zmanim = ZmanimService.getZmanim(date, loc);
+    return zmanim ? holyBlockExit(zmanim) : null;
   },
 };

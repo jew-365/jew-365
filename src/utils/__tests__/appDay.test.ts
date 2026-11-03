@@ -72,7 +72,7 @@ describe('the app day turns at alot hashachar at the location', () => {
 
   it('7. follows the London DST nights', () => {
     expect(keyAt(LONDON, '2026-10-25T03:00')).toBe('2026-10-24');
-    expect(keyAt(LONDON, '2026-10-25T05:30')).toBe('2026-10-25');
+    expect(keyAt(LONDON, '2026-10-25T06:00')).toBe('2026-10-25');
     expect(keyAt(LONDON, '2027-06-15T02:30')).toBe('2027-06-14');
     expect(keyAt(LONDON, '2027-06-15T04:15')).toBe('2027-06-15');
   });

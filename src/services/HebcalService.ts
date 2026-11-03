@@ -111,7 +111,7 @@ function blockKind(days: HDate[], loc: Location): HolyBlockKind {
 
 // Shabbat and Yom Tov that touch merge into one block: Yom Tov on Friday flows into Shabbat, two
 // days of Rosh Hashana into a third that is Shabbat. The block opens at candle lighting on the
-// erev and closes at the exit of its last day, `holyBlockExit()` after its tzeit. Where the sun
+// erev and closes at the exit of its last day, `holyBlockExit()` after its shkia. Where the sun
 // never sets the civil day stands in.
 function holyBlockAround(hd: HDate, loc: Location): HolyBlock | null {
   if (!isHolyHebrewDay(hd, loc)) return null;

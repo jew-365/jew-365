@@ -142,9 +142,15 @@ function noonAt(hd: HDate, location: Location): Date {
   ).toJSDate();
 }
 
-function nightfallOpening(night: HDate, location: Location): Date | null {
-  const zmanim = ZmanimService.getZmanim(noonAt(night.prev(), location), location);
-  return zmanim ? HebcalService.nightfall(zmanim, location) : null;
+// When Kiddush Levana may open on `night`: its nightfall, or the fast's end after Tisha B'Av.
+export function kiddushLevanaOpening(night: HDate, location: Location): Date | null {
+  const evening = night.prev();
+  const zmanim = ZmanimService.getZmanim(noonAt(evening, location), location);
+  if (!zmanim) return null;
+  const nightfall = HebcalService.nightfall(zmanim, location);
+  return evening.abs() === observedTishaBav(evening.getFullYear()).abs()
+    ? new Date(Math.max(nightfall.getTime(), zmanim.tzeitTaanit.getTime()))
+    : nightfall;
 }
 
 function nightOfEvening(instant: Date, location: Location): HDate {
@@ -175,14 +181,14 @@ export function kiddushLevanaPeriod(hebrewMonth: HDate, nusach: Nusach, location
     if (yomKippur) start = Math.max(start, yomKippur.end.getTime());
   }
   if (hebrewMonth.getMonth() === months.AV) {
-    const zmanim = ZmanimService.getZmanim(noonAt(observedTishaBav(year), location), location);
-    if (zmanim) start = Math.max(start, HebcalService.nightfall(zmanim, location).getTime());
+    const afterFast = kiddushLevanaOpening(observedTishaBav(year).next(), location);
+    if (afterFast) start = Math.max(start, afterFast.getTime());
   }
   return { start: new Date(start), end: new Date(molad + KIDDUSH_LEVANA_END_MS[nusach]) };
 }
 
 export function kiddushLevanaNightOpen(night: HDate, nusach: Nusach, location: Location): boolean {
-  const opens = nightfallOpening(night, location);
+  const opens = kiddushLevanaOpening(night, location);
   const period = kiddushLevanaPeriod(night, nusach, location);
   return opens !== null && opens.getTime() >= period.start.getTime() && opens.getTime() < period.end.getTime();
 }
@@ -193,7 +199,7 @@ function searchFirstNight(hebrewMonth: HDate, nusach: Nusach, inIsrael: boolean,
   const period = kiddushLevanaPeriod(hebrewMonth, nusach, location);
   let night = nightOfEvening(period.start, location);
   for (let step = 0; step < FIRST_NIGHT_SEARCH_NIGHTS; step++, night = night.next()) {
-    const opens = nightfallOpening(night, location);
+    const opens = kiddushLevanaOpening(night, location);
     if (!opens) continue;
     if (opens.getTime() >= period.end.getTime()) return null;
     if (opens.getTime() < period.start.getTime()) continue;

@@ -197,10 +197,10 @@ describe('a custom mitzvah whose hours are not wholly before alot', () => {
 
   it('puts the hours on the evening before only while they end at or before alot', () => {
     const wholly = custom({ startHHMM: '04:30', endHHMM: '05:15' });
-    const straddling = custom({ startHHMM: '04:30', endHHMM: '05:30' });
+    const straddling = custom({ startHHMM: '04:30', endHHMM: '05:45' });
     const winterAlot = HebcalService.dawnAt(locationNoon(new Date(2026, 0, 5), JERUSALEM), JERUSALEM).getTime();
     expect(winterAlot).toBeGreaterThan(at(JERUSALEM, '2026-01-05T05:15').getTime());
-    expect(winterAlot).toBeLessThan(at(JERUSALEM, '2026-01-05T05:30').getTime());
+    expect(winterAlot).toBeLessThan(at(JERUSALEM, '2026-01-05T05:45').getTime());
     expect(startOf(wholly, new Date(2026, 0, 4))).toBe(at(JERUSALEM, '2026-01-05T04:30').getTime());
     expect(startOf(straddling, new Date(2026, 0, 5))).toBe(at(JERUSALEM, '2026-01-05T04:30').getTime());
     const summerAlot = HebcalService.dawnAt(locationNoon(new Date(2026, 5, 15), JERUSALEM), JERUSALEM).getTime();

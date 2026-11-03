@@ -176,6 +176,15 @@ describe('the Kiddush Levana window', () => {
     expect(windowOn(JERUSALEM, '2026-11-14', A)!.start).toEqual(blockEndOn(JERUSALEM, '2026-11-14'));
   });
 
+  it("opens on the night after Tisha B'Av only once the fast is over, 20 minutes after shkia", () => {
+    for (const location of [JERUSALEM, LOS_ANGELES]) {
+      const window = windowOn(location, '2026-07-23', A);
+      const zmanim = zmanimFor(at(location, '2026-07-23T12:00'), location);
+      expect(window!.start).toEqual(zmanim.tzeitTaanit);
+      expect(window!.start.getTime()).toBeGreaterThan(nightfallOn(location, '2026-07-23').getTime());
+    }
+  });
+
   it('depends only on the day, not on the clock time of ctx.date', () => {
     const noon = windowOn(JERUSALEM, '2026-10-14', A, '12:00');
     expect(noon).not.toBeNull();

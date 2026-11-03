@@ -41,12 +41,12 @@ describe('Settings logic — halachic opinions + israel/diaspora', () => {
     expect(winMA?.end.getTime()).not.toBe(winGra?.end.getTime());
   });
 
-  it('12.7 candle lighting in Israel = 18min before sunset (relative test)', () => {
+  it('12.7 candle lighting in Israel defaults to 20min before sunset, as abroad (relative test)', () => {
     const fri = dateAt('2026-04-24T10:00:00Z');
-    const israel = CITIES.find((c) => c.nameEn === 'Tel Aviv')!; // Jerusalem's minhag is 40 min
-    const c18 = ZmanimService.getCandleLighting(fri, israel, { isFriday: true, isErevYomTov: false })!;
+    const israel = CITIES.find((c) => c.nameEn === 'Tel Aviv')!;
+    const c20 = ZmanimService.getCandleLighting(fri, israel, { isFriday: true, isErevYomTov: false })!;
     const c0 = ZmanimService.getCandleLighting(fri, israel, { isFriday: true, isErevYomTov: false, minutesBefore: 0 })!;
-    expect(c0.getTime() - c18.getTime()).toBe(18 * 60_000);
+    expect(c0.getTime() - c20.getTime()).toBe(20 * 60_000);
   });
 
   it('12.7 candle lighting outside Israel defaults to 20min before sunset', () => {

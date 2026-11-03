@@ -1,8 +1,12 @@
 import type { LocationSource } from '@/services/LocationService';
 import { Location } from '@/types/zmanim';
+import { distanceKm } from '@/utils/compass';
 
 export type City = Location & { cityId: string };
 
+// Heights for the zmanim: Jerusalem, Tel Aviv, Haifa and Be'er Sheva carry the effective height that
+// matches the printed Ohr HaChaim luach (Tishrei 5781, ZmanimService.ohrHachaim.test.ts); the rest are
+// SRTM 30 m at the listed point, Safed's kept.
 export const CITIES: City[] = [
   {
     cityId: 'jerusalem',
@@ -12,7 +16,7 @@ export const CITIES: City[] = [
     lng: 35.2137,
     tz: 'Asia/Jerusalem',
     inIsrael: true,
-    elevation: 754,
+    elevation: 1150,
   },
   {
     cityId: 'tel-aviv',
@@ -22,7 +26,7 @@ export const CITIES: City[] = [
     lng: 34.7818,
     tz: 'Asia/Jerusalem',
     inIsrael: true,
-    elevation: 5,
+    elevation: 75,
   },
   {
     cityId: 'haifa',
@@ -32,7 +36,7 @@ export const CITIES: City[] = [
     lng: 34.9896,
     tz: 'Asia/Jerusalem',
     inIsrael: true,
-    elevation: 250,
+    elevation: 390,
   },
   {
     cityId: 'beer-sheva',
@@ -42,7 +46,7 @@ export const CITIES: City[] = [
     lng: 34.7913,
     tz: 'Asia/Jerusalem',
     inIsrael: true,
-    elevation: 260,
+    elevation: 300,
   },
   {
     cityId: 'netanya',
@@ -52,6 +56,7 @@ export const CITIES: City[] = [
     lng: 34.8532,
     tz: 'Asia/Jerusalem',
     inIsrael: true,
+    elevation: 31,
   },
   {
     cityId: 'ashdod',
@@ -61,6 +66,7 @@ export const CITIES: City[] = [
     lng: 34.6435,
     tz: 'Asia/Jerusalem',
     inIsrael: true,
+    elevation: 38,
   },
   {
     cityId: 'petah-tikva',
@@ -70,6 +76,7 @@ export const CITIES: City[] = [
     lng: 34.8878,
     tz: 'Asia/Jerusalem',
     inIsrael: true,
+    elevation: 53,
   },
   {
     cityId: 'bnei-brak',
@@ -79,6 +86,7 @@ export const CITIES: City[] = [
     lng: 34.8338,
     tz: 'Asia/Jerusalem',
     inIsrael: true,
+    elevation: 50,
   },
   {
     cityId: 'safed',
@@ -90,7 +98,16 @@ export const CITIES: City[] = [
     inIsrael: true,
     elevation: 900,
   },
-  { cityId: 'eilat', name: 'אילת', nameEn: 'Eilat', lat: 29.5581, lng: 34.9482, tz: 'Asia/Jerusalem', inIsrael: true },
+  {
+    cityId: 'eilat',
+    name: 'אילת',
+    nameEn: 'Eilat',
+    lat: 29.5581,
+    lng: 34.9482,
+    tz: 'Asia/Jerusalem',
+    inIsrael: true,
+    elevation: 62,
+  },
   {
     cityId: 'new-york',
     name: 'ניו יורק',
@@ -99,6 +116,7 @@ export const CITIES: City[] = [
     lng: -74.006,
     tz: 'America/New_York',
     inIsrael: false,
+    elevation: 25,
   },
   {
     cityId: 'lakewood',
@@ -108,6 +126,7 @@ export const CITIES: City[] = [
     lng: -74.2176,
     tz: 'America/New_York',
     inIsrael: false,
+    elevation: 24,
   },
   {
     cityId: 'los-angeles',
@@ -117,6 +136,7 @@ export const CITIES: City[] = [
     lng: -118.2437,
     tz: 'America/Los_Angeles',
     inIsrael: false,
+    elevation: 91,
   },
   {
     cityId: 'miami',
@@ -126,6 +146,7 @@ export const CITIES: City[] = [
     lng: -80.1918,
     tz: 'America/New_York',
     inIsrael: false,
+    elevation: 45,
   },
   {
     cityId: 'london',
@@ -135,8 +156,18 @@ export const CITIES: City[] = [
     lng: -0.1278,
     tz: 'Europe/London',
     inIsrael: false,
+    elevation: 15,
   },
-  { cityId: 'paris', name: 'פריז', nameEn: 'Paris', lat: 48.8566, lng: 2.3522, tz: 'Europe/Paris', inIsrael: false },
+  {
+    cityId: 'paris',
+    name: 'פריז',
+    nameEn: 'Paris',
+    lat: 48.8566,
+    lng: 2.3522,
+    tz: 'Europe/Paris',
+    inIsrael: false,
+    elevation: 46,
+  },
   {
     cityId: 'antwerp',
     name: 'אנטוורפן',
@@ -145,6 +176,7 @@ export const CITIES: City[] = [
     lng: 4.4025,
     tz: 'Europe/Brussels',
     inIsrael: false,
+    elevation: 12,
   },
   {
     cityId: 'melbourne',
@@ -154,6 +186,7 @@ export const CITIES: City[] = [
     lng: 144.9631,
     tz: 'Australia/Melbourne',
     inIsrael: false,
+    elevation: 28,
   },
   {
     cityId: 'toronto',
@@ -163,6 +196,7 @@ export const CITIES: City[] = [
     lng: -79.3832,
     tz: 'America/Toronto',
     inIsrael: false,
+    elevation: 101,
   },
   {
     cityId: 'moscow',
@@ -172,6 +206,7 @@ export const CITIES: City[] = [
     lng: 37.6176,
     tz: 'Europe/Moscow',
     inIsrael: false,
+    elevation: 152,
   },
 ];
 
@@ -191,10 +226,18 @@ export function cityOf(location: Location): City | undefined {
   );
 }
 
+// A fix takes a city's height only inside the city: the luach cities' heights are fitted, not
+// measured, and a town 20 km away can sit hundreds of metres higher or lower.
+export const CITY_HEIGHT_KM = 10;
+
+export function heightAt(city: City, point: { lat: number; lng: number }): number | undefined {
+  return distanceKm(point, city) <= CITY_HEIGHT_KM ? city.elevation : undefined;
+}
+
 export function refreshSavedLocation(saved: Location, source: LocationSource): Location {
   const city = cityOf(saved);
   if (!city) return saved;
-  return source === 'manual' ? city : { ...city, lat: saved.lat, lng: saved.lng };
+  return source === 'manual' ? city : { ...city, lat: saved.lat, lng: saved.lng, elevation: heightAt(city, saved) };
 }
 
 export function getLocationName(location: Location, language: 'he' | 'en'): string {

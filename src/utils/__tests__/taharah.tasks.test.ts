@@ -6,7 +6,6 @@ import { Location } from '@/types/zmanim';
 import { TaharahEvent, TaharahSettings } from '@/types/taharah';
 import { taharahTasksFor, taskKindsForRole } from '@/utils/taharah/tasks';
 import { HebcalService } from '@/services/HebcalService';
-import { HOLY_BLOCK_EXIT_MIN } from '@/services/ZmanimService';
 
 const JERUSALEM = CITIES[0];
 const NEW_YORK = CITIES.find((c) => c.nameEn === 'New York')!;
@@ -122,7 +121,7 @@ describe('taharahTasksFor', () => {
     const events = log(onset(O), hefsek(O + 4), morning(O + 5), morning(O + 11));
 
     it('requires the bedikot and adds the tevila of the coming night, sorted by start', () => {
-      // 2026-10-31 is Shabbat: the tevila night opens at the block's exit, ten minutes after tzeit.
+      // 2026-10-31 is Shabbat: the tevila night opens at the block's exit (tzeitShabbat).
       const tasks = tasksOn(new Date(2026, 9, 31), events, '2026-10-31T12:00');
       expect(kinds(tasks)).toEqual(['bedikaMorning', 'bedikaEvening', 'tevila']);
       expect(tasks[0]).toMatchObject({ done: true, required: true, cleanDayIndex: 7 });
@@ -130,7 +129,7 @@ describe('taharahTasksFor', () => {
       expect(tasks[2]).toMatchObject({ day: O + 12, required: true, done: false });
       const block = HebcalService.holyBlockAt(at(JERUSALEM, '2026-10-31T12:00'), JERUSALEM)!;
       expect(time(tasks[2].start)).toBe(time(block.end));
-      expect(time(tasks[2].start)).toBe(time(zmanim('2026-10-31').tzeitHakochavim) + HOLY_BLOCK_EXIT_MIN * 60_000);
+      expect(time(tasks[2].start)).toBe(time(zmanim('2026-10-31').tzeitShabbat));
       expect(time(tasks[2].end)).toBe(time(zmanim('2026-11-01').netzHaChama));
       expect(tasks.map((t) => time(t.start))).toEqual([...tasks.map((t) => time(t.start))].sort((a, b) => a - b));
     });

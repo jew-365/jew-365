@@ -388,8 +388,8 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
 - **Requested:** the owner, 2026-11-02, in chat, in Hebrew: "יש באג בזמנים ההלכתיים, אני רוצה שכל הזמנים יהיו לפי זמני אור החיים, בוא נאפיין ביחד"; characterized that day in a cloud session, and on 2026-11-03 the owner asked for the findings as this batch, to be carried out in a session on their own computer.
 - **Spec:** [.claude/specs/ohr-hachaim-zmanim.md](.claude/specs/ohr-hachaim-zmanim.md): what the app computes today, the luach's definitions with their evidence, the Jerusalem differences (2 to 24 minutes, both ways), the target design, and section 11, the handover: everything the cloud session could not do. Read it before any task.
 - **Flag:** every task is `OTA` (pure JavaScript; no native change, no `SCHEDULE_FORMAT` raise: a moved trigger changes `contentHash`).
-- **Decisions taken:** the luach's definitions as listed in the spec's section 3 (seasonal minutes of the GRA day from sunrise and sunset at the city's height; alot 72, tzeit 13.5, MGA 72 seasonal, mincha gedola the larger of 30 fixed and 30 seasonal; the exit 30 minutes after sunset in Israel and 40 abroad; Rabbeinu Tam 72 seasonal); technical calls: `tzeitShabbat` as a new `Zmanim` field beside `tzeitHakochavim`, chatzot halayla stays `getSolarMidnight()`, sof zman tefila stays GRA, the fixed-minute fallbacks go, no new setting.
-- **Pending:** Q17 to Q26 under [For the owner](#for-the-owner) and R15 under [For the rav](#for-the-rav); each task names the question it waits on, and a task that names none may start.
+- **Decisions taken:** the luach's definitions as listed in the spec's section 3 (seasonal minutes of the GRA day from sunrise and sunset at the city's height; alot 72, tzeit 13.5, MGA 72 seasonal, mincha gedola the larger of 30 fixed and 30 seasonal; the exit 30 minutes after sunset in Israel and 40 abroad; Rabbeinu Tam 72 seasonal); the owner, 2026-11-03: the exit and Jerusalem's candles exactly as the luach ("כמו בלוח"), family purity's doubtful span by the luach's tzeit too ("לפי הלוח"), a preview update before production ("קודם לפריויו"); technical calls: `tzeitShabbat` as a new `Zmanim` field beside `tzeitHakochavim`, chatzot halayla stays `getSolarMidnight()`, sof zman tefila stays GRA, the fixed-minute fallbacks go, no new setting.
+- **Pending:** Q24 (Rabbeinu Tam) under [For the owner](#for-the-owner) and R15 under [For the rav](#for-the-rav); Q17 to Q23, Q25 and Q26 were answered on 2026-11-03 (the spec, section 13).
 - **Verified so far:** the luach's printed Tel Aviv Shabbat of 2026-10-02/03 (candles 18:05, exit 18:55, Rabbeinu Tam 19:36) reproduced to the minute by the definitions, with a dependency-free calculator ([.claude/specs/ohr-hachaim-zmanim-compare.mjs](.claude/specs/ohr-hachaim-zmanim-compare.mjs)); `kosher-zmanim` itself never ran (the cloud environment reaches no npm registry).
 - **Done means:** the calibration suite green against the luach's printed values within a minute; every suite that pinned minutes of the old method re-pinned; the rav page's section 1, R15 and `RULES_VERSION` 3, the taharah page's two "7.083" lines, the three AGENTS.md, the guide topic and a `WHATS_NEW` item, `pnpm guide:build`; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, `pnpm test:tz` green; a preview update checked on a phone against the luach before production; commits to `main`, an OTA only on the owner's per-action approval.
 
@@ -400,26 +400,36 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it is:** A new suite `src/services/__tests__/ZmanimService.ohrHachaim.test.ts` over `ZmanimService.getZmanim()`, `getCandleLighting()` and `getHavdalah()`: a table of the luach's printed values (Q26: Jerusalem and one more city, a winter and a summer date; already in hand: Tel Aviv, Friday 2026-10-02 candles 18:05, Saturday 2026-10-03 exit 18:55 and Rabbeinu Tam 19:36), each within one minute, since the luach rounds. Before the table is filled, read the KosherKotlin PR #27 diff and its tests and the Rabbi Ovadiah Yosef Calendar README (spec, section 11), which the cloud session could not open.
   - **What it solves:** The only proof that the definitions match the luach; every other task of the batch is checked against it (spec, sections 3 and 4).
   - **Expected result:** The suite fails on today's code (tzeit 7.083°, the exit at tzeit + 10, candles 18 in Tel Aviv) and passes once the batch is done, under `pnpm test:tz`.
+  - **Done:** 2026-11-03. Verified: [src/services/__tests__/ZmanimService.ohrHachaim.test.ts](src/services/__tests__/ZmanimService.ohrHachaim.test.ts) holds a printed page of the luach (5781, Sunday 2020-09-27 to Shabbat 2020-10-03, Jerusalem, Tel Aviv, Haifa and Be'er Sheva: every daily zman, the week's box, two candle lightings, two exits) and the Tel Aviv Shabbat of 2026-10-02/03, each within a minute; 43 of its 45 tests fail on the old code. The page and the official implementation are recorded in the spec, section 13.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
 - [ ] Give every city its height and settle the GPS rule
   - **Flag:** `OTA`.
   - **What it is:** `elevation` on every entry of `CITIES` ([src/data/cities.ts](src/data/cities.ts); 14 of 20 lack one), from the luach's own heights where it prints them, else a geographic source, each noted; `refreshSavedLocation()` already carries the value to every install and `resolvedLocation()` copies it to a fix within 25 km; a far fix keeps 0 (Q17). The zmanim cache key already includes the elevation.
   - **What it solves:** The luach's sunrise and sunset are taken at the city's height, 4 to 5 minutes from sea level in Jerusalem (spec, sections 3 and 4).
   - **Expected result:** [src/data/__tests__/cities.test.ts](src/data/__tests__/cities.test.ts) pins an elevation on every city; a fix 10 km from Jerusalem computes Jerusalem's sunset.
+  - **Done:** 2026-11-03. Verified: every entry of `CITIES` has an `elevation`, pinned by [src/data/__tests__/cities.test.ts](src/data/__tests__/cities.test.ts): Jerusalem 1150, Tel Aviv 75, Haifa 390 and Be'er Sheva 300, effective heights fitted to the printed page (with the real heights every value is on its minute or one off; no single correction fits all four, spec section 13), the rest SRTM 30 m (Safed keeps 900). A GPS fix takes its city's height only within `CITY_HEIGHT_KM` (10 km), else sea level as before, so a town near a city (Beit Shemesh, Tiberias) never takes a height that is not its own. The owner sends a winter and a summer week to re-check the fit.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
 - [ ] Compute the zmanim by the luach's definitions
   - **Flag:** `OTA`.
   - **What it is:** [src/services/ZmanimService.ts](src/services/ZmanimService.ts) per the spec's section 5.1: sunrise and sunset at the city's height (`getSunrise()` / `getSunset()`, or `setUseElevation(true)` where the installed `kosher-zmanim` has it: read its `.d.ts` first), alot 72 seasonal minutes before sunrise, misheyakir 66 (Q25), Shema MGA over the 72-seasonal day, mincha gedola the larger of 30 fixed and 30 seasonal minutes after chatzot, tzeit 13.5 seasonal minutes after sunset, plag 1.25 seasonal hours before tzeit (Q22); chatzot, the GRA times, mincha ketana and chatzot halayla unchanged; the fixed-minute fallbacks (`ALOT_FALLBACK_MIN`, `MISHEYAKIR_FALLBACK_MIN`, `TZEIT_FALLBACK_MIN`, the misheyakir clamp) removed, `null` kept for a day with no sunrise or sunset.
   - **What it solves:** The method itself: every window and every strip value (spec, sections 1 to 4).
   - **Expected result:** The calibration suite is green; [src/services/__tests__/ZmanimService.test.ts](src/services/__tests__/ZmanimService.test.ts) (its "Jerusalem 2026-04-23 matches published zmanim" case re-pinned to the luach) and `ZmanimService.extra.test.ts` pass under `pnpm test:tz -- src/services`.
+  - **Done:** 2026-11-03. Verified: `getZmanim()` per the spec's section 5.1, sunrise and sunset at the city's height, netz the sea-level sunrise (the official implementation's stand-in for the visible one), misheyakir 66 and plag per Yalkut Yosef (both settled by the printed page), every zman rounded to the minute on its stringent side as the luach prints it; the fallbacks are gone. The calibration suite is green.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
 - [ ] Separate the Shabbat and Yom Tov exit from the weekday tzeit
   - **Flag:** `OTA`.
   - **What it is:** `Zmanim.tzeitShabbat` ([src/types/zmanim.ts](src/types/zmanim.ts)): sunset + 30 minutes in Israel, + 40 abroad; `holyBlockExit()` returns it plus the margin Q19 leaves (`HOLY_BLOCK_EXIT_MIN` becomes that margin, 0 if dropped), so `getHavdalah()`, `HebcalService.nightfall()` on a block's last day, `holyBlockAround()`, the pre-block notice, the check-in nudges and the Shabbat screen follow; `hebrewDaysAt()` keeps shkia to tzeit (13.5 seasonal minutes) as the doubtful span; the Sunday Tisha B'Av havdalah keeps tzeit until the luach's fast-end rule is known (Q26).
   - **What it solves:** Today the exit is tzeit (7.083°) + 10, 5 to 14 minutes after the luach's (Tel Aviv 2026-10-03: 19:03 against 18:55), and a tzeit of 13.5 seasonal minutes plus 10 would end Shabbat far too early (spec, section 5.2).
   - **Expected result:** Tel Aviv 2026-10-03 exits at 18:55 within a minute in the calibration suite; [src/utils/__tests__/checkIn.test.ts](src/utils/__tests__/checkIn.test.ts), [src/services/__tests__/HebcalService.test.ts](src/services/__tests__/HebcalService.test.ts), [src/utils/__tests__/weeklyReport.test.ts](src/utils/__tests__/weeklyReport.test.ts) and [src/services/notifications/__tests__/notices.test.ts](src/services/notifications/__tests__/notices.test.ts) re-pinned and green under `pnpm test:tz`.
+  - **Done:** 2026-11-03. Verified: `Zmanim.tzeitShabbat` (30 minutes after shkia in Israel, 40 abroad, rounded up) is the exit, `HOLY_BLOCK_EXIT_MIN` is removed (the owner: "כמו בלוח"), `holyBlockExit()`, `getHavdalah()` and the blocks read it; `Zmanim.tzeitTaanit` (20 minutes, the luach's end of a fast) opens the Sunday Tisha B'Av havdalah and Kiddush Levana on the night after the fast (`kiddushLevanaOpening()` in [src/utils/siddur.ts](src/utils/siddur.ts)). The printed exits of Yom Kippur and Sukkot 5781 match within a minute.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
 - [ ] Light candles by the luach's minutes
   - **Flag:** `OTA`.
   - **What it is:** `candleLightingMinutes()` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts): Jerusalem 40, every other Israeli city 20 (today 18), abroad 18 (today 20), and `candleLightingMinutes` on the city entries the luach prints with their own value (Haifa 30, per Q20); the line in `docs/halacha-review.html` section 1.
   - **What it solves:** The block's start, the `candle_lighting` window and the pre-block notice differ from the luach by two minutes everywhere but Jerusalem (spec, section 3).
   - **Expected result:** Tel Aviv 2026-10-02 lights at 18:05 in the calibration suite; the block start of `holyBlockOn()` and the `candle_lighting` window agree on it.
+  - **Done:** 2026-11-03. Verified: `candleLightingMinutes()` is 20, or the location's own value, everywhere: the printed page lights 20 minutes in every city, Haifa included, and the owner chose the luach's main line in Jerusalem too ("כמו בלוח"). The printed candle lightings match within a minute, and the block opens at the same instant.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
 
 ### Medium — Zmanim per the Ohr HaChaim luach
 
@@ -428,16 +438,22 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it is:** The `ksSofZman` setting stays; its default for a new install per Q21; the home strip's `sofShma` keeps following the setting, and the schedule's row ([src/utils/buildDayTimeline.ts](src/utils/buildDayTimeline.ts), label `zman.sofZmanShmaGra`) follows the setting too, or shows both as the luach prints them (Q21), with both dictionaries' labels.
   - **What it solves:** The MGA time becomes the luach's (72 seasonal minutes), and the schedule today shows GRA whatever the setting (spec, section 2).
   - **Expected result:** The Shema window, the strip and the schedule name the same time for the chosen opinion; [src/utils/__tests__/buildDayTimeline.test.ts](src/utils/__tests__/buildDayTimeline.test.ts) and the day-view render suite pass.
+  - **Done:** 2026-11-03. Verified: the setting and its GRA default stay; `ZMAN_KEYS` shows `sofZmanShmaMA` before `sofZmanShmaGra`, as the luach prints both, with `zman.sofZmanShmaMA` in both dictionaries.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
 - [ ] Re-pin the suites that assert minutes of the old method
   - **Flag:** `OTA` (tests only).
   - **What it is:** The suites the spec's section 7 lists (found by `grep -rln "7.083\|7Point083\|getAlosHashachar\|16.1\|11.5\|Geonim\|MGA\|zmanis" src`): each pinned minute recomputed from the new `ZmanimService` and checked against the calibration suite's values, never adjusted to whatever the code prints.
   - **What it solves:** About 28 suites encode the old definitions as expected minutes; `pnpm test:tz` stays red until they are re-pinned (spec, section 7).
   - **Expected result:** `pnpm test:tz` green in all four zones.
+  - **Done:** 2026-11-03. Verified: the 14 suites that failed on the new method re-pinned against the rule, relational where they were relational; `pnpm test:tz` green in all four zones.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
 - [ ] Update the documents that state the zmanim
   - **Flag:** `OTA` for the guide; docs for the pages.
   - **What it is:** `docs/halacha-review.html` section 1 rewritten to the spec's section 3, a new item R15 and `RULES_VERSION` 3; the two "7.083 מעלות" lines of `docs/taharah-review.html`; the root [AGENTS.md](AGENTS.md) (Zmanim and Calendar), [src/services/AGENTS.md](src/services/AGENTS.md) and [src/data/AGENTS.md](src/data/AGENTS.md); the home topic of [src/data/guide.ts](src/data/guide.ts) names the luach and a `WHATS_NEW` item under the next production label; the FAQ line of [docs/index.html](docs/index.html); `pnpm guide:build`.
   - **What it solves:** The rav and the users read the method the app uses (spec, section 8).
   - **Expected result:** `pnpm check:dox` and [src/data/__tests__/guide.test.ts](src/data/__tests__/guide.test.ts) pass; the review page states the luach's definitions and version 3.
+  - **Done:** 2026-11-03. Verified: [docs/halacha-review.html](docs/halacha-review.html) section 1 rewritten, R15 added as item 15, `RULES_VERSION` 4; the two lines of [docs/taharah-review.html](docs/taharah-review.html) and its rules version 2; the root, [src/services/AGENTS.md](src/services/AGENTS.md) and [src/data/AGENTS.md](src/data/AGENTS.md); the guide's home and Shabbat lines and the `WHATS_NEW` entry `1.0.21-13`, `pnpm guide:build`; the FAQ line of [docs/index.html](docs/index.html).
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
 - [ ] Ship the luach's zmanim as an update and check them on a phone
   - **Flag:** `OTA`.
   - **What it is:** `pnpm update:preview`, then on the preview app against the luach: the home strip of the day, a Friday's candles and the Saturday's exit on the schedule, and a mitzvah screen's next reminder; then `pnpm update:production` with the `WHATS_NEW` entry, each on the owner's approval.
@@ -459,6 +475,8 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it is:** [src/services/ZmanimService.ts](src/services/ZmanimService.ts) computes alot at 16.1°, misheyakir at 11.5°, tzeit at 7.083°, the MGA day in 72 fixed minutes, sunrise and sunset at sea level, the exit at tzeit + 10 and candles 18 minutes before sunset outside Jerusalem; the luach computes in seasonal minutes from the city's height, with the exit 30 minutes after sunset. Measured: Tel Aviv, Saturday 2026-10-03, the app's exit 19:03 against the luach's printed 18:55; Jerusalem 2026-11-02, tzeit 17:19 against 17:06, misheyakir 05:04 against 04:51, plag 15:41 against 15:57.
   - **What it solves:** Every window that opens at tzeit opens 11 to 16 minutes after the luach, tefillin 6 to 24 minutes after it, the Shabbat exit 5 to 10 minutes after it, plag 16 to 20 minutes before it, and the users who follow the luach see other times than their calendar.
   - **Expected result:** The calibration suite of the batch "Zmanim per the Ohr HaChaim luach" passes; the batch is the fix.
+  - **Done:** 2026-11-03. Verified: the batch "Zmanim per the Ohr HaChaim luach" is built and its calibration suite is green against a printed page of the luach.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
 
 - [ ] A Hebrew Android phone shows the app's English name
   - **Done:** 2026-10-25. Verified: [scripts/__tests__/androidLegacyHebrewLocale.test.js](scripts/__tests__/androidLegacyHebrewLocale.test.js) (the file equals Expo's `values-b+he`), prebuild of both variants, `aapt2 compile` of `values-b+iw`, and `application-label-iw:'יהודי 365 P'` in build `c625eaa5`. Not checked: a phone set to Hebrew (the emulator went into a boot loop when its language was switched to Hebrew).
@@ -555,9 +573,9 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
   - **Lives in:** `selichotFlags()` and the Kiddush Levana period in [src/utils/siddur.ts](src/utils/siddur.ts), the `chanukah_candles` and `ushpizin` entries of [src/data/mitzvot.ts](src/data/mitzvot.ts), `keepsCholHamoed()` in [src/utils/skipRules.ts](src/utils/skipRules.ts), `halachaRulingFor()` in [src/data/halachaLines.ts](src/data/halachaLines.ts), `HAFTARAH_VARIANT` in [src/utils/chok.ts](src/utils/chok.ts), `presetForNusach()` in [src/data/taharahPresets.ts](src/data/taharahPresets.ts), `NUSCHAOT` in [src/data/nuschaot.ts](src/data/nuschaot.ts) and the `candle_lighting` entry of [scripts/siddur/manifest.js](scripts/siddur/manifest.js).
 
 - **R15 — The zmanim follow the Ohr HaChaim luach.**
-  - **Question:** May every user, of every nusach, in Israel and abroad, be given the zmanim of לוח אור החיים (seasonal minutes of the GRA day from sunrise and sunset at the city's height: alot 72 and misheyakir 66 before sunrise, tzeit 13.5 after sunset, the MGA day 72 each side, mincha gedola the larger of 30 fixed and 30 seasonal minutes after chatzot, plag 1.25 hours before tzeit, Shabbat out 30 minutes after sunset in Israel and 40 abroad)?
+  - **Question:** May every user, of every nusach, in Israel and abroad, be given the zmanim of לוח אור החיים (seasonal minutes of the GRA day from sunrise and sunset at the city's height: alot 72 and misheyakir 66 before sunrise, tzeit 13.5 after sunset, the MGA day 72 each side, mincha gedola the larger of 30 fixed and 30 seasonal minutes after chatzot, plag 1.25 hours before tzeit, candles 20 minutes before sunset everywhere, Shabbat out 30 minutes after sunset in Israel and 40 abroad, a fast out 20 minutes after sunset)?
   - **Assumption:** Yes, for everyone, with no setting for another method (the owner's call, 2026-11-02; the open points are Q17 to Q26 under For the owner).
-  - **Lives in:** [src/services/ZmanimService.ts](src/services/ZmanimService.ts) once the batch "Zmanim per the Ohr HaChaim luach" is built; until then the method of section 1 of [docs/halacha-review.html](docs/halacha-review.html).
+  - **Lives in:** [src/services/ZmanimService.ts](src/services/ZmanimService.ts) and the heights of [src/data/cities.ts](src/data/cities.ts); item 15 and section 1 of [docs/halacha-review.html](docs/halacha-review.html) (rules version 4).
 
 ### For the owner
 
@@ -578,43 +596,50 @@ Q9 to Q15, the seven questions of the nagging batch, were all answered by the ow
   - **Owner's word, 2026-11-02:** "ולך על ההמלצות שלך" (go with your recommendations), leaving for the night. The recommendation is (c) with (b): the one-line blessings from the Rambam's wording once the rav approves, and a typed source for the long orders. Until then Teiman stays staged, so nothing incomplete reaches users.
   - **Answered, 2026-11-03:** (1) "אתה תקליד עם ביקורת גבוהה שלא תעשה טעות": Claude types the missing texts; (2) "כן קח ותוסיף את זה בשאלון לאישור רב": the rav approves them on the review page; (3) "מעולה" for R14. The same morning the 1894 Tiklal Etz Chaim itself was found on archive.org (public domain, the National Library's scan), so the missing texts are transcribed from the Baladi print, not from the Rambam's wording, by the double-typing contract of [.claude/specs/nusach-teiman.md](.claude/specs/nusach-teiman.md) section 5, and the rav reviews the transcription (R15).
 
-Q17 to Q26 are the open points of the batch "Zmanim per the Ohr HaChaim luach, 2026-11-03" ([.claude/specs/ohr-hachaim-zmanim.md](.claude/specs/ohr-hachaim-zmanim.md), section 10). The owner answers them before the batch is built; each task names the one it waits on.
+Q17 to Q26 are the points of the batch "Zmanim per the Ohr HaChaim luach, 2026-11-03" ([.claude/specs/ohr-hachaim-zmanim.md](.claude/specs/ohr-hachaim-zmanim.md), sections 10 and 13). All but Q24 were answered on 2026-11-03.
 
 - **Q17 — Sunrise and sunset at the city's height.**
   - **Question:** Take sunrise and sunset at the city's height, as the luach does (Jerusalem's sunset 4 to 5 minutes after the sea-level one), and give a GPS fix far from every city a height of 0?
   - **Assumption:** Yes to both.
   - **Lives in:** `buildCalendar()` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts) and `elevation` in [src/data/cities.ts](src/data/cities.ts).
   - **What it affects:** Every zman, candle lighting, the exit, the Hebrew date's turn.
+  - **Answered, 2026-11-03:** Yes, settled by the printed page: its sunset is the city's, 2 to 5 minutes after sea level; the four printed cities carry fitted heights (spec section 13), a far fix 0.
 - **Q18 — The luach's visible sunrise is out of reach.**
   - **Question:** The luach prints the visible sunrise of the Bechoray Yosef tables, which depend on the hills around each city and cannot be reproduced; the app would use the astronomical sunrise at the city's height, a few minutes before the printed one in Jerusalem. Acceptable?
   - **Assumption:** Yes.
   - **Lives in:** the same `buildCalendar()`.
   - **What it affects:** The start of shacharit and the Shema, and the GRA times by a minute or two.
+  - **Answered, 2026-11-03:** The sea-level sunrise stands in for the visible one, as before and as the official implementation (royzmanim.com) does; it is within a minute of the printed one in Jerusalem and Haifa and 3 to 5 minutes earlier in Tel Aviv and Be'er Sheva.
 - **Q19 — The exit's margin.**
   - **Question:** The luach ends Shabbat and Yom Tov 30 minutes after sunset in Israel and 40 abroad. Show and use that time exactly, or keep the 10-minute margin of 2026-10-10 on top of it (40 and 50)?
   - **Assumption:** The luach's time exactly, the margin dropped (`HOLY_BLOCK_EXIT_MIN` 0).
   - **Lives in:** `holyBlockExit()` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts).
   - **What it affects:** The Shabbat screen, havdalah, the pre-block notice's exit line, the check-in nudges, every night window of a block's last day.
+  - **Answered, 2026-11-03:** The owner, 2026-11-03: "כמו בלוח": the luach's time exactly, the margin dropped.
 - **Q20 — Candle lighting minutes per city.**
   - **Question:** What does the luach print for each city of `CITIES`? Known customs: Jerusalem 40, Haifa 30, most Israeli cities 20, and 18 for a city abroad the luach does not print; today the app uses 18 in Israel outside Jerusalem and 20 abroad.
   - **Assumption:** Jerusalem 40, Haifa 30, every other Israeli city 20, abroad 18.
   - **Lives in:** `candleLightingMinutes()` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts) and `candleLightingMinutes` on the entries of [src/data/cities.ts](src/data/cities.ts).
   - **What it affects:** The block's start, the `candle_lighting` window, the pre-block notice.
+  - **Answered, 2026-11-03:** The owner, 2026-11-03, on Jerusalem: "כמו בלוח": 20 minutes, the luach's main line (it prints 40 beside it for those who keep it). The printed page lights every city at 20, Haifa included.
 - **Q21 — The Shema time's default and the schedule's row.**
   - **Question:** Keep the GRA / MGA choice in Settings; which is the default for a new install (the luach prints both; Rav Ovadia holds MGA lechatchila), and should the schedule show both rows as the luach does, or the chosen one?
   - **Assumption:** The choice stays, the default stays GRA for every install, and the schedule's row follows the setting.
   - **Lives in:** `halachicOpinions.ksSofZman` in [src/stores/useUserStore.ts](src/stores/useUserStore.ts) and `ZMAN_KEYS` in [src/utils/buildDayTimeline.ts](src/utils/buildDayTimeline.ts).
   - **What it affects:** The Shema window's end, the strip, the schedule.
+  - **Answered, 2026-11-03:** Taken with the assumption, shown to the owner on 2026-11-03: the setting and its GRA default stay, and the schedule shows both rows as the luach does.
 - **Q22 — Plag hamincha.**
   - **Question:** Plag 1.25 seasonal hours before tzeit, as Yalkut Yosef and the luach have it (12 to 20 minutes later than today), rather than before sunset (the Halacha Berurah)?
   - **Assumption:** Before tzeit.
   - **Lives in:** `plagHaMincha` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts).
   - **What it affects:** The Chanukah candles on the erev of a holy block, the strip, the schedule.
+  - **Answered, 2026-11-03:** Before tzeit, settled by the printed page (the sunset-based plag misses it by 14 minutes).
 - **Q23 — Scope.**
   - **Question:** The luach for every user, every nusach (Ashkenaz, Sefard and Chabad included), in Israel and abroad, with no setting for another method?
   - **Assumption:** Yes.
   - **Lives in:** [src/services/ZmanimService.ts](src/services/ZmanimService.ts), the one method.
   - **What it affects:** Every user.
+  - **Answered, 2026-11-03:** Yes, the owner's request of 2026-11-02 ("שכל הזמנים יהיו לפי זמני אור החיים").
 - **Q24 — Rabbeinu Tam.**
   - **Question:** Show Rabbeinu Tam (72 seasonal minutes after sunset) on the home strip and the schedule, as the luach prints it beside tzeit?
   - **Assumption:** Not shown; the Low task waits.
@@ -625,11 +650,13 @@ Q17 to Q26 are the open points of the batch "Zmanim per the Ohr HaChaim luach, 2
   - **Assumption:** 66.
   - **Lives in:** `misheyakir` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts).
   - **What it affects:** The tefillin window's start and its first reminder.
+  - **Answered, 2026-11-03:** 66, settled by the printed page's tallit time (60 misses it by 5 to 7 minutes).
 - **Q26 — The calibration material.**
   - **Question:** The printed pages of the luach (or the values of the לוח המאור app) for Jerusalem and one more city, a winter day and a summer day, every zman of the day and a Shabbat's candles and exit; the owner's own bug case (the zman, the date and city, the luach's value); what the luach uses its 20 fixed minutes after sunset for, and when a fast ends by it.
   - **Assumption:** Until they arrive, the calibration suite holds only the Tel Aviv Shabbat of 2026-10-02/03 and the fast's end stays at tzeit.
   - **Lives in:** not built yet: task "Pin the luach's printed zmanim in a calibration suite".
   - **What it affects:** The proof of every task of the batch.
+  - **Answered, 2026-11-03:** Partly: a printed page of the luach was found (spec section 13) and is the calibration suite; the luach ends a fast 20 fixed minutes after sunset (its introduction, via the official implementation). The owner sends a winter and a summer week, and the original case, once the fix is in (2026-11-03).
 
 ## Other Open Items
 

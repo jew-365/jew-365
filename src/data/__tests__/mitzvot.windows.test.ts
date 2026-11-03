@@ -3,7 +3,6 @@ import { findMitzvah, omerDayFor } from '../mitzvot';
 import { CITIES } from '../cities';
 import { at, zmanimFor } from '@/testing/zmanim';
 import { HebcalService } from '@/services/HebcalService';
-import { HOLY_BLOCK_EXIT_MIN } from '@/services/ZmanimService';
 import { appDayEnd, locationNoon } from '@/utils/locationDay';
 import { calendarDay } from '@/utils/checkIn';
 import { UserSettings } from '@/types/mitzvah';
@@ -123,7 +122,7 @@ describe('mitzvot windows extra', () => {
       const block = HebcalService.holyBlockOn(SHABBAT_NOON, JERUSALEM)!;
       const w = bedtime().computeWindow(c)!;
       expect(w.start).toEqual(block.end);
-      expect(w.start.getTime()).toBe(c.zmanim.tzeitHakochavim.getTime() + HOLY_BLOCK_EXIT_MIN * 60_000);
+      expect(w.start).toEqual(c.zmanim.tzeitShabbat);
     });
 
     it("lies wholly inside Shabbat on Friday night, from tzeit to Shabbat's alot", () => {
@@ -189,20 +188,22 @@ describe('mitzvot windows extra', () => {
     expect(tenOClock).toBeGreaterThan(c.zmanim.sofZmanShmaGra.getTime());
   });
 
-  it('3.9 candle lighting follows the local minhag: 40 min in Jerusalem, 18 elsewhere in Israel', () => {
+  it('3.9 candle lighting is 20 minutes before shkia everywhere, Jerusalem included, unless the location sets its own', () => {
     const jerusalem = ctx(FRIDAY);
     const telAviv = ctx(
       FRIDAY,
       SETTINGS_GRA,
       CITIES.find((c) => c.nameEn === 'Tel Aviv')!,
     );
+    const own = ctx(FRIDAY, SETTINGS_GRA, { ...JERUSALEM, candleLightingMinutes: 30 });
     const minutesBefore = (c: ReturnType<typeof ctx>) => {
       const w = findMitzvah('candle_lighting')!.computeWindow(c)!;
       return (c.zmanim.shkia.getTime() - w.start.getTime()) / 60000;
     };
 
-    expect(minutesBefore(jerusalem)).toBeCloseTo(40, 0);
-    expect(minutesBefore(telAviv)).toBeCloseTo(18, 0);
+    expect(minutesBefore(jerusalem)).toBe(20);
+    expect(minutesBefore(telAviv)).toBe(20);
+    expect(minutesBefore(own)).toBe(30);
   });
 
   // Candles are lit before Yom Tov too, not only on Friday. Pesach 5786 starts on a Wednesday
@@ -312,8 +313,7 @@ describe('mitzvot windows extra', () => {
       expect(windowOn('havdalah', '2028-09-21')).toBeNull();
       expect(windowOn('havdalah', '2028-09-22')).toBeNull();
       const end = windowOn('havdalah', '2028-09-23')!;
-      const tzeit = zmanimFor(at(JERUSALEM, '2028-09-23T12:00'), JERUSALEM).tzeitHakochavim;
-      expect(end.start.getTime()).toBe(tzeit.getTime() + HOLY_BLOCK_EXIT_MIN * 60_000);
+      expect(end.start).toEqual(zmanimFor(at(JERUSALEM, '2028-09-23T12:00'), JERUSALEM).tzeitShabbat);
       expect(end.start).toEqual(HebcalService.holyBlockOn(at(JERUSALEM, '2028-09-23T12:00'), JERUSALEM)!.end);
       // Shabbat into Rosh Hashana: separated in kiddush, so the cup waits for Sunday night.
       expect(windowOn('havdalah', '2027-10-02')).toBeNull();
@@ -338,18 +338,19 @@ describe('mitzvot windows extra', () => {
 
     it('splits havdalah around a Tisha B’Av deferred from Shabbat', () => {
       // 9 Av 5789 is Shabbat: the flame on Saturday night, the cup at the end of the fast on Sunday,
-      // which ends at tzeit itself: the exit margin belongs to Shabbat and Yom Tov only.
+      // which ends 20 minutes after sunset (tzeitTaanit): the later exit belongs to Shabbat and Yom Tov only.
       expect(windowOn('havdalah', '2029-07-21')).not.toBeNull();
       const sunday = windowOn('havdalah', '2029-07-22')!;
-      expect(sunday.start).toEqual(zmanimFor(at(JERUSALEM, '2029-07-22T12:00'), JERUSALEM).tzeitHakochavim);
+      const sundayZmanim = zmanimFor(at(JERUSALEM, '2029-07-22T12:00'), JERUSALEM);
+      expect(sunday.start).toEqual(sundayZmanim.tzeitTaanit);
+      expect(sunday.start.getTime()).toBeLessThan(sundayZmanim.tzeitShabbat.getTime());
       expect(windowOn('havdalah', '2029-07-23')).toBeNull();
     });
 
     it('maariv and the Omer open at the exit on the night a block ends, at tzeit on other nights', () => {
       // Shabbat 2026-04-25 is Omer night 24 at its exit; Sunday 2026-04-26 is an ordinary night.
       const block = HebcalService.holyBlockOn(at(JERUSALEM, '2026-04-25T12:00'), JERUSALEM)!;
-      const saturdayTzeit = zmanimFor(at(JERUSALEM, '2026-04-25T12:00'), JERUSALEM).tzeitHakochavim;
-      expect(block.end.getTime()).toBe(saturdayTzeit.getTime() + HOLY_BLOCK_EXIT_MIN * 60_000);
+      expect(block.end).toEqual(zmanimFor(at(JERUSALEM, '2026-04-25T12:00'), JERUSALEM).tzeitShabbat);
       for (const id of ['maariv', 'sefirat_haomer']) {
         expect(windowOn(id, '2026-04-25')!.start).toEqual(block.end);
         expect(windowOn(id, '2026-04-26')!.start).toEqual(

@@ -88,8 +88,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'דף הבית וסימון מצווה', en: 'Home and marking a mitzvah' },
     body: [
       {
-        he: 'בראש דף הבית עיגול אחד של היום והלילה: השמש נעה על חציו העליון מעלות השחר ועד צאת הכוכבים, והירח על חציו התחתון עד עלות השחר הבאה, לפי הזמנים ההלכתיים של המיקום שנבחר. השמיים משנים את צבעם מעלות השחר ועד הלילה, ומתחת לעיגול רצועה של אחד־עשר זמני היום, שבה הזמן ההלכתי הבא מסומן. גרירת השמש או הירח, גם מהיום אל הלילה ובחזרה, או הקשה על אחד הזמנים, מציגה את העיגול בשעה אחרת, ו״חזרה לעכשיו״ מחזיר אותו. הרשימות שמתחת נשארות בזמן אמת.',
-        en: "At the top of Home is one circle for the day and the night: the sun moves along its upper half from dawn to nightfall and the moon along its lower half until the next dawn, by the halachic times of the location you chose. The sky changes colour from dawn to night, and under the circle is a strip of the day's eleven zmanim, with the next one marked. Drag the sun or the moon, even from the day into the night and back, or tap a zman, to see the circle at another time; Back to now returns it. The lists below stay live.",
+        he: 'בראש דף הבית עיגול אחד של היום והלילה: השמש נעה על חציו העליון מעלות השחר ועד צאת הכוכבים, והירח על חציו התחתון עד עלות השחר הבאה, לפי זמני לוח אור החיים במיקום שנבחר. השמיים משנים את צבעם מעלות השחר ועד הלילה, ומתחת לעיגול רצועה של אחד־עשר זמני היום, שבה הזמן ההלכתי הבא מסומן. גרירת השמש או הירח, גם מהיום אל הלילה ובחזרה, או הקשה על אחד הזמנים, מציגה את העיגול בשעה אחרת, ו״חזרה לעכשיו״ מחזיר אותו. הרשימות שמתחת נשארות בזמן אמת.',
+        en: "At the top of Home is one circle for the day and the night: the sun moves along its upper half from dawn to nightfall and the moon along its lower half until the next dawn, by the zmanim of the Ohr HaChaim luach at the location you chose. The sky changes colour from dawn to night, and under the circle is a strip of the day's eleven zmanim, with the next one marked. Drag the sun or the moon, even from the day into the night and back, or tap a zman, to see the circle at another time; Back to now returns it. The lists below stay live.",
       },
       {
         he: '״פתוח עכשיו״ מציג כל מצווה שהזמן שלה פתוח, עם טבעת של הזמן שנותר ושעות ההתחלה והסוף. ״עשיתי״ מסמן אותה כבוצעה ומבטל את שאר ההתראות שלה לאותו יום, ו״פתח נוסח״ פותח את הנוסח בסידור. תחת ״הודעות״ מופיע מה שדורש תשומת לב, כמו סימון אחרי שבת או מיקום שלא אושר, וגם הרצף, השבת הקרובה, ראש חודש, והילולות כשההתראות עליהן פועלות.',
@@ -170,8 +170,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'שבת ויום טוב', en: 'Shabbat and Yom Tov' },
     body: [
       {
-        he: 'בשבת וביום טוב האפליקציה נחה: מהדלקת הנרות ועד עשר דקות אחרי צאת הכוכבים לא נשלחות התראות, ובמקום המסכים מופיע מסך שקט עם שעת היציאה. זה במכוון, והאפליקציה חוזרת לפעול מעצמה.',
-        en: 'On Shabbat and Yom Tov the app rests: from candle lighting until ten minutes after nightfall no notifications go out, and a quiet screen with the exit time covers the app. This is by design, and the app comes back by itself.',
+        he: 'בשבת וביום טוב האפליקציה נחה: מהדלקת הנרות ועד היציאה, 30 דקות אחרי השקיעה בארץ ו־40 בחוץ לארץ, לא נשלחות התראות, ובמקום המסכים מופיע מסך שקט עם שעת היציאה. זה במכוון, והאפליקציה חוזרת לפעול מעצמה.',
+        en: 'On Shabbat and Yom Tov the app rests: from candle lighting until the exit, 30 minutes after sunset in Israel and 40 abroad, no notifications go out, and a quiet screen with the exit time covers the app. This is by design, and the app comes back by itself.',
       },
       {
         he: 'שעה לפני הדלקת הנרות מגיעה התראה עם זמני ההדלקה והיציאה, ולפי מה שמופעל גם ספירת העומר, ההילולות, ראש חודש והאושפיזין של הלילות שבתוך השבת או החג.',
@@ -409,6 +409,24 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 ];
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
+  {
+    label: '1.0.21-13',
+    date: '2026-11-03',
+    items: [
+      {
+        he: 'כל זמני היום לפי לוח אור החיים: עלות השחר, זמן טלית ותפילין, סוף זמן קריאת שמע ותפילה, מנחה, פלג המנחה וצאת הכוכבים מחושבים כמו בלוח ומעוגלים לדקה כמו בו.',
+        en: 'Every zman follows the Ohr HaChaim luach: dawn, the time for tallit and tefillin, the latest Shema and prayer, mincha, plag hamincha and nightfall are computed as the luach does and rounded to the minute as it prints them.',
+      },
+      {
+        he: 'הדלקת נרות 20 דקות לפני השקיעה בכל מקום, ויציאת שבת וחג 30 דקות אחרי השקיעה בארץ ו־40 בחוץ לארץ.',
+        en: 'Candle lighting is 20 minutes before sunset everywhere, and Shabbat and Yom Tov end 30 minutes after sunset in Israel and 40 abroad.',
+      },
+      {
+        he: 'לוח הזמנים מציג את סוף זמן קריאת שמע לפי המג״א ולפי הגר״א, כמו בלוח.',
+        en: 'The schedule shows the latest Shema both by the Magen Avraham and by the Gra, as the luach does.',
+      },
+    ],
+  },
   {
     label: '1.0.21-12',
     date: '2026-11-03',
