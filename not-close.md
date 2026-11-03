@@ -541,20 +541,18 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
   - **Question:** Is his hilula on 29 Tevet or 28 Tevet?
   - **Assumption:** 29 Tevet: he died after nightfall on motzaei Shabbat, 28 January 2006, already 29 Tevet 5766 (Hebrew Wikipedia, Chabad.org, Kikar HaShabbat). JDN and a breslev.com listing give 28 Tevet.
   - **Lives in:** the `yitzchak_kaduri` entry of `HILULOT` in [src/data/hilulot.ts](src/data/hilulot.ts) and the date in his page in [src/data/hilulaPages.ts](src/data/hilulaPages.ts).
-- **R14 — Nusach Teiman Baladi.** (the batch Nusach Teiman, 2026-11-02; nothing is implemented yet, and each answer sets the `teiman` value the first time it is written)
+- **R14 — Nusach Teiman Baladi.** (the batch Nusach Teiman, 2026-11-02; on the review page since 2026-11-03 as R14.1 to R14.7, `RULES_VERSION` 3; nothing is implemented yet, and each answer sets the `teiman` value the first time it is written)
   - **Question:** Which value does each nusach-dependent rule take for a Baladi user?
-  - **Assumption**, each marked with what supports it; a web search on 2026-11-02 found no Yemenite source for the items marked "unsourced":
-    - Selichot (R2): from 2 Elul, as Edot HaMizrach. The Yeshiva wiki's "סליחות" says Edot HaMizrach and Teiman rise for Selichot from Rosh Chodesh Elul, and JDN says Sephardim and Teiman start on the night of 2 Elul. Whether Baladi say Selichot on a Shabbat night is unsourced; the app keeps none then, as for every nusach.
-    - Chanukah candles (R4): from shkia, as Chabad, because the Rambam (Hilchot Chanukah 4:5) lights "עם שקיעתה". That the Baladi custom follows him here is unsourced.
-    - Ushpizin (R5, R10): not offered, as for Chabad, because the formula is kabbalistic. Unsourced; the Baladi pages are checked for it once they can be read.
-    - Kiddush Levana (R1): as Edot HaMizrach, 7 days after the molad to 15 days after it. Unsourced; the Rambam (Hilchot Berachot 10:16) gives the blessing, not its days.
-    - Tefillin on Chol HaMoed: never in Israel, as for every nusach; abroad not either, as for every nusach but Ashkenaz. Unsourced for Teiman.
-    - The default Shema opinion: GRA, as for every nusach but Chabad.
-    - The halacha line (`halachaRulingFor()`): the Sephardi poskim, as for Edot HaMizrach. The owner's call as much as the rav's.
-    - Chok LeYisrael's haftarah: the Sephardi one, as for Edot HaMizrach; the Yemenite haftarot are their own custom.
-    - The taharah preset a Baladi user starts from: `sephardi_ovadia`, as for Edot HaMizrach. The user can pick another; the Baladi follow the Rambam on rules no preset models, so a preset of their own needs the rav.
-    - The women's liturgy (R8): written per text once the source is mapped.
-  - **Lives in:** each rule's place in R1 to R10, `halachaRulingFor()` in [src/data/halachaLines.ts](src/data/halachaLines.ts), `HAFTARAH_VARIANT` in [src/utils/chok.ts](src/utils/chok.ts), `presetForNusach()` in [src/data/taharahPresets.ts](src/data/taharahPresets.ts), `keepsCholHamoed()` in [src/utils/skipRules.ts](src/utils/skipRules.ts) and `NUSCHAOT` in [src/data/nuschaot.ts](src/data/nuschaot.ts).
+  - **Assumption**, each with what was checked; "the Tiklal" is the 1894 Tiklal Etz Chaim scan (vol., leaf):
+    - R14.1 Selichot: from the night of Rosh Chodesh Elul (the night before the morning of 1 Elul) through Erev Yom Kippur. The Tiklal, vol. 2 leaf 276: "ראוי ונכון מנהג הקדושים לומר סליחות מראש חדש אלול … המנהג הנכון הוא מראש חדש אלול". Unchecked: which night "מראש חדש" means when Rosh Chodesh has two days.
+    - R14.2 Chanukah candles: from shkia, as Chabad. The Tiklal, vol. 1 leaf 341: "ואסראג אלחנוכה ענד מגיב אלשמס לא קבל ולא בעד"; Rambam, Hilchot Megillah VeChanukah 4:5 (Wikisource revision 1292389).
+    - R14.3 Ushpizin: not offered, as for Chabad. The Tiklal prints none (vol. 2 leaves 122-132 and 170-171).
+    - R14.4 Kiddush Levana: as Edot HaMizrach, 7 days after the molad to 15 days after it, until the rav decides. The Etz Chaim commentary (vol. 1 leaf 338) brings the first night (from the Rambam), after 3 days (the students of Rabbeinu Yonah), after 7 days (Rabbi Yosef Karo, "מהר״י קארו") and until the 16th; Rambam, Hilchot Berachot 10:16 (revision 2793236), "בחדושה", gives no days.
+    - R14.5 Tefillin on Chol HaMoed: never, in Israel or abroad. Unsourced.
+    - R14.6 The defaults: the Sephardi halacha line, the Sephardi haftarah in Chok LeYisrael, the `sephardi_ovadia` taharah preset as the starting point, the GRA Shema opinion. The app's own decisions.
+    - R14.7 Yom Tov candle lighting: only the Shabbat blessing the Tiklal prints (vol. 1 leaf 395); a Yom Tov blessing waits for the rav to approve its wording.
+    - The women's liturgy (R8): written per text, as the texts are built.
+  - **Lives in:** `selichotFlags()` and the Kiddush Levana period in [src/utils/siddur.ts](src/utils/siddur.ts), the `chanukah_candles` and `ushpizin` entries of [src/data/mitzvot.ts](src/data/mitzvot.ts), `keepsCholHamoed()` in [src/utils/skipRules.ts](src/utils/skipRules.ts), `halachaRulingFor()` in [src/data/halachaLines.ts](src/data/halachaLines.ts), `HAFTARAH_VARIANT` in [src/utils/chok.ts](src/utils/chok.ts), `presetForNusach()` in [src/data/taharahPresets.ts](src/data/taharahPresets.ts), `NUSCHAOT` in [src/data/nuschaot.ts](src/data/nuschaot.ts) and the `candle_lighting` entry of [scripts/siddur/manifest.js](scripts/siddur/manifest.js).
 
 - **R15 — The zmanim follow the Ohr HaChaim luach.**
   - **Question:** May every user, of every nusach, in Israel and abroad, be given the zmanim of לוח אור החיים (seasonal minutes of the GRA day from sunrise and sunset at the city's height: alot 72 and misheyakir 66 before sunrise, tzeit 13.5 after sunset, the MGA day 72 each side, mincha gedola the larger of 30 fixed and 30 seasonal minutes after chatzot, plag 1.25 hours before tzeit, Shabbat out 30 minutes after sunset in Israel and 40 abroad)?
