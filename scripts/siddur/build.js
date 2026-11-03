@@ -77,9 +77,13 @@ async function download(url, key) {
   }
 }
 
+const LOCAL_SOURCE_DIR = path.join(__dirname, 'source');
+
 async function loadSource(key) {
   const source = SOURCES[key];
   if (!source) throw new Error(`unknown source ${key}`);
+  // A transcription committed under source/ is pinned by the commit that holds it.
+  if (source.local) return fs.readFileSync(path.join(LOCAL_SOURCE_DIR, source.local), 'utf8');
   fs.mkdirSync(CACHE_DIR, { recursive: true });
   const cached = path.join(CACHE_DIR, `${key}.json`);
   if (!fs.existsSync(cached)) fs.writeFileSync(cached, await download(sourceUrl(source), key));
@@ -509,7 +513,7 @@ async function wikisourceSegments(key, nodePath, used) {
 async function segmentsOf(sourceKey, nodePath, used = new Set()) {
   const source = SOURCES[sourceKey];
   if (!source) throw new Error(`unknown source ${sourceKey}`);
-  if (source.wikisource) return wikisourceSegments(sourceKey, nodePath, used);
+  if (source.wikisource || source.local) return wikisourceSegments(sourceKey, nodePath, used);
   used.add(sourceKey);
   return segmentsAt(await loadSource(sourceKey), nodePath, sourceKey);
 }

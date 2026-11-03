@@ -70,6 +70,19 @@ Done on 2026-11-02 (`c66bf4a`): the build reads these templates for a source wit
 - A psalm the pages transclude (`צתס`, `פתל`) comes from the pinned Sefaria Psalms, as `{{צת}}` does today.
 - The build also needs a `teiman` entry in every per-nusach table, and the `teiman` specs of every text in [scripts/siddur/manifest.js](../../scripts/siddur/manifest.js).
 
-## 5. Open
+## 5. The 1894 Tiklal, for the texts Wikisource lacks
 
-The gaps of section 2 and the missing parts of Shacharit in section 3 decide whether the nusach can ship under the standing rule that every text ships for all nuschaot. That decision is Q16 in [not-close.md](../../not-close.md), For the owner.
+Found on 2026-11-03: archive.org item `Tiklal_Eiz_Hayyim_Jerusalem_1894` is the first printed Tiklal Etz Chaim (Jerusalem 1894, two volumes, eds. R. Shalom Yosef Araqi and R. Avraham Al-Naddaf, with Maharitz's commentary), scanned by the National Library of Israel from its copy NNL_ALEPH990011795220205171, "Public Domain, all use permitted". Each leaf is a 1802x2367 JPEG 2000 in the item's `_jp2.zip`. Its archive.org OCR is too poor to use. It prints every text section 2 lists as a gap, and Hallel, Musaf, the end of Shacharit and the Selichot of Elul.
+
+The owner's call of 2026-11-03 (Q16): Claude transcribes the missing texts from this print, "with high scrutiny so as not to err", and the rav reviews the transcription (R15). The Rambam's wording is no longer needed for the short blessings, because the print has the Baladi wording itself.
+
+Transcription contract:
+
+- A transcription is a file under `scripts/siddur/source/tiklal-1894/`, a pinned `local` source of [manifest.js](../../scripts/siddur/manifest.js) read by the same Wikisource parser (`params` Baladi), credited to the print and the scan. It is pinned by the commit that holds it.
+- Only the prayer column, never Maharitz's commentary. Letters, nikud, dagesh, the shin and sin dots, meteg, maqaf and the print's own punctuation exactly as printed; the divine name as printed (`baladiName()` shows it as יְיָ, the spelling of the Wikisource pages). Print line breaks are joined; a new printed paragraph or blessing is a new paragraph. A heading or an instruction in small or Rashi type is `{{הור|…}}` in plain letters. A new leaf is marked `<!-- V1 leaf N -->`.
+- Every section is typed twice, by two passes that never see each other's work, from the same leaf range and boundary words. The two are compared character by character after NFC normalization; every difference, and every word either pass marked uncertain, is settled by a third look at the scan zoomed in, and the file records the leaves and that it was reconciled. A psalm or other verse is also checked letter by letter against the pinned Sefaria Tanach.
+- Nothing is typed from memory. A word the scan does not show clearly is not guessed: the section waits until it is settled.
+
+## 6. Open
+
+The gaps of section 2 and the missing parts of Shacharit in section 3 decide whether the nusach can ship under the standing rule that every text ships for all nuschaot. Q16 in [not-close.md](../../not-close.md) was answered on 2026-11-03: section 5.
