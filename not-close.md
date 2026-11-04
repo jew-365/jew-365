@@ -514,7 +514,7 @@ The owner's upgrade list of 2026-11-04, narrowed the same day to simple tasks th
   - **What it solves:** every custom mitzvah showed the same star.
   - **Expected result:** a picked icon shows on home, the schedule, tracking, My mitzvot and the mitzvah screen, and survives an edit and a backup.
   - **Done:** 2026-11-04. Verified: the form's render suite (pick, save, reopen) and the adapter's fallback cases; typecheck, lint, DOX and the full Jest suite. Not checked on a phone.
-  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, the next production update · Committed: yes, `af180be` feat(custom): an icon of its own for a custom mitzvah · Pushed: yes · Live: no · Channel: none
 
 ## Bugs
 
