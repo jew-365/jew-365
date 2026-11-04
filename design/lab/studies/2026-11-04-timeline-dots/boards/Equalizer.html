@@ -1,0 +1,57 @@
+<!--board title="ב · אקולייזר"-->
+<style>
+/* An equalizer: every notification is a slider standing on the window's bar, its height by kind (a reminder the
+   tallest, the last time to start next, a nag the shortest) and its knob in the stage colour, the time under the
+   reminders and the selected one. A knob drags sideways along the bar like an equalizer's fader moved across; a tap
+   opens its values; a tap on an empty stretch adds a reminder there. The critical zone is a hatched column. */
+.eq-axis{position:relative;height:150px;margin:0 6px}
+.eq-axis>.zoneband{top:6px;bottom:30px}
+.eq-axis>.gbar{position:absolute;inset-inline:0;bottom:36px;height:8px}
+.fader{position:absolute;bottom:22px;width:44px;margin-inline-start:-22px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;touch-action:none;cursor:grab;z-index:2}
+.fader>.stick{width:4px;border-radius:2px;background:var(--border)}
+.fader>.knob{order:-1;width:24px;height:24px;border-radius:8px;box-shadow:0 0 0 3px var(--surface),0 2px 6px var(--shadowC);display:grid;place-items:center;transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.fader>.knob>svg{width:15px;height:15px;stroke-width:2.3;color:#fff}
+.fader.st-green>.knob{background:var(--stG)}.fader.st-orange>.knob{background:var(--stO)}.fader.st-red>.knob{background:var(--stR)}
+.fader.k-rem>.knob{width:30px;height:30px;border-radius:10px}
+.fader:not(.k-rem)>.knob>svg{display:none}
+.fader.k-rem>.stick{height:70px;background:var(--gold)}
+.fader.k-last>.stick{height:54px;background:color-mix(in srgb,var(--stR) 55%,transparent)}
+.fader.k-nag>.stick{height:38px;background:color-mix(in srgb,var(--stO) 55%,transparent)}
+.fader>.t{position:absolute;bottom:-20px;font-size:12px;line-height:16px;font-weight:600;color:var(--sub);white-space:nowrap;visibility:hidden}
+.fader.k-rem>.t,.fader.on>.t{visibility:visible}
+.fader.on>.t{bottom:auto;top:-22px;padding:1px 6px;border-radius:8px;background:var(--text);color:var(--bg);font-weight:700;z-index:4}
+.fader.on>.knob{transform:scale(1.18)}
+.fader.drag{cursor:grabbing;z-index:3}
+</style>
+<template>
+<!--WINDOW_TOP-->
+<div class="eq-axis" data-axis>
+<button class="axis-hit" onClick="{{axisTap}}" aria-label="{{axisLabel}}"></button>
+<sc-for list="{{zones}}" as="z" hint-placeholder-count="1"><span class="zoneband" style="{{z.style}}"></span></sc-for>
+<span class="gbar" aria-hidden="true"></span>
+<sc-for list="{{faders}}" as="d" hint-placeholder-count="4"><button class="{{d.cls}}" style="{{d.pos}}" aria-label="{{d.aria}}" aria-pressed="{{d.on}}" onPointerDown="{{d.down}}" onPointerMove="{{d.move}}" onPointerUp="{{d.up}}" onPointerCancel="{{d.up}}" onKeyDown="{{d.keydown}}"><span class="stick"></span><span class="knob">[[ic:bell]]</span><span class="t num">{{d.time}}</span></button></sc-for>
+</div>
+<!--WINDOW_BOTTOM-->
+<!--TOAST-->
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  renderVals() {
+    const c = this.core();
+    return Object.assign(c, {
+      faders: c.sends.filter(c.dotsShown).map((s) =>
+        this.dotVals(s, {
+          cls:
+            'fader st-' +
+            s.stage +
+            (s.isReminder ? ' k-rem' : s.isLast ? ' k-last' : ' k-nag') +
+            (s.on ? ' on' : '') +
+            (this.state.dragKey === s.key ? ' drag' : ''),
+        }),
+      ),
+    });
+  }
+}
+</script>

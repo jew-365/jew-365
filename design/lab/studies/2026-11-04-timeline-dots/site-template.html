@@ -1,0 +1,362 @@
+<title>גלריית ציר ההתראות</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: a page of the app's own surfaces, one section per surface of spec section 4, each board a phone beside its
+   notes (stacked under 900 points); a controls bar of two sideways-scrolling lines, sticky only above 900 points;
+   the owner's choice at the end. Colours are the app's gold palette, and its dark palette in the dark theme. */
+:root {
+  --page: #F6F1E8;
+  --card: #FFFDF9;
+  --card2: #F1EADF;
+  --ink: #1D2240;
+  --sub: #69645D;
+  --line: #EBE3D6;
+  --accent: #F08A3C;
+  --on-accent: #2B1608;
+  --accent-ink: #A04A0C;
+  --wash: #FDE9D5;
+  --bezel: #1D2240;
+  --veil: rgba(29, 34, 64, .88);
+  --shadow: 0 2px 12px rgba(94, 62, 28, .08);
+  --font: 'Rubik', 'Segoe UI', Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0E1626; --card: #172238; --card2: #222F4A; --ink: #EEF1F7; --sub: #9DA9BF; --line: #28354F;
+    --accent: #F59A4A; --on-accent: #1E1006; --accent-ink: #F7A65E; --wash: #3A2D26; --bezel: #000814;
+    --veil: rgba(0, 4, 12, .92); --shadow: 0 2px 12px rgba(0, 1, 10, .4);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #0E1626; --card: #172238; --card2: #222F4A; --ink: #EEF1F7; --sub: #9DA9BF; --line: #28354F;
+  --accent: #F59A4A; --on-accent: #1E1006; --accent-ink: #F7A65E; --wash: #3A2D26; --bezel: #000814;
+  --veil: rgba(0, 4, 12, .92); --shadow: 0 2px 12px rgba(0, 1, 10, .4);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--page); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+body.locked { overflow: hidden; }
+.wrap { max-width: 1040px; margin: 0 auto; }
+h1, h2, h3, p { margin: 0; }
+button, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid var(--accent-ink); outline-offset: 3px; border-radius: 8px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.top { padding-block: 36px 18px; display: grid; gap: 14px; }
+.top > * { min-width: 0; }
+.eyebrow { font-size: .8125rem; font-weight: 600; letter-spacing: .02em; color: var(--accent-ink); }
+h1 { font-size: clamp(2rem, 7vw, 3.1rem); font-weight: 700; line-height: 1.08; text-wrap: balance; }
+.lede { font-size: 1.0625rem; color: var(--sub); max-width: 40em; text-wrap: pretty; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 10px; max-width: 46em; }
+.fact { background: var(--card); border-radius: 18px; padding: 12px 14px; box-shadow: var(--shadow); display: grid; gap: 2px; min-width: 0; }
+.fact span { font-size: .8125rem; color: var(--sub); }
+.fact b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.levels { max-width: 46em; border-collapse: collapse; width: 100%; font-size: .9375rem; }
+.levels-wrap { overflow-x: auto; max-width: 46em; background: var(--card); border-radius: 18px; box-shadow: var(--shadow); }
+.levels th, .levels td { text-align: start; padding: 9px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.levels tr:last-child td { border-bottom: 0; }
+.levels th { font-size: .8125rem; color: var(--sub); font-weight: 600; }
+.jump { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 8px; padding-block: 4px; }
+.jump::-webkit-scrollbar { display: none; }
+.jump a { flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border-radius: 22px; background: var(--card); border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 500; white-space: nowrap; }
+.jump a b { color: var(--accent-ink); font-weight: 700; }
+
+/* The controls: two lines that scroll sideways; sticky above 900 points only (the lab's phone rule). */
+.bar { margin: 12px calc(-1 * max(16px, env(safe-area-inset-left, 0px))) 0; padding: 10px max(16px, env(safe-area-inset-left, 0px)) 12px; background: var(--page); border-bottom: 1px solid var(--line); }
+@media (min-width: 900px) {
+  .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 21; background: var(--page); }
+}
+.bar-in { max-width: 1040px; margin: 0 auto; display: grid; gap: 8px; }
+.bar-row { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.bar-row::-webkit-scrollbar { display: none; }
+.bar-row > * { flex: none; white-space: nowrap; }
+.bar-row > span { font-size: .8125rem; font-weight: 600; color: var(--sub); min-width: 7.5em; }
+.opt { min-height: 44px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); font-weight: 500; }
+.opt[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+.opt i { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; margin-inline-end: 6px; box-shadow: 0 0 0 1px var(--line); }
+
+.surface { margin-top: 48px; display: grid; gap: 18px; scroll-margin-top: 130px; }
+.surface-h { display: grid; gap: 6px; }
+h2 { font-size: clamp(1.5rem, 5vw, 2.1rem); font-weight: 700; line-height: 1.15; text-wrap: balance; }
+.stall { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: start; padding: 24px; border-radius: 28px; background: var(--card); box-shadow: var(--shadow); scroll-margin-top: 130px; }
+.info { display: grid; gap: 12px; min-width: 0; align-content: start; }
+.head { display: flex; align-items: center; gap: 10px; }
+.letter { width: 48px; height: 48px; border-radius: 18px; background: var(--wash); color: var(--accent-ink); display: grid; place-items: center; font-size: 1.5rem; font-weight: 700; }
+.badge { display: inline-flex; align-items: center; min-height: 26px; padding: 0 10px; border-radius: 13px; font-size: .8125rem; font-weight: 600; background: var(--card2); color: var(--sub); }
+h3 { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+.idea { max-width: 34em; text-wrap: pretty; }
+.try { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.try li { display: flex; gap: 10px; align-items: baseline; color: var(--sub); }
+.try li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; transform: translateY(-2px); }
+.demos { display: grid; gap: 6px; min-width: 0; }
+.demos > span { font-size: .8125rem; font-weight: 600; color: var(--sub); }
+.demos .row { display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.demos .row::-webkit-scrollbar { display: none; }
+.demo { flex: none; white-space: nowrap; min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid var(--line); background: var(--page); font-weight: 500; }
+.demo[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.fit { font-size: .9375rem; color: var(--sub); border-top: 1px solid var(--line); padding-top: 12px; max-width: 34em; }
+.fit b { color: var(--ink); font-weight: 600; }
+.device { display: grid; justify-items: center; gap: 16px; width: 414px; max-width: 100%; }
+.screen { position: relative; border-radius: 40px; overflow: hidden; background: var(--bezel); box-shadow: 0 0 0 9px var(--bezel), 0 0 0 10px var(--line), 0 24px 50px rgba(20, 26, 51, .16); margin: 10px; direction: ltr; }
+.screen iframe { position: absolute; top: 0; left: 0; width: 390px; height: 844px; border: 0; transform-origin: 0 0; background: var(--page); }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.verdict { display: flex; gap: 8px; }
+.pick { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 24px; border: 2px solid var(--ink); background: transparent; font-weight: 600; transition: background-color .2s, color .2s, border-color .2s, transform .15s; }
+.pick .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; }
+.pick[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.pick[aria-pressed="true"] .dot { background: currentColor; }
+.pick.alt[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--page); }
+.pick:active { transform: scale(.97); }
+.ghost { min-height: 48px; padding: 0 18px; border-radius: 24px; border: 1px solid var(--line); background: var(--page); font-weight: 500; }
+.close { display: none; }
+.device.fs { position: fixed; inset: 0; z-index: 60; width: auto; max-width: none; background: var(--veil); align-content: center; padding: calc(12px + env(safe-area-inset-top, 0px)) 12px calc(12px + env(safe-area-inset-bottom, 0px)); gap: 14px; }
+.device.fs .actions { display: none; }
+.device.fs .close { display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border-radius: 24px; border: 0; background: var(--card); color: var(--ink); font-weight: 600; }
+
+.choice { margin-top: 56px; background: var(--card); border-radius: 28px; padding: 26px 20px; display: grid; gap: 14px; box-shadow: var(--shadow); scroll-margin-top: 130px; }
+.picked { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.picked li { display: grid; grid-template-columns: minmax(0, 13em) minmax(0, 1fr); gap: 4px 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.picked li span { color: var(--sub); }
+.picked li b { font-weight: 600; }
+.picked li b.wait { color: var(--sub); font-weight: 400; }
+.choice label { font-size: .8125rem; font-weight: 600; color: var(--sub); }
+.choice textarea { min-height: 96px; border: 1.5px solid var(--line); background: var(--page); border-radius: 14px; padding: 12px 14px; resize: vertical; line-height: 1.5; width: 100%; }
+.copy { justify-self: start; min-height: 52px; padding: 0 24px; border-radius: 26px; border: 0; background: var(--accent); color: var(--on-accent); font-weight: 600; font-size: 1.0625rem; }
+.status { font-size: .9375rem; font-weight: 500; color: var(--accent-ink); min-height: 1.5em; }
+.out { width: 100%; min-height: 110px; border: 1px dashed var(--line); background: transparent; border-radius: 12px; padding: 10px 12px; font-size: .9375rem; color: var(--sub); resize: none; }
+.foot { margin-top: 28px; font-size: .8125rem; color: var(--sub); text-align: center; text-wrap: balance; }
+
+@media (max-width: 899px) {
+  .stall { grid-template-columns: minmax(0, 1fr); gap: 18px; padding: 20px 14px; border-radius: 24px; }
+  .device { width: 100%; }
+  .picked li { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap" dir="rtl" lang="he">
+  <header class="top">
+    <p class="eyebrow">יהודי 365 · מעבדת העיצוב · 4 בנובמבר 2026</p>
+    <h1>ציר ההתראות בחלון הזמן</h1>
+    <p class="lede">כל ההתראות של מצווה, על הציר של חלון הזמן שלה במסך המצווה: התזכורות שלך, הנודניקים של הנודניק החכם והזמן האחרון להתחיל. גוררים נקודה על הציר כדי להזיז אותה, לוחצים עליה כדי לראות ולערוך את הערכים שלה, ולוחצים על מקום ריק בציר כדי להוסיף תזכורת. גם נודניק אפשר לגרור, ואז "חזרה לנודניק החכם" מחזיר את החישוב האוטומטי. שלושה כיוונים, בוחרים אחד.</p>
+    <div class="facts">
+      <div class="fact"><span>היום שבלוחות</span><b>{{dateLine}} · {{hebDate}}</b></div>
+      <div class="fact"><span>מקום</span><b>{{city}}</b></div>
+      <div class="fact"><span>תפילת מנחה</span><b>{{mincha}}</b></div>
+      <div class="fact"><span>תפילת ערבית</span><b>{{maariv}}</b></div>
+    </div>
+    <nav class="jump" aria-label="מעבר למסך">
+<!--JUMP-->
+      <a href="#bchira"><b>✓</b>הבחירה שלך</a>
+    </nav>
+  </header>
+</div>
+
+<div class="bar" dir="rtl" lang="he">
+  <div class="bar-in" role="toolbar" aria-label="תצוגת הטלפונים">
+    <div class="bar-row" role="group" aria-label="ערכה">
+      <span>ערכה בטלפונים</span>
+      <button class="opt" data-palette="gold" aria-pressed="false"><i style="background: #F08A3C"></i>זהב</button>
+      <button class="opt" data-palette="dark" aria-pressed="false"><i style="background: #172238"></i>לילה</button>
+    </div>
+  </div>
+</div>
+
+<main class="wrap" dir="rtl" lang="he">
+<!--SURFACES-->
+
+  <section class="choice" id="bchira" aria-labelledby="h-bchira">
+    <h2 id="h-bchira">הבחירה שלך</h2>
+    <p class="lede">בוחרים כיוון אחד מתוך שלושה, וכותבים מה לשנות אם צריך.</p>
+    <ul class="picked" id="picked" aria-live="polite"></ul>
+    <label for="why">מה לשנות, או למה (לא חובה)</label>
+    <textarea id="why" maxlength="600" placeholder="למשל: הייתי רוצה את הנקודות של א עם המסלולים של ג"></textarea>
+    <button class="copy" id="copy">העתקת הבחירה</button>
+    <p class="status" id="status" role="status"></p>
+    <label for="out">הטקסט שיועתק</label>
+    <textarea class="out" id="out" readonly></textarea>
+  </section>
+
+  <p class="foot">השעות, התאריך, התזכורות והנודניקים אמיתיים לירושלים, מחושבים בקוד של האפליקציה עצמה (המצווה האישית היא דוגמה, עם שעות לבחירת המשתמש). הבחירה נשמרת רק בדפדפן הזה.</p>
+</main>
+
+<script>
+(function () {
+  var KEY = 'jew365-timeline-pick-v1';
+  var LABELS = /*LABELS*/;
+  var SURFACES = /*SURFACES*/;
+  var root = document.documentElement;
+  var darkHost = root.getAttribute('data-theme') === 'dark' || (root.getAttribute('data-theme') !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { saved = {}; }
+  var state = {
+    palette: saved.palette === 'dark' || saved.palette === 'gold' ? saved.palette : darkHost ? 'dark' : 'gold',
+    level: [1, 2, 3, 4].indexOf(saved.level) >= 0 ? saved.level : 3,
+    m: typeof saved.m === 'string' && document.querySelector('[data-m="' + saved.m + '"]') ? saved.m : 'maariv',
+    picks: saved.picks && typeof saved.picks === 'object' ? saved.picks : {},
+    why: typeof saved.why === 'string' ? saved.why : ''
+  };
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage blocked */ } }
+
+  var frames = Array.prototype.slice.call(document.querySelectorAll('iframe[data-src]'));
+  function hashFor(f) {
+    var extra = f.dataset.extra || '';
+    return 'theme=' + state.palette + (extra ? '&' + extra : '');
+  }
+  function push(f) {
+    var h = hashFor(f);
+    try {
+      if (f.contentWindow && f.contentWindow.location.href.indexOf(f.dataset.src) !== -1) {
+        if (f.contentWindow.location.hash.slice(1) !== h) f.contentWindow.location.hash = h;
+        return;
+      }
+    } catch (e) { /* not reachable yet */ }
+    f.src = f.dataset.src + '#' + h;
+  }
+  function pushAll() { frames.forEach(push); }
+
+  function syncControls() {
+    document.querySelectorAll('[data-palette]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.palette === state.palette)); });
+    document.querySelectorAll('[data-level]').forEach(function (b) { b.setAttribute('aria-pressed', String(Number(b.dataset.level) === state.level)); });
+    document.querySelectorAll('[data-m]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.m === state.m)); });
+    document.querySelectorAll('[data-pick]').forEach(function (b) {
+      var on = state.picks.window === b.dataset.pick;
+      b.setAttribute('aria-pressed', String(on));
+      b.querySelector('.lbl').textContent = on ? 'נבחר' : 'זה הכיוון שלי';
+    });
+    document.querySelectorAll('[data-ok]').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(state.picks[b.dataset.ok] === b.dataset.v));
+    });
+    var list = document.getElementById('picked');
+    list.innerHTML = '';
+    Object.keys(SURFACES).forEach(function (sid) {
+      var s = SURFACES[sid];
+      var li = document.createElement('li');
+      var t = document.createElement('span');
+      t.textContent = s.title.split(':')[0];
+      var v = document.createElement('b');
+      var answer = answerFor(sid);
+      v.textContent = answer || 'עוד לא';
+      if (!answer) v.className = 'wait';
+      li.appendChild(t);
+      li.appendChild(v);
+      list.appendChild(li);
+    });
+    document.getElementById('out').value = shareText();
+  }
+  function answerFor(sid) {
+    var s = SURFACES[sid];
+    if (s.pick === 'one') return state.picks.window ? LABELS[state.picks.window] : '';
+    var id = s.items[0];
+    var v = state.picks[id];
+    return v === 'ok' ? 'מאשר' : v === 'change' ? 'רוצה שינוי' : '';
+  }
+  function shareText() {
+    var lines = ['יהודי 365 · ציר ההתראות · הבחירה שלי'];
+    Object.keys(SURFACES).forEach(function (sid) { lines.push(SURFACES[sid].title.split(':')[0] + ': ' + (answerFor(sid) || 'עוד לא')); });
+    var why = state.why.trim();
+    if (why) lines.push('הערות: ' + why);
+    return lines.join('\n');
+  }
+
+  document.querySelectorAll('[data-palette]').forEach(function (b) {
+    b.addEventListener('click', function () { state.palette = b.dataset.palette; save(); syncControls(); pushAll(); });
+  });
+  document.querySelectorAll('[data-level]').forEach(function (b) {
+    b.addEventListener('click', function () { state.level = Number(b.dataset.level); save(); syncControls(); pushAll(); });
+  });
+  document.querySelectorAll('[data-m]').forEach(function (b) {
+    b.addEventListener('click', function () { state.m = b.dataset.m; save(); syncControls(); pushAll(); });
+  });
+  document.querySelectorAll('[data-pick]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.picks.window = state.picks.window === b.dataset.pick ? undefined : b.dataset.pick;
+      save(); syncControls();
+    });
+  });
+  document.querySelectorAll('[data-ok]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.picks[b.dataset.ok] = state.picks[b.dataset.ok] === b.dataset.v ? undefined : b.dataset.v;
+      save(); syncControls();
+    });
+  });
+  document.querySelectorAll('.stall').forEach(function (stall) {
+    var f = stall.querySelector('iframe');
+    stall.querySelectorAll('.demo').forEach(function (b) {
+      b.addEventListener('click', function () {
+        stall.querySelectorAll('.demo').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        f.dataset.extra = b.dataset.demo;
+        push(f);
+      });
+    });
+  });
+  var why = document.getElementById('why');
+  why.value = state.why;
+  why.addEventListener('input', function () { state.why = why.value; save(); document.getElementById('out').value = shareText(); });
+  document.getElementById('copy').addEventListener('click', function () {
+    var text = shareText();
+    var status = document.getElementById('status');
+    var out = document.getElementById('out');
+    function fallback() {
+      out.focus();
+      out.select();
+      status.textContent = 'לא הצלחנו להעתיק אוטומטית. הטקסט למטה מסומן, אפשר להעתיק אותו ידנית.';
+    }
+    try {
+      navigator.clipboard.writeText(text).then(function () { status.textContent = 'הועתק. אפשר להדביק בוואטסאפ או בכל הודעה.'; }, fallback);
+    } catch (e) { fallback(); }
+  });
+
+  var devices = Array.prototype.slice.call(document.querySelectorAll('.device'));
+  function fit() {
+    devices.forEach(function (d) {
+      var screen = d.querySelector('.screen');
+      var w;
+      if (d.classList.contains('fs')) w = Math.min(window.innerWidth - 44, (window.innerHeight - 110) * 390 / 844, 390);
+      else w = Math.min(d.clientWidth - 20, 390);
+      w = Math.max(200, Math.floor(w));
+      var s = w / 390;
+      screen.style.width = w + 'px';
+      screen.style.height = Math.round(844 * s) + 'px';
+      screen.querySelector('iframe').style.transform = 'scale(' + s + ')';
+    });
+  }
+  var opened = null;
+  function closeFull() {
+    if (!opened) return;
+    opened.classList.remove('fs');
+    document.body.classList.remove('locked');
+    var back = opened.querySelector('.full');
+    opened = null;
+    fit();
+    if (back) back.focus();
+  }
+  devices.forEach(function (d) {
+    d.querySelector('.full').addEventListener('click', function () {
+      opened = d;
+      d.classList.add('fs');
+      document.body.classList.add('locked');
+      fit();
+      d.querySelector('.close').focus();
+    });
+    d.querySelector('.close').addEventListener('click', closeFull);
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeFull(); });
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(document.body);
+  window.addEventListener('resize', fit);
+
+  syncControls();
+  pushAll();
+  fit();
+})();
+</script>

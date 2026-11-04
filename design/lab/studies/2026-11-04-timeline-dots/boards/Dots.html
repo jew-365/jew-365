@@ -1,0 +1,53 @@
+<!--board title="א · נקודות על הפס"-->
+<style>
+/* The window card of the mitzvah screen as it is (the green-to-red bar), with every notification as a dot riding on the
+   bar: a reminder a large gold dot with a bell, a nag a small dot in the stage colour, the last time to start a red
+   diamond. The critical zone is a hatched band behind the bar. A dot drags along the bar; a tap opens its values; a
+   tap on an empty stretch adds a reminder there. Each dot keeps a 44px touch area. */
+.axis{position:relative;height:76px;margin:4px 6px 0}
+.axis>.zoneband{top:14px;bottom:14px}
+.axis>.gbar{position:absolute;inset-inline:0;top:32px;height:12px}
+.dot{position:absolute;top:16px;width:44px;height:44px;margin-inline-start:-22px;display:grid;place-items:center;touch-action:none;cursor:grab;z-index:2}
+.dot>i{display:block;border-radius:50%;transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.dot.k-rem>i{width:30px;height:30px;background:var(--gold);box-shadow:0 0 0 3px var(--surface),0 2px 8px var(--shadowC);display:grid;place-items:center}
+.dot.k-rem>i>svg{width:17px;height:17px;color:var(--onGold);stroke-width:2.2}
+.dot.k-nag>i{width:14px;height:14px;background:var(--stO);box-shadow:0 0 0 3px var(--surface)}
+.dot.k-last>i{width:18px;height:18px;border-radius:4px;transform:rotate(45deg);background:var(--stR);box-shadow:0 0 0 3px var(--surface)}
+.dot:not(.k-rem)>i>svg{display:none}
+.dot.on>i{transform:scale(1.25)}
+.dot.k-last.on>i{transform:rotate(45deg) scale(1.25)}
+.dot.drag{cursor:grabbing;z-index:3}
+.dot>.tip{position:absolute;top:-14px;font-size:12px;line-height:16px;font-weight:700;padding:1px 6px;border-radius:8px;background:var(--text);color:var(--bg);white-space:nowrap;opacity:0;transition:opacity 120ms}
+.dot.on>.tip{opacity:1}
+</style>
+<template>
+<!--WINDOW_TOP-->
+<div class="axis" data-axis>
+<button class="axis-hit" onClick="{{axisTap}}" aria-label="{{axisLabel}}"></button>
+<sc-for list="{{zones}}" as="z" hint-placeholder-count="1"><span class="zoneband" style="{{z.style}}"></span></sc-for>
+<span class="gbar" aria-hidden="true"></span>
+<sc-for list="{{dots}}" as="d" hint-placeholder-count="4"><button class="{{d.cls}}" style="{{d.pos}}" aria-label="{{d.aria}}" aria-pressed="{{d.on}}" onPointerDown="{{d.down}}" onPointerMove="{{d.move}}" onPointerUp="{{d.up}}" onPointerCancel="{{d.up}}" onKeyDown="{{d.keydown}}"><i>[[ic:bell]]</i><span class="tip num">{{d.time}}</span></button></sc-for>
+</div>
+<!--WINDOW_BOTTOM-->
+<!--TOAST-->
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  renderVals() {
+    const c = this.core();
+    return Object.assign(c, {
+      dots: c.sends.filter(c.dotsShown).map((s) =>
+        this.dotVals(s, {
+          cls:
+            'dot ' +
+            (s.isReminder ? 'k-rem' : s.isLast ? 'k-last' : 'k-nag') +
+            (s.on ? ' on' : '') +
+            (this.state.dragKey === s.key ? ' drag' : ''),
+        }),
+      ),
+    });
+  }
+}
+</script>

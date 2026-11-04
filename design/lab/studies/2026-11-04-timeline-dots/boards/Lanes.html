@@ -1,0 +1,56 @@
+<!--board title="ג · שני מסלולים"-->
+<style>
+/* Two lanes around the window's bar: above it, the user's reminders as pills that carry their time; below it, the
+   smart nag (the nags as small orange dots, the last time to start as a red dot with an exclamation mark). The critical zone is shaded on the bar
+   itself. A pill or a dot drags along its lane; a tap opens its values; a tap on an empty stretch adds a reminder.
+   The two lanes say who decides what: the user above, the app below. */
+.ln-axis{position:relative;height:132px;margin:0 6px}
+.ln-axis>.zoneband{top:52px;height:28px;bottom:auto}
+.ln-axis>.gbar{position:absolute;inset-inline:0;top:60px;height:12px}
+.lane-l{position:absolute;inset-inline-start:0;font-size:12px;line-height:16px;color:var(--muted);pointer-events:none}
+.lane-l.up{top:0}.lane-l.down{bottom:0}
+.pin{position:absolute;min-width:44px;height:44px;margin-inline-start:-22px;display:grid;place-items:center;touch-action:none;cursor:grab;z-index:2}
+.pin.up{top:8px}.pin.down{top:76px}
+.pin>i{display:flex;align-items:center;gap:3px;font-style:normal;font-size:12px;line-height:16px;font-weight:700;border-radius:999px;transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.pin.k-rem>i{padding:4px 8px;background:var(--gold);color:var(--onGold);box-shadow:0 2px 6px var(--shadowC)}
+.pin.k-rem>i>svg{width:12px;height:12px;stroke-width:2.4}
+.pin.k-last>i{width:22px;height:22px;justify-content:center;background:var(--stR);color:#fff;font-size:14px;box-shadow:0 0 0 3px var(--surface)}
+.pin.k-nag>i{width:14px;height:14px;background:var(--stO);box-shadow:0 0 0 3px var(--surface)}
+.pin.k-nag>i>*{display:none}
+.pin:not(.k-rem)>i>svg{display:none}
+.pin.on>i{transform:scale(1.15);outline:2px solid var(--text);outline-offset:2px}
+.pin.drag{cursor:grabbing;z-index:3}
+</style>
+<template>
+<!--WINDOW_TOP-->
+<div class="ln-axis" data-axis>
+<button class="axis-hit" onClick="{{axisTap}}" aria-label="{{axisLabel}}"></button>
+<span class="lane-l up">התזכורות שלך</span><span class="lane-l down">הנודניק</span>
+<sc-for list="{{zones}}" as="z" hint-placeholder-count="1"><span class="zoneband" style="{{z.style}}"></span></sc-for>
+<span class="gbar" aria-hidden="true"></span>
+<sc-for list="{{pins}}" as="d" hint-placeholder-count="4"><button class="{{d.cls}}" style="{{d.pos}}" aria-label="{{d.aria}}" aria-pressed="{{d.on}}" onPointerDown="{{d.down}}" onPointerMove="{{d.move}}" onPointerUp="{{d.up}}" onPointerCancel="{{d.up}}" onKeyDown="{{d.keydown}}"><i>[[ic:bell]]<span class="num">{{d.label}}</span></i></button></sc-for>
+</div>
+<!--WINDOW_BOTTOM-->
+<!--TOAST-->
+</template>
+<script>
+class Component extends DCLogic {
+/*CORE*/
+
+  renderVals() {
+    const c = this.core();
+    return Object.assign(c, {
+      pins: c.sends.filter(c.dotsShown).map((s) =>
+        this.dotVals(s, {
+          cls:
+            'pin ' +
+            (s.isReminder ? 'up k-rem' : s.isLast ? 'down k-last' : 'down k-nag') +
+            (s.on ? ' on' : '') +
+            (this.state.dragKey === s.key ? ' drag' : ''),
+          label: s.isLast ? '!' : s.time,
+        }),
+      ),
+    });
+  }
+}
+</script>
