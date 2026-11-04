@@ -7,6 +7,7 @@ import { dateKey } from '@/stores/useCompletionsStore';
 import { appliesOn, categoryForWindow, windowMinutes } from '@/utils/customMitzvah';
 import { HebcalService } from '@/services/HebcalService';
 import { Location } from '@/types/zmanim';
+import { customIconFor } from '@/data/customIcons';
 
 const ALL_NUSCHAOT: Nusach[] = [...NUSACH_IDS];
 
@@ -44,7 +45,7 @@ export function customToMitzvah(c: CustomMitzvah): Mitzvah {
   return {
     id: c.id,
     name: { he: c.name },
-    icon: 'custom',
+    icon: customIconFor(c.icon),
     timeType: 'range-within-day',
     category: categoryForWindow(c.startHHMM, c.endHHMM),
     group: 'mine',

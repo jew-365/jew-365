@@ -502,6 +502,20 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it solves:** The luach prints it beside tzeit; the app computes it nowhere (spec, section 3).
   - **Expected result:** Tel Aviv 2026-10-03 shows 19:36 within a minute; unknown until Q24 is answered.
 
+### App requests of 2026-11-04 — batch rules
+
+The owner's upgrade list of 2026-11-04, narrowed the same day to simple tasks that need no build ("בוא נתמקד במשימות פשוטות ומעשיות כרגע וללא בילד"). Done means as in the batch rules of 2026-10-24.
+
+### Medium — App requests of 2026-11-04
+
+- [ ] Let a custom mitzvah take an icon of its own, not only the star
+  - **Flag:** `OTA`.
+  - **What it is:** an Icon field in the custom mitzvah form that opens a sheet of the app's drawn icons (`CUSTOM_ICON_CHOICES` in [src/data/customIcons.ts](src/data/customIcons.ts)); the choice is saved as `icon` on the custom mitzvah and every surface draws it through the adapter.
+  - **What it solves:** every custom mitzvah showed the same star.
+  - **Expected result:** a picked icon shows on home, the schedule, tracking, My mitzvot and the mitzvah screen, and survives an edit and a backup.
+  - **Done:** 2026-11-04. Verified: the form's render suite (pick, save, reopen) and the adapter's fallback cases; typecheck, lint, DOX and the full Jest suite. Not checked on a phone.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
+
 ## Bugs
 
 - [ ] The zmanim follow a depression-angle method, not the Ohr HaChaim luach

@@ -147,6 +147,9 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
       'new',
       'create',
       'custom mitzvah',
+      'אייקון',
+      'סמל',
+      'icon',
     ],
   },
   {

@@ -6,6 +6,8 @@ jest.mock('react-native-mmkv', () => {
 import { CHOK_LEYISRAEL, LIBRARY_GROUPS, MITZVOT } from '../mitzvot';
 import { CITIES } from '../cities';
 import { customToMitzvah } from '../customMitzvotAdapter';
+import { CUSTOM_ICON_CHOICES } from '../customIcons';
+import { ICON_NAMES } from '@/components/MitzvahIcon';
 import { NUSACH_IDS, NUSCHAOT, defaultOpinionFor } from '../nuschaot';
 import { HebcalService } from '@/services/HebcalService';
 import { at, zmanimFor } from '@/testing/zmanim';
@@ -191,6 +193,21 @@ describe('custom mitzvah category', () => {
   it('ignores a category key left on a mitzvah stored before the category was derived', () => {
     const stored = { ...customMitzvah({ startHHMM: '17:00', endHHMM: '19:00' }), category: 'learning' };
     expect(customToMitzvah(stored).category).toBe('daily-evening');
+  });
+});
+
+describe('custom mitzvah icon', () => {
+  it('takes its chosen icon, and the star for none, an unknown one or an interface icon', () => {
+    expect(customToMitzvah(customMitzvah({ icon: 'apple' })).icon).toBe('apple');
+    expect(customToMitzvah(customMitzvah({})).icon).toBe('custom');
+    expect(customToMitzvah(customMitzvah({ icon: 'gone' })).icon).toBe('custom');
+    expect(customToMitzvah(customMitzvah({ icon: 'chevronLeft' })).icon).toBe('custom');
+  });
+
+  it('offers only drawn icons, each once, the default first', () => {
+    expect(CUSTOM_ICON_CHOICES[0]).toBe('custom');
+    expect(new Set(CUSTOM_ICON_CHOICES).size).toBe(CUSTOM_ICON_CHOICES.length);
+    for (const icon of CUSTOM_ICON_CHOICES) expect(ICON_NAMES).toContain(icon);
   });
 });
 

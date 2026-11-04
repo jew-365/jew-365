@@ -1,5 +1,16 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Keyboard, ScrollView, StyleProp, StyleSheet, Switch, Text, TextInput, TextStyle, View } from 'react-native';
+import {
+  Keyboard,
+  Pressable,
+  ScrollView,
+  StyleProp,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TextStyle,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
@@ -8,6 +19,7 @@ import { CalendarRangePicker, DateRange } from '@/components/CalendarRangePicker
 import { Card } from '@/components/Card';
 import { ChipRow } from '@/components/ChipRow';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { IconTile } from '@/components/IconTile';
 import { ListRow } from '@/components/ListRow';
 import { OptionSelect } from '@/components/OptionSelect';
 import { ReminderNagFields } from '@/components/ReminderNagFields';
@@ -17,6 +29,7 @@ import { SectionLabel } from '@/components/SectionLabel';
 import { TimeField } from '@/components/TimeField';
 import { WeekdayPicker } from '@/components/WeekdayPicker';
 import { WheelPicker } from '@/components/WheelPicker';
+import { CUSTOM_ICON_CHOICES, CustomIconName, customIconFor } from '@/data/customIcons';
 import { SIDDUR_GROUPS, SIDDUR_TEXTS, standaloneTextsIn } from '@/data/siddur';
 import { useCustomMitzvotStore, makeCustomMitzvahId } from '@/stores/useCustomMitzvotStore';
 import { effectiveReminders, useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -90,6 +103,8 @@ type Surface = 'home' | 'schedule' | 'notifications' | 'history' | 'library' | '
 
 const DAY_SURFACES: readonly Surface[] = ['home', 'schedule', 'notifications', 'history'];
 const CATEGORY_SURFACES: readonly Surface[] = ['library'];
+const ICON_SURFACES: readonly Surface[] = ['home', 'schedule', 'history', 'library', 'details'];
+const ICON_TILE = scaled(52);
 const REMINDER_SURFACES: readonly Surface[] = ['notifications'];
 const CONTENT_SURFACES: readonly Surface[] = ['details', 'siddur', 'notifications'];
 
@@ -121,6 +136,8 @@ export default function CustomMitzvahScreen() {
   const nusach = useUserStore((s) => s.nusach);
 
   const [name, setName] = useState(existing?.name ?? '');
+  const [icon, setIcon] = useState<CustomIconName>(() => customIconFor(existing?.icon));
+  const [iconOpen, setIconOpen] = useState(false);
   const [startTime, setStartTime] = useState(existing?.startHHMM ?? '08:00');
   const [endTime, setEndTime] = useState(existing?.endHHMM ?? '12:00');
   const [initialSchedule] = useState(() => (existing ? currentSchedule(existing) : null));
@@ -270,6 +287,7 @@ export default function CustomMitzvahScreen() {
     }
     const fields = {
       name: name.trim(),
+      icon,
       startHHMM: startTime,
       endHHMM: endTime,
       skipOn,
@@ -401,6 +419,24 @@ export default function CustomMitzvahScreen() {
             },
           ]}
         />
+
+        <View style={styles.section}>
+          <SectionLabel variant="field" text={t('custom.icon')} />
+          <Card>
+            <ListRow
+              icon={icon}
+              title={t(`custom.iconName.${icon}`)}
+              accessibilityLabel={`${t('custom.icon')}: ${t(`custom.iconName.${icon}`)}`}
+              chevron
+              onPress={() => {
+                Keyboard.dismiss();
+                setIconOpen(true);
+              }}
+            />
+          </Card>
+          <Hint text={t('custom.hint.icon')} />
+          <Affects surfaces={ICON_SURFACES} />
+        </View>
 
         <View style={[styles.row, styles.section]}>
           <TimeField label={t('custom.startTime')} value={startTime} onChange={setStartTime} style={styles.timeField} />
@@ -709,6 +745,32 @@ export default function CustomMitzvahScreen() {
           })}
         </ScrollView>
       </BottomSheet>
+      <BottomSheet visible={iconOpen} title={t('custom.iconPick')} onClose={() => setIconOpen(false)}>
+        <ScrollView style={styles.sheetList}>
+          <View style={styles.iconGrid} accessibilityRole="radiogroup" accessibilityLabel={t('custom.iconPick')}>
+            {CUSTOM_ICON_CHOICES.map((choice) => {
+              const selected = choice === icon;
+              const label = t(`custom.iconName.${choice}`);
+              return (
+                <Pressable
+                  key={choice}
+                  testID={`custom-icon-${choice}`}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: selected }}
+                  accessibilityLabel={selected ? t('custom.iconSelected', { name: label }) : label}
+                  onPress={() => {
+                    setIcon(choice);
+                    setIconOpen(false);
+                  }}
+                  style={[styles.iconChoice, { borderColor: selected ? colors.gold : 'transparent' }]}
+                >
+                  <IconTile name={choice} tone={selected ? 'accent' : 'muted'} size={ICON_TILE} />
+                </Pressable>
+              );
+            })}
+          </View>
+        </ScrollView>
+      </BottomSheet>
       <BottomSheet
         visible={rangeOpen}
         title={t('custom.schedule.range')}
@@ -784,5 +846,17 @@ const styles = StyleSheet.create({
   },
   sheetList: {
     maxHeight: scaled(420),
+  },
+  iconGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingBottom: spacing.md,
+  },
+  iconChoice: {
+    borderRadius: radius.lg,
+    borderWidth: 2,
+    padding: spacing.xs,
   },
 });

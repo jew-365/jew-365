@@ -93,6 +93,8 @@ export type CustomMitzvah = {
   activeDays?: Weekday[];
   schedules?: ScheduleEntry[];
   contentBlocks?: ContentBlock[];
+  // One of CUSTOM_ICON_CHOICES; absent means the default `custom` icon.
+  icon?: string;
   createdAt: number;
 };
 

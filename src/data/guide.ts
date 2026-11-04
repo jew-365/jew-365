@@ -156,8 +156,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "Seasonal mitzvot appear only in their time: the Omer count, Chanukah candles (the reminder names the night), Selichot in your nusach's season, and Ushpizin on the nights of Sukkot with that night's guest. Kiddush Levana appears once a month, from the first night it is said until the period ends, until it is marked. Some mitzvot depend on the nusach.",
       },
       {
-        he: '״הוסף מצווה חדשה״ בתחתית המסך יוצר מצווה אישית: שם, שעות (שעת סיום מוקדמת משעת ההתחלה נמשכת עד למחרת), ובתזמון המצווה ימים קבועים בשבוע, טווח מתאריך עד תאריך או מספר ימים ברצף. בוחרים אם לדלג בשבת וביום טוב, ומוסיפים תזכורות ותוכן עשיר: טקסט, ברכה, קישור או טקסט מהסידור. כשהטווח או הרצף מסתיימים המצווה נכבית, וההיסטוריה שלה נשמרת.',
-        en: 'Add custom mitzvah at the bottom of the screen creates your own mitzvah: a name, hours (an end before the start runs into the next day), and a schedule of set weekdays, a range from date to date or a run of days. You choose whether to skip it on Shabbat and Yom Tov, and add reminders and rich content: text, a blessing, a link or a text from the siddur. When its range or streak ends it switches off, and its history is kept.',
+        he: '״הוסף מצווה חדשה״ בתחתית המסך יוצר מצווה אישית: שם, אייקון מתוך האייקונים של האפליקציה, שעות (שעת סיום מוקדמת משעת ההתחלה נמשכת עד למחרת), ובתזמון המצווה ימים קבועים בשבוע, טווח מתאריך עד תאריך או מספר ימים ברצף. בוחרים אם לדלג בשבת וביום טוב, ומוסיפים תזכורות ותוכן עשיר: טקסט, ברכה, קישור או טקסט מהסידור. כשהטווח או הרצף מסתיימים המצווה נכבית, וההיסטוריה שלה נשמרת.',
+        en: 'Add custom mitzvah at the bottom of the screen creates your own mitzvah: a name, an icon of your choice, hours (an end before the start runs into the next day), and a schedule of set weekdays, a range from date to date or a run of days. You choose whether to skip it on Shabbat and Yom Tov, and add reminders and rich content: text, a blessing, a link or a text from the siddur. When its range or streak ends it switches off, and its history is kept.',
       },
     ],
     routes: ['/mitzvot', '/custom-mitzvah'],
@@ -428,6 +428,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: 'נוסח תימן בלדי: אפשר לבחור אותו בפתיחה הראשונה או בהגדרות ← תפילה וסידור. נוסחי הסידור מגיעים בנוסח הבלדי, מוויקיטקסט ומהתכלאל שנדפס בירושלים בשנת תרנ״ד, בעברית בלבד, והסליחות, קידוש לבנה, נרות חנוכה ושאר הכללים שתלויים בנוסח הולכים אחריו.',
         en: 'Nusach Teiman Baladi: choose it when the app first opens or in Settings → Prayer and siddur. The siddur texts come in the Baladi wording, from Hebrew Wikisource and the Tiklal printed in Jerusalem in 1894, in Hebrew only, and Selichot, Kiddush Levana, the Chanukah candles and the other rules that depend on the nusach follow it.',
+      },
+      {
+        he: 'מצווה אישית מקבלת אייקון לבחירה, ולא רק כוכב: בטופס המצווה מקישים על ״אייקון״ ובוחרים מתוך האייקונים של האפליקציה. האייקון מופיע בבית, בלוח הזמנים, במעקב, בהמצוות שלי ובמסך המצווה.',
+        en: "A custom mitzvah takes an icon of your choice, not only the star: in the mitzvah's form tap Icon and pick one of the app's icons. It shows on Home, the schedule, Tracking, My mitzvot and the mitzvah's screen.",
       },
     ],
   },

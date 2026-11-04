@@ -96,6 +96,28 @@ describe('Custom mitzvah form', () => {
     mockCanGoBack = true;
   });
 
+  it('saves the icon picked from the icon sheet, and keeps it on the next edit', () => {
+    storeCustom([ONE]);
+    renderForm({ id: STORED_ID });
+    const field = () => screen.getByRole('button', { name: `${t('custom.icon')}: ${t('custom.iconName.custom')}` });
+    expect(within(field()).UNSAFE_getAllByType(MitzvahIcon)[0].props.name).toBe('custom');
+    fireEvent.press(field());
+    const sheet = openSheet();
+    expect(
+      sheet.getByRole('radio', { name: t('custom.iconSelected', { name: t('custom.iconName.custom') }) }),
+    ).toBeTruthy();
+    expect(sheet.queryByTestId('custom-icon-chevronLeft')).toBeNull();
+    fireEvent.press(sheet.getByRole('radio', { name: t('custom.iconName.apple') }));
+    const picked = screen.getByRole('button', { name: `${t('custom.icon')}: ${t('custom.iconName.apple')}` });
+    expect(within(picked).UNSAFE_getAllByType(MitzvahIcon)[0].props.name).toBe('apple');
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+    expect(list()[0].icon).toBe('apple');
+    screen.unmount();
+
+    renderForm({ id: STORED_ID });
+    expect(screen.getByRole('button', { name: `${t('custom.icon')}: ${t('custom.iconName.apple')}` })).toBeTruthy();
+  });
+
   it('adds a reminder from the plus button', () => {
     renderForm();
     expect(screen.getAllByRole('button', { name: DELETE_REMINDER })).toHaveLength(1);
