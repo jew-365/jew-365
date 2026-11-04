@@ -41,7 +41,7 @@ Nags fall only inside the mitzvah's critical zone, which follows its kind and ti
 | Multi-day | Kiddush Levana | the last three nights of the period, tzeit to chatzot each night | — |
 | Pre-dawn | Selichot | the last third, before alot | — |
 | Learning day | Chok LeYisrael | shkia to chatzot of the learning day | sparse until alot |
-| Custom | custom mitzvot | the last third, like a bounded day mitzvah | — |
+| Custom | custom mitzvot | the last third, kept to 30 minutes to 3 hours before the last-chance point; hours that cross midnight (12 hours at most) as a night mitzvah, to chatzot | sparse after chatzot, for hours across midnight |
 
 ### 2.4 How many, and where
 
@@ -65,6 +65,8 @@ The reminder editor's own nag block and the custom form's are removed; the Setti
 - **Q3** (the durations of 2.2 and the zones of 2.3): approved as listed.
 
 ## 5. Decisions made while building (2026-11-04), for the owner to confirm or reverse
+
+- **A custom mitzvah's zone** (the owner's approval of 2026-11-04, after a long custom window spread its nags over half a day): the last third, at most 3 hours and at least 30 minutes before its last-chance point; hours that cross midnight and last 12 hours at most behave like a night mitzvah, to chatzot and an hour apart after it.
 
 - **A nag never comes before the mitzvah's first reminder.** The zone and its tail open no earlier than the window's first reminder, so the bedtime Shema nags from its 23:00 reminder, not from nightfall.
 - **A zone nag that lands within 10 minutes of a reminder moves** to the middle of the zone's widest free stretch, instead of being dropped (Mincha at level 2: its one nag fell on the "one hour left" reminder).

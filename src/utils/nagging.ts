@@ -48,7 +48,7 @@ export const validPerformMin = (value: number): boolean =>
 // - `preDawn`: the last third of the window up to alot (Selichot);
 // - `learning`: shkia to chatzot halayla of the learning day, sparse until alot (Chok LeYisrael).
 export type NagZoneKind =
-  'lastThird' | 'night' | 'firstHour' | 'lastMinutes' | 'evening' | 'nights' | 'preDawn' | 'learning';
+  'lastThird' | 'night' | 'firstHour' | 'lastMinutes' | 'evening' | 'nights' | 'preDawn' | 'learning' | 'custom';
 
 export const NAG_ZONE_KIND: Readonly<Record<string, NagZoneKind>> = {
   maariv: 'night',
@@ -63,7 +63,9 @@ export const NAG_ZONE_KIND: Readonly<Record<string, NagZoneKind>> = {
   chok_leyisrael: 'learning',
 };
 
-export const nagZoneKindOf = (mitzvahId: string): NagZoneKind => NAG_ZONE_KIND[mitzvahId] ?? 'lastThird';
+// A custom mitzvah (`custom_<…>`) has its own rule, `customNagZone()`.
+export const nagZoneKindOf = (mitzvahId: string): NagZoneKind =>
+  NAG_ZONE_KIND[mitzvahId] ?? (mitzvahId.startsWith('custom_') ? 'custom' : 'lastThird');
 
 // The kinds whose zone ends before the window does and that keep nagging, an hour apart, after it.
 export const hasSparseTail = (kind: NagZoneKind): boolean =>
@@ -77,6 +79,30 @@ export const isNagLevel = (value: unknown): value is NagLevel => NAG_LEVEL_IDS.i
 const levelOf = (level: NagLevel | undefined): NagLevel => (isNagLevel(level) ? level : DEFAULT_NAG_LEVEL);
 
 export type Interval = { start: Date; end: Date };
+
+// A custom mitzvah's critical zone (the owner's call of 2026-11-04, on the smart nag's section 5): the last third of
+// its hours, at most `CUSTOM_ZONE_MAX_MIN` and at least `CUSTOM_ZONE_MIN_MIN` before its last-chance point; and for
+// hours that cross midnight and last no more than `CUSTOM_NIGHT_MAX_MIN`, a night mitzvah's zone instead: from the
+// start to chatzot halayla (`chatzotLayla`), with the sparse tail after it.
+export const CUSTOM_ZONE_MAX_MIN = 180;
+export const CUSTOM_ZONE_MIN_MIN = 30;
+export const CUSTOM_NIGHT_MAX_MIN = 12 * 60;
+
+export function customNagZone(
+  window: Interval,
+  lastChance: Date,
+  night: { crossesMidnight: boolean; chatzotLayla: Date },
+): { zone: Interval[]; sparse: boolean } {
+  const { start, end } = window;
+  const length = end.getTime() - start.getTime();
+  if (night.crossesMidnight && length <= CUSTOM_NIGHT_MAX_MIN * 60_000) {
+    return { zone: [{ start, end: night.chatzotLayla }], sparse: true };
+  }
+  const point = lastChance.getTime();
+  const third = end.getTime() - length / 3;
+  const from = Math.min(Math.max(third, point - CUSTOM_ZONE_MAX_MIN * 60_000), point - CUSTOM_ZONE_MIN_MIN * 60_000);
+  return { zone: [{ start: new Date(from), end: lastChance }], sparse: false };
+}
 export type NagKind = 'zone' | 'sparse' | 'lastChance';
 export type LastChance = 'alone' | 'minyan';
 export type NagTime = { at: Date; kind: NagKind; lastChance?: LastChance };

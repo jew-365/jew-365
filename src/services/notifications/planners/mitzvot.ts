@@ -19,6 +19,7 @@ import { interpolate, t, translate } from '@/i18n';
 import { reminderLabel } from '@/utils/mitzvahName';
 import { TIME_STAGE_COLOR, sendStage, timeLeftLine, type SendKind } from '@/utils/timeLeft';
 import {
+  customNagZone,
   hasLastChance,
   hasSparseTail,
   nagZoneKindOf,
@@ -28,6 +29,7 @@ import {
   type LastChance,
   type NagKind,
   type NagLevel,
+  type NagZoneKind,
 } from '@/utils/nagging';
 import { HebcalService } from '@/services/HebcalService';
 import { dateKey, type Completions } from '@/stores/useCompletionsStore';
@@ -219,13 +221,25 @@ export function windowTriggers(
   return { ...own, triggers: own.triggers.filter((entry) => !(isHeadsUp(entry) && heldEarlier(entry))) };
 }
 
-// The critical zone of `date`'s window (spec 2.3), by the mitzvah's kind; `smartNagTimes()` clips it to the window.
-function nagZone(mitzvah: Mitzvah, window: Interval, ctx: ComputeContext): Interval[] {
+// The critical zone of `date`'s window (spec 2.3), by the mitzvah's kind, and whether a sparse tail follows it;
+// `smartNagTimes()` clips it to the window.
+function nagZone(mitzvah: Mitzvah, window: Interval, ctx: ComputeContext): { zone: Interval[]; sparse: boolean } {
+  const kind = nagZoneKindOf(mitzvah.id);
+  if (kind === 'custom') {
+    const startDay = DateTime.fromJSDate(window.start, { zone: ctx.location.tz }).toISODate();
+    const crossesMidnight = startDay !== DateTime.fromJSDate(window.end, { zone: ctx.location.tz }).toISODate();
+    const lastChance = new Date(window.end.getTime() - performMinOf(mitzvah).alone * 60_000);
+    return customNagZone(window, lastChance, { crossesMidnight, chatzotLayla: ctx.zmanim.chatzotLayla });
+  }
+  return { zone: kindZone(kind, window, ctx), sparse: hasSparseTail(kind) };
+}
+
+function kindZone(kind: NagZoneKind, window: Interval, ctx: ComputeContext): Interval[] {
   const { start, end } = window;
   const third = (until: Date): Interval[] => [
     { start: new Date(until.getTime() - (until.getTime() - start.getTime()) / 3), end: until },
   ];
-  switch (nagZoneKindOf(mitzvah.id)) {
+  switch (kind) {
     case 'night':
     case 'evening':
       return [{ start, end: ctx.zmanim.chatzotLayla }];
@@ -295,11 +309,12 @@ function ownTriggers(mitzvah: Mitzvah, reminders: Reminder[], date: Date, scope:
   const before = (minutes: number | undefined) =>
     minutes && hasLastChance(kind) ? new Date(window.end.getTime() - minutes * 60_000) : null;
   const moves = new Map<number, number>();
+  const { zone, sparse } = nagZone(mitzvah, window, ctx);
   const nags = smartNagTimes({
     level: scope.nagLevel,
     window,
-    zone: nagZone(mitzvah, window, ctx),
-    sparseUntil: hasSparseTail(kind) ? window.end : null,
+    zone,
+    sparseUntil: sparse ? window.end : null,
     lastChance: { alone: before(perform.alone), minyan: before(perform.minyan) },
     taken: sent,
     accept: (planned) => {

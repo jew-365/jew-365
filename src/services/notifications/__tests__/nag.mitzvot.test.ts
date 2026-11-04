@@ -246,6 +246,33 @@ describe('the critical zone', () => {
   });
 });
 
+describe('a custom mitzvah’s critical zone', () => {
+  it('keeps the zone of a long window to the three hours before its last-chance point', () => {
+    // 06:00 to 22:00, ten minutes to perform: the point at 21:50, the zone no earlier than 18:50.
+    const custom = fixture('custom_long', 360, 1320, [r('start', 0)]);
+    const zone = nags(of(plan([custom], NIGHT_BEFORE, { level: 4 }), 'custom_long', DAY)).filter(
+      (c) => c.data.nag?.kind === 'zone',
+    );
+    expect(zone).toHaveLength(3);
+    for (const t of times(zone)) {
+      expect(t).toBeGreaterThanOrEqual(clock(`${DAY}T18:50`));
+      expect(t).toBeLessThan(clock(`${DAY}T21:50`));
+    }
+  });
+
+  it('nags hours across midnight like a night mitzvah: to chatzot, then an hour apart at the least', () => {
+    const { zmanim } = windowOf(MINCHA);
+    // 21:00 to 03:00.
+    const custom = fixture('custom_night', 1260, 1620, [r('start', 0)]);
+    const day = nags(of(plan([custom], NIGHT_BEFORE, { level: 3 }), 'custom_night', DAY));
+    const byKind = (kind: string) => times(day.filter((c) => c.data.nag?.kind === kind));
+    for (const t of byKind('zone')) expect(t).toBeLessThanOrEqual(zmanim.chatzotLayla.getTime());
+    const tail = byKind('sparse');
+    expect(tail.length).toBeGreaterThan(0);
+    for (const t of tail) expect(t).toBeGreaterThan(zmanim.chatzotLayla.getTime());
+  });
+});
+
 describe('the plan around the nags', () => {
   it('ignores the per-reminder nag an earlier version stored', () => {
     const legacy = { ...r('start', 0), nag: { count: 3, everyMin: 5, placement: 'after' } } as Reminder;

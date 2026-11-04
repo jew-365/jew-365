@@ -15,6 +15,7 @@ import {
   remindersPerDay,
   smartNagTimes,
   validPerformMin,
+  customNagZone,
   type NagInput,
 } from '../nagging';
 
@@ -132,7 +133,7 @@ describe('the mitzvot', () => {
   });
 
   it('names each kind of critical zone', () => {
-    expect(['shacharit', 'tefillin', 'custom_1'].map(nagZoneKindOf)).toEqual(['lastThird', 'lastThird', 'lastThird']);
+    expect(['shacharit', 'tefillin', 'custom_1'].map(nagZoneKindOf)).toEqual(['lastThird', 'lastThird', 'custom']);
     expect(['maariv', 'krias_shma_al_hamita', 'sefirat_haomer', 'ushpizin'].map(nagZoneKindOf)).toEqual([
       'night',
       'night',
@@ -166,5 +167,38 @@ describe('the mitzvot', () => {
     expect(countsInDayEstimate('daily-morning')).toBe(true);
     expect(countsInDayEstimate('learning')).toBe(true);
     expect(countsInDayEstimate('weekly')).toBe(false);
+  });
+});
+
+describe('customNagZone', () => {
+  const span = (zone: { start: Date; end: Date }[]) => zone.map(({ start, end }) => [minOf(start), minOf(end)]);
+  const day = { crossesMidnight: false, chatzotLayla: atMin(1000) };
+
+  it('takes the last third of a short window, up to its last-chance point', () => {
+    // 06:00-09:00, the point at 170: the third from 120.
+    expect(customNagZone(WINDOW, atMin(170), day)).toEqual({
+      zone: [{ start: atMin(120), end: atMin(170) }],
+      sparse: false,
+    });
+  });
+
+  it('keeps at most three hours before the point, and at least half an hour', () => {
+    const long = { start: atMin(0), end: atMin(24 * 60) };
+    expect(span(customNagZone(long, atMin(24 * 60 - 10), day).zone)).toEqual([[24 * 60 - 190, 24 * 60 - 10]]);
+    const hour = { start: atMin(0), end: atMin(60) };
+    expect(span(customNagZone(hour, atMin(50), day).zone)).toEqual([[20, 50]]);
+  });
+
+  it('nags hours across midnight like a night mitzvah: to chatzot, then a sparse tail', () => {
+    const night = { start: atMin(0), end: atMin(240) };
+    expect(customNagZone(night, atMin(230), { crossesMidnight: true, chatzotLayla: atMin(100) })).toEqual({
+      zone: [{ start: atMin(0), end: atMin(100) }],
+      sparse: true,
+    });
+    // A whole day across midnight is not a night: its last third, capped.
+    const whole = { start: atMin(0), end: atMin(24 * 60) };
+    expect(customNagZone(whole, atMin(24 * 60 - 10), { crossesMidnight: true, chatzotLayla: atMin(100) }).sparse).toBe(
+      false,
+    );
   });
 });
