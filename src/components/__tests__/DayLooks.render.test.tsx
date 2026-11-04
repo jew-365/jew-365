@@ -199,16 +199,16 @@ describe('DayLooks', () => {
 
 describe('the nagging bell', () => {
   it.each(['rail', 'cards', 'rings'] as const)(
-    '%s: a bell with the level beside the name, and in the label; none at level 1',
+    '%s: a bell with the total beside the name, and in the label; none without a count',
     (look) => {
       setup(look, [
-        { ...A, nagLevel: 3 },
-        { ...B, nagLevel: 1 },
+        { ...A, nagCount: 6 },
+        { ...B, nagCount: null },
       ]);
       const bells = screen.getAllByTestId('nag-bell');
       expect(bells).toHaveLength(1);
-      expect(within(bells[0]).getByText('3')).toBeOnTheScreen();
-      expect(screen.getByRole('button', { name: /^A, .*, נודניק בינוני: כל תזכורת נשלחת 3 פעמים$/ })).toBeOnTheScreen();
+      expect(within(bells[0]).getByText('6')).toBeOnTheScreen();
+      expect(screen.getByRole('button', { name: /^A, .*, נודניק: 6 התראות בסך הכול$/ })).toBeOnTheScreen();
     },
   );
 });

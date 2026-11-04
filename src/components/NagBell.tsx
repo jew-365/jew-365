@@ -5,26 +5,28 @@ import { useI18n } from '@/i18n';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fontFamilies } from '@/theme/typography';
-import type { NagLevel } from '@/utils/nagging';
 
-// A mitzvah's nagging level on home (the owner's pick of 2026-11-04, the study design/lab/studies/2026-11-04-time-
-// and-nag, direction ד with the number inside the bell): a small bell beside the name with how many times each
-// reminder is sent at that level. Level 1 sends each reminder once and shows nothing.
+// A mitzvah's nagging on home (the owner's pick of 2026-11-04, direction ד of the study design/lab/studies/2026-11-04-
+// time-and-nag, with the number inside the bell; the number became the total on the same day): a small bell beside
+// the name with how many notifications the mitzvah's time sends in all, its reminders and their repeats. Without a
+// count (no repeat to send) it shows nothing.
 const BELL_SIZE = scaled(26);
 const NUMBER_SIZE = scaled(11);
+// Two digits (a mitzvah of three reminders at the top level sends 12) sit a little tighter, inside the bell's body.
+const TWO_DIGIT_SPACING = scaled(-0.5);
 
 type Translate = (scope: string, options?: Record<string, unknown>) => string;
 
-// What the bell says, for the accessibility label of the card that holds it; null at level 1.
-export function nagBellLabel(level: NagLevel | undefined, t: Translate): string | null {
-  if (!level || level < 2) return null;
-  return t('home.nag.label', { name: t(`nag.level.${level}.name`), n: level });
+// What the bell says, for the accessibility label of the card that holds it; null without a count.
+export function nagBellLabel(count: number | null | undefined, t: Translate): string | null {
+  if (count == null) return null;
+  return t('home.nag.label', { n: count });
 }
 
-export function NagBell({ level, style }: { level: NagLevel | undefined; style?: object }) {
+export function NagBell({ count, style }: { count: number | null | undefined; style?: object }) {
   const { colors } = useTheme();
   const { t } = useI18n();
-  const label = nagBellLabel(level, t);
+  const label = nagBellLabel(count, t);
   if (!label) return null;
   return (
     <View
@@ -35,8 +37,11 @@ export function NagBell({ level, style }: { level: NagLevel | undefined; style?:
       style={[styles.wrap, style]}
     >
       <MitzvahIcon name="bell" size={BELL_SIZE} color={colors.textSub} strokeWidth={1.6} />
-      <Text style={[styles.number, { color: colors.goldText }]} allowFontScaling={false}>
-        {String(level)}
+      <Text
+        style={[styles.number, { color: colors.goldText }, (count ?? 0) >= 10 ? styles.twoDigits : null]}
+        allowFontScaling={false}
+      >
+        {String(count)}
       </Text>
     </View>
   );
@@ -54,4 +59,5 @@ const styles = StyleSheet.create({
     fontSize: NUMBER_SIZE,
     lineHeight: NUMBER_SIZE * 1.15,
   },
+  twoDigits: { letterSpacing: TWO_DIGIT_SPACING },
 });

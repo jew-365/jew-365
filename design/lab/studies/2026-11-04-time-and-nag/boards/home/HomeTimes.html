@@ -230,6 +230,11 @@
 .nagi.pill{padding:0 8px;border-radius:999px;background:var(--goldLight);min-height:20px}
 .nagi.pill>.ng-t{color:var(--goldText)}
 .nagi.dial>.ng-a{border-radius:50%}
+/* the final result: the app's NagBell, a 26px bell in textSub with the total inside in goldText, 11px bold as in the app */
+.nagi.inbell{width:26px;height:26px;justify-content:center}
+.nagi.inbell>.ng-a{position:absolute;inset:0;background:var(--sub)}
+.nagi.inbell>.ng-t{position:absolute;top:7.5px;left:0;right:0;text-align:center;font-size:11px;line-height:13px;font-weight:700}
+.nagi.inbell.two>.ng-t{letter-spacing:-.5px}
 .st-done .nagi,.st-late .nagi,.st-missed .nagi{opacity:.55}
 </style>
 <template>
@@ -451,6 +456,7 @@ class Component extends DCLogic {
   // Shema 2) or the app's (the gallery's level, else 1). Level n repeats each reminder n - 1 times (src/utils/nagging.ts).
   nagOf(appId) {
     const OWN = { krias_shma_shacharit: 4, shacharit: 3, krias_shma_al_hamita: 2 };
+    const TOTALS = {"tefillin":{"1":3,"2":6,"3":9,"4":12},"krias_shma_shacharit":{"1":2,"2":4,"3":6,"4":8},"shacharit":{"1":2,"2":4,"3":6,"4":8},"mincha":{"1":2,"2":4,"3":6,"4":8},"maariv":{"1":2,"2":4,"3":6,"4":8},"krias_shma_al_hamita":{"1":1,"2":2,"3":3,"4":4}};
     const NAMES = ['', 'רגיל', 'עדין', 'בינוני', 'נודניק'];
     const appLevel = [1, 2, 3, 4].includes(Number(this.opt('level'))) ? Number(this.opt('level')) : 1;
     const own = OWN[appId] || null;
@@ -482,6 +488,12 @@ class Component extends DCLogic {
     if (NAG === 'count') {
       if (!reps) return res;
       return { ...res, on: true, cls: 'solo', a: mask('viewBox="0 0 24 24">' + BELL(0), 18, 18), b: 'display:none', text: '×' + (reps + 1) };
+    }
+    if (NAG === 'total') {
+      const total = (TOTALS[appId] || {})[L];
+      if (!reps || !total) return res;
+      const BELL16 = '<path d="M6,16.5V11A6,6 0 0 1 18,11V16.5L19.5,18H4.5Z" fill="none" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/><path d="M10,20.5A2.2,2.2 0 0 0 14,20.5" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"/>';
+      return { ...res, on: true, cls: total >= 10 ? 'inbell two' : 'inbell', a: mask('viewBox="0 0 24 24">' + BELL16, 26, 26), b: 'display:none', text: String(total), aria: 'נודניק: ' + total + ' התראות בסך הכול' };
     }
     if (NAG === 'times') {
       if (!reps) return res;

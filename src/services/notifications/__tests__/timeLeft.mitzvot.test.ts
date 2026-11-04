@@ -82,9 +82,9 @@ describe('the time-left line of a mitzvah reminder', () => {
     expect(candidates[candidates.length - 1].color).toBe(TIME_STAGE_COLOR.orange);
     const [first] = candidates;
     const last = candidates[candidates.length - 1];
-    expect(first.subtitle).toMatch(/^◔ עד \d\d:\d\d · נשארו /);
+    expect(first.subtitle).toMatch(/^עד \d\d:\d\d · נשארו /);
     // Shacharit's last reminder is 45 minutes before its end, under half of the window: orange.
-    expect(last.subtitle).toMatch(/^◑ עד \d\d:\d\d · נשארו 45 דק'$/);
+    expect(last.subtitle).toMatch(/^עד \d\d:\d\d · נשארו 45 דק'$/);
     // The repeats before the end reminder are worded at their own, earlier instants.
     expect(new Set(candidates.map((c) => c.subtitle)).size).toBe(candidates.length);
   });

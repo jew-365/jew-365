@@ -9,22 +9,28 @@ import { useUserStore } from '@/stores/useUserStore';
 describe('NagBell', () => {
   beforeEach(() => useUserStore.getState().reset());
 
-  it('shows nothing at level 1 or without a level', () => {
-    renderWithTheme(<NagBell level={1} />);
+  it('shows nothing without a count', () => {
+    renderWithTheme(<NagBell count={null} />);
     expect(screen.queryByTestId('nag-bell')).toBeNull();
     screen.unmount();
-    renderWithTheme(<NagBell level={undefined} />);
+    renderWithTheme(<NagBell count={undefined} />);
     expect(screen.queryByTestId('nag-bell')).toBeNull();
-    expect(nagBellLabel(1, t)).toBeNull();
+    expect(nagBellLabel(null, t)).toBeNull();
   });
 
-  it.each([2, 3, 4] as const)('level %i: the number inside a bell, named by the level and the times sent', (level) => {
-    renderWithTheme(<NagBell level={level} />);
+  it.each([4, 6, 12])('%i: the total inside a bell, named by the total', (count) => {
+    renderWithTheme(<NagBell count={count} />);
     const bell = screen.getByTestId('nag-bell');
     expect(within(bell).UNSAFE_getByType(MitzvahIcon).props.name).toBe('bell');
-    expect(within(bell).getByText(String(level))).toHaveStyle({ color: THEMES.gold.goldText });
-    expect(bell.props.accessibilityLabel).toBe(
-      `נודניק ${t(`nag.level.${level}.name`)}: כל תזכורת נשלחת ${level} פעמים`,
-    );
+    expect(within(bell).getByText(String(count))).toHaveStyle({ color: THEMES.gold.goldText });
+    expect(bell.props.accessibilityLabel).toBe(`נודניק: ${count} התראות בסך הכול`);
+  });
+
+  it('sets two digits a little tighter', () => {
+    renderWithTheme(<NagBell count={12} />);
+    expect(screen.getByText('12')).toHaveStyle({ letterSpacing: -0.5 });
+    screen.unmount();
+    renderWithTheme(<NagBell count={8} />);
+    expect(screen.getByText('8')).not.toHaveStyle({ letterSpacing: -0.5 });
   });
 });

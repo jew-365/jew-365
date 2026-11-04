@@ -2,18 +2,14 @@ import { clockOf, formatRemaining, fireTimeText } from './clock';
 
 type Translate = (scope: string, options?: Record<string, unknown>) => string;
 
-// How close a mitzvah's time is to its end when a reminder goes out (the owner's pick of 2026-11-04, the study
-// design/lab/studies/2026-11-04-time-and-nag): red at 15 minutes or under a fifth of the window, orange at an
-// hour or half of it, green before that.
+// How close a mitzvah's time is to its end when a reminder goes out (the owner's pick of 2026-11-04, direction ז of the
+// study design/lab/studies/2026-11-04-time-and-nag, kept exactly as it was after round 2): red at 15 minutes or under a
+// fifth of the window, orange at an hour or half of it, green before that.
 export type TimeStage = 'green' | 'orange' | 'red';
 
-// A small pie of the time gone, in the text's own colour (the owner found a coloured emoji too loud, 2026-11-04):
-// a quarter, a half, three quarters.
-export const TIME_STAGE_PIE: Record<TimeStage, string> = { green: '◔', orange: '◑', red: '◕' };
-
-// Soft tones for Android's accent colour (the notification's small icon, and on Android 11 and older its app name);
-// an iPhone banner takes no colour.
-export const TIME_STAGE_COLOR: Record<TimeStage, string> = { green: '#4F9D73', orange: '#D08A3A', red: '#C65A52' };
+// Android's accent colour by stage, direction ז's: it tints the notification's small icon (and on Android 11 and
+// older its app name). The text carries no mark; an iPhone banner takes no colour.
+export const TIME_STAGE_COLOR: Record<TimeStage, string> = { green: '#13804A', orange: '#B85F00', red: '#C5221F' };
 
 const RED_MIN = 15;
 const RED_SHARE = 0.2;
@@ -49,9 +45,5 @@ export function timeLeftLine(trigger: Date, window: { start: Date; end: Date }, 
   if (at < start) return t('notifications.timeLeft.startsIn', { left: formatRemaining(start - at, t) });
   const endText = end - at >= 24 * 60 * 60 * 1000 ? fireTimeText(window.end, tz) : clockOf(window.end, tz);
   if (at > end) return t('notifications.timeLeft.ended', { end: endText });
-  return t('notifications.timeLeft.line', {
-    mark: TIME_STAGE_PIE[timeStage(at, start, end)],
-    end: endText,
-    left: formatRemaining(end - at, t),
-  });
+  return t('notifications.timeLeft.line', { end: endText, left: formatRemaining(end - at, t) });
 }

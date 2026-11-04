@@ -16,6 +16,7 @@ mkdirSync(canvasDir, { recursive: true });
 mkdirSync(siteBoards, { recursive: true });
 
 const SURFACES = [
+  { id: 'final', title: 'התוצאה הסופית', lede: 'כך זה ייראה באפליקציה אחרי העדכון: ההתראה של ז בדיוק כמו שבחרת, והפעמון בדף הבית עם סך ההתראות בתוכו. בהתראות בוחרים בתחתית הטלפון את השעה ואנדרואיד או אייפון; בבית אפשר לשנות בסרגל את הרמה של האפליקציה.', pick: 'one', pickLabel: 'מאשר' },
   { id: 'notif2', title: 'סבב 2: מה פותח את שורת הזמן', lede: 'אחרי שהנקודה הצבעונית ירדה. באייפון אי אפשר לצבוע שום דבר בהתראה: אפל מציגה את הסמל ואת הטקסט בצבעי המערכת. לכן באייפון רק סימן בתוך הטקסט יכול לרמוז על השלב. באנדרואיד 12 ומעלה הצבע הרך נכנס לסמל העגול (בגרסה 11 ומטה גם לשם האפליקציה). מחליפים בתחתית כל טלפון בין אנדרואיד לאייפון.', pick: 'one' },
   { id: 'notif', title: 'ההתראה: כמה זמן נשאר וכמה זה קרוב', lede: 'אותן התראות אמיתיות של היום בכל הכיוונים. בוחרים שעה בתחתית הטלפון ורואים איך כל התראה נראתה כשהגיעה. הכיוון האחרון צריך build, והוא רעיון להמשך.', pick: 'one' },
   { id: 'home', title: 'דף הבית: חיווי עדין לרמת הנודניקיות', lede: 'החיווי יושב ליד שם המצווה בכרטיס הפתוח ובכל שורה של היום שלי. בדוגמה לשלוש מצוות יש רמה משלהן: ק״ש שחרית 4, שחרית 3, ק״ש על המיטה 2. השאר הולכות לפי הרמה באפליקציה, שמשנים בסרגל למעלה.', pick: 'one' },
@@ -35,7 +36,7 @@ for (const d of dirs) {
 copyFileSync(join(built, 'support.js'), join(siteBoards, 'support.js'));
 
 const pickButton = (s, d) =>
-  `<button class="pick" data-pick="${d.id}" data-surface="${s.id}" aria-pressed="false"><span class="dot" aria-hidden="true"></span><span class="lbl">זה הכיוון שלי</span></button>`;
+  `<button class="pick" data-pick="${d.id}" data-surface="${s.id}" aria-pressed="false"><span class="dot" aria-hidden="true"></span><span class="lbl">${esc(s.pickLabel || 'זה הכיוון שלי')}</span></button>`;
 
 const stall = (s, d) => `  <article class="stall" id="${d.id}" aria-labelledby="h-${d.id}">
     <div class="info">
@@ -101,7 +102,7 @@ for (const [dir, prefix] of [[siteBoards, 'boards/'], [canvasDir, 'project/']]) 
 }
 if (stale.length) console.log('removed from out (pass null for these on the next publish):', stale.join(', '));
 
-// The canvas: round 2's four lines on the first row, the notification directions on the second, the home ones on the third.
+// The canvas: the final result on the first row, round 2's four lines on the next, the notification directions on the second, the home ones on the third.
 const W = 390;
 const H = 844;
 const GX = 80;
@@ -126,13 +127,13 @@ const notes = {
     text: 'בכל לוח: Play כדי ללחוץ. בהתראות בוחרים בתחתית הטלפון את השעה, אנדרואיד או אייפון, ונודניק. בבית: Tweaks לרמה של האפליקציה, לשעה ולמראה של היום שלי.',
   },
 };
-const rows = [dirs.filter((d) => d.surface === 'notif2'), dirs.filter((d) => d.surface === 'notif'), dirs.filter((d) => d.surface === 'home')];
+const rows = [dirs.filter((d) => d.surface === 'final'), dirs.filter((d) => d.surface === 'notif2'), dirs.filter((d) => d.surface === 'notif'), dirs.filter((d) => d.surface === 'home')];
 rows.forEach((row, r) => {
   row.forEach((d, i) => {
     const x = i * (W + GX);
     const y = r * ROW;
     boards[`${d.board}.dc.html`] = { x, y, w: W, h: H, title: d.letter + ' · ' + d.name, is_interactive: true, radius: 36 };
-    notes[`n${d.board}`] = { x, y: y + H + 40, w: W, size: 's', fill: d.surface === 'home' ? 'yellow' : d.surface === 'notif2' ? 'green' : 'orange', text: d.letter + ' · ' + d.name + ': ' + d.note };
+    notes[`n${d.board}`] = { x, y: y + H + 40, w: W, size: 's', fill: d.surface === 'final' ? 'blue' : d.surface === 'home' ? 'yellow' : d.surface === 'notif2' ? 'green' : 'orange', text: d.letter + ' · ' + d.name + ': ' + d.note };
   });
 });
 const canvas = {

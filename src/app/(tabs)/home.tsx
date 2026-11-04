@@ -34,7 +34,9 @@ import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { HomeLook, useUserStore } from '@/stores/useUserStore';
-import { useMitzvotStore } from '@/stores/useMitzvotStore';
+import { remindersOf, useMitzvotStore } from '@/stores/useMitzvotStore';
+import { windowNotificationCount } from '@/services/notifications/planners/mitzvot';
+import { quietHoursOf } from '@/utils/quietHours';
 import { useShallow } from 'zustand/react/shallow';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -188,13 +190,36 @@ export default function HomeScreen() {
   const profileName = useUserStore((s) => s.profileName);
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
   const homeLook = useUserStore((s) => s.homeLook);
-  // Each mitzvah's nagging level for the bell beside its name: its own, else the app's.
+  // The bell beside each mitzvah's name: how many notifications its window sends in all, its reminders and their
+  // repeats at its own nagging level, else the app's (the owner's call of 2026-11-04), shown while the nag sends any
+  // repeat. Counted once per window for as long as the inputs hold.
   const appNagLevel = useUserStore((s) => s.nagLevel);
+  const quietBefore = useUserStore((s) => s.quietBefore);
+  const quietAfter = useUserStore((s) => s.quietAfter);
   const activeMitzvot = useMitzvotStore((s) => s.activeMitzvot);
-  const nagLevelOf = useCallback(
-    (id: string) => activeMitzvot[id]?.nagLevel ?? appNagLevel,
-    [activeMitzvot, appNagLevel],
-  );
+  const nagCountOf = useMemo(() => {
+    const quietHours = quietHoursOf(quietBefore, quietAfter);
+    const byId = new Map(allMitzvot.map((mitzvah) => [mitzvah.id, mitzvah]));
+    const counted = new Map<string, number | null>();
+    return (id: string, date: Date | null): number | null => {
+      const mitzvah = byId.get(id);
+      if (!mitzvah || !date) return null;
+      const key = `${id}|${dateKey(date)}`;
+      if (!counted.has(key)) {
+        let total: number | null = null;
+        try {
+          const nagLevel = activeMitzvot[id]?.nagLevel ?? appNagLevel;
+          const reminders = remindersOf(activeMitzvot[id], mitzvah);
+          const count = windowNotificationCount(mitzvah, reminders, date, { location, settings, quietHours, nagLevel });
+          total = count && count.repeats > 0 ? count.total : null;
+        } catch {
+          total = null;
+        }
+        counted.set(key, total);
+      }
+      return counted.get(key) ?? null;
+    };
+  }, [allMitzvot, activeMitzvot, appNagLevel, location, settings, quietBefore, quietAfter]);
   const setHomeLook = useUserStore((s) => s.setHomeLook);
   const taharahEvents = useTaharahStore((s) => s.events);
   const taharahSettings = useTaharahStore((s) => s.settings);
@@ -437,7 +462,7 @@ export default function HomeScreen() {
         ...entry,
         name: info?.name ?? entry.id,
         icon: info?.icon ?? 'star',
-        nagLevel: nagLevelOf(entry.id),
+        nagCount: nagCountOf(entry.id, entry.date),
         statusText: dayEntryStatusText(entry, now, location.tz, t),
         range: entry.start && entry.end ? clockRange(entry.start, entry.end, t, location.tz, entry.date) : null,
         startLabel: entry.start
@@ -448,7 +473,7 @@ export default function HomeScreen() {
         endLabel: entry.end ? clockOf(entry.end, location.tz) : null,
       };
     });
-  }, [current, allCurrent, upcoming, allMissed, completed, stamping, heldOpen, now, location.tz, t, nagLevelOf]);
+  }, [current, allCurrent, upcoming, allMissed, completed, stamping, heldOpen, now, location.tz, t, nagCountOf]);
 
   const name = firstName(profileName);
   const greeting = t(greetingKey(now, location.tz, name !== ''), { name });
@@ -688,7 +713,7 @@ export default function HomeScreen() {
                     testID={`home-now-${item.mitzvah.id}`}
                     name={item.name}
                     icon={iconFor(item.mitzvah.icon)}
-                    nagLevel={nagLevelOf(item.mitzvah.id)}
+                    nagCount={nagCountOf(item.mitzvah.id, item.window.date)}
                     start={item.window.start}
                     end={item.window.end}
                     now={now}

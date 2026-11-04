@@ -11,7 +11,7 @@ jest.mock('@/services/notifications/planners/horizonEnd', () => ({ planHorizonEn
 
 import { DateTime } from 'luxon';
 import { buildPlan } from '../plan';
-import { nagPreview, nextReminderAt, planMitzvot } from '../planners/mitzvot';
+import { nagPreview, nextReminderAt, planMitzvot, windowNotificationCount } from '../planners/mitzvot';
 import { horizonFor } from '../planners/horizon';
 import { parseId } from '../ids';
 import type { PlanInput, ScheduleCandidate } from '../types';
@@ -352,5 +352,68 @@ describe('the previews agree with the plan', () => {
     expect(nagPreview(closing, closing.defaultReminders[0], { ...scope, nagLevel: 1 })).toEqual([]);
     const never = fixture('never', 300, 360, [r('start', 120)]);
     expect(nagPreview(never, never.defaultReminders[0], { ...scope, nagLevel: 4 })).toEqual([]);
+  });
+});
+
+describe('the total a window sends, for the bell on home', () => {
+  // The location date 2026-11-11 as day-level surfaces hold it: the device-local midnight of that date.
+  const DAY = new Date(2026, 10, 11);
+  const scope = (nagLevel?: NagLevel, quietHours?: QuietHours) => ({
+    location: J,
+    settings: SETTINGS,
+    ...(nagLevel ? { nagLevel } : {}),
+    ...(quietHours ? { quietHours } : {}),
+  });
+
+  it.each([
+    [1, 2, 0],
+    [2, 4, 2],
+    [3, 6, 4],
+    [4, 8, 6],
+  ] as const)('Shacharit at level %i: %i notifications, %i of them repeats', (level, total, repeats) => {
+    expect(windowNotificationCount(SHACHARIT, SHACHARIT.defaultReminders, DAY, scope(level))).toEqual({
+      total,
+      repeats,
+    });
+  });
+
+  it('equals what the plan schedules for that window, ahead of it, at every level', () => {
+    for (const level of [1, 2, 3, 4] as const) {
+      const planned = of(plan([SHACHARIT], NIGHT_BEFORE, { level }), 'shacharit', '2026-11-11');
+      expect(windowNotificationCount(SHACHARIT, SHACHARIT.defaultReminders, DAY, scope(level))?.total).toBe(
+        planned.length,
+      );
+    }
+  });
+
+  it('counts one notification where a repeat lands on another reminder, as the plan keeps one', () => {
+    const close = fixture('close', 8 * 60, 12 * 60, [r('start', 0), r('start', 5)]);
+    const planned = of(plan([close], NIGHT_BEFORE, { level: 3 }), 'close', '2026-11-11');
+    // 08:00, 08:05 (the second reminder, which a repeat of the first also lands on), 08:10 and 08:15.
+    expect(planned.map((c) => c.trigger.getTime())).toEqual(
+      [0, 5, 10, 15].map((m) => clock('2026-11-11T08:00') + m * MIN),
+    );
+    expect(windowNotificationCount(close, close.defaultReminders, DAY, scope(3))).toEqual({ total: 4, repeats: 2 });
+  });
+
+  it('keeps counting the whole window whatever is marked or already sent', () => {
+    const marked = of(
+      plan([SHACHARIT], NIGHT_BEFORE, { level: 3, completions: { '2026-11-11': { shacharit: 1 } } }),
+      'shacharit',
+      '2026-11-11',
+    );
+    expect(marked).toHaveLength(0);
+    expect(windowNotificationCount(SHACHARIT, SHACHARIT.defaultReminders, DAY, scope(3))?.total).toBe(6);
+  });
+
+  it('leaves out the repeats the end of the time drops', () => {
+    // A reminder 5 minutes before the end with a nag of two every 10 after it: neither repeat fits.
+    const late = fixture('late', 8 * 60, 9 * 60, [r('start', 55, { count: 2, everyMin: 10, placement: 'after' })]);
+    expect(windowNotificationCount(late, late.defaultReminders, DAY, scope())).toEqual({ total: 1, repeats: 0 });
+  });
+
+  it('is null on a day with no window', () => {
+    const once = fixture('once', 8 * 60, 9 * 60, [r('start', 0)], { onlyOn: '2026-11-12' });
+    expect(windowNotificationCount(once, once.defaultReminders, DAY, scope(3))).toBeNull();
   });
 });

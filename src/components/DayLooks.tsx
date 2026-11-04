@@ -17,7 +17,6 @@ import {
   type DayEntry,
   type DayEntryStatus,
 } from '@/utils/homeDay';
-import type { NagLevel } from '@/utils/nagging';
 import { Button } from './Button';
 import { Card } from './Card';
 import { IconTile } from './IconTile';
@@ -29,7 +28,8 @@ export type DayLookEntry = DayEntry & {
   name: string;
   icon: IconName;
   // The mitzvah's nagging level, drawn beside the name by NagBell (nothing at level 1).
-  nagLevel?: NagLevel;
+  // How many notifications the entry's window sends in all, for the bell; absent or null shows none.
+  nagCount?: number | null;
   statusText: string;
   range: string | null;
   startLabel: string | null;
@@ -138,7 +138,7 @@ export const DayLooks = React.memo(function DayLooks({
       onPress={() => onPress(e)}
       onLongPress={() => onLongPress(e)}
       accessibilityRole="button"
-      accessibilityLabel={[e.name, e.statusText, e.status === 'late' ? lateLabel : null, nagBellLabel(e.nagLevel, t)]
+      accessibilityLabel={[e.name, e.statusText, e.status === 'late' ? lateLabel : null, nagBellLabel(e.nagCount, t)]
         .filter(Boolean)
         .join(', ')}
       accessibilityActions={[{ name: 'longpress', label: t('home.quick.title') }]}
@@ -239,7 +239,7 @@ export const DayLooks = React.memo(function DayLooks({
           <Text style={[typography.bodyBold, styles.centerText, styles.name, { color: colors.text }]} numberOfLines={2}>
             {e.name}
           </Text>
-          <NagBell level={e.nagLevel} />
+          <NagBell count={e.nagCount} />
         </View>
         {statusLine(e, true)}
         {rangeLine(e, true)}
@@ -260,7 +260,7 @@ export const DayLooks = React.memo(function DayLooks({
             <Text style={[typography.bodyBold, styles.name, { color: colors.text }]} numberOfLines={2}>
               {e.name}
             </Text>
-            <NagBell level={e.nagLevel} />
+            <NagBell count={e.nagCount} />
           </View>
           {statusLine(e, false)}
         </View>

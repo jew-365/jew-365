@@ -112,16 +112,16 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'תזכורות ועורך התזכורות', en: 'Reminders and the reminder editor' },
     body: [
       {
-        he: 'במסך של כל מצווה מופיעים חלון הזמן של היום, ההתראה הבאה ורשימת התזכורות לפי סדר השליחה, ולצד כל אחת מתי היא תישלח בפעם הבאה. ״הוסף תזכורת״ מוסיף עוד אחת, ו״חזרה לברירת מחדל״ מחזיר את התזכורות המקוריות. כל תזכורת כותבת גם מתחת לכותרת עד מתי הזמן ונשארו כמה, עם עוגת זמן קטנה שמראה כמה מהזמן עבר. באנדרואיד הסמל של ההתראה נצבע בגוון רך: ירוק כשיש זמן, כתום מחצי הזמן או בשעה האחרונה, ואדום לקראת הסוף.',
-        en: "Each mitzvah's screen shows today's time window, the next notification and its reminders in the order they go out, each with when it fires next. Add reminder adds one more, and Reset to default brings back the original reminders. Every reminder also says under its title until when the time lasts and how long is left, with a small pie of the time gone. On Android the notification's icon takes a soft colour: green while there is time, orange from half the time or the last hour, red near the end.",
+        he: 'במסך של כל מצווה מופיעים חלון הזמן של היום, ההתראה הבאה ורשימת התזכורות לפי סדר השליחה, ולצד כל אחת מתי היא תישלח בפעם הבאה. ״הוסף תזכורת״ מוסיף עוד אחת, ו״חזרה לברירת מחדל״ מחזיר את התזכורות המקוריות. כל תזכורת כותבת גם מתחת לכותרת עד מתי הזמן ונשארו כמה. באנדרואיד הסמל של ההתראה נצבע: ירוק כשיש זמן, כתום מחצי הזמן או בשעה האחרונה, ואדום לקראת הסוף.',
+        en: "Each mitzvah's screen shows today's time window, the next notification and its reminders in the order they go out, each with when it fires next. Add reminder adds one more, and Reset to default brings back the original reminders. Every reminder also says under its title until when the time lasts and how long is left. On Android the notification's icon takes a colour: green while there is time, orange from half the time or the last hour, red near the end.",
       },
       {
         he: 'ב״מתי לשלוח״ בוחרים מתי התזכורת נשלחת: לפני תחילת הזמן (עד שלוש שעות לפני), בתחילת הזמן או אחריה, לפני סוף הזמן או בשעה קבועה, ומתחת קובעים כמה דקות. ״דלג אם כבר סומן״ מוותר עליה כשהמצווה כבר סומנה. במצווה אישית יש גם ״אחרי סוף הזמן, אם לא סימנת״, ובקידוש לבנה ״אחרי צאת שבת או חג״.',
         en: 'In When to send you choose when the reminder goes out: before the time starts (up to three hours before), at the start or after it, before the time ends or at a set time, and below it how many minutes. Skip if already done drops it once the mitzvah is marked. A custom mitzvah also offers After the end, if not marked, and Kiddush Levana offers After Shabbat or Yom Tov ends.',
       },
       {
-        he: 'רמת נודניקיות קובעת כמה פעמים כל תזכורת חוזרת: רגיל (פעם אחת), עדין, בינוני או נודניק (עוד שלוש התראות, כל 5 דקות). בוחרים אותה בהגדרות ← מכשיר והתראות, ובמסך של כל מצווה אפשר לקבוע לה רמה משלה. בעורך התזכורת ובמצווה אישית אפשר לתת לתזכורת אחת נודניק משלה (כמה פעמים, כל כמה דקות ומתי) או לפטור אותה מהרמה. החזרות באות לפני תזכורת של תחילת הזמן או של שעה קבועה, או אחריה, לפי הבחירה; לפני תזכורת של סוף הזמן ושל קריאת שמע על המיטה הן באות רק לפניה, ואף פעם לא אחרי שהזמן נגמר. ״עשיתי״ על אחת מהן מבטל את כל השאר. בדף הבית, מצווה שהרמה שלה מעל רגיל מקבלת ליד השם פעמון קטן ובתוכו כמה פעמים כל תזכורת שלה נשלחת.',
-        en: 'The nagging level sets how many times each reminder repeats: Regular (once), Gentle, Medium or Nagging (three more, every 5 minutes). Choose it in Settings → Device and notifications, and any mitzvah can have a level of its own on its screen. In the reminder editor and in a custom mitzvah one reminder can have a nag of its own (how many times, every how many minutes and when) or be exempt from the level. The repeats come before or after a reminder at the start of the time or at a set time, as chosen; for a reminder before the end and for the bedtime Shema they come only before it, and never after the time has ended. Done on any of them cancels the rest. On Home, a mitzvah whose level is above Regular shows a small bell beside its name with how many times each of its reminders is sent.',
+        he: 'רמת נודניקיות קובעת כמה פעמים כל תזכורת חוזרת: רגיל (פעם אחת), עדין, בינוני או נודניק (עוד שלוש התראות, כל 5 דקות). בוחרים אותה בהגדרות ← מכשיר והתראות, ובמסך של כל מצווה אפשר לקבוע לה רמה משלה. בעורך התזכורת ובמצווה אישית אפשר לתת לתזכורת אחת נודניק משלה (כמה פעמים, כל כמה דקות ומתי) או לפטור אותה מהרמה. החזרות באות לפני תזכורת של תחילת הזמן או של שעה קבועה, או אחריה, לפי הבחירה; לפני תזכורת של סוף הזמן ושל קריאת שמע על המיטה הן באות רק לפניה, ואף פעם לא אחרי שהזמן נגמר. ״עשיתי״ על אחת מהן מבטל את כל השאר. בדף הבית, ליד שם של מצווה עם נודניק יש פעמון קטן, ובתוכו כמה התראות היא שולחת בסך הכול בזמן שלה: התזכורות והחזרות שלהן.',
+        en: 'The nagging level sets how many times each reminder repeats: Regular (once), Gentle, Medium or Nagging (three more, every 5 minutes). Choose it in Settings → Device and notifications, and any mitzvah can have a level of its own on its screen. In the reminder editor and in a custom mitzvah one reminder can have a nag of its own (how many times, every how many minutes and when) or be exempt from the level. The repeats come before or after a reminder at the start of the time or at a set time, as chosen; for a reminder before the end and for the bedtime Shema they come only before it, and never after the time has ended. Done on any of them cancels the rest. On Home, a mitzvah with a nag shows a small bell beside its name with how many notifications it sends in all during its time: the reminders and their repeats.',
       },
       {
         he: 'מצווה פעילה נשארת תמיד עם תזכורת אחת לפחות: את האחרונה אי אפשר למחוק, והפעלה של מצווה בלי תזכורות מבקשת קודם להגדיר אחת.',
@@ -434,12 +434,12 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: "A custom mitzvah takes an icon of your choice, not only the star: in the mitzvah's form tap Icon and pick one of the app's icons. It shows on Home, the schedule, Tracking, My mitzvot and the mitzvah's screen.",
       },
       {
-        he: 'כל תזכורת של מצווה כותבת מתחת לכותרת עד מתי הזמן ונשארו כמה, למשל ״◑ עד 09:32 · נשארו 45 דק׳״, עם עוגת זמן קטנה שמראה כמה מהזמן עבר. באנדרואיד הסמל של ההתראה נצבע ירוק, כתום או אדום בגוונים רכים לפי כמה זה קרוב לסוף.',
-        en: 'Every mitzvah reminder says under its title until when the time lasts and how long is left, such as “◑ until 09:32 · 45 min left”, with a small pie of the time gone. On Android the notification’s icon turns a soft green, orange or red by how close the end is.',
+        he: 'כל תזכורת של מצווה כותבת מתחת לכותרת עד מתי הזמן ונשארו כמה, למשל ״עד 09:32 · נשארו 45 דק׳״. באנדרואיד הסמל של ההתראה נצבע ירוק, כתום או אדום לפי כמה זה קרוב לסוף.',
+        en: 'Every mitzvah reminder says under its title until when the time lasts and how long is left, such as “Until 09:32 · 45 min left”. On Android the notification’s icon turns green, orange or red by how close the end is.',
       },
       {
-        he: 'בדף הבית, ליד שם מצווה שרמת הנודניקיות שלה מעל רגיל, יש פעמון קטן ובתוכו כמה פעמים כל תזכורת שלה נשלחת.',
-        en: 'On Home, beside the name of a mitzvah whose nagging level is above Regular, a small bell shows how many times each of its reminders is sent.',
+        he: 'בדף הבית, ליד שם של מצווה עם נודניק, יש פעמון קטן ובתוכו כמה התראות היא שולחת בסך הכול.',
+        en: 'On Home, beside the name of a mitzvah with a nag, a small bell shows how many notifications it sends in all.',
       },
     ],
   },

@@ -424,3 +424,33 @@ export function nagChain(mitzvah: Mitzvah, draft: Reminder, scope: ReminderScope
 
 export const nagPreview = (mitzvah: Mitzvah, draft: Reminder, scope: ReminderScope): NagPreviewEntry[] =>
   nagChain(mitzvah, draft, scope)?.repeats ?? [];
+
+// How many notifications `date`'s window of `mitzvah` sends in all, from its first trigger and whatever is marked:
+// every main and every repeat of its nag that the plan lets through (the end of the time, the holy blocks and the
+// quiet hours), one per instant where the plan keeps one (`withoutDuplicates()`). `repeats` counts the repeats
+// among them. `null` when the day has no window or skips it. Home's bell prints `total` while `repeats` holds any.
+export type WindowNotificationCount = { total: number; repeats: number };
+
+export function windowNotificationCount(
+  mitzvah: Mitzvah,
+  reminders: Reminder[],
+  date: Date,
+  scope: Omit<ReminderScope, 'now' | 'completions' | 'skipped'>,
+): WindowNotificationCount | null {
+  const planned = windowTriggers(mitzvah, reminders, date, { ...scope, now: NO_PAST, completions: {}, skipped: {} });
+  if (!planned) return null;
+  const atInstant = new Map<number, WindowTrigger[]>();
+  for (const entry of planned.triggers) {
+    const key = entry.trigger.getTime();
+    atInstant.set(key, [...(atInstant.get(key) ?? []), entry]);
+  }
+  let total = 0;
+  let repeats = 0;
+  for (const group of atInstant.values()) {
+    const collapses = group.length > 1 && group.some(({ moved, repeat }) => moved || repeat > 0);
+    const kept = collapses ? [group.find(({ repeat }) => repeat === 0) ?? group[0]] : group;
+    total += kept.length;
+    repeats += kept.filter(({ repeat }) => repeat > 0).length;
+  }
+  return { total, repeats };
+}

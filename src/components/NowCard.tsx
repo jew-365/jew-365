@@ -22,7 +22,6 @@ import { durations, radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { clockOf, formatRemaining, remainingParts } from '@/utils/clock';
 import { ringDashOffset } from '@/utils/homeDay';
-import type { NagLevel } from '@/utils/nagging';
 import { Button } from './Button';
 import { Card } from './Card';
 import { IconTile } from './IconTile';
@@ -57,8 +56,8 @@ const WASH_ALPHA = '1F';
 type Props = {
   name: string;
   icon: IconName;
-  // The mitzvah's nagging level, drawn beside the name by NagBell (nothing at level 1).
-  nagLevel?: NagLevel;
+  // How many notifications the mitzvah's window sends in all, drawn beside the name by NagBell (nothing without one).
+  nagCount?: number | null;
   start: Date;
   end: Date;
   now: Date;
@@ -109,7 +108,7 @@ function Spark({ progress, index, color }: { progress: SharedValue<number>; inde
 
 export const NowCard = React.memo(function NowCard({
   name,
-  nagLevel,
+  nagCount,
   icon,
   start,
   end,
@@ -223,7 +222,7 @@ export const NowCard = React.memo(function NowCard({
           accessibilityLabel={[
             name,
             t('home.now.ringLabel', { left: formatRemaining(remaining, t) }),
-            nagBellLabel(nagLevel, t),
+            nagBellLabel(nagCount, t),
           ]
             .filter(Boolean)
             .join(', ')}
@@ -237,7 +236,7 @@ export const NowCard = React.memo(function NowCard({
               <Text style={[typography.heading, styles.name, { color: colors.text }]} numberOfLines={1}>
                 {name}
               </Text>
-              <NagBell level={nagLevel} />
+              <NagBell count={nagCount} />
             </View>
             <Text style={[typography.caption, { color: colors.textSub }]}>
               {t('home.now.start', { time: clockOf(start, tz) })}

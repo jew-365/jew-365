@@ -153,12 +153,20 @@
     // Round 2 (the owner's question of 2026-11-04 on the mark that opens the line): the app's own line of
     // timeLeftLine() in src/utils/timeLeft.ts, the pie of TIME_STAGE_PIE and the soft tones of TIME_STAGE_COLOR, which
     // tint only the small icon on Android 12 and later (the app name too only on Android 11 and older).
+    // The final result (the owner's pick of the same day, ז exactly as drawn): the app's line with no mark, and ז's
+    // colours on the small icon alone, as Android 12 and later draw them.
+    if (STYLE === 'final') {
+      r.sub = stage === 'before' ? this.str('notifications.timeLeft.startsIn', { left: this.leftText(w.start - n.at) }) : this.str('notifications.timeLeft.line', { end: this.hm(w.end), left: this.leftText(w.end - n.at) });
+      r.accent = this.stageColor(stage);
+      r.tintName = false;
+      return r;
+    }
     if (STYLE.startsWith('r2')) {
       const leftR2 = this.leftText(w.end - n.at);
       const startsR2 = this.str('notifications.timeLeft.startsIn', { left: this.leftText(w.start - n.at) });
       const pie = { green: '◔', orange: '◑', red: '◕' }[stage];
-      const withPie = stage === 'before' ? startsR2 : this.str('notifications.timeLeft.line', { mark: pie, end: this.hm(w.end), left: leftR2 });
-      const plain = stage === 'before' ? startsR2 : this.str('notifications.timeLeft.line', { mark: '', end: this.hm(w.end), left: leftR2 }).trim();
+      const plain = stage === 'before' ? startsR2 : this.str('notifications.timeLeft.line', { end: this.hm(w.end), left: leftR2 });
+      const withPie = stage === 'before' ? startsR2 : pie + ' ' + plain;
       r.accent = { green: '#4F9D73', orange: '#D08A3A', red: '#C65A52', before: this.data().notifColor }[stage];
       r.tintName = false;
       if (STYLE === 'r2pie') r.sub = withPie;
@@ -244,7 +252,7 @@
     });
     const [lh, lm] = this.look().split(':');
     return {
-      phCls: 't-' + this.theme() + ' p-' + plat + (STYLE.startsWith('r2') ? ' r2' : ''),
+      phCls: 't-' + this.theme() + ' p-' + plat + (STYLE.startsWith('r2') || STYLE === 'final' ? ' r2' : ''),
       hasToast: Boolean(t),
       toastText: t ? t.text : '',
       toastCls: t ? 't' + this.flip('toast', t.n) : '',

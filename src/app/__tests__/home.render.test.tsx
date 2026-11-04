@@ -180,6 +180,19 @@ describe('home between midnight and alot', () => {
     expect(dateKey(date)).toBe('2027-06-14');
   });
 
+  it('shows in the bell how many notifications the open window sends in all, and no bell without repeats', () => {
+    useUserStore.setState({ nagLevel: 3 });
+    renderAt(NIGHT_OF_THE_14TH);
+    // Maariv's two reminders, each followed by two repeats at level 3.
+    const bell = within(nowCard('maariv')).getByTestId('nag-bell');
+    expect(within(bell).getByText('6')).toBeOnTheScreen();
+    expect(bell.props.accessibilityLabel).toBe('נודניק: 6 התראות בסך הכול');
+    screen.unmount();
+    useUserStore.setState({ nagLevel: 1 });
+    renderAt(NIGHT_OF_THE_14TH);
+    expect(within(nowCard('maariv')).queryByTestId('nag-bell')).toBeNull();
+  });
+
   it('does not call missed a window that closed before the install, and keeps the evening one', () => {
     const installedAt = at(JERUSALEM, '2027-06-14T21:30').getTime();
     useMitzvotStore.setState({

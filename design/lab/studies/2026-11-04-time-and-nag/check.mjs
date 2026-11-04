@@ -33,7 +33,7 @@ for (const d of dirs) {
       await page.goto(`http://localhost:${port}/project/${d.board}.dc.html#theme=${theme}&${demo.hash}`);
       await page.waitForTimeout(900);
       if (errs.length) fail(`${d.board} ${theme} ${demo.hash}: ${errs[0]}`);
-      if (d.surface.startsWith('notif') && demo === d.demos[0]) {
+      if (d.board.startsWith('Notif') && demo === d.demos[0]) {
         for (const platform of ['android', 'iphone']) {
           await page.evaluate((p) => (location.hash = location.hash + '&platform=' + p), platform);
           await page.waitForTimeout(400);
@@ -41,9 +41,13 @@ for (const d of dirs) {
           if (!n) fail(`${d.board} ${platform}: no notification at ${demo.hash}`);
         }
       }
-      if (d.surface === 'home' && demo.hash === 'startTime=07:42') {
+      if (d.board.startsWith('Home') && demo.hash === 'startTime=07:42') {
         const n = await page.locator('.nagi').count();
         if (theme === 'gold' && !n && d.board !== 'HomeOwnOnly') fail(`${d.board}: no level shown at 07:42`);
+        if (d.board === 'HomeTotal' && theme === 'gold') {
+          const texts = await page.locator('.nagi.inbell .ng-t').allInnerTexts();
+          if (!texts.includes('8') || !texts.includes('6')) fail(`HomeTotal: totals ${texts.join(',')}, expected 8 and 6`);
+        }
       }
       await page.close();
     }
