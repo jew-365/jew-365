@@ -322,7 +322,7 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: boo
           channel: 'mitzvot',
           categoryIdentifier: offersText ? MITZVAH_TEXT_CATEGORY : MITZVAH_REMINDER_CATEGORY,
           title: mitzvahTitle(mitzvah, english),
-          subtitle: timeLeftLine(trigger, planned.window, location.tz, t),
+          subtitle: timeLeftLine(trigger, planned.window, location.tz, t, input.platform === 'ios'),
           ...(timeLeftColor(trigger, planned.window) ? { color: timeLeftColor(trigger, planned.window) } : {}),
           body: repeat ? `${body} · ${t('notifications.nag.repeat', { k: repeat, n: of })}` : body,
           data: {

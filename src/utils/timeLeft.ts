@@ -33,17 +33,29 @@ export function timeLeftColor(trigger: Date, window: { start: Date; end: Date })
   return TIME_STAGE_COLOR[at > end ? 'red' : timeStage(at, start, end)];
 }
 
+// The urgency mark of the iPhone, which takes no colour (the owner's pick of 2026-11-04, round 3 direction א of the
+// study): it opens the line in the red stage and after the window. Android keeps ז's line and shows the stage in colour.
+export const URGENT_MARK = '⚠️';
+
 // The line a mitzvah reminder carries under its title (the notification's subtitle: the iPhone's bold second
 // line, Android's subText beside the app name). It is worded at the instant the reminder goes out and never
 // changes, so it leads with the end time, which stays true, and the time left beside it. Before the window it
 // says when the time starts; after it (a follow-up), when it ended. The end time carries its date when it is a
-// day or more away (a multi-day window).
-export function timeLeftLine(trigger: Date, window: { start: Date; end: Date }, tz: string, t: Translate): string {
+// day or more away (a multi-day window). With `urgentMark` (the iPhone) a red-stage line opens with URGENT_MARK.
+export function timeLeftLine(
+  trigger: Date,
+  window: { start: Date; end: Date },
+  tz: string,
+  t: Translate,
+  urgentMark = false,
+): string {
   const at = trigger.getTime();
   const start = window.start.getTime();
   const end = window.end.getTime();
   if (at < start) return t('notifications.timeLeft.startsIn', { left: formatRemaining(start - at, t) });
   const endText = end - at >= 24 * 60 * 60 * 1000 ? fireTimeText(window.end, tz) : clockOf(window.end, tz);
-  if (at > end) return t('notifications.timeLeft.ended', { end: endText });
-  return t('notifications.timeLeft.line', { end: endText, left: formatRemaining(end - at, t) });
+  const mark = (line: string, red: boolean) => (urgentMark && red ? `${URGENT_MARK} ${line}` : line);
+  if (at > end) return mark(t('notifications.timeLeft.ended', { end: endText }), true);
+  const line = t('notifications.timeLeft.line', { end: endText, left: formatRemaining(end - at, t) });
+  return mark(line, timeStage(at, start, end) === 'red');
 }

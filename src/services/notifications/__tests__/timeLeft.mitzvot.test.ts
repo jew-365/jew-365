@@ -32,11 +32,11 @@ const SETTINGS: UserSettings = { nusach: 'ashkenaz', halachicOpinions: { ksSofZm
 const NIGHT_BEFORE = at(J, '2026-11-11T00:30');
 const SHACHARIT = MITZVOT.find((m) => m.id === 'shacharit')!;
 
-function planInput(now: Date, nagLevel?: NagLevel): PlanInput {
+function planInput(now: Date, nagLevel?: NagLevel, platform: PlanInput['platform'] = 'android'): PlanInput {
   return {
     now,
     fromDate: now,
-    platform: 'android',
+    platform,
     hasPermission: true,
     language: 'he',
     location: J,
@@ -87,6 +87,24 @@ describe('the time-left line of a mitzvah reminder', () => {
     expect(last.subtitle).toMatch(/^עד \d\d:\d\d · נשארו 45 דק'$/);
     // The repeats before the end reminder are worded at their own, earlier instants.
     expect(new Set(candidates.map((c) => c.subtitle)).size).toBe(candidates.length);
+  });
+
+  it('opens the red-stage lines with the urgency mark on the iPhone only', () => {
+    // A reminder at the start (green) and one 10 minutes before the end (red: 15 minutes or less are left).
+    const reminders = [
+      { anchor: 'start' as const, offsetMin: 0, label: 'x' },
+      { anchor: 'end' as const, offsetMin: -10, label: 'y' },
+    ];
+    for (const platform of ['ios', 'android'] as const) {
+      const input = { ...planInput(NIGHT_BEFORE, 1, platform), reminderOverrides: { shacharit: reminders } };
+      const candidates = day(buildPlan(input));
+      const red = candidates.filter((c) => c.color === TIME_STAGE_COLOR.red);
+      const others = candidates.filter((c) => c.color !== TIME_STAGE_COLOR.red);
+      expect(others.length).toBeGreaterThan(0);
+      expect(red.length).toBeGreaterThan(0);
+      for (const c of others) expect(c.subtitle?.startsWith('⚠️')).toBe(false);
+      for (const c of red) expect(c.subtitle?.startsWith('⚠️ ')).toBe(platform === 'ios');
+    }
   });
 
   it('is part of what the hash covers and is handed to expo as the subtitle', async () => {

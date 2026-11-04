@@ -21,16 +21,22 @@ describe('NagBell', () => {
   it.each([4, 6, 12])('%i: the total inside a bell, named by the total', (count) => {
     renderWithTheme(<NagBell count={count} />);
     const bell = screen.getByTestId('nag-bell');
-    expect(within(bell).UNSAFE_getByType(MitzvahIcon).props.name).toBe('bell');
+    const icon = within(bell).UNSAFE_getByType(MitzvahIcon);
+    expect(icon.props).toMatchObject({
+      name: 'bell',
+      color: THEMES.gold.goldText,
+      tint: THEMES.gold.goldLight,
+      variant: 'duotone',
+    });
     expect(within(bell).getByText(String(count))).toHaveStyle({ color: THEMES.gold.goldText });
     expect(bell.props.accessibilityLabel).toBe(`נודניק: ${count} התראות בסך הכול`);
   });
 
-  it('sets two digits a little tighter', () => {
+  it('sets two digits smaller, so they stay inside the bell', () => {
     renderWithTheme(<NagBell count={12} />);
-    expect(screen.getByText('12')).toHaveStyle({ letterSpacing: -0.5 });
+    expect(screen.getByText('12')).toHaveStyle({ fontSize: 10 });
     screen.unmount();
     renderWithTheme(<NagBell count={8} />);
-    expect(screen.getByText('8')).not.toHaveStyle({ letterSpacing: -0.5 });
+    expect(screen.getByText('8')).toHaveStyle({ fontSize: 12 });
   });
 });

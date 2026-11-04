@@ -1,7 +1,7 @@
 import { CITIES } from '@/data/cities';
 import { setLocale, t } from '@/i18n';
 import { at } from '@/testing/zmanim';
-import { TIME_STAGE_COLOR, timeLeftColor, timeLeftLine, timeStage } from '../timeLeft';
+import { TIME_STAGE_COLOR, URGENT_MARK, timeLeftColor, timeLeftLine, timeStage } from '../timeLeft';
 
 const J = CITIES[0];
 const MIN = 60_000;
@@ -50,6 +50,18 @@ describe('timeLeftLine', () => {
     setLocale('he');
     const long = { start: window.start, end: at(J, '2026-11-12T03:40') };
     expect(timeLeftLine(window.start, long, J.tz, t)).toBe('עד 12/11 03:40 · נשארו 7 ימים');
+  });
+
+  it('opens a red-stage line with the urgency mark on the iPhone, and nothing else', () => {
+    setLocale('he');
+    expect(URGENT_MARK).toBe('⚠️');
+    expect(timeLeftLine(at(J, '2026-11-04T09:22'), window, J.tz, t, true)).toBe("⚠️ עד 09:32 · נשארו 10 דק'");
+    expect(timeLeftLine(at(J, '2026-11-04T10:02'), window, J.tz, t, true)).toBe('⚠️ הזמן נגמר ב־09:32');
+    expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t, true)).toBe("עד 09:32 · נשארו 45 דק'");
+    expect(timeLeftLine(window.start, window, J.tz, t, true)).toBe('עד 09:32 · נשארו 3:34 שעות');
+    expect(timeLeftLine(at(J, '2026-11-04T05:48'), window, J.tz, t, true)).toBe("מתחיל בעוד 10 דק'");
+    // Without it (Android) the red line stays plain.
+    expect(timeLeftLine(at(J, '2026-11-04T09:22'), window, J.tz, t)).toBe("עד 09:32 · נשארו 10 דק'");
   });
 
   it('reads in English', () => {

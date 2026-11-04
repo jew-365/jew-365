@@ -6,14 +6,17 @@ import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fontFamilies } from '@/theme/typography';
 
-// A mitzvah's nagging on home (the owner's pick of 2026-11-04, direction ד of the study design/lab/studies/2026-11-04-
-// time-and-nag, with the number inside the bell; the number became the total on the same day): a small bell beside
-// the name with how many notifications the mitzvah's time sends in all, its reminders and their repeats. Without a
-// count (no repeat to send) it shows nothing.
-const BELL_SIZE = scaled(26);
-const NUMBER_SIZE = scaled(11);
-// Two digits (a mitzvah of three reminders at the top level sends 12) sit a little tighter, inside the bell's body.
-const TWO_DIGIT_SPACING = scaled(-0.5);
+// A mitzvah's nagging on home (the owner's picks of 2026-11-04 in the study design/lab/studies/2026-11-04-time-and-nag:
+// direction ד with the number inside the bell, the number made the total, and round 3's bell א): a soft bell, filled
+// goldLight with its outline and number in goldText, the number centred in its body, beside the name, with how many
+// notifications the mitzvah's time sends in all, its reminders and their repeats. Without a count it shows nothing.
+const BELL_SIZE = scaled(30);
+const NUMBER_SIZE = scaled(12);
+// Two digits (a mitzvah of three reminders at the top level sends 12) take a smaller size, inside the bell's body.
+const TWO_DIGIT_SIZE = scaled(10);
+// The number's box, centred on the bell's body (the dome and the rim, about 49% down the drawing).
+const NUMBER_BOX = scaled(16);
+const NUMBER_TOP = BELL_SIZE * 0.49 - NUMBER_BOX / 2;
 
 type Translate = (scope: string, options?: Record<string, unknown>) => string;
 
@@ -36,28 +39,37 @@ export function NagBell({ count, style }: { count: number | null | undefined; st
       testID="nag-bell"
       style={[styles.wrap, style]}
     >
-      <MitzvahIcon name="bell" size={BELL_SIZE} color={colors.textSub} strokeWidth={1.6} />
-      <Text
-        style={[styles.number, { color: colors.goldText }, (count ?? 0) >= 10 ? styles.twoDigits : null]}
-        allowFontScaling={false}
-      >
-        {String(count)}
-      </Text>
+      <MitzvahIcon
+        name="bell"
+        size={BELL_SIZE}
+        color={colors.goldText}
+        tint={colors.goldLight}
+        variant="duotone"
+        strokeWidth={1.7}
+      />
+      <View style={styles.numberBox} pointerEvents="none">
+        <Text
+          style={[styles.number, { color: colors.goldText }, (count ?? 0) >= 10 ? styles.twoDigits : null]}
+          allowFontScaling={false}
+        >
+          {String(count)}
+        </Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   wrap: { width: BELL_SIZE, height: BELL_SIZE, alignItems: 'center', justifyContent: 'center' },
-  number: {
+  numberBox: {
     position: 'absolute',
-    top: BELL_SIZE * 0.29,
+    top: NUMBER_TOP,
     left: 0,
     right: 0,
-    textAlign: 'center',
-    fontFamily: fontFamilies.ui.bold,
-    fontSize: NUMBER_SIZE,
-    lineHeight: NUMBER_SIZE * 1.15,
+    height: NUMBER_BOX,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  twoDigits: { letterSpacing: TWO_DIGIT_SPACING },
+  number: { fontFamily: fontFamilies.ui.bold, fontSize: NUMBER_SIZE, lineHeight: NUMBER_BOX, textAlign: 'center' },
+  twoDigits: { fontSize: TWO_DIGIT_SIZE },
 });
