@@ -182,23 +182,32 @@ describe('home between midnight and alot', () => {
     expect(dateKey(date)).toBe('2027-06-14');
   });
 
-  it('shows in the bell how many notifications the open window sends in all, and no bell at level 1', () => {
+  it('shows the bell only on a mitzvah whose own level differs from the app’s, with its total', () => {
+    // The app at 3 and no mitzvah of its own: no bell anywhere, however much it nags.
     useUserStore.setState({ nagLevel: 3 });
     renderAt(NIGHT_OF_THE_14TH);
-    // Maariv's two reminders, its two last-chance points and the level's nags in its zone and after it.
+    expect(within(nowCard('maariv')).queryByTestId('nag-bell')).toBeNull();
+    screen.unmount();
+    // Maariv's own level equal to the app's is no exception either.
+    useMitzvotStore.getState().setNagLevel('maariv', 3);
+    renderAt(NIGHT_OF_THE_14TH);
+    expect(within(nowCard('maariv')).queryByTestId('nag-bell')).toBeNull();
+    screen.unmount();
+    // Its own level 4 over the app's 3: the bell, with every notification of the window.
+    useMitzvotStore.getState().setNagLevel('maariv', 4);
+    renderAt(NIGHT_OF_THE_14TH);
     const maariv = findMitzvah('maariv')!;
     const { nusach, halachicOpinions, inIsrael } = useUserStore.getState();
-    const scope = { location: JERUSALEM, settings: { nusach, halachicOpinions, inIsrael }, nagLevel: 3 as const };
-    const { total, nags } = windowNotificationCount(maariv, maariv.defaultReminders, new Date(2027, 5, 14), scope)!;
-    expect(nags).toBeGreaterThan(2);
+    const scope = { location: JERUSALEM, settings: { nusach, halachicOpinions, inIsrael }, nagLevel: 4 as const };
+    const { total } = windowNotificationCount(maariv, maariv.defaultReminders, new Date(2027, 5, 14), scope)!;
     const bell = within(nowCard('maariv')).getByTestId('nag-bell');
     expect(within(bell).getByText(String(total))).toBeOnTheScreen();
     expect(bell.props.accessibilityLabel).toBe(`נודניק: ${total} התראות בסך הכול`);
     screen.unmount();
-    // Level 1 sends the last-chance points too, but nags nothing: no bell.
-    useUserStore.setState({ nagLevel: 1 });
+    // A level of its own below the app's is an exception too.
+    useMitzvotStore.getState().setNagLevel('maariv', 1);
     renderAt(NIGHT_OF_THE_14TH);
-    expect(within(nowCard('maariv')).queryByTestId('nag-bell')).toBeNull();
+    expect(within(nowCard('maariv')).getByTestId('nag-bell')).toBeOnTheScreen();
   });
 
   it('does not call missed a window that closed before the install, and keeps the evening one', () => {

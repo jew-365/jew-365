@@ -208,11 +208,17 @@ export default function HomeScreen() {
       if (!counted.has(key)) {
         let total: number | null = null;
         try {
-          const nagLevel = activeMitzvot[id]?.nagLevel ?? appNagLevel;
+          const own = activeMitzvot[id]?.nagLevel;
+          // The bell marks only a mitzvah whose own level differs from the app's (the owner's call, 2026-11-04).
+          if (own === undefined || own === appNagLevel) {
+            counted.set(key, null);
+            return null;
+          }
+          const nagLevel = own;
           const reminders = remindersOf(activeMitzvot[id], mitzvah);
           const count = windowNotificationCount(mitzvah, reminders, date, { location, settings, quietHours, nagLevel });
-          // The bell marks a mitzvah its level nags (above 1), and counts every notification of the window.
-          total = count && nagLevel > 1 && count.nags > 0 ? count.total : null;
+          // It counts every notification of the window: the reminders and the nags.
+          total = count ? count.total : null;
         } catch {
           total = null;
         }

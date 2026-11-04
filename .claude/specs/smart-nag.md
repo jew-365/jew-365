@@ -72,5 +72,5 @@ The reminder editor's own nag block and the custom form's are removed; the Setti
 - **Candle lighting gets no nags.** Its window, lighting time to shkia, is inside Shabbat, where nothing is sent.
 - **The night mitzvot's last-chance points fall just before alot** (Maariv about 04:30 and 04:45, the bedtime Shema about 04:50 in a Jerusalem winter), at level 1 too. Only the quiet hours, off by default, keep them out.
 - **A full schedule gives up the later days' nags before any reminder.** From the third day on, the nags are dropped first, and only if the reminders alone still do not fit is each window thinned to one reminder. On iOS the opening days' nags outrank the later days, so a default iOS plan reaches one or two days less before its end notice.
-- **The mitzvah screen's "next reminder" names reminders only**, never a nag. **Home's bell shows only for a level above 1.** The last-chance points of level 1 bring no bell.
+- **The mitzvah screen's "next reminder" names reminders only**, never a nag. **Home's bell shows only for a mitzvah whose own level differs from the app's** (the owner's correction of 2026-11-04: the bell marks the exception), with its total.
 - **A reminder's own nag from the 2026-11-01 model is ignored**, and it is dropped on the next save. The `SCHEDULE_FORMAT` is 13, so every install rebuilds once.
