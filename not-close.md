@@ -523,6 +523,7 @@ The owner's upgrade list of 2026-11-04, narrowed the same day to simple tasks th
   - **Expected result:** the owner picks one direction for each surface in the gallery; the picks are recorded in the study's AGENTS.md and become two implementation tasks here.
   - **Done:** 2026-11-04. Verified: the owner's picks (ז with the end time's digits coloured, ד with the number inside the bell) recorded in the study's AGENTS.md; the two tasks below implement them.
   - **Round 2:** 2026-11-04, four phones for what opens the time line (the pie, a word at red, no mark, the pie on the iPhone only). The owner took none and chose ז exactly as drawn, and made the bell's number the total; the final result is the first section of the same links (`NotifFinal`, `HomeTotal`), shown before the preview update.
+  - **Round 3 (open):** 2026-11-04, the owner's notes on that result: "אין באייפון אינדיקטור לדחיפות ההודעה ... נדרש סימול שמבטא דחיפות" and the bell "לא סימטרי ... הצבעים שונים ... המספר צפוף". Five iPhone urgency marks and four bells at the top of the same links; waiting for the owner's pick, which changes `timeLeftLine()` (iPhone only) and [NagBell](src/components/NagBell.tsx) before the preview update.
   - **Status:** Version: none (design) · Committed: yes, `fb6cbf4` design(lab): the time-left and nagging-level study of 2026-11-04 · Pushed: yes · Live: the two Artifacts · Channel: none
 - [ ] Say in every mitzvah reminder until when the time lasts and how long is left, with the stage shown
   - **Flag:** `OTA`.

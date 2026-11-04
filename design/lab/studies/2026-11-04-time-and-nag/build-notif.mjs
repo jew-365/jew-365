@@ -26,6 +26,7 @@ if (CORE_CSS.includes('/*PALETTES*/')) throw new Error('palettes not injected');
 // MitzvahIcon's line drawings (src/components/MitzvahIcon.tsx and BottomTabs.tsx), the ones the boards need.
 const P = {
   bell: '<path d="M6,16.5V11A6,6 0 0 1 18,11V16.5L19.5,18H4.5Z"></path><path d="M10,20.5A2.2,2.2 0 0 0 14,20.5"></path>',
+  clock: '<circle cx="12" cy="12" r="8.5"></circle><path d="M12,7.5V12L15,14"></path>',
   chevronLeft: '<path d="M15,6L9,12L15,18"></path>',
   chevronRight: '<path d="M9,6L15,12L9,18"></path>',
   chevronDown: '<path d="M6,9L12,15L18,9"></path>',

@@ -161,6 +161,21 @@
       r.tintName = false;
       return r;
     }
+    // Round 3 (the owner's request of 2026-11-04: an urgency mark on the iPhone, which takes no colour): Android keeps
+    // ז as it ships, and the iPhone adds a mark by stage. r3ts is the iPhone's own Time Sensitive level (a build).
+    if (STYLE.startsWith('r3')) {
+      const line = stage === 'before' ? this.str('notifications.timeLeft.startsIn', { left: this.leftText(w.start - n.at) }) : this.str('notifications.timeLeft.line', { end: this.hm(w.end), left: this.leftText(w.end - n.at) });
+      r.sub = line;
+      r.accent = this.stageColor(stage);
+      r.tintName = false;
+      if (this.plat() !== 'iphone') return r;
+      if (STYLE === 'r3warn') r.sub = stage === 'red' ? '⚠️ ' + line : line;
+      else if (STYLE === 'r3bang') r.sub = stage === 'red' ? '‼️ ' + line : stage === 'orange' ? '❗ ' + line : line;
+      else if (STYLE === 'r3word') r.sub = stage === 'red' ? 'דחוף · ' + line : line;
+      else if (STYLE === 'r3alarm') r.title = stage === 'red' ? '⏰ ' + name : name;
+      else if (STYLE === 'r3ts') r.ts = stage === 'red';
+      return r;
+    }
     if (STYLE.startsWith('r2')) {
       const leftR2 = this.leftText(w.end - n.at);
       const startsR2 = this.str('notifications.timeLeft.startsIn', { left: this.leftText(w.start - n.at) });
@@ -235,6 +250,7 @@
       return {
         title: x.title,
         hasSub: Boolean(x.sub),
+        hasTs: Boolean(x.ts),
         sub: x.sub,
         body: x.body,
         time: this.hm(n.at),
@@ -252,7 +268,7 @@
     });
     const [lh, lm] = this.look().split(':');
     return {
-      phCls: 't-' + this.theme() + ' p-' + plat + (STYLE.startsWith('r2') || STYLE === 'final' ? ' r2' : ''),
+      phCls: 't-' + this.theme() + ' p-' + plat + (STYLE.startsWith('r2') || STYLE.startsWith('r3') || STYLE === 'final' ? ' r2' : ''),
       hasToast: Boolean(t),
       toastText: t ? t.text : '',
       toastCls: t ? 't' + this.flip('toast', t.n) : '',

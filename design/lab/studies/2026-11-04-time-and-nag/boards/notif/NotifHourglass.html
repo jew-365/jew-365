@@ -44,6 +44,9 @@
 .ios-row>span{flex:none;font-size:13px;line-height:18px;opacity:.6}
 .ios-sub{font-size:15px;line-height:20px;font-weight:600}
 .ios-body{font-size:15px;line-height:20px}
+/* round 3: the iPhone's own Time Sensitive label (interruptionLevel timeSensitive, an entitlement and so a build) */
+.ios-ts{display:flex;align-items:center;gap:4px;font-size:12px;line-height:16px;font-weight:600;opacity:.7;margin-bottom:2px}
+.ios-ts>.ic{width:13px;height:13px;stroke-width:2.2}
 /* round 2: the iPhone shows the subtitle on one line and cuts the rest */
 .r2 .ios-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
@@ -79,6 +82,7 @@
 <article class="ios" aria-label="{{n.aria}}" onClick="{{n.markDone}}">
 <i class="ios-ic" style="{{appIconStyle}}" aria-hidden="true"></i>
 <div class="ios-t">
+<sc-if value="{{n.hasTs}}" hint-placeholder-val="{{ false }}"><p class="ios-ts">[[ic:clock]]<span>רגיש לזמן</span></p></sc-if>
 <div class="ios-row"><b>{{n.title}}</b><span>{{n.ago}}</span></div>
 <sc-if value="{{n.hasSub}}" hint-placeholder-val="{{ true }}"><p class="ios-sub">{{n.sub}}</p></sc-if>
 <p class="ios-body">{{n.body}}</p>

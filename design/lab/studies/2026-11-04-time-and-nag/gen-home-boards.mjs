@@ -19,6 +19,10 @@ export const HOME_DIRS = [
   ['HomeDial', 'dial', 'חוגה קטנה'],
   ['HomeOwnOnly', 'ownOnly', 'רק כשהמצווה חורגת'],
   ['HomeTotal', 'total', 'התוצאה הסופית: סך ההתראות בפעמון'],
+  ['HomeB3Fill', 'b3fill', 'סבב 3 · פעמון רך ומספר באמצע'],
+  ['HomeB3Solid', 'b3solid', 'סבב 3 · פעמון מלא ומספר לבן'],
+  ['HomeB3Badge', 'b3badge', 'סבב 3 · פעמון ותג מספר'],
+  ['HomeB3Pill', 'b3pill', 'סבב 3 · תווית פעמון ומספר'],
 ];
 
 const SLOT = (v) =>
@@ -54,6 +58,23 @@ const CSS = `
 .nagi.inbell>.ng-a{position:absolute;inset:0;background:var(--sub)}
 .nagi.inbell>.ng-t{position:absolute;top:7.5px;left:0;right:0;text-align:center;font-size:11px;line-height:13px;font-weight:700}
 .nagi.inbell.two>.ng-t{letter-spacing:-.5px}
+/* round 3 (the owner's note of 2026-11-04: the bell and its number in two colours, off centre and crowded): every
+   option in one colour family, the number centred in the bell's body or set beside it */
+.nagi.b3{position:relative;flex:none;color:var(--goldText)}
+.nagi.b3>.ng-a,.nagi.b3>.ng-b{position:absolute;inset:0;top:0;transform:none}
+.nagi.fill,.nagi.solid{width:30px;height:30px}
+.nagi.fill>.ng-a{background:var(--goldLight)}
+.nagi.fill>.ng-b{background:var(--goldText)}
+.nagi.solid>.ng-a{background:var(--goldText)}
+.nagi.fill>.ng-t,.nagi.solid>.ng-t{position:absolute;left:0;right:0;top:6.5px;height:16px;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:16px;font-weight:700;color:var(--goldText)}
+.nagi.solid>.ng-t{color:var(--surface)}
+.nagi.fill.two>.ng-t,.nagi.solid.two>.ng-t{font-size:10px;letter-spacing:-.2px}
+.nagi.badge{width:30px;height:28px}
+.nagi.badge>.ng-a{inset:auto;left:0;bottom:0;width:24px;height:24px;background:var(--sub)}
+.nagi.badge>.ng-t{position:absolute;top:-2px;right:-1px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--gold);color:var(--onGold);font-size:11px;line-height:17px;font-weight:700;text-align:center;box-sizing:border-box;box-shadow:0 0 0 2px var(--surface)}
+.nagi.pill3{height:24px;padding:0 9px 0 8px;border-radius:12px;background:var(--goldLight);gap:4px}
+.nagi.pill3>.ng-a{position:static;width:16px;height:16px;background:var(--goldText)}
+.nagi.pill3>.ng-t{font-size:13px;line-height:16px;font-weight:700;color:var(--goldText)}
 .st-done .nagi,.st-late .nagi,.st-missed .nagi{opacity:.55}
 `;
 
@@ -112,6 +133,18 @@ function make(name, nag, title) {
       if (!reps || !total) return res;
       const BELL16 = '<path d="M6,16.5V11A6,6 0 0 1 18,11V16.5L19.5,18H4.5Z" fill="none" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/><path d="M10,20.5A2.2,2.2 0 0 0 14,20.5" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"/>';
       return { ...res, on: true, cls: total >= 10 ? 'inbell two' : 'inbell', a: mask('viewBox="0 0 24 24">' + BELL16, 26, 26), b: 'display:none', text: String(total), aria: 'נודניק: ' + total + ' התראות בסך הכול' };
+    }
+    if (NAG.startsWith('b3')) {
+      const total = (TOTALS[appId] || {})[L];
+      if (!reps || !total) return res;
+      const SIL = '<path d="M6,16.5V11A6,6 0 0 1 18,11V16.5L19.5,18H4.5Z"/><path d="M10,20.5A2.2,2.2 0 0 0 14,20.5" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round"/>';
+      const OUT = '<path d="M6,16.5V11A6,6 0 0 1 18,11V16.5L19.5,18H4.5Z" fill="none" stroke="#000" stroke-width="1.7" stroke-linejoin="round"/><path d="M10,20.5A2.2,2.2 0 0 0 14,20.5" fill="none" stroke="#000" stroke-width="1.7" stroke-linecap="round"/>';
+      const two = total >= 10 ? ' two' : '';
+      const base3 = { ...res, on: true, text: String(total), aria: 'נודניק: ' + total + ' התראות בסך הכול', b: 'display:none' };
+      if (NAG === 'b3fill') return { ...base3, cls: 'b3 fill' + two, a: mask('viewBox="0 0 24 24">' + SIL, 30, 30), b: mask('viewBox="0 0 24 24">' + OUT, 30, 30) };
+      if (NAG === 'b3solid') return { ...base3, cls: 'b3 solid' + two, a: mask('viewBox="0 0 24 24">' + SIL, 30, 30) };
+      if (NAG === 'b3badge') return { ...base3, cls: 'b3 badge' + two, a: mask('viewBox="0 0 24 24">' + OUT, 24, 24) };
+      return { ...base3, cls: 'b3 pill3' + two, a: mask('viewBox="0 0 24 24">' + OUT, 16, 16) };
     }
     if (NAG === 'times') {
       if (!reps) return res;
