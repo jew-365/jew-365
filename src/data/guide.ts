@@ -112,8 +112,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'תזכורות ועורך התזכורות', en: 'Reminders and the reminder editor' },
     body: [
       {
-        he: 'במסך של כל מצווה מופיעים חלון הזמן של היום, ההתראה הבאה ורשימת התזכורות לפי סדר השליחה, ולצד כל אחת מתי היא תישלח בפעם הבאה. ״הוסף תזכורת״ מוסיף עוד אחת, ו״חזרה לברירת מחדל״ מחזיר את התזכורות המקוריות. כל תזכורת כותבת גם מתחת לכותרת עד מתי הזמן ונשארו כמה. באנדרואיד הסמל של ההתראה נצבע: ירוק כשיש זמן, כתום מחצי הזמן או בשעה האחרונה, ואדום לקראת הסוף. באייפון, שבו אי אפשר לצבוע התראה, תזכורת לקראת הסוף נפתחת ב־⚠️.',
-        en: "Each mitzvah's screen shows today's time window, the next notification and its reminders in the order they go out, each with when it fires next. Add reminder adds one more, and Reset to default brings back the original reminders. Every reminder also says under its title until when the time lasts and how long is left. On Android the notification's icon takes a colour: green while there is time, orange from half the time or the last hour, red near the end. On iPhone, where a notification takes no colour, a reminder near the end opens with ⚠️.",
+        he: 'במסך של כל מצווה מופיעים חלון הזמן של היום, ההתראה הבאה ורשימת התזכורות לפי סדר השליחה, ולצד כל אחת מתי היא תישלח בפעם הבאה. ״הוסף תזכורת״ מוסיף עוד אחת, ו״חזרה לברירת מחדל״ מחזיר את התזכורות המקוריות. כל תזכורת כותבת גם מתחת לכותרת עד מתי הזמן ונשארו כמה. ההתראה האחרונה של המצווה נפתחת ב־🔺 וזו שלפניה ב־⚠️, בכל טלפון. באנדרואיד שמציג את צבע ההתראה, הסמל שלה ירוק, כתום לפני האחרונה ואדום באחרונה.',
+        en: "Each mitzvah's screen shows today's time window, the next notification and its reminders in the order they go out, each with when it fires next. Add reminder adds one more, and Reset to default brings back the original reminders. Every reminder also says under its title until when the time lasts and how long is left. The mitzvah's last notification opens with 🔺 and the one before it with ⚠️, on every phone. On Android phones that show the notification colour, its icon is green, orange before the last and red on the last.",
       },
       {
         he: 'ב״מתי לשלוח״ בוחרים מתי התזכורת נשלחת: לפני תחילת הזמן (עד שלוש שעות לפני), בתחילת הזמן או אחריה, לפני סוף הזמן או בשעה קבועה, ומתחת קובעים כמה דקות. ״דלג אם כבר סומן״ מוותר עליה כשהמצווה כבר סומנה. במצווה אישית יש גם ״אחרי סוף הזמן, אם לא סימנת״, ובקידוש לבנה ״אחרי צאת שבת או חג״.',
@@ -434,8 +434,8 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: "A custom mitzvah takes an icon of your choice, not only the star: in the mitzvah's form tap Icon and pick one of the app's icons. It shows on Home, the schedule, Tracking, My mitzvot and the mitzvah's screen.",
       },
       {
-        he: 'כל תזכורת של מצווה כותבת מתחת לכותרת עד מתי הזמן ונשארו כמה, למשל ״עד 09:32 · נשארו 45 דק׳״. באנדרואיד הסמל של ההתראה נצבע ירוק, כתום או אדום לפי כמה זה קרוב לסוף, ובאייפון תזכורת לקראת הסוף נפתחת ב־⚠️.',
-        en: 'Every mitzvah reminder says under its title until when the time lasts and how long is left, such as “Until 09:32 · 45 min left”. On Android the notification’s icon turns green, orange or red by how close the end is, and on iPhone a reminder near the end opens with ⚠️.',
+        he: 'כל תזכורת של מצווה כותבת מתחת לכותרת עד מתי הזמן ונשארו כמה, למשל ״עד 09:32 · נשארו 45 דק׳״. ההתראה האחרונה של המצווה נפתחת ב־🔺 וזו שלפניה ב־⚠️.',
+        en: 'Every mitzvah reminder says under its title until when the time lasts and how long is left, such as “Until 09:32 · 45 min left”. The mitzvah’s last notification opens with 🔺 and the one before it with ⚠️.',
       },
       {
         he: 'בדף הבית, ליד שם של מצווה עם נודניק, יש פעמון קטן ובתוכו כמה התראות היא שולחת בסך הכול.',

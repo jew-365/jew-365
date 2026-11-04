@@ -1,43 +1,54 @@
 import { CITIES } from '@/data/cities';
 import { setLocale, t } from '@/i18n';
 import { at } from '@/testing/zmanim';
-import { TIME_STAGE_COLOR, URGENT_MARK, timeLeftColor, timeLeftLine, timeStage } from '../timeLeft';
+import { STAGE_MARK, TIME_STAGE_COLOR, sendStage, timeLeftLine } from '../timeLeft';
 
 const J = CITIES[0];
-const MIN = 60_000;
 // Shacharit on Wednesday 2026-11-04 in Jerusalem: 05:58 to 09:32.
 const window = { start: at(J, '2026-11-04T05:58'), end: at(J, '2026-11-04T09:32') };
 
-describe('timeStage', () => {
-  const start = 0;
-  const end = 214 * MIN;
-  it('is green while more than half the time and more than an hour are left', () => {
-    expect(timeStage(0, start, end)).toBe('green');
-    expect(timeStage(end - 108 * MIN, start, end)).toBe('green');
+describe('sendStage', () => {
+  it('makes the last notification red, the one before it orange and the rest green', () => {
+    expect([0, 1, 2, 3, 4, 5].map((i) => sendStage(i, 6))).toEqual([
+      'green',
+      'green',
+      'green',
+      'green',
+      'orange',
+      'red',
+    ]);
+    expect([0, 1, 2].map((i) => sendStage(i, 3))).toEqual(['green', 'orange', 'red']);
+    expect([0, 1].map((i) => sendStage(i, 2))).toEqual(['orange', 'red']);
   });
-  it('turns orange at half the time or at an hour left', () => {
-    expect(timeStage(end - 107 * MIN, start, end)).toBe('orange');
-    expect(timeStage(end - 60 * MIN, start, end)).toBe('orange');
-    // A short window is orange from its start: an hour or less is left.
-    expect(timeStage(0, 0, 50 * MIN)).toBe('orange');
-    // A long window is already red at an hour left, because under a fifth of it is.
-    expect(timeStage(9 * 60 * MIN, 0, 10 * 60 * MIN)).toBe('red');
+
+  it('makes a single notification red, and one not found green', () => {
+    expect(sendStage(0, 1)).toBe('red');
+    expect(sendStage(-1, 4)).toBe('green');
   });
-  it('turns red under a fifth of the time or at 15 minutes left', () => {
-    expect(timeStage(end - 42 * MIN, start, end)).toBe('red');
-    expect(timeStage(0, 0, 15 * MIN)).toBe('red');
-    expect(timeStage(end - 43 * MIN, start, end)).toBe('orange');
+
+  it("keeps direction ז's colours and the two marks", () => {
+    expect(TIME_STAGE_COLOR).toEqual({ green: '#13804A', orange: '#B85F00', red: '#C5221F' });
+    expect(STAGE_MARK).toEqual({ green: '', orange: '⚠️', red: '🔺' });
   });
 });
 
 describe('timeLeftLine', () => {
   afterEach(() => setLocale('he'));
 
-  it('leads with the end time on the location clock and the time left, with no mark', () => {
+  it('leads with the end time on the location clock and the time left', () => {
     setLocale('he');
     expect(timeLeftLine(window.start, window, J.tz, t)).toBe('עד 09:32 · נשארו 3:34 שעות');
     expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t)).toBe("עד 09:32 · נשארו 45 דק'");
-    expect(timeLeftLine(at(J, '2026-11-04T09:22'), window, J.tz, t)).toBe("עד 09:32 · נשארו 10 דק'");
+  });
+
+  it('opens with the mark of its stage: a triangle on the last, a warning sign on the one before, none on the rest', () => {
+    setLocale('he');
+    const at0847 = at(J, '2026-11-04T08:47');
+    expect(timeLeftLine(at0847, window, J.tz, t, 'red')).toBe("🔺 עד 09:32 · נשארו 45 דק'");
+    expect(timeLeftLine(at0847, window, J.tz, t, 'orange')).toBe("⚠️ עד 09:32 · נשארו 45 דק'");
+    expect(timeLeftLine(at0847, window, J.tz, t, 'green')).toBe("עד 09:32 · נשארו 45 דק'");
+    expect(timeLeftLine(at(J, '2026-11-04T10:02'), window, J.tz, t, 'red')).toBe('🔺 הזמן נגמר ב־09:32');
+    expect(timeLeftLine(at(J, '2026-11-04T05:48'), window, J.tz, t, 'orange')).toBe("⚠️ מתחיל בעוד 10 דק'");
   });
 
   it('says when the time starts before the window and when it ended after it', () => {
@@ -52,34 +63,8 @@ describe('timeLeftLine', () => {
     expect(timeLeftLine(window.start, long, J.tz, t)).toBe('עד 12/11 03:40 · נשארו 7 ימים');
   });
 
-  it('opens a red-stage line with the urgency mark on the iPhone, and nothing else', () => {
-    setLocale('he');
-    expect(URGENT_MARK).toBe('⚠️');
-    expect(timeLeftLine(at(J, '2026-11-04T09:22'), window, J.tz, t, true)).toBe("⚠️ עד 09:32 · נשארו 10 דק'");
-    expect(timeLeftLine(at(J, '2026-11-04T10:02'), window, J.tz, t, true)).toBe('⚠️ הזמן נגמר ב־09:32');
-    expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t, true)).toBe("עד 09:32 · נשארו 45 דק'");
-    expect(timeLeftLine(window.start, window, J.tz, t, true)).toBe('עד 09:32 · נשארו 3:34 שעות');
-    expect(timeLeftLine(at(J, '2026-11-04T05:48'), window, J.tz, t, true)).toBe("מתחיל בעוד 10 דק'");
-    // Without it (Android) the red line stays plain.
-    expect(timeLeftLine(at(J, '2026-11-04T09:22'), window, J.tz, t)).toBe("עד 09:32 · נשארו 10 דק'");
-  });
-
   it('reads in English', () => {
     setLocale('en');
-    expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t)).toBe('Until 09:32 · 45 min left');
-  });
-});
-
-describe('timeLeftColor', () => {
-  it('keeps the colours of direction ז', () => {
-    expect(TIME_STAGE_COLOR).toEqual({ green: '#13804A', orange: '#B85F00', red: '#C5221F' });
-  });
-
-  it('is the stage colour inside the window, red after it and none before it', () => {
-    expect(timeLeftColor(window.start, window)).toBe(TIME_STAGE_COLOR.green);
-    expect(timeLeftColor(at(J, '2026-11-04T08:47'), window)).toBe(TIME_STAGE_COLOR.orange);
-    expect(timeLeftColor(at(J, '2026-11-04T09:22'), window)).toBe(TIME_STAGE_COLOR.red);
-    expect(timeLeftColor(at(J, '2026-11-04T10:02'), window)).toBe(TIME_STAGE_COLOR.red);
-    expect(timeLeftColor(at(J, '2026-11-04T05:48'), window)).toBeUndefined();
+    expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t, 'red')).toBe('🔺 Until 09:32 · 45 min left');
   });
 });

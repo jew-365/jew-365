@@ -17,7 +17,7 @@ import { MULTI_DAY_LOOKAHEAD_DAYS } from '@/utils/buildDayTimeline';
 import { locationNoon } from '@/utils/locationDay';
 import { interpolate, t, translate } from '@/i18n';
 import { reminderLabel } from '@/utils/mitzvahName';
-import { timeLeftColor, timeLeftLine } from '@/utils/timeLeft';
+import { TIME_STAGE_COLOR, sendStage, timeLeftLine } from '@/utils/timeLeft';
 import { nagFor, repeatOffsets, type NagLevel } from '@/utils/nagging';
 import { dateKey, type Completions } from '@/stores/useCompletionsStore';
 import { MITZVAH_REMINDER_CATEGORY, MITZVAH_TEXT_CATEGORY, buildId } from '@/services/notifications/ids';
@@ -304,6 +304,10 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: boo
   const nagLevel = input.nagLevels?.[mitzvah.id] ?? input.nagLevel;
   const planned = windowTriggers(mitzvah, reminders, date, { ...input, nagLevel });
   if (!planned?.triggers.length) return [];
+  // Each notification's place among all the window sends (the owner's rule of 2026-11-04): the last red, the one
+  // before it orange, the rest green, whatever is already past or marked.
+  const sends = (windowSendTimes(mitzvah, reminders, date, { ...input, nagLevel }) ?? []).map(({ at }) => at);
+  const stageAt = (trigger: Date) => sendStage(sends.indexOf(trigger.getTime()), sends.length);
 
   const english = input.language === 'en';
   const hasText = hasSiddurText(mitzvah, settings.nusach, date, siddurPlace(location, settings.inIsrael));
@@ -322,8 +326,8 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: boo
           channel: 'mitzvot',
           categoryIdentifier: offersText ? MITZVAH_TEXT_CATEGORY : MITZVAH_REMINDER_CATEGORY,
           title: mitzvahTitle(mitzvah, english),
-          subtitle: timeLeftLine(trigger, planned.window, location.tz, t, input.platform === 'ios'),
-          ...(timeLeftColor(trigger, planned.window) ? { color: timeLeftColor(trigger, planned.window) } : {}),
+          subtitle: timeLeftLine(trigger, planned.window, location.tz, t, stageAt(trigger)),
+          color: TIME_STAGE_COLOR[stageAt(trigger)],
           body: repeat ? `${body} · ${t('notifications.nag.repeat', { k: repeat, n: of })}` : body,
           data: {
             mitzvahId: mitzvah.id,
@@ -425,10 +429,34 @@ export function nagChain(mitzvah: Mitzvah, draft: Reminder, scope: ReminderScope
 export const nagPreview = (mitzvah: Mitzvah, draft: Reminder, scope: ReminderScope): NagPreviewEntry[] =>
   nagChain(mitzvah, draft, scope)?.repeats ?? [];
 
-// How many notifications `date`'s window of `mitzvah` sends in all, from its first trigger and whatever is marked:
-// every main and every repeat of its nag that the plan lets through (the end of the time, the holy blocks and the
-// quiet hours), one per instant where the plan keeps one (`withoutDuplicates()`). `repeats` counts the repeats
-// among them. `null` when the day has no window or skips it. Home's bell prints `total` while `repeats` holds any.
+// The instants `date`'s window of `mitzvah` sends a notification at, in all and in order, from its first trigger and
+// whatever is marked: every main and every repeat of its nag that the plan lets through (the end of the time, the holy
+// blocks and the quiet hours), one per instant where the plan keeps one (`withoutDuplicates()`), each flagged when a
+// repeat is the one kept. `null` when the day has no window or skips it.
+function windowSendTimes(
+  mitzvah: Mitzvah,
+  reminders: Reminder[],
+  date: Date,
+  scope: Omit<ReminderScope, 'now' | 'completions' | 'skipped'>,
+): { at: number; repeat: boolean }[] | null {
+  const planned = windowTriggers(mitzvah, reminders, date, { ...scope, now: NO_PAST, completions: {}, skipped: {} });
+  if (!planned) return null;
+  const atInstant = new Map<number, WindowTrigger[]>();
+  for (const entry of planned.triggers) {
+    const key = entry.trigger.getTime();
+    atInstant.set(key, [...(atInstant.get(key) ?? []), entry]);
+  }
+  const sends: { at: number; repeat: boolean }[] = [];
+  for (const [at, group] of atInstant) {
+    const collapses = group.length > 1 && group.some(({ moved, repeat }) => moved || repeat > 0);
+    const kept = collapses ? [group.find(({ repeat }) => repeat === 0) ?? group[0]] : group;
+    for (const entry of kept) sends.push({ at, repeat: entry.repeat > 0 });
+  }
+  return sends.sort((a, b) => a.at - b.at);
+}
+
+// How many notifications `date`'s window sends in all (`windowSendTimes()`), and how many of them are repeats.
+// Home's bell prints `total` while `repeats` holds any.
 export type WindowNotificationCount = { total: number; repeats: number };
 
 export function windowNotificationCount(
@@ -437,20 +465,7 @@ export function windowNotificationCount(
   date: Date,
   scope: Omit<ReminderScope, 'now' | 'completions' | 'skipped'>,
 ): WindowNotificationCount | null {
-  const planned = windowTriggers(mitzvah, reminders, date, { ...scope, now: NO_PAST, completions: {}, skipped: {} });
-  if (!planned) return null;
-  const atInstant = new Map<number, WindowTrigger[]>();
-  for (const entry of planned.triggers) {
-    const key = entry.trigger.getTime();
-    atInstant.set(key, [...(atInstant.get(key) ?? []), entry]);
-  }
-  let total = 0;
-  let repeats = 0;
-  for (const group of atInstant.values()) {
-    const collapses = group.length > 1 && group.some(({ moved, repeat }) => moved || repeat > 0);
-    const kept = collapses ? [group.find(({ repeat }) => repeat === 0) ?? group[0]] : group;
-    total += kept.length;
-    repeats += kept.filter(({ repeat }) => repeat > 0).length;
-  }
-  return { total, repeats };
+  const sends = windowSendTimes(mitzvah, reminders, date, scope);
+  if (!sends) return null;
+  return { total: sends.length, repeats: sends.filter(({ repeat }) => repeat).length };
 }
