@@ -44,6 +44,8 @@
 .ios-row>span{flex:none;font-size:13px;line-height:18px;opacity:.6}
 .ios-sub{font-size:15px;line-height:20px;font-weight:600}
 .ios-body{font-size:15px;line-height:20px}
+/* round 2: the iPhone shows the subtitle on one line and cuts the rest */
+.r2 .ios-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* the demo bar */
 .demo{position:absolute;inset:auto 0 0 0;height:132px;border-top:1px solid var(--border);background:var(--surface);padding:8px 12px 10px;display:grid;gap:6px;align-content:start}

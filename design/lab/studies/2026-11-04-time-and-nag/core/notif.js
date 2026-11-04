@@ -148,8 +148,25 @@
     const name = w.name;
     const share = Math.max(0, Math.min(1, (w.end - n.at) / (w.end - w.start)));
     const body = n.body + (n.k ? ' · ' + this.str('notifications.nag.repeat', { k: n.k, n: n.of }) : '');
-    const r = { title: name, sub: '', body, accent: this.data().notifColor, stage };
+    const r = { title: name, sub: '', body, accent: this.data().notifColor, stage, tintName: true };
     const timePart = stage === 'before' ? startsIn : until + ' · ' + left;
+    // Round 2 (the owner's question of 2026-11-04 on the mark that opens the line): the app's own line of
+    // timeLeftLine() in src/utils/timeLeft.ts, the pie of TIME_STAGE_PIE and the soft tones of TIME_STAGE_COLOR, which
+    // tint only the small icon on Android 12 and later (the app name too only on Android 11 and older).
+    if (STYLE.startsWith('r2')) {
+      const leftR2 = this.leftText(w.end - n.at);
+      const startsR2 = this.str('notifications.timeLeft.startsIn', { left: this.leftText(w.start - n.at) });
+      const pie = { green: '◔', orange: '◑', red: '◕' }[stage];
+      const withPie = stage === 'before' ? startsR2 : this.str('notifications.timeLeft.line', { mark: pie, end: this.hm(w.end), left: leftR2 });
+      const plain = stage === 'before' ? startsR2 : this.str('notifications.timeLeft.line', { mark: '', end: this.hm(w.end), left: leftR2 }).trim();
+      r.accent = { green: '#4F9D73', orange: '#D08A3A', red: '#C65A52', before: this.data().notifColor }[stage];
+      r.tintName = false;
+      if (STYLE === 'r2pie') r.sub = withPie;
+      else if (STYLE === 'r2word') r.sub = stage === 'red' ? plain + ' · הזמן כמעט נגמר' : plain;
+      else if (STYLE === 'r2none') r.sub = plain;
+      else if (STYLE === 'r2iosPie') r.sub = this.plat() === 'iphone' ? withPie : plain;
+      return r;
+    }
     switch (STYLE) {
       case 'dot':
         r.sub = dot + ' ' + timePart;
@@ -215,7 +232,7 @@
         time: this.hm(n.at),
         ago: this.ago(n.at),
         accentStyle: 'background:' + x.accent,
-        inkStyle: 'color:' + x.accent,
+        inkStyle: x.tintName ? 'color:' + x.accent : '',
         maskStyle: '-webkit-mask:url("' + D.icons.notifMask + '") center/contain no-repeat;mask:url("' + D.icons.notifMask + '") center/contain no-repeat;background:' + x.accent,
         aria: x.title + ', ' + x.sub + ', ' + x.body,
         markDone: () => {
@@ -227,7 +244,7 @@
     });
     const [lh, lm] = this.look().split(':');
     return {
-      phCls: 't-' + this.theme() + ' p-' + plat,
+      phCls: 't-' + this.theme() + ' p-' + plat + (STYLE.startsWith('r2') ? ' r2' : ''),
       hasToast: Boolean(t),
       toastText: t ? t.text : '',
       toastCls: t ? 't' + this.flip('toast', t.n) : '',

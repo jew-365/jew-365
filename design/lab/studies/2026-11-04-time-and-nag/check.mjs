@@ -1,6 +1,6 @@
 // The study's check, with Playwright's Chromium (NODE_PATH=$(npm root -g) for a global install): every board in
 // out/project opens at 390 x 844 for each of its demo hashes in dirs.json, in both palettes, with no page error,
-// and the notification boards show at least one notification at 08:10 on both platforms; then the gallery in
+// and the notification boards show at least one notification at their first demo on both platforms; then the gallery in
 // out/site opens at 430 and 1100 points with no sideways scroll and every phone's iframe present.
 // The home boards print five console errors before the runtime fills their SVG attributes ({{sw}}, {{gx1}} and
 // the rest), inherited from the 2026-10-29-home-ellipse board; console messages are not counted, page errors are.
@@ -33,12 +33,12 @@ for (const d of dirs) {
       await page.goto(`http://localhost:${port}/project/${d.board}.dc.html#theme=${theme}&${demo.hash}`);
       await page.waitForTimeout(900);
       if (errs.length) fail(`${d.board} ${theme} ${demo.hash}: ${errs[0]}`);
-      if (d.surface === 'notif' && demo.hash === 'at=08:10') {
+      if (d.surface.startsWith('notif') && demo === d.demos[0]) {
         for (const platform of ['android', 'iphone']) {
           await page.evaluate((p) => (location.hash = location.hash + '&platform=' + p), platform);
           await page.waitForTimeout(400);
           const n = await page.locator(platform === 'android' ? 'article.ntf' : 'article.ios').count();
-          if (!n) fail(`${d.board} ${platform}: no notification at 08:10`);
+          if (!n) fail(`${d.board} ${platform}: no notification at ${demo.hash}`);
         }
       }
       if (d.surface === 'home' && demo.hash === 'startTime=07:42') {

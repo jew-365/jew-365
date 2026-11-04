@@ -1,10 +1,11 @@
 /* The app's look in CSS: tokens from src/theme/colors.ts (build.mjs puts them in place of the marker below), the type scale of
    src/theme/typography.ts in Rubik, spacing and radii of src/theme/tokens.ts, and the shared components each board
    reuses (SegmentedControl, ChipRow, ListRow, Card, BottomSheet + SheetAction, OptionSelect, ChoiceRow, the steppers,
-   Switch, Button). Text is never under 12px and every control reaches 44px, a few through an invisible hit area. */
+   Switch, Button). The time pie of round 2 (◔ ◑ ◕) falls back to Noto Sans Symbols 2, the font Android draws it in,
+   loaded for those three glyphs only. Text is never under 12px and every control reaches 44px, a few through an invisible hit area. */
 /*PALETTES*/
 body{margin:0}
-.ph{font-family:'Rubik',system-ui,sans-serif;font-size:15px;line-height:22px;-webkit-font-smoothing:antialiased}
+.ph{font-family:'Rubik','Noto Sans Symbols 2',system-ui,sans-serif;font-size:15px;line-height:22px;-webkit-font-smoothing:antialiased}
 .ph.tall{height:auto!important;min-height:844px;overflow:visible!important}
 .ph.tall .scroll{position:relative!important;inset:auto!important;overflow:visible!important;height:auto!important}
 .ph.tall .sheetwrap{position:absolute!important}

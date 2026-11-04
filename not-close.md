@@ -522,6 +522,7 @@ The owner's upgrade list of 2026-11-04, narrowed the same day to simple tasks th
   - **What it solves:** the owner's requests of 2026-11-04 ("ספרות הזמן שנשאר ... ירוק אדום וכתום", "חיווי עדין ... מה רמת הנודניקיות"), decided before any app code.
   - **Expected result:** the owner picks one direction for each surface in the gallery; the picks are recorded in the study's AGENTS.md and become two implementation tasks here.
   - **Done:** 2026-11-04. Verified: the owner's picks (ז with the end time's digits coloured, ד with the number inside the bell) recorded in the study's AGENTS.md; the two tasks below implement them.
+  - **Round 2 (open):** 2026-11-04, four phones at the top of the same links for what opens the time line once the coloured dot was dropped: א the pie (what the app does now), ב a word at the end of a red line, ג no mark, ד the pie on the iPhone only. Waiting for the owner's pick; a pick other than א changes `timeLeftLine()` before the line ships.
   - **Status:** Version: none (design) · Committed: yes, `fb6cbf4` design(lab): the time-left and nagging-level study of 2026-11-04 · Pushed: yes · Live: the two Artifacts · Channel: none
 - [ ] Say in every mitzvah reminder until when the time lasts and how long is left, with the stage shown
   - **Flag:** `OTA`.

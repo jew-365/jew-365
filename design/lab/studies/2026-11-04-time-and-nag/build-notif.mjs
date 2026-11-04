@@ -210,6 +210,7 @@ function build(name) {
 <x-dc>
 <helmet>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Symbols+2&amp;text=%E2%97%94%E2%97%91%E2%97%95&amp;display=swap">
 <style>
 ${CORE_CSS}
 ${css}

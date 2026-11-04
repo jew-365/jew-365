@@ -35,6 +35,7 @@ const nowDate = new Date(base);
 
 const he = JSON.parse(readFileSync(join(REPO, 'src', 'i18n', 'he.json'), 'utf8'));
 const KEYS = ['notifications.markDone', 'siddur.open', 'notifications.nag.repeat', 'notifications.timeFor', 'time.unit.minutes', 'time.unit.hours', 'home.now.ringLabel',
+  'notifications.timeLeft.line', 'notifications.timeLeft.startsIn', 'notifications.timeLeft.ended',
   ...[0, 1, 2, 3, 4, 5, 6].map((d) => `weekday.long.${d}`), ...Array.from({ length: 12 }, (_, i) => `month.long.${i + 1}`),
   ...[1, 2, 3, 4].map((l) => `nag.level.${l}.name`)];
 const STRINGS = {};

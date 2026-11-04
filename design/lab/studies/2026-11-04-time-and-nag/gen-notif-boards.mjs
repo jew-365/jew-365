@@ -19,6 +19,10 @@ export const NOTIF_DIRS = [
   ['NotifInTitle', 'inTitle', 'הזמן בכותרת'],
   ['NotifDeadline', 'deadline', 'רק שעת הסיום'],
   ['NotifPercent', 'percent', 'אחוז מהזמן'],
+  ['NotifR2Pie', 'r2pie', 'סבב 2 · עוגת זמן'],
+  ['NotifR2Word', 'r2word', 'סבב 2 · מילה בשלב האחרון'],
+  ['NotifR2None', 'r2none', 'סבב 2 · בלי סימן'],
+  ['NotifR2IosPie', 'r2iosPie', 'סבב 2 · עוגה רק באייפון'],
 ];
 
 mkdirSync(join(here, 'boards', 'notif'), { recursive: true });
