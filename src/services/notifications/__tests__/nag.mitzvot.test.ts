@@ -141,8 +141,9 @@ describe('a level’s repeats', () => {
 
     const main = nagged[0];
     const [first, second] = nagged.slice(1, 3);
-    expect(first.body).toBe(`${main.body} · תזכורת 1 מתוך 2`);
-    expect(second.body).toBe(`${main.body} · תזכורת 2 מתוך 2`);
+    // A repeat reads as its main, with no count (the owner's call, 2026-11-04).
+    expect(first.body).toBe(main.body);
+    expect(second.body).toBe(main.body);
     expect(first.data).toMatchObject({ reminderIndex: 0, repeat: { k: 1, of: 2 }, dateKey: '2026-11-11' });
     expect(main.data.repeat).toBeUndefined();
     expect(first.categoryIdentifier).toBe(main.categoryIdentifier);

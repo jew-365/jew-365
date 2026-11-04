@@ -304,10 +304,13 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: boo
   const nagLevel = input.nagLevels?.[mitzvah.id] ?? input.nagLevel;
   const planned = windowTriggers(mitzvah, reminders, date, { ...input, nagLevel });
   if (!planned?.triggers.length) return [];
-  // Each notification's place among all the window sends (the owner's rule of 2026-11-04): the last red, the one
-  // before it orange, the rest green, whatever is already past or marked.
-  const sends = (windowSendTimes(mitzvah, reminders, date, { ...input, nagLevel }) ?? []).map(({ at }) => at);
-  const stageAt = (trigger: Date) => sendStage(sends.indexOf(trigger.getTime()), sends.length);
+  // Each reminder's place among the window's reminders (the owner's rule of 2026-11-04, by reminder so a nag's repeats
+  // never count as places of their own): the last red, the one before it orange, the rest green, whatever is already
+  // past or marked; a repeat takes its main's stage.
+  const mains = (windowSendTimes(mitzvah, reminders, date, { ...input, nagLevel }) ?? [])
+    .filter(({ repeat }) => !repeat)
+    .map(({ at }) => at);
+  const stageOf = (main: Date) => sendStage(mains.indexOf(main.getTime()), mains.length);
 
   const english = input.language === 'en';
   const hasText = hasSiddurText(mitzvah, settings.nusach, date, siddurPlace(location, settings.inIsrael));
@@ -326,9 +329,9 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: boo
           channel: 'mitzvot',
           categoryIdentifier: offersText ? MITZVAH_TEXT_CATEGORY : MITZVAH_REMINDER_CATEGORY,
           title: mitzvahTitle(mitzvah, english),
-          subtitle: timeLeftLine(trigger, planned.window, location.tz, t, stageAt(trigger)),
-          color: TIME_STAGE_COLOR[stageAt(trigger)],
-          body: repeat ? `${body} · ${t('notifications.nag.repeat', { k: repeat, n: of })}` : body,
+          subtitle: timeLeftLine(trigger, planned.window, location.tz, t, stageOf(main)),
+          color: TIME_STAGE_COLOR[stageOf(main)],
+          body,
           data: {
             mitzvahId: mitzvah.id,
             windowEnd: planned.window.end.toISOString(),

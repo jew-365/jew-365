@@ -8,7 +8,7 @@ const J = CITIES[0];
 const window = { start: at(J, '2026-11-04T05:58'), end: at(J, '2026-11-04T09:32') };
 
 describe('sendStage', () => {
-  it('makes the last notification red, the one before it orange and the rest green', () => {
+  it('makes the last reminder red, the one before it orange and the rest green', () => {
     expect([0, 1, 2, 3, 4, 5].map((i) => sendStage(i, 6))).toEqual([
       'green',
       'green',
@@ -18,10 +18,11 @@ describe('sendStage', () => {
       'red',
     ]);
     expect([0, 1, 2].map((i) => sendStage(i, 3))).toEqual(['green', 'orange', 'red']);
-    expect([0, 1].map((i) => sendStage(i, 2))).toEqual(['orange', 'red']);
+    // Two reminders: no orange, so the first is never orange hours before the end.
+    expect([0, 1].map((i) => sendStage(i, 2))).toEqual(['green', 'red']);
   });
 
-  it('makes a single notification red, and one not found green', () => {
+  it('makes a single reminder red, and one not found green', () => {
     expect(sendStage(0, 1)).toBe('red');
     expect(sendStage(-1, 4)).toBe('green');
   });
@@ -35,18 +36,18 @@ describe('sendStage', () => {
 describe('timeLeftLine', () => {
   afterEach(() => setLocale('he'));
 
-  it('leads with the end time on the location clock and the time left', () => {
+  it('leads with the time left and then the end time on the location clock', () => {
     setLocale('he');
-    expect(timeLeftLine(window.start, window, J.tz, t)).toBe('עד 09:32 · נשארו 3:34 שעות');
-    expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t)).toBe("עד 09:32 · נשארו 45 דק'");
+    expect(timeLeftLine(window.start, window, J.tz, t)).toBe('נשארו 3:34 שעות · עד 09:32');
+    expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t)).toBe("נשארו 45 דק' · עד 09:32");
   });
 
   it('opens with the mark of its stage: an exclamation mark on the last, a warning sign on the one before, none on the rest', () => {
     setLocale('he');
     const at0847 = at(J, '2026-11-04T08:47');
-    expect(timeLeftLine(at0847, window, J.tz, t, 'red')).toBe("❗ עד 09:32 · נשארו 45 דק'");
-    expect(timeLeftLine(at0847, window, J.tz, t, 'orange')).toBe("⚠️ עד 09:32 · נשארו 45 דק'");
-    expect(timeLeftLine(at0847, window, J.tz, t, 'green')).toBe("עד 09:32 · נשארו 45 דק'");
+    expect(timeLeftLine(at0847, window, J.tz, t, 'red')).toBe("❗ נשארו 45 דק' · עד 09:32");
+    expect(timeLeftLine(at0847, window, J.tz, t, 'orange')).toBe("⚠️ נשארו 45 דק' · עד 09:32");
+    expect(timeLeftLine(at0847, window, J.tz, t, 'green')).toBe("נשארו 45 דק' · עד 09:32");
     expect(timeLeftLine(at(J, '2026-11-04T10:02'), window, J.tz, t, 'red')).toBe('❗ הזמן נגמר ב־09:32');
     expect(timeLeftLine(at(J, '2026-11-04T05:48'), window, J.tz, t, 'orange')).toBe("⚠️ מתחיל בעוד 10 דק'");
   });
@@ -60,11 +61,11 @@ describe('timeLeftLine', () => {
   it('dates the end of a window a day or more away', () => {
     setLocale('he');
     const long = { start: window.start, end: at(J, '2026-11-12T03:40') };
-    expect(timeLeftLine(window.start, long, J.tz, t)).toBe('עד 12/11 03:40 · נשארו 7 ימים');
+    expect(timeLeftLine(window.start, long, J.tz, t)).toBe('נשארו 7 ימים · עד 12/11 03:40');
   });
 
   it('reads in English', () => {
     setLocale('en');
-    expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t, 'red')).toBe('❗ Until 09:32 · 45 min left');
+    expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t, 'red')).toBe('❗ 45 min left · until 09:32');
   });
 });

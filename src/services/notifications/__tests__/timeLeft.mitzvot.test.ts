@@ -68,7 +68,7 @@ const day = (candidates: ScheduleCandidate[]) => candidates.filter((c) => c.id.s
 describe('the time-left line of a mitzvah reminder', () => {
   beforeAll(() => setLocale('he'));
 
-  it('colours and marks each notification by its place in the window: the last red, the one before orange', () => {
+  it('colours and marks each reminder by its place in the window, its repeats with it', () => {
     const candidates = day(buildPlan(planInput(NIGHT_BEFORE, 3)));
     expect(candidates.length).toBe(6);
     const window = SHACHARIT.computeWindow({
@@ -77,15 +77,17 @@ describe('the time-left line of a mitzvah reminder', () => {
       settings: SETTINGS,
       zmanim: require('@/services/ZmanimService').ZmanimService.getZmanim(at(J, '2026-11-11T12:00'), J),
     })!;
-    const stages = ['green', 'green', 'green', 'green', 'orange', 'red'] as const;
+    // The start reminder and its two repeats, then the before-the-end reminder after its two repeats: two reminders,
+    // so the first is green and the last red, repeats included.
+    const stages = ['green', 'green', 'green', 'red', 'red', 'red'] as const;
     candidates.forEach((c, i) => {
       expect(c.color).toBe(TIME_STAGE_COLOR[stages[i]]);
       expect(c.subtitle).toBe(timeLeftLine(c.trigger, window, J.tz, t, stages[i]));
     });
-    expect(candidates[0].subtitle).toMatch(/^עד \d\d:\d\d · נשארו /);
-    expect(candidates[4].subtitle).toMatch(/^⚠️ עד \d\d:\d\d · נשארו /);
+    expect(candidates[0].subtitle).toMatch(/^נשארו .* · עד \d\d:\d\d$/);
+    expect(candidates[3].subtitle).toMatch(/^❗ נשארו .* · עד \d\d:\d\d$/);
     // Shacharit's last reminder, 45 minutes before its end.
-    expect(candidates[5].subtitle).toMatch(/^❗ עד \d\d:\d\d · נשארו 45 דק'$/);
+    expect(candidates[5].subtitle).toMatch(/^❗ נשארו 45 דק' · עד \d\d:\d\d$/);
   });
 
   it('is the same on the iPhone and Android, and keeps the places once some are past or marked', () => {
@@ -96,6 +98,22 @@ describe('the time-left line of a mitzvah reminder', () => {
       expect(later[0].subtitle?.startsWith('❗ ')).toBe(true);
       expect(later[0].color).toBe(TIME_STAGE_COLOR.red);
     }
+  });
+
+  it('marks the one before the last of three reminders orange, with its repeats, and never names a repeat in the body', () => {
+    const reminders = [
+      { anchor: 'start' as const, offsetMin: 0, label: 'x' },
+      { anchor: 'start' as const, offsetMin: 60, label: 'y' },
+      { anchor: 'end' as const, offsetMin: -10, label: 'z' },
+    ];
+    const input = { ...planInput(NIGHT_BEFORE, 2), reminderOverrides: { shacharit: reminders } };
+    const candidates = day(buildPlan(input));
+    // Level 2: each reminder and one repeat (after a start reminder, before the end one).
+    expect(candidates.map((c) => c.color)).toEqual(
+      ['green', 'green', 'orange', 'orange', 'red', 'red'].map((s) => TIME_STAGE_COLOR[s as 'green']),
+    );
+    expect(candidates.filter((c) => c.subtitle?.startsWith('⚠️ '))).toHaveLength(2);
+    for (const c of candidates) expect(c.body).not.toMatch(/מתוך/);
   });
 
   it('makes a mitzvah with one notification red', () => {
