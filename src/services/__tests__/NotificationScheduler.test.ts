@@ -326,7 +326,7 @@ describe('NotificationScheduler', () => {
     const running = NotificationScheduler.rebuild();
     expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBeUndefined();
     await running;
-    expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(11);
+    expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(12);
   });
 
   it('6.3 cancelAll empties pending', async () => {

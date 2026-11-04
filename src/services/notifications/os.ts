@@ -89,6 +89,7 @@ export async function ensureCategories(): Promise<void> {
 export function contentHash(candidate: ScheduleCandidate): string {
   const text = JSON.stringify([
     candidate.title,
+    candidate.subtitle ?? null,
     candidate.body,
     candidate.trigger.getTime(),
     candidate.categoryIdentifier ?? null,
@@ -107,6 +108,7 @@ function requestFor(candidate: ScheduleCandidate): Notifications.NotificationReq
     identifier: candidate.id,
     content: {
       title: candidate.title,
+      ...(candidate.subtitle && { subtitle: candidate.subtitle }),
       body: candidate.body,
       data: { ...candidate.data, contentHash: contentHash(candidate) },
       ...(candidate.categoryIdentifier && { categoryIdentifier: candidate.categoryIdentifier }),

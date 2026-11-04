@@ -34,6 +34,7 @@ import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { HomeLook, useUserStore } from '@/stores/useUserStore';
+import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useShallow } from 'zustand/react/shallow';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -187,6 +188,13 @@ export default function HomeScreen() {
   const profileName = useUserStore((s) => s.profileName);
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
   const homeLook = useUserStore((s) => s.homeLook);
+  // Each mitzvah's nagging level for the bell beside its name: its own, else the app's.
+  const appNagLevel = useUserStore((s) => s.nagLevel);
+  const activeMitzvot = useMitzvotStore((s) => s.activeMitzvot);
+  const nagLevelOf = useCallback(
+    (id: string) => activeMitzvot[id]?.nagLevel ?? appNagLevel,
+    [activeMitzvot, appNagLevel],
+  );
   const setHomeLook = useUserStore((s) => s.setHomeLook);
   const taharahEvents = useTaharahStore((s) => s.events);
   const taharahSettings = useTaharahStore((s) => s.settings);
@@ -429,6 +437,7 @@ export default function HomeScreen() {
         ...entry,
         name: info?.name ?? entry.id,
         icon: info?.icon ?? 'star',
+        nagLevel: nagLevelOf(entry.id),
         statusText: dayEntryStatusText(entry, now, location.tz, t),
         range: entry.start && entry.end ? clockRange(entry.start, entry.end, t, location.tz, entry.date) : null,
         startLabel: entry.start
@@ -439,7 +448,7 @@ export default function HomeScreen() {
         endLabel: entry.end ? clockOf(entry.end, location.tz) : null,
       };
     });
-  }, [current, allCurrent, upcoming, allMissed, completed, stamping, heldOpen, now, location.tz, t]);
+  }, [current, allCurrent, upcoming, allMissed, completed, stamping, heldOpen, now, location.tz, t, nagLevelOf]);
 
   const name = firstName(profileName);
   const greeting = t(greetingKey(now, location.tz, name !== ''), { name });
@@ -679,6 +688,7 @@ export default function HomeScreen() {
                     testID={`home-now-${item.mitzvah.id}`}
                     name={item.name}
                     icon={iconFor(item.mitzvah.icon)}
+                    nagLevel={nagLevelOf(item.mitzvah.id)}
                     start={item.window.start}
                     end={item.window.end}
                     now={now}

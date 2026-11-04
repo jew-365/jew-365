@@ -521,6 +521,27 @@ The owner's upgrade list of 2026-11-04, narrowed the same day to simple tasks th
   - **What it is:** the design lab study [design/lab/studies/2026-11-04-time-and-nag/](design/lab/studies/2026-11-04-time-and-nag/AGENTS.md): eleven directions for how a mitzvah reminder says how long is left with a colour by how close the end is (Android and iPhone, ten without a build and one live idea that needs one), and eight for a subtle mark of the nagging level beside each mitzvah on home. Canvas https://claude.ai/artifact/RqgAKD1iiJfQcPiGtS8yKT, gallery https://claude.ai/artifact/67xThcj5rmdEzt1beon62k.
   - **What it solves:** the owner's requests of 2026-11-04 ("ספרות הזמן שנשאר ... ירוק אדום וכתום", "חיווי עדין ... מה רמת הנודניקיות"), decided before any app code.
   - **Expected result:** the owner picks one direction for each surface in the gallery; the picks are recorded in the study's AGENTS.md and become two implementation tasks here.
+  - **Done:** 2026-11-04. Verified: the owner's picks (ז with the end time's digits coloured, ד with the number inside the bell) recorded in the study's AGENTS.md; the two tasks below implement them.
+  - **Status:** Version: none (design) · Committed: yes, `fb6cbf4` design(lab): the time-left and nagging-level study of 2026-11-04 · Pushed: yes · Live: the two Artifacts · Channel: none
+- [ ] Say in every mitzvah reminder until when the time lasts and how long is left, with a stage dot
+  - **Flag:** `OTA`.
+  - **What it is:** the notification's subtitle (`timeLeftLine()` in [src/utils/timeLeft.ts](src/utils/timeLeft.ts)): "🟠 עד 09:32 · נשארו 45 דק'", the dot green, orange or red by how close the end is, on every reminder and repeat; `SCHEDULE_FORMAT` 12.
+  - **What it solves:** the owner's request of 2026-11-04 and pick ז of the study, with the dot by the end time in place of colouring the icon.
+  - **Expected result:** every mitzvah reminder on Android (beside the app name) and iPhone (the bold second line) carries the line, worded at its own instant.
+  - **Done:** 2026-11-04. Verified: [src/utils/__tests__/timeLeft.test.ts](src/utils/__tests__/timeLeft.test.ts) (stages, wording in Hebrew and English, before and after the window, a multi-day end) and [src/services/notifications/__tests__/timeLeft.mitzvot.test.ts](src/services/notifications/__tests__/timeLeft.mitzvot.test.ts) (each main and repeat through `buildPlan()`, the hash, the request handed to expo); typecheck, lint, DOX and the full Jest suite. Not checked on a phone.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
+- [ ] Show each mitzvah's nagging level on home as a bell with the number inside
+  - **Flag:** `OTA`.
+  - **What it is:** [NagBell](src/components/NagBell.tsx) beside the name in the open card and in every My day look, with the mitzvah's own level or the app's; nothing at level 1.
+  - **What it solves:** the owner's request of 2026-11-04 and pick ד of the study.
+  - **Expected result:** a mitzvah above level 1 shows a small bell with 2, 3 or 4 inside beside its name on home, read out in the card's label.
+  - **Done:** 2026-11-04. Verified: [src/components/__tests__/NagBell.render.test.tsx](src/components/__tests__/NagBell.render.test.tsx) and the bell in the three looks in [src/components/__tests__/DayLooks.render.test.tsx](src/components/__tests__/DayLooks.render.test.tsx); typecheck, lint, DOX and the full Jest suite. Not checked on a phone.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
+- [ ] Colour the end time's digits in a reminder on Android
+  - **Flag:** `Build`.
+  - **What it is:** with native code, the digits of the end time in the time-left line drawn in the stage colour (a styled `subText` or text through a change to the notification builder of expo-notifications), and the dot dropped on Android; the iPhone keeps the dot, since its banner cannot colour text.
+  - **What it solves:** the owner's pick of 2026-11-04 as asked ("לצבוע את הספרות של שעת סוף הזמן בצבע ההתראה הרלוונטי"), deferred to the next build by the owner's choice the same day.
+  - **Expected result:** on an Android build, the end time in each reminder shows in green, orange or red, and the icon and app name keep their default colour.
 
 ## Bugs
 

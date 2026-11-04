@@ -419,6 +419,8 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
       'נודניק',
       'נודניקיות',
       'רמת נודניקיות',
+      'פעמון',
+      'bell',
       'תזכורות חוזרות',
       'חזרות',
       'כמה תזכורות',

@@ -20,6 +20,8 @@ export type ScheduleCandidate = {
   channel: ChannelKey;
   categoryIdentifier?: string;
   title: string;
+  // The iPhone's bold second line and Android's subText; a mitzvah reminder's time-left line.
+  subtitle?: string;
   body: string;
   data: PendingNotificationMeta;
 };

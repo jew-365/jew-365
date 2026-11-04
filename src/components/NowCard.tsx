@@ -22,10 +22,12 @@ import { durations, radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { clockOf, formatRemaining, remainingParts } from '@/utils/clock';
 import { ringDashOffset } from '@/utils/homeDay';
+import type { NagLevel } from '@/utils/nagging';
 import { Button } from './Button';
 import { Card } from './Card';
 import { IconTile } from './IconTile';
 import { MitzvahIcon } from './MitzvahIcon';
+import { NagBell, nagBellLabel } from './NagBell';
 import type { IconName } from './MitzvahIcon';
 
 const TILE_SIZE = scaled(44);
@@ -55,6 +57,8 @@ const WASH_ALPHA = '1F';
 type Props = {
   name: string;
   icon: IconName;
+  // The mitzvah's nagging level, drawn beside the name by NagBell (nothing at level 1).
+  nagLevel?: NagLevel;
   start: Date;
   end: Date;
   now: Date;
@@ -105,6 +109,7 @@ function Spark({ progress, index, color }: { progress: SharedValue<number>; inde
 
 export const NowCard = React.memo(function NowCard({
   name,
+  nagLevel,
   icon,
   start,
   end,
@@ -215,16 +220,25 @@ export const NowCard = React.memo(function NowCard({
           onPress={onPress}
           onLongPress={onLongPress}
           accessibilityRole="button"
-          accessibilityLabel={`${name}, ${t('home.now.ringLabel', { left: formatRemaining(remaining, t) })}`}
+          accessibilityLabel={[
+            name,
+            t('home.now.ringLabel', { left: formatRemaining(remaining, t) }),
+            nagBellLabel(nagLevel, t),
+          ]
+            .filter(Boolean)
+            .join(', ')}
           accessibilityActions={[{ name: 'longpress', label: t('home.quick.title') }]}
           onAccessibilityAction={() => onLongPress()}
           style={({ pressed }) => [styles.body, { opacity: pressed ? 0.85 : 1 }]}
         >
           <IconTile name={icon} size={TILE_SIZE} />
           <View style={styles.meta}>
-            <Text style={[typography.heading, { color: colors.text }]} numberOfLines={1}>
-              {name}
-            </Text>
+            <View style={styles.nameRow}>
+              <Text style={[typography.heading, styles.name, { color: colors.text }]} numberOfLines={1}>
+                {name}
+              </Text>
+              <NagBell level={nagLevel} />
+            </View>
             <Text style={[typography.caption, { color: colors.textSub }]}>
               {t('home.now.start', { time: clockOf(start, tz) })}
             </Text>
@@ -368,6 +382,8 @@ export const NowCard = React.memo(function NowCard({
 });
 
 const styles = StyleSheet.create({
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  name: { flexShrink: 1 },
   clip: { overflow: 'hidden' },
   card: { marginBottom: spacing.md },
   body: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },

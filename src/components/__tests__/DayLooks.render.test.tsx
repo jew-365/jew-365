@@ -196,3 +196,19 @@ describe('DayLooks', () => {
     });
   });
 });
+
+describe('the nagging bell', () => {
+  it.each(['rail', 'cards', 'rings'] as const)(
+    '%s: a bell with the level beside the name, and in the label; none at level 1',
+    (look) => {
+      setup(look, [
+        { ...A, nagLevel: 3 },
+        { ...B, nagLevel: 1 },
+      ]);
+      const bells = screen.getAllByTestId('nag-bell');
+      expect(bells).toHaveLength(1);
+      expect(within(bells[0]).getByText('3')).toBeOnTheScreen();
+      expect(screen.getByRole('button', { name: /^A, .*, נודניק בינוני: כל תזכורת נשלחת 3 פעמים$/ })).toBeOnTheScreen();
+    },
+  );
+});
