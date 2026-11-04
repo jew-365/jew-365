@@ -17,6 +17,12 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-11-03 — Pages: nusach Teiman on the rav's review page (R16)
+
+- **Put the nusach Teiman texts on the rav's review page (R16)** — R16.1 to R16.9 in [docs/halacha-review.html](docs/halacha-review.html), group "נוסח תימן בלדי — הטקסטים", each with its source and its place in the code; `RULES_VERSION` 5, 34 items.
+  - Requested: the owner's answer to Q16, 2026-11-03: "כן קח ותוסיף את זה בשאלון לאישור רב". Verified: the docs-site server in the browser pane at 375px and desktop width, dark and light (no horizontal scroll, `סומנו 0 מתוך 34`, an empty submit marks all 34, a stubbed submit posts 34 items under `(גרסה 5)`); the live page read back with curl on 2026-11-03: 9 R16 items and `RULES_VERSION = '5'`.
+  - Version: Pages · Committed: yes, `0cd2c3b` feat(siddur): nusach Teiman Baladi, the fifth nusach · Pushed: yes · Live: https://jew-365.github.io/jew-365/halacha-review.html (pages run on `6b2049f` green) · Channel: production
+
 ## 2026-11-03 — production update 1.0.21-12: the bug hunt's 24 fixes
 
 - **Requested:** the owner, 2026-11-03, in a Claude Code session: "תחפש לי עוד באגים באפליקציה ותיהיה יסודי"; after the audit report the owner chose to fix every finding that changes no product behavior, plus two decisions of their own: schedule nothing before onboarding ends, and the nagging slider changes the level only on a tap or a horizontal drag ("גם וגם"), then approved the release ("כן").
