@@ -529,14 +529,14 @@ The owner's upgrade list of 2026-11-04, narrowed the same day to simple tasks th
   - **What it solves:** the owner's request of 2026-11-04 and pick ז of the study, with the dot by the end time in place of colouring the icon.
   - **Expected result:** every mitzvah reminder on Android (beside the app name) and iPhone (the bold second line) carries the line, worded at its own instant.
   - **Done:** 2026-11-04. Verified: [src/utils/__tests__/timeLeft.test.ts](src/utils/__tests__/timeLeft.test.ts) (stages, wording in Hebrew and English, before and after the window, a multi-day end) and [src/services/notifications/__tests__/timeLeft.mitzvot.test.ts](src/services/notifications/__tests__/timeLeft.mitzvot.test.ts) (each main and repeat through `buildPlan()`, the hash, the request handed to expo); typecheck, lint, DOX and the full Jest suite. Not checked on a phone.
-  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, the next production update · Committed: yes, `8326658` feat(notifications,home): the time left in a reminder and the nagging bell on home · Pushed: yes · Live: no · Channel: none
 - [ ] Show each mitzvah's nagging level on home as a bell with the number inside
   - **Flag:** `OTA`.
   - **What it is:** [NagBell](src/components/NagBell.tsx) beside the name in the open card and in every My day look, with the mitzvah's own level or the app's; nothing at level 1.
   - **What it solves:** the owner's request of 2026-11-04 and pick ד of the study.
   - **Expected result:** a mitzvah above level 1 shows a small bell with 2, 3 or 4 inside beside its name on home, read out in the card's label.
   - **Done:** 2026-11-04. Verified: [src/components/__tests__/NagBell.render.test.tsx](src/components/__tests__/NagBell.render.test.tsx) and the bell in the three looks in [src/components/__tests__/DayLooks.render.test.tsx](src/components/__tests__/DayLooks.render.test.tsx); typecheck, lint, DOX and the full Jest suite. Not checked on a phone.
-  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, the next production update · Committed: yes, `8326658` feat(notifications,home): the time left in a reminder and the nagging bell on home · Pushed: yes · Live: no · Channel: none
 - [ ] Colour the end time's digits in a reminder on Android
   - **Flag:** `Build`.
   - **What it is:** with native code, the digits of the end time in the time-left line drawn in the stage colour (a styled `subText` or text through a change to the notification builder of expo-notifications), and the dot dropped on Android; the iPhone keeps the dot, since its banner cannot colour text.
