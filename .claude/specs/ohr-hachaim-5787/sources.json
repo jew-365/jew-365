@@ -1,0 +1,23 @@
+{
+  "winter.jpg": {
+    "sha256": "06c38e9bb607cbd8be68cbdfa1e0a3a44de083dbc5f797a23dd97bf0eaf27e83"
+  },
+  "summer.jpg": {
+    "sha256": "ac9969d23d53ab38e4ee11760e42f7a46f9e2c156188729dfbfcf4f0af44e225"
+  },
+  "intro1.png": {
+    "url": "https://raw.githubusercontent.com/Zemaneh-Yosef/royzmanimwebsite/main/assets/images/sources/intro1.png",
+    "sha256": "abf6e3992c33491e32948ea55a35814773c2f05f8bdf9dadf8f7c91eb5e1b306",
+    "note": "Older scanned printed introduction, read visually on 2026-11-04; not verified as the introduction to the 5787 edition."
+  },
+  "intro2.png": {
+    "url": "https://raw.githubusercontent.com/Zemaneh-Yosef/royzmanimwebsite/main/assets/images/sources/intro2.png",
+    "sha256": "dd19a83d84cce27c24971a7fc660b7009e7aa95dcc73cfa01be4bb3a155920ba",
+    "note": "Older scanned printed introduction, read visually on 2026-11-04; not verified as the introduction to the 5787 edition."
+  },
+  "intro3.png": {
+    "url": "https://raw.githubusercontent.com/Zemaneh-Yosef/royzmanimwebsite/main/assets/images/sources/intro3.png",
+    "sha256": "a4637fdea85da4d702703e382c168a53dd08bde2322f50d24297392f9504fd08",
+    "note": "Older scanned printed introduction, read visually on 2026-11-04; not verified as the introduction to the 5787 edition."
+  }
+}
