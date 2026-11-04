@@ -16,6 +16,7 @@ mkdirSync(canvasDir, { recursive: true });
 mkdirSync(siteBoards, { recursive: true });
 
 const SURFACES = [
+  { id: 'content', title: 'סבב 4: מה נכנס לתוכן ההתראה', lede: 'השאלה שלך: למה לא משתמשים בתוכן של ההתראה, שיש בו מקום, ומסתפקים בשורה העליונה הצפופה. כאן ההתראות האמיתיות של היום עם הנודניק החכם, כמו שסמסונג מציגה אותן (מכווצות, והעליונה מורחבת; החץ פותח וסוגר) וכמו באייפון. בכל טלפון בוחרים בתחתית שעה, טלפון ורמה.', pick: 'one' },
   { id: 'urg', title: 'סבב 3: סימן לדחיפות באייפון', lede: 'באייפון אי אפשר לצבוע התראה, אז הדחיפות צריכה להיות סימן. בכל האפשרויות אנדרואיד נשאר ז בדיוק כמו שבחרת, והסימן מתווסף רק באייפון. בתחתית הטלפון אפשר לעבור לאנדרואיד ולראות שהוא לא השתנה.', pick: 'one' },
   { id: 'bell3', title: 'סבב 3: הפעמון בדף הבית', lede: 'בכל האפשרויות הפעמון והמספר באותו צבע, והמספר במרכז או ליד הפעמון, בלי לגעת בקווים. המספר הוא סך ההתראות: ק״ש שחרית 8, שחרית 6, ק״ש על המיטה 2. בכפתור "כרטיסים, נודניק" רואים גם מספר דו־ספרתי (תפילין 12).', pick: 'one' },
   { id: 'final', title: 'מה שבנוי עכשיו (לפני סבב 3)', lede: 'כך זה ייראה באפליקציה אחרי העדכון: ההתראה של ז בדיוק כמו שבחרת, והפעמון בדף הבית עם סך ההתראות בתוכו. בהתראות בוחרים בתחתית הטלפון את השעה ואנדרואיד או אייפון; בבית אפשר לשנות בסרגל את הרמה של האפליקציה.', pick: 'one', pickLabel: 'מאשר' },
@@ -129,13 +130,13 @@ const notes = {
     text: 'בכל לוח: Play כדי ללחוץ. בהתראות בוחרים בתחתית הטלפון את השעה, אנדרואיד או אייפון, ונודניק. בבית: Tweaks לרמה של האפליקציה, לשעה ולמראה של היום שלי.',
   },
 };
-const rows = [dirs.filter((d) => d.surface === 'urg'), dirs.filter((d) => d.surface === 'bell3'), dirs.filter((d) => d.surface === 'final'), dirs.filter((d) => d.surface === 'notif2'), dirs.filter((d) => d.surface === 'notif'), dirs.filter((d) => d.surface === 'home')];
+const rows = [dirs.filter((d) => d.surface === 'content'), dirs.filter((d) => d.surface === 'urg'), dirs.filter((d) => d.surface === 'bell3'), dirs.filter((d) => d.surface === 'final'), dirs.filter((d) => d.surface === 'notif2'), dirs.filter((d) => d.surface === 'notif'), dirs.filter((d) => d.surface === 'home')];
 rows.forEach((row, r) => {
   row.forEach((d, i) => {
     const x = i * (W + GX);
     const y = r * ROW;
     boards[`${d.board}.dc.html`] = { x, y, w: W, h: H, title: d.letter + ' · ' + d.name, is_interactive: true, radius: 36 };
-    notes[`n${d.board}`] = { x, y: y + H + 40, w: W, size: 's', fill: d.surface === 'urg' || d.surface === 'bell3' ? 'gray' : d.surface === 'final' ? 'blue' : d.surface === 'home' ? 'yellow' : d.surface === 'notif2' ? 'green' : 'orange', text: d.letter + ' · ' + d.name + ': ' + d.note };
+    notes[`n${d.board}`] = { x, y: y + H + 40, w: W, size: 's', fill: d.surface === 'content' ? 'purple' : d.surface === 'urg' || d.surface === 'bell3' ? 'gray' : d.surface === 'final' ? 'blue' : d.surface === 'home' ? 'yellow' : d.surface === 'notif2' ? 'green' : 'orange', text: d.letter + ' · ' + d.name + ': ' + d.note };
   });
 });
 const canvas = {

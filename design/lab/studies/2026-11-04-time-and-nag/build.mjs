@@ -6,7 +6,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-for (const f of ['gen-notif-boards.mjs', 'gen-home-boards.mjs', 'build-notif.mjs', 'build-home.mjs']) {
+for (const f of ['gen-notif-boards.mjs', 'gen-notif4-boards.mjs', 'gen-home-boards.mjs', 'build-notif.mjs', 'build-notif4.mjs', 'build-home.mjs']) {
   execFileSync(process.execPath, [join(here, f)], { stdio: ['ignore', 'ignore', 'inherit'] });
 }
 console.log('built all boards');

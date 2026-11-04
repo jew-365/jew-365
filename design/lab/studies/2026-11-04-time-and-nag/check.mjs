@@ -24,7 +24,9 @@ const port = server.address().port;
 const browser = await chromium.launch();
 let fails = 0;
 const fail = (m) => { fails++; console.log('FAIL', m); };
-for (const d of dirs) {
+// `node check.mjs <prefix>` checks only the boards whose name starts with it (the gallery is always checked).
+const only = process.argv[2] || '';
+for (const d of dirs.filter((x) => x.board.startsWith(only))) {
   for (const theme of ['gold', 'dark']) {
     for (const demo of d.demos) {
       const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -34,10 +36,12 @@ for (const d of dirs) {
       await page.waitForTimeout(900);
       if (errs.length) fail(`${d.board} ${theme} ${demo.hash}: ${errs[0]}`);
       if (d.board.startsWith('Notif') && demo === d.demos[0]) {
-        for (const platform of ['android', 'iphone']) {
+        // Round 4 draws Samsung's card (article.sc) and the iPhone's as a button.
+        const r4 = d.board.startsWith('NotifR4');
+        for (const platform of [r4 ? 'samsung' : 'android', 'iphone']) {
           await page.evaluate((p) => (location.hash = location.hash + '&platform=' + p), platform);
           await page.waitForTimeout(400);
-          const n = await page.locator(platform === 'android' ? 'article.ntf' : 'article.ios').count();
+          const n = await page.locator(platform === 'iphone' ? '.ios' : r4 ? 'article.sc' : 'article.ntf').count();
           if (!n) fail(`${d.board} ${platform}: no notification at ${demo.hash}`);
         }
       }
