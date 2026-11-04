@@ -529,7 +529,7 @@ The owner's upgrade list of 2026-11-04, narrowed the same day to simple tasks th
   - **What it solves:** the owner's request of 2026-11-04 and pick ז of the study, with the dot by the end time in place of colouring the icon.
   - **Expected result:** every mitzvah reminder on Android (beside the app name) and iPhone (the bold second line) carries the line, worded at its own instant.
   - **Done:** 2026-11-04. Verified: [src/utils/__tests__/timeLeft.test.ts](src/utils/__tests__/timeLeft.test.ts) (stages, wording in Hebrew and English, before and after the window, a multi-day end) and [src/services/notifications/__tests__/timeLeft.mitzvot.test.ts](src/services/notifications/__tests__/timeLeft.mitzvot.test.ts) (each main and repeat through `buildPlan()`, the hash, the request handed to expo); typecheck, lint, DOX and the full Jest suite. Not checked on a phone.
-  - **Status:** Version: OTA, the next production update · Committed: yes, `8326658` feat(notifications,home): the time left in a reminder and the nagging bell on home · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, the next production update · Committed: yes, `8326658` feat(notifications,home): the time left in a reminder and the nagging bell on home ; `c339c3e` feat(notifications): a quiet time pie and a soft stage colour on Android · Pushed: yes · Live: no · Channel: none
 - [ ] Show each mitzvah's nagging level on home as a bell with the number inside
   - **Flag:** `OTA`.
   - **What it is:** [NagBell](src/components/NagBell.tsx) beside the name in the open card and in every My day look, with the mitzvah's own level or the app's; nothing at level 1.
