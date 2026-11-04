@@ -28,7 +28,7 @@ describe('sendStage', () => {
 
   it("keeps direction ז's colours and the two marks", () => {
     expect(TIME_STAGE_COLOR).toEqual({ green: '#13804A', orange: '#B85F00', red: '#C5221F' });
-    expect(STAGE_MARK).toEqual({ green: '', orange: '⚠️', red: '🔺' });
+    expect(STAGE_MARK).toEqual({ green: '', orange: '⚠️', red: '❗' });
   });
 });
 
@@ -41,13 +41,13 @@ describe('timeLeftLine', () => {
     expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t)).toBe("עד 09:32 · נשארו 45 דק'");
   });
 
-  it('opens with the mark of its stage: a triangle on the last, a warning sign on the one before, none on the rest', () => {
+  it('opens with the mark of its stage: an exclamation mark on the last, a warning sign on the one before, none on the rest', () => {
     setLocale('he');
     const at0847 = at(J, '2026-11-04T08:47');
-    expect(timeLeftLine(at0847, window, J.tz, t, 'red')).toBe("🔺 עד 09:32 · נשארו 45 דק'");
+    expect(timeLeftLine(at0847, window, J.tz, t, 'red')).toBe("❗ עד 09:32 · נשארו 45 דק'");
     expect(timeLeftLine(at0847, window, J.tz, t, 'orange')).toBe("⚠️ עד 09:32 · נשארו 45 דק'");
     expect(timeLeftLine(at0847, window, J.tz, t, 'green')).toBe("עד 09:32 · נשארו 45 דק'");
-    expect(timeLeftLine(at(J, '2026-11-04T10:02'), window, J.tz, t, 'red')).toBe('🔺 הזמן נגמר ב־09:32');
+    expect(timeLeftLine(at(J, '2026-11-04T10:02'), window, J.tz, t, 'red')).toBe('❗ הזמן נגמר ב־09:32');
     expect(timeLeftLine(at(J, '2026-11-04T05:48'), window, J.tz, t, 'orange')).toBe("⚠️ מתחיל בעוד 10 דק'");
   });
 
@@ -65,6 +65,6 @@ describe('timeLeftLine', () => {
 
   it('reads in English', () => {
     setLocale('en');
-    expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t, 'red')).toBe('🔺 Until 09:32 · 45 min left');
+    expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t, 'red')).toBe('❗ Until 09:32 · 45 min left');
   });
 });

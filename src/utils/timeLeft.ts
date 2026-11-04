@@ -20,8 +20,8 @@ export function sendStage(index: number, count: number): TimeStage {
 }
 
 // The mark that opens the line of the last two notifications, on every phone (an emoji draws its own colour, which
-// no phone strips): a red triangle on the last, a warning sign on the one before it.
-export const STAGE_MARK: Record<TimeStage, string> = { green: '', orange: '⚠️', red: '🔺' };
+// no phone strips): a red exclamation mark on the last, a warning sign on the one before it.
+export const STAGE_MARK: Record<TimeStage, string> = { green: '', orange: '⚠️', red: '❗' };
 
 export function timeLeftLine(
   trigger: Date,

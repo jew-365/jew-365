@@ -85,7 +85,7 @@ describe('the time-left line of a mitzvah reminder', () => {
     expect(candidates[0].subtitle).toMatch(/^עד \d\d:\d\d · נשארו /);
     expect(candidates[4].subtitle).toMatch(/^⚠️ עד \d\d:\d\d · נשארו /);
     // Shacharit's last reminder, 45 minutes before its end.
-    expect(candidates[5].subtitle).toMatch(/^🔺 עד \d\d:\d\d · נשארו 45 דק'$/);
+    expect(candidates[5].subtitle).toMatch(/^❗ עד \d\d:\d\d · נשארו 45 דק'$/);
   });
 
   it('is the same on the iPhone and Android, and keeps the places once some are past or marked', () => {
@@ -93,7 +93,7 @@ describe('the time-left line of a mitzvah reminder', () => {
     for (const platform of ['ios', 'android'] as const) {
       const later = day(buildPlan(planInput(new Date(lastAt.getTime() - 60_000), 3, platform)));
       expect(later).toHaveLength(1);
-      expect(later[0].subtitle?.startsWith('🔺 ')).toBe(true);
+      expect(later[0].subtitle?.startsWith('❗ ')).toBe(true);
       expect(later[0].color).toBe(TIME_STAGE_COLOR.red);
     }
   });
@@ -105,7 +105,7 @@ describe('the time-left line of a mitzvah reminder', () => {
     };
     const [only] = day(buildPlan(input));
     expect(only.color).toBe(TIME_STAGE_COLOR.red);
-    expect(only.subtitle?.startsWith('🔺 ')).toBe(true);
+    expect(only.subtitle?.startsWith('❗ ')).toBe(true);
   });
 
   it('is part of what the hash covers and is handed to expo as the subtitle', async () => {
