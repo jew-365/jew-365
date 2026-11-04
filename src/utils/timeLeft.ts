@@ -7,7 +7,13 @@ type Translate = (scope: string, options?: Record<string, unknown>) => string;
 // hour or half of it, green before that.
 export type TimeStage = 'green' | 'orange' | 'red';
 
-export const TIME_STAGE_DOT: Record<TimeStage, string> = { green: '🟢', orange: '🟠', red: '🔴' };
+// A small pie of the time gone, in the text's own colour (the owner found a coloured emoji too loud, 2026-11-04):
+// a quarter, a half, three quarters.
+export const TIME_STAGE_PIE: Record<TimeStage, string> = { green: '◔', orange: '◑', red: '◕' };
+
+// Soft tones for Android's accent colour (the notification's small icon, and on Android 11 and older its app name);
+// an iPhone banner takes no colour.
+export const TIME_STAGE_COLOR: Record<TimeStage, string> = { green: '#4F9D73', orange: '#D08A3A', red: '#C65A52' };
 
 const RED_MIN = 15;
 const RED_SHARE = 0.2;
@@ -20,6 +26,15 @@ export function timeStage(at: number, start: number, end: number): TimeStage {
   if (leftMin <= RED_MIN || share < RED_SHARE) return 'red';
   if (leftMin <= ORANGE_MIN || share <= ORANGE_SHARE) return 'orange';
   return 'green';
+}
+
+// The accent colour of a reminder at `trigger`: the stage's, red after the window, none before it.
+export function timeLeftColor(trigger: Date, window: { start: Date; end: Date }): string | undefined {
+  const at = trigger.getTime();
+  const start = window.start.getTime();
+  const end = window.end.getTime();
+  if (at < start) return undefined;
+  return TIME_STAGE_COLOR[at > end ? 'red' : timeStage(at, start, end)];
 }
 
 // The line a mitzvah reminder carries under its title (the notification's subtitle: the iPhone's bold second
@@ -35,7 +50,7 @@ export function timeLeftLine(trigger: Date, window: { start: Date; end: Date }, 
   const endText = end - at >= 24 * 60 * 60 * 1000 ? fireTimeText(window.end, tz) : clockOf(window.end, tz);
   if (at > end) return t('notifications.timeLeft.ended', { end: endText });
   return t('notifications.timeLeft.line', {
-    dot: TIME_STAGE_DOT[timeStage(at, start, end)],
+    mark: TIME_STAGE_PIE[timeStage(at, start, end)],
     end: endText,
     left: formatRemaining(end - at, t),
   });

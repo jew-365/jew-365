@@ -24,7 +24,7 @@ import { DEFAULT_HILULA_NOTICES, DEFAULT_ROSH_CHODESH_NOTICES } from '@/stores/u
 import { setLocale, t } from '@/i18n';
 import { at } from '@/testing/zmanim';
 import type { NagLevel, UserSettings } from '@/types/mitzvah';
-import { timeLeftLine } from '@/utils/timeLeft';
+import { TIME_STAGE_COLOR, timeLeftLine } from '@/utils/timeLeft';
 
 const J = CITIES[0];
 const SETTINGS: UserSettings = { nusach: 'ashkenaz', halachicOpinions: { ksSofZman: 'GRA' }, inIsrael: true };
@@ -78,11 +78,13 @@ describe('the time-left line of a mitzvah reminder', () => {
       zmanim: require('@/services/ZmanimService').ZmanimService.getZmanim(at(J, '2026-11-11T12:00'), J),
     })!;
     for (const c of candidates) expect(c.subtitle).toBe(timeLeftLine(c.trigger, window, J.tz, t));
+    expect(candidates[0].color).toBe(TIME_STAGE_COLOR.green);
+    expect(candidates[candidates.length - 1].color).toBe(TIME_STAGE_COLOR.orange);
     const [first] = candidates;
     const last = candidates[candidates.length - 1];
-    expect(first.subtitle).toMatch(/^🟢 עד \d\d:\d\d · נשארו /);
+    expect(first.subtitle).toMatch(/^◔ עד \d\d:\d\d · נשארו /);
     // Shacharit's last reminder is 45 minutes before its end, under half of the window: orange.
-    expect(last.subtitle).toMatch(/^🟠 עד \d\d:\d\d · נשארו 45 דק'$/);
+    expect(last.subtitle).toMatch(/^◑ עד \d\d:\d\d · נשארו 45 דק'$/);
     // The repeats before the end reminder are worded at their own, earlier instants.
     expect(new Set(candidates.map((c) => c.subtitle)).size).toBe(candidates.length);
   });
@@ -90,10 +92,12 @@ describe('the time-left line of a mitzvah reminder', () => {
   it('is part of what the hash covers and is handed to expo as the subtitle', async () => {
     const [candidate] = day(buildPlan(planInput(NIGHT_BEFORE)));
     expect(contentHash(candidate)).not.toBe(contentHash({ ...candidate, subtitle: 'other' }));
+    expect(contentHash(candidate)).not.toBe(contentHash({ ...candidate, color: '#000000' }));
     await schedule([candidate]);
     const request = (Notifications.scheduleNotificationAsync as jest.Mock).mock
       .calls[0][0] as Notifications.NotificationRequestInput;
     expect(request.content.subtitle).toBe(candidate.subtitle);
+    expect(request.content.color).toBe(candidate.color);
     expect(request.content.title).toBe(candidate.title);
   });
 });

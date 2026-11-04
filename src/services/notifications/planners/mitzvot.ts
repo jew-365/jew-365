@@ -17,7 +17,7 @@ import { MULTI_DAY_LOOKAHEAD_DAYS } from '@/utils/buildDayTimeline';
 import { locationNoon } from '@/utils/locationDay';
 import { interpolate, t, translate } from '@/i18n';
 import { reminderLabel } from '@/utils/mitzvahName';
-import { timeLeftLine } from '@/utils/timeLeft';
+import { timeLeftColor, timeLeftLine } from '@/utils/timeLeft';
 import { nagFor, repeatOffsets, type NagLevel } from '@/utils/nagging';
 import { dateKey, type Completions } from '@/stores/useCompletionsStore';
 import { MITZVAH_REMINDER_CATEGORY, MITZVAH_TEXT_CATEGORY, buildId } from '@/services/notifications/ids';
@@ -323,6 +323,7 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: boo
           categoryIdentifier: offersText ? MITZVAH_TEXT_CATEGORY : MITZVAH_REMINDER_CATEGORY,
           title: mitzvahTitle(mitzvah, english),
           subtitle: timeLeftLine(trigger, planned.window, location.tz, t),
+          ...(timeLeftColor(trigger, planned.window) ? { color: timeLeftColor(trigger, planned.window) } : {}),
           body: repeat ? `${body} · ${t('notifications.nag.repeat', { k: repeat, n: of })}` : body,
           data: {
             mitzvahId: mitzvah.id,

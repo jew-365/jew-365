@@ -802,7 +802,7 @@
   "notifications.markDone": "Done",
   "notifications.timeFor": "Time for %{name}",
   "notifications.nag.repeat": "reminder %{k} of %{n}",
-  "notifications.timeLeft.line": "%{dot} until %{end} · %{left} left",
+  "notifications.timeLeft.line": "%{mark} until %{end} · %{left} left",
   "notifications.timeLeft.startsIn": "Starts in %{left}",
   "notifications.timeLeft.ended": "Time ended at %{end}",
   "notifications.chanukahNight": "Time for %{name}: night %{n}",

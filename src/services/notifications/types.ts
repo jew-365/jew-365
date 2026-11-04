@@ -22,6 +22,8 @@ export type ScheduleCandidate = {
   title: string;
   // The iPhone's bold second line and Android's subText; a mitzvah reminder's time-left line.
   subtitle?: string;
+  // Android's accent colour (the small icon, and the app name on Android 11 and older); a reminder's time stage.
+  color?: string;
   body: string;
   data: PendingNotificationMeta;
 };

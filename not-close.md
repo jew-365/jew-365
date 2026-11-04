@@ -523,9 +523,9 @@ The owner's upgrade list of 2026-11-04, narrowed the same day to simple tasks th
   - **Expected result:** the owner picks one direction for each surface in the gallery; the picks are recorded in the study's AGENTS.md and become two implementation tasks here.
   - **Done:** 2026-11-04. Verified: the owner's picks (ז with the end time's digits coloured, ד with the number inside the bell) recorded in the study's AGENTS.md; the two tasks below implement them.
   - **Status:** Version: none (design) · Committed: yes, `fb6cbf4` design(lab): the time-left and nagging-level study of 2026-11-04 · Pushed: yes · Live: the two Artifacts · Channel: none
-- [ ] Say in every mitzvah reminder until when the time lasts and how long is left, with a stage dot
+- [ ] Say in every mitzvah reminder until when the time lasts and how long is left, with the stage shown
   - **Flag:** `OTA`.
-  - **What it is:** the notification's subtitle (`timeLeftLine()` in [src/utils/timeLeft.ts](src/utils/timeLeft.ts)): "🟠 עד 09:32 · נשארו 45 דק'", the dot green, orange or red by how close the end is, on every reminder and repeat; `SCHEDULE_FORMAT` 12.
+  - **What it is:** the notification's subtitle (`timeLeftLine()` in [src/utils/timeLeft.ts](src/utils/timeLeft.ts)): "◑ עד 09:32 · נשארו 45 דק'", a small pie of the time gone (the owner found the coloured dot too loud, 2026-11-04), and on Android the notification's `color` in soft green, orange or red (`timeLeftColor()`), which tints its icon and, on Android 11 and older, its app name; on every reminder and repeat; `SCHEDULE_FORMAT` 12.
   - **What it solves:** the owner's request of 2026-11-04 and pick ז of the study, with the dot by the end time in place of colouring the icon.
   - **Expected result:** every mitzvah reminder on Android (beside the app name) and iPhone (the bold second line) carries the line, worded at its own instant.
   - **Done:** 2026-11-04. Verified: [src/utils/__tests__/timeLeft.test.ts](src/utils/__tests__/timeLeft.test.ts) (stages, wording in Hebrew and English, before and after the window, a multi-day end) and [src/services/notifications/__tests__/timeLeft.mitzvot.test.ts](src/services/notifications/__tests__/timeLeft.mitzvot.test.ts) (each main and repeat through `buildPlan()`, the hash, the request handed to expo); typecheck, lint, DOX and the full Jest suite. Not checked on a phone.

@@ -1,7 +1,7 @@
 import { CITIES } from '@/data/cities';
 import { setLocale, t } from '@/i18n';
 import { at } from '@/testing/zmanim';
-import { TIME_STAGE_DOT, timeLeftLine, timeStage } from '../timeLeft';
+import { TIME_STAGE_COLOR, TIME_STAGE_PIE, timeLeftColor, timeLeftLine, timeStage } from '../timeLeft';
 
 const J = CITIES[0];
 const MIN = 60_000;
@@ -33,14 +33,14 @@ describe('timeStage', () => {
 describe('timeLeftLine', () => {
   afterEach(() => setLocale('he'));
 
-  it('leads with the end time on the location clock and the time left, with the stage dot', () => {
+  it('leads with the end time on the location clock and the time left, with the stage pie', () => {
     setLocale('he');
-    expect(timeLeftLine(window.start, window, J.tz, t)).toBe(`${TIME_STAGE_DOT.green} עד 09:32 · נשארו 3:34 שעות`);
+    expect(timeLeftLine(window.start, window, J.tz, t)).toBe(`${TIME_STAGE_PIE.green} עד 09:32 · נשארו 3:34 שעות`);
     expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t)).toBe(
-      `${TIME_STAGE_DOT.orange} עד 09:32 · נשארו 45 דק'`,
+      `${TIME_STAGE_PIE.orange} עד 09:32 · נשארו 45 דק'`,
     );
     expect(timeLeftLine(at(J, '2026-11-04T09:22'), window, J.tz, t)).toBe(
-      `${TIME_STAGE_DOT.red} עד 09:32 · נשארו 10 דק'`,
+      `${TIME_STAGE_PIE.red} עד 09:32 · נשארו 10 דק'`,
     );
   });
 
@@ -53,13 +53,23 @@ describe('timeLeftLine', () => {
   it('dates the end of a window a day or more away', () => {
     setLocale('he');
     const long = { start: window.start, end: at(J, '2026-11-12T03:40') };
-    expect(timeLeftLine(window.start, long, J.tz, t)).toBe(`${TIME_STAGE_DOT.green} עד 12/11 03:40 · נשארו 7 ימים`);
+    expect(timeLeftLine(window.start, long, J.tz, t)).toBe(`${TIME_STAGE_PIE.green} עד 12/11 03:40 · נשארו 7 ימים`);
   });
 
   it('reads in English', () => {
     setLocale('en');
     expect(timeLeftLine(at(J, '2026-11-04T08:47'), window, J.tz, t)).toBe(
-      `${TIME_STAGE_DOT.orange} until 09:32 · 45 min left`,
+      `${TIME_STAGE_PIE.orange} until 09:32 · 45 min left`,
     );
+  });
+});
+
+describe('timeLeftColor', () => {
+  it('is the stage colour inside the window, red after it and none before it', () => {
+    expect(timeLeftColor(window.start, window)).toBe(TIME_STAGE_COLOR.green);
+    expect(timeLeftColor(at(J, '2026-11-04T08:47'), window)).toBe(TIME_STAGE_COLOR.orange);
+    expect(timeLeftColor(at(J, '2026-11-04T09:22'), window)).toBe(TIME_STAGE_COLOR.red);
+    expect(timeLeftColor(at(J, '2026-11-04T10:02'), window)).toBe(TIME_STAGE_COLOR.red);
+    expect(timeLeftColor(at(J, '2026-11-04T05:48'), window)).toBeUndefined();
   });
 });

@@ -90,6 +90,7 @@ export function contentHash(candidate: ScheduleCandidate): string {
   const text = JSON.stringify([
     candidate.title,
     candidate.subtitle ?? null,
+    candidate.color ?? null,
     candidate.body,
     candidate.trigger.getTime(),
     candidate.categoryIdentifier ?? null,
@@ -109,6 +110,7 @@ function requestFor(candidate: ScheduleCandidate): Notifications.NotificationReq
     content: {
       title: candidate.title,
       ...(candidate.subtitle && { subtitle: candidate.subtitle }),
+      ...(candidate.color && { color: candidate.color }),
       body: candidate.body,
       data: { ...candidate.data, contentHash: contentHash(candidate) },
       ...(candidate.categoryIdentifier && { categoryIdentifier: candidate.categoryIdentifier }),

@@ -802,7 +802,7 @@
   "notifications.markDone": "עשיתי",
   "notifications.timeFor": "זמן %{name}",
   "notifications.nag.repeat": "תזכורת %{k} מתוך %{n}",
-  "notifications.timeLeft.line": "%{dot} עד %{end} · נשארו %{left}",
+  "notifications.timeLeft.line": "%{mark} עד %{end} · נשארו %{left}",
   "notifications.timeLeft.startsIn": "מתחיל בעוד %{left}",
   "notifications.timeLeft.ended": "הזמן נגמר ב־%{end}",
   "notifications.chanukahNight": "זמן %{name}: הנר ה־%{n}",
