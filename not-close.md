@@ -516,6 +516,12 @@ The owner's upgrade list of 2026-11-04, narrowed the same day to simple tasks th
   - **Done:** 2026-11-04. Verified: the form's render suite (pick, save, reopen) and the adapter's fallback cases; typecheck, lint, DOX and the full Jest suite. Not checked on a phone.
   - **Status:** Version: OTA, the next production update · Committed: yes, `af180be` feat(custom): an icon of its own for a custom mitzvah · Pushed: yes · Live: no · Channel: none
 
+- [ ] Design study: the time left in a reminder and the nagging level on home
+  - **Flag:** `Design`.
+  - **What it is:** the design lab study [design/lab/studies/2026-11-04-time-and-nag/](design/lab/studies/2026-11-04-time-and-nag/AGENTS.md): eleven directions for how a mitzvah reminder says how long is left with a colour by how close the end is (Android and iPhone, ten without a build and one live idea that needs one), and eight for a subtle mark of the nagging level beside each mitzvah on home. Canvas https://claude.ai/artifact/RqgAKD1iiJfQcPiGtS8yKT, gallery https://claude.ai/artifact/67xThcj5rmdEzt1beon62k.
+  - **What it solves:** the owner's requests of 2026-11-04 ("ספרות הזמן שנשאר ... ירוק אדום וכתום", "חיווי עדין ... מה רמת הנודניקיות"), decided before any app code.
+  - **Expected result:** the owner picks one direction for each surface in the gallery; the picks are recorded in the study's AGENTS.md and become two implementation tasks here.
+
 ## Bugs
 
 - [ ] The zmanim follow a depression-angle method, not the Ohr HaChaim luach

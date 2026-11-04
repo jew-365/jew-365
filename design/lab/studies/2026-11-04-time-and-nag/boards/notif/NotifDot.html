@@ -1,0 +1,106 @@
+<!--board title="זמן בהתראה · נקודה צבעונית"-->
+<style>
+/* One direction for the time left in a mitzvah reminder, on the day's real reminders as they reach the phone: the
+   Android shade (subText in the header beside the app name, the accent colour on the small icon and the app name)
+   or the iPhone lock screen (the bold subtitle between the title and the body). A notification is worded when it
+   arrives and never changes, so the demo shows each one with how long ago it came. The bar at the bottom is the
+   demo's: the moment the phone is looked at, the platform and the nagging level. */
+.dev{position:absolute;inset:0 0 132px 0;display:flex;flex-direction:column;overflow:hidden}
+.p-android .dev{background:color-mix(in srgb,var(--text) 7%,var(--bg))}
+.status{display:flex;align-items:center;justify-content:space-between;padding:10px 20px 4px;font-size:13px;line-height:18px;font-weight:600;color:var(--text)}
+.status>span{display:inline-flex;gap:4px;align-items:center}
+.status .ic{width:16px;height:16px;stroke-width:2}
+.shade-h{padding:8px 20px 12px;display:grid;gap:2px}
+.shade-h>b{font-size:28px;line-height:34px;font-weight:500;color:var(--text)}
+.list{flex:1;min-height:0;overflow-y:auto;padding:0 12px 16px;display:grid;gap:8px;align-content:start;scrollbar-width:none}
+.list::-webkit-scrollbar{display:none}
+.ntf{background:var(--surface);border-radius:24px;padding:14px 16px 6px;box-shadow:0 1px 3px var(--shadowC)}
+.n-head{display:flex;align-items:center;gap:6px;font-size:12px;line-height:16px;color:var(--sub);min-width:0}
+.n-ic{width:20px;height:20px;border-radius:50%;flex:none;display:grid;place-items:center}
+.n-ic>i{display:block;width:13px;height:13px;background:var(--surface)!important}
+.n-head>b{font-weight:500;flex:none}
+.n-head>.sep{flex:none}
+.n-head>.n-sub{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.n-head>.n-ago{flex:none}
+.n-title{font-size:15px;line-height:22px;font-weight:600;color:var(--text);margin-top:6px}
+.n-body{font-size:14px;line-height:20px;color:var(--sub)}
+.n-acts{display:flex;gap:4px;margin-top:4px}
+.n-acts>button{min-height:44px;padding:0 12px;border-radius:999px;font-size:14px;font-weight:600;color:var(--notif)}
+.empty{padding:28px 12px;text-align:center;font-size:13px;line-height:18px;color:var(--sub)}
+
+/* the iPhone lock screen */
+.p-iphone .dev{background:linear-gradient(170deg,#2B3A67 0%,#5B4A7A 45%,#C98A6B 100%);color:#fff}
+.t-dark.p-iphone .dev{background:linear-gradient(170deg,#0B1022 0%,#1E1838 50%,#3A2430 100%)}
+.p-iphone .status{color:#fff}
+.lock-h{display:grid;justify-items:center;padding:6px 16px 18px;text-align:center}
+.lock-h>span{font-size:17px;line-height:22px;font-weight:600;opacity:.9}
+.lock-h>b{font-size:84px;line-height:88px;font-weight:600;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.ios{border-radius:22px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;background:rgba(246,246,248,.78);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#111}
+.t-dark .ios{background:rgba(38,38,44,.78);color:#F2F2F7}
+.ios-ic{width:38px;height:38px;border-radius:9px;flex:none;background:#fff center/86% no-repeat;box-shadow:0 0 0 .5px rgba(0,0,0,.12)}
+.ios-t{flex:1;min-width:0}
+.ios-row{display:flex;align-items:baseline;gap:8px}
+.ios-row>b{flex:1;min-width:0;font-size:15px;line-height:20px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ios-row>span{flex:none;font-size:13px;line-height:18px;opacity:.6}
+.ios-sub{font-size:15px;line-height:20px;font-weight:600}
+.ios-body{font-size:15px;line-height:20px}
+
+/* the demo bar */
+.demo{position:absolute;inset:auto 0 0 0;height:132px;border-top:1px solid var(--border);background:var(--surface);padding:8px 12px 10px;display:grid;gap:6px;align-content:start}
+.demo-l{font-size:12px;line-height:16px;color:var(--muted)}
+.demo-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.demo-row::-webkit-scrollbar{display:none}
+.demo-row>.chip,.demo-row>.sc-interp{flex:none}
+.demo-row .chip{white-space:nowrap}
+</style>
+<template>
+<div class="dev">
+<div class="status" aria-hidden="true"><b class="num">{{clock}}</b><span>[[ic:wifi]][[ic:battery]]</span></div>
+<sc-if value="{{isAndroid}}" hint-placeholder-val="{{ true }}">
+<div class="shade-h"><b class="num">{{clock}}</b><span class="t-cap c-sub">{{dateLine}}</span></div>
+<div class="list" aria-live="polite">
+<sc-for list="{{items}}" as="n" hint-placeholder-count="3">
+<article class="ntf" aria-label="{{n.aria}}">
+<div class="n-head"><span class="n-ic" style="{{n.accentStyle}}"><i style="{{n.maskStyle}}"></i></span><b style="{{n.inkStyle}}">{{appName}}</b><sc-if value="{{n.hasSub}}" hint-placeholder-val="{{ true }}"><span class="sep">·</span><span class="n-sub">{{n.sub}}</span></sc-if><span class="sep">·</span><span class="n-ago">{{n.ago}}</span></div>
+<p class="n-title">{{n.title}}</p>
+<p class="n-body">{{n.body}}</p>
+<div class="n-acts"><button onClick="{{n.openText}}">{{openTextLabel}}</button><button onClick="{{n.markDone}}">{{markDoneLabel}}</button></div>
+</article>
+</sc-for>
+<sc-if value="{{empty}}" hint-placeholder-val="{{ false }}"><p class="empty">{{emptyText}}</p></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{isIphone}}" hint-placeholder-val="{{ false }}">
+<div class="lock-h"><span>{{dateLine}}</span><b>{{clock}}</b></div>
+<div class="list" aria-live="polite">
+<sc-for list="{{items}}" as="n" hint-placeholder-count="3">
+<article class="ios" aria-label="{{n.aria}}" onClick="{{n.markDone}}">
+<i class="ios-ic" style="{{appIconStyle}}" aria-hidden="true"></i>
+<div class="ios-t">
+<div class="ios-row"><b>{{n.title}}</b><span>{{n.ago}}</span></div>
+<sc-if value="{{n.hasSub}}" hint-placeholder-val="{{ true }}"><p class="ios-sub">{{n.sub}}</p></sc-if>
+<p class="ios-body">{{n.body}}</p>
+</div>
+</article>
+</sc-for>
+<sc-if value="{{empty}}" hint-placeholder-val="{{ false }}"><p class="empty" style="color:#fff">{{emptyText}}</p></sc-if>
+</div>
+</sc-if>
+</div>
+<div class="demo" role="group" aria-label="הדמיה">
+<span class="demo-l">הדמיה: מסתכלים בטלפון בשעה</span>
+<div class="demo-row"><sc-for list="{{looks}}" as="l" hint-placeholder-count="6"><button class="chip num" aria-pressed="{{l.on}}" onClick="{{l.pick}}">{{l.label}}</button></sc-for></div>
+<div class="demo-row"><sc-for list="{{plats}}" as="p" hint-placeholder-count="2"><button class="chip" aria-pressed="{{p.on}}" onClick="{{p.pick}}">{{p.label}}</button></sc-for><sc-for list="{{lvls}}" as="v" hint-placeholder-count="2"><button class="chip" aria-pressed="{{v.on}}" onClick="{{v.pick}}">{{v.label}}</button></sc-for></div>
+</div>
+<!--TOAST-->
+</template>
+<script>
+const STYLE = 'dot';
+class Component extends DCLogic {
+/*CORE*/
+
+  renderVals() {
+    return this.core();
+  }
+}
+</script>
