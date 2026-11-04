@@ -166,8 +166,11 @@ function nextWeekdayAt(weekday: number, hour: number): Date {
   return d.toJSDate();
 }
 
+// A day's reminders: the smart nag's notifications (`__n<k>`) are pinned in nag.mitzvot.test.ts.
 function idsFor(mitzvahId: string, key: string) {
-  return mockState.pending.filter((p) => p.identifier.startsWith(`${mitzvahId}__${key}__`));
+  return mockState.pending.filter(
+    (p) => p.identifier.startsWith(`${mitzvahId}__${key}__`) && !p.identifier.startsWith(`${mitzvahId}__${key}__n`),
+  );
 }
 
 const triggerOf = (pending: ScheduleInput) => pending.trigger!.date.getTime();
@@ -326,7 +329,7 @@ describe('NotificationScheduler', () => {
     const running = NotificationScheduler.rebuild();
     expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBeUndefined();
     await running;
-    expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(12);
+    expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(13);
   });
 
   it('6.3 cancelAll empties pending', async () => {
@@ -532,7 +535,7 @@ describe('NotificationScheduler', () => {
     await NotificationScheduler.scheduleAll(new Date(Date.now() + 1000));
     const realIds = mockState.pending.filter((p) => p.identifier.startsWith('tefillin__'));
     for (const p of realIds) {
-      expect(p.identifier).toMatch(/^tefillin__\d{4}-\d{2}-\d{2}__\d+$/);
+      expect(p.identifier).toMatch(/^tefillin__\d{4}-\d{2}-\d{2}__n?\d+$/);
     }
     const set = new Set(realIds.map((p) => p.identifier));
     expect(set.size).toBe(realIds.length);
@@ -1385,7 +1388,7 @@ describe('NotificationScheduler', () => {
       useUserStore.getState().setLanguage('en');
       await NotificationScheduler.scheduleAll(new Date(Date.now() + 1000), [mitzvah]);
 
-      const pending = mockState.pending.find((p) => p.identifier.startsWith('follow_lang__'))!;
+      const pending = mockState.pending.find((p) => /^follow_lang__[\d-]+__\d/.test(p.identifier))!;
       expect(pending.content.body).toBe('Not marked yet: Test');
       expect(triggerOf(pending)).toBe(window.end.getTime() + 30 * 60_000);
     });

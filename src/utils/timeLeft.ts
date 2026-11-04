@@ -10,18 +10,17 @@ export type TimeStage = 'green' | 'orange' | 'red';
 // (stock Android; Samsung's One UI shows the app icon untinted), and on Android 11 and older the app name.
 export const TIME_STAGE_COLOR: Record<TimeStage, string> = { green: '#13804A', orange: '#B85F00', red: '#C5221F' };
 
-// A reminder's stage by its place among the reminders its mitzvah's window sends (the owner's rule of 2026-11-04,
-// after Samsung's One UI drew no accent colour; a nag's repeats take their reminder's): the last is red, the one
-// before it orange when there are three or more, the rest green; a single reminder is red. An index not found (-1)
-// reads as green.
-export function sendStage(index: number, count: number): TimeStage {
-  if (index < 0) return 'green';
-  if (index === count - 1) return 'red';
-  return index === count - 2 && count >= 3 ? 'orange' : 'green';
+// A notification's stage in its window (the smart nag, spec 2.5): the window's last notification and the last-chance
+// point alone are red, every other nag orange, every other reminder green.
+export type SendKind = 'reminder' | 'nag' | 'lastChanceAlone';
+
+export function sendStage(kind: SendKind, last: boolean): TimeStage {
+  if (last || kind === 'lastChanceAlone') return 'red';
+  return kind === 'nag' ? 'orange' : 'green';
 }
 
-// The mark that opens the line of the last two notifications, on every phone (an emoji draws its own colour, which
-// no phone strips): a red exclamation mark on the last, a warning sign on the one before it.
+// The mark that opens the line of a red or orange notification, on every phone (an emoji draws its own colour, which
+// no phone strips): a red exclamation mark, a warning sign.
 export const STAGE_MARK: Record<TimeStage, string> = { green: '', orange: '⚠️', red: '❗' };
 
 export function timeLeftLine(

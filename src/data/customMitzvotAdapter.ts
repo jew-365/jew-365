@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { CUSTOM_PERFORM_MIN_DEFAULT } from '@/utils/nagging';
 import { CustomMitzvah, Mitzvah, MitzvahWindow, Nusach } from '@/types/mitzvah';
 import { MITZVOT, findMitzvah as findStaticMitzvah } from '@/data/mitzvot';
 import { NUSACH_IDS } from '@/data/nuschaot';
@@ -53,6 +54,7 @@ export function customToMitzvah(c: CustomMitzvah): Mitzvah {
     nuschaotSupported: ALL_NUSCHAOT,
     defaultReminders: c.reminders.map(({ bodyVariants: _dropped, ...reminder }) => reminder),
     contentBlocks: c.contentBlocks,
+    performMin: { alone: c.performMin ?? CUSTOM_PERFORM_MIN_DEFAULT },
     isCustom: true,
     computeWindow: ({ date, location }) => {
       // Anchor on the caller's calendar day rather than re-zoning the raw instant: callers pass

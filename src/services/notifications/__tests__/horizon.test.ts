@@ -171,7 +171,8 @@ describe('the end notice', () => {
     expect(plan).toHaveLength(IOS_ROOM + 1);
     expect(DateTime.fromJSDate(notice.trigger).setZone(JERUSALEM.tz).toFormat('HH:mm')).toBe('20:00');
     expect(reminderDays).toContain(lastFull);
-    expect(lastFull > '2026-11-12').toBe(true);
+    // The opening days' nags (the last-chance points at level 1 too) outrank the thinned days after them.
+    expect(lastFull >= '2026-11-12').toBe(true);
     expect(lastFull < '2026-11-24').toBe(true);
   });
 

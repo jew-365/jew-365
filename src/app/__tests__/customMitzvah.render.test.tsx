@@ -1056,10 +1056,9 @@ describe('the schedule it saves', () => {
   });
 });
 
-describe('the nag in the custom form', () => {
+describe('the nag level and the time it takes in the custom form', () => {
   const nagLevelSelect = () => screen.getByRole('button', { name: new RegExp(`^${t('custom.nagLevel')}: `) });
-  const nagMode = (mode: 'level' | 'none' | 'custom', index = 0) =>
-    fireEvent.press(screen.getAllByRole('radio', { name: t(`nag.mode.${mode}`) })[index]);
+  const performField = () => screen.getByLabelText(t('custom.performMin'));
 
   beforeEach(() => {
     useUserStore.getState().reset();
@@ -1071,29 +1070,34 @@ describe('the nag in the custom form', () => {
     mockCanGoBack = true;
   });
 
-  it('saves a reminder card’s own nag into that reminder and previews it as clocks', () => {
-    storeCustom([{ anchor: 'end', offsetMin: -10, label: 'סוף' }, ONE]);
+  it('drops a reminder’s own nag an earlier version stored, and shows no nag block on a card', () => {
+    storeCustom([{ ...ONE, nag: { count: 2, everyMin: 5, placement: 'after' } } as never]);
     renderForm({ id: STORED_ID });
-    nagMode('custom', 0);
-    // 11:50 before the end at 12:00, two repeats before it.
-    expect(screen.getByText(t('nag.preview', { times: '11:40 · 11:45' }))).toBeOnTheScreen();
-    expect(screen.getAllByText(t('nag.placement.beforeOnly')).length).toBe(1);
-    nagMode('none', 1);
+    expect(screen.queryByText('נודניק לתזכורת הזו')).toBeNull();
     fireEvent.press(screen.getByRole('button', { name: SAVE }));
-    expect(list()[0].reminders).toEqual([
-      { anchor: 'end', offsetMin: -10, label: 'סוף', nag: { count: 2, everyMin: 5, placement: 'before' } },
-      { ...ONE, nag: null },
-    ]);
+    expect(list()[0].reminders).toEqual([ONE]);
   });
 
-  it('flags a repeat that falls past the hours', () => {
-    storeCustom([{ anchor: 'start', offsetMin: 235, label: 'מאוחר' }]);
+  it('saves the minutes it takes, 10 by default, and refuses a value out of range', () => {
+    renderForm();
+    fireEvent.changeText(screen.getByPlaceholderText('לדוגמה: לימוד יומי'), 'לימוד');
+    fireEvent.changeText(screen.getByPlaceholderText(LABEL_PLACEHOLDER), 'עשר');
+    expect(performField()).toHaveDisplayValue('10');
+    fireEvent.changeText(performField(), '0');
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+    expect(screen.getByText(t('custom.errors.performMin', { max: 180 }))).toBeOnTheScreen();
+    expect(list()).toEqual([]);
+    fireEvent.changeText(performField(), '2a5');
+    expect(performField()).toHaveDisplayValue('25');
+    fireEvent.press(screen.getByRole('button', { name: SAVE }));
+    expect(list()[0].performMin).toBe(25);
+  });
+
+  it('seeds the minutes from the stored mitzvah', () => {
+    storeCustom([ONE]);
+    useCustomMitzvotStore.getState().update(STORED_ID, { performMin: 40 });
     renderForm({ id: STORED_ID });
-    nagMode('custom');
-    // 11:55, then 12:00 at the end, then 12:05 after it.
-    // The custom nag starts on two every five, after.
-    expect(screen.getByText(t('nag.preview', { times: '12:00' }))).toBeOnTheScreen();
-    expect(screen.getByText(t('nag.previewDropped', { time: '12:05' }))).toBeOnTheScreen();
+    expect(performField()).toHaveDisplayValue('40');
   });
 
   it('writes the mitzvah’s level on save, and a save that leaves it alone keeps it', () => {

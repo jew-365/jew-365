@@ -11,7 +11,7 @@ jest.mock('@/services/notifications/planners/horizonEnd', () => ({ planHorizonEn
 
 import { DateTime } from 'luxon';
 import { buildPlan } from '../plan';
-import { nagPreview, nextReminderAt, planMitzvot, windowNotificationCount } from '../planners/mitzvot';
+import { nextReminderAt, planMitzvot, windowNotificationCount, windowSends } from '../planners/mitzvot';
 import { horizonFor } from '../planners/horizon';
 import { parseId } from '../ids';
 import type { PlanInput, ScheduleCandidate } from '../types';
@@ -21,7 +21,9 @@ import { rulesFor } from '@/data/taharahPresets';
 import { DEFAULT_HILULA_NOTICES, DEFAULT_ROSH_CHODESH_NOTICES } from '@/stores/useUserStore';
 import { at } from '@/testing/zmanim';
 import { NUSACH_IDS } from '@/data/nuschaot';
-import type { Mitzvah, NagLevel, Reminder, ReminderNag, UserSettings } from '@/types/mitzvah';
+import type { Mitzvah, NagLevel, Reminder, UserSettings } from '@/types/mitzvah';
+import { ZmanimService } from '@/services/ZmanimService';
+import { locationNoon } from '@/utils/locationDay';
 import type { QuietHours } from '@/utils/quietHours';
 
 const J = CITIES[0];
@@ -36,12 +38,7 @@ const SHACHARIT = registry('shacharit');
 const BEDTIME_SHEMA = registry('krias_shma_al_hamita');
 const CANDLES = registry('candle_lighting');
 
-const r = (anchor: Reminder['anchor'], offsetMin: number, nag?: ReminderNag | null): Reminder => ({
-  anchor,
-  offsetMin,
-  label: 'x',
-  ...(nag !== undefined ? { nag } : {}),
-});
+const r = (anchor: Reminder['anchor'], offsetMin: number): Reminder => ({ anchor, offsetMin, label: 'x' });
 
 // A window from `startMin` to `endMin` minutes after the location's midnight of every day, or of
 // `onlyOn` alone.
@@ -123,298 +120,203 @@ const of = (candidates: ScheduleCandidate[], id: string, day?: string) =>
 const pairs = (candidates: ScheduleCandidate[]) => candidates.map((c) => [c.id, c.trigger.getTime()]);
 const clock = (instant: string) => at(J, instant).getTime();
 
-describe('a level’s repeats', () => {
-  it('nags after Shacharit’s start reminder and before its before-the-end one at level 3', () => {
-    const base = of(plan([SHACHARIT], NIGHT_BEFORE), 'shacharit', '2026-11-11');
-    expect(base.map((c) => c.id)).toEqual(['shacharit__2026-11-11__0', 'shacharit__2026-11-11__1']);
-    const [start, end] = base.map((c) => c.trigger.getTime());
+const MINCHA = registry('mincha');
+const DAY = '2026-11-11';
 
-    const nagged = of(plan([SHACHARIT], NIGHT_BEFORE, { level: 3 }), 'shacharit', '2026-11-11');
-    expect(pairs(nagged)).toEqual([
-      ['shacharit__2026-11-11__0', start],
-      ['shacharit__2026-11-11__0~1', start + 5 * MIN],
-      ['shacharit__2026-11-11__0~2', start + 10 * MIN],
-      ['shacharit__2026-11-11__1~1', end - 10 * MIN],
-      ['shacharit__2026-11-11__1~2', end - 5 * MIN],
-      ['shacharit__2026-11-11__1', end],
+// The window of `mitzvah` on a location date, as the planner computes it.
+function windowOf(mitzvah: Mitzvah, key = DAY) {
+  const [y, m, d] = key.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  const zmanim = ZmanimService.getZmanim(locationNoon(date, J), J)!;
+  return { ...mitzvah.computeWindow({ date, location: J, settings: SETTINGS, zmanim })!, zmanim };
+}
+const nags = (candidates: ScheduleCandidate[]) => candidates.filter((c) => c.data.nag);
+const reminders = (candidates: ScheduleCandidate[]) => candidates.filter((c) => !c.data.nag);
+const times = (candidates: ScheduleCandidate[]) => candidates.map((c) => c.trigger.getTime());
+const gaps = (candidates: ScheduleCandidate[]) =>
+  times(candidates)
+    .sort((a, b) => a - b)
+    .slice(1)
+    .map((t, i, all) => t - (i ? all[i - 1] : times(candidates).sort((a, b) => a - b)[0]));
+
+describe('the last-chance points', () => {
+  it('go out at level 1 too: Shacharit’s reminders once each, then the last time to start alone', () => {
+    const { end } = windowOf(SHACHARIT);
+    const day = of(plan([SHACHARIT], NIGHT_BEFORE), 'shacharit', DAY);
+    expect(reminders(day).map((c) => c.id)).toEqual([`shacharit__${DAY}__0`, `shacharit__${DAY}__1`]);
+    // The minyan point, 45 minutes before the end, falls on the before-the-end reminder and is not sent twice.
+    expect(pairs(nags(day))).toEqual([[`shacharit__${DAY}__n1`, end.getTime() - 20 * MIN]]);
+    expect(nags(day)[0].data.nag).toEqual({ k: 1, of: 1, kind: 'lastChance', lastChance: 'alone' });
+    expect(nags(day)[0].body).toBe('הזמן האחרון להתחיל');
+    expect(nags(day)[0].data.skipIfDone).toBe(true);
+  });
+
+  it('give a prayer both points, with a minyan and alone, whatever the prayer mode', () => {
+    const { end } = windowOf(MINCHA);
+    const day = nags(of(plan([MINCHA], NIGHT_BEFORE), 'mincha', DAY));
+    expect(day.map((c) => [c.data.nag?.lastChance, c.trigger.getTime()])).toEqual([
+      ['minyan', end.getTime() - 20 * MIN],
+      ['alone', end.getTime() - 10 * MIN],
     ]);
+    expect(day.map((c) => c.body)).toEqual(['הזמן האחרון להתחיל במניין', 'הזמן האחרון להתחיל']);
+  });
 
-    const main = nagged[0];
-    const [first, second] = nagged.slice(1, 3);
-    // A repeat reads as its main, with no count (the owner's call, 2026-11-04).
-    expect(first.body).toBe(main.body);
-    expect(second.body).toBe(main.body);
-    expect(first.data).toMatchObject({ reminderIndex: 0, repeat: { k: 1, of: 2 }, dateKey: '2026-11-11' });
-    expect(main.data.repeat).toBeUndefined();
-    expect(first.categoryIdentifier).toBe(main.categoryIdentifier);
-    expect(first.data.hasText).toBe(main.data.hasText);
-    expect(first.data.skipIfDone).toBe(main.data.skipIfDone);
-    expect(parseId(first.id)).toEqual({ mitzvahId: 'shacharit', date: '2026-11-11', idx: 0 });
+  it('take a custom mitzvah’s own minutes', () => {
+    const custom = fixture('custom_x', 600, 720, [r('start', 0)], { performMin: { alone: 30 } });
+    const day = nags(of(plan([custom], NIGHT_BEFORE), 'custom_x', DAY));
+    expect(times(day)).toEqual([clock(`${DAY}T11:30`)]);
+  });
+
+  it('are not sent once the day is marked, nor when the end of the time leaves no room', () => {
+    const completions = { [DAY]: { mincha: Date.now() } };
+    expect(of(plan([MINCHA], NIGHT_BEFORE, { completions }), 'mincha', DAY)).toEqual([]);
+    const short = fixture('short', 600, 603, [r('start', 0)]);
+    expect(nags(of(plan([short], NIGHT_BEFORE), 'short', DAY))).toEqual([]);
+  });
+
+  it('are left to the last night by Kiddush Levana, whose period ends by the molad', () => {
+    for (const day of planMitzvot(planInput([registry('kiddush_levana')], NIGHT_BEFORE), horizonFor(NIGHT_BEFORE, J))) {
+      expect(day.data.nag?.kind).not.toBe('lastChance');
+    }
+  });
+});
+
+describe('the critical zone', () => {
+  it('puts the level’s nags into the last third of a day window, before the earliest last-chance point', () => {
+    const { start, end } = windowOf(MINCHA);
+    const third = end.getTime() - (end.getTime() - start.getTime()) / 3;
+    for (const level of [2, 3, 4] as const) {
+      const day = of(plan([MINCHA], NIGHT_BEFORE, { level }), 'mincha', DAY);
+      const zone = nags(day).filter((c) => c.data.nag?.kind === 'zone');
+      expect(zone.length).toBeGreaterThan(0);
+      expect(zone.length).toBeLessThanOrEqual(level - 1);
+      for (const c of zone) {
+        expect(c.trigger.getTime()).toBeGreaterThanOrEqual(third);
+        expect(c.trigger.getTime()).toBeLessThan(end.getTime() - 20 * MIN);
+        expect(c.body).toBe('עוד לא סימנת תפילת מנחה');
+      }
+      // No two notifications of the window closer than ten minutes, the reminders included.
+      for (const gap of gaps(day)) expect(gap).toBeGreaterThanOrEqual(10 * MIN);
+      // Numbered in time order.
+      expect(nags(day).map((c) => c.data.nag?.k)).toEqual(nags(day).map((_, i) => i + 1));
+      expect(nags(day).map((c) => c.id)).toEqual(nags(day).map((_, i) => `mincha__${DAY}__n${i + 1}`));
+    }
   });
 
   it('takes a mitzvah’s own level over the app’s', () => {
-    const own = of(plan([SHACHARIT], NIGHT_BEFORE, { level: 1, levels: { shacharit: 4 } }), 'shacharit', '2026-11-11');
-    expect(own).toHaveLength(8);
-    const quiet = of(
-      plan([SHACHARIT], NIGHT_BEFORE, { level: 4, levels: { shacharit: 1 } }),
-      'shacharit',
-      '2026-11-11',
-    );
-    expect(quiet).toHaveLength(2);
+    const own = of(plan([MINCHA], NIGHT_BEFORE, { level: 1, levels: { mincha: 4 } }), 'mincha', DAY);
+    const app = of(plan([MINCHA], NIGHT_BEFORE, { level: 4 }), 'mincha', DAY);
+    expect(pairs(own)).toEqual(pairs(app));
+    expect(nags(own).length).toBeGreaterThan(2);
   });
 
-  it('nags the bedtime Shema’s 23:00 reminder only before it', () => {
-    const shema = of(plan([BEDTIME_SHEMA], NIGHT_BEFORE, { level: 3 }), 'krias_shma_al_hamita', '2026-11-11');
-    expect(pairs(shema)).toEqual([
-      ['krias_shma_al_hamita__2026-11-11__0~1', clock('2026-11-11T22:50')],
-      ['krias_shma_al_hamita__2026-11-11__0~2', clock('2026-11-11T22:55')],
-      ['krias_shma_al_hamita__2026-11-11__0', clock('2026-11-11T23:00')],
-    ]);
+  it('nags the bedtime Shema from its 23:00 reminder to chatzot, an hour apart after it, then before alot', () => {
+    const { end, zmanim } = windowOf(BEDTIME_SHEMA);
+    const day = of(plan([BEDTIME_SHEMA], NIGHT_BEFORE, { level: 3 }), 'krias_shma_al_hamita', DAY);
+    const reminder = reminders(day)[0].trigger.getTime();
+    expect(reminder).toBe(clock(`${DAY}T23:00`));
+    const byKind = (kind: string) => nags(day).filter((c) => c.data.nag?.kind === kind);
+    for (const c of byKind('zone')) {
+      expect(c.trigger.getTime()).toBeGreaterThan(reminder);
+      expect(c.trigger.getTime()).toBeLessThanOrEqual(zmanim.chatzotLayla.getTime());
+    }
+    const tail = times(byKind('sparse'));
+    expect(tail.length).toBe(2);
+    for (const t of tail) expect(t).toBeGreaterThan(zmanim.chatzotLayla.getTime());
+    expect(tail[1] - tail[0]).toBeGreaterThanOrEqual(60 * MIN);
+    expect(times(byKind('lastChance'))).toEqual([end.getTime() - 5 * MIN]);
   });
 
-  it('sends nothing more at level 1', () => {
-    const level1 = plan([SHACHARIT, BEDTIME_SHEMA], NIGHT_BEFORE, { level: 1 });
-    expect(level1.length).toBeGreaterThan(0);
-    expect(level1.filter((c) => c.id.includes('~'))).toEqual([]);
-    expect(pairs(level1)).toEqual(pairs(plan([SHACHARIT, BEDTIME_SHEMA], NIGHT_BEFORE)));
-  });
-});
-
-describe('a reminder’s own nag', () => {
-  it('splits an around nag of 3 every 5 minutes one before and two after', () => {
-    const start = of(plan([SHACHARIT], NIGHT_BEFORE), 'shacharit', '2026-11-11')[0].trigger.getTime();
-    const overrides = {
-      shacharit: [{ ...SHACHARIT.defaultReminders[0], nag: { count: 3, everyMin: 5, placement: 'around' as const } }],
-    };
-    expect(pairs(of(plan([SHACHARIT], NIGHT_BEFORE, { overrides }), 'shacharit', '2026-11-11'))).toEqual([
-      ['shacharit__2026-11-11__0~1', start - 5 * MIN],
-      ['shacharit__2026-11-11__0', start],
-      ['shacharit__2026-11-11__0~2', start + 5 * MIN],
-      ['shacharit__2026-11-11__0~3', start + 10 * MIN],
-    ]);
+  it('sends nothing inside a holy block: candle lighting has no nag, Friday’s mincha none after it', () => {
+    const friday = at(J, '2026-11-13T00:30');
+    const day = plan([CANDLES, MINCHA], friday, { level: 4 });
+    const lighting = windowOf(CANDLES, '2026-11-13').start.getTime();
+    expect(nags(day.filter((c) => c.data.mitzvahId === 'candle_lighting'))).toEqual([]);
+    const mincha = nags(day.filter((c) => c.data.mitzvahId === 'mincha' && c.data.dateKey === '2026-11-13'));
+    expect(mincha.length).toBeGreaterThan(0);
+    for (const t of times(mincha)) expect(t).toBeLessThanOrEqual(lighting);
   });
 
-  it('exempts a reminder whose nag is null from the level', () => {
-    const overrides = { shacharit: [{ ...SHACHARIT.defaultReminders[0], nag: null }, SHACHARIT.defaultReminders[1]] };
-    const ids = of(plan([SHACHARIT], NIGHT_BEFORE, { level: 4, overrides }), 'shacharit', '2026-11-11').map(
-      (c) => c.id,
-    );
-    expect(ids.filter((id) => id.includes('__0'))).toEqual(['shacharit__2026-11-11__0']);
-    expect(ids.filter((id) => id.includes('__1'))).toHaveLength(4);
-  });
-
-  it('drops a repeat after the end of the time', () => {
-    const late = fixture('late', 300, 360, [r('start', 50, { count: 3, everyMin: 5, placement: 'after' })]);
-    expect(pairs(of(plan([late], NIGHT_BEFORE), 'late', '2026-11-11'))).toEqual([
-      ['late__2026-11-11__0', clock('2026-11-11T05:50')],
-      ['late__2026-11-11__0~1', clock('2026-11-11T05:55')],
-      ['late__2026-11-11__0~2', clock('2026-11-11T06:00')],
-    ]);
-  });
-
-  it('keeps a follow-up’s repeats inside its 720 minutes after the end', () => {
-    const follow = fixture('follow', 300, 360, [r('followUp', 30, { count: 3, everyMin: 15, placement: 'before' })]);
-    expect(pairs(of(plan([follow], NIGHT_BEFORE), 'follow', '2026-11-11'))).toEqual([
-      ['follow__2026-11-11__0~3', clock('2026-11-11T06:15')],
-      ['follow__2026-11-11__0', clock('2026-11-11T06:30')],
-    ]);
-    const after = fixture('after', 300, 360, [r('followUp', 30)]);
-    expect(pairs(of(plan([after], NIGHT_BEFORE, { level: 3 }), 'after', '2026-11-11'))).toEqual([
-      ['after__2026-11-11__0', clock('2026-11-11T06:30')],
-      ['after__2026-11-11__0~1', clock('2026-11-11T06:35')],
-      ['after__2026-11-11__0~2', clock('2026-11-11T06:40')],
-    ]);
-  });
-
-  it('keeps one notification when a repeat lands on another reminder of the mitzvah, the main', () => {
-    const twins = fixture('twins', 480, 720, [r('start', 0), r('start', 10)]);
-    expect(pairs(of(plan([twins], NIGHT_BEFORE, { level: 3 }), 'twins', '2026-11-11'))).toEqual([
-      ['twins__2026-11-11__0', clock('2026-11-11T08:00')],
-      ['twins__2026-11-11__0~1', clock('2026-11-11T08:05')],
-      ['twins__2026-11-11__1', clock('2026-11-11T08:10')],
-      ['twins__2026-11-11__1~1', clock('2026-11-11T08:15')],
-      ['twins__2026-11-11__1~2', clock('2026-11-11T08:20')],
-    ]);
+  it('moves a nag out of the quiet hours, and drops one the move would take past the end', () => {
+    const quietHours: QuietHours = { before: 7 * 60, after: null };
+    const day = of(plan([BEDTIME_SHEMA], NIGHT_BEFORE, { level: 3, quietHours }), 'krias_shma_al_hamita', DAY);
+    // Everything after midnight and before alot would move to 07:00, after the end of the time.
+    const midnight = clock('2026-11-12T00:00');
+    for (const t of times(nags(day))) expect(t).toBeLessThan(midnight);
   });
 });
 
-describe('repeats under the engine’s rules', () => {
-  it('counts a moved main’s repeats from where it goes out, and folds a before chain into it', () => {
-    const quietHours: QuietHours = { before: 420, after: null };
-    const morning = fixture('morning', 300, 720, [r('start', 0)]);
-    expect(pairs(of(plan([morning], NIGHT_BEFORE, { level: 3, quietHours }), 'morning', '2026-11-11'))).toEqual([
-      ['morning__2026-11-11__0', clock('2026-11-11T07:00')],
-      ['morning__2026-11-11__0~1', clock('2026-11-11T07:05')],
-      ['morning__2026-11-11__0~2', clock('2026-11-11T07:10')],
-    ]);
-    const closing = fixture('closing', 300, 480, [r('end', -90)]);
-    expect(pairs(of(plan([closing], NIGHT_BEFORE, { level: 3, quietHours }), 'closing', '2026-11-11'))).toEqual([
-      ['closing__2026-11-11__0', clock('2026-11-11T07:00')],
-    ]);
+describe('the plan around the nags', () => {
+  it('ignores the per-reminder nag an earlier version stored', () => {
+    const legacy = { ...r('start', 0), nag: { count: 3, everyMin: 5, placement: 'after' } } as Reminder;
+    const day = of(plan([MINCHA], NIGHT_BEFORE, { overrides: { mincha: [legacy] } }), 'mincha', DAY);
+    expect(reminders(day)).toHaveLength(1);
+    expect(nags(day).every((c) => c.data.nag?.kind === 'lastChance')).toBe(true);
   });
 
-  it('drops a level’s repeats after candle lighting, inside Shabbat, and keeps a before chain', () => {
-    const friday = at(J, '2026-11-13T08:00');
-    const lighting = of(plan([CANDLES], friday), 'candle_lighting', '2026-11-13');
-    expect(lighting).toHaveLength(1);
-    expect(of(plan([CANDLES], friday, { level: 4 }), 'candle_lighting', '2026-11-13').map((c) => c.id)).toEqual([
-      'candle_lighting__2026-11-13__0',
-    ]);
-    const lit = lighting[0].trigger.getTime();
-    const overrides = { candle_lighting: [r('start', 0, { count: 2, everyMin: 5, placement: 'before' })] };
-    expect(pairs(of(plan([CANDLES], friday, { overrides }), 'candle_lighting', '2026-11-13'))).toEqual([
-      ['candle_lighting__2026-11-13__0~1', lit - 10 * MIN],
-      ['candle_lighting__2026-11-13__0~2', lit - 5 * MIN],
-      ['candle_lighting__2026-11-13__0', lit],
-    ]);
+  it('keeps the nags still due once the reminders have gone out', () => {
+    const all = of(plan([MINCHA], NIGHT_BEFORE, { level: 4 }), 'mincha', DAY);
+    const lastReminder = Math.max(...times(reminders(all)));
+    const later = of(plan([MINCHA], new Date(lastReminder + MIN), { level: 4 }), 'mincha', DAY);
+    expect(pairs(later)).toEqual(pairs(all.filter((c) => c.trigger.getTime() > lastReminder + MIN)));
+    expect(later.every((c) => c.data.nag)).toBe(true);
   });
 
-  it('plans nothing for a marked day', () => {
-    const completions = { '2026-11-11': { shacharit: Date.now() } };
-    expect(of(plan([SHACHARIT], NIGHT_BEFORE, { level: 4, completions }), 'shacharit', '2026-11-11')).toEqual([]);
-    expect(of(plan([SHACHARIT], NIGHT_BEFORE, { level: 4, completions }), 'shacharit', '2026-11-12')).toHaveLength(8);
+  it('drops the nags before the reminders where the plan is thinned', () => {
+    const horizon = horizonFor(NIGHT_BEFORE, J);
+    const input = planInput([MINCHA], NIGHT_BEFORE, { level: 4 });
+    const full = planMitzvot(input, horizon);
+    const withoutNags = planMitzvot(input, horizon, horizon.days[0], 'nags');
+    const one = planMitzvot(input, horizon, horizon.days[0], 'one');
+    expect(nags(full).length).toBeGreaterThan(0);
+    expect(pairs(withoutNags)).toEqual(pairs(reminders(full)));
+    expect(nags(one)).toEqual([]);
   });
 
-  it('keeps the repeats still due after the main has gone out', () => {
-    const start = of(plan([SHACHARIT], NIGHT_BEFORE), 'shacharit', '2026-11-11')[0].trigger;
-    const after = new Date(start.getTime() + 2 * MIN);
-    expect(of(plan([SHACHARIT], after, { level: 3 }), 'shacharit', '2026-11-11__0').map((c) => c.id)).toEqual([
-      'shacharit__2026-11-11__0~1',
-      'shacharit__2026-11-11__0~2',
-    ]);
-  });
-
-  it('numbers the repeats of every block exit of a multi-day window', () => {
-    const month = fixture('month', 300, 300 + 14 * 1440, [r('blockExit', 15)], {
-      onlyOn: '2026-11-11',
-      multiDay: { maxDays: 16 },
-    });
-    const ids = of(plan([month], NIGHT_BEFORE, { level: 2 }), 'month').map((c) => c.id);
-    expect(ids).toEqual([
-      'month__2026-11-11__0',
-      'month__2026-11-11__0~1',
-      'month__2026-11-11__0.1',
-      'month__2026-11-11__0.1~1',
-    ]);
-  });
-
-  it('keeps mains only where the plan is thinned', () => {
-    const input = planInput([SHACHARIT], NIGHT_BEFORE, { level: 4 });
-    const horizon = horizonFor(input.fromDate, J);
-    const thinned = planMitzvot(input, horizon, horizon.days[0]);
-    expect(thinned.length).toBeGreaterThan(0);
-    expect(thinned.every((c) => !c.id.includes('~'))).toBe(true);
-    expect(new Set(thinned.map((c) => c.data.dateKey)).size).toBe(thinned.length);
-  });
-});
-
-describe('the previews agree with the plan', () => {
-  it('names a repeat as the next reminder once its main has gone out', () => {
-    const start = of(plan([SHACHARIT], NIGHT_BEFORE), 'shacharit', '2026-11-11')[0].trigger;
-    const now = new Date(start.getTime() + MIN);
-    const input = planInput([SHACHARIT], now, { level: 3 });
-    const first = of(buildPlan(input), 'shacharit')[0];
-    const scope = { ...input, nagLevel: 3 as const };
-    expect(nextReminderAt(SHACHARIT, SHACHARIT.defaultReminders, scope)).toEqual(first.trigger);
-    expect(first.id).toBe('shacharit__2026-11-11__0~1');
-    expect(nextReminderAt(SHACHARIT, SHACHARIT.defaultReminders, { ...input, nagLevel: 1 })).toEqual(
-      of(buildPlan({ ...input, nagLevel: 1 }), 'shacharit')[0].trigger,
+  it('never names a nag as the next reminder', () => {
+    const all = of(plan([MINCHA], NIGHT_BEFORE, { level: 4 }), 'mincha', DAY);
+    const lastReminder = Math.max(...times(reminders(all)));
+    const scope = { ...planInput([MINCHA], new Date(lastReminder + MIN)), nagLevel: 4 as NagLevel };
+    const next = nextReminderAt(MINCHA, MINCHA.defaultReminders, scope)!;
+    expect(next.getTime()).toBeGreaterThan(clock('2026-11-12T00:00'));
+    expect(parseId(of(plan([MINCHA], new Date(lastReminder + MIN)), 'mincha', '2026-11-12')[0].id)?.date).toBe(
+      '2026-11-12',
     );
   });
 
-  it('lists the plan’s repeats and flags the one the plan drops', () => {
-    const draft = r('start', 50, { count: 3, everyMin: 5, placement: 'after' });
-    const late = fixture('late', 300, 360, [draft]);
-    const input = planInput([late], NIGHT_BEFORE);
-    expect(nagPreview(late, draft, input)).toEqual([
-      { trigger: at(J, '2026-11-11T05:55'), fires: true, afterEnd: false },
-      { trigger: at(J, '2026-11-11T06:00'), fires: true, afterEnd: false },
-      { trigger: at(J, '2026-11-11T06:05'), fires: false, afterEnd: true },
-    ]);
-    const kept = of(buildPlan(input), 'late', '2026-11-11').filter((c) => c.data.repeat);
-    expect(kept.map((c) => c.trigger)).toEqual(
-      nagPreview(late, draft, input)
-        .filter((entry) => entry.fires)
-        .map((entry) => entry.trigger),
-    );
-  });
-
-  it('previews a level’s preset, a folded repeat, and nothing without a nag', () => {
-    const closing = fixture('closing', 300, 480, [r('end', -90)]);
-    const scope = {
-      ...planInput([closing], NIGHT_BEFORE),
-      quietHours: { before: 420, after: null },
-      nagLevel: 3 as const,
-    };
-    expect(nagPreview(closing, closing.defaultReminders[0], scope)).toEqual([
-      { trigger: at(J, '2026-11-11T07:00'), fires: false, afterEnd: false },
-      { trigger: at(J, '2026-11-11T07:00'), fires: false, afterEnd: false },
-    ]);
-    expect(nagPreview(closing, closing.defaultReminders[0], { ...scope, nagLevel: 1 })).toEqual([]);
-    const never = fixture('never', 300, 360, [r('start', 120)]);
-    expect(nagPreview(never, never.defaultReminders[0], { ...scope, nagLevel: 4 })).toEqual([]);
+  it('keeps a mark’s cancel by mitzvah and date reaching every nag', () => {
+    for (const c of nags(of(plan([MINCHA], NIGHT_BEFORE, { level: 4 }), 'mincha', DAY))) {
+      expect(parseId(c.id)).toMatchObject({ mitzvahId: 'mincha', date: DAY });
+    }
   });
 });
 
 describe('the total a window sends, for the bell on home', () => {
-  // The location date 2026-11-11 as day-level surfaces hold it: the device-local midnight of that date.
-  const DAY = new Date(2026, 10, 11);
-  const scope = (nagLevel?: NagLevel, quietHours?: QuietHours) => ({
-    location: J,
-    settings: SETTINGS,
-    ...(nagLevel ? { nagLevel } : {}),
-    ...(quietHours ? { quietHours } : {}),
-  });
-
-  it.each([
-    [1, 2, 0],
-    [2, 4, 2],
-    [3, 6, 4],
-    [4, 8, 6],
-  ] as const)('Shacharit at level %i: %i notifications, %i of them repeats', (level, total, repeats) => {
-    expect(windowNotificationCount(SHACHARIT, SHACHARIT.defaultReminders, DAY, scope(level))).toEqual({
-      total,
-      repeats,
-    });
-  });
+  const scope = (level: NagLevel) => ({ location: J, settings: SETTINGS, nagLevel: level });
+  const date = new Date(2026, 10, 11);
 
   it('equals what the plan schedules for that window, ahead of it, at every level', () => {
-    for (const level of [1, 2, 3, 4] as const) {
-      const planned = of(plan([SHACHARIT], NIGHT_BEFORE, { level }), 'shacharit', '2026-11-11');
-      expect(windowNotificationCount(SHACHARIT, SHACHARIT.defaultReminders, DAY, scope(level))?.total).toBe(
-        planned.length,
-      );
+    for (const mitzvah of [SHACHARIT, MINCHA, BEDTIME_SHEMA]) {
+      for (const level of [1, 2, 3, 4] as const) {
+        const day = of(plan([mitzvah], NIGHT_BEFORE, { level }), mitzvah.id, DAY);
+        expect(windowNotificationCount(mitzvah, mitzvah.defaultReminders, date, scope(level))).toEqual({
+          total: day.length,
+          nags: nags(day).length,
+        });
+        expect(windowSends(mitzvah, mitzvah.defaultReminders, date, scope(level))?.map(({ at: t }) => t)).toEqual(
+          times(day),
+        );
+      }
     }
   });
 
-  it('counts one notification where a repeat lands on another reminder, as the plan keeps one', () => {
-    const close = fixture('close', 8 * 60, 12 * 60, [r('start', 0), r('start', 5)]);
-    const planned = of(plan([close], NIGHT_BEFORE, { level: 3 }), 'close', '2026-11-11');
-    // 08:00, 08:05 (the second reminder, which a repeat of the first also lands on), 08:10 and 08:15.
-    expect(planned.map((c) => c.trigger.getTime())).toEqual(
-      [0, 5, 10, 15].map((m) => clock('2026-11-11T08:00') + m * MIN),
-    );
-    expect(windowNotificationCount(close, close.defaultReminders, DAY, scope(3))).toEqual({ total: 4, repeats: 2 });
-  });
-
   it('keeps counting the whole window whatever is marked or already sent', () => {
-    const marked = of(
-      plan([SHACHARIT], NIGHT_BEFORE, { level: 3, completions: { '2026-11-11': { shacharit: 1 } } }),
-      'shacharit',
-      '2026-11-11',
-    );
-    expect(marked).toHaveLength(0);
-    expect(windowNotificationCount(SHACHARIT, SHACHARIT.defaultReminders, DAY, scope(3))?.total).toBe(6);
-  });
-
-  it('leaves out the repeats the end of the time drops', () => {
-    // A reminder 5 minutes before the end with a nag of two every 10 after it: neither repeat fits.
-    const late = fixture('late', 8 * 60, 9 * 60, [r('start', 55, { count: 2, everyMin: 10, placement: 'after' })]);
-    expect(windowNotificationCount(late, late.defaultReminders, DAY, scope())).toEqual({ total: 1, repeats: 0 });
+    const before = windowNotificationCount(MINCHA, MINCHA.defaultReminders, date, scope(4));
+    expect(before!.total).toBeGreaterThan(3);
+    expect(windowNotificationCount(MINCHA, MINCHA.defaultReminders, date, scope(4))).toEqual(before);
   });
 
   it('is null on a day with no window', () => {
-    const once = fixture('once', 8 * 60, 9 * 60, [r('start', 0)], { onlyOn: '2026-11-12' });
-    expect(windowNotificationCount(once, once.defaultReminders, DAY, scope(3))).toBeNull();
+    expect(windowNotificationCount(CANDLES, CANDLES.defaultReminders, date, scope(4))).toBeNull();
   });
 });

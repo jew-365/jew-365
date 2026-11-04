@@ -13,11 +13,11 @@ import { planMitzvot } from '@/services/notifications/planners/mitzvot';
 import { planHorizonEnd } from '@/services/notifications/planners/horizonEnd';
 
 // What a plan that does not fit keeps first (spec 3.7): every candidate of the opening days (those
-// before `thinFrom`: today, tomorrow and a holy-block stretch) that is not a nag's repeat, notices
-// included; then the opening's repeats; then everything else; each nearest first. So tomorrow's mains
-// outrank today's repeats, and today's repeats outrank tomorrow's. `candidates` is sorted by trigger.
+// before `thinFrom`: today, tomorrow and a holy-block stretch) that is not a nag, notices included;
+// then the opening's nags; then everything else; each nearest first. So tomorrow's reminders
+// outrank today's nags, and today's nags outrank tomorrow's. `candidates` is sorted by trigger.
 function keepOrder(candidates: ScheduleCandidate[], input: PlanInput, thinFrom: Date | undefined): ScheduleCandidate[] {
-  if (!thinFrom) return [...candidates.filter((c) => !c.data.repeat), ...candidates.filter((c) => c.data.repeat)];
+  if (!thinFrom) return [...candidates.filter((c) => !c.data.nag), ...candidates.filter((c) => c.data.nag)];
   const fromKey = dateKey(thinFrom);
   const fromStart = DateTime.fromObject(
     { year: thinFrom.getFullYear(), month: thinFrom.getMonth() + 1, day: thinFrom.getDate() },
@@ -27,8 +27,8 @@ function keepOrder(candidates: ScheduleCandidate[], input: PlanInput, thinFrom: 
     c.data.dateKey ? c.data.dateKey < fromKey : c.trigger.getTime() < fromStart;
   const opening = candidates.filter(inOpening);
   return [
-    ...opening.filter((c) => !c.data.repeat),
-    ...opening.filter((c) => c.data.repeat),
+    ...opening.filter((c) => !c.data.nag),
+    ...opening.filter((c) => c.data.nag),
     ...candidates.filter((c) => !inOpening(c)),
   ];
 }
@@ -59,12 +59,17 @@ export function buildPlan(input: PlanInput): ScheduleCandidate[] {
     ...guarded('rosh chodesh notices', () => planRoshChodesh(input, horizon)),
   ];
   let mitzvot = planMitzvot(input, horizon);
-  // A plan that does not fit keeps every reminder of the first two days and one per window after.
-  if (others.length + mitzvot.length > room) mitzvot = planMitzvot(input, horizon, horizon.days[horizon.thinFromIndex]);
+  // A plan that does not fit keeps everything of the opening days and, after them, first gives up the nags; if that
+  // is still too much, it keeps one reminder per window after the opening.
+  const thinFrom = horizon.days[horizon.thinFromIndex];
+  if (others.length + mitzvot.length > room) {
+    mitzvot = planMitzvot(input, horizon, thinFrom, 'nags');
+    if (others.length + mitzvot.length > room) mitzvot = planMitzvot(input, horizon, thinFrom, 'one');
+  }
   const candidates = [...others, ...mitzvot];
 
   // iOS keeps only the 64 soonest pending requests and silently discards the rest. Cap deliberately,
-  // by `keepOrder()`, so what gets dropped is the furthest away and a nag's repeats before the mains of
+  // by `keepOrder()`, so what gets dropped is the furthest away and the nags before the reminders of
   // the opening days, rather than — as with a day-major loop — all of tomorrow.
   const byTrigger = (a: ScheduleCandidate, b: ScheduleCandidate) => a.trigger.getTime() - b.trigger.getTime();
   candidates.sort(byTrigger);
@@ -76,9 +81,9 @@ export function buildPlan(input: PlanInput): ScheduleCandidate[] {
     console.warn(
       `[notifications] ${candidates.length - room} reminder(s) beyond the ${room} slot cap were not scheduled`,
     );
-    // A day is whole while every main of it is kept: a dropped repeat of a nag does not break it.
+    // A day is whole while every reminder of it is kept: a dropped nag does not break it.
     const keptSet = new Set(kept);
-    const firstDropped = candidates.find((candidate) => !keptSet.has(candidate) && !candidate.data.repeat);
+    const firstDropped = candidates.find((candidate) => !keptSet.has(candidate) && !candidate.data.nag);
     if (firstDropped) {
       const first = DateTime.fromJSDate(firstDropped.trigger).setZone(input.location.tz);
       const before = new Date(first.year, first.month - 1, first.day - 1);

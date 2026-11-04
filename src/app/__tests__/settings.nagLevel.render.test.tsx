@@ -42,10 +42,10 @@ const touch = (locationX: number, pageX: number, pageY: number) => ({ nativeEven
 const level = () => useUserStore.getState().nagLevel;
 // The track runs from 14 to 300 of a 314-wide slider: a third of the way is level 2, the far end level 4.
 const layout = () => fireEvent(slider(), 'layout', { nativeEvent: { layout: { width: 314, height: 44 } } });
-const pills = (kind: 'main' | 'repeat' | 'dropped') => screen.queryAllByTestId(`nag-example-${kind}`);
+const pills = (kind: 'reminder' | 'nag' | 'lastChance') => screen.queryAllByTestId(`nag-example-${kind}`);
 const pillTimes = () =>
   within(screen.getByTestId('nag-example'))
-    .queryAllByTestId(/^nag-example-(main|repeat|dropped)$/)
+    .queryAllByTestId(/^nag-example-(reminder|nag|lastChance)$/)
     .map((pill) => within(pill).getByText(/\d\d:\d\d/).props.children);
 
 async function renderDevice() {
@@ -57,7 +57,10 @@ async function renderDevice() {
 
 // The everyday default-on set: tefillin 3, the morning Shema 2, Shacharit 2, Mincha 2, Maariv 2 and the
 // bedtime Shema 1. Kiddush Levana, Selichot, the Chanukah candles and Ushpizin are on too but seasonal.
-const ONLY_DAILY = 12;
+// The everyday default-on set: 12 reminders, and 9 last-chance points (two each for Shacharit, Mincha and Maariv).
+const ONLY_DAILY = 21;
+// At level 3, two nags in the zone of each day mitzvah (4 of them) and four for each night one (2 of them).
+const DAILY_AT_3 = ONLY_DAILY + 4 * 2 + 2 * 4;
 
 describe('Settings › the nagging level', () => {
   beforeEach(() => {
@@ -100,7 +103,7 @@ describe('Settings › the nagging level', () => {
     expect(screen.getByTestId('nag-level-name')).toHaveTextContent(he('nag.level.3.name'));
     expect(screen.getByTestId('settings-nag-line')).toHaveTextContent(`${he('nag.level.3.desc')}.`);
     expect(screen.getByTestId('settings-nag-estimate')).toHaveTextContent(
-      he('settings.nagLevelPerDay', { n: ONLY_DAILY * 3 }),
+      he('settings.nagLevelPerDay', { n: DAILY_AT_3 }),
     );
   });
 
@@ -156,35 +159,45 @@ describe('Settings › the nagging level', () => {
     expect(level()).toBe(1);
   });
 
-  it('shows today’s Shacharit and bedtime Shema reminders at the chosen level as their send times', async () => {
+  it('shows today’s Shacharit and bedtime Shema windows at the chosen level as their send times', async () => {
     await renderDevice();
     expect(screen.getByText(he('settings.nagExample.title', { city: J.name }))).toBeOnTheScreen();
-    expect(pills('main')).toHaveLength(3);
-    expect(pills('repeat')).toHaveLength(0);
+    // Level 1: the three reminders and a last-chance point each (Shacharit's minyan one falls on its reminder).
+    expect(pills('reminder')).toHaveLength(3);
+    expect(pills('nag')).toHaveLength(0);
+    expect(pills('lastChance')).toHaveLength(2);
 
     fireEvent.press(nameButton(3));
-    expect(pills('main')).toHaveLength(3);
-    expect(pills('repeat')).toHaveLength(6);
-    expect(pills('dropped')).toHaveLength(0);
-    // The bedtime Shema's 23:00 is preceded by its two repeats, and is the last time shown.
-    expect(pillTimes().slice(-3)).toEqual(['22:50', '22:55', '23:00']);
+    expect(pills('reminder')).toHaveLength(3);
+    expect(pills('nag').length).toBeGreaterThan(2);
+    // The bedtime Shema's nags come after its 23:00 reminder, never before it.
+    const times = pillTimes();
+    const shema = times.slice(times.indexOf('23:00'));
+    expect(shema.length).toBeGreaterThan(2);
+    for (const legend of ['main', 'repeat', 'lastChance']) {
+      const legendText = he(`settings.nagExample.${legend}`);
+      expect(
+        within(screen.getByTestId('nag-example')).getByText(legendText, { includeHiddenElements: true }),
+      ).toBeOnTheScreen();
+    }
   });
 
   it('applies the quiet hours to the example', async () => {
     useUserStore.getState().setQuietBefore({ enabled: true, minutes: 8 * 60 });
-    useUserStore.getState().setNagLevel(3);
     await renderDevice();
-    // Shacharit opens at netz, before 08:00, so its start reminder goes out at 08:00 and nags after it.
-    expect(pillTimes().slice(0, 3)).toEqual(['08:00', '08:05', '08:10']);
+    // Shacharit opens at netz, before 08:00, so its start reminder goes out at 08:00; the bedtime Shema's last
+    // chance before alot would move past the end of its time and is not sent.
+    expect(pillTimes()[0]).toBe('08:00');
+    expect(pills('lastChance')).toHaveLength(1);
   });
 
   it('counts a mitzvah at its own level and leaves out one that is off', async () => {
     useMitzvotStore.getState().setNagLevel('shacharit', 4);
     useMitzvotStore.getState().setEnabled('tefillin', false);
     await renderDevice();
-    // 12 less tefillin's 3, with Shacharit's 2 reminders at three repeats each.
+    // Less tefillin's 3 reminders and its last-chance point, with Shacharit's three zone nags.
     expect(screen.getByTestId('settings-nag-estimate')).toHaveTextContent(
-      he('settings.nagLevelPerDay', { n: ONLY_DAILY - 3 + 2 * 3 }),
+      he('settings.nagLevelPerDay', { n: ONLY_DAILY - 4 + 3 }),
     );
   });
 

@@ -84,8 +84,9 @@ function planInput(mitzvah: Mitzvah, now: Date, overrides: Partial<PlanInput> = 
   };
 }
 
+// The plan's first reminder of the mitzvah: `nextReminderAt()` names reminders, not the smart nag's notifications.
 const plannedNext = (plan: ReturnType<typeof buildPlan>, mitzvahId: string) =>
-  plan.find((candidate) => candidate.id.startsWith(`${mitzvahId}__`))?.trigger ?? null;
+  plan.find((candidate) => candidate.id.startsWith(`${mitzvahId}__`) && !candidate.data.nag)?.trigger ?? null;
 
 const TUESDAY = '2026-10-13';
 const WEDNESDAY = '2026-10-14';

@@ -17,10 +17,21 @@ import { MULTI_DAY_LOOKAHEAD_DAYS } from '@/utils/buildDayTimeline';
 import { locationNoon } from '@/utils/locationDay';
 import { interpolate, t, translate } from '@/i18n';
 import { reminderLabel } from '@/utils/mitzvahName';
-import { TIME_STAGE_COLOR, sendStage, timeLeftLine } from '@/utils/timeLeft';
-import { nagFor, repeatOffsets, type NagLevel } from '@/utils/nagging';
+import { TIME_STAGE_COLOR, sendStage, timeLeftLine, type SendKind } from '@/utils/timeLeft';
+import {
+  hasLastChance,
+  hasSparseTail,
+  nagZoneKindOf,
+  performMinOf,
+  smartNagTimes,
+  type Interval,
+  type LastChance,
+  type NagKind,
+  type NagLevel,
+} from '@/utils/nagging';
+import { HebcalService } from '@/services/HebcalService';
 import { dateKey, type Completions } from '@/stores/useCompletionsStore';
-import { MITZVAH_REMINDER_CATEGORY, MITZVAH_TEXT_CATEGORY, buildId } from '@/services/notifications/ids';
+import { MITZVAH_REMINDER_CATEGORY, MITZVAH_TEXT_CATEGORY, buildId, buildNagId } from '@/services/notifications/ids';
 import type { PlanInput, ScheduleCandidate } from '@/services/notifications/types';
 import { horizonDays, type Horizon } from '@/services/notifications/planners/horizon';
 
@@ -28,8 +39,8 @@ const NEXT_REMINDER_LOOKAHEAD_DAYS = 10;
 const PAST_WINDOW_DAYS = 2;
 const PLACEHOLDER = /%\{\w+\}/;
 
-// `nagLevel` is the resolved nagging level of the mitzvah asked about (its own, else the app's);
-// absent means level 1, no repeats beyond the reminders' own nags.
+// `nagLevel` is the resolved nagging level of the mitzvah asked about (its own, else the app's); absent means level 1,
+// the last-chance points alone.
 export type ReminderScope = Pick<
   PlanInput,
   'now' | 'location' | 'settings' | 'completions' | 'skipped' | 'quietHours'
@@ -37,28 +48,31 @@ export type ReminderScope = Pick<
   nagLevel?: NagLevel;
 };
 
-// `repeat` is 0 for the reminder's own notification (the main) and k for the k-th of the `of` repeats
-// of its nag; `main` is the instant the main goes out, which a repeat counts from and words its body by.
-export type WindowTrigger = {
+// A window's reminder trigger, or one of its nags (the smart nag, .claude/specs/smart-nag.md): the k-th of the
+// window's `of` nags, of a `kind`, a last-chance point naming which.
+export type ReminderTrigger = {
+  type: 'reminder';
   index: number;
   occurrence: number;
   reminder: Reminder;
   trigger: Date;
   moved: boolean;
-  repeat: number;
-  of: number;
-  main: Date;
 };
-
-// A repeat of a nag as the preview shows it: `fires` false when the plan drops it, `afterEnd` when that
-// is because it falls after the end of the time.
-export type NagPreviewEntry = { trigger: Date; fires: boolean; afterEnd: boolean };
-export type NagChain = { main: Date; repeats: NagPreviewEntry[] };
+export type NagTrigger = {
+  type: 'nag';
+  k: number;
+  of: number;
+  kind: NagKind;
+  lastChance?: LastChance;
+  trigger: Date;
+  moved: boolean;
+};
+export type WindowTrigger = ReminderTrigger | NagTrigger;
 
 type PlannedCandidate = { candidate: ScheduleCandidate; moved: boolean };
 
-// The rules of `reminderFires()` without the past: whether a main is alive, so that its repeats still
-// due are planned after the main itself has gone out.
+// The rules of `reminderFires()` without the past: a reminder already sent still keeps the nags their distance,
+// and the stages read the whole window.
 const NO_PAST = new Date(0);
 
 // `date` is a calendar day as every day-level surface holds it: the device-local midnight of the
@@ -189,41 +203,66 @@ export function windowTriggers(
 ): WindowTriggers | null {
   const own = ownTriggers(mitzvah, reminders, date, scope);
   if (!own) return null;
-  // Only a main is compared; a main left to the earlier window takes its repeats with it.
-  const isHeadsUp = ({ reminder, main }: WindowTrigger) =>
-    reminder.anchor === 'clock' && main.getTime() < own.window.start.getTime();
+  // Only a reminder is compared: the nags are never before their window.
+  const isHeadsUp = (entry: WindowTrigger) =>
+    entry.type === 'reminder' &&
+    entry.reminder.anchor === 'clock' &&
+    entry.trigger.getTime() < own.window.start.getTime();
   if (!own.triggers.some(isHeadsUp)) return own;
-  const earlier = ownTriggers(mitzvah, reminders, dayBefore(date), scope)?.triggers ?? [];
-  const heldEarlier = ({ index, main }: WindowTrigger) =>
-    earlier.some((other) => other.index === index && other.main.getTime() === main.getTime());
+  const earlier = ownTriggers(mitzvah, reminders, dayBefore(date), { ...scope, now: NO_PAST })?.triggers ?? [];
+  const heldEarlier = (entry: WindowTrigger) =>
+    entry.type === 'reminder' &&
+    earlier.some(
+      (other) =>
+        other.type === 'reminder' && other.index === entry.index && other.trigger.getTime() === entry.trigger.getTime(),
+    );
   return { ...own, triggers: own.triggers.filter((entry) => !(isHeadsUp(entry) && heldEarlier(entry))) };
 }
 
-type ChainEntry = { repeat: number; planned: Date; trigger: Date | null; fires: boolean };
+// The critical zone of `date`'s window (spec 2.3), by the mitzvah's kind; `smartNagTimes()` clips it to the window.
+function nagZone(mitzvah: Mitzvah, window: Interval, ctx: ComputeContext): Interval[] {
+  const { start, end } = window;
+  const third = (until: Date): Interval[] => [
+    { start: new Date(until.getTime() - (until.getTime() - start.getTime()) / 3), end: until },
+  ];
+  switch (nagZoneKindOf(mitzvah.id)) {
+    case 'night':
+    case 'evening':
+      return [{ start, end: ctx.zmanim.chatzotLayla }];
+    case 'firstHour':
+      return [{ start, end: new Date(start.getTime() + 60 * 60_000) }];
+    case 'lastMinutes':
+      return [{ start: new Date(end.getTime() - 20 * 60_000), end }];
+    case 'learning':
+      return [{ start: ctx.zmanim.shkia, end: ctx.zmanim.chatzotLayla }];
+    case 'preDawn': {
+      const alot = ZmanimService.getZmanim(end, ctx.location)?.alotHaShachar;
+      return third(alot && alot.getTime() < end.getTime() && alot.getTime() > start.getTime() ? alot : end);
+    }
+    case 'nights':
+      return lastNights(window, ctx.location, 3);
+    default:
+      return third(end);
+  }
+}
 
-// The repeats of one main (spec 3.5): each counted from the main's final instant, moved by the quiet
-// hours and judged by the same `reminderFires()` as the main.
-function repeatsOf(
-  mitzvahId: string,
-  reminder: Reminder,
-  main: Date,
-  window: { start: Date; end: Date },
-  latest: Date,
-  scope: ReminderScope,
-): ChainEntry[] {
-  const nag = nagFor(mitzvahId, reminder, scope.nagLevel);
-  if (!nag) return [];
-  const { location, now, quietHours } = scope;
-  return repeatOffsets(nag).map((offset, i) => {
-    const planned = new Date(main.getTime() + offset * 60_000);
-    const trigger = quietHours ? quietHoursTrigger(planned, quietHours, latest, location) : planned;
-    const fires = trigger !== null && reminderFires(trigger, window, location, now, reminder.anchor);
-    return { repeat: i + 1, planned, trigger, fires };
-  });
+// Nightfall to chatzot halayla of the last `count` nights that open inside the window, in order.
+function lastNights(window: Interval, location: Location, count: number): Interval[] {
+  const last = DateTime.fromJSDate(window.end, { zone: location.tz });
+  const nights: Interval[] = [];
+  for (let back = 0; back <= count + 2 && nights.length < count; back++) {
+    const day = new Date(last.year, last.month - 1, last.day - back);
+    const zmanim = ZmanimService.getZmanim(locationNoon(day, location), location);
+    if (!zmanim) continue;
+    const start = new Date(Math.max(HebcalService.nightfall(zmanim, location).getTime(), window.start.getTime()));
+    const end = new Date(Math.min(zmanim.chatzotLayla.getTime(), window.end.getTime()));
+    if (end.getTime() > start.getTime()) nights.unshift({ start, end });
+  }
+  return nights;
 }
 
 function ownTriggers(mitzvah: Mitzvah, reminders: Reminder[], date: Date, scope: ReminderScope): WindowTriggers | null {
-  const { location, settings, now } = scope;
+  const { location, settings, now, quietHours } = scope;
   const ctx = contextFor(date, location, settings);
   if (!ctx) return null;
   const window = mitzvah.computeWindow(ctx);
@@ -232,25 +271,50 @@ function ownTriggers(mitzvah: Mitzvah, reminders: Reminder[], date: Date, scope:
   if (isMarked(scope.completions, mitzvah.id, date) || isMarked(scope.skipped, mitzvah.id, date)) return null;
 
   const triggers: WindowTrigger[] = [];
+  const sent: Date[] = [];
   reminders.forEach((reminder, index) => {
     const latest =
       reminder.anchor === 'followUp' ? new Date(window.end.getTime() + FOLLOW_UP_MAX_MIN * 60_000) : window.end;
     // The reminder editor rejects out-of-window offsets up front; this is the backstop for
     // already-persisted ones, and the same rule drops anything inside a Shabbat / Yom Tov block.
     buildTriggerTimes(reminder, window, location).forEach((planned, occurrence) => {
-      const main = scope.quietHours ? quietHoursTrigger(planned, scope.quietHours, latest, location) : planned;
-      // No main, no repeats; a main that has already gone out keeps the repeats still due.
-      if (!main || !reminderFires(main, window, location, NO_PAST, reminder.anchor)) return;
-      const chain = repeatsOf(mitzvah.id, reminder, main, window, latest, scope);
-      const of = chain.length;
-      const entry = { index, occurrence, reminder, of, main };
-      if (main.getTime() > now.getTime()) {
-        triggers.push({ ...entry, trigger: main, moved: main.getTime() !== planned.getTime(), repeat: 0 });
-      }
-      for (const { repeat, planned: at, trigger, fires } of chain) {
-        if (fires && trigger) triggers.push({ ...entry, trigger, moved: trigger.getTime() !== at.getTime(), repeat });
-      }
+      const trigger = quietHours ? quietHoursTrigger(planned, quietHours, latest, location) : planned;
+      // Judged without the past, so a reminder already sent still keeps the nags their distance.
+      if (!trigger || !reminderFires(trigger, window, location, NO_PAST, reminder.anchor)) return;
+      sent.push(trigger);
+      if (trigger.getTime() <= now.getTime()) return;
+      const moved = trigger.getTime() !== planned.getTime();
+      triggers.push({ type: 'reminder', index, occurrence, reminder, trigger, moved });
     });
+  });
+
+  // The smart nag (spec 2): the window's last-chance points and its level's nags in the critical zone, judged by the
+  // quiet hours and the holy blocks as a reminder is, and never before the window or after its end.
+  const kind = nagZoneKindOf(mitzvah.id);
+  const perform = performMinOf(mitzvah);
+  const before = (minutes: number | undefined) =>
+    minutes && hasLastChance(kind) ? new Date(window.end.getTime() - minutes * 60_000) : null;
+  const moves = new Map<number, number>();
+  const nags = smartNagTimes({
+    level: scope.nagLevel,
+    window,
+    zone: nagZone(mitzvah, window, ctx),
+    sparseUntil: hasSparseTail(kind) ? window.end : null,
+    lastChance: { alone: before(perform.alone), minyan: before(perform.minyan) },
+    taken: sent,
+    accept: (planned) => {
+      const at = quietHours ? quietHoursTrigger(planned, quietHours, window.end, location) : planned;
+      if (!at || at.getTime() < window.start.getTime() || !reminderFires(at, window, location, NO_PAST, 'start')) {
+        return null;
+      }
+      moves.set(at.getTime(), planned.getTime());
+      return at;
+    },
+  });
+  nags.forEach(({ at, kind: nagKind, lastChance }, i) => {
+    if (at.getTime() <= now.getTime()) return;
+    const moved = moves.get(at.getTime()) !== at.getTime();
+    triggers.push({ type: 'nag', k: i + 1, of: nags.length, kind: nagKind, lastChance, trigger: at, moved });
   });
   return { window, triggers };
 }
@@ -275,17 +339,20 @@ export function nextReminderAt(mitzvah: Mitzvah, reminders: Reminder[], scope: R
   const ahead = mitzvah.multiDay ? MULTI_DAY_LOOKAHEAD_DAYS : NEXT_REMINDER_LOOKAHEAD_DAYS;
   for (let offset = -plannedDaysBack(mitzvah); offset < ahead; offset++) {
     const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
-    for (const { trigger } of windowTriggers(mitzvah, reminders, date, scope)?.triggers ?? []) {
+    for (const entry of windowTriggers(mitzvah, reminders, date, scope)?.triggers ?? []) {
+      // The mitzvah's own reminders: the smart nag's notifications come on top of them and are not named here.
+      if (entry.type !== 'reminder') continue;
+      const { trigger } = entry;
       if (earliest === null || trigger.getTime() < earliest) earliest = trigger.getTime();
     }
   }
   return earliest === null ? null : new Date(earliest);
 }
 
-// Thinning keeps mains only: a nag's repeats are the first thing a full schedule gives up.
+// Thinning keeps reminders only: the nags are the first thing a full schedule gives up.
 function thinned(planned: WindowTriggers): WindowTrigger[] {
   const end = planned.window.end.getTime();
-  const mains = planned.triggers.filter(({ repeat }) => repeat === 0);
+  const mains = planned.triggers.filter((entry): entry is ReminderTrigger => entry.type === 'reminder');
   const eligible = mains.filter(
     ({ reminder, trigger }) =>
       reminder.anchor !== 'followUp' && reminder.anchor !== 'blockExit' && trigger.getTime() <= end,
@@ -298,68 +365,94 @@ function thinned(planned: WindowTriggers): WindowTrigger[] {
   return [eligible.reduce((latest, entry) => (entry.trigger.getTime() > latest.trigger.getTime() ? entry : latest))];
 }
 
-function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: boolean): PlannedCandidate[] {
+const sendKindOf = (entry: WindowTrigger): SendKind =>
+  entry.type === 'reminder' ? 'reminder' : entry.lastChance === 'alone' ? 'lastChanceAlone' : 'nag';
+
+function nagBody(entry: NagTrigger, name: string): string {
+  if (entry.lastChance)
+    return t(entry.lastChance === 'alone' ? 'notifications.nag.lastChance' : 'notifications.nag.lastChanceMinyan');
+  return t('notifications.nag.notMarked', { name });
+}
+
+function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thinning | null): PlannedCandidate[] {
   const { location, settings } = input;
   const reminders = input.reminderOverrides[mitzvah.id] ?? mitzvah.defaultReminders;
   const nagLevel = input.nagLevels?.[mitzvah.id] ?? input.nagLevel;
   const planned = windowTriggers(mitzvah, reminders, date, { ...input, nagLevel });
   if (!planned?.triggers.length) return [];
-  // Each reminder's place among the window's reminders (the owner's rule of 2026-11-04, by reminder so a nag's repeats
-  // never count as places of their own): the last red, the one before it orange, the rest green, whatever is already
-  // past or marked; a repeat takes its main's stage.
-  const mains = (windowSendTimes(mitzvah, reminders, date, { ...input, nagLevel }) ?? [])
-    .filter(({ repeat }) => !repeat)
-    .map(({ at }) => at);
-  const stageOf = (main: Date) => sendStage(mains.indexOf(main.getTime()), mains.length);
+  // The stage by the window's sends from its first one, whatever is already past or marked (spec 2.5): the last red.
+  const sends = windowSendTimes(mitzvah, reminders, date, { ...input, nagLevel }) ?? [];
+  const lastAt = sends.length ? sends[sends.length - 1].at : null;
+  const stageOf = (entry: WindowTrigger) => sendStage(sendKindOf(entry), entry.trigger.getTime() === lastAt);
 
   const english = input.language === 'en';
+  const title = mitzvahTitle(mitzvah, english);
   const hasText = hasSiddurText(mitzvah, settings.nusach, date, siddurPlace(location, settings.inIsrael));
   const params = bodyParamsOn(mitzvah, date, location, settings);
-  return (thin ? thinned(planned) : planned.triggers).map(
-    ({ index, occurrence, reminder, trigger, moved, repeat, of, main }) => {
-      // Candle lighting fires on the block's opening edge: its text would open only the Shabbat screen.
-      // A repeat follows its main: the same category, text button and wording.
-      const offersText = hasText && !opensQuietBlock(main, location);
-      const id = buildId(mitzvah.id, date, index, occurrence, repeat);
-      const body = bodyForReminder(reminder, mitzvah, main, english, params);
-      return {
-        candidate: {
-          id,
-          trigger,
-          channel: 'mitzvot',
-          categoryIdentifier: offersText ? MITZVAH_TEXT_CATEGORY : MITZVAH_REMINDER_CATEGORY,
-          title: mitzvahTitle(mitzvah, english),
-          subtitle: timeLeftLine(trigger, planned.window, location.tz, t, stageOf(main)),
-          color: TIME_STAGE_COLOR[stageOf(main)],
-          body,
-          data: {
-            mitzvahId: mitzvah.id,
-            windowEnd: planned.window.end.toISOString(),
-            dateKey: dateKey(date),
-            reminderIndex: index,
-            ...(repeat ? { repeat: { k: repeat, of } } : {}),
-            customId: id,
-            skipIfDone: skipsIfDone(reminder),
-            hasText: offersText,
-            fullContent: mitzvah.contentBlocks ?? null,
-          },
+  const kept =
+    thin === 'one'
+      ? thinned(planned)
+      : thin === 'nags'
+        ? planned.triggers.filter((entry) => entry.type === 'reminder')
+        : planned.triggers;
+  return kept.map((entry) => {
+    const { trigger, moved } = entry;
+    // Candle lighting fires on the block's opening edge: its text would open only the Shabbat screen.
+    const offersText = hasText && !opensQuietBlock(trigger, location);
+    const stage = stageOf(entry);
+    const id =
+      entry.type === 'reminder'
+        ? buildId(mitzvah.id, date, entry.index, entry.occurrence)
+        : buildNagId(mitzvah.id, date, entry.k);
+    const body =
+      entry.type === 'reminder'
+        ? bodyForReminder(entry.reminder, mitzvah, trigger, english, params)
+        : nagBody(entry, title);
+    return {
+      candidate: {
+        id,
+        trigger,
+        channel: 'mitzvot',
+        categoryIdentifier: offersText ? MITZVAH_TEXT_CATEGORY : MITZVAH_REMINDER_CATEGORY,
+        title,
+        subtitle: timeLeftLine(trigger, planned.window, location.tz, t, stage),
+        color: TIME_STAGE_COLOR[stage],
+        body,
+        data: {
+          mitzvahId: mitzvah.id,
+          windowEnd: planned.window.end.toISOString(),
+          dateKey: dateKey(date),
+          ...(entry.type === 'reminder'
+            ? { reminderIndex: entry.index }
+            : {
+                nag: {
+                  k: entry.k,
+                  of: entry.of,
+                  kind: entry.kind,
+                  ...(entry.lastChance ? { lastChance: entry.lastChance } : {}),
+                },
+              }),
+          customId: id,
+          skipIfDone: entry.type === 'reminder' ? skipsIfDone(entry.reminder) : true,
+          hasText: offersText,
+          fullContent: mitzvah.contentBlocks ?? null,
         },
-        moved,
-      };
-    },
-  );
+      },
+      moved,
+    };
+  });
 }
 
-// One notification per instant per mitzvah: a group that holds a moved trigger or a repeat keeps one,
-// a main before a repeat, then the later day, the lower reminder index and the lower repeat. Two
-// unmoved mains that coincide stay, as they always did.
+// One notification per instant per mitzvah: a group that holds a moved trigger or a nag keeps one,
+// a reminder before a nag, then the later day, the lower reminder index and the lower nag. Two
+// unmoved reminders that coincide stay, as they always did.
 function withoutDuplicates(planned: PlannedCandidate[]): ScheduleCandidate[] {
   const groups = new Map<string, PlannedCandidate[]>();
   for (const entry of planned) {
     const key = `${entry.candidate.data.mitzvahId}|${entry.candidate.trigger.getTime()}`;
     groups.set(key, [...(groups.get(key) ?? []), entry]);
   }
-  const repeatOf = (c: ScheduleCandidate) => c.data.repeat?.k ?? 0;
+  const repeatOf = (c: ScheduleCandidate) => c.data.nag?.k ?? 0;
   const beats = (a: ScheduleCandidate, b: ScheduleCandidate) => {
     if (Boolean(repeatOf(a)) !== Boolean(repeatOf(b))) return !repeatOf(a);
     const [dayA, dayB] = [a.data.dateKey ?? '', b.data.dateKey ?? ''];
@@ -376,8 +469,17 @@ function withoutDuplicates(planned: PlannedCandidate[]): ScheduleCandidate[] {
   return planned.map(({ candidate }) => candidate).filter((candidate) => !dropped.has(candidate));
 }
 
-// With `thinFrom`, every day from that one on keeps one trigger per window (see `thinned()`).
-export function planMitzvot(input: PlanInput, horizon: Horizon, thinFrom?: Date): ScheduleCandidate[] {
+// How a day from `thinFrom` on is thinned: `nags` keeps every reminder and drops the window's nags, `one` keeps one
+// trigger per window (see `thinned()`).
+export type Thinning = 'nags' | 'one';
+
+// With `thinFrom`, every day from that one on is thinned by `thinning`.
+export function planMitzvot(
+  input: PlanInput,
+  horizon: Horizon,
+  thinFrom?: Date,
+  thinning: Thinning = 'one',
+): ScheduleCandidate[] {
   const candidates: PlannedCandidate[] = [];
   const back = Math.max(PAST_WINDOW_DAYS, ...input.mitzvot.map(plannedDaysBack));
   [...pastDays(horizon.days[0], back), ...horizon.days].forEach((day, position) => {
@@ -386,7 +488,7 @@ export function planMitzvot(input: PlanInput, horizon: Horizon, thinFrom?: Date)
       // Isolate per mitzvah: one failure must never abort the rest of the batch, or a single
       // bad computation leaves the user with an empty schedule (cancelAll already ran).
       try {
-        const thin = thinFrom !== undefined && day.getTime() >= thinFrom.getTime();
+        const thin = thinFrom !== undefined && day.getTime() >= thinFrom.getTime() ? thinning : null;
         candidates.push(...candidatesFor(mitzvah, day, input, thin));
       } catch (err) {
         if (__DEV__) console.warn('[notifications] scheduling failed', mitzvah.id, err);
@@ -396,52 +498,17 @@ export function planMitzvot(input: PlanInput, horizon: Horizon, thinFrom?: Date)
   return withoutDuplicates(candidates);
 }
 
-// The chain of `draft`'s next main as the plan would send it: the first main after `scope.now` over the
-// same days `nextReminderAt()` walks, and its repeats, each flagged when the plan drops it (outside the
-// time, in a holy block, or folded into the main or an earlier repeat by the quiet hours). `null` when the
-// draft never fires. The reminder editor previews its repeats and Settings' example the whole chain.
-export function nagChain(mitzvah: Mitzvah, draft: Reminder, scope: ReminderScope): NagChain | null {
-  const [today] = horizonDays(scope.now, scope.location);
-  const ahead = mitzvah.multiDay ? MULTI_DAY_LOOKAHEAD_DAYS : NEXT_REMINDER_LOOKAHEAD_DAYS;
-  let next: { main: WindowTrigger; window: { start: Date; end: Date } } | null = null;
-  for (let offset = -plannedDaysBack(mitzvah); offset < ahead; offset++) {
-    const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
-    const planned = windowTriggers(mitzvah, [draft], date, scope);
-    for (const entry of planned?.triggers ?? []) {
-      if (entry.repeat === 0 && (!next || entry.trigger.getTime() < next.main.trigger.getTime())) {
-        next = { main: entry, window: planned!.window };
-      }
-    }
-  }
-  if (!next) return null;
-  const { main, window } = next;
-  const latest = draft.anchor === 'followUp' ? new Date(window.end.getTime() + FOLLOW_UP_MAX_MIN * 60_000) : window.end;
-  const seen = new Set([main.trigger.getTime()]);
-  const repeats = repeatsOf(mitzvah.id, draft, main.trigger, window, latest, scope).map(
-    ({ planned, trigger, fires }) => {
-      const at = trigger ?? planned;
-      const kept = fires && !seen.has(at.getTime());
-      if (kept) seen.add(at.getTime());
-      const afterEnd = at.getTime() > latest.getTime();
-      return { trigger: at, fires: kept, afterEnd };
-    },
-  );
-  return { main: main.trigger, repeats };
-}
+// What `date`'s window of `mitzvah` sends, in order, from its first trigger and whatever is marked: every reminder and
+// nag the plan lets through (the end of the time, the holy blocks and the quiet hours), one per instant where the plan
+// keeps one (`withoutDuplicates()`). `null` when the day has no window or skips it. Settings' example draws it.
+export type WindowSend = { at: number; kind: 'reminder' | NagKind; lastChance?: LastChance };
 
-export const nagPreview = (mitzvah: Mitzvah, draft: Reminder, scope: ReminderScope): NagPreviewEntry[] =>
-  nagChain(mitzvah, draft, scope)?.repeats ?? [];
-
-// The instants `date`'s window of `mitzvah` sends a notification at, in all and in order, from its first trigger and
-// whatever is marked: every main and every repeat of its nag that the plan lets through (the end of the time, the holy
-// blocks and the quiet hours), one per instant where the plan keeps one (`withoutDuplicates()`), each flagged when a
-// repeat is the one kept. `null` when the day has no window or skips it.
-function windowSendTimes(
+export function windowSends(
   mitzvah: Mitzvah,
   reminders: Reminder[],
   date: Date,
   scope: Omit<ReminderScope, 'now' | 'completions' | 'skipped'>,
-): { at: number; repeat: boolean }[] | null {
+): WindowSend[] | null {
   const planned = windowTriggers(mitzvah, reminders, date, { ...scope, now: NO_PAST, completions: {}, skipped: {} });
   if (!planned) return null;
   const atInstant = new Map<number, WindowTrigger[]>();
@@ -449,18 +516,26 @@ function windowSendTimes(
     const key = entry.trigger.getTime();
     atInstant.set(key, [...(atInstant.get(key) ?? []), entry]);
   }
-  const sends: { at: number; repeat: boolean }[] = [];
+  const sends: WindowSend[] = [];
   for (const [at, group] of atInstant) {
-    const collapses = group.length > 1 && group.some(({ moved, repeat }) => moved || repeat > 0);
-    const kept = collapses ? [group.find(({ repeat }) => repeat === 0) ?? group[0]] : group;
-    for (const entry of kept) sends.push({ at, repeat: entry.repeat > 0 });
+    const collapses = group.length > 1 && group.some((entry) => entry.moved || entry.type === 'nag');
+    const kept = collapses ? [group.find((entry) => entry.type === 'reminder') ?? group[0]] : group;
+    for (const entry of kept) {
+      sends.push(
+        entry.type === 'reminder'
+          ? { at, kind: 'reminder' }
+          : { at, kind: entry.kind, ...(entry.lastChance ? { lastChance: entry.lastChance } : {}) },
+      );
+    }
   }
   return sends.sort((a, b) => a.at - b.at);
 }
 
-// How many notifications `date`'s window sends in all (`windowSendTimes()`), and how many of them are repeats.
-// Home's bell prints `total` while `repeats` holds any.
-export type WindowNotificationCount = { total: number; repeats: number };
+const windowSendTimes = windowSends;
+
+// How many notifications `date`'s window sends in all (`windowSends()`), and how many of them are nags.
+// Home's bell prints `total` while the mitzvah's level adds nags.
+export type WindowNotificationCount = { total: number; nags: number };
 
 export function windowNotificationCount(
   mitzvah: Mitzvah,
@@ -468,7 +543,7 @@ export function windowNotificationCount(
   date: Date,
   scope: Omit<ReminderScope, 'now' | 'completions' | 'skipped'>,
 ): WindowNotificationCount | null {
-  const sends = windowSendTimes(mitzvah, reminders, date, scope);
+  const sends = windowSends(mitzvah, reminders, date, scope);
   if (!sends) return null;
-  return { total: sends.length, repeats: sends.filter(({ repeat }) => repeat).length };
+  return { total: sends.length, nags: sends.filter(({ kind }) => kind !== 'reminder').length };
 }

@@ -27,6 +27,9 @@ import { checkInFor, pendingCheckInIds } from '@/utils/checkIn';
 import { computeStats, judgeDay } from '@/utils/historyStats';
 import { reminderFires } from '@/utils/skipRules';
 
+// The smart nag's notifications are pinned in nag.mitzvot.test.ts; this suite pins the reminders.
+const withoutNags = (plan: ReturnType<typeof buildPlan>) => plan.filter((candidate) => !candidate.data.nag);
+
 const JERUSALEM = CITIES[0];
 const LOS_ANGELES = CITIES.find((city) => city.nameEn === 'Los Angeles')!;
 const LONDON = CITIES.find((city) => city.cityId === 'london')!;
@@ -156,7 +159,7 @@ describe('while the add-on is not installed', () => {
   });
 
   it('plans nothing for it even with every mitzvah switched on', () => {
-    const plan = buildPlan(planInput({ mitzvot: MITZVOT }));
+    const plan = withoutNags(buildPlan(planInput({ mitzvot: MITZVOT })));
     expect(plan.some((candidate) => candidate.id.startsWith('chok_leyisrael'))).toBe(false);
   });
 
@@ -279,9 +282,9 @@ describe('the default reminder at 09:00 on the clock of the location', () => {
 
   it('plans the Friday reminder in London, offering the text', () => {
     const now = at(LONDON, '2027-06-17T03:00');
-    const candidates = buildPlan(planInput({ now, fromDate: now, location: LONDON, settings: ABROAD })).filter(
-      (candidate) => candidate.id.startsWith('chok_leyisrael__'),
-    );
+    const candidates = withoutNags(
+      buildPlan(planInput({ now, fromDate: now, location: LONDON, settings: ABROAD })),
+    ).filter((candidate) => candidate.id.startsWith('chok_leyisrael__'));
     expect(candidates.map((candidate) => [candidate.id, clock(candidate.trigger, LONDON)])).toEqual([
       ['chok_leyisrael__2027-06-17__0', '2027-06-17 09:00'],
       ['chok_leyisrael__2027-06-18__0', '2027-06-18 09:00'],
@@ -295,7 +298,9 @@ describe('the default reminder at 09:00 on the clock of the location', () => {
   it('stays quiet once the day is marked done', () => {
     const now = at(LONDON, '2027-06-17T03:00');
     const completions = { '2027-06-18': { chok_leyisrael: MARK } };
-    const ids = buildPlan(planInput({ now, fromDate: now, location: LONDON, settings: ABROAD, completions }))
+    const ids = withoutNags(
+      buildPlan(planInput({ now, fromDate: now, location: LONDON, settings: ABROAD, completions })),
+    )
       .filter((candidate) => candidate.id.startsWith('chok_leyisrael__2027-06-18'))
       .map((candidate) => candidate.id);
     expect(ids).toEqual([]);
@@ -332,7 +337,7 @@ describe('hasSiddurText', () => {
 
 describe('the scheduler', () => {
   const chokCandidates = (input: PlanInput) =>
-    buildPlan(input).filter((candidate) => candidate.id.startsWith('chok_leyisrael__'));
+    withoutNags(buildPlan(input)).filter((candidate) => candidate.id.startsWith('chok_leyisrael__'));
 
   it('plans the one reminder on weekdays and on Friday, each offering the text', () => {
     const candidates = chokCandidates(planInput());

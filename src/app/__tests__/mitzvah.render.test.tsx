@@ -485,17 +485,7 @@ describe('Mitzvah screen', () => {
 
   describe('the reminder editor', () => {
     const CUSTOM_ID = 'custom_1800000000000_abc';
-    // The editor's timing radios alone: its nag block has radios of its own.
-    const timingRadios = () => {
-      const nagRadios = new Set(
-        (['level', 'none', 'custom'] as const).map((mode) =>
-          editor().getByRole('radio', { name: t(`nag.mode.${mode}`) }),
-        ),
-      );
-      return editor()
-        .getAllByRole('radio')
-        .filter((radio) => !nagRadios.has(radio));
-    };
+    const timingRadios = () => editor().getAllByRole('radio');
     const editor = () => within(screen.UNSAFE_getAllByType(Modal).find((modal) => modal.props.visible)!);
     const openEditor = () => fireEvent.press(screen.getByText(t('detail.addReminder')));
     const timingRadio = (timing: string) => editor().getByRole('radio', { name: t(`reminder.timing.${timing}`) });

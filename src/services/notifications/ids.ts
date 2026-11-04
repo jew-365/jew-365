@@ -24,7 +24,7 @@ export const IOS_HEADROOM = 4;
 export const HORIZON_MAX_DAYS = 30;
 export const LAST_REBUILD_KEY = 'notifications:last-rebuild-date';
 export const SCHEDULE_FORMAT_KEY = 'notifications:schedule-format';
-export const SCHEDULE_FORMAT = 12;
+export const SCHEDULE_FORMAT = 13;
 export const BLOCK_NOTICE_KIND = 'blockNotice';
 export const CHECK_IN_KIND = 'checkin';
 export const UPDATE_KIND = 'update';
@@ -64,8 +64,8 @@ export type PendingNotificationMeta = {
   dateKey?: string;
   windowEnd?: string;
   reminderIndex?: number;
-  // On a nag's repeat only: it is the k-th of `of` repeats of reminder `reminderIndex`.
-  repeat?: { k: number; of: number };
+  // On a nag only (the smart nag): the k-th of the window's `of` nags, of a kind, a last-chance point naming which.
+  nag?: { k: number; of: number; kind: 'zone' | 'sparse' | 'lastChance'; lastChance?: 'alone' | 'minyan' };
   customId?: string;
   skipIfDone?: boolean;
   hasText?: boolean;
@@ -77,10 +77,15 @@ export type NotificationContentLike = {
   dataString?: unknown;
 };
 
-// `${idx}.${occurrence}` for the n-th further trigger of a `blockExit` reminder, and `~${repeat}` after
-// either for the k-th repeat of its nag; `parseId()` reads the index alone.
-export function buildId(mitzvahId: string, date: Date, idx: number, occurrence = 0, repeat = 0): string {
-  return `${mitzvahId}__${dateKey(date)}__${idx}${occurrence ? `.${occurrence}` : ''}${repeat ? `~${repeat}` : ''}`;
+// `${idx}.${occurrence}` for the n-th further trigger of a `blockExit` reminder; `parseId()` reads the index alone.
+export function buildId(mitzvahId: string, date: Date, idx: number, occurrence = 0): string {
+  return `${mitzvahId}__${dateKey(date)}__${idx}${occurrence ? `.${occurrence}` : ''}`;
+}
+
+// The k-th nag of a window (the smart nag): `n${k}` where a reminder's index stands, so a mark's cancel by mitzvah
+// and date reaches it like any reminder.
+export function buildNagId(mitzvahId: string, date: Date, k: number): string {
+  return `${mitzvahId}__${dateKey(date)}__n${k}`;
 }
 
 export function parseId(id: string): { mitzvahId: string; date: string; idx: number } | null {

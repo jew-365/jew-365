@@ -35,6 +35,9 @@ import type { Mitzvah } from '@/types/mitzvah';
 import type { Location } from '@/types/zmanim';
 import { checkInDeadline } from '@/utils/checkIn';
 
+// The smart nag's notifications are pinned in nag.mitzvot.test.ts; this suite pins the reminders.
+const withoutNags = (plan: ReturnType<typeof buildPlan>) => plan.filter((candidate) => !candidate.data.nag);
+
 const JERUSALEM = CITIES[0];
 const ALL_NUSCHAOT: Mitzvah['nuschaotSupported'] = [...NUSACH_IDS];
 
@@ -106,7 +109,7 @@ describe('buildPlan', () => {
   afterEach(() => warn.mockRestore());
 
   it('plans every enabled mitzvah on both horizon days, soonest first, and the hilula notice beside them', () => {
-    const plan = buildPlan(planInput({ hilulotEnabled: true }));
+    const plan = withoutNags(buildPlan(planInput({ hilulotEnabled: true })));
 
     const expected: [string, number][] = [];
     for (const day of ['2026-10-13', '2026-10-14']) {
@@ -126,7 +129,7 @@ describe('buildPlan', () => {
   });
 
   it('routes each kind to its own channel and attaches the mitzvah payload', () => {
-    const plan = buildPlan(planInput({ hilulotEnabled: true }));
+    const plan = withoutNags(buildPlan(planInput({ hilulotEnabled: true })));
     const channelOf = (prefix: string) => [
       ...new Set(plan.filter((candidate) => candidate.id.startsWith(prefix)).map((candidate) => candidate.channel)),
     ];
@@ -153,7 +156,7 @@ describe('buildPlan', () => {
 
   it('gives a mitzvah with no text the mark-done-only category', () => {
     const plain: Mitzvah = { ...STUDY, id: 'custom_2_plain', contentBlocks: undefined };
-    const plan = buildPlan(planInput({ mitzvot: [plain] }));
+    const plan = withoutNags(buildPlan(planInput({ mitzvot: [plain] })));
 
     expect(plan.length).toBeGreaterThan(0);
     for (const candidate of plan) {
@@ -163,19 +166,19 @@ describe('buildPlan', () => {
   });
 
   it('names a mitzvah in English when the input language is English', () => {
-    const plan = buildPlan(planInput({ language: 'en', mitzvot: [STUDY] }));
+    const plan = withoutNags(buildPlan(planInput({ language: 'en', mitzvot: [STUDY] })));
     expect(plan.map((candidate) => candidate.title)).toEqual(['Study', 'Study']);
   });
 
   it('leaves out the hilula notices while the setting is off', () => {
-    const plan = buildPlan(planInput({ hilulotEnabled: false }));
+    const plan = withoutNags(buildPlan(planInput({ hilulotEnabled: false })));
     expect(plan.filter((candidate) => candidate.id.startsWith('hilula:'))).toEqual([]);
   });
 
   it('plans the Rosh Chodesh notices on their own channel and leaves them out while the setting is off', () => {
     const sunday = at(JERUSALEM, '2026-10-11T06:00');
     const noticesOf = (roshChodeshEnabled: boolean) =>
-      buildPlan(planInput({ now: sunday, mitzvot: [], roshChodeshEnabled })).filter((candidate) =>
+      withoutNags(buildPlan(planInput({ now: sunday, mitzvot: [], roshChodeshEnabled }))).filter((candidate) =>
         candidate.id.startsWith('roshChodesh:'),
       );
 
@@ -196,15 +199,17 @@ describe('buildPlan', () => {
   });
 
   it('plans nothing without notification permission', () => {
-    expect(buildPlan(planInput({ hasPermission: false }))).toEqual([]);
+    expect(withoutNags(buildPlan(planInput({ hasPermission: false })))).toEqual([]);
   });
 
   it('skips a mitzvah that is done or skipped on a day, and keeps its other days', () => {
-    const plan = buildPlan(
-      planInput({
-        completions: { '2026-10-13': { shacharit: 1 } },
-        skipped: { '2026-10-14': { mincha: 1 } },
-      }),
+    const plan = withoutNags(
+      buildPlan(
+        planInput({
+          completions: { '2026-10-13': { shacharit: 1 } },
+          skipped: { '2026-10-14': { mincha: 1 } },
+        }),
+      ),
     );
     const ids = plan.map((candidate) => candidate.id);
 
@@ -233,7 +238,7 @@ describe('buildPlan', () => {
       ranged('custom_5_later', '2026-10-15', '2026-10-30'),
     ];
 
-    expect(summary(buildPlan(planInput({ mitzvot })))).toEqual([
+    expect(summary(withoutNags(buildPlan(planInput({ mitzvot }))))).toEqual([
       ['custom_3_ending__2026-10-13__0', at(JERUSALEM, '2026-10-13T08:00').getTime()],
       ['custom_4_starting__2026-10-14__0', at(JERUSALEM, '2026-10-14T08:00').getTime()],
     ]);
@@ -249,11 +254,15 @@ describe('buildPlan', () => {
       skipOn: [],
       createdAt: 1,
     });
-    expect(summary(buildPlan(planInput({ now: at(JERUSALEM, '2026-10-27T20:00'), mitzvot: [night] })))).toEqual([
+    expect(
+      summary(withoutNags(buildPlan(planInput({ now: at(JERUSALEM, '2026-10-27T20:00'), mitzvot: [night] })))),
+    ).toEqual([
       ['custom_6_night__2026-10-27__0', at(JERUSALEM, '2026-10-28T03:29').getTime()],
       ['custom_6_night__2026-10-28__0', at(JERUSALEM, '2026-10-29T03:29').getTime()],
     ]);
-    expect(summary(buildPlan(planInput({ now: at(JERUSALEM, '2026-10-28T03:00'), mitzvot: [night] })))).toEqual([
+    expect(
+      summary(withoutNags(buildPlan(planInput({ now: at(JERUSALEM, '2026-10-28T03:00'), mitzvot: [night] })))),
+    ).toEqual([
       ['custom_6_night__2026-10-27__0', at(JERUSALEM, '2026-10-28T03:29').getTime()],
       ['custom_6_night__2026-10-28__0', at(JERUSALEM, '2026-10-29T03:29').getTime()],
       ['custom_6_night__2026-10-29__0', at(JERUSALEM, '2026-10-30T03:29').getTime()],
@@ -261,11 +270,13 @@ describe('buildPlan', () => {
   });
 
   it("uses a mitzvah's own reminders when the user edited them", () => {
-    const plan = buildPlan(
-      planInput({
-        mitzvot: [byId('mincha')],
-        reminderOverrides: { mincha: [{ anchor: 'start', offsetMin: 10, label: 'x' }] },
-      }),
+    const plan = withoutNags(
+      buildPlan(
+        planInput({
+          mitzvot: [byId('mincha')],
+          reminderOverrides: { mincha: [{ anchor: 'start', offsetMin: 10, label: 'x' }] },
+        }),
+      ),
     );
 
     expect(summary(plan)).toEqual([
@@ -276,7 +287,7 @@ describe('buildPlan', () => {
 
   it('reads the clock from the input: a reminder already due at `now` is dropped', () => {
     const afterNetz = at(JERUSALEM, '2026-10-13T07:00');
-    const plan = buildPlan(planInput({ now: afterNetz, mitzvot: [byId('shacharit')] }));
+    const plan = withoutNags(buildPlan(planInput({ now: afterNetz, mitzvot: [byId('shacharit')] })));
 
     expect(plan.map((candidate) => candidate.id)).toEqual([
       'shacharit__2026-10-13__1',
@@ -293,7 +304,7 @@ describe('buildPlan', () => {
         throw new Error('zmanim blew up');
       },
     };
-    const plan = buildPlan(planInput({ mitzvot: [exploding, byId('mincha')] }));
+    const plan = withoutNags(buildPlan(planInput({ mitzvot: [exploding, byId('mincha')] })));
 
     expect(plan.map((candidate) => candidate.id)).toEqual([
       'mincha__2026-10-13__0',
@@ -312,6 +323,8 @@ describe('buildPlan', () => {
       id: `bulk_${index}`,
       contentBlocks: undefined,
       defaultReminders: [{ anchor: 'start', offsetMin: 0, label: 'x' }],
+      // No last-chance point: one notification per window.
+      performMin: { alone: 0 },
       computeWindow: ({ zmanim }) => ({
         start: new Date(minutes(zmanim.netzHaChama, index + 1)),
         end: new Date(minutes(zmanim.netzHaChama, 600)),
@@ -325,7 +338,7 @@ describe('buildPlan', () => {
     ];
 
     it('keeps the soonest reminders and warns about the rest', () => {
-      const plan = buildPlan(planInput({ mitzvot: many }));
+      const plan = withoutNags(buildPlan(planInput({ mitzvot: many })));
 
       expect(plan.map((candidate) => candidate.id)).toEqual(earliest);
       expect(warn).toHaveBeenCalledWith(
@@ -334,14 +347,16 @@ describe('buildPlan', () => {
     });
 
     it('leaves iOS the headroom its 64 pending requests need, and caps elsewhere at the pending limit', () => {
-      expect(buildPlan(planInput({ mitzvot: many, platform: 'ios' }))).toHaveLength(IOS_MAX - IOS_HEADROOM - 1);
-      expect(buildPlan(planInput({ mitzvot: many, platform: 'android' }))).toHaveLength(room);
+      expect(withoutNags(buildPlan(planInput({ mitzvot: many, platform: 'ios' })))).toHaveLength(
+        IOS_MAX - IOS_HEADROOM - 1,
+      );
+      expect(withoutNags(buildPlan(planInput({ mitzvot: many, platform: 'android' })))).toHaveLength(room);
     });
   });
 
   describe('a Shabbat in the horizon', () => {
     const shabbat = () => HebcalService.holyBlockAt(at(JERUSALEM, '2026-11-14T12:00'), JERUSALEM)!;
-    const plan = () => buildPlan(planInput({ now: FRIDAY, mitzvot: [byId('shacharit'), byId('mincha')] }));
+    const plan = () => withoutNags(buildPlan(planInput({ now: FRIDAY, mitzvot: [byId('shacharit'), byId('mincha')] })));
 
     it('sends the pre-block notice an hour before candle lighting, on the mitzvot channel with no category', () => {
       const notice = plan().find((candidate) => candidate.id === 'blockNotice:2026-11-14')!;
@@ -371,7 +386,7 @@ describe('buildPlan', () => {
     it('plans every check-in nudge before the check-in closes at alot, and none once it has', () => {
       const deadline = checkInDeadline(shabbat(), JERUSALEM);
       const nudgesAt = (now: Date) =>
-        buildPlan(planInput({ now, mitzvot: [byId('shacharit'), byId('mincha')] })).filter((candidate) =>
+        withoutNags(buildPlan(planInput({ now, mitzvot: [byId('shacharit'), byId('mincha')] }))).filter((candidate) =>
           candidate.id.startsWith('checkin:'),
         );
 
@@ -384,7 +399,11 @@ describe('buildPlan', () => {
 
     it('sends the weekly report between the first and second check-in nudge, on the system channel', () => {
       const withReport = () =>
-        buildPlan(planInput({ now: FRIDAY, mitzvot: [byId('shacharit'), byId('mincha')], weeklyReportEnabled: true }));
+        withoutNags(
+          buildPlan(
+            planInput({ now: FRIDAY, mitzvot: [byId('shacharit'), byId('mincha')], weeklyReportEnabled: true }),
+          ),
+        );
       const sequence = withReport().filter((candidate) => /^(checkin|report):/.test(candidate.id));
 
       expect(summary(sequence)).toEqual([
@@ -415,8 +434,8 @@ describe('buildPlan', () => {
 
     it('keeps maariv out of the block and leaves the pre-block notice as it was', () => {
       const { start, end } = shabbat();
-      const withMaariv = buildPlan(
-        planInput({ now: FRIDAY, mitzvot: [byId('shacharit'), byId('mincha'), byId('maariv')] }),
+      const withMaariv = withoutNags(
+        buildPlan(planInput({ now: FRIDAY, mitzvot: [byId('shacharit'), byId('mincha'), byId('maariv')] })),
       );
       const maariv = withMaariv.filter((candidate) => candidate.id.startsWith('maariv__'));
       expect(maariv.filter((candidate) => candidate.id.startsWith('maariv__2026-11-13__'))).toEqual([]);
@@ -440,7 +459,7 @@ describe('buildPlan', () => {
       candidates.filter((candidate) => candidate.id.startsWith('krias_shma_al_hamita__'));
 
     it('reminds at 23:00 on a weeknight with the open-text category', () => {
-      const plan = bedtimeOf(buildPlan(planInput({ now: WEDNESDAY, mitzvot: [bedtime()] })));
+      const plan = bedtimeOf(withoutNags(buildPlan(planInput({ now: WEDNESDAY, mitzvot: [bedtime()] }))));
       expect(summary(plan)).toEqual([
         ['krias_shma_al_hamita__2026-11-11__0', at(JERUSALEM, '2026-11-11T23:00').getTime()],
         ['krias_shma_al_hamita__2026-11-12__0', at(JERUSALEM, '2026-11-12T23:00').getTime()],
@@ -465,13 +484,15 @@ describe('buildPlan', () => {
     it('reminds at 23:00 on the clock of the location abroad', () => {
       const losAngeles = CITIES.find((city) => city.nameEn === 'Los Angeles')!;
       const plan = bedtimeOf(
-        buildPlan(
-          planInput({
-            now: at(losAngeles, '2026-11-11T09:00'),
-            location: losAngeles,
-            settings: { nusach: 'ashkenaz', halachicOpinions: { ksSofZman: 'GRA' }, inIsrael: false },
-            mitzvot: [bedtime()],
-          }),
+        withoutNags(
+          buildPlan(
+            planInput({
+              now: at(losAngeles, '2026-11-11T09:00'),
+              location: losAngeles,
+              settings: { nusach: 'ashkenaz', halachicOpinions: { ksSofZman: 'GRA' }, inIsrael: false },
+              mitzvot: [bedtime()],
+            }),
+          ),
         ),
       );
       expect(summary(plan)).toEqual([
@@ -483,7 +504,7 @@ describe('buildPlan', () => {
     it('sends nothing on Friday night, inside Shabbat, and reminds again from motzaei Shabbat', () => {
       const { start, end } = HebcalService.holyBlockAt(at(JERUSALEM, '2026-11-14T12:00'), JERUSALEM)!;
       const weekdayMitzvot = [byId('shacharit'), byId('mincha')];
-      const withBedtime = buildPlan(planInput({ now: FRIDAY, mitzvot: [...weekdayMitzvot, bedtime()] }));
+      const withBedtime = withoutNags(buildPlan(planInput({ now: FRIDAY, mitzvot: [...weekdayMitzvot, bedtime()] })));
       const plan = bedtimeOf(withBedtime);
       expect(summary(plan)).toEqual([
         ['krias_shma_al_hamita__2026-11-14__0', at(JERUSALEM, '2026-11-14T23:00').getTime()],
@@ -497,7 +518,9 @@ describe('buildPlan', () => {
       expect(plan[0].categoryIdentifier).toBe(MITZVAH_TEXT_CATEGORY);
       const notice = (candidates: ReturnType<typeof buildPlan>) =>
         candidates.find((candidate) => candidate.id === 'blockNotice:2026-11-14');
-      expect(notice(withBedtime)).toEqual(notice(buildPlan(planInput({ now: FRIDAY, mitzvot: weekdayMitzvot }))));
+      expect(notice(withBedtime)).toEqual(
+        notice(withoutNags(buildPlan(planInput({ now: FRIDAY, mitzvot: weekdayMitzvot })))),
+      );
     });
 
     describe('where nightfall is after 23:00, Helsinki at the summer solstice', () => {
@@ -513,7 +536,11 @@ describe('buildPlan', () => {
       const nightfallOn = (iso: string) =>
         HebcalService.nightfall(zmanimFor(at(helsinki, `${iso}T12:00`), helsinki), helsinki);
       const planFrom = (iso: string) =>
-        bedtimeOf(buildPlan(planInput({ now: at(helsinki, iso), location: helsinki, settings, mitzvot: [bedtime()] })));
+        bedtimeOf(
+          withoutNags(
+            buildPlan(planInput({ now: at(helsinki, iso), location: helsinki, settings, mitzvot: [bedtime()] })),
+          ),
+        );
 
       it('fires at 23:00 before the window opens, as a heads-up', () => {
         const plan = planFrom('2027-06-22T05:00');
@@ -546,7 +573,7 @@ describe('buildPlan', () => {
       inIsrael: true,
     });
     const planFor = (now: Date, nusach: PlanInput['settings']['nusach'] = 'ashkenaz') =>
-      selichotOf(buildPlan(planInput({ now, settings: nusachSettings(nusach), mitzvot: [selichot()] })));
+      selichotOf(withoutNags(buildPlan(planInput({ now, settings: nusachSettings(nusach), mitzvot: [selichot()] }))));
 
     beforeEach(() => {
       installSelichotFixture();
@@ -580,7 +607,7 @@ describe('buildPlan', () => {
       });
       try {
         setLocale('en');
-        const [english] = selichotOf(buildPlan(planInput({ now, language: 'en', mitzvot: [selichot()] })));
+        const [english] = selichotOf(withoutNags(buildPlan(planInput({ now, language: 'en', mitzvot: [selichot()] }))));
         expect([english.title, english.body]).toEqual(['Selichot', 'Time for Selichot']);
       } finally {
         setLocale('he');
@@ -614,13 +641,15 @@ describe('buildPlan', () => {
     it('reminds at chatzot on the clock of the location abroad', () => {
       const losAngeles = CITIES.find((city) => city.nameEn === 'Los Angeles')!;
       const plan = selichotOf(
-        buildPlan(
-          planInput({
-            now: at(losAngeles, '2025-09-15T14:00'),
-            location: losAngeles,
-            settings: { ...nusachSettings('ashkenaz'), inIsrael: false },
-            mitzvot: [selichot()],
-          }),
+        withoutNags(
+          buildPlan(
+            planInput({
+              now: at(losAngeles, '2025-09-15T14:00'),
+              location: losAngeles,
+              settings: { ...nusachSettings('ashkenaz'), inIsrael: false },
+              mitzvot: [selichot()],
+            }),
+          ),
         ),
       );
       expect(summary(plan)).toEqual(
@@ -657,7 +686,7 @@ describe('buildPlan', () => {
       inIsrael: true,
     });
     const planFor = (now: Date, nusach: PlanInput['settings']['nusach'] = 'ashkenaz') =>
-      candlesOf(buildPlan(planInput({ now, settings: nusachSettings(nusach), mitzvot: [candles()] })));
+      candlesOf(withoutNags(buildPlan(planInput({ now, settings: nusachSettings(nusach), mitzvot: [candles()] }))));
 
     it('reminds at tzeit and names the night, with the open-text category', () => {
       const now = at(JERUSALEM, '2025-12-15T06:00');
@@ -686,7 +715,7 @@ describe('buildPlan', () => {
       });
       try {
         setLocale('en');
-        const english = candlesOf(buildPlan(planInput({ now, language: 'en', mitzvot: [candles()] })));
+        const english = candlesOf(withoutNags(buildPlan(planInput({ now, language: 'en', mitzvot: [candles()] }))));
         expect(english.map((candidate) => [candidate.title, candidate.body])).toEqual([
           ['Chanukah candles', 'Time for Chanukah candles: night 2'],
           ['Chanukah candles', 'Time for Chanukah candles: night 3'],
@@ -739,13 +768,15 @@ describe('buildPlan', () => {
     it('reminds at tzeit on the clock of the location abroad', () => {
       const newYork = CITIES.find((city) => city.cityId === 'new-york')!;
       const plan = candlesOf(
-        buildPlan(
-          planInput({
-            now: at(newYork, '2025-12-15T06:00'),
-            location: newYork,
-            settings: { ...nusachSettings('ashkenaz'), inIsrael: false },
-            mitzvot: [candles()],
-          }),
+        withoutNags(
+          buildPlan(
+            planInput({
+              now: at(newYork, '2025-12-15T06:00'),
+              location: newYork,
+              settings: { ...nusachSettings('ashkenaz'), inIsrael: false },
+              mitzvot: [candles()],
+            }),
+          ),
         ),
       );
       expect(summary(plan)).toEqual(
@@ -761,7 +792,7 @@ describe('buildPlan', () => {
       const reminderOverrides = {
         chanukah_candles: [{ anchor: 'start' as const, offsetMin: 15, label: 'זמן הדלקת נרות חנוכה' }],
       };
-      const edited = candlesOf(buildPlan(planInput({ now, reminderOverrides, mitzvot: [candles()] })));
+      const edited = candlesOf(withoutNags(buildPlan(planInput({ now, reminderOverrides, mitzvot: [candles()] }))));
       expect(edited.map((candidate) => candidate.body)).toEqual(['זמן נרות חנוכה: הנר ה־2', 'זמן נרות חנוכה: הנר ה־3']);
       expect(edited.map((candidate) => candidate.trigger.getTime())).toEqual(
         ['2025-12-15', '2025-12-16'].map((day) => zmanimOn(day).tzeitHakochavim.getTime() + 15 * 60_000),
@@ -769,7 +800,7 @@ describe('buildPlan', () => {
       try {
         setLocale('en');
         const english = candlesOf(
-          buildPlan(planInput({ now, reminderOverrides, language: 'en', mitzvot: [candles()] })),
+          withoutNags(buildPlan(planInput({ now, reminderOverrides, language: 'en', mitzvot: [candles()] }))),
         );
         expect(english.map((candidate) => candidate.body)).toEqual([
           'Time for Chanukah candles: night 2',
@@ -790,7 +821,7 @@ describe('buildPlan', () => {
           { anchor: 'start', offsetMin: 60, label: 'נרות חנוכה' },
         ],
       };
-      const plan = candlesOf(buildPlan(planInput({ now, reminderOverrides, mitzvot: [candles()] })));
+      const plan = candlesOf(withoutNags(buildPlan(planInput({ now, reminderOverrides, mitzvot: [candles()] }))));
       const bodiesOf = (index: number) =>
         ['2025-12-15', '2025-12-16'].map(
           (day) => plan.find((candidate) => candidate.id === `chanukah_candles__${day}__${index}`)?.body,
@@ -817,15 +848,24 @@ describe('buildPlan', () => {
     ];
 
     it('plans none while the feature is off', () => {
-      const plan = buildPlan(
-        planInput({ now: WEDNESDAY, mitzvot: [], taharahEnabled: false, taharah: { ...planInput().taharah, events } }),
+      const plan = withoutNags(
+        buildPlan(
+          planInput({
+            now: WEDNESDAY,
+            mitzvot: [],
+            taharahEnabled: false,
+            taharah: { ...planInput().taharah, events },
+          }),
+        ),
       );
       expect(plan).toEqual([]);
     });
 
     it('plans the hefsek on the taharah channel, discreet, at shkia minus the lead', () => {
-      const plan = buildPlan(
-        planInput({ now: WEDNESDAY, mitzvot: [], taharahEnabled: true, taharah: { ...planInput().taharah, events } }),
+      const plan = withoutNags(
+        buildPlan(
+          planInput({ now: WEDNESDAY, mitzvot: [], taharahEnabled: true, taharah: { ...planInput().taharah, events } }),
+        ),
       );
 
       expect(plan).toHaveLength(1);

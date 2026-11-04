@@ -26,12 +26,10 @@ export type SkipContext = 'shabbat' | 'yomtov' | 'cholHamoed' | 'fastDay';
 // With `clock`, `offsetMin` is minutes after midnight (0-1439) on the location's clock, not an offset from the window; with `followUp`, minutes after the window's end (1-720); with `blockExit`, minutes (0-720) after the exit of each holy block that ends inside the window.
 export type ReminderAnchor = 'start' | 'end' | 'clock' | 'followUp' | 'blockExit';
 
-// The nagging level (רמת נודניקיות): a preset nag for every reminder without one of its own.
+// The nagging level (רמת נודניקיות): how many nags a window adds in its critical zone (the smart nag).
 export type NagLevel = 1 | 2 | 3 | 4;
-// Where a nag's repeats fall against their reminder: all before it, all after it, or half and half.
-export type NagPlacement = 'before' | 'after' | 'around';
-// A reminder's nag (נודניק): `count` repeats, `everyMin` minutes apart, placed by `placement`.
-export type ReminderNag = { count: number; everyMin: number; placement: NagPlacement };
+// The minutes a mitzvah takes to perform: alone, and with a minyan for a prayer that has one.
+export type PerformMin = { alone: number; minyan?: number };
 
 export type Reminder = {
   anchor: ReminderAnchor;
@@ -40,8 +38,6 @@ export type Reminder = {
   bodyVariants?: string[];
   includeContentInBody?: boolean;
   skipIfDone?: boolean;
-  // An object is this reminder's own nag, `null` exempts it from the level, absent follows the level.
-  nag?: ReminderNag | null;
 };
 
 export type MitzvahWindow = {
@@ -80,6 +76,8 @@ export type Mitzvah = {
   bodyParams?: (ctx: ComputeContext) => BodyParams | null;
   bodyKey?: string;
   multiDay?: { maxDays: number };
+  // The time to perform it, when the registry table of `PERFORM_MIN` does not name it (a custom mitzvah).
+  performMin?: PerformMin;
   isCustom?: boolean;
 };
 
@@ -95,6 +93,8 @@ export type CustomMitzvah = {
   contentBlocks?: ContentBlock[];
   // One of CUSTOM_ICON_CHOICES; absent means the default `custom` icon.
   icon?: string;
+  // Minutes to perform it, for its last-chance point (absent: `CUSTOM_PERFORM_MIN_DEFAULT`).
+  performMin?: number;
   createdAt: number;
 };
 

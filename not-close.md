@@ -544,7 +544,8 @@ The owner's upgrade list of 2026-11-04, narrowed the same day to simple tasks th
   - **What it is:** the model of [.claude/specs/smart-nag.md](.claude/specs/smart-nag.md): a time to perform per mitzvah (alone and with a minyan for the prayers), two last-chance points for a prayer whatever the prayer mode, and the level's nags spent once per window inside a critical zone that follows the kind of mitzvah (the last third by day; tzeit to chatzot at night, sparse after it); the per-reminder nag is retired.
   - **What it solves:** the owner's words of 2026-11-04: "לא מרוצה משיטת הכפלת התראות סביב תזכורת ... נדרש מנגנון אחר פרקטי ואמיתי יותר".
   - **Expected result:** at level Nag, Shacharit sends its reminders plus three nags in its last third and its two last-chance alerts, none closer than 10 minutes, nothing after a mark.
-  - **Status:** characterized, waiting for the owner's answers to Q1 to Q3 of the spec · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Done:** 2026-11-04, after the owner's "1 כן, 2 כן, 3 כן". Built per the spec, with the decisions of its section 5 for the owner to confirm. Verified by `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, the full Jest suite (6270 passing) and `pnpm test:tz` on the nag, time-left, budget, horizon and next-reminder suites. A printed Jerusalem day at levels 1 and 4 was checked against the spec.
+  - **Status:** Version 1.0.21 · Committed: pending · Pushed: no · Live: no · Channel: none
 - [ ] Colour the end time's digits in a reminder on Android
   - **Flag:** `Build`.
   - **What it is:** with native code, the digits of the end time in the time-left line drawn in the stage colour (a styled `subText` or text through a change to the notification builder of expo-notifications), and the dot dropped on Android; the iPhone keeps the dot, since its banner cannot colour text.

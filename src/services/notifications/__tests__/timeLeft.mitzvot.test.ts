@@ -68,30 +68,35 @@ const day = (candidates: ScheduleCandidate[]) => candidates.filter((c) => c.id.s
 describe('the time-left line of a mitzvah reminder', () => {
   beforeAll(() => setLocale('he'));
 
-  it('colours and marks each reminder by its place in the window, its repeats with it', () => {
-    const candidates = day(buildPlan(planInput(NIGHT_BEFORE, 3)));
-    expect(candidates.length).toBe(6);
-    const window = SHACHARIT.computeWindow({
+  const window = () =>
+    SHACHARIT.computeWindow({
       date: at(J, '2026-11-11T12:00'),
       location: J,
       settings: SETTINGS,
       zmanim: require('@/services/ZmanimService').ZmanimService.getZmanim(at(J, '2026-11-11T12:00'), J),
     })!;
-    // The start reminder and its two repeats, then the before-the-end reminder after its two repeats: two reminders,
-    // so the first is green and the last red, repeats included.
-    const stages = ['green', 'green', 'green', 'red', 'red', 'red'] as const;
-    candidates.forEach((c, i) => {
-      expect(c.color).toBe(TIME_STAGE_COLOR[stages[i]]);
-      expect(c.subtitle).toBe(timeLeftLine(c.trigger, window, J.tz, t, stages[i]));
-    });
+  const stageOf = (c: ScheduleCandidate) =>
+    (Object.keys(TIME_STAGE_COLOR) as (keyof typeof TIME_STAGE_COLOR)[]).find((s) => TIME_STAGE_COLOR[s] === c.color);
+
+  it('colours a reminder green, a nag orange and the last notification red, and marks the line to match', () => {
+    const candidates = day(buildPlan(planInput(NIGHT_BEFORE, 3)));
+    const last = candidates[candidates.length - 1];
+    expect(last.data.nag?.lastChance).toBe('alone');
+    for (const c of candidates) {
+      const stage = c === last ? 'red' : c.data.nag ? 'orange' : 'green';
+      expect(stageOf(c)).toBe(stage);
+      expect(c.subtitle).toBe(timeLeftLine(c.trigger, window(), J.tz, t, stage));
+    }
+    expect(candidates.some((c) => c.data.nag?.kind === 'zone')).toBe(true);
     expect(candidates[0].subtitle).toMatch(/^נשארו .* · עד \d\d:\d\d$/);
-    expect(candidates[3].subtitle).toMatch(/^❗ נשארו .* · עד \d\d:\d\d$/);
-    // Shacharit's last reminder, 45 minutes before its end.
-    expect(candidates[5].subtitle).toMatch(/^❗ נשארו 45 דק' · עד \d\d:\d\d$/);
+    // Shacharit alone takes 20 minutes: its last-chance point is 20 minutes before the end.
+    expect(last.subtitle).toMatch(/^❗ נשארו 20 דק' · עד \d\d:\d\d$/);
+    expect(last.body).toBe('הזמן האחרון להתחיל');
   });
 
-  it('is the same on the iPhone and Android, and keeps the places once some are past or marked', () => {
-    const lastAt = day(buildPlan(planInput(NIGHT_BEFORE, 3)))[5].trigger;
+  it('is the same on the iPhone and Android, and keeps the stages once some are past or marked', () => {
+    const all = day(buildPlan(planInput(NIGHT_BEFORE, 3)));
+    const lastAt = all[all.length - 1].trigger;
     for (const platform of ['ios', 'android'] as const) {
       const later = day(buildPlan(planInput(new Date(lastAt.getTime() - 60_000), 3, platform)));
       expect(later).toHaveLength(1);
@@ -100,30 +105,29 @@ describe('the time-left line of a mitzvah reminder', () => {
     }
   });
 
-  it('marks the one before the last of three reminders orange, with its repeats, and never names a repeat in the body', () => {
-    const reminders = [
-      { anchor: 'start' as const, offsetMin: 0, label: 'x' },
-      { anchor: 'start' as const, offsetMin: 60, label: 'y' },
-      { anchor: 'end' as const, offsetMin: -10, label: 'z' },
-    ];
-    const input = { ...planInput(NIGHT_BEFORE, 2), reminderOverrides: { shacharit: reminders } };
-    const candidates = day(buildPlan(input));
-    // Level 2: each reminder and one repeat (after a start reminder, before the end one).
-    expect(candidates.map((c) => c.color)).toEqual(
-      ['green', 'green', 'orange', 'orange', 'red', 'red'].map((s) => TIME_STAGE_COLOR[s as 'green']),
-    );
-    expect(candidates.filter((c) => c.subtitle?.startsWith('⚠️ '))).toHaveLength(2);
-    for (const c of candidates) expect(c.body).not.toMatch(/מתוך/);
-  });
-
-  it('makes a mitzvah with one notification red', () => {
-    const input = {
+  it('marks the minyan point orange and the point alone red, and a reminder after them red as the last', () => {
+    const single = {
       ...planInput(NIGHT_BEFORE, 1),
       reminderOverrides: { shacharit: [{ anchor: 'start' as const, offsetMin: 0, label: 'x' }] },
     };
-    const [only] = day(buildPlan(input));
-    expect(only.color).toBe(TIME_STAGE_COLOR.red);
-    expect(only.subtitle?.startsWith('❗ ')).toBe(true);
+    const [reminder, minyan, alone] = day(buildPlan(single));
+    expect([stageOf(reminder), stageOf(minyan), stageOf(alone)]).toEqual(['green', 'orange', 'red']);
+    expect(minyan.body).toBe('הזמן האחרון להתחיל במניין');
+    expect(minyan.subtitle).toMatch(/^⚠️ נשארו 45 דק'/);
+
+    const late = {
+      ...planInput(NIGHT_BEFORE, 1),
+      reminderOverrides: {
+        shacharit: [
+          { anchor: 'start' as const, offsetMin: 0, label: 'x' },
+          { anchor: 'end' as const, offsetMin: -5, label: 'y' },
+        ],
+      },
+    };
+    const candidates = day(buildPlan(late));
+    expect(candidates.map(stageOf)).toEqual(['green', 'orange', 'red', 'red']);
+    expect(candidates[3].data.nag).toBeUndefined();
+    for (const c of candidates) expect(c.body).not.toMatch(/מתוך/);
   });
 
   it('is part of what the hash covers and is handed to expo as the subtitle', async () => {

@@ -1,6 +1,5 @@
 import { CustomMitzvah, ScheduleEntry, Weekday } from '@/types/mitzvah';
 import {
-  nagClockPreview,
   ALL_DAY_MIN,
   DraftBlock,
   NIGHT_END_MIN,
@@ -710,50 +709,5 @@ describe('siddurTextName', () => {
   it('is null for a retired text id', () => {
     expect(siddurTextName('tzitzit', 'he')).toBeNull();
     expect(siddurTextName('tzitzit', 'en')).toBeNull();
-  });
-});
-
-describe('nagClockPreview', () => {
-  const at = (time: string) => ({ time, fires: true, afterEnd: false });
-
-  it('prints a level’s repeats as clocks across midnight, before a before-the-end reminder', () => {
-    expect(nagClockPreview('22:00', '01:00', { anchor: 'end', offsetMin: -10 }, 3)).toEqual([at('00:40'), at('00:45')]);
-    expect(nagClockPreview('22:00', '01:00', { anchor: 'end', offsetMin: -10 }, 1)).toEqual([]);
-  });
-
-  it('flags the repeats past the hours', () => {
-    expect(
-      nagClockPreview(
-        '22:00',
-        '01:00',
-        { anchor: 'start', offsetMin: 170, nag: { count: 3, everyMin: 10, placement: 'after' } },
-        1,
-      ),
-    ).toEqual([
-      at('01:00'),
-      { time: '01:10', fires: false, afterEnd: true },
-      { time: '01:20', fires: false, afterEnd: true },
-    ]);
-  });
-
-  it('keeps a follow-up’s repeats after the end', () => {
-    expect(
-      nagClockPreview(
-        '22:00',
-        '01:00',
-        { anchor: 'followUp', offsetMin: 30, nag: { count: 3, everyMin: 15, placement: 'before' } },
-        1,
-      ),
-    ).toEqual([
-      { time: '00:45', fires: false, afterEnd: false },
-      { time: '01:00', fires: false, afterEnd: false },
-      at('01:15'),
-    ]);
-  });
-
-  it('lists nothing for a reminder outside the hours, an exempt one or invalid hours', () => {
-    expect(nagClockPreview('22:00', '01:00', { anchor: 'clock', offsetMin: 12 * 60 }, 4)).toEqual([]);
-    expect(nagClockPreview('22:00', '01:00', { anchor: 'start', offsetMin: 0, nag: null }, 4)).toEqual([]);
-    expect(nagClockPreview('2200', '01:00', { anchor: 'start', offsetMin: 0 }, 4)).toEqual([]);
   });
 });

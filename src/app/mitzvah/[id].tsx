@@ -12,7 +12,6 @@ import { IconTile } from '@/components/IconTile';
 import { MitzvahIcon, iconFor } from '@/components/MitzvahIcon';
 import { ListRow } from '@/components/ListRow';
 import { ReminderEditor } from '@/components/ReminderEditor';
-import { nagEffect, nagModeOf } from '@/components/ReminderNagFields';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SelichotAddonCard } from '@/components/SelichotAddonCard';
 import { CHOK_TEXT_ID } from '@/data/chok';
@@ -50,13 +49,12 @@ import { windowClosed } from '@/utils/lateMarks';
 import { mitzvahName, reminderLabel } from '@/utils/mitzvahName';
 import { quietHoursOf } from '@/utils/quietHours';
 import { timingSummary } from '@/utils/reminderTiming';
-import { NAG_LEVEL_IDS, nagFor, remindersPerDay } from '@/utils/nagging';
+import { NAG_LEVEL_IDS, remindersPerDay } from '@/utils/nagging';
 import { buildTriggerTime, nextReminderAt } from '@/services/NotificationScheduler';
 import { useI18n } from '@/i18n';
 
 const LEGEND_DOT_SIZE = scaled(8);
 const DELETE_ICON_SIZE = scaled(16);
-const NAG_ICON_SIZE = scaled(14);
 const ADD_ICON_SIZE = scaled(18);
 const RIBBON_HEIGHT = scaled(10);
 const TIME_LABEL_WIDTH = scaled(40);
@@ -248,20 +246,12 @@ export default function MitzvahDetailScreen() {
   };
   const pendingDeleteReminder = deleteIndex === null ? null : (reminders[deleteIndex] ?? null);
   const perDay = (level: typeof nagLevel) =>
-    t('detail.nagLevelPerDay', { n: remindersPerDay(mitzvah.id, reminders, level) });
+    t('detail.nagLevelPerDay', { n: remindersPerDay(mitzvah, reminders, level) });
   const appLevelLabel = t('detail.nagLevelApp', { name: t(`nag.level.${appNagLevel}.name`), level: appNagLevel });
   const levelLabel = (level: typeof nagLevel) => t('nag.level.title', { name: t(`nag.level.${level}.name`), level });
   const chooseNagLevel = (level: typeof nagLevel | null) => {
     setNagLevel(mitzvah.id, level);
     setLevelSheetVisible(false);
-  };
-  // A row's third line: its own nag, "no nag" when it opts out of a level that would nag, or the level's.
-  const nagLine = (reminder: Reminder): string | null => {
-    const mode = nagModeOf(reminder.nag);
-    const nag = nagFor(mitzvah.id, reminder, nagLevel);
-    if (mode === 'custom') return t('nag.row.custom', { effect: nagEffect(nag, t) });
-    if (mode === 'none') return nagFor(mitzvah.id, { anchor: reminder.anchor }, nagLevel) ? t('nag.row.none') : null;
-    return nag ? t('nag.row.fromLevel', { effect: nagEffect(nag, t) }) : null;
   };
 
   return (
@@ -452,26 +442,6 @@ export default function MitzvahDetailScreen() {
                   <Text style={[typography.micro, { color: colors.textMuted, marginTop: scaled(2) }]}>
                     {timingSummary(reminder, t)}
                   </Text>
-                  {nagLine(reminder) ? (
-                    <View style={styles.nagLine}>
-                      <MitzvahIcon
-                        name="repeat"
-                        size={NAG_ICON_SIZE}
-                        color={reminder.nag === null ? colors.textMuted : colors.goldText}
-                        strokeWidth={2}
-                      />
-                      <Text
-                        testID={`reminder-nag-${index}`}
-                        style={[
-                          typography.small,
-                          styles.nagText,
-                          { color: reminder.nag === null ? colors.textMuted : colors.goldText },
-                        ]}
-                      >
-                        {nagLine(reminder)}
-                      </Text>
-                    </View>
-                  ) : null}
                   {next ? (
                     <Text style={[typography.micro, { color: colors.goldText, marginTop: scaled(2) }]}>
                       {t('detail.reminderNextAt', { time: fireTimeText(next, location.tz) })}
@@ -533,7 +503,6 @@ export default function MitzvahDetailScreen() {
         location={location}
         settings={settings}
         mitzvahName={name}
-        nagLevel={nagLevel}
         onClose={() => {
           setEditorVisible(false);
           setEditIndex(null);
@@ -689,15 +658,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     paddingVertical: spacing.md,
     borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  nagLine: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    marginTop: scaled(2),
-  },
-  nagText: {
-    flexShrink: 1,
   },
   reminderRow: {
     flexDirection: 'row',

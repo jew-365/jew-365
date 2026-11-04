@@ -14,7 +14,7 @@ import { findMitzvah } from '@/data/mitzvot';
 import { useRowMirrored } from '@/hooks/useRowMirrored';
 import { useI18n } from '@/i18n';
 // The pure planner itself: the scheduler facade adds nothing to it, and the Settings suites mock the facade.
-import { nagChain } from '@/services/notifications/planners/mitzvot';
+import { windowSends } from '@/services/notifications/planners/mitzvot';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
@@ -22,11 +22,10 @@ import { fontFamilies, typography } from '@/theme/typography';
 import type { NagLevel, UserSettings } from '@/types/mitzvah';
 import type { Location } from '@/types/zmanim';
 import { clockOf } from '@/utils/clock';
-import { appDay, appDayEnd } from '@/utils/locationDay';
+import { appDay } from '@/utils/locationDay';
 import { mitzvahName } from '@/utils/mitzvahName';
 import { NAG_LEVEL_IDS } from '@/utils/nagging';
 import type { QuietHours } from '@/utils/quietHours';
-import { timingSummary } from '@/utils/reminderTiming';
 import { SectionLabel } from './SectionLabel';
 
 const SLIDER_HEIGHT = scaled(44);
@@ -191,54 +190,47 @@ type ExampleProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-// The example registry reminders: Shacharit's two and the bedtime Shema's.
-const EXAMPLES: readonly [string, number][] = [
-  ['shacharit', 0],
-  ['shacharit', 1],
-  ['krias_shma_al_hamita', 0],
-];
+// The example mitzvot: Shacharit, a day prayer with two last-chance points, and the bedtime Shema, a night one.
+const EXAMPLES: readonly string[] = ['shacharit', 'krias_shma_al_hamita'];
 
-type Pill = { at: number; time: string; kind: 'main' | 'repeat' | 'dropped' };
+type PillKind = 'reminder' | 'nag' | 'lastChance';
+type Pill = { at: number; time: string; kind: PillKind };
 
-// Today's chains of the example reminders at `level`, as the plan would send them from the start of the app
-// day (`nagChain()`, so the quiet hours, the holy blocks and the end of the time all apply): the main filled,
-// each repeat outlined, a repeat the plan drops dashed in `urgent`.
+// Today's window of each example mitzvah at `level`, as the plan sends it from its first notification
+// (`windowSends()`, so the quiet hours, the holy blocks and the end of the time all apply): a reminder filled, a nag
+// outlined, a last-chance point outlined in `urgent`.
 export function NagLevelExample({ level, location, settings, quietHours, style }: ExampleProps) {
   const { colors } = useTheme();
   const { t, language } = useI18n();
   const rows = useMemo(() => {
     const today = appDay(new Date(), location);
-    const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
-    const scope = {
-      now: new Date(appDayEnd(yesterday, location).getTime() - 1),
-      location,
-      settings,
-      completions: {},
-      skipped: {},
-      quietHours,
-      nagLevel: level,
-    };
-    return EXAMPLES.flatMap(([id, index]) => {
+    const scope = { location, settings, quietHours, nagLevel: level };
+    return EXAMPLES.flatMap((id) => {
       const mitzvah = findMitzvah(id);
-      const reminder = mitzvah?.defaultReminders[index];
-      const chain = mitzvah && reminder ? nagChain(mitzvah, reminder, scope) : null;
-      if (!mitzvah || !reminder || !chain) return [];
-      const pills: Pill[] = [
-        { at: chain.main.getTime(), time: clockOf(chain.main, location.tz), kind: 'main' as const },
-        ...chain.repeats.map(({ trigger, fires }): Pill => ({
-          at: trigger.getTime(),
-          time: clockOf(trigger, location.tz),
-          kind: fires ? 'repeat' : 'dropped',
-        })),
-      ].sort((a, b) => a.at - b.at);
-      return [
-        { key: `${id}-${index}`, label: `${mitzvahName(mitzvah, language)} · ${timingSummary(reminder, t)}`, pills },
-      ];
+      const sends = mitzvah ? windowSends(mitzvah, mitzvah.defaultReminders, today, scope) : null;
+      if (!mitzvah || !sends?.length) return [];
+      const pills: Pill[] = sends.map(({ at, kind }) => ({
+        at,
+        time: clockOf(new Date(at), location.tz),
+        kind: kind === 'reminder' ? 'reminder' : kind === 'lastChance' ? 'lastChance' : 'nag',
+      }));
+      return [{ key: id, label: mitzvahName(mitzvah, language), pills }];
     });
-  }, [level, location, settings, quietHours, language, t]);
+  }, [level, location, settings, quietHours, language]);
 
   if (!rows.length) return null;
   const city = language === 'en' && location.nameEn ? location.nameEn : location.name;
+  const look = (kind: PillKind) =>
+    kind === 'reminder'
+      ? { box: { backgroundColor: colors.gold, borderColor: colors.gold }, text: colors.onGold }
+      : kind === 'nag'
+        ? { box: { backgroundColor: colors.surface, borderColor: colors.gold }, text: colors.goldText }
+        : { box: { backgroundColor: colors.surface, borderColor: colors.urgent }, text: colors.urgent };
+  const legend: [PillKind, string][] = [
+    ['reminder', t('settings.nagExample.main')],
+    ['nag', t('settings.nagExample.repeat')],
+    ['lastChance', t('settings.nagExample.lastChance')],
+  ];
   return (
     <View style={[styles.example, { backgroundColor: colors.surface2 }, style]} testID="nag-example">
       <Text style={[typography.captionBold, { color: colors.text }]}>{t('settings.nagExample.title', { city })}</Text>
@@ -250,41 +242,27 @@ export function NagLevelExample({ level, location, settings, quietHours, style }
               <View
                 key={`${pill.at}-${i}`}
                 testID={`nag-example-${pill.kind}`}
-                accessibilityLabel={pill.kind === 'dropped' ? t('nag.previewSkipped', { time: pill.time }) : pill.time}
-                style={[
-                  styles.pill,
-                  pill.kind === 'main'
-                    ? { backgroundColor: colors.gold, borderColor: colors.gold }
-                    : pill.kind === 'repeat'
-                      ? { backgroundColor: colors.surface, borderColor: colors.gold }
-                      : { backgroundColor: colors.surface, borderColor: colors.urgent, borderStyle: 'dashed' },
-                ]}
+                accessibilityLabel={pill.time}
+                style={[styles.pill, look(pill.kind).box]}
               >
-                <Text
-                  style={[
-                    typography.captionBold,
-                    {
-                      color:
-                        pill.kind === 'main' ? colors.onGold : pill.kind === 'repeat' ? colors.goldText : colors.urgent,
-                    },
-                  ]}
-                >
-                  {pill.time}
-                </Text>
+                <Text style={[typography.captionBold, { color: look(pill.kind).text }]}>{pill.time}</Text>
               </View>
             ))}
           </View>
         </View>
       ))}
       <View style={styles.legend} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: colors.gold, borderColor: colors.gold }]} />
-          <Text style={[typography.small, { color: colors.textSub }]}>{t('settings.nagExample.main')}</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { borderColor: colors.gold }]} />
-          <Text style={[typography.small, { color: colors.textSub }]}>{t('settings.nagExample.repeat')}</Text>
-        </View>
+        {legend.map(([kind, label]) => (
+          <View key={kind} style={styles.legendItem}>
+            <View
+              style={[
+                styles.legendDot,
+                kind === 'reminder' ? look(kind).box : { borderColor: look(kind).box.borderColor },
+              ]}
+            />
+            <Text style={[typography.small, { color: colors.textSub }]}>{label}</Text>
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -374,6 +352,7 @@ const styles = StyleSheet.create({
   },
   legend: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.md,
   },
   legendItem: {

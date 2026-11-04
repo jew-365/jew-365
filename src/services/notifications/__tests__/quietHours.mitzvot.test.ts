@@ -93,7 +93,8 @@ function planInput(mitzvah: Mitzvah, now: Date, quietHours?: QuietHours): PlanIn
 
 const sum = (plan: ReturnType<typeof buildPlan>, id: string) =>
   plan
-    .filter((candidate) => candidate.id.startsWith(`${id}__`))
+    // The reminders: the smart nag's notifications under quiet hours are pinned in nag.mitzvot.test.ts.
+    .filter((candidate) => candidate.id.startsWith(`${id}__`) && !candidate.data.nag)
     .map((candidate) => [candidate.id, candidate.trigger.getTime()]);
 
 const planned = (mitzvah: Mitzvah, now: Date, quietHours?: QuietHours) =>

@@ -211,7 +211,8 @@ export default function HomeScreen() {
           const nagLevel = activeMitzvot[id]?.nagLevel ?? appNagLevel;
           const reminders = remindersOf(activeMitzvot[id], mitzvah);
           const count = windowNotificationCount(mitzvah, reminders, date, { location, settings, quietHours, nagLevel });
-          total = count && count.repeats > 0 ? count.total : null;
+          // The bell marks a mitzvah its level nags (above 1), and counts every notification of the window.
+          total = count && nagLevel > 1 && count.nags > 0 ? count.total : null;
         } catch {
           total = null;
         }

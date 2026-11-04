@@ -8,23 +8,16 @@ const J = CITIES[0];
 const window = { start: at(J, '2026-11-04T05:58'), end: at(J, '2026-11-04T09:32') };
 
 describe('sendStage', () => {
-  it('makes the last reminder red, the one before it orange and the rest green', () => {
-    expect([0, 1, 2, 3, 4, 5].map((i) => sendStage(i, 6))).toEqual([
-      'green',
-      'green',
-      'green',
-      'green',
-      'orange',
-      'red',
-    ]);
-    expect([0, 1, 2].map((i) => sendStage(i, 3))).toEqual(['green', 'orange', 'red']);
-    // Two reminders: no orange, so the first is never orange hours before the end.
-    expect([0, 1].map((i) => sendStage(i, 2))).toEqual(['green', 'red']);
+  it('makes a reminder green, a nag orange and the last-chance point alone red', () => {
+    expect(sendStage('reminder', false)).toBe('green');
+    expect(sendStage('nag', false)).toBe('orange');
+    expect(sendStage('lastChanceAlone', false)).toBe('red');
   });
 
-  it('makes a single reminder red, and one not found green', () => {
-    expect(sendStage(0, 1)).toBe('red');
-    expect(sendStage(-1, 4)).toBe('green');
+  it("makes the window's last notification red, whatever it is", () => {
+    expect(sendStage('reminder', true)).toBe('red');
+    expect(sendStage('nag', true)).toBe('red');
+    expect(sendStage('lastChanceAlone', true)).toBe('red');
   });
 
   it("keeps direction ז's colours and the two marks", () => {

@@ -46,6 +46,8 @@ import HomeScreen from '../(tabs)/home';
 import { AppLogo } from '@/components/AppLogo';
 import { CounterPill } from '@/components/ScreenHeader';
 import { CITIES } from '@/data/cities';
+import { findMitzvah } from '@/data/mitzvot';
+import { windowNotificationCount } from '@/services/notifications/planners/mitzvot';
 import { useChokStore } from '@/stores/useChokStore';
 import { useCompletionsStore, dateKey } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
@@ -180,14 +182,20 @@ describe('home between midnight and alot', () => {
     expect(dateKey(date)).toBe('2027-06-14');
   });
 
-  it('shows in the bell how many notifications the open window sends in all, and no bell without repeats', () => {
+  it('shows in the bell how many notifications the open window sends in all, and no bell at level 1', () => {
     useUserStore.setState({ nagLevel: 3 });
     renderAt(NIGHT_OF_THE_14TH);
-    // Maariv's two reminders, each followed by two repeats at level 3.
+    // Maariv's two reminders, its two last-chance points and the level's nags in its zone and after it.
+    const maariv = findMitzvah('maariv')!;
+    const { nusach, halachicOpinions, inIsrael } = useUserStore.getState();
+    const scope = { location: JERUSALEM, settings: { nusach, halachicOpinions, inIsrael }, nagLevel: 3 as const };
+    const { total, nags } = windowNotificationCount(maariv, maariv.defaultReminders, new Date(2027, 5, 14), scope)!;
+    expect(nags).toBeGreaterThan(2);
     const bell = within(nowCard('maariv')).getByTestId('nag-bell');
-    expect(within(bell).getByText('6')).toBeOnTheScreen();
-    expect(bell.props.accessibilityLabel).toBe('נודניק: 6 התראות בסך הכול');
+    expect(within(bell).getByText(String(total))).toBeOnTheScreen();
+    expect(bell.props.accessibilityLabel).toBe(`נודניק: ${total} התראות בסך הכול`);
     screen.unmount();
+    // Level 1 sends the last-chance points too, but nags nothing: no bell.
     useUserStore.setState({ nagLevel: 1 });
     renderAt(NIGHT_OF_THE_14TH);
     expect(within(nowCard('maariv')).queryByTestId('nag-bell')).toBeNull();

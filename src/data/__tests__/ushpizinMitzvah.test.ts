@@ -31,6 +31,9 @@ import { calendarDay, checkInDeadline, checkInFor } from '@/utils/checkIn';
 import { judgeDay } from '@/utils/historyStats';
 import { appDayKey } from '@/utils/locationDay';
 
+// The smart nag's notifications are pinned in nag.mitzvot.test.ts; this suite pins the reminders.
+const withoutNags = (plan: ReturnType<typeof buildPlan>) => plan.filter((candidate) => !candidate.data.nag);
+
 const JERUSALEM = CITIES[0];
 const NEW_YORK = CITIES.find((city) => city.cityId === 'new-york')!;
 const SAID_IN: Nusach[] = ['ashkenaz', 'sefard', 'edot_hamizrach'];
@@ -96,9 +99,9 @@ function planInput(overrides: Partial<PlanInput> = {}): PlanInput {
 }
 
 const ushpizinPlan = (overrides: Partial<PlanInput> = {}) =>
-  buildPlan(planInput(overrides)).filter((candidate) => candidate.id.startsWith('ushpizin__'));
+  withoutNags(buildPlan(planInput(overrides))).filter((candidate) => candidate.id.startsWith('ushpizin__'));
 const noticeBody = (block: string, overrides: Partial<PlanInput> = {}) =>
-  buildPlan(planInput(overrides))
+  withoutNags(buildPlan(planInput(overrides)))
     .find((candidate) => candidate.id === `blockNotice:${block}`)
     ?.body.split('\n') ?? [];
 

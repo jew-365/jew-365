@@ -109,7 +109,8 @@ describe('Mitzvah screen › the nagging level', () => {
   it('reads like the app, with the app’s level and this mitzvah’s estimate', () => {
     useUserStore.getState().setNagLevel(2);
     renderMitzvah({ id: 'shacharit' });
-    expect(screen.getByText(`${appTitle(2)} · ${perDay(4)}`)).toBeOnTheScreen();
+    // Two reminders, the two last-chance points and the level's one nag.
+    expect(screen.getByText(`${appTitle(2)} · ${perDay(5)}`)).toBeOnTheScreen();
   });
 
   it('writes the mitzvah’s own level from the sheet, and the row and estimate follow', () => {
@@ -118,7 +119,7 @@ describe('Mitzvah screen › the nagging level', () => {
     expect(sheet().getByText(appTitle(1))).toBeOnTheScreen();
     fireEvent.press(sheet().getByText(levelTitle(4)));
     expect(useMitzvotStore.getState().activeMitzvot.shacharit.nagLevel).toBe(4);
-    expect(screen.getByText(`${levelTitle(4)} · ${perDay(8)}`)).toBeOnTheScreen();
+    expect(screen.getByText(`${levelTitle(4)} · ${perDay(7)}`)).toBeOnTheScreen();
   });
 
   it('clears the override with “like the app”', () => {
@@ -127,7 +128,7 @@ describe('Mitzvah screen › the nagging level', () => {
     fireEvent.press(levelRow());
     fireEvent.press(sheet().getByText(appTitle(1)));
     expect(useMitzvotStore.getState().activeMitzvot.shacharit.nagLevel).toBeUndefined();
-    expect(screen.getByText(`${appTitle(1)} · ${perDay(2)}`)).toBeOnTheScreen();
+    expect(screen.getByText(`${appTitle(1)} · ${perDay(4)}`)).toBeOnTheScreen();
   });
 
   it('keeps the level when the reminders go back to the defaults', () => {
@@ -137,41 +138,20 @@ describe('Mitzvah screen › the nagging level', () => {
     expect(useMitzvotStore.getState().activeMitzvot.shacharit.nagLevel).toBe(3);
   });
 
-  it('says on each reminder what will repeat: from the level, its own, or none', () => {
-    useMitzvotStore.getState().setNagLevel('shacharit', 3);
-    const [start, end] = findMitzvah('shacharit')!.defaultReminders;
-    useMitzvotStore
-      .getState()
-      .setReminders('shacharit', [
-        start,
-        { ...end, nag: { count: 3, everyMin: 5, placement: 'before' } },
-        { anchor: 'start', offsetMin: 60, label: 'שקט', nag: null },
-      ]);
-    renderMitzvah({ id: 'shacharit' });
-    expect(screen.getByTestId('reminder-nag-0')).toHaveTextContent(
-      t('nag.row.fromLevel', {
-        effect: t('nag.effect', { count: 2, every: 5, placement: t('nag.effect.placement.after') }),
-      }),
-    );
-    expect(screen.getByTestId('reminder-nag-1')).toHaveTextContent(
-      t('nag.row.custom', {
-        effect: t('nag.effect', { count: 3, every: 5, placement: t('nag.effect.placement.before') }),
-      }),
-    );
-    expect(screen.getByTestId('reminder-nag-2')).toHaveTextContent(t('nag.row.none'));
-  });
-
-  it('names no nag line at level 1', () => {
+  it('shows no nag line on a reminder row: the level nags the window, not a reminder', () => {
+    useMitzvotStore.getState().setNagLevel('shacharit', 4);
     renderMitzvah({ id: 'shacharit' });
     expect(screen.queryByTestId('reminder-nag-0')).toBeNull();
     expect(screen.queryByTestId('reminder-nag-1')).toBeNull();
   });
 
-  it('names a repeat in the header once the main has gone out', () => {
-    useMitzvotStore.getState().setNagLevel('shacharit', 3);
+  it('names the next reminder in the header, never a nag', () => {
+    useMitzvotStore.getState().setNagLevel('shacharit', 4);
     jest.setSystemTime(new Date(netz.getTime() + MIN));
     renderMitzvah({ id: 'shacharit' });
-    const repeat = fireTimeText(new Date(netz.getTime() + 5 * MIN), J.tz);
-    expect(screen.getByText(t('detail.previewNext', { time: repeat }))).toBeOnTheScreen();
+    const [, end] = findMitzvah('shacharit')!.defaultReminders;
+    const sof = zmanimFor(at(J, '2026-10-28T12:00'), J).sofZmanTfilaGra;
+    const next = fireTimeText(new Date(sof.getTime() + end.offsetMin * MIN), J.tz);
+    expect(screen.getByText(t('detail.previewNext', { time: next }))).toBeOnTheScreen();
   });
 });
