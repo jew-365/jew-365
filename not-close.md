@@ -600,6 +600,12 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** the mitzvah screen and the home card show "מג״א HH:MM · גר״א HH:MM" with the chosen one marked, and the window's end stays the chosen opinion's.
   - **Done:** 2026-11-05. Verified: [src/utils/__tests__/shemaOpinions.test.ts](src/utils/__tests__/shemaOpinions.test.ts), the two opinions in [src/app/__tests__/mitzvah.render.test.tsx](src/app/__tests__/mitzvah.render.test.tsx) and the note line in [src/components/__tests__/NowCard.render.test.tsx](src/components/__tests__/NowCard.render.test.tsx). Not checked on a phone.
   - **Status:** Version: OTA, the next production update · Committed: yes, `2ab59a1` feat(siddur,tracking): the compass from a button before each Amidah, reading counts, both Shema opinions · Pushed: yes · Live: preview `1.0.21-50` (group `4568475b-8859-425b-8247-c80a0b8082a9`, commit `eb5ac69`), not production · Channel: preview
+- [ ] Design study: the prayer compass button before the Amidah
+  - **Flag:** `Design`, then `OTA` once picked.
+  - **What it is:** [design/lab/studies/2026-11-05-compass-button/](design/lab/studies/2026-11-05-compass-button/AGENTS.md): seven designs for the button (today's row, a divider pill, a row card, a soft banner, a round button in the Amidah's title, a row with a dial toward the Kotel, a chip on the card's corner) on the reader's real Mincha text, in every palette.
+  - **What it solves:** the owner's word of 2026-11-05: "הכפתור של המצפן לא יצא יפה, תעשה לי דף במעבדה עם כמה אופציות".
+  - **Expected result:** the owner picks one; building it in the reader is the change that follows.
+  - **Status:** Version: none (design) · Committed: no · Pushed: no · Live: the Artifact https://claude.ai/artifact/6eQvNboj9TgFJFFSe4PJgc · Channel: none
 - [ ] Count every siddur text read, with Tehillim by chapter, in a card in Tracking's Summary
   - **Flag:** `OTA`.
   - **What it is:** a count, with no streak, of how many times each siddur text was read (Birkat HaMazon, every other text) and how many Tehillim chapters (Tikkun HaKlali's ten chapters count toward Tehillim too). The owner's answers of 2026-11-05: every siddur text; Tehillim counted automatically by scrolling; Birkat HaMazon "בצורה חכמה לפי כמה הוא קרא לא בהכרך שהוא גלל עד למטה"; shown as a card inside סיכום.

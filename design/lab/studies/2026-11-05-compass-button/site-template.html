@@ -1,0 +1,201 @@
+<title>כפתור מצפן התפילה</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Noto+Serif+Hebrew:wght@400;600&display=swap">
+<style>
+/* Layout: an intro and one line of palette chips, then a grid of options, each a slice of the reader (the end of
+   Ashrei, the compass button, the start of the Amidah) drawn in the palette chosen. The page chrome follows the
+   viewer's theme; the phones follow the chosen palette. */
+:root {
+  --page: #F6F1E8; --card: #FFFDF9; --ink: #1D2240; --sub: #69645D; --line: #E6DCCB; --accent: #F08A3C; --on-accent: #2B1608; --mark: #A04A0C;
+  --font: "Rubik", system-ui, sans-serif;
+  --serif: "Noto Serif Hebrew", "David", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --page: #12152B; --card: #1B1F3A; --ink: #EEF0FA; --sub: #A9AEC8; --line: #2C3152; --accent: #F08A3C; --on-accent: #2B1608; --mark: #F5A86C; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --page: #12152B; --card: #1B1F3A; --ink: #EEF0FA; --sub: #A9AEC8; --line: #2C3152; --accent: #F08A3C; --on-accent: #2B1608; --mark: #F5A86C; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--font); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 22px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; }
+h1 { margin: 0; font-size: 26px; font-weight: 800; text-wrap: balance; }
+.intro { margin: 0; color: var(--sub); line-height: 1.6; max-width: 70ch; font-size: 15px; }
+.bar { display: flex; flex-wrap: nowrap; gap: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.bar::-webkit-scrollbar { display: none; }
+.bar > * { flex: none; white-space: nowrap; }
+.bar > span { font-size: 14px; color: var(--sub); }
+.bar button { font: 600 15px var(--font); min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.bar button i { width: 16px; height: 16px; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 2px var(--card), 0 0 0 3px var(--line); }
+.bar button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+button:focus-visible { outline: 3px solid var(--mark); outline-offset: 2px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 18px; align-items: start; }
+.opt { background: var(--card); border: 1.5px solid var(--line); border-radius: 22px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.opt header { display: flex; align-items: baseline; gap: 10px; }
+.opt header .letter { font-weight: 800; font-size: 20px; color: var(--mark); }
+.opt header b { font-size: 17px; }
+.opt header .rec { margin-inline-start: auto; font-size: 12px; font-weight: 700; color: var(--on-accent); background: var(--accent); border-radius: 999px; padding: 3px 10px; }
+.opt p { margin: 0; color: var(--sub); font-size: 14px; line-height: 1.55; }
+
+/* The reader slice, in the app's tokens: cards radius 20 with the soft shadow, the section title in goldText at 22,
+   the prayer text in Noto Serif Hebrew. */
+.phone { background: var(--p-bg); color: var(--p-text); border-radius: 26px; padding: 14px 12px; display: grid; gap: 12px; position: relative; overflow: hidden; }
+.pcard { background: var(--p-surface); border-radius: 20px; padding: 16px; box-shadow: 0 2px 10px color-mix(in srgb, var(--p-text) 8%, transparent); position: relative; }
+.pcard.cut-top { padding-top: 0; max-height: 132px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+.pcard.cut-top::before { content: ""; position: absolute; inset: 0 0 auto; height: 46px; background: linear-gradient(var(--p-surface), transparent); border-radius: 20px 20px 0 0; z-index: 1; }
+.pcard.cut-bottom { max-height: 210px; overflow: hidden; }
+.pcard.cut-bottom::after { content: ""; position: absolute; inset: auto 0 0; height: 56px; background: linear-gradient(transparent, var(--p-surface)); border-radius: 0 0 20px 20px; }
+.ptitle { font-size: 22px; font-weight: 600; color: var(--p-goldText); text-align: center; margin: 0 0 10px; }
+.ptext { font-family: var(--serif); font-size: 19px; line-height: 1.75; margin: 0; }
+.toast { position: absolute; inset-inline: 12px; bottom: 14px; background: var(--p-text); color: var(--p-bg); border-radius: 14px; padding: 10px 14px; font-size: 14px; font-weight: 600; text-align: center; opacity: 0; transform: translateY(8px); transition: opacity 180ms, transform 180ms; pointer-events: none; z-index: 3; }
+.toast.on { opacity: 1; transform: none; }
+.ic { width: 20px; height: 20px; flex: none; }
+.tap { cursor: pointer; font-family: var(--font); transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1), filter 140ms; }
+.tap:active { transform: scale(0.97); }
+
+/* א: today's row. */
+.o-today { min-height: 48px; border: 0; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-size: 15px; color: var(--p-onGold); background: color-mix(in srgb, var(--p-gold) 70%, transparent); }
+/* ב: a divider with a pill. */
+.o-divider { display: flex; align-items: center; gap: 10px; }
+.o-divider::before, .o-divider::after { content: ""; flex: 1; height: 1.5px; background: color-mix(in srgb, var(--p-gold) 55%, transparent); }
+.o-divider button { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--p-gold); background: var(--p-surface); color: var(--p-goldText); display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; }
+/* ג: a row card with a tile. */
+.o-row { width: 100%; border: 0; background: var(--p-surface); border-radius: 20px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; text-align: start; color: var(--p-text); box-shadow: 0 2px 10px color-mix(in srgb, var(--p-text) 8%, transparent); }
+.tile { width: 44px; height: 44px; border-radius: 18px; background: var(--p-goldLight); display: grid; place-items: center; flex: none; }
+.o-row .t { flex: 1; display: grid; gap: 2px; min-width: 0; }
+.o-row .t b { font-size: 17px; font-weight: 600; }
+.o-row .t small { font-size: 13px; color: var(--p-textSub); }
+/* ד: a tinted banner. */
+.o-banner { width: 100%; min-height: 52px; border: 0; border-radius: 20px; background: var(--p-goldLight); color: var(--p-goldText); display: flex; align-items: center; gap: 10px; padding: 0 16px; font-weight: 600; font-size: 15px; text-align: start; }
+.o-banner span { flex: 1; }
+/* ה: a round button in the Amidah's title row. */
+.titlerow { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 0 10px; }
+.titlerow .ptitle { margin: 0; }
+.o-round { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--p-goldLight); display: grid; place-items: center; }
+/* ו: a row with the direction itself. */
+.dial { width: 46px; height: 46px; flex: none; }
+/* ז: a chip on the Amidah card's corner. */
+.o-chip { position: absolute; top: -18px; inset-inline-end: 16px; min-height: 36px; padding: 0 14px; border-radius: 999px; border: 2px solid var(--p-surface); background: var(--p-gold); color: var(--p-onGold); display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; z-index: 2; box-shadow: 0 2px 8px color-mix(in srgb, var(--p-text) 14%, transparent); }
+.o-chip::after { content: ""; position: absolute; inset: -6px -2px; }
+.gap-top { margin-top: 10px; }
+@media (prefers-reduced-motion: reduce) { .tap, .toast { transition: none; } }
+</style>
+
+<div class="wrap">
+  <h1>כפתור מצפן התפילה</h1>
+  <p class="intro">שבע אפשרויות לכפתור שלפני תפילת העמידה, על הטקסט האמיתי של מנחה בנוסח אשכנז: סוף אשרי, הכפתור ותחילת העמידה. ההקשה על כל כפתור מראה מה יקרה באפליקציה (נפתח המצפן). אפשר להחליף ערכת צבעים כדי לראות כל אפשרות בכל אחת מהערכות.</p>
+  <div class="bar" id="palettes" role="group" aria-label="ערכת צבעים"><span>ערכת צבעים</span></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+const PALETTES = __PALETTES__;
+const STRINGS = __STRINGS__;
+const TEXT = __TEXT__;
+const ICON = __ICON__;
+const DIAL = __DIAL__;
+const LABEL = STRINGS['siddur.compassButton'];
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const compassIcon = (color, fill = color) =>
+  `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="${ICON.circle[0]}" cy="${ICON.circle[1]}" r="${ICON.circle[2]}" fill="none" stroke="${color}" stroke-width="2"/><path d="${ICON.needle}" fill="${fill}" stroke="${color}" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+const chevron = (color) =>
+  `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15,6L9,12L15,18" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const dial = () => {
+  const a = (DIAL.bearing * Math.PI) / 180;
+  const nx = 23 + Math.sin(a) * 15, ny = 23 - Math.cos(a) * 15;
+  return `<svg class="dial" viewBox="0 0 46 46" aria-hidden="true">
+    <circle cx="23" cy="23" r="21" fill="var(--p-goldLight)"/>
+    <circle cx="23" cy="23" r="21" fill="none" stroke="var(--p-gold)" stroke-width="1.5"/>
+    <text x="23" y="10" text-anchor="middle" font-size="8" font-weight="700" fill="var(--p-textSub)" font-family="Rubik, sans-serif">${esc(STRINGS['compass.north'].slice(0, 1))}</text>
+    <line x1="23" y1="23" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="var(--p-goldText)" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="3.5" fill="var(--p-gold)"/>
+    <circle cx="23" cy="23" r="2.5" fill="var(--p-text)"/>
+  </svg>`;
+};
+
+const beforeCard = `<div class="pcard cut-top"><p class="ptext">${esc(TEXT.before.text)}</p></div>`;
+const amidahCard = (title = `<h3 class="ptitle">${esc(TEXT.amidah.title)}</h3>`, extra = '') =>
+  `<div class="pcard cut-bottom${extra ? ' gap-top' : ''}">${extra}${title}<p class="ptext">${esc(TEXT.amidah.text)}</p></div>`;
+
+const OPTIONS = [
+  {
+    id: 'today', name: 'היום באפליקציה',
+    note: 'שורה ברוחב מלא בצבע הראשי בשקיפות 0.7. בולטת, אבל נראית ככפתור פעולה כבד שחוצה את הטקסט.',
+    body: () => `${beforeCard}<button class="tap o-today" data-open>${compassIcon('var(--p-onGold)')}${esc(LABEL)}</button>${amidahCard()}`,
+  },
+  {
+    id: 'divider', name: 'קו מפריד עם גלולה',
+    note: 'קו דק בצבע הראשי חוצה בין הקטעים, ובמרכזו גלולה עם מסגרת. מסמן מעבר לעמידה ולא מתחרה בטקסט.',
+    body: () => `${beforeCard}<div class="o-divider"><button class="tap" data-open>${compassIcon('var(--p-goldText)', 'var(--p-goldLight)')}${esc(LABEL)}</button></div>${amidahCard()}`,
+  },
+  {
+    id: 'row', name: 'שורה בכרטיס', rec: true,
+    note: 'כרטיס כמו כל שורה באפליקציה: אריח עם אייקון, כותרת, שורת הסבר וחץ. מוכר, מזמין לחיצה ונראה חלק מהסידור.',
+    body: () => `${beforeCard}<button class="tap o-row" data-open><span class="tile">${compassIcon('var(--p-gold)', 'var(--p-goldLight)')}</span><span class="t"><b>${esc(LABEL)}</b><small>לפני העמידה פונים לכיוון הכותל</small></span>${chevron('var(--p-textMuted)')}</button>${amidahCard()}`,
+  },
+  {
+    id: 'banner', name: 'פס צבעוני רך',
+    note: 'פס ברוחב מלא ברקע הבהיר של הצבע הראשי, טקסט בצבע הראשי הכהה וחץ. בולט בלי להיות כבד, וקריא בכל ערכה.',
+    body: () => `${beforeCard}<button class="tap o-banner" data-open>${compassIcon('var(--p-goldText)', 'var(--p-gold)')}<span>לפני העמידה · ${esc(LABEL)}</span>${chevron('var(--p-goldText)')}</button>${amidahCard()}`,
+  },
+  {
+    id: 'heading', name: 'בתוך כותרת העמידה',
+    note: 'אין שורה נוספת: כפתור עגול ליד הכותרת "תפילת העמידה". הכי עדין ושומר על רצף הטקסט, אבל פחות בולט.',
+    body: () => `${beforeCard}${amidahCard(`<div class="titlerow"><h3 class="ptitle">${esc(TEXT.amidah.title)}</h3><button class="tap o-round" data-open aria-label="${esc(LABEL)}">${compassIcon('var(--p-gold)', 'var(--p-goldLight)')}</button></div>`)}`,
+  },
+  {
+    id: 'dial', name: 'שורה עם הכיוון',
+    note: `כמו שורה בכרטיס, אבל במקום אייקון יש חוגה קטנה שמראה כבר את הכיוון לכותל. כאן מחושב מ${DIAL.city}; באפליקציה החוגה תסתובב לפי המיקום והטלפון.`,
+    body: () => `${beforeCard}<button class="tap o-row" data-open>${dial()}<span class="t"><b>${esc(LABEL)}</b><small>הכותל ${DIAL.bearing}° מהצפון · ${DIAL.km} ק״מ מ${esc(DIAL.city)}</small></span>${chevron('var(--p-textMuted)')}</button>${amidahCard()}`,
+  },
+  {
+    id: 'chip', name: 'תווית על פינת הכרטיס',
+    note: 'תווית קטנה בצבע הראשי המלא שיושבת על הפינה של כרטיס העמידה. בולטת מאוד ולא תופסת שורה, אבל קטנה יותר ללחיצה.',
+    body: () => `${beforeCard}<div style="position:relative">${`<button class="tap o-chip" data-open>${compassIcon('var(--p-onGold)', 'var(--p-gold)')}${esc(STRINGS['compass.title'].split(' ')[0])}</button>`}${amidahCard(undefined, ' ')}</div>`,
+  },
+];
+
+let palette = 'gold';
+try { palette = localStorage.getItem('compass-palette') || 'gold'; } catch {}
+if (!PALETTES[palette]) palette = 'gold';
+
+function applyPalette() {
+  const vars = Object.entries(PALETTES[palette]).map(([k, v]) => `--p-${k}:${v}`).join(';');
+  document.querySelectorAll('.phone').forEach((p) => p.setAttribute('style', vars));
+  document.querySelectorAll('#palettes button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.palette === palette)));
+}
+
+const bar = document.getElementById('palettes');
+for (const name of Object.keys(PALETTES)) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.dataset.palette = name;
+  b.innerHTML = `<i style="background:${PALETTES[name].gold}"></i>${esc(STRINGS[`settings.theme.${name}`])}`;
+  b.addEventListener('click', () => {
+    palette = name;
+    try { localStorage.setItem('compass-palette', name); } catch {}
+    applyPalette();
+  });
+  bar.appendChild(b);
+}
+
+const LETTERS = 'אבגדהוז';
+document.getElementById('grid').innerHTML = OPTIONS.map((o, i) => `
+  <section class="opt" id="${o.id}">
+    <header><span class="letter">${LETTERS[i]}</span><b>${esc(o.name)}</b>${o.rec ? '<span class="rec">המלצה</span>' : ''}</header>
+    <div class="phone">${o.body()}<div class="toast" role="status" aria-live="polite"></div></div>
+    <p>${esc(o.note)}</p>
+  </section>`).join('');
+
+document.querySelectorAll('[data-open]').forEach((btn) =>
+  btn.addEventListener('click', () => {
+    const toast = btn.closest('.phone').querySelector('.toast');
+    toast.textContent = `נפתח ${STRINGS['compass.title']}`;
+    toast.classList.add('on');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.classList.remove('on'), 1400);
+  }),
+);
+applyPalette();
+</script>
