@@ -606,7 +606,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** the owner's word of 2026-11-05: "הכפתור של המצפן לא יצא יפה, תעשה לי דף במעבדה עם כמה אופציות".
   - **Expected result:** the owner picks one; building it in the reader is the change that follows.
   - **Done:** 2026-11-05. The owner picked option ב ("תממש את אופציה ב"); it ships in the reader as the divider with an outlined pill. Verified: the compass button cases of [src/app/__tests__/siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx), the design-system and screen smoke suites.
-  - **Status:** Version: none (design) · Committed: yes, `8b41660` design(lab): seven designs for the prayer compass button · Pushed: yes · Live: the Artifact https://claude.ai/artifact/6eQvNboj9TgFJFFSe4PJgc · Channel: none
+  - **Status:** Version: OTA, the next production update · Committed: yes, `7d31fed` feat(siddur): the compass button as a divider with an outlined pill (option ב); pull main before every publish · Pushed: yes · Live: preview `1.0.21-53` (group `1acd0747-4052-47ec-b85e-863b6266670e`, commit `7d31fed`), not production; the study's Artifact https://claude.ai/artifact/6eQvNboj9TgFJFFSe4PJgc · Channel: preview
 - [ ] Count every siddur text read, with Tehillim by chapter, in a card in Tracking's Summary
   - **Flag:** `OTA`.
   - **What it is:** a count, with no streak, of how many times each siddur text was read (Birkat HaMazon, every other text) and how many Tehillim chapters (Tikkun HaKlali's ten chapters count toward Tehillim too). The owner's answers of 2026-11-05: every siddur text; Tehillim counted automatically by scrolling; Birkat HaMazon "בצורה חכמה לפי כמה הוא קרא לא בהכרך שהוא גלל עד למטה"; shown as a card inside סיכום.
