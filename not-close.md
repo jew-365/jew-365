@@ -446,8 +446,6 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 ### Medium — App requests of 2026-11-05
 
-<<<<<<< Updated upstream
-=======
 - [ ] An important notice on the accuracy of the times, in onboarding and in About
   - **Flag:** `OTA`.
   - **What it is:** a new onboarding step before ready, [src/app/onboarding/notice.tsx](src/app/onboarding/notice.tsx), and the same text in Settings → About and contact (the `accuracy` anchor and search item), both drawn by [src/components/AccuracyNotice.tsx](src/components/AccuracyNotice.tsx) from `accuracy.*`: we work hard for accurate times, we can still make mistakes, keeping each mitzvah in its time is the user's responsibility (in doubt, a trusted luach and a rav), and a mistake is reported in Settings → About and contact.
@@ -455,38 +453,6 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** onboarding shows the notice after the permissions step with "הבנתי, המשך" to ready; About shows it under the version line; the search finds it.
   - **Done:** 2026-11-05. Verified: [src/app/__tests__/onboarding.cta.render.test.tsx](src/app/__tests__/onboarding.cta.render.test.tsx) (permissions to the notice, its text and its way to ready, eight dots), [src/app/__tests__/settings.contact.render.test.tsx](src/app/__tests__/settings.contact.render.test.tsx) (the anchor between the version and the contact form), the smoke, routes, search coverage, design-system and i18n suites, typecheck, lint, DOX. Not checked on a phone.
   - **Status:** Version: OTA, the next production update · Committed: yes, `a450eda` feat(onboarding,settings): an important notice on the accuracy of the times · Pushed: yes · Live: no · Channel: none
-- [ ] Open the prayer compass only from a button before each Amidah
-  - **Flag:** `OTA`.
-  - **What it is:** no compass offer on opening Shacharit, Mincha or Maariv, no Settings switch for it (`siddurCompassPrompt` removed from the user store, its search item and keys), and no compass pill in the reader's header; instead a compact "מצפן תפילה" button above every section that opens an Amidah (`תפילת העמידה`, and Musaf on its days) in those three texts, which opens the compass as the offer did. The More tab's compass row stays.
-  - **Look:** a full-width row in the primary colour at 0.7 opacity, `onGold` label and the compass icon (the owner's follow-up of 2026-11-05: "יותר בולט ... שורה עם הצבע פרימרי עם שקיפות 0.7").
-  - **What it solves:** the owner's words: "מצפן תפילה לא נפתח בפופאפ ואין אותו בהגדרות; הוא נפתח אך ורק על ידי המשתמש על ידי כפתור חדש לפני כל תפילת עמידה".
-  - **Expected result:** opening a prayer shows no window; a press of the button above an Amidah opens the compass with the prayer and its date.
-  - **Done:** 2026-11-05. Verified: [src/app/__tests__/siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx) (the button above the Amidah of Mincha, Maariv and Shacharit and above Musaf on Rosh Chodesh, not above another section, its push with and without a date, no header pill, none for another text or on web), the settings and search suites, typecheck, lint, DOX. Not checked on a phone.
-  - **Status:** Version: OTA, the next production update · Committed: yes, `2ab59a1` feat(siddur,tracking): the compass from a button before each Amidah, reading counts, both Shema opinions ; `c3a523e` feat(siddur): the prayer compass as a full-width primary row at 0.7 (on preview `1.0.21-52`, group `661f6ccf-0d5a-4871-87c1-e248b9bd38fc`, commit `513638a`) · Pushed: yes · Live: preview `1.0.21-50` (group `4568475b-8859-425b-8247-c80a0b8082a9`, commit `eb5ac69`), not production · Channel: preview
-- [ ] Show the morning Shema's latest time by both the MGA and the Gra, for display only
-  - **Flag:** `OTA`.
-  - **What it is:** `shemaOpinionsFor()` / `shemaOpinionsLine()` in [src/utils/shemaOpinions.ts](src/utils/shemaOpinions.ts): a card on the `krias_shma_shacharit` screen and a line on its home NowCard with both clocks, the user's opinion marked; the window, reminders and history keep following `ksSofZman`.
-  - **What it solves:** the owner's words: "בקריאת שמע של שחרית להציג את שני הדעות גם מגן אברהם וגם הגרא וזה לתצוגה בלבד והזמנים יהיו לפי מה שהוא קבע".
-  - **Expected result:** the mitzvah screen and the home card show "מג״א HH:MM · גר״א HH:MM" with the chosen one marked, and the window's end stays the chosen opinion's.
-  - **Done:** 2026-11-05. Verified: [src/utils/__tests__/shemaOpinions.test.ts](src/utils/__tests__/shemaOpinions.test.ts), the two opinions in [src/app/__tests__/mitzvah.render.test.tsx](src/app/__tests__/mitzvah.render.test.tsx) and the note line in [src/components/__tests__/NowCard.render.test.tsx](src/components/__tests__/NowCard.render.test.tsx). Not checked on a phone.
-  - **Status:** Version: OTA, the next production update · Committed: yes, `2ab59a1` feat(siddur,tracking): the compass from a button before each Amidah, reading counts, both Shema opinions · Pushed: yes · Live: preview `1.0.21-50` (group `4568475b-8859-425b-8247-c80a0b8082a9`, commit `eb5ac69`), not production · Channel: preview
-- [ ] Design study: the prayer compass button before the Amidah
-  - **Flag:** `Design`, then `OTA` once picked.
-  - **What it is:** [design/lab/studies/2026-11-05-compass-button/](design/lab/studies/2026-11-05-compass-button/AGENTS.md): seven designs for the button (today's row, a divider pill, a row card, a soft banner, a round button in the Amidah's title, a row with a dial toward the Kotel, a chip on the card's corner) on the reader's real Mincha text, in every palette.
-  - **What it solves:** the owner's word of 2026-11-05: "הכפתור של המצפן לא יצא יפה, תעשה לי דף במעבדה עם כמה אופציות".
-  - **Expected result:** the owner picks one; building it in the reader is the change that follows.
-  - **Done:** 2026-11-05. The owner picked option ב ("תממש את אופציה ב"); it ships in the reader as the divider with an outlined pill. Verified: the compass button cases of [src/app/__tests__/siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx), the design-system and screen smoke suites.
-  - **Status:** Version: OTA, the next production update · Committed: yes, `7d31fed` feat(siddur): the compass button as a divider with an outlined pill (option ב); pull main before every publish · Pushed: yes · Live: preview `1.0.21-53` (group `1acd0747-4052-47ec-b85e-863b6266670e`, commit `7d31fed`), not production; the study's Artifact https://claude.ai/artifact/6eQvNboj9TgFJFFSe4PJgc · Channel: preview
-- [ ] Count every siddur text read, with Tehillim by chapter, in a card in Tracking's Summary
-  - **Flag:** `OTA`.
-  - **What it is:** a count, with no streak, of how many times each siddur text was read (Birkat HaMazon, every other text) and how many Tehillim chapters (Tikkun HaKlali's ten chapters count toward Tehillim too). The owner's answers of 2026-11-05: every siddur text; Tehillim counted automatically by scrolling; Birkat HaMazon "בצורה חכמה לפי כמה הוא קרא לא בהכרך שהוא גלל עד למטה"; shown as a card inside סיכום.
-  - **What it solves:** tracking what is not in the mitzvot list.
-  - **Expected result:** reading most of a text in the reader counts it once per open; each Tehillim chapter mostly read counts once; the Summary card shows totals, this week and this month.
-  - **Buttons first:** the owner's follow-up of 2026-11-05 ("תוסיף גם כפתור קראתי ואם המשתמש לא סימן תיפול למנגנון שבנית"): "קראתי" at the end of every text but Tehillim, "קראתי את הפרק" under each psalm of Tehillim and Tikkun HaKlali, and "סיימתי" counting the text too; the timer below is the fallback, each unit counted once per open either way.
-  - **How it counts:** [src/utils/reading.ts](src/utils/reading.ts): each section on screen is credited for the time it shows, by its share of the screen, up to its Hebrew letters at 25 a second; a text, or a psalm, counts once 70% of its letters are credited, once per open. Tehillim counts by chapter only; Tikkun HaKlali counts as a text and its ten psalms toward the Tehillim total; a whole book is the least count over psalms 1 to 150. The counts are `reading-store` ([src/stores/useReadingStore.ts](src/stores/useReadingStore.ts)), in the backup file.
-  - **Done:** 2026-11-05. Verified: [src/utils/__tests__/reading.test.ts](src/utils/__tests__/reading.test.ts), [src/stores/__tests__/reading.store.test.ts](src/stores/__tests__/reading.store.test.ts), the reader's reading count cases (a psalm counted after its reading time and only once, nothing in the background) in [src/app/__tests__/siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx), the card in [src/app/__tests__/history.render.test.tsx](src/app/__tests__/history.render.test.tsx), the backup and search suites. Not checked on a phone: the reading pace (25 letters a second, 70%) is a first guess for the owner to tune.
-  - **Status:** Version: OTA, the next production update · Committed: yes, `2ab59a1` feat(siddur,tracking): the compass from a button before each Amidah, reading counts, both Shema opinions ; `8e505a4` feat(siddur): a קראתי button for every text and psalm, the timer as the fallback (on preview `1.0.21-52`, group `661f6ccf-0d5a-4871-87c1-e248b9bd38fc`, commit `513638a`) · Pushed: yes · Live: preview `1.0.21-50` (group `4568475b-8859-425b-8247-c80a0b8082a9`, commit `eb5ac69`), not production · Channel: preview
->>>>>>> Stashed changes
 
 ## Bugs
 

@@ -418,7 +418,7 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
   {
-    label: '1.0.21-14',
+    label: '1.0.21-15',
     date: '2026-11-05',
     items: [
       {
@@ -429,6 +429,12 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         he: 'סימנייה ו״המשך מהמקום האחרון״ בסידור מחזירים בדיוק לשורה שבה הייתם, גם באמצע קטע ארוך, ולא לתחילת הקטע או קצת אחריו. המקום הוא השורה שקראתם מתחת לסרגל העליון, גם כשפתחתם את הכלים כדי לשמור סימנייה.',
         en: 'A bookmark and Continue from your last place in the siddur bring you back to the very line you were on, even in the middle of a long passage, not to the start of the passage or a little after it. The place is the line you were reading under the top bar, even when you opened the tools to save the bookmark.',
       },
+    ],
+  },
+  {
+    label: '1.0.21-14',
+    date: '2026-11-05',
+    items: [
       {
         he: 'מצפן התפילה נפתח רק כשמבקשים: בסידור מופיע לפני כל תפילת עמידה כפתור ״מצפן תפילה״, ואין יותר חלון שקופץ בכניסה לתפילה או הגדרה עבורו.',
         en: 'The prayer compass opens only when you ask: the siddur shows a “Prayer compass” button before every Amidah, and the window that popped up on opening a prayer, with its setting, is gone.',
