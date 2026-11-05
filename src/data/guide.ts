@@ -418,8 +418,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
   {
-    label: '1.0.21-13',
-    date: '2026-11-03',
+    label: '1.0.21-14',
+    date: '2026-11-05',
     items: [
       {
         he: 'מצפן התפילה נפתח רק כשמבקשים: בסידור מופיע לפני כל תפילת עמידה כפתור ״מצפן תפילה״, ואין יותר חלון שקופץ בכניסה לתפילה או הגדרה עבורו.',
@@ -432,22 +432,6 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: 'ספירת קריאה בסידור: בסוף לשונית מעקב ← סיכום רואים כמה פעמים קראתם כל טקסט וכמה פרקי תהילים (כולל תיקון הכללי), השבוע, החודש ובסך הכול. אפשר ללחוץ ״קראתי״ בסוף הטקסט או ״קראתי את הפרק״ אחרי כל פרק תהילים, ובלי לחיצה קריאה נספרת לפי הזמן שהטקסט היה מול העיניים, לא בגלילה עד הסוף.',
         en: 'Reading counts: at the end of Tracking → Summary see how many times you read each siddur text and how many Tehillim chapters (Tikkun HaKlali included), this week, this month and in all. Press “I read it” at the end of a text or “I read this psalm” after each psalm; without a press a read counts by the time the text was in front of you, not by scrolling to the end.',
-      },
-      {
-        he: 'כל זמני היום לפי לוח אור החיים: עלות השחר, זמן טלית ותפילין, סוף זמן קריאת שמע ותפילה, מנחה, פלג המנחה וצאת הכוכבים מחושבים כמו בלוח ומעוגלים לדקה כמו בו.',
-        en: 'Every zman follows the Ohr HaChaim luach: dawn, the time for tallit and tefillin, the latest Shema and prayer, mincha, plag hamincha and nightfall are computed as the luach does and rounded to the minute as it prints them.',
-      },
-      {
-        he: 'הדלקת נרות 20 דקות לפני השקיעה בכל מקום, ויציאת שבת וחג 30 דקות אחרי השקיעה בארץ ו־40 בחוץ לארץ.',
-        en: 'Candle lighting is 20 minutes before sunset everywhere, and Shabbat and Yom Tov end 30 minutes after sunset in Israel and 40 abroad.',
-      },
-      {
-        he: 'לוח הזמנים מציג את סוף זמן קריאת שמע לפי המג״א ולפי הגר״א, כמו בלוח.',
-        en: 'The schedule shows the latest Shema both by the Magen Avraham and by the Gra, as the luach does.',
-      },
-      {
-        he: 'נוסח תימן בלדי: אפשר לבחור אותו בפתיחה הראשונה או בהגדרות ← תפילה וסידור. נוסחי הסידור מגיעים בנוסח הבלדי, מוויקיטקסט ומהתכלאל שנדפס בירושלים בשנת תרנ״ד, בעברית בלבד, והסליחות, קידוש לבנה, נרות חנוכה ושאר הכללים שתלויים בנוסח הולכים אחריו.',
-        en: 'Nusach Teiman Baladi: choose it when the app first opens or in Settings → Prayer and siddur. The siddur texts come in the Baladi wording, from Hebrew Wikisource and the Tiklal printed in Jerusalem in 1894, in Hebrew only, and Selichot, Kiddush Levana, the Chanukah candles and the other rules that depend on the nusach follow it.',
       },
       {
         he: 'מצווה אישית מקבלת אייקון לבחירה, ולא רק כוכב: בטופס המצווה מקישים על ״אייקון״ ובוחרים מתוך האייקונים של האפליקציה. האייקון מופיע בבית, בלוח הזמנים, במעקב, בהמצוות שלי ובמסך המצווה.',
@@ -472,6 +456,28 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: 'מסך אחד לכל מצווה: גם מצווה אישית נפתחת מכל מקום במסך המצווה, עם ציר ההתראות, ו״עריכת המצווה״ בראשו פותח את הטופס, שבו כבר אין תזכורות. כפתור אחד, ״איפוס ציר ההתראות״, מופיע אחרי כל שינוי ומחזיר את התזכורות ואת הנודניק החכם. הזזה שנחסמת בגלל מרווח של 10 דקות, נודניקים שירדו, או התראה שנופלת בשעות השקטות, מוסברות בשורה מתחת לציר.',
         en: 'One screen per mitzvah: a custom mitzvah too opens its mitzvah screen from everywhere, with the notification timeline, and Edit mitzvah at its top opens the form, which no longer holds reminders. One button, Reset notification timeline, shows after any change and brings back the reminders and the smart nag. A move refused for the 10-minute gap, nags that were dropped, or a notification in the quiet hours are explained in a line under the timeline.',
+      },
+    ],
+  },
+  {
+    label: '1.0.21-13',
+    date: '2026-11-03',
+    items: [
+      {
+        he: 'כל זמני היום לפי לוח אור החיים: עלות השחר, זמן טלית ותפילין, סוף זמן קריאת שמע ותפילה, מנחה, פלג המנחה וצאת הכוכבים מחושבים כמו בלוח ומעוגלים לדקה כמו בו.',
+        en: 'Every zman follows the Ohr HaChaim luach: dawn, the time for tallit and tefillin, the latest Shema and prayer, mincha, plag hamincha and nightfall are computed as the luach does and rounded to the minute as it prints them.',
+      },
+      {
+        he: 'הדלקת נרות 20 דקות לפני השקיעה בכל מקום, ויציאת שבת וחג 30 דקות אחרי השקיעה בארץ ו־40 בחוץ לארץ.',
+        en: 'Candle lighting is 20 minutes before sunset everywhere, and Shabbat and Yom Tov end 30 minutes after sunset in Israel and 40 abroad.',
+      },
+      {
+        he: 'לוח הזמנים מציג את סוף זמן קריאת שמע לפי המג״א ולפי הגר״א, כמו בלוח.',
+        en: 'The schedule shows the latest Shema both by the Magen Avraham and by the Gra, as the luach does.',
+      },
+      {
+        he: 'נוסח תימן בלדי: אפשר לבחור אותו בפתיחה הראשונה או בהגדרות ← תפילה וסידור. נוסחי הסידור מגיעים בנוסח הבלדי, מוויקיטקסט ומהתכלאל שנדפס בירושלים בשנת תרנ״ד, בעברית בלבד, והסליחות, קידוש לבנה, נרות חנוכה ושאר הכללים שתלויים בנוסח הולכים אחריו.',
+        en: 'Nusach Teiman Baladi: choose it when the app first opens or in Settings → Prayer and siddur. The siddur texts come in the Baladi wording, from Hebrew Wikisource and the Tiklal printed in Jerusalem in 1894, in Hebrew only, and Selichot, Kiddush Levana, the Chanukah candles and the other rules that depend on the nusach follow it.',
       },
     ],
   },
