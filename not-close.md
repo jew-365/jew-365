@@ -605,7 +605,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** [design/lab/studies/2026-11-05-compass-button/](design/lab/studies/2026-11-05-compass-button/AGENTS.md): seven designs for the button (today's row, a divider pill, a row card, a soft banner, a round button in the Amidah's title, a row with a dial toward the Kotel, a chip on the card's corner) on the reader's real Mincha text, in every palette.
   - **What it solves:** the owner's word of 2026-11-05: "הכפתור של המצפן לא יצא יפה, תעשה לי דף במעבדה עם כמה אופציות".
   - **Expected result:** the owner picks one; building it in the reader is the change that follows.
-  - **Status:** Version: none (design) · Committed: no · Pushed: no · Live: the Artifact https://claude.ai/artifact/6eQvNboj9TgFJFFSe4PJgc · Channel: none
+  - **Status:** Version: none (design) · Committed: yes, `8b41660` design(lab): seven designs for the prayer compass button · Pushed: yes · Live: the Artifact https://claude.ai/artifact/6eQvNboj9TgFJFFSe4PJgc · Channel: none
 - [ ] Count every siddur text read, with Tehillim by chapter, in a card in Tracking's Summary
   - **Flag:** `OTA`.
   - **What it is:** a count, with no streak, of how many times each siddur text was read (Birkat HaMazon, every other text) and how many Tehillim chapters (Tikkun HaKlali's ten chapters count toward Tehillim too). The owner's answers of 2026-11-05: every siddur text; Tehillim counted automatically by scrolling; Birkat HaMazon "בצורה חכמה לפי כמה הוא קרא לא בהכרך שהוא גלל עד למטה"; shown as a card inside סיכום.
