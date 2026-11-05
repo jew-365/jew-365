@@ -1605,6 +1605,42 @@ describe('the siddur reader reading count', () => {
     expect(useReadingStore.getState().texts).toEqual({});
   });
 
+  it('counts a psalm from its own button, once, and the timer never counts it again', async () => {
+    await openTehillim();
+    const section = within(screen.getByTestId('siddur-section-פרק א'));
+    fireEvent.press(section.getByRole('button', { name: 'קראתי את הפרק' }));
+    expect(useReadingStore.getState().psalms).toEqual({ '2026-10-28': { '1': 1 } });
+    expect(section.getByTestId('siddur-psalm-counted-1')).toBeOnTheScreen();
+    expect(section.queryByRole('button', { name: 'קראתי את הפרק' })).toBeNull();
+    advance(240_000);
+    expect(useReadingStore.getState().psalms).toEqual({ '2026-10-28': { '1': 1 } });
+  });
+
+  it('offers no whole-text button for Tehillim, which counts by chapter', async () => {
+    await openTehillim();
+    expect(screen.queryByRole('button', { name: 'קראתי' })).toBeNull();
+  });
+
+  it('counts a whole text from its button at the end, and the timer falls back when it is not pressed', async () => {
+    jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...REAL_TICKS] });
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+    useReadingStore.getState().reset();
+    mockLoadedText = null;
+    for (const key of Object.keys(mockParams)) delete mockParams[key];
+    Object.assign(mockParams, { id: 'nishmat' });
+    renderWithTheme(<SiddurReaderScreen />);
+    for (let i = 0; i < 20 && !screen.queryByTestId('siddur-list'); i += 1) await act(async () => {});
+    fireEvent.press(screen.getByRole('button', { name: 'קראתי' }));
+    expect(useReadingStore.getState().texts).toEqual({ '2026-10-28': { nishmat: 1 } });
+    expect(screen.getByTestId('siddur-read-counted')).toBeOnTheScreen();
+    fireEvent(screen.getByTestId('siddur-list'), 'layout', {
+      nativeEvent: { layout: { x: 0, y: 0, width: 360, height: 640 } },
+    });
+    advance(600_000);
+    expect(useReadingStore.getState().texts).toEqual({ '2026-10-28': { nishmat: 1 } });
+  });
+
   it('counts nothing while the app is in the background', async () => {
     await openTehillim();
     const original = Object.getOwnPropertyDescriptor(AppState, 'currentState')!;

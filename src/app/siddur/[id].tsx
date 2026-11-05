@@ -159,8 +159,11 @@ import { compassPrayerOf } from '@/utils/compass';
 import { alphaHex } from '@/utils/dayArc';
 import { useReadingStore } from '@/stores/useReadingStore';
 import {
+  CHAPTER_ONLY_TEXTS,
+  PSALM_TEXTS,
   creditTick,
   lettersByTitle,
+  psalmOf,
   readingUnits,
   unitRead,
   visibleSections,
@@ -181,6 +184,7 @@ const SECTION_VIEWABILITY = { viewAreaCoveragePercentThreshold: 2 };
 const AMIDAH_SECTIONS: ReadonlySet<string> = new Set(['תפילת העמידה', 'מוסף']);
 // The compass row is the primary colour at this opacity (the owner's call, 2026-11-05).
 const COMPASS_ROW_ALPHA = 0.7;
+const PSALM_ICON_SIZE = scaled(16);
 const JUMP_RETRY_MS = 50;
 const JUMP_TIMEOUT_MS = 5000;
 const LIST_PADDING = spacing.lg;
@@ -771,26 +775,53 @@ type ReadingGeometry = {
   listTop: () => number;
   viewportTop: () => number;
   viewportHeight: () => number;
-  day: () => string;
 };
 
-// Counts what the reader reads (the rules in utils/reading.ts): once a second while `active` and the app is in
-// front, each section on screen is credited, and each unit of the text (the whole text, a psalm) is counted once
-// per open of the text when it is read. `countId` null counts nothing (a custom mitzvah's own text).
+// What this open of a text has counted as read: each unit (`text`, `psalm:<n>`) at most once, whether the
+// reader pressed its "קראתי" button or the timer below found it read. A new text starts over.
+type ReadCounts = { counted: ReadonlySet<string>; count: (unitId: string, psalm: number | null) => void };
+
+function useReadCounts(countId: string | null, day: () => string): ReadCounts {
+  const [counted, setCounted] = useState<ReadonlySet<string>>(() => new Set());
+  const ref = useRef(new Set<string>());
+  const dayRef = useRef(day);
+  dayRef.current = day;
+  useEffect(() => {
+    ref.current = new Set();
+    setCounted(new Set());
+  }, [countId]);
+  const count = useCallback(
+    (unitId: string, psalm: number | null) => {
+      if (!countId || ref.current.has(unitId)) return;
+      ref.current.add(unitId);
+      setCounted(new Set(ref.current));
+      const store = useReadingStore.getState();
+      if (psalm !== null) store.addPsalmRead(dayRef.current(), psalm);
+      else store.addTextRead(dayRef.current(), countId);
+    },
+    [countId],
+  );
+  return { counted, count };
+}
+
+// The fallback when no button was pressed (the rules in utils/reading.ts): once a second while `active` and the
+// app is in front, each section on screen is credited, and each unit of the text read is counted through `reads`.
 function useReadingTracker(
   countId: string | null,
   sections: readonly SiddurSection[],
   active: boolean,
   geometry: ReadingGeometry,
+  reads: ReadCounts,
 ): void {
   const geometryRef = useRef(geometry);
   geometryRef.current = geometry;
+  const countedRef = useRef(reads.counted);
+  countedRef.current = reads.counted;
   const credit = useRef<ReadingCredit>(new Map());
-  const counted = useRef(new Set<string>());
+  const { count } = reads;
 
   useEffect(() => {
     credit.current = new Map();
-    counted.current = new Set();
   }, [countId]);
 
   useEffect(() => {
@@ -810,15 +841,12 @@ function useReadingTracker(
       const shown = visibleSections(sections, g.sectionHeight, g.listTop(), top, top + height);
       credit.current = creditTick(credit.current, shown, height, dt, letters);
       for (const unit of units) {
-        if (counted.current.has(unit.id) || !unitRead(unit, credit.current, letters)) continue;
-        counted.current.add(unit.id);
-        const store = useReadingStore.getState();
-        if (unit.psalm !== null) store.addPsalmRead(g.day(), unit.psalm);
-        else store.addTextRead(g.day(), countId);
+        if (countedRef.current.has(unit.id) || !unitRead(unit, credit.current, letters)) continue;
+        count(unit.id, unit.psalm);
       }
     }, READING_TICK_MS);
     return () => clearInterval(timer);
-  }, [countId, sections, active]);
+  }, [countId, sections, active, count]);
 }
 
 export default function SiddurScreen() {
@@ -1278,8 +1306,17 @@ export default function SiddurScreen() {
   };
   // Done ends the session with the text: mark it, then land on home whatever opened the reader (a
   // home card, the mitzvah screen, a notification on a cold start).
+  const readingId = chok ? CHOK_TEXT_ID : textId;
+  const reads = useReadCounts(readingId, () => dateKey(appDay(new Date(), location)));
+  // The whole text has a "קראתי" of its own, except Tehillim, which is read chapter by chapter.
+  const textReadable = readingId !== null && !CHAPTER_ONLY_TEXTS.has(readingId);
+  const psalmReadable = readingId !== null && PSALM_TEXTS.has(readingId);
+  const markTextRead = () => {
+    if (textReadable) reads.count('text', null);
+  };
   const finish = (mitzvahId: string, date: Date = windowDate) =>
     lateMark.mark(markTarget(mitzvahId, date), () => {
+      markTextRead();
       if (bookmarkTextId) {
         finished.current = true;
         clearLastPosition(bookmarkTextId);
@@ -1353,8 +1390,8 @@ export default function SiddurScreen() {
     }
   };
   const listExtraData = useMemo(
-    () => ({ textSize, language, colors, toggled, prayerMode, commentaryOpen }),
-    [textSize, language, colors, toggled, prayerMode, commentaryOpen],
+    () => ({ textSize, language, colors, toggled, prayerMode, commentaryOpen, counted: reads.counted }),
+    [textSize, language, colors, toggled, prayerMode, commentaryOpen, reads.counted],
   );
   const titleOf = (titled: { title: { he: string; en: string } }) =>
     language === 'en' ? titled.title.en : titled.title.he;
@@ -1486,6 +1523,25 @@ export default function SiddurScreen() {
       </>
     );
   };
+  // A psalm's own "קראתי" under its card, or its counted line once this open counted it.
+  const psalmRead = (n: number) =>
+    reads.counted.has(`psalm:${n}`) ? (
+      <View testID={`siddur-psalm-counted-${n}`} style={styles.psalmCounted}>
+        <MitzvahIcon name="check" size={PSALM_ICON_SIZE} color={colors.safe} />
+        <Text style={[typography.captionBold, { color: colors.safe }]}>{t('siddur.read.psalmCounted')}</Text>
+      </View>
+    ) : (
+      <TapGuard>
+        <Button
+          variant="secondary"
+          size="compact"
+          icon="check"
+          label={t('siddur.read.psalm')}
+          onPress={() => reads.count(`psalm:${n}`, n)}
+          style={styles.psalmRead}
+        />
+      </TapGuard>
+    );
   const sectionCard = (section: SiddurSection) => {
     const folds = aloneFolds(section, prayerMode);
     if (folds.minyanFolded) {
@@ -1644,7 +1700,7 @@ export default function SiddurScreen() {
     fold,
   );
   useReadingTracker(
-    chok ? CHOK_TEXT_ID : textId,
+    readingId,
     sections,
     focused && !quiet && !body && !bookmarksOpen && !pickerOpen,
     {
@@ -1652,8 +1708,8 @@ export default function SiddurScreen() {
       listTop: () => LIST_PADDING + fold.fullHeight() + headerHeight.current,
       viewportTop: () => autoScroll.offset.value + fold.inset(),
       viewportHeight: () => Math.max(0, autoScroll.viewportHeight() - fold.inset()),
-      day: () => dateKey(appDay(new Date(), location)),
     },
+    reads,
   );
   const pendingShift = useRef(0);
   const { gesturing } = autoScroll;
@@ -2090,6 +2146,7 @@ export default function SiddurScreen() {
                       {sectionCard(section)}
                     </Card>
                   </MeasuredView>
+                  {psalmReadable && psalmOf(section) !== null ? psalmRead(psalmOf(section)!) : null}
                 </View>
               )}
               ListFooterComponent={
@@ -2121,6 +2178,24 @@ export default function SiddurScreen() {
                           onPress={() =>
                             thuNightUnanswered ? setAskingThuNight(true) : finish(doneTarget.id, doneTarget.date)
                           }
+                          style={styles.doneAction}
+                        />
+                      </TapGuard>
+                    )
+                  ) : null}
+                  {!browsing && textReadable && (!doneTarget || doneTarget.done) ? (
+                    reads.counted.has('text') ? (
+                      <View testID="siddur-read-counted" style={styles.doneRow}>
+                        <MitzvahIcon name="check" size={DONE_ICON_SIZE} color={colors.safe} />
+                        <Text style={[typography.bodyBold, { color: colors.safe }]}>{t('siddur.read.counted')}</Text>
+                      </View>
+                    ) : (
+                      <TapGuard>
+                        <Button
+                          variant="secondary"
+                          icon="check"
+                          label={t('siddur.read.button')}
+                          onPress={markTextRead}
                           style={styles.doneAction}
                         />
                       </TapGuard>
@@ -2535,6 +2610,17 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginBottom: spacing.sm,
+  },
+  psalmRead: {
+    alignSelf: 'center',
+    marginTop: spacing.sm,
+  },
+  psalmCounted: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
   },
   compassButton: {
     marginBottom: spacing.sm,

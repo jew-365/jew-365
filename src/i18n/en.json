@@ -1511,5 +1511,9 @@
   "history.reading.books": "whole book: %{count} times",
   "history.reading.text": "%{name}: %{count} times",
   "history.reading.text.once": "%{name}: once",
-  "history.reading.period": "This week %{week} · this month %{month}"
+  "history.reading.period": "This week %{week} · this month %{month}",
+  "siddur.read.button": "I read it",
+  "siddur.read.counted": "Counted in your reading",
+  "siddur.read.psalm": "I read this psalm",
+  "siddur.read.psalmCounted": "Psalm counted"
 }

@@ -1511,5 +1511,9 @@
   "history.reading.books": "ספר שלם: %{count} פעמים",
   "history.reading.text": "%{name}: %{count} פעמים",
   "history.reading.text.once": "%{name}: פעם אחת",
-  "history.reading.period": "השבוע %{week} · החודש %{month}"
+  "history.reading.period": "השבוע %{week} · החודש %{month}",
+  "siddur.read.button": "קראתי",
+  "siddur.read.counted": "נספר בספירת הקריאה",
+  "siddur.read.psalm": "קראתי את הפרק",
+  "siddur.read.psalmCounted": "הפרק נספר"
 }
