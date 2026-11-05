@@ -446,6 +446,13 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 ### Medium — App requests of 2026-11-05
 
+- [ ] Place every mitzvah's default reminders against its critical zone, and keep nags out of the night
+  - **Flag:** `OTA`.
+  - **Source:** the owner's report of 2026-11-05 with a screenshot of the bedtime Shema's timeline ("צריך לחזור שלב אחורה ולאפיין מחדש איפה לפזר התראות על כל סוג מצווה").
+  - **What it is:** the characterization in [.claude/specs/reminder-placement.md](.claude/specs/reminder-placement.md): an opener and a zone opener per window, no nag between chatzot and alot, last-chance points only where acted on, the zone ending at the latest last-chance point, morning openers at netz.
+  - **Expected result:** at every level, each mitzvah's nags spread across its whole critical zone (the bedtime Shema's no longer squeezed into the 24 minutes after a 23:00 reminder), and no notification of a night mitzvah between chatzot and alot.
+  - **Waiting on:** the owner's decisions in section 5 of the spec; P3 also goes to the rav.
+
 - [ ] An important notice on the accuracy of the times, in onboarding and in About
   - **Flag:** `OTA`.
   - **What it is:** a new onboarding step before ready, [src/app/onboarding/notice.tsx](src/app/onboarding/notice.tsx), and the same text in Settings → About and contact (the `accuracy` anchor and search item), both drawn by [src/components/AccuracyNotice.tsx](src/components/AccuracyNotice.tsx) from `accuracy.*`: we work hard for accurate times, we can still make mistakes, keeping each mitzvah in its time is the user's responsibility (in doubt, a trusted luach and a rav), and a mistake is reported in Settings → About and contact.
