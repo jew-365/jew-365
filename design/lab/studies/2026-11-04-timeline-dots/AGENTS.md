@@ -39,7 +39,7 @@
   - canvas: https://claude.ai/artifact/Mp67HPSdQDgucfb5Y7TZCP (the Design type: `root` the build output's canvas folder, `file_path` its `project/canvas.json`, each board beside it under `project/`);
   - gallery site: https://claude.ai/artifact/D2Zstpq5gmXECQuY4ix9ma (`root` the build output's site folder, `file_path` its `index.html`, the boards and `support.js` under `boards/`).
 - The day: Wednesday 4 November 2026 (כ״ד חשון תשפ״ז) in Jerusalem, nusach Sefard, the Shema by the GRA. Five mitzvot: Shacharit 05:58 to 09:32, Mincha 11:53 to 16:52, Maariv and the bedtime Shema 17:05 to 04:47, and a sample custom mitzvah "לימוד יומי" 09:00 to 21:00, 20 minutes to perform, its reminders at the start and at 18:00. The custom mitzvah's hours and reminders are the user's input, not zmanim.
-- The owner's pick: none yet.
+- The owner's pick (2026-11-05): א נקודות על הפס, the recommendation, with every recommendation of the brief and the dragged nags with their reset: "בציר ההתראות כבר בחרתי את ההמלצות שלך נקודות על הפס".
 - What a pick needs in the app (a separate task under [../../../../src/AGENTS.md](../../../../src/AGENTS.md)):
   - a mitzvah's own nag times, persisted beside its reminders, which the planner sends instead of `smartNagTimes()`;
   - the reset that clears them;

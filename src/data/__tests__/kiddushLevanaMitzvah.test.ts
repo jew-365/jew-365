@@ -35,6 +35,7 @@ import { appDayWindow, currentOrNextWindow } from '@/utils/buildDayTimeline';
 import { calendarDay, checkInFor } from '@/utils/checkIn';
 import { computeStats, computeStreak, judgeDay } from '@/utils/historyStats';
 import { dayFeatures, kiddushLevanaPeriod } from '@/utils/siddur';
+import { messageOf } from '@/testing/notifications';
 
 const JERUSALEM = CITIES[0];
 const LOS_ANGELES = findCityById('los-angeles')!;
@@ -301,7 +302,7 @@ describe('the Kiddush Levana reminders', () => {
     expect(plan.map((candidate) => candidate.categoryIdentifier)).toEqual(Array(3).fill(MITZVAH_TEXT_CATEGORY));
     expect(plan.map((candidate) => candidate.title)).toEqual(Array(3).fill('קידוש לבנה'));
     for (const candidate of plan) {
-      expect(KL.defaultReminders[candidate.data.reminderIndex!].bodyVariants).toContain(candidate.body);
+      expect(KL.defaultReminders[candidate.data.reminderIndex!].bodyVariants).toContain(messageOf(candidate));
     }
     for (const iso of ['2026-10-17', '2026-10-24']) {
       const block = HebcalService.holyBlockOn(at(JERUSALEM, `${iso}T12:00`), JERUSALEM)!;

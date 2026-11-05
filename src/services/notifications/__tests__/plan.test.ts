@@ -34,6 +34,7 @@ import { NUSACH_IDS } from '@/data/nuschaot';
 import type { Mitzvah } from '@/types/mitzvah';
 import type { Location } from '@/types/zmanim';
 import { checkInDeadline } from '@/utils/checkIn';
+import { messageOf } from '@/testing/notifications';
 
 // The smart nag's notifications are pinned in nag.mitzvot.test.ts; this suite pins the reminders.
 const withoutNags = (plan: ReturnType<typeof buildPlan>) => plan.filter((candidate) => !candidate.data.nag);
@@ -468,7 +469,7 @@ describe('buildPlan', () => {
       expect(first.channel).toBe('mitzvot');
       expect(first.categoryIdentifier).toBe(MITZVAH_TEXT_CATEGORY);
       expect(first.title).toBe('קריאת שמע על המיטה');
-      expect(bedtime().defaultReminders[0].bodyVariants).toContain(first.body);
+      expect(bedtime().defaultReminders[0].bodyVariants).toContain(messageOf(first));
       expect(first.data).toEqual({
         mitzvahId: 'krias_shma_al_hamita',
         windowEnd: zmanimOn('2026-11-12').alotHaShachar.toISOString(),
@@ -594,7 +595,7 @@ describe('buildPlan', () => {
       expect(first.channel).toBe('mitzvot');
       expect(first.categoryIdentifier).toBe(MITZVAH_TEXT_CATEGORY);
       expect(first.title).toBe('סליחות');
-      expect(selichot().defaultReminders[0].bodyVariants).toContain(first.body);
+      expect(selichot().defaultReminders[0].bodyVariants).toContain(messageOf(first));
       expect(first.data).toEqual({
         mitzvahId: 'selichot',
         windowEnd: zmanimOn('2025-09-16').sofZmanTfilaGra.toISOString(),
@@ -608,7 +609,7 @@ describe('buildPlan', () => {
       try {
         setLocale('en');
         const [english] = selichotOf(withoutNags(buildPlan(planInput({ now, language: 'en', mitzvot: [selichot()] }))));
-        expect([english.title, english.body]).toEqual(['Selichot', 'Time for Selichot']);
+        expect([english.title, messageOf(english)]).toEqual(['Selichot', 'Time for Selichot']);
       } finally {
         setLocale('he');
       }
@@ -695,9 +696,9 @@ describe('buildPlan', () => {
         ['chanukah_candles__2025-12-15__0', zmanimOn('2025-12-15').tzeitHakochavim.getTime()],
         ['chanukah_candles__2025-12-16__0', zmanimOn('2025-12-16').tzeitHakochavim.getTime()],
       ]);
-      expect(nightBodies(2)).toContain(plan[0].body);
-      expect(nightBodies(3)).toContain(plan[1].body);
-      expect(plan[0].body).toContain('הנר ה־2');
+      expect(nightBodies(2)).toContain(messageOf(plan[0]));
+      expect(nightBodies(3)).toContain(messageOf(plan[1]));
+      expect(messageOf(plan[0])).toContain('הנר ה־2');
       expect(plan[0]).toMatchObject({
         channel: 'mitzvot',
         categoryIdentifier: MITZVAH_TEXT_CATEGORY,
@@ -716,7 +717,7 @@ describe('buildPlan', () => {
       try {
         setLocale('en');
         const english = candlesOf(withoutNags(buildPlan(planInput({ now, language: 'en', mitzvot: [candles()] }))));
-        expect(english.map((candidate) => [candidate.title, candidate.body])).toEqual([
+        expect(english.map((candidate) => [candidate.title, messageOf(candidate)])).toEqual([
           ['Chanukah candles', 'Time for Chanukah candles: night 2'],
           ['Chanukah candles', 'Time for Chanukah candles: night 3'],
         ]);
@@ -738,7 +739,7 @@ describe('buildPlan', () => {
         zmanimOn('2026-12-06').alotHaShachar.toISOString(),
         zmanimOn('2026-12-07').alotHaShachar.toISOString(),
       ]);
-      expect(plan.map((candidate, index) => nightBodies(index + 1).includes(candidate.body))).toEqual([
+      expect(plan.map((candidate, index) => nightBodies(index + 1).includes(messageOf(candidate)))).toEqual([
         true,
         true,
         true,
@@ -793,7 +794,7 @@ describe('buildPlan', () => {
         chanukah_candles: [{ anchor: 'start' as const, offsetMin: 15, label: 'זמן הדלקת נרות חנוכה' }],
       };
       const edited = candlesOf(withoutNags(buildPlan(planInput({ now, reminderOverrides, mitzvot: [candles()] }))));
-      expect(edited.map((candidate) => candidate.body)).toEqual(['זמן נרות חנוכה: הנר ה־2', 'זמן נרות חנוכה: הנר ה־3']);
+      expect(edited.map(messageOf)).toEqual(['זמן נרות חנוכה: הנר ה־2', 'זמן נרות חנוכה: הנר ה־3']);
       expect(edited.map((candidate) => candidate.trigger.getTime())).toEqual(
         ['2025-12-15', '2025-12-16'].map((day) => zmanimOn(day).tzeitHakochavim.getTime() + 15 * 60_000),
       );
@@ -802,7 +803,7 @@ describe('buildPlan', () => {
         const english = candlesOf(
           withoutNags(buildPlan(planInput({ now, reminderOverrides, language: 'en', mitzvot: [candles()] }))),
         );
-        expect(english.map((candidate) => candidate.body)).toEqual([
+        expect(english.map(messageOf)).toEqual([
           'Time for Chanukah candles: night 2',
           'Time for Chanukah candles: night 3',
         ]);
@@ -823,8 +824,8 @@ describe('buildPlan', () => {
       };
       const plan = candlesOf(withoutNags(buildPlan(planInput({ now, reminderOverrides, mitzvot: [candles()] }))));
       const bodiesOf = (index: number) =>
-        ['2025-12-15', '2025-12-16'].map(
-          (day) => plan.find((candidate) => candidate.id === `chanukah_candles__${day}__${index}`)?.body,
+        ['2025-12-15', '2025-12-16'].map((day) =>
+          messageOf(plan.find((candidate) => candidate.id === `chanukah_candles__${day}__${index}`)!),
         );
       expect(plan).toHaveLength(8);
       const [second, third] = bodiesOf(0);

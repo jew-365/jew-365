@@ -434,8 +434,8 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: "A custom mitzvah takes an icon of your choice, not only the star: in the mitzvah's form tap Icon and pick one of the app's icons. It shows on Home, the schedule, Tracking, My mitzvot and the mitzvah's screen.",
       },
       {
-        he: 'כל תזכורת של מצווה כותבת מתחת לכותרת כמה זמן נשאר ועד מתי, למשל ״נשארו 45 דק׳ · עד 09:32״. התראת נודניק נפתחת ב־⚠️, וההתראה האחרונה של המצווה, ״הזמן האחרון להתחיל״, ב־❗.',
-        en: 'Every mitzvah reminder says under its title how long is left and until when, such as “45 min left · until 09:32”. A nag opens with ⚠️, and the mitzvah’s last notification, the last time to start, with ❗.',
+        he: 'כל תזכורת של מצווה כותבת כמה זמן נשאר ועד מתי, למשל ״נשארו 45 דק׳ · עד 09:32״: באייפון מתחת לכותרת, ובאנדרואיד בשורה הראשונה של תוכן ההתראה, שם יש לה מקום. התראת נודניק נפתחת ב־⚠️ ואומרת ״עוד לא סימנת״, כי שם המצווה כבר בכותרת, וההתראה האחרונה של המצווה, ״הזמן האחרון להתחיל״, ב־❗.',
+        en: 'Every mitzvah reminder says how long is left and until when, such as “45 min left · until 09:32”: on the iPhone under its title, and on Android in the first line of the notification’s content, where it has room. A nag opens with ⚠️ and says “Not marked yet”, since the title already names the mitzvah, and the mitzvah’s last notification, the last time to start, with ❗.',
       },
       {
         he: 'נודניק חכם: התזכורות נשלחות פעם אחת, ובמקום חזרות צפופות על כל תזכורת, הנודניק מתרכז בזמן הקריטי של כל מצווה (בשליש האחרון של היום, ובמצוות הלילה עד חצות), ותמיד מגיעה התראה בזמן האחרון להתחיל, בתפילה גם במניין וגם ביחיד. במצווה אישית קובעים בטופס כמה דקות לוקח לקיים אותה. הנודניק של תזכורת בודדת הוסר.',

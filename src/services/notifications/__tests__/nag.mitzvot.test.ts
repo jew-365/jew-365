@@ -25,6 +25,7 @@ import type { Mitzvah, NagLevel, Reminder, UserSettings } from '@/types/mitzvah'
 import { ZmanimService } from '@/services/ZmanimService';
 import { locationNoon } from '@/utils/locationDay';
 import type { QuietHours } from '@/utils/quietHours';
+import { messageOf } from '@/testing/notifications';
 
 const J = CITIES[0];
 const ALL_NUSCHAOT: Mitzvah['nuschaotSupported'] = [...NUSACH_IDS];
@@ -147,7 +148,7 @@ describe('the last-chance points', () => {
     // The minyan point, 45 minutes before the end, falls on the before-the-end reminder and is not sent twice.
     expect(pairs(nags(day))).toEqual([[`shacharit__${DAY}__n1`, end.getTime() - 20 * MIN]]);
     expect(nags(day)[0].data.nag).toEqual({ k: 1, of: 1, kind: 'lastChance', lastChance: 'alone' });
-    expect(nags(day)[0].body).toBe('הזמן האחרון להתחיל');
+    expect(messageOf(nags(day)[0])).toBe('הזמן האחרון להתחיל');
     expect(nags(day)[0].data.skipIfDone).toBe(true);
   });
 
@@ -158,7 +159,7 @@ describe('the last-chance points', () => {
       ['minyan', end.getTime() - 20 * MIN],
       ['alone', end.getTime() - 10 * MIN],
     ]);
-    expect(day.map((c) => c.body)).toEqual(['הזמן האחרון להתחיל במניין', 'הזמן האחרון להתחיל']);
+    expect(day.map(messageOf)).toEqual(['הזמן האחרון להתחיל במניין', 'הזמן האחרון להתחיל']);
   });
 
   it('take a custom mitzvah’s own minutes', () => {
@@ -193,7 +194,8 @@ describe('the critical zone', () => {
       for (const c of zone) {
         expect(c.trigger.getTime()).toBeGreaterThanOrEqual(third);
         expect(c.trigger.getTime()).toBeLessThan(end.getTime() - 20 * MIN);
-        expect(c.body).toBe('עוד לא סימנת תפילת מנחה');
+        // The title names the mitzvah, so the body does not repeat it.
+        expect(messageOf(c)).toBe('עוד לא סימנת');
       }
       // No two notifications of the window closer than ten minutes, the reminders included.
       for (const gap of gaps(day)) expect(gap).toBeGreaterThanOrEqual(10 * MIN);

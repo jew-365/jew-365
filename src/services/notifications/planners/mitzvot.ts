@@ -383,10 +383,11 @@ function thinned(planned: WindowTriggers): WindowTrigger[] {
 const sendKindOf = (entry: WindowTrigger): SendKind =>
   entry.type === 'reminder' ? 'reminder' : entry.lastChance === 'alone' ? 'lastChanceAlone' : 'nag';
 
-function nagBody(entry: NagTrigger, name: string): string {
+// The title already names the mitzvah, so a nag's body does not repeat it (the owner's pick, round 4 א+ב, 2026-11-05).
+function nagBody(entry: NagTrigger): string {
   if (entry.lastChance)
     return t(entry.lastChance === 'alone' ? 'notifications.nag.lastChance' : 'notifications.nag.lastChanceMinyan');
-  return t('notifications.nag.notMarked', { name });
+  return t('notifications.nag.notMarked');
 }
 
 function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thinning | null): PlannedCandidate[] {
@@ -401,6 +402,7 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thi
   const stageOf = (entry: WindowTrigger) => sendStage(sendKindOf(entry), entry.trigger.getTime() === lastAt);
 
   const english = input.language === 'en';
+  const ios = input.platform === 'ios';
   const title = mitzvahTitle(mitzvah, english);
   const hasText = hasSiddurText(mitzvah, settings.nusach, date, siddurPlace(location, settings.inIsrael));
   const params = bodyParamsOn(mitzvah, date, location, settings);
@@ -419,10 +421,9 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thi
       entry.type === 'reminder'
         ? buildId(mitzvah.id, date, entry.index, entry.occurrence)
         : buildNagId(mitzvah.id, date, entry.k);
-    const body =
-      entry.type === 'reminder'
-        ? bodyForReminder(entry.reminder, mitzvah, trigger, english, params)
-        : nagBody(entry, title);
+    const message =
+      entry.type === 'reminder' ? bodyForReminder(entry.reminder, mitzvah, trigger, english, params) : nagBody(entry);
+    const line = timeLeftLine(trigger, planned.window, location.tz, t, stage);
     return {
       candidate: {
         id,
@@ -430,9 +431,10 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thi
         channel: 'mitzvot',
         categoryIdentifier: offersText ? MITZVAH_TEXT_CATEGORY : MITZVAH_REMINDER_CATEGORY,
         title,
-        subtitle: timeLeftLine(trigger, planned.window, location.tz, t, stage),
+        // The iPhone shows the line as its bold subtitle; Android's subText sits in the cramped header row, so there the
+        // line opens the body instead (the owner's pick, round 4 א+ב, 2026-11-05).
+        ...(ios ? { subtitle: line, body: message } : { body: `${line}\n${message}` }),
         color: TIME_STAGE_COLOR[stage],
-        body,
         data: {
           mitzvahId: mitzvah.id,
           windowEnd: planned.window.end.toISOString(),

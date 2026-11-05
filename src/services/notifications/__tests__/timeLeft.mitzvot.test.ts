@@ -79,7 +79,7 @@ describe('the time-left line of a mitzvah reminder', () => {
     (Object.keys(TIME_STAGE_COLOR) as (keyof typeof TIME_STAGE_COLOR)[]).find((s) => TIME_STAGE_COLOR[s] === c.color);
 
   it('colours a reminder green, a nag orange and the last notification red, and marks the line to match', () => {
-    const candidates = day(buildPlan(planInput(NIGHT_BEFORE, 3)));
+    const candidates = day(buildPlan(planInput(NIGHT_BEFORE, 3, 'ios')));
     const last = candidates[candidates.length - 1];
     expect(last.data.nag?.lastChance).toBe('alone');
     for (const c of candidates) {
@@ -92,22 +92,36 @@ describe('the time-left line of a mitzvah reminder', () => {
     // Shacharit alone takes 20 minutes: its last-chance point is 20 minutes before the end.
     expect(last.subtitle).toMatch(/^❗ נשארו 20 דק' · עד \d\d:\d\d$/);
     expect(last.body).toBe('הזמן האחרון להתחיל');
+    // A nag's body does not repeat the mitzvah's name, which is its title.
+    for (const c of candidates.filter((n) => n.data.nag?.kind === 'zone')) expect(c.body).toBe('עוד לא סימנת');
   });
 
-  it('is the same on the iPhone and Android, and keeps the stages once some are past or marked', () => {
+  it('opens the body on Android, which sends no subtitle, and is the subtitle on the iPhone (round 4 א+ב)', () => {
+    const ios = day(buildPlan(planInput(NIGHT_BEFORE, 3, 'ios')));
+    const android = day(buildPlan(planInput(NIGHT_BEFORE, 3, 'android')));
+    expect(android.map((c) => c.id)).toEqual(ios.map((c) => c.id));
+    android.forEach((c, i) => {
+      expect(c.subtitle).toBeUndefined();
+      expect(c.body).toBe(`${ios[i].subtitle}\n${ios[i].body}`);
+      expect(c.color).toBe(ios[i].color);
+    });
+    expect(android[android.length - 1].body).toMatch(/^❗ נשארו 20 דק' · עד \d\d:\d\d\nהזמן האחרון להתחיל$/);
+  });
+
+  it('keeps the stages on both platforms once some are past or marked', () => {
     const all = day(buildPlan(planInput(NIGHT_BEFORE, 3)));
     const lastAt = all[all.length - 1].trigger;
     for (const platform of ['ios', 'android'] as const) {
       const later = day(buildPlan(planInput(new Date(lastAt.getTime() - 60_000), 3, platform)));
       expect(later).toHaveLength(1);
-      expect(later[0].subtitle?.startsWith('❗ ')).toBe(true);
+      expect((platform === 'ios' ? later[0].subtitle : later[0].body)?.startsWith('❗ ')).toBe(true);
       expect(later[0].color).toBe(TIME_STAGE_COLOR.red);
     }
   });
 
   it('marks the minyan point orange and the point alone red, and a reminder after them red as the last', () => {
     const single = {
-      ...planInput(NIGHT_BEFORE, 1),
+      ...planInput(NIGHT_BEFORE, 1, 'ios'),
       reminderOverrides: { shacharit: [{ anchor: 'start' as const, offsetMin: 0, label: 'x' }] },
     };
     const [reminder, minyan, alone] = day(buildPlan(single));
@@ -116,7 +130,7 @@ describe('the time-left line of a mitzvah reminder', () => {
     expect(minyan.subtitle).toMatch(/^⚠️ נשארו 45 דק'/);
 
     const late = {
-      ...planInput(NIGHT_BEFORE, 1),
+      ...planInput(NIGHT_BEFORE, 1, 'ios'),
       reminderOverrides: {
         shacharit: [
           { anchor: 'start' as const, offsetMin: 0, label: 'x' },
@@ -131,7 +145,7 @@ describe('the time-left line of a mitzvah reminder', () => {
   });
 
   it('is part of what the hash covers and is handed to expo as the subtitle', async () => {
-    const [candidate] = day(buildPlan(planInput(NIGHT_BEFORE)));
+    const [candidate] = day(buildPlan(planInput(NIGHT_BEFORE, undefined, 'ios')));
     expect(contentHash(candidate)).not.toBe(contentHash({ ...candidate, subtitle: 'other' }));
     expect(contentHash(candidate)).not.toBe(contentHash({ ...candidate, color: '#000000' }));
     await schedule([candidate]);
@@ -140,5 +154,12 @@ describe('the time-left line of a mitzvah reminder', () => {
     expect(request.content.subtitle).toBe(candidate.subtitle);
     expect(request.content.color).toBe(candidate.color);
     expect(request.content.title).toBe(candidate.title);
+
+    const [android] = day(buildPlan(planInput(NIGHT_BEFORE)));
+    await schedule([android]);
+    const sent = (Notifications.scheduleNotificationAsync as jest.Mock).mock
+      .calls[1][0] as Notifications.NotificationRequestInput;
+    expect('subtitle' in sent.content).toBe(false);
+    expect(sent.content.body).toBe(android.body);
   });
 });

@@ -779,7 +779,7 @@
   "notifications.timeLeft.ended": "Time ended at %{end}",
   "notifications.nag.lastChance": "Last time to start",
   "notifications.nag.lastChanceMinyan": "Last time to start with a minyan",
-  "notifications.nag.notMarked": "%{name} isn't marked yet",
+  "notifications.nag.notMarked": "Not marked yet",
   "notifications.chanukahNight": "Time for %{name}: night %{n}",
   "notifications.ushpizinNight": "Time for %{name}: %{guest}",
   "holyBlock.title.shabbat": "Shabbat Shalom",

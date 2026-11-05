@@ -30,6 +30,7 @@ import { appDayWindow } from '@/utils/buildDayTimeline';
 import { calendarDay, checkInDeadline, checkInFor } from '@/utils/checkIn';
 import { judgeDay } from '@/utils/historyStats';
 import { appDayKey } from '@/utils/locationDay';
+import { messageOf } from '@/testing/notifications';
 
 // The smart nag's notifications are pinned in nag.mitzvot.test.ts; this suite pins the reminders.
 const withoutNags = (plan: ReturnType<typeof buildPlan>) => plan.filter((candidate) => !candidate.data.nag);
@@ -280,10 +281,7 @@ describe('the Ushpizin reminders', () => {
       ['ushpizin__2026-09-27__0', zmanimOn(JERUSALEM, '2026-09-27').tzeitHakochavim],
       ['ushpizin__2026-09-28__0', zmanimOn(JERUSALEM, '2026-09-28').tzeitHakochavim],
     ]);
-    expect(plan.map((candidate) => candidate.body)).toEqual([
-      expect.stringContaining('יעקב'),
-      expect.stringContaining('משה'),
-    ]);
+    expect(plan.map(messageOf)).toEqual([expect.stringContaining('יעקב'), expect.stringContaining('משה')]);
     for (const candidate of plan) {
       expect(candidate.categoryIdentifier).toBe(MITZVAH_TEXT_CATEGORY);
       expect(candidate.title).toBe('אושפיזין');
@@ -292,8 +290,8 @@ describe('the Ushpizin reminders', () => {
 
   it('names every night’s own guest in every body variant', () => {
     const nights = daysFrom('2026-09-27', 5);
-    const bodies = nights.map(
-      (iso) => ushpizinPlan({ now: at(JERUSALEM, `${iso}T10:00`) }).find((c) => c.id === `ushpizin__${iso}__0`)!.body,
+    const bodies = nights.map((iso) =>
+      messageOf(ushpizinPlan({ now: at(JERUSALEM, `${iso}T10:00`) }).find((c) => c.id === `ushpizin__${iso}__0`)!),
     );
     bodies.forEach((body, index) => {
       expect(body).toContain(GUESTS_HE[index + 2]);
@@ -304,7 +302,7 @@ describe('the Ushpizin reminders', () => {
   it('writes the English body with the English name of the guest', () => {
     setLocale('en');
     const [first] = ushpizinPlan({ language: 'en' });
-    expect(first.body).toBe('Time for Ushpizin: Yaakov');
+    expect(messageOf(first)).toBe('Time for Ushpizin: Yaakov');
   });
 
   it('plans nothing inside the Yom Tov block, and the night after it at the exit', () => {
