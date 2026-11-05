@@ -73,6 +73,14 @@ Per mitzvah under P1–P5:
 4. The bedtime Shema's zone: the two hours before chatzot (recommended), or from nightfall.
 5. Existing installs: a user who never edited a mitzvah's reminders gets the new defaults through an OTA update; one who edited them keeps theirs (their `customReminders` override).
 
+## 5a. The marks: one orange and one red per window (the owner, 2026-11-05)
+
+The owner's rule: a window has exactly two marked notifications, one orange ⚠️ before the end and one red ❗ last; every other notification, reminders and zone nags alike, is plain. Today `sendStage()` in [src/utils/timeLeft.ts](../../src/utils/timeLeft.ts) marks every zone nag orange (up to three at level 4, plus a prayer's minyan point), and a mitzvah with one duration has no orange at all at level 1. Decisions:
+
+1. The orange of a mitzvah with one duration (tefillin, the Shema, Birchot HaShachar, a custom mitzvah). Recommended: a "time is running out" notification 15 minutes before the red one, at every level. A prayer's orange stays its minyan point.
+2. Zone nags unmarked ("עוד לא סימנת", no ⚠️). Recommended: yes.
+3. The zone ends at the alone (red) point, so the orange sits inside it (P4).
+
 ## 6. What it touches once approved
 
 `defaultReminders` in [src/data/mitzvot.ts](../../src/data/mitzvot.ts); a `zone` anchor in the `Reminder` type, `windowTriggers()`, `reminderFires()`, the reminder editor, the timeline (a drag converts it to `start` / `end`) and `timingSummary()`; `NAG_ZONE_KIND`, `hasSparseTail()` and the zone's end in [src/utils/nagging.ts](../../src/utils/nagging.ts); [smart-nag.md](smart-nag.md); `SCHEDULE_FORMAT`; the guide; the dated suites in [src/services/notifications/__tests__/](../../src/services/notifications/__tests__).

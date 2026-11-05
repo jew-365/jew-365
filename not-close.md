@@ -451,7 +451,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Source:** the owner's report of 2026-11-05 with a screenshot of the bedtime Shema's timeline ("צריך לחזור שלב אחורה ולאפיין מחדש איפה לפזר התראות על כל סוג מצווה").
   - **What it is:** the characterization in [.claude/specs/reminder-placement.md](.claude/specs/reminder-placement.md): an opener and a zone opener per window, no nag between chatzot and alot, last-chance points only where acted on, the zone ending at the latest last-chance point, morning openers at netz.
   - **Expected result:** at every level, each mitzvah's nags spread across its whole critical zone (the bedtime Shema's no longer squeezed into the 24 minutes after a 23:00 reminder), and no notification of a night mitzvah between chatzot and alot.
-  - **Waiting on:** the owner's decisions in section 5 of the spec; P3 also goes to the rav.
+  - **Waiting on:** the owner's decisions in sections 5 and 5a of the spec (5a: exactly one orange and one red notification per window); P3 also goes to the rav. The schema the owner reads: https://claude.ai/artifact/JyDspDEDu2jzzRsTTpJB3X
 
 - [ ] An important notice on the accuracy of the times, in onboarding and in About
   - **Flag:** `OTA`.
