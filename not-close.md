@@ -581,6 +581,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 - [ ] Open the prayer compass only from a button before each Amidah
   - **Flag:** `OTA`.
   - **What it is:** no compass offer on opening Shacharit, Mincha or Maariv, no Settings switch for it (`siddurCompassPrompt` removed from the user store, its search item and keys), and no compass pill in the reader's header; instead a compact "מצפן תפילה" button above every section that opens an Amidah (`תפילת העמידה`, and Musaf on its days) in those three texts, which opens the compass as the offer did. The More tab's compass row stays.
+  - **Look:** a full-width row in the primary colour at 0.7 opacity, `onGold` label and the compass icon (the owner's follow-up of 2026-11-05: "יותר בולט ... שורה עם הצבע פרימרי עם שקיפות 0.7").
   - **What it solves:** the owner's words: "מצפן תפילה לא נפתח בפופאפ ואין אותו בהגדרות; הוא נפתח אך ורק על ידי המשתמש על ידי כפתור חדש לפני כל תפילת עמידה".
   - **Expected result:** opening a prayer shows no window; a press of the button above an Amidah opens the compass with the prayer and its date.
   - **Done:** 2026-11-05. Verified: [src/app/__tests__/siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx) (the button above the Amidah of Mincha, Maariv and Shacharit and above Musaf on Rosh Chodesh, not above another section, its push with and without a date, no header pill, none for another text or on web), the settings and search suites, typecheck, lint, DOX. Not checked on a phone.

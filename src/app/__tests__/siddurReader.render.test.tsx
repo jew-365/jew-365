@@ -96,6 +96,7 @@ import { readSiddurText } from '@/testing/siddur';
 import { renderWithTheme } from '@/testing/render';
 import { at } from '@/testing/zmanim';
 import { THEMES } from '@/theme/colors';
+import { alphaHex } from '@/utils/dayArc';
 import type { CustomMitzvah, Nusach } from '@/types/mitzvah';
 import type { SiddurLastPosition, SiddurSection, SiddurText, SiddurVoice } from '@/types/siddur';
 
@@ -1493,6 +1494,9 @@ describe('the siddur reader compass button', () => {
       expect(screen.queryByText(OLD_OFFER)).toBeNull();
       expect(amidahButton()).toBeOnTheScreen();
       expect(screen.getAllByRole('button', { name: BUTTON })).toHaveLength(1);
+      // A full-width row in the primary colour at 0.7 (the owner's call, 2026-11-05).
+      expect(amidahButton()).toHaveStyle({ backgroundColor: alphaHex(THEMES.gold.gold, 0.7) });
+      expect(amidahButton()).not.toHaveStyle({ alignSelf: 'center' });
     },
   );
 

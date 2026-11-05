@@ -156,6 +156,7 @@ import {
 import { currentOrNextWindow, dayWindow, windowDueToday } from '@/utils/buildDayTimeline';
 import { afterPaint } from '@/utils/afterPaint';
 import { compassPrayerOf } from '@/utils/compass';
+import { alphaHex } from '@/utils/dayArc';
 import { useReadingStore } from '@/stores/useReadingStore';
 import {
   creditTick,
@@ -178,6 +179,8 @@ const LEFT_EDGE = I18nManager.isRTL ? ('right' as const) : ('left' as const);
 const SECTION_VIEWABILITY = { viewAreaCoveragePercentThreshold: 2 };
 // The sections of Shacharit, Mincha and Maariv that open an Amidah: the compass button sits above each.
 const AMIDAH_SECTIONS: ReadonlySet<string> = new Set(['תפילת העמידה', 'מוסף']);
+// The compass row is the primary colour at this opacity (the owner's call, 2026-11-05).
+const COMPASS_ROW_ALPHA = 0.7;
 const JUMP_RETRY_MS = 50;
 const JUMP_TIMEOUT_MS = 5000;
 const LIST_PADDING = spacing.lg;
@@ -2075,12 +2078,10 @@ export default function SiddurScreen() {
                   {compassPrayer && AMIDAH_SECTIONS.has(section.title.he) ? (
                     <TapGuard>
                       <Button
-                        variant="secondary"
-                        size="compact"
                         icon="compass"
                         label={t('siddur.compassButton')}
                         onPress={openCompass}
-                        style={styles.compassButton}
+                        style={[styles.compassButton, { backgroundColor: alphaHex(colors.gold, COMPASS_ROW_ALPHA) }]}
                       />
                     </TapGuard>
                   ) : null}
@@ -2536,7 +2537,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   compassButton: {
-    alignSelf: 'center',
     marginBottom: spacing.sm,
   },
   sectionHeading: {
