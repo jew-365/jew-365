@@ -87,6 +87,7 @@ import { useUserStore } from '@/stores/useUserStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
+import { useReadingStore } from '@/stores/useReadingStore';
 import { useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { DEFAULT_UI_SCALE, __setUiScaleForTests } from '@/theme/scale';
@@ -118,6 +119,7 @@ function resetAll() {
   useCompletionsStore.getState().reset();
   useCustomMitzvotStore.getState().reset();
   useSiddurBookmarksStore.getState().reset();
+  useReadingStore.getState().reset();
   useTaharahStore.getState().reset();
   for (const name of BACKUP_STORES) storage.delete(name);
 }
@@ -139,6 +141,7 @@ function fillSource() {
   useCompletionsStore.getState().markSkipped('mincha', MARK_DAY);
   useCustomMitzvotStore.getState().add(custom);
   useSiddurBookmarksStore.getState().addBookmark(ENTRY, 1792000000000);
+  useReadingStore.getState().addTextRead('2026-10-12', 'birkat_hamazon');
   useSiddurBookmarksStore.getState().saveLastPosition('shacharit', {
     nusach: 'sefard',
     sectionTitle: 'אשרי',
@@ -158,7 +161,7 @@ describe('BackupService', () => {
   afterEach(() => jest.restoreAllMocks());
 
   describe('createBackup', () => {
-    it('carries the five plain stores as their persisted strings and nothing else', () => {
+    it('carries the six plain stores as their persisted strings and nothing else', () => {
       fillSource();
       const backup = createBackup(CREATED);
 
@@ -169,6 +172,7 @@ describe('BackupService', () => {
         'completions-store',
         'custom-mitzvot-store',
         'mitzvot-store',
+        'reading-store',
         'siddur-bookmarks-store',
         'user-store',
       ]);

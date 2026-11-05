@@ -45,6 +45,7 @@ import { typography } from '@/theme/typography';
 import { durations, motion, spacing } from '@/theme/tokens';
 import { afterPaint } from '@/utils/afterPaint';
 import { clockOf, clockRange } from '@/utils/clock';
+import { shemaOpinionsFor, shemaOpinionsLine } from '@/utils/shemaOpinions';
 import { DayWindow, appDayWindow } from '@/utils/buildDayTimeline';
 import { checkInLastDay, checkInPhraseKey, latestCheckIn, overlapsBlock, trackedOn } from '@/utils/checkIn';
 import { Mitzvah } from '@/types/mitzvah';
@@ -197,6 +198,11 @@ export default function HomeScreen() {
   const quietBefore = useUserStore((s) => s.quietBefore);
   const quietAfter = useUserStore((s) => s.quietAfter);
   const activeMitzvot = useMitzvotStore((s) => s.activeMitzvot);
+  const ksOpinion = settings.halachicOpinions.ksSofZman;
+  const shemaNote = (id: string, date: Date) => {
+    const opinions = shemaOpinionsFor(id, date, location, ksOpinion);
+    return opinions ? shemaOpinionsLine(opinions, location.tz, t) : null;
+  };
   const nagCountOf = useMemo(() => {
     const quietHours = quietHoursOf(quietBefore, quietAfter);
     const byId = new Map(allMitzvot.map((mitzvah) => [mitzvah.id, mitzvah]));
@@ -734,6 +740,7 @@ export default function HomeScreen() {
                     now={now}
                     tz={location.tz}
                     pct={item.pct}
+                    note={shemaNote(item.mitzvah.id, item.window.date)}
                     urgent={item.urgent}
                     stamping={stamping.has(item.mitzvah.id)}
                     onComplete={() => completeOpen(item)}

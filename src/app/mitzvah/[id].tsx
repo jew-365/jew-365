@@ -49,6 +49,7 @@ import { windowClosed } from '@/utils/lateMarks';
 import { mitzvahName, reminderLabel } from '@/utils/mitzvahName';
 import { quietHoursOf } from '@/utils/quietHours';
 import { timingSummary } from '@/utils/reminderTiming';
+import { shemaOpinionsFor, shemaOpinionsLine } from '@/utils/shemaOpinions';
 import { NAG_LEVEL_IDS, remindersPerDay } from '@/utils/nagging';
 import { buildTriggerTime, nextReminderAt } from '@/services/NotificationScheduler';
 import { useI18n } from '@/i18n';
@@ -195,6 +196,10 @@ export default function MitzvahDetailScreen() {
           date: scheduleDateLabel(startsOn, language),
         })
       : '-';
+
+  const shemaOpinions = window
+    ? shemaOpinionsFor(mitzvah.id, window.date, location, settings.halachicOpinions.ksSofZman)
+    : null;
 
   const saveReminder = (value: Reminder) => {
     setLastReminderRefused(false);
@@ -354,6 +359,20 @@ export default function MitzvahDetailScreen() {
           }}
           onDeleteReminder={requestDeleteReminder}
         />
+
+        {shemaOpinions ? (
+          <View testID="mitzvah-shema-opinions">
+            <Card padded>
+              <Text style={[typography.subheading, { color: colors.text }]}>{t('shema.opinions.title')}</Text>
+              <Text style={[typography.body, styles.shemaLine, { color: colors.text }]}>
+                {shemaOpinionsLine(shemaOpinions, location.tz, t)}
+              </Text>
+              <Text style={[typography.caption, { color: colors.textSub }]}>
+                {t('shema.opinions.note', { name: t(`settings.opinion.${shemaOpinions.chosen}`) })}
+              </Text>
+            </Card>
+          </View>
+        ) : null}
 
         {mitzvah.description ? (
           <Card padded>
@@ -604,6 +623,10 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     gap: spacing.md,
+  },
+  shemaLine: {
+    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
   },
   todayCaption: {
     marginTop: spacing.xs,

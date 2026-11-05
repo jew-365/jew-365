@@ -146,7 +146,6 @@ export default function SettingsScreen() {
       siddurVoice: s.siddurVoice,
       chokCommentaryOpen: s.chokCommentaryOpen,
       chokThuNightDay: s.chokThuNightDay,
-      siddurCompassPrompt: s.siddurCompassPrompt,
       taharahEnabled: s.taharahEnabled,
       weeklyReportEnabled: s.weeklyReportEnabled,
       quietBefore: s.quietBefore,
@@ -171,7 +170,6 @@ export default function SettingsScreen() {
       setSiddurVoice: s.setSiddurVoice,
       setChokCommentaryOpen: s.setChokCommentaryOpen,
       setChokThuNightDay: s.setChokThuNightDay,
-      setSiddurCompassPrompt: s.setSiddurCompassPrompt,
       setWeeklyReportEnabled: s.setWeeklyReportEnabled,
       setQuietBefore: s.setQuietBefore,
       setQuietAfter: s.setQuietAfter,
@@ -606,15 +604,6 @@ export default function SettingsScreen() {
                     selected={user.chokThuNightDay}
                     onSelect={user.setChokThuNightDay}
                     renderLabel={(value) => t(`chok.thuNight.${value}`)}
-                  />
-                </Anchor>
-                <Anchor {...anchor('compassPrompt')}>
-                  <SwitchRow
-                    label={t('settings.compassPrompt')}
-                    hint={t('settings.compassPromptHint')}
-                    value={user.siddurCompassPrompt}
-                    onValueChange={user.setSiddurCompassPrompt}
-                    style={styles.groupGap}
                   />
                 </Anchor>
               </SettingsSection>

@@ -127,7 +127,6 @@ function resetReader() {
     location: JERUSALEM,
     inIsrael: true,
     nusach: 'ashkenaz',
-    siddurCompassPrompt: false,
   });
   useCompletionsStore.getState().reset();
   useMitzvotStore.getState().reset();

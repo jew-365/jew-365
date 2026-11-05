@@ -63,6 +63,8 @@ type Props = {
   now: Date;
   tz: string;
   pct: number;
+  // An extra caption line under the end time (the morning Shema's two opinions).
+  note?: string | null;
   urgent: boolean;
   stamping: boolean;
   onComplete: () => void;
@@ -115,6 +117,7 @@ export const NowCard = React.memo(function NowCard({
   now,
   tz,
   pct,
+  note,
   urgent,
   stamping,
   onComplete,
@@ -223,6 +226,7 @@ export const NowCard = React.memo(function NowCard({
             name,
             t('home.now.ringLabel', { left: formatRemaining(remaining, t) }),
             nagBellLabel(nagCount, t),
+            note,
           ]
             .filter(Boolean)
             .join(', ')}
@@ -251,6 +255,11 @@ export const NowCard = React.memo(function NowCard({
                 </Animated.Text>
               ) : null}
             </View>
+            {note ? (
+              <Text testID="now-card-note" style={[typography.small, { color: colors.textSub }]}>
+                {note}
+              </Text>
+            ) : null}
           </View>
           <View style={styles.ring} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
             <Svg width={RING_SIZE} height={RING_SIZE} viewBox="0 0 60 60">

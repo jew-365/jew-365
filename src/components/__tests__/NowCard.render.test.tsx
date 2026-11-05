@@ -50,6 +50,14 @@ describe('NowCard', () => {
     expect(screen.getByText("דק'", { includeHiddenElements: true })).toBeOnTheScreen();
   });
 
+  it('draws a note line under the end time when given, and none without one', () => {
+    setup({ note: 'מג״א 08:01 · גר״א 08:34 (בחירתך)' });
+    expect(screen.getByTestId('now-card-note')).toHaveTextContent('מג״א 08:01 · גר״א 08:34 (בחירתך)');
+    screen.unmount();
+    setup();
+    expect(screen.queryByTestId('now-card-note')).toBeNull();
+  });
+
   it('keeps the time left clear of the ring: a 68-point ring, 13-point figures, a capped font scale', () => {
     setup({ now: at(J, '2026-10-29T06:00') });
     const ring = screen.UNSAFE_getAllByType(Svg).find((svg) => svg.props.viewBox === '0 0 60 60');

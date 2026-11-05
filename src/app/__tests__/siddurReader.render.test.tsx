@@ -81,7 +81,7 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
 }));
 
-import { AccessibilityInfo, AppState, FlatList, Platform, StyleSheet } from 'react-native';
+import { AppState, FlatList, Platform, StyleSheet } from 'react-native';
 import { act, fireEvent, screen, within } from '@testing-library/react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
 import SiddurReaderScreen from '../siddur/[id]';
@@ -89,6 +89,7 @@ import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { CITIES } from '@/data/cities';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
+import { useReadingStore } from '@/stores/useReadingStore';
 import { useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { readSiddurText } from '@/testing/siddur';
@@ -121,7 +122,6 @@ async function openShacharit() {
     location: JERUSALEM,
     inIsrael: true,
     nusach: 'ashkenaz',
-    siddurCompassPrompt: false,
   });
   for (const key of Object.keys(mockParams)) delete mockParams[key];
   Object.assign(mockParams, { id: 'shacharit', date: '2026-10-28' });
@@ -138,7 +138,6 @@ async function openAt(section?: string) {
     location: JERUSALEM,
     inIsrael: true,
     nusach: 'ashkenaz',
-    siddurCompassPrompt: false,
   });
   for (const key of Object.keys(mockParams)) delete mockParams[key];
   Object.assign(mockParams, { id: 'shacharit', ...(section ? { section } : {}) });
@@ -181,7 +180,6 @@ function openVoiced(voice: SiddurVoice | null) {
     location: JERUSALEM,
     inIsrael: true,
     nusach: 'ashkenaz',
-    siddurCompassPrompt: false,
     siddurVoice: voice,
   });
   mockLoadedText = VOICED;
@@ -265,7 +263,6 @@ describe('the siddur reader header while the text loads', () => {
       location: JERUSALEM,
       inIsrael: true,
       nusach: 'ashkenaz',
-      siddurCompassPrompt: false,
     });
     for (const key of Object.keys(mockParams)) delete mockParams[key];
     Object.assign(mockParams, { id: 'shacharit', date: '2026-10-28' });
@@ -348,7 +345,6 @@ describe('the siddur reader mitzvah settings pill', () => {
       location: JERUSALEM,
       inIsrael: true,
       nusach: 'ashkenaz',
-      siddurCompassPrompt: false,
     });
     for (const key of Object.keys(mockParams)) delete mockParams[key];
     Object.assign(mockParams, { id: 'birkat_hamazon' });
@@ -464,7 +460,7 @@ describe('the siddur reader bookmarks and last place', () => {
   const MIDDLE_REACHED = { index: 1, animated: false, viewOffset: -150 };
   let scrollSpy: jest.SpyInstance;
 
-  async function openKeyed(params: Record<string, string>, nusach?: Nusach, compassPrompt = false) {
+  async function openKeyed(params: Record<string, string>, nusach?: Nusach) {
     jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
     useUserStore.getState().reset();
     useUserStore.setState({
@@ -472,7 +468,6 @@ describe('the siddur reader bookmarks and last place', () => {
       location: JERUSALEM,
       inIsrael: true,
       nusach: 'ashkenaz',
-      siddurCompassPrompt: compassPrompt,
     });
     mockLoadedText = keyedText(params.id, nusach);
     for (const key of Object.keys(mockParams)) delete mockParams[key];
@@ -844,16 +839,6 @@ describe('the siddur reader bookmarks and last place', () => {
     fireEvent.press(screen.getByText('המקום האחרון'));
     expect(liveChangeListeners()).toBe(idle + 1);
   });
-
-  it('holds auto-scroll while the compass offer shows', async () => {
-    await openKeyed(SHACHARIT, undefined, true);
-    const idle = liveChangeListeners();
-    act(() => useUserStore.getState().setSiddurAutoScroll(true));
-    expect(liveChangeListeners()).toBe(idle);
-
-    fireEvent.press(screen.getByRole('button', { name: 'לא' }));
-    expect(liveChangeListeners()).toBe(idle + 1);
-  });
 });
 
 describe('the siddur reader header for a custom mitzvah', () => {
@@ -886,7 +871,6 @@ describe('the siddur reader header for a custom mitzvah', () => {
       location: JERUSALEM,
       inIsrael: true,
       nusach: 'ashkenaz',
-      siddurCompassPrompt: false,
     });
     useCompletionsStore.getState().reset();
     useCustomMitzvotStore.getState().reset();
@@ -1021,7 +1005,6 @@ describe('the siddur reader folds its controls while the user reads', () => {
       location: JERUSALEM,
       inIsrael: true,
       nusach: 'ashkenaz',
-      siddurCompassPrompt: false,
     });
     mockLoadedText = { nusach: 'ashkenaz', id: 'shacharit', credits: [], sections };
     for (const key of Object.keys(mockParams)) delete mockParams[key];
@@ -1478,21 +1461,14 @@ describe('the siddur reader folds its controls while the user reads', () => {
   });
 });
 
-describe('the siddur reader compass offer', () => {
-  const TITLE = 'לפתוח מצפן תפילה?';
-  const BODY = 'אם הודעה זאת מפריעה לך, אפשר לכבות אותה בהגדרות בחלק של הסידור';
-  const PILL = 'פתח מצפן תפילה';
+describe('the siddur reader compass button', () => {
+  const BUTTON = 'מצפן תפילה';
+  const OLD_OFFER = 'לפתוח מצפן תפילה?';
 
-  async function openPrayer(params: Record<string, string>, prompt = true) {
+  async function openPrayer(params: Record<string, string>) {
     jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
     useUserStore.getState().reset();
-    useUserStore.setState({
-      language: 'he',
-      location: JERUSALEM,
-      inIsrael: true,
-      nusach: 'ashkenaz',
-      siddurCompassPrompt: prompt,
-    });
+    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
     mockLoadedText = null;
     for (const key of Object.keys(mockParams)) delete mockParams[key];
     Object.assign(mockParams, params);
@@ -1501,88 +1477,139 @@ describe('the siddur reader compass offer', () => {
     await act(async () => {});
   }
 
+  const amidahButton = () =>
+    within(screen.getByTestId('siddur-section-תפילת העמידה')).queryByRole('button', { name: BUTTON });
+
   beforeEach(() => mockRouter.push.mockClear());
   afterEach(() => {
     jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
-  it.each(['shacharit', 'mincha', 'maariv'])('offers the compass on opening %s', async (id) => {
-    await openPrayer({ id, date: '2026-10-28' });
-    expect(screen.getByText(TITLE)).toBeOnTheScreen();
-    expect(screen.getByText(BODY)).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: 'כן' })).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: 'לא' })).toBeOnTheScreen();
-    expect(screen.getByTestId('confirm-dialog-countdown', { includeHiddenElements: true })).toBeOnTheScreen();
+  it.each(['mincha', 'maariv'])(
+    'draws the button above the Amidah of %s, and offers nothing on opening',
+    async (id) => {
+      await openPrayer({ id, date: '2026-10-28' });
+      expect(screen.queryByText(OLD_OFFER)).toBeNull();
+      expect(amidahButton()).toBeOnTheScreen();
+      expect(screen.getAllByRole('button', { name: BUTTON })).toHaveLength(1);
+    },
+  );
+
+  it.each([
+    ['the Amidah', '2026-10-28', 'תפילת העמידה'],
+    ['Musaf on Rosh Chodesh', '2026-11-11', 'מוסף'],
+  ])('draws it above %s of Shacharit', async (_name, date, title) => {
+    await openPrayer({ id: 'shacharit', date });
+    const { data: sections, renderItem } = screen.getByTestId('siddur-list').props as {
+      data: { title: { he: string } }[];
+      renderItem: (info: { item: unknown; index: number }) => React.ReactElement;
+    };
+    const amidah = sections.find((section) => section.title.he === title);
+    expect(amidah).toBeDefined();
+    const before = sections.find((section) => section.title.he === 'קריאת שמע וברכותיה');
+    screen.unmount();
+    renderWithTheme(renderItem({ item: amidah, index: 0 }));
+    expect(screen.getByRole('button', { name: BUTTON })).toBeOnTheScreen();
+    screen.unmount();
+    renderWithTheme(renderItem({ item: before, index: 0 }));
+    expect(screen.queryByRole('button', { name: BUTTON })).toBeNull();
   });
 
-  it('לא closes the offer at once and opens nothing', async () => {
-    await openPrayer({ id: 'shacharit', date: '2026-10-28' });
-    fireEvent.press(screen.getByRole('button', { name: 'לא' }));
-    expect(screen.queryByText(TITLE)).toBeNull();
-    expect(mockRouter.push).not.toHaveBeenCalled();
-  });
-
-  it('כן opens the compass with the prayer and its date', async () => {
-    await openPrayer({ id: 'shacharit', date: '2026-10-28' });
-    fireEvent.press(screen.getByRole('button', { name: 'כן' }));
+  it('opens the compass with the prayer and its date', async () => {
+    await openPrayer({ id: 'mincha', date: '2026-10-28' });
+    fireEvent.press(amidahButton()!);
     expect(mockRouter.push).toHaveBeenCalledTimes(1);
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: '/compass',
-      params: { prayer: 'shacharit', date: '2026-10-28' },
-    });
-    expect(screen.queryByText(TITLE)).toBeNull();
-  });
-
-  it('opened without a date, כן sends the prayer alone', async () => {
-    await openPrayer({ id: 'shacharit' });
-    fireEvent.press(screen.getByRole('button', { name: 'כן' }));
-    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/compass', params: { prayer: 'shacharit' } });
-  });
-
-  it('offers nothing when the setting is off, and keeps the pill', async () => {
-    await openPrayer({ id: 'shacharit', date: '2026-10-28' }, false);
-    expect(screen.queryByText(TITLE)).toBeNull();
-    expect(screen.getByRole('button', { name: PILL })).toBeOnTheScreen();
-  });
-
-  it('the pill opens the compass', async () => {
-    await openPrayer({ id: 'shacharit', date: '2026-10-28' }, false);
-    fireEvent.press(screen.getByRole('button', { name: PILL }));
-    expect(mockRouter.push).toHaveBeenCalledWith({
-      pathname: '/compass',
-      params: { prayer: 'shacharit', date: '2026-10-28' },
+      params: { prayer: 'mincha', date: '2026-10-28' },
     });
   });
 
-  it('offers nothing and draws no pill for another text', async () => {
+  it('opened without a date, sends the prayer alone', async () => {
+    await openPrayer({ id: 'mincha' });
+    fireEvent.press(amidahButton()!);
+    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/compass', params: { prayer: 'mincha' } });
+  });
+
+  it('draws no compass pill in the header', async () => {
+    await openPrayer({ id: 'mincha', date: '2026-10-28' });
+    expect(screen.queryByRole('button', { name: 'פתח מצפן תפילה' })).toBeNull();
+  });
+
+  it('draws no button for another text', async () => {
     await openPrayer({ id: 'tefillin', date: '2026-10-28' });
-    expect(screen.queryByText(TITLE)).toBeNull();
-    expect(screen.queryByRole('button', { name: PILL })).toBeNull();
+    expect(screen.queryByRole('button', { name: BUTTON })).toBeNull();
   });
 
-  it('offers nothing when the compass sent the reader back', async () => {
-    await openPrayer({ id: 'shacharit', date: '2026-10-28', fromCompass: '1' });
-    expect(screen.queryByText(TITLE)).toBeNull();
-    expect(screen.getByRole('button', { name: PILL })).toBeOnTheScreen();
-  });
-
-  it('runs no countdown with a screen reader on', async () => {
-    jest.spyOn(AccessibilityInfo, 'isScreenReaderEnabled').mockResolvedValue(true);
-    await openPrayer({ id: 'shacharit', date: '2026-10-28' });
-    expect(screen.getByText(TITLE)).toBeOnTheScreen();
-    expect(screen.queryByTestId('confirm-dialog-countdown', { includeHiddenElements: true })).toBeNull();
-  });
-
-  it('offers nothing and draws no pill on the web', async () => {
+  it('draws no button on the web', async () => {
     const original = Platform.OS;
     Object.defineProperty(Platform, 'OS', { configurable: true, get: () => 'web' });
     try {
-      await openPrayer({ id: 'shacharit', date: '2026-10-28' });
-      expect(screen.queryByText(TITLE)).toBeNull();
-      expect(screen.queryByRole('button', { name: PILL })).toBeNull();
+      await openPrayer({ id: 'mincha', date: '2026-10-28' });
+      expect(amidahButton()).toBeNull();
     } finally {
       Object.defineProperty(Platform, 'OS', { configurable: true, get: () => original });
+    }
+  });
+});
+
+describe('the siddur reader reading count', () => {
+  // setInterval alone is faked (and Date pinned): reanimated's mocked frames run on setTimeout.
+  const REAL_TICKS = [
+    'nextTick',
+    'queueMicrotask',
+    'setImmediate',
+    'clearImmediate',
+    'setTimeout',
+    'clearTimeout',
+  ] as const;
+
+  async function openTehillim() {
+    jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...REAL_TICKS] });
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+    useReadingStore.getState().reset();
+    mockLoadedText = null;
+    for (const key of Object.keys(mockParams)) delete mockParams[key];
+    Object.assign(mockParams, { id: 'tehillim' });
+    renderWithTheme(<SiddurReaderScreen />);
+    // The asset loads on a resolved promise; findBy* would step the fake interval clock instead.
+    for (let i = 0; i < 20 && !screen.queryByTestId('siddur-list'); i += 1) await act(async () => {});
+    const layout = (testID: string, height: number) =>
+      fireEvent(screen.getByTestId(testID), 'layout', { nativeEvent: { layout: { x: 0, y: 0, width: 360, height } } });
+    layout('siddur-list', 640);
+    // The prayer before takes no room, so the first psalm fills the screen.
+    layout('siddur-section-תפילה לפני אמירת תהלים', 0);
+    layout('siddur-section-פרק א', 2000);
+  }
+  const advance = (ms: number) => act(() => jest.advanceTimersByTime(ms));
+
+  afterEach(() => {
+    jest.useRealTimers();
+    useReadingStore.getState().reset();
+  });
+
+  it('counts a psalm read once it has been on screen as long as its words take, and only once', async () => {
+    await openTehillim();
+    advance(3000);
+    expect(useReadingStore.getState().psalms).toEqual({});
+    advance(120_000);
+    expect(useReadingStore.getState().psalms).toEqual({ '2026-10-28': { '1': 1 } });
+    advance(120_000);
+    expect(useReadingStore.getState().psalms).toEqual({ '2026-10-28': { '1': 1 } });
+    expect(useReadingStore.getState().texts).toEqual({});
+  });
+
+  it('counts nothing while the app is in the background', async () => {
+    await openTehillim();
+    const original = Object.getOwnPropertyDescriptor(AppState, 'currentState')!;
+    Object.defineProperty(AppState, 'currentState', { value: 'background', configurable: true, writable: true });
+    try {
+      advance(240_000);
+      expect(useReadingStore.getState().psalms).toEqual({});
+    } finally {
+      Object.defineProperty(AppState, 'currentState', original);
     }
   });
 });

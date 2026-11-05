@@ -56,6 +56,7 @@ import {
 import { useCompletionsStore, dateKey } from '../useCompletionsStore';
 import { useCustomMitzvotStore } from '../useCustomMitzvotStore';
 import { useChokStore } from '../useChokStore';
+import { useReadingStore } from '@/stores/useReadingStore';
 import { useSiddurBookmarksStore } from '../useSiddurBookmarksStore';
 import { CITIES } from '@/data/cities';
 import { MITZVOT } from '@/data/mitzvot';
@@ -78,6 +79,7 @@ describe('stores', () => {
     ['completions-store', useCompletionsStore],
     ['custom-mitzvot-store', useCustomMitzvotStore],
     ['siddur-bookmarks-store', useSiddurBookmarksStore],
+    ['reading-store', useReadingStore],
     ['chok-store', useChokStore],
   ])('%s keeps a persisted state across a version bump (identity migrate)', (name, store) => {
     const options = store.persist.getOptions();
@@ -832,25 +834,6 @@ describe('useUserStore saved city', () => {
     useUserStore.getState().setLocationState(HAIFA, 'ready', 'manual');
     expect(useUserStore.getState().location.cityId).toBe('haifa');
     expect(hydrate({ location: useUserStore.getState().location, locationSource: 'manual' }).location).toBe(HAIFA);
-  });
-});
-
-describe('useUserStore compass prompt', () => {
-  beforeEach(() => useUserStore.getState().reset());
-
-  it('starts on, turns off and resets to on', () => {
-    expect(useUserStore.getState().siddurCompassPrompt).toBe(true);
-    useUserStore.getState().setSiddurCompassPrompt(false);
-    expect(useUserStore.getState().siddurCompassPrompt).toBe(false);
-    useUserStore.getState().reset();
-    expect(useUserStore.getState().siddurCompassPrompt).toBe(true);
-  });
-
-  it('stays on for a payload saved before the field existed and keeps a saved choice', () => {
-    const { merge } = useUserStore.persist.getOptions();
-    const current = useUserStore.getState();
-    expect(merge!({ nusach: 'sefard' }, current).siddurCompassPrompt).toBe(true);
-    expect(merge!({ siddurCompassPrompt: false }, current).siddurCompassPrompt).toBe(false);
   });
 });
 

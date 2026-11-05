@@ -111,16 +111,6 @@ describe('Settings layout', () => {
     expect(toggle().props.value).toBe(false);
   });
 
-  it('puts the compass offer switch in Prayer, on by default', async () => {
-    await renderSettings();
-    openSection('settings.prayer');
-    const block = screen.getByTestId('settings-anchor-compassPrompt');
-    const toggle = () => within(block).getByLabelText(he('settings.compassPrompt'));
-    expect(toggle().props.value).toBe(true);
-    fireEvent(toggle(), 'valueChange', false);
-    expect(useUserStore.getState().siddurCompassPrompt).toBe(false);
-  });
-
   it('offers the ליל שישי day in Prayer, bound to the field the reader writes', async () => {
     await renderSettings();
     openSection('settings.prayer');
@@ -255,17 +245,6 @@ describe('Settings search', () => {
     const target = screen.getByTestId('settings-anchor-chokCommentary');
     expect(target.props.style).toBeTruthy();
     expect(within(target).getByLabelText(he('settings.chokCommentaryOpen'))).toBeOnTheScreen();
-  });
-
-  it('opens Prayer at the compass offer switch for "הצעת מצפן"', async () => {
-    await renderSettings();
-    await search('הצעת מצפן');
-    await act(async () => {
-      fireEvent.press(screen.getByText(he('settings.compassPrompt')));
-    });
-    const target = screen.getByTestId('settings-anchor-compassPrompt');
-    expect(target.props.style).toBeTruthy();
-    expect(within(target).getByLabelText(he('settings.compassPrompt'))).toBeOnTheScreen();
   });
 
   it('opens Prayer at the ליל שישי chips for "ליל שישי"', async () => {

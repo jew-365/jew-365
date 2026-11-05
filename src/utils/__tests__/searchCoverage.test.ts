@@ -140,6 +140,7 @@ describe('search coverage', () => {
       'stat:card:onTime',
       'stat:card:improve',
       'stat:card:lateWeeks',
+      'stat:card:reading',
       'stat:lateTotal',
       ...MITZVOT.map((mitzvah) => `badge:hundred:${mitzvah.id}`),
       ...SEARCH_SCREENS.map((screen) => `screen:${screen.id}`),
@@ -177,6 +178,12 @@ describe('search results', () => {
     expect(close('on time')).toContain('stat:card:onTime');
     expect(close('איחורים')).toContain('stat:card:lateWeeks');
     expect(close('late marks')).toContain('stat:lateTotal');
+  });
+
+  it('finds the reading card by what it counts', () => {
+    expect(close('קריאה בסידור')).toContain('stat:card:reading');
+    expect(close('פרקי תהילים')).toContain('stat:card:reading');
+    expect(close('times read')).toContain('stat:card:reading');
   });
 
   it('shows the late marks total with its value', () => {

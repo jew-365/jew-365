@@ -69,8 +69,6 @@ describe('typedInOtherLayout', () => {
 });
 
 const SETTING_QUERIES: [string, string][] = [
-  ['הצעת מצפן', 'compassPrompt'],
-  ['compass prompt', 'compassPrompt'],
   ['התראות', 'notifications'],
   ['נוסח', 'nusach'],
   ['ספרדי', 'nusach'],

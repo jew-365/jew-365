@@ -40,6 +40,7 @@ import { MITZVOT } from '@/data/mitzvot';
 import { Achievements, BadgeId, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { enabledSinceOf, useMitzvotStore } from '@/stores/useMitzvotStore';
+import { useReadingStore } from '@/stores/useReadingStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { CALENDAR_PARTIAL_SHARES, blendHex, lateTone, readableOn } from '@/theme/colors';
 import { scaled } from '@/theme/scale';
@@ -99,8 +100,13 @@ import {
   weekdayChart,
   weekdayInsight,
   weeksInsight,
+  periodStartKeys,
 } from '@/utils/historyTrends';
 import { lateImprove, type LateImprove } from '@/utils/lateMarks';
+import { PSALM_COUNT, readingSummary } from '@/utils/reading';
+import { siddurTextName } from '@/utils/customMitzvah';
+import { STANDALONE_TEXTS } from '@/data/siddur';
+import { CHOK_TEXT_ID } from '@/data/chok';
 import { appDay, appDayKey } from '@/utils/locationDay';
 import { firstName } from '@/utils/homeDay';
 import { nextStreakGoal } from '@/utils/streakGoal';
@@ -932,6 +938,71 @@ function BadgeSheet({ badge, onClose }: { badge: BadgeInfo | null; onClose: () =
 
 const EMPTY_STATS: HistoryStats = { streak: 0, daily: [], perMitzvah: {}, missedYesterday: [] };
 
+// What was read in the siddur, counted with no streak (the owner's call, 2026-11-05): the Tehillim chapters,
+// then every text read at least once, from the reader's counts (utils/reading.ts).
+function ReadingCard() {
+  const { t, language } = useI18n();
+  const location = useUserStore((s) => s.location);
+  const texts = useReadingStore((s) => s.texts);
+  const psalms = useReadingStore((s) => s.psalms);
+  const now = useNow();
+  const { week, month } = useMemo(() => periodStartKeys(now, location), [now, location]);
+  const summary = useMemo(() => readingSummary({ texts, psalms }, week, month), [texts, psalms, week, month]);
+  const period = (totals: { week: number; month: number }) =>
+    t('history.reading.period', { week: totals.week, month: totals.month });
+  const nameOf = (id: string) => (id === CHOK_TEXT_ID ? t('chok.title') : (siddurTextName(id, language) ?? id));
+  const iconOf = (id: string): IconName => {
+    const standalone = (STANDALONE_TEXTS as Record<string, { icon: string } | undefined>)[id];
+    if (standalone) return iconFor(standalone.icon);
+    return iconFor(findAnyMitzvah(id)?.icon ?? 'siddur');
+  };
+  const empty = summary.psalms.total === 0 && summary.texts.length === 0;
+  return (
+    <>
+      <SectionLabel text={t('history.reading.title')} />
+      <Card divided>
+        {empty ? (
+          <View testID="history-reading-empty">
+            <ListRow
+              icon="siddur"
+              iconTone="muted"
+              title={t('history.reading.emptyTitle')}
+              caption={t('history.reading.empty')}
+            />
+          </View>
+        ) : null}
+        {summary.psalms.total > 0 ? (
+          <View testID="history-reading-psalms">
+            <ListRow
+              icon="tehillim"
+              title={t('history.reading.psalms', { count: summary.psalms.total })}
+              caption={[
+                period(summary.psalms),
+                t('history.reading.distinct', { count: summary.psalms.distinct, of: PSALM_COUNT }),
+                summary.psalms.books > 0 ? t('history.reading.books', { count: summary.psalms.books }) : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            />
+          </View>
+        ) : null}
+        {summary.texts.map((entry) => (
+          <View key={entry.id} testID={`history-reading-${entry.id}`}>
+            <ListRow
+              icon={iconOf(entry.id)}
+              title={t(entry.totals.total === 1 ? 'history.reading.text.once' : 'history.reading.text', {
+                name: nameOf(entry.id),
+                count: entry.totals.total,
+              })}
+              caption={period(entry.totals)}
+            />
+          </View>
+        ))}
+      </Card>
+    </>
+  );
+}
+
 export default function HistoryScreen() {
   const { colors } = useTheme();
   const { t, language } = useI18n();
@@ -1352,6 +1423,8 @@ export default function HistoryScreen() {
             <Insight text={t('history.insight.leader', { name: nameForId(leader.id), percent: leader.percent })} />
           </Reveal>
         ) : null}
+
+        <ReadingCard />
 
         {data.improve ? (
           <>

@@ -331,7 +331,6 @@ function seedStores(language) {
       notificationsEnabled: true,
       inIsrael: true,
       isOnboarded: true,
-      siddurCompassPrompt: false,
       siddurVoice: 'male',
       prayerMode: 'minyan',
       homeLook: 'rail',

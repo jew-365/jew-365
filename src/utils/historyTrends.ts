@@ -110,6 +110,16 @@ export function periodPercents(input: HistoryInput, now: Date, judge: DayJudge):
   };
 }
 
+// The first app day of this week and of this Hebrew month, as date keys: the period rings' own starts, which the
+// reading card counts from too.
+export function periodStartKeys(now: Date, location: Location): { week: string; month: string } {
+  const today = appDay(now, location);
+  return {
+    week: dateKey(currentWeekSpan(today, location, now).start),
+    month: dateKey(hebrewMonthStart(today)),
+  };
+}
+
 export type WeekName = { kind: 'parasha' | 'festival'; he: string; en: string };
 
 function festivalName(hd: HDate, inIsrael: boolean): { he: string; en: string } | null {

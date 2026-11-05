@@ -150,6 +150,28 @@ describe('Mitzvah screen', () => {
     });
   });
 
+  it.each([
+    ['GRA', 'מג״א 08:42 · גר״א 09:17 (בחירתך)', 'לפי הגר"א'],
+    ['MA', 'מג״א 08:42 (בחירתך) · גר״א 09:17', 'לפי המגן אברהם'],
+  ] as const)('shows the morning Shema by both opinions, the window by %s', (opinion, line, note) => {
+    useUserStore.setState({ halachicOpinions: { ksSofZman: opinion } });
+    const z = zmanimFor(at(JERUSALEM, '2026-10-28T12:00'), JERUSALEM);
+    const expected = line
+      .replace('08:42', clockOf(z.sofZmanShmaMA, JERUSALEM.tz))
+      .replace('09:17', clockOf(z.sofZmanShmaGra, JERUSALEM.tz));
+    renderMitzvah({ id: 'krias_shma_shacharit' });
+    const card = within(screen.getByTestId('mitzvah-shema-opinions'));
+    expect(card.getByText(expected)).toBeOnTheScreen();
+    expect(card.getByText(new RegExp(note))).toBeOnTheScreen();
+    const end = clockOf(opinion === 'MA' ? z.sofZmanShmaMA : z.sofZmanShmaGra, JERUSALEM.tz);
+    expect(screen.getAllByText(new RegExp(`עד ${end}$`)).length).toBeGreaterThan(0);
+  });
+
+  it('shows no Shema opinions for another mitzvah', () => {
+    renderMitzvah({ id: 'shacharit' });
+    expect(screen.queryByTestId('mitzvah-shema-opinions')).toBeNull();
+  });
+
   it('prints the next reminder in the accent text colour', () => {
     renderMitzvah({ id: 'shacharit' });
     expect(screen.getByText(/^ההתראה הבאה תישלח ב-/)).toHaveStyle({ color: THEMES.gold.goldText });

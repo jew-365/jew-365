@@ -93,7 +93,6 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChokLicenseNotice } from '@/components/ChokLicenseNotice';
 import { ChokWeekControls } from '@/components/ChokWeekControls';
-import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { ListRow } from '@/components/ListRow';
 import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { PickerCard } from '@/components/PickerCard';
@@ -157,6 +156,15 @@ import {
 import { currentOrNextWindow, dayWindow, windowDueToday } from '@/utils/buildDayTimeline';
 import { afterPaint } from '@/utils/afterPaint';
 import { compassPrayerOf } from '@/utils/compass';
+import { useReadingStore } from '@/stores/useReadingStore';
+import {
+  creditTick,
+  lettersByTitle,
+  readingUnits,
+  unitRead,
+  visibleSections,
+  type ReadingCredit,
+} from '@/utils/reading';
 import { calendarDay } from '@/utils/checkIn';
 import { windowClosed } from '@/utils/lateMarks';
 import { appDay } from '@/utils/locationDay';
@@ -168,7 +176,8 @@ const KEEP_AWAKE_TAG = 'siddur-reader';
 const RIGHT_EDGE = I18nManager.isRTL ? ('left' as const) : ('right' as const);
 const LEFT_EDGE = I18nManager.isRTL ? ('right' as const) : ('left' as const);
 const SECTION_VIEWABILITY = { viewAreaCoveragePercentThreshold: 2 };
-const COMPASS_PROMPT_MS = 5000;
+// The sections of Shacharit, Mincha and Maariv that open an Amidah: the compass button sits above each.
+const AMIDAH_SECTIONS: ReadonlySet<string> = new Set(['תפילת העמידה', 'מוסף']);
 const JUMP_RETRY_MS = 50;
 const JUMP_TIMEOUT_MS = 5000;
 const LIST_PADDING = spacing.lg;
@@ -733,6 +742,7 @@ function useAutoScroll(
   return {
     scrollHandler,
     offset,
+    viewportHeight: () => sizes.current.viewport,
     reset,
     animatedProps: SCROLLS_BY_PROP ? animatedProps : undefined,
     webInput,
@@ -749,6 +759,63 @@ function useAutoScroll(
       updateEnd();
     },
   };
+}
+
+const READING_TICK_MS = 1000;
+
+type ReadingGeometry = {
+  sectionHeight: (title: string) => number | undefined;
+  listTop: () => number;
+  viewportTop: () => number;
+  viewportHeight: () => number;
+  day: () => string;
+};
+
+// Counts what the reader reads (the rules in utils/reading.ts): once a second while `active` and the app is in
+// front, each section on screen is credited, and each unit of the text (the whole text, a psalm) is counted once
+// per open of the text when it is read. `countId` null counts nothing (a custom mitzvah's own text).
+function useReadingTracker(
+  countId: string | null,
+  sections: readonly SiddurSection[],
+  active: boolean,
+  geometry: ReadingGeometry,
+): void {
+  const geometryRef = useRef(geometry);
+  geometryRef.current = geometry;
+  const credit = useRef<ReadingCredit>(new Map());
+  const counted = useRef(new Set<string>());
+
+  useEffect(() => {
+    credit.current = new Map();
+    counted.current = new Set();
+  }, [countId]);
+
+  useEffect(() => {
+    if (!countId || !active || sections.length === 0) return undefined;
+    const letters = lettersByTitle(sections);
+    const units = readingUnits(countId, sections);
+    let last = Date.now();
+    const timer = setInterval(() => {
+      const now = Date.now();
+      const dt = now - last;
+      last = now;
+      const appState = AppState.currentState;
+      if (appState === 'background' || appState === 'inactive') return;
+      const g = geometryRef.current;
+      const height = g.viewportHeight();
+      const top = g.viewportTop();
+      const shown = visibleSections(sections, g.sectionHeight, g.listTop(), top, top + height);
+      credit.current = creditTick(credit.current, shown, height, dt, letters);
+      for (const unit of units) {
+        if (counted.current.has(unit.id) || !unitRead(unit, credit.current, letters)) continue;
+        counted.current.add(unit.id);
+        const store = useReadingStore.getState();
+        if (unit.psalm !== null) store.addPsalmRead(g.day(), unit.psalm);
+        else store.addTextRead(g.day(), countId);
+      }
+    }, READING_TICK_MS);
+    return () => clearInterval(timer);
+  }, [countId, sections, active]);
 }
 
 export default function SiddurScreen() {
@@ -814,9 +881,6 @@ export default function SiddurScreen() {
         : null;
   const compassPrayer =
     Platform.OS === 'web' ? null : compassPrayerOf(mitzvah && !mitzvah.isCustom ? mitzvah.id : undefined);
-  const [compassPromptOpen, setCompassPromptOpen] = useState(
-    () => compassPrayer !== null && params.fromCompass !== '1' && useUserStore.getState().siddurCompassPrompt,
-  );
   const requestedDate = useMemo(() => parseDateParam(params.date), [params.date]);
   const { settings } = useDayModel();
   const place = useMemo(() => siddurPlace(location, inIsrael), [location, inIsrael]);
@@ -1188,7 +1252,6 @@ export default function SiddurScreen() {
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
   const openCompass = () => {
     if (!compassPrayer) return;
-    setCompassPromptOpen(false);
     router.push({
       pathname: '/compass',
       params: { prayer: compassPrayer, ...(params.date ? { date: params.date } : {}) },
@@ -1571,12 +1634,23 @@ export default function SiddurScreen() {
       !bookmarksOpen &&
       saving === null &&
       resumeOffer === null &&
-      !compassPromptOpen &&
       !lateMark.open,
     autoScrollPixelsPerSecond(SIDDUR_SCROLL_SPEEDS[scrollSpeedLevel(scrollSpeed) - 1], textSize),
     onUserScroll,
     onScrollReport,
     fold,
+  );
+  useReadingTracker(
+    chok ? CHOK_TEXT_ID : textId,
+    sections,
+    focused && !quiet && !body && !bookmarksOpen && !pickerOpen,
+    {
+      sectionHeight: (title) => sectionHeights.current.get(title),
+      listTop: () => LIST_PADDING + fold.fullHeight() + headerHeight.current,
+      viewportTop: () => autoScroll.offset.value + fold.inset(),
+      viewportHeight: () => Math.max(0, autoScroll.viewportHeight() - fold.inset()),
+      day: () => dateKey(appDay(new Date(), location)),
+    },
   );
   const pendingShift = useRef(0);
   const { gesturing } = autoScroll;
@@ -1777,7 +1851,7 @@ export default function SiddurScreen() {
             subtitle={subtitle}
             onBack={goBack}
             actions={
-              settingsTarget || bookmarkable || compassPrayer ? (
+              settingsTarget || bookmarkable ? (
                 <>
                   {settingsTarget ? (
                     <HeaderPill
@@ -1785,9 +1859,6 @@ export default function SiddurScreen() {
                       accessibilityLabel={t('siddur.mitzvahSettings')}
                       onPress={openMitzvahSettings}
                     />
-                  ) : null}
-                  {compassPrayer ? (
-                    <HeaderPill icon="compass" accessibilityLabel={t('siddur.openCompass')} onPress={openCompass} />
                   ) : null}
                   {bookmarkable ? (
                     <>
@@ -2001,6 +2072,18 @@ export default function SiddurScreen() {
                       {nameOf(heading)}
                     </Text>
                   ))}
+                  {compassPrayer && AMIDAH_SECTIONS.has(section.title.he) ? (
+                    <TapGuard>
+                      <Button
+                        variant="secondary"
+                        size="compact"
+                        icon="compass"
+                        label={t('siddur.compassButton')}
+                        onPress={openCompass}
+                        style={styles.compassButton}
+                      />
+                    </TapGuard>
+                  ) : null}
                   <MeasuredView>
                     <Card padded style={styles.sectionCard}>
                       {sectionCard(section)}
@@ -2180,17 +2263,6 @@ export default function SiddurScreen() {
       </BottomSheet>
 
       {lateMark.dialog}
-
-      <ConfirmDialog
-        visible={compassPromptOpen}
-        title={t('siddur.compassPrompt.title')}
-        body={t('siddur.compassPrompt.body')}
-        confirmLabel={t('common.yes')}
-        cancelLabel={t('common.no')}
-        countdownMs={screenReader ? undefined : COMPASS_PROMPT_MS}
-        onConfirm={openCompass}
-        onCancel={() => setCompassPromptOpen(false)}
-      />
 
       {toast ? (
         <View pointerEvents="none" accessibilityLiveRegion="polite" style={styles.toast}>
@@ -2461,6 +2533,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   sectionTitle: {
+    marginBottom: spacing.sm,
+  },
+  compassButton: {
+    alignSelf: 'center',
     marginBottom: spacing.sm,
   },
   sectionHeading: {

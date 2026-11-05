@@ -11,6 +11,7 @@ import { useUserStore } from '@/stores/useUserStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
+import { useReadingStore } from '@/stores/useReadingStore';
 import { useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useChokStore } from '@/stores/useChokStore';
@@ -36,6 +37,7 @@ export const AppResetService = {
       useCompletionsStore.getState().reset();
       useCustomMitzvotStore.getState().reset();
       useSiddurBookmarksStore.getState().reset();
+      useReadingStore.getState().reset();
       useTaharahStore.getState().reset();
       useChokStore.getState().reset();
       useSelichotStore.getState().reset();

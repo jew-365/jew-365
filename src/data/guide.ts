@@ -76,8 +76,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'Five tabs sit at the bottom: More, Siddur, Home, Tracking and Settings. More holds the schedule, Chok LeYisrael, Tehillim, the hilulot, the prayer compass, the halacha hotline and this guide, which also opens from Settings → About and contact or by searching “guide” in Settings.',
       },
       {
-        he: 'מצפן התפילה בלשונית עוד הוא רדאר: קו סריקה מסתובב, והכותל נדלק כנקודה במרחק שלו ובכיוון שלו ביחס לטלפון. מתחתיו כתוב כמה מעלות לסובב ולאיזה צד, המרחק בקילומטרים והכיוון מהצפון, וכשהטלפון פונה לכותל הוא נצבע ירוק ומגיע רטט קצר. הוא צריך הרשאת מיקום, ובלעדיה הוא מבקש אותה. הכיוון מחושב מהמקום שבו אתה עומד, וכשהמיקום לא נמצא המסך אומר זאת, מחשב לפי העיר שבהגדרות ומאפשר לנסות שוב. כשהמצפן מבקש כיול, מזיזים את הטלפון בצורת שמונה. אפשר לפתוח אותו גם מכפתור המצפן בראש שחרית, מנחה וערבית בסידור, ובכניסה לתפילות האלה מופיעה לחמש שניות הצעה לפתוח אותו, שאפשר לכבות בהגדרות ← תפילה וסידור. כשנכנסים אליו מתפילה ופונים לכותל, מופיע בתחתית כפתור ״המשך לתפילה״.',
-        en: 'The prayer compass in the More tab is a radar: a sweep line turns and the Kotel lights up as a point at its distance and direction from the phone. Under it the screen says how many degrees to turn and which way, the distance in kilometres and the bearing from north, and when the phone faces the Kotel it turns green with a short vibration. It needs the location permission and asks for it when missing. The direction is measured from where you stand; when your location is not found the screen says so, measures from the city in Settings and lets you try again. When it asks for calibration, move the phone in a figure eight. It also opens from the compass button at the top of Shacharit, Mincha and Maariv in the siddur, and opening those prayers offers it for five seconds, an offer you can turn off in Settings → Prayer and siddur. Opened from a prayer, it shows a “Continue to the prayer” button at the bottom once you face the Kotel.',
+        he: 'מצפן התפילה בלשונית עוד הוא רדאר: קו סריקה מסתובב, והכותל נדלק כנקודה במרחק שלו ובכיוון שלו ביחס לטלפון. מתחתיו כתוב כמה מעלות לסובב ולאיזה צד, המרחק בקילומטרים והכיוון מהצפון, וכשהטלפון פונה לכותל הוא נצבע ירוק ומגיע רטט קצר. הוא צריך הרשאת מיקום, ובלעדיה הוא מבקש אותה. הכיוון מחושב מהמקום שבו אתה עומד, וכשהמיקום לא נמצא המסך אומר זאת, מחשב לפי העיר שבהגדרות ומאפשר לנסות שוב. כשהמצפן מבקש כיול, מזיזים את הטלפון בצורת שמונה. אפשר לפתוח אותו גם מכפתור ״מצפן תפילה״ שמופיע בסידור לפני כל תפילת עמידה בשחרית, במוסף, במנחה ובערבית. כשנכנסים אליו מתפילה ופונים לכותל, מופיע בתחתית כפתור ״המשך לתפילה״.',
+        en: 'The prayer compass in the More tab is a radar: a sweep line turns and the Kotel lights up as a point at its distance and direction from the phone. Under it the screen says how many degrees to turn and which way, the distance in kilometres and the bearing from north, and when the phone faces the Kotel it turns green with a short vibration. It needs the location permission and asks for it when missing. The direction is measured from where you stand; when your location is not found the screen says so, measures from the city in Settings and lets you try again. When it asks for calibration, move the phone in a figure eight. It also opens from the “Prayer compass” button the siddur shows before every Amidah of Shacharit, Musaf, Mincha and Maariv. Opened from a prayer, it shows a “Continue to the prayer” button at the bottom once you face the Kotel.',
       },
     ],
     routes: ['/(tabs)/more', '/guide', '/compass'],
@@ -206,8 +206,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "The star button saves the current place as a bookmark; when the text already has bookmarks it asks whether to add a new one or move one of them here, and Bookmarks shows Where you left off and the text's bookmarks, to jump to or delete. Next time the reader offers to continue where you left off: for a mitzvah's text (the prayers, candle lighting, havdalah, the Omer) on the same day only, for every other text always. Done at the end of the text marks its mitzvah, and in a mitzvah's text the settings button at the top opens the mitzvah's screen.",
       },
       {
-        he: 'בהגדרות ← תפילה וסידור בוחרים נוסח (אשכנז, ספרד, עדות המזרח, חב״ד או תימן בלדי), דעת זמן ק״ש (הגר״א או המגן אברהם, שקובעת מתי נגמר חלון קריאת שמע של שחרית), במניין או ביחיד, ״נוסח הסידור״ לגבר או לאישה, וגלילה. נוסח הסידור מתעדכן לפי המגדר בפרופיל: אישה קוראת את ״מודה אני״, את ברכות השחר ואת שאר הנוסחים בלשון אישה.',
-        en: "Settings → Prayer and siddur sets the nusach (Ashkenaz, Sefard, Edot HaMizrach, Chabad or Teiman Baladi), the Shema opinion (Gra or Magen Avraham, which decides when the morning Shema window ends), Minyan or Alone, the Siddur wording for a man or a woman, and scrolling. The siddur wording follows the gender in your profile: a woman reads Modeh Ani, the morning blessings and the other women's forms.",
+        he: 'בהגדרות ← תפילה וסידור בוחרים נוסח (אשכנז, ספרד, עדות המזרח, חב״ד או תימן בלדי), דעת זמן ק״ש (הגר״א או המגן אברהם, שקובעת מתי נגמר חלון קריאת שמע של שחרית; מסך המצווה והכרטיס בדף הבית מציגים את שתי הדעות לידיעה), במניין או ביחיד, ״נוסח הסידור״ לגבר או לאישה, וגלילה. נוסח הסידור מתעדכן לפי המגדר בפרופיל: אישה קוראת את ״מודה אני״, את ברכות השחר ואת שאר הנוסחים בלשון אישה.',
+        en: "Settings → Prayer and siddur sets the nusach (Ashkenaz, Sefard, Edot HaMizrach, Chabad or Teiman Baladi), the Shema opinion (Gra or Magen Avraham, which decides when the morning Shema window ends; the mitzvah's screen and its Home card show both for reference), Minyan or Alone, the Siddur wording for a man or a woman, and scrolling. The siddur wording follows the gender in your profile: a woman reads Modeh Ani, the morning blessings and the other women's forms.",
       },
       {
         he: 'הסליחות יורדות כתוסף בנוסח שלך: עד שהן מותקנות, השורה בסידור, מסך המצווה ולשונית עוד מציעים להוריד אותן, ושבוע לפני תחילת העונה מופיעה גם בדף הבית הצעה להוריד. החלפת נוסח מציעה את הסליחות של הנוסח החדש.',
@@ -269,6 +269,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
       {
         he: 'בלשונית מעקב, מעל שלוש לשוניות, מופיעים הרצף שלך וכמה ימים נשארו עד היעד הבא. ״סיכום״ מראה כמה סימנת היום, השבוע והחודש העברי, לוח של החודש העברי שבו כל יום צבוע לפי כמה ממנו בוצע (הקשה על יום מציגה את המצוות שלו), ועקביות ורצף לכל מצווה. הקשה על מצווה, ברשימה או בתוך יום, פותחת את המסך שלה. מצווה שהופעלה היום מסומנת ״חדש״ עד שנספר לה יום.',
         en: "The Tracking tab shows your streak and the days left to the next goal above three tabs. Summary shows how much you marked today, this week and this Hebrew month, a calendar of the Hebrew month where each day is shaded by how much of it was done (tap a day to see its mitzvot), and each mitzvah's consistency and streak. Tapping a mitzvah, in the list or inside a day, opens its screen. A mitzvah switched on today reads New until one of its days is counted.",
+      },
+      {
+        he: 'בסוף ״סיכום״ נמצא כרטיס ״קריאה בסידור״: כמה פעמים קראתם כל טקסט בסידור (ברכת המזון, נשמת, תפילת הדרך וכל השאר), וכמה פרקי תהילים, השבוע, החודש ובסך הכול, בלי רצף. כל פרק תהילים נספר בנפרד, גם הפרקים של תיקון הכללי, וכשכל 150 הפרקים נקראו נספר ספר שלם. הספירה חכמה: קריאה נספרת לפי הזמן שהטקסט היה מול העיניים ביחס לאורכו, ולא בגלילה מהירה עד הסוף.',
+        en: 'At the end of Summary, the Reading in the siddur card counts how many times you read each siddur text (Grace After Meals, Nishmat, the traveler’s prayer and the rest) and how many Tehillim chapters, this week, this month and in all, with no streak. Each psalm counts on its own, Tikkun HaKlali’s chapters included, and once all 150 chapters are read a whole book is counted. The count is smart: a read counts by how long the text was in front of you for its length, not by scrolling fast to the end.',
       },
       {
         he: '״מגמות״ מציג את 12 השבועות האחרונים, היום החזק שלך בשבוע (שבת וחג בנפרד, כי הם נסמנים בצ׳ק־אין), איך כל מצווה השתנתה לעומת 30 הימים שלפני, ואת הדוחות השבועיים. ״הישגים״ שומר את ההישגים שהשגת ואת השיאים שלך, גם אחרי שההיסטוריה הישנה נמחקת.',
@@ -417,6 +421,18 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
     label: '1.0.21-13',
     date: '2026-11-03',
     items: [
+      {
+        he: 'מצפן התפילה נפתח רק כשמבקשים: בסידור מופיע לפני כל תפילת עמידה כפתור ״מצפן תפילה״, ואין יותר חלון שקופץ בכניסה לתפילה או הגדרה עבורו.',
+        en: 'The prayer compass opens only when you ask: the siddur shows a “Prayer compass” button before every Amidah, and the window that popped up on opening a prayer, with its setting, is gone.',
+      },
+      {
+        he: 'קריאת שמע של שחרית מציגה את סוף הזמן לפי שתי הדעות, המג״א והגר״א, במסך המצווה ובכרטיס שבדף הבית. זו תצוגה בלבד: החלון והתזכורות ממשיכים לפי הדעה שבחרתם בהגדרות ← תפילה וסידור.',
+        en: "The morning Shema shows its latest time by both opinions, the MGA and the Gra, on the mitzvah's screen and on its Home card. It is for display only: the window and reminders still follow the opinion chosen in Settings → Prayer and siddur.",
+      },
+      {
+        he: 'ספירת קריאה בסידור: בסוף לשונית מעקב ← סיכום רואים כמה פעמים קראתם כל טקסט וכמה פרקי תהילים (כולל תיקון הכללי), השבוע, החודש ובסך הכול. קריאה נספרת לפי הזמן שהטקסט היה מול העיניים, לא בגלילה עד הסוף.',
+        en: 'Reading counts: at the end of Tracking → Summary see how many times you read each siddur text and how many Tehillim chapters (Tikkun HaKlali included), this week, this month and in all. A read counts by the time the text was in front of you, not by scrolling to the end.',
+      },
       {
         he: 'כל זמני היום לפי לוח אור החיים: עלות השחר, זמן טלית ותפילין, סוף זמן קריאת שמע ותפילה, מנחה, פלג המנחה וצאת הכוכבים מחושבים כמו בלוח ומעוגלים לדקה כמו בו.',
         en: 'Every zman follows the Ohr HaChaim luach: dawn, the time for tallit and tefillin, the latest Shema and prayer, mincha, plag hamincha and nightfall are computed as the luach does and rounded to the minute as it prints them.',

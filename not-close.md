@@ -572,6 +572,35 @@ The owner's upgrade list of 2026-11-04, narrowed the same day to simple tasks th
   - **What it solves:** the owner's pick of 2026-11-04 as asked ("לצבוע את הספרות של שעת סוף הזמן בצבע ההתראה הרלוונטי"), deferred to the next build by the owner's choice the same day.
   - **Expected result:** on an Android build, the end time in each reminder shows in green, orange or red, and the icon and app name keep their default colour.
 
+### App requests of 2026-11-05 — batch rules
+
+The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה שינויים"), each `OTA`. Done means as in the batch rules of 2026-10-24.
+
+### Medium — App requests of 2026-11-05
+
+- [ ] Open the prayer compass only from a button before each Amidah
+  - **Flag:** `OTA`.
+  - **What it is:** no compass offer on opening Shacharit, Mincha or Maariv, no Settings switch for it (`siddurCompassPrompt` removed from the user store, its search item and keys), and no compass pill in the reader's header; instead a compact "מצפן תפילה" button above every section that opens an Amidah (`תפילת העמידה`, and Musaf on its days) in those three texts, which opens the compass as the offer did. The More tab's compass row stays.
+  - **What it solves:** the owner's words: "מצפן תפילה לא נפתח בפופאפ ואין אותו בהגדרות; הוא נפתח אך ורק על ידי המשתמש על ידי כפתור חדש לפני כל תפילת עמידה".
+  - **Expected result:** opening a prayer shows no window; a press of the button above an Amidah opens the compass with the prayer and its date.
+  - **Done:** 2026-11-05. Verified: [src/app/__tests__/siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx) (the button above the Amidah of Mincha, Maariv and Shacharit and above Musaf on Rosh Chodesh, not above another section, its push with and without a date, no header pill, none for another text or on web), the settings and search suites, typecheck, lint, DOX. Not checked on a phone.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
+- [ ] Show the morning Shema's latest time by both the MGA and the Gra, for display only
+  - **Flag:** `OTA`.
+  - **What it is:** `shemaOpinionsFor()` / `shemaOpinionsLine()` in [src/utils/shemaOpinions.ts](src/utils/shemaOpinions.ts): a card on the `krias_shma_shacharit` screen and a line on its home NowCard with both clocks, the user's opinion marked; the window, reminders and history keep following `ksSofZman`.
+  - **What it solves:** the owner's words: "בקריאת שמע של שחרית להציג את שני הדעות גם מגן אברהם וגם הגרא וזה לתצוגה בלבד והזמנים יהיו לפי מה שהוא קבע".
+  - **Expected result:** the mitzvah screen and the home card show "מג״א HH:MM · גר״א HH:MM" with the chosen one marked, and the window's end stays the chosen opinion's.
+  - **Done:** 2026-11-05. Verified: [src/utils/__tests__/shemaOpinions.test.ts](src/utils/__tests__/shemaOpinions.test.ts), the two opinions in [src/app/__tests__/mitzvah.render.test.tsx](src/app/__tests__/mitzvah.render.test.tsx) and the note line in [src/components/__tests__/NowCard.render.test.tsx](src/components/__tests__/NowCard.render.test.tsx). Not checked on a phone.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
+- [ ] Count every siddur text read, with Tehillim by chapter, in a card in Tracking's Summary
+  - **Flag:** `OTA`.
+  - **What it is:** a count, with no streak, of how many times each siddur text was read (Birkat HaMazon, every other text) and how many Tehillim chapters (Tikkun HaKlali's ten chapters count toward Tehillim too). The owner's answers of 2026-11-05: every siddur text; Tehillim counted automatically by scrolling; Birkat HaMazon "בצורה חכמה לפי כמה הוא קרא לא בהכרך שהוא גלל עד למטה"; shown as a card inside סיכום.
+  - **What it solves:** tracking what is not in the mitzvot list.
+  - **Expected result:** reading most of a text in the reader counts it once per open; each Tehillim chapter mostly read counts once; the Summary card shows totals, this week and this month.
+  - **How it counts:** [src/utils/reading.ts](src/utils/reading.ts): each section on screen is credited for the time it shows, by its share of the screen, up to its Hebrew letters at 25 a second; a text, or a psalm, counts once 70% of its letters are credited, once per open. Tehillim counts by chapter only; Tikkun HaKlali counts as a text and its ten psalms toward the Tehillim total; a whole book is the least count over psalms 1 to 150. The counts are `reading-store` ([src/stores/useReadingStore.ts](src/stores/useReadingStore.ts)), in the backup file.
+  - **Done:** 2026-11-05. Verified: [src/utils/__tests__/reading.test.ts](src/utils/__tests__/reading.test.ts), [src/stores/__tests__/reading.store.test.ts](src/stores/__tests__/reading.store.test.ts), the reader's reading count cases (a psalm counted after its reading time and only once, nothing in the background) in [src/app/__tests__/siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx), the card in [src/app/__tests__/history.render.test.tsx](src/app/__tests__/history.render.test.tsx), the backup and search suites. Not checked on a phone: the reading pace (25 letters a second, 70%) is a first guess for the owner to tune.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
+
 ## Bugs
 
 - [ ] The zmanim follow a depression-angle method, not the Ohr HaChaim luach

@@ -19,6 +19,7 @@ import { UI_SCALE } from '@/theme/scale';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
+import { useReadingStore } from '@/stores/useReadingStore';
 import { useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
 
 export const BACKUP_APP = 'jew-365';
@@ -34,6 +35,7 @@ const STORES = {
   'completions-store': useCompletionsStore,
   'custom-mitzvot-store': useCustomMitzvotStore,
   'siddur-bookmarks-store': useSiddurBookmarksStore,
+  'reading-store': useReadingStore,
 } as const;
 
 export type BackupStoreName = keyof typeof STORES;

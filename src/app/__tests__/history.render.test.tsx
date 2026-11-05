@@ -15,6 +15,7 @@ import { StreakRing } from '@/components/StreakRing';
 import { CITIES } from '@/data/cities';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
+import { useReadingStore } from '@/stores/useReadingStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { renderWithTheme } from '@/testing/render';
 import { at } from '@/testing/zmanim';
@@ -295,6 +296,41 @@ describe('history', () => {
     it('persists the achievements it computed', async () => {
       await renderFixture();
       expect(useCompletionsStore.getState().achievements?.badges.streak7).toBe('2026-10-18');
+    });
+  });
+
+  describe('the reading card in סיכום', () => {
+    afterEach(() => useReadingStore.getState().reset());
+
+    it('invites a first read while nothing is counted', async () => {
+      useReadingStore.getState().reset();
+      renderHistory(lastTwoDays);
+      await screen.findByTestId('history-calendar');
+      expect(screen.getByText('קריאה בסידור')).toBeOnTheScreen();
+      expect(screen.getByTestId('history-reading-empty')).toBeOnTheScreen();
+    });
+
+    it('counts the psalms and each text, all, this week and this Hebrew month, most read first', async () => {
+      useReadingStore.setState({
+        texts: {
+          '2026-09-01': { nishmat: 1 },
+          '2026-10-20': { birkat_hamazon: 2 },
+          '2026-10-26': { birkat_hamazon: 1, nishmat: 1 },
+        },
+        psalms: { '2026-10-27': { '1': 1, '2': 1 }, '2026-10-26': { '1': 1 } },
+      });
+      renderHistory(lastTwoDays);
+      await screen.findByTestId('history-calendar');
+      expect(screen.queryByTestId('history-reading-empty')).toBeNull();
+      const psalms = within(screen.getByTestId('history-reading-psalms'));
+      expect(psalms.getByText('פרקי תהילים: 3')).toBeOnTheScreen();
+      expect(psalms.getByText('השבוע 3 · החודש 3 · 2 מתוך 150 פרקים')).toBeOnTheScreen();
+      const grace = within(screen.getByTestId('history-reading-birkat_hamazon'));
+      expect(grace.getByText('ברכת המזון: 3 פעמים')).toBeOnTheScreen();
+      expect(grace.getByText('השבוע 1 · החודש 3')).toBeOnTheScreen();
+      const nishmat = within(screen.getByTestId('history-reading-nishmat'));
+      expect(nishmat.getByText('נשמת כל חי: 2 פעמים')).toBeOnTheScreen();
+      expect(nishmat.getByText('השבוע 1 · החודש 1')).toBeOnTheScreen();
     });
   });
 
