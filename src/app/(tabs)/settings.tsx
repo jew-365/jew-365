@@ -111,7 +111,7 @@ const selectEnabledCount =
     ).length;
 
 // About how many notifications a day the enabled mitzvot send: each everyday mitzvah's reminders once
-// plus its window's nags, at its own nagging level or the app's.
+// plus its window's nags, at its own nagging level or the app's, or the ones placed by hand.
 const selectDayEstimate =
   (nusach: Nusach, appLevel: NagLevel) =>
   (state: { activeMitzvot: Record<string, ActiveMitzvahState> }): number =>
@@ -120,7 +120,9 @@ const selectDayEstimate =
       if (!mitzvah || !mitzvah.nuschaotSupported.includes(nusach) || !countsInDayEstimate(mitzvah.category)) {
         return sum;
       }
-      return sum + remindersPerDay(mitzvah, remindersOf(active, mitzvah), active.nagLevel ?? appLevel);
+      return (
+        sum + remindersPerDay(mitzvah, remindersOf(active, mitzvah), active.nagLevel ?? appLevel, active.manualNags)
+      );
     }, 0);
 
 export default function SettingsScreen() {

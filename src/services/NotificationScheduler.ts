@@ -587,10 +587,9 @@ export function setSchedulingSuspended(value: boolean): void {
   schedulingSuspended = value;
 }
 
-function mitzvotConfigChanged(
-  next: Record<string, { enabled: boolean; customReminders?: Reminder[]; nagLevel?: number }>,
-  prev: Record<string, { enabled: boolean; customReminders?: Reminder[]; nagLevel?: number }>,
-): boolean {
+type MitzvahConfig = { enabled: boolean; customReminders?: Reminder[]; nagLevel?: number; manualNags?: unknown };
+
+function mitzvotConfigChanged(next: Record<string, MitzvahConfig>, prev: Record<string, MitzvahConfig>): boolean {
   const keys = new Set([...Object.keys(next), ...Object.keys(prev)]);
   for (const id of keys) {
     const a = next[id];
@@ -598,6 +597,7 @@ function mitzvotConfigChanged(
     if ((a?.enabled ?? false) !== (b?.enabled ?? false)) return true;
     if (a?.customReminders !== b?.customReminders) return true;
     if (a?.nagLevel !== b?.nagLevel) return true;
+    if (a?.manualNags !== b?.manualNags) return true;
   }
   return false;
 }

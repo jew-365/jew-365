@@ -11,7 +11,7 @@ jest.mock('@/services/notifications/planners/horizonEnd', () => ({ planHorizonEn
 
 import { DateTime } from 'luxon';
 import { buildPlan } from '../plan';
-import { nextReminderAt, planMitzvot, windowNotificationCount, windowSends } from '../planners/mitzvot';
+import { nextReminderAt, planMitzvot, windowNotificationCount, windowSends, windowTimeline } from '../planners/mitzvot';
 import { horizonFor } from '../planners/horizon';
 import { parseId } from '../ids';
 import type { PlanInput, ScheduleCandidate } from '../types';
@@ -21,7 +21,7 @@ import { rulesFor } from '@/data/taharahPresets';
 import { DEFAULT_HILULA_NOTICES, DEFAULT_ROSH_CHODESH_NOTICES } from '@/stores/useUserStore';
 import { at } from '@/testing/zmanim';
 import { NUSACH_IDS } from '@/data/nuschaot';
-import type { Mitzvah, NagLevel, Reminder, UserSettings } from '@/types/mitzvah';
+import type { ManualNag, Mitzvah, NagLevel, Reminder, UserSettings } from '@/types/mitzvah';
 import { ZmanimService } from '@/services/ZmanimService';
 import { locationNoon } from '@/utils/locationDay';
 import type { QuietHours } from '@/utils/quietHours';
@@ -80,6 +80,7 @@ type Options = {
   quietHours?: QuietHours;
   completions?: PlanInput['completions'];
   platform?: PlanInput['platform'];
+  manual?: Record<string, ManualNag[]>;
 };
 
 function planInput(mitzvot: Mitzvah[], now: Date, options: Options = {}): PlanInput {
@@ -95,6 +96,7 @@ function planInput(mitzvot: Mitzvah[], now: Date, options: Options = {}): PlanIn
     reminderOverrides: options.overrides ?? {},
     ...(options.level ? { nagLevel: options.level } : {}),
     ...(options.levels ? { nagLevels: options.levels } : {}),
+    ...(options.manual ? { manualNagsByMitzvah: options.manual } : {}),
     completions: options.completions ?? {},
     skipped: {},
     checkIns: {},
@@ -347,5 +349,83 @@ describe('the total a window sends, for the bell on home', () => {
 
   it('is null on a day with no window', () => {
     expect(windowNotificationCount(CANDLES, CANDLES.defaultReminders, date, scope(4))).toBeNull();
+  });
+});
+
+describe('nags placed by hand on the timeline', () => {
+  const placed: ManualNag[] = [
+    { anchor: 'end', offsetMin: -10, kind: 'lastChance', lastChance: 'alone' },
+    { anchor: 'end', offsetMin: -70, kind: 'zone' },
+  ];
+
+  it('are sent instead of the smart nag’s, numbered in time order, worded by their kind', () => {
+    const { end } = windowOf(MINCHA);
+    const day = of(plan([MINCHA], NIGHT_BEFORE, { level: 4, manual: { mincha: placed } }), 'mincha', DAY);
+    expect(pairs(nags(day))).toEqual([
+      [`mincha__${DAY}__n1`, end.getTime() - 70 * MIN],
+      [`mincha__${DAY}__n2`, end.getTime() - 10 * MIN],
+    ]);
+    expect(nags(day).map((c) => c.data.nag)).toEqual([
+      { k: 1, of: 2, kind: 'zone' },
+      { k: 2, of: 2, kind: 'lastChance', lastChance: 'alone' },
+    ]);
+    expect(nags(day).map(messageOf)).toEqual(['עוד לא סימנת', 'הזמן האחרון להתחיל']);
+    // The reminders are the mitzvah’s own, as before.
+    const smart = of(plan([MINCHA], NIGHT_BEFORE, { level: 4 }), 'mincha', DAY);
+    expect(pairs(reminders(day))).toEqual(pairs(reminders(smart)));
+  });
+
+  it('send nothing for an empty list, and only what lands inside the window and the open hours', () => {
+    expect(nags(of(plan([MINCHA], NIGHT_BEFORE, { level: 4, manual: { mincha: [] } }), 'mincha', DAY))).toEqual([]);
+    const { start, end } = windowOf(MINCHA);
+    const outside: ManualNag[] = [
+      { anchor: 'start', offsetMin: Math.round((end.getTime() - start.getTime()) / MIN) + 30, kind: 'zone' },
+      ...placed,
+    ];
+    // Quiet hours after 16:00 on the location's clock: the nags near the end have nowhere to move to before it.
+    const quietHours = { before: null, after: 16 * 60 };
+    const day = of(plan([MINCHA], NIGHT_BEFORE, { manual: { mincha: outside }, quietHours }), 'mincha', DAY);
+    expect(nags(day).every((c) => c.trigger.getTime() <= clock(`${DAY}T16:00`))).toBe(true);
+    expect(nags(day).every((c) => c.trigger.getTime() <= end.getTime())).toBe(true);
+  });
+
+  it('are counted by windowNotificationCount and drawn by windowTimeline with their numbers and stages', () => {
+    const date = new Date(2026, 10, 11);
+    const scope = { location: J, settings: SETTINGS, nagLevel: 4 as const, manualNags: placed };
+    expect(windowNotificationCount(MINCHA, MINCHA.defaultReminders, date, scope)).toEqual({
+      total: MINCHA.defaultReminders.length + 2,
+      nags: 2,
+    });
+    const timeline = windowTimeline(MINCHA, MINCHA.defaultReminders, date, scope)!;
+    const { start, end } = windowOf(MINCHA);
+    expect(timeline.window).toEqual({ start, end });
+    expect(timeline.sends.map((send) => send.at)).toEqual(
+      [...(windowSends(MINCHA, MINCHA.defaultReminders, date, scope) ?? [])].map((send) => send.at),
+    );
+    const last = timeline.sends[timeline.sends.length - 1];
+    expect(last).toMatchObject({ type: 'nag', k: 2, kind: 'lastChance', lastChance: 'alone', stage: 'red' });
+    expect(timeline.sends.find((send) => send.type === 'nag' && send.k === 1)?.stage).toBe('orange');
+    expect(timeline.sends.filter((send) => send.type === 'reminder').map((send) => send.stage)).toEqual(
+      MINCHA.defaultReminders.map(() => 'green'),
+    );
+    // The zone is the last third, clipped to the window.
+    const third = end.getTime() - (end.getTime() - start.getTime()) / 3;
+    expect(timeline.zone).toEqual([{ start: new Date(third), end }]);
+  });
+
+  it('give the timeline the reminder index of each reminder dot', () => {
+    const date = new Date(2026, 10, 11);
+    const timeline = windowTimeline(SHACHARIT, SHACHARIT.defaultReminders, date, { location: J, settings: SETTINGS })!;
+    const dots = timeline.sends.filter((send) => send.type === 'reminder');
+    expect(dots.map((send) => (send.type === 'reminder' ? send.index : -1)).sort()).toEqual(
+      SHACHARIT.defaultReminders.map((_, index) => index),
+    );
+    // On Shabbat the window is inside the holy block: the timeline draws it with nothing sent.
+    const shabbat = windowTimeline(SHACHARIT, SHACHARIT.defaultReminders, new Date(2026, 10, 14), {
+      location: J,
+      settings: SETTINGS,
+      nagLevel: 4,
+    });
+    expect(shabbat?.sends).toEqual([]);
   });
 });

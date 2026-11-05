@@ -147,3 +147,66 @@ describe('a mitzvah’s nagging level', () => {
     expect(merged.activeMitzvot.maariv).toEqual({ enabled: true });
   });
 });
+
+describe('a mitzvah’s hand-placed nags', () => {
+  const placed = [
+    { anchor: 'end' as const, offsetMin: -40, kind: 'zone' as const },
+    { anchor: 'end' as const, offsetMin: -20, kind: 'lastChance' as const, lastChance: 'alone' as const },
+  ];
+
+  beforeEach(() => mitzvot().reset());
+
+  it('are absent, the smart nag, by default', () => {
+    expect(mitzvot().activeMitzvot.shacharit.manualNags).toBeUndefined();
+  });
+
+  it('are written as a list, an empty one included, and cleared with null', () => {
+    mitzvot().setManualNags('shacharit', placed);
+    expect(mitzvot().activeMitzvot.shacharit.manualNags).toEqual(placed);
+    mitzvot().setManualNags('shacharit', []);
+    expect(mitzvot().activeMitzvot.shacharit.manualNags).toEqual([]);
+    mitzvot().setManualNags('shacharit', null);
+    expect('manualNags' in mitzvot().activeMitzvot.shacharit).toBe(false);
+  });
+
+  it('refuses a malformed nag and a clear with nothing set, without firing a subscriber', () => {
+    const listener = jest.fn();
+    const unsubscribe = useMitzvotStore.subscribe(listener);
+    mitzvot().setManualNags('shacharit', null);
+    mitzvot().setManualNags('shacharit', [{ anchor: 'start', offsetMin: -5, kind: 'zone' }]);
+    mitzvot().setManualNags('shacharit', [{ anchor: 'end', offsetMin: 1.5, kind: 'zone' }]);
+    unsubscribe();
+    expect(listener).not.toHaveBeenCalled();
+    expect(mitzvot().activeMitzvot.shacharit.manualNags).toBeUndefined();
+  });
+
+  it('give way to a level chosen, the same level included, and stay through resetToDefault', () => {
+    mitzvot().setNagLevel('shacharit', 3);
+    mitzvot().setManualNags('shacharit', placed);
+    mitzvot().resetToDefault('shacharit');
+    expect(mitzvot().activeMitzvot.shacharit.manualNags).toEqual(placed);
+    mitzvot().setNagLevel('shacharit', 3);
+    expect(mitzvot().activeMitzvot.shacharit.manualNags).toBeUndefined();
+    expect(mitzvot().activeMitzvot.shacharit.nagLevel).toBe(3);
+    mitzvot().setManualNags('shacharit', placed);
+    mitzvot().setNagLevel('shacharit', null);
+    expect(mitzvot().activeMitzvot.shacharit.manualNags).toBeUndefined();
+  });
+
+  it('keep the valid entries of a saved list in the merge and drop anything that is not a list', () => {
+    const merge = useMitzvotStore.persist.getOptions().merge!;
+    const merged = merge(
+      {
+        activeMitzvot: {
+          shacharit: { enabled: true, manualNags: [...placed, { anchor: 'middle', offsetMin: 0, kind: 'zone' }] },
+          mincha: { enabled: true, manualNags: 'x' },
+          maariv: { enabled: true, manualNags: [] },
+        },
+      },
+      mitzvot(),
+    );
+    expect(merged.activeMitzvot.shacharit).toEqual({ enabled: true, manualNags: placed });
+    expect(merged.activeMitzvot.mincha).toEqual({ enabled: true });
+    expect(merged.activeMitzvot.maariv).toEqual({ enabled: true, manualNags: [] });
+  });
+});

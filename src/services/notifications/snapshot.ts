@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import type { Mitzvah, Reminder, UserSettings } from '@/types/mitzvah';
+import type { ManualNag, Mitzvah, Reminder, UserSettings } from '@/types/mitzvah';
 import type { Location } from '@/types/zmanim';
 import { getAllMitzvot } from '@/data/customMitzvotAdapter';
 import { enabledSinceOf, useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -59,6 +59,16 @@ function nagLevelsFor(mitzvot: Mitzvah[]): Record<string, NagLevel> {
   return levels;
 }
 
+function manualNagsFor(mitzvot: Mitzvah[]): Record<string, ManualNag[]> {
+  const { activeMitzvot } = useMitzvotStore.getState();
+  const nags: Record<string, ManualNag[]> = {};
+  for (const { id } of mitzvot) {
+    const own = activeMitzvot[id]?.manualNags;
+    if (own) nags[id] = own;
+  }
+  return nags;
+}
+
 // The one place a plan reads the stores: planners and `buildPlan()` see only what is returned here.
 export function readPlanInput(now: Date, scope: PlanScope = currentScope(now)): PlanInput {
   const user = useUserStore.getState();
@@ -76,6 +86,7 @@ export function readPlanInput(now: Date, scope: PlanScope = currentScope(now)): 
     reminderOverrides: reminderOverridesFor(scope.mitzvot),
     nagLevel: user.nagLevel,
     nagLevels: nagLevelsFor(scope.mitzvot),
+    manualNagsByMitzvah: manualNagsFor(scope.mitzvot),
     completions,
     skipped,
     checkIns,

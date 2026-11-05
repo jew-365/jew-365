@@ -5,8 +5,8 @@ import { STORE_VERSION, migrate, onRehydrateStorage } from './persistOptions';
 import { useUserStore } from './useUserStore';
 import { MITZVOT } from '@/data/mitzvot';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
-import { Mitzvah, Reminder } from '@/types/mitzvah';
-import { isNagLevel, type NagLevel } from '@/utils/nagging';
+import { ManualNag, Mitzvah, Reminder } from '@/types/mitzvah';
+import { isManualNag, isNagLevel, type NagLevel } from '@/utils/nagging';
 
 export type ActiveMitzvahState = {
   enabled: boolean;
@@ -16,6 +16,9 @@ export type ActiveMitzvahState = {
   enabledAt?: number;
   // The mitzvah's own nagging level; absent means like the app (`useUserStore.nagLevel`).
   nagLevel?: NagLevel;
+  // The nags the user placed by hand on the window's axis, sent instead of the smart nag's; absent means the smart nag,
+  // an empty list none at all.
+  manualNags?: ManualNag[];
 };
 
 function switchedTo(current: ActiveMitzvahState | undefined, enabled: boolean): ActiveMitzvahState {
@@ -47,6 +50,7 @@ type MitzvotState = {
   setReminders: (id: string, reminders: Reminder[]) => void;
   resetToDefault: (id: string) => void;
   setNagLevel: (id: string, level: NagLevel | null) => void;
+  setManualNags: (id: string, nags: ManualNag[] | null) => void;
   getEnabledIds: () => string[];
   removeMitzvah: (id: string) => void;
   reset: () => void;
@@ -100,6 +104,15 @@ const withoutInvalidNagLevels = (active: Record<string, ActiveMitzvahState>) =>
     ]),
   );
 
+// A saved list of hand-placed nags keeps its valid entries; anything that is not a list is dropped, back to the smart nag.
+const withoutInvalidManualNags = (active: Record<string, ActiveMitzvahState>) =>
+  Object.fromEntries(
+    Object.entries(active).map(([id, { manualNags, ...state }]) => [
+      id,
+      Array.isArray(manualNags) ? { ...state, manualNags: manualNags.filter(isManualNag) } : state,
+    ]),
+  );
+
 for (const m of MITZVOT) {
   if (!(m.id in DEFAULT_ACTIVE)) DEFAULT_ACTIVE[m.id] = { enabled: false };
 }
@@ -140,17 +153,30 @@ export const useMitzvotStore = create<MitzvotState>()(
       resetToDefault: (id) =>
         set((s) => {
           const next = { ...s.activeMitzvot };
-          const { enabled = false, enabledAt, nagLevel } = next[id] ?? {};
-          next[id] = { enabled, enabledAt, ...(nagLevel ? { nagLevel } : {}) };
+          const { enabled = false, enabledAt, nagLevel, manualNags } = next[id] ?? {};
+          next[id] = { enabled, enabledAt, ...(nagLevel ? { nagLevel } : {}), ...(manualNags ? { manualNags } : {}) };
           return { activeMitzvot: next };
         }),
       setNagLevel: (id, level) =>
         set((s) => {
           const current = s.activeMitzvot[id];
-          if ((level !== null && !isNagLevel(level)) || (current?.nagLevel ?? null) === level) return s;
+          if (level !== null && !isNagLevel(level)) return s;
+          if ((current?.nagLevel ?? null) === level && !current?.manualNags) return s;
           const entry: ActiveMitzvahState = { ...(current ?? { enabled: false }) };
           if (level === null) delete entry.nagLevel;
           else entry.nagLevel = level;
+          // A level chosen is the smart nag at that level: the nags placed by hand give way to it.
+          delete entry.manualNags;
+          return { activeMitzvot: { ...s.activeMitzvot, [id]: entry } };
+        }),
+      setManualNags: (id, nags) =>
+        set((s) => {
+          const current = s.activeMitzvot[id];
+          if (nags === null && !current?.manualNags) return s;
+          if (nags !== null && !nags.every(isManualNag)) return s;
+          const entry: ActiveMitzvahState = { ...(current ?? { enabled: false }) };
+          if (nags === null) delete entry.manualNags;
+          else entry.manualNags = nags;
           return { activeMitzvot: { ...s.activeMitzvot, [id]: entry } };
         }),
       getEnabledIds: () =>
@@ -176,8 +202,8 @@ export const useMitzvotStore = create<MitzvotState>()(
       // default-on one is stamped now, so the days before this hydrate are never judged as missed.
       merge: (persisted: unknown, current: MitzvotState): MitzvotState => {
         const saved = persisted as Partial<MitzvotState> | undefined;
-        const kept = withoutInvalidNagLevels(
-          withoutEmptyReminders(withoutRetired(saved?.activeMitzvot ?? unsavedStart())),
+        const kept = withoutInvalidManualNags(
+          withoutInvalidNagLevels(withoutEmptyReminders(withoutRetired(saved?.activeMitzvot ?? unsavedStart()))),
         );
         addedOnHydrate = defaultsOnMissingFrom(kept);
         const stampedAt = Date.now();

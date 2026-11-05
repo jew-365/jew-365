@@ -16,6 +16,10 @@ import {
   smartNagTimes,
   validPerformMin,
   customNagZone,
+  isManualNag,
+  manualNagAt,
+  manualNagFor,
+  manualNagTimes,
   type NagInput,
 } from '../nagging';
 
@@ -200,5 +204,77 @@ describe('customNagZone', () => {
     expect(customNagZone(whole, atMin(24 * 60 - 10), { crossesMidnight: true, chatzotLayla: atMin(100) }).sparse).toBe(
       false,
     );
+  });
+});
+
+describe('nags placed by hand', () => {
+  const MIN = 60_000;
+  const start = new Date('2026-11-11T12:00:00Z');
+  const end = new Date('2026-11-11T16:00:00Z');
+  const window = { start, end };
+  const minutes = (n: number) => new Date(start.getTime() + n * MIN);
+
+  it('keeps a nag by the edge it is nearer to, in whole minutes, and finds its instant again', () => {
+    expect(manualNagFor(minutes(30.4), window, 'zone')).toEqual({ anchor: 'start', offsetMin: 30, kind: 'zone' });
+    expect(manualNagFor(minutes(200), window, 'lastChance', 'alone')).toEqual({
+      anchor: 'end',
+      offsetMin: -40,
+      kind: 'lastChance',
+      lastChance: 'alone',
+    });
+    // The middle counts as nearer the start.
+    expect(manualNagFor(minutes(120), window, 'zone').anchor).toBe('start');
+    for (const n of [0, 30, 120, 200, 240]) {
+      expect(manualNagAt(manualNagFor(minutes(n), window, 'zone'), window)).toEqual(minutes(n));
+    }
+    // Against a longer window the nag keeps its distance from its own edge.
+    const longer = { start, end: new Date(end.getTime() + 60 * MIN) };
+    expect(manualNagAt({ anchor: 'end', offsetMin: -40, kind: 'zone' }, longer)).toEqual(minutes(260));
+  });
+
+  it('accepts only a well-formed nag', () => {
+    expect(isManualNag({ anchor: 'start', offsetMin: 0, kind: 'sparse' })).toBe(true);
+    expect(isManualNag({ anchor: 'end', offsetMin: -5, kind: 'lastChance', lastChance: 'minyan' })).toBe(true);
+    for (const bad of [
+      null,
+      'x',
+      { anchor: 'clock', offsetMin: 0, kind: 'zone' },
+      { anchor: 'start', offsetMin: -1, kind: 'zone' },
+      { anchor: 'end', offsetMin: 1, kind: 'zone' },
+      { anchor: 'start', offsetMin: 2.5, kind: 'zone' },
+      { anchor: 'start', offsetMin: 5, kind: 'other' },
+      { anchor: 'start', offsetMin: 5, kind: 'lastChance', lastChance: 'later' },
+    ]) {
+      expect(isManualNag(bad)).toBe(false);
+    }
+  });
+
+  it('sends each inside the window, one per instant, earliest first, through accept', () => {
+    const nags = [
+      { anchor: 'end' as const, offsetMin: -20, kind: 'lastChance' as const, lastChance: 'alone' as const },
+      { anchor: 'start' as const, offsetMin: 60, kind: 'zone' as const },
+      { anchor: 'start' as const, offsetMin: 60, kind: 'sparse' as const },
+      { anchor: 'end' as const, offsetMin: -300, kind: 'zone' as const },
+      { anchor: 'start' as const, offsetMin: 90, kind: 'zone' as const },
+    ];
+    const accept = (at: Date) => (at.getTime() === minutes(90).getTime() ? null : at);
+    expect(manualNagTimes(nags, window, accept)).toEqual([
+      { at: minutes(60), kind: 'zone' },
+      { at: minutes(220), kind: 'lastChance', lastChance: 'alone' },
+    ]);
+    // No gap rule: the user put them there.
+    const close = [
+      { anchor: 'start' as const, offsetMin: 60, kind: 'zone' as const },
+      { anchor: 'start' as const, offsetMin: 61, kind: 'zone' as const },
+    ];
+    expect(manualNagTimes(close, window, (at) => at)).toHaveLength(2);
+  });
+
+  it('counts the hand-placed nags in the per-day estimate instead of the level’s', () => {
+    const shacharit = { id: 'shacharit' };
+    const reminders = [{ anchor: 'start' as const }, { anchor: 'end' as const }];
+    expect(remindersPerDay(shacharit, reminders, 4)).toBe(2 + nagsPerWindow(shacharit, 4));
+    expect(remindersPerDay(shacharit, reminders, 4, [])).toBe(2);
+    expect(remindersPerDay(shacharit, reminders, 1, [{ anchor: 'start', offsetMin: 5, kind: 'zone' }])).toBe(3);
   });
 });

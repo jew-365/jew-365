@@ -442,7 +442,7 @@ describe('Mitzvah screen', () => {
           name: 'לימוד',
           startHHMM: '10:00',
           endHHMM: '11:00',
-          reminders: [{ ...reminder, label: 'תזכורת' }],
+          reminders: [{ ...reminder, label: 'תזכורת ללימוד' }],
           skipOn: [],
           createdAt: 1800000000000,
         });
@@ -463,7 +463,7 @@ describe('Mitzvah screen', () => {
         storeReminder(reminder);
         renderMitzvah({ id });
 
-        expect(screen.getByText('תזכורת')).toBeOnTheScreen();
+        expect(screen.getByText('תזכורת ללימוד')).toBeOnTheScreen();
         expect(screen.getByText(caption)).toBeOnTheScreen();
       });
 

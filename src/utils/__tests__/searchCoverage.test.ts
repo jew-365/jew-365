@@ -228,6 +228,10 @@ describe('search results', () => {
 
   it('opens a guide topic from a word of its text', () => {
     expect(close('כיול')).toContain('topic:start');
+    // The notification timeline of the mitzvah screen, by the words its card and its reset carry.
+    expect(close('ציר')).toContain('topic:reminders');
+    expect(close('לנודניק החכם')).toContain('topic:reminders');
+    expect(close('timeline')).toContain('topic:reminders');
   });
 
   it('puts a near miss only among the maybe results, never among the close ones', () => {

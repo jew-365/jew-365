@@ -1,6 +1,15 @@
-import type { Mitzvah, MitzvahCategory, NagLevel, PerformMin, Reminder } from '@/types/mitzvah';
+import type {
+  LastChance,
+  ManualNag,
+  Mitzvah,
+  MitzvahCategory,
+  NagKind,
+  NagLevel,
+  PerformMin,
+  Reminder,
+} from '@/types/mitzvah';
 
-export type { NagLevel, PerformMin };
+export type { LastChance, ManualNag, NagKind, NagLevel, PerformMin };
 
 // The smart nag (the owner's spec of 2026-11-04, .claude/specs/smart-nag.md): a mitzvah's reminders go out once
 // each, and its level adds nags once per window, inside the window's critical zone, plus the last-chance points.
@@ -103,8 +112,6 @@ export function customNagZone(
   const from = Math.min(Math.max(third, point - CUSTOM_ZONE_MAX_MIN * 60_000), point - CUSTOM_ZONE_MIN_MIN * 60_000);
   return { zone: [{ start: new Date(from), end: lastChance }], sparse: false };
 }
-export type NagKind = 'zone' | 'sparse' | 'lastChance';
-export type LastChance = 'alone' | 'minyan';
 export type NagTime = { at: Date; kind: NagKind; lastChance?: LastChance };
 
 export type NagInput = {
@@ -210,6 +217,60 @@ function widestGapMiddle(zone: Interval[], kept: number[]): Date | null {
   return new Date((best.from + best.to) / 2);
 }
 
+// ---- Nags placed by hand (the timeline on the mitzvah screen, the owner's pick of 2026-11-05) ----
+
+// The instant a hand-placed nag stands for in a window: its minutes from that edge.
+export function manualNagAt(nag: ManualNag, window: Interval): Date {
+  const edge = nag.anchor === 'start' ? window.start : window.end;
+  return new Date(edge.getTime() + nag.offsetMin * MIN);
+}
+
+// A nag placed at `at`, kept by the window edge it is nearer to, in whole minutes, so it keeps its place against that
+// edge on a day whose window is longer or shorter.
+export function manualNagFor(at: Date, window: Interval, kind: NagKind, lastChance?: LastChance): ManualNag {
+  const fromStart = Math.max(0, Math.round((at.getTime() - window.start.getTime()) / MIN));
+  const toEnd = Math.max(0, Math.round((window.end.getTime() - at.getTime()) / MIN));
+  const anchor = fromStart <= toEnd ? 'start' : 'end';
+  return {
+    anchor,
+    offsetMin: anchor === 'start' ? fromStart : -toEnd || 0,
+    kind,
+    ...(lastChance ? { lastChance } : {}),
+  };
+}
+
+const NAG_KINDS: readonly NagKind[] = ['zone', 'sparse', 'lastChance'];
+
+export const isManualNag = (value: unknown): value is ManualNag => {
+  if (!value || typeof value !== 'object') return false;
+  const { anchor, offsetMin, kind, lastChance } = value as Partial<ManualNag>;
+  if (anchor !== 'start' && anchor !== 'end') return false;
+  if (typeof offsetMin !== 'number' || !Number.isInteger(offsetMin)) return false;
+  if (anchor === 'start' ? offsetMin < 0 : offsetMin > 0) return false;
+  if (!NAG_KINDS.includes(kind as NagKind)) return false;
+  return lastChance === undefined || lastChance === 'alone' || lastChance === 'minyan';
+};
+
+// The hand-placed nags of one window, earliest first: each inside the window and passing `accept` (the quiet hours,
+// the holy blocks), one per instant. No gap rule: the user put them there.
+export function manualNagTimes(
+  nags: readonly ManualNag[],
+  window: Interval,
+  accept: (planned: Date) => Date | null,
+): NagTime[] {
+  const seen = new Set<number>();
+  const times: NagTime[] = [];
+  for (const nag of nags) {
+    const planned = manualNagAt(nag, window);
+    if (planned.getTime() < window.start.getTime() || planned.getTime() > window.end.getTime()) continue;
+    const at = accept(planned);
+    if (!at || seen.has(at.getTime())) continue;
+    seen.add(at.getTime());
+    times.push({ at, kind: nag.kind, ...(nag.lastChance ? { lastChance: nag.lastChance } : {}) });
+  }
+  return times.sort((a, b) => a.at.getTime() - b.at.getTime());
+}
+
 // The most nags a window of the mitzvah sends at `level`: its last-chance points and the level's count, twice for a
 // kind with a tail. The screens print it in their per-day estimate.
 export function nagsPerWindow(mitzvah: Pick<Mitzvah, 'id' | 'performMin'>, level: NagLevel | undefined): number {
@@ -220,12 +281,13 @@ export function nagsPerWindow(mitzvah: Pick<Mitzvah, 'id' | 'performMin'>, level
   return lastChance + count * (hasSparseTail(kind) ? 2 : 1);
 }
 
-// The per-day estimate the screens print: each reminder once, plus the window's nags.
+// The per-day estimate the screens print: each reminder once, plus the window's nags, or the ones placed by hand.
 export const remindersPerDay = (
   mitzvah: Pick<Mitzvah, 'id' | 'performMin'>,
   reminders: readonly Pick<Reminder, 'anchor'>[],
   level: NagLevel | undefined,
-): number => reminders.length + nagsPerWindow(mitzvah, level);
+  manual?: readonly ManualNag[],
+): number => reminders.length + (manual ? manual.length : nagsPerWindow(mitzvah, level));
 
 // A mitzvah counted in the app's per-day estimate: one with a window on a plain weekday, not a weekly
 // or seasonal one (candle lighting, Kiddush Levana, Selichot) that would inflate it.

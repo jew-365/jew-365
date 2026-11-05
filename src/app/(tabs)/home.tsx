@@ -209,14 +209,22 @@ export default function HomeScreen() {
         let total: number | null = null;
         try {
           const own = activeMitzvot[id]?.nagLevel;
-          // The bell marks only a mitzvah whose own level differs from the app's (the owner's call, 2026-11-04).
-          if (own === undefined || own === appNagLevel) {
+          const manualNags = activeMitzvot[id]?.manualNags;
+          // The bell marks only a mitzvah whose own level differs from the app's (the owner's call, 2026-11-04), or
+          // whose nags were placed by hand on its timeline.
+          if (!manualNags && (own === undefined || own === appNagLevel)) {
             counted.set(key, null);
             return null;
           }
-          const nagLevel = own;
+          const nagLevel = own ?? appNagLevel;
           const reminders = remindersOf(activeMitzvot[id], mitzvah);
-          const count = windowNotificationCount(mitzvah, reminders, date, { location, settings, quietHours, nagLevel });
+          const count = windowNotificationCount(mitzvah, reminders, date, {
+            location,
+            settings,
+            quietHours,
+            nagLevel,
+            manualNags,
+          });
           // It counts every notification of the window: the reminders and the nags.
           total = count ? count.total : null;
         } catch {

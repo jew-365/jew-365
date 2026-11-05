@@ -154,4 +154,53 @@ describe('Mitzvah screen › the nagging level', () => {
     const next = fireTimeText(new Date(sof.getTime() + end.offsetMin * MIN), J.tz);
     expect(screen.getByText(t('detail.previewNext', { time: next }))).toBeOnTheScreen();
   });
+
+  describe('the timeline on the time window card', () => {
+    const tapDot = (testID: string) => {
+      const dot = screen.getByTestId(testID);
+      fireEvent(dot, 'responderGrant', { nativeEvent: { pageX: 10, pageY: 10 } });
+      fireEvent(dot, 'responderRelease', { nativeEvent: { pageX: 10, pageY: 10 } });
+    };
+
+    it('saves a stepped nag as the mitzvah’s own, counts it, and gives the smart nag back', () => {
+      useMitzvotStore.getState().setNagLevel('shacharit', 3);
+      renderMitzvah({ id: 'shacharit' });
+      // The nags the window sends at level 3, which become the user's.
+      const nags = screen.getAllByTestId(/^timeline-dot-n\d+$/).length;
+      expect(nags).toBeGreaterThan(1);
+      tapDot('timeline-dot-n1');
+      fireEvent.press(screen.getByRole('button', { name: t('detail.timeline.later') }));
+      const manual = useMitzvotStore.getState().activeMitzvot.shacharit.manualNags;
+      expect(manual).toHaveLength(nags);
+      expect(screen.getByTestId('timeline-manual')).toBeOnTheScreen();
+      // The level row counts the user's nags beside the two reminders.
+      expect(screen.getByText(`${levelTitle(3)} · ${perDay(2 + nags)}`)).toBeOnTheScreen();
+      fireEvent.press(screen.getByRole('button', { name: t('detail.timeline.resetSmart') }));
+      expect(useMitzvotStore.getState().activeMitzvot.shacharit.manualNags).toBeUndefined();
+      expect(screen.queryByTestId('timeline-manual')).toBeNull();
+    });
+
+    it('gives way to a level chosen in the sheet', () => {
+      useMitzvotStore.getState().setManualNags('shacharit', [{ anchor: 'end', offsetMin: -30, kind: 'zone' }]);
+      renderMitzvah({ id: 'shacharit' });
+      fireEvent.press(levelRow());
+      fireEvent.press(sheet().getByText(levelTitle(2)));
+      expect(useMitzvotStore.getState().activeMitzvot.shacharit.manualNags).toBeUndefined();
+      expect(useMitzvotStore.getState().activeMitzvot.shacharit.nagLevel).toBe(2);
+    });
+
+    it('opens the reminder editor from a reminder’s full edit, and deletes through the screen’s rule', () => {
+      useMitzvotStore.getState().setEnabled('shacharit', true);
+      useMitzvotStore.getState().setReminders('shacharit', [{ anchor: 'start', offsetMin: 0, label: 'יחידה' }]);
+      renderMitzvah({ id: 'shacharit' });
+      tapDot('timeline-dot-r0.0');
+      fireEvent.press(screen.getByRole('button', { name: t('detail.timeline.delete') }));
+      // The last reminder of an enabled mitzvah is kept, with the screen's error.
+      expect(useMitzvotStore.getState().activeMitzvot.shacharit.customReminders).toHaveLength(1);
+      expect(screen.getByText(t('reminder.errors.lastReminder'))).toBeOnTheScreen();
+      tapDot('timeline-dot-r0.0');
+      fireEvent.press(screen.getByRole('button', { name: t('detail.timeline.fullEdit') }));
+      expect(sheet().getByDisplayValue('יחידה')).toBeOnTheScreen();
+    });
+  });
 });

@@ -371,7 +371,7 @@ describe('NotificationScheduler', () => {
     cancelAll.mockRestore();
   });
 
-  it('6.4d a change of the app’s or a mitzvah’s nagging level drives a rebuild; a refused one does not', () => {
+  it('6.4d a change of the app’s or a mitzvah’s nagging level, or of its hand-placed nags, drives a rebuild; a refused one does not', () => {
     const rebuild = jest.spyOn(NotificationScheduler, 'rebuild').mockResolvedValue();
     const teardown = initNotificationHandlers();
     rebuild.mockClear();
@@ -386,9 +386,17 @@ describe('NotificationScheduler', () => {
     useMitzvotStore.getState().setNagLevel('shacharit', null);
     expect(rebuild).toHaveBeenCalledTimes(3);
 
+    // A nag placed by hand on the timeline, and its reset to the smart nag.
+    useMitzvotStore.getState().setManualNags('shacharit', [{ anchor: 'end', offsetMin: -30, kind: 'zone' }]);
+    expect(rebuild).toHaveBeenCalledTimes(4);
+    useMitzvotStore.getState().setManualNags('shacharit', null);
+    expect(rebuild).toHaveBeenCalledTimes(5);
+    useMitzvotStore.getState().setManualNags('shacharit', null);
+    expect(rebuild).toHaveBeenCalledTimes(5);
+
     teardown();
     useUserStore.getState().setNagLevel(1);
-    expect(rebuild).toHaveBeenCalledTimes(3);
+    expect(rebuild).toHaveBeenCalledTimes(5);
     rebuild.mockRestore();
   });
 

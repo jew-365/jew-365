@@ -1,6 +1,6 @@
 import type { PlatformOSType } from 'react-native';
 import type { AppLanguage } from '@/i18n';
-import type { Mitzvah, Reminder, UserSettings } from '@/types/mitzvah';
+import type { ManualNag, Mitzvah, Reminder, UserSettings } from '@/types/mitzvah';
 import type { TaharahEvent, TaharahSettings } from '@/types/taharah';
 import type { Location } from '@/types/zmanim';
 import type { CheckIns, Completions } from '@/stores/useCompletionsStore';
@@ -46,6 +46,8 @@ export type PlanInput = {
   // hand-built input without them plans no repeat (level 1).
   nagLevel?: NagLevel;
   nagLevels?: Record<string, NagLevel>;
+  // The nags each planned mitzvah's user placed by hand on its window's axis, sent instead of the smart nag's.
+  manualNagsByMitzvah?: Record<string, ManualNag[]>;
   completions: Completions;
   skipped: Completions;
   checkIns: CheckIns;

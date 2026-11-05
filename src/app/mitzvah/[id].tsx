@@ -2,7 +2,6 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChokAddonCard } from '@/components/ChokAddonCard';
@@ -14,6 +13,7 @@ import { ListRow } from '@/components/ListRow';
 import { ReminderEditor } from '@/components/ReminderEditor';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SelichotAddonCard } from '@/components/SelichotAddonCard';
+import { WindowTimeline } from '@/components/WindowTimeline';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
@@ -53,11 +53,8 @@ import { NAG_LEVEL_IDS, remindersPerDay } from '@/utils/nagging';
 import { buildTriggerTime, nextReminderAt } from '@/services/NotificationScheduler';
 import { useI18n } from '@/i18n';
 
-const LEGEND_DOT_SIZE = scaled(8);
 const DELETE_ICON_SIZE = scaled(16);
 const ADD_ICON_SIZE = scaled(18);
-const RIBBON_HEIGHT = scaled(10);
-const TIME_LABEL_WIDTH = scaled(40);
 const ICON_STROKE = 2.4;
 
 export default function MitzvahDetailScreen() {
@@ -84,6 +81,7 @@ export default function MitzvahDetailScreen() {
   const setReminders = useMitzvotStore((s) => s.setReminders);
   const resetToDefault = useMitzvotStore((s) => s.resetToDefault);
   const setNagLevel = useMitzvotStore((s) => s.setNagLevel);
+  const setManualNags = useMitzvotStore((s) => s.setManualNags);
   const [levelSheetVisible, setLevelSheetVisible] = useState(false);
   const [editorVisible, setEditorVisible] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -335,43 +333,27 @@ export default function MitzvahDetailScreen() {
         {isChok ? <ChokAddonCard /> : null}
         {isSelichot ? <SelichotAddonCard /> : null}
         {textNow || textAnytime ? <Button label={t('siddur.open')} onPress={openText} /> : null}
-        <Card padded>
-          <Text style={[typography.captionBold, { color: colors.textSub, marginBottom: spacing.md }]}>
-            {t('detail.timeWindow')}
-          </Text>
-          <View style={styles.windowRow}>
-            <Text style={[typography.micro, { color: colors.textMuted, width: TIME_LABEL_WIDTH }]}>
-              {window ? clockOf(window.start, location.tz) : '--:--'}
-            </Text>
-            <View style={styles.ribbon}>
-              <Svg width="100%" height={RIBBON_HEIGHT} viewBox="0 0 100 10" preserveAspectRatio="none">
-                <Defs>
-                  <LinearGradient id="timeGradient" x1="0%" x2="100%">
-                    <Stop offset="0%" stopColor={colors.safe} />
-                    <Stop offset="40%" stopColor={colors.warning} />
-                    <Stop offset="100%" stopColor={colors.urgent} />
-                  </LinearGradient>
-                </Defs>
-                <Rect x={0} y={0} width={100} height={10} rx={5} fill="url(#timeGradient)" />
-              </Svg>
-            </View>
-            <Text style={[typography.micro, { color: colors.textMuted, width: TIME_LABEL_WIDTH }]}>
-              {window ? clockOf(window.end, location.tz) : '--:--'}
-            </Text>
-          </View>
-          <View style={styles.legend}>
-            {[
-              ['time.safe', colors.safe],
-              ['time.warning', colors.warning],
-              ['time.urgent', colors.urgent],
-            ].map(([key, color]) => (
-              <View key={key} style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: color }]} />
-                <Text style={[typography.micro, { color }]}>{t(key)}</Text>
-              </View>
-            ))}
-          </View>
-        </Card>
+        <WindowTimeline
+          mitzvah={mitzvah}
+          name={name}
+          window={window}
+          reminders={reminders}
+          manualNags={active.manualNags}
+          nagLevel={nagLevel}
+          location={location}
+          settings={settings}
+          quietHours={quietHours}
+          onRemindersChange={(next) => {
+            setLastReminderRefused(false);
+            setReminders(mitzvah.id, next);
+          }}
+          onManualNagsChange={(next) => setManualNags(mitzvah.id, next)}
+          onEditReminder={(index) => {
+            setEditIndex(index);
+            setEditorVisible(true);
+          }}
+          onDeleteReminder={requestDeleteReminder}
+        />
 
         {mitzvah.description ? (
           <Card padded>
@@ -420,7 +402,12 @@ export default function MitzvahDetailScreen() {
             <ListRow
               icon="bell"
               title={t('detail.nagLevel')}
-              caption={`${active.nagLevel ? levelLabel(active.nagLevel) : appLevelLabel} · ${perDay(nagLevel)}`}
+              caption={`${active.nagLevel ? levelLabel(active.nagLevel) : appLevelLabel} · ${t(
+                'detail.nagLevelPerDay',
+                {
+                  n: remindersPerDay(mitzvah, reminders, nagLevel, active.manualNags),
+                },
+              )}`}
               chevron
               onPress={() => setLevelSheetVisible(true)}
               accessibilityLabel={t('detail.nagLevel')}
@@ -621,32 +608,6 @@ const styles = StyleSheet.create({
   todayCaption: {
     marginTop: spacing.xs,
     marginBottom: spacing.md,
-  },
-  windowRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  ribbon: {
-    flex: 1,
-    height: RIBBON_HEIGHT,
-    borderRadius: radius.sm,
-    overflow: 'hidden',
-  },
-  legend: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  legendDot: {
-    width: LEGEND_DOT_SIZE,
-    height: LEGEND_DOT_SIZE,
-    borderRadius: radius.full,
   },
   row: {
     flexDirection: 'row',
