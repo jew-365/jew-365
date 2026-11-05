@@ -182,8 +182,11 @@ const LEFT_EDGE = I18nManager.isRTL ? ('right' as const) : ('left' as const);
 const SECTION_VIEWABILITY = { viewAreaCoveragePercentThreshold: 2 };
 // The sections of Shacharit, Mincha and Maariv that open an Amidah: the compass button sits above each.
 const AMIDAH_SECTIONS: ReadonlySet<string> = new Set(['תפילת העמידה', 'מוסף']);
-// The compass row is the primary colour at this opacity (the owner's call, 2026-11-05).
-const COMPASS_ROW_ALPHA = 0.7;
+// The compass button is option ב of design/lab/studies/2026-11-05-compass-button (the owner's pick, 2026-11-05):
+// an outlined pill on a hairline in the primary colour at this opacity.
+const COMPASS_LINE_ALPHA = 0.55;
+const COMPASS_ICON_SIZE = scaled(18);
+const COMPASS_HIT_SLOP = scaled(4);
 const PSALM_ICON_SIZE = scaled(16);
 const JUMP_RETRY_MS = 50;
 const JUMP_TIMEOUT_MS = 5000;
@@ -2132,14 +2135,37 @@ export default function SiddurScreen() {
                     </Text>
                   ))}
                   {compassPrayer && AMIDAH_SECTIONS.has(section.title.he) ? (
-                    <TapGuard>
-                      <Button
-                        icon="compass"
-                        label={t('siddur.compassButton')}
-                        onPress={openCompass}
-                        style={[styles.compassButton, { backgroundColor: alphaHex(colors.gold, COMPASS_ROW_ALPHA) }]}
+                    <View testID="siddur-compass-divider" style={styles.compassDivider}>
+                      <View
+                        style={[styles.compassLine, { backgroundColor: alphaHex(colors.gold, COMPASS_LINE_ALPHA) }]}
                       />
-                    </TapGuard>
+                      <TapGuard>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={t('siddur.compassButton')}
+                          onPress={openCompass}
+                          hitSlop={COMPASS_HIT_SLOP}
+                          style={({ pressed }) => [
+                            styles.compassPill,
+                            { borderColor: colors.gold, backgroundColor: pressed ? colors.goldLight : colors.surface },
+                          ]}
+                        >
+                          <MitzvahIcon
+                            name="compass"
+                            size={COMPASS_ICON_SIZE}
+                            color={colors.goldText}
+                            tint={colors.goldLight}
+                            variant="duotone"
+                          />
+                          <Text style={[typography.bodyBold, { color: colors.goldText }]}>
+                            {t('siddur.compassButton')}
+                          </Text>
+                        </Pressable>
+                      </TapGuard>
+                      <View
+                        style={[styles.compassLine, { backgroundColor: alphaHex(colors.gold, COMPASS_LINE_ALPHA) }]}
+                      />
+                    </View>
                   ) : null}
                   <MeasuredView>
                     <Card padded style={styles.sectionCard}>
@@ -2622,8 +2648,24 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     marginTop: spacing.sm,
   },
-  compassButton: {
-    marginBottom: spacing.sm,
+  compassDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
+  compassLine: {
+    flex: 1,
+    height: 1.5,
+  },
+  compassPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    minHeight: scaled(44),
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.full,
+    borderWidth: 1.5,
   },
   sectionHeading: {
     textAlign: 'center',

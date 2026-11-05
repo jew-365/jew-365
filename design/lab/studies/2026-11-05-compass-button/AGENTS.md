@@ -13,7 +13,7 @@
 ## Local Contracts
 
 - Published as one private Artifact: https://claude.ai/artifact/6eQvNboj9TgFJFFSe4PJgc, from the page the build writes. Republish to the same link after a change.
-- The owner's pick: none yet.
+- The owner's pick, the same day: option ב, the divider with an outlined pill ("תממש את אופציה ב"). It ships in [../../../../src/app/siddur/[id].tsx](<../../../../src/app/siddur/[id].tsx>) with the page's line at 0.55 and the pill's 1.5-point border.
 
 ## Work Guidance
 

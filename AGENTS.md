@@ -75,6 +75,7 @@ An update carries no native code, so shipping a native change as an update produ
 
 Settings shows `<version>-<n>`: `n` counts the updates published on that channel for that `version`, and a build shows `-0`. The user asked for it on 2026-10-08 so the phone shows which update it runs.
 
+- Pull `main` before every publish and publish from a tree equal to `origin/main` (User Preferences): another session may have pushed, or published, since this one last synced.
 - `pnpm update:*` runs [scripts/publish-update.js](scripts/publish-update.js), which takes the next `n` from EAS and publishes with it. Never publish with `npx eas-cli update` directly: the update would carry no number and the next one would repeat a number.
 - A production update also needs its user guide entry: [scripts/publish-update.js](scripts/publish-update.js) refuses `pnpm update:production` unless `WHATS_NEW` in [src/data/guide.ts](src/data/guide.ts) has an entry labelled with the `<version>-<n>` it is about to publish, and names the missing label. `--skip-whats-new` passes the check only with a `--message` that starts with `Rollback to `, for republishing a known-good bundle.
 - `n` starts each EAS message (`1.0.20-1: …`), so the dashboard and `eas update:list` show the same label as the phone.
@@ -585,6 +586,7 @@ tree. It cannot judge whether the prose is still true — that part is still the
 - DOX indexes and durable file references should use Markdown links to the referenced files whenever practical.
 - Reply to the user in Hebrew unless they explicitly ask for another language (the user's call, 2026-11-01). Files keep their own language rules.
 - Work on, commit to and push to `main` unless the user explicitly asks for another branch (the user's call, 2026-11-01); this overrides a session's default feature branch.
+- Before every update to preview or production, sync with `main` first (`git pull --rebase origin main`) and publish only from a tree that equals `origin/main` with everything committed and pushed (the user's call, 2026-11-05): several features are often worked on in parallel sessions, and a bundle built from a stale tree would drop another session's work from the channel.
 - A request for an update to preview or production means an over-the-air update (`pnpm update:preview` / `pnpm update:production`), never a build, unless the user explicitly asks for a build (the user's call, 2026-11-01).
 - Before starting any work, check that `main` has nothing uncommitted; commit anything found first, then start (the user's call, 2026-11-01).
 - Before starting any work, sync the local `main` with `origin/main` (`git pull --rebase origin main`) (the user's call, 2026-11-01).
