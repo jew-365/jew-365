@@ -194,6 +194,9 @@ const LIST_PADDING = spacing.lg;
 const SCROLL_REPORT_MS = 250;
 const LAST_POSITION_DELAY_MS = 1000;
 const SEGMENT_SETTLE_MS = 1000;
+// A jump to a saved place is checked against the live geometry until it holds for this many retries in a row.
+const AIM_STEADY_TICKS = 6;
+const AIM_SLOP_PX = 1;
 const TOAST_MS = 2000;
 // iOS cannot present a Modal while another one is still sliding away.
 const SHEET_SWAP_MS = 400;
@@ -271,6 +274,8 @@ function useReaderFold() {
   const progress = useSharedValue(0);
   const folded = useSharedValue(false);
   const pinned = useSharedValue(false);
+  // Pinned by a jump that landed under the full block, not by an unfold over the line being read.
+  const jumpPinned = useSharedValue(false);
   const fullHeight = useSharedValue(0);
   const compactHeight = useSharedValue(0);
   const lastY = useSharedValue(0);
@@ -300,12 +305,13 @@ function useReaderFold() {
       if (folded.value === next) return;
       folded.value = next;
       pinned.value = !next;
+      jumpPinned.value = false;
       travel.value = 0;
       if (!next) holdUntil.value = Date.now() + UNFOLD_HOLD_MS;
       progress.value = withTiming(next ? 1 : 0, { duration: FOLD_MS });
       runOnJS(mirror)(next);
     },
-    [folded, pinned, travel, holdUntil, progress, mirror],
+    [folded, pinned, jumpPinned, travel, holdUntil, progress, mirror],
   );
   // Switches between attached and folded where the two look the same, so it needs no animation.
   const settle = useCallback(
@@ -363,11 +369,29 @@ function useReaderFold() {
   const open = useCallback(() => {
     folded.value = false;
     pinned.value = false;
+    jumpPinned.value = false;
     progress.value = 0;
     lastY.value = 0;
     travel.value = 0;
     mirror(false);
-  }, [folded, pinned, progress, lastY, travel, mirror]);
+  }, [folded, pinned, jumpPinned, progress, lastY, travel, mirror]);
+  // The reading state at offset y: the compact bar over the text, or the block still attached near the top,
+  // so whatever covers the list is the compact bar's height once the text lands there.
+  const read = useCallback(
+    (y: number) => {
+      const next = sizes.current.full > 0 && y >= sizes.current.full;
+      const animate = pinned.value && next && !folded.value;
+      pinned.value = false;
+      jumpPinned.value = false;
+      lastY.value = y;
+      travel.value = 0;
+      if (folded.value === next && !animate) return;
+      folded.value = next;
+      progress.value = animate ? withTiming(1, { duration: FOLD_MS }) : next ? 1 : 0;
+      mirror(next);
+    },
+    [folded, pinned, jumpPinned, progress, lastY, travel, mirror],
+  );
   const unfold = useCallback(() => setTarget(false), [setTarget]);
   const toggle = useCallback(() => {
     if (folded.value) setTarget(false);
@@ -376,8 +400,11 @@ function useReaderFold() {
   // A jump keeps what covers the list: an open full block stays over the text where the jump lands.
   const freeze = useCallback(() => {
     frozenUntil.value = Date.now() + JUMP_FREEZE_MS;
-    if (!folded.value) pinned.value = true;
-  }, [frozenUntil, folded, pinned]);
+    if (!folded.value) {
+      pinned.value = true;
+      jumpPinned.value = true;
+    }
+  }, [frozenUntil, folded, pinned, jumpPinned]);
   const setFull = useCallback(
     (height: number) => {
       const previous = sizes.current.full;
@@ -427,6 +454,7 @@ function useReaderFold() {
     track,
     beginGesture,
     open,
+    read,
     unfold,
     toggle,
     freeze,
@@ -434,10 +462,18 @@ function useReaderFold() {
     getFolded,
     space,
     fullHeight: () => sizes.current.full,
+    compactHeight: () => sizes.current.compact,
     inset: () => {
       const { full, compact } = sizes.current;
       if (foldedRef.current) return compact;
       if (pinned.value) return full;
+      return Math.max(full - Math.max(lastY.value, 0), compact);
+    },
+    // The top of the line being read: a full block opened over the text hides it but does not move it.
+    readingInset: () => {
+      const { full, compact } = sizes.current;
+      if (foldedRef.current) return compact;
+      if (pinned.value) return jumpPinned.value ? full : compact;
       return Math.max(full - Math.max(lastY.value, 0), compact);
     },
     setFull,
@@ -556,7 +592,7 @@ type LoadState =
   | { status: 'error' };
 
 type LayoutNode = { y: number; parent: LayoutNode | null };
-type SegmentLayouts = Map<string, { y: number; parent: LayoutNode | null }>;
+type SegmentLayouts = Map<string, { y: number; height: number; parent: LayoutNode | null }>;
 const LayoutNodeContext = React.createContext<LayoutNode | null>(null);
 
 function MeasuredView({ style, children }: { style?: StyleProp<ViewStyle>; children: React.ReactNode }) {
@@ -1070,6 +1106,7 @@ export default function SiddurScreen() {
   const segmentLayouts = useRef<SegmentLayouts>(new Map());
   const sectionHeights = useRef(new Map<string, number>());
   const headerHeight = useRef(0);
+  const spaceRef = useRef(0);
   const moved = useRef(false);
   const finished = useRef(false);
   const offered = useRef(false);
@@ -1579,6 +1616,7 @@ export default function SiddurScreen() {
     );
   };
   const contentStyle = useMemo(() => [styles.content, { paddingTop: LIST_PADDING + fold.space }], [fold.space]);
+  spaceRef.current = fold.space;
   const picker = useMemo(() => pickerEntries(sections), [sections]);
   const currentEntry = pickerEntryAt(picker, sections, Math.min(shownSection, sections.length - 1));
   const segmentOffset = (key: string) => {
@@ -1598,32 +1636,78 @@ export default function SiddurScreen() {
     if (offset === undefined) return inset === 0 ? {} : { viewOffset: inset };
     return { viewOffset: inset === 0 ? -offset : inset - offset };
   };
-  const settleOnSegment = (index: number, segmentKey: string, deadline: number) => {
+  // The content offset of a saved place: its section's top, its segment's offset and the share of the segment.
+  const placeTop = (index: number, segmentKey: string, share: number) => {
+    let top = LIST_PADDING + spaceRef.current + headerHeight.current;
+    for (const section of sections.slice(0, index)) {
+      const height = sectionHeights.current.get(section.title.he);
+      if (height === undefined) return undefined;
+      top += height;
+    }
+    const offset = segmentOffset(segmentKey);
+    const height = segmentLayouts.current.get(segmentKey)?.height;
+    return offset === undefined || height === undefined ? undefined : top + offset + share * height;
+  };
+  // A saved place lands exactly where it was read: its line right under the compact bar, the reading state.
+  const aimTarget = (index: number, segmentKey: string, share: number) => {
+    const top = placeTop(index, segmentKey, share);
+    return top === undefined ? undefined : Math.max(0, top - fold.compactHeight());
+  };
+  const aimAt = (target: number) => {
+    autoScroll.hold(AUTO_SCROLL_RESUME_MS);
+    fold.read(target);
+    listRef.current?.scrollToOffset({ offset: target, animated: false });
+  };
+  // Heights still settle after a jump (a banner leaving the header, a section measured late), so the aim is
+  // checked against the live geometry and corrected until it holds.
+  const settleOnSegment = (index: number, segmentKey: string, share: number, deadline: number, steady = 0) => {
     jumpTimer.current = setTimeout(() => {
-      const offset = segmentOffset(segmentKey);
-      if (offset !== undefined) {
-        holdForJump();
-        listRef.current?.scrollToIndex({ index, animated: false, ...landing(offset) });
-      } else if (Date.now() < deadline) {
-        settleOnSegment(index, segmentKey, deadline);
+      const target = aimTarget(index, segmentKey, share);
+      let held = steady;
+      if (target === undefined) {
+        // A section above it was never measured: land on the segment's top under the cover, as before.
+        const offset = segmentOffset(segmentKey);
+        if (offset !== undefined) {
+          holdForJump();
+          listRef.current?.scrollToIndex({ index, animated: false, ...landing(offset) });
+        }
+        held = 0;
+      } else if (Math.abs(autoScroll.offset.value - target) <= AIM_SLOP_PX) held += 1;
+      else {
+        aimAt(target);
+        held = 0;
       }
+      if (held < AIM_STEADY_TICKS && Date.now() < deadline) settleOnSegment(index, segmentKey, share, deadline, held);
     }, JUMP_RETRY_MS);
   };
-  const jumpTo = (index: number, deadline = Date.now() + JUMP_TIMEOUT_MS, segmentKey: string | null = null) => {
+  const jumpTo = (
+    index: number,
+    deadline = Date.now() + JUMP_TIMEOUT_MS,
+    segmentKey: string | null = null,
+    share = 0,
+  ) => {
     const list = listRef.current;
     clearTimeout(jumpTimer.current);
     if (!list) return;
     holdForJump();
+    const target = segmentKey ? aimTarget(index, segmentKey, share) : undefined;
+    if (segmentKey && target !== undefined) {
+      aimAt(target);
+      setShownSection(index);
+      setRenderUpTo(null);
+      settleOnSegment(index, segmentKey, share, Date.now() + SEGMENT_SETTLE_MS);
+      return;
+    }
     jumpMissed.current = false;
     const offset = segmentKey ? segmentOffset(segmentKey) : undefined;
     list.scrollToIndex({ index, animated: false, ...landing(offset) });
     if (!jumpMissed.current) {
       setShownSection(index);
       setRenderUpTo(null);
-      if (segmentKey && offset === undefined) settleOnSegment(index, segmentKey, Date.now() + SEGMENT_SETTLE_MS);
+      if (segmentKey) settleOnSegment(index, segmentKey, share, Date.now() + SEGMENT_SETTLE_MS);
     } else if (Date.now() < deadline) {
       setRenderUpTo(index);
-      jumpTimer.current = setTimeout(() => jumpTo(index, deadline, segmentKey), JUMP_RETRY_MS);
+      jumpTimer.current = setTimeout(() => jumpTo(index, deadline, segmentKey, share), JUMP_RETRY_MS);
     } else {
       setRenderUpTo(null);
     }
@@ -1731,16 +1815,19 @@ export default function SiddurScreen() {
   }, [fold, autoScroll.offset, gesturing, listRef]);
   const placeholder = body !== null && loadStatus === 'loading' && available;
   const bookmarkable = bookmarkTextId !== null && (!body || placeholder);
-  const placeInView = () =>
+  const placeInView = (inset = fold.inset()) =>
     placeAt(
       sections,
       (title) => sectionHeights.current.get(title),
       segmentOffset,
       LIST_PADDING + fold.fullHeight() + headerHeight.current,
-      autoScroll.offset.value + fold.inset(),
+      autoScroll.offset.value + inset,
+      (key) => segmentLayouts.current.get(key)?.height,
     );
+  // The place saved is the line being read, under the compact bar, even while the tools cover it.
   const currentPlace = () =>
-    placeInView() ?? (sections.length ? firstPlace(sections[Math.min(shownSection, sections.length - 1)]) : null);
+    placeInView(fold.readingInset()) ??
+    (sections.length ? firstPlace(sections[Math.min(shownSection, sections.length - 1)]) : null);
   topSectionRef.current = (fallback) => {
     if (fold.inset() === 0) return fallback;
     const title = placeInView()?.sectionTitle;
@@ -1761,6 +1848,7 @@ export default function SiddurScreen() {
       nusach: placeNusach,
       sectionTitle: place.sectionTitle,
       segmentKey: place.segmentKey,
+      ...(place.share !== undefined ? { share: place.share } : {}),
       appDay: dateKey(appDay(new Date(), location)),
       savedAt: Date.now(),
     });
@@ -1781,6 +1869,7 @@ export default function SiddurScreen() {
       nusach: placeNusach,
       sectionTitle: place.sectionTitle,
       segmentKey: place.segmentKey,
+      ...(place.share !== undefined ? { share: place.share } : {}),
       label: [titleOf(section), segmentLead(segment)].filter(Boolean).join(' · '),
     };
   };
@@ -1816,7 +1905,7 @@ export default function SiddurScreen() {
       return;
     }
     const found = placeTarget(sections, target);
-    if (found) jumpTo(found.index, Date.now() + JUMP_TIMEOUT_MS, found.segmentKey);
+    if (found) jumpTo(found.index, Date.now() + JUMP_TIMEOUT_MS, found.segmentKey, target.share ?? 0);
   };
   const resume = () => {
     if (!resumeOffer) return;
@@ -1872,7 +1961,7 @@ export default function SiddurScreen() {
     const index = sections.findIndex((section) =>
       section.segments.some((segment) => segment.key === pendingPlace.segmentKey),
     );
-    if (index >= 0) jumpTo(index, Date.now() + JUMP_TIMEOUT_MS, pendingPlace.segmentKey);
+    if (index >= 0) jumpTo(index, Date.now() + JUMP_TIMEOUT_MS, pendingPlace.segmentKey, pendingPlace.share ?? 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- jumpTo is rebuilt on every render; the place lands once
   }, [pendingPlace, load.status, loadStale, sections]);
 
@@ -2526,7 +2615,12 @@ function SegmentView({
     <View
       style={styles.segment}
       testID={key ? `siddur-segment-${key}` : undefined}
-      onLayout={key ? (event) => layouts.set(key, { y: event.nativeEvent.layout.y, parent }) : undefined}
+      onLayout={
+        key
+          ? (event) =>
+              layouts.set(key, { y: event.nativeEvent.layout.y, height: event.nativeEvent.layout.height, parent })
+          : undefined
+      }
     >
       {segment.he.map((runs, index) => (
         <Text

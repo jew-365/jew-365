@@ -710,21 +710,26 @@ export function placeAt(
   segmentOffset: (key: string) => number | undefined,
   listTop: number,
   viewportTop: number,
+  segmentHeight?: (key: string) => number | undefined,
 ): SiddurPlace | null {
   let top = listTop;
   for (const section of sections) {
     const height = sectionHeight(section.title.he);
     if (height === undefined) return null;
     if (viewportTop < top + height) {
-      const within = viewportTop - top + PLACE_SLOP_PX;
+      const within = viewportTop - top;
       let place = firstPlace(section);
+      let into: number | undefined;
       for (const segment of section.segments) {
         const offset = segment.key ? segmentOffset(segment.key) : undefined;
-        if (segment.key && offset !== undefined && offset <= within) {
+        if (segment.key && offset !== undefined && offset <= within + PLACE_SLOP_PX) {
           place = { sectionTitle: section.title.he, segmentKey: segment.key };
+          into = within - offset;
         }
       }
-      return place;
+      const size = place && into !== undefined ? segmentHeight?.(place.segmentKey) : undefined;
+      if (!place || into === undefined || !size) return place;
+      return { ...place, share: Math.round((Math.max(0, into) / size) * 1e4) / 1e4 };
     }
     top += height;
   }

@@ -187,7 +187,8 @@ export type SiddurChapterTitle = { he: string; en: string; voices?: VoiceAudienc
 
 export type SiddurChapterIndex = Partial<Record<SiddurTextId, Partial<Record<Nusach, SiddurChapterTitle[]>>>>;
 
-export type SiddurPlace = { sectionTitle: string; segmentKey: string };
+// `share` is how far into the segment the place sits, as a share of its height (absent: its top).
+export type SiddurPlace = { sectionTitle: string; segmentKey: string; share?: number };
 
 export type SiddurBookmark = SiddurPlace & {
   id: string;

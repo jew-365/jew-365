@@ -457,8 +457,12 @@ describe('the siddur reader bookmarks and last place', () => {
     credits: [],
     sections: KEYED,
   });
-  const MIDDLE_REACHED = { index: 1, animated: false, viewOffset: -150 };
+  // List padding 16, the first section 300 high: k-mid-2 starts at 466 and is 80 high. A scroll to 476 reads
+  // 10 points into it, an eighth of it.
+  const MIDDLE_REACHED = { offset: 466, animated: false };
+  const READ_PLACE = { offset: 476, animated: false };
   let scrollSpy: jest.SpyInstance;
+  let offsetSpy: jest.SpyInstance;
 
   async function openKeyed(params: Record<string, string>, nusach?: Nusach) {
     jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
@@ -499,6 +503,7 @@ describe('the siddur reader bookmarks and last place', () => {
   }
 
   const lastScroll = () => scrollSpy.mock.calls[scrollSpy.mock.calls.length - 1][0];
+  const lastOffset = () => offsetSpy.mock.calls[offsetSpy.mock.calls.length - 1][0];
   const seedPosition = (textId: string, position: Partial<SiddurLastPosition>) =>
     useSiddurBookmarksStore.setState({
       lastPositions: {
@@ -537,6 +542,7 @@ describe('the siddur reader bookmarks and last place', () => {
     useSiddurBookmarksStore.getState().reset();
     useCompletionsStore.getState().reset();
     scrollSpy = jest.spyOn(FlatList.prototype, 'scrollToIndex').mockImplementation(() => {});
+    offsetSpy = jest.spyOn(FlatList.prototype, 'scrollToOffset').mockImplementation(() => {});
     jest.mocked(AppState.addEventListener).mockClear();
   });
 
@@ -558,6 +564,7 @@ describe('the siddur reader bookmarks and last place', () => {
         nusach: 'ashkenaz',
         sectionTitle: 'אמצע',
         segmentKey: 'k-mid-2',
+        share: 0.125,
         label: 'אמצע · שְׁמַע יִשְׂרָאֵל יְהוָה',
         createdAt: NOW,
       },
@@ -566,7 +573,8 @@ describe('the siddur reader bookmarks and last place', () => {
 
     openBookmarks();
     fireEvent.press(screen.getByText('אמצע · שְׁמַע יִשְׂרָאֵל יְהוָה'));
-    expect(lastScroll()).toEqual(MIDDLE_REACHED);
+    expect(scrollSpy).not.toHaveBeenCalled();
+    expect(lastOffset()).toEqual(READ_PLACE);
 
     openBookmarks();
     fireEvent.press(screen.getByLabelText('מחק סימנייה'));
@@ -596,6 +604,7 @@ describe('the siddur reader bookmarks and last place', () => {
         nusach: 'ashkenaz',
         sectionTitle: 'אמצע',
         segmentKey: 'k-mid-2',
+        share: 0.125,
         label: 'אמצע · שְׁמַע יִשְׂרָאֵל יְהוָה',
         createdAt: NOW,
       },
@@ -640,12 +649,13 @@ describe('the siddur reader bookmarks and last place', () => {
       nusach: 'ashkenaz',
       sectionTitle: 'אמצע',
       segmentKey: 'k-mid-2',
+      share: 0.125,
       appDay: '2026-10-28',
       savedAt: NOW,
     });
     openBookmarks();
     fireEvent.press(screen.getByText('המקום האחרון'));
-    expect(lastScroll()).toEqual(MIDDLE_REACHED);
+    expect(lastOffset()).toEqual(READ_PLACE);
   });
 
   it('saves the place when the reader closes, and clears it when it closes at the top', async () => {
@@ -689,7 +699,7 @@ describe('the siddur reader bookmarks and last place', () => {
     expect(resumeBanner()).toBeOnTheScreen();
     measureKeyed();
     fireEvent.press(screen.getByRole('button', { name: 'המשך' }));
-    expect(lastScroll()).toEqual(MIDDLE_REACHED);
+    expect(lastOffset()).toEqual(MIDDLE_REACHED);
     expect(resumeBanner()).toBeNull();
     screen.unmount();
 
@@ -706,6 +716,7 @@ describe('the siddur reader bookmarks and last place', () => {
     fireEvent.press(screen.getByRole('button', { name: 'מההתחלה' }));
     expect(resumeBanner()).toBeNull();
     expect(scrollSpy).not.toHaveBeenCalled();
+    expect(offsetSpy).not.toHaveBeenCalled();
     expect(saved().shacharit).toEqual(before);
   });
 
@@ -791,7 +802,21 @@ describe('the siddur reader bookmarks and last place', () => {
     });
     openBookmarks();
     fireEvent.press(screen.getByText('מקום'));
-    expect(lastScroll()).toEqual({ ...MIDDLE_REACHED, viewOffset: -190 });
+    expect(lastOffset()).toEqual({ offset: 506, animated: false });
+  });
+
+  it('returns to the very point inside a long passage, scaled to its height when the text size changed', async () => {
+    useSiddurBookmarksStore.setState({ bookmarks: [{ ...bookmark('מקום', 'shacharit', 'ashkenaz', 1), share: 0.75 }] });
+    await openKeyed(SHACHARIT, 'ashkenaz');
+    measureKeyed();
+    openBookmarks();
+    fireEvent.press(screen.getByText('מקום'));
+    expect(lastOffset()).toEqual({ offset: 466 + 60, animated: false });
+
+    layout('siddur-segment-k-mid-2', 150, 160);
+    openBookmarks();
+    fireEvent.press(screen.getByText('מקום'));
+    expect(lastOffset()).toEqual({ offset: 466 + 120, animated: false });
   });
 
   it('lands on the section first and re-aims at the segment once it is measured', async () => {
@@ -804,8 +829,8 @@ describe('the siddur reader bookmarks and last place', () => {
 
     measureKeyed();
     await pause(200);
-    expect(scrollSpy).toHaveBeenCalledTimes(2);
-    expect(lastScroll()).toEqual(MIDDLE_REACHED);
+    expect(scrollSpy).toHaveBeenCalledTimes(1);
+    expect(lastOffset()).toEqual(MIDDLE_REACHED);
   });
 
   it('clears the place on סיימתי and saves nothing more while the reader stays open', async () => {
@@ -1372,33 +1397,65 @@ describe('the siddur reader folds its controls while the user reads', () => {
     });
   });
 
-  it('keeps its state through a jump to a place until the freeze ends', async () => {
+  it('lands a resumed place right under the compact bar, folded, at its point inside the passage', async () => {
     seed();
     await open();
     fireEvent.press(screen.getByText('המשך'));
-    expect(scrollSpy).toHaveBeenCalledWith({ index: 1, animated: false, viewOffset: FULL - 150 });
-    await scrollList(900);
-    expect(folded()).toBe(false);
-    await scrollList(FULL + 100);
-    expect(folded()).toBe(false);
-    await later(700);
-    await scrollList(FULL + 150);
+    expect(scrollSpy).not.toHaveBeenCalled();
+    expect(offsetSpy).toHaveBeenLastCalledWith({ offset: 766 - COMPACT, animated: false });
     expect(folded()).toBe(true);
   });
 
-  it('lands a place under the full block when unfolded and under the bar when folded', async () => {
+  it('lands a place under the compact bar even when the tools were open over the text', async () => {
+    useSiddurBookmarksStore.setState({
+      bookmarks: [
+        {
+          id: 'bookmark_1',
+          textId: 'shacharit',
+          nusach: 'ashkenaz',
+          sectionTitle: 'אמצע',
+          segmentKey: 'k-mid-2',
+          share: 0.5,
+          label: 'מקום',
+          createdAt: 1,
+        },
+      ],
+    });
     await open();
-    await scrollList(766 - COMPACT);
+    await scrollList(900);
+    expect(folded()).toBe(true);
+    await openTools();
+    expect(folded()).toBe(false);
+    fireEvent.press(screen.getByRole('button', { name: 'סימניות' }));
+    fireEvent.press(screen.getByText('מקום'));
+    expect(offsetSpy).toHaveBeenLastCalledWith({ offset: 766 + 40 - COMPACT, animated: false });
+    expect(folded()).toBe(true);
+  });
+
+  // The header can re-measure before the jump's scroll event arrives, which leaves the list's own shift undone.
+  it('re-aims a resumed place when the header shrinks as its banner leaves', async () => {
+    seed();
+    await open();
+    fireEvent.press(screen.getByText('המשך'));
+    layout('siddur-header-full', 0, FULL - 40);
+    await pause(200);
+    expect(offsetSpy).toHaveBeenLastCalledWith({ offset: 766 - 40 - COMPACT, animated: false });
+  });
+
+  it('saves the line being read under the bar, even while the tools are open over it', async () => {
+    await open();
+    await scrollList(676 - COMPACT);
     expect(folded()).toBe(true);
     await pause(1100);
-    expect(saved().shacharit.segmentKey).toBe('k-mid-2');
-    await dragTo(766 - FULL);
+    expect(saved().shacharit).toMatchObject({ segmentKey: 'k-mid-1', share: 0 });
     await openTools();
-    await dragTo(766 - FULL - 4);
-    await dragTo(766 - FULL);
+    await dragTo(676 - COMPACT - 4);
+    await dragTo(676 - COMPACT);
     expect(folded()).toBe(false);
     await pause(1100);
-    expect(saved().shacharit.segmentKey).toBe('k-mid-2');
+    expect(saved().shacharit).toMatchObject({ segmentKey: 'k-mid-1', share: 0 });
+    fireEvent.press(screen.getByRole('button', { name: 'הוסף סימנייה' }));
+    expect(useSiddurBookmarksStore.getState().bookmarks[0]).toMatchObject({ segmentKey: 'k-mid-1', share: 0 });
   });
 
   it('names the section under the cover in the picker once the controls come back', async () => {

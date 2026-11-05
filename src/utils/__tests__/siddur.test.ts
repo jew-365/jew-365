@@ -1336,6 +1336,19 @@ describe('reader places', () => {
     expect(segmentLead(KEYED[1].segments[1], 1)).toBe('שְׁמַע');
   });
 
+  it('measures how far into the top segment the screen starts, as a share of its height', () => {
+    const sizes: Record<string, number> = { 'k-open-1': 104, 'k-open-2': 180, 'k-mid-1': 90, 'k-mid-2': 200 };
+    const at = (viewportTop: number) => placeAt(KEYED, height, offset, LIST_TOP, viewportTop, (key) => sizes[key]);
+    expect(at(466)).toEqual({ sectionTitle: 'אמצע', segmentKey: 'k-mid-2', share: 0 });
+    expect(at(516)).toEqual({ sectionTitle: 'אמצע', segmentKey: 'k-mid-2', share: 0.25 });
+    expect(at(465)).toEqual({ sectionTitle: 'אמצע', segmentKey: 'k-mid-2', share: 0 });
+    expect(at(200)).toEqual({ sectionTitle: 'פתיחה', segmentKey: 'k-open-2', share: 0.3556 });
+    expect(placeAt(KEYED, height, offset, LIST_TOP, 516, () => undefined)).toEqual({
+      sectionTitle: 'אמצע',
+      segmentKey: 'k-mid-2',
+    });
+  });
+
   it('names the first keyed segment of a section', () => {
     const section: SiddurSection = {
       title: { he: 'ס', en: 'S' },
