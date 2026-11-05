@@ -57,6 +57,7 @@ import { useUserStore, type Gender, type PrayerMode } from '@/stores/useUserStor
 import { useShallow } from 'zustand/react/shallow';
 import { BRAND } from '@/theme/colors';
 import { useTheme } from '@/theme/ThemeProvider';
+import { AccuracyNotice } from '@/components/AccuracyNotice';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChipRow } from '@/components/ChipRow';
@@ -796,6 +797,10 @@ export default function SettingsScreen() {
                     {t('settings.version', { version: appVersionLabel() })}
                   </Text>
                 </Anchor>
+                <Anchor {...anchor('accuracy')}>
+                  <SectionLabel variant="field" text={t('accuracy.title')} style={styles.fieldLabel} />
+                  <AccuracyNotice style={styles.accuracy} />
+                </Anchor>
                 <Anchor {...anchor('contact')}>
                   <Text style={[typography.small, { color: colors.textMuted }]}>{t('settings.contactHint')}</Text>
                   {isContactConfigured() ? (
@@ -1267,6 +1272,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   backupFiles: {
+    marginBottom: spacing.lg,
+  },
+  accuracy: {
     marginBottom: spacing.lg,
   },
   versionText: {

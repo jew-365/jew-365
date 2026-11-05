@@ -2,7 +2,7 @@
 
 ## Purpose
 
-- Own the first-run onboarding flow for welcome, profile, nusach, mitzvot, location setup, the permissions step, and ready state.
+- Own the first-run onboarding flow for welcome, profile, nusach, mitzvot, location setup, the permissions step, the important notice, and ready state.
 
 ## Ownership
 
@@ -13,9 +13,10 @@
   - **Continue** pushes `/onboarding/location`, or goes back when the ready step opened the step (`from=ready`).
   - **Existing users:** an onboarded user never sees it, because the root layout's guard sends every onboarding route home.
 - The location step shows the default city with `settings.locationStatus.missing` until GPS or a city chip confirms it; the status never reads "ready" for a guess.
-- [permissions.tsx](permissions.tsx) owns the sixth step, after location: `onboarding.permissionsTitle` and `onboarding.permissionsBody` over a `ScrollView` holding [PermissionsList](../../components/PermissionsList.tsx), then the dots and a Continue that is never disabled and pushes `/onboarding/ready`.
+- [permissions.tsx](permissions.tsx) owns the sixth step, after location: `onboarding.permissionsTitle` and `onboarding.permissionsBody` over a `ScrollView` holding [PermissionsList](../../components/PermissionsList.tsx), then the dots and a Continue that is never disabled and pushes `/onboarding/notice`.
+- [notice.tsx](notice.tsx) owns the seventh step, the important notice on the accuracy of the times (the owner's request, 2026-11-05): an [IconTile](../../components/IconTile.tsx) (`warning`, accent, 64 points) over `accuracy.title` (`typography.title`, `accessibilityRole="header"`) and a padded [Card](../../components/Card.tsx) holding [AccuracyNotice](../../components/AccuracyNotice.tsx), the same paragraphs Settings → About and contact keeps; then the dots, a Button `onboarding.noticeAccept` that pushes `/onboarding/ready`, and the back link. Nothing is stored: the step is read, not signed.
 - [nusach.tsx](nusach.tsx), [location.tsx](location.tsx), and [ready.tsx](ready.tsx) own their respective onboarding steps. The nusach step lists the five nuschaot of `NUSACH_IDS` ([../../data/nuschaot.ts](../../data/nuschaot.ts)) as [ChoiceRow](../../components/ChoiceRow.tsx)s, and its Continue pushes `/onboarding/mitzvot`, the location step's `/onboarding/permissions`. The ready step's mark is an [IconTile](../../components/IconTile.tsx) (`check`, size 64), never a text glyph. It also lists what the app will remind about: the names of the enabled mitzvot of `useDayModel()` (filtered by nusach, localized by `nameFor()`, joined with " · ") under `onboarding.readyList`. Its link `onboarding.readyEdit` pushes `/onboarding/mitzvot` with `from=ready`, because `/mitzvot` is outside onboarding and the guard would send a user who is not onboarded yet back to the welcome step.
-- Every step draws its progress with [OnboardingDots](../../components/OnboardingDots.tsx) and `ONBOARDING_STEPS`; a new step raises that constant and shifts the later steps' indexes (seven: welcome 0, profile 1, nusach 2, mitzvot 3, location 4, permissions 5, ready 6). Where a step's list `ScrollView` sits right above the dots (welcome, profile, nusach and mitzvot), the dots take `marginTop: spacing.lg` and the list's content container `paddingBottom: spacing.lg`, so a scrolling row never sits flush against them (the user's call, 2026-10-26).
+- Every step draws its progress with [OnboardingDots](../../components/OnboardingDots.tsx) and `ONBOARDING_STEPS`; a new step raises that constant and shifts the later steps' indexes (eight: welcome 0, profile 1, nusach 2, mitzvot 3, location 4, permissions 5, notice 6, ready 7). Where a step's list `ScrollView` sits right above the dots (welcome, profile, nusach and mitzvot), the dots take `marginTop: spacing.lg` and the list's content container `paddingBottom: spacing.lg`, so a scrolling row never sits flush against them (the user's call, 2026-10-26).
 
 ## Local Contracts
 

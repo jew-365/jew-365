@@ -17,6 +17,7 @@ import { act, fireEvent, screen } from '@testing-library/react-native';
 import WelcomeScreen from '../onboarding/index';
 import OnboardingLocationScreen from '../onboarding/location';
 import OnboardingMitzvotScreen from '../onboarding/mitzvot';
+import NoticeScreen from '../onboarding/notice';
 import NusachScreen from '../onboarding/nusach';
 import PermissionsScreen from '../onboarding/permissions';
 import ProfileScreen from '../onboarding/profile';
@@ -30,6 +31,7 @@ import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
 
 const he = (key: string) => translate(key, undefined, 'he', null);
+const en = (key: string) => translate(key, undefined, 'en', null);
 
 describe('Onboarding Continue buttons', () => {
   beforeEach(() => {
@@ -67,11 +69,23 @@ describe('Onboarding Continue buttons', () => {
     expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
   });
 
-  it('Continue on the permissions step is enabled and goes to ready', () => {
+  it('Continue on the permissions step is enabled and goes to the important notice', () => {
     renderWithTheme(<PermissionsScreen />);
     const next = screen.getByRole('button', { name: he('common.continue') });
     expect(next).toBeEnabled();
     fireEvent.press(next);
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/notice');
+  });
+
+  it("the important notice says the times are the user's responsibility and where to report a mistake", () => {
+    renderWithTheme(<NoticeScreen />);
+    expect(screen.getByRole('header', { name: he('accuracy.title') })).toBeOnTheScreen();
+    for (const key of ['accuracy.effort', 'accuracy.responsibility', 'accuracy.report']) {
+      expect(screen.getByText(he(key))).toBeOnTheScreen();
+    }
+    expect(he('accuracy.report')).toContain(he('settings.contact'));
+    expect(en('accuracy.report')).toContain(en('settings.contact'));
+    fireEvent.press(screen.getByRole('button', { name: he('onboarding.noticeAccept') }));
     expect(mockPush).toHaveBeenCalledWith('/onboarding/ready');
   });
 
@@ -113,14 +127,15 @@ describe('Onboarding Continue buttons', () => {
     ['mitzvot', OnboardingMitzvotScreen, 3],
     ['location', OnboardingLocationScreen, 4],
     ['permissions', PermissionsScreen, 5],
-    ['ready', ReadyScreen, 6],
+    ['notice', NoticeScreen, 6],
+    ['ready', ReadyScreen, 7],
   ])('draws the %s step as dot %i of ONBOARDING_STEPS', async (_name, Screen, step) => {
     renderWithTheme(<Screen />);
     await act(async () => {});
     expect(screen.UNSAFE_getByType(OnboardingDots).props).toMatchObject({ step, total: ONBOARDING_STEPS });
   });
 
-  it('counts seven onboarding steps', () => {
-    expect(ONBOARDING_STEPS).toBe(7);
+  it('counts eight onboarding steps', () => {
+    expect(ONBOARDING_STEPS).toBe(8);
   });
 });

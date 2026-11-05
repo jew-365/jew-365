@@ -400,8 +400,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'אודות ויצירת קשר', en: 'About and contact' },
     body: [
       {
-        he: 'בהגדרות ← אודות ויצירת קשר: הגרסה, טופס פנייה (שם, טלפון ותוכן, שנשלחים אלינו דרך Formspree יחד עם גרסת האפליקציה וסוג המכשיר), המייל 365jew@gmail.com, וקישורים לדף התמיכה, למדיניות הפרטיות, לעמוד האפליקציה בחנות ולקרדיט של חק לישראל.',
-        en: "Settings → About and contact holds the version, a contact form (name, phone and message, sent to us through Formspree with the app version and device type), the email 365jew@gmail.com, and links to the support page, the privacy policy, the app's store page and the Chok LeYisrael credit.",
+        he: 'בהגדרות ← אודות ויצירת קשר: הגרסה, הודעה חשובה על דיוק הזמנים, טופס פנייה (שם, טלפון ותוכן, שנשלחים אלינו דרך Formspree יחד עם גרסת האפליקציה וסוג המכשיר), המייל 365jew@gmail.com, וקישורים לדף התמיכה, למדיניות הפרטיות, לעמוד האפליקציה בחנות ולקרדיט של חק לישראל.',
+        en: "Settings → About and contact holds the version, an important notice on the accuracy of the times, a contact form (name, phone and message, sent to us through Formspree with the app version and device type), the email 365jew@gmail.com, and links to the support page, the privacy policy, the app's store page and the Chok LeYisrael credit.",
       },
       {
         he: 'לשאלה הלכתית, ״קו ההלכה״ בלשונית עוד מחייג לקו לפי הנוסח שבהגדרות: קווים אשכנזיים, ולעדות המזרח ולתימן קו לפי פסקי מרן, גם בוואטסאפ.',
@@ -421,6 +421,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
     label: '1.0.21-14',
     date: '2026-11-05',
     items: [
+      {
+        he: 'הודעה חשובה על דיוק הזמנים: אנחנו משקיעים מאמץ רב כדי שהזמנים יהיו מדויקים, אבל גם אנחנו עלולים לטעות, והאחריות לקיום כל מצווה בזמנה היא של המשתמש. ההודעה מופיעה בהרשמה, לפני המסך האחרון, ונשארת בהגדרות ← אודות ויצירת קשר, ושם גם מדווחים לנו על טעות.',
+        en: 'An important notice on the accuracy of the times: we put a great deal of effort into accurate times, but we can make mistakes too, and keeping each mitzvah in its time is the user’s responsibility. It shows in onboarding, before the last screen, and stays in Settings → About and contact, where you can also report a mistake to us.',
+      },
       {
         he: 'סימנייה ו״המשך מהמקום האחרון״ בסידור מחזירים בדיוק לשורה שבה הייתם, גם באמצע קטע ארוך, ולא לתחילת הקטע או קצת אחריו. המקום הוא השורה שקראתם מתחת לסרגל העליון, גם כשפתחתם את הכלים כדי לשמור סימנייה.',
         en: 'A bookmark and Continue from your last place in the siddur bring you back to the very line you were on, even in the middle of a long passage, not to the start of the passage or a little after it. The place is the line you were reading under the top bar, even when you opened the tools to save the bookmark.',

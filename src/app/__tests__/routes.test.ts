@@ -60,6 +60,7 @@ describe('expo-router routes', () => {
     expect(routes).toContain('onboarding/mitzvot');
     expect(routes).toContain('onboarding/location');
     expect(routes).toContain('onboarding/permissions');
+    expect(routes).toContain('onboarding/notice');
     expect(routes).toContain('onboarding/ready');
   });
 

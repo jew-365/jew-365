@@ -194,6 +194,7 @@ import OnboardingWelcomeScreen from '../onboarding/index';
 import OnboardingLocationScreen from '../onboarding/location';
 import OnboardingMitzvotScreen from '../onboarding/mitzvot';
 import OnboardingNusachScreen from '../onboarding/nusach';
+import OnboardingNoticeScreen from '../onboarding/notice';
 import OnboardingPermissionsScreen from '../onboarding/permissions';
 import OnboardingProfileScreen from '../onboarding/profile';
 import OnboardingReadyScreen from '../onboarding/ready';
@@ -765,6 +766,13 @@ const CASES: SmokeCase[] = [
     Screen: OnboardingNusachScreen,
     fresh: true,
     check: both(text('מה הנוסח שלך?', 'Which nusach are you?'), text('תימן בלדי', 'Teiman Baladi')),
+  },
+  {
+    file: 'onboarding/notice',
+    label: 'notice',
+    Screen: OnboardingNoticeScreen,
+    fresh: true,
+    check: text('הודעה חשובה', 'Important notice'),
   },
   {
     file: 'onboarding/permissions',

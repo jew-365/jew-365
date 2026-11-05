@@ -26,7 +26,7 @@ export default function OnboardingPermissionsScreen() {
         <PermissionsList />
       </ScrollView>
       <OnboardingDots step={5} total={ONBOARDING_STEPS} style={styles.dots} />
-      <Button label={t('common.continue')} onPress={() => router.push('/onboarding/ready')} />
+      <Button label={t('common.continue')} onPress={() => router.push('/onboarding/notice')} />
       <Pressable onPress={() => router.back()} accessibilityRole="button" style={styles.backBtn}>
         <Text style={[typography.small, { color: colors.textSub }]}>{t('common.back')}</Text>
       </Pressable>

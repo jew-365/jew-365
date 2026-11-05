@@ -96,13 +96,18 @@ describe('Settings contact', () => {
     expect(screen.getByText(he('settings.version', { version: appVersionLabel() }))).toBeOnTheScreen();
     expect(screen.getAllByTestId(/^settings-anchor-/).map((node) => node.props.testID)).toEqual([
       'settings-anchor-version',
+      'settings-anchor-accuracy',
       'settings-anchor-contact',
       'settings-anchor-links',
     ]);
     const tree = JSON.stringify(screen.toJSON());
     const position = (id: string) => tree.indexOf(`"testID":"settings-anchor-${id}"`);
     expect(position('version')).toBeGreaterThan(-1);
-    expect(position('contact')).toBeGreaterThan(position('version'));
+    expect(position('accuracy')).toBeGreaterThan(position('version'));
+    expect(position('contact')).toBeGreaterThan(position('accuracy'));
+    const accuracy = within(screen.getByTestId('settings-anchor-accuracy'));
+    expect(accuracy.getByText(he('accuracy.title'))).toBeOnTheScreen();
+    expect(accuracy.getByText(he('accuracy.responsibility'))).toBeOnTheScreen();
     expect(position('links')).toBeGreaterThan(position('contact'));
     expect(
       within(screen.getByTestId('settings-anchor-contact')).getByLabelText(he('settings.contactMessage')),
