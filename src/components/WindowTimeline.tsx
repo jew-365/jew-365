@@ -40,6 +40,7 @@ import {
   timelineView,
   type TimelineNag,
 } from '@/utils/timeline';
+import { NAG_MIN_GAP_MIN } from '@/utils/nagging';
 import { timeLeftLine } from '@/utils/timeLeft';
 import { Button } from './Button';
 import { Card } from './Card';
@@ -91,7 +92,14 @@ type Props = {
   onManualNagsChange: (next: ManualNag[] | null) => void;
   onEditReminder: (index: number) => void;
   onDeleteReminder: (index: number) => void;
+  // Whether the reminders or the nags differ from the defaults, and the one reset that brings both back.
+  changed: boolean;
+  onReset: () => void;
 };
+
+// Why the timeline did not do what a gesture asked, said under the axis until the next gesture.
+type Notice =
+  { kind: 'tooClose' } | { kind: 'quiet' } | { kind: 'moved'; time: string } | { kind: 'nagsDropped'; n: number };
 
 // A point along the axis, from its start: `start` on native, which follows the layout direction, and the physical edge
 // on the web, where react-native-web keeps `start` physical; `offset` centres an element twice that wide on the point.
@@ -132,6 +140,7 @@ export function WindowTimeline(props: Props) {
   const [listOpen, setListOpen] = useState(false);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [notice, setNotice] = useState<Notice | null>(null);
   const gesture = useRef<Gesture | null>(null);
   const axisGesture = useRef<{ x: number; y: number } | null>(null);
 
@@ -203,20 +212,66 @@ export function WindowTimeline(props: Props) {
   const inView = (send: TimelineSend) =>
     view !== null && send.at >= view.start.getTime() && send.at <= view.end.getTime();
 
+  // ---- the 10-minute rule (the smart nag's spec 2.4) and what a change leaves ----
+  // The sends that stay where they are while `selection` moves: for a nag every other send, for a reminder the other
+  // reminders and the user's own nags (the smart nag's nags rearrange around it).
+  const blockers = (moving: Selection | null) =>
+    (base?.sends ?? []).filter((send) => {
+      if (moving?.type === 'nag') return !(send.type === 'nag' && send.at === moving.at);
+      if (send.type === 'nag') return Boolean(manualNags);
+      return !(moving?.type === 'reminder' && send.index === moving.index);
+    });
+  const allowedAt = (at: number, moving: Selection | null) =>
+    blockers(moving).every((send) => Math.abs(send.at - at) >= NAG_MIN_GAP_MIN * MIN);
+  // What the saved change sends, said when it is not what the gesture asked: a send the quiet hours or a holy block
+  // moved or dropped, or nags the smart nag had no room for.
+  const explain = (
+    asked: number,
+    next: { reminders: Reminder[]; manualNags: ManualNag[] | undefined },
+    target: Selection,
+  ) => {
+    if (!window) return;
+    const after = windowTimeline(mitzvah, next.reminders, window.date, { ...scope, manualNags: next.manualNags });
+    const sends = after?.sends ?? [];
+    const landed =
+      target.type === 'reminder'
+        ? sends.find((send) => send.type === 'reminder' && send.index === target.index)
+        : sends.find((send) => send.type === 'nag' && send.at === asked);
+    if (!landed) {
+      setNotice({ kind: 'quiet' });
+      return;
+    }
+    if (landed && landed.at !== asked) {
+      setNotice({ kind: 'moved', time: clockOf(new Date(landed.at), location.tz) });
+      return;
+    }
+    const dropped = nagsOf(base).length - sends.filter((send) => send.type === 'nag').length;
+    if (target.type === 'reminder' && dropped > 0) setNotice({ kind: 'nagsDropped', n: dropped });
+  };
+
   // ---- saving an edit ----
   const commit = (change: Draft) => {
     if (!window) return;
     const at = clampToWindow(change.at, window).getTime();
+    const next = edited({ ...change, at });
     if (change.selection.type === 'reminder') {
-      props.onRemindersChange(edited({ ...change, at }).reminders);
+      props.onRemindersChange(next.reminders);
       setSelection(change.selection);
     } else {
-      props.onManualNagsChange(edited({ ...change, at }).manualNags ?? null);
+      props.onManualNagsChange(next.manualNags ?? null);
       setSelection({ type: 'nag', at });
     }
+    explain(at, next, change.selection);
   };
-  const step = (send: TimelineSend, minutes: number) =>
-    commit({ selection: selectionOf(send), from: send.at, at: send.at + minutes * MIN });
+  const step = (send: TimelineSend, minutes: number) => {
+    setNotice(null);
+    const at = window ? clampToWindow(send.at + minutes * MIN, window).getTime() : send.at;
+    if (!allowedAt(at, selectionOf(send))) {
+      setNotice({ kind: 'tooClose' });
+      return;
+    }
+    commit({ selection: selectionOf(send), from: send.at, at });
+  };
   const remove = (send: TimelineSend) => {
     setSelection(null);
     if (send.type === 'reminder') props.onDeleteReminder(send.index);
@@ -232,6 +287,7 @@ export function WindowTimeline(props: Props) {
     onMoveShouldSetResponder: () => true,
     onResponderTerminationRequest: () => gesture.current?.mode !== 'drag',
     onResponderGrant: (event: GestureResponderEvent) => {
+      setNotice(null);
       gesture.current = {
         send,
         x: event.nativeEvent.pageX,
@@ -250,18 +306,22 @@ export function WindowTimeline(props: Props) {
         current.mode = Math.abs(dx) > Math.abs(dy) && current.draggable ? 'drag' : 'scroll';
         if (current.mode === 'scroll') return;
       }
-      const at = current.send.at + shareDelta(dx) * viewLength;
-      setDraft({
-        selection: selectionOf(current.send),
-        from: current.send.at,
-        at: clampToWindow(at, window!).getTime(),
-      });
+      const moving = selectionOf(current.send);
+      const at = clampToWindow(current.send.at + shareDelta(dx) * viewLength, window!).getTime();
+      // A spot within 10 minutes of another notification is refused: the dot stays at its last allowed place.
+      if (!allowedAt(at, moving)) {
+        setNotice({ kind: 'tooClose' });
+        if (!draft) setDraft({ selection: moving, from: current.send.at, at: current.send.at });
+        return;
+      }
+      setNotice(null);
+      setDraft({ selection: moving, from: current.send.at, at });
     },
     onResponderRelease: () => {
       const current = gesture.current;
       gesture.current = null;
       if (current?.mode === 'pending') select(current.send);
-      else if (current?.mode === 'drag' && draft) commit(draft);
+      else if (current?.mode === 'drag' && draft && draft.at !== draft.from) commit(draft);
       setDraft(null);
     },
     onResponderTerminate: () => {
@@ -273,6 +333,7 @@ export function WindowTimeline(props: Props) {
     onStartShouldSetResponder: () => Boolean(window && view),
     onResponderTerminationRequest: () => true,
     onResponderGrant: (event: GestureResponderEvent) => {
+      setNotice(null);
       axisGesture.current = { x: event.nativeEvent.pageX, y: event.nativeEvent.pageY };
     },
     onResponderRelease: (event: GestureResponderEvent) => {
@@ -283,8 +344,16 @@ export function WindowTimeline(props: Props) {
       if (moved > DRAG_SLOP) return;
       const physical = Math.min(1, Math.max(0, event.nativeEvent.locationX / width));
       const at = timeAtShare(mirrored ? 1 - physical : physical, view);
-      props.onRemindersChange([...reminders, reminderAt(at, window, name)]);
+      const added = reminderAt(at, window, name);
+      const addedAt = clampToWindow(at.getTime(), window).getTime();
+      if (!allowedAt(addedAt, null)) {
+        setNotice({ kind: 'tooClose' });
+        return;
+      }
+      const next = [...reminders, added];
+      props.onRemindersChange(next);
       setSelection({ type: 'reminder', index: reminders.length });
+      explain(addedAt, { reminders: next, manualNags }, { type: 'reminder', index: reminders.length });
     },
     onResponderTerminate: () => {
       axisGesture.current = null;
@@ -345,6 +414,28 @@ export function WindowTimeline(props: Props) {
                   />
                 );
               })
+            : null}
+          {view && draft
+            ? blockers(draft.selection.type === 'nag' ? { type: 'nag', at: draft.from } : draft.selection).map(
+                (send) => {
+                  const gap = NAG_MIN_GAP_MIN * MIN;
+                  const from = Math.max(0, shareOf(send.at - gap, view));
+                  const to = Math.min(1, shareOf(send.at + gap, view));
+                  if (to <= from) return null;
+                  return (
+                    <View
+                      key={`gap-${send.at}`}
+                      pointerEvents="none"
+                      testID="timeline-gap"
+                      style={[
+                        styles.gap,
+                        along(from, mirrored),
+                        { width: `${(to - from) * 100}%`, backgroundColor: colors.urgent },
+                      ]}
+                    />
+                  );
+                },
+              )
             : null}
           <View pointerEvents="none" style={styles.bar}>
             <Svg width="100%" height={BAR_HEIGHT} viewBox="0 0 100 10" preserveAspectRatio="none">
@@ -462,17 +553,45 @@ export function WindowTimeline(props: Props) {
         ) : (
           <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>{t('detail.timeline.hint')}</Text>
         )}
-        {manualNags ? (
+        {notice ? (
+          <Text
+            testID="timeline-notice"
+            accessibilityLiveRegion="polite"
+            style={[
+              typography.small,
+              styles.note,
+              { color: notice.kind === 'tooClose' ? colors.urgent : colors.textSub },
+            ]}
+          >
+            {notice.kind === 'tooClose'
+              ? t('detail.timeline.notice.tooClose', { min: NAG_MIN_GAP_MIN })
+              : notice.kind === 'quiet'
+                ? t('detail.timeline.notice.quiet')
+                : notice.kind === 'moved'
+                  ? t('detail.timeline.notice.moved', { time: notice.time })
+                  : t(
+                      notice.n === 1 ? 'detail.timeline.notice.nagsDropped.once' : 'detail.timeline.notice.nagsDropped',
+                      {
+                        n: notice.n,
+                        min: NAG_MIN_GAP_MIN,
+                      },
+                    )}
+          </Text>
+        ) : null}
+        {props.changed ? (
           <View style={styles.manual} testID="timeline-manual">
-            <Text style={[typography.small, { color: colors.textSub }]}>{t('detail.timeline.manualNote')}</Text>
+            <Text style={[typography.small, { color: colors.textSub }]}>
+              {manualNags ? t('detail.timeline.manualNote') : t('detail.timeline.changedNote')}
+            </Text>
             <Button
               variant="secondary"
               size="compact"
               icon="repeat"
-              label={t('detail.timeline.resetSmart')}
+              label={t('detail.timeline.reset')}
               onPress={() => {
                 setSelection(null);
-                props.onManualNagsChange(null);
+                setNotice(null);
+                props.onReset();
               }}
             />
           </View>
@@ -595,6 +714,7 @@ const styles = StyleSheet.create({
   title: { flex: 1 },
   zoomRow: { flexDirection: 'row', marginBottom: spacing.xs },
   axis: { height: AXIS_HEIGHT, marginHorizontal: spacing.xs },
+  gap: { position: 'absolute', top: ZONE_INSET, bottom: ZONE_INSET, opacity: 0.18, borderRadius: radius.xs },
   zone: {
     position: 'absolute',
     top: ZONE_INSET,

@@ -675,13 +675,7 @@ export default function HomeScreen() {
           })
       : undefined;
 
-  const openDetail = (id: string) => {
-    if (id.startsWith('custom_')) {
-      router.push({ pathname: '/custom-mitzvah', params: { id } });
-    } else {
-      router.push(`/mitzvah/${id}`);
-    }
-  };
+  const openDetail = (id: string) => router.push(`/mitzvah/${id}`);
 
   const selectedMitzvah = selectedId ? allMitzvot.find((item) => item.id === selectedId) : undefined;
   const selectedName = selectedMitzvah ? nameFor(selectedMitzvah) : undefined;

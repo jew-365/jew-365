@@ -29,6 +29,7 @@ type Handlers = {
   onManualNagsChange: jest.Mock;
   onEditReminder: jest.Mock;
   onDeleteReminder: jest.Mock;
+  onReset: jest.Mock;
 };
 
 function renderTimeline(options: { reminders?: Reminder[]; manualNags?: ManualNag[]; level?: 1 | 2 | 3 | 4 } = {}) {
@@ -37,6 +38,7 @@ function renderTimeline(options: { reminders?: Reminder[]; manualNags?: ManualNa
     onManualNagsChange: jest.fn(),
     onEditReminder: jest.fn(),
     onDeleteReminder: jest.fn(),
+    onReset: jest.fn(),
   };
   const reminders = options.reminders ?? MINCHA.defaultReminders;
   renderWithTheme(
@@ -46,6 +48,7 @@ function renderTimeline(options: { reminders?: Reminder[]; manualNags?: ManualNa
       window={WINDOW}
       reminders={reminders}
       manualNags={options.manualNags}
+      changed={Boolean(options.manualNags) || Boolean(options.reminders)}
       nagLevel={options.level ?? 3}
       location={J}
       settings={SETTINGS}
@@ -152,8 +155,8 @@ describe('WindowTimeline', () => {
     const before = nagStarts();
     const target = screen.getByTestId('timeline-dot-r0.0');
     fireEvent(target, 'responderGrant', { nativeEvent: { pageX: 0, pageY: 50 } });
-    // Four fifths of the window on: past the start of the last third, so the zone now opens at this reminder.
-    fireEvent(target, 'responderMove', { nativeEvent: { pageX: AXIS_WIDTH * 0.8, pageY: 50 } });
+    // Three quarters of the window on: past the start of the last third, so the zone now opens at this reminder.
+    fireEvent(target, 'responderMove', { nativeEvent: { pageX: AXIS_WIDTH * 0.75, pageY: 50 } });
     expect(handlers.onRemindersChange).not.toHaveBeenCalled();
     expect(nagStarts()).not.toEqual(before);
     fireEvent(target, 'responderTerminate', { nativeEvent: {} });
@@ -225,7 +228,7 @@ describe('WindowTimeline', () => {
     });
   });
 
-  it('with nags placed by hand, says so and offers the smart nag back; a nag’s delete saves the rest', () => {
+  it('with nags placed by hand, says so and offers the reset; a nag’s delete saves the rest', () => {
     const manualNags: ManualNag[] = [
       { anchor: 'end', offsetMin: -90, kind: 'zone' },
       { anchor: 'end', offsetMin: -10, kind: 'lastChance', lastChance: 'alone' },
@@ -235,8 +238,8 @@ describe('WindowTimeline', () => {
     press('timeline-dot-n1');
     fireEvent.press(screen.getByText('מחיקה'));
     expect(handlers.onManualNagsChange).toHaveBeenLastCalledWith([manualNags[1]]);
-    fireEvent.press(screen.getByText('חזרה לנודניק החכם'));
-    expect(handlers.onManualNagsChange).toHaveBeenLastCalledWith(null);
+    fireEvent.press(screen.getByText('איפוס ציר ההתראות'));
+    expect(handlers.onReset).toHaveBeenCalledTimes(1);
   });
 
   it('zooms to the critical time and back', () => {
@@ -276,10 +279,84 @@ describe('WindowTimeline', () => {
         onManualNagsChange={jest.fn()}
         onEditReminder={jest.fn()}
         onDeleteReminder={jest.fn()}
+        changed={false}
+        onReset={jest.fn()}
       />,
     );
     expect(screen.getAllByText('--:--')).toHaveLength(2);
     expect(screen.getByText('אין חלון זמן בימים הקרובים.')).toBeOnTheScreen();
     expect(screen.queryByTestId('timeline-count')).toBeNull();
+  });
+
+  describe('the 10-minute rule and what a change leaves', () => {
+    it('refuses a step within 10 minutes of another notification and says why, saving nothing', () => {
+      const manualNags: ManualNag[] = [
+        { anchor: 'end', offsetMin: -30, kind: 'zone' },
+        { anchor: 'end', offsetMin: -22, kind: 'zone' },
+      ];
+      const { handlers } = renderTimeline({ manualNags });
+      press('timeline-dot-n1');
+      fireEvent.press(screen.getByLabelText('5 דקות מאוחר יותר'));
+      expect(handlers.onManualNagsChange).not.toHaveBeenCalled();
+      expect(screen.getByTestId('timeline-notice')).toHaveTextContent(/במרחק 10 דקות לפחות/);
+    });
+
+    it('holds a dragged dot at its last allowed place, draws the forbidden stretches, and saves only an allowed move', () => {
+      const { handlers, timeline } = renderTimeline();
+      const target = screen.getByTestId('timeline-dot-r0.0');
+      const length = WINDOW.end.getTime() - WINDOW.start.getTime();
+      const second = timeline.sends.find((send) => send.type === 'reminder' && send.index === 1)!;
+      // Onto the second reminder, which a drag may not come within 10 minutes of.
+      const share = (second.at - WINDOW.start.getTime()) / length;
+      fireEvent(target, 'responderGrant', { nativeEvent: { pageX: 0, pageY: 50 } });
+      fireEvent(target, 'responderMove', { nativeEvent: { pageX: AXIS_WIDTH * share, pageY: 50 } });
+      expect(screen.getAllByTestId('timeline-gap').length).toBeGreaterThan(0);
+      expect(screen.getByTestId('timeline-notice')).toHaveTextContent(/במרחק 10 דקות לפחות/);
+      fireEvent(target, 'responderRelease', { nativeEvent: { pageX: AXIS_WIDTH * share, pageY: 50 } });
+      expect(handlers.onRemindersChange).not.toHaveBeenCalled();
+      expect(screen.queryAllByTestId('timeline-gap')).toHaveLength(0);
+    });
+
+    it('says how many nags the smart nag dropped when a reminder moves into the critical zone', () => {
+      const { handlers } = renderTimeline({ level: 4 });
+      // Mincha at level 4 from four fifths on: the reminder's 10 minutes push nags out (the probe of 2026-11-05).
+      drag('timeline-dot-r0.0', AXIS_WIDTH * 0.85);
+      expect(handlers.onRemindersChange).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId('timeline-notice')).toHaveTextContent(/הנודניק החכם סידר מחדש/);
+    });
+
+    it('says a notification dropped in the quiet hours moved or will not go out', () => {
+      const handlers = {
+        onRemindersChange: jest.fn(),
+        onManualNagsChange: jest.fn(),
+        onEditReminder: jest.fn(),
+        onDeleteReminder: jest.fn(),
+        onReset: jest.fn(),
+      };
+      renderWithTheme(
+        <WindowTimeline
+          mitzvah={MINCHA}
+          name="תפילת מנחה"
+          window={WINDOW}
+          reminders={MINCHA.defaultReminders}
+          manualNags={undefined}
+          nagLevel={1}
+          location={J}
+          settings={SETTINGS}
+          quietHours={{ before: null, after: 13 * 60 }}
+          changed={false}
+          {...handlers}
+        />,
+      );
+      fireEvent(screen.getByTestId('timeline-axis'), 'layout', {
+        nativeEvent: { layout: { x: 0, y: 0, width: AXIS_WIDTH, height: 76 } },
+      });
+      const axis = screen.getByTestId('timeline-axis');
+      // Half way through the window, after 13:00 on the location's clock.
+      fireEvent(axis, 'responderGrant', { nativeEvent: { pageX: 150, pageY: 40, locationX: AXIS_WIDTH / 2 } });
+      fireEvent(axis, 'responderRelease', { nativeEvent: { pageX: 150, pageY: 40, locationX: AXIS_WIDTH / 2 } });
+      expect(handlers.onRemindersChange).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId('timeline-notice')).toHaveTextContent(/שעות שקטות/);
+    });
   });
 });

@@ -206,14 +206,7 @@ export default function ScheduleScreen() {
                 return (
                   <Pressable
                     key={item.id}
-                    onPress={() =>
-                      item.mitzvahId &&
-                      router.push(
-                        item.mitzvahId.startsWith('custom_')
-                          ? { pathname: '/custom-mitzvah', params: { id: item.mitzvahId } }
-                          : `/mitzvah/${item.mitzvahId}`,
-                      )
-                    }
+                    onPress={() => item.mitzvahId && router.push(`/mitzvah/${item.mitzvahId}`)}
                     disabled={!item.mitzvahId}
                     style={[styles.timelineRow, { backgroundColor: highlight ? colors.goldWash : 'transparent' }]}
                   >

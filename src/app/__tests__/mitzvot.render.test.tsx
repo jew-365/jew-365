@@ -149,14 +149,14 @@ describe('Mitzvot library', () => {
     expect(switchLabels()).not.toContain('אושפיזין');
   });
 
-  it('lists the custom mitzvot under My mitzvot in the order they were created, and opens the form from a row', () => {
+  it('lists the custom mitzvot under My mitzvot in the order they were created, and opens the mitzvah screen from a row, as every row does', () => {
     addCustom('custom_1800000000002_b', 'שיעור ערב', 1800000000002);
     addCustom('custom_1800000000001_a', 'שיעור בוקר', 1800000000001);
     renderWithTheme(<MitzvotScreen />);
     expect(groupSwitches('mine')).toEqual(['שיעור בוקר', 'שיעור ערב']);
     expect(switchLabels().filter((label) => label.startsWith('שיעור'))).toHaveLength(2);
     fireEvent.press(screen.getByText('שיעור בוקר'));
-    expect(mockPush).toHaveBeenCalledWith({ pathname: '/custom-mitzvah', params: { id: 'custom_1800000000001_a' } });
+    expect(mockPush).toHaveBeenCalledWith('/mitzvah/custom_1800000000001_a');
   });
 
   it('draws each section as one divided card holding all its rows', () => {

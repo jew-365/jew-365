@@ -22,7 +22,6 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { IconTile } from '@/components/IconTile';
 import { ListRow } from '@/components/ListRow';
 import { OptionSelect } from '@/components/OptionSelect';
-import { ReminderTimingFields } from '@/components/ReminderTimingFields';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
 import { TimeField } from '@/components/TimeField';
@@ -31,7 +30,7 @@ import { WheelPicker } from '@/components/WheelPicker';
 import { CUSTOM_ICON_CHOICES, CustomIconName, customIconFor } from '@/data/customIcons';
 import { SIDDUR_GROUPS, SIDDUR_TEXTS, standaloneTextsIn } from '@/data/siddur';
 import { useCustomMitzvotStore, makeCustomMitzvahId } from '@/stores/useCustomMitzvotStore';
-import { effectiveReminders, useMitzvotStore } from '@/stores/useMitzvotStore';
+import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { BRAND } from '@/theme/colors';
 import { scaled } from '@/theme/scale';
@@ -39,7 +38,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
-import { TIME_PATTERN, minutesToTime, timeToMinutes } from '@/utils/clock';
+import { TIME_PATTERN, timeToMinutes } from '@/utils/clock';
 import {
   DraftBlock,
   STREAK_DEFAULT_DAYS,
@@ -49,7 +48,6 @@ import {
   categoryForWindow,
   cleanContentBlocks,
   currentSchedule,
-  reminderClock,
   scheduleDateLabel,
   scheduleOnSave,
   siddurTextName,
@@ -58,18 +56,6 @@ import {
   validStreakDays,
 } from '@/utils/customMitzvah';
 import { appDayKey } from '@/utils/locationDay';
-import { reminderLabel } from '@/utils/mitzvahName';
-import {
-  ReminderTiming,
-  TIMING_MINUTES,
-  parseMinutes,
-  switchTiming,
-  timingKinds,
-  timingMinutes,
-  timingOf,
-  withTiming,
-} from '@/utils/reminderTiming';
-import { FOLLOW_UP_MAX_MIN, HEADS_UP_MAX_MIN } from '@/utils/skipRules';
 import {
   CUSTOM_PERFORM_MIN_DEFAULT,
   CUSTOM_PERFORM_MIN_MAX,
@@ -85,7 +71,6 @@ type ScheduleMode = CustomSchedule['mode'];
 type NagChoice = 'app' | `${NagLevel}`;
 
 const CONTENT_TYPES: DraftBlock['type'][] = ['text', 'blessing', 'link', 'siddur'];
-const REMINDER_TIMINGS = timingKinds({ custom: true, multiDay: false });
 const STREAK_CHOICES: readonly number[] = Array.from({ length: STREAK_MAX_DAYS }, (_, index) => index + 1);
 function siddurChoices(nusach: Nusach): SiddurTextId[] {
   return [
@@ -94,8 +79,10 @@ function siddurChoices(nusach: Nusach): SiddurTextId[] {
   ];
 }
 
-function emptyReminder(): Reminder {
-  return { anchor: 'start', offsetMin: 0, label: '' };
+// The one reminder a new custom mitzvah starts with, at the start of its time; the rest are added, moved and deleted on
+// its screen's timeline (the owner's call, 2026-11-05).
+function firstReminder(name: string): Reminder {
+  return { anchor: 'start', offsetMin: 0, label: name };
 }
 
 function Hint({ text, style }: { text: string; style?: StyleProp<TextStyle> }) {
@@ -160,11 +147,6 @@ export default function CustomMitzvahScreen() {
   const [rangeOpen, setRangeOpen] = useState(false);
   const [skipShabbat, setSkipShabbat] = useState(existing?.skipOn.includes('shabbat') ?? false);
   const [skipYomtov, setSkipYomtov] = useState(existing?.skipOn.includes('yomtov') ?? false);
-  const [initialReminders] = useState<Reminder[]>(() =>
-    existing ? effectiveReminders(existing.id) : [emptyReminder()],
-  );
-  const [reminders, setReminders] = useState<Reminder[]>(initialReminders);
-  const [timings, setTimings] = useState<ReminderTiming[]>(() => initialReminders.map(timingOf));
   const appNagLevel = useUserStore((s) => s.nagLevel);
   const [nagChoice, setNagChoice] = useState<NagChoice>(() => {
     const own = existing ? useMitzvotStore.getState().activeMitzvot[existing.id]?.nagLevel : undefined;
@@ -228,14 +210,6 @@ export default function CustomMitzvahScreen() {
     setRangeOpen(true);
   };
 
-  const outsideCopy = (
-    reminder: Reminder,
-    key: 'custom.reminderOutsideWindow' | 'custom.errors.reminderOutsideWindow',
-  ) =>
-    reminder.anchor === 'followUp'
-      ? t('reminder.errors.followUpRange', { max: FOLLOW_UP_MAX_MIN })
-      : t(key, { hours: HEADS_UP_MAX_MIN / 60 });
-
   const leave = () => (router.canGoBack() ? router.back() : router.replace('/mitzvot'));
 
   const onSave = () => {
@@ -272,24 +246,6 @@ export default function CustomMitzvahScreen() {
     const skipOn: SkipContext[] = [];
     if (skipShabbat) skipOn.push('shabbat');
     if (skipYomtov) skipOn.push('yomtov');
-    if (!reminders.length) {
-      setError(t('custom.errors.reminderRequired'));
-      return;
-    }
-    // A reminder's own nag of an earlier version is retired with it (the smart nag).
-    const cleanedReminders = reminders.map(({ bodyVariants: _dropped, ...r }) => {
-      const { nag: _retired, ...kept } = r as Reminder & { nag?: unknown };
-      return { ...kept, label: r.label.trim() };
-    });
-    if (cleanedReminders.some((r) => r.anchor !== 'followUp' && !r.label)) {
-      setError(t('custom.errors.reminderLabelRequired'));
-      return;
-    }
-    const outside = cleanedReminders.find((r) => reminderClock(startTime, endTime, r) === null);
-    if (outside) {
-      setError(outsideCopy(outside, 'custom.errors.reminderOutsideWindow'));
-      return;
-    }
     const perform = Number(performMin.trim());
     if (!/^\d+$/.test(performMin.trim()) || !validPerformMin(perform)) {
       setError(t('custom.errors.performMin', { max: CUSTOM_PERFORM_MIN_MAX }));
@@ -304,21 +260,25 @@ export default function CustomMitzvahScreen() {
       skipOn,
       activeDays: undefined,
       schedules: scheduleOnSave(existing, schedule, todayOnSave),
-      reminders: cleanedReminders,
+      // The reminders are the timeline's (the mitzvah screen); an edit keeps them as they are.
+      reminders: existing ? existing.reminders : [firstReminder(name.trim())],
       contentBlocks: cleanContentBlocks(contentBlocks),
     };
     const ownLevel = nagChoice === 'app' ? null : nagLevel;
     if (editingId && existing) {
       updateCustom(editingId, fields);
-      useMitzvotStore.getState().resetToDefault(editingId);
-      useMitzvotStore.getState().setNagLevel(editingId, ownLevel);
+      if ((useMitzvotStore.getState().activeMitzvot[editingId]?.nagLevel ?? null) !== ownLevel) {
+        useMitzvotStore.getState().setNagLevel(editingId, ownLevel);
+      }
+      leave();
     } else {
       const id = makeCustomMitzvahId();
       addCustom({ id, ...fields, createdAt: Date.now() });
       setEnabled(id, true);
       useMitzvotStore.getState().setNagLevel(id, ownLevel);
+      // A new mitzvah opens on its screen, where its timeline is.
+      router.replace({ pathname: '/mitzvah/[id]', params: { id } });
     }
-    leave();
   };
 
   const onDelete = () => {
@@ -333,31 +293,6 @@ export default function CustomMitzvahScreen() {
     const weekday = WEEKDAYS.find((candidate) => candidate === day);
     if (weekday === undefined) return;
     setActiveDays((prev) => (prev.includes(weekday) ? prev.filter((d) => d !== weekday) : [...prev, weekday]));
-  };
-  const updateReminder = (idx: number, patch: Partial<Reminder>) => {
-    setReminders((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
-  };
-  const changeTiming = (idx: number, next: ReminderTiming) => {
-    const current = timings[idx];
-    if (next === current) return;
-    const reminder = reminders[idx];
-    const fires = current === 'followUp' ? null : reminderClock(startTime, endTime, reminder);
-    const clockDefault = fires ? timeToMinutes(fires) : timesValid ? timeToMinutes(startTime) : 0;
-    updateReminder(idx, withTiming(next, switchTiming(current, timingMinutes(reminder), next, clockDefault)));
-    setTimings((prev) => prev.map((timing, i) => (i === idx ? next : timing)));
-  };
-  const changeMinutes = (idx: number, digits: string) => {
-    const timing = timings[idx];
-    if (timing === 'clock') return;
-    updateReminder(idx, withTiming(timing, Math.min(TIMING_MINUTES[timing].max, parseMinutes(digits) ?? 0)));
-  };
-  const removeReminder = (idx: number) => {
-    setReminders((prev) => prev.filter((_, i) => i !== idx));
-    setTimings((prev) => prev.filter((_, i) => i !== idx));
-  };
-  const addReminder = () => {
-    setReminders((prev) => [...prev, emptyReminder()]);
-    setTimings((prev) => [...prev, timingOf(emptyReminder())]);
   };
   const addContentBlock = () => {
     setContentBlocks((prev) => [...prev, { type: 'text', he: '' }]);
@@ -556,70 +491,6 @@ export default function CustomMitzvahScreen() {
           ]}
         />
         <Hint text={t('custom.hint.performMin')} style={styles.nagLevel} />
-        {reminders.map((r, idx) => {
-          const clock = reminderClock(startTime, endTime, r);
-          const timing = timings[idx];
-          return (
-            <Card key={idx} padded style={styles.itemCard}>
-              <Text style={[typography.subheading, styles.reminderHeading, { color: colors.text }]}>
-                {t('custom.reminderN', { n: idx + 1 })}
-              </Text>
-              <SectionLabel variant="field" text={t('custom.reminderText')} />
-              <TextInput
-                value={r.label}
-                onChangeText={(v) => updateReminder(idx, { label: v })}
-                placeholder={
-                  r.anchor === 'followUp'
-                    ? reminderLabel({ anchor: r.anchor, label: '' }, name.trim())
-                    : t('custom.reminderLabelPlaceholder')
-                }
-                placeholderTextColor={colors.textMuted}
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.surface2,
-                    color: colors.text,
-                    borderColor: colors.border,
-                    writingDirection: inputDir,
-                    marginBottom: spacing.md,
-                  },
-                ]}
-              />
-              <ReminderTimingFields
-                timing={timing}
-                kinds={REMINDER_TIMINGS}
-                onTiming={(next) => changeTiming(idx, next)}
-                minutes={String(timingMinutes(r))}
-                onMinutes={(digits) => changeMinutes(idx, digits)}
-                time={timing === 'clock' ? minutesToTime(r.offsetMin) : ''}
-                onTime={(value) => updateReminder(idx, withTiming('clock', timeToMinutes(value)))}
-              />
-              {clock ? (
-                <Text style={[typography.small, styles.note, { color: colors.goldText }]}>
-                  {t('custom.reminderPreview', { time: clock })}
-                </Text>
-              ) : timesValid ? (
-                <Text style={[typography.small, styles.note, { color: colors.urgent }]}>
-                  {outsideCopy(r, 'custom.reminderOutsideWindow')}
-                </Text>
-              ) : null}
-              <Button
-                variant="danger"
-                size="compact"
-                label={t('custom.deleteReminder')}
-                onPress={() => removeReminder(idx)}
-                style={styles.itemAction}
-              />
-            </Card>
-          );
-        })}
-        <Button
-          variant="secondary"
-          icon="plus"
-          label={t('custom.addReminder')}
-          onPress={addReminder}
-          style={styles.addAction}
-        />
 
         <View style={[styles.editorSection, { borderColor: colors.border }]}>
           <Text style={[typography.subheading, { color: colors.text }]}>{t('custom.contentBlocks')}</Text>

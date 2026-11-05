@@ -214,11 +214,31 @@ describe('Mitzvah screen', () => {
     });
   });
 
-  it('resets the reminders from a secondary button', () => {
+  it('keeps a single reset, on the timeline, shown only once something changed', () => {
     renderMitzvah({ id: 'shacharit' });
-    expect(screen.getByRole('button', { name: 'חזרה לברירת מחדל' })).toHaveStyle({
-      backgroundColor: THEMES.gold.surface2,
+    expect(screen.queryByRole('button', { name: 'חזרה לברירת מחדל' })).toBeNull();
+    expect(screen.queryByRole('button', { name: t('detail.timeline.reset') })).toBeNull();
+  });
+
+  it('heads a custom mitzvah’s screen with a pill to its form, and a registry mitzvah’s with none', () => {
+    useCustomMitzvotStore.getState().add({
+      id: 'custom_1800000000000_abc',
+      name: 'לימוד',
+      startHHMM: '08:00',
+      endHHMM: '12:00',
+      reminders: [{ anchor: 'start', offsetMin: 0, label: 'לימוד' }],
+      skipOn: [],
+      createdAt: 1800000000000,
     });
+    renderMitzvah({ id: 'custom_1800000000000_abc' });
+    fireEvent.press(screen.getByRole('button', { name: t('detail.editCustom') }));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/custom-mitzvah', params: { id: 'custom_1800000000000_abc' } });
+    act(() => useCustomMitzvotStore.getState().reset());
+  });
+
+  it('heads a registry mitzvah’s screen with no edit pill', () => {
+    renderMitzvah({ id: 'shacharit' });
+    expect(screen.queryByRole('button', { name: t('detail.editCustom') })).toBeNull();
   });
 
   describe('at least one reminder', () => {
@@ -293,7 +313,8 @@ describe('Mitzvah screen', () => {
       fireEvent.press(screen.getByRole('button', { name: DELETE_REMINDER }));
       expect(screen.getByText(LAST_REMINDER_ERROR)).toBeOnTheScreen();
 
-      fireEvent.press(screen.getByRole('button', { name: 'חזרה לברירת מחדל' }));
+      act(() => useMitzvotStore.getState().setReminders('havdalah', [{ anchor: 'start', offsetMin: 0, label: 'א' }]));
+      fireEvent.press(screen.getByRole('button', { name: t('detail.timeline.reset') }));
 
       expect(screen.queryByText(LAST_REMINDER_ERROR)).toBeNull();
     });

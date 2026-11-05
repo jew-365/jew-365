@@ -49,7 +49,7 @@ jest.mock('expo-background-task', () => ({
   BackgroundTaskStatus: { Restricted: 1, Available: 2 },
 }));
 
-import { cleanup, fireEvent, screen, within } from '@testing-library/react-native';
+import { act, cleanup, fireEvent, screen, within } from '@testing-library/react-native';
 import { Modal } from 'react-native';
 import MitzvahDetailScreen from '../mitzvah/[id]';
 import { CITIES } from '@/data/cities';
@@ -131,11 +131,28 @@ describe('Mitzvah screen › the nagging level', () => {
     expect(screen.getByText(`${appTitle(1)} · ${perDay(4)}`)).toBeOnTheScreen();
   });
 
-  it('keeps the level when the reminders go back to the defaults', () => {
+  it('keeps the level when the timeline is reset', () => {
     useMitzvotStore.getState().setNagLevel('shacharit', 3);
+    useMitzvotStore.getState().setReminders('shacharit', [{ anchor: 'start', offsetMin: 0, label: 'יחידה' }]);
     renderMitzvah({ id: 'shacharit' });
-    fireEvent.press(screen.getByRole('button', { name: t('detail.defaultReset') }));
+    fireEvent.press(screen.getByRole('button', { name: t('detail.timeline.reset') }));
     expect(useMitzvotStore.getState().activeMitzvot.shacharit.nagLevel).toBe(3);
+    expect(useMitzvotStore.getState().activeMitzvot.shacharit.customReminders).toBeUndefined();
+  });
+
+  it('shows the reset only after a change, and the one reset gives back both the reminders and the smart nag', () => {
+    renderMitzvah({ id: 'shacharit' });
+    expect(screen.queryByTestId('timeline-manual')).toBeNull();
+    act(() => {
+      useMitzvotStore.getState().setReminders('shacharit', [{ anchor: 'start', offsetMin: 0, label: 'יחידה' }]);
+      useMitzvotStore.getState().setManualNags('shacharit', [{ anchor: 'end', offsetMin: -30, kind: 'zone' }]);
+    });
+    expect(screen.getByTestId('timeline-manual')).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: t('detail.timeline.reset') }));
+    const entry = useMitzvotStore.getState().activeMitzvot.shacharit;
+    expect(entry.customReminders).toBeUndefined();
+    expect(entry.manualNags).toBeUndefined();
+    expect(screen.queryByTestId('timeline-manual')).toBeNull();
   });
 
   it('shows no nag line on a reminder row: the level nags the window, not a reminder', () => {
@@ -175,7 +192,7 @@ describe('Mitzvah screen › the nagging level', () => {
       expect(screen.getByTestId('timeline-manual')).toBeOnTheScreen();
       // The level row counts the user's nags beside the two reminders.
       expect(screen.getByText(`${levelTitle(3)} · ${perDay(2 + nags)}`)).toBeOnTheScreen();
-      fireEvent.press(screen.getByRole('button', { name: t('detail.timeline.resetSmart') }));
+      fireEvent.press(screen.getByRole('button', { name: t('detail.timeline.reset') }));
       expect(useMitzvotStore.getState().activeMitzvot.shacharit.manualNags).toBeUndefined();
       expect(screen.queryByTestId('timeline-manual')).toBeNull();
     });

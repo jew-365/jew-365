@@ -90,7 +90,9 @@ export function MitzvahLibraryList({ showMine, navigable }: MitzvahLibraryListPr
     const enabled = !awaitingAddon && endedOn === null && (active[item.id]?.enabled ?? false);
     const label = nameFor(item);
     const mitzvahScreen = opener(`/mitzvah/${item.id}`);
-    const openEditor = item.isCustom ? opener({ pathname: '/custom-mitzvah', params: { id: item.id } }) : mitzvahScreen;
+    // Every mitzvah, a custom one included, opens its screen; a custom one's form opens from there (the owner's call,
+    // 2026-11-05), and from the switch of an ended one, whose schedule is what needs a change.
+    const editForm = opener({ pathname: '/custom-mitzvah', params: { id: item.id } });
     return (
       <ListRow
         key={item.id}
@@ -106,14 +108,14 @@ export function MitzvahLibraryList({ showMine, navigable }: MitzvahLibraryListPr
                 ? t('library.notForWomen')
                 : t(`library.category.${item.category}`)
         }
-        onPress={navigable ? openEditor : undefined}
+        onPress={navigable ? mitzvahScreen : undefined}
         trailing={
           <EnabledSwitch
             value={enabled}
             label={label}
             onChange={
               endedOn !== null
-                ? openEditor
+                ? editForm
                 : awaitingAddon
                   ? mitzvahScreen
                   : () => needsReminder.setMitzvahEnabled(item.id, !enabled, mitzvahScreen)

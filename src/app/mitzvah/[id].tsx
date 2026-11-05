@@ -11,7 +11,7 @@ import { IconTile } from '@/components/IconTile';
 import { MitzvahIcon, iconFor } from '@/components/MitzvahIcon';
 import { ListRow } from '@/components/ListRow';
 import { ReminderEditor } from '@/components/ReminderEditor';
-import { ScreenHeader } from '@/components/ScreenHeader';
+import { HeaderPill, ScreenHeader } from '@/components/ScreenHeader';
 import { SelichotAddonCard } from '@/components/SelichotAddonCard';
 import { WindowTimeline } from '@/components/WindowTimeline';
 import { CHOK_TEXT_ID } from '@/data/chok';
@@ -235,9 +235,12 @@ export default function MitzvahDetailScreen() {
     setLastReminderRefused(false);
     needsReminder.setMitzvahEnabled(mitzvah.id, value, () => scrollRef.current?.scrollToEnd({ animated: true }));
   };
-  const resetReminders = () => {
+  // The timeline's one reset (the owner's call, 2026-11-05): the original reminders (a custom mitzvah's saved ones) and
+  // the smart nag, after any change on the timeline or in the reminder editor; the level stays.
+  const resetTimeline = () => {
     setLastReminderRefused(false);
     resetToDefault(mitzvah.id);
+    setManualNags(mitzvah.id, null);
   };
   const openText = () => {
     const open = (textParams: { id: string; date?: string }) =>
@@ -265,6 +268,15 @@ export default function MitzvahDetailScreen() {
         subtitle={`${cycle} · ${timeRange}`}
         onBack={goBack}
         leading={<IconTile name={iconFor(mitzvah.icon)} tone="accent" size={scaled(46)} />}
+        actions={
+          mitzvah.isCustom ? (
+            <HeaderPill
+              icon="sliders"
+              label={t('detail.editCustom')}
+              onPress={() => router.push({ pathname: '/custom-mitzvah', params: { id: mitzvah.id } })}
+            />
+          ) : undefined
+        }
       >
         {nextTrigger ? (
           <Text style={[typography.micro, { color: colors.goldText }]}>
@@ -358,6 +370,8 @@ export default function MitzvahDetailScreen() {
             setEditorVisible(true);
           }}
           onDeleteReminder={requestDeleteReminder}
+          changed={active.customReminders !== undefined || active.manualNags !== undefined}
+          onReset={resetTimeline}
         />
 
         {shemaOpinions ? (
@@ -492,12 +506,6 @@ export default function MitzvahDetailScreen() {
               </View>
               <Text style={[typography.bodyBold, { color: colors.goldText }]}>{t('detail.addReminder')}</Text>
             </Pressable>
-            <Button
-              variant="secondary"
-              label={t('detail.defaultReset')}
-              onPress={resetReminders}
-              style={styles.resetAction}
-            />
           </Card>
         ) : null}
       </ScrollView>
@@ -670,9 +678,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  resetAction: {
-    marginTop: spacing.md,
   },
   reminderError: {
     marginTop: spacing.sm,
