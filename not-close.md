@@ -470,7 +470,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Fix:** [src/services/zoneOffsetCache.ts](src/services/zoneOffsetCache.ts) caches each zone's offset per hour on both Luxon copies (the app's 3.7.2 and kosher-zmanim's 1.28.1), never across an hour that holds a transition. The same plan now makes 872 calls cold and none warm, and takes 350 ms instead of 540 ms in Jest.
   - **Expected result:** the app opens to home in a few seconds every time, also right after a long time closed and when the background task is running.
   - **Done:** 2026-11-06. Verified: [src/services/__tests__/zoneOffsetCache.test.ts](src/services/__tests__/zoneOffsetCache.test.ts) (the cached offset equals Intl's at every hour of 2026 in Jerusalem, New York, Lord Howe, St. John's and Kiritimati, on both copies; the minute on each side of New York's transitions; Intl asked once per zone and hour; installed by `ZmanimService`), typecheck, lint, DOX and the full suite under `pnpm test:tz`. Not checked on a phone.
-  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, the next production update · Committed: yes, `517a628` fix(startup): cache Luxon zone offsets per hour, the half-minute splash · Pushed: yes · Live: no · Channel: none
 
 - [ ] A bookmark or the last place in the reader comes back a little before or after where it was
   - **Found:** the owner's report, 2026-11-05, in chat ("אני תמיד חוזר לטיפה לפני או לטיפה אחרי ... אני רוצה שזה יהיה בול לאותו מקום").
