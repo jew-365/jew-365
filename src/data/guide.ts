@@ -422,6 +422,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
     date: '2026-11-05',
     items: [
       {
+        he: 'האפליקציה נפתחת מהר יותר: לפעמים היא נתקעה על מסך הלוגו כחצי דקה לפני דף הבית, כי חישוב התזכורות ביקש מהטלפון את שעון אזור הזמן עשרות אלפי פעמים. עכשיו כל שעה של אזור זמן מחושבת פעם אחת, וגם דף הבית, המעקב והסידור נפתחים מהר יותר.',
+        en: 'The app opens faster: it sometimes hung on the logo screen for half a minute before Home, because working out the reminders asked the phone for the time zone’s clock tens of thousands of times. Now each hour of a time zone is worked out once, and Home, Tracking and the siddur open faster too.',
+      },
+      {
         he: 'הודעה חשובה על דיוק הזמנים: אנחנו משקיעים מאמץ רב כדי שהזמנים יהיו מדויקים, אבל גם אנחנו עלולים לטעות, והאחריות לקיום כל מצווה בזמנה היא של המשתמש. ההודעה מופיעה בהרשמה, לפני המסך האחרון, ונשארת בהגדרות ← אודות ויצירת קשר, ושם גם מדווחים לנו על טעות.',
         en: 'An important notice on the accuracy of the times: we put a great deal of effort into accurate times, but we can make mistakes too, and keeping each mitzvah in its time is the user’s responsibility. It shows in onboarding, before the last screen, and stays in Settings → About and contact, where you can also report a mistake to us.',
       },

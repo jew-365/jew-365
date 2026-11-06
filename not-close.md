@@ -463,6 +463,15 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 ## Bugs
 
+- [ ] The app sometimes hangs on the logo screen for about half a minute before home
+  - **Found:** the owner's report, 2026-11-06, in chat ("לפעמים אני פותח תאפליקציה היא נתקעת הרבה זמן על המסך הראשוני שמראה את הלוגו ורק אחרי איזה חצי דקה מראה את דף הבית").
+  - **Flag:** `OTA`.
+  - **What it is:** Luxon asks `Intl.DateTimeFormat#formatToParts` for a zone's offset on every zoned DateTime, and `@hebcal/core` also installs `temporal-polyfill/global`, which wraps that formatter. One notification plan (`buildPlan()`) made 24,584 such calls, measured in Jest on 2026-11-06; on Hermes each is slow, so the plan cost tens of seconds of a blocked JS thread. The hourly background task (`jew-365-daily-rebuild`) builds one in a headless launch, and a tap on the icon while it runs joins that busy process, so the splash stays until it ends; a cold start's first render (home, all five tabs mounted by `lazy: false`) pays the same cost per zoned date. Not reproduced on a phone: the cause is inferred from the measurement.
+  - **Fix:** [src/services/zoneOffsetCache.ts](src/services/zoneOffsetCache.ts) caches each zone's offset per hour on both Luxon copies (the app's 3.7.2 and kosher-zmanim's 1.28.1), never across an hour that holds a transition. The same plan now makes 872 calls cold and none warm, and takes 350 ms instead of 540 ms in Jest.
+  - **Expected result:** the app opens to home in a few seconds every time, also right after a long time closed and when the background task is running.
+  - **Done:** 2026-11-06. Verified: [src/services/__tests__/zoneOffsetCache.test.ts](src/services/__tests__/zoneOffsetCache.test.ts) (the cached offset equals Intl's at every hour of 2026 in Jerusalem, New York, Lord Howe, St. John's and Kiritimati, on both copies; the minute on each side of New York's transitions; Intl asked once per zone and hour; installed by `ZmanimService`), typecheck, lint, DOX and the full suite under `pnpm test:tz`. Not checked on a phone.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
+
 - [ ] A bookmark or the last place in the reader comes back a little before or after where it was
   - **Found:** the owner's report, 2026-11-05, in chat ("אני תמיד חוזר לטיפה לפני או לטיפה אחרי ... אני רוצה שזה יהיה בול לאותו מקום").
   - **Flag:** `OTA`.

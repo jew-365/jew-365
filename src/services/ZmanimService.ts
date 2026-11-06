@@ -1,3 +1,5 @@
+// Before any zoned date is built: an hourly cache over Luxon's Intl offset lookups, the launch's heaviest cost.
+import './zoneOffsetCache';
 import { ComplexZmanimCalendar, GeoLocation } from 'kosher-zmanim';
 import { DateTime } from 'luxon';
 import { Location, Zmanim } from '@/types/zmanim';
