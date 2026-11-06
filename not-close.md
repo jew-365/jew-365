@@ -408,8 +408,6 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **Correspondence:** The owner reported sending the prepared inquiry on 2026-11-04 ("שלחתי תמייל"). Await the publisher's answer under Other Open Items, "Ohr HaChaim publisher response"; sending does not resolve the calibration failures.
   - **Status:** Version: none for the local investigation; eventual correction label unknown · Committed: yes, `b6b2379` docs(zmanim): record independent winter and summer calibration · Pushed: yes, origin/main verified 2026-11-04 · Live: no runtime correction or new release; diagnostic tooling in the repository · Channel: —
 
-
-
 ### Medium — Zmanim per the Ohr HaChaim luach
 
 - [ ] Ship the luach's zmanim as an update and check them on a phone
@@ -432,7 +430,6 @@ The owner's upgrade list of 2026-11-04, narrowed the same day to simple tasks th
 
 ### Medium — App requests of 2026-11-04
 
-
 - [ ] Question: more room for the reminder's message inside a notification's content
 - [ ] Colour the end time's digits in a reminder on Android
   - **Flag:** `Build`.
@@ -453,32 +450,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** at every level, each mitzvah's nags spread across its whole critical zone (the bedtime Shema's no longer squeezed into the 24 minutes after a 23:00 reminder), and no notification of a night mitzvah between chatzot and alot.
   - **Waiting on:** the owner's decisions in sections 5 and 5a of the spec (5a: exactly one orange and one red notification per window); P3 also goes to the rav. The schema the owner reads: https://claude.ai/artifact/JyDspDEDu2jzzRsTTpJB3X
 
-- [ ] An important notice on the accuracy of the times, in onboarding and in About
-  - **Flag:** `OTA`.
-  - **What it is:** a new onboarding step before ready, [src/app/onboarding/notice.tsx](src/app/onboarding/notice.tsx), and the same text in Settings → About and contact (the `accuracy` anchor and search item), both drawn by [src/components/AccuracyNotice.tsx](src/components/AccuracyNotice.tsx) from `accuracy.*`: we work hard for accurate times, we can still make mistakes, keeping each mitzvah in its time is the user's responsibility (in doubt, a trusted luach and a rav), and a mistake is reported in Settings → About and contact.
-  - **What it solves:** the owner's words of 2026-11-05: "מסך של הודעה חשובה שאנחנו עושים את מירב המאמצים על מנת לתת את הזמנים המדוייקים ביותר אבל גם לנו יכולות להיות טעויות אז הכל באחריות המשתמש ... ושים את זה גם באודות".
-  - **Expected result:** onboarding shows the notice after the permissions step with "הבנתי, המשך" to ready; About shows it under the version line; the search finds it.
-  - **Done:** 2026-11-05. Verified: [src/app/__tests__/onboarding.cta.render.test.tsx](src/app/__tests__/onboarding.cta.render.test.tsx) (permissions to the notice, its text and its way to ready, eight dots), [src/app/__tests__/settings.contact.render.test.tsx](src/app/__tests__/settings.contact.render.test.tsx) (the anchor between the version and the contact form), the smoke, routes, search coverage, design-system and i18n suites, typecheck, lint, DOX. Not checked on a phone.
-  - **Status:** Version: OTA, the next production update · Committed: yes, `a450eda` feat(onboarding,settings): an important notice on the accuracy of the times · Pushed: yes · Live: preview `1.0.21-54` (group `9607974f-2c86-4bbb-8584-32c13742f971`, commit `5082a39`), not production · Channel: preview
-
 ## Bugs
-
-- [ ] The app sometimes hangs on the logo screen for about half a minute before home
-  - **Found:** the owner's report, 2026-11-06, in chat ("לפעמים אני פותח תאפליקציה היא נתקעת הרבה זמן על המסך הראשוני שמראה את הלוגו ורק אחרי איזה חצי דקה מראה את דף הבית").
-  - **Flag:** `OTA`.
-  - **What it is:** Luxon asks `Intl.DateTimeFormat#formatToParts` for a zone's offset on every zoned DateTime, and `@hebcal/core` also installs `temporal-polyfill/global`, which wraps that formatter. One notification plan (`buildPlan()`) made 24,584 such calls, measured in Jest on 2026-11-06; on Hermes each is slow, so the plan cost tens of seconds of a blocked JS thread. The hourly background task (`jew-365-daily-rebuild`) builds one in a headless launch, and a tap on the icon while it runs joins that busy process, so the splash stays until it ends; a cold start's first render (home, all five tabs mounted by `lazy: false`) pays the same cost per zoned date. Not reproduced on a phone: the cause is inferred from the measurement.
-  - **Fix:** [src/services/zoneOffsetCache.ts](src/services/zoneOffsetCache.ts) caches each zone's offset per hour on both Luxon copies (the app's 3.7.2 and kosher-zmanim's 1.28.1), never across an hour that holds a transition. The same plan now makes 872 calls cold and none warm, and takes 350 ms instead of 540 ms in Jest.
-  - **Expected result:** the app opens to home in a few seconds every time, also right after a long time closed and when the background task is running.
-  - **Done:** 2026-11-06. Verified: [src/services/__tests__/zoneOffsetCache.test.ts](src/services/__tests__/zoneOffsetCache.test.ts) (the cached offset equals Intl's at every hour of 2026 in Jerusalem, New York, Lord Howe, St. John's and Kiritimati, on both copies; the minute on each side of New York's transitions; Intl asked once per zone and hour; installed by `ZmanimService`), typecheck, lint, DOX and the full suite under `pnpm test:tz`. Not checked on a phone.
-  - **Status:** Version: OTA, the next production update · Committed: yes, `517a628` fix(startup): cache Luxon zone offsets per hour, the half-minute splash · Pushed: yes · Live: no · Channel: none
-
-- [ ] A bookmark or the last place in the reader comes back a little before or after where it was
-  - **Found:** the owner's report, 2026-11-05, in chat ("אני תמיד חוזר לטיפה לפני או לטיפה אחרי ... אני רוצה שזה יהיה בול לאותו מקום").
-  - **Flag:** `OTA`.
-  - **What it is:** three causes in [src/app/siddur/[id].tsx](src/app/siddur/[id].tsx). A place kept only its segment, so a long passage came back at its start; a jump landed under the cover of that moment (the full block when the tools were open or at the top) and the block then folded and uncovered the text above it, or the resume banner left the block after the jump was aimed; and the star, reached by opening the tools, saved the segment under the full block instead of the line being read under the compact bar.
-  - **Expected result:** a bookmark and the resume land the line that was read right under the compact bar, inside a long passage too: a place carries `share` (how far into its segment), is saved from the line under the compact bar (`fold.readingInset()`), and lands by `scrollToOffset` in the reading state with a re-aim until the geometry holds.
-  - **Done:** 2026-11-05. Verified: the bookmark and fold cases of [src/app/__tests__/siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx) (the point inside a passage and its scaling with the text size, the landing under the compact bar after the tools were open, the re-aim when the header shrinks before the scroll event, the line saved while the tools are open; each fails without its part of the fix) and the `share` cases of `placeAt()` in [src/utils/__tests__/siddur.test.ts](src/utils/__tests__/siddur.test.ts), typecheck, lint, DOX. Not checked on a phone.
-  - **Status:** Version: OTA, the next production update · Committed: yes, `60999eb` fix(siddur): a bookmark and the last place land on the exact line that was read · Pushed: yes · Live: preview `1.0.21-54` (group `9607974f-2c86-4bbb-8584-32c13742f971`, commit `5082a39`), not production · Channel: preview
 
 - [ ] Psalm 67:1 reads "לַמְנַצֵּח" without its furtive patach
   - **Found:** 2026-11-03, building the Teiman Birkat HaMazon, which reads Psalm 67 from the same source.
@@ -616,7 +588,6 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
 
 Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were answered by the owner on 2026-10-26 and became the tasks "Add an English (U.K.) localization on the App Store" and "Ask for a store rating inside the app". Q3 to Q7, from the app requests of 2026-10-26, were answered the same day and are written into their tasks (App requests of 2026-10-26 — batch rules). None is open.
 
-
 Q8 (should a city picked by hand follow the phone too) was answered by the owner on 2026-10-31 ("כן גם היא") and became the task "Let a city picked by hand follow the phone too", in production `1.0.21-8` ([action-log.md](action-log.md)).
 
 Q9 to Q15, the seven questions of the nagging batch, were all answered by the owner on 2026-11-01 and are written into the batch rules, its tasks and [.claude/specs/nagging-levels.md](.claude/specs/nagging-levels.md) (section 10): Q9, Q10, Q11, Q12 and Q15 approved as proposed; Q13 no, "אין שום תזכורת בסוף הזמן", with the placement rule (a start or set-time reminder nags before or after itself as the user chooses, a before-the-end reminder and the bedtime Shema only before); Q14 with four levels instead of five, level 4 the top on iPhone and Android alike. None is open.
@@ -720,7 +691,6 @@ Q27 and Q28 are the batch "Nusach Teiman, 2026-11-02", found while building its 
   - **Inquiry prepared:** subject "בירור שיטת החישוב וקבלת נתוני זמנים מלוח אור החיים". Asked for (1) coordinates, elevations and sunrise/sunset horizons for all four cities, (2) exact Bikurei Yosef sunrise tables/settings and whether a separate astronomical sunrise drives seasonal hours, (3) per-time rounding including Jerusalem quarter-minutes, and (4) an annual data file/API plus access, licensing and credit terms. The owner received a complete Hebrew email ready to copy.
   - **Next actor:** the owner supplies the reply when received; then the implementing agent checks the response against the preserved printed fixtures, corrects the calculation, verifies all time/reminder consumers and previews it on a phone. No reminder or monitoring automation was created. No answer, delivery or agreement is inferred from the sent-mail report.
   - **Repository evidence:** [Report and reproduction](.claude/specs/ohr-hachaim-5787/README.md), [printed fixtures](.claude/specs/ohr-hachaim-5787/printed.json), [comparison CSV](.claude/specs/ohr-hachaim-5787/comparison.csv), [checker](.claude/specs/ohr-hachaim-5787/check.cjs), [source digests](.claude/specs/ohr-hachaim-5787/sources.json), [winter photograph](.claude/specs/ohr-hachaim-5787/winter.jpg) and [summer photograph](.claude/specs/ohr-hachaim-5787/summer.jpg) are committed in `b6b2379` and pushed to origin/main (verified 2026-11-04). The same commit carries the spec/agent-context corrections and record updates. No runtime TypeScript, dependency, lockfile, version, build or update was changed. A process check during this conversation found no remaining test/build/publish process.
-
 
 - **The full siddur build no longer reproduces the shipped assets from today's Sefaria.** Found 2026-11-02, in a cloud session with an empty `scripts/siddur/.cache/`: `node scripts/siddur/build.js` stops at `edot_hamizrach/shacharit` (the edit "יש אומרים תפילת רב מגמרה ברכות ט"ז ע"ב…" matched 0x), because Sefaria corrected text inside a pinned version title after the assets were built, and the cache that built them lives only on the owner's machine. Rebuilding everything would change shipped texts unreviewed, so the session builds with `--nusach teiman`, which keeps every other output byte-identical. The check: a full build from an empty cache runs green with `git status` clean, after the manifest is brought up to the current Sefaria text and each change is reviewed.
 - **Network access for the siddur sources in the cloud environment.** Found 2026-11-02, starting the nusach Teiman batch: the session's proxy refused `www.sefaria.org` and `he.wikisource.org` (403 on CONNECT), and the build cache `scripts/siddur/.cache/` is gitignored, so `pnpm siddur:build` cannot run there for any nusach. The owner adds both hosts under Allowed domains in the environment's network settings; the check is that `curl -sI https://www.sefaria.org/` and `curl -sI https://he.wikisource.org/` answer from the session. Found again on 2026-11-02, in the session of the Ohr HaChaim zmanim batch: the same environment resolves no address for `registry.npmjs.org` (`ENOTFOUND`, so `pnpm install` fails and no typecheck, lint or test can run there) nor for `github.com`, `maor.orhachaim.org`, `calendar.2net.co.il`, `skyview2020.co.il` and `blog.calj.net` (the luach's sources); the owner continues that batch on their own computer ([.claude/specs/ohr-hachaim-zmanim.md](.claude/specs/ohr-hachaim-zmanim.md), section 11). **Done:** 2026-11-02, the owner opened both hosts; from the session `curl` answered 200 from the Wikisource API and Sefaria's `/api/index/Psalms`. Wikisource rate-limits the shared address (HTTP 429 with `retry-after`), so a fetch waits and retries.
