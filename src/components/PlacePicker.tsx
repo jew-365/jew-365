@@ -1,6 +1,7 @@
 import React, { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Keyboard,
   ScrollView,
   StyleProp,
   StyleSheet,
@@ -23,6 +24,21 @@ import { ListRow } from './ListRow';
 import { SettingsSearchBox } from './SettingsSearch';
 
 const RESULTS_HEIGHT_SHARE = 0.45;
+
+// Whether the keyboard is up: the sheet then drops its hint and its sources line, so the results keep the
+// room left above the keyboard.
+function useKeyboardShown(): boolean {
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => setShown(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setShown(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  return shown;
+}
 
 const sameLocation = (a: Location, b: Location) =>
   a.placeId !== undefined
@@ -60,6 +76,7 @@ export function PlacePicker({
   const [failed, setFailed] = useState(false);
   const [pinned, setPinned] = useState<Place | null>(null);
   const deferredQuery = useDeferredValue(query);
+  const keyboardShown = useKeyboardShown();
 
   useEffect(() => {
     if (!request) return;
@@ -127,7 +144,12 @@ export function PlacePicker({
           />
         </Card>
       ) : null}
-      <BottomSheet visible={open} title={t('location.pick.title')} caption={t('location.pick.hint')} onClose={close}>
+      <BottomSheet
+        visible={open}
+        title={t('location.pick.title')}
+        caption={keyboardShown ? undefined : t('location.pick.hint')}
+        onClose={close}
+      >
         <SettingsSearchBox
           query={query}
           onChangeQuery={setQuery}
@@ -138,7 +160,7 @@ export function PlacePicker({
           placeholderKey="location.pick.placeholder"
         />
         <ScrollView
-          style={{ maxHeight: height * RESULTS_HEIGHT_SHARE }}
+          style={[styles.results, { maxHeight: height * RESULTS_HEIGHT_SHARE }]}
           keyboardShouldPersistTaps="handled"
           testID="place-results"
         >
@@ -180,13 +202,22 @@ export function PlacePicker({
             </View>
           )}
         </ScrollView>
-        <Text style={[typography.micro, styles.credit, { color: colors.textMuted }]}>{t('location.pick.credit')}</Text>
+        {keyboardShown ? null : (
+          <Text style={[typography.micro, styles.credit, { color: colors.textMuted }]}>
+            {t('location.pick.credit')}
+          </Text>
+        )}
       </BottomSheet>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  // The one part of the sheet that gives way when the keyboard leaves little room.
+  results: {
+    flexGrow: 0,
+    flexShrink: 1,
+  },
   credit: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,

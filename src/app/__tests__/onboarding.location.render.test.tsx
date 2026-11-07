@@ -10,6 +10,7 @@ jest.mock('@/services/PlacesService', () => ({
 }));
 
 import { act, fireEvent, screen } from '@testing-library/react-native';
+import { Keyboard } from 'react-native';
 import OnboardingLocationScreen from '../onboarding/location';
 import { CITIES, findCityById, getLocationName } from '@/data/cities';
 import { translate } from '@/i18n';
@@ -90,6 +91,24 @@ describe('the onboarding location step', () => {
     });
     expect(useUserStore.getState()).toMatchObject({ location: CITIES[1], locationStatus: 'ready' });
     expect(continueButton()).toBeEnabled();
+  });
+
+  it('drops the hint and the sources line while the keyboard is up, so the results keep the room', async () => {
+    const listeners: Record<string, () => void> = {};
+    jest.spyOn(Keyboard, 'addListener').mockImplementation(((event: string, listener: () => void) => {
+      listeners[event] = listener;
+      return { remove: jest.fn() };
+    }) as never);
+    renderWithTheme(<OnboardingLocationScreen />);
+    openPicker(getLocationName(CITIES[0], 'he'));
+    await act(async () => {});
+    expect(screen.getByText(he('location.pick.hint'))).toBeOnTheScreen();
+    expect(screen.getByText(he('location.pick.credit'))).toBeOnTheScreen();
+    act(() => listeners.keyboardDidShow());
+    expect(screen.queryByText(he('location.pick.hint'))).toBeNull();
+    expect(screen.queryByText(he('location.pick.credit'))).toBeNull();
+    act(() => listeners.keyboardDidHide());
+    expect(screen.getByText(he('location.pick.credit'))).toBeOnTheScreen();
   });
 
   it('says so when no place has that name', async () => {

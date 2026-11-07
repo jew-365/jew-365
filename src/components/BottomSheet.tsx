@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useContext, useLayoutEffect } from 'react';
 import {
   KeyboardAvoidingView,
   Modal,
@@ -10,6 +10,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { EASE_OUT, useReduceMotion } from '@/hooks/useMotion';
 import { useTheme } from '@/theme/ThemeProvider';
 import { scaled } from '@/theme/scale';
@@ -32,6 +33,8 @@ export function BottomSheet({ visible, title, caption, onClose, children }: Bott
   const quiet = useQuietBlock() !== null;
   const shown = visible && !quiet;
   const { height } = useWindowDimensions();
+  // Read without the hook, which throws outside a provider: a sheet never reaches under the status bar.
+  const topInset = useContext(SafeAreaInsetsContext)?.top ?? 0;
   const reduce = useReduceMotion();
   // The modal fades, so the backdrop appears in place; only the sheet rises from the bottom (the owner's call, 2026-10-31).
   const rise = useSharedValue(reduce ? 0 : height);
@@ -49,7 +52,7 @@ export function BottomSheet({ visible, title, caption, onClose, children }: Bott
   return (
     <Modal visible={shown} transparent animationType="fade" onRequestClose={onClose}>
       <KeyboardAvoidingView style={styles.fill} behavior="padding">
-        <View style={[styles.backdrop, { backgroundColor: colors.overlay }]}>
+        <View style={[styles.backdrop, { backgroundColor: colors.overlay, paddingTop: topInset + spacing.lg }]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessible={false} />
           <Animated.View testID="bottom-sheet" style={[styles.sheet, { backgroundColor: colors.surface }, sheetMotion]}>
             {title || caption ? (
@@ -120,7 +123,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     padding: spacing.lg,
   },
+  // Never taller than the room left between the status bar and the keyboard; a child that may shrink
+  // (the place picker's results) gives way first.
   sheet: {
+    maxHeight: '100%',
     borderRadius: radius.xxl,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.xl,

@@ -104,6 +104,23 @@ export const LocationService = {
     }
   },
 
+  // A fresh fix at the network's accuracy (Wi-Fi and cell, GPS only when it is already on), cheap enough to
+  // ask for every half minute while the app is open; null on any failure.
+  async getCurrentPoint(timeoutMs: number = DEFAULT_TIMEOUT_MS): Promise<DevicePoint | null> {
+    try {
+      const result = await withTimeout(
+        ExpoLocation.getCurrentPositionAsync({
+          accuracy: ExpoLocation.Accuracy.Balanced,
+          mayShowUserSettingsDialog: false,
+        }),
+        timeoutMs,
+      );
+      return { lat: result.coords.latitude, lng: result.coords.longitude };
+    } catch {
+      return null;
+    }
+  },
+
   // No settings dialog: declining Android's "Location Accuracy" prompt rejects the request outright,
   // while a GPS-only fused request still resolves.
   async getPrecisePoint(timeoutMs: number = PRECISE_TIMEOUT_MS): Promise<DevicePoint | null> {

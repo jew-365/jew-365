@@ -51,6 +51,23 @@ describe('followDeviceLocation', () => {
     expect(mockGetCurrentPosition).not.toHaveBeenCalled();
   });
 
+  it('asks the phone for a new fix on the half-minute tick, even with a last-known one', async () => {
+    startAt('gps');
+    mockGetLastKnown.mockResolvedValue(fix(JERUSALEM.lat, JERUSALEM.lng));
+    expect(await followDeviceLocation({ fresh: true })).toBe(true);
+    expect(mockGetCurrentPosition).toHaveBeenCalledWith(expect.objectContaining({ accuracy: 3 }));
+    expect(mockGetLastKnown).not.toHaveBeenCalled();
+    expect(useUserStore.getState().location).toMatchObject({ cityId: 'tel-aviv' });
+  });
+
+  it('keeps the place when the tick gets no fix', async () => {
+    startAt('gps');
+    const before = useUserStore.getState().location;
+    mockGetCurrentPosition.mockRejectedValue(new Error('no fix'));
+    expect(await followDeviceLocation({ fresh: true })).toBe(false);
+    expect(useUserStore.getState().location).toBe(before);
+  });
+
   it('leaves a GPS location alone for a move under a kilometre', async () => {
     startAt('gps');
     const before = useUserStore.getState().location;

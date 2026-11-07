@@ -32,8 +32,11 @@ jest.mock('@expo-google-fonts/rubik/useFonts', () => ({ useFonts: () => [true, n
 jest.mock('@/services/NotificationScheduler', () => ({ initNotificationHandlers: () => () => {} }));
 jest.mock('@/services/ChokContentService', () => ({ reconcileChokInstall: () => {} }));
 jest.mock('@/services/SelichotContentService', () => ({ reconcileSelichotInstall: () => {} }));
-const mockFollow = jest.fn(async () => false);
-jest.mock('@/services/locationFollow', () => ({ followDeviceLocation: () => mockFollow() }));
+const mockFollow = jest.fn(async (_options?: { fresh?: boolean }) => false);
+jest.mock('@/services/locationFollow', () => ({
+  FOLLOW_INTERVAL_MS: 30_000,
+  followDeviceLocation: (options?: { fresh?: boolean }) => mockFollow(options),
+}));
 const mockWatchRating = jest.fn();
 const mockStopRating = jest.fn();
 jest.mock('@/services/storeReview', () => ({
@@ -167,6 +170,53 @@ describe('the root layout and the location', () => {
     jest.setSystemTime(at(J, '2026-10-28T09:00'));
     act(() => listeners.forEach((listener) => listener('active')));
     await waitFor(() => expect(mockFollow).toHaveBeenCalledTimes(2));
+  });
+
+  describe('every half minute in the foreground', () => {
+    const original = Object.getOwnPropertyDescriptor(AppState, 'currentState');
+    let appState = 'active';
+    const freshCalls = () => mockFollow.mock.calls.filter(([options]) => options?.fresh).length;
+
+    beforeEach(() => {
+      jest.useFakeTimers({ now: at(J, '2026-10-28T07:00'), doNotFake: ['nextTick', 'queueMicrotask', 'setImmediate'] });
+      appState = 'active';
+      Object.defineProperty(AppState, 'currentState', { get: () => appState, configurable: true });
+    });
+
+    afterEach(() => {
+      if (original) Object.defineProperty(AppState, 'currentState', original);
+    });
+
+    const tick = () => act(() => jest.advanceTimersByTime(30_000));
+
+    it('reads a fresh fix every 30 seconds while the user follows the phone', async () => {
+      useUserStore.setState({ locationSource: 'gps', locationStatus: 'ready' });
+      renderWithTheme(<RootLayout />);
+      await screen.findByTestId('stack');
+      expect(freshCalls()).toBe(0);
+      tick();
+      expect(freshCalls()).toBe(1);
+      tick();
+      expect(freshCalls()).toBe(2);
+    });
+
+    it('skips a tick while the app is not in the foreground', async () => {
+      useUserStore.setState({ locationSource: 'gps', locationStatus: 'ready' });
+      renderWithTheme(<RootLayout />);
+      await screen.findByTestId('stack');
+      appState = 'background';
+      tick();
+      expect(freshCalls()).toBe(0);
+    });
+
+    it('never ticks for a place picked by hand', async () => {
+      useUserStore.setState({ locationSource: 'manual', locationStatus: 'ready' });
+      renderWithTheme(<RootLayout />);
+      await screen.findByTestId('stack');
+      tick();
+      tick();
+      expect(freshCalls()).toBe(0);
+    });
   });
 
   it('never follows before onboarding', async () => {

@@ -37,7 +37,7 @@ import { reconcileChokInstall } from '@/services/ChokContentService';
 import { reconcileSelichotInstall } from '@/services/SelichotContentService';
 import { afterPaint } from '@/utils/afterPaint';
 import { reconcileEndedCustomMitzvot } from '@/stores/customMitzvahLifecycle';
-import { followDeviceLocation } from '@/services/locationFollow';
+import { FOLLOW_INTERVAL_MS, followDeviceLocation } from '@/services/locationFollow';
 import { watchForRatingMoment } from '@/services/storeReview';
 import {
   initNotificationResponseHandler,
@@ -192,6 +192,16 @@ function RootInner() {
     const task = afterPaint(() => void followDeviceLocation());
     return () => task.cancel();
   }, [quiet, isOnboarded, now]);
+
+  // While the user follows "my location", it is read again every half minute the app is in the foreground.
+  const followsPhone = useUserStore((s) => s.locationSource === 'gps');
+  useEffect(() => {
+    if (quiet || !isOnboarded || !followsPhone) return;
+    const timer = setInterval(() => {
+      if (AppState.currentState === 'active') void followDeviceLocation({ fresh: true });
+    }, FOLLOW_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [quiet, isOnboarded, followsPhone]);
 
   // Unwind everything stacked under the Shabbat screen — when the block starts, and again after any
   // navigation inside it — so nothing stale stays mounted for a day, above all the reader, which
