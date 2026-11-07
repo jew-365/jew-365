@@ -1,6 +1,8 @@
 export type Location = {
   // Stable id of the CITIES entry this location came from; absent for a fix far from every city.
   cityId?: string;
+  // Id of the place picked from the places list (src/data/places.ts), when it is not a CITIES entry.
+  placeId?: string;
   lat: number;
   lng: number;
   tz: string;

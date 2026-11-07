@@ -443,6 +443,14 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 ### Medium — App requests of 2026-11-05
 
+- [ ] Location: ask for it in onboarding, else any place in the world by a searchable select; reversible in Settings
+  - **Flag:** `OTA` (pure JS and a bundled asset; no new permission or native module).
+  - **What it is:** the onboarding location step asks for location access first (`onboarding.locationAllow`), else [src/components/PlacePicker.tsx](src/components/PlacePicker.tsx) searches every locality of Israel and of Judea and Samaria (CBS, 2024) and every other city of 15,000 people or more (GeoNames) in Hebrew or English, from [assets/places/world.places](assets/places/world.places) built by [scripts/places/build.js](scripts/places/build.js). Settings → Device: "המיקום שלי" / "מקום שבחרתי" back and forth, the lookup again, the picker, and the phone's settings to remove or give the permission. A place picked by hand no longer follows the phone (`followDeviceLocation()`), replacing the owner's call of 2026-10-31. The app search finds every place (`placeSearchItems()`) and opens the picker on it.
+  - **What it solves:** the owner's words of 2026-11-05: "לבקש באונבורדינג מהמשתמש גישה לנתוני המיקום ולתת תמיד את הזמנים לפי המיקום שלו ואם הוא לא רוצה לתת מיקום אז לתת לו לבחור כל עיר וכל מקום בעולם על ידי סלקט עם חיפוש ... הוא תמיד יוכל לשנות את זה בהגדרות ... הכל הפיך".
+  - **Expected result:** onboarding offers the location first and any place by search; Settings switches either way at any time; a picked place stays; the search finds Elad, Kfar Chabad, Beitar Illit, Yitzhar, Monsey or Antwerp.
+  - **Done:** 2026-11-05. Verified: [src/data/__tests__/places.test.ts](src/data/__tests__/places.test.ts) (the real file: Israeli localities with their CBS coordinates, Hebrew and English search, captions, curated cities kept, a picked place never swapped on hydrate), [src/app/__tests__/onboarding.location.render.test.tsx](src/app/__tests__/onboarding.location.render.test.tsx), [src/app/__tests__/settings.location.render.test.tsx](src/app/__tests__/settings.location.render.test.tsx), [src/services/__tests__/locationFollow.test.ts](src/services/__tests__/locationFollow.test.ts), the coverage case in [src/utils/__tests__/searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) (every Israeli locality found first by its Hebrew name), typecheck, lint, DOX, the full suite. Not checked on a phone: the sheet with the keyboard, and the time to read the 2.6 MB list on a low-end Android.
+  - **Status:** Version: OTA, the next production update · Committed: no · Pushed: no · Live: no · Channel: none
+
 - [ ] Place every mitzvah's default reminders against its critical zone, and keep nags out of the night
   - **Flag:** `OTA`.
   - **Source:** the owner's report of 2026-11-05 with a screenshot of the bedtime Shema's timeline ("צריך לחזור שלב אחורה ולאפיין מחדש איפה לפזר התראות על כל סוג מצווה").

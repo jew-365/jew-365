@@ -4,17 +4,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
-import { ChipRow } from '@/components/ChipRow';
 import { ONBOARDING_STEPS, OnboardingDots } from '@/components/OnboardingDots';
-import { LocationService } from '@/services/LocationService';
+import { PlacePicker } from '@/components/PlacePicker';
+import { LocationService, type LocationStatus } from '@/services/LocationService';
 import { useUserStore } from '@/stores/useUserStore';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
-import { CITIES, findCityByName, getLocationName } from '@/data/cities';
-
-const CITY_NAMES = CITIES.map((city) => city.name);
+import { getLocationName } from '@/data/cities';
 
 export default function OnboardingLocationScreen() {
   const { colors } = useTheme();
@@ -22,6 +20,8 @@ export default function OnboardingLocationScreen() {
   const router = useRouter();
   const user = useUserStore();
   const [busy, setBusy] = useState(false);
+  // Why the last request for the phone's location found none; a place picked since clears it.
+  const [failure, setFailure] = useState<LocationStatus | null>(null);
   const locationReady = user.locationStatus === 'ready';
 
   const refreshLocation = async () => {
@@ -31,8 +31,11 @@ export default function OnboardingLocationScreen() {
       const resolved = await LocationService.getCurrentLocation();
       if (resolved.location) {
         user.setLocationState(resolved.location, resolved.status, resolved.source);
+        setFailure(null);
       } else {
-        user.setLocationStatus(resolved.status);
+        // A place already picked stays the place: a refused permission only says so.
+        if (useUserStore.getState().locationStatus !== 'ready') user.setLocationStatus(resolved.status);
+        setFailure(resolved.status);
       }
     } finally {
       // Without this a rejection left the button reading "..." forever, dead-ending onboarding.
@@ -51,28 +54,29 @@ export default function OnboardingLocationScreen() {
       <Card padded style={styles.cardGap}>
         <Text style={[typography.bodyBold, { color: colors.text }]}>{getLocationName(user.location, language)}</Text>
         <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.xs }]}>
-          {t(`settings.locationStatus.${user.locationStatus}`)}
+          {t(
+            failure
+              ? `settings.locationStatus.${failure}`
+              : user.locationStatus !== 'ready'
+                ? `settings.locationStatus.${user.locationStatus}`
+                : user.locationSource === 'gps'
+                  ? 'settings.locationFollows'
+                  : 'settings.locationPicked',
+          )}
         </Text>
-        <Button
-          variant="secondary"
-          label={busy ? '...' : t('onboarding.locationRefresh')}
-          onPress={refreshLocation}
-          style={styles.buttonGap}
-        />
+        <Button label={t('onboarding.locationAllow')} onPress={refreshLocation} busy={busy} style={styles.buttonGap} />
+        <Text style={[typography.small, styles.allowHint, { color: colors.textSub }]}>
+          {t('onboarding.locationAllowHint')}
+        </Text>
       </Card>
 
-      <ChipRow
-        values={CITY_NAMES}
-        selected={user.location.name}
-        onSelect={(name) => {
-          const city = findCityByName(name);
-          if (city) user.setLocationState(city, 'ready', 'manual');
+      <Text style={[typography.captionBold, styles.or, { color: colors.textSub }]}>{t('onboarding.locationOr')}</Text>
+      <PlacePicker
+        location={user.location}
+        onPick={(location) => {
+          user.setLocationState(location, 'ready', 'manual');
+          setFailure(null);
         }}
-        renderLabel={(name) => {
-          const city = findCityByName(name);
-          return city ? getLocationName(city, language) : name;
-        }}
-        style={styles.cities}
       />
 
       <OnboardingDots step={4} total={ONBOARDING_STEPS} style={styles.dots} />
@@ -104,8 +108,12 @@ const styles = StyleSheet.create({
   buttonGap: {
     marginTop: spacing.md,
   },
-  cities: {
-    marginTop: spacing.lg,
+  allowHint: {
+    marginTop: spacing.sm,
+  },
+  or: {
+    marginTop: spacing.xl,
+    marginBottom: spacing.sm,
   },
   dots: {
     marginTop: 'auto',

@@ -35,3 +35,4 @@ scripts/chok/source/y_hok?1.txt
 
 # Design lab build output (regenerate with each study's build.mjs and assemble.mjs)
 design/lab/studies/*/out/
+scripts/places/.cache/

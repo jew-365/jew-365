@@ -9,8 +9,10 @@ import { translate } from '@/i18n';
 import type { Achievements } from '@/stores/useCompletionsStore';
 import type { SiddurText } from '@/types/siddur';
 import { at } from '@/testing/zmanim';
+import { placesIndex } from '@/testing/places';
 import { STREAK_BADGE_DAYS } from '../badges';
 import {
+  placeSearchItems,
   SEARCH_SCREENS,
   SETTINGS_SEARCH_ITEMS,
   appContentItems,
@@ -283,5 +285,39 @@ describe('deep search', () => {
     const tiers = searchDeep('יושבי ביתכה', deep, namer);
     expect(tiers.close.some((item) => item.kind === 'passage')).toBe(false);
     expect(tiers.maybe.some((item) => item.kind === 'passage')).toBe(true);
+  });
+});
+
+describe('every place of the places list', () => {
+  const index = placesIndex();
+  const namer = (key: string) => ({
+    he: translate(key, undefined, 'he', null),
+    en: translate(key, undefined, 'en', null),
+  });
+
+  it('is found by its Hebrew name, first, in Israel and in Judea and Samaria', () => {
+    const missed = index.places
+      .filter((place) => place.cc === 'IL')
+      .filter((place) => placeSearchItems(index, place.he, namer)[0]?.id !== `place:${place.id}`)
+      .filter((place) => {
+        // Two localities of one name: each is still listed among the results.
+        const items = placeSearchItems(index, place.he, namer, 10);
+        return !items.some((item) => item.id === `place:${place.id}`);
+      });
+    expect(missed.map((place) => place.he)).toEqual([]);
+  });
+
+  it('opens Settings on the location with the picker on the place', () => {
+    const [item] = placeSearchItems(index, 'ביתר עילית', namer);
+    expect(item).toMatchObject({
+      id: 'place:c3780',
+      kind: 'place',
+      title: { he: 'ביתר עילית', en: 'Betar Illit' },
+      caption: { he: 'מקום לחישוב הזמנים', en: 'Place for the times' },
+      href: { pathname: '/(tabs)/settings', params: { focus: 'location', place: 'c3780' } },
+    });
+    expect(placeSearchItems(index, 'Monsey', namer)[0]).toMatchObject({
+      caption: { en: 'Place for the times · New York, United States' },
+    });
   });
 });

@@ -59,20 +59,14 @@ describe('followDeviceLocation', () => {
     expect(useUserStore.getState().location).toBe(before);
   });
 
-  it('moves a city picked by hand to where the phone is, as a GPS place', async () => {
-    startAt('manual');
-    expect(await followDeviceLocation()).toBe(true);
-    expect(useUserStore.getState()).toMatchObject({ locationSource: 'gps', locationStatus: 'ready' });
-    expect(useUserStore.getState().location.cityId).toBe('tel-aviv');
-  });
-
-  it('keeps a city picked by hand while the phone is within a kilometre of it', async () => {
+  it('keeps a place picked by hand wherever the phone is, with the permission granted', async () => {
     startAt('manual');
     const before = useUserStore.getState().location;
-    mockGetCurrentPosition.mockResolvedValue(fix(JERUSALEM.lat + 0.004, JERUSALEM.lng));
     expect(await followDeviceLocation()).toBe(false);
     expect(useUserStore.getState().location).toBe(before);
     expect(useUserStore.getState().locationSource).toBe('manual');
+    expect(mockGetCurrentPosition).not.toHaveBeenCalled();
+    expect(mockGetLastKnown).not.toHaveBeenCalled();
   });
 
   it('keeps a city picked by hand without the permission', async () => {

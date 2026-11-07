@@ -1,26 +1,16 @@
-import { Platform } from 'react-native';
-import { Asset } from 'expo-asset';
-import { File } from 'expo-file-system';
 import { Nusach } from '@/types/mitzvah';
 import { ChokAsset } from '@/types/chok';
 import { SiddurText, SiddurTextId } from '@/types/siddur';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import { siddurAsset } from '@/data/siddur';
 import { readAddonJson } from '@/services/addons/addonFiles';
+import { readBundledAsset as readAsset } from '@/services/bundledAsset';
 import { chokParashaFile, readChokAsset } from '@/services/chokFiles';
 import { selichotTextFile } from '@/services/selichotFiles';
 import { useChokStore } from '@/stores/useChokStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
 
 const loaded = new Map<string, Promise<unknown>>();
-
-async function readAsset(moduleId: number): Promise<string> {
-  const asset = Asset.fromModule(moduleId);
-  await asset.downloadAsync();
-  const uri = asset.localUri ?? asset.uri;
-  if (Platform.OS === 'web') return (await fetch(uri)).text();
-  return new File(uri).text();
-}
 
 function loadOnce<T>(key: string, load: () => Promise<T>): Promise<T> {
   const cached = loaded.get(key);

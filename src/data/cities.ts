@@ -220,6 +220,8 @@ export function findCityById(cityId: string): City | undefined {
 
 export function cityOf(location: Location): City | undefined {
   if (location.cityId) return findCityById(location.cityId);
+  // A place picked from the places list is its own: London, Ontario never turns into London.
+  if (location.placeId) return undefined;
   return (
     CITIES.find((c) => c.name === location.name) ??
     CITIES.find((c) => location.nameEn !== undefined && c.nameEn === location.nameEn)

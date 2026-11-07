@@ -97,6 +97,7 @@ describe('Settings cards, icons and actions', () => {
   });
 
   it('draws the locate action as a primary button', async () => {
+    useUserStore.getState().setLocationState(useUserStore.getState().location, 'ready', 'gps');
     await renderSettings();
     openSection('settings.device');
     expect(screen.getByRole('button', { name: he('settings.useCurrentLocation') })).toHaveStyle({
@@ -143,6 +144,7 @@ describe('Settings › the locate line', () => {
     mockFocusEffects.length = 0;
     useUserStore.getState().reset();
     useUserStore.setState({ isOnboarded: true, gender: 'male', maritalStatus: 'single' });
+    useUserStore.getState().setLocationState(useUserStore.getState().location, 'ready', 'gps');
   });
 
   afterEach(() => jest.restoreAllMocks());

@@ -8,10 +8,12 @@ export const FOLLOW_MIN_KM = 1;
 
 let running: Promise<boolean> | null = null;
 
-// The location follows the phone (the owner's calls, 2026-10-31): on launch and on every return to the
-// app the zmanim move to where the user is now, a city picked by hand included. No permission is ever
-// asked for here, so without one the saved place stays. Resolves true when it wrote a new location;
-// never rejects.
+// The location follows the phone unless the user picked a place by hand (`locationSource` 'manual' with a
+// `ready` status; the default place, never confirmed, follows too): on launch
+// and on every return to the app the zmanim move to where the user is now. A place picked by hand stays
+// until the user switches back (the owner's call, 2026-11-05, replacing that of 2026-10-31, which moved a
+// picked city too). No permission is ever asked for here, so without one the saved place stays. Resolves
+// true when it wrote a new location; never rejects.
 export function followDeviceLocation(): Promise<boolean> {
   running ??= follow().finally(() => {
     running = null;
@@ -22,6 +24,9 @@ export function followDeviceLocation(): Promise<boolean> {
 async function follow(): Promise<boolean> {
   try {
     const before = useUserStore.getState().location;
+    const { locationSource, locationStatus } = useUserStore.getState();
+    // A place the user picked stays; the default nobody confirmed does not.
+    if (locationSource === 'manual' && locationStatus === 'ready') return false;
     if ((await LocationService.getPermissionStatus()) !== 'ready') return false;
     const point = (await LocationService.getLastKnownPoint()) ?? (await LocationService.getPrecisePoint());
     if (!point) return false;

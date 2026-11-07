@@ -62,7 +62,12 @@ describe('Onboarding Continue buttons', () => {
     expect(next()).toBeDisabled();
     expect(screen.getByText(he('onboarding.locationRequired'))).toBeOnTheScreen();
 
-    fireEvent.press(screen.getByRole('button', { name: getLocationName(CITIES[0], 'he') }));
+    fireEvent.press(
+      screen.getByRole('button', {
+        name: translate('location.pick.open', { place: getLocationName(CITIES[0], 'he') }, 'he', null),
+      }),
+    );
+    fireEvent.press(screen.getByText(getLocationName(CITIES[1], 'he')));
 
     expect(next()).toBeEnabled();
     fireEvent.press(next());

@@ -1,4 +1,6 @@
 import { CITIES } from '@/data/cities';
+import { normalizeSearchText } from './searchText';
+import { placeCaption, placeName, searchPlaces, type PlaceIndex } from '@/data/places';
 import { iconFor, type IconName } from '@/components/MitzvahIcon';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { GUIDE_TOPICS } from '@/data/guide';
@@ -30,6 +32,8 @@ import type { SiddurChapterTitle, SiddurText, SiddurTextId, SiddurVoice } from '
 import type { Location } from '@/types/zmanim';
 import { mitzvahName } from './mitzvahName';
 import { catalogListsText, chapterVisible, dayFeatures } from './siddur';
+
+export { normalizeSearchText };
 
 export type SettingsSectionKey = 'profile' | 'prayer' | 'device' | 'backup' | 'contact';
 
@@ -82,6 +86,7 @@ export type SettingsSearchHref =
   | { pathname: '/(tabs)/siddur'; params: { group: string } }
   | { pathname: '/(tabs)/more'; params: { open: 'halacha' } }
   | { pathname: '/guide'; params: { topic: string } }
+  | { pathname: '/(tabs)/settings'; params: { focus: 'location'; place: string } }
   | ScreenPath;
 
 export type SettingsSearchNotToday = { label: SettingsSearchName | null };
@@ -97,7 +102,8 @@ export type SettingsSearchContentItem = SearchItemBase & {
     | { kind: AppSearchKind; caption: SettingsSearchName }
   );
 
-export type AppSearchKind = 'screen' | 'category' | 'stat' | 'badge' | 'topic' | 'hotline' | 'section' | 'passage';
+export type AppSearchKind =
+  'screen' | 'category' | 'stat' | 'badge' | 'topic' | 'hotline' | 'section' | 'passage' | 'place';
 
 export type SettingsSearchItem = SettingsSearchSettingItem | SettingsSearchContentItem;
 export type SettingsSearchKind = SettingsSearchContentItem['kind'];
@@ -367,11 +373,22 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
     id: 'location',
     icon: 'sun',
     titleKey: 'settings.zmanim',
-    labelKeys: ['settings.useCurrentLocation', 'settings.pickCity', 'settings.location'],
+    labelKeys: [
+      'settings.useCurrentLocation',
+      'settings.pickCity',
+      'settings.location',
+      'settings.locationGps',
+      'settings.locationManual',
+    ],
     section: 'device',
     terms: [
       'מיקום',
       'עיר',
+      'יישוב',
+      'ישוב',
+      'הרשאת מיקום',
+      'locality',
+      'permission',
       'זמנים',
       'זמני היום',
       'GPS',
@@ -711,8 +728,6 @@ export type SettingsSearchEntry = {
 
 export type SettingsSearchContext = Record<SettingsSearchCondition, boolean>;
 
-const FINAL_LETTERS: Record<string, string> = { ך: 'כ', ם: 'מ', ן: 'נ', ף: 'פ', ץ: 'צ' };
-
 const HEBREW_PREFIXES = 'הובלמשכ';
 
 const EN_TO_HE: Record<string, string> = {
@@ -751,17 +766,6 @@ const HE_TO_EN: Record<string, string> = Object.fromEntries(
     .filter(([, he]) => /[א-ת]/.test(he))
     .map(([en, he]) => [he, en]),
 );
-
-export function normalizeSearchText(text: string): string {
-  return text
-    .normalize('NFKD')
-    .replace(/[̀-֑ͯ-ׇ]/g, '')
-    .toLowerCase()
-    .replace(/[ךםןףץ]/g, (letter) => FINAL_LETTERS[letter])
-    .replace(/["'`׳״]/g, '')
-    .replace(/[^\p{L}\p{N}]+/gu, ' ')
-    .trim();
-}
 
 const wordsOf = (text: string): string[] => normalizeSearchText(text).split(' ').filter(Boolean);
 
@@ -1582,6 +1586,7 @@ const KIND_RANK: Record<SettingsSearchKind, number> = {
   hotline: 10,
   topic: 11,
   passage: 12,
+  place: 13,
 };
 const kindRank = (item: SettingsSearchItem): number => (item.kind ? KIND_RANK[item.kind] : 0);
 
@@ -1737,6 +1742,35 @@ function passageHits(
 
 // The deep pass over loaded siddur texts: section titles first, then the passages that hold the
 // query as a phrase; what only typo tolerance finds goes to `maybe`.
+export const PLACE_SEARCH_LIMIT = 5;
+
+// The places of the places list whose name holds the query, the deep pass's last part: each opens Settings
+// on the location with the picker on that place, so a search for a city never changes the location by
+// itself.
+export function placeSearchItems(
+  index: PlaceIndex,
+  query: string,
+  namer: SearchNamer,
+  limit = PLACE_SEARCH_LIMIT,
+): SettingsSearchContentItem[] {
+  const kind = namer('settings.search.kind.place');
+  return searchPlaces(index, query, limit).map((place) => {
+    const where = { he: placeCaption(index, place, 'he'), en: placeCaption(index, place, 'en') };
+    return {
+      id: `place:${place.id}`,
+      kind: 'place',
+      icon: 'search',
+      title: { he: placeName(place, 'he'), en: placeName(place, 'en') },
+      caption: {
+        he: [kind.he, where.he].filter(Boolean).join(' · '),
+        en: [kind.en, where.en].filter(Boolean).join(' · '),
+      },
+      terms: [],
+      href: { pathname: '/(tabs)/settings', params: { focus: 'location', place: place.id } },
+    };
+  });
+}
+
 export function searchDeep(
   query: string,
   texts: readonly DeepText[],

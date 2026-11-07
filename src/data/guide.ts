@@ -64,8 +64,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'תחילת הדרך', en: 'Getting started' },
     body: [
       {
-        he: 'בפתיחה הראשונה האפליקציה שואלת כמה שאלות קצרות: שם וטלפון (אפשר לדלג), מגדר ומצב משפחתי, נוסח התפילה, אחרי אילו מצוות לעקוב, ועיר או מיקום לפי GPS לחישוב הזמנים (כשיש הרשאת מיקום, המיקום מתעדכן לבד בכל פתיחה של האפליקציה, כך שהזמנים תמיד של המקום שבו הטלפון נמצא, וגם עיר שנבחרה ידנית מתחלפת במקום שבו הטלפון נמצא; בלי הרשאה העיר שנבחרה נשארת), ואז מסך הרשאות שמראה מה כבר מאושר ומאפשר לאשר את השאר. אחרי אישור ההתראות מצוות היום כבר מחכות בדף הבית.',
-        en: "The first time the app opens it asks a few short questions: name and phone (optional), gender and marital status, your nusach, which mitzvot to track, and a city or a GPS location for the zmanim (with location access allowed, the location updates itself every time the app opens, so the times are always those of where the phone is, and a city picked by hand also gives way to where the phone is; without access the city picked stays), then a permissions screen that shows what is already allowed and lets you allow the rest. Once notifications are allowed, today's mitzvot are waiting on Home.",
+        he: 'בפתיחה הראשונה האפליקציה שואלת כמה שאלות קצרות: שם וטלפון (אפשר לדלג), מגדר ומצב משפחתי, נוסח התפילה, אחרי אילו מצוות לעקוב, והמקום לחישוב הזמנים: עם אישור גישה למיקום, המיקום מתעדכן לבד בכל פתיחה של האפליקציה, כך שהזמנים תמיד של המקום שבו הטלפון נמצא; בלי אישור, בוחרים כל יישוב בישראל או כל עיר בעולם בחיפוש לפי שם, והזמנים נשארים לפיו. אחר כך מסך הרשאות שמראה מה כבר מאושר ומאפשר לאשר את השאר. אחרי אישור ההתראות מצוות היום כבר מחכות בדף הבית.',
+        en: "The first time the app opens it asks a few short questions: name and phone (optional), gender and marital status, your nusach, which mitzvot to track, and the place for the zmanim: with location access allowed, the location updates itself every time the app opens, so the times are always those of where the phone is; without it, you pick any locality in Israel or any city in the world by searching its name, and the times stay with it. Then comes a permissions screen that shows what is already allowed and lets you allow the rest. Once notifications are allowed, today's mitzvot are waiting on Home.",
       },
       {
         he: 'במעבר לטלפון חדש מקישים במסך הפתיחה על ״יש לי קובץ גיבוי״ ומשחזרים את הקובץ שיוצא בטלפון הקודם.',
@@ -367,8 +367,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "Settings opens with a search: type a word such as “notifications”, “nusach” or “backup” to go straight to the setting. It finds anything in the app: screens, mitzvot and categories, prayers and the passages and phrases inside them, tzaddikim by name, works or grave, the rabbis of the halacha hotline, guide topics, and your badges and figures with their values. It forgives typing on the other language's keyboard. Close results show at once, the search inside the prayers joins a moment later, and results found only despite a misspelling show apart, under “Did you mean”. The same search sits at the top of the More tab, and a setting found there opens in Settings at its place.",
       },
       {
-        he: 'החלקים: פרופיל (שם, טלפון, מגדר ומצב משפחתי), תפילה וסידור, מכשיר והתראות (עיר או GPS, התראות, הסיכום השבועי, שעות בלי התראות, הרשאות, ערכת נושא, גודל התצוגה ושפה), גיבוי, שחזור ואיפוס, ואודות ויצירת קשר. העיר או מיקום ה־GPS קובעים גם אם אתם בישראל או בחוץ לארץ, למשל לעניין יום טוב שני.',
-        en: 'Its sections: Profile (name, phone, gender and marital status), Prayer and siddur, Device and notifications (city or GPS, notifications, the weekly report, hours without notifications, permissions, theme, display size and language), Backup, restore and reset, and About and contact. The city or GPS location also decides whether you count as in Israel or abroad, for example for the second day of Yom Tov.',
+        he: 'החלקים: פרופיל (שם, טלפון, מגדר ומצב משפחתי), תפילה וסידור, מכשיר והתראות (המיקום שלי או מקום שבחרתם, הפיך לכאן ולכאן, התראות, הסיכום השבועי, שעות בלי התראות, הרשאות, ערכת נושא, גודל התצוגה ושפה), גיבוי, שחזור ואיפוס, ואודות ויצירת קשר. המקום קובע גם אם אתם בישראל או בחוץ לארץ, למשל לעניין יום טוב שני. כדי להסיר את הרשאת המיקום, בוחרים ״מקום שבחרתי״ ומבטלים את ההרשאה בהגדרות הטלפון; החיפוש בראש ההגדרות מוצא גם יישובים וערים ופותח את הבחירה עליהם.',
+        en: "Its sections: Profile (name, phone, gender and marital status), Prayer and siddur, Device and notifications (my location or a place you chose, either way back and forth, notifications, the weekly report, hours without notifications, permissions, theme, display size and language), Backup, restore and reset, and About and contact. The place also decides whether you count as in Israel or abroad, for example for the second day of Yom Tov. To remove the location permission, choose A place I chose and turn the permission off in the phone's settings; the search at the top of Settings finds localities and cities too and opens the choice on them.",
       },
       {
         he: 'באנדרואיד ההגדרות, המצוות וההיסטוריה מגובות לחשבון Google, ובאייפון בגיבוי iCloud של המכשיר. בהגדרות ← גיבוי, שחזור ואיפוס אפשר גם לייצא קובץ גיבוי ולשחזר ממנו בכל טלפון; שחזור מחליף את מה שיש בטלפון. ״איפוס האפליקציה״ מוחק הכל, גם את נתוני הטהרה, שאינם נכללים בגיבוי.',
@@ -417,6 +417,16 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 ];
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
+  {
+    label: '1.0.21-16',
+    date: '2026-11-07',
+    items: [
+      {
+        he: 'מיקום לפי בחירה: בהרשמה האפליקציה מבקשת גישה למיקום, ואז הזמנים תמיד לפי המקום שבו הטלפון נמצא. מי שלא רוצה לתת מיקום בוחר כל יישוב בישראל, ביהודה ובשומרון, וכל עיר בעולם, בחיפוש לפי שם בעברית או באנגלית. בהגדרות ← מכשיר והתראות עוברים בין ״המיקום שלי״ ל״מקום שבחרתי״ בכל רגע, ומקום שבחרתם נשאר קבוע גם כשהטלפון זז.',
+        en: 'Location your way: onboarding asks for location access, and then the times always follow where the phone is. Without it, pick any locality in Israel, Judea and Samaria, or any city in the world, by searching its name in Hebrew or English. In Settings → Device and notifications switch between My location and A place I chose at any time, and a place you chose stays put even when the phone moves.',
+      },
+    ],
+  },
   {
     label: '1.0.21-15',
     date: '2026-11-05',

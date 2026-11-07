@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  AppState,
   Keyboard,
   Linking,
   Platform,
@@ -16,7 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { appVersionLabel } from '@/services/appUpdates';
-import { LocationService } from '@/services/LocationService';
+import { LocationService, type LocationStatus } from '@/services/LocationService';
 import {
   NotificationScheduler,
   requestNotificationPermissions,
@@ -67,6 +68,8 @@ import { ListRow } from '@/components/ListRow';
 import { MitzvahIcon, type IconName } from '@/components/MitzvahIcon';
 import { NavBar } from '@/components/NavBar';
 import { PermissionsList } from '@/components/PermissionsList';
+import { PlacePicker, type PlaceRequest } from '@/components/PlacePicker';
+import { SegmentedControl } from '@/components/SegmentedControl';
 import { SectionLabel } from '@/components/SectionLabel';
 import { ThemeSwatchRow } from '@/components/ThemeSwatchRow';
 import { TimeField } from '@/components/TimeField';
@@ -78,7 +81,7 @@ import { UI_SCALES, rescaled, scaled } from '@/theme/scale';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
-import { CITIES, cityOf, getLocationName } from '@/data/cities';
+import { getLocationName } from '@/data/cities';
 import type { ChokThuNightDay } from '@/types/chok';
 import { findMitzvah } from '@/data/mitzvot';
 import { NUSACH_IDS } from '@/data/nuschaot';
@@ -98,7 +101,6 @@ const MARITAL_STATUSES = ['married', 'single'] as const;
 const PRAYER_MODES: readonly PrayerMode[] = ['minyan', 'alone'];
 const SIDDUR_VOICES: readonly SiddurVoice[] = ['male', 'female'];
 const CHOK_THU_NIGHT_DAYS: readonly ChokThuNightDay[] = ['thu', 'fri'];
-const CITY_INDEXES = CITIES.map((_, index) => index);
 
 const FOCUS_HIGHLIGHT_MS = 2500;
 
@@ -191,12 +193,10 @@ export default function SettingsScreen() {
     () => ({ nusach: user.nusach, halachicOpinions: user.halachicOpinions, inIsrael: user.inIsrael }),
     [user.nusach, user.halachicOpinions, user.inIsrael],
   );
-  const savedCityId = cityOf(user.location)?.cityId;
   // Held locally and committed on blur. Bound straight to the store, every keystroke serialised
   // the whole user store to MMKV and re-rendered the entire settings tree.
   const [nameDraft, setNameDraft] = useState(user.profileName);
   const [phoneDraft, setPhoneDraft] = useState(user.profilePhone);
-  const [locateStatus, setLocateStatus] = useState<{ text: string; location: Location } | null>(null);
   const [resetVisible, setResetVisible] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [backupBusy, setBackupBusy] = useState(false);
@@ -212,7 +212,11 @@ export default function SettingsScreen() {
   const [creditOpen, setCreditOpen] = useState(false);
   const focusCount = useRef(0);
   const { query, setQuery, searching, results, tiers, pending } = useSettingsSearch(focusCount.current);
-  const params = useLocalSearchParams<{ focus?: string }>();
+  const params = useLocalSearchParams<{ focus?: string; place?: string }>();
+  // A place the app search found: the location's picker opens on it.
+  const [placeRequest, setPlaceRequest] = useState<PlaceRequest | null>(null);
+  const placeParam = useRef<string | undefined>(undefined);
+  placeParam.current = typeof params.place === 'string' ? params.place : undefined;
   const focusParam = useRef<string | undefined>(undefined);
   const routerRef = useRef(router);
   routerRef.current = router;
@@ -225,7 +229,6 @@ export default function SettingsScreen() {
     useCallback(() => {
       setOpen(new Set());
       setQuery('');
-      setLocateStatus(null);
       scrollRef.current?.scrollTo({ y: 0, animated: false });
       focusCount.current += 1;
       setFocusTarget(null);
@@ -236,7 +239,9 @@ export default function SettingsScreen() {
         if (section) setOpen(new Set([section]));
         if (section === 'contact') seedContactRef.current();
         setFocusTarget(target);
-        routerRef.current.setParams({ focus: undefined });
+        const place = placeParam.current;
+        setPlaceRequest(target === 'location' && place ? { placeId: place, key: Date.now() } : null);
+        routerRef.current.setParams({ focus: undefined, place: undefined });
       }
       syncNotificationPermissionStatus().catch((error) => reportError('schedule', error));
     }, [setQuery]),
@@ -289,6 +294,12 @@ export default function SettingsScreen() {
   const chooseResult = (item: SettingsSearchItem) => {
     Keyboard.dismiss();
     setQuery('');
+    if (item.kind === 'place') {
+      openSection('device');
+      setFocusTarget('location');
+      setPlaceRequest({ placeId: item.id.slice('place:'.length), key: Date.now() });
+      return;
+    }
     if (item.kind) {
       router.push(item.href);
       return;
@@ -389,29 +400,6 @@ export default function SettingsScreen() {
       setContactStatus({ text: t(contactFailureKey(error)), failed: true });
     } finally {
       setContactBusy(false);
-    }
-  };
-
-  const [locating, setLocating] = useState(false);
-
-  const refreshLocation = async () => {
-    if (locating) return;
-    setLocating(true);
-    try {
-      const resolved = await LocationService.getCurrentLocation();
-      // Only commit a location the lookup actually produced. A failed refresh must keep the city
-      // the user chose, not silently move them to the default.
-      if (resolved.location) {
-        user.setLocationState(resolved.location, resolved.status, resolved.source);
-      } else {
-        user.setLocationStatus(resolved.status);
-      }
-      setLocateStatus({
-        text: resolved.location ? t('settings.gpsUpdated') : t('settings.gpsFallback'),
-        location: useUserStore.getState().location,
-      });
-    } finally {
-      setLocating(false);
     }
   };
 
@@ -620,31 +608,7 @@ export default function SettingsScreen() {
                     text={t('settings.zmanim')}
                     style={[styles.subHeading, styles.firstSubHeading, subHeadingTone]}
                   />
-                  <Text style={[typography.bodyBold, { color: colors.text }]}>
-                    {getLocationName(user.location, language)}
-                  </Text>
-                  <Text style={[typography.small, styles.hint, { color: colors.textMuted }]}>
-                    {t(
-                      user.locationStatus !== 'ready'
-                        ? `settings.locationStatus.${user.locationStatus}`
-                        : user.locationSource === 'gps'
-                          ? 'settings.locationFollows'
-                          : 'settings.locationPicked',
-                    )}
-                  </Text>
-                  <Button label={t('settings.useCurrentLocation')} onPress={refreshLocation} style={styles.buttonGap} />
-                  {locateStatus && locateStatus.location === user.location ? (
-                    <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>
-                      {locateStatus.text}
-                    </Text>
-                  ) : null}
-                  <SectionLabel variant="field" text={t('settings.pickCity')} style={styles.fieldLabel} />
-                  <ChipRow
-                    values={CITY_INDEXES}
-                    selected={CITIES.findIndex((city) => city.cityId === savedCityId)}
-                    onSelect={(index) => user.setLocationState(CITIES[index], 'ready', 'manual')}
-                    renderLabel={(index) => getLocationName(CITIES[index], language)}
-                  />
+                  <LocationBlock request={placeRequest} />
                 </Anchor>
 
                 <SectionLabel text={t('settings.notifications')} style={[styles.subHeading, subHeadingTone]} />
@@ -973,6 +937,149 @@ type QuietHoursBlockProps = {
   afterAnchor: AnchorTarget;
   taharahNote: boolean;
 };
+
+// Where the times are calculated (the owner's call, 2026-11-05): by the phone's location, which follows the
+// phone, or by a place picked from the whole list; either way back and forth, and the permission given or
+// sent to the phone's settings to remove.
+function LocationBlock({ request }: { request: PlaceRequest | null }) {
+  const { colors } = useTheme();
+  const { t, language } = useI18n();
+  const location = useUserStore((s) => s.location);
+  const status = useUserStore((s) => s.locationStatus);
+  const source = useUserStore((s) => s.locationSource);
+  const [permission, setPermission] = useState<LocationStatus | null>(null);
+  const [locating, setLocating] = useState(false);
+  // A line about the last lookup, kept only while the location is the one it left.
+  const [note, setNote] = useState<{ text: string; location: Location } | null>(null);
+  const mode: 'gps' | 'manual' = source === 'gps' ? 'gps' : 'manual';
+
+  useEffect(() => {
+    const read = () =>
+      LocationService.getPermissionStatus().then(
+        (next) => setPermission(next),
+        () => {},
+      );
+    read();
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') read();
+    });
+    return () => subscription.remove();
+  }, []);
+
+  const locateMe = async () => {
+    if (locating) return;
+    if (permission === 'denied') {
+      setNote({ text: t('settings.locationBlocked'), location });
+      return;
+    }
+    setLocating(true);
+    try {
+      const resolved = await LocationService.getCurrentLocation();
+      const user = useUserStore.getState();
+      // Only commit a location the lookup actually produced: a failed one keeps the place the user has.
+      if (resolved.location) user.setLocationState(resolved.location, resolved.status, resolved.source);
+      else if (user.locationStatus !== 'ready') user.setLocationStatus(resolved.status);
+      setPermission(await LocationService.getPermissionStatus().catch(() => permission));
+      setNote({
+        text: t(
+          resolved.location
+            ? 'settings.gpsUpdated'
+            : resolved.status === 'denied'
+              ? 'settings.locationBlocked'
+              : 'settings.gpsFallback',
+        ),
+        location: useUserStore.getState().location,
+      });
+    } finally {
+      setLocating(false);
+    }
+  };
+
+  const chooseMode = (next: 'gps' | 'manual') => {
+    if (next === mode) return;
+    if (next === 'gps') {
+      locateMe();
+      return;
+    }
+    const user = useUserStore.getState();
+    user.setLocationState(user.location, user.locationStatus, 'manual');
+    setNote(null);
+  };
+
+  const pickPlace = (next: Location) => {
+    useUserStore.getState().setLocationState(next, 'ready', 'manual');
+    setNote(null);
+  };
+
+  const statusKey =
+    status !== 'ready'
+      ? `settings.locationStatus.${status}`
+      : mode === 'manual'
+        ? 'settings.locationPicked'
+        : permission === null || permission === 'ready'
+          ? 'settings.locationFollows'
+          : 'settings.locationNoPermission';
+  const openPhoneSettings = () => {
+    Linking.openSettings().catch(() => {});
+  };
+
+  return (
+    <View testID="settings-location">
+      <Text style={[typography.bodyBold, { color: colors.text }]}>{getLocationName(location, language)}</Text>
+      <Text style={[typography.small, styles.hint, { color: colors.textMuted }]}>{t(statusKey)}</Text>
+      <SectionLabel variant="field" text={t('settings.locationMode')} style={styles.fieldLabel} />
+      <View accessibilityRole="radiogroup" accessibilityLabel={t('settings.locationMode')}>
+        <SegmentedControl
+          options={[
+            { value: 'gps', label: t('settings.locationGps') },
+            { value: 'manual', label: t('settings.locationManual') },
+          ]}
+          value={mode}
+          onChange={chooseMode}
+        />
+      </View>
+      {mode === 'gps' ? (
+        <>
+          <Button
+            label={t('settings.useCurrentLocation')}
+            onPress={locateMe}
+            busy={locating}
+            style={styles.buttonGap}
+          />
+          {permission === 'denied' ? (
+            <Button
+              variant="secondary"
+              label={t('settings.locationOpenSettings')}
+              onPress={openPhoneSettings}
+              style={styles.buttonGap}
+            />
+          ) : null}
+          <PlacePicker location={location} onPick={pickPlace} request={request} showField={false} />
+        </>
+      ) : (
+        <>
+          <SectionLabel variant="field" text={t('settings.pickCity')} style={styles.fieldLabel} />
+          <PlacePicker location={location} onPick={pickPlace} request={request} />
+          {permission === 'ready' ? (
+            <>
+              <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>
+                {t('settings.locationRevokeHint')}
+              </Text>
+              <Pressable onPress={openPhoneSettings} accessibilityRole="link" style={styles.link}>
+                <Text style={[typography.bodyBold, { color: colors.goldText }]}>
+                  {t('settings.locationOpenSettings')}
+                </Text>
+              </Pressable>
+            </>
+          ) : null}
+        </>
+      )}
+      {note && note.location === location ? (
+        <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>{note.text}</Text>
+      ) : null}
+    </View>
+  );
+}
 
 function QuietHoursBlock({
   before,

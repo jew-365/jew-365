@@ -10,6 +10,7 @@ import { findAnyMitzvah, getAllMitzvot } from '@/data/customMitzvotAdapter';
 import { halachaRulingFor } from '@/data/halachaLines';
 import { translate, useI18n } from '@/i18n';
 import { HebcalService } from '@/services/HebcalService';
+import { loadPlaces } from '@/services/PlacesService';
 import { loadSiddurText } from '@/services/SiddurService';
 import { taharahOffered } from '@/stores/taharahOptIn';
 import { useChokStore } from '@/stores/useChokStore';
@@ -33,6 +34,7 @@ import {
   appContentItems,
   buildSettingsSearchIndex,
   deepTextOf,
+  placeSearchItems,
   searchDeep,
   searchTiers,
   settingsContentItems,
@@ -195,12 +197,15 @@ export function useSettingsSearch(visit: number) {
         await yieldToUi();
       }
       if (cancelled) return;
+      const places = await loadPlaces().catch(() => null);
+      if (cancelled) return;
+      const fromPlaces = places ? placeSearchItems(places, query, namer) : [];
       const fromText = searchDeep(query, texts, namer);
       const fromStreak = cached?.streak ? searchTiers(query, cached.streak, context) : EMPTY_TIERS;
       setDeep({
         query,
         tiers: {
-          close: [...fromStreak.close, ...fromText.close],
+          close: [...fromStreak.close, ...fromText.close, ...fromPlaces],
           maybe: [...fromStreak.maybe, ...fromText.maybe],
         },
       });
