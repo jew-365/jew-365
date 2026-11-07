@@ -16,7 +16,8 @@ import { useI18n } from '@/i18n';
 
 type Props = {
   active: boolean;
-  background: string;
+  // A tint laid over what is under the stamp (a card's own background); without one the stamp stands alone.
+  background?: string;
 };
 
 export function MarkStamp({ active, background }: Props) {
@@ -54,13 +55,12 @@ export function MarkStamp({ active, background }: Props) {
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <View style={[styles.stampOverlay, { backgroundColor: background + 'BB' }]}>
+      <View style={[styles.stampOverlay, background ? { backgroundColor: background + 'BB' } : null]}>
         <Animated.View
           style={[
             styles.stamp,
-            {
-              borderColor: colors.goldText,
-            },
+            // Alone over a screen, the stamp carries the card colour so the page under it never shows through its letters.
+            { borderColor: colors.goldText, backgroundColor: background ? undefined : colors.surface },
             shadowStyle(colors.goldLight, shadowPresets.glow),
             stampStyle,
           ]}

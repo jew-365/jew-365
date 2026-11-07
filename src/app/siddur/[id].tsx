@@ -1354,25 +1354,33 @@ export default function SiddurScreen() {
   const markTextRead = () => {
     if (textReadable) reads.count('text', null);
   };
+  // The completion plays over the reader first, and only then does it go home (the owner's call, 2026-11-07); a reader
+  // left meanwhile goes nowhere.
+  const alive = useRef(true);
+  useEffect(
+    () => () => {
+      alive.current = false;
+    },
+    [],
+  );
   const finish = (mitzvahId: string, date: Date = windowDate) =>
-    lateMark.mark(markTarget(mitzvahId, date), () => {
+    lateMark.mark(markTarget(mitzvahId, date), (celebration) => {
       markTextRead();
       if (bookmarkTextId) {
         finished.current = true;
         clearLastPosition(bookmarkTextId);
       }
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-      if (router.canDismiss()) {
-        router.dismissAll();
-        router.navigate('/(tabs)/home');
-      } else {
-        router.replace('/(tabs)/home');
-      }
+      void celebration.then(() => {
+        if (!alive.current) return;
+        if (router.canDismiss()) {
+          router.dismissAll();
+          router.navigate('/(tabs)/home');
+        } else {
+          router.replace('/(tabs)/home');
+        }
+      });
     });
-  const finishMakeUp = (makeUp: ChokMakeUpFold) =>
-    lateMark.mark(markTarget(CHOK_TEXT_ID, calendarDay(makeUp.dateKey)), () => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    });
+  const finishMakeUp = (makeUp: ChokMakeUpFold) => lateMark.mark(markTarget(CHOK_TEXT_ID, calendarDay(makeUp.dateKey)));
   const doneTarget = mitzvah
     ? offSeason
       ? null

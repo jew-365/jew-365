@@ -25,6 +25,7 @@ import { ringDashOffset } from '@/utils/homeDay';
 import { Button } from './Button';
 import { Card } from './Card';
 import { IconTile } from './IconTile';
+import { MarkStamp } from './MarkStamp';
 import { MitzvahIcon } from './MitzvahIcon';
 import { NagBell, nagBellLabel } from './NagBell';
 import type { IconName } from './MitzvahIcon';
@@ -362,6 +363,8 @@ export const NowCard = React.memo(function NowCard({
             />
           ) : null}
         </View>
+        {/* The stamp the cards had before, in addition to the completion (the owner's call, 2026-11-07). */}
+        <MarkStamp active={stamping && !reduce} background={background} />
       </Card>
       {stamping && !reduce && actions ? (
         // The sparks' layer copies the actions row over the card (the card clips, this layer does not): the same

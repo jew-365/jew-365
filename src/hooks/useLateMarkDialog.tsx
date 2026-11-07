@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
+import { celebrateMark } from '@/components/MarkCelebration';
 import { useI18n } from '@/i18n';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useUserStore } from '@/stores/useUserStore';
@@ -16,12 +17,17 @@ export type LateMarkTarget = {
   until?: Date;
 };
 
-type Pending = LateMarkTarget & { window: { start: Date; end: Date }; onMarked?: () => void };
+// Called once the mark is written, with the completion animation's end: a screen that leaves after a mark leaves then.
+type OnMarked = (celebration: Promise<void>) => void;
+// `celebrate: false` for a card that answers the mark with its own animation (home's open card).
+type MarkOptions = { celebrate?: boolean };
+
+type Pending = LateMarkTarget & { window: { start: Date; end: Date }; onMarked?: OnMarked; celebrate: boolean };
 
 // Every mark of a mitzvah whose window has already closed asks when it was done: in time but
 // not marked (filed as a mark in time) or after the time had passed (a late mark).
 export function useLateMarkDialog(): {
-  mark: (target: LateMarkTarget, onMarked?: () => void) => void;
+  mark: (target: LateMarkTarget, onMarked?: OnMarked, options?: MarkOptions) => void;
   open: boolean;
   dialog: React.ReactElement;
 } {
@@ -29,14 +35,20 @@ export function useLateMarkDialog(): {
   const tz = useUserStore((s) => s.location.tz);
   const [pending, setPending] = useState<Pending | null>(null);
 
-  const mark = (target: LateMarkTarget, onMarked?: () => void) => {
+  // Every mark made on a screen plays the completion (the owner's call, 2026-11-07).
+  const marked = (onMarked: OnMarked | undefined, celebrate: boolean) => {
+    const celebration = celebrate ? celebrateMark() : Promise.resolve();
+    onMarked?.(celebration);
+  };
+
+  const mark = (target: LateMarkTarget, onMarked?: OnMarked, { celebrate = true }: MarkOptions = {}) => {
     const { window } = target;
     if (!window || !windowClosed(window, new Date())) {
       useCompletionsStore.getState().markDone(target.id, target.date);
-      onMarked?.();
+      marked(onMarked, celebrate);
       return;
     }
-    setPending({ ...target, window, onMarked });
+    setPending({ ...target, window, onMarked, celebrate });
   };
 
   const choose = (late: boolean) => {
@@ -46,7 +58,7 @@ export function useLateMarkDialog(): {
     useCompletionsStore
       .getState()
       .markDone(pending.id, pending.date, late ? { late: true } : { at: onTimeMarkAt(pending.window) });
-    pending.onMarked?.();
+    marked(pending.onMarked, pending.celebrate);
   };
 
   const dialog = (

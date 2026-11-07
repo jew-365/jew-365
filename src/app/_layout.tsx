@@ -37,6 +37,7 @@ import { reconcileChokInstall } from '@/services/ChokContentService';
 import { reconcileSelichotInstall } from '@/services/SelichotContentService';
 import { afterPaint } from '@/utils/afterPaint';
 import { reconcileEndedCustomMitzvot } from '@/stores/customMitzvahLifecycle';
+import { MarkCelebrationHost } from '@/components/MarkCelebration';
 import { FOLLOW_INTERVAL_MS, followDeviceLocation } from '@/services/locationFollow';
 import { watchForRatingMoment } from '@/services/storeReview';
 import {
@@ -278,6 +279,7 @@ function RootInner() {
         </View>
         {isOnboarded ? <UpdateBanner /> : null}
         {isOnboarded ? <ChokEnablePrompt /> : null}
+        {isOnboarded ? <MarkCelebrationHost /> : null}
         <ShabbatScreen
           block={quietBlock}
           tz={location.tz}

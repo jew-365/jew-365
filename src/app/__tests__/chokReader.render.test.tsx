@@ -242,7 +242,7 @@ describe('the Chok LeYisrael reader with the mitzvah switched on', () => {
     await openAt('2026-11-18T12:00');
     fireEvent.press(screen.getByText('סיימתי'));
     expect(marked('2026-11-18')).toBe(true);
-    expect(mockReplace).toHaveBeenCalledWith('/(tabs)/home');
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/(tabs)/home'));
   });
 
   it.each(['2026-11-18T21:00', '2026-11-19T02:00'])(
@@ -314,7 +314,7 @@ describe('the Chok LeYisrael reader with the mitzvah switched on', () => {
       expect(useUserStore.getState().chokThuNightDay).toBe('thu');
       expect(marked('2026-11-19')).toBe(true);
       expect(marked('2026-11-20')).toBe(false);
-      expect(mockReplace).toHaveBeenCalledWith('/(tabs)/home');
+      await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/(tabs)/home'));
     });
 
     it("files under Friday when asked for Friday, and Friday's reminders drop", async () => {
@@ -337,7 +337,7 @@ describe('the Chok LeYisrael reader with the mitzvah switched on', () => {
       fireEvent.press(screen.getByText('סיימתי'));
       expect(screen.queryByText(ASK)).toBeNull();
       expect(marked('2026-11-19')).toBe(true);
-      expect(mockReplace).toHaveBeenCalledWith('/(tabs)/home');
+      await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/(tabs)/home'));
     });
 
     it.each([

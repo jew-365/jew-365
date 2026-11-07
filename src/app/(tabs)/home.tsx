@@ -528,8 +528,9 @@ export default function HomeScreen() {
   // dropped every other card tapped during it. Each card is held on screen while it animates.
   const dayFor = (id: string) => windowDays.get(id) ?? today;
 
+  // An open card answers with its own completion; a missed entry's mark plays the shared one, which has its haptic.
   const stamp = (id: string, fromOpen: boolean) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    if (fromOpen) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     setSelectedId(null);
     setStampingIds((ids) => (ids.includes(id) ? ids : [...ids, id]));
     if (fromOpen) setHeldOpenIds((ids) => (ids.includes(id) ? ids : [...ids, id]));
@@ -563,8 +564,10 @@ export default function HomeScreen() {
   // An open card is marked at once; one whose window closed since the last tick asks first, as a missed entry does.
   const completeOpen = (item: LiveItem) => {
     if (stamping.has(item.mitzvah.id)) return;
-    lateMark.mark({ id: item.mitzvah.id, name: item.name, date: item.window.date, window: item.window }, () =>
-      stamp(item.mitzvah.id, true),
+    lateMark.mark(
+      { id: item.mitzvah.id, name: item.name, date: item.window.date, window: item.window },
+      () => stamp(item.mitzvah.id, true),
+      { celebrate: false },
     );
   };
 

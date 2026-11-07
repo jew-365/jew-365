@@ -78,7 +78,8 @@ jest.mock('react-native-safe-area-context', () => ({
 }));
 
 import { HDate, months } from '@hebcal/core';
-import { screen, fireEvent } from '@testing-library/react-native';
+import { act, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import * as Celebration from '@/components/MarkCelebration';
 import SiddurReaderScreen from '../siddur/[id]';
 import { CITIES } from '@/data/cities';
 import { siddurPlace } from '@/data/siddur';
@@ -134,6 +135,7 @@ function resetReader() {
   mockLoadText.mockClear();
   mockRouter.push.mockClear();
   mockRouter.back.mockClear();
+  mockRouter.replace.mockClear();
 }
 
 describe('the reader for a mitzvah linked to a standalone text', () => {
@@ -149,7 +151,24 @@ describe('the reader for a mitzvah linked to a standalone text', () => {
     fireEvent.press(screen.getByText('סיימתי'));
 
     expect(useCompletionsStore.getState().completions['2026-10-28'].krias_shma_al_hamita).toBeTruthy();
+    await waitFor(() => expect(mockRouter.replace).toHaveBeenCalledWith('/(tabs)/home'));
+  });
+
+  it('goes home only once the completion has played', async () => {
+    let finish!: () => void;
+    const celebrate = jest
+      .spyOn(Celebration, 'celebrateMark')
+      .mockReturnValue(new Promise<void>((resolve) => (finish = resolve)));
+    open({ id: 'krias_shma_al_hamita', date: '2026-10-28' }, '2026-10-28T21:00');
+    await screen.findByText('נוסח kriat_shema_al_hamita');
+    fireEvent.press(screen.getByText('סיימתי'));
+    expect(celebrate).toHaveBeenCalledTimes(1);
+    expect(useCompletionsStore.getState().completions['2026-10-28'].krias_shma_al_hamita).toBeTruthy();
+    await act(async () => {});
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+    await act(async () => finish());
     expect(mockRouter.replace).toHaveBeenCalledWith('/(tabs)/home');
+    celebrate.mockRestore();
   });
 
   it("reads Selichot for the mitzvah's night after midnight, and its done button files the mark under that night's day", async () => {

@@ -108,7 +108,7 @@ describe('NowCard', () => {
     expect(props.onLongPress).toHaveBeenCalledTimes(1);
   });
 
-  it('answers a mark with the done button, the sparks, the green arc, the ring check and the done line, not the old stamp', () => {
+  it('answers a mark with the done button, the sparks, the green arc, the ring check, the done line and the old stamp', () => {
     setup({ stamping: true });
     expect(screen.getByTestId('now-card-done-button')).toBeOnTheScreen();
     // The sparks wait for the actions row's box, which they copy over the card.
@@ -129,7 +129,7 @@ describe('NowCard', () => {
     ]);
     expect(screen.getByTestId('now-card-ring-check', { includeHiddenElements: true })).toBeOnTheScreen();
     expect(screen.getByText(/^בוצע ב-\d{2}:\d{2}$/)).toBeOnTheScreen();
-    expect(screen.queryByText('נעשה!')).toBeNull();
+    expect(screen.getByText('נעשה!')).toBeOnTheScreen();
   });
 
   it('draws none of it while not stamping', () => {

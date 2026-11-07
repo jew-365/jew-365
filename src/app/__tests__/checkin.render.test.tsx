@@ -24,6 +24,7 @@ import { act, fireEvent, screen } from '@testing-library/react-native';
 import { getAnimatedStyle } from 'react-native-reanimated';
 import CheckInRoute from '../checkin';
 import { CompletedRow } from '@/components/CompletedRow';
+import * as Celebration from '@/components/MarkCelebration';
 import { MitzvahCard } from '@/components/MitzvahCard';
 import { Reveal } from '@/components/Reveal';
 import { CITIES } from '@/data/cities';
@@ -101,6 +102,16 @@ describe('check-in', () => {
     expect(filed).toBeGreaterThan(at(JERUSALEM, '2026-11-14T04:00').getTime());
     expect(filed).toBeLessThan(at(JERUSALEM, '2026-11-14T06:00').getTime());
     expect(useCompletionsStore.getState().late).toEqual({});
+  });
+
+  it('plays the completion on every mark', async () => {
+    const celebrate = jest.spyOn(Celebration, 'celebrateMark');
+    renderWithTheme(<CheckInRoute />);
+    await screen.findByText(/מה עשית בשבת/);
+    const card = screen.UNSAFE_getAllByType(MitzvahCard)[0];
+    act(() => card.props.onComplete());
+    expect(celebrate).toHaveBeenCalledTimes(1);
+    celebrate.mockRestore();
   });
 
   it('writes nothing after the deadline', async () => {

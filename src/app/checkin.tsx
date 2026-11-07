@@ -7,6 +7,7 @@ import { Card } from '@/components/Card';
 import { CompletedRow } from '@/components/CompletedRow';
 import { formatDayLine } from '@/components/DayStepper';
 import { iconFor } from '@/components/MitzvahIcon';
+import { celebrateMark } from '@/components/MarkCelebration';
 import { MitzvahCard } from '@/components/MitzvahCard';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
@@ -87,6 +88,7 @@ export default function CheckInRoute() {
       date,
       windowClosed(item.window, new Date()) ? { at: onTimeMarkAt(item.window) } : undefined,
     );
+    void celebrateMark();
   };
 
   const close = () => {

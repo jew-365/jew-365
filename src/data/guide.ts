@@ -422,6 +422,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
     date: '2026-11-07',
     items: [
       {
+        he: 'סימון ״עשיתי״ מכל מקום באפליקציה מקבל עכשיו אנימציה: מהסידור, ממסך המצווה, מהיום שלי, מתצוגת היום ומהסיכום שאחרי שבת. מהסידור האנימציה מתנגנת לפני המעבר לדף הבית, ובכרטיס של דף הבית חזרה גם החותמת ״נעשה!״.',
+        en: 'Marking done from anywhere in the app now plays an animation: from the siddur, the mitzvah screen, My day, the day view and the check-in after Shabbat. From the siddur it plays before the move to home, and the home card has its "Done!" stamp back as well.',
+      },
+      {
         he: 'מיקום לפי בחירה: בהרשמה האפליקציה מבקשת גישה למיקום, ואז הזמנים תמיד לפי המקום שבו הטלפון נמצא. מי שלא רוצה לתת מיקום בוחר כל יישוב בישראל, ביהודה ובשומרון, וכל עיר בעולם, בחיפוש לפי שם בעברית או באנגלית. בהגדרות ← מכשיר והתראות עוברים בין ״המיקום שלי״ ל״מקום שבחרתי״ בכל רגע, ומקום שבחרתם נשאר קבוע גם כשהטלפון זז. כשהאפליקציה פתוחה, ״המיקום שלי״ מתעדכן כל חצי דקה.',
         en: 'Location your way: onboarding asks for location access, and then the times always follow where the phone is. Without it, pick any locality in Israel, Judea and Samaria, or any city in the world, by searching its name in Hebrew or English. In Settings → Device and notifications switch between My location and A place I chose at any time, and a place you chose stays put even when the phone moves. While the app is open, My location updates every half minute.',
       },
