@@ -586,7 +586,9 @@ function Invoke-Apk {
     $downloads = Join-Path $HOME 'Downloads'
     New-Item -ItemType Directory -Force -Path $downloads | Out-Null
     $variantTag = if ($variant) { "-$variant" } else { '' }
-    $target = Join-Path $downloads "jew365$variantTag-$($build.appVersion)-$($build.appBuildVersion)$extension"
+    # A profile without autoIncrement (preview) reuses its build number, so the EAS build id keeps two builds apart.
+    $buildTag = "$($build.id)".Substring(0, 8)
+    $target = Join-Path $downloads "jew365$variantTag-$($build.appVersion)-$($build.appBuildVersion)-$buildTag$extension"
     Say "latest build $($build.id): version $($build.appVersion), build number $($build.appBuildVersion), finished $($build.completedAt)"
     if ((Test-Path $target) -and (Get-Item $target).Length -gt 0) {
         Say "already downloaded: $target"
@@ -631,8 +633,8 @@ native.ps1 <command> [options]   (PowerShell 7: pwsh -NoProfile -File native.ps1
                           gradlew --stop, stop the Metro this skill started, optionally delete the copy
                           (only a folder this skill created) / close the emulator (only one this skill started)
   apk [-BuildProfile p]   download the latest finished EAS Android build of profile p (default
-                          production-apk) to ~\Downloads\jew365-<version>-<buildNumber>.apk (jew365-preview-<version>-<buildNumber>.apk
-                          for a profile that sets APP_VARIANT=preview) and verify it
+                          production-apk) to ~\Downloads\jew365-<version>-<buildNumber>-<build id 8>.apk
+                          (jew365-preview-... for a profile that sets APP_VARIANT=preview) and verify it
   help                    this text
 
 Options: -Copy <dir under C:\work\> -Avd <name> -Port <n> -Limit <n> -TimeoutMin <n> -UseRunning -Force
