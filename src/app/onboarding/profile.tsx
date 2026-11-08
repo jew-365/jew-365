@@ -25,7 +25,6 @@ export default function ProfileScreen() {
   const gender = useUserStore((s) => s.gender);
   const maritalStatus = useUserStore((s) => s.maritalStatus);
   const taharahEnabled = useUserStore((s) => s.taharahEnabled);
-  const complete = gender !== null && maritalStatus !== null;
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top', 'bottom']}>
@@ -35,8 +34,8 @@ export default function ProfileScreen() {
         {t('onboarding.profileBody')}
       </Text>
       <ScrollView contentContainerStyle={styles.list}>
-        <SectionLabel variant="field" text={t('profile.gender')} style={styles.groupLabel} />
-        <View accessibilityRole="radiogroup" accessibilityLabel={t('profile.gender')} style={styles.group}>
+        <SectionLabel variant="field" text={t('onboarding.genderLabel')} style={styles.groupLabel} />
+        <View accessibilityRole="radiogroup" accessibilityLabel={t('onboarding.genderLabel')} style={styles.group}>
           {GENDERS.map((option) => (
             <ChoiceRow
               key={option}
@@ -47,8 +46,16 @@ export default function ProfileScreen() {
           ))}
         </View>
 
-        <SectionLabel variant="field" text={t('profile.maritalStatus')} style={[styles.groupLabel, styles.groupGap]} />
-        <View accessibilityRole="radiogroup" accessibilityLabel={t('profile.maritalStatus')} style={styles.group}>
+        <SectionLabel
+          variant="field"
+          text={t('onboarding.maritalStatusLabel')}
+          style={[styles.groupLabel, styles.groupGap]}
+        />
+        <View
+          accessibilityRole="radiogroup"
+          accessibilityLabel={t('onboarding.maritalStatusLabel')}
+          style={styles.group}
+        >
           {MARITAL_STATUSES.map((option) => (
             <ChoiceRow
               key={option}
@@ -85,7 +92,7 @@ export default function ProfileScreen() {
         ) : null}
       </ScrollView>
       <OnboardingDots step={1} total={ONBOARDING_STEPS} style={styles.dots} />
-      <Button label={t('common.continue')} onPress={() => router.push('/onboarding/nusach')} disabled={!complete} />
+      <Button label={t('common.continue')} onPress={() => router.push('/onboarding/nusach')} />
       <Pressable onPress={() => router.back()} accessibilityRole="button" style={styles.backBtn}>
         <Text style={[typography.small, { color: colors.textSub }]}>{t('common.back')}</Text>
       </Pressable>

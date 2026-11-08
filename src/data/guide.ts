@@ -64,8 +64,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'תחילת הדרך', en: 'Getting started' },
     body: [
       {
-        he: 'בפתיחה הראשונה האפליקציה שואלת כמה שאלות קצרות: שם וטלפון (אפשר לדלג), מגדר ומצב משפחתי, נוסח התפילה, אחרי אילו מצוות לעקוב, והמקום לחישוב הזמנים: עם אישור גישה למיקום, המיקום מתעדכן לבד בכל פתיחה של האפליקציה, כך שהזמנים תמיד של המקום שבו הטלפון נמצא; בלי אישור, בוחרים כל יישוב בישראל או כל עיר בעולם בחיפוש לפי שם, והזמנים נשארים לפיו. אחר כך מסך הרשאות שמראה מה כבר מאושר ומאפשר לאשר את השאר. אחרי אישור ההתראות מצוות היום כבר מחכות בדף הבית.',
-        en: "The first time the app opens it asks a few short questions: name and phone (optional), gender and marital status, your nusach, which mitzvot to track, and the place for the zmanim: with location access allowed, the location updates itself every time the app opens, so the times are always those of where the phone is; without it, you pick any locality in Israel or any city in the world by searching its name, and the times stay with it. Then comes a permissions screen that shows what is already allowed and lets you allow the rest. Once notifications are allowed, today's mitzvot are waiting on Home.",
+        he: 'בפתיחה הראשונה האפליקציה שואלת כמה שאלות קצרות: שם וטלפון, מגדר ומצב משפחתי (על כל אלה אפשר לדלג, והתשובות נשמרות רק במכשיר), נוסח התפילה, אחרי אילו מצוות לעקוב, והמקום לחישוב הזמנים: עם אישור גישה למיקום, המיקום מתעדכן לבד בכל פתיחה של האפליקציה, כך שהזמנים תמיד של המקום שבו הטלפון נמצא; בלי אישור, בוחרים כל יישוב בישראל או כל עיר בעולם בחיפוש לפי שם, והזמנים נשארים לפיו. אחר כך מסך הרשאות שמראה מה כבר מאושר ומאפשר לאשר את השאר. אחרי אישור ההתראות מצוות היום כבר מחכות בדף הבית.',
+        en: "The first time the app opens it asks a few short questions: name, phone, gender and marital status (all optional, and the answers stay on the device), your nusach, which mitzvot to track, and the place for the zmanim: with location access allowed, the location updates itself every time the app opens, so the times are always those of where the phone is; without it, you pick any locality in Israel or any city in the world by searching its name, and the times stay with it. Then comes a permissions screen that shows what is already allowed and lets you allow the rest. Once notifications are allowed, today's mitzvot are waiting on Home.",
       },
       {
         he: 'במעבר לטלפון חדש מקישים במסך הפתיחה על ״יש לי קובץ גיבוי״ ומשחזרים את הקובץ שיוצא בטלפון הקודם.',
@@ -424,6 +424,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: 'בהגדרות ← זמני הלכה בוחרים אילו זמני היום יוצגו בשורת הזמנים ובמעגל של דף הבית. כברירת מחדל כולם מוצגים, וזמן אחד לפחות נשאר. ״משיכיר״ נקרא עכשיו ״זמן תו״ט״.',
         en: "Settings → Halachic times chooses which of the day's times show in Home's strip and circle. All of them show by default, and at least one stays. Misheyakir is now named Tallit and tefillin.",
+      },
+      {
+        he: 'בהרשמה, מגדר ומצב משפחתי הם עכשיו לא חובה: אפשר להמשיך בלי לענות, ולענות מתי שרוצים בהגדרות ← פרופיל. התשובות נשמרות רק במכשיר.',
+        en: 'At sign-up, gender and marital status are now optional: you can continue without answering, and answer any time in Settings → Profile. The answers stay on the device.',
       },
     ],
   },

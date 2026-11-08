@@ -41,17 +41,32 @@ describe('Onboarding Continue buttons', () => {
     mockPush.mockClear();
   });
 
-  it('keeps Continue on the profile step disabled until gender and status are chosen', () => {
+  it('lets the profile step continue with gender and marital status unanswered, both marked optional', () => {
     renderWithTheme(<ProfileScreen />);
-    const next = () => screen.getByRole('button', { name: he('common.continue') });
-    expect(next()).toBeDisabled();
+    expect(screen.getByLabelText(he('onboarding.genderLabel'))).toHaveProp('accessibilityRole', 'radiogroup');
+    expect(screen.getByLabelText(he('onboarding.maritalStatusLabel'))).toHaveProp('accessibilityRole', 'radiogroup');
+    expect(he('onboarding.genderLabel')).toContain('לא חובה');
+    expect(he('onboarding.maritalStatusLabel')).toContain('לא חובה');
 
+    const next = screen.getByRole('button', { name: he('common.continue') });
+    expect(next).toBeEnabled();
+    fireEvent.press(next);
+
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/nusach');
+    expect(useUserStore.getState().gender).toBeNull();
+    expect(useUserStore.getState().maritalStatus).toBeNull();
+  });
+
+  it('continues from the profile step with both answers given and keeps them', () => {
+    renderWithTheme(<ProfileScreen />);
     fireEvent.press(screen.getByText(he('profile.gender.male')));
     fireEvent.press(screen.getByText(he('profile.maritalStatus.married.male')));
 
-    expect(next()).toBeEnabled();
-    fireEvent.press(next());
+    fireEvent.press(screen.getByRole('button', { name: he('common.continue') }));
+
     expect(mockPush).toHaveBeenCalledWith('/onboarding/nusach');
+    expect(useUserStore.getState().gender).toBe('male');
+    expect(useUserStore.getState().maritalStatus).toBe('married');
   });
 
   it('keeps Continue on the location step disabled until the location is confirmed', async () => {
