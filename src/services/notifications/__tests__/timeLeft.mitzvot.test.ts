@@ -92,7 +92,7 @@ describe('the time-left line of a mitzvah reminder', () => {
     expect(candidates[0].subtitle).toMatch(/^נשארו .* · עד \d\d:\d\d$/);
     // Shacharit alone takes 20 minutes: its last-chance point is 20 minutes before the end.
     expect(last.subtitle).toMatch(/^❗ נשארו 20 דק' · עד \d\d:\d\d$/);
-    expect(last.body).toBe('הזמן האחרון להתחיל');
+    expect(last.body).toBe('הזמן האחרון להתחיל להתפלל');
     // A nag's body does not repeat the mitzvah's name, which is its title.
     for (const c of candidates.filter((n) => n.data.nag?.kind === 'zone')) expect(c.body).toBe('עוד לא סימנת');
   });
@@ -106,7 +106,7 @@ describe('the time-left line of a mitzvah reminder', () => {
       expect(c.body).toBe(`${ios[i].subtitle}\n${ios[i].body}`);
       expect(c.color).toBe(ios[i].color);
     });
-    expect(android[android.length - 1].body).toMatch(/^❗ נשארו 20 דק' · עד \d\d:\d\d\nהזמן האחרון להתחיל$/);
+    expect(android[android.length - 1].body).toMatch(/^❗ נשארו 20 דק' · עד \d\d:\d\d\nהזמן האחרון להתחיל להתפלל$/);
   });
 
   it('keeps the stages on both platforms once some are past or marked', () => {
@@ -128,7 +128,7 @@ describe('the time-left line of a mitzvah reminder', () => {
     const [reminder, opener, minyan, alone] = day(buildPlan(single));
     expect(opener.data.nag?.kind).toBe('open');
     expect([reminder, opener, minyan, alone].map(stageOf)).toEqual(['green', 'green', 'orange', 'red']);
-    expect(minyan.body).toBe('הזמן האחרון להתחיל במניין');
+    expect(minyan.body).toBe('הזמן האחרון להתחיל להתפלל במניין');
     expect(minyan.subtitle).toMatch(/^⚠️ נשארו 45 דק'/);
 
     const late = {

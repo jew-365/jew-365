@@ -17,6 +17,7 @@ import {
   windowTimeline,
   type TimelineSend,
   type WindowTimeline as Timeline,
+  nagMessage,
 } from '@/services/notifications/planners/mitzvot';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -40,7 +41,7 @@ import {
   timelineView,
   type TimelineNag,
 } from '@/utils/timeline';
-import { NAG_MIN_GAP_MIN } from '@/utils/nagging';
+import { NAG_MIN_GAP_MIN, nagVerbKey } from '@/utils/nagging';
 import { timeLeftLine } from '@/utils/timeLeft';
 import { Button } from './Button';
 import { Card } from './Card';
@@ -195,15 +196,12 @@ export function WindowTimeline(props: Props) {
     send.type === 'reminder'
       ? t('detail.timeline.kind.reminder')
       : send.kind === 'lastChance'
-        ? t(`detail.timeline.kind.${send.lastChance ?? 'alone'}`)
+        ? t(`detail.timeline.kind.${send.lastChance ?? 'alone'}`, { verb: t(nagVerbKey(mitzvah.id)) })
         : t(`detail.timeline.kind.${send.kind}`);
-  const messageOf = (send: TimelineSend) => {
-    if (send.type === 'reminder') return reminderLabel(reminders[send.index] ?? { anchor: 'start', label: '' }, name);
-    if (send.kind === 'open') return t('notifications.nag.zoneOpen');
-    if (send.kind !== 'lastChance') return t('notifications.nag.notMarked');
-    if (send.lastChance === 'soon') return t('notifications.nag.endingSoon');
-    return t(send.lastChance === 'minyan' ? 'notifications.nag.lastChanceMinyan' : 'notifications.nag.lastChance');
-  };
+  const messageOf = (send: TimelineSend) =>
+    send.type === 'reminder'
+      ? reminderLabel(reminders[send.index] ?? { anchor: 'start', label: '' }, name)
+      : nagMessage(send, mitzvah.id, t);
   const stageColor = (send: TimelineSend) =>
     send.stage === 'red' ? colors.urgent : send.stage === 'orange' ? colors.warning : colors.safe;
   const draggable = (send: TimelineSend) =>

@@ -173,7 +173,7 @@ describe('the end notice', () => {
     expect(reminderDays).toContain(lastFull);
     // The opening days' nags (the zone's opener, the orange and the red at level 1 too) outrank the thinned days
     // after them.
-    expect(lastFull >= '2026-11-11').toBe(true);
+    expect(lastFull >= '2026-11-10').toBe(true);
     expect(lastFull < '2026-11-24').toBe(true);
   });
 
@@ -245,7 +245,9 @@ describe('thinning edges and the end notice fallback', () => {
       defaultReminders: [{ anchor: 'followUp', offsetMin: 60, label: 'x' }],
     };
 
-    const plan = buildPlan(planInput({ platform: 'ios', mitzvot: [...DEFAULT_MITZVOT, followUpOnly] }));
+    // Without maariv's points, so the cut reaches past the first thinned day.
+    const others = DEFAULT_MITZVOT.filter(({ id }) => id !== 'maariv');
+    const plan = buildPlan(planInput({ platform: 'ios', mitzvot: [...others, followUpOnly] }));
 
     // 2026-11-10 is the first thinned day: its window keeps the follow-up and nothing else.
     expect(plan.filter(({ id }) => id.startsWith('edge_followup__2026-11-10')).map(({ id }) => id)).toEqual([

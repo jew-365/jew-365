@@ -21,6 +21,8 @@ import { TIME_STAGE_COLOR, sendStage, timeLeftLine, type SendKind, type TimeStag
 import {
   BEDTIME_ZONE_MIN,
   ORANGE_LEAD_MIN,
+  FINAL_MARGIN_MIN,
+  nagVerbKey,
   customNagZone,
   endsAtChatzot,
   hasLastChance,
@@ -323,16 +325,19 @@ function ownTriggers(mitzvah: Mitzvah, reminders: Reminder[], date: Date, scope:
   // quiet hours and the holy blocks as a reminder is, and never before the window or after its end.
   const kind = nagZoneKindOf(mitzvah.id);
   const perform = performMinOf(mitzvah);
-  // A kind that stops at chatzot halayla counts its last-chance points from there (no nag from chatzot to alot).
+  // A kind that stops at chatzot halayla has its ideal latest times there (no nag from chatzot to alot) and its red, the
+  // real last time, `FINAL_MARGIN_MIN` (or the time it takes) before its real end (the owner's call, 2026-11-08).
   const chatzot = ctx.zmanim.chatzotLayla.getTime();
   const { zone, sparse, night } = nagZone(mitzvah, window, ctx);
   const nightEdge =
     (endsAtChatzot(kind) || night === true) && chatzot > window.start.getTime() && chatzot < window.end.getTime();
-  const edge = nightEdge ? chatzot : window.end.getTime();
-  const before = (minutes: number | undefined) =>
+  const before = (minutes: number | undefined, edge = window.end.getTime()) =>
     minutes && hasLastChance(kind) ? new Date(edge - minutes * 60_000) : null;
-  const alone = before(perform.alone);
-  const soon = alone && !perform.minyan ? new Date(alone.getTime() - ORANGE_LEAD_MIN * 60_000) : null;
+  const alone = before(nightEdge ? Math.max(perform.alone, FINAL_MARGIN_MIN) : perform.alone);
+  const soon = alone && !perform.minyan && !nightEdge ? new Date(alone.getTime() - ORANGE_LEAD_MIN * 60_000) : null;
+  const ideal = nightEdge
+    ? { chatzot: before(perform.alone, chatzot), chatzotMinyan: before(perform.minyan, chatzot) }
+    : {};
   const moves = new Map<number, number>();
   const accept = (planned: Date) => {
     const at = quietHours ? quietHoursTrigger(planned, quietHours, window.end, location) : planned;
@@ -349,7 +354,7 @@ function ownTriggers(mitzvah: Mitzvah, reminders: Reminder[], date: Date, scope:
         window,
         zone,
         sparseUntil: sparse ? new Date(Math.min(window.end.getTime(), nightEdge ? chatzot : Infinity)) : null,
-        lastChance: { alone, minyan: before(perform.minyan), soon },
+        lastChance: { alone, minyan: nightEdge ? null : before(perform.minyan), soon, ...ideal },
         taken: sent,
         accept,
       });
@@ -418,17 +423,27 @@ const sendKindOf = (entry: WindowTrigger): SendKind =>
     ? 'reminder'
     : entry.lastChance === 'alone'
       ? 'lastChanceAlone'
-      : entry.lastChance
+      : entry.lastChance && entry.lastChance !== 'chatzotMinyan'
         ? 'warning'
         : 'nag';
 
-// The title already names the mitzvah, so a nag's body does not repeat it (the owner's pick, round 4 א+ב, 2026-11-05).
-function nagBody(entry: NagTrigger): string {
-  if (entry.lastChance === 'alone') return t('notifications.nag.lastChance');
-  if (entry.lastChance === 'minyan') return t('notifications.nag.lastChanceMinyan');
-  if (entry.lastChance === 'soon') return t('notifications.nag.endingSoon');
-  if (entry.kind === 'open') return t('notifications.nag.zoneOpen');
-  return t('notifications.nag.notMarked');
+const NAG_MESSAGE: Readonly<Record<LastChance, string>> = {
+  alone: 'notifications.nag.lastChance',
+  minyan: 'notifications.nag.lastChanceMinyan',
+  soon: 'notifications.nag.endingSoon',
+  chatzot: 'notifications.nag.chatzot',
+  chatzotMinyan: 'notifications.nag.chatzotMinyan',
+};
+
+// A nag's message, worded with the mitzvah's own verb ("הזמן האחרון להניח"). The title already names the mitzvah, so
+// the body does not repeat it (the owner's pick, round 4 א+ב, 2026-11-05). The timeline shows the same text.
+export function nagMessage(
+  send: { kind: NagKind; lastChance?: LastChance },
+  mitzvahId: string,
+  tr: (key: string, params?: Record<string, unknown>) => string = t,
+): string {
+  if (send.lastChance) return tr(NAG_MESSAGE[send.lastChance], { verb: tr(nagVerbKey(mitzvahId)) });
+  return tr(send.kind === 'open' ? 'notifications.nag.zoneOpen' : 'notifications.nag.notMarked');
 }
 
 function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thinning | null): PlannedCandidate[] {
@@ -465,7 +480,9 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thi
         ? buildId(mitzvah.id, date, entry.index, entry.occurrence)
         : buildNagId(mitzvah.id, date, entry.k);
     const message =
-      entry.type === 'reminder' ? bodyForReminder(entry.reminder, mitzvah, trigger, english, params) : nagBody(entry);
+      entry.type === 'reminder'
+        ? bodyForReminder(entry.reminder, mitzvah, trigger, english, params)
+        : nagMessage(entry, mitzvah.id);
     const line = timeLeftLine(trigger, planned.window, location.tz, t, stage);
     return {
       candidate: {

@@ -212,7 +212,14 @@ export function NagLevelExample({ level, location, settings, quietHours, style }
       const pills: Pill[] = sends.map(({ at, kind, lastChance }) => ({
         at,
         time: clockOf(new Date(at), location.tz),
-        kind: kind === 'reminder' ? 'reminder' : lastChance === 'alone' ? 'lastChance' : lastChance ? 'warning' : 'nag',
+        kind:
+          kind === 'reminder'
+            ? 'reminder'
+            : lastChance === 'alone'
+              ? 'lastChance'
+              : lastChance && lastChance !== 'chatzotMinyan'
+                ? 'warning'
+                : 'nag',
       }));
       return [{ key: id, label: mitzvahName(mitzvah, language), pills }];
     });

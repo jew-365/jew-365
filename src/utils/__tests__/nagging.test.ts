@@ -173,7 +173,7 @@ describe('the mitzvot', () => {
     const two = [{ anchor: 'start' as const }, { anchor: 'end' as const }];
     expect(nagsPerWindow({ id: 'shacharit' }, 1)).toBe(3);
     expect(nagsPerWindow({ id: 'shacharit' }, 4)).toBe(6);
-    expect(nagsPerWindow({ id: 'maariv' }, 3)).toBe(4);
+    expect(nagsPerWindow({ id: 'maariv' }, 3)).toBe(5);
     expect(nagsPerWindow({ id: 'chanukah_candles' }, 2)).toBe(4);
     expect(nagsPerWindow({ id: 'kiddush_levana' }, 2)).toBe(2);
     expect(remindersPerDay({ id: 'tefillin' }, two, 2)).toBe(6);

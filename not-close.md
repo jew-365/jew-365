@@ -479,6 +479,14 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 ### Medium — App requests of 2026-11-08
 
+- [x] Night mitzvot: an ideal point before chatzot, a real last notification before alot, and wording per mitzvah
+  - **Flag:** `OTA`.
+  - **Source:** the owner's report of 2026-11-08 with a screenshot of Maariv's timeline: "פחות נכון לאמר פה ובמצוות שזה לא סוף הזמן האמיתי שלהם סוף זמן במיניין או סוף זמן להתחיל, וגם לא נכון להשאיר את סוף הזמן האמיתי ללא כלום..לפחות התראה אחת לפני הסוף עם מרווח שמן לקיום המצווה שזה הסוף הסופי.. וגם הניסוחים לא תמיד נכונים לכל מצווה."
+  - **What it is:** in a window that runs past chatzot halayla (Maariv, the bedtime Shema, the Omer, Ushpizin, the Chanukah candles, Chok LeYisrael, a night custom mitzvah) the points at chatzot are ideal times, `chatzot` (orange, "לכתחילה … עד חצות") and `chatzotMinyan` (plain); the red is the real last time, `FINAL_MARGIN_MIN` (30) minutes, or the time it takes, before the window's end, the one send between chatzot and alot. Every last-chance text names the mitzvah's own verb (`nag.verb.<id>`: להתחיל להתפלל, להניח, לקרוא, לספור, להדליק…). `SCHEDULE_FORMAT` 16; R3 and R6 on the rav's page, `RULES_VERSION` 7.
+  - **Expected result:** Maariv on 2026-11-11 in Jerusalem reads 23:04 "לכתחילה להתחיל להתפלל במניין עד חצות", 23:14 ⚠️ "לכתחילה להתחיל להתפלל עד חצות", 04:24 ❗ "הזמן האחרון להתחיל להתפלל"; tefillin's red reads "הזמן האחרון להניח".
+  - **Done:** 2026-11-08: verified by `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, the full Jest suite (6373 passed) and `pnpm test:tz` on the nag suites, and a probe of Jerusalem's 2026-11-11 timelines matching the expected result. Still to check on the phone.
+  - **Status:** 1.0.21 · Committed: pending · Pushed: no · Live: no · Channel: none
+
 - [ ] "זמן תו״ט" for misheyakir, and a "זמני הלכה" section in Settings that chooses which zmanim home shows
   - **Flag:** `OTA`.
   - **Source:** the owner's request of 2026-11-08: "לכתוב זמן תו"ט במקום משיכיר בזמני היום ... לפתוח עוד קטגוריה בהגדרות של זמני היום ולבחור איזה זמני היום המשתמש רוצה להציג ... הדיפולט לראות הכל ... הקטגוריה תקרא זמני הלכה".

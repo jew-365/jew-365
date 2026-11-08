@@ -36,7 +36,9 @@ export type NagKind = 'open' | 'zone' | 'sparse' | 'lastChance';
 // The two marked notifications of a window (the owner's rule, 2026-11-05): `alone` (`end − performMin`) is the red,
 // the last; `minyan` (a prayer's `end − performMin.minyan`) or `soon` (`ORANGE_LEAD_MIN` before `alone`, for a mitzvah
 // with one duration) is the one orange before it.
-export type LastChance = 'alone' | 'minyan' | 'soon';
+// `alone` the red (the real last time), `minyan` or `soon` the orange before it; in a window that runs past chatzot
+// halayla, `chatzot` (the orange) and `chatzotMinyan` (plain) are the ideal latest times, before chatzot.
+export type LastChance = 'alone' | 'minyan' | 'soon' | 'chatzot' | 'chatzotMinyan';
 // A nag the user placed by hand on the window's axis (the timeline, the owner's pick of 2026-11-05): minutes from the
 // window's `start` or `end`, whichever edge it was nearer, and the kind it had, which words its body. A mitzvah that
 // holds a list of them sends these instead of the smart nag's until the reset.

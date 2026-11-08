@@ -58,7 +58,7 @@ async function renderDevice() {
 // The everyday default-on set: one reminder each of tefillin, the morning Shema, Shacharit, Mincha, Maariv and the
 // bedtime Shema (6); each window's orange and red (12); and the opener of every zone that starts after its window
 // does (5, all but Maariv's). Kiddush Levana, Selichot, the Chanukah candles and Ushpizin are on too but seasonal.
-const ONLY_DAILY = 23;
+const ONLY_DAILY = 24;
 // At level 3, two nags in the zone of each of the six.
 const DAILY_AT_3 = ONLY_DAILY + 6 * 2;
 
@@ -186,10 +186,11 @@ describe('Settings › the nagging level', () => {
   it('applies the quiet hours to the example', async () => {
     useUserStore.getState().setQuietBefore({ enabled: true, minutes: 8 * 60 });
     await renderDevice();
-    // Shacharit opens at netz, before 08:00, so its start reminder goes out at 08:00; both reds stay, the bedtime
-    // Shema's before chatzot.
+    // Shacharit opens at netz, before 08:00, so its start reminder goes out at 08:00; its red stays, while the bedtime
+    // Shema's red before alot would move past the end of its time and is dropped, its orange before chatzot kept.
     expect(pillTimes()[0]).toBe('08:00');
-    expect(pills('lastChance')).toHaveLength(2);
+    expect(pills('lastChance')).toHaveLength(1);
+    expect(pills('warning').length).toBeGreaterThan(0);
   });
 
   it('counts a mitzvah at its own level and leaves out one that is off', async () => {
