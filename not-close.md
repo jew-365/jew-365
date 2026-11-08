@@ -485,7 +485,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** in a window that runs past chatzot halayla (Maariv, the bedtime Shema, the Omer, Ushpizin, the Chanukah candles, Chok LeYisrael, a night custom mitzvah) the points at chatzot are ideal times, `chatzot` (orange, "לכתחילה … עד חצות") and `chatzotMinyan` (plain); the red is the real last time, `FINAL_MARGIN_MIN` (30) minutes, or the time it takes, before the window's end, the one send between chatzot and alot. Every last-chance text names the mitzvah's own verb (`nag.verb.<id>`: להתחיל להתפלל, להניח, לקרוא, לספור, להדליק…). `SCHEDULE_FORMAT` 16; R3 and R6 on the rav's page, `RULES_VERSION` 7.
   - **Expected result:** Maariv on 2026-11-11 in Jerusalem reads 23:04 "לכתחילה להתחיל להתפלל במניין עד חצות", 23:14 ⚠️ "לכתחילה להתחיל להתפלל עד חצות", 04:24 ❗ "הזמן האחרון להתחיל להתפלל"; tefillin's red reads "הזמן האחרון להניח".
   - **Done:** 2026-11-08: verified by `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, the full Jest suite (6373 passed) and `pnpm test:tz` on the nag suites, and a probe of Jerusalem's 2026-11-11 timelines matching the expected result. Still to check on the phone.
-  - **Status:** 1.0.21 · Committed: pending · Pushed: no · Live: no · Channel: none
+  - **Status:** 1.0.21 · Committed: `c1e43f4` feat(nag): an ideal point before chatzot and a real last time before alot, worded per mitzvah · Pushed: yes · Live: preview `1.0.21-61` (group `f698b01d-e154-4d0d-b20e-0087fa6ed6d4`), not production · Channel: preview
 
 - [ ] "זמן תו״ט" for misheyakir, and a "זמני הלכה" section in Settings that chooses which zmanim home shows
   - **Flag:** `OTA`.
