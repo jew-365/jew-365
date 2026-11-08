@@ -475,7 +475,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** at every level, each mitzvah's nags spread across its whole critical zone (the bedtime Shema's no longer squeezed into the 24 minutes after a 23:00 reminder), and no notification of a night mitzvah between chatzot and alot.
   - **Decided:** the owner approved the recommendations with the visual of 2026-11-06 (https://claude.ai/artifact/CuCafHRDLzcsiN7NcndgEA, "מאשר"); the night kinds' last chance at chatzot is on the rav's page (R3, R6, `RULES_VERSION` 6).
   - **Done:** 2026-11-08: one opener per window at a waking hour (the bedtime Shema's at 21:00), the zone's opener (`open`) at every level, one orange (the minyan point, or `soon` 15 minutes before the red) and one red per window, the zone ending at the red point, the bedtime Shema's zone the two hours before chatzot, the night kinds' points from chatzot and nothing from chatzot to alot but Selichot, `SCHEDULE_FORMAT` 15; verified by `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, the full Jest suite and `pnpm test:tz` on the touched suites, and a probe of Jerusalem's 2026-11-11 plan matching the approved visual. Still to check on the phone.
-  - **Status:** 1.0.21 · Committed: pending · Pushed: no · Live: no · Channel: none
+  - **Status:** 1.0.21 · Committed: `8a95fa8` feat(nag): place reminders against the critical zone, one orange and one red per window · Pushed: yes · Live: preview `1.0.21-60` (group `657739bb-fdce-4062-ae91-2935ba102373`), not production · Channel: preview
 
 ### Medium — App requests of 2026-11-08
 
