@@ -245,3 +245,20 @@ https://testflight.apple.com/join/cZeSqPzG
 
 תודה רבה ובהצלחה! 🙌
 ```
+
+## Production Access Application
+
+Submitted on 2026-11-08 at 10:00 Israel time from the Dashboard (Apply for production), as the account owner avi6190i@gmail.com (`/console/u/1/`): the button is disabled for 365jew@gmail.com, an admin, with the tooltip "Only the account owner can apply for production access". The owner chose the recruitment, ease, feedback-channel and install answers and approved every text before it was sent. Google's answer comes by email to the account owner, usually within 7 days. The answers as submitted:
+
+1. About your closed test
+   - How did you recruit users: "We invited friends and family, members of our synagogue community and work colleagues to a Google Group (jew365-testers). 28 people joined, and at least 12 stayed opted in for more than 14 days, on Android phones in Israel and the United States."
+   - How easy was it to recruit testers: Neither difficult or easy.
+   - Tester engagement: "Testers used the app daily as intended: reminders for prayers and mitzvot inside their halachic time windows, marking them done, reading prayers in the built-in siddur, the Shabbat rest mode and the tracking tab. Play counted 23-24 active devices in Israel and the US."
+   - Feedback summary: "We collected feedback in WhatsApp and direct conversations, through the in-app contact form, in Play testing feedback (two 5-star entries) and from our own daily use. It covered reminder timing, prayer times, the siddur text and launch speed; reported bugs were fixed in updates during the test."
+2. About your app
+   - Intended audience: "Jewish men and women who want to keep their daily prayers and mitzvot on time, in Israel and abroad, in every major nusach (Ashkenaz, Sefard, Edot HaMizrach, Chabad and Teiman). The app is in Hebrew and English, needs no account and has no ads."
+   - How the app provides value: "It computes each day's halachic times for the user's location, reminds them of each prayer and mitzvah inside its time window, opens the right text in a built-in siddur, rests on Shabbat and holidays, and tracks streaks and consistency, so users keep their mitzvot on time."
+   - Expected installs in the first year: 0 to 10,000.
+3. Your production readiness
+   - Changes made from the closed test: "During the test we shipped weekly updates: a fix for a crash when marking a mitzvah on Android, 24 fixes from a full audit, faster launch, a first screen in the device language, location by permission or search, reminder nagging levels, quiet hours, and prayer times matched to a printed luach."
+   - How you decided the app is ready: "Every change passes CI: type checks, lint and over 6,000 automated tests run in four time zones. We check each update on our own Android phones and an emulator before it reaches users, and Play vitals show no crash since the fix of November 3. The app ran 14+ days with 12+ testers."

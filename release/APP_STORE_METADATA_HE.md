@@ -2,7 +2,7 @@
 
 ## App Store Connect App Record
 
-The record is shared by both languages: see [APP_STORE_METADATA_EN.md](APP_STORE_METADATA_EN.md) (Apple ID `6825802248`, primary language Hebrew, name `יהודי 365`). The version page's language-independent fields (copyright, build, App Review information and notes, release option, TestFlight), the App Privacy answers and the pricing and availability (174 storefronts, every one but China mainland) are recorded there too.
+The record is shared by both languages: see [APP_STORE_METADATA_EN.md](APP_STORE_METADATA_EN.md) (Apple ID `6825802248`, primary language Hebrew, name `יהודי 365`). The version page's language-independent fields (copyright, build, App Review information and notes, release option, TestFlight), the App Privacy answers and the pricing and availability (174 storefronts, every one but China mainland) are recorded there too, the App Review notes prepared on 2026-11-08 for build 1.0.21 (6) among them (English only, as App Review reads them; no Hebrew copy changes with them).
 
 The subtitle, promotional text, description and keywords below were entered in App Store Connect on 2026-11-02 and read back, with build 1.0.21 (5), and the version was resubmitted the same day ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-02; the owner: "כן שלח כולל כל הטקסטים והתיקונים והצילומים").
 

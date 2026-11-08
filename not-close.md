@@ -118,6 +118,25 @@ Finished, committed and pushed, and native or store-side: each reaches users onl
   - **What it solves:** 1.0.21 cannot be approved or released until the issue is answered.
   - **Expected result:** App Store Connect shows the submission back in review, then approved; `asc review status` reads `WAITING_FOR_REVIEW`, then `PENDING_DEVELOPER_RELEASE`.
   - **Requested:** App Review's message of 2026-11-01, found in the owner's status read of 2026-11-02.
+  - **Status 2026-11-08:** App Review rejected 1.0.21 (5) on 2026-11-07; the follow-up is the next item ([release/RELEASE_LOG.md](release/RELEASE_LOG.md), 2026-11-08).
+- [ ] Answer App Review's rejection of 1.0.21 (5): optional profile questions, Shabbat review notes, build 6
+  - **Done:** 2026-11-08, the code and the notes only. Verified: [src/app/__tests__/onboarding.cta.render.test.tsx](src/app/__tests__/onboarding.cta.render.test.tsx) (Continue enabled with both answers `null`, both groups labelled optional, answers kept when given), `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, the onboarding, i18n, guide, home, design-system and search-coverage suites, and `pnpm test:tz` (6,373 tests in each of the four zones, one skipped). Not checked: the step on a phone.
+  - **Status:** Version: OTA `1.0.21-17` and Build 1.0.21 (6) with a new AAB · Committed: yes, `50ece63` feat(onboarding): make gender and marital status optional · Pushed: yes, 2026-11-08 · Live: no · Channel: none
+  - **Flag:** OTA for every install, and `Build` for App Review (the reviewer's first launch runs the build's own bundle).
+  - **What it is:** App Review rejected 1.0.21 (5) on 2026-11-07 (review on a Saturday, iPad Air 11-inch): 5.1.1(v), gender and marital status were required (Apple's screenshot shows Continue disabled on "About you"); 2.1(a), "the app was not available at the time of review"; 2.1, "Does the app retain any information from the onboarding questions?". The owner's decisions of 2026-11-08: both questions optional, Continue always enabled ([src/app/onboarding/profile.tsx](src/app/onboarding/profile.tsx), `onboarding.genderLabel`, `onboarding.maritalStatusLabel`, `onboarding.profileBody`), home's `home.completeProfile` reworded without "New"; the Shabbat issue answered by the review notes and the reply only, the rest screen unchanged; new review notes in [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md) (pick Honolulu on a Friday, Tokyo on a Saturday, never New York); a new iOS build and a new Android AAB from the same commit.
+    - Commit and push, then `pnpm update:production` (`1.0.21-17`, its what's-new item is in place).
+    - `pnpm build:ios:production` (buildNumber 6), upload with `asc builds upload`, attach to 1.0.21, replace the App Review notes, reply to App Review (yes, on the device only; both questions optional; what each sets), Update Review, Resubmit.
+    - `pnpm build:android:production:aab`, upload to `Closed testing - Alpha`; once production access is granted, release it on the production track.
+  - **What it solves:** 1.0.21 cannot be approved until 5.1.1 is fixed and the questions are answered, and a Saturday review must reach the app.
+  - **Expected result:** the profile step continues with nothing chosen on iOS and Android; App Review approves 1.0.21 (6); `asc review status` reads `PENDING_DEVELOPER_RELEASE`.
+  - **Requested:** App Review's message of 2026-11-07, found in the owner's status read of 2026-11-08; the owner's decisions the same day.
+- [ ] Google Play production access
+  - **Done:** 2026-11-08, applied. Verified: the Dashboard read "We received your application for production access", submitted 2026-11-08 10:00, usually 7 days or less; the answers are in [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md), Production Access Application.
+  - **Status:** Version: none (an account permission) · Committed: no (records in this pass) · Pushed: no · Live: waiting for Google's answer · Channel: Play Console
+  - **What it is:** the personal developer account needs Google's approval before any production release; only the account owner, avi6190i@gmail.com (`/console/u/1/`), can apply, not the 365jew admin.
+  - **What it solves:** opens the Production track for the first store release on Android.
+  - **Expected result:** an email to the account owner and a Dashboard that offers a production release; then the new AAB goes to production.
+  - **Requested:** the owner, 2026-11-08.
 - [ ] iOS build 1.0.21 (4)
   - **Done:** 2026-10-22. Verified: build `72c51b1e` FINISHED after `052c2db2` and `1b4f562b` errored ([release/RELEASE_LOG.md](release/RELEASE_LOG.md)).
   - **Status:** Version: Build `1.0.21` (4), expected on the App Store · Committed: yes, `42e961d` fix(ios): give expo.name Latin letters so EAS finds the Xcode target; `a035ab3` feat(ios): keep the taharah fallback out of iCloud, ship iPhone only; `04500e7` fix(ios): add @sentry/cli as a direct dev dependency · Pushed: yes · Live: `72c51b1e` on TestFlight (public link); rejected by App Review on 2026-11-01 (Guideline 2.1(a), see "Answer App Review's 2.1(a) on 1.0.21"); App Store release not yet · Channel: TestFlight

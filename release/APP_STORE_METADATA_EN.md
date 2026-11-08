@@ -29,6 +29,22 @@ Reminders are local notifications scheduled on the device for each mitzvah's hal
 By design the app rests on Shabbat and Jewish holidays at the chosen city: from candle lighting until after nightfall it shows a rest screen and sends no notifications. If the review falls on a Friday evening or Saturday in Israel, pick a city in another time zone, such as New York, during onboarding.
 ```
 
+- App Review notes prepared on 2026-11-08 for the resubmission with build 1.0.21 (6), not yet saved in App Store Connect. App Review rejected 1.0.21 (5) on 2026-11-07 under 5.1.1(v) (gender and marital status were required in setup), 2.1(a) ("the app was not available at the time of review", reviewed on a Saturday) and 2.1 ("Does the app retain any information from the onboarding questions?"); the 2026-11-02 text sent a Saturday reviewer to New York, where it is Shabbat too:
+
+```
+No account, login or payment anywhere in the app; every screen opens without signing in.
+
+The app opens in the device's language: English on an English device, with a Hebrew / English switch on the first screen. Every personal question in setup is optional: name and phone on the first screen (they only prefill the contact form), and gender and marital status on the second (they only adapt the prayer wording, the colors and whether the family purity tracker is offered). Tap Continue to skip any of them. The answers stay on the device.
+
+Location: the prayer times are computed for one place. In setup, either allow location access, or search and pick any city in the world; a picked city stays fixed.
+
+By design the app rests on Shabbat and Jewish holidays at that place: from candle lighting on Friday until nightfall on Saturday it shows only a rest screen with the time the rest ends, and sends no notifications. This is a core religious feature, not an outage. If the review falls on a Friday or a Saturday, do not allow location access in setup; search and pick a city where it is not Shabbat at that moment: on a Friday pick Honolulu, on a Saturday pick Tokyo. If the app is already set up and shows the rest screen, delete it, install it again and pick the city that way.
+
+Optional family purity tracker: Settings > Profile, set Gender and Marital status: Married, then turn on Family purity tracking. Its screens open with the device's own Face ID, Touch ID or passcode; on a device without biometrics the lock is off, and it can also be turned off in the tracker's settings. Its data is kept on the device, encrypted.
+
+Reminders are local notifications scheduled on the device for each mitzvah's halachic time window at the chosen place.
+```
+
 - Release option: Manually release this version (saved 2026-10-23), so an approved version waits for the owner's Release.
 - TestFlight: internal group Team (Expo) (365jew@gmail.com); external group Beta testers with builds 1.0.21 (4) and, since 2026-11-02, 1.0.21 (5) (Beta App Review approved at once, Hebrew What to Test in [RELEASE_LOG.md](RELEASE_LOG.md)), public link https://testflight.apple.com/join/cZeSqPzG (open to anyone, no limit), Test Information: feedback 365jew@gmail.com, beta review contact Avraham Sason, +972546559314, 365jew@gmail.com, sign-in not required. The Beta App Review passed on 2026-10-23; that day the group listed 7 testers: moshechaim22@gmail.com invited, and 6 anonymous public-link installs of 1.0.21 (4) on iOS 26 and 27.
 - App Information: primary category Lifestyle, secondary category Reference (set on 2026-11-02). Content Rights: yes, third-party content with the necessary rights (the siddur texts, under Public Domain, CC0, CC-BY and CC-BY-SA, credited in the reader).
