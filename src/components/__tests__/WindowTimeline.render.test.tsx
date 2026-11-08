@@ -19,6 +19,12 @@ const J = CITIES[0];
 const SETTINGS: UserSettings = { nusach: 'ashkenaz', halachicOpinions: { ksSofZman: 'GRA' }, inIsrael: true };
 const MINCHA = MITZVOT.find((m) => m.id === 'mincha')!;
 // Wednesday 2026-11-11, a plain weekday in Jerusalem, as a day-level surface holds it.
+// Mincha's two reminders before the reminder placement of 2026-11-08 (its start and an hour before its end), so the
+// card is exercised with two bells on the axis.
+const TWO_REMINDERS: Reminder[] = [
+  { anchor: 'start', offsetMin: 0, label: 'זמן תפילת מנחה' },
+  { anchor: 'end', offsetMin: -60, label: 'נותרה שעה למנחה', skipIfDone: true },
+];
 const DAY = new Date(2026, 10, 11);
 const WINDOW = dayWindow(MINCHA, DAY, J, SETTINGS)!;
 const MIN = 60_000;
@@ -40,7 +46,7 @@ function renderTimeline(options: { reminders?: Reminder[]; manualNags?: ManualNa
     onDeleteReminder: jest.fn(),
     onReset: jest.fn(),
   };
-  const reminders = options.reminders ?? MINCHA.defaultReminders;
+  const reminders = options.reminders ?? TWO_REMINDERS;
   renderWithTheme(
     <WindowTimeline
       mitzvah={MINCHA}
@@ -91,9 +97,9 @@ describe('WindowTimeline', () => {
     const { timeline } = renderTimeline();
     const reminders = timeline.sends.filter((send) => send.type === 'reminder');
     const nags = timeline.sends.filter((send) => send.type === 'nag');
-    expect(reminders.length).toBe(MINCHA.defaultReminders.length);
-    // Level 3: two nags in the zone and the two last-chance points.
-    expect(nags.length).toBe(4);
+    expect(reminders.length).toBe(TWO_REMINDERS.length);
+    // Level 3: the zone's opener, two nags in the zone and the two last-chance points.
+    expect(nags.length).toBe(5);
     for (const send of nags)
       expect(screen.getByTestId(`timeline-dot-n${send.type === 'nag' ? send.k : 0}`)).toBeOnTheScreen();
     expect(screen.getByTestId('timeline-count')).toHaveTextContent(`${timeline.sends.length} התראות בזמן הזה`);
@@ -126,8 +132,8 @@ describe('WindowTimeline', () => {
     press(`timeline-dot-r0.${first.type === 'reminder' ? first.occurrence : 0}`);
     fireEvent.press(screen.getByLabelText('5 דקות מאוחר יותר'));
     // The moved reminder drops its rotating bodies, as the reminder editor does; the other stays as it was.
-    const { bodyVariants: _variants, ...first0 } = MINCHA.defaultReminders[0];
-    expect(handlers.onRemindersChange).toHaveBeenCalledWith([{ ...first0, offsetMin: 5 }, MINCHA.defaultReminders[1]]);
+    const { bodyVariants: _variants, ...first0 } = TWO_REMINDERS[0];
+    expect(handlers.onRemindersChange).toHaveBeenCalledWith([{ ...first0, offsetMin: 5 }, TWO_REMINDERS[1]]);
     fireEvent.press(screen.getByText('עריכה מלאה'));
     expect(handlers.onEditReminder).toHaveBeenCalledWith(0);
     fireEvent.press(screen.getByText('מחיקה'));
@@ -141,7 +147,7 @@ describe('WindowTimeline', () => {
     drag('timeline-dot-r0.0', AXIS_WIDTH / 10);
     const [saved] = handlers.onRemindersChange.mock.calls[0];
     expect(saved[0]).toMatchObject({ anchor: 'start', offsetMin: Math.round(length / 10 / MIN) });
-    expect(saved[1]).toBe(MINCHA.defaultReminders[1]);
+    expect(saved[1]).toBe(TWO_REMINDERS[1]);
     expect(handlers.onManualNagsChange).not.toHaveBeenCalled();
   });
 
@@ -185,12 +191,13 @@ describe('WindowTimeline', () => {
 
   it('drags a nag, which makes every nag of the window the user’s own', () => {
     const { handlers, timeline } = renderTimeline();
+    // The first zone nag, a little later: earlier it would come within 10 minutes of the zone's opener.
     const zone = timeline.sends.find((send) => send.type === 'nag' && send.kind === 'zone')!;
     const k = zone.type === 'nag' ? zone.k : 0;
-    drag(`timeline-dot-n${k}`, -AXIS_WIDTH / 20);
+    drag(`timeline-dot-n${k}`, AXIS_WIDTH / 40);
     const [saved] = handlers.onManualNagsChange.mock.calls[0] as [ManualNag[]];
-    expect(saved).toHaveLength(4);
-    const moved = Math.round((zone.at - (WINDOW.end.getTime() - WINDOW.start.getTime()) / 20) / MIN) * MIN;
+    expect(saved).toHaveLength(5);
+    const moved = Math.round((zone.at + (WINDOW.end.getTime() - WINDOW.start.getTime()) / 40) / MIN) * MIN;
     const atOf = (nag: ManualNag) =>
       (nag.anchor === 'start' ? WINDOW.start.getTime() : WINDOW.end.getTime()) + nag.offsetMin * MIN;
     expect(saved.map(atOf)).toContain(moved);
@@ -220,7 +227,7 @@ describe('WindowTimeline', () => {
     fireEvent(axis, 'responderRelease', { nativeEvent: { pageX: 150, pageY: 40, locationX: AXIS_WIDTH / 4 } });
     const [saved] = handlers.onRemindersChange.mock.calls[0];
     const length = WINDOW.end.getTime() - WINDOW.start.getTime();
-    expect(saved).toHaveLength(MINCHA.defaultReminders.length + 1);
+    expect(saved).toHaveLength(TWO_REMINDERS.length + 1);
     expect(saved[saved.length - 1]).toEqual({
       anchor: 'start',
       offsetMin: Math.round(length / 4 / MIN),
@@ -270,7 +277,7 @@ describe('WindowTimeline', () => {
         mitzvah={MINCHA}
         name="תפילת מנחה"
         window={null}
-        reminders={MINCHA.defaultReminders}
+        reminders={TWO_REMINDERS}
         manualNags={undefined}
         nagLevel={3}
         location={J}
@@ -338,7 +345,7 @@ describe('WindowTimeline', () => {
           mitzvah={MINCHA}
           name="תפילת מנחה"
           window={WINDOW}
-          reminders={MINCHA.defaultReminders}
+          reminders={TWO_REMINDERS}
           manualNags={undefined}
           nagLevel={1}
           location={J}

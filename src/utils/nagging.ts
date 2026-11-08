@@ -49,19 +49,31 @@ export const validPerformMin = (value: number): boolean =>
 
 // The critical zone of a kind of mitzvah (spec 2.3):
 // - `lastThird`: the last third of the window (a bounded day mitzvah, Selichot before alot, a custom mitzvah);
-// - `night`: from the window's start (nightfall) to chatzot halayla, sparse after it;
-// - `firstHour`: the first hour of the window, sparse after it (the Chanukah candles);
+// - `night`: from the window's start (nightfall) to chatzot halayla;
+// - `bedtime`: the `BEDTIME_ZONE_MIN` before chatzot halayla (the bedtime Shema);
+// - `firstHour`: the first hour of the window, sparse after it up to chatzot (the Chanukah candles);
 // - `lastMinutes`: the last 20 minutes (candle lighting);
-// - `evening`: the window's start to chatzot halayla, sparse after it (havdalah);
+// - `evening`: the window's start to chatzot halayla (havdalah);
 // - `nights`: nightfall to chatzot of each of the period's last three nights (Kiddush Levana);
 // - `preDawn`: the last third of the window up to alot (Selichot);
-// - `learning`: shkia to chatzot halayla of the learning day, sparse until alot (Chok LeYisrael).
+// - `learning`: shkia to chatzot halayla of the learning day (Chok LeYisrael).
+// Nothing but Selichot nags between chatzot halayla and alot (the owner's call, 2026-11-08): the kinds that run past
+// chatzot take it as their end (`endsAtChatzot()`), and so do their last-chance points.
 export type NagZoneKind =
-  'lastThird' | 'night' | 'firstHour' | 'lastMinutes' | 'evening' | 'nights' | 'preDawn' | 'learning' | 'custom';
+  | 'lastThird'
+  | 'night'
+  | 'bedtime'
+  | 'firstHour'
+  | 'lastMinutes'
+  | 'evening'
+  | 'nights'
+  | 'preDawn'
+  | 'learning'
+  | 'custom';
 
 export const NAG_ZONE_KIND: Readonly<Record<string, NagZoneKind>> = {
   maariv: 'night',
-  krias_shma_al_hamita: 'night',
+  krias_shma_al_hamita: 'bedtime',
   sefirat_haomer: 'night',
   ushpizin: 'night',
   chanukah_candles: 'firstHour',
@@ -77,8 +89,19 @@ export const nagZoneKindOf = (mitzvahId: string): NagZoneKind =>
   NAG_ZONE_KIND[mitzvahId] ?? (mitzvahId.startsWith('custom_') ? 'custom' : 'lastThird');
 
 // The kinds whose zone ends before the window does and that keep nagging, an hour apart, after it.
-export const hasSparseTail = (kind: NagZoneKind): boolean =>
-  kind === 'night' || kind === 'firstHour' || kind === 'evening' || kind === 'learning';
+export const hasSparseTail = (kind: NagZoneKind): boolean => kind === 'firstHour';
+
+// The kinds whose notifications stop at chatzot halayla: their zone, tail and last-chance points end there.
+export const endsAtChatzot = (kind: NagZoneKind): boolean =>
+  kind === 'night' || kind === 'bedtime' || kind === 'firstHour' || kind === 'evening' || kind === 'learning';
+
+// A kind whose zone opens after its window does, so the smart nag sends the zone's opener.
+export const opensLate = (kind: NagZoneKind): boolean => kind !== 'night' && kind !== 'evening' && kind !== 'firstHour';
+
+// The bedtime Shema's zone: the two hours before chatzot halayla.
+export const BEDTIME_ZONE_MIN = 120;
+// A mitzvah with one duration sends its orange this many minutes before its red (the owner's call, 2026-11-08).
+export const ORANGE_LEAD_MIN = 15;
 
 // Kiddush Levana's period ends by the molad, often in daylight, so it has no last-chance point: the last
 // night's nag is its last notification.
@@ -101,11 +124,12 @@ export function customNagZone(
   window: Interval,
   lastChance: Date,
   night: { crossesMidnight: boolean; chatzotLayla: Date },
-): { zone: Interval[]; sparse: boolean } {
+): { zone: Interval[]; sparse: boolean; night?: boolean } {
   const { start, end } = window;
   const length = end.getTime() - start.getTime();
   if (night.crossesMidnight && length <= CUSTOM_NIGHT_MAX_MIN * 60_000) {
-    return { zone: [{ start, end: night.chatzotLayla }], sparse: true };
+    // A night mitzvah: nothing from chatzot on, its last-chance points included.
+    return { zone: [{ start, end: night.chatzotLayla }], sparse: false, night: true };
   }
   const point = lastChance.getTime();
   const third = end.getTime() - length / 3;
@@ -119,10 +143,10 @@ export type NagInput = {
   window: Interval;
   // The critical zone, one interval or several (Kiddush Levana's nights), in order.
   zone: Interval[];
-  // With a sparse tail: where it ends (the window's end); `null` for a kind without one.
+  // With a sparse tail: where it ends (chatzot halayla, or the window's end); `null` for a kind without one.
   sparseUntil: Date | null;
-  // The last-chance points, `end − performMin`, `null` where there is none (a `performMin` of 0 included).
-  lastChance: { alone: Date | null; minyan: Date | null };
+  // The last-chance points: `alone` the red, `minyan` or `soon` the orange; `null` where there is none.
+  lastChance: { alone: Date | null; minyan: Date | null; soon?: Date | null };
   // The instants the window's reminders go out at: always kept, and a nag keeps its distance from them. The zone
   // and its tail start no earlier than the first of them, so a nag never comes before the mitzvah's own first
   // reminder (the bedtime Shema's 23:00 rather than nightfall).
@@ -145,39 +169,42 @@ function alongZone(zone: Interval[], share: number): Date {
   return zone[zone.length - 1].end;
 }
 
-// The nags of one window (spec 2.2 to 2.4), earliest first: the last-chance points, then the level's count spread
-// evenly inside the zone (which ends at the earliest last-chance point when that falls inside it, and opens no earlier
-// than the first reminder; one that lands too close to another moves to the middle of the widest free stretch), then
-// the same count
-// spread after a zone with a tail, an hour apart at the least and before the earliest last-chance point. Each is
-// judged by `accept`, and one closer than `NAG_MIN_GAP_MIN` to a reminder or a nag already kept is dropped, in
-// that order of priority, so a short zone sends fewer.
+// The nags of one window (spec 2.2 to 2.4 and the placement of 2026-11-08), earliest first: the red and the orange,
+// then the one that opens the zone, at every level, then the level's count spread evenly inside the zone (which ends
+// at the red, the latest last-chance point, and opens no earlier than the first reminder; one that lands too close to
+// another moves to the middle of the widest free stretch), then the same count spread after a zone with a tail, an
+// hour apart at the least and before the red. Each is judged by `accept`, and one closer than `NAG_MIN_GAP_MIN` to a
+// reminder or a nag already kept is dropped, in that order of priority, so a short zone sends fewer.
 export function smartNagTimes(input: NagInput): NagTime[] {
   const { window, accept } = input;
   const count = ZONE_NAGS[levelOf(input.level)];
   const inWindow = (at: Date | null): at is Date =>
     at !== null && at.getTime() >= window.start.getTime() && at.getTime() <= window.end.getTime();
   const points: { planned: Date; kind: NagKind; lastChance?: LastChance }[] = [];
-  const { alone, minyan } = input.lastChance;
+  const { alone, minyan, soon = null } = input.lastChance;
   if (inWindow(alone)) points.push({ planned: alone, kind: 'lastChance', lastChance: 'alone' });
   if (inWindow(minyan)) points.push({ planned: minyan, kind: 'lastChance', lastChance: 'minyan' });
-  const earliest = [alone, minyan].filter(inWindow).sort((a, b) => a.getTime() - b.getTime())[0] ?? null;
+  else if (inWindow(soon)) points.push({ planned: soon, kind: 'lastChance', lastChance: 'soon' });
+  const latest = [alone, minyan].filter(inWindow).sort((a, b) => b.getTime() - a.getTime())[0] ?? null;
 
   const firstReminder = Math.min(...input.taken.map((at) => at.getTime()));
   const opens = Math.max(window.start.getTime(), Number.isFinite(firstReminder) ? firstReminder : -Infinity);
   const zone = input.zone
     .map(({ start, end }) => ({
       start: new Date(Math.max(start.getTime(), opens)),
-      end: new Date(Math.min(end.getTime(), window.end.getTime(), earliest?.getTime() ?? Infinity)),
+      end: new Date(Math.min(end.getTime(), window.end.getTime(), latest?.getTime() ?? Infinity)),
     }))
     .filter(({ start, end }) => end.getTime() > start.getTime());
+  if (zone.length && zone[0].start.getTime() > window.start.getTime()) {
+    points.push({ planned: zone[0].start, kind: 'open' });
+  }
   if (count && zone.length) {
     for (let k = 1; k <= count; k++) points.push({ planned: alongZone(zone, k / (count + 1)), kind: 'zone' });
   }
   const zoneEnd = input.zone.length ? input.zone[input.zone.length - 1].end : null;
   if (count && input.sparseUntil && zoneEnd) {
     const from = Math.max(zoneEnd.getTime(), opens);
-    const until = Math.min(input.sparseUntil.getTime(), window.end.getTime(), earliest?.getTime() ?? Infinity);
+    const until = Math.min(input.sparseUntil.getTime(), window.end.getTime(), latest?.getTime() ?? Infinity);
     const n = Math.max(0, Math.min(count, Math.floor((until - from) / (SPARSE_MIN_GAP_MIN * MIN)) - 1));
     for (let k = 1; k <= n; k++)
       points.push({ planned: new Date(from + ((until - from) * k) / (n + 1)), kind: 'sparse' });
@@ -239,7 +266,7 @@ export function manualNagFor(at: Date, window: Interval, kind: NagKind, lastChan
   };
 }
 
-const NAG_KINDS: readonly NagKind[] = ['zone', 'sparse', 'lastChance'];
+const NAG_KINDS: readonly NagKind[] = ['open', 'zone', 'sparse', 'lastChance'];
 
 export const isManualNag = (value: unknown): value is ManualNag => {
   if (!value || typeof value !== 'object') return false;
@@ -248,7 +275,7 @@ export const isManualNag = (value: unknown): value is ManualNag => {
   if (typeof offsetMin !== 'number' || !Number.isInteger(offsetMin)) return false;
   if (anchor === 'start' ? offsetMin < 0 : offsetMin > 0) return false;
   if (!NAG_KINDS.includes(kind as NagKind)) return false;
-  return lastChance === undefined || lastChance === 'alone' || lastChance === 'minyan';
+  return lastChance === undefined || lastChance === 'alone' || lastChance === 'minyan' || lastChance === 'soon';
 };
 
 // The hand-placed nags of one window, earliest first: each inside the window and passing `accept` (the quiet hours,
@@ -276,9 +303,11 @@ export function manualNagTimes(
 export function nagsPerWindow(mitzvah: Pick<Mitzvah, 'id' | 'performMin'>, level: NagLevel | undefined): number {
   const kind = nagZoneKindOf(mitzvah.id);
   const perform = performMinOf(mitzvah);
-  const lastChance = hasLastChance(kind) ? (perform.minyan ? 2 : 1) : 0;
+  // The red and the orange (the minyan point, or `soon`), and the opener of a zone that starts after the window does.
+  const lastChance = hasLastChance(kind) && perform.alone > 0 ? 2 : 0;
+  const opener = opensLate(kind) ? 1 : 0;
   const count = ZONE_NAGS[levelOf(level)];
-  return lastChance + count * (hasSparseTail(kind) ? 2 : 1);
+  return lastChance + opener + count * (hasSparseTail(kind) ? 2 : 1);
 }
 
 // The per-day estimate the screens print: each reminder once, plus the window's nags, or the ones placed by hand.

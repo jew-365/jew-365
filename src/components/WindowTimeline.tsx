@@ -195,11 +195,13 @@ export function WindowTimeline(props: Props) {
     send.type === 'reminder'
       ? t('detail.timeline.kind.reminder')
       : send.kind === 'lastChance'
-        ? t(send.lastChance === 'minyan' ? 'detail.timeline.kind.minyan' : 'detail.timeline.kind.alone')
-        : t(send.kind === 'sparse' ? 'detail.timeline.kind.sparse' : 'detail.timeline.kind.zone');
+        ? t(`detail.timeline.kind.${send.lastChance ?? 'alone'}`)
+        : t(`detail.timeline.kind.${send.kind}`);
   const messageOf = (send: TimelineSend) => {
     if (send.type === 'reminder') return reminderLabel(reminders[send.index] ?? { anchor: 'start', label: '' }, name);
+    if (send.kind === 'open') return t('notifications.nag.zoneOpen');
     if (send.kind !== 'lastChance') return t('notifications.nag.notMarked');
+    if (send.lastChance === 'soon') return t('notifications.nag.endingSoon');
     return t(send.lastChance === 'minyan' ? 'notifications.nag.lastChanceMinyan' : 'notifications.nag.lastChance');
   };
   const stageColor = (send: TimelineSend) =>
@@ -527,7 +529,8 @@ export function WindowTimeline(props: Props) {
           {(
             [
               ['detail.timeline.legend.reminder', colors.gold, 'round'],
-              ['detail.timeline.legend.nag', colors.warning, 'round'],
+              ['detail.timeline.legend.nag', colors.safe, 'round'],
+              ['detail.timeline.legend.warning', colors.warning, 'diamond'],
               ['detail.timeline.legend.lastChance', colors.urgent, 'diamond'],
               ['detail.timeline.legend.zone', colors.goldWashStrong, 'band'],
             ] as const

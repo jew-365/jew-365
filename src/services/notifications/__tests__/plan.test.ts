@@ -117,9 +117,7 @@ describe('buildPlan', () => {
       const zmanim = zmanimOn(day);
       expected.push(
         [`shacharit__${day}__0`, zmanim.netzHaChama.getTime()],
-        [`shacharit__${day}__1`, minutes(zmanim.sofZmanTfilaGra, -45)],
         [`mincha__${day}__0`, zmanim.minchaGedola.getTime()],
-        [`mincha__${day}__1`, minutes(zmanim.shkia, -60)],
         [`${STUDY.id}__${day}__0`, minutes(zmanim.shkia, 15)],
       );
     }
@@ -214,11 +212,8 @@ describe('buildPlan', () => {
     );
     const ids = plan.map((candidate) => candidate.id);
 
-    expect(ids.filter((id) => id.startsWith('shacharit__'))).toEqual([
-      'shacharit__2026-10-14__0',
-      'shacharit__2026-10-14__1',
-    ]);
-    expect(ids.filter((id) => id.startsWith('mincha__'))).toEqual(['mincha__2026-10-13__0', 'mincha__2026-10-13__1']);
+    expect(ids.filter((id) => id.startsWith('shacharit__'))).toEqual(['shacharit__2026-10-14__0']);
+    expect(ids.filter((id) => id.startsWith('mincha__'))).toEqual(['mincha__2026-10-13__0']);
   });
 
   it('plans a date-range custom mitzvah only on the days of its range', () => {
@@ -290,11 +285,7 @@ describe('buildPlan', () => {
     const afterNetz = at(JERUSALEM, '2026-10-13T07:00');
     const plan = withoutNags(buildPlan(planInput({ now: afterNetz, mitzvot: [byId('shacharit')] })));
 
-    expect(plan.map((candidate) => candidate.id)).toEqual([
-      'shacharit__2026-10-13__1',
-      'shacharit__2026-10-14__0',
-      'shacharit__2026-10-14__1',
-    ]);
+    expect(plan.map((candidate) => candidate.id)).toEqual(['shacharit__2026-10-14__0']);
   });
 
   it('keeps the other mitzvot when one throws', () => {
@@ -307,24 +298,20 @@ describe('buildPlan', () => {
     };
     const plan = withoutNags(buildPlan(planInput({ mitzvot: [exploding, byId('mincha')] })));
 
-    expect(plan.map((candidate) => candidate.id)).toEqual([
-      'mincha__2026-10-13__0',
-      'mincha__2026-10-13__1',
-      'mincha__2026-10-14__0',
-      'mincha__2026-10-14__1',
-    ]);
+    expect(plan.map((candidate) => candidate.id)).toEqual(['mincha__2026-10-13__0', 'mincha__2026-10-14__0']);
     expect(warn).toHaveBeenCalledWith('[notifications] scheduling failed', 'exploding', expect.any(Error));
   });
 
   describe('the slot cap', () => {
-    // 250 mitzvot whose single reminder falls one minute apart, on each of the two horizon days; the
-    // end notice, which these suites leave out, takes the last slot.
+    // 250 mitzvot whose single reminder falls one minute apart, on each of the two horizon days, each window also
+    // opening its critical zone (1000 notifications); the end notice, which these suites leave out, takes the last
+    // slot, and the reminders outrank the openers.
     const bulk = (index: number): Mitzvah => ({
       ...STUDY,
       id: `bulk_${index}`,
       contentBlocks: undefined,
       defaultReminders: [{ anchor: 'start', offsetMin: 0, label: 'x' }],
-      // No last-chance point: one notification per window.
+      // No last-chance point: a reminder and the zone's opener per window.
       performMin: { alone: 0 },
       computeWindow: ({ zmanim }) => ({
         start: new Date(minutes(zmanim.netzHaChama, index + 1)),
@@ -343,7 +330,7 @@ describe('buildPlan', () => {
 
       expect(plan.map((candidate) => candidate.id)).toEqual(earliest);
       expect(warn).toHaveBeenCalledWith(
-        `[notifications] ${500 - room} reminder(s) beyond the ${room} slot cap were not scheduled`,
+        `[notifications] ${1000 - room} reminder(s) beyond the ${room} slot cap were not scheduled`,
       );
     });
 
@@ -459,11 +446,11 @@ describe('buildPlan', () => {
     const bedtimeOf = (candidates: ReturnType<typeof buildPlan>) =>
       candidates.filter((candidate) => candidate.id.startsWith('krias_shma_al_hamita__'));
 
-    it('reminds at 23:00 on a weeknight with the open-text category', () => {
+    it('reminds at 21:00 on a weeknight with the open-text category', () => {
       const plan = bedtimeOf(withoutNags(buildPlan(planInput({ now: WEDNESDAY, mitzvot: [bedtime()] }))));
       expect(summary(plan)).toEqual([
-        ['krias_shma_al_hamita__2026-11-11__0', at(JERUSALEM, '2026-11-11T23:00').getTime()],
-        ['krias_shma_al_hamita__2026-11-12__0', at(JERUSALEM, '2026-11-12T23:00').getTime()],
+        ['krias_shma_al_hamita__2026-11-11__0', at(JERUSALEM, '2026-11-11T21:00').getTime()],
+        ['krias_shma_al_hamita__2026-11-12__0', at(JERUSALEM, '2026-11-12T21:00').getTime()],
       ]);
       const [first] = plan;
       expect(first.channel).toBe('mitzvot');
@@ -482,7 +469,7 @@ describe('buildPlan', () => {
       });
     });
 
-    it('reminds at 23:00 on the clock of the location abroad', () => {
+    it('reminds at 21:00 on the clock of the location abroad', () => {
       const losAngeles = CITIES.find((city) => city.nameEn === 'Los Angeles')!;
       const plan = bedtimeOf(
         withoutNags(
@@ -497,8 +484,8 @@ describe('buildPlan', () => {
         ),
       );
       expect(summary(plan)).toEqual([
-        ['krias_shma_al_hamita__2026-11-11__0', at(losAngeles, '2026-11-11T23:00').getTime()],
-        ['krias_shma_al_hamita__2026-11-12__0', at(losAngeles, '2026-11-12T23:00').getTime()],
+        ['krias_shma_al_hamita__2026-11-11__0', at(losAngeles, '2026-11-11T21:00').getTime()],
+        ['krias_shma_al_hamita__2026-11-12__0', at(losAngeles, '2026-11-12T21:00').getTime()],
       ]);
     });
 
@@ -508,8 +495,8 @@ describe('buildPlan', () => {
       const withBedtime = withoutNags(buildPlan(planInput({ now: FRIDAY, mitzvot: [...weekdayMitzvot, bedtime()] })));
       const plan = bedtimeOf(withBedtime);
       expect(summary(plan)).toEqual([
-        ['krias_shma_al_hamita__2026-11-14__0', at(JERUSALEM, '2026-11-14T23:00').getTime()],
-        ['krias_shma_al_hamita__2026-11-15__0', at(JERUSALEM, '2026-11-15T23:00').getTime()],
+        ['krias_shma_al_hamita__2026-11-14__0', at(JERUSALEM, '2026-11-14T21:00').getTime()],
+        ['krias_shma_al_hamita__2026-11-15__0', at(JERUSALEM, '2026-11-15T21:00').getTime()],
       ]);
       expect(
         plan.filter(
@@ -524,7 +511,7 @@ describe('buildPlan', () => {
       );
     });
 
-    describe('where nightfall is after 23:00, Helsinki at the summer solstice', () => {
+    describe('where nightfall is after 21:00, Helsinki at the summer solstice', () => {
       const helsinki: Location = {
         name: 'הלסינקי',
         nameEn: 'Helsinki',
@@ -543,22 +530,24 @@ describe('buildPlan', () => {
           ),
         );
 
-      it('fires at 23:00 before the window opens, as a heads-up', () => {
+      it('fires at 21:00 before the window opens, as a heads-up', () => {
         const plan = planFrom('2027-06-22T05:00');
         expect(summary(plan)).toEqual([
-          ['krias_shma_al_hamita__2027-06-22__0', at(helsinki, '2027-06-22T23:00').getTime()],
-          ['krias_shma_al_hamita__2027-06-23__0', at(helsinki, '2027-06-23T23:00').getTime()],
+          ['krias_shma_al_hamita__2027-06-22__0', at(helsinki, '2027-06-22T21:00').getTime()],
+          ['krias_shma_al_hamita__2027-06-23__0', at(helsinki, '2027-06-23T21:00').getTime()],
         ]);
         expect(plan[0].trigger.getTime()).toBeLessThan(nightfallOn('2027-06-22').getTime());
       });
 
-      it('sends nothing on a motzaei Shabbat whose exit is after 23:00, when 23:00 falls inside the block', () => {
+      it('sends nothing on a motzaei Shabbat whose exit is after 21:00, when 21:00 falls inside the block', () => {
         const { start, end } = HebcalService.holyBlockAt(at(helsinki, '2027-06-19T12:00'), helsinki)!;
         const plan = planFrom('2027-06-18T06:00');
-        expect(at(helsinki, '2027-06-19T23:00').getTime()).toBeGreaterThan(start.getTime());
-        expect(at(helsinki, '2027-06-19T23:00').getTime()).toBeLessThan(end.getTime());
+        expect(at(helsinki, '2027-06-19T21:00').getTime()).toBeGreaterThan(start.getTime());
+        expect(at(helsinki, '2027-06-19T21:00').getTime()).toBeLessThan(end.getTime());
+        // Friday's 21:00 comes before candle lighting there, so Friday night's window still gets its heads-up.
         expect(summary(plan)).toEqual([
-          ['krias_shma_al_hamita__2027-06-20__0', at(helsinki, '2027-06-20T23:00').getTime()],
+          ['krias_shma_al_hamita__2027-06-18__0', at(helsinki, '2027-06-18T21:00').getTime()],
+          ['krias_shma_al_hamita__2027-06-20__0', at(helsinki, '2027-06-20T21:00').getTime()],
         ]);
       });
     });

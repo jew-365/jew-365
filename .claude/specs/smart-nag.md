@@ -54,6 +54,8 @@ Nags fall only inside the mitzvah's critical zone, which follows its kind and ti
 
 Stage by place, as built on 2026-11-04 for reminders: the reminders are green; the zone's nags ⚠️ (orange); the last notification of the window ❗ (red). The time line keeps the time left first, then the end.
 
+Superseded on 2026-11-08 by [reminder-placement.md](reminder-placement.md): exactly one orange and one red per window, every other notification plain; the zone ends at the red point, opens with a notification of its own, and nothing but Selichot goes out from chatzot halayla to alot.
+
 ## 3. Out of scope
 
 The reminder editor's own nag block and the custom form's are removed; the Settings level control and its example stay, the example redrawn on the new model. A native build is not needed: everything is JavaScript and ships over the air.

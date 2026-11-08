@@ -24,7 +24,7 @@ export const IOS_HEADROOM = 4;
 export const HORIZON_MAX_DAYS = 30;
 export const LAST_REBUILD_KEY = 'notifications:last-rebuild-date';
 export const SCHEDULE_FORMAT_KEY = 'notifications:schedule-format';
-export const SCHEDULE_FORMAT = 14;
+export const SCHEDULE_FORMAT = 15;
 export const BLOCK_NOTICE_KIND = 'blockNotice';
 export const CHECK_IN_KIND = 'checkin';
 export const UPDATE_KIND = 'update';
@@ -65,7 +65,12 @@ export type PendingNotificationMeta = {
   windowEnd?: string;
   reminderIndex?: number;
   // On a nag only (the smart nag): the k-th of the window's `of` nags, of a kind, a last-chance point naming which.
-  nag?: { k: number; of: number; kind: 'zone' | 'sparse' | 'lastChance'; lastChance?: 'alone' | 'minyan' };
+  nag?: {
+    k: number;
+    of: number;
+    kind: 'open' | 'zone' | 'sparse' | 'lastChance';
+    lastChance?: 'alone' | 'minyan' | 'soon';
+  };
   customId?: string;
   skipIfDone?: boolean;
   hasText?: boolean;

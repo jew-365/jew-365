@@ -337,6 +337,11 @@ describe('Mitzvah screen', () => {
     });
 
     it('deleting one of several reminders of an enabled mitzvah still asks and deletes', () => {
+      useMitzvotStore.getState().setReminders('tefillin', [
+        { anchor: 'start', offsetMin: 0, label: 'א' },
+        { anchor: 'start', offsetMin: 180, label: 'ב' },
+        { anchor: 'end', offsetMin: -45, label: 'ג' },
+      ]);
       renderMitzvah({ id: 'tefillin' });
       expect(stored('tefillin').enabled).toBe(true);
 
@@ -655,7 +660,6 @@ describe('Mitzvah screen', () => {
 
       expect(saved('sefirat_haomer')).toEqual([
         { anchor: 'start', offsetMin: 0, label: 'חדש', skipIfDone: false, includeContentInBody: true },
-        { anchor: 'start', offsetMin: 60, label: 'תזכורת - ספירת העומר', skipIfDone: true },
       ]);
       expect(contentSwitch()).toBeChecked();
     });
@@ -727,7 +731,7 @@ describe('Mitzvah screen', () => {
       expect(screen.getByText('Ideally before chatzot (halachic midnight)')).toBeOnTheScreen();
     });
 
-    it('runs the bedtime Shema to the next alot, prints its description and 23:00 reminder, and opens its text', () => {
+    it('runs the bedtime Shema to the next alot, prints its description and 21:00 reminder, and opens its text', () => {
       const clock = (instant: Date) => DateTime.fromJSDate(instant, { zone: JERUSALEM.tz }).toFormat('HH:mm');
       const start = clock(zmanimFor(at(JERUSALEM, '2026-10-28T12:00'), JERUSALEM).tzeitHakochavim);
       const end = clock(zmanimFor(at(JERUSALEM, '2026-10-29T12:00'), JERUSALEM).alotHaShachar);
@@ -735,8 +739,8 @@ describe('Mitzvah screen', () => {
       expect(screen.getByText(`יומי · ${start} עד ${end} למחרת`)).toBeOnTheScreen();
       expect(screen.getByText('לכתחילה לפני חצות הלילה')).toBeOnTheScreen();
       expect(screen.getByText('זמן קריאת שמע על המיטה')).toBeOnTheScreen();
-      expect(screen.getByText('ההתראה הבאה תישלח ב-28/10 23:00')).toBeOnTheScreen();
-      expect(screen.getByText('הבאה ב-28/10 23:00')).toBeOnTheScreen();
+      expect(screen.getByText('ההתראה הבאה תישלח ב-28/10 21:00')).toBeOnTheScreen();
+      expect(screen.getByText('הבאה ב-28/10 21:00')).toBeOnTheScreen();
       fireEvent.press(screen.getByRole('button', { name: 'פתח נוסח' }));
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/siddur/[id]',

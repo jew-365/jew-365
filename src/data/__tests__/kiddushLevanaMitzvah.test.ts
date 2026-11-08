@@ -338,8 +338,10 @@ describe('the Kiddush Levana reminders', () => {
   it('reminds Edot HaMizrach in Tishrei 5787 after the first day of Sukkot in Israel only', () => {
     const now = at(JERUSALEM, '2026-09-20T10:00');
     const edot = levanaPlan({ now, settings: settingsFor('edot_hamizrach') });
+    // Between the two, the smart nag opens the period's last three nights at nightfall on 2026-09-24.
     expect(idsAndTriggers(edot)).toEqual([
       ['kiddush_levana__2026-09-21__0', blockEndOn(JERUSALEM, '2026-09-21')],
+      ['kiddush_levana__2026-09-21__n1', at(JERUSALEM, '2026-09-24T18:53')],
       ['kiddush_levana__2026-09-21__1', exit('2026-09-26')],
     ]);
     const abroad = levanaPlan({
@@ -347,9 +349,13 @@ describe('the Kiddush Levana reminders', () => {
       location: LOS_ANGELES,
       settings: settingsFor('edot_hamizrach', false),
     });
-    expect(idsAndTriggers(abroad)).toEqual([['kiddush_levana__2026-09-21__0', blockEndOn(LOS_ANGELES, '2026-09-21')]]);
+    expect(idsAndTriggers(abroad)).toEqual([
+      ['kiddush_levana__2026-09-21__0', blockEndOn(LOS_ANGELES, '2026-09-21')],
+      ['kiddush_levana__2026-09-21__n1', at(LOS_ANGELES, '2026-09-23T19:04')],
+    ]);
     expect(idsAndTriggers(levanaPlan({ now }))).toEqual([
       ['kiddush_levana__2026-09-21__0', blockEndOn(JERUSALEM, '2026-09-21')],
+      ['kiddush_levana__2026-09-21__n1', at(JERUSALEM, '2026-09-23T18:54')],
     ]);
   });
 

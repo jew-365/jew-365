@@ -19,7 +19,10 @@ import { interpolate, t, translate } from '@/i18n';
 import { reminderLabel } from '@/utils/mitzvahName';
 import { TIME_STAGE_COLOR, sendStage, timeLeftLine, type SendKind, type TimeStage } from '@/utils/timeLeft';
 import {
+  BEDTIME_ZONE_MIN,
+  ORANGE_LEAD_MIN,
   customNagZone,
+  endsAtChatzot,
   hasLastChance,
   hasSparseTail,
   manualNagTimes,
@@ -227,7 +230,11 @@ export function windowTriggers(
 
 // The critical zone of `date`'s window (spec 2.3), by the mitzvah's kind, and whether a sparse tail follows it;
 // `smartNagTimes()` clips it to the window.
-function nagZone(mitzvah: Mitzvah, window: Interval, ctx: ComputeContext): { zone: Interval[]; sparse: boolean } {
+function nagZone(
+  mitzvah: Mitzvah,
+  window: Interval,
+  ctx: ComputeContext,
+): { zone: Interval[]; sparse: boolean; night?: boolean } {
   const kind = nagZoneKindOf(mitzvah.id);
   if (kind === 'custom') {
     const startDay = DateTime.fromJSDate(window.start, { zone: ctx.location.tz }).toISODate();
@@ -247,6 +254,12 @@ function kindZone(kind: NagZoneKind, window: Interval, ctx: ComputeContext): Int
     case 'night':
     case 'evening':
       return [{ start, end: ctx.zmanim.chatzotLayla }];
+    case 'bedtime': {
+      const chatzot = ctx.zmanim.chatzotLayla;
+      return [
+        { start: new Date(Math.max(start.getTime(), chatzot.getTime() - BEDTIME_ZONE_MIN * 60_000)), end: chatzot },
+      ];
+    }
     case 'firstHour':
       return [{ start, end: new Date(start.getTime() + 60 * 60_000) }];
     case 'lastMinutes':
@@ -310,10 +323,17 @@ function ownTriggers(mitzvah: Mitzvah, reminders: Reminder[], date: Date, scope:
   // quiet hours and the holy blocks as a reminder is, and never before the window or after its end.
   const kind = nagZoneKindOf(mitzvah.id);
   const perform = performMinOf(mitzvah);
+  // A kind that stops at chatzot halayla counts its last-chance points from there (no nag from chatzot to alot).
+  const chatzot = ctx.zmanim.chatzotLayla.getTime();
+  const { zone, sparse, night } = nagZone(mitzvah, window, ctx);
+  const nightEdge =
+    (endsAtChatzot(kind) || night === true) && chatzot > window.start.getTime() && chatzot < window.end.getTime();
+  const edge = nightEdge ? chatzot : window.end.getTime();
   const before = (minutes: number | undefined) =>
-    minutes && hasLastChance(kind) ? new Date(window.end.getTime() - minutes * 60_000) : null;
+    minutes && hasLastChance(kind) ? new Date(edge - minutes * 60_000) : null;
+  const alone = before(perform.alone);
+  const soon = alone && !perform.minyan ? new Date(alone.getTime() - ORANGE_LEAD_MIN * 60_000) : null;
   const moves = new Map<number, number>();
-  const { zone, sparse } = nagZone(mitzvah, window, ctx);
   const accept = (planned: Date) => {
     const at = quietHours ? quietHoursTrigger(planned, quietHours, window.end, location) : planned;
     if (!at || at.getTime() < window.start.getTime() || !reminderFires(at, window, location, NO_PAST, 'start')) {
@@ -328,8 +348,8 @@ function ownTriggers(mitzvah: Mitzvah, reminders: Reminder[], date: Date, scope:
         level: scope.nagLevel,
         window,
         zone,
-        sparseUntil: sparse ? window.end : null,
-        lastChance: { alone: before(perform.alone), minyan: before(perform.minyan) },
+        sparseUntil: sparse ? new Date(Math.min(window.end.getTime(), nightEdge ? chatzot : Infinity)) : null,
+        lastChance: { alone, minyan: before(perform.minyan), soon },
         taken: sent,
         accept,
       });
@@ -394,12 +414,20 @@ function thinned(planned: WindowTriggers): WindowTrigger[] {
 }
 
 const sendKindOf = (entry: WindowTrigger): SendKind =>
-  entry.type === 'reminder' ? 'reminder' : entry.lastChance === 'alone' ? 'lastChanceAlone' : 'nag';
+  entry.type === 'reminder'
+    ? 'reminder'
+    : entry.lastChance === 'alone'
+      ? 'lastChanceAlone'
+      : entry.lastChance
+        ? 'warning'
+        : 'nag';
 
 // The title already names the mitzvah, so a nag's body does not repeat it (the owner's pick, round 4 א+ב, 2026-11-05).
 function nagBody(entry: NagTrigger): string {
-  if (entry.lastChance)
-    return t(entry.lastChance === 'alone' ? 'notifications.nag.lastChance' : 'notifications.nag.lastChanceMinyan');
+  if (entry.lastChance === 'alone') return t('notifications.nag.lastChance');
+  if (entry.lastChance === 'minyan') return t('notifications.nag.lastChanceMinyan');
+  if (entry.lastChance === 'soon') return t('notifications.nag.endingSoon');
+  if (entry.kind === 'open') return t('notifications.nag.zoneOpen');
   return t('notifications.nag.notMarked');
 }
 
@@ -413,7 +441,8 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thi
   // The stage by the window's sends from its first one, whatever is already past or marked (spec 2.5): the last red.
   const sends = windowSendTimes(mitzvah, reminders, date, { ...input, nagLevel, manualNags }) ?? [];
   const lastAt = sends.length ? sends[sends.length - 1].at : null;
-  const stageOf = (entry: WindowTrigger) => sendStage(sendKindOf(entry), entry.trigger.getTime() === lastAt);
+  const hasRed = sends.some((send) => send.lastChance === 'alone');
+  const stageOf = (entry: WindowTrigger) => sendStage(sendKindOf(entry), !hasRed && entry.trigger.getTime() === lastAt);
 
   const english = input.language === 'en';
   const ios = input.platform === 'ios';
@@ -597,9 +626,10 @@ export function windowTimeline(
   if (!found) return null;
   const { planned, sent } = found;
   const lastAt = sent.length ? sent[sent.length - 1].trigger.getTime() : null;
+  const hasRed = sent.some((entry) => entry.type === 'nag' && entry.lastChance === 'alone');
   const sends = sent.map((entry): TimelineSend => {
     const at = entry.trigger.getTime();
-    const stage = sendStage(sendKindOf(entry), at === lastAt);
+    const stage = sendStage(sendKindOf(entry), !hasRed && at === lastAt);
     return entry.type === 'reminder'
       ? { type: 'reminder', at, index: entry.index, occurrence: entry.occurrence, stage }
       : {

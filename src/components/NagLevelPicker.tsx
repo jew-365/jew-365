@@ -193,12 +193,12 @@ type ExampleProps = {
 // The example mitzvot: Shacharit, a day prayer with two last-chance points, and the bedtime Shema, a night one.
 const EXAMPLES: readonly string[] = ['shacharit', 'krias_shma_al_hamita'];
 
-type PillKind = 'reminder' | 'nag' | 'lastChance';
+type PillKind = 'reminder' | 'nag' | 'warning' | 'lastChance';
 type Pill = { at: number; time: string; kind: PillKind };
 
 // Today's window of each example mitzvah at `level`, as the plan sends it from its first notification
 // (`windowSends()`, so the quiet hours, the holy blocks and the end of the time all apply): a reminder filled, a nag
-// outlined, a last-chance point outlined in `urgent`.
+// outlined, the orange point before the end outlined in `warning` and the last time to start in `urgent`.
 export function NagLevelExample({ level, location, settings, quietHours, style }: ExampleProps) {
   const { colors } = useTheme();
   const { t, language } = useI18n();
@@ -209,10 +209,10 @@ export function NagLevelExample({ level, location, settings, quietHours, style }
       const mitzvah = findMitzvah(id);
       const sends = mitzvah ? windowSends(mitzvah, mitzvah.defaultReminders, today, scope) : null;
       if (!mitzvah || !sends?.length) return [];
-      const pills: Pill[] = sends.map(({ at, kind }) => ({
+      const pills: Pill[] = sends.map(({ at, kind, lastChance }) => ({
         at,
         time: clockOf(new Date(at), location.tz),
-        kind: kind === 'reminder' ? 'reminder' : kind === 'lastChance' ? 'lastChance' : 'nag',
+        kind: kind === 'reminder' ? 'reminder' : lastChance === 'alone' ? 'lastChance' : lastChance ? 'warning' : 'nag',
       }));
       return [{ key: id, label: mitzvahName(mitzvah, language), pills }];
     });
@@ -225,10 +225,13 @@ export function NagLevelExample({ level, location, settings, quietHours, style }
       ? { box: { backgroundColor: colors.gold, borderColor: colors.gold }, text: colors.onGold }
       : kind === 'nag'
         ? { box: { backgroundColor: colors.surface, borderColor: colors.gold }, text: colors.goldText }
-        : { box: { backgroundColor: colors.surface, borderColor: colors.urgent }, text: colors.urgent };
+        : kind === 'warning'
+          ? { box: { backgroundColor: colors.surface, borderColor: colors.warning }, text: colors.warning }
+          : { box: { backgroundColor: colors.surface, borderColor: colors.urgent }, text: colors.urgent };
   const legend: [PillKind, string][] = [
     ['reminder', t('settings.nagExample.main')],
     ['nag', t('settings.nagExample.repeat')],
+    ['warning', t('settings.nagExample.warning')],
     ['lastChance', t('settings.nagExample.lastChance')],
   ];
   return (

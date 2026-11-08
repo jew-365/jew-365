@@ -78,16 +78,17 @@ describe('the time-left line of a mitzvah reminder', () => {
   const stageOf = (c: ScheduleCandidate) =>
     (Object.keys(TIME_STAGE_COLOR) as (keyof typeof TIME_STAGE_COLOR)[]).find((s) => TIME_STAGE_COLOR[s] === c.color);
 
-  it('colours a reminder green, a nag orange and the last notification red, and marks the line to match', () => {
+  it('colours the red last point red, the minyan point orange and every other send green, and marks the line to match', () => {
     const candidates = day(buildPlan(planInput(NIGHT_BEFORE, 3, 'ios')));
     const last = candidates[candidates.length - 1];
     expect(last.data.nag?.lastChance).toBe('alone');
     for (const c of candidates) {
-      const stage = c === last ? 'red' : c.data.nag ? 'orange' : 'green';
+      const stage = c === last ? 'red' : c.data.nag?.lastChance ? 'orange' : 'green';
       expect(stageOf(c)).toBe(stage);
       expect(c.subtitle).toBe(timeLeftLine(c.trigger, window(), J.tz, t, stage));
     }
     expect(candidates.some((c) => c.data.nag?.kind === 'zone')).toBe(true);
+    expect(candidates.filter((c) => stageOf(c) === 'orange')).toHaveLength(1);
     expect(candidates[0].subtitle).toMatch(/^נשארו .* · עד \d\d:\d\d$/);
     // Shacharit alone takes 20 minutes: its last-chance point is 20 minutes before the end.
     expect(last.subtitle).toMatch(/^❗ נשארו 20 דק' · עד \d\d:\d\d$/);
@@ -119,13 +120,14 @@ describe('the time-left line of a mitzvah reminder', () => {
     }
   });
 
-  it('marks the minyan point orange and the point alone red, and a reminder after them red as the last', () => {
+  it('marks the minyan point orange and the point alone red, and leaves a reminder after them plain', () => {
     const single = {
       ...planInput(NIGHT_BEFORE, 1, 'ios'),
       reminderOverrides: { shacharit: [{ anchor: 'start' as const, offsetMin: 0, label: 'x' }] },
     };
-    const [reminder, minyan, alone] = day(buildPlan(single));
-    expect([stageOf(reminder), stageOf(minyan), stageOf(alone)]).toEqual(['green', 'orange', 'red']);
+    const [reminder, opener, minyan, alone] = day(buildPlan(single));
+    expect(opener.data.nag?.kind).toBe('open');
+    expect([reminder, opener, minyan, alone].map(stageOf)).toEqual(['green', 'green', 'orange', 'red']);
     expect(minyan.body).toBe('הזמן האחרון להתחיל במניין');
     expect(minyan.subtitle).toMatch(/^⚠️ נשארו 45 דק'/);
 
@@ -139,8 +141,8 @@ describe('the time-left line of a mitzvah reminder', () => {
       },
     };
     const candidates = day(buildPlan(late));
-    expect(candidates.map(stageOf)).toEqual(['green', 'orange', 'red', 'red']);
-    expect(candidates[3].data.nag).toBeUndefined();
+    expect(candidates.map(stageOf)).toEqual(['green', 'green', 'orange', 'red', 'green']);
+    expect(candidates[4].data.nag).toBeUndefined();
     for (const c of candidates) expect(c.body).not.toMatch(/מתוך/);
   });
 

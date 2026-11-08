@@ -15,7 +15,8 @@ import type { NagLevel } from '@/types/mitzvah';
 import { DateTime } from 'luxon';
 
 const J = CITIES[0];
-// The everyday default-on set: 12 reminders a day on a plain weekday, and the smart nag's notifications on top.
+// The everyday default-on set: 6 reminders a day on a plain weekday (one each since the reminder placement of
+// 2026-11-08), and the smart nag's notifications on top.
 const DAILY = ['tefillin', 'krias_shma_shacharit', 'shacharit', 'mincha', 'maariv', 'krias_shma_al_hamita'];
 const MITZVOT_DAILY = MITZVOT.filter((m) => DAILY.includes(m.id));
 // Tuesday 2026-11-10 before dawn in Jerusalem: Tuesday and Wednesday are plain weekdays, and no
@@ -80,11 +81,11 @@ describe('the keep order inside the cap', () => {
   });
   afterEach(() => warn.mockRestore());
 
-  it('sends the 12 reminders a day at every level, and more nags the higher the level', () => {
+  it('sends the 6 reminders a day at every level, and more nags the higher the level', () => {
     let previous = -1;
     for (const level of [1, 2, 3, 4] as const) {
       const full = unbounded(BEFORE_DAWN, level);
-      for (const day of [TODAY, TOMORROW]) expect(mains(onDay(full, day))).toHaveLength(12);
+      for (const day of [TODAY, TOMORROW]) expect(mains(onDay(full, day))).toHaveLength(6);
       const count = nags(onDay(full, TODAY)).length;
       expect(count).toBeGreaterThan(previous);
       previous = count;
@@ -122,8 +123,9 @@ describe('the keep order inside the cap', () => {
       expect(ids(onDay(plan, TOMORROW))).toEqual(ids(onDay(full, TOMORROW)));
       const later = plan.filter((c) => c.data.dateKey && c.data.dateKey > TOMORROW);
       expect(nags(later)).toEqual([]);
-      // Every reminder of every later day: the windows keep their two reminders each.
-      expect(perWindow(later).some((n) => n > 1)).toBe(true);
+      // Every reminder of every later day: each window keeps its one reminder.
+      expect(perWindow(later).every((n) => n === 1)).toBe(true);
+      expect(mains(later).length).toBeGreaterThan(100);
       expect(new Set(later.map((c) => c.data.dateKey)).size).toBeGreaterThanOrEqual(27);
     }
   });

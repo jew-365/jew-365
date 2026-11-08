@@ -95,9 +95,30 @@ const SATURDAY = '2026-11-14';
 const SUNDAY = '2026-11-15';
 
 describe('nextReminderAt', () => {
-  const shacharit = byId('shacharit');
-  const tefillin = byId('tefillin');
-  const mincha = byId('mincha');
+  // Windows with several reminders, the defaults before the reminder placement of 2026-11-08, so the preview's walk
+  // over a window's reminders stays covered.
+  const shacharit: Mitzvah = {
+    ...byId('shacharit'),
+    defaultReminders: [
+      { anchor: 'start', offsetMin: 0, label: 'זמן תפילת שחרית' },
+      { anchor: 'end', offsetMin: -45, label: 'x', skipIfDone: true },
+    ],
+  };
+  const tefillin: Mitzvah = {
+    ...byId('tefillin'),
+    defaultReminders: [
+      { anchor: 'start', offsetMin: 0, label: 'הגיע זמן הנחת תפילין' },
+      { anchor: 'start', offsetMin: 180, label: 'x', skipIfDone: true },
+      { anchor: 'end', offsetMin: -45, label: 'y', skipIfDone: true },
+    ],
+  };
+  const mincha: Mitzvah = {
+    ...byId('mincha'),
+    defaultReminders: [
+      { anchor: 'start', offsetMin: 0, label: 'זמן תפילת מנחה' },
+      { anchor: 'end', offsetMin: -60, label: 'x', skipIfDone: true },
+    ],
+  };
 
   it('is the first reminder still ahead in the window that is open', () => {
     const tuesday = zmanimOn(TUESDAY);
@@ -392,8 +413,8 @@ describe('nextReminderAt for Chok LeYisrael', () => {
   it('files a 03:00 clock reminder under the window still open at 03:00, not the one that has not opened', () => {
     const night: Reminder[] = [{ anchor: 'clock', offsetMin: 180, label: 'לילה' }];
     const now = at(JERUSALEM, '2026-12-14T12:00');
-    const first = buildPlan(planInput(CHOK, now, { reminderOverrides: { chok_leyisrael: night } })).find((candidate) =>
-      candidate.id.startsWith('chok_leyisrael__'),
+    const first = buildPlan(planInput(CHOK, now, { reminderOverrides: { chok_leyisrael: night } })).find(
+      (candidate) => candidate.id.startsWith('chok_leyisrael__') && !candidate.data.nag,
     )!;
     expect(first.id).toBe('chok_leyisrael__2026-12-14__0');
     expect(first.trigger.getTime()).toBe(at(JERUSALEM, '2026-12-15T03:00').getTime());

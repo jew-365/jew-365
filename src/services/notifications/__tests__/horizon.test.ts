@@ -76,7 +76,7 @@ describe('the planning horizon', () => {
     expect(days.has('2026-11-08')).toBe(true);
     expect(days.has('2026-12-06')).toBe(true);
     expect(warn).not.toHaveBeenCalled();
-    expect(plan.filter(({ id }) => id.startsWith('shacharit__2026-11-20')).length).toBe(2);
+    expect(plan.filter(({ id }) => id.startsWith('shacharit__2026-11-20')).length).toBe(1);
   });
 
   it('fills the iOS slots and keeps every reminder of days one and two', () => {
@@ -171,8 +171,9 @@ describe('the end notice', () => {
     expect(plan).toHaveLength(IOS_ROOM + 1);
     expect(DateTime.fromJSDate(notice.trigger).setZone(JERUSALEM.tz).toFormat('HH:mm')).toBe('20:00');
     expect(reminderDays).toContain(lastFull);
-    // The opening days' nags (the last-chance points at level 1 too) outrank the thinned days after them.
-    expect(lastFull >= '2026-11-12').toBe(true);
+    // The opening days' nags (the zone's opener, the orange and the red at level 1 too) outrank the thinned days
+    // after them.
+    expect(lastFull >= '2026-11-11').toBe(true);
     expect(lastFull < '2026-11-24').toBe(true);
   });
 
@@ -246,7 +247,10 @@ describe('thinning edges and the end notice fallback', () => {
 
     const plan = buildPlan(planInput({ platform: 'ios', mitzvot: [...DEFAULT_MITZVOT, followUpOnly] }));
 
-    expect(plan.some(({ id }) => id === 'edge_followup__2026-11-11__0')).toBe(true);
+    // 2026-11-10 is the first thinned day: its window keeps the follow-up and nothing else.
+    expect(plan.filter(({ id }) => id.startsWith('edge_followup__2026-11-10')).map(({ id }) => id)).toEqual([
+      'edge_followup__2026-11-10__0',
+    ]);
   });
 
   it('sends the end notice at the last kept trigger when the cut lands tomorrow and 20:00 has passed', () => {

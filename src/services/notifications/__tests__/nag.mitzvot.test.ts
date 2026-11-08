@@ -143,20 +143,32 @@ const gaps = (candidates: ScheduleCandidate[]) =>
     .map((t, i, all) => t - (i ? all[i - 1] : times(candidates).sort((a, b) => a - b)[0]));
 
 describe('the last-chance points', () => {
-  it('go out at level 1 too: Shacharit’s reminders once each, then the last time to start alone', () => {
-    const { end } = windowOf(SHACHARIT);
+  it('go out at level 1 too: Shacharit’s reminder, the zone’s opener, the orange minyan point and the red one', () => {
+    const { start, end } = windowOf(SHACHARIT);
     const day = of(plan([SHACHARIT], NIGHT_BEFORE), 'shacharit', DAY);
-    expect(reminders(day).map((c) => c.id)).toEqual([`shacharit__${DAY}__0`, `shacharit__${DAY}__1`]);
-    // The minyan point, 45 minutes before the end, falls on the before-the-end reminder and is not sent twice.
-    expect(pairs(nags(day))).toEqual([[`shacharit__${DAY}__n1`, end.getTime() - 20 * MIN]]);
-    expect(nags(day)[0].data.nag).toEqual({ k: 1, of: 1, kind: 'lastChance', lastChance: 'alone' });
-    expect(messageOf(nags(day)[0])).toBe('הזמן האחרון להתחיל');
-    expect(nags(day)[0].data.skipIfDone).toBe(true);
+    expect(reminders(day).map((c) => c.id)).toEqual([`shacharit__${DAY}__0`]);
+    const third = end.getTime() - (end.getTime() - start.getTime()) / 3;
+    expect(pairs(nags(day))).toEqual([
+      [`shacharit__${DAY}__n1`, third],
+      [`shacharit__${DAY}__n2`, end.getTime() - 45 * MIN],
+      [`shacharit__${DAY}__n3`, end.getTime() - 20 * MIN],
+    ]);
+    expect(nags(day).map((c) => c.data.nag)).toEqual([
+      { k: 1, of: 3, kind: 'open' },
+      { k: 2, of: 3, kind: 'lastChance', lastChance: 'minyan' },
+      { k: 3, of: 3, kind: 'lastChance', lastChance: 'alone' },
+    ]);
+    expect(nags(day).map(messageOf)).toEqual([
+      'נכנסת לזמן הקריטי, עוד לא סימנת',
+      'הזמן האחרון להתחיל במניין',
+      'הזמן האחרון להתחיל',
+    ]);
+    expect(nags(day).every((c) => c.data.skipIfDone)).toBe(true);
   });
 
   it('give a prayer both points, with a minyan and alone, whatever the prayer mode', () => {
     const { end } = windowOf(MINCHA);
-    const day = nags(of(plan([MINCHA], NIGHT_BEFORE), 'mincha', DAY));
+    const day = nags(of(plan([MINCHA], NIGHT_BEFORE), 'mincha', DAY)).filter((c) => c.data.nag?.lastChance);
     expect(day.map((c) => [c.data.nag?.lastChance, c.trigger.getTime()])).toEqual([
       ['minyan', end.getTime() - 20 * MIN],
       ['alone', end.getTime() - 10 * MIN],
@@ -164,10 +176,13 @@ describe('the last-chance points', () => {
     expect(day.map(messageOf)).toEqual(['הזמן האחרון להתחיל במניין', 'הזמן האחרון להתחיל']);
   });
 
-  it('take a custom mitzvah’s own minutes', () => {
+  it('take a custom mitzvah’s own minutes, with the orange a quarter of an hour before the red', () => {
     const custom = fixture('custom_x', 600, 720, [r('start', 0)], { performMin: { alone: 30 } });
     const day = nags(of(plan([custom], NIGHT_BEFORE), 'custom_x', DAY));
-    expect(times(day)).toEqual([clock(`${DAY}T11:30`)]);
+    // The zone opens half an hour before the last-chance point at the latest: its opener at 11:00.
+    expect(times(day)).toEqual([clock(`${DAY}T11:00`), clock(`${DAY}T11:15`), clock(`${DAY}T11:30`)]);
+    expect(day.map((c) => c.data.nag?.lastChance)).toEqual([undefined, 'soon', 'alone']);
+    expect(messageOf(day[1])).toBe('עוד מעט נגמר הזמן');
   });
 
   it('are not sent once the day is marked, nor when the end of the time leaves no room', () => {
@@ -214,21 +229,18 @@ describe('the critical zone', () => {
     expect(nags(own).length).toBeGreaterThan(2);
   });
 
-  it('nags the bedtime Shema from its 23:00 reminder to chatzot, an hour apart after it, then before alot', () => {
-    const { end, zmanim } = windowOf(BEDTIME_SHEMA);
+  it('nags the bedtime Shema in the two hours before chatzot, and nothing from chatzot to alot', () => {
+    const { zmanim } = windowOf(BEDTIME_SHEMA);
     const day = of(plan([BEDTIME_SHEMA], NIGHT_BEFORE, { level: 3 }), 'krias_shma_al_hamita', DAY);
-    const reminder = reminders(day)[0].trigger.getTime();
-    expect(reminder).toBe(clock(`${DAY}T23:00`));
+    expect(reminders(day)[0].trigger.getTime()).toBe(clock(`${DAY}T21:00`));
+    const chatzot = zmanim.chatzotLayla.getTime();
     const byKind = (kind: string) => nags(day).filter((c) => c.data.nag?.kind === kind);
-    for (const c of byKind('zone')) {
-      expect(c.trigger.getTime()).toBeGreaterThan(reminder);
-      expect(c.trigger.getTime()).toBeLessThanOrEqual(zmanim.chatzotLayla.getTime());
-    }
-    const tail = times(byKind('sparse'));
-    expect(tail.length).toBe(2);
-    for (const t of tail) expect(t).toBeGreaterThan(zmanim.chatzotLayla.getTime());
-    expect(tail[1] - tail[0]).toBeGreaterThanOrEqual(60 * MIN);
-    expect(times(byKind('lastChance'))).toEqual([end.getTime() - 5 * MIN]);
+    expect(times(byKind('open'))).toEqual([chatzot - 120 * MIN]);
+    expect(byKind('zone')).toHaveLength(2);
+    for (const c of byKind('zone')) expect(c.trigger.getTime()).toBeGreaterThan(chatzot - 120 * MIN);
+    expect(byKind('sparse')).toEqual([]);
+    expect(times(byKind('lastChance'))).toEqual([chatzot - 20 * MIN, chatzot - 5 * MIN]);
+    expect(Math.max(...times(nags(day)))).toBe(chatzot - 5 * MIN);
   });
 
   it('sends nothing inside a holy block: candle lighting has no nag, Friday’s mincha none after it', () => {
@@ -264,16 +276,18 @@ describe('a custom mitzvah’s critical zone', () => {
     }
   });
 
-  it('nags hours across midnight like a night mitzvah: to chatzot, then an hour apart at the least', () => {
+  it('nags hours across midnight like a night mitzvah: to chatzot, its last-chance points too, and nothing after', () => {
     const { zmanim } = windowOf(MINCHA);
     // 21:00 to 03:00.
     const custom = fixture('custom_night', 1260, 1620, [r('start', 0)]);
     const day = nags(of(plan([custom], NIGHT_BEFORE, { level: 3 }), 'custom_night', DAY));
-    const byKind = (kind: string) => times(day.filter((c) => c.data.nag?.kind === kind));
-    for (const t of byKind('zone')) expect(t).toBeLessThanOrEqual(zmanim.chatzotLayla.getTime());
-    const tail = byKind('sparse');
-    expect(tail.length).toBeGreaterThan(0);
-    for (const t of tail) expect(t).toBeGreaterThan(zmanim.chatzotLayla.getTime());
+    const chatzot = zmanim.chatzotLayla.getTime();
+    expect(day.filter((c) => c.data.nag?.kind === 'zone')).toHaveLength(2);
+    for (const t of times(day)) expect(t).toBeLessThanOrEqual(chatzot);
+    expect(times(day.filter((c) => c.data.nag?.kind === 'lastChance'))).toEqual([
+      chatzot - 20 * MIN,
+      chatzot - 5 * MIN,
+    ]);
   });
 });
 
@@ -282,7 +296,7 @@ describe('the plan around the nags', () => {
     const legacy = { ...r('start', 0), nag: { count: 3, everyMin: 5, placement: 'after' } } as Reminder;
     const day = of(plan([MINCHA], NIGHT_BEFORE, { overrides: { mincha: [legacy] } }), 'mincha', DAY);
     expect(reminders(day)).toHaveLength(1);
-    expect(nags(day).every((c) => c.data.nag?.kind === 'lastChance')).toBe(true);
+    expect(nags(day).every((c) => c.data.nag?.kind === 'lastChance' || c.data.nag?.kind === 'open')).toBe(true);
   });
 
   it('keeps the nags still due once the reminders have gone out', () => {
@@ -404,7 +418,8 @@ describe('nags placed by hand on the timeline', () => {
     );
     const last = timeline.sends[timeline.sends.length - 1];
     expect(last).toMatchObject({ type: 'nag', k: 2, kind: 'lastChance', lastChance: 'alone', stage: 'red' });
-    expect(timeline.sends.find((send) => send.type === 'nag' && send.k === 1)?.stage).toBe('orange');
+    // A zone nag is plain: only the warning is orange.
+    expect(timeline.sends.find((send) => send.type === 'nag' && send.k === 1)?.stage).toBe('green');
     expect(timeline.sends.filter((send) => send.type === 'reminder').map((send) => send.stage)).toEqual(
       MINCHA.defaultReminders.map(() => 'green'),
     );

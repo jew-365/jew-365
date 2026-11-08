@@ -44,16 +44,24 @@ function input(overrides: Partial<NagInput> = {}): NagInput {
 }
 
 const times = (overrides: Partial<NagInput> = {}) => smartNagTimes(input(overrides)).map(({ at }) => minOf(at));
+// The same without the zone's opener, which every level sends at the zone's start (reminder placement, 2026-11-08).
+const zoneTimes = (overrides: Partial<NagInput> = {}) =>
+  smartNagTimes(input(overrides))
+    .filter(({ kind }) => kind !== 'open')
+    .map(({ at }) => minOf(at));
 
 describe('the levels', () => {
   it('adds no zone nag at level 1 and one, two and three at the levels above', () => {
     expect(NAG_LEVEL_IDS).toEqual([1, 2, 3, 4]);
     expect(ZONE_NAGS).toEqual({ 1: 0, 2: 1, 3: 2, 4: 3 });
-    expect(times({ level: 1 })).toEqual([]);
-    expect(times({ level: 2 })).toEqual([150]);
-    expect(times({ level: 3 })).toEqual([140, 160]);
-    expect(times({ level: 4 })).toEqual([135, 150, 165]);
-    expect(times({ level: undefined })).toEqual([]);
+    expect(zoneTimes({ level: 1 })).toEqual([]);
+    expect(zoneTimes({ level: 2 })).toEqual([150]);
+    expect(zoneTimes({ level: 3 })).toEqual([140, 160]);
+    expect(zoneTimes({ level: 4 })).toEqual([135, 150, 165]);
+    expect(zoneTimes({ level: undefined })).toEqual([]);
+    // Every level opens a zone that starts after the window does, level 1 included; one at the window's start is not.
+    expect(times({ level: 1 })).toEqual([120]);
+    expect(times({ level: 1, zone: [{ start: atMin(0), end: atMin(180) }] })).toEqual([]);
   });
 
   it('guards a level', () => {
@@ -64,37 +72,40 @@ describe('the levels', () => {
 describe('smartNagTimes', () => {
   it('sends the last-chance points at every level, the minyan one too', () => {
     const lastChance = { alone: atMin(160), minyan: atMin(135) };
-    const nags = smartNagTimes(input({ level: 1, lastChance }));
+    const nags = smartNagTimes(input({ level: 1, lastChance })).filter(({ kind }) => kind !== 'open');
     expect(nags.map(({ at, kind, lastChance: which }) => [minOf(at), kind, which])).toEqual([
       [135, 'lastChance', 'minyan'],
       [160, 'lastChance', 'alone'],
     ]);
   });
 
-  it('ends the zone at the earliest last-chance point inside it', () => {
-    // The zone 120-180 ends at the minyan point, 150: two nags at 130 and 140, then 150 and 170.
+  it('ends the zone at the red point, so the orange minyan point sits inside it', () => {
+    // The zone 120-180 ends at the alone point, 170: its opener at 120, nags at a third and two thirds of 120-170
+    // (the second, 10 minutes from nothing but within 4 of the minyan point at 150, moves to the widest stretch), the
+    // minyan point at 150 and the alone point at 170.
     const lastChance = { alone: atMin(170), minyan: atMin(150) };
-    expect(times({ level: 3, lastChance })).toEqual([130, 140, 150, 170]);
+    expect(times({ level: 3, lastChance }).map(Math.round)).toEqual([120, 137, 150, 160, 170]);
   });
 
   it(`keeps every notification ${NAG_MIN_GAP_MIN} minutes from the reminders and the nags before it`, () => {
     // A reminder at 152 moves the zone nag at 150 (level 2) to the middle of the widest free stretch, 120-152; at 160
     // it is ten minutes away and both stay; a zone with no stretch of twenty minutes left drops it.
-    expect(times({ level: 2, taken: [atMin(0), atMin(152)] })).toEqual([136]);
-    expect(times({ level: 2, zone: [{ start: atMin(140), end: atMin(160) }], taken: [atMin(0), atMin(150)] })).toEqual(
-      [],
-    );
-    expect(times({ level: 2, taken: [atMin(0), atMin(160)] })).toEqual([150]);
-    // A zone of 20 minutes holds one nag of the three; the last-chance point outranks a zone nag at 9 minutes.
-    expect(times({ level: 4, zone: [{ start: atMin(160), end: atMin(180) }] })).toEqual([165, 175]);
+    expect(zoneTimes({ level: 2, taken: [atMin(0), atMin(152)] })).toEqual([136]);
+    expect(
+      zoneTimes({ level: 2, zone: [{ start: atMin(140), end: atMin(160) }], taken: [atMin(0), atMin(150)] }),
+    ).toEqual([]);
+    expect(zoneTimes({ level: 2, taken: [atMin(0), atMin(160)] })).toEqual([150]);
+    // A zone of 20 minutes holds its opener and one nag of the three; the last-chance point outranks a nag at 9 minutes.
+    expect(times({ level: 4, zone: [{ start: atMin(160), end: atMin(180) }] })).toEqual([160, 170]);
     const short = { zone: [{ start: atMin(160), end: atMin(180) }], lastChance: { alone: atMin(179), minyan: null } };
-    expect(times({ level: 2, ...short })).toEqual([179]);
+    expect(times({ level: 2, ...short })).toEqual([160, 179]);
   });
 
   it('never opens the zone before the first reminder, nor sends a nag outside the window', () => {
     expect(times({ level: 2, zone: [{ start: atMin(0), end: atMin(120) }], taken: [atMin(60)] })).toEqual([90]);
-    expect(times({ level: 2, zone: [{ start: atMin(170), end: atMin(240) }] })).toEqual([175]);
-    expect(times({ level: 1, lastChance: { alone: atMin(-5), minyan: atMin(200) } })).toEqual([]);
+    // A zone that opens at 170 sends its opener there, which leaves no room for a nag at 175.
+    expect(times({ level: 2, zone: [{ start: atMin(170), end: atMin(240) }] })).toEqual([170]);
+    expect(zoneTimes({ level: 1, lastChance: { alone: atMin(-5), minyan: atMin(200) } })).toEqual([]);
   });
 
   it('follows a zone with a tail by the same count an hour apart at the least, before the last-chance point', () => {
@@ -120,7 +131,7 @@ describe('smartNagTimes', () => {
 
   it('drops a nag the rules refuse and takes the instant they move it to', () => {
     const accept = (planned: Date) => (minOf(planned) === 150 ? null : new Date(planned.getTime() + MIN));
-    expect(times({ level: 4, accept })).toEqual([136, 166]);
+    expect(zoneTimes({ level: 4, accept })).toEqual([136, 166]);
   });
 });
 
@@ -138,36 +149,34 @@ describe('the mitzvot', () => {
 
   it('names each kind of critical zone', () => {
     expect(['shacharit', 'tefillin', 'custom_1'].map(nagZoneKindOf)).toEqual(['lastThird', 'lastThird', 'custom']);
-    expect(['maariv', 'krias_shma_al_hamita', 'sefirat_haomer', 'ushpizin'].map(nagZoneKindOf)).toEqual([
-      'night',
-      'night',
-      'night',
-      'night',
-    ]);
+    expect(['maariv', 'sefirat_haomer', 'ushpizin'].map(nagZoneKindOf)).toEqual(['night', 'night', 'night']);
+    expect(nagZoneKindOf('krias_shma_al_hamita')).toBe('bedtime');
     expect(nagZoneKindOf('chanukah_candles')).toBe('firstHour');
     expect(nagZoneKindOf('candle_lighting')).toBe('lastMinutes');
     expect(nagZoneKindOf('havdalah')).toBe('evening');
     expect(nagZoneKindOf('kiddush_levana')).toBe('nights');
     expect(nagZoneKindOf('selichot')).toBe('preDawn');
     expect(nagZoneKindOf('chok_leyisrael')).toBe('learning');
+    // Only the Chanukah candles keep a tail, up to chatzot: no nag from chatzot to alot.
     expect(['night', 'firstHour', 'evening', 'learning', 'lastThird'].map((k) => hasSparseTail(k as never))).toEqual([
+      false,
       true,
-      true,
-      true,
-      true,
+      false,
+      false,
       false,
     ]);
     expect(hasLastChance('nights')).toBe(false);
     expect(hasLastChance('lastThird')).toBe(true);
   });
 
-  it('estimates a window: its reminders, its last-chance points and the level, twice with a tail', () => {
+  it('estimates a window: its reminders, the orange and the red, the zone opener and the level, twice with a tail', () => {
     const two = [{ anchor: 'start' as const }, { anchor: 'end' as const }];
-    expect(nagsPerWindow({ id: 'shacharit' }, 1)).toBe(2);
-    expect(nagsPerWindow({ id: 'shacharit' }, 4)).toBe(5);
-    expect(nagsPerWindow({ id: 'maariv' }, 3)).toBe(6);
-    expect(nagsPerWindow({ id: 'kiddush_levana' }, 2)).toBe(1);
-    expect(remindersPerDay({ id: 'tefillin' }, two, 2)).toBe(4);
+    expect(nagsPerWindow({ id: 'shacharit' }, 1)).toBe(3);
+    expect(nagsPerWindow({ id: 'shacharit' }, 4)).toBe(6);
+    expect(nagsPerWindow({ id: 'maariv' }, 3)).toBe(4);
+    expect(nagsPerWindow({ id: 'chanukah_candles' }, 2)).toBe(4);
+    expect(nagsPerWindow({ id: 'kiddush_levana' }, 2)).toBe(2);
+    expect(remindersPerDay({ id: 'tefillin' }, two, 2)).toBe(6);
     expect(countsInDayEstimate('daily-morning')).toBe(true);
     expect(countsInDayEstimate('learning')).toBe(true);
     expect(countsInDayEstimate('weekly')).toBe(false);
@@ -193,11 +202,12 @@ describe('customNagZone', () => {
     expect(span(customNagZone(hour, atMin(50), day).zone)).toEqual([[20, 50]]);
   });
 
-  it('nags hours across midnight like a night mitzvah: to chatzot, then a sparse tail', () => {
+  it('nags hours across midnight like a night mitzvah: to chatzot, and nothing after it', () => {
     const night = { start: atMin(0), end: atMin(240) };
     expect(customNagZone(night, atMin(230), { crossesMidnight: true, chatzotLayla: atMin(100) })).toEqual({
       zone: [{ start: atMin(0), end: atMin(100) }],
-      sparse: true,
+      sparse: false,
+      night: true,
     });
     // A whole day across midnight is not a night: its last third, capped.
     const whole = { start: atMin(0), end: atMin(24 * 60) };

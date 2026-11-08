@@ -468,12 +468,14 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** a background location update. It needs the "Allow all the time" permission (`ACCESS_BACKGROUND_LOCATION`, iOS "Always"), a native build, Google Play's background-location declaration and an App Store justification, and the OS still sets the cadence (15 minutes at the least on Android).
   - **Waiting on:** the owner's decision whether to build it.
 
-- [ ] Place every mitzvah's default reminders against its critical zone, and keep nags out of the night
+- [x] Place every mitzvah's default reminders against its critical zone, and keep nags out of the night
   - **Flag:** `OTA`.
   - **Source:** the owner's report of 2026-11-05 with a screenshot of the bedtime Shema's timeline ("צריך לחזור שלב אחורה ולאפיין מחדש איפה לפזר התראות על כל סוג מצווה").
   - **What it is:** the characterization in [.claude/specs/reminder-placement.md](.claude/specs/reminder-placement.md): an opener and a zone opener per window, no nag between chatzot and alot, last-chance points only where acted on, the zone ending at the latest last-chance point, morning openers at netz.
   - **Expected result:** at every level, each mitzvah's nags spread across its whole critical zone (the bedtime Shema's no longer squeezed into the 24 minutes after a 23:00 reminder), and no notification of a night mitzvah between chatzot and alot.
-  - **Waiting on:** the owner's decisions in sections 5 and 5a of the spec (5a: exactly one orange and one red notification per window); P3 also goes to the rav. The schema the owner reads: https://claude.ai/artifact/JyDspDEDu2jzzRsTTpJB3X
+  - **Decided:** the owner approved the recommendations with the visual of 2026-11-06 (https://claude.ai/artifact/CuCafHRDLzcsiN7NcndgEA, "מאשר"); the night kinds' last chance at chatzot is on the rav's page (R3, R6, `RULES_VERSION` 6).
+  - **Done:** 2026-11-08: one opener per window at a waking hour (the bedtime Shema's at 21:00), the zone's opener (`open`) at every level, one orange (the minyan point, or `soon` 15 minutes before the red) and one red per window, the zone ending at the red point, the bedtime Shema's zone the two hours before chatzot, the night kinds' points from chatzot and nothing from chatzot to alot but Selichot, `SCHEDULE_FORMAT` 15; verified by `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, the full Jest suite and `pnpm test:tz` on the touched suites, and a probe of Jerusalem's 2026-11-11 plan matching the approved visual. Still to check on the phone.
+  - **Status:** 1.0.21 · Committed: pending · Pushed: no · Live: no · Channel: none
 
 ### Medium — App requests of 2026-11-08
 
@@ -527,7 +529,7 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
 - **R3 — Bedtime Shema.**
   - **Question:** What is its window?
   - **Assumption:** From tzeit to alot, ideally before chatzot halayla.
-  - **Reminder:** one `clock` reminder at 23:00 on the location's clock, no reminder at the window's start (the owner's call, 2026-10-29; was 22:30); `RULES_VERSION` of the review page is 2.
+  - **Reminder:** one `clock` reminder at 21:00 on the location's clock (the reminder placement of 2026-11-08; 23:00 from 2026-10-29, 22:30 before), the critical zone the two hours before chatzot halayla, the last time to start 5 minutes before chatzot with the orange 15 minutes before it, and nothing from chatzot to alot; `RULES_VERSION` of the review page is 6.
   - **Lives in:** the `krias_shma_al_hamita` entry in [src/data/mitzvot.ts](src/data/mitzvot.ts).
 - **R4 — Chanukah candles.**
   - **Question:** When are the candles lit each night?
@@ -540,6 +542,7 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
 - **R6 — Maariv.**
   - **Question:** Until when may Maariv be prayed?
   - **Assumption:** From tzeit until alot, ideally before chatzot.
+  - **Notifications:** the last time to start with a minyan 20 minutes before chatzot and alone 10 minutes before it, and nothing from chatzot to alot (the reminder placement of 2026-11-08; `RULES_VERSION` 6).
   - **Lives in:** maariv's `computeWindow`.
 - **R7 — Birchot hashachar.**
   - **Question:** Until when may birchot hashachar be said?

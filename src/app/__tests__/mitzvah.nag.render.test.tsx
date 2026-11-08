@@ -53,7 +53,6 @@ import { act, cleanup, fireEvent, screen, within } from '@testing-library/react-
 import { Modal } from 'react-native';
 import MitzvahDetailScreen from '../mitzvah/[id]';
 import { CITIES } from '@/data/cities';
-import { findMitzvah } from '@/data/mitzvot';
 import { t } from '@/i18n';
 import { useChokStore } from '@/stores/useChokStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -164,9 +163,10 @@ describe('Mitzvah screen › the nagging level', () => {
 
   it('names the next reminder in the header, never a nag', () => {
     useMitzvotStore.getState().setNagLevel('shacharit', 4);
+    const end = { anchor: 'end' as const, offsetMin: -45, label: 'סוף' };
+    useMitzvotStore.getState().setReminders('shacharit', [{ anchor: 'start', offsetMin: 0, label: 'התחלה' }, end]);
     jest.setSystemTime(new Date(netz.getTime() + MIN));
     renderMitzvah({ id: 'shacharit' });
-    const [, end] = findMitzvah('shacharit')!.defaultReminders;
     const sof = zmanimFor(at(J, '2026-10-28T12:00'), J).sofZmanTfilaGra;
     const next = fireTimeText(new Date(sof.getTime() + end.offsetMin * MIN), J.tz);
     expect(screen.getByText(t('detail.previewNext', { time: next }))).toBeOnTheScreen();
@@ -190,8 +190,8 @@ describe('Mitzvah screen › the nagging level', () => {
       const manual = useMitzvotStore.getState().activeMitzvot.shacharit.manualNags;
       expect(manual).toHaveLength(nags);
       expect(screen.getByTestId('timeline-manual')).toBeOnTheScreen();
-      // The level row counts the user's nags beside the two reminders.
-      expect(screen.getByText(`${levelTitle(3)} · ${perDay(2 + nags)}`)).toBeOnTheScreen();
+      // The level row counts the user's nags beside the one reminder.
+      expect(screen.getByText(`${levelTitle(3)} · ${perDay(1 + nags)}`)).toBeOnTheScreen();
       fireEvent.press(screen.getByRole('button', { name: t('detail.timeline.reset') }));
       expect(useMitzvotStore.getState().activeMitzvot.shacharit.manualNags).toBeUndefined();
       expect(screen.queryByTestId('timeline-manual')).toBeNull();

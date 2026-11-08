@@ -8,16 +8,17 @@ const J = CITIES[0];
 const window = { start: at(J, '2026-11-04T05:58'), end: at(J, '2026-11-04T09:32') };
 
 describe('sendStage', () => {
-  it('makes a reminder green, a nag orange and the last-chance point alone red', () => {
+  it('makes only the warning orange and only the last-chance point alone red; every other send is plain', () => {
     expect(sendStage('reminder', false)).toBe('green');
-    expect(sendStage('nag', false)).toBe('orange');
+    expect(sendStage('nag', false)).toBe('green');
+    expect(sendStage('warning', false)).toBe('orange');
     expect(sendStage('lastChanceAlone', false)).toBe('red');
   });
 
-  it("makes the window's last notification red, whatever it is", () => {
+  it("makes the window's last notification red only when the window has no red point", () => {
     expect(sendStage('reminder', true)).toBe('red');
     expect(sendStage('nag', true)).toBe('red');
-    expect(sendStage('lastChanceAlone', true)).toBe('red');
+    expect(sendStage('warning', true)).toBe('red');
   });
 
   it("keeps direction ז's colours and the two marks", () => {

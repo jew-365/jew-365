@@ -30,10 +30,13 @@ export type ReminderAnchor = 'start' | 'end' | 'clock' | 'followUp' | 'blockExit
 export type NagLevel = 1 | 2 | 3 | 4;
 // The minutes a mitzvah takes to perform: alone, and with a minyan for a prayer that has one.
 export type PerformMin = { alone: number; minyan?: number };
-// What a nag of the smart nag is: one of the critical zone, one of the sparse tail after it, or a last-chance point
-// (`end − performMin`), alone or with a minyan.
-export type NagKind = 'zone' | 'sparse' | 'lastChance';
-export type LastChance = 'alone' | 'minyan';
+// What a nag of the smart nag is: the one that opens the critical zone, one of the zone, one of the sparse tail after
+// it, or a last-chance point.
+export type NagKind = 'open' | 'zone' | 'sparse' | 'lastChance';
+// The two marked notifications of a window (the owner's rule, 2026-11-05): `alone` (`end − performMin`) is the red,
+// the last; `minyan` (a prayer's `end − performMin.minyan`) or `soon` (`ORANGE_LEAD_MIN` before `alone`, for a mitzvah
+// with one duration) is the one orange before it.
+export type LastChance = 'alone' | 'minyan' | 'soon';
 // A nag the user placed by hand on the window's axis (the timeline, the owner's pick of 2026-11-05): minutes from the
 // window's `start` or `end`, whichever edge it was nearer, and the kind it had, which words its body. A mitzvah that
 // holds a list of them sends these instead of the smart nag's until the reset.

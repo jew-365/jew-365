@@ -10,13 +10,15 @@ export type TimeStage = 'green' | 'orange' | 'red';
 // (stock Android; Samsung's One UI shows the app icon untinted), and on Android 11 and older the app name.
 export const TIME_STAGE_COLOR: Record<TimeStage, string> = { green: '#13804A', orange: '#B85F00', red: '#C5221F' };
 
-// A notification's stage in its window (the smart nag, spec 2.5): the window's last notification and the last-chance
-// point alone are red, every other nag orange, every other reminder green.
-export type SendKind = 'reminder' | 'nag' | 'lastChanceAlone';
+// A notification's stage in its window (the owner's rule of 2026-11-05, built 2026-11-08): exactly one red and one
+// orange per window. The last-chance point alone is red, the minyan point or the `soon` point before it orange, and
+// every other notification, reminder or nag, green (plain, no mark). A window without a red point (Kiddush Levana, or
+// one the quiet hours dropped) takes its last notification as the red: `lastWithoutRed`.
+export type SendKind = 'reminder' | 'nag' | 'warning' | 'lastChanceAlone';
 
-export function sendStage(kind: SendKind, last: boolean): TimeStage {
-  if (last || kind === 'lastChanceAlone') return 'red';
-  return kind === 'nag' ? 'orange' : 'green';
+export function sendStage(kind: SendKind, lastWithoutRed: boolean): TimeStage {
+  if (kind === 'lastChanceAlone' || lastWithoutRed) return 'red';
+  return kind === 'warning' ? 'orange' : 'green';
 }
 
 // The mark that opens the line of a red or orange notification, on every phone (an emoji draws its own colour, which

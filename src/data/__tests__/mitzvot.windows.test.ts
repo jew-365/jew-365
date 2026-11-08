@@ -85,16 +85,13 @@ describe('mitzvot windows extra', () => {
     expect(w.end.getTime()).toBeLessThan(block.end.getTime());
   });
 
-  it('3.7d maariv says it is ideally prayed before chatzot and keeps its two reminders', () => {
+  it('3.7d maariv says it is ideally prayed before chatzot and keeps one reminder, at its start', () => {
     const maariv = findMitzvah('maariv')!;
     expect(maariv.description).toEqual({
       he: 'לכתחילה עד חצות הלילה',
       en: 'Ideally before chatzot (halachic midnight)',
     });
-    expect(maariv.defaultReminders.map((reminder) => [reminder.anchor, reminder.offsetMin])).toEqual([
-      ['start', 0],
-      ['start', 120],
-    ]);
+    expect(maariv.defaultReminders.map((reminder) => [reminder.anchor, reminder.offsetMin])).toEqual([['start', 0]]);
   });
 
   describe('3.7e the bedtime Shema runs from nightfall to the next alot (R3)', () => {
@@ -135,7 +132,7 @@ describe('mitzvot windows extra', () => {
       expect(w.end.getTime()).toBeLessThan(block.end.getTime());
     });
 
-    it('is a daily evening mitzvah of every nusach, ideally before chatzot, with one 23:00 clock reminder', () => {
+    it('is a daily evening mitzvah of every nusach, ideally before chatzot, with one 21:00 clock reminder', () => {
       expect(bedtime()).toMatchObject({
         name: { he: 'קריאת שמע על המיטה', en: 'Bedtime Shema' },
         icon: 'night',
@@ -149,7 +146,7 @@ describe('mitzvot windows extra', () => {
       expect(bedtime().defaultReminders).toEqual([
         {
           anchor: 'clock',
-          offsetMin: 1380,
+          offsetMin: 1260,
           label: 'זמן קריאת שמע על המיטה',
           bodyVariants: ['זמן קריאת שמע על המיטה', 'קריאת שמע לפני השינה', 'לסיים את היום בשמע ישראל'],
         },

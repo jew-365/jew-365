@@ -1,6 +1,6 @@
 # Reminder placement per mitzvah, aligned with the critical zone
 
-Status: characterization, 2026-11-05. Awaiting the owner's decisions (section 5). Nothing here is built.
+Status: characterized 2026-11-05; the owner approved the recommendations with the visual of 2026-11-06 ("מאשר"); built 2026-11-08. As built: the zone's opener is a notification of the smart nag (`open`, at every level) rather than a new reminder anchor, so the editors and the timeline needed no anchor; the bedtime Shema keeps one reminder of its own, a 21:00 clock (a mitzvah needs one), before its zone; the night kinds' last-chance points count from chatzot halayla (R3 and R6 on the rav's page, `RULES_VERSION` 6), the Omer and Ushpizin included; Selichot keeps its zone before alot.
 
 ## 1. The owner's report
 
