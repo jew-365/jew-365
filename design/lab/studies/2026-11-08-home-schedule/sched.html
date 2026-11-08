@@ -1,44 +1,10 @@
-<sc-if value="{{schedCard}}" hint-placeholder-val="{{ false }}">
-<h2 class="sl first">{{sTitle}}</h2>
-</sc-if>
-
 <sc-if value="{{schedA}}" hint-placeholder-val="{{ false }}">
-<section class="card sch" aria-label="הזמנים החשובים עכשיו">
-<div class="schhead"><span class="tile accent l40">[[icA:sCur]]</span><span class="schh"><b>{{sCur.name}}</b><span class="cap num">{{sCur.endsLine}}</span></span></div>
-<sc-if value="{{sHasBadges}}" hint-placeholder-val="{{ true }}"><div class="badges"><sc-for list="{{sBadges}}" as="b" hint-placeholder-count="2"><span class="bdg {{b.tone}}">[[icB:b]]<span>{{b.text}}</span></span></sc-for></div></sc-if>
-<sc-if value="{{sOpen}}" hint-placeholder-val="{{ false }}">
-<div role="list" aria-label="כל זמני היום"><sc-for list="{{sAll}}" as="x" hint-placeholder-count="11"><button class="srow {{x.cls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span class="stime num">{{x.time}}</span><span class="smeta"><span class="stitle">{{x.title}}</span><sc-if value="{{x.hasWhy}}" hint-placeholder-val="{{ true }}"><span class="swhy">{{x.why}}</span></sc-if></span><span class="sleft num">{{x.left}}</span></button></sc-for></div>
+<h2 class="sl first">לוח הזמנים</h2>
+<section class="card lb" aria-label="לוח הזמנים">
+<div class="lfix" role="list" aria-label="זמנים קבועים"><sc-for list="{{bFixed}}" as="f" hint-placeholder-count="4"><button class="lf {{f.cls}}" role="listitem" onClick="{{f.pick}}" aria-label="{{f.aria}}"><span class="ll">{{f.label}}</span><b class="lt num">{{f.time}}</b></button></sc-for></div>
+<sc-if value="{{bHasSmart}}" hint-placeholder-val="{{ true }}">
+<div class="lrow" role="list" aria-label="חכם לעכשיו"><span class="lk">[[ic:sparkle]]<span>עכשיו</span></span><sc-for list="{{bSmart}}" as="x" hint-placeholder-count="2"><button class="lc sm {{x.cls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for></div>
 </sc-if>
-<sc-if value="{{sClosed}}" hint-placeholder-val="{{ true }}">
-<div role="list" aria-label="הבאים בתור"><sc-for list="{{sTop}}" as="x" hint-placeholder-count="3"><button class="srow {{x.cls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span class="stime num">{{x.time}}</span><span class="smeta"><span class="stitle">{{x.title}}</span><sc-if value="{{x.hasWhy}}" hint-placeholder-val="{{ true }}"><span class="swhy">{{x.why}}</span></sc-if></span><span class="sleft num">{{x.left}}</span></button></sc-for></div>
-</sc-if>
-<button class="smore" onClick="{{sToggle}}" aria-expanded="{{sOpen}}">{{sMoreLabel}}</button>
-</section>
-</sc-if>
-
-<sc-if value="{{schedB}}" hint-placeholder-val="{{ false }}">
-<section class="card pad tln" aria-label="ציר התקופה">
-<sc-if value="{{sHasBadges}}" hint-placeholder-val="{{ true }}"><div class="badges in"><sc-for list="{{sBadges}}" as="b" hint-placeholder-count="2"><span class="bdg {{b.tone}}">[[icB:b]]<span>{{b.text}}</span></span></sc-for></div></sc-if>
-<div class="tlh"><b>{{sCur.name}}</b><span class="cap num">{{sCur.endsLine}}</span></div>
-<div class="track" role="img" aria-label="{{sTrackAria}}"><i class="fill" style="width: {{sNowPct}}%"></i><sc-for list="{{sTicks}}" as="k" hint-placeholder-count="3"><i class="tk {{k.cls}}" style="right: {{k.pos}}%"></i></sc-for><i class="nowdot" style="right: {{sNowPct}}%"></i></div>
-<div class="tends cap num"><span>{{sCur.range}}</span></div>
-<sc-if value="{{sHasNext}}" hint-placeholder-val="{{ true }}">
-<button class="tnext {{sNext.cls}}" onClick="{{sNext.pick}}" aria-label="{{sNext.aria}}"><span class="tile accent l44">[[icA:sNext]]</span><span class="tnm"><span class="cap">הבא</span><b>{{sNext.title}}</b><sc-if value="{{sNext.hasWhy}}" hint-placeholder-val="{{ true }}"><span class="swhy">{{sNext.why}}</span></sc-if></span><span class="tnt"><b class="num">{{sNext.time}}</b><span class="num">{{sNext.left}}</span></span></button>
-</sc-if>
-<sc-if value="{{sHasThen}}" hint-placeholder-val="{{ true }}">
-<div class="tthen" role="list" aria-label="אחר כך"><sc-for list="{{sThen}}" as="x" hint-placeholder-count="3"><button class="tchip {{x.cls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.title}}</span><b class="num">{{x.time}}</b></button></sc-for></div>
-</sc-if>
-</section>
-</sc-if>
-
-<sc-if value="{{schedC}}" hint-placeholder-val="{{ false }}">
-<section class="card ag" aria-label="סדר היום לפי תקופות">
-<sc-if value="{{sHasBadges}}" hint-placeholder-val="{{ true }}"><div class="badges in top"><sc-for list="{{sBadges}}" as="b" hint-placeholder-count="2"><span class="bdg {{b.tone}}">[[icB:b]]<span>{{b.text}}</span></span></sc-for></div></sc-if>
-<sc-for list="{{sPeriods}}" as="p" hint-placeholder-count="5">
-<div class="agp st-{{p.state}}">
-<button class="agh" onClick="{{p.toggle}}" aria-expanded="{{p.open}}" aria-label="{{p.aria}}"><span class="tile l40 {{p.tileCls}}">[[icA:p]]</span><span class="agm"><b>{{p.name}}</b><span class="cap num">{{p.sumLine}}</span></span><span class="agr num">{{p.range}}</span><span class="agc">[[ia:chevronLeft]]</span></button>
-<sc-if value="{{p.open}}" hint-placeholder-val="{{ false }}"><div class="agl" role="list"><sc-for list="{{p.items}}" as="x" hint-placeholder-count="3"><button class="srow sm {{x.cls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span class="stime num">{{x.time}}</span><span class="smeta"><span class="stitle">{{x.title}}</span><sc-if value="{{x.hasWhy}}" hint-placeholder-val="{{ true }}"><span class="swhy">{{x.why}}</span></sc-if></span><span class="sleft num">{{x.left}}</span></button></sc-for></div></sc-if>
-</div>
-</sc-for>
+<div class="lrow" role="list" aria-label="הזמנים שלי"><span class="lk">[[ic:star]]<span>שלי</span></span><sc-for list="{{bMine}}" as="x" hint-placeholder-count="1"><button class="lc mine {{x.cls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for><button class="ladd" onClick="{{bAdd}}" aria-label="{{bAddLabel}}">+</button></div>
 </section>
 </sc-if>

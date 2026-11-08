@@ -1,5 +1,5 @@
 // Writes the four direction boards from boards/HomeNow.html: each is a copy with its title and
-// `const SCHED` changed (a, b, c, d; `none` in HomeNow). Never edit the generated boards by hand.
+// `const SCHED` changed (a, b, c; `none` in HomeNow). Never edit the generated boards by hand.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,10 +7,9 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const now = readFileSync(join(here, 'boards', 'HomeNow.html'), 'utf8');
 const variants = [
-  { board: 'SchedNext', sched: 'a', title: 'שלושת הבאים' },
-  { board: 'SchedRail', sched: 'b', title: 'ציר התקופה' },
-  { board: 'SchedDay', sched: 'c', title: 'סדר היום לפי תקופות' },
-  { board: 'SchedChips', sched: 'd', title: 'רצועה חכמה בקשת' },
+  { board: 'BoardCard', sched: 'a', title: 'לוח בכרטיס מתחת לקשת' },
+  { board: 'BoardStrip', sched: 'b', title: 'לוח ברצועת הקשת' },
+  { board: 'BoardTop', sched: 'c', title: 'לוח בראש האפליקציה' },
 ];
 for (const v of variants) {
   let out = now;

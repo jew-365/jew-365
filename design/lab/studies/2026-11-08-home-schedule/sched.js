@@ -160,80 +160,105 @@
     return { items, future, pick, cur: periods[ci], periods, badges, horizonEnd, t };
   }
 
+  // The board's three layers. FIXED: the times always shown. SMART: what the hour and the period add.
+  // MINE: the times the user pinned, chosen from suggestions read off their own mitzvot and marks.
+  boardCatalog() {
+    const z = this.day().z;
+    const D = this.data();
+    const key = this.dayKey();
+    let fri = null;
+    for (let i = 0; i < 7 && !fri; i++) {
+      const b = D.blocks.find((x) => x.erev === this.shiftDate(key, i));
+      if (b) fri = { m: b.candle + i * 1440, day: i === 0 ? 'היום' : D.days[b.erev].weekday.replace('יום ', '') };
+    }
+    const on = (id) => this.items().some((x) => x.id === id);
+    return [
+      { id: 'misheyakir', label: 'זמן תו״ט', m: z.misheyakir, why: on('tefillin') ? 'אתה מניח תפילין' : '', group: 'בוקר' },
+      { id: 'sofShmaMA', label: 'סוף ק״ש מג״א', m: z.sofShmaMA, why: on('shma') ? 'קריאת שמע בבוקר מופעלת אצלך' : '', group: 'בוקר' },
+      { id: 'sofTfila', label: 'סוף זמן תפילה', m: z.sofTfila, why: on('shacharit') ? 'שחרית מופעלת אצלך' : '', group: 'בוקר' },
+      { id: 'alot', label: 'עלות השחר', m: z.alot, why: '', group: 'בוקר' },
+      { id: 'chatzot', label: 'חצות היום', m: z.chatzot, why: '', group: 'צהריים' },
+      { id: 'minchaG', label: 'מנחה גדולה', m: z.minchaG, why: '', group: 'צהריים' },
+      { id: 'plag', label: 'פלג המנחה', m: z.plag, why: on('mincha') ? 'סימנת מנחה אחרי פלג השבוע' : '', group: 'צהריים' },
+      { id: 'chatzotL', label: 'חצות הלילה', m: z.chatzotL, why: on('shmaNight') ? 'ק״ש על המיטה מופעלת אצלך' : '', group: 'לילה' },
+      { id: 'candleWeek', label: 'הדלקת נרות', m: fri ? fri.m : null, sub: fri ? fri.day : '', why: 'כדי לתכנן את השבוע', group: 'שבוע' },
+    ].filter((c) => c.m != null);
+  }
+
   schedVals(zchips, kit) {
     const s = this.state;
+    const t = this.now();
+    const z = this.day().z;
     const plan = this.schedPlan();
-    const top = plan.pick(SCHED === 'b' ? 4 : 3);
-    const cur = plan.cur;
-    const next = top[0] || null;
-    const curItems = cur.items;
-    const span = Math.max(60, cur.E - cur.S);
-    const ticks = curItems.map((x) => ({ cls: x.cls + (next && x.id === next.id ? ' nx' : ''), pos: Math.max(0, Math.min(100, (100 * (x.S - cur.S)) / span)).toFixed(1) }));
-    const openP = s.openP || {};
-    const periods = plan.periods.map((p) => {
-      const open = p.id in openP ? openP[p.id] : p.isNow;
-      return {
-        ...p,
-        open,
-        closed: !open,
-        tileCls: p.isNow ? 'accent' : '',
-        sumLine: p.isNow ? 'עכשיו · ' + p.endsLine : p.isPast ? 'עבר · ' + (p.count === 1 ? 'זמן אחד' : p.count + ' זמנים') : p.brief,
-        toggle: () => this.setState({ openP: { ...openP, [p.id]: !open } }),
-        aria: p.name + ', ' + p.range + (open ? ', פתוח' : ', סגור'),
-      };
+    const clock = (m) => this.clock(m * 60);
+    const pins = s.pins || ['misheyakir'];
+    const FIXED = [
+      { id: 'netz', label: 'הנץ', m: z.netz },
+      { id: 'sofShma', label: 'סוף ק״ש', m: z.sofShma },
+      { id: 'shkia', label: 'שקיעה', m: z.shkia },
+      { id: 'tzeit', label: 'צאה״כ', m: z.tzeit },
+    ];
+    const nextFixed = FIXED.find((f) => f.m * 60 > t);
+    const fixed = FIXED.map((f) => {
+      const past = f.m * 60 <= t;
+      const isNext = f === nextFixed;
+      return { ...f, time: clock(f.m), cls: (past ? 'past' : '') + (isNext ? ' nx' : ''), aria: f.label + ' ' + clock(f.m) + (past ? ', עבר' : isNext ? ', הבא' : ''), pick: () => this.scrub(f.m * 60) };
     });
+
+    const taken = new Set([...FIXED.map((f) => f.id), ...pins]);
+    const tagOf = (x) => (x.season ? (x.id === 'candle' ? 'ערב שבת' : x.id === 'chanukah' ? 'חנוכה' : x.id === 'fastEnd' ? 'צום' : x.id === 'exit' ? 'מוצ״ש' : x.id === 'kl' ? 'קידוש לבנה' : 'היום') : plan.cur.name);
+    const smartSrc = plan.future.filter((x) => !(x.zid && taken.has(x.zid)) && !taken.has(x.id) && (x.season || x.S <= plan.horizonEnd) && (x.id !== 'alot' || plan.cur.id === 'night'));
+    const ranked = smartSrc.slice().sort((a, b) => b.score - a.score || a.S - b.S).slice(0, 2).sort((a, b) => a.S - b.S);
+    const smart = ranked.map((x) => ({
+      label: x.title.replace(/ · .*/, ''),
+      time: x.time,
+      tag: tagOf(x),
+      cls: (x.season ? 'season' : '') + (x.urgent ? ' urgent' : ''),
+      aria: x.title + ' ' + x.time + ', ' + x.left + ', ' + tagOf(x),
+      pick: x.pick,
+      isTime: true,
+    }));
+    const info = ranked.some((r) => r.season) ? [] : plan.badges;
+    if (smart.length < 3 && info[0]) smart.push({ label: info[0].text.split(' · ')[0], time: info[0].text.split(' · ').slice(1).join(' · '), tag: '', cls: 'info', aria: info[0].text, pick: () => this.showToast({ text: info[0].text }), isTime: false });
+
+    const cat = this.boardCatalog();
+    const toggle = (id) => () => this.setState({ pins: pins.includes(id) ? pins.filter((p) => p !== id) : [...pins, id] });
+    const mine = pins.map((id) => cat.find((c) => c.id === id)).filter(Boolean).map((c) => ({
+      label: c.label + (c.sub ? ' · ' + c.sub : ''),
+      time: clock(c.m),
+      cls: c.m * 60 <= t && c.id !== 'candleWeek' ? 'past' : '',
+      aria: c.label + ' ' + clock(c.m) + ', נעוץ על ידך',
+      pick: () => (c.id === 'candleWeek' ? this.showToast({ text: 'הדלקת נרות ' + (c.sub || '') + ' ' + clock(c.m) }) : this.scrub(c.m * 60)),
+    }));
+    const row = (c) => {
+      const pinned = pins.includes(c.id);
+      return { ...c, time: clock(c.m) + (c.sub ? ' · ' + c.sub : ''), pinned, hasWhy: Boolean(c.why), act: pinned ? 'הסרה' : 'הוספה', aria: (pinned ? 'הסרה מהלוח: ' : 'הוספה ללוח: ') + c.label, toggle: toggle(c.id) };
+    };
+    const suggested = cat.filter((c) => c.why).map(row);
+    const more = cat.filter((c) => !c.why).map(row);
+
     const out = {
       schedA: SCHED === 'a',
       schedB: SCHED === 'b',
       schedC: SCHED === 'c',
-      schedD: SCHED === 'd',
-      schedCard: SCHED === 'a' || SCHED === 'b' || SCHED === 'c',
-      openFirstCls: SCHED === 'a' || SCHED === 'b' || SCHED === 'c' ? '' : 'first',
-      sCur: { ...cur, tileCls: 'accent' },
-      sTitle: 'לוח הזמנים שלך',
-      sBadges: plan.badges,
-      sHasBadges: plan.badges.length > 0,
-      sTop: top,
-      sHasTop: top.length > 0,
-      sNoTop: top.length === 0,
-      sAll: plan.items,
-      sOpen: Boolean(s.sAll),
-      sClosed: !s.sAll,
-      sMoreLabel: s.sAll ? 'פחות' : 'כל זמני היום (' + plan.items.length + ')',
-      sToggle: () => this.setState({ sAll: !s.sAll }),
-      sNext: next || {},
-      sHasNext: Boolean(next),
-      sThen: top.slice(1),
-      sHasThen: top.length > 1,
-      sTicks: ticks,
-      sNowPct: String(cur.pct),
-      sTrackAria: cur.name + ', ' + cur.range + ', עברו ' + cur.pct + ' אחוז',
-      sPeriods: periods,
+      schedCard: SCHED === 'a',
+      openFirstCls: SCHED === 'a' ? '' : 'first',
+      bFixed: fixed,
+      bSmart: smart,
+      bHasSmart: smart.length > 0,
+      bMine: mine,
+      bHasMine: mine.length > 0,
+      bPeriod: plan.cur.name,
+      bAdd: () => this.setState({ pinSheet: true }),
+      bAddLabel: mine.length ? 'עריכת הזמנים שלי' : 'הוספת זמן ללוח',
+      pinOn: Boolean(s.pinSheet),
+      pinClose: () => this.setState({ pinSheet: false }),
+      pinSuggested: suggested,
+      pinMore: more,
     };
-    if (SCHED === 'd') {
-      const byZ = Object.fromEntries(zchips.map((c) => [c.id, c]));
-      if (s.allChips) {
-        out.zchips = [...zchips, { id: 'less', label: 'פחות', time: '−', cls: '', tcls: 'b', pressed: false, ink: kit.inkPlain, aria: 'רק הזמנים החשובים', style: kit.plainBg, pick: () => this.setState({ allChips: false }) }];
-      } else {
-        const chips = top.slice(0, 4).map((x, i) => {
-          const base = x.zid && byZ[x.zid];
-          return {
-            id: x.id,
-            label: (i === 0 ? 'הבא · ' : '') + (x.season ? x.title.replace(/ · .*/, '') : base ? base.label.replace(/^הבא · /, '') : x.title),
-            time: x.time,
-            cls: i === 0 ? 'mk' : '',
-            tcls: 'b',
-            pressed: false,
-            ink: x.season || i === 0 ? kit.inkNext : kit.inkPlain,
-            aria: x.aria,
-            style: x.season || i === 0 ? kit.nextBg : kit.plainBg,
-            pick: () => this.scrub(x.S),
-          };
-        });
-        const badges = plan.badges.map((b) => ({ id: 'b' + b.text, label: b.text.split(' · ')[0], time: b.text.split(' · ').slice(1).join(' · '), cls: '', tcls: '', pressed: false, ink: kit.inkNext, aria: b.text, style: kit.nextBg, pick: () => this.showToast({ text: b.text }) }));
-        const more = zchips.length - chips.filter((x) => x.id in byZ).length;
-        out.zchips = [...chips, ...badges, { id: 'all', label: 'כל הזמנים', time: '+' + more, cls: '', tcls: 'b', pressed: false, ink: kit.inkPlain, aria: 'כל ' + zchips.length + ' זמני היום', style: kit.plainBg, pick: () => this.setState({ allChips: true }) }];
-      }
+    if (SCHED === 'b') {
+      const chip = (x, kind) => ({ id: kind + x.label, label: x.label, time: x.time, cls: (kind === 'fixed' && x.cls.includes('nx') ? 'mk ' : '') + 'k-' + kind, tcls: x.cls.includes('past') ? '' : 'b', pressed: false, ink: kind === 'smart' ? kit.inkNext : kit.inkPlain, aria: x.aria, style: kind === 'smart' ? kit.nextBg : kit.plainBg, pick: x.pick });
+      out.zchips = [...fixed.map((x) => chip(x, 'fixed')), ...smart.map((x) => chip(x, 'smart')), ...mine.map((x) => chip(x, 'mine')), { id: 'add', label: 'שלי', time: '+', cls: '', tcls: 'b', pressed: false, ink: kit.inkPlain, aria: 'הוספת זמן ללוח', style: kit.plainBg, pick: () => this.setState({ pinSheet: true }) }].map((c, i, a) => (i === a.length - 1 ? { ...c, cls: 'k-add' } : c));
     }
     return out;
   }

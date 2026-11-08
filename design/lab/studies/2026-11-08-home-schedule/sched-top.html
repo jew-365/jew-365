@@ -1,0 +1,6 @@
+<sc-if value="{{schedC}}" hint-placeholder-val="{{ false }}">
+<section class="ltop" aria-label="לוח הזמנים">
+<div class="lfix" role="list" aria-label="זמנים קבועים"><sc-for list="{{bFixed}}" as="f" hint-placeholder-count="4"><button class="lf {{f.cls}}" role="listitem" onClick="{{f.pick}}" aria-label="{{f.aria}}"><span class="ll">{{f.label}}</span><b class="lt num">{{f.time}}</b></button></sc-for></div>
+<div class="lrow one" role="list" aria-label="עכשיו ושלי"><sc-for list="{{bSmart}}" as="x" hint-placeholder-count="2"><button class="lc sm {{x.cls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}">[[ic:sparkle]]<span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for><sc-for list="{{bMine}}" as="x" hint-placeholder-count="1"><button class="lc mine {{x.cls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}">[[ic:star]]<span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for><button class="ladd" onClick="{{bAdd}}" aria-label="{{bAddLabel}}">+</button></div>
+</section>
+</sc-if>

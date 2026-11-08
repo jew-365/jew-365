@@ -19,3 +19,7 @@ They live once, in [sched.js](sched.js) (`schedPlan()`, `schedVals()`):
 ## Boards
 
 One source, [boards/HomeNow.html](boards/HomeNow.html); [gen-boards.mjs](gen-boards.mjs) writes the four directions by `const SCHED`. The template format and runtime rules are the lab's ([../../AGENTS.md](../../AGENTS.md)); the markup of the schedule card is [sched.html](sched.html), its styles [sched.css](sched.css).
+
+## Round 2
+
+The owner, after round 1: "התכוונתי ... לוח קטן שיציג זמנים רלוונטים לאותו הרגע ומצומצם עבור דף הבית או ראש האפליקציה", then the three layers: fixed times always shown, smart times by the hour and the period, and times the user pins from suggestions fitted to them. Round 2 keeps round 1's engine for the smart layer, takes at most two of its times, and shows one board in three placements (a card under the hero, the hero's strip, a band at the top of the app).

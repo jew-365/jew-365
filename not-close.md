@@ -499,11 +499,11 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done:** 2026-11-08, verified by `typecheck`, `lint`, `format:check`, `check:dox`, the full suite (6372 passed), `test:tz` of the hero, home, the new settings suite, the search and the smoke suites, and a web export: Settings › זמני הלכה with its switches, and home without the two zmanim hidden.
   - **Status:** Version 1.0.21 · Committed: `3ea0e48` feat(zmanim): name misheyakir זמן תו״ט, and a זמני הלכה section · Pushed: yes · Live: preview update `1.0.21-59` (group `d68a442e-a346-4f80-a923-1074be6fdc3a`, from `cca7a41`), not production · Channel: preview.
 
-- [ ] A condensed, smart schedule per period on home: design study, waiting for the owner's pick
-  - **Flag:** `OTA` (once a direction is picked and built).
-  - **Source:** the owner's request of 2026-11-08: "לוח זמנים נוכחי מצומצם רלוונטי חכם פר תקופה למסך הבית".
-  - **What it is:** the design study [design/lab/studies/2026-11-08-home-schedule/](design/lab/studies/2026-11-08-home-schedule/AGENTS.md): four directions (א three next times in a card, ב the period as a track, ג the day's five periods, ד a smart zmanim strip in the hero) beside today's home, all on one rule set: the part of the day (שחר, בוקר, צהריים, ערב, לילה) and the time of year (ערב שבת, מוצאי שבת, ראש חודש, חנוכה, קידוש לבנה, a fast), with a time that ends an unmarked mitzvah ranked first. The data is computed by the app's own code. Gallery https://claude.ai/artifact/RWquxzv3PmRkZhUHW5K54o, canvas https://claude.ai/artifact/BDc4e5AT1m23BrLSEHR7mT.
-  - **Waiting on:** the owner's pick of a direction (or a mix), then building it in the app under [src/AGENTS.md](src/AGENTS.md), with its search item and guide entry.
+- [ ] A small schedule board on home: fixed, smart and mine; design study, waiting for the owner's pick
+  - **Flag:** `OTA` (once a placement is picked and built).
+  - **Source:** the owner's request of 2026-11-08 ("לוח זמנים נוכחי מצומצם רלוונטי חכם פר תקופה למסך הבית"), refined the same day: a small board of fixed times always shown, smart times by the hour and the period, and times the user pins from suggestions fitted to them.
+  - **What it is:** round 2 of the design study [design/lab/studies/2026-11-08-home-schedule/](design/lab/studies/2026-11-08-home-schedule/AGENTS.md): one board in three layers (הנץ, סוף ק״ש, שקיעה, צאה״כ always; up to two times of the moment, such as סוף זמן תפילה, הדלקת נרות, נרות חנוכה, סוף הצום; the user's pins from a sheet of suggestions), in three placements: a card under the hero, the hero's strip, a band at the top of the app. Gallery https://claude.ai/artifact/RWquxzv3PmRkZhUHW5K54o, canvas https://claude.ai/artifact/BDc4e5AT1m23BrLSEHR7mT.
+  - **Waiting on:** the owner's pick of a placement and of the four fixed times, then building it in the app under [src/AGENTS.md](src/AGENTS.md) (the pins in `useUserStore`, beside `hiddenZmanim`), with its search item and guide entry.
 
 ## Bugs
 
