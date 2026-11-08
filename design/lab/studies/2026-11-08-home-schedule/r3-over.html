@@ -1,0 +1,30 @@
+<sc-if value="{{sb.d}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{uiOpen}}" hint-placeholder-val="{{ false }}"><button class="pscrim" onClick="{{uiClose}}" aria-label="סגירה" tabindex="-1"></button></sc-if>
+<section class="curt {{uiLevel}} {{uiOpenCls}}" aria-hidden="{{uiClosed}}" aria-label="לוח הזמנים">
+<div class="curt-in"><p class="curt-t">לוח הזמנים · {{bPeriod}}</p><!--LAYERS--></div>
+<button class="curt-h" onClick="{{uiClose}}" aria-label="סגירת הלוח"><i></i></button>
+</section>
+</sc-if>
+
+<sc-if value="{{sb.e}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{uiOpen}}" hint-placeholder-val="{{ false }}"><button class="pscrim soft" onClick="{{uiClose}}" aria-label="סגירה" tabindex="-1"></button></sc-if>
+<section class="isl {{uiOpenCls}}" aria-label="לוח הזמנים">
+<button class="isl-pill" onClick="{{uiToggle}}" aria-expanded="{{uiOpen}}"><span class="cdot {{bNext.lcls}}"></span><span>{{bNext.label}}</span><b class="num">{{bNext.time}}</b><span class="num isl-l">{{bNext.left}}</span></button>
+<div class="isl-body"><!--LAYERS--></div>
+</section>
+</sc-if>
+
+<sc-if value="{{sb.j}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{uiOpen}}" hint-placeholder-val="{{ false }}">
+<button class="pscrim" onClick="{{uiClose}}" aria-label="סגירה" tabindex="-1"></button>
+<section class="psheet" role="dialog" aria-modal="true" aria-label="לוח הזמנים"><div class="psheet-head"><span class="pgrab" aria-hidden="true"></span><h2 class="psheet-t">לוח הזמנים · {{bPeriod}}</h2><button class="pclose" onClick="{{uiClose}}" aria-label="סגירה">[[ic:close]]</button></div><div class="psheet-body"><!--LAYERS--></div></section>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{sb.l}}" hint-placeholder-val="{{ false }}">
+<section class="drw {{uiLevel}}" aria-label="לוח הזמנים">
+<button class="drw-h" onClick="{{uiLevelUp}}" aria-label="הגדלת הלוח"><i></i></button>
+<div class="drw-peek"><span class="cdot {{bNext.lcls}}"></span><span class="drw-n">{{bNext.label}}</span><b class="num">{{bNext.time}}</b><span class="num drw-l">{{bNext.left}}</span><sc-for list="{{bAfter}}" as="x" hint-placeholder-count="2"><span class="drw-a"><span>{{x.label}}</span><b class="num">{{x.time}}</b></span></sc-for></div>
+<div class="drw-body"><!--LAYERS--><p class="plabel">כל זמני היום</p><div class="drw-all"><sc-for list="{{bAll}}" as="x" hint-placeholder-count="10"><button class="snr {{x.lcls}}" onClick="{{x.pick}}"><span>{{x.label}}</span><i class="num">{{x.layerName}}</i><b class="num">{{x.time}}</b></button></sc-for></div></div>
+</section>
+</sc-if>

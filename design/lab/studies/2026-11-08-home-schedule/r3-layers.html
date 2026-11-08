@@ -1,0 +1,8 @@
+<sc-for list="{{bLayers}}" as="L" hint-placeholder-count="3">
+<div class="lyr {{L.cls}}">
+<div class="lyh"><b>{{L.name}}</b><span>{{L.sub}}</span></div>
+<sc-if value="{{L.has}}" hint-placeholder-val="{{ true }}"><div class="lyg"><sc-for list="{{L.items}}" as="x" hint-placeholder-count="4"><button class="lyi {{x.lcls}}" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for></div></sc-if>
+<sc-if value="{{L.empty}}" hint-placeholder-val="{{ false }}"><p class="lye">אין כרגע</p></sc-if>
+</div>
+</sc-for>
+<button class="lyadd" onClick="{{bAdd}}">+ הוספת זמן ללוח שלי</button>

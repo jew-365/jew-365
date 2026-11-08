@@ -216,7 +216,7 @@
 .tab.on .tu{background:var(--gold)}
 </style>
 <template>
-<div class="scroll" id="scroll">
+<div class="scroll {{uiCollapsed}}" id="scroll" onScroll="{{onScroll}}">
 <!--SCHEDTOP-->
 
 <section class="hero" aria-label="קשת היום וזמני היום" style="{{skyStyle}}">

@@ -1,5 +1,5 @@
 // Writes the four direction boards from boards/HomeNow.html: each is a copy with its title and
-// `const SCHED` changed (a, b, c; `none` in HomeNow). Never edit the generated boards by hand.
+// `const SCHED` changed (a to o; `none` in HomeNow). Never edit the generated boards by hand.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,6 +10,18 @@ const variants = [
   { board: 'BoardCard', sched: 'a', title: 'לוח בכרטיס מתחת לקשת' },
   { board: 'BoardStrip', sched: 'b', title: 'לוח ברצועת הקשת' },
   { board: 'BoardTop', sched: 'c', title: 'לוח בראש האפליקציה' },
+  { board: 'R3Curtain', sched: 'd', title: 'וילון שיורד מלמעלה' },
+  { board: 'R3Island', sched: 'e', title: 'אי דינמי' },
+  { board: 'R3Stack', sched: 'f', title: 'ערימת שכבות' },
+  { board: 'R3Bento', sched: 'g', title: 'בנטו' },
+  { board: 'R3Shul', sched: 'h', title: 'לוח בית הכנסת' },
+  { board: 'R3Collapse', sched: 'i', title: 'כותרת שמתכווצת בגלילה' },
+  { board: 'R3Ticker', sched: 'j', title: 'טיקר מתחלף' },
+  { board: 'R3Wallet', sched: 'k', title: 'ארנק כרטיסים' },
+  { board: 'R3Drawer', sched: 'l', title: 'מגירה מלמטה' },
+  { board: 'R3Snap', sched: 'm', title: 'קרוסלת שכבות' },
+  { board: 'R3Ribbon', sched: 'n', title: 'סרגל הזמן של היום' },
+  { board: 'R3Flip', sched: 'o', title: 'כרטיס מתהפך' },
 ];
 for (const v of variants) {
   let out = now;

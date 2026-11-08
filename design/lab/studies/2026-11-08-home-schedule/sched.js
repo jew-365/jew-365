@@ -242,7 +242,8 @@
       schedB: SCHED === 'b',
       schedC: SCHED === 'c',
       schedCard: SCHED === 'a',
-      openFirstCls: SCHED === 'a' ? '' : 'first',
+      sb: Object.fromEntries('abcdefghijklmno'.split('').map((k) => [k, SCHED === k])),
+      openFirstCls: 'acfghkmno'.includes(SCHED) && SCHED !== 'none' ? '' : 'first',
       bFixed: fixed,
       bSmart: smart,
       bHasSmart: smart.length > 0,
@@ -256,6 +257,85 @@
       pinSuggested: suggested,
       pinMore: more,
     };
+    // Round 3: values the twelve placements share.
+    const ui = s.ui || {};
+    const setUi = (k, v) => () => this.setState({ ui: { ...(this.state.ui || {}), [k]: typeof v === 'function' ? v((this.state.ui || {})[k]) : v } });
+    const A0 = this.dayStart();
+    const span = this.dayEnd() - A0;
+    const pos = (S) => Math.max(0, Math.min(100, (100 * (S - A0)) / span)).toFixed(2);
+    const withS = (arr, src, layer, layerName) => arr.map((x, i) => {
+      const S = src[i];
+      const leftTxt = S > t ? 'בעוד ' + this.leftText(S - t) : 'עבר';
+      return { ...x, S, layer, layerName, left: leftTxt, pos: pos(S), lcls: 'ly-' + layer + (S <= t ? ' past' : '') };
+    });
+    const fixedL = withS(fixed, FIXED.map((f) => f.m * 60), 'fixed', 'קבוע');
+    const smartTimes = smart.filter((x) => x.isTime);
+    const smartL = withS(smartTimes, ranked.map((x) => x.S), 'smart', 'עכשיו');
+    const minePinned = pins.map((id) => cat.find((c) => c.id === id)).filter(Boolean);
+    const mineL = withS(mine, minePinned.map((c) => c.m * 60), 'mine', 'שלי');
+    const infoChips = smart.filter((x) => !x.isTime);
+    const used = new Set([...FIXED.map((f) => f.id), ...pins, ...ranked.map((x) => x.zid).filter(Boolean)]);
+    const others = cat.filter((c) => !used.has(c.id) && c.id !== 'candleWeek').map((c) => ({ label: c.label, time: clock(c.m), S: c.m * 60, layer: 'other', layerName: '', pick: () => this.scrub(c.m * 60) }));
+    const all = [...fixedL, ...smartL, ...mineL, ...withS(others, others.map((o) => o.S), 'other', '')].filter((x) => x.S < this.dayEnd()).sort((a, b) => a.S - b.S);
+    const future = [...fixedL, ...smartL, ...mineL].filter((x) => x.S > t).sort((a, b) => a.S - b.S);
+    const nx = future[0] || null;
+    const after = future.slice(1, 3);
+    const layers = [
+      { id: 'fixed', name: 'קבועים', sub: 'תמיד בלוח', items: fixedL, has: true, cls: 'ly-fixed' },
+      { id: 'smart', name: 'עכשיו', sub: plan.cur.name + (plan.badges[0] ? ' · ' + plan.badges[0].text.split(' · ')[0] : ''), items: smartL, has: smartL.length > 0, cls: 'ly-smart' },
+      { id: 'mine', name: 'שלי', sub: 'הזמנים שבחרת', items: mineL, has: mineL.length > 0, cls: 'ly-mine' },
+    ].map((L) => ({ ...L, empty: !L.has, open: ui['L' + L.id] !== false, toggle: setUi('L' + L.id, (v) => v === false), first: L.items[0] || {}, count: L.items.length }));
+    const page = ui.page || (smartL.length ? 'smart' : 'fixed');
+    const tick = Math.floor(this.state.e / 4);
+    const tickerSrc = [nx && { ...nx, tag: 'הבא' }, ...smartL.filter((x) => x.S > t).map((x) => ({ ...x, tag: 'עכשיו · ' + plan.cur.name })), ...mineL.filter((x) => x.S > t).map((x) => ({ ...x, tag: 'שלי' })), ...infoChips.map((x) => ({ ...x, tag: 'התקופה', left: '' }))].filter(Boolean);
+    const tk = tickerSrc.length ? tickerSrc[tick % tickerSrc.length] : null;
+    const ringPct = nx ? Math.max(0.04, Math.min(1, 1 - (nx.S - t) / Math.max(3600, nx.S - Math.max(A0, (all.filter((x) => x.S <= t).pop() || { S: A0 }).S)))) : 0;
+    Object.assign(out, {
+      bNext: nx || { label: 'אין עוד זמנים היום', time: '', left: '', layerName: '', lcls: '' },
+      bHasNext: Boolean(nx),
+      bAfter: after,
+      bLayers: layers,
+      bAll: all,
+      bInfo: infoChips,
+      bHasInfo: infoChips.length > 0,
+      bRingOff: (163.36 * (1 - ringPct)).toFixed(2),
+      bTicker: tk || { label: '', time: '', tag: '', left: '' },
+      bTickKey: 'tk-' + (tick % 2),
+      bDots: tickerSrc.map((_, i) => ({ cls: tk && i === tick % tickerSrc.length ? 'on' : '' })),
+      uiOpen: Boolean(ui.open),
+      uiOpenCls: ui.open ? 'open' : '',
+      uiClosed: !ui.open,
+      uiToggle: setUi('open', (v) => !v),
+      uiClose: setUi('open', false),
+      uiLevel: 'lv' + (ui.level || 0),
+      uiLevelUp: setUi('level', (v) => ((v || 0) + 1) % 3),
+      uiFlip: ui.flip ? 'flipped' : '',
+      uiFlipToggle: setUi('flip', (v) => !v),
+      uiCollapsed: ui.collapsed ? 'collapsed' : '',
+      onScroll: SCHED === 'i' ? (e) => { const c = e.currentTarget.scrollTop > 60; if (c !== Boolean((this.state.ui || {}).collapsed)) this.setState({ ui: { ...(this.state.ui || {}), collapsed: c } }); } : undefined,
+      uiWallet: ui.wallet || 'smart',
+      wallet: layers.map((L) => ({ ...L, wcls: (ui.wallet || (smartL.length ? 'smart' : 'fixed')) === L.id ? 'w-open' : 'w-shut', isOpen: (ui.wallet || (smartL.length ? 'smart' : 'fixed')) === L.id, pick: setUi('wallet', L.id) })),
+      stackPages: layers.map((L) => ({ ...L, pcls: page === L.id ? 'on' : '', sel: page === L.id, pick: setUi('page', L.id) })),
+      ribbonNow: pos(t),
+      ribbonMarks: (() => {
+        const ends = [-1e9, -1e9, -1e9];
+        return all.map((x) => {
+          const px = (Number(pos(x.S)) / 100) * 1500;
+          let r = ends.findIndex((e) => px - e >= 66);
+          if (r < 0) r = ends.indexOf(Math.min(...ends));
+          ends[r] = px;
+          return { ...x, mcls: 'ly-' + x.layer + (x.S <= t ? ' past' : ''), top: 36 + r * 50 };
+        });
+      })(),
+      ribbonHours: Array.from({ length: Math.ceil(span / 3600) + 1 }, (_, i) => { const S = Math.ceil(A0 / 3600) * 3600 + i * 3600; return { pos: pos(S), label: this.clock(S).slice(0, 2) }; }).filter((h) => Number(h.pos) < 100),
+    });
+    if (SCHED === 'n' && !this._rib) {
+      this._rib = true;
+      setTimeout(() => {
+        const el = document.getElementById('ribbon');
+        if (el) el.scrollLeft = -Math.max(0, (Number(pos(t)) / 100) * el.scrollWidth - el.clientWidth * 0.35);
+      }, 120);
+    }
     if (SCHED === 'b') {
       const chip = (x, kind) => ({ id: kind + x.label, label: x.label, time: x.time, cls: (kind === 'fixed' && x.cls.includes('nx') ? 'mk ' : '') + 'k-' + kind, tcls: x.cls.includes('past') ? '' : 'b', pressed: false, ink: kind === 'smart' ? kit.inkNext : kit.inkPlain, aria: x.aria, style: kind === 'smart' ? kit.nextBg : kit.plainBg, pick: x.pick });
       out.zchips = [...fixed.map((x) => chip(x, 'fixed')), ...smart.map((x) => chip(x, 'smart')), ...mine.map((x) => chip(x, 'mine')), { id: 'add', label: 'שלי', time: '+', cls: '', tcls: 'b', pressed: false, ink: kit.inkPlain, aria: 'הוספת זמן ללוח', style: kit.plainBg, pick: () => this.setState({ pinSheet: true }) }].map((c, i, a) => (i === a.length - 1 ? { ...c, cls: 'k-add' } : c));

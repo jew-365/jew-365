@@ -67,13 +67,14 @@ const H = 844;
 const GX = 80;
 const boards = {};
 const notes = {
-  title1: { x: 0, y: -300, text: 'מסך הבית · לוח זמנים קטן: קבוע, חכם ושלי', kind: 'title1', maxW: dirs.length * (W + GX) },
-  howto: { x: dirs.length * (W + GX), y: 0, w: 320, size: 's', fill: 'gray', text: 'בכל לוח: Play כדי ללחוץ ולגרור. הלוח נפתח על השעה של עכשיו בירושלים. Tweaks: יום (ראש חודש, ערב שבת, מוצאי שבת, קידוש לבנה, חנוכה, ערב שבת חנוכה, עשרה בטבת), שעה קבועה ופלטה.' },
+  title1: { x: 0, y: -300, text: 'מסך הבית · לוח זמנים קטן · 12 רעיונות', kind: 'title1', maxW: 4 * (W + GX) },
+  howto: { x: 4 * (W + GX), y: 0, w: 320, size: 's', fill: 'gray', text: 'בכל לוח: Play כדי ללחוץ ולגרור. הלוח נפתח על השעה של עכשיו בירושלים. Tweaks: יום (ראש חודש, ערב שבת, מוצאי שבת, קידוש לבנה, חנוכה, ערב שבת חנוכה, עשרה בטבת), שעה קבועה ופלטה.' },
 };
 dirs.forEach((d, i) => {
-  const x = i * (W + GX);
-  boards[`${d.board}.dc.html`] = { x, y: 0, w: W, h: H, title: d.letter + ' · ' + d.name, is_interactive: true, radius: 36 };
-  notes[`n${d.board}`] = { x, y: H + 40, w: W, size: 's', fill: 'orange', text: d.letter + ' · ' + d.name + ': ' + d.fit };
+  const x = (i % 4) * (W + GX);
+  const y = Math.floor(i / 4) * (H + 360);
+  boards[`${d.board}.dc.html`] = { x, y, w: W, h: H, title: d.letter + ' · ' + d.name, is_interactive: true, radius: 36 };
+  notes[`n${d.board}`] = { x, y: y + H + 40, w: W, size: 's', fill: 'orange', text: d.letter + ' · ' + d.name + ': ' + d.fit };
 });
 const canvas = {
   v: 3,

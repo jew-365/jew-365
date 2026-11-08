@@ -1,0 +1,14 @@
+<sc-if value="{{sb.d}}" hint-placeholder-val="{{ false }}">
+<button class="cbar" onClick="{{uiToggle}}" aria-expanded="{{uiOpen}}" aria-label="פתיחת לוח הזמנים"><span class="cdot {{bNext.lcls}}"></span><span class="cbl">{{bNext.label}}</span><b class="num">{{bNext.time}}</b><span class="cbt num">{{bNext.left}}</span><span class="cbc" aria-hidden="true"></span></button>
+</sc-if>
+<sc-if value="{{sb.e}}" hint-placeholder-val="{{ false }}"><div class="isp" aria-hidden="true"></div></sc-if>
+<sc-if value="{{sb.i}}" hint-placeholder-val="{{ false }}">
+<section class="clp" aria-label="לוח הזמנים">
+<div class="clp-full"><div class="lfix" role="list"><sc-for list="{{bFixed}}" as="f" hint-placeholder-count="4"><button class="lf {{f.cls}}" role="listitem" onClick="{{f.pick}}" aria-label="{{f.aria}}"><span class="ll">{{f.label}}</span><b class="lt num">{{f.time}}</b></button></sc-for></div>
+<div class="lrow"><sc-for list="{{bSmart}}" as="x" hint-placeholder-count="2"><button class="lc sm {{x.cls}}" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for><sc-for list="{{bMine}}" as="x" hint-placeholder-count="1"><button class="lc mine {{x.cls}}" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for><button class="ladd" onClick="{{bAdd}}" aria-label="הוספת זמן">+</button></div></div>
+<div class="clp-mini" aria-hidden="true"><sc-for list="{{bFixed}}" as="f" hint-placeholder-count="4"><span class="cm {{f.cls}}"><span>{{f.label}}</span><b class="num">{{f.time}}</b></span></sc-for><sc-for list="{{bSmart}}" as="x" hint-placeholder-count="1"><span class="cm sm"><span>{{x.label}}</span><b class="num">{{x.time}}</b></span></sc-for></div>
+</section>
+</sc-if>
+<sc-if value="{{sb.j}}" hint-placeholder-val="{{ false }}">
+<button class="tkr" onClick="{{uiToggle}}" aria-label="פתיחת לוח הזמנים המלא"><span class="tkt">{{bTicker.tag}}</span><span class="tkm {{bTickKey}}"><span>{{bTicker.label}}</span><b class="num">{{bTicker.time}}</b><span class="tkl num">{{bTicker.left}}</span></span><span class="tkd" aria-hidden="true"><sc-for list="{{bDots}}" as="d" hint-placeholder-count="3"><i class="{{d.cls}}"></i></sc-for></span></button>
+</sc-if>

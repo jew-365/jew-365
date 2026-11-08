@@ -10,11 +10,13 @@ copyFileSync(join(here, '..', '..', 'runtime', 'support.js'), join(outDir, 'supp
 const DATA = readFileSync(join(here, 'data.json'), 'utf8').trim();
 const CORE_JS = readFileSync(join(here, 'core.js'), 'utf8').replace('/*DATA*/ null', DATA);
 if (CORE_JS.includes('/*DATA*/')) throw new Error('data not injected');
-const CORE_CSS = readFileSync(join(here, 'core.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'sched.css'), 'utf8').trim();
+const CORE_CSS = readFileSync(join(here, 'core.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'sched.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r3.css'), 'utf8').trim();
 const SCHED_JS = readFileSync(join(here, 'sched.js'), 'utf8');
-const SCHED_HTML = readFileSync(join(here, 'sched.html'), 'utf8').trim();
-const SCHED_TOP = readFileSync(join(here, 'sched-top.html'), 'utf8').trim();
-const SCHED_SHEET = readFileSync(join(here, 'sched-sheet.html'), 'utf8').trim();
+const SCHED_HTML = readFileSync(join(here, 'sched.html'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r3-card.html'), 'utf8').trim();
+const SCHED_TOP = readFileSync(join(here, 'sched-top.html'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r3-top.html'), 'utf8').trim();
+const LAYERS = readFileSync(join(here, 'r3-layers.html'), 'utf8').trim();
+const r3 = (f) => readFileSync(join(here, f), 'utf8').trim().split('<!--LAYERS-->').join(LAYERS);
+const SCHED_SHEET = r3('r3-over.html') + '\n' + readFileSync(join(here, 'sched-sheet.html'), 'utf8').trim();
 const MOTION = '@media (prefers-reduced-motion:reduce){.ph *,.ph *::before,.ph *::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}';
 
 const P = {

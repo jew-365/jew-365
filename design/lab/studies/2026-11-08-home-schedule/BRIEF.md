@@ -23,3 +23,7 @@ One source, [boards/HomeNow.html](boards/HomeNow.html); [gen-boards.mjs](gen-boa
 ## Round 2
 
 The owner, after round 1: "התכוונתי ... לוח קטן שיציג זמנים רלוונטים לאותו הרגע ומצומצם עבור דף הבית או ראש האפליקציה", then the three layers: fixed times always shown, smart times by the hour and the period, and times the user pins from suggestions fitted to them. Round 2 keeps round 1's engine for the smart layer, takes at most two of its times, and shows one board in three placements (a card under the hero, the hero's strip, a band at the top of the app).
+
+## Round 3
+
+The owner, after round 2: more creative examples that use the space to the full, keep the three layers, and may expand on demand, scroll, or drop like a curtain, at least ten. Twelve placements, one engine: the layers keep one colour each in every board, and every board reads the same fixed, now and mine times and the same pin sheet.

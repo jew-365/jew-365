@@ -1,0 +1,78 @@
+<sc-if value="{{sb.f}}" hint-placeholder-val="{{ false }}">
+<h2 class="sl first">לוח הזמנים</h2>
+<section class="card stk" aria-label="לוח הזמנים, שלוש שכבות">
+<div class="stk-tabs" role="tablist"><sc-for list="{{stackPages}}" as="P" hint-placeholder-count="3"><button role="tab" class="stb {{P.pcls}} {{P.cls}}" aria-selected="{{P.sel}}" onClick="{{P.pick}}">{{P.name}}<span class="num">{{P.count}}</span></button></sc-for></div>
+<sc-for list="{{stackPages}}" as="P" hint-placeholder-count="3">
+<div class="stk-p {{P.pcls}}" role="tabpanel"><sc-if value="{{P.has}}" hint-placeholder-val="{{ true }}"><div class="lyg big"><sc-for list="{{P.items}}" as="x" hint-placeholder-count="4"><button class="lyi {{x.lcls}}" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b><i class="num">{{x.left}}</i></button></sc-for></div></sc-if><sc-if value="{{P.empty}}" hint-placeholder-val="{{ false }}"><button class="lyadd" onClick="{{bAdd}}">+ הוספת זמן</button></sc-if></div>
+</sc-for>
+</section>
+</sc-if>
+
+<sc-if value="{{sb.g}}" hint-placeholder-val="{{ false }}">
+<h2 class="sl first">לוח הזמנים</h2>
+<section class="bento" aria-label="לוח הזמנים">
+<button class="bt big {{bNext.lcls}}" onClick="{{bNext.pick}}" aria-label="{{bNext.aria}}"><span class="btl">הבא · {{bNext.layerName}}</span><span class="btr"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="mt" cx="32" cy="32" r="26"></circle><circle class="mp" cx="32" cy="32" r="26" transform="rotate(-90 32 32)" stroke-dasharray="163.36" stroke-dashoffset="{{bRingOff}}"></circle></svg></span><b class="btn-t">{{bNext.label}}</b><b class="btx num">{{bNext.time}}</b><span class="btl num">{{bNext.left}}</span></button>
+<sc-for list="{{bFixed}}" as="f" hint-placeholder-count="4"><button class="bt sm {{f.cls}}" onClick="{{f.pick}}" aria-label="{{f.aria}}"><span class="btl">{{f.label}}</span><b class="btx num">{{f.time}}</b></button></sc-for>
+<div class="bt wide sm2"><span class="btk">עכשיו</span><sc-for list="{{bSmart}}" as="x" hint-placeholder-count="2"><button class="lc sm {{x.cls}}" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for></div>
+<div class="bt wide mn"><span class="btk">שלי</span><sc-for list="{{bMine}}" as="x" hint-placeholder-count="1"><button class="lc mine {{x.cls}}" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for><button class="ladd" onClick="{{bAdd}}" aria-label="הוספת זמן">+</button></div>
+</section>
+</sc-if>
+
+<sc-if value="{{sb.h}}" hint-placeholder-val="{{ false }}">
+<section class="shul {{uiLevel}}" aria-label="לוח זמנים">
+<header class="shh"><b>זמני היום</b><span>{{bPeriod}}</span></header>
+<div class="shc"><sc-for list="{{bLayers}}" as="L" hint-placeholder-count="3"><sc-if value="{{L.has}}" hint-placeholder-val="{{ true }}"><div class="shs {{L.cls}}"><p class="shk">{{L.name}}</p><sc-for list="{{L.items}}" as="x" hint-placeholder-count="4"><button class="shr {{x.lcls}}" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><i aria-hidden="true"></i><b class="num">{{x.time}}</b></button></sc-for></div></sc-if></sc-for></div>
+<div class="shx"><sc-for list="{{bAll}}" as="x" hint-placeholder-count="10"><button class="shr {{x.lcls}}" onClick="{{x.pick}}"><span>{{x.label}}</span><i aria-hidden="true"></i><b class="num">{{x.time}}</b></button></sc-for></div>
+<div class="shf"><button onClick="{{uiLevelUp}}">כל זמני היום</button><button onClick="{{bAdd}}">+ שלי</button></div>
+</section>
+</sc-if>
+
+<sc-if value="{{sb.k}}" hint-placeholder-val="{{ false }}">
+<h2 class="sl first">לוח הזמנים</h2>
+<section class="wal" aria-label="לוח הזמנים">
+<sc-for list="{{wallet}}" as="W" hint-placeholder-count="3">
+<div class="wc {{W.cls}} {{W.wcls}}">
+<button class="wch" onClick="{{W.pick}}" aria-expanded="{{W.isOpen}}"><b>{{W.name}}</b><span class="wcs">{{W.sub}}</span><span class="wcf num">{{W.first.label}} {{W.first.time}}</span></button>
+<div class="wcb"><sc-if value="{{W.has}}" hint-placeholder-val="{{ true }}"><div class="lyg"><sc-for list="{{W.items}}" as="x" hint-placeholder-count="4"><button class="lyi {{x.lcls}}" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b><i class="num">{{x.left}}</i></button></sc-for></div></sc-if><button class="lyadd" onClick="{{bAdd}}">+ הוספת זמן ללוח שלי</button></div>
+</div>
+</sc-for>
+</section>
+</sc-if>
+
+<sc-if value="{{sb.m}}" hint-placeholder-val="{{ false }}">
+<h2 class="sl first">לוח הזמנים</h2>
+<div class="snap" role="list" aria-label="לוח הזמנים, החליקו הצידה">
+<sc-for list="{{bLayers}}" as="L" hint-placeholder-count="3">
+<section class="snc card {{L.cls}}" role="listitem"><div class="lyh"><b>{{L.name}}</b><span>{{L.sub}}</span></div><sc-if value="{{L.has}}" hint-placeholder-val="{{ true }}"><div class="snl"><sc-for list="{{L.items}}" as="x" hint-placeholder-count="4"><button class="snr {{x.lcls}}" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><i class="num">{{x.left}}</i><b class="num">{{x.time}}</b></button></sc-for></div></sc-if><sc-if value="{{L.empty}}" hint-placeholder-val="{{ false }}"><button class="lyadd" onClick="{{bAdd}}">+ הוספת זמן</button></sc-if></section>
+</sc-for>
+<section class="snc card add" role="listitem"><button class="lyadd tall" onClick="{{bAdd}}">+<span>הוספת זמן ללוח שלי</span></button></section>
+</div>
+</sc-if>
+
+<sc-if value="{{sb.n}}" hint-placeholder-val="{{ false }}">
+<h2 class="sl first">לוח הזמנים</h2>
+<section class="card rib" aria-label="ציר הזמנים של היום">
+<div class="ribs" id="ribbon"><div class="ribt">
+<sc-for list="{{ribbonHours}}" as="h" hint-placeholder-count="20"><span class="rh num" style="right: {{h.pos}}%">{{h.label}}</span></sc-for>
+<i class="rnow" style="right: {{ribbonNow}}%"></i>
+<sc-for list="{{ribbonMarks}}" as="x" hint-placeholder-count="12"><button class="rm {{x.mcls}}" style="right: {{x.pos}}%; top: {{x.top}}px" onClick="{{x.pick}}" aria-label="{{x.label}} {{x.time}}"><b class="num">{{x.time}}</b><span>{{x.label}}</span></button></sc-for>
+</div></div>
+<div class="rleg"><span class="ly-fixed">קבוע</span><span class="ly-smart">עכשיו</span><span class="ly-mine">שלי</span><span class="ly-other">עוד</span><button class="ladd" onClick="{{bAdd}}" aria-label="הוספת זמן">+</button></div>
+</section>
+</sc-if>
+
+<sc-if value="{{sb.o}}" hint-placeholder-val="{{ false }}">
+<h2 class="sl first">לוח הזמנים</h2>
+<div class="flp {{uiFlip}}">
+<section class="card fside front" aria-label="קבועים ועכשיו">
+<div class="lfix"><sc-for list="{{bFixed}}" as="f" hint-placeholder-count="4"><button class="lf {{f.cls}}" onClick="{{f.pick}}" aria-label="{{f.aria}}"><span class="ll">{{f.label}}</span><b class="lt num">{{f.time}}</b></button></sc-for></div>
+<div class="lrow"><sc-for list="{{bSmart}}" as="x" hint-placeholder-count="2"><button class="lc sm {{x.cls}}" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for></div>
+<button class="fbtn" onClick="{{uiFlipToggle}}">הזמנים שלי ↺</button>
+</section>
+<section class="card fside back" aria-label="הזמנים שלי">
+<div class="lyh"><b>הזמנים שלי</b><span>מה שבחרת להוסיף</span></div>
+<div class="lyg"><sc-for list="{{bMine}}" as="x" hint-placeholder-count="2"><button class="lyi ly-mine" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for><button class="lyi addc" onClick="{{bAdd}}"><span>הוספה</span><b>+</b></button></div>
+<button class="fbtn" onClick="{{uiFlipToggle}}">חזרה לקבועים ↺</button>
+</section>
+</div>
+</sc-if>
