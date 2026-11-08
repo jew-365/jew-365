@@ -464,7 +464,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** `home.zman.misheyakir.*` reads "זמן תו״ט" ("Tallit and tefillin"); `useUserStore.hiddenZmanim` (empty by default, the last zman shown cannot be hidden, [src/utils/zmanIds.ts](src/utils/zmanIds.ts)); a collapsible Settings section `settings.halachaTimes` after Prayer with one switch per zman; home's hero leaves the hidden ones out of its strip, ticks and next zman, its sky unchanged; the search item `zmanimShown`; the guide and what's new `1.0.21-17`.
   - **Expected result:** a fresh install shows all eleven zmanim; a zman switched off leaves home's strip and circle at once and comes back when switched on.
   - **Done:** 2026-11-08, verified by `typecheck`, `lint`, `format:check`, `check:dox`, the full suite (6372 passed), `test:tz` of the hero, home, the new settings suite, the search and the smoke suites, and a web export: Settings › זמני הלכה with its switches, and home without the two zmanim hidden.
-  - **Status:** Version 1.0.21 · Committed: `3ea0e48` feat(zmanim): name misheyakir זמן תו״ט, and a זמני הלכה section · Pushed: yes · Live: no · Channel: none.
+  - **Status:** Version 1.0.21 · Committed: `3ea0e48` feat(zmanim): name misheyakir זמן תו״ט, and a זמני הלכה section · Pushed: yes · Live: preview update `1.0.21-59` (group `d68a442e-a346-4f80-a923-1074be6fdc3a`, from `cca7a41`), not production · Channel: preview.
 
 ## Bugs
 
