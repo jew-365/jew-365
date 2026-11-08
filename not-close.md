@@ -456,6 +456,16 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** at every level, each mitzvah's nags spread across its whole critical zone (the bedtime Shema's no longer squeezed into the 24 minutes after a 23:00 reminder), and no notification of a night mitzvah between chatzot and alot.
   - **Waiting on:** the owner's decisions in sections 5 and 5a of the spec (5a: exactly one orange and one red notification per window); P3 also goes to the rav. The schema the owner reads: https://claude.ai/artifact/JyDspDEDu2jzzRsTTpJB3X
 
+### Medium — App requests of 2026-11-08
+
+- [ ] "זמן תו״ט" for misheyakir, and a "זמני הלכה" section in Settings that chooses which zmanim home shows
+  - **Flag:** `OTA`.
+  - **Source:** the owner's request of 2026-11-08: "לכתוב זמן תו"ט במקום משיכיר בזמני היום ... לפתוח עוד קטגוריה בהגדרות של זמני היום ולבחור איזה זמני היום המשתמש רוצה להציג ... הדיפולט לראות הכל ... הקטגוריה תקרא זמני הלכה".
+  - **What it is:** `home.zman.misheyakir.*` reads "זמן תו״ט" ("Tallit and tefillin"); `useUserStore.hiddenZmanim` (empty by default, the last zman shown cannot be hidden, [src/utils/zmanIds.ts](src/utils/zmanIds.ts)); a collapsible Settings section `settings.halachaTimes` after Prayer with one switch per zman; home's hero leaves the hidden ones out of its strip, ticks and next zman, its sky unchanged; the search item `zmanimShown`; the guide and what's new `1.0.21-17`.
+  - **Expected result:** a fresh install shows all eleven zmanim; a zman switched off leaves home's strip and circle at once and comes back when switched on.
+  - **Done:** 2026-11-08, verified by `typecheck`, `lint`, `format:check`, `check:dox`, the full suite (6372 passed), `test:tz` of the hero, home, the new settings suite, the search and the smoke suites, and a web export: Settings › זמני הלכה with its switches, and home without the two zmanim hidden.
+  - **Status:** Version 1.0.21 · Committed: pending · Pushed: no · Live: no · Channel: none.
+
 ## Bugs
 
 - [ ] Psalm 67:1 reads "לַמְנַצֵּח" without its furtive patach

@@ -22,6 +22,7 @@ import {
   type QuietBound,
 } from '@/utils/quietHours';
 import { DEFAULT_NAG_LEVEL, isNagLevel, type NagLevel } from '@/utils/nagging';
+import { hiddenZmanimOf, withZmanShown, type ZmanId } from '@/utils/zmanIds';
 
 export type Language = 'he' | 'en';
 export type NotificationPermissionStatus = 'unknown' | 'granted' | 'denied';
@@ -137,6 +138,7 @@ type UserState = {
   chokDoubleChoice: ChokDoubleChoice | null;
   chokCommentaryOpen: boolean;
   chokThuNightDay: ChokThuNightDay | null;
+  hiddenZmanim: readonly ZmanId[];
   homeLook: HomeLook;
   gender: Gender | null;
   maritalStatus: MaritalStatus | null;
@@ -172,6 +174,7 @@ type UserState = {
   setNagLevel: (level: NagLevel) => void;
   setChokDoubleChoice: (choice: ChokDoubleChoice) => void;
   setChokCommentaryOpen: (open: boolean) => void;
+  setZmanShown: (id: ZmanId, shown: boolean) => void;
   setChokThuNightDay: (day: ChokThuNightDay) => void;
   setHomeLook: (look: HomeLook) => void;
   setGender: (g: Gender | null) => void;
@@ -187,7 +190,7 @@ type PersistedUserState = Partial<
     UserState,
     'taharahEnabled' | 'maritalStatus' | 'hilulaNotices' | 'roshChodeshNotices' | 'quietBefore' | 'quietAfter'
   >
-> & { theme?: unknown };
+> & { theme?: unknown; hiddenZmanim?: unknown };
 
 const DEFAULT_LOCATION = CITIES[0];
 const DEFAULT_THEME: ThemeName = 'gold';
@@ -199,8 +202,13 @@ const savedThemeName = (saved: unknown): ThemeName => {
 };
 
 const mergeSavedUserState = (persisted: unknown, current: UserState): UserState => {
-  const { theme, ...saved } = (persisted ?? {}) as PersistedUserState;
-  const merged = { ...current, ...saved, theme: theme === undefined ? current.theme : savedThemeName(theme) };
+  const { theme, hiddenZmanim, ...saved } = (persisted ?? {}) as PersistedUserState;
+  const merged = {
+    ...current,
+    ...saved,
+    theme: theme === undefined ? current.theme : savedThemeName(theme),
+    hiddenZmanim: hiddenZmanimOf(hiddenZmanim),
+  };
   if (merged.taharahEnabled && merged.maritalStatus == null) merged.maritalStatus = 'married';
   if (!isUiScale(merged.uiScale)) merged.uiScale = DEFAULT_UI_SCALE;
   if (!HOME_LOOKS.includes(merged.homeLook)) merged.homeLook = 'rail';
@@ -255,6 +263,7 @@ export const useUserStore = create<UserState>()(
       chokDoubleChoice: null,
       chokCommentaryOpen: false,
       chokThuNightDay: null,
+      hiddenZmanim: [],
       homeLook: 'rail',
       gender: null,
       maritalStatus: null,
@@ -313,6 +322,11 @@ export const useUserStore = create<UserState>()(
       setNagLevel: (level) => set((s) => (isNagLevel(level) ? { nagLevel: level } : s)),
       setChokDoubleChoice: (choice) => set({ chokDoubleChoice: choice }),
       setChokCommentaryOpen: (open) => set({ chokCommentaryOpen: open }),
+      setZmanShown: (id, shown) =>
+        set((s) => {
+          const hiddenZmanim = withZmanShown(s.hiddenZmanim, id, shown);
+          return hiddenZmanim === s.hiddenZmanim ? s : { hiddenZmanim };
+        }),
       setChokThuNightDay: (day) => set({ chokThuNightDay: day }),
       setHomeLook: (look) => set((state) => (HOME_LOOKS.includes(look) ? { homeLook: look } : state)),
       setGender: (g) => set({ gender: g }),
@@ -352,6 +366,7 @@ export const useUserStore = create<UserState>()(
           chokDoubleChoice: null,
           chokCommentaryOpen: false,
           chokThuNightDay: null,
+          hiddenZmanim: [],
           homeLook: 'rail',
           gender: null,
           maritalStatus: null,

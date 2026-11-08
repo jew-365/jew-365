@@ -784,3 +784,42 @@ describe('DayArcHero', () => {
     expect(sceneScale(600)).toBeCloseTo(179 / 286, 6);
   });
 });
+
+describe('DayArcHero with zmanim hidden in Settings', () => {
+  beforeEach(() => {
+    jest.replaceProperty(I18nManager, 'isRTL', true);
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', theme: 'gold' });
+  });
+
+  const ticks = () =>
+    screen.UNSAFE_getAllByType(Circle).filter((c) => c.props.strokeWidth === 2 && [6, 9].includes(c.props.r));
+
+  it('draws neither a chip nor a tick for a hidden zman, and the next one skips it', () => {
+    const next = nextZman(F, NOON)!.id;
+    const hidden: ZmanId[] = [next, 'misheyakir'];
+    renderWithTheme(<DayArcHero {...heroProps(NOON, F, jest.fn(), jest.fn())} hiddenZmanim={hidden} />);
+    hidden.forEach((id) => expect(screen.queryByTestId(`home-zman-${id}`)).toBeNull());
+    ZMAN_IDS.filter((id) => !hidden.includes(id)).forEach((id) =>
+      expect(screen.getByTestId(`home-zman-${id}`)).toBeOnTheScreen(),
+    );
+    expect(ticks()).toHaveLength(ZMAN_IDS.length - hidden.length);
+    const shownNext = nextZman(F, NOON, hidden)!.id;
+    expect(shownNext).not.toBe(next);
+    expect(ZMAN_IDS.indexOf(shownNext)).toBeGreaterThan(ZMAN_IDS.indexOf(next));
+    expect(screen.getByTestId(`home-zman-${shownNext}`)).toHaveTextContent(/^הבא · /);
+  });
+
+  it('keeps the sky of the whole frame when the zmanim it reads are hidden', () => {
+    const hidden: ZmanId[] = ['netz', 'chatzot', 'plag', 'shkia', 'chatzotLayla'];
+    const onSkyTop = jest.fn();
+    renderWithTheme(<DayArcHero {...heroProps(NOON, F, jest.fn(), onSkyTop)} hiddenZmanim={hidden} />);
+    expect(onSkyTop).toHaveBeenLastCalledWith({ color: skyAt(F, NOON).top, lightInk: inkFor(skyAt(F, NOON)).light });
+    expect(ticks()).toHaveLength(ZMAN_IDS.length - hidden.length);
+  });
+
+  it('names misheyakir as the time of tallit and tefillin', () => {
+    setup();
+    expect(screen.getByTestId('home-zman-misheyakir')).toHaveTextContent(/זמן תו״ט/);
+  });
+});

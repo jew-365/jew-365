@@ -309,6 +309,16 @@ describe('home between midnight and alot', () => {
     expect(dateKey(mockCancel.mock.calls[0][1] as Date)).toBe('2027-06-14');
   });
 
+  it('leaves out of the hero the zmanim hidden in Settings, and brings them back', () => {
+    renderAt(AFTER_ALOT);
+    expect(screen.getByTestId('home-zman-plag')).toBeOnTheScreen();
+    act(() => useUserStore.getState().setZmanShown('plag', false));
+    expect(screen.queryByTestId('home-zman-plag')).toBeNull();
+    expect(screen.getByTestId('home-zman-shkia')).toBeOnTheScreen();
+    act(() => useUserStore.getState().setZmanShown('plag', true));
+    expect(screen.getByTestId('home-zman-plag')).toBeOnTheScreen();
+  });
+
   it('names the evening date in the date line until alot and the new date after it', () => {
     const night = renderAt(NIGHT_OF_THE_14TH);
     expect(screen.getByText(/^יום שני · /)).toBeOnTheScreen();

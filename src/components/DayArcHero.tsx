@@ -37,6 +37,7 @@ import {
   inkFor,
   LAND_OPACITY,
   nextZman,
+  shownZmanim,
   relativeLabel,
   skyAt,
   stageOffset,
@@ -89,6 +90,8 @@ function BackPill({ label, onPress }: { label: string; onPress: () => void }) {
   );
 }
 
+const NO_ZMANIM: readonly ZmanId[] = [];
+
 type DragRef = { state: DragState; startPoint: ArcPoint; startPageX: number; startPageY: number };
 type Preview = { atMs: number; zman: ZmanId | null };
 
@@ -99,6 +102,7 @@ export type DayArcHeroProps = {
   greeting: string;
   dateLine: string;
   caption: string;
+  hiddenZmanim?: readonly ZmanId[];
   onScrubChange: (active: boolean) => void;
   onSkyTop: (sky: { color: string; lightInk: boolean } | null) => void;
 };
@@ -110,6 +114,7 @@ export const DayArcHero = React.memo(function DayArcHero({
   greeting,
   dateLine,
   caption,
+  hiddenZmanim = NO_ZMANIM,
   onScrubChange,
   onSkyTop,
 }: DayArcHeroProps) {
@@ -175,7 +180,7 @@ export const DayArcHero = React.memo(function DayArcHero({
     onSkyTop(skyTop ? { color: skyTop, lightInk: ink.light } : null);
   }, [skyTop, ink.light, onSkyTop]);
 
-  const nextId = frame ? (nextZman(frame, shown)?.id ?? null) : null;
+  const nextId = frame ? (nextZman(frame, shown, hiddenZmanim)?.id ?? null) : null;
   const selectedId = preview?.zman ?? null;
   const markedId = selectedId ?? nextId;
   const centreRef = useRef(markedId);
@@ -359,6 +364,7 @@ export const DayArcHero = React.memo(function DayArcHero({
           live={now}
           previewing={preview !== null}
           selected={preview?.zman ?? null}
+          hidden={hiddenZmanim}
           rtl={rtl}
           k={k}
           units={units}
@@ -387,7 +393,7 @@ export const DayArcHero = React.memo(function DayArcHero({
             if (!centredOnce.current) centre();
           }}
         >
-          {frame.zmanim.map((z) => {
+          {shownZmanim(frame, hiddenZmanim).map((z) => {
             const selected = z.id === selectedId;
             const isNextChip = z.id === nextId;
             const marked = z.id === markedId;

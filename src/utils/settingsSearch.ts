@@ -35,7 +35,7 @@ import { catalogListsText, chapterVisible, dayFeatures } from './siddur';
 
 export { normalizeSearchText };
 
-export type SettingsSectionKey = 'profile' | 'prayer' | 'device' | 'backup' | 'contact';
+export type SettingsSectionKey = 'profile' | 'prayer' | 'halachaTimes' | 'device' | 'backup' | 'contact';
 
 export type SettingsSearchCondition = 'taharah' | 'backup';
 
@@ -367,6 +367,42 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
       'thursday',
       'friday',
       'chok',
+    ],
+  },
+  {
+    id: 'zmanimShown',
+    icon: 'sun',
+    titleKey: 'settings.zmanimShown',
+    labelKeys: [
+      'settings.halachaTimes',
+      'home.zman.alot.name',
+      'home.zman.misheyakir.name',
+      'home.zman.netz.name',
+      'home.zman.sofShma.name',
+      'home.zman.sofTfila.name',
+      'home.zman.chatzot.name',
+      'home.zman.minchaGedola.name',
+      'home.zman.plag.name',
+      'home.zman.shkia.name',
+      'home.zman.tzeit.name',
+      'home.zman.chatzotLayla.name',
+    ],
+    section: 'halachaTimes',
+    terms: [
+      'זמני היום',
+      'זמני הלכה',
+      'זמנים',
+      'משיכיר',
+      'טלית ותפילין',
+      'תו״ט',
+      'להסתיר',
+      'הסתרה',
+      'להציג',
+      'zmanim',
+      'halachic times',
+      'misheyakir',
+      'hide',
+      'show',
     ],
   },
   {

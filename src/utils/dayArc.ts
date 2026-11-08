@@ -5,35 +5,11 @@ import { SKY, SKY_SCENE, type SkyStop } from '@/theme/sky';
 import { formatRemaining } from '@/utils/clock';
 import type { HalachicOpinion } from '@/types/mitzvah';
 import type { Location } from '@/types/zmanim';
+import { ARC_ZMANIM, type ZmanId } from './zmanIds';
 
 export type Translate = (scope: string, options?: Record<string, unknown>) => string;
 
-export type ZmanId =
-  | 'alot'
-  | 'misheyakir'
-  | 'netz'
-  | 'sofShma'
-  | 'sofTfila'
-  | 'chatzot'
-  | 'minchaGedola'
-  | 'plag'
-  | 'shkia'
-  | 'tzeit'
-  | 'chatzotLayla';
-
-export const ARC_ZMANIM: readonly ZmanId[] = [
-  'alot',
-  'misheyakir',
-  'netz',
-  'sofShma',
-  'sofTfila',
-  'chatzot',
-  'minchaGedola',
-  'plag',
-  'shkia',
-  'tzeit',
-  'chatzotLayla',
-];
+export { ARC_ZMANIM, type ZmanId } from './zmanIds';
 
 export type ArcZman = { id: ZmanId; at: Date };
 export type DayFrame = { start: Date; tzeit: Date; end: Date; zmanim: readonly ArcZman[] };
@@ -135,8 +111,12 @@ export function dragMove(
   return { state: { offsetMs: s.offsetMs * 0.93, prevMs: at }, atMs: at };
 }
 
-export function nextZman(f: DayFrame, at: Date): ArcZman | null {
-  return f.zmanim.find((z) => z.at.getTime() > at.getTime()) ?? null;
+// The zmanim the hero draws: the frame's, less those the user hid (the sky still reads every one of the frame's).
+export const shownZmanim = (f: DayFrame, hidden: readonly ZmanId[] = []): readonly ArcZman[] =>
+  hidden.length ? f.zmanim.filter((z) => !hidden.includes(z.id)) : f.zmanim;
+
+export function nextZman(f: DayFrame, at: Date, hidden: readonly ZmanId[] = []): ArcZman | null {
+  return shownZmanim(f, hidden).find((z) => z.at.getTime() > at.getTime()) ?? null;
 }
 
 export function relativeLabel(target: Date, at: Date, t: Translate): string {

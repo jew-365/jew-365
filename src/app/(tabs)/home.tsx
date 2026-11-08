@@ -191,6 +191,7 @@ export default function HomeScreen() {
   const profileName = useUserStore((s) => s.profileName);
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
   const homeLook = useUserStore((s) => s.homeLook);
+  const hiddenZmanim = useUserStore((s) => s.hiddenZmanim);
   // The bell beside each mitzvah's name: how many notifications its window sends in all, its reminders and their
   // repeats at its own nagging level, else the app's (the owner's call of 2026-11-04), shown while the nag sends any
   // repeat. Counted once per window for as long as the inputs hold.
@@ -719,6 +720,7 @@ export default function HomeScreen() {
             greeting={greeting}
             dateLine={dateLine}
             caption={caption}
+            hiddenZmanim={hiddenZmanim}
             onScrubChange={setScrubbing}
             onSkyTop={onSkyTop}
           />

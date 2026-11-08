@@ -30,6 +30,7 @@ import {
   groundColors,
   HALF_LENGTH,
   nextZman,
+  shownZmanim,
   nightPath,
   nightShare,
   stageOffset,
@@ -78,6 +79,7 @@ type DaySkySceneProps = {
   live: Date;
   previewing: boolean;
   selected: ZmanId | null;
+  hidden: readonly ZmanId[];
   rtl: boolean;
   k: number;
   units: number;
@@ -97,6 +99,7 @@ export function DaySkyScene({
   live,
   previewing,
   selected,
+  hidden,
   rtl,
   k,
   units,
@@ -115,7 +118,7 @@ export function DaySkyScene({
   const { core, edge } = sunColors(frame, shown);
   const ground = groundColors(sky);
   const share = nightShare(frame, shown);
-  const nextId = nextZman(frame, shown)?.id ?? null;
+  const nextId = nextZman(frame, shown, hidden)?.id ?? null;
   const ghost = previewing && Math.abs(live.getTime() - shown.getTime()) > 240000 ? arcPoint(live, frame, rtl) : null;
   const originX = stageOffset(units);
   const width = units * k;
@@ -242,7 +245,7 @@ export function DaySkyScene({
           importantForAccessibility="no-hide-descendants"
           style={StyleSheet.absoluteFill}
         >
-          {frame.zmanim.map((z) => {
+          {shownZmanim(frame, hidden).map((z) => {
             const pt = arcPoint(z.at, frame, rtl);
             const past = z.at.getTime() <= shown.getTime();
             const isNext = z.id === nextId;

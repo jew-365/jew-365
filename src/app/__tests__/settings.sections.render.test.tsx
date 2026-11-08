@@ -61,6 +61,7 @@ describe('Settings cards, icons and actions', () => {
       'star',
       'user',
       'siddur',
+      'sun',
       'bell',
       'cloud',
       'chat',

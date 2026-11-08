@@ -88,8 +88,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'דף הבית וסימון מצווה', en: 'Home and marking a mitzvah' },
     body: [
       {
-        he: 'בראש דף הבית עיגול אחד של היום והלילה: השמש נעה על חציו העליון מעלות השחר ועד צאת הכוכבים, והירח על חציו התחתון עד עלות השחר הבאה, לפי זמני לוח אור החיים במיקום שנבחר. השמיים משנים את צבעם מעלות השחר ועד הלילה, ומתחת לעיגול רצועה של אחד־עשר זמני היום, שבה הזמן ההלכתי הבא מסומן. גרירת השמש או הירח, גם מהיום אל הלילה ובחזרה, או הקשה על אחד הזמנים, מציגה את העיגול בשעה אחרת, ו״חזרה לעכשיו״ מחזיר אותו. הרשימות שמתחת נשארות בזמן אמת.',
-        en: "At the top of Home is one circle for the day and the night: the sun moves along its upper half from dawn to nightfall and the moon along its lower half until the next dawn, by the zmanim of the Ohr HaChaim luach at the location you chose. The sky changes colour from dawn to night, and under the circle is a strip of the day's eleven zmanim, with the next one marked. Drag the sun or the moon, even from the day into the night and back, or tap a zman, to see the circle at another time; Back to now returns it. The lists below stay live.",
+        he: 'בראש דף הבית עיגול אחד של היום והלילה: השמש נעה על חציו העליון מעלות השחר ועד צאת הכוכבים, והירח על חציו התחתון עד עלות השחר הבאה, לפי זמני לוח אור החיים במיקום שנבחר. השמיים משנים את צבעם מעלות השחר ועד הלילה, ומתחת לעיגול רצועה של זמני היום, שבה הזמן ההלכתי הבא מסומן. בהגדרות ← זמני הלכה בוחרים אילו מהם יוצגו; כברירת מחדל כולם מוצגים. גרירת השמש או הירח, גם מהיום אל הלילה ובחזרה, או הקשה על אחד הזמנים, מציגה את העיגול בשעה אחרת, ו״חזרה לעכשיו״ מחזיר אותו. הרשימות שמתחת נשארות בזמן אמת.',
+        en: "At the top of Home is one circle for the day and the night: the sun moves along its upper half from dawn to nightfall and the moon along its lower half until the next dawn, by the zmanim of the Ohr HaChaim luach at the location you chose. The sky changes colour from dawn to night, and under the circle is a strip of the day's zmanim, with the next one marked. Settings → Halachic times chooses which of them show; by default all of them do. Drag the sun or the moon, even from the day into the night and back, or tap a zman, to see the circle at another time; Back to now returns it. The lists below stay live.",
       },
       {
         he: '״פתוח עכשיו״ מציג כל מצווה שהזמן שלה פתוח, עם טבעת של הזמן שנותר ושעות ההתחלה והסוף. ״עשיתי״ מסמן אותה כבוצעה ומבטל את שאר ההתראות שלה לאותו יום, ו״פתח נוסח״ פותח את הנוסח בסידור. תחת ״הודעות״ מופיע מה שדורש תשומת לב, כמו סימון אחרי שבת או מיקום שלא אושר, וגם הרצף, השבת הקרובה, ראש חודש, והילולות כשההתראות עליהן פועלות.',
@@ -367,8 +367,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "Settings opens with a search: type a word such as “notifications”, “nusach” or “backup” to go straight to the setting. It finds anything in the app: screens, mitzvot and categories, prayers and the passages and phrases inside them, tzaddikim by name, works or grave, the rabbis of the halacha hotline, guide topics, and your badges and figures with their values. It forgives typing on the other language's keyboard. Close results show at once, the search inside the prayers joins a moment later, and results found only despite a misspelling show apart, under “Did you mean”. The same search sits at the top of the More tab, and a setting found there opens in Settings at its place.",
       },
       {
-        he: 'החלקים: פרופיל (שם, טלפון, מגדר ומצב משפחתי), תפילה וסידור, מכשיר והתראות (המיקום שלי או מקום שבחרתם, הפיך לכאן ולכאן, התראות, הסיכום השבועי, שעות בלי התראות, הרשאות, ערכת נושא, גודל התצוגה ושפה), גיבוי, שחזור ואיפוס, ואודות ויצירת קשר. המקום קובע גם אם אתם בישראל או בחוץ לארץ, למשל לעניין יום טוב שני. כדי להסיר את הרשאת המיקום, בוחרים ״מקום שבחרתי״ ומבטלים את ההרשאה בהגדרות הטלפון; החיפוש בראש ההגדרות מוצא גם יישובים וערים ופותח את הבחירה עליהם.',
-        en: "Its sections: Profile (name, phone, gender and marital status), Prayer and siddur, Device and notifications (my location or a place you chose, either way back and forth, notifications, the weekly report, hours without notifications, permissions, theme, display size and language), Backup, restore and reset, and About and contact. The place also decides whether you count as in Israel or abroad, for example for the second day of Yom Tov. To remove the location permission, choose A place I chose and turn the permission off in the phone's settings; the search at the top of Settings finds localities and cities too and opens the choice on them.",
+        he: 'החלקים: פרופיל (שם, טלפון, מגדר ומצב משפחתי), תפילה וסידור, זמני הלכה (אילו זמני היום מוצגים בדף הבית), מכשיר והתראות (המיקום שלי או מקום שבחרתם, הפיך לכאן ולכאן, התראות, הסיכום השבועי, שעות בלי התראות, הרשאות, ערכת נושא, גודל התצוגה ושפה), גיבוי, שחזור ואיפוס, ואודות ויצירת קשר. המקום קובע גם אם אתם בישראל או בחוץ לארץ, למשל לעניין יום טוב שני. כדי להסיר את הרשאת המיקום, בוחרים ״מקום שבחרתי״ ומבטלים את ההרשאה בהגדרות הטלפון; החיפוש בראש ההגדרות מוצא גם יישובים וערים ופותח את הבחירה עליהם.',
+        en: "Its sections: Profile (name, phone, gender and marital status), Prayer and siddur, Halachic times (which of the day's times Home shows), Device and notifications (my location or a place you chose, either way back and forth, notifications, the weekly report, hours without notifications, permissions, theme, display size and language), Backup, restore and reset, and About and contact. The place also decides whether you count as in Israel or abroad, for example for the second day of Yom Tov. To remove the location permission, choose A place I chose and turn the permission off in the phone's settings; the search at the top of Settings finds localities and cities too and opens the choice on them.",
       },
       {
         he: 'באנדרואיד ההגדרות, המצוות וההיסטוריה מגובות לחשבון Google, ובאייפון בגיבוי iCloud של המכשיר. בהגדרות ← גיבוי, שחזור ואיפוס אפשר גם לייצא קובץ גיבוי ולשחזר ממנו בכל טלפון; שחזור מחליף את מה שיש בטלפון. ״איפוס האפליקציה״ מוחק הכל, גם את נתוני הטהרה, שאינם נכללים בגיבוי.',
@@ -417,6 +417,16 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 ];
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
+  {
+    label: '1.0.21-17',
+    date: '2026-11-08',
+    items: [
+      {
+        he: 'בהגדרות ← זמני הלכה בוחרים אילו זמני היום יוצגו בשורת הזמנים ובמעגל של דף הבית. כברירת מחדל כולם מוצגים, וזמן אחד לפחות נשאר. ״משיכיר״ נקרא עכשיו ״זמן תו״ט״.',
+        en: "Settings → Halachic times chooses which of the day's times show in Home's strip and circle. All of them show by default, and at least one stays. Misheyakir is now named Tallit and tefillin.",
+      },
+    ],
+  },
   {
     label: '1.0.21-16',
     date: '2026-11-08',

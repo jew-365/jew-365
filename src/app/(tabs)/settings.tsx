@@ -93,6 +93,7 @@ import type { Location } from '@/types/zmanim';
 import { minutesToTime, timeToMinutes } from '@/utils/clock';
 import { quietBoundsValid, quietHoursOf, type QuietBound } from '@/utils/quietHours';
 import { SETTINGS_SEARCH_ITEMS, type SettingsSearchItem, type SettingsSectionKey } from '@/utils/settingsSearch';
+import { ARC_ZMANIM } from '@/utils/zmanIds';
 
 const LANGS = ['he', 'en'] as const;
 const OPINIONS = ['GRA', 'MA'] as const;
@@ -149,6 +150,7 @@ export default function SettingsScreen() {
       siddurVoice: s.siddurVoice,
       chokCommentaryOpen: s.chokCommentaryOpen,
       chokThuNightDay: s.chokThuNightDay,
+      hiddenZmanim: s.hiddenZmanim,
       taharahEnabled: s.taharahEnabled,
       weeklyReportEnabled: s.weeklyReportEnabled,
       quietBefore: s.quietBefore,
@@ -173,6 +175,7 @@ export default function SettingsScreen() {
       setSiddurVoice: s.setSiddurVoice,
       setChokCommentaryOpen: s.setChokCommentaryOpen,
       setChokThuNightDay: s.setChokThuNightDay,
+      setZmanShown: s.setZmanShown,
       setWeeklyReportEnabled: s.setWeeklyReportEnabled,
       setQuietBefore: s.setQuietBefore,
       setQuietAfter: s.setQuietAfter,
@@ -594,6 +597,33 @@ export default function SettingsScreen() {
                     onSelect={user.setChokThuNightDay}
                     renderLabel={(value) => t(`chok.thuNight.${value}`)}
                   />
+                </Anchor>
+              </SettingsSection>
+
+              <SettingsSection
+                title={t('settings.halachaTimes')}
+                subtitle={t('settings.halachaTimesSummary')}
+                icon="sun"
+                {...collapsible('halachaTimes')}
+              >
+                <Anchor {...anchor('zmanimShown')}>
+                  <SectionLabel variant="field" text={t('settings.zmanimShown')} />
+                  <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>
+                    {t('settings.zmanimShownHint')}
+                  </Text>
+                  {ARC_ZMANIM.map((id) => {
+                    const shown = !user.hiddenZmanim.includes(id);
+                    return (
+                      <SwitchRow
+                        key={id}
+                        testID={`settings-zman-${id}`}
+                        label={t(`home.zman.${id}.name`)}
+                        value={shown}
+                        disabled={shown && user.hiddenZmanim.length === ARC_ZMANIM.length - 1}
+                        onValueChange={(value) => user.setZmanShown(id, value)}
+                      />
+                    );
+                  })}
                 </Anchor>
               </SettingsSection>
 
@@ -1255,22 +1285,26 @@ function Anchor({ id, focus, onReveal, children }: AnchorProps) {
 
 type SwitchRowProps = {
   label: string;
-  hint: string;
+  hint?: string;
   value: boolean;
   onValueChange: (value: boolean) => void;
+  disabled?: boolean;
+  testID?: string;
   style?: StyleProp<ViewStyle>;
 };
 
-function SwitchRow({ label, hint, value, onValueChange, style }: SwitchRowProps) {
+function SwitchRow({ label, hint, value, onValueChange, disabled, testID, style }: SwitchRowProps) {
   const { colors } = useTheme();
   return (
     <View style={[styles.switchRow, style]}>
       <View style={styles.switchMeta}>
         <Text style={[typography.bodyBold, { color: colors.text }]}>{label}</Text>
-        <Text style={[typography.small, styles.hint, { color: colors.textMuted }]}>{hint}</Text>
+        {hint ? <Text style={[typography.small, styles.hint, { color: colors.textMuted }]}>{hint}</Text> : null}
       </View>
       <Switch
+        testID={testID}
         value={value}
+        disabled={disabled}
         onValueChange={onValueChange}
         accessibilityLabel={label}
         thumbColor={BRAND.white}
