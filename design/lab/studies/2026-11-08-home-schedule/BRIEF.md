@@ -31,3 +31,7 @@ The owner, after round 2: more creative examples that use the space to the full,
 ## Round 4
 
 The owner picked the bento and asked: no zmanim strip in the hero, only the relevant times in view and the rest a sideways scroll away, the hero's background carried down under the bento so it ends before the mitzvah cards, and a smaller bento and arc scene, so the cards keep their room.
+
+## Round 5
+
+The owner: merge the "עכשיו" and "שלי" rows, add an edit mode to the whole bento (add times, built-in ones too, place them, size them, change them), and characterize the best default of each zone for heavy use and function: [.claude/specs/home-bento.md](../../../../.claude/specs/home-bento.md).

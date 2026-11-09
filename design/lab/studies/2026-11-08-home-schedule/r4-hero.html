@@ -1,11 +1,40 @@
 <sc-if value="{{sb.p}}" hint-placeholder-val="{{ false }}">
 <section class="hbn" aria-label="לוח הזמנים">
+<div class="hbtop">
 <sc-if value="{{hbHasInfo}}" hint-placeholder-val="{{ false }}"><p class="hbi"><span>{{hbInfo.label}}</span><b>{{hbInfo.time}}</b></p></sc-if>
-<div class="bento">
-<button class="bt big {{bNext.lcls}}" onClick="{{bNext.pick}}" aria-label="{{bNext.aria}}"><span class="btl">הבא · {{bNext.layerName}}</span><span class="btr"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="mt" cx="32" cy="32" r="26"></circle><circle class="mp" cx="32" cy="32" r="26" transform="rotate(-90 32 32)" stroke-dasharray="163.36" stroke-dashoffset="{{bRingOff}}"></circle></svg></span><b class="btn-t">{{bNext.label}}</b><b class="btx num">{{bNext.time}}</b><span class="btl num">{{bNext.left}}</span></button>
-<sc-for list="{{bFixed}}" as="f" hint-placeholder-count="4"><button class="bt sm {{f.cls}}" onClick="{{f.pick}}" aria-label="{{f.aria}}"><span class="btl">{{f.label}}</span><b class="btx num">{{f.time}}</b></button></sc-for>
-<div class="bt wide sm2" role="list" aria-label="עכשיו, וגלילה הצידה לשאר זמני היום"><span class="btk">עכשיו</span><sc-for list="{{hbSmart}}" as="x" hint-placeholder-count="2"><button class="lc sm {{x.cls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for><span class="hbsep" aria-hidden="true"></span><sc-for list="{{hbRest}}" as="x" hint-placeholder-count="6"><button class="lc rest {{x.tcls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for></div>
-<div class="bt wide mn" role="list" aria-label="שלי"><span class="btk">שלי</span><sc-for list="{{bMine}}" as="x" hint-placeholder-count="1"><button class="lc mine {{x.cls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for><button class="ladd" onClick="{{bAdd}}" aria-label="הוספת זמן">+</button></div>
+<span class="spc"></span>
+<sc-if value="{{bEditing}}" hint-placeholder-val="{{ false }}"><button class="hbe ghost" onClick="{{bReset}}">איפוס</button></sc-if>
+<button class="hbe" onClick="{{bEditToggle}}" aria-pressed="{{bEditing}}">{{bEditLabel}}</button>
 </div>
+<div class="bento ed">
+<sc-for list="{{bWidgets}}" as="w" hint-placeholder-count="6">
+<div class="bw {{w.cls}}" draggable="{{w.drag}}" onDragStart="{{w.onDragStart}}" onDragOver="{{w.onDragOver}}" onDrop="{{w.onDrop}}" onDragEnd="{{w.onDragEnd}}">
+<sc-if value="{{w.isNextW}}" hint-placeholder-val="{{ true }}">
+<button class="bt big {{bNext.lcls}}" onClick="{{bNext.pick}}" aria-label="{{bNext.aria}}"><span class="btl">הבא · {{bNext.layerName}}</span><span class="btr"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="mt" cx="32" cy="32" r="26"></circle><circle class="mp" cx="32" cy="32" r="26" transform="rotate(-90 32 32)" stroke-dasharray="163.36" stroke-dashoffset="{{bRingOff}}"></circle></svg></span><b class="btn-t">{{bNext.label}}</b><b class="btx num">{{bNext.time}}</b><span class="btl num">{{bNext.left}}</span></button>
+</sc-if>
+<sc-if value="{{w.isZman}}" hint-placeholder-val="{{ true }}">
+<button class="bt sm" onClick="{{w.pick}}" aria-label="{{w.aria}}"><span class="btl">{{w.label}}</span><b class="btx num">{{w.time}}</b><sc-if value="{{w.showLeft}}" hint-placeholder-val="{{ false }}"><span class="btl num">{{w.left}}</span></sc-if></button>
+</sc-if>
+<sc-if value="{{w.isRow}}" hint-placeholder-val="{{ false }}">
+<div class="bt wide" role="list" aria-label="עכשיו ושלי, וגלילה הצידה לשאר זמני היום"><sc-for list="{{hbRow}}" as="x" hint-placeholder-count="3"><button class="lc {{x.rcls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for><button class="ladd" onClick="{{bAdd}}" aria-label="הוספת זמן לשלי">+</button><span class="hbsep" aria-hidden="true"></span><sc-for list="{{hbRest}}" as="x" hint-placeholder-count="6"><button class="lc rest {{x.tcls}}" role="listitem" onClick="{{x.pick}}" aria-label="{{x.aria}}"><span>{{x.label}}</span><b class="num">{{x.time}}</b></button></sc-for></div>
+</sc-if>
+<sc-if value="{{bEditing}}" hint-placeholder-val="{{ false }}"><button class="bwsel" onClick="{{w.pick}}" aria-label="בחירה לעריכה: {{w.name}}" aria-pressed="{{w.selected}}"></button></sc-if>
+</div>
+</sc-for>
+<sc-if value="{{bEditing}}" hint-placeholder-val="{{ false }}"><button class="bw sz-s bnew" onClick="{{bAddTile}}" aria-label="הוספת אריח">+<span>אריח</span></button></sc-if>
+</div>
+<sc-if value="{{bEditing}}" hint-placeholder-val="{{ false }}">
+<div class="btool" role="toolbar" aria-label="עריכת האריח הנבחר">
+<sc-if value="{{bNoSel}}" hint-placeholder-val="{{ true }}"><p class="btool-h">בוחרים אריח כדי לשנות, להזיז או להסיר אותו. אפשר גם לגרור אריח למקום אחר.</p></sc-if>
+<sc-if value="{{bHasSel}}" hint-placeholder-val="{{ false }}">
+<b class="btool-n">{{bSel.name}}</b>
+<sc-if value="{{bSel.canReplace}}" hint-placeholder-val="{{ true }}"><button class="tb" onClick="{{bSel.replace}}">החלפה</button></sc-if>
+<sc-if value="{{bSel.canSize}}" hint-placeholder-val="{{ true }}"><button class="tb" onClick="{{bSel.resize}}" aria-label="{{bSel.sizeAria}}">גודל: {{bSel.sizeLabel}}</button></sc-if>
+<button class="tb" onClick="{{bSel.back}}" aria-label="הזזה קדימה" disabled="{{bSel.isFirst}}">›</button>
+<button class="tb" onClick="{{bSel.fwd}}" aria-label="הזזה אחורה" disabled="{{bSel.isLast}}">‹</button>
+<button class="tb del" onClick="{{bSel.remove}}">הסרה</button>
+</sc-if>
+</div>
+</sc-if>
 </section>
 </sc-if>

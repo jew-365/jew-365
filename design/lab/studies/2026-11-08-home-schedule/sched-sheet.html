@@ -11,3 +11,14 @@
 </div>
 </section>
 </sc-if>
+<sc-if value="{{bSheetOn}}" hint-placeholder-val="{{ false }}">
+<button class="pscrim" onClick="{{bSheetClose}}" aria-label="סגירה" tabindex="-1"></button>
+<section class="psheet" role="dialog" aria-modal="true" aria-labelledby="bs-t">
+<div class="psheet-head"><span class="pgrab" aria-hidden="true"></span><h2 class="psheet-t" id="bs-t">{{bSheetTitle}}</h2><button class="pclose" onClick="{{bSheetClose}}" aria-label="סגירה">[[ic:close]]</button></div>
+<div class="psheet-body">
+<div class="pinl" role="list"><sc-for list="{{bSheetSpecials}}" as="c" hint-placeholder-count="0"><div class="pinr" role="listitem"><span class="pinm"><b>{{c.label}}</b><span class="cap">{{c.why}}</span></span><button class="pinb" onClick="{{c.pick}}">הוספה</button></div></sc-for></div>
+<p class="plabel">זמני היום</p>
+<div class="pinl" role="list"><sc-for list="{{bSheetZmanim}}" as="c" hint-placeholder-count="10"><div class="pinr" role="listitem"><span class="pinm"><b>{{c.label}}</b></span><span class="pint num">{{c.time}}</span><button class="pinb" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.act}}</button></div></sc-for></div>
+</div>
+</section>
+</sc-if>

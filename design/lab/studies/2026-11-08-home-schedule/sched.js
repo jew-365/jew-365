@@ -350,6 +350,8 @@
       hbInfo: infoChips[0] || null,
       hbHasInfo: infoChips.length > 0,
     });
+    // Round 5: the bento as an editable layout. A widget is { key, kind: next | row | zman, id, size: s | w | b }.
+    if (SCHED === 'p') Object.assign(out, this.bentoEdit({ t, nx, fixedL, smartL, mineL, rest, smart, tile, tag }));
     if (SCHED === 'n' && !this._rib) {
       this._rib = true;
       setTimeout(() => {
@@ -362,4 +364,133 @@
       out.zchips = [...fixed.map((x) => chip(x, 'fixed')), ...smart.map((x) => chip(x, 'smart')), ...mine.map((x) => chip(x, 'mine')), { id: 'add', label: 'שלי', time: '+', cls: '', tcls: 'b', pressed: false, ink: kit.inkPlain, aria: 'הוספת זמן ללוח', style: kit.plainBg, pick: () => this.setState({ pinSheet: true }) }].map((c, i, a) => (i === a.length - 1 ? { ...c, cls: 'k-add' } : c));
     }
     return out;
+  }
+
+  bentoZmanim() {
+    const d = this.day();
+    const z = d.z;
+    const cat = this.boardCatalog();
+    const week = cat.find((c) => c.id === 'candleWeek');
+    return [
+      { id: 'alot', label: 'עלות השחר', short: 'עלות', m: z.alot },
+      { id: 'misheyakir', label: 'זמן תו״ט', short: 'זמן תו״ט', m: z.misheyakir },
+      { id: 'netz', label: 'הנץ החמה', short: 'הנץ', m: z.netz },
+      { id: 'sofShmaMA', label: 'סוף ק״ש מג״א', short: 'ק״ש מג״א', m: z.sofShmaMA },
+      { id: 'sofShma', label: 'סוף זמן ק״ש', short: 'סוף ק״ש', m: z.sofShma },
+      { id: 'sofTfila', label: 'סוף זמן תפילה', short: 'סוף תפילה', m: z.sofTfila },
+      { id: 'chatzot', label: 'חצות היום', short: 'חצות', m: z.chatzot },
+      { id: 'minchaG', label: 'מנחה גדולה', short: 'מנחה גד׳', m: z.minchaG },
+      { id: 'plag', label: 'פלג המנחה', short: 'פלג', m: z.plag },
+      { id: 'shkia', label: 'שקיעה', short: 'שקיעה', m: z.shkia },
+      { id: 'tzeit', label: 'צאת הכוכבים', short: 'צאה״כ', m: z.tzeit },
+      { id: 'chatzotL', label: 'חצות הלילה', short: 'חצות לילה', m: z.chatzotL },
+      ...(week ? [{ id: 'candleWeek', label: 'הדלקת נרות · ' + week.sub, short: 'הדלקה · ' + week.sub, m: week.m }] : []),
+    ];
+  }
+
+  bentoEdit({ t, nx, smartL, mineL, rest, smart, tile }) {
+    const s = this.state;
+    const DEF = [
+      { key: 'next', kind: 'next', size: 'b' },
+      { key: 'z-sofShma', kind: 'zman', id: 'sofShma', size: 's' },
+      { key: 'z-sofTfila', kind: 'zman', id: 'sofTfila', size: 's' },
+      { key: 'z-shkia', kind: 'zman', id: 'shkia', size: 's' },
+      { key: 'z-tzeit', kind: 'zman', id: 'tzeit', size: 's' },
+      { key: 'row', kind: 'row', size: 'f' },
+    ];
+    const lay = s.lay || DEF;
+    const edit = Boolean(s.bEdit);
+    const ZM = this.bentoZmanim();
+    const zById = Object.fromEntries(ZM.map((x) => [x.id, x]));
+    const set = (next) => this.setState({ lay: next });
+    const idx = (k) => lay.findIndex((w) => w.key === k);
+    const move = (k, d) => () => {
+      const i = idx(k);
+      const j = i + d;
+      if (i < 0 || j < 0 || j >= lay.length) return;
+      const n = lay.slice();
+      [n[i], n[j]] = [n[j], n[i]];
+      set(n);
+    };
+    const SIZES = { s: 'w', w: 'b', b: 's' };
+    const sizeName = { s: 'קטן', w: 'רחב', b: 'גדול', f: 'שורה' };
+    const widgets = lay.map((w, i) => {
+      const z = w.kind === 'zman' ? zById[w.id] : null;
+      const past = z ? z.m * 60 <= t : false;
+      const isNext = z && nx && nx.S === z.m * 60;
+      const left = z && !past ? 'בעוד ' + this.leftText(z.m * 60 - t) : past ? 'עבר' : '';
+      return {
+        ...w,
+        isNextW: w.kind === 'next',
+        isRow: w.kind === 'row',
+        isZman: w.kind === 'zman',
+        label: z ? (w.size === 's' ? z.short : z.label) : '',
+        time: z ? this.clock(z.m * 60) : '',
+        left,
+        showLeft: Boolean(z) && w.size === 'b',
+        cls: 'sz-' + w.size + (past ? ' past' : '') + (isNext ? ' nx' : '') + (edit ? ' jig' : '') + (edit && s.bSel === w.key ? ' sel' : '') + (s.dragKey === w.key ? ' dragging' : ''),
+        aria: z ? z.label + ' ' + this.clock(z.m * 60) + ', ' + left : w.kind === 'next' ? 'הזמן הבא' : 'עכשיו ושלי',
+        pick: edit ? () => this.setState({ bSel: w.key }) : z ? () => this.scrub(z.m * 60) : () => {},
+        name: z ? z.label : w.kind === 'next' ? 'הזמן הבא' : 'שורת עכשיו ושלי',
+        canSize: w.kind !== 'row',
+        sizeLabel: sizeName[w.size],
+        sizeAria: 'גודל: ' + sizeName[w.size] + ', לחיצה מחליפה',
+        resize: () => set(lay.map((x) => (x.key === w.key ? { ...x, size: w.kind === 'next' && SIZES[w.size] === 's' ? 'w' : SIZES[w.size] } : x))),
+        remove: () => set(lay.filter((x) => x.key !== w.key)),
+        back: move(w.key, -1),
+        fwd: move(w.key, 1),
+        notFirst: i > 0,
+        notLast: i < lay.length - 1,
+        selected: edit && s.bSel === w.key,
+        isFirst: i === 0,
+        isLast: i === lay.length - 1,
+        drag: edit,
+        onDragStart: (e) => { e.dataTransfer.effectAllowed = 'move'; this.setState({ dragKey: w.key }); },
+        onDragOver: (e) => e.preventDefault(),
+        onDrop: (e) => {
+          e.preventDefault();
+          const from = idx(s.dragKey);
+          if (from < 0 || from === i) return this.setState({ dragKey: null });
+          const n = lay.slice();
+          const [m] = n.splice(from, 1);
+          n.splice(i, 0, m);
+          this.setState({ lay: n, dragKey: null });
+        },
+        onDragEnd: () => this.setState({ dragKey: null }),
+      };
+    });
+    const has = (k) => lay.some((w) => w.key === k);
+    const selW = edit ? widgets.find((w) => w.key === s.bSel) || null : null;
+    const sheet = s.bSheet;
+    const choose = (id) => () => {
+      if (sheet.mode === 'replace') { set(lay.map((x) => (x.key === sheet.key ? { ...x, key: 'z-' + id, id } : x))); this.setState({ bSel: 'z-' + id }); }
+      else { set([...lay.filter((x) => x.kind !== 'row'), { key: 'z-' + id, kind: 'zman', id, size: 's' }, ...lay.filter((x) => x.kind === 'row')]); this.setState({ bSel: 'z-' + id }); }
+      this.setState({ bSheet: null });
+    };
+    const addSpecial = (w) => () => { set(w.kind === 'next' ? [w, ...lay] : [...lay, w]); this.setState({ bSheet: null, bSel: w.key }); };
+    const rowMine = mineL.map((x) => ({ ...x, mcls: 'mine' + (x.S <= t ? ' past' : '') }));
+    return {
+      bEditing: edit,
+      bNotEditing: !edit,
+      bEditToggle: () => this.setState({ bEdit: !edit, bSheet: null, bSel: null }),
+      bSel: selW ? { ...selW, canReplace: selW.kind === 'zman', remove: () => { selW.remove(); this.setState({ bSel: null }); }, replace: () => this.setState({ bSheet: { mode: 'replace', key: selW.key } }) } : {},
+      bHasSel: Boolean(selW),
+      bNoSel: edit && !selW,
+      bEditLabel: edit ? 'סיום' : 'עריכה',
+      bReset: () => this.setState({ lay: null }),
+      bWidgets: widgets,
+      bAddTile: () => this.setState({ bSheet: { mode: 'add' } }),
+      bSheetOn: Boolean(sheet),
+      bSheetTitle: sheet && sheet.mode === 'replace' ? 'החלפת הזמן באריח' : 'הוספה לבנטו',
+      bSheetClose: () => this.setState({ bSheet: null }),
+      bSheetSpecials: [
+        { key: 'next', kind: 'next', size: 'b', label: 'הזמן הבא', why: 'משתנה לבד: הזמן הקרוב שהכי חשוב לך' },
+        { key: 'row', kind: 'row', size: 'f', label: 'שורת עכשיו ושלי', why: 'זמני התקופה והזמנים שבחרת, וגלילה לשאר היום' },
+      ].filter((w) => !has(w.key) && !(sheet && sheet.mode === 'replace')).map((w) => ({ ...w, pick: addSpecial({ key: w.key, kind: w.kind, size: w.size }) })),
+      bSheetZmanim: ZM.map((z) => ({ label: z.label, time: this.clock(z.m * 60), on: has('z-' + z.id), act: has('z-' + z.id) ? 'בלוח' : sheet && sheet.mode === 'replace' ? 'בחירה' : 'הוספה', pick: has('z-' + z.id) ? () => {} : choose(z.id) })),
+      hbRow: [
+        ...smart.filter((x) => x.isTime && !(nx && x.label === nx.label && x.time === nx.time)).map((x) => ({ ...x, rcls: 'sm ' + x.cls })),
+        ...rowMine.map((x) => ({ ...x, rcls: x.mcls })),
+      ],
+    };
   }
