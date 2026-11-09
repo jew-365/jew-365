@@ -40,7 +40,7 @@ const PRAYER_MIN_HEIGHT = scaled(110);
 
 type Loaded = { state: 'idle' | 'loading' | 'failed' } | { state: 'ready'; verses: PersonalVerse[] };
 
-// Settings › Prayer: the verses said for one's name before the second "יהיו לרצון" of the Amidah (up to three, one
+// Settings, Prayer section: the verses said for one's name before the second "יהיו לרצון" of the Amidah (up to three, one
 // per name, found by their first and last letter in Tehillim and in Chok LeYisrael's Tanakh, or typed), and a free
 // prayer said there too. The reader shows both in place.
 export function AmidahPersonalSettings() {
