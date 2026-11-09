@@ -8,6 +8,7 @@ import { Banner, BannerTone } from '@/components/Banner';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { Card } from '@/components/Card';
 import { DayArcHero } from '@/components/DayArcHero';
+import { HomeBento, type BentoNext } from '@/components/HomeBento';
 import { DayLookEntry, DayLooks } from '@/components/DayLooks';
 import { Reveal } from '@/components/Reveal';
 import { IconTile } from '@/components/IconTile';
@@ -53,6 +54,8 @@ import { Mitzvah } from '@/types/mitzvah';
 import { TaharahEvent, TaharahSettings } from '@/types/taharah';
 import { Location } from '@/types/zmanim';
 import { dayFrameFor } from '@/utils/dayArc';
+import { bentoOf, pickNext, suggestedPins, type NextCandidate } from '@/utils/homeBento';
+import type { ZmanId } from '@/utils/zmanIds';
 import { computeStreak } from '@/utils/historyStats';
 import { DayEntry, dayEntryStatusText, firstName, greetingKey, heroCaption, orderDayEntries } from '@/utils/homeDay';
 import { hilulaMessage, holyBlockMessage, roshChodeshMessage, streakMessage } from '@/utils/homeMessages';
@@ -193,6 +196,10 @@ export default function HomeScreen() {
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
   const homeLook = useUserStore((s) => s.homeLook);
   const hiddenZmanim = useUserStore((s) => s.hiddenZmanim);
+  const savedBento = useUserStore((s) => s.homeBento);
+  const bentoPins = useUserStore((s) => s.bentoPins);
+  const setHomeBento = useUserStore((s) => s.setHomeBento);
+  const setBentoPins = useUserStore((s) => s.setBentoPins);
   // The bell beside each mitzvah's name: how many notifications its window sends in all, its reminders and their
   // repeats at its own nagging level, else the app's (the owner's call of 2026-11-04), shown while the nag sends any
   // repeat. Counted once per window for as long as the inputs hold.
@@ -511,6 +518,78 @@ export default function HomeScreen() {
 
   const onSkyTop = useCallback((next: SkyTop | null) => skySetter.current(next), []);
 
+  // The bento in the hero (the owner's pick of 2026-11-09; the defaults: .claude/specs/home-bento.md).
+  const enabledIds = useMemo(() => new Set(enabled.map((m) => m.id)), [enabled]);
+  const bentoWidgets = useMemo(() => bentoOf(savedBento, enabledIds), [savedBento, enabledIds]);
+  const bentoSuggestions = useMemo(() => suggestedPins(enabledIds), [enabledIds]);
+  const bentoNext = useMemo((): { candidate: NextCandidate; label: string } | null => {
+    if (!frame) return null;
+    const labels = new Map<string, string>();
+    const candidates: NextCandidate[] = [];
+    for (const item of allCurrent) {
+      if (item.marked) continue;
+      candidates.push({ kind: 'end', at: item.window.end, id: item.mitzvah.id });
+      labels.set(item.mitzvah.id, item.name);
+    }
+    for (const item of upcoming) {
+      const period = item.mitzvah.id === 'candle_lighting' || item.mitzvah.id === 'chanukah_candles';
+      candidates.push({ kind: period ? 'period' : 'opens', at: item.window.start, id: item.mitzvah.id });
+      labels.set(item.mitzvah.id, item.name);
+    }
+    for (const z of frame.zmanim) {
+      if (hiddenZmanim.includes(z.id)) continue;
+      candidates.push({ kind: 'zman', at: z.at, id: z.id });
+      labels.set(z.id, t(`home.zman.${z.id}.name`));
+    }
+    const chosen = pickNext(candidates, now);
+    return chosen ? { candidate: chosen, label: labels.get(chosen.id) ?? chosen.id } : null;
+  }, [frame, allCurrent, upcoming, hiddenZmanim, now, t]);
+  const renderBento = useCallback(
+    ({ pick, selected }: { pick: (id: ZmanId) => void; selected: ZmanId | null }) => {
+      if (!frame) return null;
+      const next: BentoNext | null = bentoNext
+        ? {
+            label: bentoNext.label,
+            at: bentoNext.candidate.at,
+            kind: bentoNext.candidate.kind,
+            onPress: () =>
+              bentoNext.candidate.kind === 'zman'
+                ? pick(bentoNext.candidate.id as ZmanId)
+                : router.push({ pathname: '/mitzvah/[id]', params: { id: bentoNext.candidate.id } }),
+          }
+        : null;
+      return (
+        <HomeBento
+          widgets={bentoWidgets}
+          frame={frame}
+          now={now}
+          tz={location.tz}
+          hidden={hiddenZmanim}
+          pins={bentoPins}
+          suggestions={bentoSuggestions}
+          next={next}
+          selected={selected}
+          onPick={pick}
+          onLayoutChange={(list) => setHomeBento(list ? [...list] : null)}
+          onPinsChange={setBentoPins}
+        />
+      );
+    },
+    [
+      frame,
+      bentoNext,
+      bentoWidgets,
+      now,
+      location.tz,
+      hiddenZmanim,
+      bentoPins,
+      bentoSuggestions,
+      router,
+      setHomeBento,
+      setBentoPins,
+    ],
+  );
+
   const todayTime = today.getTime();
   const selichotOffer = useMemo(
     () => selichotOfferOn(new Date(todayTime), nusach, siddurPlace(location, inIsrael)),
@@ -753,6 +832,7 @@ export default function HomeScreen() {
             dateLine={dateLine}
             caption={caption}
             hiddenZmanim={hiddenZmanim}
+            bento={renderBento}
             onScrubChange={setScrubbing}
             onSkyTop={onSkyTop}
           />

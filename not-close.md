@@ -475,13 +475,14 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 ### Medium — App requests of 2026-11-08
 
-- [ ] A small schedule board on home: fixed, smart and mine; design study, waiting for the owner's pick
+- [x] A small schedule board on home (the bento): fixed, smart and mine, with an edit mode
   - **Flag:** `OTA` (once a placement is picked and built).
   - **Source:** the owner's request of 2026-11-08 ("לוח זמנים נוכחי מצומצם רלוונטי חכם פר תקופה למסך הבית"), refined the same day: a small board of fixed times always shown, smart times by the hour and the period, and times the user pins from suggestions fitted to them.
   - **What it is:** round 2 of the design study [design/lab/studies/2026-11-08-home-schedule/](design/lab/studies/2026-11-08-home-schedule/AGENTS.md): one board in three layers, rounds 2 and 3 (הנץ, סוף ק״ש, שקיעה, צאה״כ always; up to two times of the moment, such as סוף זמן תפילה, הדלקת נרות, נרות חנוכה, סוף הצום; the user's pins from a sheet of suggestions), in three placements (round 2: a card under the hero, the hero's strip, a band at the top of the app) and twelve more creative ones (round 3: a curtain, an island, tabs, bento, a synagogue board, a header that collapses on scroll, a ticker, a wallet, a bottom drawer, a carousel, a day ribbon, a flip card). Gallery https://claude.ai/artifact/RWquxzv3PmRkZhUHW5K54o, canvas https://claude.ai/artifact/BDc4e5AT1m23BrLSEHR7mT.
   - **Picked:** the bento (2026-11-09), refined in round 4 as `R4Bento`: inside the hero in place of the zmanim strip, relevant times in view and the rest a sideways scroll, the hero's background ending under it, the arc scene smaller.
   - **Round 5 (2026-11-09):** "עכשיו" and "שלי" merged into one row, and an edit mode for the whole bento (select a tile, replace, size, move, remove, add, reset, drag); the default of each zone is the spec [.claude/specs/home-bento.md](.claude/specs/home-bento.md).
-  - **Waiting on:** the owner's approval of round 5 and of the spec's defaults, then building it in the app under [src/AGENTS.md](src/AGENTS.md) (the pins in `useUserStore`, beside `hiddenZmanim`), with its search item and guide entry.
+  - **Decided:** the owner approved round 5 and the spec's defaults on 2026-11-09 ("כן רק לפריביו. לבדיקה"), for the preview app only.
+  - **Done:** 2026-11-09: [src/components/HomeBento.tsx](src/components/HomeBento.tsx) inside the hero in place of the zmanim strip (`bento` prop of `DayArcHero`, the scene `BENTO_EXTRA` smaller), the pure rules in [src/utils/homeBento.ts](src/utils/homeBento.ts) (defaults by profile, dense pack, edits, the next tile's rule, the row), `homeBento` and `bentoPins` in `useUserStore`, the search item `homeBento`, the guide topic and `1.0.21-18` what's new; no drag (every edit is a button), and the fast's end and the week's candle lighting of the spec are not in the app's next tile or pins yet. Verified by `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, the full suite (6462 passed), `pnpm test:tz` of home, the bento logic and its render suite, and a web export of home in Hebrew and English. Still to check on the phone.
 
 ### Medium — App requests of 2026-11-09
 

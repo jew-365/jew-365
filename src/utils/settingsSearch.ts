@@ -1008,6 +1008,32 @@ const HISTORY_TABS: readonly HistoryTab[] = ['summary', 'trends', 'achievements'
 // route under src/app that neither this list, a setting's `route` nor a content kind opens.
 export const SEARCH_SCREENS: readonly ScreenEntry[] = [
   {
+    id: 'homeBento',
+    icon: 'calendar',
+    titleKey: 'home.bento.label',
+    captionKey: 'home.bento.searchCaption',
+    href: '/(tabs)/home',
+    terms: [
+      'לוח זמנים',
+      'לוח הזמנים',
+      'בנטו',
+      'אריחים',
+      'אריח',
+      'עריכת הלוח',
+      'הזמן הבא',
+      'הזמנים שלי',
+      'זמנים קבועים',
+      'נעיצת זמן',
+      'times board',
+      'bento',
+      'tiles',
+      'edit board',
+      'next time',
+      'my times',
+      'pin a time',
+    ],
+  },
+  {
     id: 'home',
     icon: 'sun',
     titleKey: 'nav.home',

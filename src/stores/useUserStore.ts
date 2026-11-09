@@ -23,6 +23,7 @@ import {
 } from '@/utils/quietHours';
 import { DEFAULT_NAG_LEVEL, isNagLevel, type NagLevel } from '@/utils/nagging';
 import { hiddenZmanimOf, withZmanShown, type ZmanId } from '@/utils/zmanIds';
+import { bentoPinsOf, type BentoWidget } from '@/utils/homeBento';
 import { amidahPrayerOf, amidahVersesOf } from '@/utils/personalPrayer';
 
 export type Language = 'he' | 'en';
@@ -140,6 +141,8 @@ type UserState = {
   chokCommentaryOpen: boolean;
   chokThuNightDay: ChokThuNightDay | null;
   hiddenZmanim: readonly ZmanId[];
+  homeBento: readonly BentoWidget[] | null;
+  bentoPins: readonly ZmanId[];
   amidahVerses: readonly string[];
   amidahPrayer: string;
   homeLook: HomeLook;
@@ -178,6 +181,8 @@ type UserState = {
   setChokDoubleChoice: (choice: ChokDoubleChoice) => void;
   setChokCommentaryOpen: (open: boolean) => void;
   setZmanShown: (id: ZmanId, shown: boolean) => void;
+  setHomeBento: (layout: readonly BentoWidget[] | null) => void;
+  setBentoPins: (pins: readonly ZmanId[]) => void;
   setAmidahVerses: (verses: readonly string[]) => void;
   setAmidahPrayer: (text: string) => void;
   setChokThuNightDay: (day: ChokThuNightDay) => void;
@@ -195,7 +200,14 @@ type PersistedUserState = Partial<
     UserState,
     'taharahEnabled' | 'maritalStatus' | 'hilulaNotices' | 'roshChodeshNotices' | 'quietBefore' | 'quietAfter'
   >
-> & { theme?: unknown; hiddenZmanim?: unknown; amidahVerses?: unknown; amidahPrayer?: unknown };
+> & {
+  theme?: unknown;
+  hiddenZmanim?: unknown;
+  amidahVerses?: unknown;
+  amidahPrayer?: unknown;
+  homeBento?: unknown;
+  bentoPins?: unknown;
+};
 
 const DEFAULT_LOCATION = CITIES[0];
 const DEFAULT_THEME: ThemeName = 'gold';
@@ -207,12 +219,15 @@ const savedThemeName = (saved: unknown): ThemeName => {
 };
 
 const mergeSavedUserState = (persisted: unknown, current: UserState): UserState => {
-  const { theme, hiddenZmanim, amidahVerses, amidahPrayer, ...saved } = (persisted ?? {}) as PersistedUserState;
+  const { theme, hiddenZmanim, amidahVerses, amidahPrayer, homeBento, bentoPins, ...saved } = (persisted ??
+    {}) as PersistedUserState;
   const merged = {
     ...current,
     ...saved,
     theme: theme === undefined ? current.theme : savedThemeName(theme),
     hiddenZmanim: hiddenZmanimOf(hiddenZmanim),
+    homeBento: Array.isArray(homeBento) ? (homeBento as BentoWidget[]) : null,
+    bentoPins: bentoPinsOf(bentoPins),
     amidahVerses: amidahVersesOf(amidahVerses),
     amidahPrayer: amidahPrayerOf(amidahPrayer),
   };
@@ -271,6 +286,8 @@ export const useUserStore = create<UserState>()(
       chokCommentaryOpen: false,
       chokThuNightDay: null,
       hiddenZmanim: [],
+      homeBento: null,
+      bentoPins: [],
       amidahVerses: [],
       amidahPrayer: '',
       homeLook: 'rail',
@@ -336,6 +353,8 @@ export const useUserStore = create<UserState>()(
           const hiddenZmanim = withZmanShown(s.hiddenZmanim, id, shown);
           return hiddenZmanim === s.hiddenZmanim ? s : { hiddenZmanim };
         }),
+      setHomeBento: (layout) => set({ homeBento: layout }),
+      setBentoPins: (pins) => set({ bentoPins: bentoPinsOf(pins) }),
       setAmidahVerses: (verses) => set({ amidahVerses: amidahVersesOf(verses) }),
       setAmidahPrayer: (text) => set({ amidahPrayer: amidahPrayerOf(text) }),
       setChokThuNightDay: (day) => set({ chokThuNightDay: day }),
@@ -378,6 +397,8 @@ export const useUserStore = create<UserState>()(
           chokCommentaryOpen: false,
           chokThuNightDay: null,
           hiddenZmanim: [],
+          homeBento: null,
+          bentoPins: [],
           amidahVerses: [],
           amidahPrayer: '',
           homeLook: 'rail',

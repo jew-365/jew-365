@@ -53,8 +53,11 @@ export const SCENE_MIN = scaled(179);
 export const SCENE_MAX = scaled(ARC.height);
 export const HERO_CHROME = scaled(168);
 
-export function sceneScale(windowHeight: number): number {
-  return Math.min(SCENE_MAX, Math.max(SCENE_MIN, windowHeight / 2 - HERO_CHROME)) / ARC.height;
+// The bento below the scene is taller than the strip it replaces, so the scene gives way by that much.
+export const BENTO_EXTRA = scaled(64);
+
+export function sceneScale(windowHeight: number, extra = 0): number {
+  return Math.min(SCENE_MAX, Math.max(SCENE_MIN, windowHeight / 2 - HERO_CHROME - extra)) / ARC.height;
 }
 
 const LOGO = scaled(40);
@@ -105,6 +108,8 @@ export type DayArcHeroProps = {
   hiddenZmanim?: readonly ZmanId[];
   onScrubChange: (active: boolean) => void;
   onSkyTop: (sky: { color: string; lightInk: boolean } | null) => void;
+  // Home's bento, drawn in place of the zmanim strip: it picks a zman to preview, or clears the preview.
+  bento?: (api: { pick: (id: ZmanId) => void; selected: ZmanId | null }) => React.ReactNode;
 };
 
 export const DayArcHero = React.memo(function DayArcHero({
@@ -117,12 +122,13 @@ export const DayArcHero = React.memo(function DayArcHero({
   hiddenZmanim = NO_ZMANIM,
   onScrubChange,
   onSkyTop,
+  bento,
 }: DayArcHeroProps) {
   const { colors } = useTheme();
   const { t } = useI18n();
   const rtl = useRowMirrored();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const k = sceneScale(windowHeight);
+  const k = sceneScale(windowHeight, bento ? BENTO_EXTRA : 0);
   const units = stageUnits(windowWidth, k);
   const offset = stageOffset(units);
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -382,51 +388,61 @@ export const DayArcHero = React.memo(function DayArcHero({
             <BackPill label={t('home.arc.back')} onPress={() => setPreview(null)} />
           </View>
         ) : null}
-        <ScrollView
-          ref={scrollRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          accessibilityLabel={t('home.arc.chips')}
-          contentContainerStyle={styles.chips}
-          onLayout={(e: LayoutChangeEvent) => {
-            viewWidth.current = e.nativeEvent.layout.width;
-            if (!centredOnce.current) centre();
-          }}
-        >
-          {shownZmanim(frame, hiddenZmanim).map((z) => {
-            const selected = z.id === selectedId;
-            const isNextChip = z.id === nextId;
-            const marked = z.id === markedId;
-            const past = z.at.getTime() <= shown.getTime() && !isNextChip;
-            const short = t(`home.zman.${z.id}.short`);
-            const time = clockOf(z.at, tz);
-            const label = isNextChip ? t('home.arc.chipNext', { name: short }) : short;
-            const textColor = selected ? colors.bg : isNextChip ? chipInks.next : chipInks.plain;
-            return (
-              <Pressable
-                key={z.id}
-                testID={`home-zman-${z.id}`}
-                accessibilityRole="button"
-                accessibilityLabel={`${t(`home.zman.${z.id}.name`)}, ${time}`}
-                accessibilityState={{ selected }}
-                onPress={() => onChipPress(z)}
-                onLayout={(e: LayoutChangeEvent) => {
-                  chipLayouts.current[z.id] = { x: e.nativeEvent.layout.x, width: e.nativeEvent.layout.width };
-                  if (!centredOnce.current && z.id === centreRef.current) centre();
-                }}
-                style={[
-                  styles.chip,
-                  { backgroundColor: alphaHex(isNextChip ? colors.goldLight : colors.surface, CHIP_ALPHA) },
-                  marked && { borderColor: colors.gold },
-                  selected && { backgroundColor: colors.text },
-                ]}
-              >
-                <Text style={[typography.small, { color: textColor }]}>{label}</Text>
-                <Text style={[past ? typography.body : typography.bodyBold, { color: textColor }]}>{time}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        {bento ? (
+          bento({
+            pick: (id) => {
+              const z = frame.zmanim.find((x) => x.id === id);
+              if (z) onChipPress(z);
+            },
+            selected: selectedId,
+          })
+        ) : (
+          <ScrollView
+            ref={scrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            accessibilityLabel={t('home.arc.chips')}
+            contentContainerStyle={styles.chips}
+            onLayout={(e: LayoutChangeEvent) => {
+              viewWidth.current = e.nativeEvent.layout.width;
+              if (!centredOnce.current) centre();
+            }}
+          >
+            {shownZmanim(frame, hiddenZmanim).map((z) => {
+              const selected = z.id === selectedId;
+              const isNextChip = z.id === nextId;
+              const marked = z.id === markedId;
+              const past = z.at.getTime() <= shown.getTime() && !isNextChip;
+              const short = t(`home.zman.${z.id}.short`);
+              const time = clockOf(z.at, tz);
+              const label = isNextChip ? t('home.arc.chipNext', { name: short }) : short;
+              const textColor = selected ? colors.bg : isNextChip ? chipInks.next : chipInks.plain;
+              return (
+                <Pressable
+                  key={z.id}
+                  testID={`home-zman-${z.id}`}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${t(`home.zman.${z.id}.name`)}, ${time}`}
+                  accessibilityState={{ selected }}
+                  onPress={() => onChipPress(z)}
+                  onLayout={(e: LayoutChangeEvent) => {
+                    chipLayouts.current[z.id] = { x: e.nativeEvent.layout.x, width: e.nativeEvent.layout.width };
+                    if (!centredOnce.current && z.id === centreRef.current) centre();
+                  }}
+                  style={[
+                    styles.chip,
+                    { backgroundColor: alphaHex(isNextChip ? colors.goldLight : colors.surface, CHIP_ALPHA) },
+                    marked && { borderColor: colors.gold },
+                    selected && { backgroundColor: colors.text },
+                  ]}
+                >
+                  <Text style={[typography.small, { color: textColor }]}>{label}</Text>
+                  <Text style={[past ? typography.body : typography.bodyBold, { color: textColor }]}>{time}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        )}
       </View>
     </View>
   );

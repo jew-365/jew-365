@@ -41,7 +41,7 @@ const SIZES = {
 };
 const LANGUAGES = ['he', 'en'];
 const SCREENS = [
-  { name: '1-home', path: '/home', centreNextZman: true },
+  { name: '1-home', path: '/home' },
   { name: '2-siddur', path: '/siddur' },
   { name: '3-reader', path: `/siddur/mincha?section=${encodeURIComponent('אשרי')}` },
   { name: '4-history', path: '/history' },
@@ -546,21 +546,6 @@ const SETTLE = `(async () => {
   throw new Error('The page never settled');
 })()`;
 
-// A phone centres home's next-zman chip in its row; React Native Web's scrollTo does nothing in a
-// right-to-left row, so the capture scrolls the row the same way.
-const centreNextZman = (prefix) => `(() => {
-  const chip = [...document.querySelectorAll('[data-testid^="home-zman-"]')].find((node) =>
-    node.innerText.trim().startsWith(${JSON.stringify(prefix)}),
-  );
-  let row = chip?.parentElement;
-  while (row && row.scrollWidth <= row.clientWidth) row = row.parentElement;
-  if (!row) return false;
-  const chipBox = chip.getBoundingClientRect();
-  const rowBox = row.getBoundingClientRect();
-  row.scrollBy({ left: chipBox.left + chipBox.width / 2 - (rowBox.left + rowBox.width / 2), behavior: 'instant' });
-  return true;
-})()`;
-
 function textProblems(text, path, expectedPath, dictionaryKeys, errorTitles) {
   const problems = [];
   if (path !== expectedPath) problems.push(`opened ${path} instead of ${expectedPath}`);
@@ -621,15 +606,7 @@ async function captureSet(cdp, origin, set, screens, outDir, checks) {
       const loaded = cdp.once('Page.loadEventFired', sessionId);
       await page('Page.navigate', { url: `${origin}${screen.path}` });
       await loaded;
-      let settled = await page('Runtime.evaluate', { expression: SETTLE, awaitPromise: true, returnByValue: true });
-      if (screen.centreNextZman && !settled.exceptionDetails) {
-        const centred = await page('Runtime.evaluate', {
-          expression: centreNextZman(checks.nextChipPrefix[language]),
-          returnByValue: true,
-        });
-        if (!centred.result.value) throw new Error(`${set}/${screen.name} has no next-zman chip in a scrolling row`);
-        settled = await page('Runtime.evaluate', { expression: SETTLE, awaitPromise: true, returnByValue: true });
-      }
+      const settled = await page('Runtime.evaluate', { expression: SETTLE, awaitPromise: true, returnByValue: true });
       if (settled.exceptionDetails)
         throw new Error(`${set}/${screen.name}: ${settled.exceptionDetails.exception?.description}`);
       const { text, path } = settled.result.value;
@@ -664,9 +641,6 @@ function dictionaryChecks() {
   return {
     dictionaryKeys: Object.keys(dictionaries[1]).filter((key) => key.includes('.')),
     errorTitles: dictionaries.map((dictionary) => dictionary['errors.boundaryTitle']),
-    nextChipPrefix: Object.fromEntries(
-      ['he', 'en'].map((lang, i) => [lang, dictionaries[i]['home.arc.chipNext'].split('%{name}')[0]]),
-    ),
   };
 }
 
