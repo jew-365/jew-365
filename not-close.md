@@ -528,6 +528,14 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done:** 2026-11-09. Verified: the forced case in [src/services/__tests__/ChokContentService.test.ts](src/services/__tests__/ChokContentService.test.ts) and the mount call in [src/components/__tests__/ChokAddonCard.render.test.tsx](src/components/__tests__/ChokAddonCard.render.test.tsx). Not checked on a phone.
   - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: yes, `b48af4a` fix(addons): the add-on card always checks for a new version when it opens · Pushed: yes · Live: preview `1.0.21-68` (group `e367d046-39cd-46cb-bfbc-1cbb996d0ae7`, 2026-11-09, from `b48af4a`), not production · Channel: preview
 
+- [ ] The commentary choice collapsed to two empty bars on a day with one section
+  - **Found:** 2026-11-09, the owner's screenshot of Shnayim Mikra on Monday (one aliyah, so no section picker): "הבוררים לא נראים טוב בכלל אם יש לומר לא נראים".
+  - **Flag:** `OTA`.
+  - **What it is:** the reader's commentary control took `flex: 1` (a zero basis) in a column with no height of its own; beside a picker card it stretched to the card's height, alone it collapsed and its labels vanished. It now takes `flexGrow: 1` (`commentaryControl` in [src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>)), its own height, still growing beside a picker card.
+  - **Expected result:** "עם פירושים" and "בלי פירושים" show as full pills on every day, with or without the section picker.
+  - **Done:** 2026-11-09. Verified: the reader suites pass; the layout itself is not measured under Jest, so it waits for the owner's phone.
+  - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: no · Pushed: no · Live: no · Channel: none
+
 ## Bugs
 
 - [ ] Psalm 67:1 reads "לַמְנַצֵּח" without its furtive patach

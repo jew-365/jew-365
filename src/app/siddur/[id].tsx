@@ -2777,8 +2777,10 @@ const styles = StyleSheet.create({
     flexGrow: 1.4,
     flexBasis: scaled(170),
   },
+  // Grows to the picker card's height beside it, from its own height: `flex: 1` (a zero basis) collapsed it to nothing
+  // where no picker card sits beside it (Shnayim Mikra's one-aliyah days, the owner's report of 2026-11-09).
   commentaryControl: {
-    flex: 1,
+    flexGrow: 1,
   },
   toolbar: {
     flexDirection: 'row',
