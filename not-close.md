@@ -518,6 +518,14 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Rashi (the owner's request of 2026-11-09):** "תוסיף אפשרות עם רשי ואז יהיה בורר עם פירושים ובלי פירושים כמו בחוק לישראל". Rashi (On Your Way, public domain, via Sefaria) after each verse, folded by the commentary control the reader shares with Chok LeYisrael (`chokCommentaryOpen`); the add-on is now 1.17 MB, content version 2 (live on Pages); committed `a58339d`, in preview `1.0.21-67` (group `a60fbd1f-9020-4e02-8f20-48498021bb1e`, 2026-11-09, from `0d273e6`). Verified: the Rashi cases of [scripts/shnayim/__tests__/build.test.js](scripts/shnayim/__tests__/build.test.js), [src/utils/__tests__/shnayim.test.ts](src/utils/__tests__/shnayim.test.ts) and [src/app/__tests__/shnayimReader.render.test.tsx](src/app/__tests__/shnayimReader.render.test.tsx).
   - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: yes, `f2aa4dc` feat(learning): Shnayim Mikra ve'Echad Targum as a downloadable add-on, and a learning group in the siddur · Pushed: yes · Live: preview `1.0.21-66` (group `2df4020b-68a3-4381-adf7-b0e17f5f7d42`, 2026-11-09, from `f770471`), not production; [docs/shnayim/](docs/shnayim) live on Pages (manifest and a parasha file answered 200, 2026-11-09) · Channel: preview
 
+- [ ] A new add-on version was not offered on the day of its download
+  - **Found:** 2026-11-09, the owner's report after preview `1.0.21-67`: "קיבלתי באנר של עדכון ... ואין לא רשי ולא עדכון של החבילה".
+  - **Flag:** `OTA`.
+  - **What it is:** every add-on checked its manifest at most once a day, and a download stamped that check, so Shnayim Mikra's content version 2 (Rashi), published the same day, was not offered. The add-on card on the mitzvah screen now always checks when it opens (`checkUpdate(now, true)` in [src/components/AddonCard.tsx](src/components/AddonCard.tsx), the `force` of [src/services/addons/addonContent.ts](src/services/addons/addonContent.ts)); the More tab keeps its daily check. Applies to Chok LeYisrael and Selichot too.
+  - **Expected result:** opening the mitzvah screen of an installed add-on whose manifest has a newer version shows the update banner and button.
+  - **Done:** 2026-11-09. Verified: the forced case in [src/services/__tests__/ChokContentService.test.ts](src/services/__tests__/ChokContentService.test.ts) and the mount call in [src/components/__tests__/ChokAddonCard.render.test.tsx](src/components/__tests__/ChokAddonCard.render.test.tsx). Not checked on a phone.
+  - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: no · Pushed: no · Live: no · Channel: none
+
 ## Bugs
 
 - [ ] Psalm 67:1 reads "לַמְנַצֵּח" without its furtive patach

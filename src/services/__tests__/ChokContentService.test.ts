@@ -718,6 +718,15 @@ describe('checkChokUpdate', () => {
     expect(hits).toEqual([]);
   });
 
+  it('asks within the day when forced, as the add-on card does', async () => {
+    await installChok(v1.manifest);
+    useChokStore.setState({ checkedAt: NOW - 1000 });
+    route = serve(v2);
+    await checkChokUpdate(NOW, true);
+    expect(useChokStore.getState().latestVersion).toBe(2);
+    expect(selectChokUpdateAvailable(useChokStore.getState())).toBe(true);
+  });
+
   it('records a newer version once the day has passed', async () => {
     await installChok(v1.manifest);
     useChokStore.setState({ checkedAt: NOW - CHOK_CHECK_INTERVAL_MS - 1 });

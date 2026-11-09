@@ -19,7 +19,7 @@ export type AddonSource<M extends AddonManifest> = {
   install: (manifest: M) => Promise<boolean>;
   cancel: () => void;
   remove: () => void;
-  checkUpdate: () => Promise<void>;
+  checkUpdate: (now?: number, force?: boolean) => Promise<void>;
   downloadBytes: (manifest: M) => number;
 };
 
@@ -117,8 +117,9 @@ export function AddonCard<M extends AddonManifest>({
   const { preparing, prepare, dialog } = useAddonDownloadFlow({ copy, source, installed: installed !== null, params });
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  // The card is where an update is offered, so opening it always asks, past the once-a-day gate of the other screens.
   useEffect(() => {
-    void source.checkUpdate();
+    void source.checkUpdate(Date.now(), true);
   }, [source]);
 
   const failure =

@@ -153,9 +153,10 @@ describe('ChokAddonCard', () => {
       expect(install).not.toHaveBeenCalled();
     });
 
-    it('checks for a newer version once, when it mounts', () => {
+    it('checks for a newer version once, when it mounts, past the once-a-day gate', () => {
       renderWithTheme(<ChokAddonCard />);
       expect(checkChokUpdate).toHaveBeenCalledTimes(1);
+      expect(checkChokUpdate).toHaveBeenCalledWith(expect.any(Number), true);
     });
 
     it('says the download is a phone feature on the web, with no download button', () => {

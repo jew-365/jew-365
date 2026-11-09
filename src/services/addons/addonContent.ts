@@ -88,7 +88,7 @@ export type AddonContent<M extends AddonManifest> = {
   install: (manifest: M, keys?: readonly string[]) => Promise<boolean>;
   cancel: () => void;
   remove: () => void;
-  checkUpdate: (now?: number) => Promise<void>;
+  checkUpdate: (now?: number, force?: boolean) => Promise<void>;
   verifyInstall: (readError?: unknown) => boolean;
   reconcile: () => void;
 };
@@ -321,10 +321,12 @@ export function createAddonContent<M extends AddonManifest>(config: AddonConfig)
     }
   }
 
-  async function checkUpdate(now: number = Date.now()): Promise<void> {
+  // At most once a day, unless `force` (the add-on's own card, opened on purpose, always asks).
+  async function checkUpdate(now: number = Date.now(), force = false): Promise<void> {
     const { installed, download, checkedAt } = store.getState();
     if (!addonDownloadSupported() || installed === null || download.status === 'downloading') return;
-    if (checkedAt !== null && checkedAt <= now && now - checkedAt < ADDON_CHECK_INTERVAL_MS) return;
+    const recent = checkedAt !== null && checkedAt <= now && now - checkedAt < ADDON_CHECK_INTERVAL_MS;
+    if (recent && !force) return;
     try {
       const manifest = await fetchManifest();
       store.getState().setChecked(manifest.version, now);
