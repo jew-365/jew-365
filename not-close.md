@@ -491,21 +491,21 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** the hills were drawn over the circle's tracks, so each half stopped short of the horizon; the drag held at alot. The tracks, the sun and the moon now draw above the hills (`home-arc-tracks` in [src/components/DaySkyScene.tsx](src/components/DaySkyScene.tsx)), and `dragMove()` in [src/utils/dayArc.ts](src/utils/dayArc.ts) wraps past the alot end to the other end of the same app day.
   - **Expected result:** one whole circle at every hour; the sun or moon turns all the way round, from night to the same morning and back, never into another day.
   - **Done:** 2026-11-09. Verified: [src/utils/__tests__/dayArc.test.ts](src/utils/__tests__/dayArc.test.ts) (the turn across alot both ways, an offset carried past either end wrapped into the day), [src/components/__tests__/DayArcHero.render.test.tsx](src/components/__tests__/DayArcHero.render.test.tsx) (the tracks layer after the hills, the drag across alot on screen). Not checked on a phone.
-  - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: no · Pushed: no · Live: no · Channel: —
+  - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: yes, `a913b4c` feat(home, siddur): a whole circle turned freely within the day, messages in the empty open-now slot, Shabbat from Thursday night, and name verses with a personal prayer in the Amidah · Pushed: yes · Live: no · Channel: —
 
 - [ ] Home: the messages take the open-now slot when nothing is open; the coming Shabbat only from Thursday night
   - **Flag:** `OTA`.
   - **What it is:** with no open window, home's `home.messages` block replaces `home.openNow` and is not repeated after My day ([src/app/(tabs)/home.tsx](<src/app/(tabs)/home.tsx>)); `holyBlockMessage()` ([src/utils/homeMessages.ts](src/utils/homeMessages.ts)) shows the next Shabbat or Yom Tov only from the nightfall before its erev.
   - **Expected result:** a quiet afternoon shows the messages at the top of the body; Wednesday shows no Shabbat line, Thursday night says "מחר", Friday says "היום".
   - **Done:** 2026-11-09. Verified: [src/utils/__tests__/homeMessages.test.ts](src/utils/__tests__/homeMessages.test.ts), [src/app/__tests__/home.render.test.tsx](src/app/__tests__/home.render.test.tsx), [src/app/__tests__/home.mark.render.test.tsx](src/app/__tests__/home.mark.render.test.tsx). Not checked on a phone.
-  - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: no · Pushed: no · Live: no · Channel: —
+  - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: yes, `a913b4c` feat(home, siddur): a whole circle turned freely within the day, messages in the empty open-now slot, Shabbat from Thursday night, and name verses with a personal prayer in the Amidah · Pushed: yes · Live: no · Channel: —
 
 - [ ] Name verses and a personal prayer before the second "יהיו לרצון" of the Amidah
   - **Flag:** `OTA`.
   - **What it is:** Settings → Prayer, [src/components/AmidahPersonalSettings.tsx](src/components/AmidahPersonalSettings.tsx): up to three verses found by first and last letter in Tehillim and, when installed, the Tanakh of Chok LeYisrael ([src/services/PersonalVerses.ts](src/services/PersonalVerses.ts)), or typed, and a free prayer; the reader inserts both after Elokai Netzor, before its "יהיו לרצון", in Shacharit, Mincha and Maariv of every nusach ([src/utils/personalPrayer.ts](src/utils/personalPrayer.ts)), with a link under each Amidah back to the setting; search item `amidahPersonal`; guide and what's new `1.0.21-18`.
   - **Expected result:** the chosen verses and prayer show in place in every Amidah (Musaf included); nothing of the printed text moves or is lost.
   - **Done:** 2026-11-09. Verified: [src/utils/__tests__/personalPrayer.test.ts](src/utils/__tests__/personalPrayer.test.ts) (all five nuschaot × three prayers: the place, the text unchanged around it, unique keys; the 2527 Tehillim verses; Chok verses only from verse segments), [src/components/__tests__/AmidahPersonalSettings.render.test.tsx](src/components/__tests__/AmidahPersonalSettings.render.test.tsx), the name-verse cases of [src/app/__tests__/siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx). Not checked on a phone; the Chok search over 54 files not timed on a low-end Android.
-  - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: no · Pushed: no · Live: no · Channel: —
+  - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: yes, `a913b4c` feat(home, siddur): a whole circle turned freely within the day, messages in the empty open-now slot, Shabbat from Thursday night, and name verses with a personal prayer in the Amidah · Pushed: yes · Live: no · Channel: —
 
 ## Bugs
 
