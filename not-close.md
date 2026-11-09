@@ -483,7 +483,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Round 5 (2026-11-09):** "עכשיו" and "שלי" merged into one row, and an edit mode for the whole bento (select a tile, replace, size, move, remove, add, reset, drag); the default of each zone is the spec [.claude/specs/home-bento.md](.claude/specs/home-bento.md).
   - **Decided:** the owner approved round 5 and the spec's defaults on 2026-11-09 ("כן רק לפריביו. לבדיקה"), for the preview app only.
   - **Done:** 2026-11-09: [src/components/HomeBento.tsx](src/components/HomeBento.tsx) inside the hero in place of the zmanim strip (`bento` prop of `DayArcHero`, the scene `BENTO_EXTRA` smaller), the pure rules in [src/utils/homeBento.ts](src/utils/homeBento.ts) (defaults by profile, dense pack, edits, the next tile's rule, the row), `homeBento` and `bentoPins` in `useUserStore`, the search item `homeBento`, the guide topic and `1.0.21-18` what's new; no drag (every edit is a button), and the fast's end and the week's candle lighting of the spec are not in the app's next tile or pins yet. Verified by `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, the full suite (6462 passed), `pnpm test:tz` of home, the bento logic and its render suite, and a web export of home in Hebrew and English. Still to check on the phone.
-  - **Status:** 1.0.21 · Committed: `3d80c08` feat(home): the times board (bento) in the hero, with an edit mode · Pushed: yes · Live: not yet; the preview update waits for an EAS login in a session (this one has no Expo token) · Channel: none
+  - **Status:** 1.0.21 · Committed: `3d80c08` feat(home): the times board (bento) in the hero, with an edit mode · Pushed: yes · Live: preview `1.0.21-69` (group `8e46fa21-a672-4fd5-8f48-12b246022b17`, 2026-11-09, from `db0c013`, published by the Shnayim Mikra session), not production · Channel: preview
 
 ### Medium — App requests of 2026-11-09
 
@@ -534,7 +534,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** the reader's commentary control took `flex: 1` (a zero basis) in a column with no height of its own; beside a picker card it stretched to the card's height, alone it collapsed and its labels vanished. It now takes `flexGrow: 1` (`commentaryControl` in [src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>)), its own height, still growing beside a picker card.
   - **Expected result:** "עם פירושים" and "בלי פירושים" show as full pills on every day, with or without the section picker.
   - **Done:** 2026-11-09. Verified: the reader suites pass; the layout itself is not measured under Jest, so it waits for the owner's phone.
-  - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: yes, `db0c013` fix(siddur): the commentary choice keeps its height when no section picker sits beside it · Pushed: yes · Live: preview `1.0.21-69` (group `8e46fa21-a672-4fd5-8f48-12b246022b17`, 2026-11-09, from `db0c013`), not production · Channel: preview
 
 ## Bugs
 
