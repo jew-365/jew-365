@@ -524,7 +524,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** every add-on checked its manifest at most once a day, and a download stamped that check, so Shnayim Mikra's content version 2 (Rashi), published the same day, was not offered. The add-on card on the mitzvah screen now always checks when it opens (`checkUpdate(now, true)` in [src/components/AddonCard.tsx](src/components/AddonCard.tsx), the `force` of [src/services/addons/addonContent.ts](src/services/addons/addonContent.ts)); the More tab keeps its daily check. Applies to Chok LeYisrael and Selichot too.
   - **Expected result:** opening the mitzvah screen of an installed add-on whose manifest has a newer version shows the update banner and button.
   - **Done:** 2026-11-09. Verified: the forced case in [src/services/__tests__/ChokContentService.test.ts](src/services/__tests__/ChokContentService.test.ts) and the mount call in [src/components/__tests__/ChokAddonCard.render.test.tsx](src/components/__tests__/ChokAddonCard.render.test.tsx). Not checked on a phone.
-  - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: yes, `b48af4a` fix(addons): the add-on card always checks for a new version when it opens · Pushed: yes · Live: preview `1.0.21-68` (group `e367d046-39cd-46cb-bfbc-1cbb996d0ae7`, 2026-11-09, from `b48af4a`), not production · Channel: preview
 
 ## Bugs
 
