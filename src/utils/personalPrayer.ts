@@ -200,6 +200,9 @@ function splitAt(segment: SiddurSegment, at: Place): [SiddurSegment | null, Sidd
 const NETZOR = /אלהי[\s,.]+נצו?ר\s+לשוני/u;
 const YIHYU = /יהיו\s+לרצון/u;
 
+// The segments the insert adds, which the reader frames apart and never folds.
+export const isPersonalSegment = (segment: SiddurSegment): boolean => segment.key?.startsWith('personal:') ?? false;
+
 export type PersonalInsert = {
   verses: readonly string[];
   prayer: string;

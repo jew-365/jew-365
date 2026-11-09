@@ -8,6 +8,7 @@ import {
   amidahPrayerOf,
   amidahVersesOf,
   chokVerses,
+  isPersonalSegment,
   MAX_AMIDAH_VERSES,
   plainHebrew,
   tehillimVerses,
@@ -18,7 +19,7 @@ import {
   withPersonalPrayer,
   type PersonalInsert,
 } from '../personalPrayer';
-import { dayFeatures, forVoice, resolveSiddurText } from '../siddur';
+import { aloneFolds, dayFeatures, forVoice, resolveSiddurText } from '../siddur';
 
 const LABELS = {
   verses: { he: 'פסוק לשמי', en: 'My name verse' },
@@ -73,6 +74,24 @@ describe('the personal insert in each Amidah', () => {
         segments: s.segments.filter((g) => !g.key?.startsWith('personal:')),
       }));
       expect(plainOf(without)).toBe(plain);
+      // Never folded, with a minyan or alone: no label of its own, and never in a section that folds whole.
+      withInsert
+        .filter((section) => section.segments.some(isPersonalSegment))
+        .forEach((section) => {
+          expect(section.minyanOnly).toBeFalsy();
+          expect(section.optional).toBeUndefined();
+          ['minyan', 'alone'].forEach((mode) => {
+            const folds = aloneFolds(section, mode as 'minyan' | 'alone');
+            folds.blocks
+              .filter((block) => block.segments.some(isPersonalSegment))
+              .forEach((block) => {
+                expect(block.label).toBeUndefined();
+                block.minyanBlocks
+                  .filter((inner) => inner.segments.some(isPersonalSegment))
+                  .forEach((inner) => expect(inner.folded).toBeFalsy());
+              });
+          });
+        });
       // Every key stays unique, so bookmarks still point at one place.
       const keys = segments.map((g) => g.key).filter(Boolean);
       expect(new Set(keys).size).toBe(keys.length);

@@ -96,6 +96,7 @@ import { readSiddurText } from '@/testing/siddur';
 import { renderWithTheme } from '@/testing/render';
 import { at } from '@/testing/zmanim';
 import { THEMES } from '@/theme/colors';
+import { alphaHex } from '@/utils/dayArc';
 import type { CustomMitzvah, Nusach } from '@/types/mitzvah';
 import type { SiddurLastPosition, SiddurSection, SiddurText, SiddurVoice } from '@/types/siddur';
 
@@ -1740,6 +1741,24 @@ describe('the name verses and personal prayer in the Amidah', () => {
     expect(within(amidah).getByText('רפא נא את אמי')).toBeOnTheScreen();
     fireEvent.press(within(amidah).getByRole('button', { name: 'פסוקים לשמי ותפילה אישית' }));
     expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/(tabs)/settings', params: { focus: 'amidahPersonal' } });
+  });
+
+  it('frames the verses and the prayer in the accent, apart from the prayer, open with a minyan and alone', async () => {
+    for (const mode of ['minyan', 'alone'] as const) {
+      await openMincha(['יוֹסֵף הַצַּדִּיק'], 'רפא נא');
+      act(() => useUserStore.getState().setPrayerMode(mode));
+      const frames = screen.getAllByTestId('siddur-personal-insert');
+      expect(frames).toHaveLength(1);
+      expect(StyleSheet.flatten(frames[0].props.style)).toMatchObject({
+        backgroundColor: alphaHex(THEMES.gold.gold, 0.14),
+        borderColor: THEMES.gold.gold,
+      });
+      expect(within(frames[0]).getByText('תוספת אישית, לא חלק מנוסח התפילה')).toBeOnTheScreen();
+      expect(within(frames[0]).getByText('יוֹסֵף הַצַּדִּיק')).toBeOnTheScreen();
+      expect(within(frames[0]).getByText('רפא נא')).toBeOnTheScreen();
+      screen.unmount();
+      jest.useRealTimers();
+    }
   });
 
   it('keeps the link, and adds nothing, while nothing is set', async () => {

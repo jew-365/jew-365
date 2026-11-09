@@ -157,7 +157,7 @@ import { currentOrNextWindow, dayWindow, windowDueToday } from '@/utils/buildDay
 import { afterPaint } from '@/utils/afterPaint';
 import { compassPrayerOf } from '@/utils/compass';
 import { alphaHex } from '@/utils/dayArc';
-import { PERSONAL_PRAYER_TEXTS, withPersonalPrayer } from '@/utils/personalPrayer';
+import { isPersonalSegment, PERSONAL_PRAYER_TEXTS, withPersonalPrayer } from '@/utils/personalPrayer';
 import { useReadingStore } from '@/stores/useReadingStore';
 import {
   CHAPTER_ONLY_TEXTS,
@@ -184,6 +184,8 @@ const SECTION_VIEWABILITY = { viewAreaCoveragePercentThreshold: 2 };
 // The sections of Shacharit, Mincha and Maariv that open an Amidah: the compass button sits above each.
 const AMIDAH_SECTIONS: ReadonlySet<string> = new Set(['תפילת העמידה', 'מוסף']);
 const NO_POINTS: ReadonlySet<string> = new Set();
+// The user's own verses and prayer sit on the accent at this alpha, apart from the printed text (the owner's call, 2026-11-09).
+const PERSONAL_FILL_ALPHA = 0.14;
 // The compass button is option ב of design/lab/studies/2026-11-05-compass-button (the owner's pick, 2026-11-05):
 // an outlined pill on a hairline in the primary colour at this opacity.
 const COMPASS_LINE_ALPHA = 0.55;
@@ -597,13 +599,22 @@ type LayoutNode = { y: number; parent: LayoutNode | null };
 type SegmentLayouts = Map<string, { y: number; height: number; parent: LayoutNode | null }>;
 const LayoutNodeContext = React.createContext<LayoutNode | null>(null);
 
-function MeasuredView({ style, children }: { style?: StyleProp<ViewStyle>; children: React.ReactNode }) {
+function MeasuredView({
+  style,
+  testID,
+  children,
+}: {
+  style?: StyleProp<ViewStyle>;
+  testID?: string;
+  children: React.ReactNode;
+}) {
   const parent = useContext(LayoutNodeContext);
   const node = useMemo<LayoutNode>(() => ({ y: 0, parent }), [parent]);
   return (
     <LayoutNodeContext.Provider value={node}>
       <View
         style={style}
+        testID={testID}
         onLayout={(event) => {
           node.y = event.nativeEvent.layout.y;
         }}
@@ -1465,12 +1476,18 @@ export default function SiddurScreen() {
   const labelOf = (label: PassageLabel) => (language === 'en' ? label.en : label.he);
   const labeledEdge = (language === 'he') === I18nManager.isRTL ? styles.labeledLeftEdge : styles.labeledRightEdge;
   const segmentViews = (section: SiddurSection, segments: SiddurSegment[], start: number, color: string) => {
-    const runs: { added: boolean; start: number; segments: SiddurSegment[] }[] = [];
+    // A run is plain text, an insert added for the day, or the user's own verses and prayer (`personal`).
+    type RunKind = 'plain' | 'added' | 'personal';
+    const runs: { kind: RunKind; start: number; segments: SiddurSegment[] }[] = [];
     segments.forEach((segment, offset) => {
-      const added = isAddedForToday(segment, section);
+      const kind: RunKind = isPersonalSegment(segment)
+        ? 'personal'
+        : isAddedForToday(segment, section)
+          ? 'added'
+          : 'plain';
       const previous = runs[runs.length - 1];
-      if (previous?.added === added) previous.segments.push(segment);
-      else runs.push({ added, start: start + offset, segments: [segment] });
+      if (previous?.kind === kind) previous.segments.push(segment);
+      else runs.push({ kind, start: start + offset, segments: [segment] });
     });
     return runs.flatMap((run) => {
       const views = run.segments.map((segment, offset) => (
@@ -1483,7 +1500,23 @@ export default function SiddurScreen() {
           layouts={segmentLayouts.current}
         />
       ));
-      if (!run.added) return views;
+      if (run.kind === 'plain') return views;
+      if (run.kind === 'personal')
+        return [
+          <MeasuredView
+            key={`personal#${run.start}`}
+            testID="siddur-personal-insert"
+            style={[
+              styles.addedToday,
+              { backgroundColor: alphaHex(colors.gold, PERSONAL_FILL_ALPHA), borderColor: colors.gold },
+            ]}
+          >
+            <Text style={[typography.micro, styles.addedTodayLabel, { color: colors.goldText }]}>
+              {t('amidahPersonal.readerNote')}
+            </Text>
+            {views}
+          </MeasuredView>,
+        ];
       return [
         <MeasuredView
           key={`added#${run.start}`}
