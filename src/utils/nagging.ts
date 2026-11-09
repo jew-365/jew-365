@@ -34,6 +34,7 @@ export const PERFORM_MIN: Readonly<Record<string, PerformMin>> = {
   tefillin: { alone: 5 },
   krias_shma_al_hamita: { alone: 5 },
   chok_leyisrael: { alone: 15 },
+  shnayim_mikra: { alone: 20 },
 };
 // A registry mitzvah the table does not name (a blessing, the Omer count, lighting candles) takes minutes.
 export const DEFAULT_PERFORM_MIN = 5;
@@ -82,6 +83,7 @@ export const NAG_ZONE_KIND: Readonly<Record<string, NagZoneKind>> = {
   kiddush_levana: 'nights',
   selichot: 'preDawn',
   chok_leyisrael: 'learning',
+  shnayim_mikra: 'learning',
 };
 
 // A custom mitzvah (`custom_<…>`) has its own rule, `customNagZone()`.
@@ -120,6 +122,7 @@ const NAG_VERB_IDS: ReadonlySet<string> = new Set([
   'candle_lighting',
   'havdalah',
   'chok_leyisrael',
+  'shnayim_mikra',
   'ushpizin',
   'selichot',
   'kiddush_levana',

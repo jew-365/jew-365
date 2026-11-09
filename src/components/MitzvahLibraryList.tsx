@@ -3,14 +3,17 @@ import { StyleSheet, Switch, View } from 'react-native';
 import { useRouter, type Href } from 'expo-router';
 import { Card } from '@/components/Card';
 import { chokAddonCaption } from '@/components/ChokAddonCard';
+import { shnayimAddonCaption } from '@/components/ShnayimAddonCard';
 import { ListRow } from '@/components/ListRow';
 import { iconFor, type IconName } from '@/components/MitzvahIcon';
 import { SectionLabel } from '@/components/SectionLabel';
 import { CHOK_TEXT_ID } from '@/data/chok';
+import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
 import { LIBRARY_GROUPS } from '@/data/mitzvot';
 import { useDayModel } from '@/hooks/useDayModel';
 import { useNeedsReminderDialog } from '@/hooks/useNeedsReminderDialog';
 import { useChokStore } from '@/stores/useChokStore';
+import { useShnayimStore } from '@/stores/useShnayimStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { isMensMitzvah } from '@/stores/taharahOptIn';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -41,18 +44,22 @@ export type MitzvahLibraryListProps = { showMine: boolean; navigable: boolean };
 
 export function MitzvahLibraryList({ showMine, navigable }: MitzvahLibraryListProps) {
   const { t } = useI18n();
-  const { allMitzvot, nameFor, chokInstalled, location, language } = useDayModel();
+  const { allMitzvot, nameFor, chokInstalled, shnayimInstalled, location, language } = useDayModel();
   const router = useRouter();
   const needsReminder = useNeedsReminderDialog();
   const active = useMitzvotStore((s) => s.activeMitzvot);
   const chokDownload = useChokStore((s) => s.download);
+  const shnayimDownload = useShnayimStore((s) => s.download);
   const customItems = useCustomMitzvotStore((s) => s.items);
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
   const roshChodeshEnabled = useUserStore((s) => s.roshChodeshEnabled);
   const gender = useUserStore((s) => s.gender);
   const todayKey = appDayKey(new Date(), location);
   const opener = (href: Href) => (navigable ? () => router.push(href) : NOTHING);
-  const listed = (item: Mitzvah) => navigable || chokInstalled || item.id !== CHOK_TEXT_ID;
+  // A learning add-on not yet downloaded: Chok LeYisrael or Shnayim Mikra.
+  const missingAddon = (item: Mitzvah) =>
+    (item.id === CHOK_TEXT_ID && !chokInstalled) || (item.id === SHNAYIM_TEXT_ID && !shnayimInstalled);
+  const listed = (item: Mitzvah) => navigable || !missingAddon(item);
 
   const settingRows: SettingRow[] = [
     {
@@ -84,7 +91,7 @@ export function MitzvahLibraryList({ showMine, navigable }: MitzvahLibraryListPr
     .filter((section) => section.mitzvot.length + section.settings.length > 0);
 
   const mitzvahRow = (item: Mitzvah) => {
-    const awaitingAddon = item.id === CHOK_TEXT_ID && !chokInstalled;
+    const awaitingAddon = missingAddon(item);
     const custom = item.isCustom ? customItems[item.id] : undefined;
     const endedOn = custom ? customEndedOn(custom, todayKey) : null;
     const enabled = !awaitingAddon && endedOn === null && (active[item.id]?.enabled ?? false);
@@ -103,7 +110,9 @@ export function MitzvahLibraryList({ showMine, navigable }: MitzvahLibraryListPr
           endedOn !== null
             ? t('custom.ended', { date: scheduleDateLabel(endedOn, language) })
             : awaitingAddon
-              ? chokAddonCaption(chokDownload, t)
+              ? item.id === SHNAYIM_TEXT_ID
+                ? shnayimAddonCaption(shnayimDownload, t)
+                : chokAddonCaption(chokDownload, t)
               : gender === 'female' && isMensMitzvah(item.id)
                 ? t('library.notForWomen')
                 : t(`library.category.${item.category}`)

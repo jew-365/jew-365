@@ -15,6 +15,8 @@ export type ChokThuNightDay = 'thu' | 'fri';
 export type ChokSection = {
   kind: ChokSectionKind;
   heading: string;
+  // The English title when it is not the kind's (Shnayim Mikra's aliyot).
+  en?: string;
   variant?: HaftarahVariant;
   segments: SiddurSegment[];
 };
@@ -22,6 +24,8 @@ export type ChokSection = {
 export type ChokAsset = {
   parasha: string;
   credit: SiddurCredit;
+  // Every credit of an asset built from more than one source (Shnayim Mikra: the Torah and Onkelos).
+  credits?: SiddurCredit[];
   dedication: string | null;
   slots: Partial<Record<ChokSlot, ChokSection[]>>;
 };

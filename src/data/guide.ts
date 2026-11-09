@@ -244,7 +244,7 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
   {
     id: 'chok',
     icon: 'chok',
-    title: { he: 'חק לישראל', en: 'Chok LeYisrael' },
+    title: { he: 'חק לישראל ושניים מקרא', en: 'Chok LeYisrael and Shnayim Mikra' },
     body: [
       {
         he: 'חק לישראל הוא תוסף שיורד פעם אחת, כ־5 MB, ממסך המצווה או מלשונית עוד, ואחרי ההורדה הוא זמין גם בלי חיבור לאינטרנט. בסוף ההורדה האפליקציה שואלת אם להפעיל תזכורות ומעקב. כשיש גרסה חדשה של הטקסט מסך המצווה מציע לעדכן, ושם אפשר גם למחוק את התוסף.',
@@ -257,6 +257,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
       {
         he: 'המצווה פתוחה ביום הלימוד, מעלות השחר עד עלות השחר שלמחרת, ובערב שבת וחג עד הדלקת הנרות, ותזכורת ברירת המחדל שלה בשעה 09:00. ליל שישי נרשם ליום חמישי או ליום שישי, לפי מה שבוחרים ב״סיימתי״ הראשון או בהגדרות ← תפילה וסידור. הטקסט מתוך מאגר תורת אמת, ברישיון CC BY-NC-SA 2.5; הקרדיט המלא בהגדרות ← אודות ויצירת קשר.',
         en: 'The mitzvah is open for the learning day, from dawn to the next dawn, and until candle lighting before Shabbat and Yom Tov, with its default reminder at 09:00. Thursday night counts for Thursday or Friday, as you choose on the first Done or in Settings → Prayer and siddur. The text is from the Torat Emet database under CC BY-NC-SA 2.5; the full credit is in Settings → About and contact.',
+      },
+      {
+        he: 'שניים מקרא ואחד תרגום הוא תוסף נוסף באותה דרך, כ־0.6 MB: התורה כולה עם תרגום אונקלוס, עלייה ליום, ראשון עד חמישי עלייה אחת ושישי השישית והשביעית. כל פסוק מופיע פעמיים ואחריו התרגום, ובשבוע של פרשות מחוברות קוראים את שתיהן. סימון ״סיימתי״, ההשלמות של ימים קודמים והבחירה בפרשה אחרת פועלים כמו בחק לישראל, ותזכורת ברירת המחדל בשעה 20:00. שניהם נמצאים בסידור תחת ״לימוד״ ובלשונית עוד.',
+        en: "Shnayim Mikra Ve'Echad Targum is another add-on of the same kind, about 0.6 MB: the whole Torah with Targum Onkelos, an aliyah a day, Sunday to Thursday one aliyah each and Friday the sixth and the seventh. Each verse appears twice and then its translation, and in a double week both parashiyot are read. Done, the make-ups of earlier days and reading another parasha work as in Chok LeYisrael, and the default reminder is at 20:00. Both are in the siddur under Learning and in the More tab.",
       },
     ],
     routes: [],
@@ -428,6 +432,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: 'פסוקים לשמך ותפילה אישית בעמידה: עד שלושה פסוקים, אחד לכל שם, נמצאים לפי השם או לפי האות הראשונה והאחרונה, מתוך תהלים וחק לישראל, ופסוק שגם מופיע בו השם מסומן כמומלץ; או מוקלדים, ותפילה בכתב חופשי. הסידור מציג אותם בסוף אלהי נצור, לפני יהיו לרצון השני, מודגשים בצבע הראשי ופתוחים תמיד. בהגדרות ← תפילה וסידור, ובקישור מתחת לעמידה.',
         en: 'Name verses and a personal prayer in the Amidah: up to three verses, one for each name, found by the name or by their first and last letter in Tehillim and Chok LeYisrael, a verse that also holds the name marked recommended, or typed, and a prayer in free text. The siddur shows them at the end of Elokai Netzor, before the second Yihyu Leratzon, set off in the accent colour and always open. In Settings → Prayer and siddur, and by the link under the Amidah.',
+      },
+      {
+        he: 'שניים מקרא ואחד תרגום: תוסף להורדה עם התורה כולה ותרגום אונקלוס, עלייה ליום, כל פסוק פעמיים ואחריו התרגום, עם תזכורת, ״סיימתי״ ומעקב כמו חק לישראל. בסידור נוספה קטגוריית ״לימוד״ עם חק לישראל ושניים מקרא.',
+        en: "Shnayim Mikra Ve'Echad Targum: an add-on to download with the whole Torah and Targum Onkelos, an aliyah a day, each verse twice and then its translation, with a reminder, Done and tracking like Chok LeYisrael. The siddur has a new Learning group with Chok LeYisrael and Shnayim Mikra.",
       },
       {
         he: 'העיגול בדף הבית שלם, ואפשר לגרור את השמש או הירח סביבו כולו, בתוך אותו יום.',

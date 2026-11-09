@@ -16,9 +16,11 @@ import {
   StandaloneTextId,
 } from '@/types/siddur';
 import { CHOK_TEXT_ID } from './chok';
+import { SHNAYIM_TEXT_ID } from './shnayim';
 import { DayWindow, dayWindow } from '@/utils/buildDayTimeline';
 import { SELICHOT_NUSCHAOT, SELICHOT_TEXT_ID, hasSelichotContent } from './selichot';
-import { chokDayHasText } from '@/utils/chok';
+import { CHOK_PROGRAM, chokDayHasText } from '@/utils/chok';
+import { SHNAYIM_PROGRAM } from '@/utils/shnayim';
 import { appDay, locationNoon } from '@/utils/locationDay';
 import {
   KIDDUSH_LEVANA_FLAGS,
@@ -390,9 +392,10 @@ export function siddurPlace(location: Location, inIsrael: boolean): Place {
 
 export function hasSiddurText(mitzvah: Mitzvah, nusach: Nusach, windowDate: Date, place: Place): boolean {
   if (mitzvah.isCustom) return customSiddurText(mitzvah, nusach) !== null;
-  if (mitzvah.id === CHOK_TEXT_ID) {
+  if (mitzvah.id === CHOK_TEXT_ID || mitzvah.id === SHNAYIM_TEXT_ID) {
     const day = liturgicalDay(windowDate, false);
-    return chokDayHasText(day, place.inIsrael) && matchesCondition(CHOK_DAYS, dayFeatures(day, place));
+    const program = mitzvah.id === CHOK_TEXT_ID ? CHOK_PROGRAM : SHNAYIM_PROGRAM;
+    return chokDayHasText(day, place.inIsrael, program) && matchesCondition(CHOK_DAYS, dayFeatures(day, place));
   }
   const linked = MITZVAH_STANDALONE_TEXT[mitzvah.id];
   if (linked) {
@@ -422,7 +425,9 @@ export function nextMitzvahTextWindow(
 ): DayWindow | null {
   const own = mitzvahTextId(mitzvah.id);
   const linked = MITZVAH_STANDALONE_TEXT[mitzvah.id];
-  if (mitzvah.isCustom || mitzvah.id === CHOK_TEXT_ID || !(own || linked)) return null;
+  if (mitzvah.isCustom || mitzvah.id === CHOK_TEXT_ID || mitzvah.id === SHNAYIM_TEXT_ID || !(own || linked)) {
+    return null;
+  }
   const dayFrom = (base: Date, offset: number) =>
     new Date(base.getFullYear(), base.getMonth(), base.getDate() + offset);
   const today = appDay(now, location);

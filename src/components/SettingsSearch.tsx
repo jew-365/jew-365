@@ -6,6 +6,7 @@ import { ListRow } from './ListRow';
 import { MitzvahIcon } from './MitzvahIcon';
 import { SectionLabel } from './SectionLabel';
 import { CHOK_TEXT_ID } from '@/data/chok';
+import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
 import { findAnyMitzvah, getAllMitzvot } from '@/data/customMitzvotAdapter';
 import { halachaRulingFor } from '@/data/halachaLines';
 import { translate, useI18n } from '@/i18n';
@@ -14,6 +15,7 @@ import { loadPlaces } from '@/services/PlacesService';
 import { loadSiddurText } from '@/services/SiddurService';
 import { taharahOffered } from '@/stores/taharahOptIn';
 import { useChokStore } from '@/stores/useChokStore';
+import { useShnayimStore } from '@/stores/useShnayimStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { enabledSinceOf, useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -81,6 +83,7 @@ export function useSettingsSearch(visit: number) {
     })),
   );
   const chokInstalled = useChokStore((s) => s.installed !== null);
+  const shnayimInstalled = useShnayimStore((s) => s.installed !== null);
   const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(user.nusach));
   const customMitzvot = useCustomMitzvotStore((s) => s.items);
   const [query, setQuery] = useState('');
@@ -106,6 +109,7 @@ export function useSettingsSearch(visit: number) {
       user.location,
       user.inIsrael,
       chokInstalled,
+      shnayimInstalled,
       selichotInstalled,
       customMitzvot,
       appDayKey(now, user.location),
@@ -128,6 +132,7 @@ export function useSettingsSearch(visit: number) {
           voice: user.siddurVoice,
           maritalStatus: user.maritalStatus,
           chokInstalled,
+          shnayimInstalled,
           now,
           location: user.location,
           inIsrael: user.inIsrael,
@@ -159,7 +164,7 @@ export function useSettingsSearch(visit: number) {
   const instant = useMemo(
     () => (searching ? searchTiers(query, indexFor(), context) : EMPTY_TIERS),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- indexFor reads the profile and custom mitzvot; its own cache decides when to rebuild
-    [query, searching, taharah, user, chokInstalled, selichotInstalled, customMitzvot],
+    [query, searching, taharah, user, chokInstalled, shnayimInstalled, selichotInstalled, customMitzvot],
   );
 
   const [deep, setDeep] = useState<{ query: string; tiers: SearchTiers } | null>(null);
@@ -174,7 +179,7 @@ export function useSettingsSearch(visit: number) {
         const href = listed?.href;
         if (!href || typeof href !== 'object' || href.pathname !== '/siddur/[id]') continue;
         const id = href.params.id;
-        if (id === CHOK_TEXT_ID) continue;
+        if (id === CHOK_TEXT_ID || id === SHNAYIM_TEXT_ID) continue;
         const key = `${user.nusach}/${id}/${user.gender ?? ''}`;
         let text = deepTexts.get(key);
         if (!text) {
@@ -215,7 +220,7 @@ export function useSettingsSearch(visit: number) {
       clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- indexFor and namer read the same profile the instant pass reads
-  }, [query, searching, taharah, user, chokInstalled, selichotInstalled, customMitzvot]);
+  }, [query, searching, taharah, user, chokInstalled, shnayimInstalled, selichotInstalled, customMitzvot]);
 
   const pending = searching && deep?.query !== query;
   const tiers = useMemo(() => {

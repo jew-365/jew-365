@@ -9,6 +9,7 @@ import {
   syncNotificationPermissionStatus,
 } from '@/services/NotificationScheduler';
 import { reconcileChokInstall } from '@/services/ChokContentService';
+import { reconcileShnayimInstall } from '@/services/ShnayimContentService';
 import { reconcileSelichotInstall } from '@/services/SelichotContentService';
 import { reloadApp } from '@/services/appReload';
 import { reportError } from '@/services/errors';
@@ -133,6 +134,7 @@ export async function restoreBackup(backup: Backup, options?: { reload?: boolean
     applyGenderDefaultsToNew();
     applyRestoredTaharahProfile({ taharahEnabled, gender, nusach });
     reconcileChokInstall();
+    reconcileShnayimInstall();
     reconcileSelichotInstall();
     await syncNotificationPermissionStatus().catch((error) => reportError('schedule', error));
   } finally {

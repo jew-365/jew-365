@@ -107,6 +107,7 @@ import { PSALM_COUNT, readingSummary } from '@/utils/reading';
 import { siddurTextName } from '@/utils/customMitzvah';
 import { STANDALONE_TEXTS } from '@/data/siddur';
 import { CHOK_TEXT_ID } from '@/data/chok';
+import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
 import { appDay, appDayKey } from '@/utils/locationDay';
 import { firstName } from '@/utils/homeDay';
 import { nextStreakGoal } from '@/utils/streakGoal';
@@ -950,7 +951,12 @@ function ReadingCard() {
   const summary = useMemo(() => readingSummary({ texts, psalms }, week, month), [texts, psalms, week, month]);
   const period = (totals: { week: number; month: number }) =>
     t('history.reading.period', { week: totals.week, month: totals.month });
-  const nameOf = (id: string) => (id === CHOK_TEXT_ID ? t('chok.title') : (siddurTextName(id, language) ?? id));
+  const nameOf = (id: string) =>
+    id === CHOK_TEXT_ID
+      ? t('chok.title')
+      : id === SHNAYIM_TEXT_ID
+        ? t('shnayim.title')
+        : (siddurTextName(id, language) ?? id);
   const iconOf = (id: string): IconName => {
     const standalone = (STANDALONE_TEXTS as Record<string, { icon: string } | undefined>)[id];
     if (standalone) return iconFor(standalone.icon);

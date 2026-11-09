@@ -7,6 +7,9 @@ import { readAddonJson } from '@/services/addons/addonFiles';
 import { readBundledAsset as readAsset } from '@/services/bundledAsset';
 import { chokParashaFile, readChokAsset } from '@/services/chokFiles';
 import { selichotTextFile } from '@/services/selichotFiles';
+import { readShnayimAsset, shnayimParashaFile } from '@/services/shnayimFiles';
+import { useShnayimStore } from '@/stores/useShnayimStore';
+import { shnayimAsChok } from '@/utils/shnayim';
 import { useChokStore } from '@/stores/useChokStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
 
@@ -38,6 +41,20 @@ export function loadChokParasha(parasha: string): Promise<ChokAsset> {
   const file = install ? chokParashaFile(install, parasha) : null;
   if (!install || !file) return Promise.reject(new Error(`no chok text ${parasha}`));
   return loadOnce(`chok/${install.version}/${parasha}`, () => readChokAsset(file));
+}
+
+// A Shnayim Mikra parasha in the shape the Chok LeYisrael reader reads: one slot per day, its aliyot.
+export function loadShnayimParasha(parasha: string): Promise<ChokAsset> {
+  const install = useShnayimStore.getState().installed;
+  const file = install ? shnayimParashaFile(install, parasha) : null;
+  if (!install || !file) return Promise.reject(new Error(`no shnayim text ${parasha}`));
+  return loadOnce(`shnayim/${install.version}/${parasha}`, () => readShnayimAsset(file).then(shnayimAsChok));
+}
+
+export function clearShnayimCache(): void {
+  for (const key of [...loaded.keys()]) {
+    if (key.startsWith('shnayim/')) loaded.delete(key);
+  }
 }
 
 export function clearChokCache(): void {

@@ -93,7 +93,7 @@ describe('Onboarding mitzvot step', () => {
     expect(screen.queryByText(CUSTOM_NAME)).toBeNull();
   });
 
-  it('lists each registry mitzvah of the nusach under its group, the setting rows last under More, and no Chok LeYisrael', () => {
+  it('lists each registry mitzvah of the nusach under its group, the setting rows last under More, and no learning add-on', () => {
     renderWithTheme(<OnboardingMitzvotScreen />);
     expect(groupSwitches('prayers')).toEqual(names(['shacharit', 'mincha', 'maariv']));
     expect(groupSwitches('daily')).toEqual(
@@ -105,7 +105,10 @@ describe('Onboarding mitzvot step', () => {
     expect([...switchLabels()].sort()).toEqual(
       [
         ...MITZVOT.filter(
-          (mitzvah) => mitzvah.id !== CHOK_TEXT_ID && mitzvah.nuschaotSupported.includes('ashkenaz'),
+          (mitzvah) =>
+            mitzvah.id !== CHOK_TEXT_ID &&
+            mitzvah.id !== 'shnayim_mikra' &&
+            mitzvah.nuschaotSupported.includes('ashkenaz'),
         ).map((mitzvah) => mitzvah.name.he),
         HILULOT,
         ROSH_CHODESH,

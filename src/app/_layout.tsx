@@ -34,6 +34,7 @@ import { initNotificationHandlers } from '@/services/NotificationScheduler';
 import { captureException } from '@/services/crashReporting';
 import { reloadApp } from '@/services/appReload';
 import { reconcileChokInstall } from '@/services/ChokContentService';
+import { reconcileShnayimInstall } from '@/services/ShnayimContentService';
 import { reconcileSelichotInstall } from '@/services/SelichotContentService';
 import { afterPaint } from '@/utils/afterPaint';
 import { reconcileEndedCustomMitzvot } from '@/stores/customMitzvahLifecycle';
@@ -52,6 +53,7 @@ import { ZmanimService } from '@/services/ZmanimService';
 import { QuietBlockContext, ShabbatScreen } from '@/components/ShabbatScreen';
 import { UpdateBanner } from '@/components/UpdateBanner';
 import { ChokEnablePrompt } from '@/components/ChokEnablePrompt';
+import { ShnayimEnablePrompt } from '@/components/ShnayimEnablePrompt';
 import { nextQuietBoundary, quietBlockAt } from '@/utils/skipRules';
 import { CHECK_IN_PROMPTED_KEY, latestCheckIn } from '@/utils/checkIn';
 import { getAllMitzvot } from '@/data/customMitzvotAdapter';
@@ -279,6 +281,7 @@ function RootInner() {
         </View>
         {isOnboarded ? <UpdateBanner /> : null}
         {isOnboarded ? <ChokEnablePrompt /> : null}
+        {isOnboarded ? <ShnayimEnablePrompt /> : null}
         {isOnboarded ? <MarkCelebrationHost /> : null}
         <ShabbatScreen
           block={quietBlock}
@@ -355,6 +358,7 @@ function RootLayout() {
     if (!ready) return undefined;
     SplashScreen.hideAsync().catch(() => {});
     reconcileChokInstall();
+    reconcileShnayimInstall();
     reconcileSelichotInstall();
     return initNotificationHandlers();
   }, [ready]);

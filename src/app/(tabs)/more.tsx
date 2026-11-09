@@ -4,27 +4,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { Card } from '@/components/Card';
-import { chokAddonCaption, useChokDownloadFlow } from '@/components/ChokAddonCard';
+import { useLearningRows } from '@/components/LearningRows';
 import { ListRow } from '@/components/ListRow';
 import { NavBar } from '@/components/NavBar';
 import { SectionLabel } from '@/components/SectionLabel';
 import { SettingsSearchBox, SettingsSearchResults, useSettingsSearch } from '@/components/SettingsSearch';
 import { selichotAddonCaption, useSelichotDownloadFlow } from '@/components/SelichotAddonCard';
-import { CHOK_TEXT_ID } from '@/data/chok';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import { STANDALONE_TEXTS } from '@/data/siddur';
 import { HALACHA_LINES, callUrl, halachaRulingFor, phoneLabel, whatsappUrl } from '@/data/halachaLines';
 import { useNow } from '@/hooks/useNow';
-import { checkChokUpdate, chokDownloadSupported } from '@/services/ChokContentService';
+import { checkChokUpdate } from '@/services/ChokContentService';
+import { checkShnayimUpdate } from '@/services/ShnayimContentService';
 import { checkSelichotUpdate, selichotDownloadSupported } from '@/services/SelichotContentService';
-import { useChokStore } from '@/stores/useChokStore';
 import { selectSelichotInstalledFor, useSelichotStore } from '@/stores/useSelichotStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
-import { chokPortionAt, chokWeekName } from '@/utils/chok';
 import type { SettingsSearchItem } from '@/utils/settingsSearch';
 import { useI18n } from '@/i18n';
 
@@ -33,14 +31,10 @@ export default function MoreScreen() {
   const { language, t } = useI18n();
   const router = useRouter();
   const now = useNow();
-  const location = useUserStore((s) => s.location);
-  const inIsrael = useUserStore((s) => s.inIsrael);
   const nusach = useUserStore((s) => s.nusach);
   const [halachaOpen, setHalachaOpen] = useState(false);
   const ruling = halachaRulingFor(nusach);
-  const chokInstall = useChokStore((s) => s.installed);
-  const chokDownload = useChokStore((s) => s.download);
-  const { preparing, prepare, dialog: chokDialog } = useChokDownloadFlow();
+  const learning = useLearningRows(now);
   const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(nusach));
   const selichotDownload = useSelichotStore((s) => s.download);
   const selichotFlow = useSelichotDownloadFlow();
@@ -51,6 +45,7 @@ export default function MoreScreen() {
       setVisit((count) => count + 1);
       setQuery('');
       void checkChokUpdate();
+      void checkShnayimUpdate();
       void checkSelichotUpdate();
     }, [setQuery]),
   );
@@ -70,11 +65,6 @@ export default function MoreScreen() {
     else if (item.route) router.push(item.route);
     else router.push({ pathname: '/(tabs)/settings', params: { focus: item.id } });
   };
-  const openChok = () => {
-    if (chokInstall) router.push({ pathname: '/siddur/[id]', params: { id: CHOK_TEXT_ID } });
-    else if (!chokDownloadSupported() || chokDownload.status === 'downloading') router.push(`/mitzvah/${CHOK_TEXT_ID}`);
-    else void prepare();
-  };
   const openSelichot = () => {
     if (selichotInstalled || !selichotDownloadSupported() || selichotDownload.status === 'downloading') {
       router.push(`/mitzvah/${SELICHOT_TEXT_ID}`);
@@ -82,10 +72,6 @@ export default function MoreScreen() {
       void selichotFlow.prepare();
     }
   };
-  const portion = chokInstall ? chokPortionAt(now, location, inIsrael) : null;
-  const chokCaption = portion
-    ? `${t('chok.parashaOf', { name: chokWeekName(portion.parashiyot, language) })} · ${t(`chok.slot.${portion.slot}`)}`
-    : t('chok.nothingToday');
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
@@ -111,15 +97,18 @@ export default function MoreScreen() {
             chevron
             onPress={() => router.push('/schedule')}
           />
-          <ListRow
-            icon="chok"
-            iconTone={chokInstall ? 'accent' : 'muted'}
-            title={t('chok.title')}
-            caption={chokInstall ? chokCaption : chokAddonCaption(chokDownload, t)}
-            chevron
-            disabled={preparing}
-            onPress={openChok}
-          />
+          {learning.rows.map((row) => (
+            <ListRow
+              key={row.id}
+              icon="chok"
+              iconTone={row.installed ? 'accent' : 'muted'}
+              title={row.title}
+              caption={row.caption}
+              chevron
+              disabled={row.disabled}
+              onPress={row.onPress}
+            />
+          ))}
           <ListRow
             icon="shofar"
             iconTone={selichotInstalled ? 'accent' : 'muted'}
@@ -171,7 +160,7 @@ export default function MoreScreen() {
         </Card>
       </ScrollView>
 
-      {chokDialog}
+      {learning.dialogs}
       {selichotFlow.dialog}
 
       <BottomSheet

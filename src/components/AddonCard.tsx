@@ -11,7 +11,7 @@ import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { AddonDownload, AddonInstall, AddonManifest } from '@/types/addon';
 
-export type AddonCopy = 'chok.addon' | 'selichot.addon';
+export type AddonCopy = 'chok.addon' | 'shnayim.addon' | 'selichot.addon';
 
 export type AddonSource<M extends AddonManifest> = {
   supported: () => boolean;

@@ -33,6 +33,12 @@ jest.mock('@/services/chokFiles', () => ({
   deleteChokFiles: () => mockDeleteChokFiles(),
 }));
 
+const mockDeleteShnayimFiles = jest.fn();
+jest.mock('@/services/shnayimFiles', () => ({
+  ...jest.requireActual('@/services/shnayimFiles'),
+  deleteShnayimFiles: () => mockDeleteShnayimFiles(),
+}));
+
 const mockDeleteSelichotFiles = jest.fn();
 jest.mock('@/services/selichotFiles', () => ({
   ...jest.requireActual('@/services/selichotFiles'),
@@ -40,6 +46,7 @@ jest.mock('@/services/selichotFiles', () => ({
 }));
 
 import { AppResetService } from '../AppResetService';
+import { useShnayimStore } from '@/stores/useShnayimStore';
 import { taharahStorage } from '../TaharahStorage';
 import { useUserStore } from '@/stores/useUserStore';
 import { DEFAULT_UI_SCALE, __setUiScaleForTests } from '@/theme/scale';
@@ -120,6 +127,16 @@ describe('AppResetService.reset', () => {
 
     expect(useChokStore.getState().installed).toBeNull();
     expect(mockDeleteChokFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('forgets the Shnayim Mikra add-on and deletes its files', async () => {
+    useShnayimStore.getState().setInstalled({ version: 1, bytes: 1, installedAt: 1, files: { Bereshit: 'b.json.gz' } });
+    mockDeleteShnayimFiles.mockClear();
+
+    await AppResetService.reset();
+
+    expect(useShnayimStore.getState().installed).toBeNull();
+    expect(mockDeleteShnayimFiles).toHaveBeenCalledTimes(1);
   });
 
   it('hydrates the mitzvot store as a fresh install: default-on mitzvot stamped with the reset, no check-in for the Shabbat before it', async () => {

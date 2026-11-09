@@ -5,6 +5,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChokAddonCard } from '@/components/ChokAddonCard';
+import { ShnayimAddonCard } from '@/components/ShnayimAddonCard';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { IconTile } from '@/components/IconTile';
@@ -15,6 +16,7 @@ import { HeaderPill, ScreenHeader } from '@/components/ScreenHeader';
 import { SelichotAddonCard } from '@/components/SelichotAddonCard';
 import { WindowTimeline } from '@/components/WindowTimeline';
 import { CHOK_TEXT_ID } from '@/data/chok';
+import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import {
@@ -29,6 +31,7 @@ import { useLateMarkDialog } from '@/hooks/useLateMarkDialog';
 import { useNeedsReminderDialog } from '@/hooks/useNeedsReminderDialog';
 import { useNow } from '@/hooks/useNow';
 import { useChokStore } from '@/stores/useChokStore';
+import { useShnayimStore } from '@/stores/useShnayimStore';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { remindersOf, selectActive, useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -91,8 +94,12 @@ export default function MitzvahDetailScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const needsReminder = useNeedsReminderDialog();
   const isChok = mitzvah?.id === CHOK_TEXT_ID;
+  const isShnayim = mitzvah?.id === SHNAYIM_TEXT_ID;
+  // A weekly learning program, read in the reader on the portion of the moment.
+  const isLearning = isChok || isShnayim;
   const chokInstalled = useChokStore((s) => s.installed !== null);
-  const awaitingAddon = isChok && !chokInstalled;
+  const shnayimInstalled = useShnayimStore((s) => s.installed !== null);
+  const awaitingAddon = (isChok && !chokInstalled) || (isShnayim && !shnayimInstalled);
   const isSelichot = mitzvah?.id === SELICHOT_TEXT_ID;
   const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(nusach));
   const addonMissing = awaitingAddon || (isSelichot && !selichotInstalled);
@@ -114,7 +121,7 @@ export default function MitzvahDetailScreen() {
   const place = siddurPlace(location, inIsrael);
   const textNow = Boolean(mitzvah && window && hasSiddurText(mitzvah, nusach, window.date, place));
   const anytimeTextId =
-    mitzvah && !mitzvah.isCustom && !isChok
+    mitzvah && !mitzvah.isCustom && !isLearning
       ? (MITZVAH_STANDALONE_TEXT[mitzvah.id] ?? mitzvahTextId(mitzvah.id) ?? null)
       : null;
   const textAnytime = anytimeTextId !== null && !addonMissing && siddurTextPresent(nusach, anytimeTextId);
@@ -245,7 +252,7 @@ export default function MitzvahDetailScreen() {
   const openText = () => {
     const open = (textParams: { id: string; date?: string }) =>
       router.push({ pathname: '/siddur/[id]', params: { ...textParams, from: mitzvah.id } });
-    if (textNow && window && isChok) open({ id: mitzvah.id });
+    if (textNow && window && isLearning) open({ id: mitzvah.id });
     else if (textNow && window && (mitzvah.isCustom || windowDueToday(window, location, new Date()))) {
       open({ id: mitzvah.id, date: dateKey(window.date) });
     } else if (anytimeTextId) open({ id: anytimeTextId });
@@ -293,7 +300,7 @@ export default function MitzvahDetailScreen() {
             title={t('detail.activeTitle')}
             caption={
               awaitingAddon
-                ? t('chok.addon.enableAfterDownload')
+                ? t(isShnayim ? 'shnayim.addon.enableAfterDownload' : 'chok.addon.enableAfterDownload')
                 : active.enabled
                   ? t('detail.activeOn')
                   : t('detail.activeOff')
@@ -348,6 +355,7 @@ export default function MitzvahDetailScreen() {
           </View>
         ) : null}
         {isChok ? <ChokAddonCard /> : null}
+        {isShnayim ? <ShnayimAddonCard /> : null}
         {isSelichot ? <SelichotAddonCard /> : null}
         {textNow || textAnytime ? <Button label={t('siddur.open')} onPress={openText} /> : null}
         <WindowTimeline

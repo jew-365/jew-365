@@ -132,7 +132,11 @@ describe('Mitzvot library', () => {
     );
     expect(groupSwitches('weekly')).toEqual(names(['candle_lighting', 'havdalah']));
     expect(groupSwitches('seasonal')).toEqual(names(['sefirat_haomer', 'chanukah_candles', 'selichot', 'ushpizin']));
-    expect(groupSwitches('other')).toEqual([...names(['kiddush_levana', 'chok_leyisrael']), HILULOT, ROSH_CHODESH]);
+    expect(groupSwitches('other')).toEqual([
+      ...names(['kiddush_levana', 'shnayim_mikra', 'chok_leyisrael']),
+      HILULOT,
+      ROSH_CHODESH,
+    ]);
   });
 
   it('lists every registry mitzvah once across the sections', () => {
@@ -210,7 +214,7 @@ describe('Mitzvot library', () => {
   it('lists Chok LeYisrael as a learning mitzvah once the add-on is installed, and its switch turns it on', () => {
     installChokFixture();
     renderWithTheme(<MitzvotScreen />);
-    expect(screen.queryByText(/תוסף להורדה/)).toBeNull();
+    expect(screen.queryByText(`תוסף להורדה · כ־${CHOK_SIZE_ESTIMATE_MB} MB`)).toBeNull();
     expect(screen.getAllByText('לימוד')).toHaveLength(1);
     fireEvent(screen.getByRole('switch', { name: 'חק לישראל' }), 'valueChange', true);
     expect(useMitzvotStore.getState().activeMitzvot.chok_leyisrael.enabled).toBe(true);

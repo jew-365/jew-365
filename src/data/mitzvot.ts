@@ -3,12 +3,14 @@ import { DateTime } from 'luxon';
 import { ComputeContext, LibraryGroup, Mitzvah, MitzvahWindow, Nusach } from '@/types/mitzvah';
 import { Location, Zmanim } from '@/types/zmanim';
 import { CHOK_TEXT_ID, hasChokContent } from '@/data/chok';
+import { SHNAYIM_TEXT_ID, hasShnayimContent } from '@/data/shnayim';
 import { NUSACH_IDS } from '@/data/nuschaot';
 import { hasSelichotContent } from '@/data/selichot';
 import { MIDNIGHT_TO_MORNING_PRAYER, siddurPlace, standaloneAvailability } from '@/data/siddur';
 import { HebcalService } from '@/services/HebcalService';
 import { ZmanimService, candleLightingMinutes, isJerusalem } from '@/services/ZmanimService';
 import { chokPortionOn } from '@/utils/chok';
+import { SHNAYIM_PROGRAM } from '@/utils/shnayim';
 import { BLOCK_EXIT_DEFAULT_MIN } from '@/utils/skipRules';
 import {
   chanukahNightOn,
@@ -150,6 +152,37 @@ export const CHOK_LEYISRAEL: Mitzvah = {
     const day = dayOf(ctx.zmanim, ctx.location);
     const date = new Date(day.year, day.month - 1, day.day);
     if (!hasChokContent() || !chokPortionOn(date, ctx.location, ctx.settings.inIsrael)) return null;
+    const block = HebcalService.holyBlockOn(day.plus({ days: 1 }).toJSDate(), ctx.location);
+    return win(ctx.zmanim.alotHaShachar, block?.start ?? nextAlot(ctx));
+  },
+};
+
+// Shnayim Mikra ve'Echad Targum (the owner's call, 2026-11-09): Chok LeYisrael's learning day and add-on, an aliyah a day.
+export const SHNAYIM_MIKRA: Mitzvah = {
+  id: SHNAYIM_TEXT_ID,
+  name: { he: 'שניים מקרא ואחד תרגום', en: "Shnayim Mikra Ve'Echad Targum" },
+  icon: 'chok',
+  timeType: 'range-within-day',
+  category: 'learning',
+  group: 'other',
+  skipOn: ['shabbat', 'yomtov'],
+  nuschaotSupported: ALL_NUSCHAOT,
+  defaultReminders: [
+    {
+      anchor: 'clock',
+      offsetMin: 20 * 60,
+      label: 'זמן שניים מקרא ואחד תרגום',
+      bodyVariants: [
+        'זמן שניים מקרא ואחד תרגום',
+        'העלייה של היום בפרשת השבוע מחכה לך',
+        'כמה דקות של פרשת השבוע, שניים מקרא ואחד תרגום',
+      ],
+    },
+  ],
+  computeWindow: (ctx) => {
+    const day = dayOf(ctx.zmanim, ctx.location);
+    const date = new Date(day.year, day.month - 1, day.day);
+    if (!hasShnayimContent() || !chokPortionOn(date, ctx.location, ctx.settings.inIsrael, SHNAYIM_PROGRAM)) return null;
     const block = HebcalService.holyBlockOn(day.plus({ days: 1 }).toJSDate(), ctx.location);
     return win(ctx.zmanim.alotHaShachar, block?.start ?? nextAlot(ctx));
   },
@@ -510,6 +543,7 @@ export const MITZVOT: Mitzvah[] = [
       return win(opens, kiddushLevanaPeriod(night, ctx.settings.nusach, ctx.location).end);
     },
   },
+  SHNAYIM_MIKRA,
   CHOK_LEYISRAEL,
 ];
 

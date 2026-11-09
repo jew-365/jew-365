@@ -22,6 +22,7 @@ import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { useCompletionsStore, dateKey } from '@/stores/useCompletionsStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useChokStore } from '@/stores/useChokStore';
+import { useShnayimStore } from '@/stores/useShnayimStore';
 import { selectSelichotNusach, useSelichotStore } from '@/stores/useSelichotStore';
 import { applyGenderDefaultsToNew } from '@/stores/taharahOptIn';
 import {
@@ -559,6 +560,10 @@ export function initNotificationHandlers(): () => void {
       }
     }),
     useChokStore.subscribe((state, prev) => {
+      if ((state.installed === null) !== (prev.installed === null))
+        NotificationScheduler.rebuild().catch(reportScheduleError);
+    }),
+    useShnayimStore.subscribe((state, prev) => {
       if ((state.installed === null) !== (prev.installed === null))
         NotificationScheduler.rebuild().catch(reportScheduleError);
     }),

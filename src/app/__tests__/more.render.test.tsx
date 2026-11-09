@@ -188,7 +188,7 @@ describe('More tab', () => {
       else useChokStore.getState().reset();
       const { unmount } = renderAt('2026-11-16T12:00');
       const rows = screen.getAllByRole('button');
-      expect(rows).toHaveLength(8);
+      expect(rows).toHaveLength(9);
       expect(within(rows[rows.length - 5]).getByText('תהילים')).toBeOnTheScreen();
       expect(within(rows[rows.length - 5]).getByText('מחולק לפי ימי השבוע')).toBeOnTheScreen();
       expect(within(rows[rows.length - 4]).getByText('הילולות צדיקים')).toBeOnTheScreen();
@@ -213,7 +213,7 @@ describe('More tab', () => {
     expect(cards).toHaveLength(2);
     expect(within(cards[0]).getByLabelText('חיפוש')).toBeOnTheScreen();
     expect(cards[1].props.divided).toBe(true);
-    expect(within(cards[1]).UNSAFE_getAllByType(ListRow)).toHaveLength(8);
+    expect(within(cards[1]).UNSAFE_getAllByType(ListRow)).toHaveLength(9);
   });
 
   it('opens the hilulot from its row', () => {
@@ -253,13 +253,15 @@ describe('More tab', () => {
     expect(screen.getByText("How each part of the app works, and what's new")).toBeOnTheScreen();
   });
 
-  it('lists the Selichot row between Chok LeYisrael and Tehillim, with the download of the nusach', () => {
+  it('lists Chok LeYisrael, Shnayim Mikra and Selichot before Tehillim, each with its download', () => {
     renderAt('2026-11-16T12:00');
     const rows = screen.getAllByRole('button');
     expect(within(rows[1]).getByText('חק לישראל')).toBeOnTheScreen();
-    expect(within(rows[2]).getByText('סליחות')).toBeOnTheScreen();
-    expect(within(rows[2]).getByText('להורדה בנוסח אשכנז · כ־1 MB')).toBeOnTheScreen();
-    expect(within(rows[3]).getByText('תהילים')).toBeOnTheScreen();
+    expect(within(rows[2]).getByText('שניים מקרא ואחד תרגום')).toBeOnTheScreen();
+    expect(within(rows[2]).getByText('תוסף להורדה · כ־0.6 MB')).toBeOnTheScreen();
+    expect(within(rows[3]).getByText('סליחות')).toBeOnTheScreen();
+    expect(within(rows[3]).getByText('להורדה בנוסח אשכנז · כ־1 MB')).toBeOnTheScreen();
+    expect(within(rows[4]).getByText('תהילים')).toBeOnTheScreen();
   });
 
   it('starts the Selichot download from its row, and installs the nusach on confirm', async () => {

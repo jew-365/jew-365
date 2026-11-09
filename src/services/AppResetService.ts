@@ -4,8 +4,10 @@ import { storage } from '@/services/StorageService';
 import { clearTaharahStorage } from '@/services/TaharahStorage';
 import { clearLastError, reportError } from '@/services/errors';
 import { cancelChokDownload } from '@/services/ChokContentService';
+import { cancelShnayimDownload } from '@/services/ShnayimContentService';
 import { cancelSelichotDownload } from '@/services/SelichotContentService';
 import { deleteChokFiles } from '@/services/chokFiles';
+import { deleteShnayimFiles } from '@/services/shnayimFiles';
 import { deleteSelichotFiles } from '@/services/selichotFiles';
 import { useUserStore } from '@/stores/useUserStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -15,6 +17,7 @@ import { useReadingStore } from '@/stores/useReadingStore';
 import { useSiddurBookmarksStore } from '@/stores/useSiddurBookmarksStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useChokStore } from '@/stores/useChokStore';
+import { useShnayimStore } from '@/stores/useShnayimStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
 import { NotificationScheduler, setSchedulingSuspended } from '@/services/NotificationScheduler';
 import { DEFAULT_UI_SCALE, UI_SCALE } from '@/theme/scale';
@@ -30,6 +33,7 @@ export const AppResetService = {
     try {
       clearLastError();
       cancelChokDownload();
+      cancelShnayimDownload();
       cancelSelichotDownload();
       useUserStore.getState().reset();
       useMitzvotStore.persist.clearStorage();
@@ -40,6 +44,7 @@ export const AppResetService = {
       useReadingStore.getState().reset();
       useTaharahStore.getState().reset();
       useChokStore.getState().reset();
+      useShnayimStore.getState().reset();
       useSelichotStore.getState().reset();
       try {
         await NotificationScheduler.cancelAll();
@@ -59,6 +64,11 @@ export const AppResetService = {
         }
         try {
           deleteChokFiles();
+        } catch (error) {
+          reportError('reset', error);
+        }
+        try {
+          deleteShnayimFiles();
         } catch (error) {
           reportError('reset', error);
         }

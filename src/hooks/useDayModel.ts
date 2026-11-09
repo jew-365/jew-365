@@ -3,6 +3,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { customToMitzvah } from '@/data/customMitzvotAdapter';
 import { MITZVOT } from '@/data/mitzvot';
 import { useChokStore } from '@/stores/useChokStore';
+import { useShnayimStore } from '@/stores/useShnayimStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { ActiveMitzvahState, enabledSinceOf, useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -22,6 +23,7 @@ export type DayModelState = {
   activeMitzvot: Record<string, ActiveMitzvahState>;
   customItems: Record<string, CustomMitzvah>;
   chokInstalled: boolean;
+  shnayimInstalled?: boolean;
   selichotInstalled: boolean;
 };
 
@@ -33,6 +35,7 @@ export type DayModel = {
   inIsrael: boolean;
   language: 'he' | 'en';
   chokInstalled: boolean;
+  shnayimInstalled: boolean;
   selichotInstalled: boolean;
   settings: UserSettings;
   nameFor: (mitzvah: Pick<Mitzvah, 'name'>) => string;
@@ -50,6 +53,7 @@ export function dayModelFrom(state: DayModelState): DayModel {
     activeMitzvot,
     customItems,
     chokInstalled,
+    shnayimInstalled = false,
     selichotInstalled,
   } = state;
   const customs = Object.values(customItems)
@@ -67,6 +71,7 @@ export function dayModelFrom(state: DayModelState): DayModel {
     inIsrael,
     language,
     chokInstalled,
+    shnayimInstalled,
     selichotInstalled,
     settings,
     nameFor: (mitzvah) => mitzvahName(mitzvah, language),
@@ -101,9 +106,10 @@ export function useDayModel(): DayModel {
   const activeMitzvot = useMitzvotStore((s) => s.activeMitzvot);
   const customItems = useCustomMitzvotStore((s) => s.items);
   const chokInstalled = useChokStore((s) => s.installed !== null);
+  const shnayimInstalled = useShnayimStore((s) => s.installed !== null);
   const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(user.nusach));
   return useMemo(
-    () => dayModelFrom({ ...user, activeMitzvot, customItems, chokInstalled, selichotInstalled }),
-    [user, activeMitzvot, customItems, chokInstalled, selichotInstalled],
+    () => dayModelFrom({ ...user, activeMitzvot, customItems, chokInstalled, shnayimInstalled, selichotInstalled }),
+    [user, activeMitzvot, customItems, chokInstalled, shnayimInstalled, selichotInstalled],
   );
 }

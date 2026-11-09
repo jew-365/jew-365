@@ -25,6 +25,8 @@ type Props = {
   asking: boolean;
   onAskClose: () => void;
   onPickingChange?: (open: boolean) => void;
+  // Shnayim Mikra reads both parashiyot of a double week, so it offers no choice.
+  chooses?: boolean;
 };
 
 const CHOICES: readonly ChokDoubleChoice[] = ['first', 'second', 'both'];
@@ -43,6 +45,7 @@ export function ChokWeekControls({
   choice,
   onChoice,
   asking,
+  chooses = true,
   onAskClose,
   onPickingChange,
 }: Props) {
@@ -54,7 +57,7 @@ export function ChokWeekControls({
     onPickingChange?.(open);
   };
   const listRef = useRef<ScrollView>(null);
-  const double = names.length > 1;
+  const double = chooses && names.length > 1;
   const choiceLabel = (value: ChokDoubleChoice) =>
     value === 'both' ? t('chok.both') : names[value === 'first' ? 0 : 1];
   const title = browsing

@@ -23,6 +23,7 @@ import { useViewport, ViewportContext } from '@/hooks/useInView';
 import { useIsFocused, useReplayKey } from '@/hooks/useIsFocused';
 import { useNow } from '@/hooks/useNow';
 import { CHOK_TEXT_ID } from '@/data/chok';
+import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
 import { getLocationName } from '@/data/cities';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import { hasSiddurText, selichotOfferOn, siddurPlace } from '@/data/siddur';
@@ -673,7 +674,7 @@ export default function HomeScreen() {
           router.push({
             pathname: '/siddur/[id]',
             params:
-              item.mitzvah.id === CHOK_TEXT_ID
+              item.mitzvah.id === CHOK_TEXT_ID || item.mitzvah.id === SHNAYIM_TEXT_ID
                 ? { id: item.mitzvah.id }
                 : { id: item.mitzvah.id, date: dateKey(item.window.date) },
           })

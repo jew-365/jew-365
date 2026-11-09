@@ -42,6 +42,7 @@ import { DateTime } from 'luxon';
 import Svg, { Path } from 'react-native-svg';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { CHOK_PARASHIYOT, CHOK_TEXT_ID } from '@/data/chok';
+import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
 import { findMitzvah } from '@/data/mitzvot';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import {
@@ -64,10 +65,13 @@ import { useLateMarkDialog } from '@/hooks/useLateMarkDialog';
 import { useNow } from '@/hooks/useNow';
 import { HDate } from '@hebcal/core';
 import { verifyChokInstall } from '@/services/ChokContentService';
+import { verifyShnayimInstall } from '@/services/ShnayimContentService';
 import { verifySelichotInstall } from '@/services/SelichotContentService';
-import { loadChokParasha, loadSiddurText } from '@/services/SiddurService';
+import { loadChokParasha, loadShnayimParasha, loadSiddurText } from '@/services/SiddurService';
 import { HebcalService } from '@/services/HebcalService';
 import { useChokStore } from '@/stores/useChokStore';
+import { useShnayimStore } from '@/stores/useShnayimStore';
+import { SHNAYIM_PROGRAM } from '@/utils/shnayim';
 import { useCompletionsStore, dateKey } from '@/stores/useCompletionsStore';
 import { selectActive, useMitzvotStore } from '@/stores/useMitzvotStore';
 import { selectSelichotInstalledFor, useSelichotStore } from '@/stores/useSelichotStore';
@@ -136,6 +140,7 @@ import {
   siddurLineHeight,
 } from '@/utils/siddur';
 import {
+  CHOK_PROGRAM,
   CHOK_SECTION_KINDS,
   CHOK_SLOTS,
   ChokMakeUpFold,
@@ -148,7 +153,6 @@ import {
   chokPlaceOf,
   chokReaderPortion,
   chokSlotDay,
-  chokSlotsOf,
   chokText,
   chokToday,
   isChokCommentary,
@@ -915,7 +919,11 @@ export default function SiddurScreen() {
     from?: string;
     fromCompass?: string;
   }>();
-  const chok = params.id === CHOK_TEXT_ID;
+  // Chok LeYisrael and Shnayim Mikra share this reader: the week, its days, its folds and "סיימתי" (`program`).
+  const shnayim = params.id === SHNAYIM_TEXT_ID;
+  const chok = params.id === CHOK_TEXT_ID || shnayim;
+  const program = shnayim ? SHNAYIM_PROGRAM : CHOK_PROGRAM;
+  const programTitle = shnayim ? 'shnayim.title' : 'chok.title';
   const textOnly = !chok && !params.date && standaloneTextId(params.id) !== null;
   const mitzvah = useMemo(
     () => (chok || textOnly ? undefined : findAnyMitzvah(params.id)),
@@ -937,10 +945,14 @@ export default function SiddurScreen() {
   const siddurVoice = useUserStore((s) => s.siddurVoice);
   const amidahVerses = useUserStore((s) => s.amidahVerses);
   const amidahPrayer = useUserStore((s) => s.amidahPrayer);
-  const chokInstall = useChokStore((s) => s.installed);
+  const chokOnly = useChokStore((s) => s.installed);
+  const shnayimInstall = useShnayimStore((s) => s.installed);
+  const chokInstall = shnayim ? shnayimInstall : chokOnly;
   const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(nusach));
   const selichotVersion = useSelichotStore((s) => s.installed?.version ?? null);
-  const doubleChoice = useUserStore((s) => s.chokDoubleChoice);
+  const savedDoubleChoice = useUserStore((s) => s.chokDoubleChoice);
+  // Shnayim Mikra reads both parashiyot of a double week.
+  const doubleChoice = shnayim ? 'both' : savedDoubleChoice;
   const setDoubleChoice = useUserStore((s) => s.setChokDoubleChoice);
   const commentaryOpen = useUserStore((s) => s.chokCommentaryOpen);
   const setCommentaryOpen = useUserStore((s) => s.setChokCommentaryOpen);
@@ -958,7 +970,7 @@ export default function SiddurScreen() {
     ? Object.keys(MITZVAH_STANDALONE_TEXT).find((id) => MITZVAH_STANDALONE_TEXT[id] === standalone)
     : undefined;
   const settingsTarget = chok
-    ? CHOK_TEXT_ID
+    ? program.id
     : mitzvah
       ? mitzvah.id
       : linkedMitzvah && findMitzvah(linkedMitzvah)?.nuschaotSupported.includes(nusach)
@@ -1035,12 +1047,12 @@ export default function SiddurScreen() {
     setBrowsing(parasha);
   };
   const weekPortion = useMemo(
-    () => (chok ? chokReaderPortion({ now, date: requestedDate, slot: chokSlot }, location, inIsrael) : null),
-    [chok, now, requestedDate, chokSlot, location, inIsrael],
+    () => (chok ? chokReaderPortion({ now, date: requestedDate, slot: chokSlot }, location, inIsrael, program) : null),
+    [chok, now, requestedDate, chokSlot, location, inIsrael, program],
   );
   const chokPortion = useMemo(
-    () => (weekPortion && browsing ? chokBrowsePortion(browsing, weekPortion, chokSlot) : weekPortion),
-    [weekPortion, browsing, chokSlot],
+    () => (weekPortion && browsing ? chokBrowsePortion(browsing, weekPortion, chokSlot, program) : weekPortion),
+    [weekPortion, browsing, chokSlot, program],
   );
   const chokWeekKey = chokPortion ? chokPortion.parashiyot.join('|') : '';
   const chokWeek = useMemo(() => (chokWeekKey ? chokWeekKey.split('|') : []), [chokWeekKey]);
@@ -1063,11 +1075,11 @@ export default function SiddurScreen() {
       : Boolean(mitzvah && hasSiddurText(mitzvah, nusach, windowDate, place));
   const done = useCompletionsStore((s) => Boolean(mitzvah && s.completions[dateKey(windowDate)]?.[mitzvah.id]));
   const lateMark = useLateMarkDialog();
-  const chokActive = useMitzvotStore(selectActive(CHOK_TEXT_ID));
+  const chokActive = useMitzvotStore(selectActive(program.id));
   const chokMarks = useCompletionsStore((s) => (chok ? s.completions : null));
   const chokTodayKey = useMemo(
-    () => (chok ? dateKey(chokToday(now, location, inIsrael)) : ''),
-    [chok, now, location, inIsrael],
+    () => (chok ? dateKey(chokToday(now, location, inIsrael, program)) : ''),
+    [chok, now, location, inIsrael, program],
   );
   const chokTodayDate = useMemo(() => (chokTodayKey ? calendarDay(chokTodayKey) : null), [chokTodayKey]);
   const chokDoneDate =
@@ -1083,16 +1095,18 @@ export default function SiddurScreen() {
   const makeUpFolds = useMemo(
     (): ChokMakeUpFold[] =>
       showMakeUps && chokTodayDate && chokMarks
-        ? chokOpenMakeUps(chokTodayDate, location, inIsrael, chokMarks, chokActive.enabledAt).map((makeUp) => ({
-            dateKey: makeUp.dateKey,
-            slot: makeUp.slot,
-            label: {
-              he: translate('chok.makeUp', { day: translate(`chok.slot.${makeUp.slot}`, undefined, 'he') }, 'he'),
-              en: translate('chok.makeUp', { day: translate(`chok.slot.${makeUp.slot}`, undefined, 'en') }, 'en'),
-            },
-          }))
+        ? chokOpenMakeUps(chokTodayDate, location, inIsrael, chokMarks, chokActive.enabledAt, program).map(
+            (makeUp) => ({
+              dateKey: makeUp.dateKey,
+              slot: makeUp.slot,
+              label: {
+                he: translate('chok.makeUp', { day: translate(`chok.slot.${makeUp.slot}`, undefined, 'he') }, 'he'),
+                en: translate('chok.makeUp', { day: translate(`chok.slot.${makeUp.slot}`, undefined, 'en') }, 'en'),
+              },
+            }),
+          )
         : [],
-    [showMakeUps, chokTodayDate, chokMarks, location, inIsrael, chokActive.enabledAt],
+    [showMakeUps, chokTodayDate, chokMarks, location, inIsrael, chokActive.enabledAt, program],
   );
   const [attempt, setAttempt] = useState(0);
   const [load, setLoad] = useState<LoadState>({ status: 'loading' });
@@ -1214,11 +1228,12 @@ export default function SiddurScreen() {
       let active = true;
       setLoad({ status: 'loading' });
       const task = afterPaint(() => {
-        Promise.all(chokWeek.map(loadChokParasha))
+        Promise.all(chokWeek.map(shnayim ? loadShnayimParasha : loadChokParasha))
           .then((assets) => active && setLoad({ status: 'chok', assets }))
           .catch((error: unknown) => {
             if (!active) return;
-            verifyChokInstall(error);
+            if (shnayim) verifyShnayimInstall(error);
+            else verifyChokInstall(error);
             setLoad({ status: 'error' });
           });
       });
@@ -1253,7 +1268,7 @@ export default function SiddurScreen() {
       active = false;
       task.cancel();
     };
-  }, [mitzvah, available, nusach, textId, attempt, chok, chokWeek, chokInstall?.version, selichotVersion]);
+  }, [mitzvah, available, nusach, textId, attempt, chok, shnayim, chokWeek, chokInstall?.version, selichotVersion]);
 
   useEffect(() => {
     if (chokWeek.length < 2 || doubleChoice !== null || asked.current) return;
@@ -1267,6 +1282,7 @@ export default function SiddurScreen() {
     if (load.status === 'ready') return load.text;
     if (load.status !== 'chok' || loadStale || !shownSlot) return null;
     return chokText(load.assets, {
+      id: program.id,
       slot: shownSlot,
       choice: doubleChoice ?? 'first',
       variant: HAFTARAH_VARIANT[nusach],
@@ -1274,7 +1290,7 @@ export default function SiddurScreen() {
       variantNames: CHOK_VARIANT_NAMES,
       makeUps: makeUpFolds,
     });
-  }, [load, loadStale, shownSlot, doubleChoice, nusach, makeUpFolds]);
+  }, [load, loadStale, shownSlot, doubleChoice, nusach, makeUpFolds, program.id]);
 
   const resolvedSections = useMemo(
     () => (readyText ? resolveForReader(readyText, features, maritalStatus, siddurVoice) : []),
@@ -1291,7 +1307,7 @@ export default function SiddurScreen() {
     });
   }, [chok, textId, resolvedSections, amidahVerses, amidahPrayer]);
   const sections = personal.sections;
-  const bookmarkTextId: string | null = chok ? CHOK_TEXT_ID : textId;
+  const bookmarkTextId: string | null = chok ? program.id : textId;
   const placeNusach = readyText?.nusach ?? null;
   const dailyText = textId !== null && mitzvahTextId(textId) !== null;
   const shownBookmarks = useMemo(
@@ -1306,10 +1322,10 @@ export default function SiddurScreen() {
   );
   const placeAway = useCallback(
     (segmentKey: string) => {
-      const there = chok && !sectionKeys.has(segmentKey) ? chokPlaceOf(segmentKey) : null;
+      const there = chok && !sectionKeys.has(segmentKey) ? chokPlaceOf(segmentKey, program) : null;
       return there && !(there.slot === shownSlot && shownParashiyot.includes(there.parasha)) ? there : null;
     },
-    [chok, sectionKeys, shownSlot, shownParashiyot],
+    [chok, sectionKeys, shownSlot, shownParashiyot, program],
   );
   const placeText = (there: { parasha: string; slot: ChokSlot }) =>
     t('chok.place', { name: chokParashaName(there.parasha, language), day: t(`chok.slot.${there.slot}`) });
@@ -1365,14 +1381,14 @@ export default function SiddurScreen() {
     const target = findAnyMitzvah(mitzvahId);
     return {
       id: mitzvahId,
-      name: mitzvahId === CHOK_TEXT_ID ? t('chok.title') : target ? nameOf(target.name) : '',
+      name: mitzvahId === program.id && chok ? t(programTitle) : target ? nameOf(target.name) : '',
       date,
       window: target ? dayWindow(target, date, location, settings) : null,
     };
   };
   // Done ends the session with the text: mark it, then land on home whatever opened the reader (a
   // home card, the mitzvah screen, a notification on a cold start).
-  const readingId = chok ? CHOK_TEXT_ID : textId;
+  const readingId = chok ? program.id : textId;
   const reads = useReadCounts(readingId, () => dateKey(appDay(new Date(), location)));
   // The whole text has a "קראתי" of its own, except Tehillim, which is read chapter by chapter.
   const textReadable = readingId !== null && !CHAPTER_ONLY_TEXTS.has(readingId);
@@ -1406,21 +1422,21 @@ export default function SiddurScreen() {
         }
       });
     });
-  const finishMakeUp = (makeUp: ChokMakeUpFold) => lateMark.mark(markTarget(CHOK_TEXT_ID, calendarDay(makeUp.dateKey)));
+  const finishMakeUp = (makeUp: ChokMakeUpFold) => lateMark.mark(markTarget(program.id, calendarDay(makeUp.dateKey)));
   const doneTarget = mitzvah
     ? offSeason
       ? null
       : { id: mitzvah.id, date: windowDate, done }
     : chokDoneDate
       ? {
-          id: CHOK_TEXT_ID,
+          id: program.id,
           date: chokDoneDate,
-          done: !thuNightUnanswered && Boolean(chokMarks?.[dateKey(chokDoneDate)]?.[CHOK_TEXT_ID]),
+          done: !thuNightUnanswered && Boolean(chokMarks?.[dateKey(chokDoneDate)]?.[program.id]),
         }
       : null;
   const nameOf = (entry: { he: string; en?: string }) => (language === 'en' && entry.en ? entry.en : entry.he);
   const name = chok
-    ? t('chok.title')
+    ? t(programTitle)
     : mitzvah
       ? nameOf(mitzvah.name)
       : standalone
@@ -1774,12 +1790,13 @@ export default function SiddurScreen() {
   const body = (() => {
     if (!mitzvah && !standalone && !chok) return <Message text={t('errors.generic')} />;
     if (chok && chokInstall === null) {
+      const addon = shnayim ? 'shnayim.addon' : 'chok.addon';
       return (
         <View style={styles.center}>
-          <Text style={[typography.body, { color: colors.textSub }]}>{t('chok.addon.readerMissing')}</Text>
+          <Text style={[typography.body, { color: colors.textSub }]}>{t(`${addon}.readerMissing`)}</Text>
           <Button
-            label={t('chok.addon.goDownload')}
-            onPress={() => router.push(`/mitzvah/${CHOK_TEXT_ID}`)}
+            label={t(`${addon}.goDownload`)}
+            onPress={() => router.push(`/mitzvah/${program.id}`)}
             style={styles.retryAction}
           />
         </View>
@@ -1970,7 +1987,7 @@ export default function SiddurScreen() {
   };
   const resumePlace = resumeOffer ? placeAway(resumeOffer.segmentKey) : null;
   const rowOf = (place: SiddurPlace, titled: boolean) => {
-    const there = chok ? chokPlaceOf(place.segmentKey) : null;
+    const there = chok ? chokPlaceOf(place.segmentKey, program) : null;
     if (there) return { caption: placeText(there), disabled: chokInstall?.files[there.parasha] === undefined };
     const target = placeTarget(sections, place);
     return {
@@ -2093,7 +2110,7 @@ export default function SiddurScreen() {
                   browsing={browsing}
                   onBrowse={browse}
                   offered={CHOK_PARASHIYOT.filter((parasha) => chokInstall?.files[parasha] !== undefined)}
-                  slots={chokSlotsOf(chokPortion.parashiyot[0])}
+                  slots={program.slotsOf(chokPortion.parashiyot[0])}
                   slot={chokPortion.slot}
                   onSlot={setChokSlot}
                   names={chokPortion.parashiyot.map((parasha) => chokParashaName(parasha, language))}
@@ -2102,6 +2119,7 @@ export default function SiddurScreen() {
                   asking={asking}
                   onAskClose={() => setAsking(false)}
                   onPickingChange={setParashaPickerOpen}
+                  chooses={!shnayim}
                 />
               ) : null}
               {placeholder || hasCommentaryPassages || (picker.length > 1 && currentEntry) ? (
@@ -2229,7 +2247,7 @@ export default function SiddurScreen() {
               onViewableItemsChanged={onViewableSectionsChanged}
               contentContainerStyle={contentStyle}
               ListHeaderComponent={
-                chok ? (
+                chok && !shnayim ? (
                   <View
                     onTouchStart={taps.consume}
                     onLayout={(event) => {

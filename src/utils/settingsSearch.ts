@@ -3,6 +3,7 @@ import { normalizeSearchText } from './searchText';
 import { placeCaption, placeName, searchPlaces, type PlaceIndex } from '@/data/places';
 import { iconFor, type IconName } from '@/components/MitzvahIcon';
 import { CHOK_TEXT_ID } from '@/data/chok';
+import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
 import { GUIDE_TOPICS } from '@/data/guide';
 import { HALACHA_LINES, phoneLabel, type HalachaRuling } from '@/data/halachaLines';
 import { hilulaPage } from '@/data/hilulaPages';
@@ -851,18 +852,22 @@ export type SettingsContentInput = {
   voice: SiddurVoice | null;
   maritalStatus: MaritalStatus | null;
   chokInstalled: boolean;
+  shnayimInstalled?: boolean;
   now: Date;
   location: Location;
   inIsrael: boolean;
 };
 
 type ContentText = {
-  id: SiddurTextId | typeof CHOK_TEXT_ID;
+  id: SiddurTextId | typeof CHOK_TEXT_ID | typeof SHNAYIM_TEXT_ID;
   title: SettingsSearchName;
   icon: IconName;
   chapters: readonly SiddurChapterTitle[];
   notToday?: SettingsSearchNotToday;
 };
+
+// The words people type for Shnayim Mikra beside its name.
+const SHNAYIM_TERMS = ['שמו״ת', 'שמות', 'אונקלוס', 'תרגום', 'פרשת השבוע', 'onkelos', 'targum', 'weekly parasha'];
 
 const nameOf = (mitzvah: Mitzvah): SettingsSearchName => ({ he: mitzvah.name.he, en: mitzvahName(mitzvah, 'en') });
 
@@ -872,6 +877,7 @@ export function settingsContentItems({
   voice,
   maritalStatus,
   chokInstalled,
+  shnayimInstalled = false,
   now,
   location,
   inIsrael,
@@ -881,15 +887,15 @@ export function settingsContentItems({
     kind: 'mitzvah',
     icon: iconFor(mitzvah.icon),
     title: nameOf(mitzvah),
-    terms: [],
+    terms: mitzvah.id === SHNAYIM_TEXT_ID ? SHNAYIM_TERMS : [],
     href: { pathname: '/mitzvah/[id]', params: { id: mitzvah.id } },
   }));
   const texts: ContentText[] = [];
   for (const mitzvah of mitzvot) {
     if (mitzvah.isCustom) continue;
-    if (mitzvah.id === CHOK_TEXT_ID) {
-      if (chokInstalled)
-        texts.push({ id: CHOK_TEXT_ID, title: nameOf(mitzvah), icon: iconFor(mitzvah.icon), chapters: [] });
+    if (mitzvah.id === CHOK_TEXT_ID || mitzvah.id === SHNAYIM_TEXT_ID) {
+      if (mitzvah.id === CHOK_TEXT_ID ? chokInstalled : shnayimInstalled)
+        texts.push({ id: mitzvah.id, title: nameOf(mitzvah), icon: iconFor(mitzvah.icon), chapters: [] });
       continue;
     }
     const id = mitzvahTextId(mitzvah.id);
@@ -1269,7 +1275,7 @@ const LIBRARY_ICONS: Record<LibraryGroup, IconName> = {
   mine: 'custom',
 };
 
-const SIDDUR_TAB_GROUPS = ['now', 'meals', 'prayers', 'mitzvot', 'general', 'occasions'] as const;
+const SIDDUR_TAB_GROUPS = ['now', 'meals', 'prayers', 'mitzvot', 'learning', 'general', 'occasions'] as const;
 
 const dayLabelOf = (key: string): string => {
   const [year, month, day] = key.split('-').map(Number);
@@ -1344,7 +1350,9 @@ export function appContentItems({
     const texts =
       group === 'meals' || group === 'general' || group === 'occasions'
         ? standaloneTextsIn(group, nusach).map((id) => STANDALONE_TEXTS[id].name)
-        : [];
+        : group === 'learning'
+          ? [name('chok.title'), name('shnayim.title')]
+          : [];
     items.push({
       id: `category:siddur:${group}`,
       kind: 'category',

@@ -22,6 +22,7 @@ import {
   standaloneTextsIn,
 } from '@/data/siddur';
 import { Card } from '@/components/Card';
+import { useLearningRows } from '@/components/LearningRows';
 import { ListRow } from '@/components/ListRow';
 import { iconFor, type IconName } from '@/components/MitzvahIcon';
 import { NavBar } from '@/components/NavBar';
@@ -44,14 +45,15 @@ import { formatDate, useI18n } from '@/i18n';
 const MITZVAH_TEXTS = MITZVOT.filter((mitzvah) => mitzvahTextId(mitzvah.id));
 const PRAYER_IDS = ['shacharit', 'mincha', 'maariv'];
 
-type SectionKey = 'now' | 'prayers' | 'mitzvot' | SiddurGroup;
-const SECTION_KEYS: readonly SectionKey[] = ['now', 'prayers', 'mitzvot', ...SIDDUR_GROUPS];
+type SectionKey = 'now' | 'prayers' | 'mitzvot' | 'learning' | SiddurGroup;
+const SECTION_KEYS: readonly SectionKey[] = ['now', 'prayers', 'mitzvot', 'learning', ...SIDDUR_GROUPS];
 
 const OPEN_ON_FOCUS: ReadonlySet<SectionKey> = new Set<SectionKey>(['now']);
-const SECTION_ICONS: Record<'now' | 'prayers' | 'mitzvot', IconName> = {
+const SECTION_ICONS: Record<'now' | 'prayers' | 'mitzvot' | 'learning', IconName> = {
   now: 'sparkle',
   prayers: 'siddur',
   mitzvot: 'tefillin',
+  learning: 'chok',
 };
 
 type CatalogRowProps = {
@@ -131,6 +133,7 @@ export default function SiddurScreen() {
   const completions = useCompletionsStore((state) => state.completions);
   const siddurVoice = useUserStore((state) => state.siddurVoice);
   const [open, setOpen] = useState<ReadonlySet<SectionKey>>(OPEN_ON_FOCUS);
+  const learning = useLearningRows(now);
 
   const navigation = useNavigation();
   const tabKey = useRef<string | null>(null);
@@ -409,9 +412,36 @@ export default function SiddurScreen() {
             render={() => mitzvotTexts.map(mitzvahRow)}
           />
         )}
+        <CatalogSection
+          sectionKey="learning"
+          title={t('siddur.group.learning')}
+          subtitle={summary(learning.rows.map((entry) => entry.title))}
+          icon={SECTION_ICONS.learning}
+          open={open}
+          onToggle={toggle}
+          testID="siddur-learning"
+          render={() =>
+            learning.rows.map((entry) => (
+              <View key={entry.id} testID={`siddur-row-${entry.id}`}>
+                <Card>
+                  <ListRow
+                    icon={SECTION_ICONS.learning}
+                    iconTone={entry.installed ? 'accent' : 'muted'}
+                    title={entry.title}
+                    caption={entry.caption}
+                    chevron
+                    disabled={entry.disabled}
+                    onPress={entry.onPress}
+                  />
+                </Card>
+              </View>
+            ))
+          }
+        />
         {otherGroups.map(standaloneSection)}
       </ScrollView>
       {selichotFlow.dialog}
+      {learning.dialogs}
     </SafeAreaView>
   );
 }

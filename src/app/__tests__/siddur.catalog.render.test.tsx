@@ -23,6 +23,7 @@ import { ListRow } from '@/components/ListRow';
 import { CITIES } from '@/data/cities';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
+import { useShnayimStore } from '@/stores/useShnayimStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { renderWithTheme } from '@/testing/render';
 import { at, zmanimFor } from '@/testing/zmanim';
@@ -95,7 +96,7 @@ describe('the siddur tab’s catalog', () => {
   afterEach(() => jest.useRealTimers());
 
   describe('the groups', () => {
-    const TITLES = ['עכשיו', 'סעודה', 'תפילות', 'מצוות', 'כללי', 'מועדים ושמחות'];
+    const TITLES = ['עכשיו', 'סעודה', 'תפילות', 'מצוות', 'לימוד', 'כללי', 'מועדים ושמחות'];
     const headersInOrder = () => {
       const tree = JSON.stringify(screen.toJSON());
       return TITLES.filter((title) => tree.includes(`"${title}"`)).sort(
@@ -103,7 +104,7 @@ describe('the siddur tab’s catalog', () => {
       );
     };
 
-    it('lists meals right under now, then the prayers, the mitzvot, general and the occasions', () => {
+    it('lists meals right under now, then the prayers, the mitzvot, learning, general and the occasions', () => {
       openClosed('2027-06-16T09:00');
       expect(headersInOrder()).toEqual(TITLES);
     });
@@ -128,6 +129,24 @@ describe('the siddur tab’s catalog', () => {
       expect(screen.getByText(/^תפילת שחרית · תפילת מנחה · תפילת ערבית$/)).toBeOnTheScreen();
       expect(screen.getByText('ברכת המזון · ברכה מעין שלוש · בורא נפשות')).toBeOnTheScreen();
       expect(screen.getByText(/^תיקון הכללי · תהילים · נשמת כל חי ועוד \d+$/)).toBeOnTheScreen();
+    });
+
+    it('lists Chok LeYisrael and Shnayim Mikra under learning, a download until installed, then the reader', () => {
+      openClosed(WEDNESDAY);
+      expect(screen.getByText('חק לישראל · שניים מקרא ואחד תרגום')).toBeOnTheScreen();
+      fireEvent.press(screen.getByText('לימוד'));
+      expect(idsIn('siddur-learning')).toEqual(['chok_leyisrael', 'shnayim_mikra']);
+      expect(within(rowOf('shnayim_mikra')).getByText('תוסף להורדה · כ־0.6 MB')).toBeOnTheScreen();
+      expect(listRowOf('shnayim_mikra').props.iconTone).toBe('muted');
+      act(() =>
+        useShnayimStore.setState({
+          installed: { version: 1, bytes: 1, installedAt: 0, files: { "Beha'alotcha": 'b.json.gz' } },
+        }),
+      );
+      expect(within(rowOf('shnayim_mikra')).getByText('פרשת בהעלתך · יום רביעי')).toBeOnTheScreen();
+      fireEvent.press(within(rowOf('shnayim_mikra')).getByText('שניים מקרא ואחד תרגום'));
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/siddur/[id]', params: { id: 'shnayim_mikra' } });
+      act(() => useShnayimStore.getState().reset());
     });
 
     it('opens and closes a group on a tap of its header', () => {
