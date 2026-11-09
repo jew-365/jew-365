@@ -1,23 +1,21 @@
-/* Round 4: the bento inside the hero, on the land, the zmanim strip gone. */
-.hero.hb .zchips{display:none}
-.hero.hb .block{padding-bottom:10px}
+/* Round 4: round 3's bento, as is, inside the hero in place of the zmanim strip, on the land, its tiles frosted. */
 .hero.hb{padding-top:10px}
-.hbn{position:relative;z-index:2;padding:4px 0 0}
-.hbi{display:flex;justify-content:center;gap:6px;margin:0 16px 6px;padding:4px 12px;border-radius:999px;background:rgba(255,255,255,.18);color:#FFF6E6;font-size:12px;font-weight:600;width:max-content;max-width:calc(100% - 32px);margin-inline:auto}
-.hbs{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,46px);grid-auto-columns:94px;gap:6px;overflow-x:auto;padding:0 16px;scroll-snap-type:x proximity;scrollbar-width:none}
-.hbs::-webkit-scrollbar{display:none}
-.hbc{display:contents}
-.hbt{all:unset;box-sizing:border-box;position:relative;display:flex;flex-direction:column;justify-content:center;padding:4px 10px;border-radius:14px;background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 2px 8px rgba(0,0,0,.12);cursor:pointer;scroll-snap-align:start;min-width:0}
-.hbt:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.hbig{grid-row:span 2;width:150px;padding:8px 12px;background:color-mix(in srgb,var(--goldLight) 92%,transparent)}
-.hbk{font-size:12px;line-height:15px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hbl{font-size:15px;line-height:19px;font-weight:700;color:var(--goldText);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hbx{font-size:17px;line-height:21px;font-weight:800;color:var(--lc,var(--text))}
-.hbig .hbx{font-size:26px;line-height:30px;color:var(--text)}
-.hbleft{font-size:12px;color:var(--muted)}
-.hbt.past{opacity:.62}
-.hbt.past .hbx{font-weight:500}
-.hbt.ly-smart{background:color-mix(in srgb,var(--goldLight) 90%,transparent)}
-.hbd{position:absolute;top:7px;left:8px;width:7px;height:7px;border-radius:50%;background:var(--lc)}
-.hbt.ly-fixed .hbd{display:none}
-.hadd{align-items:center;justify-content:center;font-size:24px;font-weight:700;color:var(--goldText);border:1.5px dashed var(--gold);background:color-mix(in srgb,var(--surface) 70%,transparent)}
+.hero.hb .zchips{display:none}
+.hero.hb .block{padding-bottom:12px}
+.hbn{position:relative;z-index:2;padding:2px 16px 0}
+.hbi{display:flex;justify-content:center;gap:6px;width:max-content;max-width:100%;margin:0 auto 6px;padding:4px 12px;border-radius:999px;background:rgba(255,255,255,.18);color:#FFF6E6;font-size:12px;font-weight:600}
+.hbn .bento{gap:6px;grid-template-rows:repeat(2,46px) auto auto}
+.hbn .bt{min-height:0;padding:4px 10px;border-radius:16px;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.hbn .bt.big{padding:8px 12px;background:color-mix(in srgb,var(--goldLight) 94%,transparent)}
+.hbn .bt.big .btx{font-size:26px;line-height:30px}
+.hbn .btn-t{font-size:15px;line-height:19px}
+.hbn .btl{font-size:12px;line-height:15px}
+.hbn .btx{font-size:17px;line-height:21px}
+.hbn .btr{top:8px;left:8px;width:32px;height:32px}
+.hbn .bt.wide{min-height:50px;padding:3px 8px;gap:6px;justify-content:flex-start;scrollbar-width:none}
+.hbn .bt.wide::-webkit-scrollbar{display:none}
+.hbn .btk{width:36px}
+.hbsep{flex:none;width:1px;align-self:stretch;margin:6px 2px;background:var(--border)}
+.lc.rest{background:var(--surface2)}
+.lc.rest.past{opacity:.6}
+.lc.rest.past>b{font-weight:500}

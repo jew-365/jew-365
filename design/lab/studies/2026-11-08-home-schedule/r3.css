@@ -64,7 +64,7 @@
 .bento{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .bt{all:unset;box-sizing:border-box;position:relative;display:flex;flex-direction:column;justify-content:center;padding:8px;border-radius:18px;background:var(--surface);box-shadow:var(--shd);cursor:pointer;min-height:64px}
 .bt.big{grid-column:span 2;grid-row:span 2;padding:12px;background:linear-gradient(160deg,var(--goldLight),var(--surface))}
-.bt.wide{grid-column:span 4;flex-direction:row;align-items:center;gap:6px;min-height:52px;overflow-x:auto;scrollbar-width:none;cursor:default}
+.bt.wide{grid-column:span 4;flex-direction:row;justify-content:flex-start;align-items:center;gap:6px;min-height:52px;overflow-x:auto;scrollbar-width:none;cursor:default}
 .btl{font-size:12px;color:var(--muted)}
 .btx{font-size:18px;font-weight:800;color:var(--text)}
 .bt.big .btx{font-size:30px;line-height:34px}

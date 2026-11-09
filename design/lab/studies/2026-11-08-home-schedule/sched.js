@@ -345,6 +345,8 @@
       hbNext: nx ? { ...tile(nx, true), label: nx.label, layerName: tag[nx.layer] } : { label: 'אין עוד זמנים היום', time: '', left: '', tag: '', tcls: '', pick: () => {} },
       hbCols: cols.map((c) => ({ a: { ...(c.a || {}), isTile: Boolean(c.a && !c.a.add), isAdd: Boolean(c.a && c.a.add) }, b: { ...(c.b || {}), isTile: Boolean(c.b && !c.b.add), isAdd: Boolean(c.b && c.b.add) } })),
       hbMore: rest.length,
+      hbRest: rest.filter((r) => !smart.some((x) => x.label === r.full)),
+      hbSmart: smart.filter((x) => x.isTime && !(nx && x.label === nx.label && x.time === nx.time)),
       hbInfo: infoChips[0] || null,
       hbHasInfo: infoChips.length > 0,
     });
