@@ -109,7 +109,6 @@ describe('home when its two open cards are marked', () => {
   const NEXT = 'shacharit';
   const TWO_OPEN = 'פתוח עכשיו (2)';
   const ONE_OPEN = 'פתוח עכשיו (1)';
-  const NONE_OPEN = 'פתוח עכשיו (0)';
   const ANIMATED = [...ONLY_DATE, 'requestAnimationFrame', 'cancelAnimationFrame', 'performance'] as const;
   let rects: ReturnType<typeof mockWindowRects>;
 
@@ -267,7 +266,8 @@ describe('home when its two open cards are marked', () => {
     const record = (t: number) =>
       rows.push({
         t,
-        heading: String(screen.getByText(/^פתוח עכשיו/).props.children),
+        // With nothing open the messages (the streak the marks made) take the open-now slot.
+        heading: String((screen.queryByText(/^פתוח עכשיו/) ?? screen.getByText(/^הודעות/)).props.children),
         first: screen.queryByTestId(`home-now-${KS}`) !== null,
         second: screen.queryByTestId(`home-now-${NEXT}`) !== null,
         firstDay: dayState(KS),
@@ -288,7 +288,10 @@ describe('home when its two open cards are marked', () => {
     }
     expect(rows.every((row) => row.first === row.t < durations.stamp)).toBe(true);
     expect(rows.every((row) => row.second === row.t < durations.stamp + SECOND)).toBe(true);
-    expect(changes(rows.map((row) => row.heading))).toEqual([TWO_OPEN, ONE_OPEN, NONE_OPEN]);
+    const headings = changes(rows.map((row) => row.heading));
+    expect(headings.slice(0, 2)).toEqual([TWO_OPEN, ONE_OPEN]);
+    expect(headings).toHaveLength(3);
+    expect(headings[2]).toMatch(/^הודעות/);
     expect(rows.every((row) => row.firstDay === (row.first ? 'active' : 'done'))).toBe(true);
     expect(rows.every((row) => row.secondDay === (row.second ? 'active' : 'done'))).toBe(true);
     // Each card's own close runs on its own clock: the first is nearly gone while the second has not begun closing.

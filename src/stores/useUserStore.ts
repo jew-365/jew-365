@@ -23,6 +23,7 @@ import {
 } from '@/utils/quietHours';
 import { DEFAULT_NAG_LEVEL, isNagLevel, type NagLevel } from '@/utils/nagging';
 import { hiddenZmanimOf, withZmanShown, type ZmanId } from '@/utils/zmanIds';
+import { amidahPrayerOf, amidahVersesOf } from '@/utils/personalPrayer';
 
 export type Language = 'he' | 'en';
 export type NotificationPermissionStatus = 'unknown' | 'granted' | 'denied';
@@ -139,6 +140,8 @@ type UserState = {
   chokCommentaryOpen: boolean;
   chokThuNightDay: ChokThuNightDay | null;
   hiddenZmanim: readonly ZmanId[];
+  amidahVerses: readonly string[];
+  amidahPrayer: string;
   homeLook: HomeLook;
   gender: Gender | null;
   maritalStatus: MaritalStatus | null;
@@ -175,6 +178,8 @@ type UserState = {
   setChokDoubleChoice: (choice: ChokDoubleChoice) => void;
   setChokCommentaryOpen: (open: boolean) => void;
   setZmanShown: (id: ZmanId, shown: boolean) => void;
+  setAmidahVerses: (verses: readonly string[]) => void;
+  setAmidahPrayer: (text: string) => void;
   setChokThuNightDay: (day: ChokThuNightDay) => void;
   setHomeLook: (look: HomeLook) => void;
   setGender: (g: Gender | null) => void;
@@ -190,7 +195,7 @@ type PersistedUserState = Partial<
     UserState,
     'taharahEnabled' | 'maritalStatus' | 'hilulaNotices' | 'roshChodeshNotices' | 'quietBefore' | 'quietAfter'
   >
-> & { theme?: unknown; hiddenZmanim?: unknown };
+> & { theme?: unknown; hiddenZmanim?: unknown; amidahVerses?: unknown; amidahPrayer?: unknown };
 
 const DEFAULT_LOCATION = CITIES[0];
 const DEFAULT_THEME: ThemeName = 'gold';
@@ -202,12 +207,14 @@ const savedThemeName = (saved: unknown): ThemeName => {
 };
 
 const mergeSavedUserState = (persisted: unknown, current: UserState): UserState => {
-  const { theme, hiddenZmanim, ...saved } = (persisted ?? {}) as PersistedUserState;
+  const { theme, hiddenZmanim, amidahVerses, amidahPrayer, ...saved } = (persisted ?? {}) as PersistedUserState;
   const merged = {
     ...current,
     ...saved,
     theme: theme === undefined ? current.theme : savedThemeName(theme),
     hiddenZmanim: hiddenZmanimOf(hiddenZmanim),
+    amidahVerses: amidahVersesOf(amidahVerses),
+    amidahPrayer: amidahPrayerOf(amidahPrayer),
   };
   if (merged.taharahEnabled && merged.maritalStatus == null) merged.maritalStatus = 'married';
   if (!isUiScale(merged.uiScale)) merged.uiScale = DEFAULT_UI_SCALE;
@@ -264,6 +271,8 @@ export const useUserStore = create<UserState>()(
       chokCommentaryOpen: false,
       chokThuNightDay: null,
       hiddenZmanim: [],
+      amidahVerses: [],
+      amidahPrayer: '',
       homeLook: 'rail',
       gender: null,
       maritalStatus: null,
@@ -327,6 +336,8 @@ export const useUserStore = create<UserState>()(
           const hiddenZmanim = withZmanShown(s.hiddenZmanim, id, shown);
           return hiddenZmanim === s.hiddenZmanim ? s : { hiddenZmanim };
         }),
+      setAmidahVerses: (verses) => set({ amidahVerses: amidahVersesOf(verses) }),
+      setAmidahPrayer: (text) => set({ amidahPrayer: amidahPrayerOf(text) }),
       setChokThuNightDay: (day) => set({ chokThuNightDay: day }),
       setHomeLook: (look) => set((state) => (HOME_LOOKS.includes(look) ? { homeLook: look } : state)),
       setGender: (g) => set({ gender: g }),
@@ -367,6 +378,8 @@ export const useUserStore = create<UserState>()(
           chokCommentaryOpen: false,
           chokThuNightDay: null,
           hiddenZmanim: [],
+          amidahVerses: [],
+          amidahPrayer: '',
           homeLook: 'rail',
           gender: null,
           maritalStatus: null,

@@ -706,7 +706,10 @@ describe('DayArcHero', () => {
         expect(units * k).toBeCloseTo(width, 9);
         expect(stageOffset(units)).toBeCloseTo(175 - width / k / 2, 9);
         const sizes = screen.UNSAFE_getAllByType(Svg).filter((s) => s.props.viewBox === viewBox);
-        expect(sizes).toHaveLength(2);
+        expect(sizes).toHaveLength(3);
+        // The circle's tracks and the sun or moon draw above the hills, so the circle is whole at the horizon.
+        const order = screen.UNSAFE_getAllByType(Svg).map((s) => s.props.testID ?? s.props.viewBox);
+        expect(order.indexOf('home-arc-tracks')).toBeGreaterThan(order.indexOf(`-20 0 390 ${ARC.skyHeight}`));
         sizes.forEach((s) => expect(s.props).toMatchObject({ width: units * k, height: ARC.height * k }));
         const hills = screen.UNSAFE_getAllByType(Svg).find((s) => s.props.viewBox === `-20 0 390 ${ARC.skyHeight}`)!;
         expect(hills.props.height).toBeCloseTo(ARC.skyHeight * k, 9);
@@ -762,19 +765,23 @@ describe('DayArcHero', () => {
       expect(orb('moon').props.cy).toBeGreaterThan(ARC.cy);
     });
 
-    it('holds at alot when the drag crosses the alot end into the night half', () => {
+    it('turns the sun past the alot end onto the night of the same app day', () => {
       const early = at(J, '2026-10-29T04:59');
       const frame = frameAt(early);
-      const [held] = drag(early, [arcPoint(new Date(frame.end.getTime() - 20 * 60000), frame, true)]);
-      expect(held.expected).toBe(frame.start.getTime());
-      expect(held.shown).toBe(clockOf(frame.start, J.tz));
+      const target = new Date(frame.end.getTime() - 20 * 60000);
+      const [turned] = drag(early, [arcPoint(target, frame, true)]);
+      expect(Math.abs(turned.expected - target.getTime())).toBeLessThanOrEqual(2);
+      expect(turned.shown).toBe(clockOf(new Date(turned.expected), J.tz));
+      expect(frameAt(early).start.getTime()).toBe(frame.start.getTime());
     });
 
-    it('holds just before the next alot when the drag crosses the alot end into the day half', () => {
+    it('turns the moon past the alot end onto the morning of the same app day', () => {
       const late = at(J, '2026-10-30T04:19');
       const frame = frameAt(late);
-      const [held] = drag(late, [arcPoint(new Date(frame.start.getTime() + 20 * 60000), frame, true)]);
-      expect(held.expected).toBe(frame.end.getTime() - 60000);
+      const target = new Date(frame.start.getTime() + 20 * 60000);
+      const [turned] = drag(late, [arcPoint(target, frame, true)]);
+      expect(Math.abs(turned.expected - target.getTime())).toBeLessThanOrEqual(2);
+      expect(turned.shown).toBe(clockOf(new Date(turned.expected), J.tz));
     });
   });
 

@@ -258,27 +258,38 @@ describe('drag', () => {
     expect(Math.abs(across.atMs - justAfter.getTime())).toBeLessThanOrEqual(2);
   });
 
-  it('holds at alot when the point crosses the alot end from the day side into the night half', () => {
+  it('turns past the alot end from the day side to the night of the same app day', () => {
     const state = { offsetMs: 0, prevMs: F.start.getTime() + 20 * 60000 };
-    const below = arcPoint(shift(F.end, -20 * 60000), F, true);
-    expect(dragMove(state, below, F, true)!.atMs).toBe(F.start.getTime());
+    const below = shift(F.end, -20 * 60000);
+    expect(Math.abs(dragMove(state, arcPoint(below, F, true), F, true)!.atMs - below.getTime())).toBeLessThanOrEqual(2);
   });
 
-  it('holds at the next alot when the point crosses the alot end from the night half into the day side', () => {
+  it('turns past the alot end from the night half to the morning of the same app day', () => {
     const state = { offsetMs: 0, prevMs: F.end.getTime() - 20 * 60000 };
-    const above = arcPoint(shift(F.start, 20 * 60000), F, true);
-    expect(dragMove(state, above, F, true)!.atMs).toBe(F.end.getTime() - 60000);
+    const above = shift(F.start, 20 * 60000);
+    expect(Math.abs(dragMove(state, arcPoint(above, F, true), F, true)!.atMs - above.getTime())).toBeLessThanOrEqual(2);
+  });
+
+  it('wraps an hour carried past either end by the grab offset back into the same app day', () => {
+    const late = dragMove(
+      { offsetMs: -30 * 60000, prevMs: F.end.getTime() - 60000 },
+      arcPoint(shift(F.end, -10 * 60000), F, true),
+      F,
+      true,
+    )!;
+    expect(Math.abs(late.atMs - (F.start.getTime() + 20 * 60000))).toBeLessThanOrEqual(2);
+    const early = dragMove(
+      { offsetMs: 30 * 60000, prevMs: F.start.getTime() },
+      arcPoint(shift(F.start, 10 * 60000), F, true),
+      F,
+      true,
+    )!;
+    expect(Math.abs(early.atMs - (F.end.getTime() - 20 * 60000))).toBeLessThanOrEqual(2);
   });
 
   it('ignores the centre', () => {
     const start = dragStart(arcPoint(T, F, true), T.getTime(), F, true);
     expect(dragMove(start, { x: 175, y: 158 }, F, true)).toBeNull();
-  });
-
-  it('snaps a jump over three quarters to the near end', () => {
-    const state = { offsetMs: 0, prevMs: F.start.getTime() + 60000 };
-    const far = arcPoint(shift(F.end, -120000), F, true);
-    expect(dragMove(state, far, F, true)!.atMs).toBe(F.start.getTime());
   });
 
   it('never passes the end', () => {

@@ -182,6 +182,27 @@ describe('home between midnight and alot', () => {
     expect(dateKey(date)).toBe('2027-06-14');
   });
 
+  it('puts the messages in the open-now slot while nothing is open, and after My day otherwise', () => {
+    useUserStore.setState({ gender: null });
+    const { unmount } = renderAt(AFTER_ALOT);
+    expect(screen.queryByText(/^פתוח עכשיו/)).toBeNull();
+    expect(screen.queryByText('אין מצווה פתוחה ברגע זה')).toBeNull();
+    expect(screen.getByText(/^הודעות/)).toBeOnTheScreen();
+    expect(screen.getByText('התאמה אישית לפי מגדר ומצב משפחתי, לא חובה. להגדרה')).toBeOnTheScreen();
+    unmount();
+    jest.useRealTimers();
+    renderAt(NIGHT_OF_THE_14TH);
+    const labels = screen.getAllByText(/^(פתוח עכשיו|הודעות)/).map((n) => String(n.props.children));
+    expect(labels[0]).toMatch(/^פתוח עכשיו/);
+    expect(labels.some((l) => /^הודעות/.test(l))).toBe(true);
+  });
+
+  it('keeps the empty state when nothing is open and there is no message', () => {
+    renderAt(AFTER_ALOT);
+    expect(screen.getByText(/^פתוח עכשיו/)).toBeOnTheScreen();
+    expect(screen.queryByText(/^הודעות/)).toBeNull();
+  });
+
   it('shows the bell only on a mitzvah whose own level differs from the app’s, with its total', () => {
     // The app at 3 and no mitzvah of its own: no bell anywhere, however much it nags.
     useUserStore.setState({ nagLevel: 3 });
@@ -253,8 +274,10 @@ describe('home between midnight and alot', () => {
       },
     });
     renderAt('2027-06-14T14:00');
-    expect(screen.getByText('אין מצווה פתוחה ברגע זה')).toBeOnTheScreen();
+    // The streak message takes the empty open-now slot; the all-done line is not claimed.
+    expect(screen.getByText(/^הודעות/)).toBeOnTheScreen();
     expect(screen.queryByText('כל המצוות של היום בוצעו')).toBeNull();
+    expect(screen.queryByText('הכול סומן להיום')).toBeNull();
     expect(within(dayCard('mincha')).getByText(/^בוצע ב-/)).toBeOnTheScreen();
   });
 

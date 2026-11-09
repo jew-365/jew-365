@@ -5,6 +5,7 @@ import { hilulaDateLabel, hilulotOn } from '@/data/hilulot';
 import { roshChodeshLabel, upcomingRoshChodesh } from '@/data/roshChodesh';
 import { t } from '@/i18n';
 import { HebcalService } from '@/services/HebcalService';
+import { ZmanimService } from '@/services/ZmanimService';
 import { at } from '@/testing/zmanim';
 import { clockOf } from '../clock';
 import { holyBlockMessage, hilulaMessage, roshChodeshMessage, streakMessage } from '../homeMessages';
@@ -33,19 +34,30 @@ describe('streakMessage', () => {
 });
 
 describe('holyBlockMessage', () => {
-  it('4. names tomorrow, the lighting and the exit', () => {
-    const b = HebcalService.holyBlockOn(at(J, '2026-10-31T12:00'), J)!;
-    expect(holyBlockMessage(at(J, '2026-10-29T12:00'), J, 'he', t)).toEqual({
+  const b = HebcalService.holyBlockOn(at(J, '2026-10-31T12:00'), J)!;
+  const times = `הדלקת נרות ${clockOf(b.start, J.tz)} · צאת השבת ${clockOf(b.end, J.tz)}`;
+  const thursdayNightfall = HebcalService.nightfall(ZmanimService.getZmanim(at(J, '2026-10-29T12:00'), J)!, J);
+
+  it('4. is absent through the week, Thursday afternoon included', () => {
+    expect(holyBlockMessage(at(J, '2026-10-26T12:00'), J, t)).toBeNull();
+    expect(holyBlockMessage(at(J, '2026-10-28T20:00'), J, t)).toBeNull();
+    expect(holyBlockMessage(new Date(thursdayNightfall.getTime() - 60000), J, t)).toBeNull();
+  });
+
+  it('5. shows from Thursday nightfall, naming tomorrow, the lighting and the exit', () => {
+    expect(holyBlockMessage(thursdayNightfall, J, t)).toEqual({
       id: 'holyBlock',
       icon: 'candles',
       title: 'שבת',
-      caption: `מחר · הדלקת נרות ${clockOf(b.start, J.tz)} · צאת השבת ${clockOf(b.end, J.tz)}`,
+      caption: `מחר · ${times}`,
       href: null,
     });
+    expect(holyBlockMessage(at(J, '2026-10-30T02:00'), J, t)!.caption).toBe(`מחר · ${times}`);
   });
 
-  it('5. names the weekday from two days out', () => {
-    expect(holyBlockMessage(at(J, '2026-10-30T20:00'), J, 'he', t)!.caption.startsWith('יום שישי · ')).toBe(true);
+  it('5a. names today on Friday until candle lighting', () => {
+    expect(holyBlockMessage(at(J, '2026-10-30T09:00'), J, t)!.caption).toBe(`היום · ${times}`);
+    expect(holyBlockMessage(new Date(b.start.getTime() - 60000), J, t)!.caption).toBe(`היום · ${times}`);
   });
 });
 

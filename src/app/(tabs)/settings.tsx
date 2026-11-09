@@ -58,6 +58,7 @@ import { useUserStore, type Gender, type PrayerMode } from '@/stores/useUserStor
 import { useShallow } from 'zustand/react/shallow';
 import { BRAND } from '@/theme/colors';
 import { useTheme } from '@/theme/ThemeProvider';
+import { AmidahPersonalSettings } from '@/components/AmidahPersonalSettings';
 import { AccuracyNotice } from '@/components/AccuracyNotice';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -597,6 +598,11 @@ export default function SettingsScreen() {
                     onSelect={user.setChokThuNightDay}
                     renderLabel={(value) => t(`chok.thuNight.${value}`)}
                   />
+                </Anchor>
+                <Anchor {...anchor('amidahPersonal')}>
+                  <View style={styles.fieldLabel}>
+                    <AmidahPersonalSettings />
+                  </View>
                 </Anchor>
               </SettingsSection>
 

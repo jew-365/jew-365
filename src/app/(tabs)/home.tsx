@@ -416,7 +416,7 @@ export default function HomeScreen() {
     () =>
       [
         streakMessage(streak, t),
-        holyBlockMessage(now, location, language, t),
+        holyBlockMessage(now, location, t),
         roshChodeshMessage(now, location, language, t),
         hilulaMessage(now, location, inIsrael, hilulotEnabled, language, t),
       ].filter(nonNull),
@@ -701,6 +701,37 @@ export default function HomeScreen() {
 
   const nextUpcoming = upcoming[0];
   const messageCount = (errorScope ? 1 : 0) + (banner ? 1 : 0) + messages.length;
+  // Nothing open now: the messages take the open-now slot (the owner's call, 2026-11-09).
+  const messagesFirst = current.length === 0 && messageCount > 0;
+  const messagesBlock = messageCount ? (
+    <>
+      <SectionLabel text={t('home.messages')} count={messageCount} />
+      {errorScope ? (
+        <Banner
+          tone="warning"
+          text={t('home.lastError', { what: t(`errors.scope.${errorScope}`) })}
+          onPress={retryLastError}
+        />
+      ) : null}
+      {banner ? <Banner tone={banner.tone} text={banner.text} onPress={banner.onPress} /> : null}
+      {messages.length ? (
+        <View testID="home-messages">
+          <Card divided>
+            {messages.map((message) => (
+              <ListRow
+                key={message.id}
+                icon={message.icon}
+                title={message.title}
+                caption={message.caption}
+                onPress={message.href ? () => router.push(message.href as never) : undefined}
+                chevron={Boolean(message.href)}
+              />
+            ))}
+          </Card>
+        </View>
+      ) : null}
+    </>
+  ) : null;
 
   return (
     <SkyFrame setterRef={skySetter} focused={focused} quiet={quiet}>
@@ -725,8 +756,12 @@ export default function HomeScreen() {
             onSkyTop={onSkyTop}
           />
           <View style={styles.body}>
-            <SectionLabel text={t('home.openNow')} count={current.length} style={styles.openNowLabel} />
-            {current.length ? (
+            {messagesFirst ? (
+              <View style={styles.openNowLabel}>{messagesBlock}</View>
+            ) : (
+              <SectionLabel text={t('home.openNow')} count={current.length} style={styles.openNowLabel} />
+            )}
+            {messagesFirst ? null : current.length ? (
               current.map((item, index) => (
                 <Reveal key={item.mitzvah.id} delay={index * 40} duration={280} shift={25} playKey={playKey}>
                   <NowCard
@@ -796,35 +831,7 @@ export default function HomeScreen() {
               </>
             ) : null}
 
-            {messageCount ? (
-              <>
-                <SectionLabel text={t('home.messages')} count={messageCount} />
-                {errorScope ? (
-                  <Banner
-                    tone="warning"
-                    text={t('home.lastError', { what: t(`errors.scope.${errorScope}`) })}
-                    onPress={retryLastError}
-                  />
-                ) : null}
-                {banner ? <Banner tone={banner.tone} text={banner.text} onPress={banner.onPress} /> : null}
-                {messages.length ? (
-                  <View testID="home-messages">
-                    <Card divided>
-                      {messages.map((message) => (
-                        <ListRow
-                          key={message.id}
-                          icon={message.icon}
-                          title={message.title}
-                          caption={message.caption}
-                          onPress={message.href ? () => router.push(message.href as never) : undefined}
-                          chevron={Boolean(message.href)}
-                        />
-                      ))}
-                    </Card>
-                  </View>
-                ) : null}
-              </>
-            ) : null}
+            {messagesFirst ? null : messagesBlock}
 
             {taharahCard ? (
               <Card style={styles.taharahCard}>

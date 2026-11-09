@@ -157,6 +157,7 @@ import { currentOrNextWindow, dayWindow, windowDueToday } from '@/utils/buildDay
 import { afterPaint } from '@/utils/afterPaint';
 import { compassPrayerOf } from '@/utils/compass';
 import { alphaHex } from '@/utils/dayArc';
+import { PERSONAL_PRAYER_TEXTS, withPersonalPrayer } from '@/utils/personalPrayer';
 import { useReadingStore } from '@/stores/useReadingStore';
 import {
   CHAPTER_ONLY_TEXTS,
@@ -182,6 +183,7 @@ const LEFT_EDGE = I18nManager.isRTL ? ('right' as const) : ('left' as const);
 const SECTION_VIEWABILITY = { viewAreaCoveragePercentThreshold: 2 };
 // The sections of Shacharit, Mincha and Maariv that open an Amidah: the compass button sits above each.
 const AMIDAH_SECTIONS: ReadonlySet<string> = new Set(['תפילת העמידה', 'מוסף']);
+const NO_POINTS: ReadonlySet<string> = new Set();
 // The compass button is option ב of design/lab/studies/2026-11-05-compass-button (the owner's pick, 2026-11-05):
 // an outlined pill on a hairline in the primary colour at this opacity.
 const COMPASS_LINE_ALPHA = 0.55;
@@ -922,6 +924,8 @@ export default function SiddurScreen() {
   const setPrayerMode = useUserStore((s) => s.setPrayerMode);
   const maritalStatus = useUserStore((s) => s.maritalStatus);
   const siddurVoice = useUserStore((s) => s.siddurVoice);
+  const amidahVerses = useUserStore((s) => s.amidahVerses);
+  const amidahPrayer = useUserStore((s) => s.amidahPrayer);
   const chokInstall = useChokStore((s) => s.installed);
   const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(nusach));
   const selichotVersion = useSelichotStore((s) => s.installed?.version ?? null);
@@ -1261,10 +1265,21 @@ export default function SiddurScreen() {
     });
   }, [load, loadStale, shownSlot, doubleChoice, nusach, makeUpFolds]);
 
-  const sections = useMemo(
+  const resolvedSections = useMemo(
     () => (readyText ? resolveForReader(readyText, features, maritalStatus, siddurVoice) : []),
     [readyText, features, maritalStatus, siddurVoice],
   );
+  // The name verses and personal prayer before the second "יהיו לרצון" of each Amidah, and where its settings link goes.
+  const personal = useMemo(() => {
+    if (chok || !textId || !PERSONAL_PRAYER_TEXTS.has(textId)) return { sections: resolvedSections, points: NO_POINTS };
+    const both = (key: string) => ({ he: translate(key, undefined, 'he'), en: translate(key, undefined, 'en') });
+    return withPersonalPrayer(resolvedSections, {
+      verses: amidahVerses,
+      prayer: amidahPrayer,
+      labels: { verses: both('amidahPersonal.readerVerses'), prayer: both('amidahPersonal.readerPrayer') },
+    });
+  }, [chok, textId, resolvedSections, amidahVerses, amidahPrayer]);
+  const sections = personal.sections;
   const bookmarkTextId: string | null = chok ? CHOK_TEXT_ID : textId;
   const placeNusach = readyText?.nusach ?? null;
   const dailyText = textId !== null && mitzvahTextId(textId) !== null;
@@ -2270,6 +2285,22 @@ export default function SiddurScreen() {
                     </Card>
                   </MeasuredView>
                   {psalmReadable && psalmOf(section) !== null ? psalmRead(psalmOf(section)!) : null}
+                  {personal.points.has(section.title.he) ? (
+                    <TapGuard>
+                      <View testID="siddur-amidah-personal">
+                        <Button
+                          variant="secondary"
+                          size="compact"
+                          icon="sliders"
+                          label={t('amidahPersonal.link')}
+                          onPress={() =>
+                            router.push({ pathname: '/(tabs)/settings', params: { focus: 'amidahPersonal' } })
+                          }
+                          style={styles.psalmRead}
+                        />
+                      </View>
+                    </TapGuard>
+                  ) : null}
                 </View>
               )}
               ListFooterComponent={

@@ -104,10 +104,9 @@ export function dragMove(
   const hit = timeAtPoint(p, f, rtl);
   if (hit.rho < 0.15) return null;
   const lo = f.start.getTime();
-  const hi = f.end.getTime() - 60000;
-  let at = hit.atMs - s.offsetMs;
-  if (Math.abs(at - s.prevMs) > 0.75 * (hi - lo)) at = s.prevMs < (lo + hi) / 2 ? lo : hi;
-  at = Math.min(hi, Math.max(lo, at));
+  const span = f.end.getTime() - lo;
+  // A full turn: past the alot end the hour wraps to the other end of the same app day, never into another day.
+  const at = Math.min(f.end.getTime() - 60000, lo + ((((hit.atMs - s.offsetMs - lo) % span) + span) % span));
   return { state: { offsetMs: s.offsetMs * 0.93, prevMs: at }, atMs: at };
 }
 

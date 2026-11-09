@@ -1710,3 +1710,50 @@ describe('the siddur reader reading count', () => {
     }
   });
 });
+
+describe('the name verses and personal prayer in the Amidah', () => {
+  async function openMincha(verses: string[], prayer: string) {
+    jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T14:00'), doNotFake: [...ONLY_DATE] });
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'sefard' });
+    useUserStore.getState().setAmidahVerses(verses);
+    useUserStore.getState().setAmidahPrayer(prayer);
+    for (const key of Object.keys(mockParams)) delete mockParams[key];
+    Object.assign(mockParams, { id: 'mincha', date: '2026-10-28' });
+    mockLoadedText = null;
+    renderWithTheme(<SiddurReaderScreen />);
+    await screen.findByTestId('siddur-section-תפילת העמידה');
+    await act(async () => {});
+  }
+
+  afterEach(() => {
+    jest.useRealTimers();
+    mockRouter.push.mockClear();
+  });
+
+  it('shows the verses and the prayer in the Amidah, with a link to their settings', async () => {
+    await openMincha(['יוֹסֵף הַצַּדִּיק', 'חַיִּים טוֹבִים'], 'רפא נא את אמי');
+    const amidah = screen.getByTestId('siddur-section-תפילת העמידה');
+    expect(within(amidah).getByText('פסוקים לשמי')).toBeOnTheScreen();
+    expect(within(amidah).getByText('יוֹסֵף הַצַּדִּיק')).toBeOnTheScreen();
+    expect(within(amidah).getByText('חַיִּים טוֹבִים')).toBeOnTheScreen();
+    expect(within(amidah).getByText('רפא נא את אמי')).toBeOnTheScreen();
+    fireEvent.press(within(amidah).getByRole('button', { name: 'פסוקים לשמי ותפילה אישית' }));
+    expect(mockRouter.push).toHaveBeenCalledWith({ pathname: '/(tabs)/settings', params: { focus: 'amidahPersonal' } });
+  });
+
+  it('keeps the link, and adds nothing, while nothing is set', async () => {
+    await openMincha([], '');
+    const amidah = screen.getByTestId('siddur-section-תפילת העמידה');
+    expect(within(amidah).queryByText('פסוקים לשמי')).toBeNull();
+    expect(within(amidah).getByTestId('siddur-amidah-personal')).toBeOnTheScreen();
+  });
+
+  it('puts the link once, under the Amidah alone', async () => {
+    await openMincha(['יוֹסֵף הַצַּדִּיק'], '');
+    expect(screen.getAllByTestId('siddur-amidah-personal')).toHaveLength(1);
+    expect(
+      within(screen.getByTestId('siddur-section-תפילת העמידה')).getByTestId('siddur-amidah-personal'),
+    ).toBeOnTheScreen();
+  });
+});

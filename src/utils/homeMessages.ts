@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import type { IconName } from '@/components/MitzvahIcon';
 import { hilulaDateLabel, hilulaNames, hilulotOn } from '@/data/hilulot';
 import { roshChodeshLabel, upcomingRoshChodesh } from '@/data/roshChodesh';
@@ -9,7 +8,7 @@ import { formatDate } from '@/i18n';
 import type { Location } from '@/types/zmanim';
 import { clockOf } from '@/utils/clock';
 import { addDays } from '@/utils/historyStats';
-import { appDay, locationNoon } from '@/utils/locationDay';
+import { appDay, appDayEnd, locationNoon } from '@/utils/locationDay';
 import { holyBlockLabelKeys } from '@/utils/skipRules';
 import { nextStreakGoal } from '@/utils/streakGoal';
 import { civilHebrewDayAt } from '@/utils/taharah/onot';
@@ -26,7 +25,7 @@ export type HomeMessage = {
   href: HomeHref | null;
 };
 
-const HOLY_BLOCK_LOOKAHEAD_DAYS = 8;
+const HOLY_BLOCK_LOOKAHEAD_DAYS = 2;
 const ROSH_CHODESH_LOOKAHEAD_DAYS = 7;
 
 export function streakMessage(streak: number, t: Translate): HomeMessage | null {
@@ -42,18 +41,22 @@ export function streakMessage(streak: number, t: Translate): HomeMessage | null 
   };
 }
 
-export function holyBlockMessage(now: Date, location: Location, language: Language, t: Translate): HomeMessage | null {
+// The next block shows only from the nightfall before its erev (Thursday night for Shabbat; the owner's
+// call, 2026-11-09), or from that day's alot where the sun neither rises nor sets.
+function shownFrom(erev: Date, location: Location): Date {
+  const before = addDays(erev, -1);
+  const z = ZmanimService.getZmanim(locationNoon(before, location), location);
+  return z ? HebcalService.nightfall(z, location) : appDayEnd(before, location);
+}
+
+export function holyBlockMessage(now: Date, location: Location, t: Translate): HomeMessage | null {
   const today = appDay(now, location);
   for (let o = 0; o <= HOLY_BLOCK_LOOKAHEAD_DAYS; o++) {
     const block = HebcalService.holyBlockOn(locationNoon(addDays(today, o), location), location);
     if (!block || block.start.getTime() <= now.getTime()) continue;
     const erev = appDay(block.start, location);
-    const ahead = Math.round(
-      DateTime.fromISO(dateKey(erev), { zone: 'utc' }).diff(DateTime.fromISO(dateKey(today), { zone: 'utc' }), 'days')
-        .days,
-    );
-    const when =
-      ahead === 0 ? t('common.today') : ahead === 1 ? t('common.tomorrow') : formatDate(erev, 'cccc', language);
+    if (now.getTime() < shownFrom(erev, location).getTime()) return null;
+    const when = dateKey(erev) === dateKey(today) ? t('common.today') : t('common.tomorrow');
     const labels = holyBlockLabelKeys(block);
     const times = t('holyBlock.notice.body', {
       start: clockOf(block.start, location.tz),

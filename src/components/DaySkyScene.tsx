@@ -150,6 +150,48 @@ export function DaySkyScene({
         importantForAccessibility="no-hide-descendants"
         style={styles.backSvg}
       >
+        <G opacity={share * 0.6}>
+          {STARS.map(([x, y, size]) => (
+            <Circle key={`${x}-${y}`} cx={x} cy={y} r={size / 2} fill={BRAND.white} />
+          ))}
+        </G>
+        <G opacity={(1 - share) * 0.9} fill={sky.cloud}>
+          {CLOUDS.map(([x, y, w, opacity]) => (
+            <G key={`${x}-${y}`} opacity={opacity} transform={`translate(${x} ${y}) scale(${w / 120})`}>
+              <Ellipse cx={30} cy={34} rx={26} ry={14} />
+              <Ellipse cx={62} cy={26} rx={28} ry={20} />
+              <Ellipse cx={92} cy={34} rx={24} ry={13} />
+              <Rect x={30} y={30} width={62} height={17} rx={8} />
+            </G>
+          ))}
+        </G>
+      </Svg>
+
+      <Svg
+        viewBox={`-20 0 390 ${ARC.skyHeight}`}
+        preserveAspectRatio="none"
+        pointerEvents="none"
+        accessible={false}
+        importantForAccessibility="no-hide-descendants"
+        width="100%"
+        height={ARC.skyHeight * k}
+        style={styles.hills}
+      >
+        <Path d="M-20 158V142Q45 128 95 140T200 138T290 134T370 142V158Z" fill={ground.back} />
+        <Path d="M-20 158V150Q60 140 120 150T250 148T370 150V158Z" fill={ground.front} />
+        <Path d="M-20 158H370" stroke={ink.ink} strokeOpacity={0.35} strokeWidth={1.2} />
+      </Svg>
+
+      <Svg
+        testID="home-arc-tracks"
+        width={width}
+        height={height}
+        viewBox={viewBox}
+        pointerEvents="none"
+        accessible={false}
+        importantForAccessibility="no-hide-descendants"
+        style={styles.backSvg}
+      >
         <Defs>
           <LinearGradient id="homeArcGradient" gradientUnits="userSpaceOnUse" x1={arcStart} y1="0" x2={arcEnd} y2="0">
             {SKY_SCENE.arcStops.map(([offset, color]) => (
@@ -171,21 +213,6 @@ export function DaySkyScene({
             <Circle cx={p.x + (rtl ? 9 : -9)} cy={p.y - 4} r={14} fill="#000000" />
           </Mask>
         </Defs>
-        <G opacity={share * 0.6}>
-          {STARS.map(([x, y, size]) => (
-            <Circle key={`${x}-${y}`} cx={x} cy={y} r={size / 2} fill={BRAND.white} />
-          ))}
-        </G>
-        <G opacity={(1 - share) * 0.9} fill={sky.cloud}>
-          {CLOUDS.map(([x, y, w, opacity]) => (
-            <G key={`${x}-${y}`} opacity={opacity} transform={`translate(${x} ${y}) scale(${w / 120})`}>
-              <Ellipse cx={30} cy={34} rx={26} ry={14} />
-              <Ellipse cx={62} cy={26} rx={28} ry={20} />
-              <Ellipse cx={92} cy={34} rx={24} ry={13} />
-              <Rect x={30} y={30} width={62} height={17} rx={8} />
-            </G>
-          ))}
-        </G>
         <Path d={dayPath(rtl)} fill="none" {...track} />
         <Path
           d={dayPath(rtl)}
@@ -218,21 +245,6 @@ export function DaySkyScene({
             <Circle cx={p.x} cy={p.y} r={15} fill="url(#homeSun)" />
           </G>
         )}
-      </Svg>
-
-      <Svg
-        viewBox={`-20 0 390 ${ARC.skyHeight}`}
-        preserveAspectRatio="none"
-        pointerEvents="none"
-        accessible={false}
-        importantForAccessibility="no-hide-descendants"
-        width="100%"
-        height={ARC.skyHeight * k}
-        style={styles.hills}
-      >
-        <Path d="M-20 158V142Q45 128 95 140T200 138T290 134T370 142V158Z" fill={ground.back} />
-        <Path d="M-20 158V150Q60 140 120 150T250 148T370 150V158Z" fill={ground.front} />
-        <Path d="M-20 158H370" stroke={ink.ink} strokeOpacity={0.35} strokeWidth={1.2} />
       </Svg>
 
       <View testID="home-arc" style={[styles.stage, box]}>

@@ -88,12 +88,12 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'דף הבית וסימון מצווה', en: 'Home and marking a mitzvah' },
     body: [
       {
-        he: 'בראש דף הבית עיגול אחד של היום והלילה: השמש נעה על חציו העליון מעלות השחר ועד צאת הכוכבים, והירח על חציו התחתון עד עלות השחר הבאה, לפי זמני לוח אור החיים במיקום שנבחר. השמיים משנים את צבעם מעלות השחר ועד הלילה, ומתחת לעיגול רצועה של זמני היום, שבה הזמן ההלכתי הבא מסומן. בהגדרות ← זמני הלכה בוחרים אילו מהם יוצגו; כברירת מחדל כולם מוצגים. גרירת השמש או הירח, גם מהיום אל הלילה ובחזרה, או הקשה על אחד הזמנים, מציגה את העיגול בשעה אחרת, ו״חזרה לעכשיו״ מחזיר אותו. הרשימות שמתחת נשארות בזמן אמת.',
-        en: "At the top of Home is one circle for the day and the night: the sun moves along its upper half from dawn to nightfall and the moon along its lower half until the next dawn, by the zmanim of the Ohr HaChaim luach at the location you chose. The sky changes colour from dawn to night, and under the circle is a strip of the day's zmanim, with the next one marked. Settings → Halachic times chooses which of them show; by default all of them do. Drag the sun or the moon, even from the day into the night and back, or tap a zman, to see the circle at another time; Back to now returns it. The lists below stay live.",
+        he: 'בראש דף הבית עיגול אחד של היום והלילה: השמש נעה על חציו העליון מעלות השחר ועד צאת הכוכבים, והירח על חציו התחתון עד עלות השחר הבאה, לפי זמני לוח אור החיים במיקום שנבחר. השמיים משנים את צבעם מעלות השחר ועד הלילה, ומתחת לעיגול רצועה של זמני היום, שבה הזמן ההלכתי הבא מסומן. בהגדרות ← זמני הלכה בוחרים אילו מהם יוצגו; כברירת מחדל כולם מוצגים. גרירת השמש או הירח סביב כל העיגול, מהיום אל הלילה ומהלילה אל הבוקר, תמיד בתוך אותו יום, או הקשה על אחד הזמנים, מציגה את העיגול בשעה אחרת, ו״חזרה לעכשיו״ מחזיר אותו. הרשימות שמתחת נשארות בזמן אמת.',
+        en: "At the top of Home is one circle for the day and the night: the sun moves along its upper half from dawn to nightfall and the moon along its lower half until the next dawn, by the zmanim of the Ohr HaChaim luach at the location you chose. The sky changes colour from dawn to night, and under the circle is a strip of the day's zmanim, with the next one marked. Settings → Halachic times chooses which of them show; by default all of them do. Drag the sun or the moon all the way around the circle, from the day into the night and from the night into the morning, always within the same day, or tap a zman, to see the circle at another time; Back to now returns it. The lists below stay live.",
       },
       {
-        he: '״פתוח עכשיו״ מציג כל מצווה שהזמן שלה פתוח, עם טבעת של הזמן שנותר ושעות ההתחלה והסוף. ״עשיתי״ מסמן אותה כבוצעה ומבטל את שאר ההתראות שלה לאותו יום, ו״פתח נוסח״ פותח את הנוסח בסידור. תחת ״הודעות״ מופיע מה שדורש תשומת לב, כמו סימון אחרי שבת או מיקום שלא אושר, וגם הרצף, השבת הקרובה, ראש חודש, והילולות כשההתראות עליהן פועלות.',
-        en: 'Open now shows every mitzvah whose time is open, with a ring of the time left and its start and end. Done marks it done and cancels its other notifications for that day, and Open text opens its text in the siddur. Messages shows what needs attention, such as the check-in after Shabbat or a location that was not allowed, along with your streak, the coming Shabbat, Rosh Chodesh, and hilulot when their notices are on.',
+        he: '״פתוח עכשיו״ מציג כל מצווה שהזמן שלה פתוח, עם טבעת של הזמן שנותר ושעות ההתחלה והסוף. ״עשיתי״ מסמן אותה כבוצעה ומבטל את שאר ההתראות שלה לאותו יום, ו״פתח נוסח״ פותח את הנוסח בסידור. תחת ״הודעות״ מופיע מה שדורש תשומת לב, כמו סימון אחרי שבת או מיקום שלא אושר, וגם הרצף, השבת הקרובה (מליל חמישי), ראש חודש, והילולות כשההתראות עליהן פועלות. כשאין מצווה פתוחה, ההודעות מופיעות במקום ״פתוח עכשיו״.',
+        en: 'Open now shows every mitzvah whose time is open, with a ring of the time left and its start and end. Done marks it done and cancels its other notifications for that day, and Open text opens its text in the siddur. Messages shows what needs attention, such as the check-in after Shabbat or a location that was not allowed, along with your streak, the coming Shabbat (from Thursday night), Rosh Chodesh, and hilulot when their notices are on. When no mitzvah is open, the messages take the place of Open now.',
       },
       {
         he: '״היום שלי״ מסדר את כל מצוות היום: מה שעוד פתוח, אחר כך מה שבוצע ובסוף מה שפוספס, בשלוש תצוגות לבחירה, טבעות, כרטיסים או ציר, והבחירה נשמרת. מצווה שפוספסה אפשר לסמן עד סוף היום, ו״בטל״ מחזיר סימון. הקשה על מצווה פותחת את המסך שלה, ולחיצה ארוכה פותחת פעולות מהירות: ״פרטים״ או ״דלג היום״.',
@@ -208,6 +208,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
       {
         he: 'בהגדרות ← תפילה וסידור בוחרים נוסח (אשכנז, ספרד, עדות המזרח, חב״ד או תימן בלדי), דעת זמן ק״ש (הגר״א או המגן אברהם, שקובעת מתי נגמר חלון קריאת שמע של שחרית; מסך המצווה והכרטיס בדף הבית מציגים את שתי הדעות לידיעה), במניין או ביחיד, ״נוסח הסידור״ לגבר או לאישה, וגלילה. נוסח הסידור מתעדכן לפי המגדר בפרופיל: אישה קוראת את ״מודה אני״, את ברכות השחר ואת שאר הנוסחים בלשון אישה.',
         en: "Settings → Prayer and siddur sets the nusach (Ashkenaz, Sefard, Edot HaMizrach, Chabad or Teiman Baladi), the Shema opinion (Gra or Magen Avraham, which decides when the morning Shema window ends; the mitzvah's screen and its Home card show both for reference), Minyan or Alone, the Siddur wording for a man or a woman, and scrolling. The siddur wording follows the gender in your profile: a woman reads Modeh Ani, the morning blessings and the other women's forms.",
+      },
+      {
+        he: 'בהגדרות ← תפילה וסידור, ״פסוקים לשמך ותפילה אישית בעמידה״: עד שלושה פסוקים, אחד לכל שם, שנאמרים בסוף אלהי נצור לפני יהיו לרצון השני. פסוק נמצא לפי האות הראשונה והאות האחרונה שלו, מתוך תהלים ומחלקי התנ״ך של חק לישראל כשהוא מותקן, או מוקלד. אפשר להוסיף גם תפילה אישית בכתב חופשי. הסידור מציג את שניהם במקומם בכל עמידה של שחרית, מנחה וערבית, ומתחת לעמידה כפתור שמוביל להגדרה.',
+        en: 'Settings → Prayer and siddur, Name verses and personal prayer in the Amidah: up to three verses, one for each name, said at the end of Elokai Netzor before the second Yihyu Leratzon. A verse is found by its first and last letter, in Tehillim and in the Tanakh parts of Chok LeYisrael when it is installed, or typed. A personal prayer in free text can be added too. The siddur shows both in place in every Amidah of Shacharit, Mincha and Maariv, with a button under the Amidah that leads to the setting.',
       },
       {
         he: 'הסליחות יורדות כתוסף בנוסח שלך: עד שהן מותקנות, השורה בסידור, מסך המצווה ולשונית עוד מציעים להוריד אותן, ושבוע לפני תחילת העונה מופיעה גם בדף הבית הצעה להוריד. החלפת נוסח מציעה את הסליחות של הנוסח החדש.',
@@ -417,6 +421,24 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 ];
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
+  {
+    label: '1.0.21-18',
+    date: '2026-11-09',
+    items: [
+      {
+        he: 'פסוקים לשמך ותפילה אישית בעמידה: עד שלושה פסוקים, אחד לכל שם, נמצאים לפי האות הראשונה והאחרונה מתוך תהלים וחק לישראל או מוקלדים, ותפילה בכתב חופשי. הסידור מציג אותם בסוף אלהי נצור, לפני יהיו לרצון השני. בהגדרות ← תפילה וסידור, ובקישור מתחת לעמידה.',
+        en: 'Name verses and a personal prayer in the Amidah: up to three verses, one for each name, found by their first and last letter in Tehillim and Chok LeYisrael or typed, and a prayer in free text. The siddur shows them at the end of Elokai Netzor, before the second Yihyu Leratzon. In Settings → Prayer and siddur, and by the link under the Amidah.',
+      },
+      {
+        he: 'העיגול בדף הבית שלם, ואפשר לגרור את השמש או הירח סביבו כולו, בתוך אותו יום.',
+        en: "Home's circle is whole, and the sun or the moon can be dragged all the way around it, within the same day.",
+      },
+      {
+        he: 'כשאין מצווה פתוחה, ההודעות מופיעות במקום ״פתוח עכשיו״. הודעת השבת הקרובה מופיעה מליל חמישי.',
+        en: 'When no mitzvah is open, the messages take the place of Open now. The coming Shabbat shows from Thursday night.',
+      },
+    ],
+  },
   {
     label: '1.0.21-17',
     date: '2026-11-08',
