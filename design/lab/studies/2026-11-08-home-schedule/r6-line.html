@@ -1,0 +1,16 @@
+<sc-if value="{{r6On.line}}" hint-placeholder-val="{{ false }}">
+<button class="r6line" style="{{r6Style}}" onClick="{{r6.next}}" aria-label="{{r6.aria}}"><span class="r6ic">[[icB:r6.cur]]</span><span class="r6k">{{r6.cur.kicker}}</span><span class="r6t">{{r6.cur.text}}</span><sc-if value="{{r6.many}}" hint-placeholder-val="{{ true }}"><span class="r6dots" aria-hidden="true"><sc-for list="{{r6.ctx}}" as="c" hint-placeholder-count="2"><i class="{{c.cls}}"></i></sc-for></span></sc-if></button>
+</sc-if>
+<sc-if value="{{sb.s}}" hint-placeholder-val="{{ false }}">
+<div class="r6stack" style="{{r6Style}}">
+<div class="r6tabs" role="tablist" aria-label="מה מוצג בכרטיס"><sc-for list="{{r6Stack}}" as="p" hint-placeholder-count="3"><button class="r6tab {{p.cls}}" role="tab" aria-selected="{{p.on}}" onClick="{{p.pick}}">{{p.name}}</button></sc-for></div>
+<button class="r6sc pg-{{r6Page.id}}" onClick="{{r6PageNext}}" aria-label="{{r6Page.name}}: {{r6Page.title}}, {{r6Page.sub}}. לחיצה לכרטיס הבא"><span class="r6ic big">[[icB:r6Page]]</span><span class="r6sm"><b class="r6st">{{r6Page.title}}</b><sc-if value="{{r6Page.hasSub}}" hint-placeholder-val="{{ true }}"><span class="r6ss">{{r6Page.sub}}</span></sc-if></span></button>
+</div>
+</sc-if>
+<sc-if value="{{sb.u}}" hint-placeholder-val="{{ false }}">
+<div class="r6week" role="tablist" aria-label="ימי השבוע">
+<sc-for list="{{r6Days}}" as="d" hint-placeholder-count="7"><button class="r6d {{d.cls}}" style="{{r6DayStyle}}" role="tab" aria-selected="{{d.sel}}" aria-label="{{d.aria}}" onClick="{{d.pick}}"><span class="r6dl">{{d.letter}}</span><b class="r6dh">{{d.heb}}</b><i class="{{d.dotCls}}" aria-hidden="true"></i></button></sc-for>
+</div>
+<sc-if value="{{r6Sel.other}}" hint-placeholder-val="{{ false }}"><div class="r6line r6sel" style="{{r6Style}}" role="status"><span class="r6t"><b>{{r6Sel.title}}</b> · {{r6Sel.lines}}</span><button class="r6back" onClick="{{r6Sel.back}}">להיום</button></div></sc-if>
+<sc-if value="{{r6Sel.today}}" hint-placeholder-val="{{ true }}"><button class="r6line" style="{{r6Style}}" onClick="{{r6.next}}" aria-label="{{r6.aria}}"><span class="r6ic">[[icB:r6.cur]]</span><span class="r6k">{{r6.cur.kicker}}</span><span class="r6t">{{r6.cur.text}}</span><sc-if value="{{r6.many}}" hint-placeholder-val="{{ true }}"><span class="r6dots" aria-hidden="true"><sc-for list="{{r6.ctx}}" as="c" hint-placeholder-count="2"><i class="{{c.cls}}"></i></sc-for></span></sc-if></button></sc-if>
+</sc-if>

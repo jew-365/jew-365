@@ -23,6 +23,12 @@ const variants = [
   { board: 'R3Ribbon', sched: 'n', title: 'סרגל הזמן של היום' },
   { board: 'R3Flip', sched: 'o', title: 'כרטיס מתהפך' },
   { board: 'R4Bento', sched: 'p', title: 'בנטו בתוך הקשת', k: '156 / 216' },
+  { board: 'R6Glance', sched: 'q', title: 'שורה אחת חכמה' },
+  { board: 'R6Weather', sched: 'r', title: 'כרטיס זכוכית' },
+  { board: 'R6Stack', sched: 's', title: 'ערימה חכמה' },
+  { board: 'R6Live', sched: 't', title: 'הצ׳יפ החי' },
+  { board: 'R6Week', sched: 'u', title: 'השבוע במבט' },
+  { board: 'R6Arc', sched: 'v', title: 'הכול בתוך הקשת' },
 ];
 for (const v of variants) {
   let out = now;

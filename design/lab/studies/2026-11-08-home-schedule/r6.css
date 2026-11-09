@@ -1,0 +1,83 @@
+/* Round 6: one carousel, one smart line, nothing twice. */
+.hero.r6 .block{padding-bottom:6px}
+.r6ic{flex:none;display:inline-flex;width:18px;height:18px}
+.r6ic .ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.r6ic.big,.r6ic.big .ic{width:26px;height:26px}
+.r6line{position:relative;z-index:2;box-sizing:border-box;display:flex;align-items:center;gap:8px;width:calc(100% - 32px);min-height:44px;margin:0 16px 2px;padding:0 14px;border:0;border-radius:22px;font:inherit;text-align:start;cursor:pointer;backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2)}
+.r6k{flex:none;font-size:11px;line-height:14px;font-weight:800;letter-spacing:.04em;opacity:.78}
+.r6k::after{content:'';display:inline-block;width:3px;height:3px;margin-inline-start:8px;vertical-align:middle;border-radius:50%;background:currentColor;opacity:.6}
+.r6t{flex:1;min-width:0;font-size:13px;line-height:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.r6dots{flex:none;display:flex;gap:4px}
+.r6dots>i,.r6dots>.sc-interp>i{display:block;width:5px;height:5px;border-radius:3px;background:currentColor;opacity:.32;transition:width .25s,opacity .25s}
+.r6dots i.on{width:12px;opacity:.9}
+.r6line:active{transform:scale(.985)}
+.r6line:focus-visible,.r6d:focus-visible,.r6tab:focus-visible,.r6sc:focus-visible,.r6pl:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* The carousel, shared by every round-6 board: upcoming first, a separator, the past dimmed. */
+.zc.k6{transition:opacity .2s}
+.zc.k-past{opacity:.5}
+.zc.k-past .zt{font-weight:400}
+.zc.k-pin .zl::before{content:'★';color:var(--gold);margin-inline-end:3px;font-size:11px}
+.zc.k-season{border-color:color-mix(in srgb,var(--gold) 65%,transparent)}
+.zc.k-week{border-style:dashed;border-color:color-mix(in srgb,currentColor 40%,transparent)}
+.zc.k-sep{min-width:0;flex-direction:row;align-items:center;gap:6px;padding:0 2px;background:none!important;border:0;pointer-events:none}
+.zc.k-sep::before{content:'';width:1px;height:30px;background:currentColor;opacity:.3}
+.zc.k-sep .zl{font-size:11px;font-weight:700;opacity:.75;color:inherit}
+.zc.k-sep .zt{display:none}
+.zc.k-add{min-width:52px;align-items:center;border:1.5px dashed color-mix(in srgb,currentColor 45%,transparent)}
+.zc.k-live{min-width:168px;border-color:var(--gold);background-repeat:no-repeat}
+.zc.k-live .zl{font-weight:700}
+.zc.k-live .zt{font-size:19px;line-height:24px}
+
+/* ק · Glance: the line has no frame, typography only. */
+.hero.r6q .r6line{background:none!important;backdrop-filter:none;-webkit-backdrop-filter:none;justify-content:center;min-height:44px;margin-bottom:0}
+.hero.r6q .r6line .r6t{flex:0 1 auto;font-family:'Frank Ruhl Libre',serif;font-size:16px;font-weight:500;letter-spacing:.005em}
+.hero.r6q .r6k{font-size:11px}
+
+/* ר · Weather: the line and the carousel are one glass card, the chips its columns. */
+.hero.r6r .r6line{margin-bottom:0;border-radius:20px 20px 0 0;min-height:42px}
+.hero.r6r .r6line::after{content:'';position:absolute;bottom:0;inset-inline:14px;height:1px;background:currentColor;opacity:.18}
+.hero.r6r .zchips{margin:0 16px 10px;padding:6px 6px 8px;border-radius:0 0 20px 20px;background:color-mix(in srgb,var(--surface) 22%,transparent);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);gap:2px}
+.hero.r6r .zc{background:none!important;min-width:62px;align-items:center;padding:6px 8px;border-radius:12px;border-width:1.5px}
+.hero.r6r .zc .zl{font-size:11px;opacity:.85}
+.hero.r6r .zc .zt{font-size:16px;line-height:22px}
+.hero.r6r .zc.mk{background:color-mix(in srgb,var(--goldLight) 30%,transparent)!important}
+.hero.r6r .zc.k-season{background:color-mix(in srgb,var(--gold) 18%,transparent)!important}
+.hero.r6r .zc.k-add{min-width:46px}
+
+/* ס · Smart Stack: one card, the day, the week and mine, tabs above it. */
+.r6stack{position:relative;z-index:2;margin:0 16px 4px;padding:6px 6px 8px;border-radius:22px;backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2)}
+.r6tabs{display:flex;gap:2px;padding:0 4px}
+.r6tab{position:relative;min-height:28px;padding:0 10px;border:0;border-radius:14px;background:none;color:inherit;font:inherit;font-size:12px;font-weight:600;opacity:.7;cursor:pointer}
+.r6tab::after{content:'';position:absolute;inset:-8px 0}
+.r6tab[aria-selected="true"]{opacity:1;background:color-mix(in srgb,currentColor 16%,transparent);font-weight:800}
+.r6sc{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:4px 10px;border:0;background:none;color:inherit;font:inherit;text-align:start;cursor:pointer}
+.r6sm{display:flex;flex-direction:column;min-width:0}
+.r6st{font-family:'Frank Ruhl Libre',serif;font-size:18px;line-height:24px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r6ss{font-size:12px;line-height:16px;opacity:.82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.pg-day{animation:r6a .35s cubic-bezier(.2,.8,.2,1)}.pg-week{animation:r6b .35s cubic-bezier(.2,.8,.2,1)}.pg-mine{animation:r6c .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes r6a{from{opacity:0;transform:translateY(8px)}}@keyframes r6b{from{opacity:0;transform:translateY(8px)}}@keyframes r6c{from{opacity:0;transform:translateY(8px)}}
+
+/* ש · Week: seven days, a mark on each day that carries something. */
+.r6week{position:relative;z-index:2;display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:0 16px 6px}
+.r6d{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50px;padding:4px 0 8px;border:0;border-radius:14px;background:color-mix(in srgb,var(--surface) 14%,transparent);font:inherit;cursor:pointer}
+.r6dl{font-size:11px;line-height:14px;opacity:.75}
+.r6dh{font-size:15px;line-height:20px;font-weight:700}
+.r6d.gone{opacity:.55}
+.r6d.today .r6dl{font-weight:800;opacity:1}
+.r6d.sel{background:var(--surface);color:var(--text)!important;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.r6d .dot{position:absolute;bottom:5px;width:5px;height:5px;border-radius:3px;background:currentColor}
+.r6d .dot.gold{background:var(--gold)}
+.r6d .dot.moon{background:#C9D3FF}
+.r6d.sel .dot.moon{background:var(--info,#4A6CF7)}
+.r6sel{cursor:default}
+.r6back{flex:none;min-height:32px;padding:0 12px;border:0;border-radius:16px;background:var(--gold);color:var(--onGold);font:inherit;font-size:12px;font-weight:800;cursor:pointer;position:relative}
+.r6back::after{content:'';position:absolute;inset:-6px 0}
+
+/* ו · Arc: the smart line sits in the arc's plate under the moment; no row is added. */
+.r6pl{pointer-events:auto;display:flex;align-items:center;gap:6px;max-width:226px;min-height:32px;margin-top:4px;padding:0 10px;border:0;border-radius:16px;background:color-mix(in srgb,currentColor 10%,transparent);color:inherit;font:inherit;cursor:pointer;position:relative}
+.r6pl::after{content:'';position:absolute;inset:-6px 0}
+.r6pl .r6t{font-size:12px;font-weight:600}
+.r6pl .r6ic,.r6pl .r6ic .ic{width:15px;height:15px}
+@media (prefers-reduced-motion:reduce){.pg-day,.pg-week,.pg-mine{animation:none}}
+.hero.r6v .hintw{display:none}

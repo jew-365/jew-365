@@ -145,6 +145,19 @@ h2 { font-size: clamp(1.75rem, 6vw, 2.5rem); font-weight: 900; letter-spacing: -
 .device.fs .actions { display: none; }
 .device.fs .close { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 24px; border: 0; background: #FBF8F2; color: #1D2240; font-weight: 800; }
 
+.principle, .ideas { margin-top: 44px; padding: 28px; border-radius: 34px; background: var(--surface); border: 1px solid var(--line); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: var(--shadow); }
+.principle h2, .ideas h2 { font-size: clamp(1.5rem, 5vw, 2rem); margin-bottom: 14px; }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; counter-reset: r; }
+.rules li { padding: 16px 18px; border-radius: 22px; border: 1px solid var(--line); counter-increment: r; }
+.rules li::before { content: counter(r); display: inline-grid; place-items: center; width: 28px; height: 28px; margin-inline-end: 8px; border-radius: 14px; background: var(--ink); color: var(--bg); font-weight: 800; font-size: .875rem; }
+.rules b, .idl b { display: block; margin: 6px 0 2px; }
+.rules p, .idl p { margin: 0; color: var(--sub); font-size: .9375rem; text-wrap: pretty; }
+.idl { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 18px 0 0; padding: 0; list-style: none; }
+.idl li { padding: 14px 16px; border-radius: 20px; border: 1px solid var(--line); }
+.idl .tag { display: inline-block; padding: 0 8px; border-radius: 10px; font-size: .75rem; font-weight: 800; border: 1px solid var(--line); color: var(--sub); }
+.src { margin-top: 18px; font-size: .8125rem; color: var(--sub); }
+.src a { color: inherit; }
+@media (max-width: 860px) { .principle, .ideas { padding: 22px 16px; border-radius: 28px; } }
 .foot { margin-top: 28px; font-size: .8125rem; color: var(--sub); text-align: center; text-wrap: balance; }
 
 @media (max-width: 860px) {
@@ -162,8 +175,8 @@ h2 { font-size: clamp(1.75rem, 6vw, 2.5rem); font-weight: 900; letter-spacing: -
   <header class="top">
     <div class="sky" id="sky" aria-hidden="true"><div class="stars" id="stars"></div><div class="sun" id="sun"></div><div class="moon" id="moon"></div><span class="live-tag" id="liveTag"><i></i>חי · ירושלים</span><div class="read"><b class="num" id="skyTime">--:--</b><span id="skyLine"></span></div></div>
     <p class="eyebrow">יהודי 365 · מסך הבית · לוח זמנים קטן</p>
-    <h1>לוח זמנים קטן: בנטו בתוך הקשת</h1>
-    <p class="lede">סבב 4, לפי מה שאהבת בבנטו: הבנטו נכנס לחלק העליון במקום רצועת הזמנים. מה שרלוונטי עכשיו נמצא בצד שרואים, וגוללים הצידה כדי לראות עוד. רקע השמיים נגמר מתחת לבנטו ולא בשטח הכרטיסים, והסצנה עם העיגול קטנה מעט. מיד אחריו מופיעים שנים עשר הרעיונות של סבב 3, אחריהם שלושת הלוחות של סבב 2, ובסוף מסך הבית של היום להשוואה.</p>
+    <h1>זמנים חכמים במסך הבית: כל זמן פעם אחת</h1>
+    <p class="lede">סבב 6. אחרי שהבנטו לא יצא יפה, חזרנו לעיקרון: שלושה רכיבים, וכל אחד עושה דבר אחד. קרוסלת הזמנים הקיימת מחזיקה את כל השעות. שורה חכמה אחת מספרת מה מיוחד היום ומה בא השבוע. ומה שבחרת מסומן בכוכב באותה קרוסלה. ששה עיצובים לאותו עיקרון, אחריהם הבנטו שבפריוויו ומסך הבית של היום, ובסוף המחקר ועוד רעיונות.</p>
     <p class="news"><b>איך משווים:</b> בסרגל שמתחת לכותרת בוחרים יום (היום, או יום מיוחד מהשבועות הקרובים) ושעה, וכל הטלפונים עוברים אליהם יחד. הזמנים, חלונות המצוות, השבתות והאירועים מחושבים בקוד של האפליקציה עצמה, לפי לוח אור החיים בירושלים.</p>
     <nav class="jump" aria-label="מעבר לכיוון">
 <!--JUMP-->
@@ -205,6 +218,29 @@ h2 { font-size: clamp(1.75rem, 6vw, 2.5rem); font-weight: 900; letter-spacing: -
 <div class="duo">
 <!--STALLS-->
 </div>
+<section class="principle" aria-labelledby="prin-t">
+  <h2 id="prin-t">העיקרון של הסבב: שלושה רכיבים, אף כפילות</h2>
+  <ol class="rules">
+    <li><b>הקרוסלה מחזיקה את כל השעות</b><p>אותה קרוסלה שיש היום, בסדר אחר: מה שבא עכשיו ראשון, זמני התקופה (הדלקה, נרות חנוכה, סוף הצום, צאת השבת, קידוש לבנה) נכנסים לתוכה בזהב, בלילה מגיעים זמני מחר, ומה שעבר בסוף ומעומעם.</p></li>
+    <li><b>השורה החכמה מדברת על היום והשבוע</b><p>ראש חודש, ערב שבת ומתי יוצאים, חנוכה, צום, קידוש לבנה, השבת הקרובה (רק מחמישי בלילה), ומה אומרים בתפילה בתקופה. אם השעה כבר כתובה בקרוסלה, השורה לא חוזרת עליה.</p></li>
+    <li><b>מה שבחרת מסומן, לא מוסף</b><p>זמן שבחרת מקבל כוכב בתוך הקרוסלה. זמן שאין בה (סוף ק״ש מג״א, ההדלקה של השבוע) נכנס אליה במקומו. אין שורה נפרדת של "שלי". בוחרים ב+ שבסוף.</p></li>
+  </ol>
+  <p class="src"><b>מה בדקנו:</b> אפליקציות זמני תפילה (Athan, Five Prayers, Nimaz): הזמן הבא עם ספירה לאחור הוא המרכז, ולוח היום מתחתיו, והמשתמש בוחר אילו זמנים יופיעו. ערימת הווידג׳טים של האייפון: מקום אחד שמחליף תוכן לפי מה שרלוונטי עכשיו. At a Glance של גוגל: שורה אחת שמופיעה כשיש מה לומר ונעלמת כשאין, והמשתמש בוחר קטגוריות. מזג האוויר של אפל: משפט סיכום אחד מעל רצועת השעות. Live Activity: פריט אחד חי עם התקדמות.
+  מקורות: <a href="https://apps.apple.com/us/app/-/id1476295383" target="_blank" rel="noopener">Athan</a> · <a href="https://apps.apple.com/us/app/five-prayers/id6756225930" target="_blank" rel="noopener">Five Prayers</a> · <a href="https://www.mintlify.com/arshad-shah/Nimaz/widgets/next-prayer-widget" target="_blank" rel="noopener">Nimaz</a> · <a href="https://developer.apple.com/documentation/widgetkit/widget-suggestions-in-smart-stacks" target="_blank" rel="noopener">Smart Stack</a> · <a href="https://support.google.com/pixelphone/answer/14884067" target="_blank" rel="noopener">At a Glance</a> · <a href="https://9to5google.com/2023/08/21/about-at-a-glance/" target="_blank" rel="noopener">9to5Google</a></p>
+</section>
+<section class="ideas" aria-labelledby="ideas-t">
+  <h2 id="ideas-t">עוד רעיונות, לא בנויים</h2>
+  <ul class="idl">
+    <li><span class="tag">אינטראקציה</span><b>לחיצה ארוכה על זמן = שלי</b><p>לחיצה ארוכה על כל זמן בקרוסלה מוסיפה לו כוכב או מסירה אותו, בלי לפתוח רשימה.</p></li>
+    <li><span class="tag">חכם</span><b>הצעות מתוך הסימונים</b><p>מי שמסמן מנחה אחרי פלג המנחה יקבל הצעה לסמן את פלג בכוכב. מי שמניח תפילין לפני הנץ יקבל הצעה לזמן תו״ט.</p></li>
+    <li><span class="tag">חכם</span><b>שורה לפי לוח השנה</b><p>באלול ובימי הסליחות: הלילה סליחות. בספירת העומר: הלילה סופרים 23. בתענית: עד מתי הצום. ובשבוע של שבת מברכין: מתי המולד.</p></li>
+    <li><span class="tag">חכם</span><b>בחמישי ושישי השורה עוברת לשבת</b><p>מחמישי בצהריים השורה מתמקדת בשבת: ההדלקה, הפרשה ומתי יוצאים. במוצאי שבת היא עוברת להבדלה ולקידוש לבנה.</p></li>
+    <li><span class="tag">מחוץ לאפליקציה · דורש build</span><b>ווידג׳ט ו-Live Activity</b><p>אותה שורה והזמן הבא בווידג׳ט של מסך הבית ובמסך הנעילה. בערב שבת: ספירה לאחור להדלקה באי הדינמי.</p></li>
+    <li><span class="tag">ניווט</span><b>משיכה פותחת את השבוע</b><p>משיכה של הקרוסלה כלפי מטה פותחת דף עם כל זמני השבוע, יום בכל שורה.</p></li>
+    <li><span class="tag">נגישות</span><b>משפט אחד לקורא המסך</b><p>VoiceOver ו-TalkBack מקריאים את השורה ואת הזמן הבא כמשפט אחד, ולא חתיכות.</p></li>
+    <li><span class="tag">פרמיום</span><b>תנועה עדינה</b><p>כשזמן עובר, הצ׳יפ שלו גולש בעדינות לסוף הקרוסלה, ורטט קל מסמן כשמגיעים לזמן החשוב הבא.</p></li>
+  </ul>
+</section>
 
   <p class="foot">הזמנים, התאריכים, השבתות והחלונות אמיתיים לירושלים, מחושבים בקוד של האפליקציה. הסימונים הם לדוגמה. הדף לא שולח שום דבר.</p>
 </main>

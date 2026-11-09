@@ -266,7 +266,7 @@
 <sc-for list="{{ticks}}" as="k" hint-placeholder-count="11"><circle cx="{{k.x}}" cy="{{k.y}}" r="{{k.r}}" fill="{{k.fill}}" stroke="{{k.stroke}}" stroke-width="2"></circle></sc-for>
 <rect x="{{ghostX}}" y="{{ghostY}}" width="10" height="10" transform="{{ghostTf}}" fill="{{inkchipHex}}" stroke="{{inkHex}}" stroke-width="2" stroke-dasharray="2 2" opacity="{{ghostOp}}"></rect>
 </svg>
-<div class="plate" style="top: {{plateTop}}px"><div class="pin"><span class="bigtime" aria-hidden="true">{{nowT}}</span><span class="midcap" aria-live="{{liveMode}}">{{midCaption}}</span></div></div>
+<div class="plate" style="top: {{plateTop}}px"><div class="pin"><span class="bigtime" aria-hidden="true">{{nowT}}</span><span class="midcap" aria-live="{{liveMode}}">{{midCaption}}</span><!--PLATE--></div></div>
 <div class="hintw {{hintCls}}" style="top: {{hintTop}}px" aria-hidden="true"><span class="hintp">{{hintText}}</span></div>
 <span class="edge" style="right: {{edgeX}}px; top: {{edgeTop}}px; color: {{edgeInk}}"><span>עלות</span><b>{{edgeStart}}</b></span>
 <span class="edge" style="left: {{edgeX}}px; top: {{edgeTop}}px; color: {{edgeInk}}"><span>צאה״כ</span><b>{{edgeEnd}}</b></span>
@@ -276,6 +276,7 @@
 <sc-if value="{{isScrub}}" hint-placeholder-val="{{ false }}">
 <div class="backw"><button class="bpill" onClick="{{back}}">[[ia:undo]]<span>חזרה לעכשיו</span></button></div>
 </sc-if>
+<!--HEROLINE-->
 <div class="zchips" id="zchips" role="group" aria-label="זמני היום">
 <sc-for list="{{zchips}}" as="z" hint-placeholder-count="11">
 <button class="zc {{z.cls}}" style="{{z.style}}" aria-pressed="{{z.pressed}}" aria-label="{{z.aria}}" onClick="{{z.pick}}"><span class="zl" style="color: {{z.ink}}">{{z.label}}</span><span class="zt {{z.tcls}}" style="color: {{z.ink}}">{{z.time}}</span></button>

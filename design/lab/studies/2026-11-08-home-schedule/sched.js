@@ -242,7 +242,7 @@
       schedB: SCHED === 'b',
       schedC: SCHED === 'c',
       schedCard: SCHED === 'a',
-      sb: Object.fromEntries('abcdefghijklmnop'.split('').map((k) => [k, SCHED === k])),
+      sb: Object.fromEntries('abcdefghijklmnopqrstuv'.split('').map((k) => [k, SCHED === k])),
       openFirstCls: 'acfghkmno'.includes(SCHED) && SCHED !== 'none' ? '' : 'first',
       bFixed: fixed,
       bSmart: smart,
@@ -359,6 +359,8 @@
         if (el) el.scrollLeft = -Math.max(0, (Number(pos(t)) / 100) * el.scrollWidth - el.clientWidth * 0.35);
       }, 120);
     }
+    if ('qrstuv'.includes(SCHED) && SCHED.length === 1) Object.assign(out, this.r6Vals(zchips, kit, plan), { r6Style: kit.plainBg + '; color: ' + kit.inkPlain, r6DayStyle: 'color: ' + kit.inkPlain });
+    else out.r6On = {};
     if (SCHED === 'b') {
       const chip = (x, kind) => ({ id: kind + x.label, label: x.label, time: x.time, cls: (kind === 'fixed' && x.cls.includes('nx') ? 'mk ' : '') + 'k-' + kind, tcls: x.cls.includes('past') ? '' : 'b', pressed: false, ink: kind === 'smart' ? kit.inkNext : kit.inkPlain, aria: x.aria, style: kind === 'smart' ? kit.nextBg : kit.plainBg, pick: x.pick });
       out.zchips = [...fixed.map((x) => chip(x, 'fixed')), ...smart.map((x) => chip(x, 'smart')), ...mine.map((x) => chip(x, 'mine')), { id: 'add', label: 'שלי', time: '+', cls: '', tcls: 'b', pressed: false, ink: kit.inkPlain, aria: 'הוספת זמן ללוח', style: kit.plainBg, pick: () => this.setState({ pinSheet: true }) }].map((c, i, a) => (i === a.length - 1 ? { ...c, cls: 'k-add' } : c));
