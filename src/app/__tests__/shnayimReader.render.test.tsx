@@ -145,6 +145,26 @@ describe('the Shnayim Mikra reader', () => {
     expect(screen.getAllByText('פסוק Vayetzei 4')).toHaveLength(2);
   });
 
+  it('offers the commentary choice over the published asset, its Rashi folded', async () => {
+    reset();
+    const fs = jest.requireActual('fs');
+    const path = jest.requireActual('path');
+    const { gunzipSync, strFromU8 } = jest.requireActual('fflate');
+    const dir = path.join(__dirname, '..', '..', '..', 'docs', 'shnayim');
+    const manifest = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8'));
+    mockLoad.mockImplementation((parasha: string) =>
+      Promise.resolve(
+        shnayimAsChok(JSON.parse(strFromU8(gunzipSync(fs.readFileSync(path.join(dir, manifest.gz[parasha].path)))))),
+      ),
+    );
+    jest.useFakeTimers({ now: at(JERUSALEM, '2026-11-18T12:00'), doNotFake: [...ONLY_DATE] });
+    renderWithTheme(<SiddurScreen />);
+    await screen.findAllByText(/^רביעי$/);
+    await act(async () => {});
+    expect(screen.getByLabelText('פירושים')).toBeOnTheScreen();
+    expect(screen.getAllByRole('button', { name: 'רש״י', expanded: false }).length).toBeGreaterThan(0);
+  });
+
   it('keeps Thursday through Thursday night, and reads the sixth and seventh aliyot on Friday', async () => {
     reset();
     await openAt('2026-11-19T22:30');
