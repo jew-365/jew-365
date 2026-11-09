@@ -136,7 +136,7 @@ describe('the siddur tab’s catalog', () => {
       expect(screen.getByText('חק לישראל · שניים מקרא ואחד תרגום')).toBeOnTheScreen();
       fireEvent.press(screen.getByText('לימוד'));
       expect(idsIn('siddur-learning')).toEqual(['chok_leyisrael', 'shnayim_mikra']);
-      expect(within(rowOf('shnayim_mikra')).getByText('תוסף להורדה · כ־0.6 MB')).toBeOnTheScreen();
+      expect(within(rowOf('shnayim_mikra')).getByText('תוסף להורדה · כ־1.2 MB')).toBeOnTheScreen();
       expect(listRowOf('shnayim_mikra').props.iconTone).toBe('muted');
       act(() =>
         useShnayimStore.setState({

@@ -34,7 +34,7 @@ jest.mock('@/services/SiddurService', () => ({
   loadSiddurText: jest.fn(),
 }));
 
-import { act, fireEvent, screen } from '@testing-library/react-native';
+import { act, fireEvent, screen, within } from '@testing-library/react-native';
 import SiddurScreen from '../siddur/[id]';
 import { CHOK_PARASHIYOT } from '@/data/chok';
 import { CITIES } from '@/data/cities';
@@ -69,6 +69,7 @@ const asset = (parasha: string): ShnayimAsset => ({
     {
       he: [[{ t: '(א) ', s: 'n' }, { t: `פסוק ${parasha} ${n + 1}` }], [{ t: `תרגום ${parasha} ${n + 1}`, s: 't' }]],
     },
+    { he: [[{ t: `רש״י ${parasha} ${n + 1}` }]], optional: { he: 'רש״י', en: 'Rashi' } },
   ]),
 });
 
@@ -126,9 +127,22 @@ describe('the Shnayim Mikra reader', () => {
     expect(screen.getByText('תרגום Vayetzei 4')).toBeOnTheScreen();
     expect(screen.queryByText('פסוק Vayetzei 3')).toBeNull();
     // Six days, no ליל שישי, and no licence notice of Chok LeYisrael.
-    expect(screen.getAllByRole('radio')).toHaveLength(6);
+    expect(within(screen.getByLabelText('יום הלימוד')).getAllByRole('radio')).toHaveLength(6);
     expect(screen.queryByRole('radio', { name: 'ליל שישי' })).toBeNull();
     expect(screen.queryByText(/תורת אמת/)).toBeNull();
+  });
+
+  it('folds Rashi by the commentary choice it shares with Chok LeYisrael', async () => {
+    reset();
+    await openAt('2026-11-18T12:00');
+    expect(screen.queryByText('רש״י Vayetzei 4')).toBeNull();
+    expect(screen.getByLabelText('פירושים')).toBeOnTheScreen();
+    expect(screen.getByRole('radio', { name: 'בלי פירושים' })).toBeSelected();
+    fireEvent.press(screen.getByRole('radio', { name: 'עם פירושים' }));
+    expect(screen.getByText('רש״י Vayetzei 4')).toBeOnTheScreen();
+    expect(useUserStore.getState().chokCommentaryOpen).toBe(true);
+    // Each verse is still read twice; Rashi once.
+    expect(screen.getAllByText('פסוק Vayetzei 4')).toHaveLength(2);
   });
 
   it('keeps Thursday through Thursday night, and reads the sixth and seventh aliyot on Friday', async () => {

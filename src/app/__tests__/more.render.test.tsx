@@ -258,7 +258,7 @@ describe('More tab', () => {
     const rows = screen.getAllByRole('button');
     expect(within(rows[1]).getByText('חק לישראל')).toBeOnTheScreen();
     expect(within(rows[2]).getByText('שניים מקרא ואחד תרגום')).toBeOnTheScreen();
-    expect(within(rows[2]).getByText('תוסף להורדה · כ־0.6 MB')).toBeOnTheScreen();
+    expect(within(rows[2]).getByText('תוסף להורדה · כ־1.2 MB')).toBeOnTheScreen();
     expect(within(rows[3]).getByText('סליחות')).toBeOnTheScreen();
     expect(within(rows[3]).getByText('להורדה בנוסח אשכנז · כ־1 MB')).toBeOnTheScreen();
     expect(within(rows[4]).getByText('תהילים')).toBeOnTheScreen();

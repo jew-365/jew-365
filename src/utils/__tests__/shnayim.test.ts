@@ -49,6 +49,11 @@ describe('the Shnayim Mikra text', () => {
     ]);
   });
 
+  it('leaves Rashi as it is, folded under its label', () => {
+    const rashi = { he: [[{ t: 'פירוש' }]], optional: { he: 'רש״י', en: 'Rashi' } };
+    expect(shnayimVerse(rashi)).toBe(rashi);
+  });
+
   it('reads an aliyah a day, Friday the sixth and the seventh, under the aliyah names', () => {
     const chok = shnayimAsChok(ASSET);
     expect(Object.keys(chok.slots)).toEqual([...SHNAYIM_SLOTS]);

@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { gunzipSync, strFromU8 } = require('fflate');
 const { createHash } = require('crypto');
-const { torahReading, onkelosRuns, verseLabel, parseRef, aliyahSegments, validate } = require('../build');
+const { torahReading, onkelosRuns, rashiRuns, verseLabel, parseRef, aliyahSegments, validate } = require('../build');
 const { PARASHIYOT } = require('../../chok/manifest');
 
 const SITE = path.join(__dirname, '..', '..', '..', 'docs', 'shnayim');
@@ -21,6 +21,15 @@ describe('the source cleanup', () => {
     ]);
   });
 
+  it('reads Rashi as its dibur hamatchil in bold and its references as notes', () => {
+    expect(rashiRuns('<b>בראשית.</b> אמר רבי יצחק (שמות יב ב) מהחודש:')).toEqual([
+      { t: 'בראשית.', s: 'b' },
+      { t: ' אמר רבי יצחק ' },
+      { t: '(שמות יב ב)', s: 'n' },
+      { t: ' מהחודש:' },
+    ]);
+  });
+
   it('numbers a verse, with its chapter at a chapter start or an aliyah start', () => {
     expect(verseLabel(5, 1, false)).toBe('ה (א) ');
     expect(verseLabel(15, 16, true)).toBe('טו (טז) ');
@@ -31,6 +40,15 @@ describe('the source cleanup', () => {
     expect(parseRef('Genesis 1:1-2:3')).toEqual({ book: 'Genesis', from: [1, 1], to: [2, 3] });
     expect(parseRef('Deuteronomy 33:1–7')).toEqual({ book: 'Deuteronomy', from: [33, 1], to: [33, 7] });
     expect(() => parseRef('Genesis 1')).toThrow();
+  });
+
+  it('folds the Rashi of a verse right after it, under its label', () => {
+    const torah = { Genesis: [['א׃', 'ב׃']] };
+    const onkelos = { Genesis: [['a', 'b']] };
+    const rashi = { Genesis: [[['<b>א.</b> פירוש', '<b>ב.</b> עוד'], []]] };
+    const segments = aliyahSegments('Genesis 1:1-1:2', torah, onkelos, rashi);
+    expect(segments.map((s) => s.optional?.en ?? 'verse')).toEqual(['verse', 'Rashi', 'verse']);
+    expect(segments[1].he).toHaveLength(2);
   });
 
   it('builds a segment per verse, failing on a missing verse or targum', () => {
@@ -64,17 +82,27 @@ describe('the published add-on', () => {
     expect(fs.readdirSync(SITE).filter((name) => name.endsWith('.gz'))).toHaveLength(54);
   });
 
-  it('reads every verse of the Torah once, seven aliyot a parasha, each with its targum', () => {
+  it('reads every verse of the Torah once, seven aliyot a parasha, each with its targum, and Rashi on most', () => {
     let verses = 0;
+    let rashi = 0;
     for (const entry of Object.values(manifest.gz)) {
       const asset = JSON.parse(strFromU8(gunzipSync(fs.readFileSync(path.join(SITE, entry.path)))));
       expect(asset.aliyot).toHaveLength(7);
       for (const segment of asset.aliyot.flat()) {
+        if (segment.optional) {
+          expect(segment.optional).toEqual({ he: 'רש״י', en: 'Rashi' });
+          expect(segment.he[0][0].s).toBe('b');
+          rashi++;
+          continue;
+        }
         expect(segment.he).toHaveLength(2);
         expect(segment.he[1].some((run) => run.s === 't' && run.t.trim())).toBe(true);
         verses++;
       }
     }
     expect(verses).toBe(5846);
+    // Rashi comments on about half the verses of the Torah.
+    expect(rashi).toBeGreaterThan(3000);
+    expect(rashi).toBeLessThan(verses);
   });
 });

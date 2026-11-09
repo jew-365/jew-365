@@ -342,6 +342,7 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
       'מפרשים',
       'חק לישראל',
       'חוק לישראל',
+      'שניים מקרא',
       'מקופל',
       'קיפול',
       'rashi',

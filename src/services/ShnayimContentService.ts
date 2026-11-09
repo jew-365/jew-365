@@ -15,7 +15,7 @@ import { ShnayimManifest } from '@/types/shnayim';
 
 export const SHNAYIM_BASE_URL = 'https://jew-365.github.io/jew-365/shnayim/';
 export const SHNAYIM_FORMAT = 1;
-export const SHNAYIM_SIZE_ESTIMATE_MB = 0.6;
+export const SHNAYIM_SIZE_ESTIMATE_MB = 1.2;
 export const SHNAYIM_SPACE_NEEDED_MB = SHNAYIM_SIZE_ESTIMATE_MB + ADDON_SPACE_MARGIN_BYTES / 1_000_000;
 
 export const shnayimDownloadSupported = addonDownloadSupported;

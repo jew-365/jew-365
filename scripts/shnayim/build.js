@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // pnpm shnayim:build: the Shnayim Mikra add-on in docs/shnayim, one gzip per parasha of the Torah verses (Tanach with
-// Nikkud) and Targum Onkelos (Torat Emet), cut into the seven aliyot of Sefaria's parasha structure, and a manifest.
+// Nikkud), Targum Onkelos (Torat Emet) and Rashi (On Your Way), cut into the seven aliyot of Sefaria's parasha
+// structure, and a manifest.
 const fs = require('fs');
 const path = require('path');
 const { Buffer } = require('buffer');
@@ -20,6 +21,8 @@ const GZIP_OPTIONS = { level: 9, mtime: 0 };
 
 const torahVersion = (book) => `${book} - he - Tanach with Nikkud`;
 const onkelosVersion = (book) => `Onkelos ${book} - he - Onkelos ${book}`;
+const rashiVersion = (book) => `Rashi on ${book} - he - On Your Way`;
+const RASHI = { he: 'רש״י', en: 'Rashi' };
 
 const CREDITS = [
   {
@@ -28,11 +31,16 @@ const CREDITS = [
     url: `${SEFARIA}/Genesis`,
   },
   { title: 'תרגום אונקלוס, מאגר תורת אמת, דרך ספריא', license: 'Public Domain', url: `${SEFARIA}/Onkelos_Genesis` },
+  {
+    title: 'פירוש רש״י, On Your Way (tora.ws), דרך ספריא',
+    license: 'Public Domain',
+    url: `${SEFARIA}/Rashi_on_Genesis`,
+  },
 ];
 
 const MANIFEST_CREDIT = {
-  he: 'נוסח התורה: תנ״ך מנוקד (Westminster Leningrad Codex); תרגום אונקלוס: מאגר תורת אמת. שניהם נחלת הכלל, דרך ספריא',
-  en: 'Torah: Tanach with Nikkud (Westminster Leningrad Codex); Targum Onkelos: the Torat Emet database. Both public domain, via Sefaria',
+  he: 'נוסח התורה: תנ״ך מנוקד (Westminster Leningrad Codex); תרגום אונקלוס: מאגר תורת אמת; רש״י: On Your Way. כולם נחלת הכלל, דרך ספריא',
+  en: 'Torah: Tanach with Nikkud (Westminster Leningrad Codex); Targum Onkelos: the Torat Emet database; Rashi: On Your Way. All public domain, via Sefaria',
 };
 
 // The qere replaces the unpointed ketiv before it, as the siddur build reads Tehillim (scripts/siddur/manifest.js).
@@ -64,6 +72,25 @@ function onkelosRuns(text) {
     .map((part) => (part.startsWith('(') ? { t: part, s: 'n' } : { t: part, s: 't' }));
 }
 
+// One Rashi comment as runs: its dibur hamatchil bold, its references in parentheses as notes.
+function rashiRuns(text) {
+  const clean = text
+    .replace(/[\u200d\u200e]/g, '')
+    .replace(/''/g, '״')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return clean
+    .split(/(<b>.*?<\/b>|\([^)]*\))/)
+    .filter((part) => part.trim())
+    .map((part) =>
+      part.startsWith('<b>')
+        ? { t: part.replace(/<[^>]+>/g, ''), s: 'b' }
+        : part.startsWith('(')
+          ? { t: part, s: 'n' }
+          : { t: part.replace(/<[^>]+>/g, '') },
+    );
+}
+
 const number = (n) => gematriya(n).replace(/[׳״]/g, '');
 
 function verseLabel(chapter, verse, first) {
@@ -78,7 +105,7 @@ function parseRef(ref) {
   return { book, from: [Number(c1), Number(v1)], to: [Number(c2 ?? c1), Number(v2)] };
 }
 
-function aliyahSegments(ref, torah, onkelos) {
+function aliyahSegments(ref, torah, onkelos, rashi = {}) {
   const { book, from, to } = parseRef(ref);
   const segments = [];
   for (let chapter = from[0]; chapter <= to[0]; chapter++) {
@@ -93,6 +120,9 @@ function aliyahSegments(ref, torah, onkelos) {
       segments.push({
         he: [[{ t: verseLabel(chapter, verse, segments.length === 0), s: 'n' }, { t: text }], targum],
       });
+      // Rashi on the verse, one paragraph per comment, folded under its label as in Chok LeYisrael.
+      const comments = (rashi[book]?.[chapter - 1]?.[verse - 1] ?? []).map(rashiRuns).filter((runs) => runs.length);
+      if (comments.length) segments.push({ he: comments, optional: RASHI });
     }
   }
   return segments;
@@ -136,20 +166,25 @@ async function cached(name, url) {
 async function readSources() {
   const torah = {};
   const onkelos = {};
+  const rashi = {};
   const parashiyot = [];
   for (const book of BOOKS) {
     const version = (name) => `${SEFARIA}/download/version/${encodeURIComponent(name)}.json`;
     torah[book] = (await cached(`torah-${book}`, version(torahVersion(book)))).text;
     onkelos[book] = (await cached(`onkelos-${book}`, version(onkelosVersion(book)))).text;
+    rashi[book] = (await cached(`rashi-${book}`, version(rashiVersion(book)))).text;
+    if (rashi[book].some((chapter, i) => chapter.length > torah[book][i].length)) {
+      throw new Error(`${book}: Rashi on a verse the Torah lacks`);
+    }
     const index = await cached(`index-${book}`, `${SEFARIA}/api/v2/raw/index/${book}`);
     parashiyot.push(...index.alt_structs.Parasha.nodes);
     const shape = (text) => text.map((chapter) => chapter.length).join();
     if (shape(torah[book]) !== shape(onkelos[book])) throw new Error(`${book}: Torah and Onkelos verse counts differ`);
   }
-  return { torah, onkelos, parashiyot };
+  return { torah, onkelos, rashi, parashiyot };
 }
 
-function buildOutputs({ torah, onkelos, parashiyot }, previousVersion = 0, previousGz = {}) {
+function buildOutputs({ torah, onkelos, rashi, parashiyot }, previousVersion = 0, previousGz = {}) {
   validate(parashiyot, torah);
   const gz = {};
   const files = new Map();
@@ -158,7 +193,7 @@ function buildOutputs({ torah, onkelos, parashiyot }, previousVersion = 0, previ
     const asset = {
       parasha,
       credits: CREDITS,
-      aliyot: node.refs.map((ref) => aliyahSegments(ref, torah, onkelos)),
+      aliyot: node.refs.map((ref) => aliyahSegments(ref, torah, onkelos, rashi)),
     };
     const bytes = Buffer.from(gzipSync(Buffer.from(JSON.stringify(asset)), GZIP_OPTIONS));
     const sha256 = createHash('sha256').update(bytes).digest('hex');
@@ -211,6 +246,7 @@ if (require.main === module) {
 module.exports = {
   torahReading,
   onkelosRuns,
+  rashiRuns,
   verseLabel,
   parseRef,
   aliyahSegments,

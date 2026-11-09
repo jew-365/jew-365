@@ -27,8 +27,9 @@ export const SHNAYIM_PROGRAM: LearningProgram = {
 };
 
 // Each verse twice in the Torah's words, then once in Onkelos: the asset's first paragraph (number and verse), the
-// verse again without its number, then the targum.
+// verse again without its number, then the targum. A Rashi segment (an optional one) is left as it is.
 export function shnayimVerse(segment: SiddurSegment): SiddurSegment {
+  if (segment.optional) return segment;
   const [verse, ...targum] = segment.he;
   return { ...segment, he: [verse, verse.filter((run) => run.s !== 'n'), ...targum] };
 }
