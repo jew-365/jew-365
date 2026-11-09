@@ -148,6 +148,10 @@ Every step toward the stores, in order: what was done, what it produced, and eve
 - Preview build, the owner's request before the AAB goes to the stores ("לפני שאה מעלה את ה AAB לפרודקשן ולחנות אני רוצה בילד חדש של פריויו"): `npx eas-cli build --platform android --profile preview --non-interactive --no-wait` from `779515b`, EAS `3581cc21`, `com.jew365.app.preview` versionCode 1 (the preview profile has no `autoIncrement`), the preview keystore, FINISHED, downloaded to the owner's Downloads folder. No native change lies between `acaa72f` and `779515b`, so it carries the native layer of AAB 10 and iOS build 6; the `Build` tasks not yet made stay out of it, the owner's call ("נוסיף את כל זה רק בבילד הבא"). The owner installed it and ran the seven-point check (icon and Hebrew name, splash, permissions card and battery dialog, marks without a crash, notifications, onboarding from scratch with the optional profile, the OTA): "הכל עובד".
 - Held, the owner's call after that check ("בוא נחכה"): nothing goes to either store and no production OTA is published until Apple answers on 1.0.21 (6) and Google on production access.
 
+## 2026-11-09
+
+- The OTA part of the hold lifted by the owner ("תעשה ota לפרודקשן וגם לפריויו"): production `1.0.21-17` (group `325dc965-a442-4f03-855b-d847444e1243`) and preview `1.0.21-62` (group `304164b5-a488-4f6c-ba25-aa2c01b1867f`), both from `8810f31`, a tree equal to `origin/main`. iOS build 1.0.21 (6), still in App Review, listens to `production` and downloads `1.0.21-17`. The store uploads stay held.
+
 ## Next
 
 - iOS: wait for App Review's answer on 1.0.21 (6) (Waiting for Review since 2026-11-08 10:22 UTC, manual release). On approval, publish production OTA `1.0.21-17` and the owner's Release, each on the owner's yes; on a rejection, fix first.
