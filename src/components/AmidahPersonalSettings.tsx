@@ -15,6 +15,7 @@ import { Card } from './Card';
 import { ChipRow } from './ChipRow';
 import { MitzvahIcon } from './MitzvahIcon';
 import { SectionLabel } from './SectionLabel';
+import { SegmentedControl } from './SegmentedControl';
 import { useI18n } from '@/i18n';
 import { loadPersonalVerses } from '@/services/PersonalVerses';
 import { useUserStore } from '@/stores/useUserStore';
@@ -28,6 +29,8 @@ import {
   HEBREW_LETTERS,
   MAX_AMIDAH_VERSES,
   versesFor,
+  versesForName,
+  type NameMatch,
   type PersonalVerse,
 } from '@/utils/personalPrayer';
 
@@ -37,6 +40,8 @@ const DELETE_SIZE = scaled(18);
 const DELETE_HIT = scaled(10);
 const INPUT_FONT = scaled(16);
 const PRAYER_MIN_HEIGHT = scaled(110);
+
+type SearchMode = 'name' | 'letters';
 
 type Loaded = { state: 'idle' | 'loading' | 'failed' } | { state: 'ready'; verses: PersonalVerse[] };
 
@@ -52,6 +57,8 @@ export function AmidahPersonalSettings() {
   const setVerses = useUserStore((s) => s.setAmidahVerses);
   const setPrayer = useUserStore((s) => s.setAmidahPrayer);
   const [adding, setAdding] = useState(false);
+  const [mode, setMode] = useState<SearchMode>('name');
+  const [name, setName] = useState('');
   const [first, setFirst] = useState<string | null>(null);
   const [last, setLast] = useState<string | null>(null);
   const [typed, setTyped] = useState('');
@@ -73,10 +80,14 @@ export function AmidahPersonalSettings() {
     );
   }, [adding, loaded.state]);
 
-  const matches = useMemo(
-    () => (loaded.state === 'ready' && first && last ? versesFor(loaded.verses, first, last) : []),
-    [loaded, first, last],
-  );
+  // By name, the verses of its first and last letter, those holding the name first and recommended; by letters, the pair.
+  const asked = mode === 'name' ? Boolean(name.trim()) : Boolean(first && last);
+  const matches = useMemo((): NameMatch[] => {
+    if (loaded.state !== 'ready') return [];
+    if (mode === 'name') return versesForName(loaded.verses, name);
+    return first && last ? versesFor(loaded.verses, first, last).map((v) => ({ ...v, recommended: false })) : [];
+  }, [loaded, mode, name, first, last]);
+  const recommended = matches.filter((v) => v.recommended).length;
   const full = verses.length >= MAX_AMIDAH_VERSES;
   const inputTone = { backgroundColor: colors.surface2, color: colors.text, borderColor: colors.border };
 
@@ -141,22 +152,52 @@ export function AmidahPersonalSettings() {
         onClose={close}
       >
         <ScrollView style={{ maxHeight: height * 0.65 }} keyboardShouldPersistTaps="handled">
-          <SectionLabel variant="field" text={t('amidahPersonal.firstLetter')} />
-          <ChipRow
-            values={HEBREW_LETTERS}
-            selected={first}
-            onSelect={setFirst}
-            renderLabel={(l) => l}
-            style={styles.letters}
-          />
-          <SectionLabel variant="field" text={t('amidahPersonal.lastLetter')} style={styles.fieldLabel} />
-          <ChipRow
-            values={HEBREW_LETTERS}
-            selected={last}
-            onSelect={setLast}
-            renderLabel={(l) => l}
-            style={styles.letters}
-          />
+          <View accessibilityRole="radiogroup" accessibilityLabel={t('amidahPersonal.searchBy')}>
+            <SegmentedControl<SearchMode>
+              options={[
+                { value: 'name', label: t('amidahPersonal.byName') },
+                { value: 'letters', label: t('amidahPersonal.byLetters') },
+              ]}
+              value={mode}
+              onChange={setMode}
+            />
+          </View>
+          {mode === 'name' ? (
+            <>
+              <SectionLabel variant="field" text={t('amidahPersonal.name')} style={styles.fieldLabel} />
+              <TextInput
+                testID="amidah-verse-name"
+                value={name}
+                onChangeText={setName}
+                placeholder={t('amidahPersonal.namePlaceholder')}
+                placeholderTextColor={colors.textMuted}
+                accessibilityLabel={t('amidahPersonal.name')}
+                style={[styles.input, inputTone]}
+              />
+              <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>
+                {t('amidahPersonal.nameHint')}
+              </Text>
+            </>
+          ) : (
+            <>
+              <SectionLabel variant="field" text={t('amidahPersonal.firstLetter')} style={styles.fieldLabel} />
+              <ChipRow
+                values={HEBREW_LETTERS}
+                selected={first}
+                onSelect={setFirst}
+                renderLabel={(l) => l}
+                style={styles.letters}
+              />
+              <SectionLabel variant="field" text={t('amidahPersonal.lastLetter')} style={styles.fieldLabel} />
+              <ChipRow
+                values={HEBREW_LETTERS}
+                selected={last}
+                onSelect={setLast}
+                renderLabel={(l) => l}
+                style={styles.letters}
+              />
+            </>
+          )}
           <View style={styles.results}>
             {loaded.state === 'loading' ? (
               <View style={styles.loading}>
@@ -165,19 +206,25 @@ export function AmidahPersonalSettings() {
               </View>
             ) : loaded.state === 'failed' ? (
               <Text style={[typography.small, { color: colors.urgent }]}>{t('amidahPersonal.failed')}</Text>
-            ) : !first || !last ? (
-              <Text style={[typography.small, { color: colors.textSub }]}>{t('amidahPersonal.pickLetters')}</Text>
+            ) : !asked ? (
+              <Text style={[typography.small, { color: colors.textSub }]}>
+                {t(mode === 'name' ? 'amidahPersonal.typeName' : 'amidahPersonal.pickLetters')}
+              </Text>
             ) : matches.length ? (
               <>
                 <Text style={[typography.captionBold, { color: colors.textSub }]}>
                   {t('amidahPersonal.found', { count: matches.length })}
+                  {recommended ? ` · ${t('amidahPersonal.foundRecommended', { count: recommended })}` : ''}
                 </Text>
                 <ScrollView nestedScrollEnabled style={{ maxHeight: height * RESULTS_SHARE }}>
                   {matches.slice(0, RESULTS_MAX).map((verse) => (
                     <SheetAction
                       key={`${verse.source.he}|${verse.text}`}
                       label={verse.text}
-                      caption={verse.source.he}
+                      caption={
+                        verse.recommended ? `${t('amidahPersonal.recommended')} · ${verse.source.he}` : verse.source.he
+                      }
+                      selected={verse.recommended}
                       onPress={() => add(verse.text)}
                     />
                   ))}

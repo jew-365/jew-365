@@ -102,6 +102,35 @@ export function versesFor(verses: readonly PersonalVerse[], first: string, last:
   });
 }
 
+const PREFIXES = /^[והבלמשכ]{1,2}/u;
+const wordsOf = (text: string): string[] =>
+  plainHebrew(text)
+    .replace(/[^\u05D0-\u05EA\s]/gu, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => [...word].map(baseLetter).join(''));
+
+// Whether a verse holds every word of a name, as a word of its own or after up to two prefix letters (ויוסף, ליוסף).
+export function verseHoldsName(verse: string, name: string): boolean {
+  const words = wordsOf(verse);
+  const named = wordsOf(name);
+  return named.length > 0 && named.every((n) => words.some((w) => w === n || w.replace(PREFIXES, '') === n));
+}
+
+export type NameMatch = PersonalVerse & { recommended: boolean };
+
+// The verses for a name: those that open with its first letter and close with its last, the ones that also hold the
+// name first and marked recommended (the owner's call, 2026-11-09), each group in the order given.
+export function versesForName(verses: readonly PersonalVerse[], name: string): NameMatch[] {
+  const edges = verseEdges(name);
+  if (!edges) return [];
+  const all = versesFor(verses, edges.first, edges.last).map((verse) => ({
+    ...verse,
+    recommended: verseHoldsName(verse.text, name),
+  }));
+  return [...all.filter((v) => v.recommended), ...all.filter((v) => !v.recommended)];
+}
+
 // A saved list cleaned: trimmed non-empty strings of at most AMIDAH_VERSE_MAX, at most MAX_AMIDAH_VERSES.
 export function amidahVersesOf(saved: unknown): string[] {
   if (!Array.isArray(saved)) return [];

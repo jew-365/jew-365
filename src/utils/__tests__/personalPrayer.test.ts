@@ -12,7 +12,9 @@ import {
   plainHebrew,
   tehillimVerses,
   verseEdges,
+  verseHoldsName,
   versesFor,
+  versesForName,
   withPersonalPrayer,
   type PersonalInsert,
 } from '../personalPrayer';
@@ -156,5 +158,40 @@ describe('the saved values', () => {
     expect(MAX_AMIDAH_VERSES).toBe(3);
     expect(amidahPrayerOf(5)).toBe('');
     expect(amidahPrayerOf('שלום')).toBe('שלום');
+  });
+});
+
+describe('verses by a name', () => {
+  const verses = [
+    { text: 'יְהוָה רֹעִי לֹא אֶחְסָף', source: { he: 'א', en: 'a' } },
+    { text: 'וַיֹּאמֶר יוֹסֵף אֶל אֶחָיו הַאֵין לָנוּ סוֹף', source: { he: 'ב', en: 'b' } },
+    { text: 'יַעֲקֹב קָרָא לְיוֹסֵף וַיַּעֲנֵהוּ בַּסּוֹף', source: { he: 'ג', en: 'c' } },
+    { text: 'אַשְׁרֵי יוֹסֵף', source: { he: 'ד', en: 'd' } },
+  ];
+
+  it('finds the name as a word, with a prefix letter, never inside another word', () => {
+    expect(verseHoldsName('וַיֹּאמֶר יוֹסֵף אֶל אֶחָיו', 'יוסף')).toBe(true);
+    expect(verseHoldsName('קָרָא לְיוֹסֵף', 'יוֹסֵף')).toBe(true);
+    expect(verseHoldsName('יוֹסֵפוֹת', 'יוסף')).toBe(false);
+    expect(verseHoldsName('חַיִּים וְשָׁלוֹם', 'חיים')).toBe(true);
+    expect(verseHoldsName('יוֹסֵף וְחַיִּים', 'יוסף חיים')).toBe(true);
+    expect(verseHoldsName('יוֹסֵף', '')).toBe(false);
+  });
+
+  it('lists the verses of the name’s first and last letter, those holding the name first and recommended', () => {
+    const found = versesForName(verses, 'יוסף');
+    expect(found.map((v) => v.source.he)).toEqual(['ג', 'א']);
+    expect(found.map((v) => v.recommended)).toEqual([true, false]);
+    expect(versesForName(verses, '...')).toEqual([]);
+  });
+
+  it('recommends the real Tehillim verses that hold the name', () => {
+    const all = tehillimVerses(readSiddurText('ashkenaz', 'tehillim'));
+    const david = versesForName(all, 'דוד');
+    expect(david.length).toBeGreaterThan(0);
+    david.forEach((v) => expect(verseEdges(v.text)).toEqual({ first: 'ד', last: 'ד' }));
+    const firstPlain = david.findIndex((v) => !v.recommended);
+    david.forEach((v, i) => expect(v.recommended).toBe(firstPlain === -1 || i < firstPlain));
+    david.filter((v) => v.recommended).forEach((v) => expect(verseHoldsName(v.text, 'דוד')).toBe(true));
   });
 });
