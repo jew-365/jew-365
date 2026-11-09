@@ -22,12 +22,14 @@ const variants = [
   { board: 'R3Snap', sched: 'm', title: 'קרוסלת שכבות' },
   { board: 'R3Ribbon', sched: 'n', title: 'סרגל הזמן של היום' },
   { board: 'R3Flip', sched: 'o', title: 'כרטיס מתהפך' },
+  { board: 'R4Bento', sched: 'p', title: 'בנטו בתוך הקשת', k: '156 / 216' },
 ];
 for (const v of variants) {
   let out = now;
   for (const [from, to] of [
     ['<!--board title="היום · כמו באפליקציה"-->', '<!--board title="' + v.title + '"-->'],
     ["const SCHED = 'none';", "const SCHED = '" + v.sched + "';"],
+    ...(v.k ? [['const K = 192 / 216;', 'const K = ' + v.k + ';']] : []),
   ]) {
     if (!out.includes(from)) throw new Error('HomeNow.html lost its marker: ' + from);
     out = out.replace(from, () => to);

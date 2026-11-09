@@ -10,7 +10,7 @@ copyFileSync(join(here, '..', '..', 'runtime', 'support.js'), join(outDir, 'supp
 const DATA = readFileSync(join(here, 'data.json'), 'utf8').trim();
 const CORE_JS = readFileSync(join(here, 'core.js'), 'utf8').replace('/*DATA*/ null', DATA);
 if (CORE_JS.includes('/*DATA*/')) throw new Error('data not injected');
-const CORE_CSS = readFileSync(join(here, 'core.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'sched.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r3.css'), 'utf8').trim();
+const CORE_CSS = readFileSync(join(here, 'core.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'sched.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r3.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r4.css'), 'utf8').trim();
 const SCHED_JS = readFileSync(join(here, 'sched.js'), 'utf8');
 const SCHED_HTML = readFileSync(join(here, 'sched.html'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r3-card.html'), 'utf8').trim();
 const SCHED_TOP = readFileSync(join(here, 'sched-top.html'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r3-top.html'), 'utf8').trim();
@@ -200,7 +200,7 @@ function build(name) {
   if (!markup.includes('<!--NAMECARD-->')) throw new Error(`${name}: markup needs <!--NAMECARD-->`);
   if (!script.includes('/*CORE*/')) throw new Error(`${name}: script needs /*CORE*/`);
   if (/<x-dc|<helmet|class="ph[ "]/.test(markup)) throw new Error(`${name}: markup must not contain the shell (.ph, x-dc, helmet)`);
-  markup = expand(markup.replace('<!--NAMECARD-->', NAMECARD).replace('<!--SCHEDCARD-->', SCHED_HTML).replace('<!--SCHEDTOP-->', SCHED_TOP));
+  markup = expand(markup.replace('<!--NAMECARD-->', NAMECARD).replace('<!--SCHEDCARD-->', SCHED_HTML).replace('<!--SCHEDTOP-->', SCHED_TOP).replace('<!--HEROBENTO-->', readFileSync(join(here, 'r4-hero.html'), 'utf8').trim()));
   script = script.replace('/*CORE*/', CORE_JS.trimEnd()).replace('/*SCHED*/', SCHED_JS.trimEnd());
   const leftover = markup.match(/\[\[[^\]]*\]\]/);
   if (leftover) throw new Error(`${name}: unknown macro ${leftover[0]}`);

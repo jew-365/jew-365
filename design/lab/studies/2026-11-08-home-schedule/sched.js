@@ -242,7 +242,7 @@
       schedB: SCHED === 'b',
       schedC: SCHED === 'c',
       schedCard: SCHED === 'a',
-      sb: Object.fromEntries('abcdefghijklmno'.split('').map((k) => [k, SCHED === k])),
+      sb: Object.fromEntries('abcdefghijklmnop'.split('').map((k) => [k, SCHED === k])),
       openFirstCls: 'acfghkmno'.includes(SCHED) && SCHED !== 'none' ? '' : 'first',
       bFixed: fixed,
       bSmart: smart,
@@ -328,6 +328,25 @@
         });
       })(),
       ribbonHours: Array.from({ length: Math.ceil(span / 3600) + 1 }, (_, i) => { const S = Math.ceil(A0 / 3600) * 3600 + i * 3600; return { pos: pos(S), label: this.clock(S).slice(0, 2) }; }).filter((h) => Number(h.pos) < 100),
+    });
+    // Round 4: the bento inside the hero. Relevant tiles first (the right side, in view), the rest after a scroll.
+    const tag = { fixed: 'קבוע', smart: 'עכשיו', mine: 'שלי', other: '' };
+    const SHORT = { 'סוף זמן תפילה': 'סוף תפילה', 'סוף ק״ש מג״א': 'ק״ש מג״א', 'הדלקת נרות שבת': 'הדלקת נרות', 'צאת הכוכבים': 'צאה״כ', 'עלות השחר': 'עלות השחר', 'מנחה גדולה': 'מנחה גד׳', 'חצות הלילה': 'חצות לילה', 'נרות חנוכה': 'נרות חנוכה' };
+    const tile = (x, rel) => ({ label: SHORT[x.label] || x.label, full: x.label, time: x.time, left: x.S > t ? x.left : '', tag: tag[x.layer] || '', tcls: 'ly-' + x.layer + (x.S <= t ? ' past' : '') + (rel ? ' rel' : ''), hasTag: Boolean(tag[x.layer]), pick: x.pick, aria: x.label + ' ' + x.time + (x.S > t ? ', ' + x.left : ', עבר') });
+    const relSet = [...smartL, ...fixedL, ...mineL].filter((x) => x.S > t && (!nx || x !== nx)).sort((a, b) => (a.layer === 'smart' ? 0 : 1) - (b.layer === 'smart' ? 0 : 1) || a.S - b.S);
+    const restSet = all.filter((x) => x !== nx && !relSet.includes(x)).sort((a, b) => (a.S > t ? 0 : 1) - (b.S > t ? 0 : 1) || a.S - b.S);
+    const rel = relSet.map((x) => tile(x, true));
+    const rest = restSet.map((x) => tile(x, false));
+    const cols = [];
+    const flat = [...rel, ...rest, { add: true }];
+    for (let i = 0; i < flat.length; i += 2) cols.push({ a: flat[i], b: flat[i + 1] || null });
+    Object.assign(out, {
+      heroCls: SCHED === 'p' ? 'hb' : '',
+      hbNext: nx ? { ...tile(nx, true), label: nx.label, layerName: tag[nx.layer] } : { label: 'אין עוד זמנים היום', time: '', left: '', tag: '', tcls: '', pick: () => {} },
+      hbCols: cols.map((c) => ({ a: { ...(c.a || {}), isTile: Boolean(c.a && !c.a.add), isAdd: Boolean(c.a && c.a.add) }, b: { ...(c.b || {}), isTile: Boolean(c.b && !c.b.add), isAdd: Boolean(c.b && c.b.add) } })),
+      hbMore: rest.length,
+      hbInfo: infoChips[0] || null,
+      hbHasInfo: infoChips.length > 0,
     });
     if (SCHED === 'n' && !this._rib) {
       this._rib = true;

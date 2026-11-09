@@ -503,7 +503,8 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Flag:** `OTA` (once a placement is picked and built).
   - **Source:** the owner's request of 2026-11-08 ("לוח זמנים נוכחי מצומצם רלוונטי חכם פר תקופה למסך הבית"), refined the same day: a small board of fixed times always shown, smart times by the hour and the period, and times the user pins from suggestions fitted to them.
   - **What it is:** round 2 of the design study [design/lab/studies/2026-11-08-home-schedule/](design/lab/studies/2026-11-08-home-schedule/AGENTS.md): one board in three layers, rounds 2 and 3 (הנץ, סוף ק״ש, שקיעה, צאה״כ always; up to two times of the moment, such as סוף זמן תפילה, הדלקת נרות, נרות חנוכה, סוף הצום; the user's pins from a sheet of suggestions), in three placements (round 2: a card under the hero, the hero's strip, a band at the top of the app) and twelve more creative ones (round 3: a curtain, an island, tabs, bento, a synagogue board, a header that collapses on scroll, a ticker, a wallet, a bottom drawer, a carousel, a day ribbon, a flip card). Gallery https://claude.ai/artifact/RWquxzv3PmRkZhUHW5K54o, canvas https://claude.ai/artifact/BDc4e5AT1m23BrLSEHR7mT.
-  - **Waiting on:** the owner's pick of a placement and of the four fixed times, then building it in the app under [src/AGENTS.md](src/AGENTS.md) (the pins in `useUserStore`, beside `hiddenZmanim`), with its search item and guide entry.
+  - **Picked:** the bento (2026-11-09), refined in round 4 as `R4Bento`: inside the hero in place of the zmanim strip, relevant times in view and the rest a sideways scroll, the hero's background ending under it, the arc scene smaller.
+  - **Waiting on:** the owner's approval of round 4 and of the four fixed times, then building it in the app under [src/AGENTS.md](src/AGENTS.md) (the pins in `useUserStore`, beside `hiddenZmanim`), with its search item and guide entry.
 
 ## Bugs
 

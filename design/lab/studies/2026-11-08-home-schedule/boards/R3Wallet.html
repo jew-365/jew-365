@@ -219,7 +219,7 @@
 <div class="scroll {{uiCollapsed}}" id="scroll" onScroll="{{onScroll}}">
 <!--SCHEDTOP-->
 
-<section class="hero" aria-label="קשת היום וזמני היום" style="{{skyStyle}}">
+<section class="hero {{heroCls}}" aria-label="קשת היום וזמני היום" style="{{skyStyle}}">
 <header class="topchip">
 <div class="greet"><p class="dl">{{dateLine}}</p><h1>{{greeting}}</h1></div>
 <span class="spc"></span>
@@ -281,6 +281,7 @@
 <button class="zc {{z.cls}}" style="{{z.style}}" aria-pressed="{{z.pressed}}" aria-label="{{z.aria}}" onClick="{{z.pick}}"><span class="zl" style="color: {{z.ink}}">{{z.label}}</span><span class="zt {{z.tcls}}" style="color: {{z.ink}}">{{z.time}}</span></button>
 </sc-for>
 </div>
+<!--HEROBENTO-->
 </div>
 </section>
 

@@ -1,0 +1,16 @@
+<sc-if value="{{sb.p}}" hint-placeholder-val="{{ false }}">
+<section class="hbn" aria-label="לוח הזמנים, גוללים הצידה לעוד">
+<sc-if value="{{hbHasInfo}}" hint-placeholder-val="{{ false }}"><p class="hbi"><span>{{hbInfo.label}}</span><b>{{hbInfo.time}}</b></p></sc-if>
+<div class="hbs" role="list">
+<button class="hbt hbig {{hbNext.tcls}}" role="listitem" onClick="{{hbNext.pick}}" aria-label="{{hbNext.aria}}"><span class="hbk">הבא · {{hbNext.layerName}}</span><b class="hbl">{{hbNext.label}}</b><b class="hbx num">{{hbNext.time}}</b><span class="hbleft num">{{hbNext.left}}</span></button>
+<sc-for list="{{hbCols}}" as="c" hint-placeholder-count="6">
+<div class="hbc" role="presentation">
+<sc-if value="{{c.a.isTile}}" hint-placeholder-val="{{ true }}"><button class="hbt {{c.a.tcls}}" role="listitem" onClick="{{c.a.pick}}" aria-label="{{c.a.aria}}"><span class="hbk">{{c.a.label}}</span><b class="hbx num">{{c.a.time}}</b><sc-if value="{{c.a.hasTag}}" hint-placeholder-val="{{ true }}"><i class="hbd" aria-hidden="true"></i></sc-if></button></sc-if>
+<sc-if value="{{c.a.isAdd}}" hint-placeholder-val="{{ false }}"><button class="hbt hadd" onClick="{{bAdd}}" aria-label="הוספת זמן ללוח שלי">+</button></sc-if>
+<sc-if value="{{c.b.isTile}}" hint-placeholder-val="{{ true }}"><button class="hbt {{c.b.tcls}}" role="listitem" onClick="{{c.b.pick}}" aria-label="{{c.b.aria}}"><span class="hbk">{{c.b.label}}</span><b class="hbx num">{{c.b.time}}</b><sc-if value="{{c.b.hasTag}}" hint-placeholder-val="{{ true }}"><i class="hbd" aria-hidden="true"></i></sc-if></button></sc-if>
+<sc-if value="{{c.b.isAdd}}" hint-placeholder-val="{{ false }}"><button class="hbt hadd" onClick="{{bAdd}}" aria-label="הוספת זמן ללוח שלי">+</button></sc-if>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-if>

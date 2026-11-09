@@ -27,3 +27,7 @@ The owner, after round 1: "התכוונתי ... לוח קטן שיציג זמנ�
 ## Round 3
 
 The owner, after round 2: more creative examples that use the space to the full, keep the three layers, and may expand on demand, scroll, or drop like a curtain, at least ten. Twelve placements, one engine: the layers keep one colour each in every board, and every board reads the same fixed, now and mine times and the same pin sheet.
+
+## Round 4
+
+The owner picked the bento and asked: no zmanim strip in the hero, only the relevant times in view and the rest a sideways scroll away, the hero's background carried down under the bento so it ends before the mitzvah cards, and a smaller bento and arc scene, so the cards keep their room.
