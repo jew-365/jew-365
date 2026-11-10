@@ -607,7 +607,7 @@
   "settings.halachaTimes": "Halachic times",
   "settings.halachaTimesSummary": "Which times home shows, and your favourites",
   "settings.zmanimShown": "The day's times on home",
-  "settings.zmanimShownHint": "Choose which times show in home's carousel and circle, add times the circle does not show, such as Mincha Ketana, and star your favourites. The same sheet opens from the times button in the carousel.",
+  "settings.zmanimShownHint": "Choose which times show in Home's carousel and circle, add times the circle does not show, such as Mincha Ketana, and star favourites: they always show, come first in the carousel and show on Mine. The same list opens from the times button in the carousel.",
   "settings.deviceSummary": "Location, notifications, permissions, colours and language",
   "settings.deviceSummaryTaharah": "Location, notifications, permissions, family purity, colours and language",
   "settings.backupSummary": "Export a backup file, restore from it, or reset the app",
@@ -1804,7 +1804,6 @@
   "home.card.pinsNone": "Choose with ⭐ in the carousel",
   "home.card.mineFull": "Three are chosen: remove one to add",
   "home.times.pinsChip": "My times",
-  "settings.zmanimCount": "%{shown} times in the carousel · favourites: %{pins}",
   "home.times.pins.shown": "In the carousel now",
   "home.times.pins.add": "Add to the carousel",
   "home.times.pins.starred": "Favourite",
@@ -1818,5 +1817,7 @@
   "home.zman.sofShmaMga.name": "Latest Shema (Magen Avraham)",
   "home.zman.sofShmaMga.short": "Shema MA",
   "home.zman.sofShmaGra.name": "Latest Shema (Gra)",
-  "home.zman.sofShmaGra.short": "Shema Gra"
+  "home.zman.sofShmaGra.short": "Shema Gra",
+  "onboarding.zmanim.title": "Which times to show?",
+  "onboarding.zmanim.hint": "The times show in Home's carousel. Star your favourites and they come first. You can change this any time in Settings → Halachic times."
 }

@@ -50,7 +50,7 @@ export default function ReadyScreen() {
         <Pressable onPress={editMitzvot} accessibilityRole="link" hitSlop={scaled(8)} style={styles.editLink}>
           <Text style={[typography.bodyBold, { color: colors.goldText }]}>{t('onboarding.readyEdit')}</Text>
         </Pressable>
-        <OnboardingDots step={7} total={ONBOARDING_STEPS} style={styles.dots} />
+        <OnboardingDots step={8} total={ONBOARDING_STEPS} style={styles.dots} />
       </ScrollView>
       <Button label={t('onboarding.finish')} onPress={finish} />
     </SafeAreaView>

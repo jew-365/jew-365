@@ -42,14 +42,12 @@ describe('Settings › זמני הלכה', () => {
     expect(texts.indexOf(he('settings.halachaTimes'))).toBeGreaterThan(texts.indexOf(he('settings.prayer')));
     expect(texts.indexOf(he('settings.device'))).toBeGreaterThan(texts.indexOf(he('settings.halachaTimes')));
     expect(screen.getByText(he('settings.halachaTimesSummary'))).toBeOnTheScreen();
-    expect(screen.queryByText(he('home.times.pins.title'))).toBeNull();
+    expect(screen.queryByTestId('zmanim-row-alot')).toBeNull();
   });
 
-  it('opens the times sheet, every zman of the circle shown by default, misheyakir as זמן תו״ט', async () => {
+  it("lists the carousel's times in place, every zman of the circle shown by default, misheyakir as זמן תו״ט", async () => {
     await renderSection();
     expect(screen.getByText(he('settings.zmanimShownHint'))).toBeOnTheScreen();
-    expect(screen.getByText('11 זמנים בקרוסלה · מועדפים: 0')).toBeOnTheScreen();
-    fireEvent.press(screen.getByLabelText(he('home.times.pins.title')));
     ARC_ZMANIM.forEach((id) => {
       expect(screen.getByTestId(`zmanim-row-${id}`)).toBeOnTheScreen();
       expect(screen.getByText(he(`home.zman.${id}.name`))).toBeOnTheScreen();
@@ -58,9 +56,8 @@ describe('Settings › זמני הלכה', () => {
     expect(screen.queryByText('משיכיר')).toBeNull();
   });
 
-  it('hides a zman, shows it again, and counts what it adds and stars', async () => {
+  it('hides a zman, shows it again, adds a time and stars it', async () => {
     await renderSection();
-    fireEvent.press(screen.getByLabelText(he('home.times.pins.title')));
     await act(async () => fireEvent.press(screen.getByTestId('zmanim-remove-plag')));
     expect(useUserStore.getState().hiddenZmanim).toEqual(['plag']);
     expect(screen.queryByTestId('zmanim-row-plag')).toBeNull();
@@ -68,13 +65,13 @@ describe('Settings › זמני הלכה', () => {
     expect(useUserStore.getState().hiddenZmanim).toEqual([]);
     await act(async () => fireEvent.press(screen.getByText(he('home.zman.minchaKetana.name'))));
     await act(async () => fireEvent.press(screen.getByTestId('zmanim-star-minchaKetana')));
-    expect(screen.getByText('12 זמנים בקרוסלה · מועדפים: 1')).toBeOnTheScreen();
+    expect(useUserStore.getState().addedZmanim).toEqual(['minchaKetana']);
+    expect(useUserStore.getState().zmanPins).toEqual(['minchaKetana']);
   });
 
   it('keeps the last zman of the circle: its remove button is disabled', async () => {
     useUserStore.setState({ hiddenZmanim: ARC_ZMANIM.filter((id) => id !== 'shkia') });
     await renderSection();
-    fireEvent.press(screen.getByLabelText(he('home.times.pins.title')));
     expect(screen.getByTestId('zmanim-remove-shkia').props.accessibilityState).toMatchObject({ disabled: true });
   });
 });

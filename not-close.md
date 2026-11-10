@@ -505,6 +505,12 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done:** 2026-11-10: the card's colour follows the part of the day only (dawn, morning, noon, evening, night), a muted gradient drawn at 0.72 over the land so the sky shows through; white text holds 4.5:1 on it every 10 minutes of three days of the year ([src/theme/__tests__/periodTone.test.ts](src/theme/__tests__/periodTone.test.ts)). Checked in the web build at 06:10, 15:40 and 20:30. Verified: `typecheck`, `lint`, `check:dox`, the full suite (6676 passed), `test:tz` on the tone, the card and the guide.
   - **Status:** 1.0.21 · Committed: `58fc45e` fix(home): the card's colour follows the time of day and lets the sky show through · Pushed: yes · Live: preview `1.0.21-74` (group `31498385-82ea-4ab0-a100-1dd97f14aa4f`, from `58fc45e`, 2026-11-10); production no · Channel: preview
 
+- [ ] The carousel's times kept in Settings and in onboarding
+  - **Flag:** `OTA`.
+  - **Source:** the owner's message of 2026-11-10 on preview `1.0.21-76`: do not take the option out of Settings, and offer it at the user's first setup too.
+  - **Done:** 2026-11-10: the sheet's list is `ZmanimPicker` of [src/components/ZmanimSheet.tsx](src/components/ZmanimSheet.tsx), drawn in place in Settings → זמני הלכה (in place of the row that opened the sheet) and in a new onboarding step, [src/app/onboarding/zmanim.tsx](src/app/onboarding/zmanim.tsx), between the mitzvot and the location (`ONBOARDING_STEPS` 9). Checked in the web build (Settings). Verified: `typecheck`, `lint`, `format:check`, `check:dox`, the full suite (6693 passed).
+  - **Status:** 1.0.21 · Committed: pending · Pushed: no · Live: no · Channel: none
+
 - [ ] The carousel's times in one sheet: add, remove and favourites
   - **Flag:** `OTA`.
   - **Source:** the owner's message of 2026-11-10: the + in the carousel (stars) and Settings → זמני הלכה (show or hide) looked like two copies of one feature; the + should also add times from the app's list. The owner chose option א (one sheet), with the added times on the carousel only, not the circle.

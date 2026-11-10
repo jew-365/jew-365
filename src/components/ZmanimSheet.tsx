@@ -16,10 +16,11 @@ import { ARC_ZMANIM, isZmanId, offeredMoreZmanim, type CarouselZmanId } from '@/
 const TOUCH = scaled(44);
 const ICON = scaled(20);
 
-// The one place the carousel's times are chosen (the owner's call, 2026-11-10): the times shown, each with its star
-// and a remove button, then the times that can be added, the circle's hidden zmanim and the times the circle never
-// shows. Home's + chip and the זמני הלכה section of Settings both open it.
-export function ZmanimSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+// The one list the carousel's times are chosen in (the owner's calls of 2026-11-10): the times shown, each with its
+// star and a remove button, then the times that can be added, the circle's hidden zmanim and the times the circle
+// never shows. Home's + chip opens it in a sheet; the זמני הלכה section of Settings and the onboarding times step
+// draw it in place.
+export function ZmanimPicker() {
   const { colors } = useTheme();
   const { t } = useI18n();
   const hidden = useUserStore((s) => s.hiddenZmanim);
@@ -51,6 +52,69 @@ export function ZmanimSheet({ visible, onClose }: { visible: boolean; onClose: (
   };
 
   return (
+    <View>
+      <SectionLabel variant="field" text={t('home.times.pins.shown')} />
+      {shown.map((id) => {
+        const pinned = pins.includes(id);
+        const locked = isZmanId(id) && lastOnCircle;
+        const caption = pinned
+          ? t('home.times.pins.starred')
+          : (reason(id) ?? (isZmanId(id) ? null : t('home.times.pins.notOnArc')));
+        return (
+          <View key={id} testID={`zmanim-row-${id}`} style={[styles.row, { borderBottomColor: colors.border }]}>
+            <View style={styles.text}>
+              <Text style={[typography.subheading, { color: colors.text }]}>{name(id)}</Text>
+              {caption ? <Text style={[typography.caption, { color: colors.textSub }]}>{caption}</Text> : null}
+            </View>
+            <Pressable
+              testID={`zmanim-star-${id}`}
+              accessibilityRole="button"
+              accessibilityState={{ selected: pinned }}
+              accessibilityLabel={t(pinned ? 'home.times.pins.unstar' : 'home.times.pins.star', { name: name(id) })}
+              onPress={() => setPinned(id, !pinned)}
+              style={styles.button}
+            >
+              <MitzvahIcon
+                name="star"
+                size={ICON}
+                color={pinned ? colors.gold : colors.textMuted}
+                variant="duotone"
+                tint={pinned ? colors.gold : 'transparent'}
+              />
+            </Pressable>
+            <Pressable
+              testID={`zmanim-remove-${id}`}
+              accessibilityRole="button"
+              accessibilityLabel={t('home.times.pins.remove', { name: name(id) })}
+              accessibilityHint={locked ? t('home.times.pins.lastOne') : undefined}
+              accessibilityState={{ disabled: locked }}
+              disabled={locked}
+              onPress={() => setShown(id, false)}
+              style={[styles.button, locked && styles.disabled]}
+            >
+              <MitzvahIcon name="close" size={ICON} color={colors.textSub} />
+            </Pressable>
+          </View>
+        );
+      })}
+      {addable.length ? <SectionLabel variant="field" text={t('home.times.pins.more')} style={styles.label} /> : null}
+      {addable.map((id) => (
+        <SheetAction
+          key={id}
+          label={name(id)}
+          caption={[t('home.times.pins.add'), reason(id) ?? (isZmanId(id) ? null : t('home.times.pins.notOnArc'))]
+            .filter(Boolean)
+            .join(' · ')}
+          onPress={() => setShown(id, true)}
+        />
+      ))}
+    </View>
+  );
+}
+
+export function ZmanimSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { t } = useI18n();
+  return (
     <BottomSheet
       visible={visible}
       title={t('home.times.pins.title')}
@@ -58,61 +122,7 @@ export function ZmanimSheet({ visible, onClose }: { visible: boolean; onClose: (
       onClose={onClose}
     >
       <ScrollView style={styles.body}>
-        <SectionLabel variant="field" text={t('home.times.pins.shown')} />
-        {shown.map((id) => {
-          const pinned = pins.includes(id);
-          const locked = isZmanId(id) && lastOnCircle;
-          const caption = pinned
-            ? t('home.times.pins.starred')
-            : (reason(id) ?? (isZmanId(id) ? null : t('home.times.pins.notOnArc')));
-          return (
-            <View key={id} testID={`zmanim-row-${id}`} style={[styles.row, { borderBottomColor: colors.border }]}>
-              <View style={styles.text}>
-                <Text style={[typography.subheading, { color: colors.text }]}>{name(id)}</Text>
-                {caption ? <Text style={[typography.caption, { color: colors.textSub }]}>{caption}</Text> : null}
-              </View>
-              <Pressable
-                testID={`zmanim-star-${id}`}
-                accessibilityRole="button"
-                accessibilityState={{ selected: pinned }}
-                accessibilityLabel={t(pinned ? 'home.times.pins.unstar' : 'home.times.pins.star', { name: name(id) })}
-                onPress={() => setPinned(id, !pinned)}
-                style={styles.button}
-              >
-                <MitzvahIcon
-                  name="star"
-                  size={ICON}
-                  color={pinned ? colors.gold : colors.textMuted}
-                  variant="duotone"
-                  tint={pinned ? colors.gold : 'transparent'}
-                />
-              </Pressable>
-              <Pressable
-                testID={`zmanim-remove-${id}`}
-                accessibilityRole="button"
-                accessibilityLabel={t('home.times.pins.remove', { name: name(id) })}
-                accessibilityHint={locked ? t('home.times.pins.lastOne') : undefined}
-                accessibilityState={{ disabled: locked }}
-                disabled={locked}
-                onPress={() => setShown(id, false)}
-                style={[styles.button, locked && styles.disabled]}
-              >
-                <MitzvahIcon name="close" size={ICON} color={colors.textSub} />
-              </Pressable>
-            </View>
-          );
-        })}
-        {addable.length ? <SectionLabel variant="field" text={t('home.times.pins.more')} style={styles.label} /> : null}
-        {addable.map((id) => (
-          <SheetAction
-            key={id}
-            label={name(id)}
-            caption={[t('home.times.pins.add'), reason(id) ?? (isZmanId(id) ? null : t('home.times.pins.notOnArc'))]
-              .filter(Boolean)
-              .join(' · ')}
-            onPress={() => setShown(id, true)}
-          />
-        ))}
+        <ZmanimPicker />
       </ScrollView>
     </BottomSheet>
   );

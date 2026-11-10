@@ -607,7 +607,7 @@
   "settings.halachaTimes": "זמני הלכה",
   "settings.halachaTimesSummary": "אילו זמנים מוצגים במסך הבית ואילו מועדפים",
   "settings.zmanimShown": "זמני היום במסך הבית",
-  "settings.zmanimShownHint": "בוחרים אילו זמנים מוצגים בקרוסלה ובמעגל של מסך הבית, מוסיפים זמנים שהמעגל לא מראה, כמו מנחה קטנה, ומסמנים מועדפים בכוכב. זה אותו מסך שנפתח מכפתור הזמנים שבקרוסלה.",
+  "settings.zmanimShownHint": "בוחרים אילו זמנים מוצגים בקרוסלה ובמעגל של מסך הבית, מוסיפים זמנים שהמעגל לא מראה, כמו מנחה קטנה, ומסמנים מועדפים בכוכב: הם תמיד מוצגים, עומדים ראשונים בקרוסלה ומופיעים ב״שלי״. אותה רשימה נפתחת גם מכפתור הזמנים שבקרוסלה.",
   "settings.deviceSummary": "מיקום, התראות, הרשאות, צבעים ושפה",
   "settings.deviceSummaryTaharah": "מיקום, התראות, הרשאות, טהרת המשפחה, צבעים ושפה",
   "settings.backupSummary": "ייצוא קובץ גיבוי, שחזור ממנו ואיפוס האפליקציה",
@@ -1804,7 +1804,6 @@
   "home.card.pinsNone": "בוחרים ב⭐ שבקרוסלה",
   "home.card.mineFull": "כבר נבחרו שלושה: הסר אחד כדי להוסיף",
   "home.times.pinsChip": "הזמנים שלי",
-  "settings.zmanimCount": "%{shown} זמנים בקרוסלה · מועדפים: %{pins}",
   "home.times.pins.shown": "בקרוסלה עכשיו",
   "home.times.pins.add": "הוספה לקרוסלה",
   "home.times.pins.starred": "מועדף",
@@ -1818,5 +1817,7 @@
   "home.zman.sofShmaMga.name": "סוף זמן קריאת שמע לשיטת המג״א",
   "home.zman.sofShmaMga.short": "ק״ש מג״א",
   "home.zman.sofShmaGra.name": "סוף זמן קריאת שמע לשיטת הגר״א",
-  "home.zman.sofShmaGra.short": "ק״ש גר״א"
+  "home.zman.sofShmaGra.short": "ק״ש גר״א",
+  "onboarding.zmanim.title": "אילו זמנים להציג?",
+  "onboarding.zmanim.hint": "הזמנים יופיעו בקרוסלה של מסך הבית. סמנו בכוכב את המועדפים, והם יעמדו ראשונים. אפשר לשנות בכל עת בהגדרות ← זמני הלכה."
 }

@@ -198,6 +198,7 @@ import OnboardingNoticeScreen from '../onboarding/notice';
 import OnboardingPermissionsScreen from '../onboarding/permissions';
 import OnboardingProfileScreen from '../onboarding/profile';
 import OnboardingReadyScreen from '../onboarding/ready';
+import OnboardingZmanimScreen from '../onboarding/zmanim';
 import TaharahLayout from '../taharah/_layout';
 import TaharahCalendarScreen from '../taharah/calendar';
 import TaharahDashboardScreen from '../taharah/index';
@@ -759,6 +760,13 @@ const CASES: SmokeCase[] = [
     Screen: OnboardingMitzvotScreen,
     fresh: true,
     check: text('אילו מצוות לעקוב?', 'Which mitzvot to track?'),
+  },
+  {
+    file: 'onboarding/zmanim',
+    label: 'times',
+    Screen: OnboardingZmanimScreen,
+    fresh: true,
+    check: text('אילו זמנים להציג?', 'Which times to show?'),
   },
   {
     file: 'onboarding/nusach',

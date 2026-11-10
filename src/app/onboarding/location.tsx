@@ -79,7 +79,7 @@ export default function OnboardingLocationScreen() {
         }}
       />
 
-      <OnboardingDots step={4} total={ONBOARDING_STEPS} style={styles.dots} />
+      <OnboardingDots step={5} total={ONBOARDING_STEPS} style={styles.dots} />
       <Button
         label={t('common.continue')}
         onPress={() => router.push('/onboarding/permissions')}

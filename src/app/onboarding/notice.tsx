@@ -30,7 +30,7 @@ export default function OnboardingNoticeScreen() {
           <AccuracyNotice />
         </Card>
       </ScrollView>
-      <OnboardingDots step={6} total={ONBOARDING_STEPS} style={styles.dots} />
+      <OnboardingDots step={7} total={ONBOARDING_STEPS} style={styles.dots} />
       <Button label={t('onboarding.noticeAccept')} onPress={() => router.push('/onboarding/ready')} />
       <Pressable onPress={() => router.back()} accessibilityRole="button" style={styles.backBtn}>
         <Text style={[typography.small, { color: colors.textSub }]}>{t('common.back')}</Text>

@@ -15,7 +15,7 @@ export default function OnboardingMitzvotScreen() {
   const { t } = useI18n();
   const router = useRouter();
   const { from } = useLocalSearchParams<{ from?: string }>();
-  const next = () => (from === 'ready' ? router.back() : router.push('/onboarding/location'));
+  const next = () => (from === 'ready' ? router.back() : router.push('/onboarding/zmanim'));
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top', 'bottom']}>

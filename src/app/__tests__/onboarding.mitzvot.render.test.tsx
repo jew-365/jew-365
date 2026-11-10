@@ -240,7 +240,7 @@ describe('Onboarding mitzvot step', () => {
     renderWithTheme(<OnboardingMitzvotScreen />);
     fireEvent.press(continueButton());
     expect(mockPush).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith('/onboarding/location');
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/zmanim');
     expect(mockBack).not.toHaveBeenCalled();
   });
 

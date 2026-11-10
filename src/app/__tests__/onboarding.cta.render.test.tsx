@@ -22,6 +22,7 @@ import NusachScreen from '../onboarding/nusach';
 import PermissionsScreen from '../onboarding/permissions';
 import ProfileScreen from '../onboarding/profile';
 import ReadyScreen from '../onboarding/ready';
+import OnboardingZmanimScreen from '../onboarding/zmanim';
 import { ONBOARDING_STEPS, OnboardingDots } from '@/components/OnboardingDots';
 import { CITIES, getLocationName } from '@/data/cities';
 import { translate } from '@/i18n';
@@ -145,17 +146,29 @@ describe('Onboarding Continue buttons', () => {
     ['profile', ProfileScreen, 1],
     ['nusach', NusachScreen, 2],
     ['mitzvot', OnboardingMitzvotScreen, 3],
-    ['location', OnboardingLocationScreen, 4],
-    ['permissions', PermissionsScreen, 5],
-    ['notice', NoticeScreen, 6],
-    ['ready', ReadyScreen, 7],
+    ['zmanim', OnboardingZmanimScreen, 4],
+    ['location', OnboardingLocationScreen, 5],
+    ['permissions', PermissionsScreen, 6],
+    ['notice', NoticeScreen, 7],
+    ['ready', ReadyScreen, 8],
   ])('draws the %s step as dot %i of ONBOARDING_STEPS', async (_name, Screen, step) => {
     renderWithTheme(<Screen />);
     await act(async () => {});
     expect(screen.UNSAFE_getByType(OnboardingDots).props).toMatchObject({ step, total: ONBOARDING_STEPS });
   });
 
-  it('counts eight onboarding steps', () => {
-    expect(ONBOARDING_STEPS).toBe(8);
+  it('counts nine onboarding steps', () => {
+    expect(ONBOARDING_STEPS).toBe(9);
+  });
+
+  it("the times step: the carousel's list, a star saved, and Continue to the location", async () => {
+    renderWithTheme(<OnboardingZmanimScreen />);
+    await act(async () => {});
+    expect(screen.getByText(he('onboarding.zmanim.title'))).toBeOnTheScreen();
+    expect(screen.getByTestId('zmanim-row-alot')).toBeOnTheScreen();
+    await act(async () => fireEvent.press(screen.getByTestId('zmanim-star-plag')));
+    expect(useUserStore.getState().zmanPins).toEqual(['plag']);
+    fireEvent.press(screen.getByRole('button', { name: he('common.continue') }));
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/location');
   });
 });
