@@ -510,7 +510,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Source:** the owner's report of 2026-11-10 on preview `1.0.21-77`, with a screenshot at 21:31: the star in the carousel does not work and its meaning is unclear, Mine has room for one starred time only, and the chip does not fill as planned.
   - **Found:** a starred time already past today stayed among the earlier times at the carousel's end, so a star showed nothing; nothing starred from the carousel itself; Mine joined every starred name into one cut value; and a chip filled only when its time was the end of an open window, which at night (Maariv and the bedtime Shema end at alot, not in the carousel) never happened.
   - **Done:** 2026-11-10: the starred times lead the carousel at their next time (`pinnedAhead()`: today's while ahead, else tomorrow's, labelled `home.times.tomorrowChip`), with a filled star; a long press on a time stars or unstars it (and a `longpress` accessibility action); Mine shows the next starred time as `home.card.pinsUntil` with the time left, the way Shabbat is shown; with no window closing at a time, the next time fills from the time before it. Checked in the web build at 15:40 and 20:30. Verified: `typecheck`, `lint`, `format:check`, `check:dox`, the full suite (6698 passed), `test:tz` on the carousel, the card and the board.
-  - **Status:** 1.0.21 · Committed: pending · Pushed: no · Live: no · Channel: none
+  - **Status:** 1.0.21 · Committed: `e517c85` fix(home): the carousel's star and fill that work · Pushed: yes · Live: preview `1.0.21-78` (group `539e9cae-410e-45ec-878a-c241f1dca73c`, from `e517c85`, 2026-11-10); production no · Channel: preview
 
 - [ ] The carousel's times kept in Settings and in onboarding
   - **Flag:** `OTA`.
