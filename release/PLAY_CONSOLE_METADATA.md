@@ -167,13 +167,15 @@ Questionnaire notes:
 
 ## Store Graphics
 
-The redesigned set made on 2026-10-21 replaced the temporary graphics of 2026-10-20 in the Hebrew default listing the same day; the English translation has no graphics of its own, so Play shows these. The files live outside the repo, in the user's `Downloads\jew365-play-assets\redesign`:
+The redesigned set made on 2026-10-21 replaced the temporary graphics of 2026-10-20 in the Hebrew default listing the same day. The icon and the feature graphic still are that set, in the user's `Downloads\jew365-play-assets\redesign`, and still show the four-symbol logo the app replaced with the bell and the open book on 2026-11-02:
 
-- App icon: 512x512, a downscale of [../assets/icon.png](../assets/icon.png), the launcher icon.
+- App icon: 512x512, a downscale of the launcher icon of that day.
 - Feature graphic: 1024x500, a cream background with the full logo, the name, the tagline and a one-line description.
-- Phone screenshots, 1080x1920 from the web build, in this order: Home, Siddur tab, Reader, History, Settings. The mitzvah detail screen is left out because the web build renders its switches broken.
 
-In the console (checked 2026-10-23) the default listing carries them as `v3-icon-512.png`, `v2-feature-graphic-1024x500.png` and `v2-1-home.png` to `v2-5-settings.png`, and the English translation shows the same files.
+Phone screenshots since 2026-11-10 (the owner's request, "תחליף את הצילומים שיתאימו לגרסה הנוכחית"): the `play-he` and `play-en` sets of `pnpm store:screenshots`, rendered from `acaa72f`, the commit of AAB versionCode 10, 1080x2160, seven each in this order: Home, Siddur tab, Reader (Mincha on Ashrei), History, Settings, Rabbi Shimon bar Yochai's page, the weekly report of 25–31.10. The Hebrew set is on the default listing (`iw-IL`, files `1-home.png` to `7-report.png`); the English set is on the `en-US` translation (`en-1-home.png` to `en-7-report.png`), which until then showed copies of the Hebrew ones. Not labelled as AI assets. Play took the 1:2 images without an error although its form names 16:9 and 9:16. The files live in the user's `Downloads\jew365-play-assets\2026-11-10\he` and `\en`.
+
+In the console (checked 2026-11-10) the default listing carries `v3-icon-512.png` and `v2-feature-graphic-1024x500.png`; the English translation showed the same two on 2026-10-23.
+
 ## Closed Test
 
 The Play Console account is personal, so production needs at least 12 testers opted in for 14 days in a row (see [../not-close.md](../not-close.md)).
@@ -281,4 +283,4 @@ Jew 365 arrives in the store: a reminder for each mitzvah in its halachic time a
 </en-US>
 ```
 
-The store listing went out as it stood (the copy and graphics of 2026-10-23); the copy and screenshots of 2026-11-01 stay held by the owner.
+The store listing's text and its icon and feature graphic went out as they stood (2026-10-23); its phone screenshots were replaced the same day with the set of `acaa72f` ([Store Graphics](#store-graphics)) and sent to review with the release. The copy of 2026-11-01 stays held by the owner.
