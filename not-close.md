@@ -509,7 +509,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Flag:** `OTA`.
   - **Source:** the owner's message of 2026-11-10: the + in the carousel (stars) and Settings → זמני הלכה (show or hide) looked like two copies of one feature; the + should also add times from the app's list. The owner chose option א (one sheet), with the added times on the carousel only, not the circle.
   - **Done:** 2026-11-10: [src/components/ZmanimSheet.tsx](src/components/ZmanimSheet.tsx), opened by the + chip and by Settings → זמני הלכה: each time in the carousel with a star and a remove button, then the times to add, the circle's hidden zmanim and `MORE_ZMANIM` (Mincha Ketana and the other opinion's latest Shema), carousel only. A star shows its time, comes first among the upcoming times and is named on Mine; a time taken off loses its star; the gold border stays on the time that comes next by the clock. Store fields `addedZmanim` and `setZmanPinned()`; no `STORE_VERSION` bump. Checked in the web build (the carousel with a starred plag first, the sheet). Verified: `typecheck`, `lint`, `format:check`, `check:dox`, the full suite (6689 passed), `test:tz` on the carousel, the arc, the sheet, home and Settings.
-  - **Status:** 1.0.21 · Committed: pending · Pushed: no · Live: no · Channel: none
+  - **Status:** 1.0.21 · Committed: `8cc0bed` feat(home): the carousel's times in one sheet: add, remove and favourites · Pushed: yes · Live: preview `1.0.21-76` (group `1f227183-1f32-4fa0-a601-695f25e271af`, from `8cc0bed`, 2026-11-10); production no · Channel: preview
 
 - [ ] Home's card in the sky's own glass
   - **Flag:** `OTA`.
