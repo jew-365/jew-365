@@ -108,6 +108,8 @@ describe('Onboarding mitzvot step', () => {
           (mitzvah) =>
             mitzvah.id !== CHOK_TEXT_ID &&
             mitzvah.id !== 'shnayim_mikra' &&
+            mitzvah.id !== 'halacha_yomit' &&
+            mitzvah.id !== 'hilchot_hachag' &&
             mitzvah.nuschaotSupported.includes('ashkenaz'),
         ).map((mitzvah) => mitzvah.name.he),
         HILULOT,

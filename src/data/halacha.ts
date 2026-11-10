@@ -42,3 +42,19 @@ export const FESTIVAL_PERIOD_DAYS: Readonly<Record<FestivalKey, number>> = {
 };
 
 export const FESTIVAL_KEYS = Object.keys(FESTIVAL_PERIOD_DAYS) as FestivalKey[];
+
+// Each festival's name, as the reminders and the reader name it.
+export const FESTIVAL_NAMES: Readonly<Record<FestivalKey, { he: string; en: string }>> = {
+  pesach: { he: 'פסח', en: 'Pesach' },
+  shavuot: { he: 'שבועות', en: 'Shavuot' },
+  sukkot: { he: 'סוכות', en: 'Sukkot' },
+  rosh_hashanah: { he: 'ראש השנה', en: 'Rosh Hashanah' },
+  yom_kippur: { he: 'יום הכיפורים', en: 'Yom Kippur' },
+  chanukah: { he: 'חנוכה', en: 'Chanukah' },
+  purim: { he: 'פורים', en: 'Purim' },
+  tisha_bav: { he: 'תשעה באב', en: "Tisha B'Av" },
+  tzom_gedaliah: { he: 'צום גדליה', en: 'Tzom Gedaliah' },
+  asara_betevet: { he: 'עשרה בטבת', en: 'Asara BeTevet' },
+  taanit_esther: { he: 'תענית אסתר', en: "Ta'anit Esther" },
+  shiva_asar_betammuz: { he: 'שבעה עשר בתמוז', en: 'Shiva Asar BeTammuz' },
+};

@@ -4,6 +4,8 @@ import { ComputeContext, LibraryGroup, Mitzvah, MitzvahWindow, Nusach } from '@/
 import { Location, Zmanim } from '@/types/zmanim';
 import { CHOK_TEXT_ID, hasChokContent } from '@/data/chok';
 import { SHNAYIM_TEXT_ID, hasShnayimContent } from '@/data/shnayim';
+import { FESTIVAL_NAMES, HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID } from '@/data/halacha';
+import { halachaYomitOn, hilchotHachagOn } from '@/data/halachaContent';
 import { NUSACH_IDS } from '@/data/nuschaot';
 import { hasSelichotContent } from '@/data/selichot';
 import { MIDNIGHT_TO_MORNING_PRAYER, siddurPlace, standaloneAvailability } from '@/data/siddur';
@@ -155,6 +157,87 @@ export const CHOK_LEYISRAEL: Mitzvah = {
     const block = HebcalService.holyBlockOn(day.plus({ days: 1 }).toJSDate(), ctx.location);
     return win(ctx.zmanim.alotHaShachar, block?.start ?? nextAlot(ctx));
   },
+};
+
+// The civil day a window is keyed on, at its device-local midnight, for the halacha schedules.
+function civilDayOf(ctx: ComputeContext): Date {
+  const day = dayOf(ctx.zmanim, ctx.location);
+  return new Date(day.year, day.month - 1, day.day);
+}
+
+const halachaYomitOf = (ctx: ComputeContext) =>
+  halachaYomitOn(civilDayOf(ctx), ctx.settings.nusach, ctx.settings.inIsrael);
+
+const hilchotHachagOf = (ctx: ComputeContext) => hilchotHachagOn(civilDayOf(ctx), ctx.settings.nusach)[0] ?? null;
+
+// The daily halacha (.claude/specs/halacha-yomit.md, section 8): the user's track (Settings, else the nusach's book),
+// every day from alot to the next alot, Shabbat and Yom Tov included (D9: asked in the check-in, made up afterwards),
+// `null` while the track is not installed or the day has no portion.
+export const HALACHA_YOMIT: Mitzvah = {
+  id: HALACHA_YOMIT_ID,
+  name: { he: 'הלכה יומית', en: 'Daily Halacha' },
+  icon: 'chok',
+  timeType: 'range-within-day',
+  category: 'learning',
+  group: 'other',
+  skipOn: [],
+  nuschaotSupported: ALL_NUSCHAOT,
+  defaultReminders: [
+    {
+      anchor: 'clock',
+      offsetMin: 8 * 60,
+      label: 'זמן ההלכה היומית',
+      bodyVariants: [
+        'זמן ההלכה היומית: %{portion}',
+        'ההלכה של היום מחכה לך: %{portion}',
+        'כמה דקות של הלכה: %{portion}',
+      ],
+    },
+  ],
+  bodyParams: (ctx) => {
+    const today = halachaYomitOf(ctx);
+    if (!today) return null;
+    const { book, portion } = today;
+    return { portion: { he: `${book.he}, ${portion.label.he}`, en: `${book.en}, ${portion.label.en}` } };
+  },
+  bodyKey: 'notifications.halachaYomit',
+  computeWindow: (ctx) => (halachaYomitOf(ctx) ? win(ctx.zmanim.alotHaShachar, nextAlot(ctx)) : null),
+};
+
+// The halachot before a festival (section 7): on each day of a period the user's track covers, from alot to the next
+// alot; the reminder names the nearer festival of an overlap and the days left to it.
+export const HILCHOT_HACHAG: Mitzvah = {
+  id: HILCHOT_HACHAG_ID,
+  name: { he: 'הלכות החג', en: 'Halachot of the Festival' },
+  icon: 'chok',
+  timeType: 'annual-seasonal',
+  category: 'learning',
+  group: 'other',
+  skipOn: [],
+  nuschaotSupported: ALL_NUSCHAOT,
+  defaultReminders: [
+    {
+      anchor: 'clock',
+      offsetMin: 19 * 60,
+      label: 'זמן הלכות החג',
+      bodyVariants: [
+        'זמן הלכות החג: %{chag}, %{when}',
+        'לקראת %{chag}, %{when}: ההלכות של היום',
+        'הכנה ל%{chag}, %{when}: כמה דקות של הלכות החג',
+      ],
+    },
+  ],
+  bodyParams: (ctx) => {
+    const today = hilchotHachagOf(ctx);
+    if (!today) return null;
+    const left = today.period.daysLeft;
+    return {
+      chag: FESTIVAL_NAMES[today.period.festival],
+      when: left === 1 ? { he: 'מחר', en: 'tomorrow' } : { he: `בעוד ${left} ימים`, en: `in ${left} days` },
+    };
+  },
+  bodyKey: 'notifications.hilchotHachag',
+  computeWindow: (ctx) => (hilchotHachagOf(ctx) ? win(ctx.zmanim.alotHaShachar, nextAlot(ctx)) : null),
 };
 
 // Shnayim Mikra ve'Echad Targum (the owner's call, 2026-11-09): Chok LeYisrael's learning day and add-on, an aliyah a day.
@@ -543,6 +626,8 @@ export const MITZVOT: Mitzvah[] = [
       return win(opens, kiddushLevanaPeriod(night, ctx.settings.nusach, ctx.location).end);
     },
   },
+  HALACHA_YOMIT,
+  HILCHOT_HACHAG,
   SHNAYIM_MIKRA,
   CHOK_LEYISRAEL,
 ];

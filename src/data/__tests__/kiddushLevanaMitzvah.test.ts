@@ -143,7 +143,7 @@ describe('the Kiddush Levana registry entry', () => {
     expect(MITZVAH_STANDALONE_TEXT.kiddush_levana).toBe('kiddush_levana');
     expect(isMensMitzvah('kiddush_levana')).toBe(true);
     const ids = MITZVOT.map((mitzvah) => mitzvah.id);
-    expect(ids.indexOf('kiddush_levana')).toBe(ids.indexOf('shnayim_mikra') - 1);
+    expect(ids.indexOf('kiddush_levana')).toBe(ids.indexOf('halacha_yomit') - 1);
     expect(MITZVOT.filter((mitzvah) => mitzvah.multiDay).map((mitzvah) => mitzvah.id)).toEqual(['kiddush_levana']);
   });
 });

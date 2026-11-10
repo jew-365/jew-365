@@ -52,7 +52,7 @@
   - **Rows:** `useDayModel().allMitzvot` (filtered by nusach, in registry order, customs by `createdAt`, never re-sorted, so a row does not jump when its switch flips), each a [ListRow](ListRow.tsx) with a `Switch` as `trailing`. `other` ends with the hilulot and Rosh Chodesh setting rows. The user asked for them on 2026-10-08 and 2026-10-11; they are settings, so they stay out of `MITZVOT`.
   - **Caption:** the first that applies of:
     - `custom.ended` for an ended custom mitzvah (`customEndedOn()` against `appDayKey()` of now, worded by `scheduleDateLabel()`), shown off whatever the store holds;
-    - `chokAddonCaption()` for Chok LeYisrael while its add-on is missing, shown off;
+    - `chokAddonCaption()` for Chok LeYisrael while its add-on is missing, `shnayimAddonCaption()` for Shnayim Mikra, and `addonCaption('halacha.addon', …)` for the daily halacha and the halachot of the festival while the user's track (`effectiveHalachaTrack()` of `halachaTrack` and the nusach) is not installed, each shown off, its switch opening the mitzvah screen, and left out of the onboarding step;
     - `library.notForWomen` for a `MENS_MITZVOT` id when `gender === 'female'`, whose switch still works;
     - otherwise `library.category.<category>`.
   - **Switches:** a mitzvah's goes through `setMitzvahEnabled()` and a setting row's through `setNoticesEnabled()` of [useNeedsReminderDialog()](../hooks/useNeedsReminderDialog.tsx); the list renders its `dialog`.
