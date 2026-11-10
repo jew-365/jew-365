@@ -17,6 +17,12 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-11-10 — Pages: the Rambam add-on without Mechon Mamre's text
+
+- **No Mechon Mamre text in the Rambam add-on** — the build refuses any Sefaria version whose source is mechon-mamre.org, whatever its title (`BANNED_SOURCE` in [scripts/halacha/tracks.js](scripts/halacha/tracks.js), checked in `readRambam()` of [scripts/halacha/build.js](scripts/halacha/build.js)), so the Positive Mitzvot come from Wikisource (CC-BY-SA, all 248) and the Rambam track of [docs/halacha/rambam/](docs/halacha/rambam) rose to version 2. Mechon Mamre's terms allow private study and teaching only, "not for publishing in any form, including any Web site", and Sefaria serves its text under two titles. No request was sent; the drafted message stays in section 1 of [release/licence-requests.md](release/licence-requests.md).
+  - Requested: the batch "Licence requests, 2026-11-10" (the owner's request for permission letters), then the owner, the same day, in Hebrew: "לגבי מכון ממרא יש איך לעקוף אותם ולא להשתמש בהם?". Done: 2026-11-10. Verified: a new case in [scripts/halacha/__tests__/build.test.js](scripts/halacha/__tests__/build.test.js) (no unit or manifest credit from that source, the Positive Mitzvot credited to Wikisource) and the halacha suites (97 tests) green; `curl` of `https://jew-365.github.io/jew-365/halacha/rambam/manifest.json` on 2026-11-10 read version 2 with the credits Wikisource and Torat Emet 363 only.
+  - Version: Pages · Committed: yes, `f5e3af0` fix(halacha): no Mechon Mamre text in the Rambam add-on · Pushed: yes · Live: https://jew-365.github.io/jew-365/halacha/rambam/manifest.json (version 2, read 2026-11-10) · Channel: —
+
 ## 2026-11-09 — production update 1.0.21-17: reminders placed against the critical zone, the night mitzvot's ideal and last times, זמני הלכה, and the optional profile questions
 
 - **Requested:** the owner, 2026-11-09: "תעשה ota לפרודקשן וגם לפריויו" (this replaces the hold of 2026-11-08, "בוא נחכה", for the OTA; the store uploads stay held).

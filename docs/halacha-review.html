@@ -1088,6 +1088,135 @@ main .rv-rule li {
       </li>
     </ol>
 
+
+    <h3>הלכה יומית והלכות החג</h3>
+    <p class="rv-group-note">שתי מצוות לימוד חדשות: ״הלכה יומית״, מנה בכל יום מספר הלכה לפי הנוסח, ו״הלכות החג״, בימים שלפני כל חג וצום. הכללים עדיין אינם אצל המשתמשים: הם יוצאים לכולם רק אחרי תשובת הרב.</p>
+    <ol class="rv-items">
+      <li id="r17-1" class="rv-item" data-key="R17.1" data-title="הלכה יומית — הספר לפי הנוסח">
+        <p class="rv-q"><span class="rv-num">17.1</span> האם נכון ללמוד בהלכה היומית ובהלכות החג מתוך הספר שנקבע לכל נוסח?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה</p>
+          <ul>
+            <li>אשכנז וספרד: קיצור שולחן ערוך. עדות המזרח: בן איש חי (ההלכות בלבד, בלי הדרשות). חב״ד ותימן: משנה תורה לרמב״ם, פרק אחד ליום, לפי מחזור הרמב״ם היומי.</li>
+            <li>המשתמש יכול לבחור בהגדרות ספר אחר מבין השלושה, וספר אחד משמש לשתי המצוות.</li>
+            <li>ספרים שעדיין מוגנים בזכויות יוצרים (ילקוט יוסף, שולחן ערוך המקוצר, פניני הלכה) אינם בכלל עד שתתקבל רשות.</li>
+          </ul>
+        </div>
+        <p class="source">החלטה של האפליקציה לפי מה שנהוג בכל עדה; הטקסטים מספריא (תורת אמת, ויקיטקסט).</p>
+        <p class="source">מקום בקוד: <code>defaultHalachaTrack()</code> ב־<code>src/data/halacha.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 17.1"><label><input type="radio" name="r17-1" value="נכון">נכון</label><label><input type="radio" name="r17-1" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r17-1-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r17-2" class="rv-item" data-key="R17.2" data-title="הלכה יומית — סדר הבן איש חי">
+        <p class="rv-q"><span class="rv-num">17.2</span> האם נכון לחלק את הבן איש חי כך?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה</p>
+          <ul>
+            <li>ההלכות של פרשת השבוע מחולקות שווה בשווה על שבעת ימי השבוע, ראשון עד שבת, לפי הסדר; בשבוע של פרשות מחוברות ההלכות של שתיהן יחד.</li>
+            <li>שתי השנים מתחלפות לפי השנה העברית של שבת השבוע: שנה אי־זוגית קוראת את השנה הראשונה (תשפ״ז היא הראשונה). בהגדרות אפשר להחליף בין השנים.</li>
+            <li>פרשה שאין לה הלכות בשנה השנייה (במדבר, דברים, נצבים, וילך, האזינו, וזאת הברכה) קוראת את הראשונה; ובשנה השנייה בפרשת וישב, שבה המחבר כותב שהוא דורש בכל שנה בהלכות חנוכה, נקראות הלכות חנוכה של השנה הראשונה.</li>
+          </ul>
+        </div>
+        <p class="source">בן איש חי (ויקיטקסט, דרך ספריא). סדר השנים הוא החלטה של בעל האפליקציה (תשובה לשאלה Q30), ולא נמצא לו מקור מוסכם.</p>
+        <p class="source">מקום בקוד: <code>halachaPortion()</code> ו־<code>benIshChaiYearOf()</code> ב־<code>src/utils/halacha.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 17.2"><label><input type="radio" name="r17-2" value="נכון">נכון</label><label><input type="radio" name="r17-2" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r17-2-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r17-3" class="rv-item" data-key="R17.3" data-title="הלכה יומית — שבת וחג">
+        <p class="rv-q"><span class="rv-num">17.3</span> האם נכון שגם לשבת ולחג יש מנה, שלומדים מספר ומסמנים אחר כך?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה</p>
+          <ul>
+            <li>לשבת ולחג יש מנה כמו לכל יום. האפליקציה סגורה בהם, ולכן הם נשאלים בסיכום שאחרי השבת או החג ואפשר לסמן אותם עד עלות השחר של יום החול הראשון אחריהם.</li>
+            <li>בקורא, יום שלא סומן מתוך שבעת הימים האחרונים מופיע כ״השלמה״ מקופלת ואפשר ללמוד ולסמן אותו בדיעבד.</li>
+          </ul>
+        </div>
+        <p class="source">החלטה של האפליקציה.</p>
+        <p class="source">מקום בקוד: החלון של <code>halacha_yomit</code> ו־<code>hilchot_hachag</code> ב־<code>src/data/mitzvot.ts</code>, ו־<code>halachaMakeUpDays()</code> ב־<code>src/data/halachaContent.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 17.3"><label><input type="radio" name="r17-3" value="נכון">נכון</label><label><input type="radio" name="r17-3" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r17-3-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r17-4" class="rv-item" data-key="R17.4" data-title="הלכות החג — התקופות">
+        <p class="rv-q"><span class="rv-num">17.4</span> האם התקופות שבהן לומדים הלכות החג נכונות?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה</p>
+          <ul>
+            <li>פסח, שבועות וסוכות: שלושים יום לפני החג (פסח מפורים, שבועות מה׳ באייר, סוכות מי״ד באלול).</li>
+            <li>ראש השנה: מראש חודש אלול, 29 יום. יום הכיפורים: מג׳ בתשרי, 7 ימים. חנוכה ופורים: 14 יום. תשעה באב: מי״ז בתמוז, 21 יום. ארבעת הצומות הקלים: 3 ימים כל אחד.</li>
+            <li>התקופה נגמרת בערב החג. צום שנדחה משבת נלמד לפי היום שבו צמים. כששתי תקופות חופפות, לומדים את שתיהן, הקרוב קודם.</li>
+          </ul>
+        </div>
+        <p class="source">פסחים ו ע״א ושולחן ערוך אורח חיים תכט, א (שואלין ודורשין בהלכות הפסח קודם הפסח שלושים יום); הב״ח מרחיב לשבועות ולסוכות. התקופות לשאר החגים הן החלטה של האפליקציה.</p>
+        <p class="source">מקום בקוד: <code>FESTIVAL_PERIOD_DAYS</code> ב־<code>src/data/halacha.ts</code>, ו־<code>festivalDays()</code> ו־<code>festivalPeriodsOn()</code> ב־<code>src/utils/halacha.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 17.4"><label><input type="radio" name="r17-4" value="נכון">נכון</label><label><input type="radio" name="r17-4" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r17-4-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r17-5" class="rv-item" data-key="R17.5" data-title="הלכות החג — ביום החג עצמו">
+        <p class="rv-q"><span class="rv-num">17.5</span> האם נכון שביום החג עצמו (גם בחנוכה ובפורים) אין מנה של הלכות החג?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה</p>
+          <ul>
+            <li>הלימוד נגמר בערב החג. ביום טוב האפליקציה סגורה; בחנוכה ובפורים אין מנה בימי החג עצמם.</li>
+          </ul>
+        </div>
+        <p class="source">החלטה של האפליקציה.</p>
+        <p class="source">מקום בקוד: <code>festivalPeriodsOn()</code> ב־<code>src/utils/halacha.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 17.5"><label><input type="radio" name="r17-5" value="נכון">נכון</label><label><input type="radio" name="r17-5" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r17-5-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r17-6" class="rv-item" data-key="R17.6" data-title="הלכה יומית — תשעה באב">
+        <p class="rv-q"><span class="rv-num">17.6</span> האם נכון שבתשעה באב ההלכה היומית מוצגת כמו בכל יום?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה</p>
+          <ul>
+            <li>האפליקציה אינה מדלגת על ההלכה היומית בתשעה באב ואינה מחליפה אותה בהלכות האבלות.</li>
+          </ul>
+        </div>
+        <p class="source">החלטה של האפליקציה, שממתינה להוראת הרב.</p>
+        <p class="source">מקום בקוד: <code>halachaYomitOn()</code> ב־<code>src/data/halachaContent.ts</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 17.6"><label><input type="radio" name="r17-6" value="נכון">נכון</label><label><input type="radio" name="r17-6" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r17-6-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r17-7" class="rv-item" data-key="R17.7" data-title="הלכות החג — מה נלמד לכל חג">
+        <p class="rv-q"><span class="rv-num">17.7</span> האם החלקים שנבחרו מכל ספר לכל חג נכונים?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה</p>
+          <ul>
+            <li>קיצור שולחן ערוך: פסח סימנים קז–קיט, שבועות צח–קג (הלכות יום טוב), סוכות קלד–קלח, ראש השנה קכח–קל, יום הכיפורים קלא–קלג, חנוכה קלט, פורים קמ–קמב, תשעה באב קכב–קכו, הצומות הקלים קכא.</li>
+            <li>רמב״ם: פסח הלכות חמץ ומצה; שבועות הלכות שביתת יום טוב; סוכות הלכות שופר וסוכה ולולב ד–ח; ראש השנה שם א–ג והלכות תשובה; יום הכיפורים הלכות שביתת עשור; חנוכה הלכות מגילה וחנוכה ג–ד; פורים שם א–ב; תשעה באב הלכות תעניות ה; הצומות הקלים הלכות תעניות א–ד.</li>
+            <li>בן איש חי (שנה ראשונה): פסח פרשת צו; שבועות במדבר (הלכות יום טוב); סוכות האזינו ווזאת הברכה; ראש השנה נצבים; יום הכיפורים וילך; חנוכה הלכות חנוכה; פורים תצוה מהלכה כד (הלכות א–כג הן ברכת כהנים); תשעה באב דברים. לצומות הקלים אין בבן איש חי הלכות, ולכן אין בהם מנה למי שלומד בו.</li>
+            <li>כל חלק מחולק שווה על ימי התקופה, לפי הסדר. חלק קצר מהתקופה מתחיל מאוחר יותר, הלכה אחת ליום (למשל ראש השנה בבן איש חי מה׳ באלול, ותשעה באב ברמב״ם מי״ט בתמוז).</li>
+          </ul>
+        </div>
+        <p class="source">כותרות הסימנים וההלכות עצמן, שנבדקו מול הטקסטים בספריא ב־י׳ בחשון תשפ״ז.</p>
+        <p class="source">מקום בקוד: <code>FESTIVAL_MATERIAL</code> ב־<code>scripts/halacha/tracks.js</code>, והקבצים ב־<code>docs/halacha/</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 17.7"><label><input type="radio" name="r17-7" value="נכון">נכון</label><label><input type="radio" name="r17-7" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r17-7-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+      <li id="r17-8" class="rv-item" data-key="R17.8" data-title="הלכה יומית — לוח הקיצור בשנה מעוברת">
+        <p class="rv-q"><span class="rv-num">17.8</span> האם נכון סדר הקיצור בשנה מעוברת ובימים שאין בהם לימוד?</p>
+        <div class="rv-rule">
+          <p class="rv-rule-title">מה האפליקציה עושה</p>
+          <ul>
+            <li>בשנה מעוברת: באדר א׳ נלמדת החזרה על הלכות ברכות ותפילה (האפשרות ב׳ של הלוח), ובאדר ב׳ נלמד אדר של הלוח, כך שהלכות פורים ופסח נשארות לפני החגים. לוח Hebcal מסדר הפוך: אדר של הלוח באדר א׳ והחזרה באדר ב׳.</li>
+            <li>אין לימוד בל׳ בחשון (כשחשון מלא), בל׳ באדר א׳ ובט״ו באלול (שבלוח מוקדש ל״כללים״ שאינם בטקסט). כשכסלו חסר, לומדים בכ״ט את של כ״ט ושל ל׳ יחד.</li>
+          </ul>
+        </div>
+        <p class="source">לוח קיצור שולחן ערוך היומי כפי ש־Hebcal מפרסם (@hebcal/learning 6.13.1), עם התיקונים שבקובץ הלוח; הערת הלוח מציעה להתחיל את החזרה בכ״ג באדר א׳.</p>
+        <p class="source">מקום בקוד: <code>halachaPortion()</code> ב־<code>src/utils/halacha.ts</code> ו־<code>scripts/halacha/schedules/kitzur.json</code>.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 17.8"><label><input type="radio" name="r17-8" value="נכון">נכון</label><label><input type="radio" name="r17-8" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="r17-8-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+      </li>
+    </ol>
+
     <label class="rv-field rv-general" for="rv-general">הערות על כל כלל אחר בדף (רשות)
       <textarea id="rv-general" name="general" rows="4"></textarea>
     </label>
@@ -1113,7 +1242,7 @@ main .rv-rule li {
 <script>
 (() => {
   const ENDPOINT = 'https://formspree.io/f/xwlvgagp';
-  const RULES_VERSION = '7';
+  const RULES_VERSION = '8';
   const DRAFT_KEY = 'jew365-halacha-review-v1';
   const RIGHT = 'נכון';
   const WRONG = 'לא נכון';

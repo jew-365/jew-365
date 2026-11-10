@@ -86,6 +86,9 @@ import { getLocationName } from '@/data/cities';
 import type { ChokThuNightDay } from '@/types/chok';
 import { findMitzvah } from '@/data/mitzvot';
 import { NUSACH_IDS } from '@/data/nuschaot';
+import { HALACHA_TRACKS, defaultHalachaTrack, effectiveHalachaTrack } from '@/data/halacha';
+import { HDate } from '@hebcal/core';
+import { benIshChaiYearOf } from '@/utils/halacha';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { NagLevel, Nusach } from '@/types/mitzvah';
 import { countsInDayEstimate, remindersPerDay } from '@/utils/nagging';
@@ -151,6 +154,10 @@ export default function SettingsScreen() {
       siddurVoice: s.siddurVoice,
       chokCommentaryOpen: s.chokCommentaryOpen,
       chokThuNightDay: s.chokThuNightDay,
+      halachaTrack: s.halachaTrack,
+      setHalachaTrack: s.setHalachaTrack,
+      benIshChaiYearSwapped: s.benIshChaiYearSwapped,
+      setBenIshChaiYearSwapped: s.setBenIshChaiYearSwapped,
       hiddenZmanim: s.hiddenZmanim,
       taharahEnabled: s.taharahEnabled,
       weeklyReportEnabled: s.weeklyReportEnabled,
@@ -187,6 +194,7 @@ export default function SettingsScreen() {
       setKsOpinion: s.setKsOpinion,
     })),
   );
+  const halachaTrack = effectiveHalachaTrack(user.halachaTrack, user.nusach);
   const enabledMitzvotCount = useMitzvotStore(selectEnabledCount(user.nusach));
   const dayEstimate = useMitzvotStore(selectDayEstimate(user.nusach, user.nagLevel));
   const nagQuietHours = useMemo(
@@ -598,6 +606,31 @@ export default function SettingsScreen() {
                     onSelect={user.setChokThuNightDay}
                     renderLabel={(value) => t(`chok.thuNight.${value}`)}
                   />
+                </Anchor>
+                <Anchor {...anchor('halachaTrack')}>
+                  <SectionLabel variant="field" text={t('settings.halachaTrack')} style={styles.fieldLabel} />
+                  <ChipRow
+                    values={HALACHA_TRACKS}
+                    selected={halachaTrack}
+                    onSelect={(track) =>
+                      user.setHalachaTrack(track === defaultHalachaTrack(user.nusach) ? null : track)
+                    }
+                    renderLabel={(track) => t(`halacha.book.${track}`)}
+                  />
+                  <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>
+                    {t('settings.halachaTrackHint', { book: t(`halacha.book.${defaultHalachaTrack(user.nusach)}`) })}
+                  </Text>
+                  {halachaTrack === 'ben_ish_chai' ? (
+                    <SwitchRow
+                      label={t('settings.benIshChaiYearSwapped')}
+                      hint={t('settings.benIshChaiYearHint', {
+                        year: t(`settings.benIshChaiYear.${benIshChaiYearOf(new HDate(), user.benIshChaiYearSwapped)}`),
+                      })}
+                      value={user.benIshChaiYearSwapped}
+                      onValueChange={user.setBenIshChaiYearSwapped}
+                      style={styles.groupGap}
+                    />
+                  ) : null}
                 </Anchor>
                 <Anchor {...anchor('amidahPersonal')}>
                   <View style={styles.fieldLabel}>

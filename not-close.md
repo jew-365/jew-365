@@ -622,7 +622,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** D10: the user downloads only the chosen track.
   - **Expected result:** `src/services/__tests__/HalachaContentService.test.ts` and the shared [addonContent.test.ts](src/services/__tests__/addonContent.test.ts) green: download, verify, update, a removed file dropping the install, a track switch; the store out of the backup file and the Android whitelist.
   - **Done:** 2026-11-10. [src/services/HalachaContentService.ts](src/services/HalachaContentService.ts) on the shared core, one pack each for the Kitzur, its English, Ben Ish Chai and the Rambam; [src/stores/useHalachaStore.ts](src/stores/useHalachaStore.ts) with one store per pack (`halacha-<pack>-store`, a deviation from the spec's single `halacha-store` so the core drives each unchanged, written back into spec 10); [src/services/halachaFiles.ts](src/services/halachaFiles.ts), [src/data/halachaContent.ts](src/data/halachaContent.ts) (`halachaScheduleOf()`, `hasHalachaContent()`) and the unit loaders in [src/services/SiddurService.ts](src/services/SiddurService.ts). Two small additions to the core ([src/services/addons/addonContent.ts](src/services/addons/addonContent.ts)): keys read from the manifest, and `extraFiles`, which writes each install's `schedule.json` before the install is recorded. Wired into the reset, the launch and restore reconcile and the scheduler's rebuild; out of the backup file (its pinned list unchanged). Verified: [src/services/__tests__/HalachaContentService.test.ts](src/services/__tests__/HalachaContentService.test.ts) (16, the four published manifests accepted among them), the Kitzur case added to [src/services/__tests__/addonContent.test.ts](src/services/__tests__/addonContent.test.ts) (45), the reset case in [src/services/__tests__/AppResetService.test.ts](src/services/__tests__/AppResetService.test.ts), and the reset, backup, scheduler, root layout, Chok, Selichot and Siddur suites green unchanged. Nothing offers the download yet; when the task "Offer the download, the switches and the track choice" does, the privacy policies' GitHub line names the halacha files too ([docs/AGENTS.md](docs/AGENTS.md)).
-  - **Status:** Version: OTA (nothing offers it yet) · Committed: yes, `ee4288f` feat(halacha): the add-on's stores and download service, and `c493a0e` test(errors): stub the halacha files in the reset's error suite · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA · Committed: yes, `ee4288f` feat(halacha): the add-on's stores and download service, and `c493a0e` test(errors): stub the halacha files in the reset's error suite · Pushed: yes · Live: no · Channel: none
 
 - [x] Add the two mitzvot to the registry
   - **Flag:** `OTA`.
@@ -630,7 +630,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** The two mitzvot of the request, with reminders, home, history and the check-in.
   - **Expected result:** `src/data/__tests__/halachaMitzvot.test.ts` green under `pnpm test:tz`: `null` windows without the track's add-on, a window every day with it, the check-in after Shabbat and a two-day Yom Tov, the reminder bodies naming the portion, the festival and the days left in both languages, nothing inside a block.
   - **Done:** 2026-11-10. `HALACHA_YOMIT` and `HILCHOT_HACHAG` in [src/data/mitzvot.ts](src/data/mitzvot.ts) between Kiddush Levana and Shnayim Mikra, reading the user's track through `halachaYomitOn()` and `hilchotHachagOn()` of [src/data/halachaContent.ts](src/data/halachaContent.ts): windows alot to the next alot on a day with a portion, Shabbat and Yom Tov included (D9); one `clock` reminder each, 08:00 and 19:00; `bodyParams` with the portion (book and label) and the festival with the days left (`מחר` on the erev); `PERFORM_MIN` 10, the `learning` zone and the verb `ללמוד` in [src/utils/nagging.ts](src/utils/nagging.ts); both dictionaries, the `halacha.addon` copy and the book names included. The library shows each row off with the add-on caption while the track is not installed and the onboarding step leaves them out, as for Chok LeYisrael. Verified: [src/data/__tests__/halachaMitzvot.test.ts](src/data/__tests__/halachaMitzvot.test.ts) (15) green under `pnpm test:tz`: no window without the track, another track's install or on 30 Cheshvan 5787; the user's track over the nusach's; the reminder bodies in Hebrew and English; 08:00 reminders on weekdays and none inside Shabbat; the check-in after Shabbat and after a two-day Shavuot abroad; the festival periods' edges, the days left, an overlap's nearer festival and Ben Ish Chai's missing minor fasts. The library, onboarding, guide and Kiddush Levana suites updated to the new registry order, and `pnpm guide:build` rerun for the mitzvot list.
-  - **Status:** Version: OTA (nothing offers the download yet) · Committed: yes, `7b51bc3` feat(halacha): the daily halacha and the festival halachot in the registry (full `pnpm test:tz` green in all four zones, 6572 tests) · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA · Committed: yes, `7b51bc3` feat(halacha): the daily halacha and the festival halachot in the registry (full `pnpm test:tz` green in all four zones, 6572 tests) · Pushed: yes · Live: no · Channel: none
 
 - [x] Read both mitzvot in the nusach reader
   - **Flag:** `OTA`.
@@ -638,33 +638,41 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** D2 and the reading itself.
   - **Expected result:** `src/app/__tests__/halachaReader.render.test.tsx` green under `pnpm test:tz`, and the Chok LeYisrael and Shnayim Mikra reader suites green unchanged.
   - **Done:** 2026-11-10. The reader of [src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>) reads both ids by date (the spec's date-keyed choice, the Chok LeYisrael program untouched): `halachaReadingsOn()` of [src/data/halachaContent.ts](src/data/halachaContent.ts) gives the day's portions, `halachaText()` of [src/utils/halachaText.ts](src/utils/halachaText.ts) builds the text from the installed units (each piece grouped by its siman or chapter, a festival heading and the portion's label above each reading, the units' credits under the text, the Kitzur's English beside the Hebrew in English while its pack is installed, else a Hebrew-only banner). "סיימתי" only while the mitzvah is on; `halachaMakeUpDays()` folds the last seven unmarked days that ended after the switch-on, newest first, the festival halachot only of the periods in effect; a `DayStepper` browses other days read only (the festival halachot within the period) with a note and a way back. `hasSiddurText()` answers both ids and `nextMitzvahTextWindow()` finds the next period off season. Verified: `src/app/__tests__/halachaReader.render.test.tsx` (11) green under `pnpm test:tz`, over the published units of [docs/halacha/](docs/halacha); the Chok LeYisrael, Shnayim Mikra, siddur reader, linked-text, mitzvah, smoke and design-system suites green unchanged.
-  - **Status:** Version: OTA (nothing offers the download yet) · Committed: yes, `5d27430` feat(halacha): read the daily halacha and the festival halachot in the reader (full `pnpm test:tz` green in all four zones, 6583 tests) · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA · Committed: yes, `5d27430` feat(halacha): read the daily halacha and the festival halachot in the reader (full `pnpm test:tz` green in all four zones, 6583 tests) · Pushed: yes · Live: no · Channel: none
 
 ### Medium — Daily halacha and festival halachot
 
-- [ ] Offer the download, the switches and the track choice
+- [x] Offer the download, the switches and the track choice
   - **Flag:** `OTA`.
   - **What it is:** `AddonCard` on both mitzvah screens, the More tab rows, the siddur tab's learning group, the library rows, the enable prompt after a download, the track select (`OptionSelect`) in Settings → Prayer (spec 3, 10), and, while the track is Ben Ish Chai, which year this Hebrew year reads (`useUserStore.benIshChaiYearSwapped`, Q30). The privacy policies' GitHub line (both languages) names the halacha files once the app downloads them.
   - **What it solves:** D8 and the owner's "שינתן למשתמש אפשרות להחליף".
   - **Expected result:** The settings, siddur catalog, More tab, library and smoke suites extended and green: the select shows the nusach's default, a change offers that track's download, and both mitzvot follow it.
+  - **Done:** 2026-11-10. [src/components/HalachaAddonCard.tsx](src/components/HalachaAddonCard.tsx) on both mitzvah screens (the user's track by its book, the Kitzur's English beside it in English once installed); the two rows in `useLearningRows()` of [src/components/LearningRows.tsx](src/components/LearningRows.tsx), so the More tab and the siddur tab's learning group list them (the add-on caption, or the day's portion, one download for both; the More tab checks every pack's version on focus); [src/components/HalachaEnablePrompt.tsx](src/components/HalachaEnablePrompt.tsx) mounted by the root layout, its yes `switchHalachaOn()`; Settings → Prayer's book chips (a pick of the nusach's own book stores `null`) and, for Ben Ish Chai, the year swap with this year's reading in its hint; both privacy policies name Shnayim Mikra and the daily-halacha books among the add-ons (Shnayim Mikra had been left out). Verified: [src/components/__tests__/halachaAddon.render.test.tsx](src/components/__tests__/halachaAddon.render.test.tsx) (7), [src/app/__tests__/settings.halachaTrack.render.test.tsx](src/app/__tests__/settings.halachaTrack.render.test.tsx) (4), two new cases in [src/app/__tests__/mitzvah.render.test.tsx](src/app/__tests__/mitzvah.render.test.tsx), and the More tab and siddur catalog suites updated to the two new rows.
+  - **Status:** Version: OTA, with `docs/` on Pages · Committed: pending · Pushed: no · Live: no · Channel: none
 
-- [ ] Make the search find both mitzvot, the tracks and the festivals
+- [x] Make the search find both mitzvot, the tracks and the festivals
   - **Flag:** `OTA`.
   - **What it is:** The `halachaTrack` item in `SETTINGS_SEARCH_ITEMS`, a content item per track book and per festival with the Hebrew and English words people type, in [src/utils/settingsSearch.ts](src/utils/settingsSearch.ts) (spec 10).
   - **What it solves:** The root AGENTS.md rule "Search Finds Everything".
   - **Expected result:** [src/utils/__tests__/searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) and the settings search suites green with cases for "הלכה יומית", "קיצור", "בן איש חי", "רמב״ם" and "הלכות פסח" opening where each lives.
+  - **Done:** 2026-11-10. The `halachaTrack` setting item, and the books and every festival as words of the two mitzvah items (`MITZVAH_TERMS` in [src/utils/settingsSearch.ts](src/utils/settingsSearch.ts)), so "הלכות פסח" opens the festival halachot's screen first; both open the reader as texts while the track is installed. Verified: two new cases in [src/utils/__tests__/searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) ("הלכה יומית", "קיצור שולחן ערוך", "קצש״ע", "בן איש חי", "רמב״ם", "הלכות פסח", "הלכות החג", "laws of sukkot", "daily halacha"; the reader items only once installed), the settings search suites green.
+  - **Status:** Version: OTA, with `docs/` on Pages · Committed: pending · Pushed: no · Live: no · Channel: none
 
-- [ ] Write the guide topics and the what's-new item
+- [x] Write the guide topics and the what's-new item
   - **Flag:** `OTA` and [docs/guide/](docs/guide) on Pages.
   - **What it is:** A topic for each mitzvah in [src/data/guide.ts](src/data/guide.ts), the `WHATS_NEW` item under the next production label, `pnpm guide:build`.
   - **What it solves:** The checklist item "User-visible change", and the publish script's what's-new check.
   - **Expected result:** [src/data/__tests__/guide.test.ts](src/data/__tests__/guide.test.ts) and the guide render suite green.
+  - **Done:** 2026-11-10. One topic, `halacha`, after `chok`, for both mitzvot (as `chok` covers two), and the item under `1.0.21-18`, the next production label; `pnpm guide:build` rewrote [docs/guide/](docs/guide). Verified: [src/data/__tests__/guide.test.ts](src/data/__tests__/guide.test.ts) (the order with the new topic, 16 topics) and the guide render suite green.
+  - **Status:** Version: OTA, with `docs/` on Pages · Committed: pending · Pushed: no · Live: no · Channel: none
 
-- [ ] Put R17 on the rav's review page
+- [x] Put R17 on the rav's review page
   - **Flag:** [docs/halacha-review.html](docs/halacha-review.html) on Pages.
   - **What it is:** R17.1 to R17.8 as items with answer fields, and `RULES_VERSION` raised by one.
   - **What it solves:** D7: the rav answers before production.
   - **Expected result:** The page shows the eight items and submits them; after the push, `curl -sI https://jew-365.github.io/jew-365/halacha-review.html` answers 200.
+  - **Done:** 2026-11-10. R17.1 to R17.8 in a group of their own, "הלכה יומית והלכות החג", on [docs/halacha-review.html](docs/halacha-review.html), each with what the app does, its source and its place in the code, and `RULES_VERSION` raised from 7 to 8. Verified in Chromium at 375 px: 42 items, the progress line "סומנו 0 מתוך 42" moving with a choice, an empty submit marking all 42, no horizontal scroll and no page error.
+  - **Status:** Version: `docs/` on Pages · Committed: pending · Pushed: no · Live: no · Channel: none
 
 - [ ] Update the DOX chain for the halacha add-on
   - **Flag:** none (docs).
@@ -689,17 +697,8 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 - **Requested:** the owner, 2026-11-10, in a cloud session, in Hebrew: "אני רוצה שתרשום משימות לבקש מכל האלה שהם ברשיון סגור רשות להשתמש. תמצא אימייל ודרכי פניה לכל אחד מהם ותנסח מיילים מותאמים". This answers Q31 (yes, ask), and Claude extended it to every source the app already uses whose own terms are narrower than the licence the app shows.
 - **Drafts and contacts:** [release/licence-requests.md](release/licence-requests.md) holds, per source, what the app takes or wants, the terms as read on 2026-11-10, every contact channel marked verified or reported, and the email ready to send. A task below names its section there.
 - **Flag:** none: an email or a call the owner makes from `365jew@gmail.com`. Claude sends nothing. A source that refuses, or stays silent past the deadline the owner sets, turns its fallback into a new task.
+- **Closed so far:** Mechon Mamre's Positive Mitzvot, replaced by Wikisource's on 2026-11-10 at the owner's word, live on Pages ([action-log.md](action-log.md)).
 - **Done means:** the request sent (the date, the channel), and the answer quoted and dated in the task and in the Status column of the drafts file's summary table; a written permission is saved where the owner chooses, and the app's credit follows any wording it asks for.
-
-### High — Licence requests
-
-- [x] Ask Mechon Mamre for the Positive Mitzvot, or replace them
-  - **Flag:** none for the request; the fallback ships on `docs/halacha/` on Pages.
-  - **What it is:** section 1 of [release/licence-requests.md](release/licence-requests.md): one unit of the Rambam add-on, "מצוות עשה", comes from Mechon Mamre's edition through Sefaria, and that file is already published on GitHub Pages. Mechon Mamre's copyright page allows private study and teaching only, "not for publishing in any form, including any Web site". The request goes through the form at mechon-mamre.org/contact.htm, which has no email address.
-  - **What it solves:** a published file that breaks its source's terms.
-  - **Expected result:** their written permission, recorded with its date; or the unit rebuilt from an open version (Torat Emet 363 or Wikisource, the missing chapter from Wikisource) with `pnpm halacha:build`, the old file gone from [docs/halacha/rambam/](docs/halacha/rambam) and the Rambam test suites green.
-  - **Done:** 2026-11-10, by the fallback: the owner asked for a way around them ("יש איך לעקוף אותם ולא להשתמש בהם?"). Sefaria's other Hebrew title, "Mishneh Torah", proved to be the same Mechon Mamre text (its source is mechon-mamre.org/i/0001n.htm), so the build now refuses any version by its source (`BANNED_SOURCE` in [scripts/halacha/tracks.js](scripts/halacha/tracks.js), checked in `readRambam()` of [scripts/halacha/build.js](scripts/halacha/build.js)) and the Positive Mitzvot come from Wikisource (CC-BY-SA, all 248). `pnpm halacha:build` raised the Rambam track to version 2 and replaced the published unit; no file under [docs/](docs) names mechon-mamre.org. Verified: the new case in [scripts/halacha/__tests__/build.test.js](scripts/halacha/__tests__/build.test.js) (no credit of any unit or manifest from that source; the Positive Mitzvot credited to Wikisource) and the halacha suites (97 tests) green. No request was sent.
-  - **Status:** Version: `docs/halacha/` on Pages (Rambam track version 2) · Committed: pending · Pushed: no · Live: no · Channel: none
 
 ### Medium — Licence requests
 
@@ -883,7 +882,7 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
     - Selichot: the passages the page says only "if there is time" fold closed; "כַּת יֵשׁ לְמַעְלָה … לָמָּה לְךָ" is said every night as rendered; only the Aramaic Targum of the 13 Middot carries a minyan label, as the page marks; "לך ה׳ הצדקה" and "ה׳ אלהי הצבאות" are the Edot HaMizrach wording the page transcludes.
   - **Lives in:** the `teiman` builders in [scripts/siddur/manifest.js](scripts/siddur/manifest.js) (`teimanMincha()`, `teimanShacharit()`, `teimanNishmat()`, `teimanHallel()`, `teimanMusaf()`, `teimanBirkatHamazon()`, `teimanMaariv()`, `teimanSelichot()` and the others), with `tiklalNote()` for the renderings; the transcriptions in `scripts/siddur/source/tiklal-1894/`, which a file never changes after it is pinned, so a corrected answer is a manifest edit and a rebuild.
 
-- **R17 — Daily halacha and the halachot before a festival.** (the batch "Daily halacha and festival halachot, 2026-11-10"; not built; goes on the review page with the batch)
+- **R17 — Daily halacha and the halachot before a festival.** (the batch "Daily halacha and festival halachot, 2026-11-10"; built, on the review page since 2026-11-10)
   - **Question:** Are the books, the schedules and the periods right as planned?
   - **Assumption:** each as written in [.claude/specs/halacha-yomit.md](.claude/specs/halacha-yomit.md):
     - R17.1 The book per nusach: Kitzur Shulchan Aruch for Ashkenaz and Sefard, Ben Ish Chai for Edot HaMizrach, the Rambam one chapter a day for Chabad and for Teiman; the user may choose another.
@@ -894,7 +893,7 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
     - R17.6 Tisha B'Av: the daily portion shows as on any day.
     - R17.7 The simanim, halachot and parashiyot taken for each festival from each book (the spec's section 7.2, confirmed against the texts on 2026-11-10), and material shorter than its period starting that period later (Ben Ish Chai's Rosh Hashanah from 5 Elul, the Rambam's Tisha B'Av from 19 Tammuz).
     - R17.8 The Kitzur luach in a leap year: the review of the laws of blessings and prayer in Adar I and the luach's Adar in Adar II (Hebcal reads them the other way round), and the days that read nothing (30 Cheshvan, 30 Adar I, 15 Elul).
-  - **Lives in:** nothing yet; planned for `src/utils/halacha.ts`, `src/data/halacha.ts` and `scripts/halacha/`.
+  - **Lives in:** [src/data/halacha.ts](src/data/halacha.ts), [src/utils/halacha.ts](src/utils/halacha.ts), [src/data/halachaContent.ts](src/data/halachaContent.ts) and [scripts/halacha/](scripts/halacha); on the review page as R17.1 to R17.8 since 2026-11-10.
 
 ### For the owner
 

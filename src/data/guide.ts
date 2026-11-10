@@ -18,6 +18,7 @@ export type GuideTopicId =
   | 'siddur'
   | 'tehillim'
   | 'chok'
+  | 'halacha'
   | 'history'
   | 'schedule'
   | 'roshChodesh'
@@ -270,6 +271,30 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     },
   },
   {
+    id: 'halacha',
+    icon: 'chok',
+    title: { he: 'הלכה יומית והלכות החג', en: 'Daily halacha and the halachot of the festival' },
+    body: [
+      {
+        he: 'שתי מצוות לימוד מתוך ספר הלכה אחד: ״הלכה יומית״, מנה בכל יום, ו״הלכות החג״, בשלושים הימים שלפני פסח, שבועות וסוכות, ובימים שלפני ראש השנה, יום הכיפורים, חנוכה, פורים, תשעה באב והצומות. הספר לפי הנוסח: קיצור שולחן ערוך לאשכנז ולספרד, בן איש חי לעדות המזרח, ומשנה תורה לרמב״ם, פרק ליום, לחב״ד ולתימן. בהגדרות ← תפילה וסידור אפשר לבחור ספר אחר, ובבן איש חי גם להחליף בין שתי השנים שלו.',
+        en: "Two learning mitzvot from one halacha book: the Daily Halacha, a portion every day, and the Halachot of the Festival, in the thirty days before Pesach, Shavuot and Sukkot, and in the days before Rosh Hashanah, Yom Kippur, Chanukah, Purim, Tisha B'Av and the fasts. The book follows the nusach: Kitzur Shulchan Aruch for Ashkenaz and Sefard, Ben Ish Chai for Edot HaMizrach, and the Rambam's Mishneh Torah, a chapter a day, for Chabad and Teiman. Settings → Prayer and siddur offers another book, and for Ben Ish Chai a swap between its two years.",
+      },
+      {
+        he: 'הספר הוא תוסף שיורד פעם אחת ממסך המצווה, מלשונית עוד או מהסידור תחת ״לימוד״, ואחרי ההורדה הוא זמין גם בלי חיבור לאינטרנט; בסוף ההורדה האפליקציה שואלת אם להפעיל את שתי המצוות. באנגלית אפשר להוריד גם את התרגום של קיצור שולחן ערוך.',
+        en: 'The book is an add-on downloaded once from the mitzvah screen, the More tab or the siddur under Learning, and after that it is available without an internet connection; when the download ends, the app asks whether to turn both mitzvot on. In English, the translation of Kitzur Shulchan Aruch can be downloaded too.',
+      },
+      {
+        he: 'הקורא מציג את הלימוד של היום, ושורת ימים מאפשרת לקרוא יום אחר, בלי ״סיימתי״. כשהמצווה פעילה ״סיימתי״ מסמן את היום, וכל אחד משבעת הימים הקודמים שלא סומנו מופיע כהשלמה מקופלת. המצוות פתוחות מעלות השחר עד עלות השחר שלמחרת, גם בשבת ובחג, שנשאלים עליהם אחריהם, ותזכורות ברירת המחדל ב־08:00 להלכה היומית וב־19:00 להלכות החג.',
+        en: "The reader shows the day's learning, and a row of days reads another day, without Done. While the mitzvah is on, Done marks the day, and each of the seven days before it left unmarked appears as a folded make-up. The mitzvot are open from dawn to the next dawn, on Shabbat and Yom Tov too, which are asked about after them, with default reminders at 08:00 for the daily halacha and 19:00 for the festival's halachot.",
+      },
+    ],
+    routes: [],
+    action: {
+      label: { he: 'למסך ההלכה היומית', en: 'Open the Daily Halacha' },
+      href: { pathname: '/mitzvah/[id]', params: { id: 'halacha_yomit' } },
+    },
+  },
+  {
     id: 'history',
     icon: 'check',
     title: { he: 'מעקב, רצף וסיכום שבועי', en: 'Tracking, streak and the weekly report' },
@@ -429,6 +454,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
     label: '1.0.21-18',
     date: '2026-11-09',
     items: [
+      {
+        he: 'הלכה יומית והלכות החג: שתי מצוות לימוד מספר הלכה לפי הנוסח (קיצור שולחן ערוך, בן איש חי או רמב״ם, פרק ליום), תוסף להורדה, עם תזכורת, ״סיימתי״, השלמות של שבעת הימים הקודמים ושורת ימים לקריאה ביום אחר. הלכות החג נלמדות בשלושים הימים שלפני פסח, שבועות וסוכות ובימים שלפני שאר החגים והצומות. את הספר אפשר להחליף בהגדרות ← תפילה וסידור.',
+        en: "Daily Halacha and Halachot of the Festival: two learning mitzvot from a halacha book by nusach (Kitzur Shulchan Aruch, Ben Ish Chai or the Rambam, a chapter a day), an add-on to download, with a reminder, Done, make-ups of the seven days before and a row of days to read another day. The festival's halachot are learned in the thirty days before Pesach, Shavuot and Sukkot and in the days before the other festivals and fasts. The book can be changed in Settings → Prayer and siddur.",
+      },
       {
         he: 'דף הבית בגוון התקופה: כרטיס בצבע של השעה ושל היום עם ״היום״, ״השבוע״ (הפרשה, כניסת השבת ויציאתה, שבת מברכים והמולד) ו״שלי״, שזוכר את הבחירה שלך, וקרוסלת זמנים חיה שבה הזמן החשוב מתמלא, זמנים מקבילים מראים התקדמות בנגיעה, ובלילה מופיעים זמני מחר. הלוח לומד מהסימונים שלך (✦), למשל ״לקרוא שמע קודם״ כשהשחרית שלך מאוחרת.',
         en: "Home in the period's tone: a card in the colour of the hour and the day with Today, This week (the parasha, Shabbat's start and end, Shabbat Mevarchim and the molad) and Mine, which keeps your choice, and a live carousel of times where the time that matters fills, times running together show their progress when touched, and tomorrow's times show at night. The board learns from your marks (✦), such as Read the Shema first when your Shacharit runs late.",

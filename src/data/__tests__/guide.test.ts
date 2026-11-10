@@ -78,6 +78,7 @@ const TOPIC_IDS = [
   'siddur',
   'tehillim',
   'chok',
+  'halacha',
   'history',
   'schedule',
   'roshChodesh',
@@ -139,7 +140,7 @@ describe('the user guide topics', () => {
 
   it('shows family purity only when offered', () => {
     expect(visibleGuideTopics(false).map((topic) => topic.id)).toEqual(TOPIC_IDS.filter((id) => id !== 'taharah'));
-    expect(visibleGuideTopics(true)).toHaveLength(15);
+    expect(visibleGuideTopics(true)).toHaveLength(16);
   });
 
   it('names the tabs and every Settings path by its label', () => {

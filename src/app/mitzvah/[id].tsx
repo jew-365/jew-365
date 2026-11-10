@@ -5,6 +5,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChokAddonCard } from '@/components/ChokAddonCard';
+import { HalachaAddonCard } from '@/components/HalachaAddonCard';
 import { ShnayimAddonCard } from '@/components/ShnayimAddonCard';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
@@ -17,9 +18,11 @@ import { SelichotAddonCard } from '@/components/SelichotAddonCard';
 import { WindowTimeline } from '@/components/WindowTimeline';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
+import { effectiveHalachaTrack } from '@/data/halacha';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import {
+  isHalachaText,
   MITZVAH_STANDALONE_TEXT,
   hasSiddurText,
   isSiddurTextId,
@@ -32,6 +35,7 @@ import { useNeedsReminderDialog } from '@/hooks/useNeedsReminderDialog';
 import { useNow } from '@/hooks/useNow';
 import { useChokStore } from '@/stores/useChokStore';
 import { useShnayimStore } from '@/stores/useShnayimStore';
+import { HALACHA_STORES } from '@/stores/useHalachaStore';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
 import { remindersOf, selectActive, useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -99,7 +103,15 @@ export default function MitzvahDetailScreen() {
   const isLearning = isChok || isShnayim;
   const chokInstalled = useChokStore((s) => s.installed !== null);
   const shnayimInstalled = useShnayimStore((s) => s.installed !== null);
-  const awaitingAddon = (isChok && !chokInstalled) || (isShnayim && !shnayimInstalled);
+  // The two halacha mitzvot read the user's track, so its pack is the add-on they wait for.
+  const isHalacha = Boolean(mitzvah && isHalachaText(mitzvah.id));
+  const halachaTrack = effectiveHalachaTrack(
+    useUserStore((s) => s.halachaTrack),
+    nusach,
+  );
+  const halachaInstalled = HALACHA_STORES[halachaTrack]((s) => s.installed !== null);
+  const awaitingAddon =
+    (isChok && !chokInstalled) || (isShnayim && !shnayimInstalled) || (isHalacha && !halachaInstalled);
   const isSelichot = mitzvah?.id === SELICHOT_TEXT_ID;
   const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(nusach));
   const addonMissing = awaitingAddon || (isSelichot && !selichotInstalled);
@@ -300,7 +312,13 @@ export default function MitzvahDetailScreen() {
             title={t('detail.activeTitle')}
             caption={
               awaitingAddon
-                ? t(isShnayim ? 'shnayim.addon.enableAfterDownload' : 'chok.addon.enableAfterDownload')
+                ? t(
+                    isHalacha
+                      ? 'halacha.addon.enableAfterDownload'
+                      : isShnayim
+                        ? 'shnayim.addon.enableAfterDownload'
+                        : 'chok.addon.enableAfterDownload',
+                  )
                 : active.enabled
                   ? t('detail.activeOn')
                   : t('detail.activeOff')
@@ -356,6 +374,7 @@ export default function MitzvahDetailScreen() {
         ) : null}
         {isChok ? <ChokAddonCard /> : null}
         {isShnayim ? <ShnayimAddonCard /> : null}
+        {isHalacha ? <HalachaAddonCard track={halachaTrack} /> : null}
         {isSelichot ? <SelichotAddonCard /> : null}
         {textNow || textAnytime ? <Button label={t('siddur.open')} onPress={openText} /> : null}
         <WindowTimeline

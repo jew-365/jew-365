@@ -8,7 +8,9 @@ import {
 } from '@/services/addons/addonContent';
 import { HALACHA_DIRECTORY, HALACHA_SCHEDULE_FILE, halachaDirName } from '@/services/halachaFiles';
 import { clearHalachaCache } from '@/services/SiddurService';
+import { HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID } from '@/data/halacha';
 import { HALACHA_PACKS, HALACHA_STORES } from '@/stores/useHalachaStore';
+import { canEnable, useMitzvotStore } from '@/stores/useMitzvotStore';
 import { AddonManifest } from '@/types/addon';
 import { HalachaManifest, HalachaPack, HalachaScheduleFile, HalachaTrack } from '@/types/halacha';
 
@@ -40,6 +42,14 @@ export const halachaSpaceNeededMb = (pack: HalachaPack): number =>
 export const HALACHA_ENGLISH_PACK: Readonly<Partial<Record<HalachaTrack, HalachaPack>>> = { kitzur: 'kitzur_en' };
 
 export const halachaDownloadSupported = addonDownloadSupported;
+
+// The enable prompt's yes after a first download: both halacha mitzvot on, each with its default reminder if it has none.
+export function switchHalachaOn(): void {
+  for (const id of [HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID]) {
+    if (!canEnable(id)) useMitzvotStore.getState().resetToDefault(id);
+    useMitzvotStore.getState().setEnabled(id, true);
+  }
+}
 
 const unavailable = () => new AddonDownloadError('unavailable');
 

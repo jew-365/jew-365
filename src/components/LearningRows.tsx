@@ -1,14 +1,21 @@
 import React from 'react';
 import { useRouter } from 'expo-router';
 import { chokAddonCaption, useChokDownloadFlow } from '@/components/ChokAddonCard';
+import { halachaAddonCaption, useHalachaDownloadFlow } from '@/components/HalachaAddonCard';
 import { shnayimAddonCaption, useShnayimDownloadFlow } from '@/components/ShnayimAddonCard';
+import { FESTIVAL_NAMES, HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID, effectiveHalachaTrack } from '@/data/halacha';
+import { hilchotHachagOn, halachaYomitOn } from '@/data/halachaContent';
+import { findMitzvah } from '@/data/mitzvot';
 import { useI18n } from '@/i18n';
+import { halachaDownloadSupported } from '@/services/HalachaContentService';
 import { chokDownloadSupported } from '@/services/ChokContentService';
 import { shnayimDownloadSupported } from '@/services/ShnayimContentService';
 import { useChokStore } from '@/stores/useChokStore';
+import { HALACHA_STORES } from '@/stores/useHalachaStore';
 import { useShnayimStore } from '@/stores/useShnayimStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { CHOK_PROGRAM, LearningProgram, chokPortionAt, chokWeekName } from '@/utils/chok';
+import { appDay } from '@/utils/locationDay';
 import { SHNAYIM_PROGRAM } from '@/utils/shnayim';
 
 export type LearningRow = {
@@ -20,9 +27,10 @@ export type LearningRow = {
   onPress: () => void;
 };
 
-// The weekly learning programs (Chok LeYisrael, Shnayim Mikra) as rows, shared by the More tab and the siddur tab's
-// learning group: installed, the portion of the moment and a press that opens the reader; not installed, the add-on's
-// caption and a press that starts the download in place (the mitzvah screen while one runs, and on web).
+// The learning programs (Chok LeYisrael, Shnayim Mikra, the daily halacha and the halachot of the festival) as rows,
+// shared by the More tab and the siddur tab's learning group: installed, the portion of the moment and a press that
+// opens the reader; not installed, the add-on's caption and a press that starts the download in place (the mitzvah
+// screen while one runs, and on web). The two halacha rows share the user's track and its one download.
 export function useLearningRows(now: Date): { rows: LearningRow[]; dialogs: React.ReactElement } {
   const { t, language } = useI18n();
   const router = useRouter();
@@ -34,6 +42,15 @@ export function useLearningRows(now: Date): { rows: LearningRow[]; dialogs: Reac
   const shnayimDownload = useShnayimStore((s) => s.download);
   const chokFlow = useChokDownloadFlow();
   const shnayimFlow = useShnayimDownloadFlow();
+  const nusach = useUserStore((s) => s.nusach);
+  const track = effectiveHalachaTrack(
+    useUserStore((s) => s.halachaTrack),
+    nusach,
+  );
+  useUserStore((s) => s.benIshChaiYearSwapped);
+  const halachaInstalled = HALACHA_STORES[track]((s) => s.installed !== null);
+  const halachaDownload = HALACHA_STORES[track]((s) => s.download);
+  const halachaFlow = useHalachaDownloadFlow(track);
 
   const row = (
     program: LearningProgram,
@@ -64,6 +81,33 @@ export function useLearningRows(now: Date): { rows: LearningRow[]; dialogs: Reac
     };
   };
 
+  const halachaRow = (id: string, caption: () => string): LearningRow => {
+    const name = findMitzvah(id)?.name;
+    return {
+      id,
+      title: name ? (language === 'en' && name.en ? name.en : name.he) : id,
+      caption: halachaInstalled ? caption() : halachaAddonCaption(track, halachaDownload, t),
+      installed: halachaInstalled,
+      disabled: halachaFlow.preparing,
+      onPress: () => {
+        if (halachaInstalled) router.push({ pathname: '/siddur/[id]', params: { id } });
+        else if (!halachaDownloadSupported() || halachaDownload.status === 'downloading') router.push(`/mitzvah/${id}`);
+        else void halachaFlow.prepare();
+      },
+    };
+  };
+  const today = appDay(now, location);
+  const yomit = halachaRow(HALACHA_YOMIT_ID, () => {
+    const day = halachaYomitOn(today, nusach, inIsrael);
+    return day ? `${day.book[language]} · ${day.portion.label[language]}` : t('chok.nothingToday');
+  });
+  const hachag = halachaRow(HILCHOT_HACHAG_ID, () => {
+    const [day] = hilchotHachagOn(today, nusach);
+    return day
+      ? `${t('halacha.before', { chag: FESTIVAL_NAMES[day.period.festival][language] })} · ${day.portion.label[language]}`
+      : t('halacha.hachag.notNow');
+  });
+
   return {
     rows: [
       row(
@@ -86,11 +130,14 @@ export function useLearningRows(now: Date): { rows: LearningRow[]; dialogs: Reac
         shnayimFlow,
         shnayimAddonCaption(shnayimDownload, t),
       ),
+      yomit,
+      hachag,
     ],
     dialogs: (
       <>
         {chokFlow.dialog}
         {shnayimFlow.dialog}
+        {halachaFlow.dialog}
       </>
     ),
   };

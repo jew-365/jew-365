@@ -4,6 +4,7 @@ import { placeCaption, placeName, searchPlaces, type PlaceIndex } from '@/data/p
 import { iconFor, type IconName } from '@/components/MitzvahIcon';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
+import { FESTIVAL_KEYS, FESTIVAL_NAMES, HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID } from '@/data/halacha';
 import { GUIDE_TOPICS } from '@/data/guide';
 import { HALACHA_LINES, phoneLabel, type HalachaRuling } from '@/data/halachaLines';
 import { hilulaPage } from '@/data/hilulaPages';
@@ -369,6 +370,42 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
       'thursday',
       'friday',
       'chok',
+    ],
+  },
+  {
+    id: 'halachaTrack',
+    icon: 'chok',
+    titleKey: 'settings.halachaTrack',
+    labelKeys: [
+      'halacha.book.kitzur',
+      'halacha.book.ben_ish_chai',
+      'halacha.book.rambam',
+      'settings.benIshChaiYearSwapped',
+    ],
+    section: 'prayer',
+    terms: [
+      'הלכה יומית',
+      'הלכות החג',
+      'ספר הלכה',
+      'קיצור שולחן ערוך',
+      'קיצור',
+      'קצש"ע',
+      'קצשו"ע',
+      'בן איש חי',
+      'בא"ח',
+      'שנה ראשונה',
+      'שנה שנייה',
+      'רמב"ם',
+      'רמב"ם יומי',
+      'משנה תורה',
+      'daily halacha',
+      'halacha book',
+      'kitzur',
+      'shulchan aruch',
+      'ben ish chai',
+      'ben ish hai',
+      'rambam',
+      'mishneh torah',
     ],
   },
   {
@@ -854,13 +891,15 @@ export type SettingsContentInput = {
   maritalStatus: MaritalStatus | null;
   chokInstalled: boolean;
   shnayimInstalled?: boolean;
+  // The user's halacha track is installed, so both halacha mitzvot open in the reader.
+  halachaInstalled?: boolean;
   now: Date;
   location: Location;
   inIsrael: boolean;
 };
 
 type ContentText = {
-  id: SiddurTextId | typeof CHOK_TEXT_ID | typeof SHNAYIM_TEXT_ID;
+  id: SiddurTextId | typeof CHOK_TEXT_ID | typeof SHNAYIM_TEXT_ID | typeof HALACHA_YOMIT_ID | typeof HILCHOT_HACHAG_ID;
   title: SettingsSearchName;
   icon: IconName;
   chapters: readonly SiddurChapterTitle[];
@@ -869,6 +908,46 @@ type ContentText = {
 
 // The words people type for Shnayim Mikra beside its name.
 const SHNAYIM_TERMS = ['שמו״ת', 'שמות', 'אונקלוס', 'תרגום', 'פרשת השבוע', 'onkelos', 'targum', 'weekly parasha'];
+
+// The words people type for the two halacha mitzvot (.claude/specs/halacha-yomit.md, section 10): the books of the
+// three tracks, and the thirty days before a festival.
+const HALACHA_BOOK_TERMS = [
+  'הלכה',
+  'הלכות',
+  'קיצור שולחן ערוך',
+  'קיצור',
+  'קצש"ע',
+  'קצשו"ע',
+  'בן איש חי',
+  'בא"ח',
+  'רמב"ם',
+  'רמב"ם יומי',
+  'משנה תורה',
+  'halacha',
+  'kitzur',
+  'shulchan aruch',
+  'ben ish chai',
+  'ben ish hai',
+  'rambam',
+  'mishneh torah',
+];
+const MITZVAH_TERMS: Readonly<Record<string, readonly string[]>> = {
+  [SHNAYIM_TEXT_ID]: SHNAYIM_TERMS,
+  [HALACHA_YOMIT_ID]: [...HALACHA_BOOK_TERMS, 'לימוד יומי', 'daily learning'],
+  // Each festival by its name, "הלכות פסח" and "laws of Pesach", so a festival finds the screen of its halachot.
+  [HILCHOT_HACHAG_ID]: [
+    ...HALACHA_BOOK_TERMS,
+    'שלושים יום לפני החג',
+    'ל׳ יום קודם החג',
+    'שואלין ודורשין',
+    'laws of the festival',
+    'thirty days before',
+    ...FESTIVAL_KEYS.flatMap((festival) => [
+      `הלכות ${FESTIVAL_NAMES[festival].he}`,
+      `laws of ${FESTIVAL_NAMES[festival].en}`,
+    ]),
+  ],
+};
 
 const nameOf = (mitzvah: Mitzvah): SettingsSearchName => ({ he: mitzvah.name.he, en: mitzvahName(mitzvah, 'en') });
 
@@ -879,6 +958,7 @@ export function settingsContentItems({
   maritalStatus,
   chokInstalled,
   shnayimInstalled = false,
+  halachaInstalled = false,
   now,
   location,
   inIsrael,
@@ -888,7 +968,7 @@ export function settingsContentItems({
     kind: 'mitzvah',
     icon: iconFor(mitzvah.icon),
     title: nameOf(mitzvah),
-    terms: mitzvah.id === SHNAYIM_TEXT_ID ? SHNAYIM_TERMS : [],
+    terms: [...(MITZVAH_TERMS[mitzvah.id] ?? [])],
     href: { pathname: '/mitzvah/[id]', params: { id: mitzvah.id } },
   }));
   const texts: ContentText[] = [];
@@ -896,6 +976,11 @@ export function settingsContentItems({
     if (mitzvah.isCustom) continue;
     if (mitzvah.id === CHOK_TEXT_ID || mitzvah.id === SHNAYIM_TEXT_ID) {
       if (mitzvah.id === CHOK_TEXT_ID ? chokInstalled : shnayimInstalled)
+        texts.push({ id: mitzvah.id, title: nameOf(mitzvah), icon: iconFor(mitzvah.icon), chapters: [] });
+      continue;
+    }
+    if (mitzvah.id === HALACHA_YOMIT_ID || mitzvah.id === HILCHOT_HACHAG_ID) {
+      if (halachaInstalled)
         texts.push({ id: mitzvah.id, title: nameOf(mitzvah), icon: iconFor(mitzvah.icon), chapters: [] });
       continue;
     }

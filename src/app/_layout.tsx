@@ -55,6 +55,7 @@ import { ZmanimService } from '@/services/ZmanimService';
 import { QuietBlockContext, ShabbatScreen } from '@/components/ShabbatScreen';
 import { UpdateBanner } from '@/components/UpdateBanner';
 import { ChokEnablePrompt } from '@/components/ChokEnablePrompt';
+import { HalachaEnablePrompt } from '@/components/HalachaEnablePrompt';
 import { ShnayimEnablePrompt } from '@/components/ShnayimEnablePrompt';
 import { nextQuietBoundary, quietBlockAt } from '@/utils/skipRules';
 import { CHECK_IN_PROMPTED_KEY, latestCheckIn } from '@/utils/checkIn';
@@ -317,6 +318,7 @@ function RootInner() {
         {isOnboarded ? <UpdateBanner /> : null}
         {isOnboarded ? <ChokEnablePrompt /> : null}
         {isOnboarded ? <ShnayimEnablePrompt /> : null}
+        {isOnboarded ? <HalachaEnablePrompt /> : null}
         {isOnboarded ? <MarkCelebrationHost /> : null}
         <ShabbatScreen
           block={quietBlock}

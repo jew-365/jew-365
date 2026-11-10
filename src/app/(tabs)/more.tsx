@@ -16,6 +16,8 @@ import { HALACHA_LINES, callUrl, halachaRulingFor, phoneLabel, whatsappUrl } fro
 import { useNow } from '@/hooks/useNow';
 import { checkChokUpdate } from '@/services/ChokContentService';
 import { checkShnayimUpdate } from '@/services/ShnayimContentService';
+import { checkHalachaUpdate } from '@/services/HalachaContentService';
+import { HALACHA_PACKS } from '@/stores/useHalachaStore';
 import { checkSelichotUpdate, selichotDownloadSupported } from '@/services/SelichotContentService';
 import { selectSelichotInstalledFor, useSelichotStore } from '@/stores/useSelichotStore';
 import { useUserStore } from '@/stores/useUserStore';
@@ -47,6 +49,7 @@ export default function MoreScreen() {
       void checkChokUpdate();
       void checkShnayimUpdate();
       void checkSelichotUpdate();
+      for (const pack of HALACHA_PACKS) void checkHalachaUpdate(pack);
     }, [setQuery]),
   );
   // The search elsewhere sends a halacha line here as `open=halacha`: open the sheet once.

@@ -13,6 +13,15 @@ jest.mock('@/services/ChokContentService', () => ({
   ...jest.requireActual('@/services/ChokContentService'),
   checkChokUpdate: jest.fn(async () => {}),
 }));
+jest.mock('@/services/HalachaContentService', () => ({
+  ...jest.requireActual('@/services/HalachaContentService'),
+  checkHalachaUpdate: jest.fn(async () => {}),
+}));
+jest.mock('@/services/halachaFiles', () => ({
+  ...jest.requireActual('@/services/halachaFiles'),
+  readHalachaScheduleSync: (pack: 'kitzur' | 'ben_ish_chai' | 'rambam') =>
+    require('@/testing/halacha').publishedHalachaSchedule(pack),
+}));
 jest.mock('@/services/SelichotContentService', () => ({
   ...jest.requireActual('@/services/SelichotContentService'),
   checkSelichotUpdate: jest.fn(async () => {}),
@@ -58,6 +67,8 @@ import { t } from '@/i18n';
 import { HebcalService } from '@/services/HebcalService';
 import { useChokStore } from '@/stores/useChokStore';
 import { installChokFixture } from '@/testing/chok';
+import { installHalachaFixture } from '@/testing/halacha';
+import { resetHalachaStores } from '@/stores/useHalachaStore';
 import { renderWithTheme } from '@/testing/render';
 import { installSelichotFixture } from '@/testing/selichot';
 import { at, zmanimFor } from '@/testing/zmanim';
@@ -867,6 +878,29 @@ describe('Mitzvah screen', () => {
       storeRange('2026-10-01', '2026-10-20');
       renderMitzvah({ id: CUSTOM_ID });
       expect(screen.getByText('יומי · -')).toBeOnTheScreen();
+    });
+  });
+
+  describe('the daily halacha', () => {
+    afterEach(() => resetHalachaStores());
+
+    it("offers the user's book and holds back the switch and the reminders while it is not installed", () => {
+      useUserStore.setState({ nusach: 'edot_hamizrach' });
+      renderMitzvah({ id: 'halacha_yomit' });
+      expect(screen.getByText('תוסף ההלכה: בן איש חי')).toBeOnTheScreen();
+      expect(screen.getByRole('switch').props.disabled).toBe(true);
+      expect(screen.getByText('אפשר להפעיל את המצווה אחרי ההורדה.')).toBeOnTheScreen();
+      expect(screen.queryByText('תזכורות')).toBeNull();
+    });
+
+    it('follows the book chosen in Settings, and lets the switch on once it is installed', () => {
+      useUserStore.setState({ halachaTrack: 'rambam' });
+      installHalachaFixture('rambam');
+      renderMitzvah({ id: 'hilchot_hachag' });
+      expect(screen.getByText('תוסף ההלכה: משנה תורה לרמב״ם')).toBeOnTheScreen();
+      expect(screen.getByText(/^התוסף מותקן/)).toBeOnTheScreen();
+      expect(screen.getByRole('switch').props.disabled).toBeFalsy();
+      expect(screen.getByText('תזכורות')).toBeOnTheScreen();
     });
   });
 

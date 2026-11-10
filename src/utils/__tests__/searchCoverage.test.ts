@@ -230,6 +230,40 @@ describe('search results', () => {
     expect(close('מוצאי שבת')).toContain('screen:checkin');
   });
 
+  it("finds the two halacha mitzvot, the book choice and each festival's halachot by the words people type", () => {
+    expect(close('הלכה יומית')).toContain('mitzvah:halacha_yomit');
+    expect(close('קיצור שולחן ערוך')).toEqual(expect.arrayContaining(['halachaTrack', 'mitzvah:halacha_yomit']));
+    expect(close('קצש"ע')).toContain('mitzvah:halacha_yomit');
+    expect(close('בן איש חי')).toEqual(expect.arrayContaining(['halachaTrack', 'mitzvah:halacha_yomit']));
+    expect(close('רמב״ם')).toEqual(expect.arrayContaining(['halachaTrack', 'mitzvah:halacha_yomit']));
+    expect(close('הלכות פסח')[0]).toBe('mitzvah:hilchot_hachag');
+    expect(close('הלכות החג')).toContain('mitzvah:hilchot_hachag');
+    expect(close('laws of sukkot')).toContain('mitzvah:hilchot_hachag');
+    expect(close('daily halacha')).toContain('mitzvah:halacha_yomit');
+    const byId = new Map(index.map((entry) => [entry.item.id, entry.item]));
+    expect(byId.get('mitzvah:hilchot_hachag')).toMatchObject({
+      href: { pathname: '/mitzvah/[id]', params: { id: 'hilchot_hachag' } },
+    });
+    expect(byId.get('halachaTrack')).toMatchObject({ section: 'prayer' });
+  });
+
+  it('opens the halacha mitzvot in the reader only once their book is installed', () => {
+    const items = (halachaInstalled: boolean) =>
+      settingsContentItems({
+        mitzvot: MITZVOT,
+        nusach: 'sefard',
+        voice: null,
+        maritalStatus: 'married',
+        chokInstalled: false,
+        halachaInstalled,
+        now: at(JERUSALEM, '2026-10-28T12:00'),
+        location: JERUSALEM,
+        inIsrael: true,
+      }).map((item) => item.id);
+    expect(items(false)).not.toContain('siddur:halacha_yomit');
+    expect(items(true)).toEqual(expect.arrayContaining(['siddur:halacha_yomit', 'siddur:hilchot_hachag']));
+  });
+
   it('finds a category of the library and of the siddur tab', () => {
     expect(close('מצוות יומיות')).toContain('category:library:daily');
     expect(close('סעודה')).toContain('category:siddur:meals');

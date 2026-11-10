@@ -131,11 +131,11 @@ describe('the siddur tab’s catalog', () => {
       expect(screen.getByText(/^תיקון הכללי · תהילים · נשמת כל חי ועוד \d+$/)).toBeOnTheScreen();
     });
 
-    it('lists Chok LeYisrael and Shnayim Mikra under learning, a download until installed, then the reader', () => {
+    it('lists Chok LeYisrael, Shnayim Mikra and the halacha mitzvot under learning, a download until installed, then the reader', () => {
       openClosed(WEDNESDAY);
-      expect(screen.getByText('חק לישראל · שניים מקרא ואחד תרגום')).toBeOnTheScreen();
+      expect(screen.getByText(/^חק לישראל · שניים מקרא ואחד תרגום · הלכה יומית/)).toBeOnTheScreen();
       fireEvent.press(screen.getByText('לימוד'));
-      expect(idsIn('siddur-learning')).toEqual(['chok_leyisrael', 'shnayim_mikra']);
+      expect(idsIn('siddur-learning')).toEqual(['chok_leyisrael', 'shnayim_mikra', 'halacha_yomit', 'hilchot_hachag']);
       expect(within(rowOf('shnayim_mikra')).getByText('תוסף להורדה · כ־1.2 MB')).toBeOnTheScreen();
       expect(listRowOf('shnayim_mikra').props.iconTone).toBe('muted');
       act(() =>

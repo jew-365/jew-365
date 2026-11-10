@@ -11,6 +11,7 @@
 ## Local Contracts
 
 - Use [../../data/customMitzvotAdapter.ts](../../data/customMitzvotAdapter.ts), `getAllMitzvot()`, or `findAnyMitzvah()` when a detail route must include both static and custom mitzvot.
+- The daily halacha and the halachot of the festival show [HalachaAddonCard](../../components/HalachaAddonCard.tsx) for the user's track (`effectiveHalachaTrack()`), and while that track is not installed the screen behaves as below for Chok LeYisrael, with `halacha.addon.enableAfterDownload` as the switch's caption; pinned by [../__tests__/mitzvah.render.test.tsx](../__tests__/mitzvah.render.test.tsx).
 - For Chok LeYisrael the screen opens with [ChokAddonCard](../../components/ChokAddonCard.tsx). While the add-on is not installed (`useChokStore`), the window and the next-reminder preview are not computed, the active row's switch is disabled with `chok.addon.enableAfterDownload` as its caption, and the reminders card is not drawn.
 - For Selichot the screen opens with [SelichotAddonCard](../../components/SelichotAddonCard.tsx); while the user's nusach file is missing neither the window nor the next-reminder preview is computed (the header reads `-`, no text button), and the switch and the reminders stay as they are; both appear the moment the file installs.
 - Reminder edits must stay compatible with [../../services/AGENTS.md](../../services/AGENTS.md) scheduler contracts.
