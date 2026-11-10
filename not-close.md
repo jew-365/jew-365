@@ -505,6 +505,13 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done:** 2026-11-10: the card's colour follows the part of the day only (dawn, morning, noon, evening, night), a muted gradient drawn at 0.72 over the land so the sky shows through; white text holds 4.5:1 on it every 10 minutes of three days of the year ([src/theme/__tests__/periodTone.test.ts](src/theme/__tests__/periodTone.test.ts)). Checked in the web build at 06:10, 15:40 and 20:30. Verified: `typecheck`, `lint`, `check:dox`, the full suite (6676 passed), `test:tz` on the tone, the card and the guide.
   - **Status:** 1.0.21 · Committed: `58fc45e` fix(home): the card's colour follows the time of day and lets the sky show through · Pushed: yes · Live: preview `1.0.21-74` (group `31498385-82ea-4ab0-a100-1dd97f14aa4f`, from `58fc45e`, 2026-11-10); production no · Channel: preview
 
+- [ ] Home's card in the sky's own glass
+  - **Flag:** `OTA`.
+  - **Source:** the owner's message of 2026-11-10 on preview `1.0.21-74`, with a screenshot: the card still stands out, is not in the hue of the sky behind it, and at night sinks into the sky; the screenshot shows a 05:45 preview at 20:01 with the card still night navy.
+  - **Found:** the fixed part-of-day tones were their own colours, not the sky's, and followed the clock, not the hour previewed.
+  - **Done:** 2026-11-10: the card is `cardGlass()` of the sky shown ([src/utils/dayArc.ts](src/utils/dayArc.ts)): the sky's own middle colour taken 55% toward the dark ink or white, at 0.62, with a hairline edge in the ink that keeps it apart from the night sky; a preview's hour sets it too. Its ink holds 4.5:1 or more every 10 minutes of three days of the year ([src/utils/__tests__/dayArc.test.ts](src/utils/__tests__/dayArc.test.ts)); the period tones are removed. Checked in the web build at 06:10, 15:40, 17:00 and 20:30. Verified: `typecheck`, `lint`, `format:check`, `check:dox`, the full suite (6676 passed).
+  - **Status:** 1.0.21 · Committed: pending · Pushed: no · Live: no · Channel: none
+
 - [ ] Home's board answers and the return to home on every return
   - **Flag:** `OTA`.
   - **Source:** the owner's message of 2026-11-10 after checking preview `1.0.21-72`: the + chip of the carousel looked broken or unclear; Mine took only two facts and not always; what the smart choice means; and the app should always open on home after leaving it.

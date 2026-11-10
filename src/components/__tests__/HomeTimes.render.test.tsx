@@ -21,7 +21,6 @@ const CARD: CardModel = {
     mine: { id: 'mine', title: 'שלי', icon: 'star', facts: [{ label: 'עד השבת', value: '3 ימים' }] },
   },
   smart: 'day',
-  tone: 'morning',
   candleLighting: null,
   fastEnd: null,
 };
@@ -48,6 +47,7 @@ function renderTimes(over: Partial<HomeTimesProps> = {}) {
     now: NOW,
     tz: 'UTC',
     inks: { plain: '#000000', next: '#000000' },
+    glass: { fill: '#FFFFFF9E', ink: '#0A1228', edge: '#0A122847' },
     selected: null,
     onPickZman: jest.fn(),
     pins: ['plag'],

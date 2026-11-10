@@ -54,7 +54,7 @@ import { checkInLastDay, checkInPhraseKey, latestCheckIn, overlapsBlock, tracked
 import { Mitzvah } from '@/types/mitzvah';
 import { TaharahEvent, TaharahSettings } from '@/types/taharah';
 import { Location } from '@/types/zmanim';
-import { dayFrameFor } from '@/utils/dayArc';
+import { dayFrameFor, type CardGlass } from '@/utils/dayArc';
 import { learnedHabit, markStat, suggestedPins, timeChips } from '@/utils/homeTimes';
 import { homeCard, markHistory } from '@/utils/homeCard';
 import { MITZVOT } from '@/data/mitzvot';
@@ -619,10 +619,12 @@ export default function HomeScreen() {
       pick,
       selected,
       inks,
+      glass,
     }: {
       pick: (id: ZmanId) => void;
       selected: ZmanId | null;
       inks: { plain: string; next: string };
+      glass: CardGlass;
     }) =>
       board ? (
         <HomeTimes
@@ -634,6 +636,7 @@ export default function HomeScreen() {
           now={now}
           tz={location.tz}
           inks={inks}
+          glass={glass}
           selected={selected}
           onPickZman={pick}
           pins={zmanPins}

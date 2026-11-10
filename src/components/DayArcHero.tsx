@@ -30,6 +30,7 @@ import {
   arcPoint,
   BACK_ALPHA,
   CHIP_ALPHA,
+  cardGlass,
   chipInk,
   dragMove,
   dragStart,
@@ -43,6 +44,7 @@ import {
   stageOffset,
   stageUnits,
   type ArcPoint,
+  type CardGlass,
   type ArcZman,
   type DayFrame,
   type DragState,
@@ -124,6 +126,8 @@ export type DayArcHeroProps = {
     pick: (id: ZmanId) => void;
     selected: ZmanId | null;
     inks: { plain: string; next: string };
+    // The card's glass, of the sky shown (a preview's too).
+    glass: CardGlass;
   }) => React.ReactNode;
 };
 
@@ -408,6 +412,7 @@ export const DayArcHero = React.memo(function DayArcHero({
             },
             selected: selectedId,
             inks: chipInks,
+            glass: cardGlass(sky),
           })
         ) : (
           <ScrollView

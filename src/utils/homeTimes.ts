@@ -117,18 +117,6 @@ export function suggestedPins(enabled: ReadonlySet<string>): { id: ZmanId; reaso
 export const zmanPinsOf = (saved: unknown): ZmanId[] =>
   Array.isArray(saved) ? ARC_ZMANIM.filter((id) => saved.some((x) => isZmanId(x) && x === id)) : [];
 
-// The card's colour follows the part of the day, whatever the day is (the owner's report of 2026-11-10: on Rosh
-// Chodesh the day's own colour held all day and night); the card's title already names a special day.
-export type PeriodTone = 'dawn' | 'morning' | 'noon' | 'evening' | 'night';
-export function periodTone(now: Date, z: { netz: Date; chatzot: Date; plag: Date; tzeit: Date }): PeriodTone {
-  const t = now.getTime();
-  if (t < z.netz.getTime()) return 'dawn';
-  if (t < z.chatzot.getTime()) return 'morning';
-  if (t < z.plag.getTime()) return 'noon';
-  if (t < z.tzeit.getTime()) return 'evening';
-  return 'night';
-}
-
 // What the user's marks teach: how many of the recent marks came after a time (Shacharit after the end of the
 // Shema, Mincha after plag), and the habit it makes once enough of them do.
 export type MarkStat = { after: number; of: number };

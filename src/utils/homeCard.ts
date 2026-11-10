@@ -16,7 +16,7 @@ import type { HolyBlock, Location } from '@/types/zmanim';
 import { clockOf, formatRemaining } from './clock';
 import { appDay, locationNoon } from './locationDay';
 import { chanukahDay, dayFeatures, matchesCondition } from './siddur';
-import { MINE_MAX, periodTone, type CardPageId, type Habit, type MineFactId, type PeriodTone } from './homeTimes';
+import { MINE_MAX, type CardPageId, type Habit, type MineFactId } from './homeTimes';
 
 export { CARD_PAGES, DEFAULT_MINE, MINE_FACTS, MINE_MAX, isCardPage, mineFactsOf } from './homeTimes';
 export type { CardPageId, MineFactId } from './homeTimes';
@@ -54,7 +54,6 @@ export type CardInput = {
 export type CardModel = {
   pages: Record<CardPageId, CardPage>;
   smart: CardPageId;
-  tone: PeriodTone;
   // The period's own times for the carousel: candle lighting today, the Chanukah candles tonight, a fast's end.
   candleLighting: { at: Date; from: Date } | null;
   fastEnd: { at: Date; from: Date } | null;
@@ -309,14 +308,9 @@ export function homeCard(input: CardInput): CardModel {
   const thursdayNight = civilWeekday === 4 && z !== null && now.getTime() >= z.tzeitHakochavim.getTime();
   const smart: CardPageId = special || input.habit ? 'day' : thursdayNight || civilWeekday === 5 ? 'week' : 'day';
 
-  const tone = z
-    ? periodTone(now, { netz: z.netzHaChama, chatzot: z.chatzot, plag: z.plagHaMincha, tzeit: z.tzeitHakochavim })
-    : 'night';
-
   return {
     pages: { day, week, mine },
     smart,
-    tone,
     candleLighting: erev && z ? { at: erev.start, from: z.plagHaMincha } : null,
     fastEnd:
       features.flags.has('publicFast') && !features.flags.has('yomKippur') && z && !night

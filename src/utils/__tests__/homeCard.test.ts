@@ -36,7 +36,6 @@ describe('the smart card', () => {
       { label: 'יציאה', value: 'ש׳ 17:16' },
     ]);
     expect(m.smart).toBe('day');
-    expect(m.tone).toBe('morning');
     expect(m.candleLighting).toBeNull();
   });
 
@@ -47,8 +46,6 @@ describe('the smart card', () => {
   it('erev Shabbat: the title, candle lighting for the carousel and a countdown in the week', () => {
     const m = card('2026-11-13T12:30');
     expect(m.pages.day.title).toBe('ערב שבת פרשת תולדות');
-    // The tone follows the part of the day on a special day too.
-    expect(m.tone).toBe('noon');
     expect(m.candleLighting).not.toBeNull();
     expect(m.pages.week.facts[0]).toEqual({ label: 'כניסה', value: 'בעוד 3:56 שעות' });
   });
@@ -57,7 +54,6 @@ describe('the smart card', () => {
     const rc = card('2026-11-10T09:00');
     expect(rc.pages.day.title).toBe('ראש חודש כסלו');
     expect(rc.pages.day.facts[0].value).toBe('יעלה ויבוא · חצי הלל · מוסף');
-    expect(rc.tone).toBe('morning');
     const chanukah = card('2026-12-06T15:30');
     expect(chanukah.pages.day.title).toBe('חנוכה · ג׳ נרות');
     expect(chanukah.pages.day.facts[0].value).toBe('על הניסים · הלל שלם');
@@ -66,7 +62,6 @@ describe('the smart card', () => {
     expect(fast.pages.day.title).toBe('עשרה בטבת');
     expect(fast.pages.day.facts[0].value).toBe('עננו');
     expect(fast.fastEnd).not.toBeNull();
-    expect(fast.tone).toBe('noon');
   });
 
   it('names Shabbat Mevarchim with the molad, and a named Shabbat', () => {

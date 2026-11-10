@@ -1,19 +1,17 @@
-import React, { useId, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { ListRow } from '@/components/ListRow';
 import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { SectionLabel } from '@/components/SectionLabel';
 import { useI18n } from '@/i18n';
 import { BRAND } from '@/theme/colors';
-import { CARD_ALPHA, PERIOD_TONES, TONE_FILL_ALPHA } from '@/theme/periodTone';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { clockOf, formatRemaining } from '@/utils/clock';
-import { alphaHex, CHIP_ALPHA } from '@/utils/dayArc';
+import { alphaHex, CHIP_ALPHA, type CardGlass } from '@/utils/dayArc';
 import type { CardModel } from '@/utils/homeCard';
 import {
   CARD_PAGES,
@@ -40,6 +38,8 @@ const LABEL_LINE = scaled(14);
 const TIME_LINE = scaled(18);
 const TAB_SLOP = { top: scaled(10), bottom: scaled(10), left: scaled(4), right: scaled(4) };
 const BORDER = 2;
+// The live chip's filled share, the accent over the chip's glass.
+const LIVE_FILL_ALPHA = 0.45;
 
 export type HomeTimesProps = {
   card: CardModel;
@@ -51,6 +51,8 @@ export type HomeTimesProps = {
   now: Date;
   tz: string;
   inks: { plain: string; next: string };
+  // The card's glass, of the sky shown (cardGlass() of the hero).
+  glass: CardGlass;
   selected: ZmanId | null;
   onPickZman: (id: ZmanId) => void;
   pins: readonly ZmanId[];
@@ -66,13 +68,13 @@ export type HomeTimesProps = {
 export function HomeTimes(props: HomeTimesProps) {
   const { colors } = useTheme();
   const { t } = useI18n();
-  const gradientId = `homeTone${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   const [focus, setFocus] = useState<string | null>(null);
   const [pinsOpen, setPinsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [tabsWidth, setTabsWidth] = useState(0);
   const { card, now, tz } = props;
-  const tone = PERIOD_TONES[card.tone];
+  const { glass } = props;
+  const ink = { color: glass.ink };
   const pageId = props.page ?? card.smart;
   const page = card.pages[pageId];
   const nextPage = CARD_PAGES[(CARD_PAGES.indexOf(pageId) + 1) % CARD_PAGES.length];
@@ -100,16 +102,11 @@ export function HomeTimes(props: HomeTimesProps) {
 
   return (
     <View testID="home-times">
-      <View testID="home-card" style={styles.card} accessibilityLabel={t('home.card.label')}>
-        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" preserveAspectRatio="none" pointerEvents="none">
-          <Defs>
-            <LinearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor={tone.from} stopOpacity={CARD_ALPHA} />
-              <Stop offset="1" stopColor={tone.to} stopOpacity={CARD_ALPHA} />
-            </LinearGradient>
-          </Defs>
-          <Rect width="100%" height="100%" fill={`url(#${gradientId})`} />
-        </Svg>
+      <View
+        testID="home-card"
+        style={[styles.card, { backgroundColor: glass.fill, borderColor: glass.edge }]}
+        accessibilityLabel={t('home.card.label')}
+      >
         <View style={styles.row}>
           <Pressable
             testID={`home-card-page-${page.id}`}
@@ -119,18 +116,25 @@ export function HomeTimes(props: HomeTimesProps) {
             style={({ pressed }) => [styles.main, pressed && styles.pressed]}
           >
             <View style={[styles.titleRow, { paddingEnd: tabsWidth }]}>
-              <MitzvahIcon name={page.icon} size={TITLE_ICON} color={BRAND.white} />
-              <Text style={[typography.bodyBold, styles.white, styles.shrink]} numberOfLines={1}>
+              <MitzvahIcon name={page.icon} size={TITLE_ICON} color={glass.ink} />
+              <Text style={[typography.bodyBold, ink, styles.shrink]} numberOfLines={1}>
                 {page.title}
               </Text>
             </View>
             <View style={styles.facts}>
               {page.facts.map((f, i) => (
-                <View key={f.label} style={[styles.fact, i > 0 && styles.factDivider, i === 0 && styles.factFirst]}>
-                  <Text style={[typography.micro, styles.white]} numberOfLines={1}>
+                <View
+                  key={f.label}
+                  style={[
+                    styles.fact,
+                    i > 0 && [styles.factDivider, { borderStartColor: alphaHex(glass.ink, 0.3) }],
+                    i === 0 && styles.factFirst,
+                  ]}
+                >
+                  <Text style={[typography.micro, ink]} numberOfLines={1}>
                     {f.label}
                   </Text>
-                  <Text style={[typography.captionBold, styles.white]} numberOfLines={1}>
+                  <Text style={[typography.captionBold, ink]} numberOfLines={1}>
                     {f.value}
                   </Text>
                 </View>
@@ -149,10 +153,10 @@ export function HomeTimes(props: HomeTimesProps) {
                     accessibilityState={{ selected: on }}
                     hitSlop={TAB_SLOP}
                     onPress={() => props.onPage(id)}
-                    style={[styles.tab, on && styles.tabOn]}
+                    style={[styles.tab, on && { backgroundColor: alphaHex(glass.ink, 0.15) }]}
                   >
                     {id === card.smart ? <View style={styles.smartDot} /> : null}
-                    <Text style={[on ? typography.captionBold : typography.small, styles.white]}>
+                    <Text style={[on ? typography.captionBold : typography.small, ink]}>
                       {t(`home.card.page.${id}`)}
                     </Text>
                   </Pressable>
@@ -167,9 +171,9 @@ export function HomeTimes(props: HomeTimesProps) {
               onPress={() => setMoreOpen(true)}
               style={styles.more}
             >
-              <View style={styles.dot} />
-              <View style={styles.dot} />
-              <View style={styles.dot} />
+              <View style={[styles.dot, { backgroundColor: glass.ink }]} />
+              <View style={[styles.dot, { backgroundColor: glass.ink }]} />
+              <View style={[styles.dot, { backgroundColor: glass.ink }]} />
             </Pressable>
           </View>
         </View>
@@ -236,7 +240,7 @@ export function HomeTimes(props: HomeTimesProps) {
                 styles.chip,
                 {
                   backgroundColor: alphaHex(c.extra || live ? colors.goldLight : colors.surface, CHIP_ALPHA),
-                  borderColor: marked ? (live ? tone.bar : colors.gold) : 'transparent',
+                  borderColor: marked ? colors.gold : 'transparent',
                 },
                 live && styles.liveChip,
                 c.kind === 'past' && styles.past,
@@ -249,7 +253,7 @@ export function HomeTimes(props: HomeTimesProps) {
                   pointerEvents="none"
                   style={[
                     styles.fill,
-                    { width: `${share * 100}%`, backgroundColor: alphaHex(tone.fill, TONE_FILL_ALPHA) },
+                    { width: `${share * 100}%`, backgroundColor: alphaHex(colors.gold, LIVE_FILL_ALPHA) },
                   ]}
                 />
               ) : null}
@@ -273,7 +277,7 @@ export function HomeTimes(props: HomeTimesProps) {
               </Text>
               {c.progress && !live ? (
                 <View style={styles.track} pointerEvents="none">
-                  <View style={[styles.bar, { width: `${share * 100}%`, backgroundColor: tone.bar }]} />
+                  <View style={[styles.bar, { width: `${share * 100}%`, backgroundColor: colors.gold }]} />
                 </View>
               ) : null}
             </Pressable>
@@ -372,7 +376,12 @@ export function HomeTimes(props: HomeTimesProps) {
 }
 
 const styles = StyleSheet.create({
-  card: { marginHorizontal: spacing.lg, borderRadius: radius.xl, overflow: 'hidden' },
+  card: {
+    marginHorizontal: spacing.lg,
+    borderRadius: radius.xl,
+    borderWidth: StyleSheet.hairlineWidth,
+    overflow: 'hidden',
+  },
   row: { flexDirection: 'row', alignItems: 'stretch' },
   main: {
     flex: 1,
@@ -385,11 +394,10 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.85 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: TAB_HEIGHT },
   shrink: { flexShrink: 1 },
-  white: { color: BRAND.white },
   facts: { flexDirection: 'row' },
   fact: { flex: 1, minWidth: 0, paddingHorizontal: spacing.sm },
   factFirst: { flex: 1.5, paddingStart: 0 },
-  factDivider: { borderStartWidth: StyleSheet.hairlineWidth, borderStartColor: alphaHex(BRAND.white, 0.3) },
+  factDivider: { borderStartWidth: StyleSheet.hairlineWidth },
   // The tabs sit on the title's line, at its end, so the card is two rows (the owner's pick of 2026-11-10).
   side: { position: 'absolute', top: spacing.sm, end: spacing.sm, flexDirection: 'row', alignItems: 'center' },
   tabs: { flexDirection: 'row', gap: 1 },
@@ -401,7 +409,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: radius.full,
   },
-  tabOn: { backgroundColor: alphaHex(BRAND.white, 0.22) },
   smartDot: { width: scaled(5), height: scaled(5), borderRadius: radius.full, backgroundColor: BRAND.gold },
   more: {
     flexDirection: 'row',
@@ -411,7 +418,7 @@ const styles = StyleSheet.create({
     minHeight: TAB_HEIGHT,
     paddingHorizontal: spacing.sm,
   },
-  dot: { width: scaled(4), height: scaled(4), borderRadius: radius.full, backgroundColor: BRAND.white },
+  dot: { width: scaled(4), height: scaled(4), borderRadius: radius.full },
   chips: {
     paddingHorizontal: spacing.lg,
     paddingTop: CHIPS_TOP,

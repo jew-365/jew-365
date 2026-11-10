@@ -1,4 +1,4 @@
-import { Dimensions, I18nManager, ScrollView, StyleSheet } from 'react-native';
+import { Dimensions, I18nManager, ScrollView, StyleSheet, Text } from 'react-native';
 import type { ComponentProps } from 'react';
 import { act, fireEvent, screen, within } from '@testing-library/react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
@@ -32,6 +32,7 @@ import {
   arcLength,
   arcPoint,
   BACK_ALPHA,
+  cardGlass,
   CHIP_ALPHA,
   chipInk,
   dayFrameFor,
@@ -843,5 +844,28 @@ describe('DayArcHero with zmanim hidden in Settings', () => {
   it('names misheyakir as the time of tallit and tefillin', () => {
     setup();
     expect(screen.getByTestId('home-zman-misheyakir')).toHaveTextContent(/זמן תו״ט/);
+  });
+});
+
+describe("DayArcHero's board", () => {
+  beforeEach(() => {
+    jest.replaceProperty(I18nManager, 'isRTL', true);
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', theme: 'gold' });
+  });
+
+  it('hands the board the glass of the sky shown, a preview included', () => {
+    const F = frameAt(NOON);
+    const board = jest.fn((api: { pick: (id: ZmanId) => void; glass: unknown }) => (
+      <Text testID="board-pick" onPress={() => api.pick('tzeit')}>
+        board
+      </Text>
+    ));
+    renderWithTheme(<DayArcHero {...heroProps(NOON, F, jest.fn(), jest.fn())} board={board as never} />);
+    expect(board.mock.lastCall![0].glass).toEqual(cardGlass(skyAt(F!, NOON)));
+    fireEvent.press(screen.getByTestId('board-pick'));
+    const tzeit = F!.zmanim.find((z) => z.id === 'tzeit')!.at;
+    expect(board.mock.lastCall![0].glass).toEqual(cardGlass(skyAt(F!, tzeit)));
+    expect(cardGlass(skyAt(F!, tzeit))).not.toEqual(cardGlass(skyAt(F!, NOON)));
   });
 });

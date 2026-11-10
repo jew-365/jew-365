@@ -30,6 +30,10 @@ import {
   sunColors,
   timeAtPoint,
   worstContrast,
+  CARD_ALPHA,
+  CARD_EDGE_ALPHA,
+  CARD_MIX,
+  cardGlass,
 } from '../dayArc';
 import { appDay, appDayEnd, locationNoon } from '../locationDay';
 import { CITIES } from '@/data/cities';
@@ -500,5 +504,34 @@ describe('zmanim chip strip', () => {
     );
     pinned(min, DAY_FLOOR.back[classOf(theme)]);
     expect(min).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe("home card's glass", () => {
+  // Where the card sits on the hero's land gradient, as shares of it: its top, middle and bottom.
+  const CARD_SHARES = [0.05, 0.3, 0.6];
+  it.each(['2026-03-20', '2026-06-21', '2026-12-21'])(
+    'takes the sky colour and keeps its ink at 4.5:1 over the land, every 10 minutes of %s in Jerusalem',
+    (date) => {
+      const day = new Date(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, Number(date.slice(8)));
+      const f = dayFrameFor(day, J, 'GRA')!;
+      for (let t = f.start.getTime(); t < f.end.getTime(); t += 10 * 60000) {
+        const sky = skyAt(f, new Date(t));
+        const glass = cardGlass(sky);
+        const base = blendHex(inkFor(sky).light ? SKY_SCENE.inkDark : BRAND.white, sky.mid, CARD_MIX);
+        expect(glass.fill).toBe(alphaHex(base, CARD_ALPHA));
+        expect(glass.ink).toBe(inkFor(sky).light ? BRAND.white : SKY_SCENE.inkDark);
+        for (const share of CARD_SHARES)
+          expect(
+            contrastRatio(blendHex(base, stripBackdrop(sky, share), CARD_ALPHA), glass.ink),
+          ).toBeGreaterThanOrEqual(4.5);
+      }
+    },
+  );
+
+  it('is see-through and edged by a hairline of its ink', () => {
+    expect(CARD_ALPHA).toBeLessThan(0.7);
+    const glass = cardGlass(SKY.tzeit);
+    expect(glass.edge).toBe(alphaHex(glass.ink, CARD_EDGE_ALPHA));
   });
 });

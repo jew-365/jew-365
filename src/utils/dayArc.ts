@@ -204,6 +204,21 @@ function glassInk(backdrops: readonly string[], fill: string): { ink: string; ra
   return white > dark ? { ink: BRAND.white, ratio: white } : { ink: SKY_SCENE.inkDark, ratio: dark };
 }
 
+// Home's smart card (the owner's call of 2026-11-10): a glass of the sky's own colour, never a palette of its own. On
+// a sky that takes white ink it leans toward the night ink, on one that takes dark ink toward white, a CARD_MIX of
+// the way from the sky's middle colour, drawn at CARD_ALPHA over the land; its text is that ink, which holds 4.5:1 on
+// the glass at every hour (pinned in the suite), and a hairline of the ink at CARD_EDGE_ALPHA sets it off the sky.
+export const CARD_MIX = 0.55;
+export const CARD_ALPHA = 0.62;
+export const CARD_EDGE_ALPHA = 0.28;
+export type CardGlass = { fill: string; ink: string; edge: string };
+export function cardGlass(s: SkyStop): CardGlass {
+  const light = inkFor(s).light;
+  const ink = light ? BRAND.white : SKY_SCENE.inkDark;
+  const fill = blendHex(light ? SKY_SCENE.inkDark : BRAND.white, s.mid, CARD_MIX);
+  return { fill: alphaHex(fill, CARD_ALPHA), ink, edge: alphaHex(ink, CARD_EDGE_ALPHA) };
+}
+
 export const chipInk = (s: SkyStop, fill: string) =>
   glassInk(
     STRIP_SHARES.map((share) => stripBackdrop(s, share)),

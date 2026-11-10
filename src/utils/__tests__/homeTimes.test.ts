@@ -1,7 +1,6 @@
 import {
   learnedHabit,
   markStat,
-  periodTone,
   progressShare,
   suggestedPins,
   timeChips,
@@ -96,17 +95,6 @@ describe('the pins', () => {
     expect(suggestedPins(new Set(['tefillin', 'mincha'])).map((s) => s.id)).toEqual(['misheyakir', 'plag']);
     expect(zmanPinsOf(['plag', 'nope', 'alot'])).toEqual(['alot', 'plag']);
     expect(zmanPinsOf('plag')).toEqual([]);
-  });
-});
-
-describe('the period tone', () => {
-  const z = { netz: at(6), chatzot: at(11), plag: at(15), tzeit: at(17) };
-  it('follows the part of the day, whatever the day is', () => {
-    expect(periodTone(at(5), z)).toBe('dawn');
-    expect(periodTone(at(9), z)).toBe('morning');
-    expect(periodTone(at(13), z)).toBe('noon');
-    expect(periodTone(at(16), z)).toBe('evening');
-    expect(periodTone(at(20), z)).toBe('night');
   });
 });
 
