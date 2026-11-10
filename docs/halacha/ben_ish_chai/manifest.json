@@ -1,0 +1,3465 @@
+{
+  "format": 1,
+  "version": 1,
+  "track": "ben_ish_chai",
+  "book": {
+    "he": "בן איש חי",
+    "en": "Ben Ish Chai"
+  },
+  "credit": {
+    "he": "בן איש חי: Ben Ish Hai -- Wikisource (Public Domain), דרך ספריא. לוח הלימוד: הלכות פרשת השבוע",
+    "en": "Ben Ish Chai: Ben Ish Hai -- Wikisource (Public Domain), via Sefaria. Schedule: the halachot of the week's parasha"
+  },
+  "credits": [
+    {
+      "title": "Ben Ish Hai -- Wikisource, via Sefaria",
+      "license": "Public Domain",
+      "url": "https://he.wikisource.org/wiki/%D7%91%D7%9F_%D7%90%D7%99%D7%A9_%D7%97%D7%99"
+    }
+  ],
+  "gzipBytes": 630514,
+  "gz": {
+    "y1-bereshit": {
+      "path": "y1-bereshit.dde3cd83.json.gz",
+      "sha256": "dde3cd83d47a367e406f84c43b8b880f0389a576898ca6108bbc1ad5c53bf701",
+      "bytes": 3564
+    },
+    "y1-noach": {
+      "path": "y1-noach.19010dc1.json.gz",
+      "sha256": "19010dc17fded6fbee6ffa8220d01505df7dc51993379cf2e334a838a9da3a8a",
+      "bytes": 4424
+    },
+    "y1-lech-lecha": {
+      "path": "y1-lech-lecha.8c204b00.json.gz",
+      "sha256": "8c204b001b05a9b7620421b29178824f75fd53401c9495996f1a124565832190",
+      "bytes": 5521
+    },
+    "y1-vayera": {
+      "path": "y1-vayera.64b9b9f4.json.gz",
+      "sha256": "64b9b9f43708064b0e113b88a9d8cfc854f0ccbe5a2ba017b9cc1b6101170ed5",
+      "bytes": 8017
+    },
+    "y1-chayei-sara": {
+      "path": "y1-chayei-sara.2cfabf79.json.gz",
+      "sha256": "2cfabf799230347438ec9fa509a158ff421044e137a04fcb9048fa95c55d2b99",
+      "bytes": 6340
+    },
+    "y1-toldot": {
+      "path": "y1-toldot.43010a2b.json.gz",
+      "sha256": "43010a2bd19d6b6302d94088cf636c8125fbec4e1404313c1970c3bb6a551f33",
+      "bytes": 5886
+    },
+    "y1-vayetzei": {
+      "path": "y1-vayetzei.d7f2b4c9.json.gz",
+      "sha256": "d7f2b4c94d4f2031cca1efd58ae9142737ac1372f23b518f62a2e421332ea8e0",
+      "bytes": 4025
+    },
+    "y1-vayishlach": {
+      "path": "y1-vayishlach.5c8f2db8.json.gz",
+      "sha256": "5c8f2db8f4c9e08026850f9229b765398fd857c9a7cf2aa8b4402e47745bd516",
+      "bytes": 6548
+    },
+    "y1-vayeshev": {
+      "path": "y1-vayeshev.22958e87.json.gz",
+      "sha256": "22958e878157143e05081ae0f63f5fcfe8b981d79a5802b641d36c5e6198ad4c",
+      "bytes": 6753
+    },
+    "y1-chanukah": {
+      "path": "y1-chanukah.c26ac775.json.gz",
+      "sha256": "c26ac775568c871bf74b2747a22a87553e4e395388cb95de1bcb2173b9c40a04",
+      "bytes": 5706
+    },
+    "y1-miketz": {
+      "path": "y1-miketz.cca55e86.json.gz",
+      "sha256": "cca55e86d09d8201ac5909691bf4518a59f463fa7e144730723e77391ca59728",
+      "bytes": 6788
+    },
+    "y1-vayigash": {
+      "path": "y1-vayigash.4ab557e6.json.gz",
+      "sha256": "4ab557e66369bc63c197cda71c2d761d1ca44d07505b315e6b9903aafd78e83c",
+      "bytes": 7427
+    },
+    "y1-vayechi": {
+      "path": "y1-vayechi.e459e754.json.gz",
+      "sha256": "e459e75498e4be0b17777420b9732b9b8e52907be25fdf8293b05681e4dcf6f4",
+      "bytes": 6695
+    },
+    "y1-shemot": {
+      "path": "y1-shemot.44c6ad0c.json.gz",
+      "sha256": "44c6ad0c46d98e080b07c78718ff46c1727508d3b95470d6e1158b823da480a1",
+      "bytes": 3935
+    },
+    "y1-vaera": {
+      "path": "y1-vaera.dac7d09b.json.gz",
+      "sha256": "dac7d09ba475087664a537e6fefb90835bcbcfd58495a5f1e292c18a52e5e3f2",
+      "bytes": 7798
+    },
+    "y1-bo": {
+      "path": "y1-bo.c8819bca.json.gz",
+      "sha256": "c8819bcaefb5267f6eb4dadb1198d122917167710737d606c3df6f1041bef956",
+      "bytes": 7308
+    },
+    "y1-beshalach": {
+      "path": "y1-beshalach.a950ffd6.json.gz",
+      "sha256": "a950ffd6ab780f19b5a629c09ee57f5f864a6fe719656242354ee5973e6a7ac4",
+      "bytes": 7996
+    },
+    "y1-yitro": {
+      "path": "y1-yitro.24093985.json.gz",
+      "sha256": "24093985e23b372ae14463780c4585217a6e1cec6587240d4c73806aed6ef1bd",
+      "bytes": 5721
+    },
+    "y1-mishpatim": {
+      "path": "y1-mishpatim.cdd2c6e2.json.gz",
+      "sha256": "cdd2c6e2e62174720417c719ebdce38746bb0f091cc3af9a3147a71f4d9c5f98",
+      "bytes": 5602
+    },
+    "y1-terumah": {
+      "path": "y1-terumah.2e08517b.json.gz",
+      "sha256": "2e08517bd4768797d434620f47baf956cc92958b415d80353c6163e1d0c95363",
+      "bytes": 4920
+    },
+    "y1-tetzaveh": {
+      "path": "y1-tetzaveh.4e83d49e.json.gz",
+      "sha256": "4e83d49e9e13fe0cee03db44b5885b3a1cc644eeecdfe7ccd6512f38eea51c23",
+      "bytes": 9974
+    },
+    "y1-ki-tisa": {
+      "path": "y1-ki-tisa.eb1076ce.json.gz",
+      "sha256": "eb1076ceec402bb2412beb5efa8b959bdf91a7116168a1ccadabeeb3b99a39a8",
+      "bytes": 9048
+    },
+    "y1-vayakhel": {
+      "path": "y1-vayakhel.69f16d3a.json.gz",
+      "sha256": "69f16d3ac89e3f1f4eb6d9022a5504ff8cca114fa7a154eea780b2d2aaaf1900",
+      "bytes": 5136
+    },
+    "y1-pekudei": {
+      "path": "y1-pekudei.0a21f262.json.gz",
+      "sha256": "0a21f26243edc851fb533db6046fb2cbf00501250be88e26ecdd9b1161026292",
+      "bytes": 5591
+    },
+    "y1-vayikra": {
+      "path": "y1-vayikra.01ee9efd.json.gz",
+      "sha256": "01ee9efd235b50442079102c3ab7bded210347d56f84238afab8c06256b0c03a",
+      "bytes": 5058
+    },
+    "y1-tzav": {
+      "path": "y1-tzav.2898d4fa.json.gz",
+      "sha256": "2898d4faf2207fe0516b3c4037d65bc59aa31bf347fa5e5cbac01f17943bd0a2",
+      "bytes": 16463
+    },
+    "y1-shmini": {
+      "path": "y1-shmini.d9bf18f7.json.gz",
+      "sha256": "d9bf18f7085ef4fb9f8962b274c73548622693f0564e7e94263f187ed2f2bf3c",
+      "bytes": 5634
+    },
+    "y1-tazria-metzora": {
+      "path": "y1-tazria-metzora.4c0c0ee8.json.gz",
+      "sha256": "4c0c0ee8698e140d9a854f23ebe1e3b06b8cc7ac120f34c4cd205c3f6c43b496",
+      "bytes": 5595
+    },
+    "y1-achrei-mot-kedoshim": {
+      "path": "y1-achrei-mot-kedoshim.6609d676.json.gz",
+      "sha256": "6609d6768d31d0663c2c946a9754fd443fe8a25698a6a6880531dd30fccf60f3",
+      "bytes": 5578
+    },
+    "y1-emor": {
+      "path": "y1-emor.f3dc1ee8.json.gz",
+      "sha256": "f3dc1ee8ed6f043512f5ec554ea232a84b5283edcda5a1d7fed0161ca03854b5",
+      "bytes": 4060
+    },
+    "y1-behar-bechukotai": {
+      "path": "y1-behar-bechukotai.4903a7d7.json.gz",
+      "sha256": "4903a7d7306319cee56e814bb9a40f0e12b92a81da7f6f3ae596d6314c2c5c00",
+      "bytes": 5683
+    },
+    "y1-bamidbar": {
+      "path": "y1-bamidbar.cdd2310a.json.gz",
+      "sha256": "cdd2310a30cad5eb00fe0b17b0203e2d4da1f2e3d1089ebfce5179cda4242b59",
+      "bytes": 7253
+    },
+    "y1-nasso": {
+      "path": "y1-nasso.88d8f243.json.gz",
+      "sha256": "88d8f2430b83d065c1d23d3a68eb15eac4657c1ad44af5f3afc459aed510ac51",
+      "bytes": 5844
+    },
+    "y1-behaalotcha": {
+      "path": "y1-behaalotcha.e60d6831.json.gz",
+      "sha256": "e60d6831d6a7055ec308ed33abb3b57ab69a4d7f3a46047218d7f5badfd1e538",
+      "bytes": 6414
+    },
+    "y1-shlach": {
+      "path": "y1-shlach.86b7be49.json.gz",
+      "sha256": "86b7be492f23ed29891a03839be67ee5d713495f8ae2a0e65adeddf80ce8b3db",
+      "bytes": 6353
+    },
+    "y1-korach": {
+      "path": "y1-korach.b3be2ef4.json.gz",
+      "sha256": "b3be2ef43628cd92b3ff53b809081b2f1d1121776a457433341e214287e3eb80",
+      "bytes": 3065
+    },
+    "y1-chukat": {
+      "path": "y1-chukat.4cefce03.json.gz",
+      "sha256": "4cefce0391b45dc9a0acc7f64f476305148ea1ce52cfe4e451d192e255a9c6e3",
+      "bytes": 7434
+    },
+    "y1-balak": {
+      "path": "y1-balak.157d6d59.json.gz",
+      "sha256": "157d6d599d664d9450d7a14e4eecc5f52ded6ed47e2da449f0c111caddb9ab0a",
+      "bytes": 4277
+    },
+    "y1-pinchas": {
+      "path": "y1-pinchas.a1d196b1.json.gz",
+      "sha256": "a1d196b10997d2c2b378cbd2f28a45380f2fbdc04fedf809e45331b80ba24d87",
+      "bytes": 7363
+    },
+    "y1-matot": {
+      "path": "y1-matot.ac10aeea.json.gz",
+      "sha256": "ac10aeea74f0de602c555a1b63996590c02849528e9c60a1350b8631ff5d36be",
+      "bytes": 4374
+    },
+    "y1-masei": {
+      "path": "y1-masei.7b719b38.json.gz",
+      "sha256": "7b719b384f51c25e87f4ebeb5147ed5dfa806c2420d0572336bc3f9b1c827a49",
+      "bytes": 4037
+    },
+    "y1-devarim": {
+      "path": "y1-devarim.018e0cac.json.gz",
+      "sha256": "018e0cac57de601793cc21fa9dfb6f2bd0c28037be8d69cb950269efca4dc9c2",
+      "bytes": 8747
+    },
+    "y1-vaetchanan": {
+      "path": "y1-vaetchanan.0797df20.json.gz",
+      "sha256": "0797df20d37ab3c2e8deca9ae5c18fddaca7371a5869479b36d3b69e4af48ae2",
+      "bytes": 4042
+    },
+    "y1-eikev": {
+      "path": "y1-eikev.a9314fc9.json.gz",
+      "sha256": "a9314fc92089df61bb2a62b1f170aca4a1d9339c2e9085c4c194ea6142de54b7",
+      "bytes": 6409
+    },
+    "y1-reeh": {
+      "path": "y1-reeh.d891a45a.json.gz",
+      "sha256": "d891a45ab8c69aa9ff4eea24ad31c8330a08470c0baec335a55854dac2b9250a",
+      "bytes": 5519
+    },
+    "y1-shoftim": {
+      "path": "y1-shoftim.8bbb27cd.json.gz",
+      "sha256": "8bbb27cdd9d81845e3dd73232c1ec67ffd7bb6d969b5bc5deabf4fad64fa9d6c",
+      "bytes": 8820
+    },
+    "y1-ki-teitzei": {
+      "path": "y1-ki-teitzei.ccf5d872.json.gz",
+      "sha256": "ccf5d8721d03ed2939aa24033aae84e830cb7ae1907592590ce2d29f627b1258",
+      "bytes": 4907
+    },
+    "y1-ki-tavo": {
+      "path": "y1-ki-tavo.66cfce6d.json.gz",
+      "sha256": "66cfce6de2f9f9d58a73809c040c7f13be492b2bf6fd920a0b334a92cfb7146b",
+      "bytes": 6625
+    },
+    "y1-nitzavim": {
+      "path": "y1-nitzavim.bf9cf2e3.json.gz",
+      "sha256": "bf9cf2e3fd4cf467c42e760261af995d1c724778657046c8e4ff470ab351aca5",
+      "bytes": 7640
+    },
+    "y1-vayeilech": {
+      "path": "y1-vayeilech.db18a672.json.gz",
+      "sha256": "db18a67282dad25982facf0b6bdac0b2343a8e7a455a4bdd10810e59ebdf06fb",
+      "bytes": 5590
+    },
+    "y1-haazinu": {
+      "path": "y1-haazinu.0a208305.json.gz",
+      "sha256": "0a2083053c2c42e575a7eaae1c2e9e6a2a4c360c4abd56b6fcb7e3fd077770e0",
+      "bytes": 3961
+    },
+    "y1-vzot-haberachah": {
+      "path": "y1-vzot-haberachah.3c4d2838.json.gz",
+      "sha256": "3c4d283853f536dc78590fc145a25db4d3e5cfc7c523382788d5ee99c6aa6e24",
+      "bytes": 3654
+    },
+    "y2-bereshit": {
+      "path": "y2-bereshit.7f0aa32e.json.gz",
+      "sha256": "7f0aa32e438d47823199424d08f90af34db74a6cd83ff4b4f03e7c2cf5bc5e6a",
+      "bytes": 11530
+    },
+    "y2-noach": {
+      "path": "y2-noach.787d20bf.json.gz",
+      "sha256": "787d20bfe151711f2b47f0ecc993c3f318a00592298ff8613368cf752847f934",
+      "bytes": 5754
+    },
+    "y2-lech-lecha": {
+      "path": "y2-lech-lecha.aa8410ec.json.gz",
+      "sha256": "aa8410ec7bbf54d4b8d585865000321e1eed391afc80cf8467ff89a3f50de119",
+      "bytes": 8832
+    },
+    "y2-vayera": {
+      "path": "y2-vayera.c000af7c.json.gz",
+      "sha256": "c000af7cf5a844a52638b60bb4443dac8c6a3a70e5899885c23c693832882a31",
+      "bytes": 12732
+    },
+    "y2-chayei-sara": {
+      "path": "y2-chayei-sara.296e0de7.json.gz",
+      "sha256": "296e0de74f71d60bfa1c403a28f63e039486f0c34aee10a6cc4dafe076d8223b",
+      "bytes": 4781
+    },
+    "y2-toldot": {
+      "path": "y2-toldot.3753b53b.json.gz",
+      "sha256": "3753b53bb795c6d9b46ff646a90917baa8eb4568daaf26fceeb52922ed3a69c9",
+      "bytes": 8851
+    },
+    "y2-vayetzei": {
+      "path": "y2-vayetzei.98899df8.json.gz",
+      "sha256": "98899df85e8873192071a0e654ab9ca8d17ce086f7f162fdef54086d0f3eef12",
+      "bytes": 9508
+    },
+    "y2-vayishlach": {
+      "path": "y2-vayishlach.97e43b28.json.gz",
+      "sha256": "97e43b28dadc91e4585ea418db4a9404cfb5cf134fb9b6a1678f36664ec50d27",
+      "bytes": 7128
+    },
+    "y2-miketz": {
+      "path": "y2-miketz.cd1099a0.json.gz",
+      "sha256": "cd1099a0e8cdd3c6b56da71139698c18c8249a100f1366bcbb0a31cccf93e4a0",
+      "bytes": 5655
+    },
+    "y2-vayigash": {
+      "path": "y2-vayigash.754f8663.json.gz",
+      "sha256": "754f8663ffa0b803366e3ee2ff5e98275659c13a68f5a27f57734f91cf83bf51",
+      "bytes": 5423
+    },
+    "y2-vayechi": {
+      "path": "y2-vayechi.a2017a3d.json.gz",
+      "sha256": "a2017a3df66e6c5266d2243af60487bf40b92b96a50e5cb8262daac22869cee9",
+      "bytes": 5693
+    },
+    "y2-shemot": {
+      "path": "y2-shemot.49ecd185.json.gz",
+      "sha256": "49ecd1857c713f8bb85a71a729578da066d65767d79462f4d1e85feda173d80b",
+      "bytes": 5314
+    },
+    "y2-vaera": {
+      "path": "y2-vaera.05b4aeaa.json.gz",
+      "sha256": "05b4aeaabbd52b2e219c2b6082d475b45a71eccc1e6dbd539ff423adb2d124d5",
+      "bytes": 4810
+    },
+    "y2-bo": {
+      "path": "y2-bo.162f5c9e.json.gz",
+      "sha256": "162f5c9ef380780fbd215e02eb4f9638ea5c22056e653084cb2726aa752a7b95",
+      "bytes": 6359
+    },
+    "y2-beshalach": {
+      "path": "y2-beshalach.34e70ffe.json.gz",
+      "sha256": "34e70ffeabbbfe3da691d980fa694a114af20b361b87d517a56be5403f209945",
+      "bytes": 6940
+    },
+    "y2-yitro": {
+      "path": "y2-yitro.9b8c035b.json.gz",
+      "sha256": "9b8c035b40fbc3a9b1f13b2b555f88be25a3f51e1fc4abab6e5a2bd8e60ce5b6",
+      "bytes": 6801
+    },
+    "y2-mishpatim": {
+      "path": "y2-mishpatim.d93ed3ed.json.gz",
+      "sha256": "d93ed3eded86c1a170f1696cabdf1350f68e1cf4f7035a95bc484be84f21c0bc",
+      "bytes": 6998
+    },
+    "y2-terumah": {
+      "path": "y2-terumah.9623ac8f.json.gz",
+      "sha256": "9623ac8fb1f42e399e9398b6d9d853e1d434591010954f24344709589558ad20",
+      "bytes": 5350
+    },
+    "y2-tetzaveh": {
+      "path": "y2-tetzaveh.dfb2f551.json.gz",
+      "sha256": "dfb2f551899f05b1bf8e9662b3224e7d5aee1a97a4f323b4a6733b54421777fa",
+      "bytes": 3841
+    },
+    "y2-ki-tisa": {
+      "path": "y2-ki-tisa.d19694bc.json.gz",
+      "sha256": "d19694bce3bb2637737d2af22fdeaf14376c9426f6d5b96eaa185732a80d0a8d",
+      "bytes": 3669
+    },
+    "y2-vayakhel": {
+      "path": "y2-vayakhel.f3c01697.json.gz",
+      "sha256": "f3c016973d904d4f8b802f0c6654fce00f0635650c4de78392ccab9bd51e76db",
+      "bytes": 4232
+    },
+    "y2-pekudei": {
+      "path": "y2-pekudei.61de8c19.json.gz",
+      "sha256": "61de8c199c211f45c1fdfbcfed2151828eb3c9ffa036a37520b2b5b2f299f648",
+      "bytes": 4655
+    },
+    "y2-vayikra": {
+      "path": "y2-vayikra.8b9dadb0.json.gz",
+      "sha256": "8b9dadb05b5c780fa1b416370baeb1dfd98c3c9aa122e3fc926db952d728ccfa",
+      "bytes": 8917
+    },
+    "y2-tzav": {
+      "path": "y2-tzav.9a9fe4e3.json.gz",
+      "sha256": "9a9fe4e37993a8bab81868b63e55db161c0d4d93cba7efdf68b7146adc5f6897",
+      "bytes": 9222
+    },
+    "y2-shmini": {
+      "path": "y2-shmini.178e6dbb.json.gz",
+      "sha256": "178e6dbb6d3db3088faea53a7410c2bff20f5bc5192d6a21b61f7153621c71f5",
+      "bytes": 8056
+    },
+    "y2-tazria": {
+      "path": "y2-tazria.a013397a.json.gz",
+      "sha256": "a013397a73bb90b87b917b9690f7bb204cfd53cf568feba4c43843cf9c6b63eb",
+      "bytes": 6226
+    },
+    "y2-metzora": {
+      "path": "y2-metzora.2df31004.json.gz",
+      "sha256": "2df310048c72df20e1fdb6ca7e0779536f6b08fad363ea0980d8b5493cf067b7",
+      "bytes": 6393
+    },
+    "y2-achrei-mot": {
+      "path": "y2-achrei-mot.66be1d7c.json.gz",
+      "sha256": "66be1d7cf8140d339173a6c552acabb7a5244f5367b49775e778bf0869c02554",
+      "bytes": 6732
+    },
+    "y2-kedoshim": {
+      "path": "y2-kedoshim.dff7db93.json.gz",
+      "sha256": "dff7db93f6e701de08a342dbb58e618142eeaa4ad131f97dfc6966334895a394",
+      "bytes": 5680
+    },
+    "y2-emor": {
+      "path": "y2-emor.26aeb798.json.gz",
+      "sha256": "26aeb7983d09a55ec556bc744d26b175db9f20c252f7056ccbe853e956a2fc70",
+      "bytes": 5864
+    },
+    "y2-behar-bechukotai": {
+      "path": "y2-behar-bechukotai.cbbae39e.json.gz",
+      "sha256": "cbbae39e55027073525d24b052ece72afcc6b2a9c936d93806a3bd63726b1e26",
+      "bytes": 4227
+    },
+    "y2-nasso": {
+      "path": "y2-nasso.3182b49a.json.gz",
+      "sha256": "3182b49a2ef78a6341efda073185865f8a5e3889ab4f16d23f04a46bbd28ff06",
+      "bytes": 6354
+    },
+    "y2-behaalotcha": {
+      "path": "y2-behaalotcha.a692f40a.json.gz",
+      "sha256": "a692f40a05f5c109bb9d2cf463c0bed514279ccba97fd1a3d631d772deb79513",
+      "bytes": 4611
+    },
+    "y2-shlach": {
+      "path": "y2-shlach.14e29d48.json.gz",
+      "sha256": "14e29d4856717d22dd1971f029e1f3cad7d1ff4d22d3db14e517096aa40d8842",
+      "bytes": 4910
+    },
+    "y2-korach": {
+      "path": "y2-korach.de545bdd.json.gz",
+      "sha256": "de545bdd970fd8f7b709e6b87185759ea20f1a63d4cef3d6a30653079f72ad08",
+      "bytes": 6614
+    },
+    "y2-chukat": {
+      "path": "y2-chukat.95fb6355.json.gz",
+      "sha256": "95fb63559ff63946be6541a7d14f9d461a1029e0390c06eba6c00b2f696d119c",
+      "bytes": 10607
+    },
+    "y2-balak": {
+      "path": "y2-balak.e5dcced0.json.gz",
+      "sha256": "e5dcced06e062ffa67d62a103116e42e6d8d243aa4170bcb02631a0f29ee961f",
+      "bytes": 6218
+    },
+    "y2-pinchas": {
+      "path": "y2-pinchas.208c4020.json.gz",
+      "sha256": "208c40200ead022659fe3c6e11c9f4a61687f5cbb832150889a598f20f8dad6c",
+      "bytes": 6459
+    },
+    "y2-matot": {
+      "path": "y2-matot.4f1d512d.json.gz",
+      "sha256": "4f1d512d746ca58c876a843c6f91052c73d108824d8a78ff4af33794b7482cac",
+      "bytes": 4619
+    },
+    "y2-masei": {
+      "path": "y2-masei.e324f6e9.json.gz",
+      "sha256": "e324f6e98b3021a74a0819c29700861ee097e2c3a31da6404c0919d53a4320ad",
+      "bytes": 4936
+    },
+    "y2-vaetchanan": {
+      "path": "y2-vaetchanan.f6acf1cb.json.gz",
+      "sha256": "f6acf1cb16648cfbcb020d1bc3f131ff15bcdfdaa401a927ccd6094892f3e73c",
+      "bytes": 7103
+    },
+    "y2-eikev": {
+      "path": "y2-eikev.3de8ebca.json.gz",
+      "sha256": "3de8ebca1c16438c08ebb19a1b6fa3acea30026dc3beebf939c03137f27a4695",
+      "bytes": 7476
+    },
+    "y2-reeh": {
+      "path": "y2-reeh.457f5f92.json.gz",
+      "sha256": "457f5f9205cb07631d8e7586702e13eaaa2633bdfbb7f28378240afb170dc89e",
+      "bytes": 9773
+    },
+    "y2-shoftim": {
+      "path": "y2-shoftim.3a6ea6a1.json.gz",
+      "sha256": "3a6ea6a19601bcdb4dc0b29ca12c01e2d7405f1b4a316a60b66a4d6db728b2de",
+      "bytes": 8352
+    },
+    "y2-ki-teitzei": {
+      "path": "y2-ki-teitzei.72706f46.json.gz",
+      "sha256": "72706f46d06379690982f4fe70fb1744c4e249d565214e9467ea8e687e0d5193",
+      "bytes": 8111
+    },
+    "y2-ki-tavo": {
+      "path": "y2-ki-tavo.0040ab7f.json.gz",
+      "sha256": "0040ab7fefc7bd36ee093f6757df8005f2d80a5ef24248b46f75e45a11416ac9",
+      "bytes": 7076
+    }
+  },
+  "units": {
+    "y1-bereshit": {
+      "he": "שנה ראשונה, פרשת בראשית",
+      "en": "First year, Bereshit",
+      "count": 10
+    },
+    "y1-noach": {
+      "he": "שנה ראשונה, פרשת נח",
+      "en": "First year, Noach",
+      "count": 18
+    },
+    "y1-lech-lecha": {
+      "he": "שנה ראשונה, פרשת לך לך",
+      "en": "First year, Lech Lecha",
+      "count": 21
+    },
+    "y1-vayera": {
+      "he": "שנה ראשונה, פרשת וירא",
+      "en": "First year, Vayera",
+      "count": 26
+    },
+    "y1-chayei-sara": {
+      "he": "שנה ראשונה, פרשת חיי שרה",
+      "en": "First year, Chayei Sara",
+      "count": 19
+    },
+    "y1-toldot": {
+      "he": "שנה ראשונה, פרשת תולדות",
+      "en": "First year, Toldot",
+      "count": 17
+    },
+    "y1-vayetzei": {
+      "he": "שנה ראשונה, פרשת ויצא",
+      "en": "First year, Vayetzei",
+      "count": 16
+    },
+    "y1-vayishlach": {
+      "he": "שנה ראשונה, פרשת וישלח",
+      "en": "First year, Vayishlach",
+      "count": 19
+    },
+    "y1-vayeshev": {
+      "he": "שנה ראשונה, פרשת וישב",
+      "en": "First year, Vayeshev",
+      "count": 15
+    },
+    "y1-chanukah": {
+      "he": "שנה ראשונה, חנוכה",
+      "en": "First year, Chanukah",
+      "count": 28
+    },
+    "y1-miketz": {
+      "he": "שנה ראשונה, פרשת מקץ",
+      "en": "First year, Miketz",
+      "count": 15
+    },
+    "y1-vayigash": {
+      "he": "שנה ראשונה, פרשת ויגש",
+      "en": "First year, Vayigash",
+      "count": 18
+    },
+    "y1-vayechi": {
+      "he": "שנה ראשונה, פרשת ויחי",
+      "en": "First year, Vayechi",
+      "count": 16
+    },
+    "y1-shemot": {
+      "he": "שנה ראשונה, פרשת שמות",
+      "en": "First year, Shemot",
+      "count": 9
+    },
+    "y1-vaera": {
+      "he": "שנה ראשונה, פרשת וארא",
+      "en": "First year, Vaera",
+      "count": 22
+    },
+    "y1-bo": {
+      "he": "שנה ראשונה, פרשת בא",
+      "en": "First year, Bo",
+      "count": 28
+    },
+    "y1-beshalach": {
+      "he": "שנה ראשונה, פרשת בשלח",
+      "en": "First year, Beshalach",
+      "count": 24
+    },
+    "y1-yitro": {
+      "he": "שנה ראשונה, פרשת יתרו",
+      "en": "First year, Yitro",
+      "count": 19
+    },
+    "y1-mishpatim": {
+      "he": "שנה ראשונה, פרשת משפטים",
+      "en": "First year, Mishpatim",
+      "count": 22
+    },
+    "y1-terumah": {
+      "he": "שנה ראשונה, פרשת תרומה",
+      "en": "First year, Terumah",
+      "count": 16
+    },
+    "y1-tetzaveh": {
+      "he": "שנה ראשונה, פרשת תצוה",
+      "en": "First year, Tetzaveh",
+      "count": 46
+    },
+    "y1-ki-tisa": {
+      "he": "שנה ראשונה, פרשת כי תשא",
+      "en": "First year, Ki Tisa",
+      "count": 18
+    },
+    "y1-vayakhel": {
+      "he": "שנה ראשונה, פרשת ויקהל",
+      "en": "First year, Vayakhel",
+      "count": 13
+    },
+    "y1-pekudei": {
+      "he": "שנה ראשונה, פרשת פקודי",
+      "en": "First year, Pekudei",
+      "count": 15
+    },
+    "y1-vayikra": {
+      "he": "שנה ראשונה, פרשת ויקרא",
+      "en": "First year, Vayikra",
+      "count": 17
+    },
+    "y1-tzav": {
+      "he": "שנה ראשונה, פרשת צו",
+      "en": "First year, Tzav",
+      "count": 58
+    },
+    "y1-shmini": {
+      "he": "שנה ראשונה, פרשת שמיני",
+      "en": "First year, Shmini",
+      "count": 19
+    },
+    "y1-tazria-metzora": {
+      "he": "שנה ראשונה, פרשת תזריע-מצורע",
+      "en": "First year, Tazria Metzora",
+      "count": 20
+    },
+    "y1-achrei-mot-kedoshim": {
+      "he": "שנה ראשונה, פרשת אחרי מות-קדושים",
+      "en": "First year, Achrei Mot Kedoshim",
+      "count": 26
+    },
+    "y1-emor": {
+      "he": "שנה ראשונה, פרשת אמור",
+      "en": "First year, Emor",
+      "count": 17
+    },
+    "y1-behar-bechukotai": {
+      "he": "שנה ראשונה, פרשת בהר-בחוקותי",
+      "en": "First year, Behar Bechukotai",
+      "count": 17
+    },
+    "y1-bamidbar": {
+      "he": "שנה ראשונה, פרשת במדבר",
+      "en": "First year, Bamidbar",
+      "count": 30
+    },
+    "y1-nasso": {
+      "he": "שנה ראשונה, פרשת נשא",
+      "en": "First year, Nasso",
+      "count": 12
+    },
+    "y1-behaalotcha": {
+      "he": "שנה ראשונה, פרשת בהעלותך",
+      "en": "First year, Beha'alotcha",
+      "count": 12
+    },
+    "y1-shlach": {
+      "he": "שנה ראשונה, פרשת שלח",
+      "en": "First year, Sh'lach",
+      "count": 24
+    },
+    "y1-korach": {
+      "he": "שנה ראשונה, פרשת קורח",
+      "en": "First year, Korach",
+      "count": 14
+    },
+    "y1-chukat": {
+      "he": "שנה ראשונה, פרשת חוקת",
+      "en": "First year, Chukat",
+      "count": 22
+    },
+    "y1-balak": {
+      "he": "שנה ראשונה, פרשת בלק",
+      "en": "First year, Balak",
+      "count": 13
+    },
+    "y1-pinchas": {
+      "he": "שנה ראשונה, פרשת פינחס",
+      "en": "First year, Pinchas",
+      "count": 22
+    },
+    "y1-matot": {
+      "he": "שנה ראשונה, פרשת מטות",
+      "en": "First year, Matot",
+      "count": 16
+    },
+    "y1-masei": {
+      "he": "שנה ראשונה, פרשת מסעי",
+      "en": "First year, Masei",
+      "count": 16
+    },
+    "y1-devarim": {
+      "he": "שנה ראשונה, פרשת דברים",
+      "en": "First year, Devarim",
+      "count": 28
+    },
+    "y1-vaetchanan": {
+      "he": "שנה ראשונה, פרשת ואתחנן",
+      "en": "First year, Vaetchanan",
+      "count": 15
+    },
+    "y1-eikev": {
+      "he": "שנה ראשונה, פרשת עקב",
+      "en": "First year, Eikev",
+      "count": 19
+    },
+    "y1-reeh": {
+      "he": "שנה ראשונה, פרשת ראה",
+      "en": "First year, Re'eh",
+      "count": 17
+    },
+    "y1-shoftim": {
+      "he": "שנה ראשונה, פרשת שופטים",
+      "en": "First year, Shoftim",
+      "count": 28
+    },
+    "y1-ki-teitzei": {
+      "he": "שנה ראשונה, פרשת כי תצא",
+      "en": "First year, Ki Teitzei",
+      "count": 15
+    },
+    "y1-ki-tavo": {
+      "he": "שנה ראשונה, פרשת כי תבוא",
+      "en": "First year, Ki Tavo",
+      "count": 26
+    },
+    "y1-nitzavim": {
+      "he": "שנה ראשונה, פרשת נצבים",
+      "en": "First year, Nitzavim",
+      "count": 25
+    },
+    "y1-vayeilech": {
+      "he": "שנה ראשונה, פרשת וילך",
+      "en": "First year, Vayeilech",
+      "count": 23
+    },
+    "y1-haazinu": {
+      "he": "שנה ראשונה, פרשת האזינו",
+      "en": "First year, Ha'Azinu",
+      "count": 15
+    },
+    "y1-vzot-haberachah": {
+      "he": "שנה ראשונה, פרשת וזאת הברכה",
+      "en": "First year, V'Zot HaBerachah",
+      "count": 18
+    },
+    "y2-bereshit": {
+      "he": "שנה שנייה, פרשת בראשית",
+      "en": "Second year, Bereshit",
+      "count": 32
+    },
+    "y2-noach": {
+      "he": "שנה שנייה, פרשת נח",
+      "en": "Second year, Noach",
+      "count": 21
+    },
+    "y2-lech-lecha": {
+      "he": "שנה שנייה, פרשת לך לך",
+      "en": "Second year, Lech Lecha",
+      "count": 23
+    },
+    "y2-vayera": {
+      "he": "שנה שנייה, פרשת וירא",
+      "en": "Second year, Vayera",
+      "count": 26
+    },
+    "y2-chayei-sara": {
+      "he": "שנה שנייה, פרשת חיי שרה",
+      "en": "Second year, Chayei Sara",
+      "count": 14
+    },
+    "y2-toldot": {
+      "he": "שנה שנייה, פרשת תולדות",
+      "en": "Second year, Toldot",
+      "count": 23
+    },
+    "y2-vayetzei": {
+      "he": "שנה שנייה, פרשת ויצא",
+      "en": "Second year, Vayetzei",
+      "count": 27
+    },
+    "y2-vayishlach": {
+      "he": "שנה שנייה, פרשת וישלח",
+      "en": "Second year, Vayishlach",
+      "count": 19
+    },
+    "y2-miketz": {
+      "he": "שנה שנייה, פרשת מקץ",
+      "en": "Second year, Miketz",
+      "count": 16
+    },
+    "y2-vayigash": {
+      "he": "שנה שנייה, פרשת ויגש",
+      "en": "Second year, Vayigash",
+      "count": 13
+    },
+    "y2-vayechi": {
+      "he": "שנה שנייה, פרשת ויחי",
+      "en": "Second year, Vayechi",
+      "count": 19
+    },
+    "y2-shemot": {
+      "he": "שנה שנייה, פרשת שמות",
+      "en": "Second year, Shemot",
+      "count": 12
+    },
+    "y2-vaera": {
+      "he": "שנה שנייה, פרשת וארא",
+      "en": "Second year, Vaera",
+      "count": 16
+    },
+    "y2-bo": {
+      "he": "שנה שנייה, פרשת בא",
+      "en": "Second year, Bo",
+      "count": 20
+    },
+    "y2-beshalach": {
+      "he": "שנה שנייה, פרשת בשלח",
+      "en": "Second year, Beshalach",
+      "count": 20
+    },
+    "y2-yitro": {
+      "he": "שנה שנייה, פרשת יתרו",
+      "en": "Second year, Yitro",
+      "count": 17
+    },
+    "y2-mishpatim": {
+      "he": "שנה שנייה, פרשת משפטים",
+      "en": "Second year, Mishpatim",
+      "count": 19
+    },
+    "y2-terumah": {
+      "he": "שנה שנייה, פרשת תרומה",
+      "en": "Second year, Terumah",
+      "count": 17
+    },
+    "y2-tetzaveh": {
+      "he": "שנה שנייה, פרשת תצוה",
+      "en": "Second year, Tetzaveh",
+      "count": 16
+    },
+    "y2-ki-tisa": {
+      "he": "שנה שנייה, פרשת כי תשא",
+      "en": "Second year, Ki Tisa",
+      "count": 16
+    },
+    "y2-vayakhel": {
+      "he": "שנה שנייה, פרשת ויקהל",
+      "en": "Second year, Vayakhel",
+      "count": 14
+    },
+    "y2-pekudei": {
+      "he": "שנה שנייה, פרשת פקודי",
+      "en": "Second year, Pekudei",
+      "count": 15
+    },
+    "y2-vayikra": {
+      "he": "שנה שנייה, פרשת ויקרא",
+      "en": "Second year, Vayikra",
+      "count": 28
+    },
+    "y2-tzav": {
+      "he": "שנה שנייה, פרשת צו",
+      "en": "Second year, Tzav",
+      "count": 25
+    },
+    "y2-shmini": {
+      "he": "שנה שנייה, פרשת שמיני",
+      "en": "Second year, Shmini",
+      "count": 26
+    },
+    "y2-tazria": {
+      "he": "שנה שנייה, פרשת תזריע",
+      "en": "Second year, Tazria",
+      "count": 20
+    },
+    "y2-metzora": {
+      "he": "שנה שנייה, פרשת מצורע",
+      "en": "Second year, Metzora",
+      "count": 23
+    },
+    "y2-achrei-mot": {
+      "he": "שנה שנייה, פרשת אחרי מות",
+      "en": "Second year, Achrei Mot",
+      "count": 22
+    },
+    "y2-kedoshim": {
+      "he": "שנה שנייה, פרשת קדושים",
+      "en": "Second year, Kedoshim",
+      "count": 19
+    },
+    "y2-emor": {
+      "he": "שנה שנייה, פרשת אמור",
+      "en": "Second year, Emor",
+      "count": 18
+    },
+    "y2-behar-bechukotai": {
+      "he": "שנה שנייה, פרשת בהר-בחוקותי",
+      "en": "Second year, Behar Bechukotai",
+      "count": 13
+    },
+    "y2-nasso": {
+      "he": "שנה שנייה, פרשת נשא",
+      "en": "Second year, Nasso",
+      "count": 21
+    },
+    "y2-behaalotcha": {
+      "he": "שנה שנייה, פרשת בהעלותך",
+      "en": "Second year, Beha'alotcha",
+      "count": 19
+    },
+    "y2-shlach": {
+      "he": "שנה שנייה, פרשת שלח",
+      "en": "Second year, Sh'lach",
+      "count": 17
+    },
+    "y2-korach": {
+      "he": "שנה שנייה, פרשת קורח",
+      "en": "Second year, Korach",
+      "count": 19
+    },
+    "y2-chukat": {
+      "he": "שנה שנייה, פרשת חוקת",
+      "en": "Second year, Chukat",
+      "count": 26
+    },
+    "y2-balak": {
+      "he": "שנה שנייה, פרשת בלק",
+      "en": "Second year, Balak",
+      "count": 19
+    },
+    "y2-pinchas": {
+      "he": "שנה שנייה, פרשת פינחס",
+      "en": "Second year, Pinchas",
+      "count": 18
+    },
+    "y2-matot": {
+      "he": "שנה שנייה, פרשת מטות",
+      "en": "Second year, Matot",
+      "count": 19
+    },
+    "y2-masei": {
+      "he": "שנה שנייה, פרשת מסעי",
+      "en": "Second year, Masei",
+      "count": 16
+    },
+    "y2-vaetchanan": {
+      "he": "שנה שנייה, פרשת ואתחנן",
+      "en": "Second year, Vaetchanan",
+      "count": 27
+    },
+    "y2-eikev": {
+      "he": "שנה שנייה, פרשת עקב",
+      "en": "Second year, Eikev",
+      "count": 19
+    },
+    "y2-reeh": {
+      "he": "שנה שנייה, פרשת ראה",
+      "en": "Second year, Re'eh",
+      "count": 40
+    },
+    "y2-shoftim": {
+      "he": "שנה שנייה, פרשת שופטים",
+      "en": "Second year, Shoftim",
+      "count": 30
+    },
+    "y2-ki-teitzei": {
+      "he": "שנה שנייה, פרשת כי תצא",
+      "en": "Second year, Ki Teitzei",
+      "count": 25
+    },
+    "y2-ki-tavo": {
+      "he": "שנה שנייה, פרשת כי תבוא",
+      "en": "Second year, Ki Tavo",
+      "count": 23
+    }
+  },
+  "schedule": {
+    "kind": "parasha",
+    "parashiyot": {
+      "Bereshit": {
+        "1": "y1-bereshit",
+        "2": "y2-bereshit"
+      },
+      "Noach": {
+        "1": "y1-noach",
+        "2": "y2-noach"
+      },
+      "Lech-Lecha": {
+        "1": "y1-lech-lecha",
+        "2": "y2-lech-lecha"
+      },
+      "Vayera": {
+        "1": "y1-vayera",
+        "2": "y2-vayera"
+      },
+      "Chayei Sara": {
+        "1": "y1-chayei-sara",
+        "2": "y2-chayei-sara"
+      },
+      "Toldot": {
+        "1": "y1-toldot",
+        "2": "y2-toldot"
+      },
+      "Vayetzei": {
+        "1": "y1-vayetzei",
+        "2": "y2-vayetzei"
+      },
+      "Vayishlach": {
+        "1": "y1-vayishlach",
+        "2": "y2-vayishlach"
+      },
+      "Vayeshev": {
+        "1": "y1-vayeshev",
+        "2": "y1-chanukah"
+      },
+      "Miketz": {
+        "1": "y1-miketz",
+        "2": "y2-miketz"
+      },
+      "Vayigash": {
+        "1": "y1-vayigash",
+        "2": "y2-vayigash"
+      },
+      "Vayechi": {
+        "1": "y1-vayechi",
+        "2": "y2-vayechi"
+      },
+      "Shemot": {
+        "1": "y1-shemot",
+        "2": "y2-shemot"
+      },
+      "Vaera": {
+        "1": "y1-vaera",
+        "2": "y2-vaera"
+      },
+      "Bo": {
+        "1": "y1-bo",
+        "2": "y2-bo"
+      },
+      "Beshalach": {
+        "1": "y1-beshalach",
+        "2": "y2-beshalach"
+      },
+      "Yitro": {
+        "1": "y1-yitro",
+        "2": "y2-yitro"
+      },
+      "Mishpatim": {
+        "1": "y1-mishpatim",
+        "2": "y2-mishpatim"
+      },
+      "Terumah": {
+        "1": "y1-terumah",
+        "2": "y2-terumah"
+      },
+      "Tetzaveh": {
+        "1": "y1-tetzaveh",
+        "2": "y2-tetzaveh"
+      },
+      "Ki Tisa": {
+        "1": "y1-ki-tisa",
+        "2": "y2-ki-tisa"
+      },
+      "Vayakhel": {
+        "1": "y1-vayakhel",
+        "2": "y2-vayakhel"
+      },
+      "Pekudei": {
+        "1": "y1-pekudei",
+        "2": "y2-pekudei"
+      },
+      "Vayikra": {
+        "1": "y1-vayikra",
+        "2": "y2-vayikra"
+      },
+      "Tzav": {
+        "1": "y1-tzav",
+        "2": "y2-tzav"
+      },
+      "Shmini": {
+        "1": "y1-shmini",
+        "2": "y2-shmini"
+      },
+      "Tazria": {
+        "1": "y1-tazria-metzora",
+        "2": "y2-tazria"
+      },
+      "Metzora": {
+        "1": "y1-tazria-metzora",
+        "2": "y2-metzora"
+      },
+      "Achrei Mot": {
+        "1": "y1-achrei-mot-kedoshim",
+        "2": "y2-achrei-mot"
+      },
+      "Kedoshim": {
+        "1": "y1-achrei-mot-kedoshim",
+        "2": "y2-kedoshim"
+      },
+      "Emor": {
+        "1": "y1-emor",
+        "2": "y2-emor"
+      },
+      "Behar": {
+        "1": "y1-behar-bechukotai",
+        "2": "y2-behar-bechukotai"
+      },
+      "Bechukotai": {
+        "1": "y1-behar-bechukotai",
+        "2": "y2-behar-bechukotai"
+      },
+      "Bamidbar": {
+        "1": "y1-bamidbar"
+      },
+      "Nasso": {
+        "1": "y1-nasso",
+        "2": "y2-nasso"
+      },
+      "Beha'alotcha": {
+        "1": "y1-behaalotcha",
+        "2": "y2-behaalotcha"
+      },
+      "Sh'lach": {
+        "1": "y1-shlach",
+        "2": "y2-shlach"
+      },
+      "Korach": {
+        "1": "y1-korach",
+        "2": "y2-korach"
+      },
+      "Chukat": {
+        "1": "y1-chukat",
+        "2": "y2-chukat"
+      },
+      "Balak": {
+        "1": "y1-balak",
+        "2": "y2-balak"
+      },
+      "Pinchas": {
+        "1": "y1-pinchas",
+        "2": "y2-pinchas"
+      },
+      "Matot": {
+        "1": "y1-matot",
+        "2": "y2-matot"
+      },
+      "Masei": {
+        "1": "y1-masei",
+        "2": "y2-masei"
+      },
+      "Devarim": {
+        "1": "y1-devarim"
+      },
+      "Vaetchanan": {
+        "1": "y1-vaetchanan",
+        "2": "y2-vaetchanan"
+      },
+      "Eikev": {
+        "1": "y1-eikev",
+        "2": "y2-eikev"
+      },
+      "Re'eh": {
+        "1": "y1-reeh",
+        "2": "y2-reeh"
+      },
+      "Shoftim": {
+        "1": "y1-shoftim",
+        "2": "y2-shoftim"
+      },
+      "Ki Teitzei": {
+        "1": "y1-ki-teitzei",
+        "2": "y2-ki-teitzei"
+      },
+      "Ki Tavo": {
+        "1": "y1-ki-tavo",
+        "2": "y2-ki-tavo"
+      },
+      "Nitzavim": {
+        "1": "y1-nitzavim"
+      },
+      "Vayeilech": {
+        "1": "y1-vayeilech"
+      },
+      "Ha'azinu": {
+        "1": "y1-haazinu"
+      },
+      "Vezot Haberakhah": {
+        "1": "y1-vzot-haberachah"
+      }
+    }
+  },
+  "festivals": {
+    "pesach": [
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכה א",
+          "en": "First year, Tzav, halacha 1"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 0,
+            "to": 0
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות ב–ג",
+          "en": "First year, Tzav, halachot 2–3"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 1,
+            "to": 2
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות ד–ה",
+          "en": "First year, Tzav, halachot 4–5"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 3,
+            "to": 4
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות ו–ז",
+          "en": "First year, Tzav, halachot 6–7"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 5,
+            "to": 6
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות ח–ט",
+          "en": "First year, Tzav, halachot 8–9"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 7,
+            "to": 8
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות י–יא",
+          "en": "First year, Tzav, halachot 10–11"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 9,
+            "to": 10
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות יב–יג",
+          "en": "First year, Tzav, halachot 12–13"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 11,
+            "to": 12
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות יד–טו",
+          "en": "First year, Tzav, halachot 14–15"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 13,
+            "to": 14
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות טז–יז",
+          "en": "First year, Tzav, halachot 16–17"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 15,
+            "to": 16
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות יח–יט",
+          "en": "First year, Tzav, halachot 18–19"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 17,
+            "to": 18
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות כ–כא",
+          "en": "First year, Tzav, halachot 20–21"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 19,
+            "to": 20
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות כב–כג",
+          "en": "First year, Tzav, halachot 22–23"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 21,
+            "to": 22
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות כד–כה",
+          "en": "First year, Tzav, halachot 24–25"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 23,
+            "to": 24
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות כו–כז",
+          "en": "First year, Tzav, halachot 26–27"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 25,
+            "to": 26
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות כח–כט",
+          "en": "First year, Tzav, halachot 28–29"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 27,
+            "to": 28
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכה ל",
+          "en": "First year, Tzav, halacha 30"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 29,
+            "to": 29
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות לא–לב",
+          "en": "First year, Tzav, halachot 31–32"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 30,
+            "to": 31
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות לג–לד",
+          "en": "First year, Tzav, halachot 33–34"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 32,
+            "to": 33
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות לה–לו",
+          "en": "First year, Tzav, halachot 35–36"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 34,
+            "to": 35
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות לז–לח",
+          "en": "First year, Tzav, halachot 37–38"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 36,
+            "to": 37
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות לט–מ",
+          "en": "First year, Tzav, halachot 39–40"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 38,
+            "to": 39
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות מא–מב",
+          "en": "First year, Tzav, halachot 41–42"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 40,
+            "to": 41
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות מג–מד",
+          "en": "First year, Tzav, halachot 43–44"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 42,
+            "to": 43
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות מה–מו",
+          "en": "First year, Tzav, halachot 45–46"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 44,
+            "to": 45
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות מז–מח",
+          "en": "First year, Tzav, halachot 47–48"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 46,
+            "to": 47
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות מט–נ",
+          "en": "First year, Tzav, halachot 49–50"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 48,
+            "to": 49
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות נא–נב",
+          "en": "First year, Tzav, halachot 51–52"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 50,
+            "to": 51
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות נג–נד",
+          "en": "First year, Tzav, halachot 53–54"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 52,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות נה–נו",
+          "en": "First year, Tzav, halachot 55–56"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 54,
+            "to": 55
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת צו, הלכות נז–נח",
+          "en": "First year, Tzav, halachot 57–58"
+        },
+        "pieces": [
+          {
+            "u": "y1-tzav",
+            "from": 56,
+            "to": 57
+          }
+        ]
+      }
+    ],
+    "shavuot": [
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה א",
+          "en": "First year, Bamidbar, halacha 1"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 0,
+            "to": 0
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה ב",
+          "en": "First year, Bamidbar, halacha 2"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 1,
+            "to": 1
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה ג",
+          "en": "First year, Bamidbar, halacha 3"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 2,
+            "to": 2
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה ד",
+          "en": "First year, Bamidbar, halacha 4"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 3,
+            "to": 3
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה ה",
+          "en": "First year, Bamidbar, halacha 5"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 4,
+            "to": 4
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה ו",
+          "en": "First year, Bamidbar, halacha 6"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 5,
+            "to": 5
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה ז",
+          "en": "First year, Bamidbar, halacha 7"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 6,
+            "to": 6
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה ח",
+          "en": "First year, Bamidbar, halacha 8"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 7,
+            "to": 7
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה ט",
+          "en": "First year, Bamidbar, halacha 9"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 8,
+            "to": 8
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה י",
+          "en": "First year, Bamidbar, halacha 10"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 9,
+            "to": 9
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה יא",
+          "en": "First year, Bamidbar, halacha 11"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 10,
+            "to": 10
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה יב",
+          "en": "First year, Bamidbar, halacha 12"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 11,
+            "to": 11
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה יג",
+          "en": "First year, Bamidbar, halacha 13"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 12,
+            "to": 12
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה יד",
+          "en": "First year, Bamidbar, halacha 14"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 13,
+            "to": 13
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה טו",
+          "en": "First year, Bamidbar, halacha 15"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 14,
+            "to": 14
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה טז",
+          "en": "First year, Bamidbar, halacha 16"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 15,
+            "to": 15
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה יז",
+          "en": "First year, Bamidbar, halacha 17"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 16,
+            "to": 16
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה יח",
+          "en": "First year, Bamidbar, halacha 18"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 17,
+            "to": 17
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה יט",
+          "en": "First year, Bamidbar, halacha 19"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 18,
+            "to": 18
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה כ",
+          "en": "First year, Bamidbar, halacha 20"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 19,
+            "to": 19
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה כא",
+          "en": "First year, Bamidbar, halacha 21"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 20,
+            "to": 20
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה כב",
+          "en": "First year, Bamidbar, halacha 22"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 21,
+            "to": 21
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה כג",
+          "en": "First year, Bamidbar, halacha 23"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 22,
+            "to": 22
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה כד",
+          "en": "First year, Bamidbar, halacha 24"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 23,
+            "to": 23
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה כה",
+          "en": "First year, Bamidbar, halacha 25"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 24,
+            "to": 24
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה כו",
+          "en": "First year, Bamidbar, halacha 26"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 25,
+            "to": 25
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה כז",
+          "en": "First year, Bamidbar, halacha 27"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 26,
+            "to": 26
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה כח",
+          "en": "First year, Bamidbar, halacha 28"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 27,
+            "to": 27
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה כט",
+          "en": "First year, Bamidbar, halacha 29"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 28,
+            "to": 28
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת במדבר, הלכה ל",
+          "en": "First year, Bamidbar, halacha 30"
+        },
+        "pieces": [
+          {
+            "u": "y1-bamidbar",
+            "from": 29,
+            "to": 29
+          }
+        ]
+      }
+    ],
+    "sukkot": [
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה א",
+          "en": "First year, Ha'Azinu, halacha 1"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 0,
+            "to": 0
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה ב",
+          "en": "First year, Ha'Azinu, halacha 2"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 1,
+            "to": 1
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה ג",
+          "en": "First year, Ha'Azinu, halacha 3"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 2,
+            "to": 2
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה ד",
+          "en": "First year, Ha'Azinu, halacha 4"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 3,
+            "to": 3
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה ה",
+          "en": "First year, Ha'Azinu, halacha 5"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 4,
+            "to": 4
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה ו",
+          "en": "First year, Ha'Azinu, halacha 6"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 5,
+            "to": 5
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה ז",
+          "en": "First year, Ha'Azinu, halacha 7"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 6,
+            "to": 6
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה ח",
+          "en": "First year, Ha'Azinu, halacha 8"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 7,
+            "to": 7
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה ט",
+          "en": "First year, Ha'Azinu, halacha 9"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 8,
+            "to": 8
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכות י–יא",
+          "en": "First year, Ha'Azinu, halachot 10–11"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 9,
+            "to": 10
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה יב",
+          "en": "First year, Ha'Azinu, halacha 12"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 11,
+            "to": 11
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה יג",
+          "en": "First year, Ha'Azinu, halacha 13"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 12,
+            "to": 12
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה יד",
+          "en": "First year, Ha'Azinu, halacha 14"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 13,
+            "to": 13
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת האזינו, הלכה טו",
+          "en": "First year, Ha'Azinu, halacha 15"
+        },
+        "pieces": [
+          {
+            "u": "y1-haazinu",
+            "from": 14,
+            "to": 14
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה א",
+          "en": "First year, V'Zot HaBerachah, halacha 1"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 0,
+            "to": 0
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה ב",
+          "en": "First year, V'Zot HaBerachah, halacha 2"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 1,
+            "to": 1
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה ג",
+          "en": "First year, V'Zot HaBerachah, halacha 3"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 2,
+            "to": 2
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה ד",
+          "en": "First year, V'Zot HaBerachah, halacha 4"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 3,
+            "to": 3
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה ה",
+          "en": "First year, V'Zot HaBerachah, halacha 5"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 4,
+            "to": 4
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכות ו–ז",
+          "en": "First year, V'Zot HaBerachah, halachot 6–7"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 5,
+            "to": 6
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה ח",
+          "en": "First year, V'Zot HaBerachah, halacha 8"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 7,
+            "to": 7
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה ט",
+          "en": "First year, V'Zot HaBerachah, halacha 9"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 8,
+            "to": 8
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה י",
+          "en": "First year, V'Zot HaBerachah, halacha 10"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 9,
+            "to": 9
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה יא",
+          "en": "First year, V'Zot HaBerachah, halacha 11"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 10,
+            "to": 10
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה יב",
+          "en": "First year, V'Zot HaBerachah, halacha 12"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 11,
+            "to": 11
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה יג",
+          "en": "First year, V'Zot HaBerachah, halacha 13"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 12,
+            "to": 12
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה יד",
+          "en": "First year, V'Zot HaBerachah, halacha 14"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 13,
+            "to": 13
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה טו",
+          "en": "First year, V'Zot HaBerachah, halacha 15"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 14,
+            "to": 14
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכה טז",
+          "en": "First year, V'Zot HaBerachah, halacha 16"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 15,
+            "to": 15
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וזאת הברכה, הלכות יז–יח",
+          "en": "First year, V'Zot HaBerachah, halachot 17–18"
+        },
+        "pieces": [
+          {
+            "u": "y1-vzot-haberachah",
+            "from": 16,
+            "to": 17
+          }
+        ]
+      }
+    ],
+    "rosh_hashanah": [
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה א",
+          "en": "First year, Nitzavim, halacha 1"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 0,
+            "to": 0
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה ב",
+          "en": "First year, Nitzavim, halacha 2"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 1,
+            "to": 1
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה ג",
+          "en": "First year, Nitzavim, halacha 3"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 2,
+            "to": 2
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה ד",
+          "en": "First year, Nitzavim, halacha 4"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 3,
+            "to": 3
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה ה",
+          "en": "First year, Nitzavim, halacha 5"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 4,
+            "to": 4
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה ו",
+          "en": "First year, Nitzavim, halacha 6"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 5,
+            "to": 5
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה ז",
+          "en": "First year, Nitzavim, halacha 7"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 6,
+            "to": 6
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה ח",
+          "en": "First year, Nitzavim, halacha 8"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 7,
+            "to": 7
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה ט",
+          "en": "First year, Nitzavim, halacha 9"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 8,
+            "to": 8
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה י",
+          "en": "First year, Nitzavim, halacha 10"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 9,
+            "to": 9
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה יא",
+          "en": "First year, Nitzavim, halacha 11"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 10,
+            "to": 10
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה יב",
+          "en": "First year, Nitzavim, halacha 12"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 11,
+            "to": 11
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה יג",
+          "en": "First year, Nitzavim, halacha 13"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 12,
+            "to": 12
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה יד",
+          "en": "First year, Nitzavim, halacha 14"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 13,
+            "to": 13
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה טו",
+          "en": "First year, Nitzavim, halacha 15"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 14,
+            "to": 14
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה טז",
+          "en": "First year, Nitzavim, halacha 16"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 15,
+            "to": 15
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה יז",
+          "en": "First year, Nitzavim, halacha 17"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 16,
+            "to": 16
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה יח",
+          "en": "First year, Nitzavim, halacha 18"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 17,
+            "to": 17
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה יט",
+          "en": "First year, Nitzavim, halacha 19"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 18,
+            "to": 18
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה כ",
+          "en": "First year, Nitzavim, halacha 20"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 19,
+            "to": 19
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה כא",
+          "en": "First year, Nitzavim, halacha 21"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 20,
+            "to": 20
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה כב",
+          "en": "First year, Nitzavim, halacha 22"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 21,
+            "to": 21
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה כג",
+          "en": "First year, Nitzavim, halacha 23"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 22,
+            "to": 22
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה כד",
+          "en": "First year, Nitzavim, halacha 24"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 23,
+            "to": 23
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת נצבים, הלכה כה",
+          "en": "First year, Nitzavim, halacha 25"
+        },
+        "pieces": [
+          {
+            "u": "y1-nitzavim",
+            "from": 24,
+            "to": 24
+          }
+        ]
+      }
+    ],
+    "yom_kippur": [
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וילך, הלכות א–ג",
+          "en": "First year, Vayeilech, halachot 1–3"
+        },
+        "pieces": [
+          {
+            "u": "y1-vayeilech",
+            "from": 0,
+            "to": 2
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וילך, הלכות ד–ו",
+          "en": "First year, Vayeilech, halachot 4–6"
+        },
+        "pieces": [
+          {
+            "u": "y1-vayeilech",
+            "from": 3,
+            "to": 5
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וילך, הלכות ז–ט",
+          "en": "First year, Vayeilech, halachot 7–9"
+        },
+        "pieces": [
+          {
+            "u": "y1-vayeilech",
+            "from": 6,
+            "to": 8
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וילך, הלכות י–יג",
+          "en": "First year, Vayeilech, halachot 10–13"
+        },
+        "pieces": [
+          {
+            "u": "y1-vayeilech",
+            "from": 9,
+            "to": 12
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וילך, הלכות יד–טז",
+          "en": "First year, Vayeilech, halachot 14–16"
+        },
+        "pieces": [
+          {
+            "u": "y1-vayeilech",
+            "from": 13,
+            "to": 15
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וילך, הלכות יז–יט",
+          "en": "First year, Vayeilech, halachot 17–19"
+        },
+        "pieces": [
+          {
+            "u": "y1-vayeilech",
+            "from": 16,
+            "to": 18
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת וילך, הלכות כ–כג",
+          "en": "First year, Vayeilech, halachot 20–23"
+        },
+        "pieces": [
+          {
+            "u": "y1-vayeilech",
+            "from": 19,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "chanukah": [
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות א–ב",
+          "en": "First year, Chanukah, halachot 1–2"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 0,
+            "to": 1
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות ג–ד",
+          "en": "First year, Chanukah, halachot 3–4"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 2,
+            "to": 3
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות ה–ו",
+          "en": "First year, Chanukah, halachot 5–6"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 4,
+            "to": 5
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות ז–ח",
+          "en": "First year, Chanukah, halachot 7–8"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 6,
+            "to": 7
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות ט–י",
+          "en": "First year, Chanukah, halachot 9–10"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 8,
+            "to": 9
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות יא–יב",
+          "en": "First year, Chanukah, halachot 11–12"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 10,
+            "to": 11
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות יג–יד",
+          "en": "First year, Chanukah, halachot 13–14"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 12,
+            "to": 13
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות טו–טז",
+          "en": "First year, Chanukah, halachot 15–16"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 14,
+            "to": 15
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות יז–יח",
+          "en": "First year, Chanukah, halachot 17–18"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 16,
+            "to": 17
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות יט–כ",
+          "en": "First year, Chanukah, halachot 19–20"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 18,
+            "to": 19
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות כא–כב",
+          "en": "First year, Chanukah, halachot 21–22"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 20,
+            "to": 21
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות כג–כד",
+          "en": "First year, Chanukah, halachot 23–24"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 22,
+            "to": 23
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות כה–כו",
+          "en": "First year, Chanukah, halachot 25–26"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 24,
+            "to": 25
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, חנוכה, הלכות כז–כח",
+          "en": "First year, Chanukah, halachot 27–28"
+        },
+        "pieces": [
+          {
+            "u": "y1-chanukah",
+            "from": 26,
+            "to": 27
+          }
+        ]
+      }
+    ],
+    "purim": [
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכה כד",
+          "en": "First year, Tetzaveh, halacha 24"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 23,
+            "to": 23
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכות כה–כו",
+          "en": "First year, Tetzaveh, halachot 25–26"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 24,
+            "to": 25
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכה כז",
+          "en": "First year, Tetzaveh, halacha 27"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 26,
+            "to": 26
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכות כח–כט",
+          "en": "First year, Tetzaveh, halachot 28–29"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 27,
+            "to": 28
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכות ל–לא",
+          "en": "First year, Tetzaveh, halachot 30–31"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 29,
+            "to": 30
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכה לב",
+          "en": "First year, Tetzaveh, halacha 32"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 31,
+            "to": 31
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכות לג–לד",
+          "en": "First year, Tetzaveh, halachot 33–34"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 32,
+            "to": 33
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכות לה–לו",
+          "en": "First year, Tetzaveh, halachot 35–36"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 34,
+            "to": 35
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכה לז",
+          "en": "First year, Tetzaveh, halacha 37"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 36,
+            "to": 36
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכות לח–לט",
+          "en": "First year, Tetzaveh, halachot 38–39"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 37,
+            "to": 38
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכות מ–מא",
+          "en": "First year, Tetzaveh, halachot 40–41"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 39,
+            "to": 40
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכה מב",
+          "en": "First year, Tetzaveh, halacha 42"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 41,
+            "to": 41
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכות מג–מד",
+          "en": "First year, Tetzaveh, halachot 43–44"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 42,
+            "to": 43
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת תצוה, הלכות מה–מו",
+          "en": "First year, Tetzaveh, halachot 45–46"
+        },
+        "pieces": [
+          {
+            "u": "y1-tetzaveh",
+            "from": 44,
+            "to": 45
+          }
+        ]
+      }
+    ],
+    "tisha_bav": [
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה א",
+          "en": "First year, Devarim, halacha 1"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 0,
+            "to": 0
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה ב",
+          "en": "First year, Devarim, halacha 2"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 1,
+            "to": 1
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכות ג–ד",
+          "en": "First year, Devarim, halachot 3–4"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 2,
+            "to": 3
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה ה",
+          "en": "First year, Devarim, halacha 5"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 4,
+            "to": 4
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה ו",
+          "en": "First year, Devarim, halacha 6"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 5,
+            "to": 5
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכות ז–ח",
+          "en": "First year, Devarim, halachot 7–8"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 6,
+            "to": 7
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה ט",
+          "en": "First year, Devarim, halacha 9"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 8,
+            "to": 8
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה י",
+          "en": "First year, Devarim, halacha 10"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 9,
+            "to": 9
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכות יא–יב",
+          "en": "First year, Devarim, halachot 11–12"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 10,
+            "to": 11
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה יג",
+          "en": "First year, Devarim, halacha 13"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 12,
+            "to": 12
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה יד",
+          "en": "First year, Devarim, halacha 14"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 13,
+            "to": 13
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכות טו–טז",
+          "en": "First year, Devarim, halachot 15–16"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 14,
+            "to": 15
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה יז",
+          "en": "First year, Devarim, halacha 17"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 16,
+            "to": 16
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה יח",
+          "en": "First year, Devarim, halacha 18"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 17,
+            "to": 17
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכות יט–כ",
+          "en": "First year, Devarim, halachot 19–20"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 18,
+            "to": 19
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה כא",
+          "en": "First year, Devarim, halacha 21"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 20,
+            "to": 20
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה כב",
+          "en": "First year, Devarim, halacha 22"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 21,
+            "to": 21
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכות כג–כד",
+          "en": "First year, Devarim, halachot 23–24"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 22,
+            "to": 23
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה כה",
+          "en": "First year, Devarim, halacha 25"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 24,
+            "to": 24
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכה כו",
+          "en": "First year, Devarim, halacha 26"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 25,
+            "to": 25
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "שנה ראשונה, פרשת דברים, הלכות כז–כח",
+          "en": "First year, Devarim, halachot 27–28"
+        },
+        "pieces": [
+          {
+            "u": "y1-devarim",
+            "from": 26,
+            "to": 27
+          }
+        ]
+      }
+    ]
+  },
+  "english": {
+    "coverage": 0.038,
+    "ships": false
+  }
+}

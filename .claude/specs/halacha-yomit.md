@@ -44,7 +44,7 @@ Sources read on 2026-11-10: the Yeshiva.org.il wiki pages "הלכה יומית" 
 | Ben Ish Hai (Halachot 1st Year: 52 nodes; 2nd Year: 47 nodes) | Ben Ish Hai -- Wikisource, or Jerusalem 1898 | Public Domain | Sefaria Community Translation (CC0); Wikisource (CC-BY-SA) |
 | Mishneh Torah | Torat Emet 363 | Public Domain | Sefaria Edition, trans. Francis Nataf 2019 (CC-BY); Community (CC0); Touger, Moznaim (CC-BY-NC) |
 
-- How complete each English version is was not measured; the build measures it (5.4).
+- English coverage, measured by the build on 2026-11-10 (the share of Hebrew segments the best accepted version translates, per book for the Rambam): Kitzur Shulchan Aruch 99.0% (Metsudah, trans. Avrohom Davis, CC-BY; the CC0 community translation covers less); Ben Ish Chai 3.8% (CC0 community); Mishneh Torah 27.5% (CC0 community and the public-domain Hyamson and Glazer, per book). Only the Kitzur ships English (5.4).
 - Sefaria's calendar API (`/api/calendars`) gives "Daily Rambam" (one chapter): on 2026-11-10 it read "Forbidden Intercourse 22". It gives no Kitzur Shulchan Aruch Yomi and no Ben Ish Chai schedule.
 
 ## 3. Tracks
@@ -95,23 +95,25 @@ Claude's, cheap to reverse, the owner may overrule:
 
 ### 5.2 Layout
 
+As built on 2026-11-10 (a deviation from the single manifest first planned: each track is its own add-on on the shared core, which takes one manifest of `format`, `version`, `gzipBytes` and `gz`):
+
 ```
-docs/halacha/manifest.json
-docs/halacha/<track>/<unit>.<hash>.json.gz        Hebrew
-docs/halacha/<track>/en/<unit>.<hash>.json.gz     English, only for a track that has it
+docs/halacha/<track>/manifest.json
+docs/halacha/<track>/<unit>.<sha8>.json.gz        Hebrew
+docs/halacha/<track>/en/manifest.json             English, only for a track that has it
+docs/halacha/<track>/en/<unit>.<sha8>.json.gz
 ```
 
-- A unit is what a day's portion is read from: a group of simanim for `kitzur`, one parasha of one year for `ben_ish_chai`, one set of halachot (for example Chametz uMatzah) for `rambam`. Units keep a day's read to one small file.
-- `manifest.json`: `format`, and per track `version`, `gzipBytes`, `credit` (`{ he, en }`, the version titles and licences of 2.3), `gz` (unit → path and sha256), `en` (the same for English, absent when none), `schedule` (6), and `festivals` (7.2). A reader that needs a field refuses a manifest without it, as the Chok reader does.
-- A segment is one se'if (Kitzur, Ben Ish Chai) or one halacha (Rambam), with a stable `key` (`<track>:<siman or chapter ref>:<n>`), its Hebrew runs, and its English when the track has one.
-
+- A unit is a file a portion reads from: a block of ten simanim for `kitzur` (`simanim-101-110`), one book of the Mishneh Torah for `rambam` (88, the introduction's four included), one parasha of one year for `ben_ish_chai` (`y1-tzav`). A portion may span two units; it is written as its `pieces`, `{ u, from, to }` (inclusive indexes into the unit's segments), with a `label` (`{ he, en }`) the planner can show without opening a file.
+- A track's `manifest.json`: `format` (1), `version`, `track`, `book`, `credit` (`{ he, en }`, the version titles and licences of 2.3 and the schedule's source), `credits`, `gzipBytes`, `gz`, `units` (unit → its Hebrew and English title and segment `count`), `schedule` (6), `festivals` (7.2) and `english` (the measured share and whether the track ships it). The English manifest has `format`, `version`, `track`, `credit`, `credits`, `gzipBytes` and `gz`; each English unit file holds `en`, a string or `null` per Hebrew segment, in order.
+- A unit file: `{ track, unit, title, credits, sections }`, each section a `ref`, a `title` (`{ he, en }`) and its segments. A segment is one se'if (Kitzur), one halacha (Ben Ish Chai, Rambam), with a stable `key` (`kitzur:<siman>:<se'if>`, `rambam:<book>:<chapter>:<halacha>`, `ben_ish_chai:<year>:<node>:<n>`) and its Hebrew runs, its number first as a note run.
 ### 5.3 Credits and licences
 
 Every credit line is shown wherever the text is shown, through the existing `ChokLicenseNotice` pattern. CC-BY versions name the translator and publisher; a CC-BY-SA or CC-BY-NC version is used only if the build's licence check accepts it and the notice states it. Preference order for English: CC0, then CC-BY, then nothing.
 
 ### 5.4 Build checks
 
-`scripts/halacha/__tests__/build.test.js` fails on: a se'if or halacha missing or twice, a unit whose hash does not match its manifest entry, a schedule day that points outside the text, a festival unit with no segments, and an English version that covers less than the threshold of its track (the threshold is decided when the coverage is measured; below it the track ships Hebrew only and the test pins that).
+`scripts/halacha/__tests__/build.test.js` fails on: a se'if or halacha missing or twice, a unit whose hash does not match its manifest entry, a schedule day that points outside the text, a festival unit with no segments, and an English version that covers less than the threshold of its track (the threshold is 90% of a track's segments, `ENGLISH_THRESHOLD` in `scripts/halacha/tracks.js`; below it the track ships Hebrew only and the test pins which tracks ship English: the Kitzur alone). As built, the test checks instead that the Rambam cycle reads the text in book order and each halacha at most once, and pins the twelve halachot the calendar leaves out (Wikisource's Negative Mitzvot 366-370 and the Order of Prayer's fifth chapter); a Mishneh Torah address every Hebrew version leaves empty is listed in `RAMBAM_EMPTY` (Torah Study 7:8), and any other empty halacha fails the build.
 
 ## 6. Schedules
 
@@ -120,7 +122,9 @@ A schedule answers one question: which segments are the portion of a location da
 ### 6.1 `kitzur`
 
 - The yearly luach in use, keyed by Hebrew month and day, with its own rule for a leap year and for the short and long Cheshvan and Kislev.
-- **Unknown:** the authoritative luach. No source was found on 2026-11-10 (Sefaria has no such calendar). The first content task finds the luach in use, records its source in this section, and transcribes it to `scripts/halacha/schedules/kitzur.json`. If none can be established, the fallback is the app's own even division of the 221 simanim over the Hebrew year, festival simanim placed before their festival, and the review page says so (Q29).
+- **Source (established 2026-11-10):** the Kitzur Shulchan Aruch Yomi luach of `@hebcal/learning` 6.13.1 (`kitzurShulchanAruch`, BSD-2-Clause, `dist/esm/kitzurSa.json.js`), transcribed to [scripts/halacha/schedules/kitzur.json](../../scripts/halacha/schedules/kitzur.json) with Hebcal's licence. Its notes name the Hebrew Blum edition and an Adar II track suggested by Rav Chaim Kanievsky; Hebcal names no printed luach, so the publisher behind it stays unknown. Q29 is therefore not asked.
+- **Corrections:** checked against Sefaria's text (221 simanim, 2765 se'ifim), the published table reads 133:16, 98:23-32, 100:4 and siman 106 on no day and 6:4-11, 28:10, 32:16-18, 80:17 and siman 104 on two; 16 entries are typos ("1234:3", "80:267", "11:1"). Each entry used is listed with the published value and the reason under `corrections` in the schedule file; with them every se'if is read exactly once in a year, which the build test checks.
+- **Rules the app applies** (the file's `rules`): a common year reads month by month. A leap year reads in Adar I the luach's review of the laws of blessings and prayer (Hebcal's Adar II option B, its typos corrected) and nothing on 30 Adar I, and in Adar II the luach's Adar, so Purim's and Pesach's simanim stay before their festivals. Hebcal reads Adar in Adar I and the option in Adar II, and the luach's own note suggests starting the option on 23 Adar I; the app's choice goes to the rav as R17.8. Option A (the laws that depend on the Land, from the back of the Blum edition) is not in Sefaria's text and is not used. A short Kislev reads days 29 and 30 together on the 29th; a long Cheshvan reads nothing on the 30th; 15 Elul (the luach's "Klalim", which Sefaria's text does not hold) reads nothing. A day that reads nothing has no window.
 
 ### 6.2 `ben_ish_chai`
 
@@ -128,11 +132,13 @@ A schedule answers one question: which segments are the portion of a location da
 - The parasha's numbered halachot are divided evenly over the week's seven days, Sunday to Shabbat, in order; a double week divides both parashiyot's halachot together.
 - **Open:** which Hebrew year reads the first year's halachot and which the second (Q30), and what a week reads when the second year has no entry for its parasha (47 nodes against 52; the proposal: that week reads the first year's).
 - The drashot are not included.
+- **As built (2026-11-10):** the text is Sefaria's "Ben Ish Hai -- Wikisource" (labelled Public Domain): its "Ben Ish Chai, Jerusalem, 1898" version has the node shape but empty halachot. 98 units, 2001 halachot. The manifest maps each of the 54 parashiyot to its unit per year: the first year has all 54 (its Tazria-Metzora, Achrei Mot-Kedoshim and Behar-Bechukotai are one node each, serving both parashiyot), the second has none for Bamidbar, Devarim, Nitzavim, Vayeilech, Ha'azinu and Vezot Haberakhah. The second year's Vayeshev is only the author's note "בפרשה זו לא כתבתי הלכות בשנה שניה יען כי לדרוש בפרשה זו בהלכות חנוכה בכל שנה ושנה", so that week reads the first year's Chanukah node, as he says.
 
 ### 6.3 `rambam`
 
 - One chapter a day, every day, the public cycle.
-- The build reads Sefaria's "Daily Rambam" calendar for every day of one full cycle and writes the cycle to `scripts/halacha/schedules/rambam.json` with its anchor date; the app computes any day from the anchor and the cycle length. The suite pins 2026-11-10 = Hilchot Issurei Biah 22 and the days around a cycle's end.
+- The build reads Sefaria's "Daily Rambam" calendar for every day of one full cycle and writes the cycle to [scripts/halacha/schedules/rambam.json](../../scripts/halacha/schedules/rambam.json) with its anchor date; the app computes any day from the anchor and the cycle length. The suite pins 2026-11-10 = Hilchot Issurei Biah 22 and the days around a cycle's end.
+- **As built (2026-11-10):** the cycle is 1017 days from 2026-02-03 (Transmission of the Oral Law 1-21); its first twelve days read the introduction (the Oral Law's transmission, the positive and negative mitzvot, the Overview of the contents) and its last Kings and Wars 12. The Hebrew is Torat Emet 363 for every book that has it, Mechon Mamre for the introduction, and Wikisource (CC-BY-SA, stated in the credit) for the Overview, which has no other.
 
 ### 6.4 Days that need the rav
 
@@ -160,20 +166,21 @@ Tisha B'Av (Torah study is limited to its own topics) and a mourner's days are n
 
 ### 7.2 Content per track
 
-The build cuts each festival's material into as many portions as its period has days, evenly by segment count, in the book's order. The source units, to be confirmed against the siman and node titles when the build first runs:
+The build cuts each festival's material into as many portions as its period has days, evenly by segment count, in the book's order; material with fewer segments than its period has days gives one segment a day and starts the period that many days before the festival (Ben Ish Chai's Rosh Hashanah: 25 halachot from 5 Elul). Confirmed against the siman titles and the halachot themselves on 2026-11-10:
 
-| Festival | `kitzur` (simanim) | `rambam` | `ben_ish_chai` (1st year unless noted) |
+| Festival | `kitzur` (simanim) | `rambam` | `ben_ish_chai` (1st year) |
 |---|---|---|---|
-| Pesach | 107–119 | Chametz uMatzah | Tzav |
-| Shavuot | 120, and Yom Tov 98–103 | Shevitat Yom Tov | Bamidbar |
-| Sukkot | 134–138 | Shofar, Sukkah veLulav 4–8 | Ha'azinu, Vezot Haberakhah |
-| Rosh Hashanah | 128–130 | Shofar 1–3, Teshuvah | Nitzavim |
-| Yom Kippur | 131–133 | Shevitat Asor | Vayelech |
-| Chanukah | 139 | Megillah veChanukah 3–4 | Vayeshev |
-| Purim | 140–142 | Megillah veChanukah 1–2 | Tetzaveh |
-| Tisha B'Av and the fasts | 121–127 | Ta'aniyot 5 (and 1–4 for the minor fasts) | Devarim |
+| Pesach | 107–119 | Leavened and Unleavened Bread | Tzav (58) |
+| Shavuot | 98–103 (Yom Tov) | Rest on a Holiday | Bamidbar (30, the laws of Yom Tov) |
+| Sukkot | 134–138 | Shofar, Sukkah and Lulav 4–8 | Ha'azinu and Vezot Haberakhah (33) |
+| Rosh Hashanah | 128–130 | Shofar, Sukkah and Lulav 1–3, Repentance | Nitzavim (25) |
+| Yom Kippur | 131–133 | Rest on the Tenth of Tishrei | Vayeilech (27) |
+| Chanukah | 139 | Scroll of Esther and Hanukkah 3–4 | the Chanukah node (28) |
+| Purim | 140–142 | Scroll of Esther and Hanukkah 1–2 | Tetzaveh 24–46 (23; 1–23 are the Priestly Blessing) |
+| Tisha B'Av | 122–126 | Fasts 5 | Devarim (28) |
+| The four minor fasts | 121 | Fasts 1–4 | — |
 
-These ranges are from memory and are not verified. A festival a track does not cover gets no window for that track; the gap is reported to the owner before any text from another book fills it (the owner's condition of 2026-11-10 for Ben Ish Chai).
+Corrections to the first table: Shavuot drops Kitzur 120 (the Omer, read before the period opens); Tisha B'Av takes 122–126 and the minor fasts 121, and 127 (a private fast) is left out. **Gap reported to the owner:** Ben Ish Chai has no halachot of the minor fasts, so `hilchot_hachag` has no window on those days for that track; no other book fills it (the owner's condition of 2026-11-10).
 
 ### 7.3 Window and reminder
 
@@ -253,12 +260,14 @@ For the rav, R17:
 - R17.4 The periods of section 7.1, the thirty days for Shavuot and Sukkot and the shorter ones.
 - R17.5 No portion on the festival itself, Chanukah and Purim included (D13).
 - R17.6 Tisha B'Av and the daily portion (6.4).
-- R17.7 The festival units per book (7.2), once confirmed against the texts.
+- R17.7 The festival units per book (7.2), confirmed against the texts on 2026-11-10.
+- R17.8 The Kitzur luach's leap-year rule and the days that read nothing (6.1).
 
 ## 14. Risks
 
 - **Scope:** one release of two mitzvot and three books; users see nothing until the last part and the rav's answers are in.
 - **Ben Ish Chai and the festivals:** it may not cover every festival at the depth of the other two books (7.2).
 - **Rambam as a daily halacha:** a chapter is long and includes laws not practised today; it differs in kind from the Kitzur. The track select lets a user move.
-- **Add-on size:** unknown until the build runs; the whole Mishneh Torah in Hebrew and English is the largest. Shnayim Mikra is 1.2 MB and Chok LeYisrael 23 MB on disk for comparison.
-- **Unverified facts:** the Kitzur luach (6.1), the festival ranges (7.2), the English coverage (2.3), Dirshu's cycle length (2.1).
+- **Add-on size (measured 2026-11-10, gzipped, what the app downloads and keeps):** Kitzur Shulchan Aruch 0.60 MB and its English 0.54 MB, Ben Ish Chai 0.63 MB, Mishneh Torah 2.43 MB (Hebrew only). Shnayim Mikra is 1.2 MB and Chok LeYisrael 4.8 MB gzipped for comparison.
+- **Unverified facts:** the printed source behind Hebcal's Kitzur luach (6.1) and Dirshu's cycle length (2.1). The festival ranges (7.2) and the English coverage (2.3) were checked against the texts on 2026-11-10.
+- **Licences:** twelve books of the Rambam track are built from Wikisource's Hebrew (CC-BY-SA), the first version that holds every chapter: Sefaria has no Torat Emet text for Blessings, Circumcision, Fringes, Prayer and the Priestly Blessing, Reading the Shema, Tefillin, Mezuzah and the Torah Scroll and the Order of Prayer, nor any other version of the Negative Mitzvot and the Overview; Torat Emet's Leavened and Unleavened Bread lacks chapter 9 (the Haggadah) and Mechon Mamre's Transmission of the Oral Law a halacha the calendar reads. The Positive Mitzvot are Mechon Mamre's (public domain), the other 74 books Torat Emet's. Every unit file names its own version and licence, and the manifest's credit names all three. The app already ships Chok LeYisrael under CC BY-NC-SA with its notice; these files follow the same practice, published under CC-BY-SA with the credit shown wherever the text is.

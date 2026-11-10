@@ -32,6 +32,7 @@
     "siddur:build": "node scripts/siddur/build.js",
     "chok:build": "node scripts/chok/build.js",
     "shnayim:build": "node scripts/shnayim/build.js",
+    "halacha:build": "node scripts/halacha/build.js",
     "places:build": "node scripts/places/build.js",
     "guide:build": "node scripts/guide/build.js",
     "logo:build": "node design/jew365-concepts/vector/build.mjs && node scripts/logo/export.mjs",

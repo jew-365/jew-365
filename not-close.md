@@ -553,41 +553,51 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 - **Flag:** every task is `OTA` plus `docs/halacha/` on Pages: pure JavaScript, no native module, no field of [app.json](app.json), no version raise, no `SCHEDULE_FORMAT` raise. A task that turns out to need one stops and says so.
 - **Decisions taken:** the owner's D1 to D7 and Claude's D8 to D16 in the spec's section 4. In short: three tracks by nusach with the user's override (Kitzur Shulchan Aruch for Ashkenaz and Sefard, Ben Ish Chai for Edot HaMizrach, Rambam one chapter a day for Chabad and Teiman); a schedule fixed by the date; a window on every day, Shabbat's portion asked in the check-in and offered as a make-up; the two mitzvot side by side; an English text only under a usable licence; one release of everything; the rav before production.
 - **Pending:** Q29 to Q31 under [For the owner](#for-the-owner) and R17 under [For the rav](#for-the-rav). Q29 and Q30 block only the tasks that name them.
-- **Not verified:** the Kitzur Shulchan Aruch Yomi luach (no source found), the festival ranges per book (from memory), how complete each English version is, the add-on's size. Each is the first step of the task that needs it.
+- **Not verified:** the printed source behind Hebcal's Kitzur Shulchan Aruch Yomi luach (spec 6.1). The luach itself, the festival ranges, the English coverage and the add-on's size were established on 2026-11-10 by the content tasks below.
 - **Done means:** both dictionaries updated with every key the task adds; a DOX pass on every touched AGENTS.md; the spec section the task names implemented as written, or the deviation written back into the spec; the search finding everything the task adds; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green. No update to preview or production without the owner's word.
 - **Order:** the High tasks in the order written (content, then logic, then the mitzvot and the reader); the Medium tasks after them in any order; the release tasks last.
 
 ### High — Daily halacha and festival halachot
 
-- [ ] Establish the Kitzur Shulchan Aruch Yomi luach
+- [x] Establish the Kitzur Shulchan Aruch Yomi luach
   - **Flag:** none (research); its output is a committed schedule file.
   - **What it is:** Find the yearly luach in use, record its source in the spec's section 6.1, and transcribe it to `scripts/halacha/schedules/kitzur.json` (Hebrew month and day → siman and se'if range, with its leap-year rule).
   - **What it solves:** Spec 6.1: the `kitzur` track's fixed schedule has no source yet.
   - **Expected result:** A schedule file whose every day points inside the 221 simanim and whose days together cover every se'if once, checked by the build test; or, if no luach can be established, Q29 answered and the fallback division written instead.
+  - **Done:** 2026-11-10. The luach is the Kitzur Shulchan Aruch Yomi of `@hebcal/learning` 6.13.1 (BSD-2-Clause), transcribed to [scripts/halacha/schedules/kitzur.json](scripts/halacha/schedules/kitzur.json) with its licence; 16 broken entries corrected, each with its published value and reason; the leap-year, short-Kislev, long-Cheshvan and 15 Elul rules written into the file and spec 6.1. Q29 is not needed. Verified: [scripts/halacha/__tests__/build.test.js](scripts/halacha/__tests__/build.test.js) reads the published units and finds every one of the 2765 se'ifim read exactly once in a year of the luach.
+  - **Status:** Version: content only, no app change (`docs/halacha/` waits for the batch's release) · Committed: pending · Pushed: no · Live: no (Pages publishes `docs/halacha/` on the push to `main`; the app does not read it yet) · Channel: none
 
-- [ ] Build the halacha add-on from Sefaria
+- [x] Build the halacha add-on from Sefaria
   - **Flag:** `docs/halacha/` on Pages.
   - **What it is:** `scripts/halacha/build.js` with the `pnpm halacha:build` script and `scripts/halacha/AGENTS.md`, on the pattern of [scripts/shnayim/build.js](scripts/shnayim/build.js): the pinned Hebrew versions of the spec's section 2.3 for the three books, cut into units, with the manifest of section 5.2 (per track: version, sizes, credits, files, schedule, festivals).
   - **What it solves:** Spec 5: the text both mitzvot read.
   - **Expected result:** `scripts/halacha/__tests__/build.test.js` green on the checks of spec 5.4 (no se'if or halacha missing or twice, every hash matching, every schedule day inside the text); the size of each track written into the spec's section 14.
+  - **Done:** 2026-11-10. [scripts/halacha/build.js](scripts/halacha/build.js), [scripts/halacha/tracks.js](scripts/halacha/tracks.js), `pnpm halacha:build` and [scripts/halacha/AGENTS.md](scripts/halacha/AGENTS.md); one manifest per track (a deviation from spec 5.2's single manifest, written back into the spec, so each track is an add-on on the shared core). Sizes in spec 14: Kitzur 0.60 MB (+0.54 MB English), Ben Ish Chai 0.63 MB, Rambam 2.42 MB, gzipped. Ben Ish Chai's 1898 Jerusalem version on Sefaria has empty halachot, so its text is the Wikisource one; twelve Rambam books come from Wikisource's CC-BY-SA text, each unit crediting its version. Verified: `pnpm test -- scripts/halacha` 26 of 26 green; a second `pnpm halacha:build` writes 0 files.
+  - **Status:** Version: content only, no app change (`docs/halacha/` waits for the batch's release) · Committed: pending · Pushed: no · Live: no (Pages publishes `docs/halacha/` on the push to `main`; the app does not read it yet) · Channel: none
 
-- [ ] Write the Rambam cycle from Sefaria's calendar
+- [x] Write the Rambam cycle from Sefaria's calendar
   - **Flag:** none; part of the build's committed data.
   - **What it is:** The build reads Sefaria's "Daily Rambam" calendar for every day of one full cycle and writes `scripts/halacha/schedules/rambam.json` with its anchor date and length (spec 6.3).
   - **What it solves:** The `rambam` track's fixed public schedule.
   - **Expected result:** The suite pins 2026-11-10 as Hilchot Issurei Biah chapter 22 and the last and first day of a cycle; the cycle covers every chapter once.
+  - **Done:** 2026-11-10. `node scripts/halacha/build.js --rambam-cycle 2026-02-03` wrote [scripts/halacha/schedules/rambam.json](scripts/halacha/schedules/rambam.json): 1017 days from 2026-02-03, checked to repeat on day 1017 and identical to a second, independent crawl of the same calendar. Verified: the suite pins 2026-11-10 as Forbidden Intercourse 22 and the cycle's first and last days; the cycle reads the text in book order, each halacha at most once, and leaves out only twelve (Wikisource's Negative Mitzvot 366-370 and the Order of Prayer's fifth chapter), which the suite pins, so "covers every chapter once" holds for the chapters the calendar reads, not for those twelve.
+  - **Status:** Version: content only, no app change (`docs/halacha/` waits for the batch's release) · Committed: pending · Pushed: no · Live: no (Pages publishes `docs/halacha/` on the push to `main`; the app does not read it yet) · Channel: none
 
-- [ ] Cut the festival units for each track
+- [x] Cut the festival units for each track
   - **Flag:** `docs/halacha/` on Pages.
   - **What it is:** Confirm the ranges of the spec's section 7.2 against the siman and node titles, correct the table, and have the build cut each festival's material into as many portions as its period has days.
   - **What it solves:** Spec 7.2: the content of `hilchot_hachag`.
   - **Expected result:** The build test finds a non-empty unit for every festival a track covers; every gap (a festival a track lacks) is listed in the spec and reported to the owner before any other book fills it.
+  - **Done:** 2026-11-10. The ranges of spec 7.2 checked against the siman titles and the halachot themselves and corrected (Shavuot is Kitzur 98-103 without 120; Tisha B'Av 122-126 and the minor fasts 121; Ben Ish Chai's Purim is Tetzaveh 24-46; Chanukah its own node). Material shorter than a period fills its last days, one segment a day (Ben Ish Chai's Rosh Hashanah, the Rambam's Tisha B'Av). **Reported to the owner:** Ben Ish Chai has no halachot of the four minor fasts, so that track has no festival window on those days. Verified: the suite finds a non-empty portion for every day of every festival each track covers, and pins the minor fasts as Ben Ish Chai's only gap.
+  - **Status:** Version: content only, no app change (`docs/halacha/` waits for the batch's release) · Committed: pending · Pushed: no · Live: no (Pages publishes `docs/halacha/` on the push to `main`; the app does not read it yet) · Channel: none
 
-- [ ] Measure and add the English translations
+- [x] Measure and add the English translations
   - **Flag:** `docs/halacha/` on Pages.
   - **What it is:** For each book, measure how much of it the CC0 and CC-BY English versions of spec 2.3 cover; add the English files for a track that passes the threshold, with the translator and licence in its credit.
   - **What it solves:** D5, "תרגום אם יש חופשי".
   - **Expected result:** The coverage of each version written into the spec; the build test pins which tracks ship English and fails on an English segment with no Hebrew twin.
+  - **Done:** 2026-11-10. Coverage (spec 2.3): Kitzur 99.0% (Metsudah, CC-BY), Ben Ish Chai 3.8%, Mishneh Torah 27.5%; with a 90% threshold only the Kitzur ships English, under its translator's credit. Verified: the suite pins that the Kitzur alone ships English, every English file aligned with its unit's Hebrew segments, and no `en/` folder for the other two; spot-checked 1:1, 105:1 and 221:8 against the Hebrew.
+  - **Status:** Version: content only, no app change (`docs/halacha/` waits for the batch's release) · Committed: pending · Pushed: no · Live: no (Pages publishes `docs/halacha/` on the push to `main`; the app does not read it yet) · Channel: none
 
 - [ ] Add the portion and period logic
   - **Flag:** `OTA`.
@@ -635,9 +645,9 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 - [ ] Put R17 on the rav's review page
   - **Flag:** [docs/halacha-review.html](docs/halacha-review.html) on Pages.
-  - **What it is:** R17.1 to R17.7 as items with answer fields, and `RULES_VERSION` raised by one.
+  - **What it is:** R17.1 to R17.8 as items with answer fields, and `RULES_VERSION` raised by one.
   - **What it solves:** D7: the rav answers before production.
-  - **Expected result:** The page shows the seven items and submits them; after the push, `curl -sI https://jew-365.github.io/jew-365/halacha-review.html` answers 200.
+  - **Expected result:** The page shows the eight items and submits them; after the push, `curl -sI https://jew-365.github.io/jew-365/halacha-review.html` answers 200.
 
 - [ ] Update the DOX chain for the halacha add-on
   - **Flag:** none (docs).
@@ -802,7 +812,8 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
     - R17.4 The periods: thirty days before Pesach, Shavuot and Sukkot; Rosh Hashanah from Rosh Chodesh Elul; Yom Kippur in the Ten Days; Chanukah and Purim fourteen days; Tisha B'Av from 17 Tammuz; each minor fast three days.
     - R17.5 No portion on the festival itself, Chanukah and Purim included.
     - R17.6 Tisha B'Av: the daily portion shows as on any day.
-    - R17.7 The simanim, halachot and parashiyot taken for each festival from each book (the spec's section 7.2, once confirmed).
+    - R17.7 The simanim, halachot and parashiyot taken for each festival from each book (the spec's section 7.2, confirmed against the texts on 2026-11-10), and material shorter than its period starting that period later (Ben Ish Chai's Rosh Hashanah from 5 Elul, the Rambam's Tisha B'Av from 19 Tammuz).
+    - R17.8 The Kitzur luach in a leap year: the review of the laws of blessings and prayer in Adar I and the luach's Adar in Adar II (Hebcal reads them the other way round), and the days that read nothing (30 Cheshvan, 30 Adar I, 15 Elul).
   - **Lives in:** nothing yet; planned for `src/utils/halacha.ts`, `src/data/halacha.ts` and `scripts/halacha/`.
 
 ### For the owner
@@ -911,6 +922,7 @@ Q29 to Q31 are the batch "Daily halacha and festival halachot, 2026-11-10" ([.cl
 - **Q29 — The Kitzur Shulchan Aruch Yomi luach.**
   - **Question:** If no authoritative yearly luach can be established, may the app divide the 221 simanim over the Hebrew year itself, the festival simanim placed before their festival?
   - **Why it is open:** no source for the luach in use was found on 2026-11-10; Sefaria has no such calendar. Asked only if the task "Establish the Kitzur Shulchan Aruch Yomi luach" finds none.
+  - **Not needed, 2026-11-10:** the task found the luach (Hebcal's Kitzur Shulchan Aruch Yomi, spec 6.1), so the question is not asked.
   - **Blocks:** the `kitzur` track's schedule.
 
 - **Q30 — Ben Ish Chai: which year reads which part.**

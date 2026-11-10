@@ -1,0 +1,7809 @@
+{
+  "format": 1,
+  "version": 1,
+  "track": "kitzur",
+  "book": {
+    "he": "קיצור שולחן ערוך",
+    "en": "Kitzur Shulchan Aruch"
+  },
+  "credit": {
+    "he": "קיצור שולחן ערוך: Torat Emet 357 (Public Domain), דרך ספריא. לוח הלימוד: קיצור שולחן ערוך היומי כפי ש־Hebcal מפרסם (BSD)",
+    "en": "Kitzur Shulchan Aruch: Torat Emet 357 (Public Domain), via Sefaria. Schedule: the Kitzur Shulchan Aruch Yomi as Hebcal publishes it (BSD)"
+  },
+  "credits": [
+    {
+      "title": "Torat Emet 357, via Sefaria",
+      "license": "Public Domain",
+      "url": "http://www.toratemetfreeware.com/index.html?downloads"
+    }
+  ],
+  "gzipBytes": 602987,
+  "gz": {
+    "simanim-001-010": {
+      "path": "simanim-001-010.369880a1.json.gz",
+      "sha256": "369880a1c9e15ec0ce215520dd805940616d6f83371318c2e08119f460b3ff2a",
+      "bytes": 34941
+    },
+    "simanim-011-020": {
+      "path": "simanim-011-020.c5683309.json.gz",
+      "sha256": "c5683309c6f3bae4ca492306e90a38e447dede89ddd84ec52a2db2fcab4d7e52",
+      "bytes": 32189
+    },
+    "simanim-021-030": {
+      "path": "simanim-021-030.f2ed0490.json.gz",
+      "sha256": "f2ed0490729103ccbe021ca93f2e6fd8fd9cd495defb6e5aae814e68e6dd4abb",
+      "bytes": 32237
+    },
+    "simanim-031-040": {
+      "path": "simanim-031-040.77d69c3b.json.gz",
+      "sha256": "77d69c3b445ebcb6c216dfd40f402264741d5fad6198a7cb3cdc32f9874997c7",
+      "bytes": 32336
+    },
+    "simanim-041-050": {
+      "path": "simanim-041-050.5d5479ca.json.gz",
+      "sha256": "5d5479ca885303d5682f8e516b9f26cb59c0a0db23ee354d90352f858d16879c",
+      "bytes": 34054
+    },
+    "simanim-051-060": {
+      "path": "simanim-051-060.3b6a83a5.json.gz",
+      "sha256": "3b6a83a5c2b2dad1503637fd425d1cae60fee7d524c4c16aa092cb1784d94e8d",
+      "bytes": 23551
+    },
+    "simanim-061-070": {
+      "path": "simanim-061-070.665dcf9d.json.gz",
+      "sha256": "665dcf9db057174e3047537c97ea068e2fd37984a416b63cb6894da090e214de",
+      "bytes": 29738
+    },
+    "simanim-071-080": {
+      "path": "simanim-071-080.78d4ec07.json.gz",
+      "sha256": "78d4ec0795290e2656b5b240b5352f9398860ee6574e031f54e0c2cacbd30c34",
+      "bytes": 46664
+    },
+    "simanim-081-090": {
+      "path": "simanim-081-090.1bec4987.json.gz",
+      "sha256": "1bec498717b4abe41161bd136ce08cfb4416e040f3dae193527231983ca82cc5",
+      "bytes": 27963
+    },
+    "simanim-091-100": {
+      "path": "simanim-091-100.343c7627.json.gz",
+      "sha256": "343c7627f0f00b24c0d1b5fb5aace9b582dd8fe9d31332a346c0989239d919ba",
+      "bytes": 35156
+    },
+    "simanim-101-110": {
+      "path": "simanim-101-110.9ce1c50e.json.gz",
+      "sha256": "9ce1c50e2331f638edc25a7578407404d77a57c8e3c885793dc7c80226a6da07",
+      "bytes": 17357
+    },
+    "simanim-111-120": {
+      "path": "simanim-111-120.dced9590.json.gz",
+      "sha256": "dced95909e80f172b1eedbeba3fc332d0d9baf419846814e17dc7859b82f8ac1",
+      "bytes": 26449
+    },
+    "simanim-121-130": {
+      "path": "simanim-121-130.15ac0d93.json.gz",
+      "sha256": "15ac0d93482366dfa59b0cc1614135341f111d8267dc7a2df1c78e757a2ff019",
+      "bytes": 30648
+    },
+    "simanim-131-140": {
+      "path": "simanim-131-140.28ca3456.json.gz",
+      "sha256": "28ca345628dd825466083b112d3bb847527f8ad795f0fe99c21c651bced3e708",
+      "bytes": 38416
+    },
+    "simanim-141-150": {
+      "path": "simanim-141-150.dcbb97f7.json.gz",
+      "sha256": "dcbb97f739f621c6fcd79233e423e29f92741e58acbb33847d5d5b3357a7df84",
+      "bytes": 26488
+    },
+    "simanim-151-160": {
+      "path": "simanim-151-160.2a5fe826.json.gz",
+      "sha256": "2a5fe826e025cc1a1e0b5d0d0827cf3cb8adb89b3511b1257f7dcefa9e4d7492",
+      "bytes": 21299
+    },
+    "simanim-161-170": {
+      "path": "simanim-161-170.940960d0.json.gz",
+      "sha256": "940960d0a03e1ac380f5b429ce76433d12079644ae89728b3b04060228909d7c",
+      "bytes": 22217
+    },
+    "simanim-171-180": {
+      "path": "simanim-171-180.c8869b69.json.gz",
+      "sha256": "c8869b69935ba0786a33975559b9ff6088de5aa68bbcde2c4a5c95eb8cc65112",
+      "bytes": 13825
+    },
+    "simanim-181-190": {
+      "path": "simanim-181-190.a58cb8d7.json.gz",
+      "sha256": "a58cb8d7cd256a640aa75e8cf636e5b86c239c7cbc867e10e07578b15410e08a",
+      "bytes": 18213
+    },
+    "simanim-191-200": {
+      "path": "simanim-191-200.b3391cb7.json.gz",
+      "sha256": "b3391cb7ce1799580df6887050fab0f49bfe725b108e2f7b49d9e60c983038f2",
+      "bytes": 26688
+    },
+    "simanim-201-210": {
+      "path": "simanim-201-210.0c2d949e.json.gz",
+      "sha256": "0c2d949e98116082743f5185a33456a4d09aa46041750c83a0ebd8048cb342a3",
+      "bytes": 18147
+    },
+    "simanim-211-220": {
+      "path": "simanim-211-220.176596cc.json.gz",
+      "sha256": "176596ccf6c9049b0521481a1590745cd91b99180f6508b751bb24a13c78eaf6",
+      "bytes": 11553
+    },
+    "simanim-221-221": {
+      "path": "simanim-221-221.6ca28429.json.gz",
+      "sha256": "6ca284295e53a3fea059aa80f4a81c94c4f3654de2b6cc851a772b362ad4ab26",
+      "bytes": 2858
+    }
+  },
+  "units": {
+    "simanim-001-010": {
+      "he": "סימנים א–י",
+      "en": "Simanim 1–10",
+      "count": 119
+    },
+    "simanim-011-020": {
+      "he": "סימנים יא–כ",
+      "en": "Simanim 11–20",
+      "count": 129
+    },
+    "simanim-021-030": {
+      "he": "סימנים כא–ל",
+      "en": "Simanim 21–30",
+      "count": 140
+    },
+    "simanim-031-040": {
+      "he": "סימנים לא–מ",
+      "en": "Simanim 31–40",
+      "count": 153
+    },
+    "simanim-041-050": {
+      "he": "סימנים מא–נ",
+      "en": "Simanim 41–50",
+      "count": 191
+    },
+    "simanim-051-060": {
+      "he": "סימנים נא–ס",
+      "en": "Simanim 51–60",
+      "count": 117
+    },
+    "simanim-061-070": {
+      "he": "סימנים סא–ע",
+      "en": "Simanim 61–70",
+      "count": 116
+    },
+    "simanim-071-080": {
+      "he": "סימנים עא–פ",
+      "en": "Simanim 71–80",
+      "count": 218
+    },
+    "simanim-081-090": {
+      "he": "סימנים פא–צ",
+      "en": "Simanim 81–90",
+      "count": 129
+    },
+    "simanim-091-100": {
+      "he": "סימנים צא–ק",
+      "en": "Simanim 91–100",
+      "count": 172
+    },
+    "simanim-101-110": {
+      "he": "סימנים קא–קי",
+      "en": "Simanim 101–110",
+      "count": 92
+    },
+    "simanim-111-120": {
+      "he": "סימנים קיא–קכ",
+      "en": "Simanim 111–120",
+      "count": 117
+    },
+    "simanim-121-130": {
+      "he": "סימנים קכא–קל",
+      "en": "Simanim 121–130",
+      "count": 130
+    },
+    "simanim-131-140": {
+      "he": "סימנים קלא–קמ",
+      "en": "Simanim 131–140",
+      "count": 152
+    },
+    "simanim-141-150": {
+      "he": "סימנים קמא–קנ",
+      "en": "Simanim 141–150",
+      "count": 133
+    },
+    "simanim-151-160": {
+      "he": "סימנים קנא–קס",
+      "en": "Simanim 151–160",
+      "count": 90
+    },
+    "simanim-161-170": {
+      "he": "סימנים קסא–קע",
+      "en": "Simanim 161–170",
+      "count": 105
+    },
+    "simanim-171-180": {
+      "he": "סימנים קעא–קפ",
+      "en": "Simanim 171–180",
+      "count": 78
+    },
+    "simanim-181-190": {
+      "he": "סימנים קפא–קצ",
+      "en": "Simanim 181–190",
+      "count": 85
+    },
+    "simanim-191-200": {
+      "he": "סימנים קצא–ר",
+      "en": "Simanim 191–200",
+      "count": 135
+    },
+    "simanim-201-210": {
+      "he": "סימנים רא–רי",
+      "en": "Simanim 201–210",
+      "count": 98
+    },
+    "simanim-211-220": {
+      "he": "סימנים ריא–רכ",
+      "en": "Simanim 211–220",
+      "count": 58
+    },
+    "simanim-221-221": {
+      "he": "סימן רכא",
+      "en": "Siman 221",
+      "count": 8
+    }
+  },
+  "schedule": {
+    "kind": "hebrew",
+    "months": {
+      "Tishrei": [
+        {
+          "label": {
+            "he": "סימן קלג, סעיפים טז–כא",
+            "en": "Siman 133:16–21"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 37,
+              "to": 42
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלג, סעיפים כב–כו",
+            "en": "Siman 133:22–26"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 43,
+              "to": 47
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלג:כז – סימן קלד:א",
+            "en": "Siman 133:27–134:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 48,
+              "to": 53
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלד, סעיפים ב–ו",
+            "en": "Siman 134:2–6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 54,
+              "to": 58
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלד, סעיפים ז–יב",
+            "en": "Siman 134:7–12"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 59,
+              "to": 64
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלד:יג – סימן קלה:ב",
+            "en": "Siman 134:13–135:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 65,
+              "to": 69
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלה, סעיפים ג–ו",
+            "en": "Siman 135:3–6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 70,
+              "to": 73
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלה, סעיפים ז–יב",
+            "en": "Siman 135:7–12"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 74,
+              "to": 79
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלה, סעיפים יג–כב",
+            "en": "Siman 135:13–22"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 80,
+              "to": 89
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלו, סעיפים א–ב",
+            "en": "Siman 136:1–2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 90,
+              "to": 91
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלו, סעיפים ג–י",
+            "en": "Siman 136:3–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 92,
+              "to": 99
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלז, סעיפים א–ז",
+            "en": "Siman 137:1–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 100,
+              "to": 106
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלז:ח – סימן קלח:א",
+            "en": "Siman 137:8–138:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 107,
+              "to": 113
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלח, סעיפים ב–י",
+            "en": "Siman 138:2–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 114,
+              "to": 122
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צח, סעיפים א–ז",
+            "en": "Siman 98:1–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 108,
+              "to": 114
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צח, סעיפים ח–יג",
+            "en": "Siman 98:8–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 115,
+              "to": 120
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צח, סעיפים יד–כב",
+            "en": "Siman 98:14–22"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 121,
+              "to": 129
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צח, סעיפים כג–לב",
+            "en": "Siman 98:23–32"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 130,
+              "to": 139
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צח:לג – סימן צט:ב",
+            "en": "Siman 98:33–99:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 140,
+              "to": 146
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צט:ג – סימן ק:ג",
+            "en": "Siman 99:3–100:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 147,
+              "to": 152
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ק, סעיפים ד–י",
+            "en": "Siman 100:4–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 153,
+              "to": 159
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ק, סעיפים יא–טז",
+            "en": "Siman 100:11–16"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 160,
+              "to": 165
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ק, סעיפים יז–כב",
+            "en": "Siman 100:17–22"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 166,
+              "to": 171
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן א, סעיפים א–ד",
+            "en": "Siman 1:1–4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 0,
+              "to": 3
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן א:ה – סימן ב:ד",
+            "en": "Siman 1:5–2:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 4,
+              "to": 10
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ב:ה – סימן ג:א",
+            "en": "Siman 2:5–3:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 11,
+              "to": 16
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ג, סעיפים ב–ח",
+            "en": "Siman 3:2–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 17,
+              "to": 23
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ד:א – סימן ה:א",
+            "en": "Siman 4:1–5:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 24,
+              "to": 30
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ה, סעיפים ב–ח",
+            "en": "Siman 5:2–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 31,
+              "to": 37
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ה, סעיפים ט–טז",
+            "en": "Siman 5:9–16"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 38,
+              "to": 45
+            }
+          ]
+        }
+      ],
+      "Cheshvan": [
+        {
+          "label": {
+            "he": "סימן ה:יז – סימן ו:ג",
+            "en": "Siman 5:17–6:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 46,
+              "to": 49
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ו, סעיפים ד–ט",
+            "en": "Siman 6:4–9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 50,
+              "to": 55
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ו:י – סימן ז:ח",
+            "en": "Siman 6:10–7:8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 56,
+              "to": 65
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ח, סעיפים א–ה",
+            "en": "Siman 8:1–5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 66,
+              "to": 70
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ח:ו – סימן ט:ג",
+            "en": "Siman 8:6–9:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 71,
+              "to": 74
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ט, סעיפים ד–ט",
+            "en": "Siman 9:4–9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 75,
+              "to": 80
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ט, סעיפים י–יג",
+            "en": "Siman 9:10–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 81,
+              "to": 84
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ט, סעיפים יד–כא",
+            "en": "Siman 9:14–21"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 85,
+              "to": 92
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן י, סעיפים א–ג",
+            "en": "Siman 10:1–3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 93,
+              "to": 95
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן י, סעיפים ד–יב",
+            "en": "Siman 10:4–12"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 96,
+              "to": 104
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן י, סעיפים יג–יט",
+            "en": "Siman 10:13–19"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 105,
+              "to": 111
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן י, סעיפים כ–כו",
+            "en": "Siman 10:20–26"
+          },
+          "pieces": [
+            {
+              "u": "simanim-001-010",
+              "from": 112,
+              "to": 118
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יא, סעיפים א–יא",
+            "en": "Siman 11:1–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 0,
+              "to": 10
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יא, סעיפים יב–כ",
+            "en": "Siman 11:12–20"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 11,
+              "to": 19
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יא:כא – סימן יב:ד",
+            "en": "Siman 11:21–12:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 20,
+              "to": 28
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יב, סעיפים ה–י",
+            "en": "Siman 12:5–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 29,
+              "to": 34
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יב:יא – סימן יג:א",
+            "en": "Siman 12:11–13:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 35,
+              "to": 40
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יג:ב – סימן יד:ג",
+            "en": "Siman 13:2–14:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 41,
+              "to": 47
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יד, סעיפים ד–ח",
+            "en": "Siman 14:4–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 48,
+              "to": 52
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן טו, סעיפים א–ו",
+            "en": "Siman 15:1–6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 53,
+              "to": 58
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן טו, סעיפים ז–יג",
+            "en": "Siman 15:7–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 59,
+              "to": 65
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן טז, סעיפים א–ה",
+            "en": "Siman 16:1–5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 66,
+              "to": 70
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יז, סעיפים א–ז",
+            "en": "Siman 17:1–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 71,
+              "to": 77
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יז:ח – סימן יח:ב",
+            "en": "Siman 17:8–18:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 78,
+              "to": 82
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יח, סעיפים ג–ט",
+            "en": "Siman 18:3–9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 83,
+              "to": 89
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יח, סעיפים י–יד",
+            "en": "Siman 18:10–14"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 90,
+              "to": 94
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יח, סעיפים טו–כב",
+            "en": "Siman 18:15–22"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 95,
+              "to": 102
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יט, סעיפים א–ז",
+            "en": "Siman 19:1–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 103,
+              "to": 109
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן יט, סעיפים ח–יג",
+            "en": "Siman 19:8–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 110,
+              "to": 115
+            }
+          ]
+        }
+      ],
+      "Kislev": [
+        {
+          "label": {
+            "he": "סימן יט:יד – סימן כ:ז",
+            "en": "Siman 19:14–20:7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 116,
+              "to": 123
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כ:ח – סימן כא:ב",
+            "en": "Siman 20:8–21:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-011-020",
+              "from": 124,
+              "to": 128
+            },
+            {
+              "u": "simanim-021-030",
+              "from": 0,
+              "to": 1
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כא, סעיפים ג–ח",
+            "en": "Siman 21:3–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 2,
+              "to": 7
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כא:ט – סימן כב:י",
+            "en": "Siman 21:9–22:10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 8,
+              "to": 19
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כג, סעיפים א–ט",
+            "en": "Siman 23:1–9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 20,
+              "to": 28
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כג, סעיפים י–טו",
+            "en": "Siman 23:10–15"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 29,
+              "to": 34
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כג, סעיפים טז–כב",
+            "en": "Siman 23:16–22"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 35,
+              "to": 41
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כג, סעיפים כג–ל",
+            "en": "Siman 23:23–30"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 42,
+              "to": 49
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כד, סעיפים א–ו",
+            "en": "Siman 24:1–6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 50,
+              "to": 55
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כד, סעיפים ז–יב",
+            "en": "Siman 24:7–12"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 56,
+              "to": 61
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כה:א – סימן כו:ב",
+            "en": "Siman 25:1–26:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 62,
+              "to": 71
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כו, סעיפים ג–יב",
+            "en": "Siman 26:3–12"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 72,
+              "to": 81
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כו, סעיפים יג–כא",
+            "en": "Siman 26:13–21"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 82,
+              "to": 90
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כו:כב – סימן כז:ה",
+            "en": "Siman 26:22–27:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 91,
+              "to": 96
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כח, סעיפים א–י",
+            "en": "Siman 28:1–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 97,
+              "to": 106
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כח:יא – סימן כט:ג",
+            "en": "Siman 28:11–29:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 107,
+              "to": 112
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כט, סעיפים ד–י",
+            "en": "Siman 29:4–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 113,
+              "to": 119
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כט, סעיפים יא–יז",
+            "en": "Siman 29:11–17"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 120,
+              "to": 126
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן כט:יח – סימן ל:ג",
+            "en": "Siman 29:18–30:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 127,
+              "to": 133
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ל:ד – סימן לא:א",
+            "en": "Siman 30:4–31:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-021-030",
+              "from": 134,
+              "to": 139
+            },
+            {
+              "u": "simanim-031-040",
+              "from": 0,
+              "to": 0
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לא:ב – סימן לב:א",
+            "en": "Siman 31:2–32:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 1,
+              "to": 7
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לב, סעיפים ב–ז",
+            "en": "Siman 32:2–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 8,
+              "to": 13
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לב, סעיפים ח–טו",
+            "en": "Siman 32:8–15"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 14,
+              "to": 21
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לב, סעיפים טז–כב",
+            "en": "Siman 32:16–22"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 22,
+              "to": 28
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלט, סעיפים א–ד",
+            "en": "Siman 139:1–4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 123,
+              "to": 126
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלט, סעיפים ה–יא",
+            "en": "Siman 139:5–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 127,
+              "to": 133
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלט, סעיפים יב–יט",
+            "en": "Siman 139:12–19"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 134,
+              "to": 141
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלט, סעיפים כ–כו",
+            "en": "Siman 139:20–26"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 142,
+              "to": 148
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לב, סעיפים כג–כז",
+            "en": "Siman 32:23–27"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 29,
+              "to": 33
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לג, סעיפים א–ו",
+            "en": "Siman 33:1–6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 34,
+              "to": 39
+            }
+          ]
+        }
+      ],
+      "Tevet": [
+        {
+          "label": {
+            "he": "סימן לג, סעיפים ז–יד",
+            "en": "Siman 33:7–14"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 40,
+              "to": 47
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לד, סעיפים א–ד",
+            "en": "Siman 34:1–4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 48,
+              "to": 51
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לד, סעיפים ה–יג",
+            "en": "Siman 34:5–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 52,
+              "to": 60
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לד:יד – סימן לה:ז",
+            "en": "Siman 34:14–35:7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 61,
+              "to": 70
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לה:ח – סימן לו:י",
+            "en": "Siman 35:8–36:10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 71,
+              "to": 82
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לו, סעיפים יא–כו",
+            "en": "Siman 36:11–26"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 83,
+              "to": 98
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לו:כז – סימן לז:ט",
+            "en": "Siman 36:27–37:9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 99,
+              "to": 109
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לז:י – סימן לח:ח",
+            "en": "Siman 37:10–38:8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 110,
+              "to": 121
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לח:ט – סימן לט:א",
+            "en": "Siman 38:9–39:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 122,
+              "to": 129
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכא, סעיפים א–ה",
+            "en": "Siman 121:1–5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 0,
+              "to": 4
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן לט:ב – סימן מ:ד",
+            "en": "Siman 39:2–40:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 130,
+              "to": 135
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מ, סעיפים ה–יג",
+            "en": "Siman 40:5–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 136,
+              "to": 144
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מ, סעיפים יד–כא",
+            "en": "Siman 40:14–21"
+          },
+          "pieces": [
+            {
+              "u": "simanim-031-040",
+              "from": 145,
+              "to": 152
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מא, סעיפים א–ז",
+            "en": "Siman 41:1–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 0,
+              "to": 6
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מא:ח – סימן מב:ה",
+            "en": "Siman 41:8–42:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 7,
+              "to": 14
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מב, סעיפים ו–יט",
+            "en": "Siman 42:6–19"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 15,
+              "to": 28
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מב:כ – סימן מג:ג",
+            "en": "Siman 42:20–43:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 29,
+              "to": 35
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מג:ד – סימן מד:ד",
+            "en": "Siman 43:4–44:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 36,
+              "to": 43
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מד, סעיפים ה–יג",
+            "en": "Siman 44:5–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 44,
+              "to": 52
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מד:יד – סימן מה:ב",
+            "en": "Siman 44:14–45:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 53,
+              "to": 59
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מה, סעיפים ג–ח",
+            "en": "Siman 45:3–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 60,
+              "to": 65
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מה, סעיפים ט–טז",
+            "en": "Siman 45:9–16"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 66,
+              "to": 73
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מה:יז – סימן מו:ג",
+            "en": "Siman 45:17–46:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 74,
+              "to": 83
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מו, סעיפים ד–טז",
+            "en": "Siman 46:4–16"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 84,
+              "to": 96
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מו, סעיפים יז–כט",
+            "en": "Siman 46:17–29"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 97,
+              "to": 109
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מו, סעיפים ל–מ",
+            "en": "Siman 46:30–40"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 110,
+              "to": 120
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מו:מא – סימן מז:ז",
+            "en": "Siman 46:41–47:7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 121,
+              "to": 133
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מז, סעיפים ח–כא",
+            "en": "Siman 47:8–21"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 134,
+              "to": 147
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מז:כב – סימן מח:ה",
+            "en": "Siman 47:22–48:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 148,
+              "to": 153
+            }
+          ]
+        }
+      ],
+      "Sh'vat": [
+        {
+          "label": {
+            "he": "סימן מח, סעיפים ו–י",
+            "en": "Siman 48:6–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 154,
+              "to": 158
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מט, סעיפים א–ו",
+            "en": "Siman 49:1–6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 159,
+              "to": 164
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן מט:ז – סימן נ:ב",
+            "en": "Siman 49:7–50:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 165,
+              "to": 176
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נ, סעיפים ג–י",
+            "en": "Siman 50:3–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 177,
+              "to": 184
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נ:יא – סימן נא:א",
+            "en": "Siman 50:11–51:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-041-050",
+              "from": 185,
+              "to": 190
+            },
+            {
+              "u": "simanim-051-060",
+              "from": 0,
+              "to": 0
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נא, סעיפים ב–ז",
+            "en": "Siman 51:2–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 1,
+              "to": 6
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נא, סעיפים ח–טו",
+            "en": "Siman 51:8–15"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 7,
+              "to": 14
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נב, סעיפים א–ז",
+            "en": "Siman 52:1–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 15,
+              "to": 21
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נב, סעיפים ח–טו",
+            "en": "Siman 52:8–15"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 22,
+              "to": 29
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נב:טז – סימן נג:ב",
+            "en": "Siman 52:16–53:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 30,
+              "to": 34
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נג:ג – סימן נד:ג",
+            "en": "Siman 53:3–54:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 35,
+              "to": 41
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נד:ד – סימן נה:א",
+            "en": "Siman 54:4–55:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 42,
+              "to": 48
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נה:ב – סימן נו:ה",
+            "en": "Siman 55:2–56:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 49,
+              "to": 57
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נו:ו – סימן נז:ה",
+            "en": "Siman 56:6–57:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 58,
+              "to": 64
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נז:ו – סימן נח:ז",
+            "en": "Siman 57:6–58:7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 65,
+              "to": 73
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נח:ח – סימן נט:א",
+            "en": "Siman 58:8–59:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 74,
+              "to": 81
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נט, סעיפים ב–ח",
+            "en": "Siman 59:2–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 82,
+              "to": 88
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נט, סעיפים ט–יט",
+            "en": "Siman 59:9–19"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 89,
+              "to": 99
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן נט:כ – סימן ס:ה",
+            "en": "Siman 59:20–60:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 100,
+              "to": 106
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ס, סעיפים ו–יג",
+            "en": "Siman 60:6–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 107,
+              "to": 114
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ס:יד – סימן סא:ה",
+            "en": "Siman 60:14–61:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-051-060",
+              "from": 115,
+              "to": 116
+            },
+            {
+              "u": "simanim-061-070",
+              "from": 0,
+              "to": 4
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סא:ו – סימן סב:ג",
+            "en": "Siman 61:6–62:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 5,
+              "to": 12
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סב, סעיפים ד–יד",
+            "en": "Siman 62:4–14"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 13,
+              "to": 23
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סב:טו – סימן סג:א",
+            "en": "Siman 62:15–63:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 24,
+              "to": 28
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סג:ב – סימן סד:ד",
+            "en": "Siman 63:2–64:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 29,
+              "to": 36
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סה, סעיפים א–ח",
+            "en": "Siman 65:1–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 37,
+              "to": 44
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סה, סעיפים ט–טו",
+            "en": "Siman 65:9–15"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 45,
+              "to": 51
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סה, סעיפים טז–כב",
+            "en": "Siman 65:16–22"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 52,
+              "to": 58
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סה, סעיפים כג–ל",
+            "en": "Siman 65:23–30"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 59,
+              "to": 66
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סו, סעיפים א–ו",
+            "en": "Siman 66:1–6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 67,
+              "to": 72
+            }
+          ]
+        }
+      ],
+      "Adar": [
+        {
+          "label": {
+            "he": "סימן סו, סעיפים ז–י",
+            "en": "Siman 66:7–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 73,
+              "to": 76
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סו:יא – סימן סז:ה",
+            "en": "Siman 66:11–67:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 77,
+              "to": 83
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סז, סעיפים ו–יא",
+            "en": "Siman 67:6–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 84,
+              "to": 89
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סח, סעיפים א–ז",
+            "en": "Siman 68:1–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 90,
+              "to": 96
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סח:ח – סימן סט:א",
+            "en": "Siman 68:8–69:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 97,
+              "to": 102
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סט, סעיפים ב–ז",
+            "en": "Siman 69:2–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 103,
+              "to": 108
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן סט:ח – סימן ע:ה",
+            "en": "Siman 69:8–70:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-061-070",
+              "from": 109,
+              "to": 115
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עא, סעיפים א–ד",
+            "en": "Siman 71:1–4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 0,
+              "to": 3
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עא:ה – סימן עב:ד",
+            "en": "Siman 71:5–72:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 4,
+              "to": 8
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עב, סעיפים ה–י",
+            "en": "Siman 72:5–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 9,
+              "to": 14
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמ:א – סימן קמא:ג",
+            "en": "Siman 140:1–141:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 149,
+              "to": 151
+            },
+            {
+              "u": "simanim-141-150",
+              "from": 0,
+              "to": 2
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמא, סעיפים ד–יג",
+            "en": "Siman 141:4–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 3,
+              "to": 12
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמא, סעיפים יד–כא",
+            "en": "Siman 141:14–21"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 13,
+              "to": 20
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמא:כב – סימן קמב:ה",
+            "en": "Siman 141:22–142:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 21,
+              "to": 27
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמב, סעיפים ו–י",
+            "en": "Siman 142:6–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 28,
+              "to": 32
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עב, סעיפים יא–יט",
+            "en": "Siman 72:11–19"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 15,
+              "to": 23
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עב:כ – סימן עג:ד",
+            "en": "Siman 72:20–73:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 24,
+              "to": 31
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עג, סעיפים ה–יא",
+            "en": "Siman 73:5–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 32,
+              "to": 38
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עד:א – סימן עה:ג",
+            "en": "Siman 74:1–75:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 39,
+              "to": 45
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עה, סעיפים ד–ט",
+            "en": "Siman 75:4–9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 46,
+              "to": 51
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עה:י – סימן עו:ד",
+            "en": "Siman 75:10–76:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 52,
+              "to": 60
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עו, סעיפים ה–יג",
+            "en": "Siman 76:5–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 61,
+              "to": 69
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קז:א – סימן קח:ג",
+            "en": "Siman 107:1–108:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-101-110",
+              "from": 58,
+              "to": 63
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קח:ד – סימן קט:ו",
+            "en": "Siman 108:4–109:6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-101-110",
+              "from": 64,
+              "to": 73
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קט:ז – סימן קי:ה",
+            "en": "Siman 109:7–110:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-101-110",
+              "from": 74,
+              "to": 81
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קי, סעיפים ו–יב",
+            "en": "Siman 110:6–12"
+          },
+          "pieces": [
+            {
+              "u": "simanim-101-110",
+              "from": 82,
+              "to": 88
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קי:יג – סימן קיא:ו",
+            "en": "Siman 110:13–111:6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-101-110",
+              "from": 89,
+              "to": 91
+            },
+            {
+              "u": "simanim-111-120",
+              "from": 0,
+              "to": 5
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קיא, סעיפים ז–יג",
+            "en": "Siman 111:7–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 6,
+              "to": 12
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קיא:יד – סימן קיב:ד",
+            "en": "Siman 111:14–112:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 13,
+              "to": 20
+            }
+          ]
+        }
+      ],
+      "Nisan": [
+        {
+          "label": {
+            "he": "סימן קיב:ה – סימן קיג:ז",
+            "en": "Siman 112:5–113:7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 21,
+              "to": 29
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קיג:ח – סימן קיד:ד",
+            "en": "Siman 113:8–114:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 30,
+              "to": 35
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קיד, סעיפים ה–יב",
+            "en": "Siman 114:5–12"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 36,
+              "to": 43
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קיד:יג – סימן קטו:ג",
+            "en": "Siman 114:13–115:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 44,
+              "to": 48
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קטו:ד – סימן קטז:ד",
+            "en": "Siman 115:4–116:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 49,
+              "to": 55
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קטז, סעיפים ה–יד",
+            "en": "Siman 116:5–14"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 56,
+              "to": 65
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קטז:טו – סימן קיז:ד",
+            "en": "Siman 116:15–117:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 66,
+              "to": 73
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קיז, סעיפים ה–יא",
+            "en": "Siman 117:5–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 74,
+              "to": 80
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קיז:יב – סימן קיח:ד",
+            "en": "Siman 117:12–118:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 81,
+              "to": 86
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קיח, סעיפים ה–ח",
+            "en": "Siman 118:5–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 87,
+              "to": 90
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קיח:ט – סימן קיט:ב",
+            "en": "Siman 118:9–119:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 91,
+              "to": 95
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קיט, סעיפים ג–ה",
+            "en": "Siman 119:3–5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 96,
+              "to": 98
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קיט, סעיפים ו–ח",
+            "en": "Siman 119:6–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 99,
+              "to": 101
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קיט, סעיפים ט–יב",
+            "en": "Siman 119:9–12"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 102,
+              "to": 105
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכ, סעיפים א–יא",
+            "en": "Siman 120:1–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-111-120",
+              "from": 106,
+              "to": 116
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קא:א – סימן קב:א",
+            "en": "Siman 101:1–102:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-101-110",
+              "from": 0,
+              "to": 6
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קב:ב – סימן קג:ב",
+            "en": "Siman 102:2–103:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-101-110",
+              "from": 7,
+              "to": 14
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קג, סעיפים ג–יא",
+            "en": "Siman 103:3–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-101-110",
+              "from": 15,
+              "to": 23
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קג:יב – סימן קד:ו",
+            "en": "Siman 103:12–104:6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-101-110",
+              "from": 24,
+              "to": 32
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קד, סעיפים ז–כא",
+            "en": "Siman 104:7–21"
+          },
+          "pieces": [
+            {
+              "u": "simanim-101-110",
+              "from": 33,
+              "to": 47
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קה:א – סימן קו:ח",
+            "en": "Siman 105:1–106:8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-101-110",
+              "from": 48,
+              "to": 57
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עו, סעיפים יד–כב",
+            "en": "Siman 76:14–22"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 70,
+              "to": 78
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עו:כג – סימן עז:ח",
+            "en": "Siman 76:23–77:8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 79,
+              "to": 87
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עז, סעיפים ט–טו",
+            "en": "Siman 77:9–15"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 88,
+              "to": 94
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עז, סעיפים טז–כד",
+            "en": "Siman 77:16–24"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 95,
+              "to": 103
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עח, סעיפים א–ז",
+            "en": "Siman 78:1–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 104,
+              "to": 110
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עח:ח – סימן עט:א",
+            "en": "Siman 78:8–79:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 111,
+              "to": 115
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן עט, סעיפים ב–י",
+            "en": "Siman 79:2–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 116,
+              "to": 124
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פ, סעיפים א–ח",
+            "en": "Siman 80:1–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 125,
+              "to": 132
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פ, סעיפים ט–יז",
+            "en": "Siman 80:9–17"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 133,
+              "to": 141
+            }
+          ]
+        }
+      ],
+      "Iyyar": [
+        {
+          "label": {
+            "he": "סימן פ, סעיפים יח–כו",
+            "en": "Siman 80:18–26"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 142,
+              "to": 150
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פ, סעיפים כז–לה",
+            "en": "Siman 80:27–35"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 151,
+              "to": 159
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פ, סעיפים לו–מה",
+            "en": "Siman 80:36–45"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 160,
+              "to": 169
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פ, סעיפים מו–ס",
+            "en": "Siman 80:46–60"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 170,
+              "to": 184
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פ, סעיפים סא–סז",
+            "en": "Siman 80:61–67"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 185,
+              "to": 191
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פ, סעיפים סח–עו",
+            "en": "Siman 80:68–76"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 192,
+              "to": 200
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פ, סעיפים עז–פו",
+            "en": "Siman 80:77–86"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 201,
+              "to": 210
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פ:פז – סימן פא:ב",
+            "en": "Siman 80:87–81:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-071-080",
+              "from": 211,
+              "to": 217
+            },
+            {
+              "u": "simanim-081-090",
+              "from": 0,
+              "to": 1
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פא:ג – סימן פב:ב",
+            "en": "Siman 81:3–82:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 2,
+              "to": 6
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פב, סעיפים ג–ח",
+            "en": "Siman 82:3–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 7,
+              "to": 12
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פב:ט – סימן פג:ב",
+            "en": "Siman 82:9–83:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 13,
+              "to": 19
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פג:ג – סימן פד:ד",
+            "en": "Siman 83:3–84:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 20,
+              "to": 27
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פד, סעיפים ה–טו",
+            "en": "Siman 84:5–15"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 28,
+              "to": 38
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פד:טז – סימן פה:ג",
+            "en": "Siman 84:16–85:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 39,
+              "to": 45
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פה:ד – סימן פו:ה",
+            "en": "Siman 85:4–86:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 46,
+              "to": 55
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פו:ו – סימן פז:ו",
+            "en": "Siman 86:6–87:6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 56,
+              "to": 63
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פז, סעיפים ז–יז",
+            "en": "Siman 87:7–17"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 64,
+              "to": 74
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פז:יח – סימן פח:א",
+            "en": "Siman 87:18–88:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 75,
+              "to": 82
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פח, סעיפים ב–ו",
+            "en": "Siman 88:2–6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 83,
+              "to": 87
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פח, סעיפים ז–יד",
+            "en": "Siman 88:7–14"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 88,
+              "to": 95
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פח:טו – סימן פט:ג",
+            "en": "Siman 88:15–89:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 96,
+              "to": 102
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן פט:ד – סימן צ:ד",
+            "en": "Siman 89:4–90:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 103,
+              "to": 109
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צ, סעיפים ה–יד",
+            "en": "Siman 90:5–14"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 110,
+              "to": 119
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צ:טו – סימן צא:א",
+            "en": "Siman 90:15–91:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-081-090",
+              "from": 120,
+              "to": 128
+            },
+            {
+              "u": "simanim-091-100",
+              "from": 0,
+              "to": 0
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צא, סעיפים ב–יג",
+            "en": "Siman 91:2–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 1,
+              "to": 12
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צא:יד – סימן צב:ב",
+            "en": "Siman 91:14–92:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 13,
+              "to": 19
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צב, סעיפים ג–י",
+            "en": "Siman 92:3–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 20,
+              "to": 27
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צג:א – סימן צד:ב",
+            "en": "Siman 93:1–94:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 28,
+              "to": 34
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צד, סעיפים ג–ח",
+            "en": "Siman 94:3–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 35,
+              "to": 40
+            }
+          ]
+        }
+      ],
+      "Sivan": [
+        {
+          "label": {
+            "he": "סימן צד, סעיפים ט–יט",
+            "en": "Siman 94:9–19"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 41,
+              "to": 51
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צד:כ – סימן צה:א",
+            "en": "Siman 94:20–95:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 52,
+              "to": 60
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צה, סעיפים ב–יא",
+            "en": "Siman 95:2–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 61,
+              "to": 70
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צה, סעיפים יב–יח",
+            "en": "Siman 95:12–18"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 71,
+              "to": 77
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צו, סעיפים א–ה",
+            "en": "Siman 96:1–5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 78,
+              "to": 82
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צו, סעיפים ו–יד",
+            "en": "Siman 96:6–14"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 83,
+              "to": 91
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צו:טו – סימן צז:ט",
+            "en": "Siman 96:15–97:9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 92,
+              "to": 101
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן צז, סעיפים י–טו",
+            "en": "Siman 97:10–15"
+          },
+          "pieces": [
+            {
+              "u": "simanim-091-100",
+              "from": 102,
+              "to": 107
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמג, סעיפים א–ט",
+            "en": "Siman 143:1–9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 33,
+              "to": 41
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמג, סעיפים י–יח",
+            "en": "Siman 143:10–18"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 42,
+              "to": 50
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמג:יט – סימן קמד:ו",
+            "en": "Siman 143:19–144:6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 51,
+              "to": 60
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמד:ז – סימן קמה:ו",
+            "en": "Siman 144:7–145:6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 61,
+              "to": 69
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמה, סעיפים ז–כ",
+            "en": "Siman 145:7–20"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 70,
+              "to": 83
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמה:כא – סימן קמו:ד",
+            "en": "Siman 145:21–146:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 84,
+              "to": 93
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמז:א – סימן קמח:ד",
+            "en": "Siman 147:1–148:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 94,
+              "to": 102
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמט, סעיפים א–יא",
+            "en": "Siman 149:1–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 103,
+              "to": 113
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קמט:יב – סימן קנ:ה",
+            "en": "Siman 149:12–150:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 114,
+              "to": 120
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנ, סעיפים ו–יג",
+            "en": "Siman 150:6–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 121,
+              "to": 128
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנ:יד – סימן קנא:ה",
+            "en": "Siman 150:14–151:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-141-150",
+              "from": 129,
+              "to": 132
+            },
+            {
+              "u": "simanim-151-160",
+              "from": 0,
+              "to": 4
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנא:ו – סימן קנב:ז",
+            "en": "Siman 151:6–152:7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-151-160",
+              "from": 5,
+              "to": 13
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנב, סעיפים ח–יז",
+            "en": "Siman 152:8–17"
+          },
+          "pieces": [
+            {
+              "u": "simanim-151-160",
+              "from": 14,
+              "to": 23
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנג, סעיפים א–ט",
+            "en": "Siman 153:1–9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-151-160",
+              "from": 24,
+              "to": 32
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנג:י – סימן קנד:א",
+            "en": "Siman 153:10–154:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-151-160",
+              "from": 33,
+              "to": 40
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנד, סעיפים ב–ז",
+            "en": "Siman 154:2–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-151-160",
+              "from": 41,
+              "to": 46
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנה, סעיפים א–ו",
+            "en": "Siman 155:1–6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-151-160",
+              "from": 47,
+              "to": 52
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנה, סעיפים ז–יב",
+            "en": "Siman 155:7–12"
+          },
+          "pieces": [
+            {
+              "u": "simanim-151-160",
+              "from": 53,
+              "to": 58
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנו:א – סימן קנז:ג",
+            "en": "Siman 156:1–157:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-151-160",
+              "from": 59,
+              "to": 64
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנז:ד – סימן קנח:ד",
+            "en": "Siman 157:4–158:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-151-160",
+              "from": 65,
+              "to": 73
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנט, סעיפים א–ו",
+            "en": "Siman 159:1–6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-151-160",
+              "from": 74,
+              "to": 79
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קנט:ז – סימן קס:ה",
+            "en": "Siman 159:7–160:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-151-160",
+              "from": 80,
+              "to": 88
+            }
+          ]
+        }
+      ],
+      "Tamuz": [
+        {
+          "label": {
+            "he": "סימן קס:ו – סימן קסא:ח",
+            "en": "Siman 160:6–161:8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-151-160",
+              "from": 89,
+              "to": 89
+            },
+            {
+              "u": "simanim-161-170",
+              "from": 0,
+              "to": 7
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קסא, סעיפים ט–יז",
+            "en": "Siman 161:9–17"
+          },
+          "pieces": [
+            {
+              "u": "simanim-161-170",
+              "from": 8,
+              "to": 16
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קסא:יח – סימן קסב:ה",
+            "en": "Siman 161:18–162:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-161-170",
+              "from": 17,
+              "to": 24
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קסב, סעיפים ו–יא",
+            "en": "Siman 162:6–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-161-170",
+              "from": 25,
+              "to": 30
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קסב:יב – סימן קסג:ד",
+            "en": "Siman 162:12–163:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-161-170",
+              "from": 31,
+              "to": 37
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קסג:ה – סימן קסד:ד",
+            "en": "Siman 163:5–164:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-161-170",
+              "from": 38,
+              "to": 45
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קסד:ה – סימן קסה:ג",
+            "en": "Siman 164:5–165:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-161-170",
+              "from": 46,
+              "to": 54
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קסה, סעיפים ד–יא",
+            "en": "Siman 165:4–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-161-170",
+              "from": 55,
+              "to": 62
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קסה:יב – סימן קסו:ג",
+            "en": "Siman 165:12–166:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-161-170",
+              "from": 63,
+              "to": 70
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קסו:ד – סימן קסז:ט",
+            "en": "Siman 166:4–167:9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-161-170",
+              "from": 71,
+              "to": 81
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קסז:י – סימן קסח:ה",
+            "en": "Siman 167:10–168:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-161-170",
+              "from": 82,
+              "to": 97
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קסח:ו – סימן קעא:א",
+            "en": "Siman 168:6–171:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-161-170",
+              "from": 98,
+              "to": 104
+            },
+            {
+              "u": "simanim-171-180",
+              "from": 0,
+              "to": 0
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קעא:ב – סימן קעג:א",
+            "en": "Siman 171:2–173:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-171-180",
+              "from": 1,
+              "to": 6
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קעג:ב – סימן קעה:ג",
+            "en": "Siman 173:2–175:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-171-180",
+              "from": 7,
+              "to": 15
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קעה:ד – סימן קעו:ז",
+            "en": "Siman 175:4–176:7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-171-180",
+              "from": 16,
+              "to": 25
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קעו:ח – סימן קעז:ח",
+            "en": "Siman 176:8–177:8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-171-180",
+              "from": 26,
+              "to": 34
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכא, סעיפים ו–יא",
+            "en": "Siman 121:6–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 5,
+              "to": 10
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קעז:ט – סימן קעח:ג",
+            "en": "Siman 177:9–178:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-171-180",
+              "from": 35,
+              "to": 44
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קעח:ד – סימן קעט:ח",
+            "en": "Siman 178:4–179:8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-171-180",
+              "from": 45,
+              "to": 54
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קעט:ט – סימן קפ:ח",
+            "en": "Siman 179:9–180:8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-171-180",
+              "from": 55,
+              "to": 69
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קפ:ט – סימן קפא:ד",
+            "en": "Siman 180:9–181:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-171-180",
+              "from": 70,
+              "to": 77
+            },
+            {
+              "u": "simanim-181-190",
+              "from": 0,
+              "to": 3
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קפא, סעיפים ה–יג",
+            "en": "Siman 181:5–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-181-190",
+              "from": 4,
+              "to": 12
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קפא:יד – סימן קפב:א",
+            "en": "Siman 181:14–182:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-181-190",
+              "from": 13,
+              "to": 22
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קפב, סעיפים ב–יא",
+            "en": "Siman 182:2–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-181-190",
+              "from": 23,
+              "to": 32
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קפב:יב – סימן קפג:ג",
+            "en": "Siman 182:12–183:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-181-190",
+              "from": 33,
+              "to": 40
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קפג:ד – סימן קפד:ה",
+            "en": "Siman 183:4–184:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-181-190",
+              "from": 41,
+              "to": 49
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קפד:ו – סימן קפה:ד",
+            "en": "Siman 184:6–185:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-181-190",
+              "from": 50,
+              "to": 59
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קפה:ה – סימן קפז:ה",
+            "en": "Siman 185:5–187:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-181-190",
+              "from": 60,
+              "to": 70
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קפח:א – סימן קפט:ה",
+            "en": "Siman 188:1–189:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-181-190",
+              "from": 71,
+              "to": 80
+            }
+          ]
+        }
+      ],
+      "Av": [
+        {
+          "label": {
+            "he": "סימן קפט:ו – סימן קצא:ו",
+            "en": "Siman 189:6–191:6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-181-190",
+              "from": 81,
+              "to": 84
+            },
+            {
+              "u": "simanim-191-200",
+              "from": 0,
+              "to": 5
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכב, סעיפים א–ו",
+            "en": "Siman 122:1–6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 11,
+              "to": 16
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכב, סעיפים ז–יא",
+            "en": "Siman 122:7–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 17,
+              "to": 21
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכב:יב – סימן קכג:ב",
+            "en": "Siman 122:12–123:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 22,
+              "to": 29
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכג:ג – סימן קכד:ג",
+            "en": "Siman 123:3–124:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 30,
+              "to": 35
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכד, סעיפים ד–יא",
+            "en": "Siman 124:4–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 36,
+              "to": 43
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכד, סעיפים יב–כ",
+            "en": "Siman 124:12–20"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 44,
+              "to": 52
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכד:כא – סימן קכה:ח",
+            "en": "Siman 124:21–125:8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 53,
+              "to": 62
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכו, סעיפים א–ד",
+            "en": "Siman 126:1–4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 63,
+              "to": 66
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכז, סעיפים א–י",
+            "en": "Siman 127:1–10"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 67,
+              "to": 76
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכז, סעיפים יא–יח",
+            "en": "Siman 127:11–18"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 77,
+              "to": 84
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצב, סעיפים א–ז",
+            "en": "Siman 192:1–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 6,
+              "to": 12
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצב:ח – סימן קצג:ה",
+            "en": "Siman 192:8–193:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 13,
+              "to": 20
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצג, סעיפים ו–יד",
+            "en": "Siman 193:6–14"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 21,
+              "to": 29
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצד, סעיפים א–יא",
+            "en": "Siman 194:1–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 30,
+              "to": 40
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצד:יב – סימן קצה:ז",
+            "en": "Siman 194:12–195:7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 41,
+              "to": 48
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצה:ח – סימן קצו:א",
+            "en": "Siman 195:8–196:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 49,
+              "to": 56
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצו, סעיפים ב–ח",
+            "en": "Siman 196:2–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 57,
+              "to": 63
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצו, סעיפים ט–יט",
+            "en": "Siman 196:9–19"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 64,
+              "to": 74
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצו:כ – סימן קצז:ה",
+            "en": "Siman 196:20–197:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 75,
+              "to": 82
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצז:ו – סימן קצח:ג",
+            "en": "Siman 197:6–198:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 83,
+              "to": 93
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצח, סעיפים ד–יד",
+            "en": "Siman 198:4–14"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 94,
+              "to": 104
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצח:טו – סימן קצט:ט",
+            "en": "Siman 198:15–199:9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 105,
+              "to": 115
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קצט:י – סימן ר:ב",
+            "en": "Siman 199:10–200:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 116,
+              "to": 125
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ר, סעיפים ג–ט",
+            "en": "Siman 200:3–9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 126,
+              "to": 132
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ר:י – סימן רב:א",
+            "en": "Siman 200:10–202:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-191-200",
+              "from": 133,
+              "to": 134
+            },
+            {
+              "u": "simanim-201-210",
+              "from": 0,
+              "to": 7
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן רב, סעיפים ב–ח",
+            "en": "Siman 202:2–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-201-210",
+              "from": 8,
+              "to": 14
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן רב:ט – סימן רג:ב",
+            "en": "Siman 202:9–203:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-201-210",
+              "from": 15,
+              "to": 24
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן רג:ג – סימן רד:ה",
+            "en": "Siman 203:3–204:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-201-210",
+              "from": 25,
+              "to": 32
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן רד:ו – סימן רה:ג",
+            "en": "Siman 204:6–205:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-201-210",
+              "from": 33,
+              "to": 41
+            }
+          ]
+        }
+      ],
+      "Elul": [
+        {
+          "label": {
+            "he": "סימן רה:ד – סימן רו:ו",
+            "en": "Siman 205:4–206:6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-201-210",
+              "from": 42,
+              "to": 53
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן רו:ז – סימן רז:ה",
+            "en": "Siman 206:7–207:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-201-210",
+              "from": 54,
+              "to": 63
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן רז:ו – סימן רח:ט",
+            "en": "Siman 207:6–208:9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-201-210",
+              "from": 64,
+              "to": 74
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן רח:י – סימן רט:ו",
+            "en": "Siman 208:10–209:6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-201-210",
+              "from": 75,
+              "to": 86
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן רט:ז – סימן רי:ט",
+            "en": "Siman 209:7–210:9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-201-210",
+              "from": 87,
+              "to": 97
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ריא, סעיפים א–יא",
+            "en": "Siman 211:1–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-211-220",
+              "from": 0,
+              "to": 10
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ריא:יב – סימן ריב:ה",
+            "en": "Siman 211:12–212:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-211-220",
+              "from": 11,
+              "to": 19
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ריג:א – סימן ריד:ג",
+            "en": "Siman 213:1–214:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-211-220",
+              "from": 20,
+              "to": 27
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן רטו:א – סימן רטז:ג",
+            "en": "Siman 215:1–216:3"
+          },
+          "pieces": [
+            {
+              "u": "simanim-211-220",
+              "from": 28,
+              "to": 33
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ריז:א – סימן ריט:א",
+            "en": "Siman 217:1–219:1"
+          },
+          "pieces": [
+            {
+              "u": "simanim-211-220",
+              "from": 34,
+              "to": 39
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ריט, סעיפים ב–ז",
+            "en": "Siman 219:2–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-211-220",
+              "from": 40,
+              "to": 45
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן ריט:ח – סימן רכ:ד",
+            "en": "Siman 219:8–220:4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-211-220",
+              "from": 46,
+              "to": 51
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן רכ:ה – סימן רכא:ב",
+            "en": "Siman 220:5–221:2"
+          },
+          "pieces": [
+            {
+              "u": "simanim-211-220",
+              "from": 52,
+              "to": 57
+            },
+            {
+              "u": "simanim-221-221",
+              "from": 0,
+              "to": 1
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן רכא, סעיפים ג–ח",
+            "en": "Siman 221:3–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-221-221",
+              "from": 2,
+              "to": 7
+            }
+          ]
+        },
+        null,
+        {
+          "label": {
+            "he": "סימן קכח, סעיפים א–ד",
+            "en": "Siman 128:1–4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 85,
+              "to": 88
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכח, סעיפים ה–יא",
+            "en": "Siman 128:5–11"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 89,
+              "to": 95
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכח, סעיפים יב–טז",
+            "en": "Siman 128:12–16"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 96,
+              "to": 100
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכט, סעיפים א–ז",
+            "en": "Siman 129:1–7"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 101,
+              "to": 107
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכט, סעיפים ח–יג",
+            "en": "Siman 129:8–13"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 108,
+              "to": 113
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכט, סעיפים יד–יט",
+            "en": "Siman 129:14–19"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 114,
+              "to": 119
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קכט, סעיפים כ–כג",
+            "en": "Siman 129:20–23"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 120,
+              "to": 123
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קל, סעיפים א–ו",
+            "en": "Siman 130:1–6"
+          },
+          "pieces": [
+            {
+              "u": "simanim-121-130",
+              "from": 124,
+              "to": 129
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלא, סעיפים א–ד",
+            "en": "Siman 131:1–4"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 0,
+              "to": 3
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלא, סעיפים ה–ט",
+            "en": "Siman 131:5–9"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 4,
+              "to": 8
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלא, סעיפים י–טז",
+            "en": "Siman 131:10–16"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 9,
+              "to": 15
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלא:יז – סימן קלב:ה",
+            "en": "Siman 131:17–132:5"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 16,
+              "to": 21
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלג, סעיפים א–ח",
+            "en": "Siman 133:1–8"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 22,
+              "to": 29
+            }
+          ]
+        },
+        {
+          "label": {
+            "he": "סימן קלג, סעיפים ט–טו",
+            "en": "Siman 133:9–15"
+          },
+          "pieces": [
+            {
+              "u": "simanim-131-140",
+              "from": 30,
+              "to": 36
+            }
+          ]
+        }
+      ]
+    },
+    "leapReview": [
+      {
+        "label": {
+          "he": "סימן ו, סעיפים א–ד",
+          "en": "Siman 6:1–4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-001-010",
+            "from": 47,
+            "to": 50
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן ו, סעיפים ה–ז",
+          "en": "Siman 6:5–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-001-010",
+            "from": 51,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן ו:ח – סימן ז:ח",
+          "en": "Siman 6:8–7:8"
+        },
+        "pieces": [
+          {
+            "u": "simanim-001-010",
+            "from": 54,
+            "to": 65
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן יד, סעיפים א–ח",
+          "en": "Siman 14:1–8"
+        },
+        "pieces": [
+          {
+            "u": "simanim-011-020",
+            "from": 45,
+            "to": 52
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן טו, סעיפים א–ו",
+          "en": "Siman 15:1–6"
+        },
+        "pieces": [
+          {
+            "u": "simanim-011-020",
+            "from": 53,
+            "to": 58
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן טו, סעיפים ז–יג",
+          "en": "Siman 15:7–13"
+        },
+        "pieces": [
+          {
+            "u": "simanim-011-020",
+            "from": 59,
+            "to": 65
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן טז, סעיפים א–ה",
+          "en": "Siman 16:1–5"
+        },
+        "pieces": [
+          {
+            "u": "simanim-011-020",
+            "from": 66,
+            "to": 70
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן יז, סעיפים א–ז",
+          "en": "Siman 17:1–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-011-020",
+            "from": 71,
+            "to": 77
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן יז:ח – סימן יח:ב",
+          "en": "Siman 17:8–18:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-011-020",
+            "from": 78,
+            "to": 82
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן יח, סעיפים ג–ט",
+          "en": "Siman 18:3–9"
+        },
+        "pieces": [
+          {
+            "u": "simanim-011-020",
+            "from": 83,
+            "to": 89
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן יח, סעיפים י–יד",
+          "en": "Siman 18:10–14"
+        },
+        "pieces": [
+          {
+            "u": "simanim-011-020",
+            "from": 90,
+            "to": 94
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן יח, סעיפים טו–כב",
+          "en": "Siman 18:15–22"
+        },
+        "pieces": [
+          {
+            "u": "simanim-011-020",
+            "from": 95,
+            "to": 102
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן יט, סעיפים א–ז",
+          "en": "Siman 19:1–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-011-020",
+            "from": 103,
+            "to": 109
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן יט, סעיפים ח–יד",
+          "en": "Siman 19:8–14"
+        },
+        "pieces": [
+          {
+            "u": "simanim-011-020",
+            "from": 110,
+            "to": 116
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן מג, סעיפים א–ז",
+          "en": "Siman 43:1–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-041-050",
+            "from": 33,
+            "to": 39
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן מד, סעיפים א–יא",
+          "en": "Siman 44:1–11"
+        },
+        "pieces": [
+          {
+            "u": "simanim-041-050",
+            "from": 40,
+            "to": 50
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן מד, סעיפים יב–יח",
+          "en": "Siman 44:12–18"
+        },
+        "pieces": [
+          {
+            "u": "simanim-041-050",
+            "from": 51,
+            "to": 57
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן נ, סעיפים א–י",
+          "en": "Siman 50:1–10"
+        },
+        "pieces": [
+          {
+            "u": "simanim-041-050",
+            "from": 175,
+            "to": 184
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן נ:יא – סימן נא:א",
+          "en": "Siman 50:11–51:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-041-050",
+            "from": 185,
+            "to": 190
+          },
+          {
+            "u": "simanim-051-060",
+            "from": 0,
+            "to": 0
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן נא, סעיפים ב–ז",
+          "en": "Siman 51:2–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-051-060",
+            "from": 1,
+            "to": 6
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן נא, סעיפים ח–טו",
+          "en": "Siman 51:8–15"
+        },
+        "pieces": [
+          {
+            "u": "simanim-051-060",
+            "from": 7,
+            "to": 14
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן נב, סעיפים א–ז",
+          "en": "Siman 52:1–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-051-060",
+            "from": 15,
+            "to": 21
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן נב, סעיפים ח–טו",
+          "en": "Siman 52:8–15"
+        },
+        "pieces": [
+          {
+            "u": "simanim-051-060",
+            "from": 22,
+            "to": 29
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן נב:טז – סימן נג:ב",
+          "en": "Siman 52:16–53:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-051-060",
+            "from": 30,
+            "to": 34
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן נג:ג – סימן נד:ג",
+          "en": "Siman 53:3–54:3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-051-060",
+            "from": 35,
+            "to": 41
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן נד:ד – סימן נה:א",
+          "en": "Siman 54:4–55:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-051-060",
+            "from": 42,
+            "to": 48
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן נה:ב – סימן נו:ד",
+          "en": "Siman 55:2–56:4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-051-060",
+            "from": 49,
+            "to": 56
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן נו:ה – סימן נז:א",
+          "en": "Siman 56:5–57:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-051-060",
+            "from": 57,
+            "to": 60
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן נז, סעיפים ב–ז",
+          "en": "Siman 57:2–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-051-060",
+            "from": 61,
+            "to": 66
+          }
+        ]
+      }
+    ]
+  },
+  "festivals": {
+    "pesach": [
+      {
+        "label": {
+          "he": "סימן קז:א – סימן קח:א",
+          "en": "Siman 107:1–108:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 58,
+            "to": 61
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קח, סעיפים ב–ו",
+          "en": "Siman 108:2–6"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 62,
+            "to": 66
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קח:ז – סימן קט:ד",
+          "en": "Siman 108:7–109:4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 67,
+            "to": 71
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קט, סעיפים ה–ח",
+          "en": "Siman 109:5–8"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 72,
+            "to": 75
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קט:ט – סימן קי:ד",
+          "en": "Siman 109:9–110:4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 76,
+            "to": 80
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קי, סעיפים ה–ט",
+          "en": "Siman 110:5–9"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 81,
+            "to": 85
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קי, סעיפים י–יג",
+          "en": "Siman 110:10–13"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 86,
+            "to": 89
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קי:יד – סימן קיא:ג",
+          "en": "Siman 110:14–111:3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 90,
+            "to": 91
+          },
+          {
+            "u": "simanim-111-120",
+            "from": 0,
+            "to": 2
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיא, סעיפים ד–ח",
+          "en": "Siman 111:4–8"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 3,
+            "to": 7
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיא, סעיפים ט–יב",
+          "en": "Siman 111:9–12"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 8,
+            "to": 11
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיא, סעיפים יג–יז",
+          "en": "Siman 111:13–17"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 12,
+            "to": 16
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיב, סעיפים א–ה",
+          "en": "Siman 112:1–5"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 17,
+            "to": 21
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיב:ו – סימן קיג:ג",
+          "en": "Siman 112:6–113:3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 22,
+            "to": 25
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיג, סעיפים ד–ח",
+          "en": "Siman 113:4–8"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 26,
+            "to": 30
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיג:ט – סימן קיד:ד",
+          "en": "Siman 113:9–114:4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 31,
+            "to": 35
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיד, סעיפים ה–ח",
+          "en": "Siman 114:5–8"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 36,
+            "to": 39
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיד, סעיפים ט–יג",
+          "en": "Siman 114:9–13"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 40,
+            "to": 44
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיד:יד – סימן קטו:ד",
+          "en": "Siman 114:14–115:4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 45,
+            "to": 49
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קטו:ה – סימן קטז:ב",
+          "en": "Siman 115:5–116:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 50,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קטז, סעיפים ג–ז",
+          "en": "Siman 116:3–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 54,
+            "to": 58
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קטז, סעיפים ח–יב",
+          "en": "Siman 116:8–12"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 59,
+            "to": 63
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קטז, סעיפים יג–טז",
+          "en": "Siman 116:13–16"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 64,
+            "to": 67
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קטז:יז – סימן קיז:ג",
+          "en": "Siman 116:17–117:3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 68,
+            "to": 72
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיז, סעיפים ד–ח",
+          "en": "Siman 117:4–8"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 73,
+            "to": 77
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיז, סעיפים ט–יב",
+          "en": "Siman 117:9–12"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 78,
+            "to": 81
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיז:יג – סימן קיח:ד",
+          "en": "Siman 117:13–118:4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 82,
+            "to": 86
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיח, סעיפים ה–ט",
+          "en": "Siman 118:5–9"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 87,
+            "to": 91
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיח:י – סימן קיט:ב",
+          "en": "Siman 118:10–119:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 92,
+            "to": 95
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיט, סעיפים ג–ז",
+          "en": "Siman 119:3–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 96,
+            "to": 100
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קיט, סעיפים ח–יב",
+          "en": "Siman 119:8–12"
+        },
+        "pieces": [
+          {
+            "u": "simanim-111-120",
+            "from": 101,
+            "to": 105
+          }
+        ]
+      }
+    ],
+    "shavuot": [
+      {
+        "label": {
+          "he": "סימן צח, סעיפים א–ג",
+          "en": "Siman 98:1–3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 108,
+            "to": 110
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צח, סעיפים ד–ו",
+          "en": "Siman 98:4–6"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 111,
+            "to": 113
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צח, סעיפים ז–ט",
+          "en": "Siman 98:7–9"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 114,
+            "to": 116
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צח, סעיפים י–יב",
+          "en": "Siman 98:10–12"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 117,
+            "to": 119
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צח, סעיפים יג–טו",
+          "en": "Siman 98:13–15"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 120,
+            "to": 122
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צח, סעיפים טז–יח",
+          "en": "Siman 98:16–18"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 123,
+            "to": 125
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צח, סעיפים יט–כא",
+          "en": "Siman 98:19–21"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 126,
+            "to": 128
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צח, סעיפים כב–כד",
+          "en": "Siman 98:22–24"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 129,
+            "to": 131
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צח, סעיפים כה–כז",
+          "en": "Siman 98:25–27"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 132,
+            "to": 134
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צח, סעיפים כח–ל",
+          "en": "Siman 98:28–30"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 135,
+            "to": 137
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צח, סעיפים לא–לג",
+          "en": "Siman 98:31–33"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 138,
+            "to": 140
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צח, סעיפים לד–לו",
+          "en": "Siman 98:34–36"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 141,
+            "to": 143
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צח:לז – סימן צט:ב",
+          "en": "Siman 98:37–99:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 144,
+            "to": 146
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן צט, סעיפים ג–ה",
+          "en": "Siman 99:3–5"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 147,
+            "to": 149
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן ק, סעיפים א–ג",
+          "en": "Siman 100:1–3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 150,
+            "to": 152
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן ק, סעיפים ד–ו",
+          "en": "Siman 100:4–6"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 153,
+            "to": 155
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן ק, סעיפים ז–ט",
+          "en": "Siman 100:7–9"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 156,
+            "to": 158
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן ק, סעיפים י–יב",
+          "en": "Siman 100:10–12"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 159,
+            "to": 161
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן ק, סעיפים יג–טו",
+          "en": "Siman 100:13–15"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 162,
+            "to": 164
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן ק, סעיפים טז–יח",
+          "en": "Siman 100:16–18"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 165,
+            "to": 167
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן ק, סעיפים יט–כא",
+          "en": "Siman 100:19–21"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 168,
+            "to": 170
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן ק:כב – סימן קא:ב",
+          "en": "Siman 100:22–101:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-091-100",
+            "from": 171,
+            "to": 171
+          },
+          {
+            "u": "simanim-101-110",
+            "from": 0,
+            "to": 1
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קא, סעיפים ג–ה",
+          "en": "Siman 101:3–5"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 2,
+            "to": 4
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קא:ו – סימן קב:ב",
+          "en": "Siman 101:6–102:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 5,
+            "to": 7
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קב, סעיפים ג–ה",
+          "en": "Siman 102:3–5"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 8,
+            "to": 10
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קב:ו – סימן קג:א",
+          "en": "Siman 102:6–103:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 11,
+            "to": 13
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קג, סעיפים ב–ד",
+          "en": "Siman 103:2–4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 14,
+            "to": 16
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קג, סעיפים ה–ז",
+          "en": "Siman 103:5–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 17,
+            "to": 19
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קג, סעיפים ח–י",
+          "en": "Siman 103:8–10"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 20,
+            "to": 22
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קג, סעיפים יא–יד",
+          "en": "Siman 103:11–14"
+        },
+        "pieces": [
+          {
+            "u": "simanim-101-110",
+            "from": 23,
+            "to": 26
+          }
+        ]
+      }
+    ],
+    "sukkot": [
+      {
+        "label": {
+          "he": "סימן קלד, סעיפים א–ב",
+          "en": "Siman 134:1–2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 53,
+            "to": 54
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלד, סעיפים ג–ד",
+          "en": "Siman 134:3–4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 55,
+            "to": 56
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלד, סעיפים ה–ז",
+          "en": "Siman 134:5–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 57,
+            "to": 59
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלד, סעיפים ח–ט",
+          "en": "Siman 134:8–9"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 60,
+            "to": 61
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלד, סעיפים י–יא",
+          "en": "Siman 134:10–11"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 62,
+            "to": 63
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלד, סעיפים יב–יד",
+          "en": "Siman 134:12–14"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 64,
+            "to": 66
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלד:טו – סימן קלה:א",
+          "en": "Siman 134:15–135:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 67,
+            "to": 68
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלה, סעיפים ב–ג",
+          "en": "Siman 135:2–3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 69,
+            "to": 70
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלה, סעיפים ד–ו",
+          "en": "Siman 135:4–6"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 71,
+            "to": 73
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלה, סעיפים ז–ח",
+          "en": "Siman 135:7–8"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 74,
+            "to": 75
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלה, סעיפים ט–י",
+          "en": "Siman 135:9–10"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 76,
+            "to": 77
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלה, סעיפים יא–יג",
+          "en": "Siman 135:11–13"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 78,
+            "to": 80
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלה, סעיפים יד–טו",
+          "en": "Siman 135:14–15"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 81,
+            "to": 82
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלה, סעיפים טז–יז",
+          "en": "Siman 135:16–17"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 83,
+            "to": 84
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלה, סעיפים יח–כ",
+          "en": "Siman 135:18–20"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 85,
+            "to": 87
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלה, סעיפים כא–כב",
+          "en": "Siman 135:21–22"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 88,
+            "to": 89
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלו, סעיפים א–ב",
+          "en": "Siman 136:1–2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 90,
+            "to": 91
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלו, סעיפים ג–ה",
+          "en": "Siman 136:3–5"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 92,
+            "to": 94
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלו, סעיפים ו–ז",
+          "en": "Siman 136:6–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 95,
+            "to": 96
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלו, סעיפים ח–ט",
+          "en": "Siman 136:8–9"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 97,
+            "to": 98
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלו:י – סימן קלז:ב",
+          "en": "Siman 136:10–137:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 99,
+            "to": 101
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלז, סעיפים ג–ד",
+          "en": "Siman 137:3–4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 102,
+            "to": 103
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלז, סעיפים ה–ו",
+          "en": "Siman 137:5–6"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 104,
+            "to": 105
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלז, סעיפים ז–ט",
+          "en": "Siman 137:7–9"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 106,
+            "to": 108
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלז, סעיפים י–יא",
+          "en": "Siman 137:10–11"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 109,
+            "to": 110
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלז, סעיפים יב–יג",
+          "en": "Siman 137:12–13"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 111,
+            "to": 112
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלח, סעיפים א–ג",
+          "en": "Siman 138:1–3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 113,
+            "to": 115
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלח, סעיפים ד–ה",
+          "en": "Siman 138:4–5"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 116,
+            "to": 117
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלח, סעיפים ו–ז",
+          "en": "Siman 138:6–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 118,
+            "to": 119
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלח, סעיפים ח–י",
+          "en": "Siman 138:8–10"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 120,
+            "to": 122
+          }
+        ]
+      }
+    ],
+    "rosh_hashanah": [
+      {
+        "label": {
+          "he": "סימן קכח, סעיף א",
+          "en": "Siman 128:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 85,
+            "to": 85
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכח, סעיפים ב–ג",
+          "en": "Siman 128:2–3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 86,
+            "to": 87
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכח, סעיף ד",
+          "en": "Siman 128:4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 88,
+            "to": 88
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכח, סעיפים ה–ו",
+          "en": "Siman 128:5–6"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 89,
+            "to": 90
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכח, סעיף ז",
+          "en": "Siman 128:7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 91,
+            "to": 91
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכח, סעיפים ח–ט",
+          "en": "Siman 128:8–9"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 92,
+            "to": 93
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכח, סעיף י",
+          "en": "Siman 128:10"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 94,
+            "to": 94
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכח, סעיפים יא–יב",
+          "en": "Siman 128:11–12"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 95,
+            "to": 96
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכח, סעיף יג",
+          "en": "Siman 128:13"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 97,
+            "to": 97
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכח, סעיפים יד–טו",
+          "en": "Siman 128:14–15"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 98,
+            "to": 99
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכח:טז – סימן קכט:א",
+          "en": "Siman 128:16–129:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 100,
+            "to": 101
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיף ב",
+          "en": "Siman 129:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 102,
+            "to": 102
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיפים ג–ד",
+          "en": "Siman 129:3–4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 103,
+            "to": 104
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיף ה",
+          "en": "Siman 129:5"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 105,
+            "to": 105
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיפים ו–ז",
+          "en": "Siman 129:6–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 106,
+            "to": 107
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיף ח",
+          "en": "Siman 129:8"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 108,
+            "to": 108
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיפים ט–י",
+          "en": "Siman 129:9–10"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 109,
+            "to": 110
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיף יא",
+          "en": "Siman 129:11"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 111,
+            "to": 111
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיפים יב–יג",
+          "en": "Siman 129:12–13"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 112,
+            "to": 113
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיפים יד–טו",
+          "en": "Siman 129:14–15"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 114,
+            "to": 115
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיף טז",
+          "en": "Siman 129:16"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 116,
+            "to": 116
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיפים יז–יח",
+          "en": "Siman 129:17–18"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 117,
+            "to": 118
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיף יט",
+          "en": "Siman 129:19"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 119,
+            "to": 119
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיפים כ–כא",
+          "en": "Siman 129:20–21"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 120,
+            "to": 121
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט, סעיף כב",
+          "en": "Siman 129:22"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 122,
+            "to": 122
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכט:כג – סימן קל:א",
+          "en": "Siman 129:23–130:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 123,
+            "to": 124
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קל, סעיף ב",
+          "en": "Siman 130:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 125,
+            "to": 125
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קל, סעיפים ג–ד",
+          "en": "Siman 130:3–4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 126,
+            "to": 127
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קל, סעיפים ה–ו",
+          "en": "Siman 130:5–6"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 128,
+            "to": 129
+          }
+        ]
+      }
+    ],
+    "yom_kippur": [
+      {
+        "label": {
+          "he": "סימן קלא, סעיפים א–ז",
+          "en": "Siman 131:1–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 0,
+            "to": 6
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלא, סעיפים ח–טו",
+          "en": "Siman 131:8–15"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 7,
+            "to": 14
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלא:טז – סימן קלב:ה",
+          "en": "Siman 131:16–132:5"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 15,
+            "to": 21
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלג, סעיפים א–ח",
+          "en": "Siman 133:1–8"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 22,
+            "to": 29
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלג, סעיפים ט–טו",
+          "en": "Siman 133:9–15"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 30,
+            "to": 36
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלג, סעיפים טז–כג",
+          "en": "Siman 133:16–23"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 37,
+            "to": 44
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלג, סעיפים כד–לא",
+          "en": "Siman 133:24–31"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 45,
+            "to": 52
+          }
+        ]
+      }
+    ],
+    "chanukah": [
+      {
+        "label": {
+          "he": "סימן קלט, סעיף א",
+          "en": "Siman 139:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 123,
+            "to": 123
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיפים ב–ג",
+          "en": "Siman 139:2–3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 124,
+            "to": 125
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיפים ד–ה",
+          "en": "Siman 139:4–5"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 126,
+            "to": 127
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיפים ו–ז",
+          "en": "Siman 139:6–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 128,
+            "to": 129
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיפים ח–ט",
+          "en": "Siman 139:8–9"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 130,
+            "to": 131
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיפים י–יא",
+          "en": "Siman 139:10–11"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 132,
+            "to": 133
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיפים יב–יג",
+          "en": "Siman 139:12–13"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 134,
+            "to": 135
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיף יד",
+          "en": "Siman 139:14"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 136,
+            "to": 136
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיפים טו–טז",
+          "en": "Siman 139:15–16"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 137,
+            "to": 138
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיפים יז–יח",
+          "en": "Siman 139:17–18"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 139,
+            "to": 140
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיפים יט–כ",
+          "en": "Siman 139:19–20"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 141,
+            "to": 142
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיפים כא–כב",
+          "en": "Siman 139:21–22"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 143,
+            "to": 144
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיפים כג–כד",
+          "en": "Siman 139:23–24"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 145,
+            "to": 146
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קלט, סעיפים כה–כו",
+          "en": "Siman 139:25–26"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 147,
+            "to": 148
+          }
+        ]
+      }
+    ],
+    "purim": [
+      {
+        "label": {
+          "he": "סימן קמ, סעיפים א–ב",
+          "en": "Siman 140:1–2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 149,
+            "to": 150
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמ:ג – סימן קמא:ב",
+          "en": "Siman 140:3–141:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-131-140",
+            "from": 151,
+            "to": 151
+          },
+          {
+            "u": "simanim-141-150",
+            "from": 0,
+            "to": 1
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמא, סעיפים ג–ד",
+          "en": "Siman 141:3–4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-141-150",
+            "from": 2,
+            "to": 3
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמא, סעיפים ה–ז",
+          "en": "Siman 141:5–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-141-150",
+            "from": 4,
+            "to": 6
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמא, סעיפים ח–ט",
+          "en": "Siman 141:8–9"
+        },
+        "pieces": [
+          {
+            "u": "simanim-141-150",
+            "from": 7,
+            "to": 8
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמא, סעיפים י–יב",
+          "en": "Siman 141:10–12"
+        },
+        "pieces": [
+          {
+            "u": "simanim-141-150",
+            "from": 9,
+            "to": 11
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמא, סעיפים יג–טו",
+          "en": "Siman 141:13–15"
+        },
+        "pieces": [
+          {
+            "u": "simanim-141-150",
+            "from": 12,
+            "to": 14
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמא, סעיפים טז–יז",
+          "en": "Siman 141:16–17"
+        },
+        "pieces": [
+          {
+            "u": "simanim-141-150",
+            "from": 15,
+            "to": 16
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמא, סעיפים יח–כ",
+          "en": "Siman 141:18–20"
+        },
+        "pieces": [
+          {
+            "u": "simanim-141-150",
+            "from": 17,
+            "to": 19
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמא, סעיפים כא–כב",
+          "en": "Siman 141:21–22"
+        },
+        "pieces": [
+          {
+            "u": "simanim-141-150",
+            "from": 20,
+            "to": 21
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמא:כג – סימן קמב:ב",
+          "en": "Siman 141:23–142:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-141-150",
+            "from": 22,
+            "to": 24
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמב, סעיפים ג–ד",
+          "en": "Siman 142:3–4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-141-150",
+            "from": 25,
+            "to": 26
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמב, סעיפים ה–ז",
+          "en": "Siman 142:5–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-141-150",
+            "from": 27,
+            "to": 29
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קמב, סעיפים ח–י",
+          "en": "Siman 142:8–10"
+        },
+        "pieces": [
+          {
+            "u": "simanim-141-150",
+            "from": 30,
+            "to": 32
+          }
+        ]
+      }
+    ],
+    "tisha_bav": [
+      {
+        "label": {
+          "he": "סימן קכב, סעיפים א–ב",
+          "en": "Siman 122:1–2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 11,
+            "to": 12
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכב, סעיפים ג–ה",
+          "en": "Siman 122:3–5"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 13,
+            "to": 15
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכב, סעיפים ו–ח",
+          "en": "Siman 122:6–8"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 16,
+            "to": 18
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכב, סעיפים ט–י",
+          "en": "Siman 122:9–10"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 19,
+            "to": 20
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכב, סעיפים יא–יג",
+          "en": "Siman 122:11–13"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 21,
+            "to": 23
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכב, סעיפים יד–טז",
+          "en": "Siman 122:14–16"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 24,
+            "to": 26
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכב:יז – סימן קכג:א",
+          "en": "Siman 122:17–123:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 27,
+            "to": 28
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכג, סעיפים ב–ד",
+          "en": "Siman 123:2–4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 29,
+            "to": 31
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכג:ה – סימן קכד:ב",
+          "en": "Siman 123:5–124:2"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 32,
+            "to": 34
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכד, סעיפים ג–ד",
+          "en": "Siman 124:3–4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 35,
+            "to": 36
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכד, סעיפים ה–ז",
+          "en": "Siman 124:5–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 37,
+            "to": 39
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכד, סעיפים ח–י",
+          "en": "Siman 124:8–10"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 40,
+            "to": 42
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכד, סעיפים יא–יב",
+          "en": "Siman 124:11–12"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 43,
+            "to": 44
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכד, סעיפים יג–טו",
+          "en": "Siman 124:13–15"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 45,
+            "to": 47
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכד, סעיפים טז–יח",
+          "en": "Siman 124:16–18"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 48,
+            "to": 50
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכד, סעיפים יט–כ",
+          "en": "Siman 124:19–20"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 51,
+            "to": 52
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכד:כא – סימן קכה:א",
+          "en": "Siman 124:21–125:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 53,
+            "to": 55
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכה, סעיפים ב–ד",
+          "en": "Siman 125:2–4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 56,
+            "to": 58
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכה, סעיפים ה–ו",
+          "en": "Siman 125:5–6"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 59,
+            "to": 60
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכה:ז – סימן קכו:א",
+          "en": "Siman 125:7–126:1"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 61,
+            "to": 63
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכו, סעיפים ב–ד",
+          "en": "Siman 126:2–4"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 64,
+            "to": 66
+          }
+        ]
+      }
+    ],
+    "tzom_gedaliah": [
+      {
+        "label": {
+          "he": "סימן קכא, סעיפים א–ג",
+          "en": "Siman 121:1–3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 0,
+            "to": 2
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכא, סעיפים ד–ז",
+          "en": "Siman 121:4–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 3,
+            "to": 6
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכא, סעיפים ח–יא",
+          "en": "Siman 121:8–11"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 7,
+            "to": 10
+          }
+        ]
+      }
+    ],
+    "asara_betevet": [
+      {
+        "label": {
+          "he": "סימן קכא, סעיפים א–ג",
+          "en": "Siman 121:1–3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 0,
+            "to": 2
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכא, סעיפים ד–ז",
+          "en": "Siman 121:4–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 3,
+            "to": 6
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכא, סעיפים ח–יא",
+          "en": "Siman 121:8–11"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 7,
+            "to": 10
+          }
+        ]
+      }
+    ],
+    "taanit_esther": [
+      {
+        "label": {
+          "he": "סימן קכא, סעיפים א–ג",
+          "en": "Siman 121:1–3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 0,
+            "to": 2
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכא, סעיפים ד–ז",
+          "en": "Siman 121:4–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 3,
+            "to": 6
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכא, סעיפים ח–יא",
+          "en": "Siman 121:8–11"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 7,
+            "to": 10
+          }
+        ]
+      }
+    ],
+    "shiva_asar_betammuz": [
+      {
+        "label": {
+          "he": "סימן קכא, סעיפים א–ג",
+          "en": "Siman 121:1–3"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 0,
+            "to": 2
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכא, סעיפים ד–ז",
+          "en": "Siman 121:4–7"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 3,
+            "to": 6
+          }
+        ]
+      },
+      {
+        "label": {
+          "he": "סימן קכא, סעיפים ח–יא",
+          "en": "Siman 121:8–11"
+        },
+        "pieces": [
+          {
+            "u": "simanim-121-130",
+            "from": 7,
+            "to": 10
+          }
+        ]
+      }
+    ]
+  },
+  "english": {
+    "coverage": 0.99,
+    "ships": true
+  }
+}

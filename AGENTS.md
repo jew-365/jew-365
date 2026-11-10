@@ -33,6 +33,7 @@ pnpm check:dox                     # AGENTS.md links, section order and Child DO
 pnpm siddur:build                  # rebuild the bundled nusach texts and docs/selichot, the downloadable Selichot add-on, from pinned Sefaria and Wikisource sources
 pnpm chok:build                    # rebuild docs/chok, the downloadable Chok LeYisrael add-on, from scripts/chok/source
 pnpm shnayim:build                 # rebuild docs/shnayim, the downloadable Shnayim Mikra add-on, from Sefaria (Torah and Onkelos)
+pnpm halacha:build                 # rebuild docs/halacha, the daily-halacha add-on (Kitzur, Ben Ish Chai, Rambam), from Sefaria; --rambam-cycle <day> rewrites the Rambam schedule
 pnpm places:build                  # rebuild assets/places/world.places, the location picker's places, from the CBS and GeoNames
 pnpm guide:build                   # rebuild docs/guide, the web copy of the user guide in src/data/guide.ts
 pnpm logo:build                    # redraw the logo SVGs and export every PNG in assets/ and assets/preview/ and src/components/logo.generated.ts (needs Chrome or Edge)
@@ -160,6 +161,7 @@ Three root files say what is open, what is in production and where the project s
 - [modules/](modules) - Local Expo modules autolinked from ./modules; power-settings (Android) answers and opens the battery exemption, Samsung's never-sleeping list and app hibernation.
 - [scripts/](scripts) - Local workflow scripts and Expo config plugins.
 - [scripts/siddur/](scripts/siddur) - Build from pinned Sefaria and Wikisource sources to [assets/siddur/](assets/siddur), the generated nusach texts, and to [docs/selichot/](docs/selichot), the downloadable Selichot add-on.
+- [scripts/halacha/](scripts/halacha) - Build from Sefaria of the daily-halacha add-on in [docs/halacha/](docs/halacha): three tracks, the Kitzur luach and the Rambam cycle they schedule by, and the festival portions ([.claude/specs/halacha-yomit.md](.claude/specs/halacha-yomit.md); not yet read by the app).
 - [scripts/chok/](scripts/chok) - Build from the committed Torat Emet files of חק לישראל in [scripts/chok/source/](scripts/chok/source) (CC BY-NC-SA 2.5) to the downloadable add-on in [docs/chok/](docs/chok)
 - [design/references/2026-10-21/](design/references/2026-10-21) - The product owner's references for the shipped 2026-10-21 redesign: the UI mockup and the chosen logo. Use design material only for UI/design work. [design/handoff/](design/handoff) (a Claude Design handoff) and [design/stage1-previews/index.html](design/stage1-previews/index.html) (a preview board of logo, icon styles, palettes and type scale) are the earlier navy-and-gold direction: source material, superseded by the redesign.
 - [design/lab/](design/lab) - The design lab: every design request (a screen, a component, a flow) becomes its own study folder of live interactive prototypes, built locally and published to the owner as Artifacts ([design/lab/AGENTS.md](design/lab/AGENTS.md)).

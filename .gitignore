@@ -29,6 +29,7 @@ expo-env.d.ts
 # @end expo-cli
 scripts/siddur/.cache/
 scripts/shnayim/.cache/
+scripts/halacha/.cache/
 scripts/chok/source/y_hok?1.txt
 
 # Claude Code runtime lock
