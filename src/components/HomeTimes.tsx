@@ -26,15 +26,18 @@ import {
 } from '@/utils/homeTimes';
 import { ARC_ZMANIM, type ZmanId } from '@/utils/zmanIds';
 
-const CHIP_MIN = scaled(52);
+const CHIP_MIN = scaled(44);
 const CHIP_PAD_X = scaled(14);
-const CHIP_PAD_Y = scaled(7);
+const CHIP_PAD_Y = scaled(3);
 const CHIP_RADIUS = scaled(14);
 const LIVE_MIN_WIDTH = scaled(150);
 const BAR_HEIGHT = scaled(3);
 const MARK_ICON = scaled(11);
-const TITLE_ICON = scaled(20);
-const TAB_HEIGHT = scaled(24);
+const TITLE_ICON = scaled(16);
+const TAB_HEIGHT = scaled(28);
+const CHIPS_TOP = scaled(6);
+const LABEL_LINE = scaled(14);
+const TIME_LINE = scaled(18);
 const TAB_SLOP = { top: scaled(10), bottom: scaled(10), left: scaled(4), right: scaled(4) };
 const BORDER = 2;
 
@@ -67,6 +70,7 @@ export function HomeTimes(props: HomeTimesProps) {
   const [focus, setFocus] = useState<string | null>(null);
   const [pinsOpen, setPinsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [tabsWidth, setTabsWidth] = useState(0);
   const { card, now, tz } = props;
   const tone = PERIOD_TONES[card.tone];
   const pageId = props.page ?? card.smart;
@@ -114,9 +118,9 @@ export function HomeTimes(props: HomeTimesProps) {
             onPress={() => props.onPage(nextPage)}
             style={({ pressed }) => [styles.main, pressed && styles.pressed]}
           >
-            <View style={styles.titleRow}>
+            <View style={[styles.titleRow, { paddingEnd: tabsWidth }]}>
               <MitzvahIcon name={page.icon} size={TITLE_ICON} color={BRAND.white} />
-              <Text style={[typography.heading, styles.white, styles.shrink]} numberOfLines={1}>
+              <Text style={[typography.bodyBold, styles.white, styles.shrink]} numberOfLines={1}>
                 {page.title}
               </Text>
             </View>
@@ -133,7 +137,7 @@ export function HomeTimes(props: HomeTimesProps) {
               ))}
             </View>
           </Pressable>
-          <View style={styles.side}>
+          <View style={styles.side} onLayout={(e) => setTabsWidth(e.nativeEvent.layout.width)}>
             <View accessibilityRole="tablist" accessibilityLabel={t('home.card.pages')} style={styles.tabs}>
               {CARD_PAGES.map((id) => {
                 const on = id === pageId;
@@ -252,11 +256,21 @@ export function HomeTimes(props: HomeTimesProps) {
               <View style={styles.chipLabel}>
                 {c.pinned ? <MitzvahIcon name="star" size={MARK_ICON} color={colors.gold} /> : null}
                 {c.learned ? <MitzvahIcon name="sparkle" size={MARK_ICON} color={colors.gold} /> : null}
-                <Text style={[live ? typography.captionBold : typography.small, { color: ink }]} numberOfLines={1}>
+                <Text
+                  style={[live ? typography.captionBold : typography.small, { color: ink, lineHeight: LABEL_LINE }]}
+                  numberOfLines={1}
+                >
                   {label}
                 </Text>
               </View>
-              <Text style={[c.kind === 'past' ? typography.body : typography.bodyBold, { color: ink }]}>{time}</Text>
+              <Text
+                style={[
+                  c.kind === 'past' ? typography.body : typography.bodyBold,
+                  { color: ink, lineHeight: TIME_LINE },
+                ]}
+              >
+                {time}
+              </Text>
               {c.progress && !live ? (
                 <View style={styles.track} pointerEvents="none">
                   <View style={[styles.bar, { width: `${share * 100}%`, backgroundColor: tone.bar }]} />
@@ -351,13 +365,13 @@ const styles = StyleSheet.create({
   main: {
     flex: 1,
     minWidth: 0,
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
     paddingStart: spacing.lg,
-    paddingEnd: spacing.sm,
+    paddingEnd: spacing.lg,
   },
   pressed: { opacity: 0.85 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: TAB_HEIGHT },
   shrink: { flexShrink: 1 },
   white: { color: BRAND.white },
   dim: { opacity: 0.78 },
@@ -365,15 +379,9 @@ const styles = StyleSheet.create({
   fact: { flex: 1, minWidth: 0, paddingHorizontal: spacing.sm },
   factFirst: { flex: 1.5, paddingStart: 0 },
   factDivider: { borderStartWidth: StyleSheet.hairlineWidth, borderStartColor: alphaHex(BRAND.white, 0.3) },
-  side: {
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.xs,
-    borderStartWidth: StyleSheet.hairlineWidth,
-    borderStartColor: alphaHex(BRAND.white, 0.25),
-  },
-  tabs: { gap: 1 },
+  // The tabs sit on the title's line, at its end, so the card is two rows (the owner's pick of 2026-11-10).
+  side: { position: 'absolute', top: spacing.sm, end: spacing.sm, flexDirection: 'row', alignItems: 'center' },
+  tabs: { flexDirection: 'row', gap: 1 },
   tab: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -395,8 +403,8 @@ const styles = StyleSheet.create({
   dot: { width: scaled(4), height: scaled(4), borderRadius: radius.full, backgroundColor: BRAND.white },
   chips: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.md,
+    paddingTop: CHIPS_TOP,
+    paddingBottom: spacing.sm,
     gap: spacing.sm,
     alignItems: 'stretch',
   },

@@ -405,7 +405,7 @@ describe('home between midnight and alot', () => {
     renderAt(NIGHT_OF_THE_14TH);
     expect(screen.getByTestId('home-hero')).toBeOnTheScreen();
     expect(screen.UNSAFE_getAllByType(AppLogo)).toHaveLength(1);
-    expect(screen.UNSAFE_getByType(AppLogo).props).toMatchObject({ variant: 'icon', size: 40 });
+    expect(screen.UNSAFE_getByType(AppLogo).props).toMatchObject({ variant: 'icon', size: 30 });
     expect(screen.UNSAFE_queryAllByType(CounterPill)).toHaveLength(0);
     expect(screen.getByText('לילה טוב')).toBeOnTheScreen();
     act(() => useUserStore.setState({ profileName: 'דוד לוי' }));

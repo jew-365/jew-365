@@ -1050,7 +1050,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   openNowLabel: {
-    marginTop: spacing.lg,
+    marginTop: spacing.sm,
   },
   looks: {
     marginTop: spacing.md,

@@ -14,7 +14,6 @@ import Svg, {
 } from 'react-native-svg';
 import { useTheme } from '@/theme/ThemeProvider';
 import { BRAND } from '@/theme/colors';
-import { scaled } from '@/theme/scale';
 import { SKY_SCENE, type SkyStop } from '@/theme/sky';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies, typography } from '@/theme/typography';
@@ -39,9 +38,14 @@ import {
   type ZmanId,
 } from '@/utils/dayArc';
 
-const CLOCK_SIZE = scaled(40);
-const CLOCK_LINE = scaled(44);
-const CAPTION_MAX = scaled(230);
+// The clock inside the circle, on the sky with no plate, sized by the circle (the owner's pick of 2026-11-10, ג of
+// the home sizes study): its top PLATE_TOP scene units down, its type CLOCK_SHARE of the radius, and the caption one
+// line no wider than CAPTION_SHARE of the radius, so neither reaches the arc, the sun or the hills.
+export const PLATE_TOP = 60;
+export const CLOCK_SHARE = 0.33;
+const CAPTION_SHARE = 1.8;
+export const clockSize = (k: number): number => Math.round(ARC.r * k * CLOCK_SHARE);
+export const clockLine = (k: number): number => Math.round(clockSize(k) * 1.1);
 
 const STARS: readonly (readonly [number, number, number])[] = [
   [46, 40, 2.6],
@@ -289,14 +293,14 @@ export function DaySkyScene({
           ) : null}
         </Svg>
 
-        <View pointerEvents="none" style={[styles.plate, { top: 66 * k }]}>
-          <View style={[styles.plateInner, { backgroundColor: ink.chip }]}>
+        <View pointerEvents="none" style={[styles.plate, { top: PLATE_TOP * k }]}>
+          <View style={styles.plateInner}>
             <Text
               testID="home-arc-clock"
               style={{
                 fontFamily: previewing ? fontFamilies.ui.semibold : fontFamilies.ui.regular,
-                fontSize: CLOCK_SIZE,
-                lineHeight: CLOCK_LINE,
+                fontSize: clockSize(k),
+                lineHeight: clockLine(k),
                 color: ink.ink,
                 textAlign: 'center',
               }}
@@ -304,7 +308,19 @@ export function DaySkyScene({
               {clock}
             </Text>
             {caption ? (
-              <Text style={[typography.captionBold, styles.caption, { color: ink.ink }]}>{caption}</Text>
+              <Text
+                testID="home-arc-caption"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.75}
+                style={[
+                  typography.captionBold,
+                  styles.caption,
+                  { color: ink.ink, maxWidth: ARC.r * k * CAPTION_SHARE },
+                ]}
+              >
+                {caption}
+              </Text>
             ) : null}
           </View>
         </View>
@@ -338,13 +354,8 @@ const styles = StyleSheet.create({
   hills: { position: 'absolute', left: 0, right: 0, top: 0 },
   stage: { alignSelf: 'center' },
   plate: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
-  plateInner: {
-    alignItems: 'center',
-    borderRadius: radius.xxl,
-    paddingHorizontal: scaled(18),
-    paddingVertical: spacing.sm,
-  },
-  caption: { textAlign: 'center', maxWidth: CAPTION_MAX },
+  plateInner: { alignItems: 'center' },
+  caption: { textAlign: 'center' },
   hint: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
   hintPill: { paddingHorizontal: spacing.md, borderRadius: radius.full },
   edge: {

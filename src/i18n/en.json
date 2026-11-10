@@ -1582,7 +1582,6 @@
   "home.arc.caption.open": "%{name} · %{left} left",
   "home.arc.caption.next": "Next: %{name} at %{time}",
   "home.arc.caption.allDone": "All marked for today",
-  "home.arc.preview": "Preview only",
   "home.arc.in": "in %{time}",
   "home.arc.ago": "%{time} ago",
   "home.arc.at": "Now",

@@ -15,7 +15,7 @@
 ## Local Contracts
 
 - Published as one private Artifact; republish to the same link after a change: https://claude.ai/artifact/GyqeKYGChr3rYCwAGXr2An (the build output's `site` folder as `root`, its `index.html` as the file, the ten JPEGs under `shots/` in `files`).
-- The owner's pick: none yet; on 2026-11-10 the owner was choosing between א and ג ("מתלבט בין א לג"), so both were also captured at 06:10, 17:00 and 20:30 (`node build.mjs --only balanced,openSky --at HH:MM`), shown in pairs on the gallery.
+- The owner's pick: ג `openSky` (2026-11-10, "תעשה את המלצתך"), built in the app the same day ([../../../../src/components/DayArcHero.tsx](../../../../src/components/DayArcHero.tsx) and its neighbours); before it the owner was choosing between א and ג ("מתלבט בין א לג"), so both were also captured at 06:10, 17:00 and 20:30 (`node build.mjs --only balanced,openSky --at HH:MM`), shown in pairs on the gallery.
 
 ## Work Guidance
 

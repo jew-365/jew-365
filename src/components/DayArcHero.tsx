@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { AppLogo } from './AppLogo';
-import { DaySkyScene } from './DaySkyScene';
+import { DaySkyScene, PLATE_TOP, clockLine } from './DaySkyScene';
 import { MitzvahIcon } from './MitzvahIcon';
 import { useIsFocused } from '@/hooks/useIsFocused';
 import { useRowMirrored } from '@/hooks/useRowMirrored';
@@ -49,24 +49,33 @@ import {
   type ZmanId,
 } from '@/utils/dayArc';
 
-export const SCENE_MIN = scaled(179);
+export const SCENE_MIN = scaled(220);
 export const SCENE_MAX = scaled(ARC.height);
-export const HERO_CHROME = scaled(168);
+export const HERO_CHROME = scaled(110);
 
 // Home's board below the scene (the period's card over the live carousel) is taller than the strip it
 // replaces, so the scene gives way by that much.
-export const BOARD_EXTRA = scaled(72);
+export const BOARD_EXTRA = scaled(60);
+// The empty sky above the circle's top that the hero does not show, in scene units: the back control sits inside
+// the circle, so nothing needs the room (the owner's pick of 2026-11-10, ג of the home sizes study).
+export const SKY_CROP = 30;
 
 export function sceneScale(windowHeight: number, extra = 0): number {
   return Math.min(SCENE_MAX, Math.max(SCENE_MIN, windowHeight / 2 - HERO_CHROME - extra)) / ARC.height;
 }
 
-const LOGO = scaled(40);
-const HALO = scaled(52);
-const GREETING_PAD = scaled(6);
+const LOGO = scaled(30);
+const HALO = scaled(39);
 export const BACK_TOUCH = scaled(44);
-export const BLOCK_GAP = scaled(17);
+export const BLOCK_GAP = scaled(6);
+const TOP_PAD = scaled(6);
 const BACK_ICON = scaled(18);
+// The visible back pill is a HeaderPill's height, centred in its BACK_TOUCH box.
+const BACK_PILL = 2 * spacing.sm + (typography.captionBold.lineHeight as number);
+
+// Where the back control's box stands inside the arc block: the visible pill takes the line under the clock, the
+// caption's line, which a preview leaves empty.
+export const backTop = (k: number): number => BLOCK_GAP + PLATE_TOP * k + clockLine(k) - (BACK_TOUCH - BACK_PILL) / 2;
 const BACK_HIT_SLOP = scaled(8);
 const BORDER = 2;
 const CHIP_MIN = scaled(52);
@@ -212,13 +221,10 @@ export const DayArcHero = React.memo(function DayArcHero({
   }, [markedId, centre]);
 
   const topRow = (
-    <View
-      testID="home-top-chip"
-      style={[styles.topRow, { backgroundColor: ink.chip, flexDirection: rtl ? 'row' : 'row-reverse' }]}
-    >
+    <View testID="home-top-chip" style={[styles.topRow, { flexDirection: rtl ? 'row' : 'row-reverse' }]}>
       <View style={styles.greeting}>
-        <Text style={[typography.caption, { color: ink.ink }]}>{dateLine}</Text>
-        <Text accessibilityRole="header" style={[typography.title, { color: ink.ink }]}>
+        <Text style={[typography.small, { color: ink.ink }]}>{dateLine}</Text>
+        <Text accessibilityRole="header" style={[typography.heading, { color: ink.ink }]}>
           {greeting}
         </Text>
       </View>
@@ -358,7 +364,7 @@ export const DayArcHero = React.memo(function DayArcHero({
         </Svg>
       </View>
       {topRow}
-      <View testID="home-arc-block" style={styles.block}>
+      <View testID="home-arc-block" style={[styles.block, { marginTop: -SKY_CROP * k }]}>
         <View style={[styles.land, { top: BLOCK_GAP + 158 * k }]} pointerEvents="none">
           <Svg width="100%" height="100%" preserveAspectRatio="none">
             <Defs>
@@ -383,14 +389,14 @@ export const DayArcHero = React.memo(function DayArcHero({
           sky={sky}
           ink={ink}
           clock={clockOf(shown, tz)}
-          caption={preview ? t('home.arc.preview') : caption}
+          caption={preview ? '' : caption}
           hint={!touched && !preview ? t(night ? 'home.arc.dragMoon' : 'home.arc.dragSun') : null}
           edgeStart={{ label: t('home.zman.alot.short'), time: clockOf(frame.start, tz) }}
           edgeEnd={{ label: t('home.zman.tzeit.short'), time: clockOf(frame.tzeit, tz) }}
           grab={grab}
         />
         {preview ? (
-          <View testID="home-arc-back" pointerEvents="box-none" style={styles.back}>
+          <View testID="home-arc-back" pointerEvents="box-none" style={[styles.back, { top: backTop(k) }]}>
             <BackPill label={t('home.arc.back')} onPress={() => setPreview(null)} />
           </View>
         ) : null}
@@ -456,7 +462,7 @@ export const DayArcHero = React.memo(function DayArcHero({
 });
 
 const styles = StyleSheet.create({
-  root: { width: '100%', paddingTop: spacing.lg },
+  root: { width: '100%', paddingTop: TOP_PAD },
   block: { paddingTop: BLOCK_GAP },
   flex: { flex: 1 },
   topRow: {
@@ -464,8 +470,6 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginHorizontal: spacing.xl,
     paddingHorizontal: spacing.lg,
-    paddingVertical: GREETING_PAD,
-    borderRadius: radius.xl,
   },
   greeting: { flexShrink: 1 },
   logo: {
@@ -478,7 +482,6 @@ const styles = StyleSheet.create({
   land: { position: 'absolute', bottom: 0, left: 0, right: 0 },
   back: {
     position: 'absolute',
-    top: 0,
     start: 0,
     end: 0,
     height: BACK_TOUCH,

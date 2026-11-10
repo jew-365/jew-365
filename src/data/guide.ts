@@ -474,6 +474,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: "Home in the period's tone: a card in the colour of the hour and the day with Today, This week (the parasha, Shabbat's start and end, Shabbat Mevarchim and the molad) and Mine, which keeps your choice, and a live carousel of times where the time that matters fills, times running together show their progress when touched, and tomorrow's times show at night. The board learns from your marks (✦), such as Read the Shema first when your Shacharit runs late.",
       },
       {
+        he: 'יותר מקום למצוות שפתוחות עכשיו: הברכה והתאריך ישר על השמיים, הקשת גדולה יותר והשעה שבתוכה בגודל של הקשת ובלי רקע, הכרטיס והקרוסלה נמוכים יותר, הרווחים צפופים יותר והסרגל התחתון רזה יותר. ״חזרה לעכשיו״ מופיע בתוך הקשת, מתחת לשעה.',
+        en: 'More room for the mitzvot open now: the greeting and the date sit right on the sky, the circle is larger and the clock inside it is sized to it with no background, the card and the carousel are lower, the spacing tighter and the tab bar slimmer. Back to now shows inside the circle, under the clock.',
+      },
+      {
         he: 'האפליקציה נפתחת תמיד בדף הבית: חזרה אליה אחרי דקה או יותר מחוץ לה מחזירה לבית.',
         en: 'The app always opens on Home: coming back after a minute or more away returns to Home.',
       },

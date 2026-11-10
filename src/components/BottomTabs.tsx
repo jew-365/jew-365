@@ -12,17 +12,17 @@ import { useI18n } from '@/i18n';
 
 type TabOptionsWithHref = BottomTabNavigationOptions & { href?: string | null };
 
-const TAB_ICON_SIZE = scaled(22);
+const TAB_ICON_SIZE = scaled(20);
 const TAB_ICON_STROKE = 1.8;
-const PILL_WIDTH = scaled(48);
-const PILL_HEIGHT = scaled(32);
+const PILL_WIDTH = scaled(44);
+const PILL_HEIGHT = scaled(28);
 
 const IOS_HOME_INDICATOR_OVERLAP = 20;
 
 function stripBottomPadding(bottomInset: number): number {
   return Platform.OS === 'ios'
     ? Math.max(spacing.sm, bottomInset - IOS_HOME_INDICATOR_OVERLAP)
-    : bottomInset + spacing.sm;
+    : bottomInset + spacing.xs;
 }
 
 function HomeIcon({ color }: { color: string }) {
@@ -138,7 +138,6 @@ export function BottomTabs({ state, descriptors, navigation, insets }: BottomTab
               >
                 {label}
               </Text>
-              <View collapsable={false} style={[styles.underline, focused && { backgroundColor: colors.gold }]} />
             </Pressable>
           );
         })}
@@ -150,19 +149,19 @@ export function BottomTabs({ state, descriptors, navigation, insets }: BottomTab
 const styles = StyleSheet.create({
   strip: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.xs,
   },
   bar: {
     flexDirection: 'row',
     borderRadius: radius.xxl,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
     paddingHorizontal: spacing.xs,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: scaled(2),
+    gap: scaled(1),
   },
   pill: {
     width: PILL_WIDTH,
@@ -170,10 +169,5 @@ const styles = StyleSheet.create({
     borderRadius: PILL_HEIGHT / 2,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  underline: {
-    width: scaled(16),
-    height: scaled(3),
-    borderRadius: radius.full,
   },
 });

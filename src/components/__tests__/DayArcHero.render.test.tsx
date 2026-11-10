@@ -3,7 +3,19 @@ import type { ComponentProps } from 'react';
 import { act, fireEvent, screen, within } from '@testing-library/react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { AppLogo } from '../AppLogo';
-import { BACK_TOUCH, BLOCK_GAP, DayArcHero, HERO_CHROME, SCENE_MAX, SCENE_MIN, sceneScale } from '../DayArcHero';
+import {
+  BACK_TOUCH,
+  BLOCK_GAP,
+  BOARD_EXTRA,
+  backTop,
+  DayArcHero,
+  HERO_CHROME,
+  SCENE_MAX,
+  SCENE_MIN,
+  sceneScale,
+  SKY_CROP,
+} from '../DayArcHero';
+import { clockLine, clockSize, CLOCK_SHARE, PLATE_TOP } from '../DaySkyScene';
 import { CITIES } from '@/data/cities';
 import { renderWithTheme } from '@/testing/render';
 import { at } from '@/testing/zmanim';
@@ -147,12 +159,22 @@ describe('DayArcHero', () => {
     expect(styleOf(screen.getByTestId(`home-zman-${next}`)).borderColor).toBe(COLORS.gold);
   });
 
-  it('merges the greeting and the icon into one full-width glass chip', () => {
+  it('sets the greeting, the date and the icon on the sky in one row, with no glass behind them', () => {
     setup();
     const sky = inkFor(skyAt(F, NOON));
     const chip = screen.getByTestId('home-top-chip');
     const style = styleOf(chip);
-    expect(style).toMatchObject({ backgroundColor: sky.chip, borderRadius: radius.xl, marginHorizontal: spacing.xl });
+    expect(style).toMatchObject({ marginHorizontal: spacing.xl });
+    expect(style.backgroundColor).toBeUndefined();
+    expect(style.paddingVertical).toBeUndefined();
+    expect(StyleSheet.flatten(screen.getByText('צהריים טובים, דוד').props.style)).toMatchObject({
+      ...typography.heading,
+      color: sky.ink,
+    });
+    expect(StyleSheet.flatten(screen.getByText('יום חמישי · x · ירושלים').props.style)).toMatchObject({
+      ...typography.small,
+      color: sky.ink,
+    });
     expect(style.width).toBeUndefined();
     expect(style.alignSelf).toBeUndefined();
     const inside = within(chip);
@@ -160,7 +182,7 @@ describe('DayArcHero', () => {
     expect(inside.getByText('יום חמישי · x · ירושלים')).toBeOnTheScreen();
     const logos = screen.UNSAFE_getAllByType(AppLogo);
     expect(logos).toHaveLength(1);
-    expect(logos[0].props).toMatchObject({ variant: 'icon', size: scaled(40) });
+    expect(logos[0].props).toMatchObject({ variant: 'icon', size: scaled(30) });
     expect(inside.getByTestId('home-logo')).toBeOnTheScreen();
     const kids = findJson(screen.toJSON() as unknown as Json, 'home-top-chip')!.children as Json[];
     const order = kids.map((child) =>
@@ -197,7 +219,8 @@ describe('DayArcHero', () => {
     expect(screen.queryByTestId('home-arc-back')).toBeNull();
     fireEvent.press(screen.getByTestId('home-zman-shkia'));
     expect(screen.getByTestId('home-arc-clock')).toHaveTextContent(clockOf(shkia, J.tz));
-    expect(screen.getByText('תצוגה בלבד')).toBeOnTheScreen();
+    // The back control takes the caption's line under the clock, so the caption steps aside.
+    expect(screen.queryByTestId('home-arc-caption')).toBeNull();
     expect(screen.getByText('חזרה לעכשיו')).toBeOnTheScreen();
     expect(screen.getByTestId('home-zman-shkia').props.accessibilityState.selected).toBe(true);
 
@@ -211,13 +234,14 @@ describe('DayArcHero', () => {
     expect(screen.queryByTestId('home-arc-back')).toBeNull();
   });
 
-  it('overlays the back control, centred, above the scene without taking any room', () => {
+  it('overlays the back control inside the circle, under the clock, without taking any room', () => {
     setup();
     fireEvent.press(screen.getByTestId('home-zman-shkia'));
     const back = screen.getByTestId('home-arc-back');
+    const k = sceneScale(Dimensions.get('window').height);
     expect(styleOf(back)).toMatchObject({
       position: 'absolute',
-      top: 0,
+      top: backTop(k),
       start: 0,
       end: 0,
       height: scaled(44),
@@ -267,18 +291,39 @@ describe('DayArcHero', () => {
     expect(heroShape()).toEqual(plain);
   });
 
-  it('always leaves 17 points more between the top chip and the arc, with or without a preview', () => {
+  it('cuts the empty sky above the circle and keeps a 6 point gap, with or without a preview', () => {
     setup();
-    expect(BLOCK_GAP).toBe(scaled(17));
-    expect(styleOf(screen.getByTestId('home-arc-block')).paddingTop).toBe(scaled(17));
-    fireEvent.press(screen.getByTestId('home-zman-shkia'));
-    expect(styleOf(screen.getByTestId('home-arc-block')).paddingTop).toBe(scaled(17));
     const k = sceneScale(Dimensions.get('window').height);
+    expect(BLOCK_GAP).toBe(scaled(6));
+    expect(SKY_CROP).toBe(30);
+    expect(styleOf(screen.getByTestId('home-arc-block'))).toMatchObject({ paddingTop: scaled(6), marginTop: -30 * k });
+    fireEvent.press(screen.getByTestId('home-zman-shkia'));
+    expect(styleOf(screen.getByTestId('home-arc-block'))).toMatchObject({ paddingTop: scaled(6), marginTop: -30 * k });
     const land = findJson(screen.toJSON() as unknown as Json, 'home-arc-block')!.children!.find(
       (child): child is Json =>
         typeof child !== 'string' && styleOf(child).position === 'absolute' && styleOf(child).bottom === 0,
     )!;
-    expect(styleOf(land).top).toBe(scaled(17) + 158 * k);
+    expect(styleOf(land).top).toBe(scaled(6) + 158 * k);
+  });
+
+  it('sizes the clock by the circle, on the sky with no plate, and keeps its caption to one line', () => {
+    setup();
+    const k = sceneScale(Dimensions.get('window').height);
+    const clock = screen.getByTestId('home-arc-clock');
+    expect(StyleSheet.flatten(clock.props.style)).toMatchObject({
+      fontSize: Math.round(ARC.r * k * CLOCK_SHARE),
+      lineHeight: Math.round(Math.round(ARC.r * k * CLOCK_SHARE) * 1.1),
+    });
+    expect(clockSize(k)).toBe(Math.round(ARC.r * k * CLOCK_SHARE));
+    let node = clock.parent;
+    while (node && node.props.testID !== 'home-arc') {
+      expect(styleOf(node as never).backgroundColor).toBeUndefined();
+      node = node.parent;
+    }
+    const caption = screen.getByTestId('home-arc-caption');
+    expect(caption.props.numberOfLines).toBe(1);
+    expect(caption.props.adjustsFontSizeToFit).toBe(true);
+    expect(StyleSheet.flatten(caption.props.style).maxWidth).toBe(ARC.r * k * 1.8);
   });
 
   const PHONES = [
@@ -288,76 +333,45 @@ describe('DayArcHero', () => {
     [412, 915],
     [412, 1000],
   ] as const;
-  const TICK_OUTER = 10;
   const PILL_HEIGHT = 2 * spacing.sm + (typography.captionBold.lineHeight as number);
-  const APEX = arcPoint(F.zmanim.find((z) => z.id === 'chatzot')!.at, F, true);
-  const standOff = (height: number) => {
-    const k = sceneScale(height);
-    const tickTop = BLOCK_GAP + (APEX.y - TICK_OUTER) * k;
-    const plateTop = BLOCK_GAP + 66 * k;
-    const pillBottom = (BACK_TOUCH + PILL_HEIGHT) / 2;
-    return {
-      k,
-      tickFromBox: tickTop - BACK_TOUCH,
-      tickFromPill: tickTop - pillBottom,
-      plateFromBox: plateTop - BACK_TOUCH,
-      plateFromPill: plateTop - pillBottom,
-    };
-  };
-  const STAND_OFF: Record<number, [number, number, number, number]> = {
-    640: [-4.005, 0.995, 14.31, 19.31],
-    812: [3.574, 8.574, 27.92, 32.92],
-    844: [5.629, 10.629, 31.62, 36.62],
-    915: [9.74, 14.74, 39, 44],
-    1000: [9.74, 14.74, 39, 44],
-  };
 
   it.each(PHONES)(
-    'reports where the centred back control stands against the chatzot tick and the clock plate on %s x %s',
+    'stands the visible back pill under the clock and above the horizon, inside the circle, on %s x %s',
     (_width, height) => {
-      const r = standOff(height);
-      const [tickBox, tickPill, plateBox, platePill] = STAND_OFF[height];
-      expect(r.tickFromBox).toBeCloseTo(tickBox, 2);
-      expect(r.tickFromPill).toBeCloseTo(tickPill, 2);
-      expect(r.plateFromBox).toBeCloseTo(plateBox, 2);
-      expect(r.plateFromPill).toBeCloseTo(platePill, 2);
-      expect(r.tickFromPill).toBeGreaterThan(0);
-      expect(r.plateFromBox).toBeGreaterThan(0);
+      const k = sceneScale(height, BOARD_EXTRA);
+      const clockBottom = BLOCK_GAP + PLATE_TOP * k + clockLine(k);
+      const pillTop = backTop(k) + (BACK_TOUCH - PILL_HEIGHT) / 2;
+      const pillBottom = pillTop + PILL_HEIGHT;
+      expect(pillTop).toBeCloseTo(clockBottom, 6);
+      expect(BLOCK_GAP + 158 * k - pillBottom).toBeGreaterThan(8);
+      // The pill's lowest row is still inside the circle with room for a 120-point pill on either side.
+      const rise = (BLOCK_GAP + 158 * k - pillBottom) / k;
+      expect(2 * Math.sqrt(ARC.r ** 2 - rise ** 2) * k).toBeGreaterThan(scaled(120));
     },
   );
 
   const lineHeight = (variant: { lineHeight?: number }) => variant.lineHeight as number;
-  const TOP_ROW = lineHeight(typography.caption) + lineHeight(typography.title) + 2 * scaled(6);
+  const TOP_ROW = lineHeight(typography.small) + lineHeight(typography.heading);
   const STRIP =
     spacing.sm + 2 * 2 + 2 * scaled(7) + lineHeight(typography.small) + lineHeight(typography.body) + spacing.md;
-  const CHROME = spacing.lg + TOP_ROW + BLOCK_GAP + STRIP;
-  const HERO: Record<number, [scene: number, hero: number]> = {
-    640: [179, 346],
-    812: [238, 405],
-    844: [254, 421],
-    915: [286, 453],
-    1000: [286, 453],
-  };
+  // The chrome around the scene: the top padding, the greeting row, the gap and the strip, less the sky the block
+  // cuts above the circle, which is least on the smallest scene.
+  const CHROME = scaled(6) + TOP_ROW + BLOCK_GAP + STRIP - SKY_CROP * (SCENE_MIN / ARC.height);
+  // The scene with home's board, on each phone.
+  const SCENE: Record<number, number> = { 640: 220, 812: 236, 844: 252, 915: 286, 1000: 286 };
 
-  it('budgets the hero chrome at 168 points, 1 above what the layout tokens add up to', () => {
-    expect(CHROME).toBe(167);
-    expect(HERO_CHROME).toBe(scaled(168));
+  it('budgets the hero chrome at 110 points, above what the layout tokens add up to', () => {
+    expect(CHROME).toBeCloseTo(104.92, 2);
+    expect(HERO_CHROME).toBe(scaled(110));
     expect(HERO_CHROME).toBeGreaterThanOrEqual(CHROME);
+    expect(BOARD_EXTRA).toBe(scaled(60));
     expect(SCENE_MAX).toBe(scaled(ARC.height));
-    expect(SCENE_MIN).toBe(scaled(179));
+    expect(SCENE_MIN).toBe(scaled(220));
   });
 
-  it.each(PHONES)(
-    'sizes the scene and the hero on %s x %s, within half a screen except on the 640 point phone',
-    (_width, height) => {
-      const scene = ARC.height * sceneScale(height);
-      const [pinnedScene, pinnedHero] = HERO[height];
-      expect(scene).toBeCloseTo(pinnedScene, 2);
-      expect(scene + CHROME).toBeCloseTo(pinnedHero, 2);
-      if (height === 640) expect(scene + CHROME - height / 2).toBeCloseTo(26, 2);
-      else expect(scene + CHROME).toBeLessThanOrEqual(height / 2);
-    },
-  );
+  it.each(PHONES)("sizes the scene under home's board on %s x %s", (_width, height) => {
+    expect(ARC.height * sceneScale(height, BOARD_EXTRA)).toBeCloseTo(SCENE[height], 2);
+  });
 
   it('keeps the strip height when no zman is next: every chip carries the same border width', () => {
     setup(at(J, '2026-10-29T23:40'));
@@ -785,10 +799,11 @@ describe('DayArcHero', () => {
     });
   });
 
-  it('scales the scene to about half the screen, between 179 and 286 points high', () => {
+  it('scales the scene to half the screen less the chrome, between 220 and 286 points high', () => {
     expect(sceneScale(1334)).toBe(1);
-    expect(sceneScale(844)).toBeCloseTo(254 / 286, 6);
-    expect(sceneScale(600)).toBeCloseTo(179 / 286, 6);
+    expect(sceneScale(844)).toBe(1);
+    expect(sceneScale(844, BOARD_EXTRA)).toBeCloseTo(252 / 286, 6);
+    expect(sceneScale(600)).toBeCloseTo(220 / 286, 6);
   });
 });
 

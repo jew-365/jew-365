@@ -10,7 +10,6 @@ type Sizes = {
   button: { regular: number; compact: number; icon: number };
   tabs: {
     pill: { width: number; height: number; borderRadius: number };
-    underline: { width: number; height: number };
     icon: number;
   };
   wheel: { height: number; snap: number };
@@ -63,11 +62,10 @@ const sizesAt = (uiScale: number): Sizes => {
       insets: { top: 0, right: 0, bottom: 0, left: 0 },
     };
     view = draw(<BottomTabs {...(tabProps as unknown as React.ComponentProps<typeof BottomTabs>)} />);
-    const [pillView, underlineView] = hosts(view.getAllByRole('tab')[0] as never).filter(
+    const [pillView] = hosts(view.getAllByRole('tab')[0] as never).filter(
       (node) => node.props.collapsable === false && hostStyle(node).width !== undefined,
     );
     const pill = hostStyle(pillView);
-    const underline = hostStyle(underlineView);
     const tabIcon = (view.UNSAFE_getByType(MitzvahIcon).props as { size: number }).size;
     view.unmount();
 
@@ -84,7 +82,6 @@ const sizesAt = (uiScale: number): Sizes => {
       button: { regular, compact, icon: buttonIcon },
       tabs: {
         pill: { width: pill.width, height: pill.height, borderRadius: pill.borderRadius },
-        underline: { width: underline.width, height: underline.height },
         icon: tabIcon,
       },
       wheel: { height: wheelHeight, snap },
@@ -104,7 +101,7 @@ describe('display size in the shared components', () => {
       tile: { width: 44, height: 44, borderRadius: 18, icon: 24 },
       chevron: 16,
       button: { regular: 48, compact: 40, icon: 18 },
-      tabs: { pill: { width: 48, height: 32, borderRadius: 16 }, underline: { width: 16, height: 3 }, icon: 22 },
+      tabs: { pill: { width: 44, height: 28, borderRadius: 14 }, icon: 20 },
       wheel: { height: 200, snap: 40 },
     });
   });
@@ -115,9 +112,8 @@ describe('display size in the shared components', () => {
       chevron: 13,
       button: { regular: 38.5, compact: 32, icon: 14.5 },
       tabs: {
-        pill: { width: 38.5, height: 25.5, borderRadius: 12.75 },
-        underline: { width: 13, height: 2.5 },
-        icon: 17.5,
+        pill: { width: 35, height: 22.5, borderRadius: 11.25 },
+        icon: 16,
       },
       wheel: { height: 160, snap: 32 },
     });
@@ -129,9 +125,8 @@ describe('display size in the shared components', () => {
       chevron: 19,
       button: { regular: 57.5, compact: 48, icon: 21.5 },
       tabs: {
-        pill: { width: 57.5, height: 38.5, borderRadius: 19.25 },
-        underline: { width: 19, height: 3.5 },
-        icon: 26.5,
+        pill: { width: 53, height: 33.5, borderRadius: 16.75 },
+        icon: 24,
       },
       wheel: { height: 240, snap: 48 },
     });

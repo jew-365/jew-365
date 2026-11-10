@@ -1582,7 +1582,6 @@
   "home.arc.caption.open": "%{name} · עוד %{left}",
   "home.arc.caption.next": "הבא: %{name} ב-%{time}",
   "home.arc.caption.allDone": "הכול סומן להיום",
-  "home.arc.preview": "תצוגה בלבד",
   "home.arc.in": "בעוד %{time}",
   "home.arc.ago": "עבר לפני %{time}",
   "home.arc.at": "הגיע הזמן",
