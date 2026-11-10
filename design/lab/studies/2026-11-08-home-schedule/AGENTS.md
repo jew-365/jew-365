@@ -32,7 +32,7 @@
 - Published as two private Artifacts; republish to the same links after a change:
   - gallery: https://claude.ai/artifact/RWquxzv3PmRkZhUHW5K54o (the build output's site folder as `root`, its index page as the file, its boards listed in `files`);
   - canvas (the Design type): https://claude.ai/artifact/BDc4e5AT1m23BrLSEHR7mT (the build output's canvas folder as `root`, its `canvas.json` as the file, each board and `support.js` in `files`).
-- The owner's picks: the bento (round 3, 2026-11-09), refined in round 4's `R4Bento` and shipped to the preview app; after seeing it there the owner asked for round 6 and picked its smart stack (`R6Stack`, 2026-11-10), refined in round 7; of round 7 the owner picked the period tone (`R7Tone`, 2026-11-10), refined in round 8, whose pick is still open.
+- The owner's picks: the bento (round 3, 2026-11-09), refined in round 4's `R4Bento` and shipped to the preview app; after seeing it there the owner asked for round 6 and picked its smart stack (`R6Stack`, 2026-11-10), refined in round 7; of round 7 the owner picked the period tone (`R7Tone`, 2026-11-10), refined in round 8; of round 8 the owner picked `R8Tone` (2026-11-10), built in the app as [HomeTimes](../../../../src/components/HomeTimes.tsx).
 - The demo marks are the core's seeds (tefillin, Shacharit and Mincha marked at fixed times), so the now layer changes with them: a marked Mincha drops the shkia. The pins live in the board's state only, starting with זמן תו״ט; the reason "סימנת מנחה אחרי פלג השבוע" is a demo of a suggestion read from marks, not computed from them.
 
 ## Work Guidance

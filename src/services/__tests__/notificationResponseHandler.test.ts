@@ -75,6 +75,7 @@ import {
   DEFAULT_NOTIFICATION_ACTION,
   initNotificationResponseHandler,
   MARK_DONE_ACTION,
+  notificationNavigatedWithin,
   openLaunchNotificationResponse,
   OPEN_TEXT_ACTION,
 } from '../notificationResponseHandler';
@@ -153,6 +154,14 @@ describe('notificationResponseHandler', () => {
       pathname: '/mitzvah/[id]',
       params: { id: 'sefirat_haomer', highlightContent: '1' },
     });
+  });
+
+  it('tells the root layout a tap opened a screen just now, so its return to home yields', () => {
+    initNotificationResponseHandler();
+    const listener = mockAddNotificationResponseReceivedListener.mock.calls[0][0];
+    listener(response(DEFAULT_NOTIFICATION_ACTION, { mitzvahId: 'sefirat_haomer' }));
+    expect(notificationNavigatedWithin(3000)).toBe(true);
+    expect(notificationNavigatedWithin(3000, Date.now() + 10_000)).toBe(false);
   });
 
   it('opens the mitzvah detail from the default tap on a reminder that offers no text', () => {

@@ -3,7 +3,8 @@ const mockRouter = {
   replace: jest.fn(),
   back: jest.fn(),
   dismissAll: jest.fn(),
-  canDismiss: () => false,
+  navigate: jest.fn(),
+  canDismiss: jest.fn(() => false),
 };
 
 jest.mock('expo-router', () => {
@@ -49,11 +50,14 @@ jest.mock('@/services/notificationResponseHandler', () => ({
   initNotificationResponseHandler: () => ({ remove: () => {} }),
   consumePendingNotificationRoute: () => {},
   openLaunchNotificationResponse: () => {},
+  notificationNavigatedWithin: () => mockNotificationRecent(),
 }));
+const mockNotificationRecent = jest.fn(() => false);
 
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { AppState } from 'react-native';
 import RootLayout from '../_layout';
+import { RETURN_HOME_AFTER_MS, RETURN_HOME_DELAY_MS } from '@/utils/returnHome';
 import { CITIES } from '@/data/cities';
 import { HebcalService } from '@/services/HebcalService';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
@@ -369,5 +373,63 @@ describe('the root layout and the Shabbat screen', () => {
     act(() => jest.advanceTimersByTime(12 * 60_000));
     expect(screen.getByText(motzei)).toBeOnTheScreen();
     expect(screen.queryByText(friday)).toBeNull();
+  });
+});
+
+describe('the root layout returns to home', () => {
+  let listeners: ((state: string) => void)[] = [];
+  const send = (state: string) => act(() => listeners.forEach((listener) => listener(state)));
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: at(J, '2026-10-28T07:00'), doNotFake: ['nextTick', 'queueMicrotask', 'setImmediate'] });
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: J, inIsrael: true, nusach: 'ashkenaz', isOnboarded: true });
+    mockRouter.navigate.mockClear();
+    mockRouter.dismissAll.mockClear();
+    mockRouter.canDismiss.mockReturnValue(true);
+    mockNotificationRecent.mockReturnValue(false);
+    listeners = [];
+    jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) => {
+      listeners.push(listener as (state: string) => void);
+      return { remove: jest.fn() } as never;
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.useRealTimers();
+    mockRouter.canDismiss.mockReturnValue(false);
+  });
+
+  const away = async (ms: number) => {
+    renderWithTheme(<RootLayout />);
+    await act(async () => {});
+    send('background');
+    jest.setSystemTime(Date.now() + ms);
+    send('active');
+    act(() => jest.advanceTimersByTime(RETURN_HOME_DELAY_MS));
+  };
+
+  it('unwinds the stack and opens home after a minute or more away', async () => {
+    await away(RETURN_HOME_AFTER_MS);
+    expect(mockRouter.dismissAll).toHaveBeenCalledTimes(1);
+    expect(mockRouter.navigate).toHaveBeenCalledWith('/(tabs)/home');
+  });
+
+  it('keeps the screen after a shorter absence, such as a permission dialog', async () => {
+    await away(RETURN_HOME_AFTER_MS - 1000);
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
+  });
+
+  it('yields to a notification tap that opened a screen with the return', async () => {
+    mockNotificationRecent.mockReturnValue(true);
+    await away(10 * 60 * 1000);
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
+  });
+
+  it('does nothing before onboarding is done', async () => {
+    useUserStore.setState({ isOnboarded: false });
+    await away(10 * 60 * 1000);
+    expect(mockRouter.navigate).not.toHaveBeenCalledWith('/(tabs)/home');
   });
 });

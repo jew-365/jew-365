@@ -46,6 +46,7 @@ import {
   initNotificationResponseHandler,
   consumePendingNotificationRoute,
   openLaunchNotificationResponse,
+  notificationNavigatedWithin,
 } from '@/services/notificationResponseHandler';
 import { setLocale, t } from '@/i18n';
 import { StorageService } from '@/services/StorageService';
@@ -57,6 +58,7 @@ import { ChokEnablePrompt } from '@/components/ChokEnablePrompt';
 import { ShnayimEnablePrompt } from '@/components/ShnayimEnablePrompt';
 import { nextQuietBoundary, quietBlockAt } from '@/utils/skipRules';
 import { CHECK_IN_PROMPTED_KEY, latestCheckIn } from '@/utils/checkIn';
+import { NOTIFICATION_WINS_MS, RETURN_HOME_DELAY_MS, shouldReturnHome } from '@/utils/returnHome';
 import { getAllMitzvot } from '@/data/customMitzvotAdapter';
 import { enabledSinceOf, useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
@@ -206,6 +208,38 @@ function RootInner() {
     }, FOLLOW_INTERVAL_MS);
     return () => clearInterval(timer);
   }, [quiet, isOnboarded, followsPhone]);
+
+  // The app always opens on home (the owner's call, 2026-11-10): a return after a minute or more away unwinds
+  // every pushed screen and selects the home tab, unless a notification tap opened a screen just now.
+  const returnState = useRef({ isOnboarded, quiet });
+  returnState.current = { isOnboarded, quiet };
+  useEffect(() => {
+    let awayAt: number | null = null;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const sub = AppState.addEventListener('change', (next) => {
+      if (next === 'background') {
+        awayAt ??= Date.now();
+        return;
+      }
+      if (next !== 'active' || awayAt === null) return;
+      const away = Date.now() - awayAt;
+      awayAt = null;
+      if (!shouldReturnHome(away, returnState.current.isOnboarded, returnState.current.quiet)) return;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = null;
+        if (notificationNavigatedWithin(NOTIFICATION_WINS_MS)) return;
+        try {
+          if (router.canDismiss()) router.dismissAll();
+          router.navigate('/(tabs)/home');
+        } catch {}
+      }, RETURN_HOME_DELAY_MS);
+    });
+    return () => {
+      sub.remove();
+      if (timer) clearTimeout(timer);
+    };
+  }, [router]);
 
   // Unwind everything stacked under the Shabbat screen — when the block starts, and again after any
   // navigation inside it — so nothing stale stays mounted for a day, above all the reader, which

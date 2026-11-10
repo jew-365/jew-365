@@ -38,7 +38,15 @@ function isAppQuiet(): boolean {
   return isOnboarded && isQuietAt(new Date(), location);
 }
 
+let lastNavigationAt = 0;
+
+// Whether a tap opened a screen within the last `ms`; the root layout's return to home yields to it.
+export function notificationNavigatedWithin(ms: number, now = Date.now()): boolean {
+  return now - lastNavigationAt <= ms;
+}
+
 function navigate(go: () => void) {
+  lastNavigationAt = Date.now();
   try {
     go();
   } catch {

@@ -53,8 +53,9 @@ export const SCENE_MIN = scaled(179);
 export const SCENE_MAX = scaled(ARC.height);
 export const HERO_CHROME = scaled(168);
 
-// The bento below the scene is taller than the strip it replaces, so the scene gives way by that much.
-export const BENTO_EXTRA = scaled(64);
+// Home's board below the scene (the period's card over the live carousel) is taller than the strip it
+// replaces, so the scene gives way by that much.
+export const BOARD_EXTRA = scaled(72);
 
 export function sceneScale(windowHeight: number, extra = 0): number {
   return Math.min(SCENE_MAX, Math.max(SCENE_MIN, windowHeight / 2 - HERO_CHROME - extra)) / ARC.height;
@@ -108,8 +109,13 @@ export type DayArcHeroProps = {
   hiddenZmanim?: readonly ZmanId[];
   onScrubChange: (active: boolean) => void;
   onSkyTop: (sky: { color: string; lightInk: boolean } | null) => void;
-  // Home's bento, drawn in place of the zmanim strip: it picks a zman to preview, or clears the preview.
-  bento?: (api: { pick: (id: ZmanId) => void; selected: ZmanId | null }) => React.ReactNode;
+  // Home's board, drawn in place of the zmanim strip: it picks a zman to preview, or clears the preview, and
+  // draws its chips in the inks that hold over the sky.
+  board?: (api: {
+    pick: (id: ZmanId) => void;
+    selected: ZmanId | null;
+    inks: { plain: string; next: string };
+  }) => React.ReactNode;
 };
 
 export const DayArcHero = React.memo(function DayArcHero({
@@ -122,13 +128,13 @@ export const DayArcHero = React.memo(function DayArcHero({
   hiddenZmanim = NO_ZMANIM,
   onScrubChange,
   onSkyTop,
-  bento,
+  board,
 }: DayArcHeroProps) {
   const { colors } = useTheme();
   const { t } = useI18n();
   const rtl = useRowMirrored();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const k = sceneScale(windowHeight, bento ? BENTO_EXTRA : 0);
+  const k = sceneScale(windowHeight, board ? BOARD_EXTRA : 0);
   const units = stageUnits(windowWidth, k);
   const offset = stageOffset(units);
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -388,13 +394,14 @@ export const DayArcHero = React.memo(function DayArcHero({
             <BackPill label={t('home.arc.back')} onPress={() => setPreview(null)} />
           </View>
         ) : null}
-        {bento ? (
-          bento({
+        {board ? (
+          board({
             pick: (id) => {
               const z = frame.zmanim.find((x) => x.id === id);
               if (z) onChipPress(z);
             },
             selected: selectedId,
+            inks: chipInks,
           })
         ) : (
           <ScrollView

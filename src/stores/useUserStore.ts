@@ -25,7 +25,7 @@ import {
 } from '@/utils/quietHours';
 import { DEFAULT_NAG_LEVEL, isNagLevel, type NagLevel } from '@/utils/nagging';
 import { hiddenZmanimOf, withZmanShown, type ZmanId } from '@/utils/zmanIds';
-import { bentoPinsOf, type BentoWidget } from '@/utils/homeBento';
+import { DEFAULT_MINE, isCardPage, mineFactsOf, zmanPinsOf, type CardPageId, type MineFactId } from '@/utils/homeTimes';
 import { amidahPrayerOf, amidahVersesOf } from '@/utils/personalPrayer';
 
 export type Language = 'he' | 'en';
@@ -145,8 +145,10 @@ type UserState = {
   halachaTrack: HalachaTrack | null;
   benIshChaiYearSwapped: boolean;
   hiddenZmanim: readonly ZmanId[];
-  homeBento: readonly BentoWidget[] | null;
-  bentoPins: readonly ZmanId[];
+  zmanPins: readonly ZmanId[];
+  homeCardPage: CardPageId | null;
+  homeCardMine: readonly MineFactId[];
+  homeLearn: boolean;
   amidahVerses: readonly string[];
   amidahPrayer: string;
   homeLook: HomeLook;
@@ -185,8 +187,10 @@ type UserState = {
   setChokDoubleChoice: (choice: ChokDoubleChoice) => void;
   setChokCommentaryOpen: (open: boolean) => void;
   setZmanShown: (id: ZmanId, shown: boolean) => void;
-  setHomeBento: (layout: readonly BentoWidget[] | null) => void;
-  setBentoPins: (pins: readonly ZmanId[]) => void;
+  setZmanPins: (pins: readonly ZmanId[]) => void;
+  setHomeCardPage: (page: CardPageId | null) => void;
+  setHomeCardMine: (facts: readonly MineFactId[]) => void;
+  setHomeLearn: (on: boolean) => void;
   setAmidahVerses: (verses: readonly string[]) => void;
   setAmidahPrayer: (text: string) => void;
   setChokThuNightDay: (day: ChokThuNightDay) => void;
@@ -211,8 +215,10 @@ type PersistedUserState = Partial<
   hiddenZmanim?: unknown;
   amidahVerses?: unknown;
   amidahPrayer?: unknown;
-  homeBento?: unknown;
-  bentoPins?: unknown;
+  zmanPins?: unknown;
+  homeCardPage?: unknown;
+  homeCardMine?: unknown;
+  homeLearn?: unknown;
 };
 
 const DEFAULT_LOCATION = CITIES[0];
@@ -225,15 +231,17 @@ const savedThemeName = (saved: unknown): ThemeName => {
 };
 
 const mergeSavedUserState = (persisted: unknown, current: UserState): UserState => {
-  const { theme, hiddenZmanim, amidahVerses, amidahPrayer, homeBento, bentoPins, ...saved } = (persisted ??
-    {}) as PersistedUserState;
+  const { theme, hiddenZmanim, amidahVerses, amidahPrayer, zmanPins, homeCardPage, homeCardMine, homeLearn, ...saved } =
+    (persisted ?? {}) as PersistedUserState;
   const merged = {
     ...current,
     ...saved,
     theme: theme === undefined ? current.theme : savedThemeName(theme),
     hiddenZmanim: hiddenZmanimOf(hiddenZmanim),
-    homeBento: Array.isArray(homeBento) ? (homeBento as BentoWidget[]) : null,
-    bentoPins: bentoPinsOf(bentoPins),
+    zmanPins: zmanPinsOf(zmanPins),
+    homeCardPage: isCardPage(homeCardPage) ? homeCardPage : null,
+    homeCardMine: mineFactsOf(homeCardMine),
+    homeLearn: homeLearn !== false,
     amidahVerses: amidahVersesOf(amidahVerses),
     amidahPrayer: amidahPrayerOf(amidahPrayer),
   };
@@ -296,8 +304,10 @@ export const useUserStore = create<UserState>()(
       halachaTrack: null,
       benIshChaiYearSwapped: false,
       hiddenZmanim: [],
-      homeBento: null,
-      bentoPins: [],
+      zmanPins: [],
+      homeCardPage: null,
+      homeCardMine: [...DEFAULT_MINE],
+      homeLearn: true,
       amidahVerses: [],
       amidahPrayer: '',
       homeLook: 'rail',
@@ -363,8 +373,10 @@ export const useUserStore = create<UserState>()(
           const hiddenZmanim = withZmanShown(s.hiddenZmanim, id, shown);
           return hiddenZmanim === s.hiddenZmanim ? s : { hiddenZmanim };
         }),
-      setHomeBento: (layout) => set({ homeBento: layout }),
-      setBentoPins: (pins) => set({ bentoPins: bentoPinsOf(pins) }),
+      setZmanPins: (pins) => set({ zmanPins: zmanPinsOf(pins) }),
+      setHomeCardPage: (page) => set({ homeCardPage: isCardPage(page) ? page : null }),
+      setHomeCardMine: (facts) => set({ homeCardMine: mineFactsOf(facts) }),
+      setHomeLearn: (on) => set({ homeLearn: on }),
       setAmidahVerses: (verses) => set({ amidahVerses: amidahVersesOf(verses) }),
       setAmidahPrayer: (text) => set({ amidahPrayer: amidahPrayerOf(text) }),
       setChokThuNightDay: (day) => set({ chokThuNightDay: day }),
@@ -411,8 +423,10 @@ export const useUserStore = create<UserState>()(
           halachaTrack: null,
           benIshChaiYearSwapped: false,
           hiddenZmanim: [],
-          homeBento: null,
-          bentoPins: [],
+          zmanPins: [],
+          homeCardPage: null,
+          homeCardMine: [...DEFAULT_MINE],
+          homeLearn: true,
           amidahVerses: [],
           amidahPrayer: '',
           homeLook: 'rail',

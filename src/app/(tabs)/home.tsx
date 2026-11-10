@@ -8,7 +8,7 @@ import { Banner, BannerTone } from '@/components/Banner';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { Card } from '@/components/Card';
 import { DayArcHero } from '@/components/DayArcHero';
-import { HomeBento, type BentoNext } from '@/components/HomeBento';
+import { HomeTimes } from '@/components/HomeTimes';
 import { DayLookEntry, DayLooks } from '@/components/DayLooks';
 import { Reveal } from '@/components/Reveal';
 import { IconTile } from '@/components/IconTile';
@@ -48,13 +48,15 @@ import { durations, motion, spacing } from '@/theme/tokens';
 import { afterPaint } from '@/utils/afterPaint';
 import { clockOf, clockRange } from '@/utils/clock';
 import { shemaOpinionsFor, shemaOpinionsLine } from '@/utils/shemaOpinions';
-import { DayWindow, appDayWindow } from '@/utils/buildDayTimeline';
+import { DayWindow, appDayWindow, currentOrNextWindow } from '@/utils/buildDayTimeline';
 import { checkInLastDay, checkInPhraseKey, latestCheckIn, overlapsBlock, trackedOn } from '@/utils/checkIn';
 import { Mitzvah } from '@/types/mitzvah';
 import { TaharahEvent, TaharahSettings } from '@/types/taharah';
 import { Location } from '@/types/zmanim';
 import { dayFrameFor } from '@/utils/dayArc';
-import { bentoOf, pickNext, suggestedPins, type NextCandidate } from '@/utils/homeBento';
+import { learnedHabit, markStat, suggestedPins, timeChips } from '@/utils/homeTimes';
+import { homeCard, markHistory } from '@/utils/homeCard';
+import { MITZVOT } from '@/data/mitzvot';
 import type { ZmanId } from '@/utils/zmanIds';
 import { computeStreak } from '@/utils/historyStats';
 import { DayEntry, dayEntryStatusText, firstName, greetingKey, heroCaption, orderDayEntries } from '@/utils/homeDay';
@@ -196,10 +198,14 @@ export default function HomeScreen() {
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
   const homeLook = useUserStore((s) => s.homeLook);
   const hiddenZmanim = useUserStore((s) => s.hiddenZmanim);
-  const savedBento = useUserStore((s) => s.homeBento);
-  const bentoPins = useUserStore((s) => s.bentoPins);
-  const setHomeBento = useUserStore((s) => s.setHomeBento);
-  const setBentoPins = useUserStore((s) => s.setBentoPins);
+  const zmanPins = useUserStore((s) => s.zmanPins);
+  const homeCardPage = useUserStore((s) => s.homeCardPage);
+  const homeCardMine = useUserStore((s) => s.homeCardMine);
+  const homeLearn = useUserStore((s) => s.homeLearn);
+  const setZmanPins = useUserStore((s) => s.setZmanPins);
+  const setHomeCardPage = useUserStore((s) => s.setHomeCardPage);
+  const setHomeCardMine = useUserStore((s) => s.setHomeCardMine);
+  const setHomeLearn = useUserStore((s) => s.setHomeLearn);
   // The bell beside each mitzvah's name: how many notifications its window sends in all, its reminders and their
   // repeats at its own nagging level, else the app's (the owner's call of 2026-11-04), shown while the nag sends any
   // repeat. Counted once per window for as long as the inputs hold.
@@ -518,75 +524,141 @@ export default function HomeScreen() {
 
   const onSkyTop = useCallback((next: SkyTop | null) => skySetter.current(next), []);
 
-  // The bento in the hero (the owner's pick of 2026-11-09; the defaults: .claude/specs/home-bento.md).
+  // The board in the hero (the owner's pick of 2026-11-10, "גוון התקופה, קרוסלה חיה"): the period's card over
+  // the live carousel of the day's times.
   const enabledIds = useMemo(() => new Set(enabled.map((m) => m.id)), [enabled]);
-  const bentoWidgets = useMemo(() => bentoOf(savedBento, enabledIds), [savedBento, enabledIds]);
-  const bentoSuggestions = useMemo(() => suggestedPins(enabledIds), [enabledIds]);
-  const bentoNext = useMemo((): { candidate: NextCandidate; label: string } | null => {
+  const pinSuggestions = useMemo(() => suggestedPins(enabledIds), [enabledIds]);
+  const board = useMemo(() => {
     if (!frame) return null;
-    const labels = new Map<string, string>();
-    const candidates: NextCandidate[] = [];
-    for (const item of allCurrent) {
-      if (item.marked) continue;
-      candidates.push({ kind: 'end', at: item.window.end, id: item.mitzvah.id });
-      labels.set(item.mitzvah.id, item.name);
-    }
-    for (const item of upcoming) {
-      const period = item.mitzvah.id === 'candle_lighting' || item.mitzvah.id === 'chanukah_candles';
-      candidates.push({ kind: period ? 'period' : 'opens', at: item.window.start, id: item.mitzvah.id });
-      labels.set(item.mitzvah.id, item.name);
-    }
-    for (const z of frame.zmanim) {
-      if (hiddenZmanim.includes(z.id)) continue;
-      candidates.push({ kind: 'zman', at: z.at, id: z.id });
-      labels.set(z.id, t(`home.zman.${z.id}.name`));
-    }
-    const chosen = pickNext(candidates, now);
-    return chosen ? { candidate: chosen, label: labels.get(chosen.id) ?? chosen.id } : null;
-  }, [frame, allCurrent, upcoming, hiddenZmanim, now, t]);
-  const renderBento = useCallback(
-    ({ pick, selected }: { pick: (id: ZmanId) => void; selected: ZmanId | null }) => {
-      if (!frame) return null;
-      const next: BentoNext | null = bentoNext
-        ? {
-            label: bentoNext.label,
-            at: bentoNext.candidate.at,
-            kind: bentoNext.candidate.kind,
-            onPress: () =>
-              bentoNext.candidate.kind === 'zman'
-                ? pick(bentoNext.candidate.id as ZmanId)
-                : router.push({ pathname: '/mitzvah/[id]', params: { id: bentoNext.candidate.id } }),
-          }
+    const isOn = (id: string) => enabledIds.has(id);
+    const doneToday = (id: string) => allCurrent.some((item) => item.mitzvah.id === id && item.marked);
+    const history = markHistory(
+      completions,
+      now,
+      location,
+      settings.halachicOpinions.ksSofZman === 'MA' ? 'MA' : 'GRA',
+    );
+    const zAt = (id: ZmanId) => frame.zmanim.find((z) => z.id === id)!.at;
+    const habit = homeLearn
+      ? learnedHabit({
+          now,
+          z: { alot: zAt('alot'), sofShma: zAt('sofShma'), chatzot: zAt('chatzot'), plag: zAt('plag') },
+          shacharit: markStat(history.shacharit),
+          mincha: markStat(history.mincha),
+          keeps: { shema: isOn('krias_shma_shacharit'), shacharit: isOn('shacharit'), mincha: isOn('mincha') },
+          done: { shema: doneToday('krias_shma_shacharit'), mincha: doneToday('mincha') },
+        })
+      : null;
+    // Kiddush Levana's window while it is kept and not marked.
+    const kl = MITZVOT.find((m) => m.id === 'kiddush_levana');
+    const klOpenWindow = kl && isOn(kl.id) ? currentOrNextWindow(kl, location, settings, now) : null;
+    const klWindow = klOpenWindow && !completions[dateKey(klOpenWindow.date)]?.kiddush_levana ? klOpenWindow : null;
+    const card = homeCard({
+      now,
+      location,
+      inIsrael,
+      nusach,
+      language,
+      t,
+      habit,
+      mine: homeCardMine,
+      pinNames: zmanPins.map((id) => t(`home.zman.${id}.name`)),
+      kiddushLevana: klWindow,
+    });
+    // The Chanukah candles of the day, while the user keeps them.
+    const chanukahWindow =
+      [...allCurrent, ...upcoming].find((item) => item.mitzvah.id === 'chanukah_candles')?.window ?? null;
+    const tomorrowFrame =
+      now.getTime() >= frame.tzeit.getTime()
+        ? dayFrameFor(
+            new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
+            location,
+            settings.halachicOpinions.ksSofZman,
+          )
         : null;
-      return (
-        <HomeBento
-          widgets={bentoWidgets}
-          frame={frame}
+    const { chips, lead } = timeChips({
+      now,
+      zmanim: frame.zmanim.filter((z) => !hiddenZmanim.includes(z.id)),
+      extras: [
+        ...(card.candleLighting
+          ? [{ id: 'candleLighting' as const, at: card.candleLighting.at, from: card.candleLighting.from }]
+          : []),
+        ...(chanukahWindow ? [{ id: 'chanukahCandles' as const, at: chanukahWindow.start, from: null }] : []),
+        ...(card.fastEnd ? [{ id: 'fastEnd' as const, at: card.fastEnd.at, from: card.fastEnd.from }] : []),
+      ],
+      tomorrow: tomorrowFrame ? tomorrowFrame.zmanim.filter((z) => !hiddenZmanim.includes(z.id)) : null,
+      openWindows: allCurrent
+        .filter((item) => !item.marked)
+        .map((item) => ({ start: item.window.start, end: item.window.end })),
+      pins: zmanPins,
+      learned: habit?.zman ?? null,
+    });
+    return { card, chips, lead };
+  }, [
+    frame,
+    enabledIds,
+    allCurrent,
+    upcoming,
+    completions,
+    now,
+    location,
+    settings,
+    homeLearn,
+    inIsrael,
+    nusach,
+    language,
+    t,
+    homeCardMine,
+    zmanPins,
+    today,
+    hiddenZmanim,
+  ]);
+  const renderBoard = useCallback(
+    ({
+      pick,
+      selected,
+      inks,
+    }: {
+      pick: (id: ZmanId) => void;
+      selected: ZmanId | null;
+      inks: { plain: string; next: string };
+    }) =>
+      board ? (
+        <HomeTimes
+          card={board.card}
+          page={homeCardPage}
+          onPage={setHomeCardPage}
+          chips={board.chips}
+          lead={board.lead}
           now={now}
           tz={location.tz}
-          hidden={hiddenZmanim}
-          pins={bentoPins}
-          suggestions={bentoSuggestions}
-          next={next}
+          inks={inks}
           selected={selected}
-          onPick={pick}
-          onLayoutChange={(list) => setHomeBento(list ? [...list] : null)}
-          onPinsChange={setBentoPins}
+          onPickZman={pick}
+          pins={zmanPins}
+          suggestions={pinSuggestions}
+          hidden={hiddenZmanim}
+          onPinsChange={setZmanPins}
+          mine={homeCardMine}
+          onMineChange={setHomeCardMine}
+          learn={homeLearn}
+          onLearnChange={setHomeLearn}
         />
-      );
-    },
+      ) : null,
     [
-      frame,
-      bentoNext,
-      bentoWidgets,
+      board,
+      homeCardPage,
+      setHomeCardPage,
       now,
       location.tz,
+      zmanPins,
+      pinSuggestions,
       hiddenZmanim,
-      bentoPins,
-      bentoSuggestions,
-      router,
-      setHomeBento,
-      setBentoPins,
+      setZmanPins,
+      homeCardMine,
+      setHomeCardMine,
+      homeLearn,
+      setHomeLearn,
     ],
   );
 
@@ -830,9 +902,9 @@ export default function HomeScreen() {
             tz={location.tz}
             greeting={greeting}
             dateLine={dateLine}
-            caption={caption}
+            caption={board?.lead && current[0] ? current[0].name : caption}
             hiddenZmanim={hiddenZmanim}
-            bento={renderBento}
+            board={renderBoard}
             onScrubChange={setScrubbing}
             onSkyTop={onSkyTop}
           />

@@ -332,14 +332,25 @@ describe('home between midnight and alot', () => {
     expect(dateKey(mockCancel.mock.calls[0][1] as Date)).toBe('2027-06-14');
   });
 
-  it('leaves out of the bento the zmanim hidden in Settings, and brings them back', () => {
+  it('leaves out of the carousel the zmanim hidden in Settings, and brings them back', () => {
     renderAt(AFTER_ALOT);
-    expect(screen.getByTestId('home-bento-rest-plag')).toBeOnTheScreen();
+    expect(screen.getByTestId('home-times-plag')).toBeOnTheScreen();
     act(() => useUserStore.getState().setZmanShown('plag', false));
-    expect(screen.queryByTestId('home-bento-rest-plag')).toBeNull();
-    expect(screen.getByTestId('home-bento-zman-shkia')).toBeOnTheScreen();
+    expect(screen.queryByTestId('home-times-plag')).toBeNull();
+    expect(screen.getByTestId('home-times-shkia')).toBeOnTheScreen();
     act(() => useUserStore.getState().setZmanShown('plag', true));
-    expect(screen.getByTestId('home-bento-rest-plag')).toBeOnTheScreen();
+    expect(screen.getByTestId('home-times-plag')).toBeOnTheScreen();
+  });
+
+  it('keeps the card page the user chose, and goes back to the smart choice', () => {
+    renderAt(AFTER_ALOT);
+    fireEvent.press(screen.getByTestId('home-card-tab-week'));
+    expect(useUserStore.getState().homeCardPage).toBe('week');
+    expect(screen.getByTestId('home-card-page-week')).toBeOnTheScreen();
+    fireEvent.press(screen.getByTestId('home-card-page-week'));
+    expect(useUserStore.getState().homeCardPage).toBe('mine');
+    act(() => useUserStore.getState().setHomeCardPage(null));
+    expect(screen.queryByTestId('home-card-page-mine')).toBeNull();
   });
 
   it('names the evening date in the date line until alot and the new date after it', () => {
