@@ -1,11 +1,14 @@
 import { HDate } from '@hebcal/core';
-import { effectiveHalachaTrack } from '@/data/halacha';
+import { HALACHA_YOMIT_ID, effectiveHalachaTrack } from '@/data/halacha';
 import { readHalachaScheduleSync } from '@/services/halachaFiles';
 import { HALACHA_STORES } from '@/stores/useHalachaStore';
+import { Completions, dateKey } from '@/stores/useCompletionsStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { FestivalPeriod, HalachaLabel, HalachaPortion, HalachaScheduleFile, HalachaTrack } from '@/types/halacha';
 import { Nusach } from '@/types/mitzvah';
+import { Location } from '@/types/zmanim';
 import { festivalPortion, halachaPortion } from '@/utils/halacha';
+import { appDayEnd } from '@/utils/locationDay';
 
 // The installed track's schedule, read once per installed version: what a window and the reader ask of a day. Kept
 // apart from ./halacha.ts, which the user store imports, so that store imports no other store.
@@ -53,4 +56,45 @@ export function hilchotHachagOn(day: Date, nusach: Nusach): HachagDay[] {
     portion,
     period,
   }));
+}
+
+// What one of the two halacha mitzvot reads on a civil day: the daily portion, or the festival portions of the day.
+export function halachaReadingsOn(
+  id: string,
+  day: Date,
+  nusach: Nusach,
+  inIsrael: boolean,
+): (HalachaDay | HachagDay)[] {
+  if (id !== HALACHA_YOMIT_ID) return hilchotHachagOn(day, nusach);
+  const portion = halachaYomitOn(day, nusach, inIsrael);
+  return portion ? [portion] : [];
+}
+
+export type HalachaMakeUpDay = { date: Date; readings: (HalachaDay | HachagDay)[] };
+
+export const HALACHA_MAKE_UP_DAYS = 7;
+
+// The reader's make-up folds (spec 9, D2): each of the seven days before `today` that has a portion, no mark and ended
+// after the mitzvah was switched on, newest first; the festival halachot only of the periods `today` is in.
+export function halachaMakeUpDays(
+  id: string,
+  today: Date,
+  nusach: Nusach,
+  inIsrael: boolean,
+  completions: Completions,
+  enabledAt: number | undefined,
+  location: Location,
+): HalachaMakeUpDay[] {
+  const current = new Set(hilchotHachagOn(today, nusach).map((reading) => reading.period.festival));
+  const days: HalachaMakeUpDay[] = [];
+  for (let back = 1; back <= HALACHA_MAKE_UP_DAYS; back++) {
+    const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - back);
+    if (completions[dateKey(date)]?.[id]) continue;
+    if (enabledAt !== undefined && enabledAt >= appDayEnd(date, location).getTime()) continue;
+    const readings = halachaReadingsOn(id, date, nusach, inIsrael).filter(
+      (reading) => !('period' in reading) || current.has(reading.period.festival),
+    );
+    if (readings.length) days.push({ date, readings });
+  }
+  return days;
 }

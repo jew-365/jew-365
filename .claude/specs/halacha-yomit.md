@@ -205,7 +205,7 @@ Both open in the nusach reader, [src/app/siddur/[id].tsx](../../src/app/siddur/%
 - The credit and licence notice under the text; the English text when the app is in English and the track has one, else the Hebrew with the existing language note.
 - Bookmarks and the last reading position work through `useSiddurBookmarksStore` with a `null` nusach key, as for Chok LeYisrael.
 
-The existing `LearningProgram` is keyed by parasha and week slot (`ChokSlot` has no Shabbat). The implementation either adapts a week of portions into a `ChokAsset` with a Shabbat slot added, or gives the reader a date-keyed program; the choice is the implementer's, the behaviour above is the contract, and the Chok and Shnayim reader suites must stay green unchanged.
+The existing `LearningProgram` is keyed by parasha and week slot (`ChokSlot` has no Shabbat). The implementation either adapts a week of portions into a `ChokAsset` with a Shabbat slot added, or gives the reader a date-keyed program; the choice is the implementer's, the behaviour above is the contract, and the Chok and Shnayim reader suites must stay green unchanged. As built (2026-11-10): a date-keyed path beside the Chok program. `halachaReadingsOn()` and `halachaMakeUpDays()` in `src/data/halachaContent.ts` give a day's portions and the make-up days, `halachaText()` in `src/utils/halachaText.ts` builds the text, and the day row is the shared `DayStepper`. No language note existed, so an English reader of a Hebrew-only track sees a banner (`halacha.englishMissing`).
 
 ## 10. App wiring
 

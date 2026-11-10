@@ -17,6 +17,8 @@ import {
 } from '@/types/siddur';
 import { CHOK_TEXT_ID } from './chok';
 import { SHNAYIM_TEXT_ID } from './shnayim';
+import { HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID } from './halacha';
+import { halachaReadingsOn } from './halachaContent';
 import { DayWindow, dayWindow } from '@/utils/buildDayTimeline';
 import { SELICHOT_NUSCHAOT, SELICHOT_TEXT_ID, hasSelichotContent } from './selichot';
 import { CHOK_PROGRAM, chokDayHasText } from '@/utils/chok';
@@ -390,6 +392,9 @@ export function siddurPlace(location: Location, inIsrael: boolean): Place {
   return { inIsrael, jerusalem: isJerusalem(location), location };
 }
 
+// The two halacha mitzvot read the installed track's portion of the window's day (.claude/specs/halacha-yomit.md, 9).
+export const isHalachaText = (id: string): boolean => id === HALACHA_YOMIT_ID || id === HILCHOT_HACHAG_ID;
+
 export function hasSiddurText(mitzvah: Mitzvah, nusach: Nusach, windowDate: Date, place: Place): boolean {
   if (mitzvah.isCustom) return customSiddurText(mitzvah, nusach) !== null;
   if (mitzvah.id === CHOK_TEXT_ID || mitzvah.id === SHNAYIM_TEXT_ID) {
@@ -397,6 +402,7 @@ export function hasSiddurText(mitzvah: Mitzvah, nusach: Nusach, windowDate: Date
     const program = mitzvah.id === CHOK_TEXT_ID ? CHOK_PROGRAM : SHNAYIM_PROGRAM;
     return chokDayHasText(day, place.inIsrael, program) && matchesCondition(CHOK_DAYS, dayFeatures(day, place));
   }
+  if (isHalachaText(mitzvah.id)) return halachaReadingsOn(mitzvah.id, windowDate, nusach, place.inIsrael).length > 0;
   const linked = MITZVAH_STANDALONE_TEXT[mitzvah.id];
   if (linked) {
     return hasStandaloneText(
@@ -425,7 +431,12 @@ export function nextMitzvahTextWindow(
 ): DayWindow | null {
   const own = mitzvahTextId(mitzvah.id);
   const linked = MITZVAH_STANDALONE_TEXT[mitzvah.id];
-  if (mitzvah.isCustom || mitzvah.id === CHOK_TEXT_ID || mitzvah.id === SHNAYIM_TEXT_ID || !(own || linked)) {
+  if (
+    mitzvah.isCustom ||
+    mitzvah.id === CHOK_TEXT_ID ||
+    mitzvah.id === SHNAYIM_TEXT_ID ||
+    !(own || linked || isHalachaText(mitzvah.id))
+  ) {
     return null;
   }
   const dayFrom = (base: Date, offset: number) =>

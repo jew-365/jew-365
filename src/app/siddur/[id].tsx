@@ -43,6 +43,8 @@ import Svg, { Path } from 'react-native-svg';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { CHOK_PARASHIYOT, CHOK_TEXT_ID } from '@/data/chok';
 import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
+import { FESTIVAL_NAMES, HALACHA_YOMIT_ID, effectiveHalachaTrack } from '@/data/halacha';
+import { HachagDay, HalachaDay, halachaMakeUpDays, halachaReadingsOn } from '@/data/halachaContent';
 import { findMitzvah } from '@/data/mitzvot';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import {
@@ -51,6 +53,7 @@ import {
   customSiddurText,
   hasSiddurText,
   hasStandaloneText,
+  isHalachaText,
   mitzvahTextEvening,
   mitzvahTextId,
   nextMitzvahTextWindow,
@@ -67,9 +70,17 @@ import { HDate } from '@hebcal/core';
 import { verifyChokInstall } from '@/services/ChokContentService';
 import { verifyShnayimInstall } from '@/services/ShnayimContentService';
 import { verifySelichotInstall } from '@/services/SelichotContentService';
-import { loadChokParasha, loadShnayimParasha, loadSiddurText } from '@/services/SiddurService';
+import { HALACHA_ENGLISH_PACK, verifyHalachaInstall } from '@/services/HalachaContentService';
+import {
+  loadChokParasha,
+  loadHalachaEnglish,
+  loadHalachaUnit,
+  loadShnayimParasha,
+  loadSiddurText,
+} from '@/services/SiddurService';
 import { HebcalService } from '@/services/HebcalService';
 import { useChokStore } from '@/stores/useChokStore';
+import { HALACHA_STORES } from '@/stores/useHalachaStore';
 import { useShnayimStore } from '@/stores/useShnayimStore';
 import { SHNAYIM_PROGRAM } from '@/utils/shnayim';
 import { useCompletionsStore, dateKey } from '@/stores/useCompletionsStore';
@@ -97,6 +108,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChokLicenseNotice } from '@/components/ChokLicenseNotice';
 import { ChokWeekControls } from '@/components/ChokWeekControls';
+import { DayStepper } from '@/components/DayStepper';
 import { ListRow } from '@/components/ListRow';
 import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { PickerCard } from '@/components/PickerCard';
@@ -107,6 +119,7 @@ import { useQuietBlock } from '@/components/ShabbatScreen';
 import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies, typography } from '@/theme/typography';
+import { HalachaEnglishUnit, HalachaUnit } from '@/types/halacha';
 import { ChokAsset, ChokDoubleChoice, ChokSectionKind, ChokSlot, ChokThuNightDay, HaftarahVariant } from '@/types/chok';
 import {
   PassageLabel,
@@ -178,7 +191,8 @@ import { calendarDay } from '@/utils/checkIn';
 import { windowClosed } from '@/utils/lateMarks';
 import { appDay } from '@/utils/locationDay';
 import { calendarLocale } from '@/utils/weeklyReport';
-import { translate, useI18n } from '@/i18n';
+import { AppLanguage, formatDate, translate, useI18n } from '@/i18n';
+import { HalachaMakeUpFold, HalachaReading, halachaText, halachaUnitsOf } from '@/utils/halachaText';
 
 const KEEP_AWAKE_TAG = 'siddur-reader';
 // Native RN swaps physical left/right under RTL (Android and iOS); react-native-web keeps them literal.
@@ -597,6 +611,12 @@ type LoadState =
   | { status: 'loading' }
   | { status: 'ready'; text: SiddurText }
   | { status: 'chok'; assets: readonly ChokAsset[] }
+  | {
+      status: 'halacha';
+      key: string;
+      units: ReadonlyMap<string, HalachaUnit>;
+      english: ReadonlyMap<string, HalachaEnglishUnit> | null;
+    }
   | { status: 'error' };
 
 type LayoutNode = { y: number; parent: LayoutNode | null };
@@ -905,6 +925,33 @@ function useReadingTracker(
   }, [countId, sections, active, count]);
 }
 
+// A halacha reading under its headings: the festival on a festival portion, then the portion's label (spec 9).
+function halachaReadingOf(reading: HalachaDay | HachagDay): HalachaReading {
+  const festival = 'period' in reading ? FESTIVAL_NAMES[reading.period.festival] : null;
+  return {
+    portion: reading.portion,
+    headings: [
+      ...(festival
+        ? [
+            {
+              he: translate('halacha.before', { chag: festival.he }, 'he'),
+              en: translate('halacha.before', { chag: festival.en }, 'en'),
+              level: 1 as const,
+            },
+          ]
+        : []),
+      { ...reading.portion.label, level: 2 as const },
+    ],
+  };
+}
+
+const halachaDayName = (date: Date, language: AppLanguage) => {
+  const day = new HDate(date);
+  return `${formatDate(date, 'cccc', language)}, ${language === 'he' ? day.renderGematriya(true) : day.render('en', false)}`;
+};
+
+const sameDay = (a: Date, b: Date) => dateKey(a) === dateKey(b);
+
 export default function SiddurScreen() {
   const { colors } = useTheme();
   const quiet = useQuietBlock() !== null;
@@ -948,6 +995,16 @@ export default function SiddurScreen() {
   const chokOnly = useChokStore((s) => s.installed);
   const shnayimInstall = useShnayimStore((s) => s.installed);
   const chokInstall = shnayim ? shnayimInstall : chokOnly;
+  // The daily halacha and the halachot of the festival read the user's track day by day (spec 9).
+  const halachaId = isHalachaText(params.id) ? params.id : null;
+  const halachaTrack = effectiveHalachaTrack(
+    useUserStore((s) => s.halachaTrack),
+    nusach,
+  );
+  const halachaInstall = HALACHA_STORES[halachaTrack]((s) => s.installed);
+  const englishPack = HALACHA_ENGLISH_PACK[halachaTrack];
+  const englishInstall = HALACHA_STORES[englishPack ?? halachaTrack]((s) => (englishPack ? s.installed : null));
+  const benIshChaiSwapped = useUserStore((s) => s.benIshChaiYearSwapped);
   const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(nusach));
   const selichotVersion = useSelichotStore((s) => s.installed?.version ?? null);
   const savedDoubleChoice = useUserStore((s) => s.chokDoubleChoice);
@@ -1064,15 +1121,89 @@ export default function SiddurScreen() {
   const features = useMemo(() => dayFeatures(hebrewDay, place), [hebrewDay, place]);
   const resolveInput = useRef({ features, maritalStatus, siddurVoice });
   resolveInput.current = { features, maritalStatus, siddurVoice };
-  const available = chok
-    ? chokInstall !== null &&
-      chokWeek.length > 0 &&
-      chokWeek.every((parasha) => chokInstall.files[parasha] !== undefined)
-    : standalone
-      ? requestedDate
-        ? hasStandaloneText(standalone, nusach, features)
-        : reading !== null
-      : Boolean(mitzvah && hasSiddurText(mitzvah, nusach, windowDate, place));
+  const [halachaBrowse, setHalachaBrowse] = useState<Date | null>(null);
+  const halachaDate = halachaBrowse ?? windowDate;
+  const halachaReadings = useMemo(
+    () =>
+      halachaId && halachaInstall
+        ? halachaReadingsOn(halachaId, halachaDate, nusach, inIsrael).map(halachaReadingOf)
+        : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the Ben Ish Chai year swap changes what a day reads
+    [halachaId, halachaDate, nusach, inIsrael, halachaInstall, benIshChaiSwapped],
+  );
+  // A day of the period the festival halachot browse within: from the first day of the longest period to the erev.
+  const halachaBounds = useMemo(() => {
+    if (halachaId === HALACHA_YOMIT_ID || !halachaInstall) return null;
+    const periods = halachaReadingsOn(halachaId ?? '', windowDate, nusach, inIsrael).flatMap((reading) =>
+      'period' in reading ? [reading.period] : [],
+    );
+    if (!periods.length) return null;
+    const from = (days: number) =>
+      new Date(windowDate.getFullYear(), windowDate.getMonth(), windowDate.getDate() + days);
+    return {
+      min: from(-Math.max(...periods.map((period) => period.day))),
+      max: from(Math.max(...periods.map((period) => period.daysLeft)) - 1),
+    };
+  }, [halachaId, halachaInstall, windowDate, nusach, inIsrael]);
+  const browseHalacha = (day: Date) => setHalachaBrowse(sameDay(day, windowDate) ? null : day);
+  const halachaActive = useMitzvotStore(selectActive(halachaId ?? HALACHA_YOMIT_ID));
+  const halachaMarks = useCompletionsStore((s) => (halachaId ? s.completions : null));
+  const halachaToday = halachaBrowse === null && !offSeason && sameDay(windowDate, appDay(now, location));
+  const halachaMakeUps = useMemo(
+    (): HalachaMakeUpFold[] =>
+      halachaId && halachaInstall && halachaToday && halachaActive.enabled && halachaMarks
+        ? halachaMakeUpDays(
+            halachaId,
+            windowDate,
+            nusach,
+            inIsrael,
+            halachaMarks,
+            halachaActive.enabledAt,
+            location,
+          ).map(({ date, readings }) => ({
+            dateKey: dateKey(date),
+            label: {
+              he: translate('halacha.makeUp', { day: halachaDayName(date, 'he') }, 'he'),
+              en: translate('halacha.makeUp', { day: halachaDayName(date, 'en') }, 'en'),
+            },
+            readings: readings.map(halachaReadingOf),
+          }))
+        : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the Ben Ish Chai year swap changes what a day reads
+    [
+      halachaId,
+      halachaInstall,
+      halachaToday,
+      halachaActive.enabled,
+      halachaActive.enabledAt,
+      halachaMarks,
+      windowDate,
+      nusach,
+      inIsrael,
+      location,
+      benIshChaiSwapped,
+    ],
+  );
+  const halachaUnits = useMemo(
+    () => halachaUnitsOf([...halachaMakeUps.flatMap((makeUp) => makeUp.readings), ...halachaReadings]),
+    [halachaMakeUps, halachaReadings],
+  );
+  // The English beside the Hebrew, when the app is in English and the track's English is installed.
+  const halachaEnglish = language === 'en' && englishInstall !== null;
+  const halachaKey = halachaInstall
+    ? `${halachaTrack}/${halachaInstall.version}/${halachaEnglish ? englishInstall?.version : '-'}/${halachaUnits.join('|')}`
+    : '';
+  const available = halachaId
+    ? halachaReadings.length > 0
+    : chok
+      ? chokInstall !== null &&
+        chokWeek.length > 0 &&
+        chokWeek.every((parasha) => chokInstall.files[parasha] !== undefined)
+      : standalone
+        ? requestedDate
+          ? hasStandaloneText(standalone, nusach, features)
+          : reading !== null
+        : Boolean(mitzvah && hasSiddurText(mitzvah, nusach, windowDate, place));
   const done = useCompletionsStore((s) => Boolean(mitzvah && s.completions[dateKey(windowDate)]?.[mitzvah.id]));
   const lateMark = useLateMarkDialog();
   const chokActive = useMitzvotStore(selectActive(program.id));
@@ -1224,6 +1355,38 @@ export default function SiddurScreen() {
 
   useEffect(() => {
     if (!available) return undefined;
+    if (halachaId) {
+      let active = true;
+      setLoad({ status: 'loading' });
+      const task = afterPaint(() => {
+        // The English is optional: a unit without it reads in Hebrew.
+        const english = halachaEnglish
+          ? Promise.all(halachaUnits.map(loadHalachaEnglish))
+              .then((list) => new Map(list.map((unit) => [unit.unit, unit])))
+              .catch(() => null)
+          : Promise.resolve(null);
+        Promise.all([Promise.all(halachaUnits.map((unit) => loadHalachaUnit(halachaTrack, unit))), english])
+          .then(
+            ([list, en]) =>
+              active &&
+              setLoad({
+                status: 'halacha',
+                key: halachaKey,
+                units: new Map(list.map((unit) => [unit.unit, unit])),
+                english: en,
+              }),
+          )
+          .catch((error: unknown) => {
+            if (!active) return;
+            verifyHalachaInstall(halachaTrack, error);
+            setLoad({ status: 'error' });
+          });
+      });
+      return () => {
+        active = false;
+        task.cancel();
+      };
+    }
     if (chok) {
       let active = true;
       setLoad({ status: 'loading' });
@@ -1268,7 +1431,23 @@ export default function SiddurScreen() {
       active = false;
       task.cancel();
     };
-  }, [mitzvah, available, nusach, textId, attempt, chok, shnayim, chokWeek, chokInstall?.version, selichotVersion]);
+  }, [
+    mitzvah,
+    available,
+    nusach,
+    textId,
+    attempt,
+    chok,
+    shnayim,
+    chokWeek,
+    chokInstall?.version,
+    selichotVersion,
+    halachaId,
+    halachaKey,
+    halachaUnits,
+    halachaTrack,
+    halachaEnglish,
+  ]);
 
   useEffect(() => {
     if (chokWeek.length < 2 || doubleChoice !== null || asked.current) return;
@@ -1276,10 +1455,23 @@ export default function SiddurScreen() {
     setAsking(true);
   }, [chokWeek, doubleChoice]);
 
-  const loadStale = load.status === 'chok' && load.assets.map((asset) => asset.parasha).join('|') !== chokWeekKey;
+  const loadStale =
+    (load.status === 'chok' && load.assets.map((asset) => asset.parasha).join('|') !== chokWeekKey) ||
+    (load.status === 'halacha' && load.key !== halachaKey);
   const loadStatus = loadStale ? 'loading' : load.status;
   const readyText = useMemo(() => {
     if (load.status === 'ready') return load.text;
+    if (load.status === 'halacha') {
+      return loadStale || !halachaId
+        ? null
+        : halachaText({
+            id: halachaId,
+            readings: halachaReadings,
+            makeUps: halachaMakeUps,
+            units: load.units,
+            english: load.english,
+          });
+    }
     if (load.status !== 'chok' || loadStale || !shownSlot) return null;
     return chokText(load.assets, {
       id: program.id,
@@ -1290,7 +1482,18 @@ export default function SiddurScreen() {
       variantNames: CHOK_VARIANT_NAMES,
       makeUps: makeUpFolds,
     });
-  }, [load, loadStale, shownSlot, doubleChoice, nusach, makeUpFolds, program.id]);
+  }, [
+    load,
+    loadStale,
+    shownSlot,
+    doubleChoice,
+    nusach,
+    makeUpFolds,
+    program.id,
+    halachaId,
+    halachaReadings,
+    halachaMakeUps,
+  ]);
 
   const resolvedSections = useMemo(
     () => (readyText ? resolveForReader(readyText, features, maritalStatus, siddurVoice) : []),
@@ -1307,7 +1510,7 @@ export default function SiddurScreen() {
     });
   }, [chok, textId, resolvedSections, amidahVerses, amidahPrayer]);
   const sections = personal.sections;
-  const bookmarkTextId: string | null = chok ? program.id : textId;
+  const bookmarkTextId: string | null = chok ? program.id : (halachaId ?? textId);
   const placeNusach = readyText?.nusach ?? null;
   const dailyText = textId !== null && mitzvahTextId(textId) !== null;
   const shownBookmarks = useMemo(
@@ -1424,7 +1627,7 @@ export default function SiddurScreen() {
     });
   const finishMakeUp = (makeUp: ChokMakeUpFold) => lateMark.mark(markTarget(program.id, calendarDay(makeUp.dateKey)));
   const doneTarget = mitzvah
-    ? offSeason
+    ? offSeason || halachaBrowse || (halachaId && !halachaActive.enabled)
       ? null
       : { id: mitzvah.id, date: windowDate, done }
     : chokDoneDate
@@ -1453,6 +1656,7 @@ export default function SiddurScreen() {
   const candleNight = chanukahNightOn(candleDay);
   const subtitle = useMemo(() => {
     if (chokPortion) return undefined;
+    if (halachaId) return translate(`halacha.book.${halachaTrack}`, undefined, language);
     const occasions = [
       ...HebcalService.getHolidays(hebrewDay.greg(), location, calendarLocale(language), {
         omitChanukahCandles: true,
@@ -1461,7 +1665,7 @@ export default function SiddurScreen() {
       ...(candleNight === null ? [] : [translate('siddur.chanukahNight', { n: candleNight }, language)]),
     ];
     return [translate(`nusach.${nusach}`, undefined, language), hebrewDateLabel, ...occasions].join(' · ');
-  }, [chokPortion, hebrewDay, location, language, candleNight, nusach, hebrewDateLabel]);
+  }, [chokPortion, halachaId, halachaTrack, hebrewDay, location, language, candleNight, nusach, hebrewDateLabel]);
   const chooseDouble = (choice: ChokDoubleChoice) => {
     setDoubleChoice(choice);
     setAsking(false);
@@ -1599,6 +1803,19 @@ export default function SiddurScreen() {
       ];
     });
   const makeUpDone = (section: SiddurSection) => {
+    const halachaMakeUp = halachaMakeUps.find((fold) => fold.label.he === section.title.he);
+    if (halachaId && halachaMakeUp) {
+      const day = calendarDay(halachaMakeUp.dateKey);
+      return (
+        <TapGuard>
+          <Button
+            label={t('halacha.makeUpDone', { day: halachaDayName(day, language) })}
+            onPress={() => lateMark.mark(markTarget(halachaId, day))}
+            style={styles.doneAction}
+          />
+        </TapGuard>
+      );
+    }
     const makeUp = makeUpFolds.find((fold) => fold.label.he === section.title.he);
     if (!makeUp) return null;
     return (
@@ -1789,6 +2006,21 @@ export default function SiddurScreen() {
 
   const body = (() => {
     if (!mitzvah && !standalone && !chok) return <Message text={t('errors.generic')} />;
+    if (halachaId && halachaInstall === null) {
+      return (
+        <View style={styles.center}>
+          <Text style={[typography.body, { color: colors.textSub }]}>
+            {t('halacha.addon.readerMissing', { book: t(`halacha.book.${halachaTrack}`) })}
+          </Text>
+          <Button
+            label={t('halacha.addon.goDownload')}
+            onPress={() => router.push(`/mitzvah/${halachaId}`)}
+            style={styles.retryAction}
+          />
+        </View>
+      );
+    }
+    if (halachaId && !available) return <Message text={t('halacha.noPortion')} />;
     if (chok && chokInstall === null) {
       const addon = shnayim ? 'shnayim.addon' : 'chok.addon';
       return (
@@ -2004,6 +2236,13 @@ export default function SiddurScreen() {
     resetScroll();
   }, [listShown, resetScroll]);
 
+  const halachaDayKey = halachaId ? dateKey(halachaDate) : '';
+  useEffect(() => {
+    if (!halachaDayKey) return;
+    setToggled(new Set());
+    setShownSection(0);
+  }, [halachaDayKey]);
+
   useEffect(() => {
     if (!chok) return;
     setToggled(new Set());
@@ -2104,6 +2343,14 @@ export default function SiddurScreen() {
             }
           >
             <View style={styles.toolbarStack}>
+              {halachaId && halachaInstall ? (
+                <DayStepper
+                  value={halachaDate}
+                  onChange={browseHalacha}
+                  min={halachaBounds?.min}
+                  max={halachaBounds?.max}
+                />
+              ) : null}
               {weekPortion && chokPortion && available ? (
                 <ChokWeekControls
                   week={weekPortion.parashiyot}
@@ -2199,6 +2446,12 @@ export default function SiddurScreen() {
                 text={t(offSeason ? 'siddur.offSeason' : 'siddur.timePassed')}
                 style={styles.resumeBanner}
               />
+            </View>
+          ) : null}
+
+          {language === 'en' && load.status === 'halacha' && load.english === null && !body ? (
+            <View style={styles.resume}>
+              <Banner tone="info" text={t('halacha.englishMissing')} style={styles.resumeBanner} />
             </View>
           ) : null}
 
@@ -2356,7 +2609,21 @@ export default function SiddurScreen() {
               )}
               ListFooterComponent={
                 <>
-                  {browsing ? (
+                  {halachaBrowse ? (
+                    <View style={styles.browsingFooter}>
+                      <Text style={[typography.caption, styles.browsingNote, { color: colors.textSub }]}>
+                        {t('halacha.browsing.note')}
+                      </Text>
+                      <TapGuard>
+                        <Button
+                          variant="secondary"
+                          label={t('halacha.browsing.back')}
+                          onPress={() => setHalachaBrowse(null)}
+                          style={styles.doneAction}
+                        />
+                      </TapGuard>
+                    </View>
+                  ) : browsing ? (
                     <View style={styles.browsingFooter}>
                       <Text style={[typography.caption, styles.browsingNote, { color: colors.textSub }]}>
                         {t('chok.browsing.note')}
@@ -2388,7 +2655,7 @@ export default function SiddurScreen() {
                       </TapGuard>
                     )
                   ) : null}
-                  {!browsing && textReadable && (!doneTarget || doneTarget.done) ? (
+                  {!browsing && !halachaBrowse && textReadable && (!doneTarget || doneTarget.done) ? (
                     reads.counted.has('text') ? (
                       <View testID="siddur-read-counted" style={styles.doneRow}>
                         <MitzvahIcon name="check" size={DONE_ICON_SIZE} color={colors.safe} />
