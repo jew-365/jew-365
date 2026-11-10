@@ -1,0 +1,51 @@
+<sc-if value="{{r7On.card}}" hint-placeholder-val="{{ false }}">
+<section class="r7c {{r7On.cls}} {{r7.toneCls}} {{r7.heatCls}}" style="{{r7Style}}" aria-label="הלוח החכם">
+<i class="r7peek p1" aria-hidden="true"></i><i class="r7peek p2" aria-hidden="true"></i>
+<sc-if value="{{r7.cur.isNow}}" hint-placeholder-val="{{ true }}"><i class="r7fill" style="{{r7.live.barStyle}}" aria-hidden="true"></i></sc-if>
+<div class="r7top">
+<div class="r7tabs" role="tablist" aria-label="מה מוצג בלוח"><sc-for list="{{r7.pages}}" as="p" hint-placeholder-count="4"><button class="r7tab {{p.cls}}" role="tab" aria-selected="{{p.on}}" aria-label="{{p.aria}}" onClick="{{p.pick}}">{{p.name}}</button></sc-for></div>
+<button class="r7more" onClick="{{r7CfgOpen}}" aria-label="התאמת הלוח"><i></i><i></i><i></i></button>
+</div>
+<div class="r7body pg-{{r7.cur.id}}">
+<sc-if value="{{r7.cur.isNow}}" hint-placeholder-val="{{ true }}">
+<button class="r7live" onClick="{{r7.next}}" aria-label="{{r7.live.aria}}. לחיצה לכרטיס הבא">
+<span class="r7lt"><span class="r7lab">{{r7.live.label}}</span><sc-if value="{{r7.live.hasWhy}}" hint-placeholder-val="{{ true }}"><span class="r7why">{{r7.live.why}}</span></sc-if></span>
+<span class="r7lv"><span class="r7in">בעוד</span><b class="r7big num">{{r7.live.big}}</b></span>
+</button>
+<div class="r7bar" aria-hidden="true"><i style="{{r7.live.barStyle}}"></i></div>
+<sc-if value="{{r7.live.hasAfter}}" hint-placeholder-val="{{ true }}"><p class="r7after">{{r7.live.after}}</p></sc-if>
+</sc-if>
+<sc-if value="{{r7.cur.notNow}}" hint-placeholder-val="{{ false }}">
+<button class="r7pg" onClick="{{r7.next}}" aria-label="{{r7.cur.aria}}. לחיצה לכרטיס הבא">
+<span class="r7tt"><span class="r6ic">[[icB:r7.cur]]</span><b>{{r7.cur.title}}</b></span>
+<span class="r7facts"><sc-for list="{{r7.cur.facts}}" as="f" hint-placeholder-count="2"><span class="r7f {{f.cls}}"><span class="k">{{f.k}}</span><b class="v num">{{f.v}}</b></span></sc-for></span>
+</button>
+</sc-if>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{sb.B}}" hint-placeholder-val="{{ false }}">
+<section class="r7c r7split" style="{{r7Style}}" aria-label="הלוח החכם">
+<button class="r7ring {{r7.heatCls}}" onClick="{{r7.pickNow}}" aria-label="{{r7.live.aria}}">
+<svg viewBox="0 0 72 72" aria-hidden="true"><circle class="rt" cx="36" cy="36" r="30"></circle><circle class="rp" cx="36" cy="36" r="30" transform="rotate(-90 36 36)" stroke-dasharray="188.5" stroke-dashoffset="{{r7.live.ringOff}}"></circle></svg>
+<span class="r7rc"><b class="num">{{r7.live.big}}</b></span>
+</button>
+<div class="r7side">
+<div class="r7sl"><span class="r7lab">{{r7.live.label}}</span><span class="r7sdots" role="tablist" aria-label="מה מוצג ליד הטבעת"><sc-for list="{{r7.sidePages}}" as="p" hint-placeholder-count="3"><button class="r7sd" role="tab" aria-selected="{{p.on}}" aria-label="{{p.name}}" onClick="{{p.pick}}">{{p.name}}</button></sc-for></span><button class="r7more" onClick="{{r7CfgOpen}}" aria-label="התאמת הלוח"><i></i><i></i><i></i></button></div>
+<button class="r7pg pg-{{r7.side.id}}" onClick="{{r7.next}}" aria-label="{{r7.side.aria}}">
+<b class="r7tt2">{{r7.side.title}}</b>
+<span class="r7facts"><sc-for list="{{r7.side.facts}}" as="f" hint-placeholder-count="2"><span class="r7f {{f.cls}}"><span class="k">{{f.k}}</span><b class="v num">{{f.v}}</b></span></sc-for></span>
+</button>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{sb.E}}" hint-placeholder-val="{{ false }}">
+<section class="r7c r7lanes {{r7.heatCls}}" style="{{r7Style}}" aria-label="הלוח החכם">
+<div class="r7lane live"><i class="r7lfill" style="{{r7.live.barStyle}}" aria-hidden="true"></i><span class="lk">עכשיו</span><span class="lv"><b>{{r7.live.label}}</b> · {{r7.live.left}}</span></div>
+<sc-if value="{{r7.hasDay}}" hint-placeholder-val="{{ true }}"><div class="r7lane"><span class="lk">היום</span><span class="lv">{{r7.dayLine}}</span></div></sc-if>
+<sc-if value="{{r7.hasWeek}}" hint-placeholder-val="{{ true }}"><div class="r7lane"><span class="lk">השבוע</span><span class="lv num">{{r7.weekLine}}</span></div></sc-if>
+<button class="r7more abs" onClick="{{r7CfgOpen}}" aria-label="התאמת הלוח"><i></i><i></i><i></i></button>
+</section>
+</sc-if>

@@ -1,0 +1,48 @@
+<sc-if value="{{r7Cfg}}" hint-placeholder-val="{{ false }}">
+<button class="pscrim" onClick="{{r7CfgClose}}" aria-label="סגירה" tabindex="-1"></button>
+<section class="psheet" role="dialog" aria-modal="true" aria-labelledby="r7cfg-t">
+<div class="psheet-head"><span class="pgrab" aria-hidden="true"></span><h2 class="psheet-t" id="r7cfg-t">הלוח שלי</h2><button class="pclose" onClick="{{r7CfgClose}}" aria-label="סגירה">[[ic:close]]</button></div>
+<div class="psheet-body">
+<div class="r7sw"><span class="pinm"><b>מצב חכם</b><span class="cap">הלוח פותח את הכרטיס שהכי חשוב עכשיו: זמן שנגמר בקרוב, יום מיוחד, ומחמישי בלילה את השבת</span></span><button class="r7tog" role="switch" aria-checked="{{r7.smartOn}}" onClick="{{r7CfgSmart}}" aria-label="מצב חכם"><i></i></button></div>
+<div class="r7sw"><span class="pinm"><b>מעבר אוטומטי</b><span class="cap">כל כמה שניות לכרטיס הבא, עד שבוחרים כרטיס</span></span><button class="r7tog" role="switch" aria-checked="{{r7.rotateOn}}" onClick="{{r7CfgRotate}}" aria-label="מעבר אוטומטי"><i></i></button></div>
+<p class="plabel">כרטיסים בלוח</p>
+<div class="pchips"><sc-for list="{{r7CfgPages}}" as="c" hint-placeholder-count="4"><button class="pchip" aria-pressed="{{c.on}}" onClick="{{c.toggle}}">{{c.name}}</button></sc-for></div>
+<p class="plabel">מה יופיע ב״שלי״ (עד שלושה)</p>
+<div class="pinl" role="list"><sc-for list="{{r7CfgCat}}" as="c" hint-placeholder-count="5"><div class="pinr" role="listitem"><span class="pinm"><b>{{c.k}}</b><span class="cap">{{c.why}}</span></span><button class="pinb" aria-pressed="{{c.on}}" onClick="{{c.toggle}}">{{c.act}}</button></div></sc-for></div>
+</div>
+</section>
+</sc-if>
+<sc-if value="{{r7NativeOn}}" hint-placeholder-val="{{ false }}">
+<section class="r7nat" role="dialog" aria-modal="true" aria-label="הלוח מחוץ לאפליקציה">
+<div class="r7nt" role="tablist"><sc-for list="{{r7NativeTabs}}" as="n" hint-placeholder-count="3"><button role="tab" aria-selected="{{n.on}}" onClick="{{n.pick}}">{{n.name}}</button></sc-for></div>
+<sc-if value="{{r7IsHome}}" hint-placeholder-val="{{ true }}">
+<div class="r7wall home">
+<p class="r7tag">ווידג׳ט במסך הבית · דורש build (WidgetKit)</p>
+<div class="r7wm {{r7.heatCls}} {{r7.toneCls}}">
+<div class="r7wring"><svg viewBox="0 0 72 72" aria-hidden="true"><circle class="rt" cx="36" cy="36" r="30"></circle><circle class="rp" cx="36" cy="36" r="30" transform="rotate(-90 36 36)" stroke-dasharray="188.5" stroke-dashoffset="{{r7.live.ringOff}}"></circle></svg><b class="num">{{r7.live.big}}</b></div>
+<div class="r7wtx"><span class="r7wk">{{r7.live.label}}</span><b>{{r7.dayPage.title}}</b><span class="num">{{r7.weekLine}}</span></div>
+</div>
+<div class="r7apps" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="r7ws {{r7.toneCls}}"><span class="r7wk">השבוע</span><b>{{r7.weekPage.title}}</b><sc-for list="{{r7.weekPage.facts}}" as="f" hint-placeholder-count="2"><span class="num"><span>{{f.k}}</span> {{f.v}}</span></sc-for></div>
+</div>
+</sc-if>
+<sc-if value="{{r7IsLock}}" hint-placeholder-val="{{ false }}">
+<div class="r7wall lock">
+<div class="r7island {{r7.heatCls}}"><svg viewBox="0 0 72 72" aria-hidden="true"><circle class="rt" cx="36" cy="36" r="30"></circle><circle class="rp" cx="36" cy="36" r="30" transform="rotate(-90 36 36)" stroke-dasharray="188.5" stroke-dashoffset="{{r7.live.ringOff}}"></circle></svg><b class="num">{{r7.live.big}}</b></div>
+<p class="r7lclock num">{{nowT}}</p>
+<p class="r7ldate">{{dateLine}}</p>
+<p class="r7tag">Live Activity במסך הנעילה ובאי הדינמי · דורש build (ActivityKit)</p>
+<div class="r7la {{r7.heatCls}}"><span class="r7wk">יהודי 365</span><b>{{r7.live.label}}</b><span class="num">{{r7.live.left}}</span><div class="r7bar"><i style="{{r7.live.barStyle}}"></i></div><span class="r7why">{{r7.live.after}}</span></div>
+</div>
+</sc-if>
+<sc-if value="{{r7IsAndroid}}" hint-placeholder-val="{{ false }}">
+<div class="r7wall android">
+<p class="r7glance">{{r7.dayPage.title}} · {{r7.live.label}} {{r7.live.left}}</p>
+<p class="r7tag">שורה ב-At a Glance, ווידג׳ט והתראה מתמשכת · דורש build</p>
+<div class="r7aw {{r7.toneCls}}"><div class="r7awt"><span class="r7wk">עכשיו</span><b>{{r7.live.label}}</b><span class="num">{{r7.live.left}}</span></div><div class="r7bar"><i style="{{r7.live.barStyle}}"></i></div><div class="r7awf"><span>{{r7.dayLine}}</span><span class="num">{{r7.weekLine}}</span></div></div>
+<div class="r7ong"><span class="r7wk">יהודי 365 · עכשיו</span><b>{{r7.live.label}} · {{r7.live.left}}</b><div class="r7bar"><i style="{{r7.live.barStyle}}"></i></div></div>
+</div>
+</sc-if>
+<button class="r7natx" onClick="{{r7NativeClose}}">לאפליקציה</button>
+</section>
+</sc-if>

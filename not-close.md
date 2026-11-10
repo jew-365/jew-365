@@ -489,7 +489,9 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Flag:** `OTA` (once a design is picked and built).
   - **Source:** the owner's message of 2026-11-09 after seeing the bento in the preview app: "התוצאה לא יפה ... להציג בצורה חכמה שמשתנה בהתאם לתקופה יום או שבוע בדף הבית מה שהכי רלוונטי ... מה שבוחר המשתמש ... קרוסלת הזמנים שכבר קיימת ... ללא כפילויות וחסכון במקום ... תחושת פרמיום ... תעשה מחקר".
   - **What it is:** round 6 of [design/lab/studies/2026-11-08-home-schedule/](design/lab/studies/2026-11-08-home-schedule/AGENTS.md): six designs on one rule (the carousel holds every time once, upcoming first with the period's times in gold and tomorrow's morning after tzeit; one line of the day and the week that never repeats a printed time; picks starred in the carousel), with the research and eight more ideas, published to the same gallery and canvas.
-  - **Waiting on:** the owner's pick. The bento stays in the preview app until then.
+  - **Picked:** the smart stack, `R6Stack` (2026-11-10), with more in the same card, the live chip inside it, an optional smart mode and build features.
+  - **Round 7 (2026-11-10):** six looks of one four-page card (עכשיו with a countdown and a filling bar, היום, השבוע with Shabbat's entry and exit and the molad, שלי), the ⋯ settings sheet, and a mock of the widgets, Live Activity and Android surfaces a native build would add, published to the same gallery and canvas.
+  - **Waiting on:** the owner's pick of round 7. The bento stays in the preview app until then.
 
 ### Medium — App requests of 2026-11-09
 

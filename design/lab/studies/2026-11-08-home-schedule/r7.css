@@ -1,0 +1,149 @@
+/* Round 7: the smart stack, richer, with the live countdown inside it. */
+.hero.r7 .block{padding-bottom:6px}
+.r7c{position:relative;z-index:2;box-sizing:border-box;margin:0 16px 6px;padding:6px 6px 8px;border-radius:24px;overflow:hidden;backdrop-filter:blur(16px) saturate(1.25);-webkit-backdrop-filter:blur(16px) saturate(1.25)}
+.r7glass{background:color-mix(in srgb,var(--surface) 24%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 24px rgba(0,0,0,.12)}
+.r7top{display:flex;align-items:center;gap:2px;padding:0 2px}
+.r7tabs{display:flex;gap:2px;flex:1;min-width:0}
+.r7tab{position:relative;display:inline-flex;align-items:center;min-height:30px;padding:0 10px;border:0;border-radius:15px;background:none;color:inherit;font:inherit;font-size:12px;font-weight:600;opacity:.7;cursor:pointer;white-space:nowrap}
+.r7tab::after{content:'';position:absolute;inset:-7px 0}
+.r7tab[aria-selected="true"]{opacity:1;font-weight:800;background:color-mix(in srgb,currentColor 15%,transparent)}
+.r7tab.smart::before{content:'';width:5px;height:5px;margin-inline-end:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px color-mix(in srgb,var(--gold) 30%,transparent)}
+.r7more{position:relative;flex:none;display:inline-flex;align-items:center;justify-content:center;gap:3px;width:40px;height:30px;border:0;border-radius:15px;background:none;color:inherit;cursor:pointer;opacity:.8}
+.r7more::after{content:'';position:absolute;inset:-7px -2px}
+.r7more>i{width:4px;height:4px;border-radius:50%;background:currentColor}
+.r7more.abs{position:absolute;top:4px;inset-inline-end:4px;z-index:3}
+.r7body{position:relative;height:86px}
+.r7live,.r7pg{display:flex;width:100%;border:0;background:none;color:inherit;font:inherit;text-align:start;cursor:pointer}
+.r7live{align-items:center;justify-content:space-between;gap:10px;padding:6px 10px 2px}
+.r7lt{display:flex;flex-direction:column;min-width:0}
+.r7lab{font-family:'Frank Ruhl Libre',serif;font-size:19px;line-height:24px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r7why{font-size:12px;line-height:16px;opacity:.78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r7lv{display:flex;align-items:baseline;gap:5px;flex:none}
+.r7in{font-size:11px;font-weight:700;opacity:.72}
+.r7big{font-family:'Frank Ruhl Libre',serif;font-size:32px;line-height:36px;font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.r7bar{height:5px;margin:4px 10px 0;border-radius:3px;background:color-mix(in srgb,currentColor 16%,transparent);overflow:hidden}
+.r7bar>i{display:block;height:100%;margin-inline-start:0;border-radius:3px;background:var(--gold);transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.heat-hot .r7bar>i{background:linear-gradient(to left,#FF8A5B,#FF5A5A)}
+.heat-warm .r7bar>i{background:linear-gradient(to left,#FFC56B,#F59E0B)}
+.r7after{margin:5px 10px 0;font-size:11px;line-height:14px;opacity:.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r7pg{flex-direction:column;gap:7px;padding:6px 10px 2px}
+.r7tt{display:flex;align-items:center;gap:8px;min-width:0}
+.r7tt>b,.r7tt2{font-family:'Frank Ruhl Libre',serif;font-size:18px;line-height:23px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r7facts{display:flex;gap:0;width:100%}
+.r7facts>.sc-interp{display:contents}
+.r7f{flex:1 1 0;min-width:0;display:flex;flex-direction:column;padding:0 8px;border-inline-start:1px solid color-mix(in srgb,currentColor 18%,transparent)}
+.r7f.f0{flex:1.5 1 0;padding-inline-start:0;border:0}
+.r7f .k{font-size:11px;line-height:14px;font-weight:700;opacity:.7;white-space:nowrap}
+.r7f .v{font-size:13px;line-height:18px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.r7body.pg-now,.r7body.pg-day,.r7body.pg-week,.r7body.pg-mine{animation:r7in .38s cubic-bezier(.2,.8,.2,1)}
+.r7body.pg-day{animation-name:r7in2}.r7body.pg-week{animation-name:r7in3}.r7body.pg-mine{animation-name:r7in4}
+@keyframes r7in{from{opacity:0;transform:translateY(10px)}}@keyframes r7in2{from{opacity:0;transform:translateY(10px)}}@keyframes r7in3{from{opacity:0;transform:translateY(10px)}}@keyframes r7in4{from{opacity:0;transform:translateY(10px)}}
+.r7fill,.r7peek{display:none}
+
+/* ג · the period's tone: the card takes the colour of the hour and the day, and the live page fills it. */
+.r7tone{color:#FFF!important;box-shadow:0 10px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.25)}
+.r7tone .r7fill{display:block;position:absolute;top:0;bottom:0;right:0;background:linear-gradient(to left,rgba(255,255,255,.22),rgba(255,255,255,.10));border-inline-end:2px solid rgba(255,255,255,.55);transition:width .6s}
+.r7tone .r7bar{display:none}
+.r7tone .r7top,.r7tone .r7body{position:relative}
+.tone-dawn{background:linear-gradient(135deg,#6E5BC9,#E58FB6)}
+.tone-morning{background:linear-gradient(135deg,#F59E5B,#E8695A)}
+.tone-noon{background:linear-gradient(135deg,#3B8FD9,#2357A8)}
+.tone-evening{background:linear-gradient(135deg,#E0607E,#7D4FC8)}
+.tone-night{background:linear-gradient(135deg,#252B6E,#10143D)}
+.tone-shabbat{background:linear-gradient(135deg,#4A2350,#8C3F5E)}
+.tone-chanukah{background:linear-gradient(135deg,#0E2A6E,#2152B5)}
+.tone-fast{background:linear-gradient(135deg,#4B5563,#1F2937)}
+.tone-rc{background:linear-gradient(135deg,#2E3C74,#7E93CC)}
+.r7tone.tone-shabbat .r7tab.smart::before,.r7tone.tone-chanukah .r7tab.smart::before{background:#F6C453}
+
+/* ד · a dark stack: two cards peek above it, gold accents. */
+.r7dark{overflow:visible;margin-top:14px;color:#F4F1EA!important;background:rgba(12,15,28,.86);box-shadow:0 14px 32px rgba(0,0,0,.35)}
+.r7dark .r7peek{display:block;position:absolute;inset-inline:14px;top:-7px;height:12px;border-radius:14px 14px 0 0;background:rgba(12,15,28,.55);z-index:-1}
+.r7dark .r7peek.p2{inset-inline:30px;top:-13px;background:rgba(12,15,28,.32)}
+.r7dark .r7tab[aria-selected="true"]{background:rgba(246,196,83,.16);color:#F6C453}
+.r7dark .r7big,.r7dark .r7tt>b{color:#F6C453}
+.r7dark .r7bar{background:rgba(255,255,255,.12)}
+
+/* ב · ring and card: the live time is a ring that is always there, the card beside it turns. */
+.r7split{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 8px;background:color-mix(in srgb,var(--surface) 92%,transparent);color:var(--text)!important;box-shadow:0 10px 26px rgba(0,0,0,.14)}
+.r7ring{position:relative;flex:none;width:76px;height:76px;padding:0;border:0;background:none;color:inherit;cursor:pointer}
+.r7ring svg,.r7wring svg,.r7island svg{width:100%;height:100%}
+.r7ring .rt,.r7wring .rt,.r7island .rt{fill:none;stroke:color-mix(in srgb,currentColor 12%,transparent);stroke-width:6}
+.r7ring .rp,.r7wring .rp,.r7island .rp{fill:none;stroke:var(--gold);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .6s}
+.heat-hot .rp{stroke:#F2545B}.heat-warm .rp{stroke:#F59E0B}
+.r7rc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.r7rc b{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.r7side{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.r7sl{display:flex;align-items:center;gap:6px;min-width:0}
+.r7sl .r7lab{font-size:15px;line-height:20px;flex:1;min-width:0}
+.r7sdots{display:flex;gap:2px;flex:none}
+.r7sdots>.sc-interp{display:contents}
+.r7sd{position:relative;min-height:26px;padding:0 7px;border:0;border-radius:13px;background:none;color:inherit;font:inherit;font-size:11px;font-weight:600;opacity:.6;cursor:pointer}
+.r7sd::after{content:'';position:absolute;inset:-9px 0}
+.r7sd[aria-selected="true"]{opacity:1;font-weight:800;background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--goldText,var(--text))}
+.r7split .r7pg{padding:2px 0 0;gap:5px}
+.r7split .r7pg.pg-day{animation:r7in2 .38s}.r7split .r7pg.pg-week{animation:r7in3 .38s}.r7split .r7pg.pg-mine{animation:r7in4 .38s}
+
+/* ה · three lanes, nothing to page through. */
+.r7lanes{padding:4px 12px 6px;background:color-mix(in srgb,var(--surface) 24%,transparent)}
+.r7lane{position:relative;display:flex;align-items:center;gap:10px;min-height:32px;padding-inline-end:36px;border-bottom:1px solid color-mix(in srgb,currentColor 14%,transparent)}
+.r7lanes>.sc-interp:last-of-type .r7lane,.r7lane:last-child{border-bottom:0}
+.r7lane .lk{flex:none;width:46px;font-size:11px;font-weight:800;letter-spacing:.02em;opacity:.7}
+.r7lane .lv{flex:1;min-width:0;font-size:13px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r7lane .lv b{font-weight:800}
+.r7lane.live{margin:2px -6px;padding:0 6px;border-radius:12px;border:0;overflow:hidden}
+.r7lfill{position:absolute;top:0;bottom:0;right:0;background:color-mix(in srgb,var(--gold) 26%,transparent);transition:width .6s}
+.heat-hot .r7lfill{background:rgba(242,84,91,.28)}
+.r7lane.live>span{position:relative}
+
+/* ו · outside the app: widgets, the lock screen's Live Activity, Android. Each needs a native build. */
+.r7nat{position:absolute;inset:0;z-index:80;display:flex;flex-direction:column;gap:10px;padding:16px 12px 84px;background:#0A0D18;color:#FFF}
+.r7nt{display:flex;gap:4px;padding:4px;border-radius:16px;background:rgba(255,255,255,.08)}
+.r7nt>.sc-interp{display:contents}
+.r7nt button{flex:1;min-height:40px;border:0;border-radius:12px;background:none;color:#C9CEDF;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.r7nt button[aria-selected="true"]{background:#FFF;color:#0A0D18}
+.r7wall{position:relative;flex:1;display:flex;flex-direction:column;gap:14px;padding:18px 14px;border-radius:30px;overflow:hidden}
+.r7wall.home{background:radial-gradient(120% 80% at 80% 0%,#F0A37B 0%,transparent 55%),linear-gradient(160deg,#27346B,#5B3F8F 60%,#C46A7A)}
+.r7wall.lock{align-items:center;background:radial-gradient(90% 60% at 50% 10%,#3A4A8C,transparent 70%),linear-gradient(180deg,#0E1433,#05070F)}
+.r7wall.android{background:linear-gradient(165deg,#12343B,#1E5A57 60%,#9BC7A4)}
+.r7tag{align-self:flex-start;margin:0;padding:3px 10px;border-radius:10px;background:rgba(255,214,102,.18);color:#FFE29A;font-size:11px;font-weight:700}
+.r7wall.lock .r7tag{align-self:center}
+.r7wm{display:flex;align-items:center;gap:14px;padding:14px;border-radius:24px;background:rgba(255,255,255,.17);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.r7wring{position:relative;flex:none;width:82px;height:82px;color:#FFF}
+.r7wring>b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800}
+.r7wtx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.r7wtx b{font-family:'Frank Ruhl Libre',serif;font-size:18px;line-height:23px}
+.r7wtx span{font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r7wk{font-size:11px;font-weight:800;letter-spacing:.04em;opacity:.75}
+.r7apps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 14px;padding:4px 8px}
+.r7apps i{aspect-ratio:1;border-radius:16px;background:rgba(255,255,255,.22)}
+.r7ws{display:flex;flex-direction:column;gap:3px;width:150px;padding:14px;border-radius:24px;background:rgba(255,255,255,.17);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.r7ws b{font-family:'Frank Ruhl Libre',serif;font-size:17px}
+.r7ws>.sc-interp>span,.r7ws>span.num{font-size:12px}
+.r7ws span>span{opacity:.75}
+.r7island{display:flex;align-items:center;gap:8px;height:36px;padding:0 14px 0 8px;border-radius:18px;background:#000;color:#FFF}
+.r7island svg{width:24px;height:24px;flex:none}
+.r7island b{font-size:13px;font-weight:800}
+.r7lclock{margin:18px 0 0;font-size:72px;line-height:76px;font-weight:300;letter-spacing:-.02em}
+.r7ldate{margin:0;font-size:13px;opacity:.8;text-align:center}
+.r7la{align-self:stretch;margin-top:auto;display:flex;flex-direction:column;gap:3px;padding:14px 16px;border-radius:24px;background:rgba(28,30,44,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.r7la b{font-family:'Frank Ruhl Libre',serif;font-size:19px}
+.r7la .r7bar{margin:6px 0 2px;background:rgba(255,255,255,.14)}
+.r7glance{margin:8px 4px 0;font-size:19px;line-height:26px;font-weight:500}
+.r7aw{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:28px;background:#E9E3F5;color:#1D1B26}
+.r7awt{display:flex;align-items:baseline;gap:8px}
+.r7awt b{font-size:18px}
+.r7aw .r7bar{margin:0;background:rgba(29,27,38,.12)}
+.r7awf{display:flex;flex-direction:column;gap:2px;font-size:12px;opacity:.85}
+.r7ong{display:flex;flex-direction:column;gap:4px;margin-top:auto;padding:12px 14px;border-radius:20px;background:#F6F7F9;color:#1D1B26}
+.r7ong .r7bar{margin:4px 0 0;background:rgba(29,27,38,.12)}
+.r7natx{align-self:center;min-height:44px;padding:0 22px;border:0;border-radius:22px;background:var(--gold);color:var(--onGold);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+
+/* The settings sheet's switches. */
+.r7sw{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.r7sw .pinm{flex:1}
+.r7tog{position:relative;flex:none;width:52px;height:32px;padding:0;border:0;border-radius:16px;background:var(--surface2)!important;cursor:pointer;box-shadow:inset 0 0 0 1px var(--border)}
+.r7tog>i{position:absolute;top:3px;right:3px;width:26px;height:26px;border-radius:13px;background:#FFF;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:right .2s}
+.r7tog[aria-checked="true"]{background:var(--gold)!important;box-shadow:none}
+.r7tog[aria-checked="true"]>i{right:23px}
+@media (prefers-reduced-motion:reduce){.r7body,.r7split .r7pg{animation:none!important}.r7bar>i,.r7fill,.r7lfill,.rp{transition:none}}

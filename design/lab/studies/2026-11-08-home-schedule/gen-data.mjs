@@ -112,7 +112,13 @@ const blockOut = [...blocks.values()]
   })
   .filter(Boolean);
 
-const out = { city: 'ירושלים', first: iso(new Date(...[FIRST[0], FIRST[1] - 1, FIRST[2]])), demo: '2026-11-09', days, blocks: blockOut, events };
+// The molad of each month the data reaches, as the app's calendar library renders it.
+const molad = [];
+for (const [y, mo] of [[5787, 8], [5787, 9], [5787, 10], [5787, 11]]) {
+  const m = new hc.Molad(y, mo);
+  molad.push({ he: plain(m.render('he')) });
+}
+const out = { molad, city: 'ירושלים', first: iso(new Date(...[FIRST[0], FIRST[1] - 1, FIRST[2]])), demo: '2026-11-09', days, blocks: blockOut, events };
 writeFileSync(join(here, 'data.json'), JSON.stringify(out));
 const hm = (v) => String(Math.floor(v / 60) % 24).padStart(2, '0') + ':' + String(v % 60).padStart(2, '0');
 console.log('days', Object.keys(days).length, 'blocks', blockOut.length, 'events', events.length, 'bytes', JSON.stringify(out).length);

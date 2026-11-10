@@ -29,6 +29,12 @@ const variants = [
   { board: 'R6Live', sched: 't', title: 'הצ׳יפ החי' },
   { board: 'R6Week', sched: 'u', title: 'השבוע במבט' },
   { board: 'R6Arc', sched: 'v', title: 'הכול בתוך הקשת' },
+  { board: 'R7Glass', sched: 'A', title: 'ערימה חכמה עם עכשיו' },
+  { board: 'R7Split', sched: 'B', title: 'טבעת וכרטיס' },
+  { board: 'R7Tone', sched: 'C', title: 'גוון התקופה' },
+  { board: 'R7Dark', sched: 'D', title: 'ערימה כהה' },
+  { board: 'R7Lanes', sched: 'E', title: 'שלוש שורות' },
+  { board: 'R7Native', sched: 'F', title: 'מחוץ לאפליקציה' },
 ];
 for (const v of variants) {
   let out = now;
