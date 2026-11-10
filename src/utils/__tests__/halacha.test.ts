@@ -4,7 +4,7 @@ import { HDate, HebrewCalendar, months } from '@hebcal/core';
 import { FESTIVAL_KEYS, FESTIVAL_PERIOD_DAYS, defaultHalachaTrack, effectiveHalachaTrack } from '@/data/halacha';
 import { FestivalKey, HalachaManifest, HalachaPortion, HalachaTrack } from '@/types/halacha';
 import { chokParashiyot } from '@/utils/chok';
-import { festivalDays, festivalPeriodsOn, festivalPortion, halachaPortion } from '@/utils/halacha';
+import { benIshChaiYearOf, festivalDays, festivalPeriodsOn, festivalPortion, halachaPortion } from '@/utils/halacha';
 
 // The schedules are the published add-on's (docs/halacha), so these cases read what the app downloads.
 const manifest = (track: HalachaTrack): HalachaManifest =>
@@ -109,12 +109,20 @@ describe('Ben Ish Chai by the week', () => {
     yearDays(year).find((day) => day.getDay() === 6 && chokParashiyot(day, inIsrael).join() === parasha.join())!;
   const week = (shabbat: HDate) => Array.from({ length: 7 }, (_, i) => new HDate(shabbat.abs() - 6 + i));
 
-  it('reads nothing until the year is chosen (Q30)', () => {
-    expect(halachaPortion(shabbatOf(['Tzav'], 5786), bih, true)).toBeNull();
+  it('alternates the years by the Hebrew year, an odd one the first, and swaps them on request (Q30)', () => {
+    expect(benIshChaiYearOf(shabbatOf(['Tzav'], 5787))).toBe(1);
+    expect(benIshChaiYearOf(shabbatOf(['Tzav'], 5786))).toBe(2);
+    expect(benIshChaiYearOf(shabbatOf(['Tzav'], 5786), true)).toBe(1);
+    // A week is the year of its Shabbat: the Sunday before Bereshit 5787 reads 5787's.
+    const bereshit = shabbatOf(['Bereshit'], 5787);
+    expect(benIshChaiYearOf(new HDate(bereshit.abs() - 6))).toBe(1);
+    expect(halachaPortion(shabbatOf(['Tzav'], 5787), bih, true)?.pieces[0].u).toBe('y1-tzav');
+    expect(halachaPortion(shabbatOf(['Tzav'], 5786), bih, true)?.pieces[0].u).toBe('y2-tzav');
+    expect(halachaPortion(shabbatOf(['Tzav'], 5786), bih, true, true)?.pieces[0].u).toBe('y1-tzav');
   });
 
   it("spreads the parasha's halachot over Sunday to Shabbat, every one once, in order", () => {
-    const portions = week(shabbatOf(['Tzav'], 5786)).map((day) => halachaPortion(day, bih, true, 1));
+    const portions = week(shabbatOf(['Tzav'], 5787)).map((day) => halachaPortion(day, bih, true));
     const all = portions.flatMap(read);
     expect(all).toEqual(Array.from({ length: bih.units['y1-tzav'].count }, (_, i) => `y1-tzav#${i}`));
     expect(portions[0]?.label.he).toBe('שנה ראשונה, פרשת צו, הלכות א–ח');
@@ -123,16 +131,16 @@ describe('Ben Ish Chai by the week', () => {
 
   it('reads both parashiyot of a double week, the combined first-year node once', () => {
     const shabbat = shabbatOf(['Tazria', 'Metzora'], 5786);
-    expect(week(shabbat).flatMap((day) => read(halachaPortion(day, bih, true, 1)))).toHaveLength(
+    expect(week(shabbat).flatMap((day) => read(halachaPortion(day, bih, true, true)))).toHaveLength(
       bih.units['y1-tazria-metzora'].count,
     );
-    const second = week(shabbat).flatMap((day) => read(halachaPortion(day, bih, true, 2)));
+    const second = week(shabbat).flatMap((day) => read(halachaPortion(day, bih, true)));
     expect(second).toHaveLength(bih.units['y2-tazria'].count + bih.units['y2-metzora'].count);
     expect(new Set(second.map((key) => key.split('#')[0]))).toEqual(new Set(['y2-tazria', 'y2-metzora']));
   });
 
   it("reads the first year's halachot when the second year has none for the parasha", () => {
-    const portion = halachaPortion(week(shabbatOf(['Devarim'], 5786))[0], bih, true, 2);
+    const portion = halachaPortion(week(shabbatOf(['Devarim'], 5786))[0], bih, true);
     expect(portion?.pieces[0].u).toBe('y1-devarim');
   });
 
@@ -141,9 +149,7 @@ describe('Ben Ish Chai by the week', () => {
       .flatMap(yearDays)
       .find((day) => day.getDay() === 6 && chokParashiyot(day, true).join() !== chokParashiyot(day, false).join())!;
     const sunday = new HDate(shabbat.abs() - 6);
-    expect(halachaPortion(sunday, bih, true, 1)?.pieces[0].u).not.toBe(
-      halachaPortion(sunday, bih, false, 1)?.pieces[0].u,
-    );
+    expect(halachaPortion(sunday, bih, true)?.pieces[0].u).not.toBe(halachaPortion(sunday, bih, false)?.pieces[0].u);
   });
 });
 

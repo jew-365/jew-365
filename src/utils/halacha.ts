@@ -54,8 +54,8 @@ function cyclePortion(day: HDate, schedule: Extract<HalachaManifest['schedule'],
   return schedule.days[(((day.abs() - anchor) % length) + length) % length] ?? null;
 }
 
-// Ben Ish Chai: the halachot of the week's parasha (both, in a double week) of the year chosen, spread evenly over the
-// week, Sunday to Shabbat (spec 6.2). A parasha the year lacks reads the first year's (Q30's proposal).
+// Ben Ish Chai: the halachot of the week's parasha (both, in a double week) of the week's year, spread evenly over the
+// week, Sunday to Shabbat (spec 6.2). A parasha the second year lacks reads the first year's (Q30).
 function parashaPortion(
   day: HDate,
   { schedule, units }: Schedule,
@@ -108,18 +108,24 @@ function parashaPortion(
   };
 }
 
-// The portion a Hebrew day reads in a track, or `null` on a day the schedule gives nothing. Ben Ish Chai needs its
-// year, which waits for Q30 (`null` reads nothing).
+// Ben Ish Chai's year of a week (Q30, the owner's call, 2026-11-10): the two years alternate by the Hebrew year of the
+// week's Shabbat, an odd year reading the first year's halachot (5787 the first), and the user may swap them.
+export function benIshChaiYearOf(day: HDate, swapped = false): BenIshChaiYear {
+  const odd = day.onOrAfter(SATURDAY).getFullYear() % 2 === 1;
+  return odd !== swapped ? 1 : 2;
+}
+
+// The portion a Hebrew day reads in a track, or `null` on a day the schedule gives nothing.
 export function halachaPortion(
   day: HDate,
   manifest: Schedule,
   inIsrael: boolean,
-  benIshChaiYear: BenIshChaiYear | null = null,
+  benIshChaiSwapped = false,
 ): HalachaPortion | null {
   const { schedule } = manifest;
   if (schedule.kind === 'hebrew') return luachPortion(day, schedule);
   if (schedule.kind === 'cycle') return cyclePortion(day, schedule);
-  return benIshChaiYear ? parashaPortion(day, manifest, inIsrael, benIshChaiYear) : null;
+  return parashaPortion(day, manifest, inIsrael, benIshChaiYearOf(day, benIshChaiSwapped));
 }
 
 // A fast moved off Shabbat: deferred to Sunday, or Ta'anit Esther brought forward to Thursday.

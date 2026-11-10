@@ -130,7 +130,7 @@ A schedule answers one question: which segments are the portion of a location da
 
 - The parasha is the one the week reads, by the rule Chok LeYisrael already uses (`chokPortionOn()` in [src/utils/chok.ts](../../src/utils/chok.ts): a double week, Israel and abroad, and a week whose Shabbat is Yom Tov).
 - The parasha's numbered halachot are divided evenly over the week's seven days, Sunday to Shabbat, in order; a double week divides both parashiyot's halachot together.
-- **Open:** which Hebrew year reads the first year's halachot and which the second (Q30), and what a week reads when the second year has no entry for its parasha (47 nodes against 52; the proposal: that week reads the first year's).
+- **Q30, the owner's call of 2026-11-10** ("אופציה א וגם אפשרות לשנות בהגדרות"): the two years alternate by the Hebrew year of the week's Shabbat, an odd year reading the first year (5787 the first); Settings lets the user swap them (`useUserStore.benIshChaiYearSwapped`). A week whose parasha the second year lacks reads the first year's.
 - The drashot are not included.
 - **As built (2026-11-10):** the text is Sefaria's "Ben Ish Hai -- Wikisource" (labelled Public Domain): its "Ben Ish Chai, Jerusalem, 1898" version has the node shape but empty halachot. 98 units, 2001 halachot. The manifest maps each of the 54 parashiyot to its unit per year: the first year has all 54 (its Tazria-Metzora, Achrei Mot-Kedoshim and Behar-Bechukotai are one node each, serving both parashiyot), the second has none for Bamidbar, Devarim, Nitzavim, Vayeilech, Ha'azinu and Vezot Haberakhah. The second year's Vayeshev is only the author's note "בפרשה זו לא כתבתי הלכות בשנה שניה יען כי לדרוש בפרשה זו בהלכות חנוכה בכל שנה ושנה", so that week reads the first year's Chanukah node, as he says.
 
@@ -250,12 +250,12 @@ Every dated fixture is an `at(location, …)` instant; every suite below also ru
 
 ## 13. Open questions
 
-For the owner (in [not-close.md](../../not-close.md)): Q29 (the Kitzur luach when no authoritative one is found), Q30 (Ben Ish Chai's year), Q31 (permission for Yalkut Yosef and Shulchan Aruch HaMekutzar as later tracks).
+For the owner (in [not-close.md](../../not-close.md)): Q29 (not needed: the luach was found), Q30 (answered 2026-11-10: the years alternate by the Hebrew year, swappable), Q31 (permission for Yalkut Yosef and Shulchan Aruch HaMekutzar as later tracks).
 
 For the rav, R17:
 
 - R17.1 The book per nusach (section 3), Rambam for Chabad and for Teiman included.
-- R17.2 The Ben Ish Chai division: a parasha's halachot spread over the week, and the year rule.
+- R17.2 The Ben Ish Chai division: a parasha's halachot spread over the week, and the years alternating by the Hebrew year (Q30).
 - R17.3 The Shabbat and Yom Tov portion learned or made up afterwards (D2, D9).
 - R17.4 The periods of section 7.1, the thirty days for Shavuot and Sukkot and the shorter ones.
 - R17.5 No portion on the festival itself, Chanukah and Purim included (D13).

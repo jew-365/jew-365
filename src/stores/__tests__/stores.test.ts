@@ -501,6 +501,19 @@ describe('useUserStore halacha track', () => {
     expect(merge!({ halachaTrack: 'kitzur' }, current).halachaTrack).toBe('kitzur');
     expect(merge!({ halachaTrack: 'yalkut' }, current).halachaTrack).toBeNull();
   });
+
+  it("keeps Ben Ish Chai's years in their order unless swapped, and resets them", () => {
+    expect(useUserStore.getState().benIshChaiYearSwapped).toBe(false);
+    useUserStore.getState().setBenIshChaiYearSwapped(true);
+    expect(useUserStore.getState().benIshChaiYearSwapped).toBe(true);
+    useUserStore.getState().reset();
+    expect(useUserStore.getState().benIshChaiYearSwapped).toBe(false);
+    const { merge } = useUserStore.persist.getOptions();
+    const current = useUserStore.getState();
+    expect(merge!({ nusach: 'sefard' }, current).benIshChaiYearSwapped).toBe(false);
+    expect(merge!({ benIshChaiYearSwapped: true }, current).benIshChaiYearSwapped).toBe(true);
+    expect(merge!({ benIshChaiYearSwapped: 'yes' }, current).benIshChaiYearSwapped).toBe(false);
+  });
 });
 
 describe('useUserStore Thursday-night day', () => {

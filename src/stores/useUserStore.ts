@@ -143,6 +143,7 @@ type UserState = {
   chokCommentaryOpen: boolean;
   chokThuNightDay: ChokThuNightDay | null;
   halachaTrack: HalachaTrack | null;
+  benIshChaiYearSwapped: boolean;
   hiddenZmanim: readonly ZmanId[];
   homeBento: readonly BentoWidget[] | null;
   bentoPins: readonly ZmanId[];
@@ -190,6 +191,7 @@ type UserState = {
   setAmidahPrayer: (text: string) => void;
   setChokThuNightDay: (day: ChokThuNightDay) => void;
   setHalachaTrack: (track: HalachaTrack | null) => void;
+  setBenIshChaiYearSwapped: (swapped: boolean) => void;
   setHomeLook: (look: HomeLook) => void;
   setGender: (g: Gender | null) => void;
   setMaritalStatus: (m: MaritalStatus | null) => void;
@@ -238,6 +240,7 @@ const mergeSavedUserState = (persisted: unknown, current: UserState): UserState 
   if (merged.taharahEnabled && merged.maritalStatus == null) merged.maritalStatus = 'married';
   if (!isUiScale(merged.uiScale)) merged.uiScale = DEFAULT_UI_SCALE;
   if (!HOME_LOOKS.includes(merged.homeLook)) merged.homeLook = 'rail';
+  if (typeof merged.benIshChaiYearSwapped !== 'boolean') merged.benIshChaiYearSwapped = false;
   if (merged.halachaTrack != null && !HALACHA_TRACKS.includes(merged.halachaTrack)) merged.halachaTrack = null;
   merged.location = refreshSavedLocation(merged.location, merged.locationSource);
   merged.inIsrael = merged.location.inIsrael;
@@ -291,6 +294,7 @@ export const useUserStore = create<UserState>()(
       chokCommentaryOpen: false,
       chokThuNightDay: null,
       halachaTrack: null,
+      benIshChaiYearSwapped: false,
       hiddenZmanim: [],
       homeBento: null,
       bentoPins: [],
@@ -364,6 +368,7 @@ export const useUserStore = create<UserState>()(
       setAmidahVerses: (verses) => set({ amidahVerses: amidahVersesOf(verses) }),
       setAmidahPrayer: (text) => set({ amidahPrayer: amidahPrayerOf(text) }),
       setChokThuNightDay: (day) => set({ chokThuNightDay: day }),
+      setBenIshChaiYearSwapped: (swapped) => set({ benIshChaiYearSwapped: swapped }),
       setHalachaTrack: (track) => set({ halachaTrack: track && HALACHA_TRACKS.includes(track) ? track : null }),
       setHomeLook: (look) => set((state) => (HOME_LOOKS.includes(look) ? { homeLook: look } : state)),
       setGender: (g) => set({ gender: g }),
@@ -404,6 +409,7 @@ export const useUserStore = create<UserState>()(
           chokCommentaryOpen: false,
           chokThuNightDay: null,
           halachaTrack: null,
+          benIshChaiYearSwapped: false,
           hiddenZmanim: [],
           homeBento: null,
           bentoPins: [],
