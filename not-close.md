@@ -498,6 +498,12 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Status:** 1.0.21 · Committed: `b0a673e` feat(home): the period tone with the live carousel, the card page kept, and the app always opening on home · Pushed: yes · Live: preview `1.0.21-70` (group `5013de39-9b56-4fdc-b44b-137ca48a2a47`, from `7964dc9`, 2026-11-10); production no · Channel: preview
   - **Checked:** the owner on the preview app, 2026-11-10: "בדקתי בטלפון, עובד".
 
+- [ ] Home's card follows the time of day, see-through
+  - **Flag:** `OTA`.
+  - **Source:** the owner's message of 2026-11-10: the board's colour stayed purple instead of changing with day and night, and should not be so opaque and prominent.
+  - **Found:** a special day's colour took over the whole day and night: on Rosh Chodesh Kislev (that day) the card stayed purple from morning to night, as an erev Shabbat, Chanukah or a fast day would.
+  - **Done:** 2026-11-10: the card's colour follows the part of the day only (dawn, morning, noon, evening, night), a muted gradient drawn at 0.72 over the land so the sky shows through; white text holds 4.5:1 on it every 10 minutes of three days of the year ([src/theme/__tests__/periodTone.test.ts](src/theme/__tests__/periodTone.test.ts)). Checked in the web build at 06:10, 15:40 and 20:30. Verified: `typecheck`, `lint`, `check:dox`, the full suite (6676 passed), `test:tz` on the tone, the card and the guide.
+
 - [ ] Home's board answers and the return to home on every return
   - **Flag:** `OTA`.
   - **Source:** the owner's message of 2026-11-10 after checking preview `1.0.21-72`: the + chip of the carousel looked broken or unclear; Mine took only two facts and not always; what the smart choice means; and the app should always open on home after leaving it.

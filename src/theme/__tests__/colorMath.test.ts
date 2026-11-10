@@ -63,13 +63,3 @@ describe('color math', () => {
     expect(p3 - p2).toBeGreaterThanOrEqual(0.15);
   });
 });
-
-describe("home's period tones", () => {
-  it('hold 4.5:1 for white text on both stops of every tone', () => {
-    const { PERIOD_TONES } = require('../periodTone') as typeof import('../periodTone');
-    for (const tone of Object.values(PERIOD_TONES)) {
-      expect(contrastRatio(tone.from, '#FFFFFF')).toBeGreaterThanOrEqual(4.5);
-      expect(contrastRatio(tone.to, '#FFFFFF')).toBeGreaterThanOrEqual(4.5);
-    }
-  });
-});

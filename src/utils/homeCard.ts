@@ -310,16 +310,7 @@ export function homeCard(input: CardInput): CardModel {
   const smart: CardPageId = special || input.habit ? 'day' : thursdayNight || civilWeekday === 5 ? 'week' : 'day';
 
   const tone = z
-    ? periodTone(
-        now,
-        { netz: z.netzHaChama, chatzot: z.chatzot, plag: z.plagHaMincha, tzeit: z.tzeitHakochavim },
-        {
-          erev: erev !== null,
-          chanukah: features.flags.has('chanukah'),
-          fast: features.flags.has('publicFast'),
-          roshChodesh: features.flags.has('roshChodesh'),
-        },
-      )
+    ? periodTone(now, { netz: z.netzHaChama, chatzot: z.chatzot, plag: z.plagHaMincha, tzeit: z.tzeitHakochavim })
     : 'night';
 
   return {

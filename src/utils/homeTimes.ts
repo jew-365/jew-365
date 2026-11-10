@@ -117,18 +117,10 @@ export function suggestedPins(enabled: ReadonlySet<string>): { id: ZmanId; reaso
 export const zmanPinsOf = (saved: unknown): ZmanId[] =>
   Array.isArray(saved) ? ARC_ZMANIM.filter((id) => saved.some((x) => isZmanId(x) && x === id)) : [];
 
-// The card's colour: the day's kind first, else the part of the day.
-export type PeriodTone =
-  'dawn' | 'morning' | 'noon' | 'evening' | 'night' | 'shabbat' | 'chanukah' | 'fast' | 'roshChodesh';
-export function periodTone(
-  now: Date,
-  z: { netz: Date; chatzot: Date; plag: Date; tzeit: Date },
-  day: { erev: boolean; chanukah: boolean; fast: boolean; roshChodesh: boolean },
-): PeriodTone {
-  if (day.erev) return 'shabbat';
-  if (day.chanukah) return 'chanukah';
-  if (day.fast) return 'fast';
-  if (day.roshChodesh) return 'roshChodesh';
+// The card's colour follows the part of the day, whatever the day is (the owner's report of 2026-11-10: on Rosh
+// Chodesh the day's own colour held all day and night); the card's title already names a special day.
+export type PeriodTone = 'dawn' | 'morning' | 'noon' | 'evening' | 'night';
+export function periodTone(now: Date, z: { netz: Date; chatzot: Date; plag: Date; tzeit: Date }): PeriodTone {
   const t = now.getTime();
   if (t < z.netz.getTime()) return 'dawn';
   if (t < z.chatzot.getTime()) return 'morning';

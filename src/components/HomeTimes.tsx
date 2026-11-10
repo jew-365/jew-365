@@ -7,7 +7,7 @@ import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { SectionLabel } from '@/components/SectionLabel';
 import { useI18n } from '@/i18n';
 import { BRAND } from '@/theme/colors';
-import { PERIOD_TONES, TONE_FILL_ALPHA } from '@/theme/periodTone';
+import { CARD_ALPHA, PERIOD_TONES, TONE_FILL_ALPHA } from '@/theme/periodTone';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
@@ -104,8 +104,8 @@ export function HomeTimes(props: HomeTimesProps) {
         <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" preserveAspectRatio="none" pointerEvents="none">
           <Defs>
             <LinearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor={tone.from} />
-              <Stop offset="1" stopColor={tone.to} />
+              <Stop offset="0" stopColor={tone.from} stopOpacity={CARD_ALPHA} />
+              <Stop offset="1" stopColor={tone.to} stopOpacity={CARD_ALPHA} />
             </LinearGradient>
           </Defs>
           <Rect width="100%" height="100%" fill={`url(#${gradientId})`} />
@@ -127,7 +127,7 @@ export function HomeTimes(props: HomeTimesProps) {
             <View style={styles.facts}>
               {page.facts.map((f, i) => (
                 <View key={f.label} style={[styles.fact, i > 0 && styles.factDivider, i === 0 && styles.factFirst]}>
-                  <Text style={[typography.micro, styles.white, styles.dim]} numberOfLines={1}>
+                  <Text style={[typography.micro, styles.white]} numberOfLines={1}>
                     {f.label}
                   </Text>
                   <Text style={[typography.captionBold, styles.white]} numberOfLines={1}>
@@ -386,7 +386,6 @@ const styles = StyleSheet.create({
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: TAB_HEIGHT },
   shrink: { flexShrink: 1 },
   white: { color: BRAND.white },
-  dim: { opacity: 0.78 },
   facts: { flexDirection: 'row' },
   fact: { flex: 1, minWidth: 0, paddingHorizontal: spacing.sm },
   factFirst: { flex: 1.5, paddingStart: 0 },

@@ -101,18 +101,12 @@ describe('the pins', () => {
 
 describe('the period tone', () => {
   const z = { netz: at(6), chatzot: at(11), plag: at(15), tzeit: at(17) };
-  const plain = { erev: false, chanukah: false, fast: false, roshChodesh: false };
-  it('follows the part of the day', () => {
-    expect(periodTone(at(5), z, plain)).toBe('dawn');
-    expect(periodTone(at(9), z, plain)).toBe('morning');
-    expect(periodTone(at(13), z, plain)).toBe('noon');
-    expect(periodTone(at(16), z, plain)).toBe('evening');
-    expect(periodTone(at(20), z, plain)).toBe('night');
-  });
-  it('takes the day kind first', () => {
-    expect(periodTone(at(9), z, { ...plain, erev: true, chanukah: true })).toBe('shabbat');
-    expect(periodTone(at(9), z, { ...plain, fast: true })).toBe('fast');
-    expect(periodTone(at(9), z, { ...plain, roshChodesh: true })).toBe('roshChodesh');
+  it('follows the part of the day, whatever the day is', () => {
+    expect(periodTone(at(5), z)).toBe('dawn');
+    expect(periodTone(at(9), z)).toBe('morning');
+    expect(periodTone(at(13), z)).toBe('noon');
+    expect(periodTone(at(16), z)).toBe('evening');
+    expect(periodTone(at(20), z)).toBe('night');
   });
 });
 
