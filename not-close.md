@@ -509,7 +509,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Flag:** `OTA`.
   - **Source:** the owner's message of 2026-11-10 on preview `1.0.21-76`: do not take the option out of Settings, and offer it at the user's first setup too.
   - **Done:** 2026-11-10: the sheet's list is `ZmanimPicker` of [src/components/ZmanimSheet.tsx](src/components/ZmanimSheet.tsx), drawn in place in Settings → זמני הלכה (in place of the row that opened the sheet) and in a new onboarding step, [src/app/onboarding/zmanim.tsx](src/app/onboarding/zmanim.tsx), between the mitzvot and the location (`ONBOARDING_STEPS` 9). Checked in the web build (Settings). Verified: `typecheck`, `lint`, `format:check`, `check:dox`, the full suite (6693 passed).
-  - **Status:** 1.0.21 · Committed: pending · Pushed: no · Live: no · Channel: none
+  - **Status:** 1.0.21 · Committed: `ebf6d53` feat(home): the carousel's times kept in Settings and in onboarding · Pushed: yes · Live: preview `1.0.21-77` (group `f07a8634-f409-4131-9f25-0b4dc1312aeb`, from `ebf6d53`, 2026-11-10); production no · Channel: preview
 
 - [ ] The carousel's times in one sheet: add, remove and favourites
   - **Flag:** `OTA`.
