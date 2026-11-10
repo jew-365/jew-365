@@ -3,7 +3,7 @@ const path = require('path');
 const { gunzipSync, strFromU8 } = require('fflate');
 const { createHash } = require('crypto');
 const { runsOf, englishOf, rambamRef, kitzurRange, divide, portionOf, versioned, bihName } = require('../build');
-const { TRACKS, FESTIVALS, FESTIVAL_MATERIAL, MINOR_FASTS, KITZUR } = require('../tracks');
+const { TRACKS, FESTIVALS, FESTIVAL_MATERIAL, MINOR_FASTS, KITZUR, BANNED_SOURCE } = require('../tracks');
 const { PARASHIYOT } = require('../../chok/manifest');
 
 const SITE = path.join(__dirname, '..', '..', '..', 'docs', 'halacha');
@@ -211,6 +211,19 @@ describe('the published add-on', () => {
     expect(units.rambam.sabbath.credits).toEqual([expect.objectContaining({ license: 'Public Domain' })]);
     expect(units.rambam.blessings.credits).toEqual([expect.objectContaining({ license: 'CC-BY-SA' })]);
     expect(manifests.rambam.credit.he).toMatch(/CC-BY-SA/);
+  });
+
+  it('publishes no text whose source is Mechon Mamre, whatever title Sefaria gives it', () => {
+    expect(BANNED_SOURCE.test('http://www.mechon-mamre.org/i/0001n.htm')).toBe(true);
+    for (const track of TRACKS) {
+      for (const unit of Object.values(units[track])) {
+        for (const credit of unit.credits) expect(credit.url).not.toMatch(BANNED_SOURCE);
+      }
+      for (const credit of manifests[track].credits) expect(credit.url).not.toMatch(BANNED_SOURCE);
+    }
+    expect(units.rambam['positive-mitzvot'].credits).toEqual([
+      expect.objectContaining({ title: 'Wikisource Mishneh Torah, via Sefaria', license: 'CC-BY-SA' }),
+    ]);
   });
 
   it('has first-year Ben Ish Chai halachot for every parasha', () => {

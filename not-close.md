@@ -686,11 +686,13 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 ### High — Licence requests
 
-- [ ] Ask Mechon Mamre for the Positive Mitzvot, or replace them
+- [x] Ask Mechon Mamre for the Positive Mitzvot, or replace them
   - **Flag:** none for the request; the fallback ships on `docs/halacha/` on Pages.
   - **What it is:** section 1 of [release/licence-requests.md](release/licence-requests.md): one unit of the Rambam add-on, "מצוות עשה", comes from Mechon Mamre's edition through Sefaria, and that file is already published on GitHub Pages. Mechon Mamre's copyright page allows private study and teaching only, "not for publishing in any form, including any Web site". The request goes through the form at mechon-mamre.org/contact.htm, which has no email address.
   - **What it solves:** a published file that breaks its source's terms.
   - **Expected result:** their written permission, recorded with its date; or the unit rebuilt from an open version (Torat Emet 363 or Wikisource, the missing chapter from Wikisource) with `pnpm halacha:build`, the old file gone from [docs/halacha/rambam/](docs/halacha/rambam) and the Rambam test suites green.
+  - **Done:** 2026-11-10, by the fallback: the owner asked for a way around them ("יש איך לעקוף אותם ולא להשתמש בהם?"). Sefaria's other Hebrew title, "Mishneh Torah", proved to be the same Mechon Mamre text (its source is mechon-mamre.org/i/0001n.htm), so the build now refuses any version by its source (`BANNED_SOURCE` in [scripts/halacha/tracks.js](scripts/halacha/tracks.js), checked in `readRambam()` of [scripts/halacha/build.js](scripts/halacha/build.js)) and the Positive Mitzvot come from Wikisource (CC-BY-SA, all 248). `pnpm halacha:build` raised the Rambam track to version 2 and replaced the published unit; no file under [docs/](docs) names mechon-mamre.org. Verified: the new case in [scripts/halacha/__tests__/build.test.js](scripts/halacha/__tests__/build.test.js) (no credit of any unit or manifest from that source; the Positive Mitzvot credited to Wikisource) and the halacha suites (97 tests) green. No request was sent.
+  - **Status:** Version: `docs/halacha/` on Pages (Rambam track version 2) · Committed: pending · Pushed: no · Live: no · Channel: none
 
 ### Medium — Licence requests
 
@@ -702,7 +704,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 - [ ] Ask Sefaria what its Public Domain and CC-BY labels rest on
   - **Flag:** none.
-  - **What it is:** section 3 of [release/licence-requests.md](release/licence-requests.md): the app takes Torat Emet 357 and 363, the Torat Emet Onkelos and Selichot Edot HaMizrach, "Daat Siddur Ashkenaz" and "Mechon-mamre Mishneh Torah" as Public Domain, and the Metsudah English as CC-BY, as Sefaria labels them, while Torat Emet's and Mechon Mamre's own sites say otherwise. One email to hello@sefaria.org (their general address; confirm it on sefaria.org/contact in a browser).
+  - **What it is:** section 3 of [release/licence-requests.md](release/licence-requests.md): the app takes Torat Emet 357 and 363, the Torat Emet Onkelos and Selichot Edot HaMizrach, and "Daat Siddur Ashkenaz" as Public Domain, and the Metsudah English as CC-BY, as Sefaria labels them, while Torat Emet's own site says otherwise. One email to hello@sefaria.org (their general address; confirm it on sefaria.org/contact in a browser).
   - **What it solves:** the Kitzur and Rambam tracks, the Sefard and Chabad siddur, the Onkelos of Shnayim Mikra and the English siddur all rest on those labels.
   - **Expected result:** Sefaria's answer recorded per version; a version it says should be read more narrowly becomes a task to replace it or to ask its source.
 

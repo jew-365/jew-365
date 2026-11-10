@@ -35,14 +35,13 @@ const BEN_ISH_CHAI = {
 };
 
 // Mishneh Torah: a Hebrew version per book, the first of these the book has (the introduction books have no Torat
-// Emet text; the Overview only Wikisource's).
-const RAMBAM_HE = [
-  'Torat Emet 363',
-  'Mechon Mamre Mishneh Torah',
-  'Mechon-mamre Mishneh Torah',
-  'Mishneh Torah',
-  'Wikisource Mishneh Torah',
-];
+// Emet text; the Overview only Wikisource's). Never a version from Mechon Mamre (BANNED_SOURCE).
+const RAMBAM_HE = ['Torat Emet 363', 'Mishneh Torah', 'Wikisource Mishneh Torah'];
+
+// Mechon Mamre allows its texts for private study and teaching only, "not for publishing in any form, including any
+// Web site" (mechon-mamre.org/copy.htm, read 2026-11-10), and Sefaria serves its text under more than one title, so a
+// version is refused by its source.
+const BANNED_SOURCE = /mechon-mamre\.org/i;
 
 // Halachot every Hebrew version of Sefaria leaves empty at their address (read 2026-11-10); any other empty halacha
 // fails the build.
@@ -144,6 +143,7 @@ module.exports = {
   KITZUR,
   BEN_ISH_CHAI,
   RAMBAM_HE,
+  BANNED_SOURCE,
   RAMBAM_EMPTY,
   ENGLISH_LICENCES,
   ENGLISH_THRESHOLD,

@@ -1,14 +1,14 @@
 {
   "format": 1,
-  "version": 1,
+  "version": 2,
   "track": "rambam",
   "book": {
     "he": "משנה תורה לרמב״ם",
     "en": "Rambam's Mishneh Torah"
   },
   "credit": {
-    "he": "משנה תורה לרמב״ם: Wikisource Mishneh Torah (CC-BY-SA); Mechon-mamre Mishneh Torah (Public Domain); Torat Emet 363 (Public Domain), דרך ספריא. לוח הלימוד: הרמב״ם היומי, פרק אחד ליום, כפי שספריא מפרסמת",
-    "en": "Rambam's Mishneh Torah: Wikisource Mishneh Torah (CC-BY-SA); Mechon-mamre Mishneh Torah (Public Domain); Torat Emet 363 (Public Domain), via Sefaria. Schedule: the Daily Rambam, one chapter a day, as Sefaria publishes it"
+    "he": "משנה תורה לרמב״ם: Wikisource Mishneh Torah (CC-BY-SA); Torat Emet 363 (Public Domain), דרך ספריא. לוח הלימוד: הרמב״ם היומי, פרק אחד ליום, כפי שספריא מפרסמת",
+    "en": "Rambam's Mishneh Torah: Wikisource Mishneh Torah (CC-BY-SA); Torat Emet 363 (Public Domain), via Sefaria. Schedule: the Daily Rambam, one chapter a day, as Sefaria publishes it"
   },
   "credits": [
     {
@@ -17,17 +17,12 @@
       "url": "http://he.wikisource.org/wiki/%D7%A8%D7%9E%D7%91%22%D7%9D_%D7%94%D7%A7%D7%93%D7%9E%D7%94_%D7%9C%D7%9E%D7%A9%D7%A0%D7%94_%D7%AA%D7%95%D7%A8%D7%94_(%D7%9E%D7%A1%D7%99%D7%A8%D7%AA_%D7%AA%D7%95%D7%A8%D7%94_%D7%A9%D7%91%D7%A2%D7%9C_%D7%A4%D7%94)"
     },
     {
-      "title": "Mechon-mamre Mishneh Torah, via Sefaria",
-      "license": "Public Domain",
-      "url": "http://www.mechon-mamre.org/i/0001n.htm"
-    },
-    {
       "title": "Torat Emet 363, via Sefaria",
       "license": "Public Domain",
       "url": "http://www.toratemetfreeware.com/index.html?downloads"
     }
   ],
-  "gzipBytes": 2415937,
+  "gzipBytes": 2416149,
   "gz": {
     "transmission-of-the-oral-law": {
       "path": "transmission-of-the-oral-law.366b9519.json.gz",
@@ -35,9 +30,9 @@
       "bytes": 8476
     },
     "positive-mitzvot": {
-      "path": "positive-mitzvot.31c39c47.json.gz",
-      "sha256": "31c39c47bba92a587930cc31b8249d1e1041e49b766a525fb7501c9ecbc01043",
-      "bytes": 12185
+      "path": "positive-mitzvot.ca491270.json.gz",
+      "sha256": "ca491270c2acbf3fdd24dae3e59fe8595d074171fe0f9a7f00d58d239003d586",
+      "bytes": 12397
     },
     "negative-mitzvot": {
       "path": "negative-mitzvot.98ce7266.json.gz",

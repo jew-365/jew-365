@@ -21,6 +21,7 @@ const {
   KITZUR,
   BEN_ISH_CHAI,
   RAMBAM_HE,
+  BANNED_SOURCE,
   RAMBAM_EMPTY,
   ENGLISH_LICENCES,
   ENGLISH_THRESHOLD,
@@ -361,12 +362,13 @@ async function readRambam(cycle) {
         `${SEFARIA}/api/texts/versions/${encodeURIComponent(title)}`,
       );
       // The first preferred Hebrew version that holds every chapter of the book (every halacha of a one-level book):
-      // Torat Emet's Leavened and Unleavened Bread lacks chapter 9, the Haggadah, and Mechon Mamre's Transmission of
-      // the Oral Law has 44 of its 45, both read by the calendar. Sefaria's halacha totals are off by one in a few
+      // Torat Emet's Leavened and Unleavened Bread lacks chapter 9, the Haggadah, read by the calendar. A version
+      // whose source is Mechon Mamre is skipped whatever its title (BANNED_SOURCE). Sefaria's halacha totals are off by one in a few
       // books, so only the chapters are counted.
       let he = null;
       for (const name of RAMBAM_HE.filter((n) => versions.some((v) => v.language === 'he' && v.versionTitle === n))) {
         const candidate = await readText(title, 'he', name);
+        if (BANNED_SOURCE.test(candidate.source ?? '')) continue;
         if (candidate.text.length === index.schema.lengths[0]) {
           he = candidate;
           break;

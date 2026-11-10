@@ -10,9 +10,9 @@ Read on 2026-11-10. "Verified" means the address or terms were read on the sourc
 
 | # | Source | What | Terms as read | Channel | Status |
 |---|---|---|---|---|---|
-| 1 | Mechon Mamre | Positive Mitzvot of the Mishneh Torah, one unit of the Rambam add-on, already on GitHub Pages | Private study and teaching only; no publishing on any website; other use needs written permission (verified) | Contact form, mechon-mamre.org/contact.htm (verified; no email address published) | Not sent |
+| 1 | Mechon Mamre | Positive Mitzvot of the Mishneh Torah, one unit of the Rambam add-on, already on GitHub Pages | Private study and teaching only; no publishing on any website; other use needs written permission (verified) | Contact form, mechon-mamre.org/contact.htm (verified; no email address published) | Not needed: the unit was rebuilt from Wikisource on 2026-11-10, and the build refuses Mechon Mamre's text |
 | 2 | Chok LeYisrael, Torat Emet edition: R' Pinchas Reuven, R' Sagiv Mahfud, the J. Alan Groves Center | The Chok LeYisrael add-on, in production since 1.0.21-1 | CC BY-NC-SA 2.5; Torat Emet adds "no commercial use" (verified) | Torat Emet's contact page is closed (verified). R' Sagiv Mahfud runs "נוסח תימן" (reported); the Groves Center at info@GrovesCenter.org (reported) | Not sent |
-| 3 | Sefaria | The licence labels of the Torat Emet, Daat, Mechon Mamre and Metsudah versions it serves | Sefaria marks them Public Domain or CC-BY; the sources' own sites say otherwise for Torat Emet, Mechon Mamre and possibly Daat | hello@sefaria.org (Sefaria's public address; its site refuses automated reads, so not verified) | Not sent |
+| 3 | Sefaria | The licence labels of the Torat Emet, Daat and Metsudah versions it serves | Sefaria marks them Public Domain or CC-BY; the sources' own sites say otherwise for Torat Emet and possibly Daat | hello@sefaria.org (Sefaria's public address; its site refuses automated reads, so not verified) | Not sent |
 | 4 | Daat (daat.ac.il) | "Daat Siddur Ashkenaz", in nine Ashkenaz texts of the bundled siddur | Sefaria marks it Public Domain; no terms page was found on daat.ac.il | urisaf@gmail.com, the site manager (verified on daat.ac.il/contact.asp), and the form on the same page | Not sent |
 | 5 | Yalkut Yosef, Rav Yitzchak Yosef | A daily-halacha track from Yalkut Yosef or Kitzur Shulchan Aruch Yalkut Yosef (Q31) | In copyright | Contact form, yalkutyosef.co.il/צרו-קשר/ (verified), phone 077-2249906 (verified). Publisher Ash Pituchim through Otzar HaSefarim, sales@sefer.org.il, 074-703-7171 (reported, a retailer) | Not sent |
 | 6 | Halacha Yomit (halachayomit.co.il), the rulings of Rav Ovadia Yosef | Its daily halacha as a track (Q31) | "All rights reserved to its author; no use without his permission" (verified) | info@HalachaYomit.co.il (verified on its contact page) | Not sent |
@@ -23,10 +23,10 @@ Sources whose terms are open and need no request: Hebrew Wikisource (CC-BY-SA), 
 
 ## 1. Mechon Mamre — the Positive Mitzvot in the Rambam add-on
 
-- **What:** the Rambam track of the daily-halacha add-on ([../docs/halacha/rambam/](../docs/halacha/rambam)) takes one unit, "מצוות עשה" (the list of positive mitzvot at the opening of the Mishneh Torah), from "Mechon-mamre Mishneh Torah" through Sefaria. No other Hebrew version on Sefaria held every chapter the daily cycle reads (`RAMBAM_HE` in [../scripts/halacha/tracks.js](../scripts/halacha/tracks.js)). The file is already published on GitHub Pages; no app version offers the download yet.
+- **What:** the Rambam track of the daily-halacha add-on ([../docs/halacha/rambam/](../docs/halacha/rambam)) took one unit, "מצוות עשה" (the list of positive mitzvot at the opening of the Mishneh Torah), from "Mechon-mamre Mishneh Torah" through Sefaria. No other Hebrew version on Sefaria held every chapter the daily cycle reads (`RAMBAM_HE` in [../scripts/halacha/tracks.js](../scripts/halacha/tracks.js)). The file is already published on GitHub Pages; no app version offers the download yet.
 - **Terms:** <https://www.mechon-mamre.org/copy.htm>: "You may use materials from this site only for your private study and teaching, not for publishing in any form, including any Web site"; anything else needs their permission.
 - **Channel:** the form at <https://www.mechon-mamre.org/contact.htm> (subject: copyright). The site publishes no email address.
-- **If they refuse or do not answer:** rebuild the unit from another source (Torat Emet or Wikisource, with the missing chapter taken from Wikisource), and remove the published file.
+- **Resolved without a request (2026-11-10, the owner's choice of a way around them):** the unit is rebuilt from Wikisource's Hebrew (CC-BY-SA, all 248 mitzvot), the published file replaced in version 2 of the Rambam track, and `BANNED_SOURCE` in [../scripts/halacha/tracks.js](../scripts/halacha/tracks.js) refuses any version whose source is mechon-mamre.org, since Sefaria also serves the same text as plain "Mishneh Torah". The message below stays only in case the owner ever wants their text.
 
 **Message (Hebrew, for the form):**
 
@@ -91,14 +91,13 @@ Subject: Chok LeYisrael (Torat Emet edition) in a free app: credit and permissio
   - Torat Emet 363: 76 of the Rambam track's units. Public Domain.
   - Targum Onkelos and Selichot Edot HaMizrach, from Torat Emet. Public Domain.
   - "Daat Siddur Ashkenaz": nine Ashkenaz texts. Public Domain.
-  - "Mechon-mamre Mishneh Torah": one Rambam unit. Public Domain.
   - The Metsudah Siddur, Machzor and Selichos (Avrohom Davis) and the Metsudah Kitzur Shulchan Aruch: the English beside the Hebrew. CC-BY.
-- **Why ask:** Torat Emet's copyright page says its material may not be used commercially, and Mechon Mamre's says it may not be published at all, while Sefaria marks both Public Domain. Sefaria may hold an agreement or a reason (an old text, a public-domain base) that settles it; one answer from them covers six versions.
+- **Why ask:** Torat Emet's copyright page says its material may not be used commercially, while Sefaria marks its versions Public Domain. Sefaria may hold an agreement or a reason (an old text, a public-domain base) that settles it; one answer from them covers every version listed.
 - **Channel:** hello@sefaria.org (Sefaria's general address; their contact page refused an automated read, so open <https://www.sefaria.org/contact> in a browser to confirm it).
 
 **Email (English):**
 
-Subject: Licence labels of Torat Emet, Daat, Mechon Mamre and Metsudah versions
+Subject: Licence labels of Torat Emet, Daat and Metsudah versions
 
 > Dear Sefaria team,
 >
@@ -107,7 +106,6 @@ Subject: Licence labels of Torat Emet, Daat, Mechon Mamre and Metsudah versions
 > We would like to make sure we read the licences correctly for these versions:
 >
 > - Torat Emet 357 (Kitzur Shulchan Aruch, Siddur Sefard), Torat Emet 363 (Mishneh Torah), and the Torat Emet versions of Targum Onkelos and Selichot Edot HaMizrach, all marked Public Domain. Torat Emet's own site says its material may not be used commercially.
-> - Mechon-mamre Mishneh Torah, marked Public Domain. Mechon Mamre's site allows only private study and teaching.
 > - Daat Siddur Ashkenaz, marked Public Domain.
 > - The Metsudah Siddur, Machzor and Selichos (Avrohom Davis) and the Metsudah Kitzur Shulchan Aruch, marked CC-BY.
 >
