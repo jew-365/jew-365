@@ -262,3 +262,23 @@ Submitted on 2026-11-08 at 10:00 Israel time from the Dashboard (Apply for produ
 3. Your production readiness
    - Changes made from the closed test: "During the test we shipped weekly updates: a fix for a crash when marking a mitzvah on Android, 24 fixes from a full audit, faster launch, a first screen in the device language, location by permission or search, reminder nagging levels, quiet hours, and prayer times matched to a printed luach."
    - How you decided the app is ready: "Every change passes CI: type checks, lint and over 6,000 automated tests run in four time zones. We check each update on our own Android phones and an emulator before it reaches users, and Play vitals show no crash since the fix of November 3. The app ran 14+ days with 12+ testers."
+
+## Production Release
+
+The first production release, `10 (1.0.21)` (AAB versionCode 10, EAS `041138bc`), created on 2026-11-10 as avi6190i (`/console/u/1/`) from the bundle that `play.mjs upload --commit` had put on `Closed testing - Alpha` the same day, and sent to Google's review with the closed-test release.
+
+- Countries / regions: every country Play offers, 177 plus the rest of the world.
+- Rollout: full (Play has no staged rollout for a first production release).
+- Release name: `10 (1.0.21)`, Play's default.
+- Release notes, the same on the closed test and on Production:
+
+```
+<iw-IL>
+יהודי 365 עולה לחנות: תזכורת לכל מצווה בזמן ההלכתי שלה לפי המיקום שלך, סידור לפי הנוסח שלך, מעקב והישגים, ומנוחה מלאה בשבת ובחג. השאלות על מין ומצב משפחתי בהתחלה הן עכשיו רשות. משוב: 365jew@gmail.com
+</iw-IL>
+<en-US>
+Jew 365 arrives in the store: a reminder for each mitzvah in its halachic time at your location, a siddur in your nusach, tracking and achievements, and full rest on Shabbat and Yom Tov. The gender and marital status questions at setup are now optional. Feedback: 365jew@gmail.com
+</en-US>
+```
+
+The store listing went out as it stood (the copy and graphics of 2026-10-23); the copy and screenshots of 2026-11-01 stay held by the owner.
