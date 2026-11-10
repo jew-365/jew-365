@@ -162,7 +162,7 @@ Tisha B'Av (Torah study is limited to its own topics) and a mourner's days are n
 
 - A fast deferred from Shabbat moves its period with it; hebcal gives the observed day.
 - Purim is 14 Adar everywhere; Shushan Purim gets no period of its own.
-- `festivalPeriodsOn(day, inIsrael)` in `src/utils/halacha.ts` returns the periods a day is in, nearest festival first, each with the day's index and the days left.
+- `festivalPeriodsOn(day)` in `src/utils/halacha.ts` returns the periods a day is in, nearest festival first, each with the day's index and the days left. As built it takes no `inIsrael`: no festival of the table falls on a different day in Israel and abroad.
 
 ### 7.2 Content per track
 

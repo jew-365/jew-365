@@ -480,6 +480,29 @@ describe('useUserStore Chok commentary', () => {
   });
 });
 
+describe('useUserStore halacha track', () => {
+  beforeEach(() => useUserStore.getState().reset());
+
+  it("starts on the nusach's default, takes a track and resets to the default", () => {
+    expect(useUserStore.getState().halachaTrack).toBeNull();
+    useUserStore.getState().setHalachaTrack('rambam');
+    expect(useUserStore.getState().halachaTrack).toBe('rambam');
+    useUserStore.getState().setHalachaTrack(null);
+    expect(useUserStore.getState().halachaTrack).toBeNull();
+    useUserStore.getState().setHalachaTrack('ben_ish_chai');
+    useUserStore.getState().reset();
+    expect(useUserStore.getState().halachaTrack).toBeNull();
+  });
+
+  it('keeps a saved track, and reads a missing or unknown one as the default', () => {
+    const { merge } = useUserStore.persist.getOptions();
+    const current = useUserStore.getState();
+    expect(merge!({ nusach: 'sefard' }, current).halachaTrack).toBeNull();
+    expect(merge!({ halachaTrack: 'kitzur' }, current).halachaTrack).toBe('kitzur');
+    expect(merge!({ halachaTrack: 'yalkut' }, current).halachaTrack).toBeNull();
+  });
+});
+
 describe('useUserStore Thursday-night day', () => {
   beforeEach(() => useUserStore.getState().reset());
 

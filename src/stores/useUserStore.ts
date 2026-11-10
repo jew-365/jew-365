@@ -6,6 +6,8 @@ import { STORE_VERSION, migrate, onRehydrateStorage } from './persistOptions';
 import { Nusach, HalachicOpinion } from '@/types/mitzvah';
 import { Location } from '@/types/zmanim';
 import { ChokDoubleChoice, ChokThuNightDay } from '@/types/chok';
+import { HalachaTrack } from '@/types/halacha';
+import { HALACHA_TRACKS } from '@/data/halacha';
 import type { SiddurVoice } from '@/types/siddur';
 import { CITIES, refreshSavedLocation } from '@/data/cities';
 import type { LocationSource, LocationStatus } from '@/services/LocationService';
@@ -140,6 +142,7 @@ type UserState = {
   chokDoubleChoice: ChokDoubleChoice | null;
   chokCommentaryOpen: boolean;
   chokThuNightDay: ChokThuNightDay | null;
+  halachaTrack: HalachaTrack | null;
   hiddenZmanim: readonly ZmanId[];
   homeBento: readonly BentoWidget[] | null;
   bentoPins: readonly ZmanId[];
@@ -186,6 +189,7 @@ type UserState = {
   setAmidahVerses: (verses: readonly string[]) => void;
   setAmidahPrayer: (text: string) => void;
   setChokThuNightDay: (day: ChokThuNightDay) => void;
+  setHalachaTrack: (track: HalachaTrack | null) => void;
   setHomeLook: (look: HomeLook) => void;
   setGender: (g: Gender | null) => void;
   setMaritalStatus: (m: MaritalStatus | null) => void;
@@ -234,6 +238,7 @@ const mergeSavedUserState = (persisted: unknown, current: UserState): UserState 
   if (merged.taharahEnabled && merged.maritalStatus == null) merged.maritalStatus = 'married';
   if (!isUiScale(merged.uiScale)) merged.uiScale = DEFAULT_UI_SCALE;
   if (!HOME_LOOKS.includes(merged.homeLook)) merged.homeLook = 'rail';
+  if (merged.halachaTrack != null && !HALACHA_TRACKS.includes(merged.halachaTrack)) merged.halachaTrack = null;
   merged.location = refreshSavedLocation(merged.location, merged.locationSource);
   merged.inIsrael = merged.location.inIsrael;
   merged.hilulaNotices = savedNotices(DEFAULT_HILULA_NOTICES, saved.hilulaNotices);
@@ -285,6 +290,7 @@ export const useUserStore = create<UserState>()(
       chokDoubleChoice: null,
       chokCommentaryOpen: false,
       chokThuNightDay: null,
+      halachaTrack: null,
       hiddenZmanim: [],
       homeBento: null,
       bentoPins: [],
@@ -358,6 +364,7 @@ export const useUserStore = create<UserState>()(
       setAmidahVerses: (verses) => set({ amidahVerses: amidahVersesOf(verses) }),
       setAmidahPrayer: (text) => set({ amidahPrayer: amidahPrayerOf(text) }),
       setChokThuNightDay: (day) => set({ chokThuNightDay: day }),
+      setHalachaTrack: (track) => set({ halachaTrack: track && HALACHA_TRACKS.includes(track) ? track : null }),
       setHomeLook: (look) => set((state) => (HOME_LOOKS.includes(look) ? { homeLook: look } : state)),
       setGender: (g) => set({ gender: g }),
       setMaritalStatus: (m) => set({ maritalStatus: m }),
@@ -396,6 +403,7 @@ export const useUserStore = create<UserState>()(
           chokDoubleChoice: null,
           chokCommentaryOpen: false,
           chokThuNightDay: null,
+          halachaTrack: null,
           hiddenZmanim: [],
           homeBento: null,
           bentoPins: [],
