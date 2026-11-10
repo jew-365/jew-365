@@ -503,6 +503,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Source:** the owner's message of 2026-11-10: the board's colour stayed purple instead of changing with day and night, and should not be so opaque and prominent.
   - **Found:** a special day's colour took over the whole day and night: on Rosh Chodesh Kislev (that day) the card stayed purple from morning to night, as an erev Shabbat, Chanukah or a fast day would.
   - **Done:** 2026-11-10: the card's colour follows the part of the day only (dawn, morning, noon, evening, night), a muted gradient drawn at 0.72 over the land so the sky shows through; white text holds 4.5:1 on it every 10 minutes of three days of the year ([src/theme/__tests__/periodTone.test.ts](src/theme/__tests__/periodTone.test.ts)). Checked in the web build at 06:10, 15:40 and 20:30. Verified: `typecheck`, `lint`, `check:dox`, the full suite (6676 passed), `test:tz` on the tone, the card and the guide.
+  - **Status:** 1.0.21 · Committed: `58fc45e` fix(home): the card's colour follows the time of day and lets the sky show through · Pushed: yes · Live: preview `1.0.21-74` (group `31498385-82ea-4ab0-a100-1dd97f14aa4f`, from `58fc45e`, 2026-11-10); production no · Channel: preview
 
 - [ ] Home's board answers and the return to home on every return
   - **Flag:** `OTA`.
