@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { holdScreenOnReturn } from './externalFlow';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { storage, StorageService } from '@/services/StorageService';
@@ -157,6 +158,7 @@ export function backupFileName(now: Date = new Date()): string {
 export async function exportBackup(now: Date = new Date()): Promise<void> {
   const file = new File(Paths.cache, backupFileName(now));
   file.write(JSON.stringify(createBackup(now)));
+  holdScreenOnReturn();
   await Sharing.shareAsync(file.uri, {
     mimeType: 'application/json',
     UTI: 'public.json',
@@ -170,6 +172,7 @@ const isCancelled = (error: unknown): boolean => error instanceof Error && /canc
 export async function pickBackup(): Promise<Backup | null> {
   let picked: Awaited<ReturnType<typeof File.pickFileAsync>>;
   try {
+    holdScreenOnReturn();
     picked = await File.pickFileAsync();
   } catch (error) {
     if (isCancelled(error)) return null;

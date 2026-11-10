@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { holdScreenOnReturn } from './externalFlow';
 import * as LocalAuthentication from 'expo-local-authentication';
 
 export type LockStatus = 'unlocked' | 'locked' | 'unavailable';
@@ -23,6 +24,7 @@ export async function biometricsAvailable(): Promise<boolean> {
 
 async function prompt(promptMessage: string): Promise<boolean> {
   try {
+    holdScreenOnReturn();
     const result = await LocalAuthentication.authenticateAsync({ promptMessage, disableDeviceFallback: false });
     return result.success;
   } catch {

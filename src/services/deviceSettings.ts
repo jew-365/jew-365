@@ -1,5 +1,6 @@
 import { Linking, Platform } from 'react-native';
 import { requireOptionalNativeModule } from 'expo';
+import { holdScreenOnReturn } from './externalFlow';
 
 // Exact alarms are necessary but not sufficient: OEM battery managers still defer or kill scheduled
 // work. The owner chose on 2026-10-28 to ask for REQUEST_IGNORE_BATTERY_OPTIMIZATIONS (app.json),
@@ -29,6 +30,7 @@ export function hasPowerSettingsModule(): boolean {
 }
 
 export async function openAppSettings(): Promise<void> {
+  holdScreenOnReturn();
   await Linking.openSettings().catch(() => {});
 }
 
@@ -37,6 +39,7 @@ export function supportsBatteryOptimizationSettings(): boolean {
 }
 
 export async function openBatteryOptimizationSettings(): Promise<boolean> {
+  holdScreenOnReturn();
   if (Platform.OS !== 'android') {
     await openAppSettings();
     return false;
@@ -57,6 +60,7 @@ export async function isIgnoringBatteryOptimizations(): Promise<boolean | null> 
 }
 
 export async function requestIgnoreBatteryOptimizations(): Promise<boolean> {
+  holdScreenOnReturn();
   const native = powerSettings();
   const opened = native ? await native.requestIgnoreBatteryOptimizations().catch(() => false) : false;
   if (opened) return true;
@@ -72,6 +76,7 @@ export function isSamsungDevice(): boolean {
 }
 
 export async function openSamsungNeverSleeping(): Promise<boolean> {
+  holdScreenOnReturn();
   const native = powerSettings();
   const opened = native ? await native.openSamsungNeverSleeping().catch(() => false) : false;
   if (opened) return true;
@@ -89,6 +94,7 @@ export async function unusedAppRestrictionsStatus(): Promise<UnusedAppRestrictio
 }
 
 export async function openUnusedAppRestrictions(): Promise<boolean> {
+  holdScreenOnReturn();
   const native = powerSettings();
   const opened = native ? await native.openUnusedAppRestrictions().catch(() => false) : false;
   if (opened) return true;

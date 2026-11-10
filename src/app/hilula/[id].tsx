@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { openExternalUrl } from '@/services/externalFlow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { HDate, gematriya } from '@hebcal/core';
@@ -131,7 +132,7 @@ export default function HilulaScreen() {
               <View style={styles.stack}>
                 <Text style={[typography.body, { color: colors.text }]}>{page.grave.place[locale]}</Text>
                 {url ? (
-                  <Button label={t('hilula.page.waze')} onPress={() => Linking.openURL(url).catch(() => {})} />
+                  <Button label={t('hilula.page.waze')} onPress={() => openExternalUrl(url)} />
                 ) : page.grave.noLinkReason ? (
                   <Text style={[typography.caption, { color: colors.textSub }]}>{page.grave.noLinkReason[locale]}</Text>
                 ) : null}

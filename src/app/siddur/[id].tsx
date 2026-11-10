@@ -7,7 +7,6 @@ import {
   GestureResponderEvent,
   I18nManager,
   LayoutChangeEvent,
-  Linking,
   PixelRatio,
   Platform,
   Pressable,
@@ -19,6 +18,7 @@ import {
   ViewStyle,
   ViewToken,
 } from 'react-native';
+import { openExternalUrl } from '@/services/externalFlow';
 import Animated, {
   AnimatedRef,
   Extrapolation,
@@ -2700,7 +2700,7 @@ export default function SiddurScreen() {
                       {readyText.credits.map((credit) => (
                         <Pressable
                           key={credit.title}
-                          onPress={() => Linking.openURL(credit.url).catch(() => {})}
+                          onPress={() => openExternalUrl(credit.url)}
                           onTouchStart={taps.consume}
                           accessibilityRole="link"
                         >

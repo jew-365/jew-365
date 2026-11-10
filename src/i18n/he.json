@@ -1604,7 +1604,7 @@
   "home.times.tomorrowA11y": "%{name} מחר, %{time}",
   "home.times.addPin": "בחירת הזמנים שלי",
   "home.times.pins.title": "הזמנים שלי",
-  "home.times.pins.caption": "זמן שתבחר יסומן בכוכב בקרוסלה כל יום.",
+  "home.times.pins.caption": "זמן שתבחר יקבל ⭐ בקרוסלה כל יום, ויופיע בדף ״שלי״ שבכרטיס.",
   "home.times.pins.suggested": "מומלץ לך",
   "home.times.pins.more": "עוד זמנים",
   "home.times.reason.tefillin": "כי תפילין מופעלות אצלך",
@@ -1795,5 +1795,9 @@
   "nag.verb.ushpizin": "להזמין",
   "nag.verb.selichot": "לומר",
   "nag.verb.kiddush_levana": "לקדש",
-  "nag.verb.default": "לקיים"
+  "nag.verb.default": "לקיים",
+  "home.card.klNone": "לא בימים הקרובים",
+  "home.card.pinsNone": "בוחרים ב⭐ שבקרוסלה",
+  "home.card.mineFull": "כבר נבחרו שלושה: הסר אחד כדי להוסיף",
+  "home.times.pinsChip": "הזמנים שלי"
 }

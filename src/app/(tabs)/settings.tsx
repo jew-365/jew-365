@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AppState,
   Keyboard,
-  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -14,6 +13,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import { openExternalUrl, openSystemSettings } from '@/services/externalFlow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { appVersionLabel } from '@/services/appUpdates';
@@ -416,7 +416,7 @@ export default function SettingsScreen() {
   };
 
   const openOsSettings = () => {
-    Linking.openSettings().catch(() => {});
+    openSystemSettings();
   };
 
   const onToggleNotifications = async (next: boolean) => {
@@ -1089,7 +1089,7 @@ function LocationBlock({ request }: { request: PlaceRequest | null }) {
           ? 'settings.locationFollows'
           : 'settings.locationNoPermission';
   const openPhoneSettings = () => {
-    Linking.openSettings().catch(() => {});
+    openSystemSettings();
   };
 
   return (
@@ -1354,7 +1354,7 @@ function SwitchRow({ label, hint, value, onValueChange, disabled, testID, style 
 }
 
 function openLink(url: string) {
-  Linking.openURL(url).catch(() => {});
+  openExternalUrl(url);
 }
 
 const styles = StyleSheet.create({

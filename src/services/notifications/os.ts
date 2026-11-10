@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { holdScreenOnReturn } from '../externalFlow';
 import * as Notifications from 'expo-notifications';
 import { t } from '@/i18n';
 import {
@@ -235,6 +236,7 @@ export async function getPermissionState(): Promise<'granted' | 'missing' | 'blo
 }
 
 export async function requestPermissions(): Promise<boolean> {
+  holdScreenOnReturn();
   const { status } = await Notifications.requestPermissionsAsync({
     ios: { allowAlert: true, allowBadge: true, allowSound: true },
   });

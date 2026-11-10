@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { openExternalUrl } from '@/services/externalFlow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '@/components/Button';
@@ -619,7 +620,7 @@ function ContentBlockView({
   if (block.type === 'link' || block.type === 'siddur') {
     const onPress =
       block.type === 'link'
-        ? () => Linking.openURL(block.url).catch(() => {})
+        ? () => openExternalUrl(block.url)
         : () => router.push({ pathname: '/siddur/[id]', params: { id: block.textId, from: mitzvahId } });
     return (
       <Pressable

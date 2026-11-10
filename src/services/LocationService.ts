@@ -1,4 +1,5 @@
 import * as ExpoLocation from 'expo-location';
+import { holdScreenOnReturn } from './externalFlow';
 import { CITIES, City, heightAt } from '@/data/cities';
 import { Location } from '@/types/zmanim';
 
@@ -139,6 +140,7 @@ export const LocationService = {
   },
 
   async requestPermission(): Promise<LocationStatus> {
+    holdScreenOnReturn();
     const perm = await ExpoLocation.requestForegroundPermissionsAsync();
     if (perm.granted) return 'ready';
     return perm.canAskAgain === false ? 'denied' : 'missing';

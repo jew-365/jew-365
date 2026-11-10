@@ -478,8 +478,8 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: 'More room for the mitzvot open now: the greeting and the date sit right on the sky, the circle is larger and the clock inside it is sized to it with no background, the card and the carousel are lower, the spacing tighter and the tab bar slimmer. Back to now shows inside the circle, under the clock.',
       },
       {
-        he: 'האפליקציה נפתחת תמיד בדף הבית: חזרה אליה אחרי דקה או יותר מחוץ לה מחזירה לבית.',
-        en: 'The app always opens on Home: coming back after a minute or more away returns to Home.',
+        he: 'האפליקציה נפתחת תמיד בדף הבית: כל חזרה אליה מחזירה לבית, חוץ מחזרה ממשהו שהאפליקציה עצמה פתחה (אישור הרשאה, ההגדרות של הטלפון, שיתוף או קישור), שמחזירה למסך שממנו יצאת.',
+        en: 'The app always opens on Home: every return to it goes to Home, except a return from something the app itself opened (a permission, the phone settings, sharing or a link), which goes back to the screen you left.',
       },
       {
         he: 'פסוקים לשמך ותפילה אישית בעמידה: עד שלושה פסוקים, אחד לכל שם, נמצאים לפי השם או לפי האות הראשונה והאחרונה, מתוך תהלים וחק לישראל, ופסוק שגם מופיע בו השם מסומן כמומלץ; או מוקלדים, ותפילה בכתב חופשי. הסידור מציג אותם בסוף אלהי נצור, לפני יהיו לרצון השני, מודגשים בצבע הראשי ופתוחים תמיד. בהגדרות ← תפילה וסידור, ובקישור מתחת לעמידה.',

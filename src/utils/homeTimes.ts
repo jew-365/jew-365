@@ -193,7 +193,7 @@ export const isCardPage = (value: unknown): value is CardPageId => CARD_PAGES.in
 // What "mine" can show, each a fact none of the other pages prints.
 export type MineFactId = 'toShabbat' | 'kiddushLevana' | 'hilula' | 'tehillim' | 'pins';
 export const MINE_FACTS: readonly MineFactId[] = ['toShabbat', 'kiddushLevana', 'hilula', 'tehillim', 'pins'];
-export const DEFAULT_MINE: readonly MineFactId[] = ['toShabbat', 'kiddushLevana', 'hilula'];
+export const DEFAULT_MINE: readonly MineFactId[] = ['toShabbat', 'hilula', 'pins'];
 export const MINE_MAX = 3;
 export const mineFactsOf = (saved: unknown): MineFactId[] =>
   Array.isArray(saved) ? MINE_FACTS.filter((id) => saved.includes(id)).slice(0, MINE_MAX) : [...DEFAULT_MINE];

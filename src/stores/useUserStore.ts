@@ -25,7 +25,15 @@ import {
 } from '@/utils/quietHours';
 import { DEFAULT_NAG_LEVEL, isNagLevel, type NagLevel } from '@/utils/nagging';
 import { hiddenZmanimOf, withZmanShown, type ZmanId } from '@/utils/zmanIds';
-import { DEFAULT_MINE, isCardPage, mineFactsOf, zmanPinsOf, type CardPageId, type MineFactId } from '@/utils/homeTimes';
+import {
+  DEFAULT_MINE,
+  isCardPage,
+  MINE_MAX,
+  mineFactsOf,
+  zmanPinsOf,
+  type CardPageId,
+  type MineFactId,
+} from '@/utils/homeTimes';
 import { amidahPrayerOf, amidahVersesOf } from '@/utils/personalPrayer';
 
 export type Language = 'he' | 'en';
@@ -373,7 +381,15 @@ export const useUserStore = create<UserState>()(
           const hiddenZmanim = withZmanShown(s.hiddenZmanim, id, shown);
           return hiddenZmanim === s.hiddenZmanim ? s : { hiddenZmanim };
         }),
-      setZmanPins: (pins) => set({ zmanPins: zmanPinsOf(pins) }),
+      // The first time a zman is starred, the starred times join Mine when it has room, so the star shows somewhere.
+      setZmanPins: (pins) =>
+        set((state) => {
+          const zmanPins = zmanPinsOf(pins);
+          const mine = state.homeCardMine;
+          const join =
+            state.zmanPins.length === 0 && zmanPins.length > 0 && !mine.includes('pins') && mine.length < MINE_MAX;
+          return join ? { zmanPins, homeCardMine: mineFactsOf([...mine, 'pins']) } : { zmanPins };
+        }),
       setHomeCardPage: (page) => set({ homeCardPage: isCardPage(page) ? page : null }),
       setHomeCardMine: (facts) => set({ homeCardMine: mineFactsOf(facts) }),
       setHomeLearn: (on) => set({ homeLearn: on }),

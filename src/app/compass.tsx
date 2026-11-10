@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppState, Linking, Platform, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { AppState, Platform, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { openSystemSettings } from '@/services/externalFlow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import * as ExpoLocation from 'expo-location';
@@ -444,7 +445,7 @@ export default function CompassScreen() {
     const status = await LocationService.requestPermission();
     if (status === 'ready') applyStatus(status);
     else if (status === 'denied') {
-      Linking.openSettings().catch(() => {});
+      openSystemSettings();
     }
   };
 

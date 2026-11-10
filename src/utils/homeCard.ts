@@ -252,7 +252,8 @@ export function homeCard(input: CardInput): CardModel {
     facts: weekFacts.slice(0, 3),
   };
 
-  // Mine.
+  // Mine: every fact the user chose shows, with a plain value when it has nothing near (the owner's report of
+  // 2026-11-10: a chosen fact that only showed when relevant looked like a choice that did not work).
   const mineFact = (id: MineFactId): CardFact | null => {
     switch (id) {
       case 'toShabbat':
@@ -260,28 +261,36 @@ export function homeCard(input: CardInput): CardModel {
           ? { label: t('home.card.mine.toShabbat'), value: formatRemaining(block.start.getTime() - now.getTime(), t) }
           : null;
       case 'kiddushLevana':
-        if (!input.kiddushLevana || klOpen) return null;
         return {
           label: t('home.card.kl'),
-          value: t('home.card.klOpens', { weekday: weekdayOf(input.kiddushLevana.start, tz, language, true) }),
+          value: klOpen
+            ? t('home.card.klOpenUntil', { weekday: weekdayOf(klOpen.end, tz, language) })
+            : input.kiddushLevana
+              ? t('home.card.klOpens', { weekday: weekdayOf(input.kiddushLevana.start, tz, language, true) })
+              : t('home.card.klNone'),
         };
       case 'hilula': {
-        const next = upcomingHilulot(hd, input.inIsrael).find(
-          (h) => h.day.abs() - hd.abs() <= 14 && !hilulot.includes(h.hilula.name[language]),
-        );
+        const next = upcomingHilulot(hd, input.inIsrael).find((h) => !hilulot.includes(h.hilula.name[language]));
         if (!next) return null;
-        const when = next.day.abs() === hd.abs() ? t('home.card.today') : formatDate(next.day.greg(), 'cccc', language);
+        const days = next.day.abs() - hd.abs();
+        const when =
+          days === 0
+            ? t('home.card.today')
+            : days < 7
+              ? formatDate(next.day.greg(), 'cccc', language)
+              : formatDate(next.day.greg(), language === 'he' ? 'd LLLL' : 'LLLL d', language);
         return {
           label: t('home.card.mine.hilula'),
           value: t('home.card.soonOn', { name: next.hilula.name[language], weekday: when }),
         };
       }
       case 'tehillim':
-        return second.label === t('home.card.tehillim')
-          ? null
-          : { label: t('home.card.tehillim'), value: tehillimRange(hd.getDay(), language, t) };
+        return { label: t('home.card.tehillim'), value: tehillimRange(hd.getDay(), language, t) };
       case 'pins':
-        return input.pinNames.length ? { label: t('home.card.mine.pins'), value: input.pinNames.join(' · ') } : null;
+        return {
+          label: t('home.card.mine.pins'),
+          value: input.pinNames.length ? input.pinNames.join(' · ') : t('home.card.pinsNone'),
+        };
     }
   };
   const mineFacts = input.mine

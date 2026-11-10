@@ -1604,7 +1604,7 @@
   "home.times.tomorrowA11y": "%{name} tomorrow, %{time}",
   "home.times.addPin": "Choose my times",
   "home.times.pins.title": "My times",
-  "home.times.pins.caption": "A time you choose is starred in the carousel every day.",
+  "home.times.pins.caption": "A time you choose gets a ⭐ in the carousel every day, and shows on the Mine page of the card.",
   "home.times.pins.suggested": "Suggested for you",
   "home.times.pins.more": "More times",
   "home.times.reason.tefillin": "Because tefillin is on for you",
@@ -1795,5 +1795,9 @@
   "nag.verb.ushpizin": "invite the guests",
   "nag.verb.selichot": "say Selichot",
   "nag.verb.kiddush_levana": "say Kiddush Levana",
-  "nag.verb.default": "do it"
+  "nag.verb.default": "do it",
+  "home.card.klNone": "Not in the coming days",
+  "home.card.pinsNone": "Choose with ⭐ in the carousel",
+  "home.card.mineFull": "Three are chosen: remove one to add",
+  "home.times.pinsChip": "My times"
 }

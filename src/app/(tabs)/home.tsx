@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppState, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { openSystemSettings } from '@/services/externalFlow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -767,7 +768,7 @@ export default function HomeScreen() {
       return {
         tone: 'urgent',
         text: t('home.notificationsDenied'),
-        onPress: () => Linking.openSettings().catch(() => {}),
+        onPress: () => openSystemSettings(),
       };
     }
     if (checkIn) {

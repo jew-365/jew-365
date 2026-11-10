@@ -39,4 +39,18 @@ describe("home's board in the user store", () => {
     expect(merged.homeLearn).toBe(true);
     expect(merged.zmanPins).toEqual(['plag']);
   });
+
+  it('the first starred time joins Mine when it has room, and never pushes out a choice', () => {
+    const s = useUserStore.getState();
+    s.setHomeCardMine(['toShabbat']);
+    s.setZmanPins(['plag']);
+    expect(useUserStore.getState().homeCardMine).toEqual(['toShabbat', 'pins']);
+    s.setHomeCardMine(['toShabbat', 'hilula', 'tehillim']);
+    s.setZmanPins([]);
+    s.setZmanPins(['alot']);
+    expect(useUserStore.getState().homeCardMine).toEqual(['toShabbat', 'hilula', 'tehillim']);
+    s.setHomeCardMine(['toShabbat']);
+    s.setZmanPins(['alot', 'plag']);
+    expect(useUserStore.getState().homeCardMine).toEqual(['toShabbat']);
+  });
 });

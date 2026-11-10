@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Linking, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { openExternalUrl } from '@/services/externalFlow';
 import { BottomSheet } from '@/components/BottomSheet';
 import { useI18n } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -25,7 +26,7 @@ function NoticeLines({ style }: { style?: StyleProp<ViewStyle> }) {
         accessibilityRole="link"
         hitSlop={HIT_SLOP}
         onPress={() => {
-          Linking.openURL(t('chok.licenseUrl')).catch(() => {});
+          openExternalUrl(t('chok.licenseUrl'));
         }}
       >
         <Text style={[typography.captionBold, { color: colors.goldText }]}>{t('chok.license')}</Text>

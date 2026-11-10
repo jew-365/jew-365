@@ -111,4 +111,21 @@ describe('HomeTimes', () => {
     fireEvent.press(screen.getByText('ההילולא הקרובה'));
     expect(props.onMineChange).toHaveBeenCalledWith(['toShabbat', 'hilula']);
   });
+
+  it('refuses a fourth fact for Mine and says why, instead of dropping one', () => {
+    const props = renderTimes({ mine: ['toShabbat', 'hilula', 'pins'] });
+    fireEvent.press(screen.getByTestId('home-card-more'));
+    expect(screen.getAllByText('כבר נבחרו שלושה: הסר אחד כדי להוסיף')).toHaveLength(2);
+    fireEvent.press(screen.getByText('תהילים היום'));
+    expect(props.onMineChange).not.toHaveBeenCalled();
+    fireEvent.press(screen.getByText('ההילולא הקרובה'));
+    expect(props.onMineChange).toHaveBeenCalledWith(['toShabbat', 'pins']);
+  });
+
+  it('names the pins chip and opens its sheet', () => {
+    renderTimes();
+    expect(within(screen.getByTestId('home-times-pin')).getByText('הזמנים שלי')).toBeOnTheScreen();
+    fireEvent.press(screen.getByTestId('home-times-pin'));
+    expect(screen.getByText('זמן שתבחר יקבל ⭐ בקרוסלה כל יום, ויופיע בדף ״שלי״ שבכרטיס.')).toBeOnTheScreen();
+  });
 });

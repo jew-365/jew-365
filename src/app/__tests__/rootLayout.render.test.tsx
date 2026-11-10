@@ -57,7 +57,8 @@ const mockNotificationRecent = jest.fn(() => false);
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { AppState } from 'react-native';
 import RootLayout from '../_layout';
-import { RETURN_HOME_AFTER_MS, RETURN_HOME_DELAY_MS } from '@/utils/returnHome';
+import { holdScreenOnReturn, takeScreenHold } from '@/services/externalFlow';
+import { HOLD_LEAD_MS, HOLD_MAX_MS, RETURN_HOME_DELAY_MS } from '@/utils/returnHome';
 import { CITIES } from '@/data/cities';
 import { HebcalService } from '@/services/HebcalService';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
@@ -401,24 +402,46 @@ describe('the root layout returns to home', () => {
     mockRouter.canDismiss.mockReturnValue(false);
   });
 
-  const away = async (ms: number) => {
+  const away = async (ms: number, beforeLeaving?: () => void) => {
     renderWithTheme(<RootLayout />);
     await act(async () => {});
+    takeScreenHold();
+    beforeLeaving?.();
     send('background');
     jest.setSystemTime(Date.now() + ms);
     send('active');
     act(() => jest.advanceTimersByTime(RETURN_HOME_DELAY_MS));
   };
 
-  it('unwinds the stack and opens home after a minute or more away', async () => {
-    await away(RETURN_HOME_AFTER_MS);
+  it('unwinds the stack and opens home on every return, however short the absence', async () => {
+    await away(2000);
     expect(mockRouter.dismissAll).toHaveBeenCalledTimes(1);
     expect(mockRouter.navigate).toHaveBeenCalledWith('/(tabs)/home');
   });
 
-  it('keeps the screen after a shorter absence, such as a permission dialog', async () => {
-    await away(RETURN_HOME_AFTER_MS - 1000);
+  it('keeps the screen on a return from something the app opened (a permission dialog, the settings, a link)', async () => {
+    await away(3 * 60 * 1000, () => holdScreenOnReturn());
     expect(mockRouter.navigate).not.toHaveBeenCalled();
+  });
+
+  it('goes home after such a flow when the absence outlasts the hold', async () => {
+    await away(HOLD_MAX_MS, () => holdScreenOnReturn());
+    expect(mockRouter.navigate).toHaveBeenCalledWith('/(tabs)/home');
+  });
+
+  it('ignores a stale hold, set well before the app left', async () => {
+    await away(2000, () => holdScreenOnReturn(Date.now() - HOLD_LEAD_MS - 1000));
+    expect(mockRouter.navigate).toHaveBeenCalledWith('/(tabs)/home');
+  });
+
+  it('uses a hold once: the next return goes home', async () => {
+    await away(2000, () => holdScreenOnReturn());
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
+    send('background');
+    jest.setSystemTime(Date.now() + 2000);
+    send('active');
+    act(() => jest.advanceTimersByTime(RETURN_HOME_DELAY_MS));
+    expect(mockRouter.navigate).toHaveBeenCalledWith('/(tabs)/home');
   });
 
   it('yields to a notification tap that opened a screen with the return', async () => {

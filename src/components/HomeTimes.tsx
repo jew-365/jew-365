@@ -32,7 +32,7 @@ const CHIP_PAD_Y = scaled(3);
 const CHIP_RADIUS = scaled(14);
 const LIVE_MIN_WIDTH = scaled(150);
 const BAR_HEIGHT = scaled(3);
-const MARK_ICON = scaled(11);
+const MARK_ICON = scaled(13);
 const TITLE_ICON = scaled(16);
 const TAB_HEIGHT = scaled(28);
 const CHIPS_TOP = scaled(6);
@@ -95,7 +95,7 @@ export function HomeTimes(props: HomeTimesProps) {
     props.onPinsChange(props.pins.includes(id) ? props.pins.filter((p) => p !== id) : [...props.pins, id]);
   const toggleMine = (id: MineFactId) => {
     if (props.mine.includes(id)) props.onMineChange(props.mine.filter((m) => m !== id));
-    else props.onMineChange([...props.mine, id].slice(-MINE_MAX));
+    else if (props.mine.length < MINE_MAX) props.onMineChange([...props.mine, id]);
   };
 
   return (
@@ -286,7 +286,13 @@ export function HomeTimes(props: HomeTimesProps) {
           onPress={() => setPinsOpen(true)}
           style={[styles.chip, styles.addChip, { borderColor: props.inks.plain }]}
         >
-          <MitzvahIcon name="plus" size={TITLE_ICON} color={props.inks.plain} />
+          <View style={styles.chipLabel}>
+            <MitzvahIcon name="star" size={MARK_ICON} color={colors.gold} />
+            <Text style={[typography.small, { color: props.inks.plain, lineHeight: LABEL_LINE }]}>
+              {t('home.times.pinsChip')}
+            </Text>
+          </View>
+          <MitzvahIcon name="plus" size={MARK_ICON} color={props.inks.plain} />
         </Pressable>
       </ScrollView>
 
@@ -348,7 +354,13 @@ export function HomeTimes(props: HomeTimesProps) {
             <SheetAction
               key={id}
               label={t(`home.card.mineFact.${id}`)}
-              caption={t(props.mine.includes(id) ? 'home.card.shown' : 'home.card.add')}
+              caption={t(
+                props.mine.includes(id)
+                  ? 'home.card.shown'
+                  : props.mine.length < MINE_MAX
+                    ? 'home.card.add'
+                    : 'home.card.mineFull',
+              )}
               selected={props.mine.includes(id)}
               onPress={() => toggleMine(id)}
             />
@@ -434,6 +446,6 @@ const styles = StyleSheet.create({
   bar: { height: '100%', borderRadius: radius.full },
   sep: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingHorizontal: spacing.xs },
   sepLine: { width: StyleSheet.hairlineWidth, height: scaled(28), opacity: 0.4 },
-  addChip: { alignItems: 'center', minWidth: CHIP_MIN, borderStyle: 'dashed' },
+  addChip: { alignItems: 'center', minWidth: CHIP_MIN, borderStyle: 'dashed', gap: scaled(2) },
   sheetBody: { maxHeight: scaled(460) },
 });

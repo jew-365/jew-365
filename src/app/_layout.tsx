@@ -42,6 +42,7 @@ import { reconcileEndedCustomMitzvot } from '@/stores/customMitzvahLifecycle';
 import { MarkCelebrationHost } from '@/components/MarkCelebration';
 import { FOLLOW_INTERVAL_MS, followDeviceLocation } from '@/services/locationFollow';
 import { watchForRatingMoment } from '@/services/storeReview';
+import { takeScreenHold } from '@/services/externalFlow';
 import {
   initNotificationResponseHandler,
   consumePendingNotificationRoute,
@@ -59,7 +60,7 @@ import { HalachaEnablePrompt } from '@/components/HalachaEnablePrompt';
 import { ShnayimEnablePrompt } from '@/components/ShnayimEnablePrompt';
 import { nextQuietBoundary, quietBlockAt } from '@/utils/skipRules';
 import { CHECK_IN_PROMPTED_KEY, latestCheckIn } from '@/utils/checkIn';
-import { NOTIFICATION_WINS_MS, RETURN_HOME_DELAY_MS, shouldReturnHome } from '@/utils/returnHome';
+import { holdCovers, NOTIFICATION_WINS_MS, RETURN_HOME_DELAY_MS, shouldReturnHome } from '@/utils/returnHome';
 import { getAllMitzvot } from '@/data/customMitzvotAdapter';
 import { enabledSinceOf, useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
@@ -210,8 +211,9 @@ function RootInner() {
     return () => clearInterval(timer);
   }, [quiet, isOnboarded, followsPhone]);
 
-  // The app always opens on home (the owner's call, 2026-11-10): a return after a minute or more away unwinds
-  // every pushed screen and selects the home tab, unless a notification tap opened a screen just now.
+  // The app always opens on home (the owner's call, 2026-11-10): every return from the background unwinds every
+  // pushed screen and selects the home tab, unless the app itself opened what it left for (a permission dialog,
+  // the settings, the share sheet, a link: externalFlow's hold) or a notification tap opened a screen just now.
   const returnState = useRef({ isOnboarded, quiet });
   returnState.current = { isOnboarded, quiet };
   useEffect(() => {
@@ -224,8 +226,9 @@ function RootInner() {
       }
       if (next !== 'active' || awayAt === null) return;
       const away = Date.now() - awayAt;
+      const held = holdCovers(takeScreenHold(), awayAt, away);
       awayAt = null;
-      if (!shouldReturnHome(away, returnState.current.isOnboarded, returnState.current.quiet)) return;
+      if (!shouldReturnHome(returnState.current.isOnboarded, returnState.current.quiet, held)) return;
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
         timer = null;

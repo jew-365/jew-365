@@ -100,6 +100,16 @@ describe('the smart card', () => {
     expect(mineFactsOf(null)).toEqual(DEFAULT_MINE);
   });
 
+  it('mine: shows every chosen fact, with a plain value when it has nothing near', () => {
+    const m = card('2026-11-12T08:15', { mine: ['kiddushLevana', 'hilula', 'tehillim'] });
+    expect(m.pages.mine.facts.map((f) => f.label)).toEqual(['קידוש לבנה', 'הילולא קרובה', 'תהילים היום']);
+    expect(m.pages.mine.facts[0].value).toBe('לא בימים הקרובים');
+    expect(m.pages.mine.facts[2].value).toBe('פרקים צ–קו');
+    expect(card('2026-11-12T08:15', { mine: ['pins'] }).pages.mine.facts).toEqual([
+      { label: 'הזמנים שבחרת', value: 'בוחרים ב⭐ שבקרוסלה' },
+    ]);
+  });
+
   it('reads in English too', () => {
     setLocale('en');
     const m = card('2026-11-10T09:00', { language: 'en' });

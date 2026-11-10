@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Keyboard, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { openExternalUrl } from '@/services/externalFlow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
@@ -196,7 +197,7 @@ export default function MoreScreen() {
 }
 
 function openLink(url: string) {
-  Linking.openURL(url).catch(() => {});
+  openExternalUrl(url);
 }
 
 const styles = StyleSheet.create({

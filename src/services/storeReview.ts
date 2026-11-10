@@ -1,4 +1,5 @@
 import { AppState, Platform } from 'react-native';
+import { holdScreenOnReturn } from './externalFlow';
 import { requireOptionalNativeModule } from 'expo';
 import { useCompletionsStore, type Completions } from '@/stores/useCompletionsStore';
 import { useUserStore } from '@/stores/useUserStore';
@@ -57,6 +58,7 @@ async function askIfDue(): Promise<void> {
     const storeReview = loadStoreReview();
     if (!storeReview || !(await storeReview.isAvailableAsync())) return;
     useUserStore.getState().setRatingAskedAt(Date.now());
+    holdScreenOnReturn();
     await storeReview.requestReview();
   } catch (error) {
     console.warn('[storeReview]', error);
