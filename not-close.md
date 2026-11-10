@@ -491,7 +491,9 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** round 6 of [design/lab/studies/2026-11-08-home-schedule/](design/lab/studies/2026-11-08-home-schedule/AGENTS.md): six designs on one rule (the carousel holds every time once, upcoming first with the period's times in gold and tomorrow's morning after tzeit; one line of the day and the week that never repeats a printed time; picks starred in the carousel), with the research and eight more ideas, published to the same gallery and canvas.
   - **Picked:** the smart stack, `R6Stack` (2026-11-10), with more in the same card, the live chip inside it, an optional smart mode and build features.
   - **Round 7 (2026-11-10):** six looks of one four-page card (עכשיו with a countdown and a filling bar, היום, השבוע with Shabbat's entry and exit and the molad, שלי), the ⋯ settings sheet, and a mock of the widgets, Live Activity and Android surfaces a native build would add, published to the same gallery and canvas.
-  - **Waiting on:** the owner's pick of round 7. The bento stays in the preview app until then.
+  - **Picked:** the period tone, `R7Tone` (2026-11-10), with the fill moved into the carousel, parallel progress on a touch, the calendar and learned-habit features, and more room for the mitzvah cards.
+  - **Round 8 (2026-11-10):** five layouts that give the mitzvah cards room (a compact card, a pill, a card inside the sky, no arc, pinned on scroll), the live and parallel fills in the carousel, the Omer, Selichot, the four parshiyot and tal umatar by season, and habits learned from marks (a demo history in the study); the learned habits in the app need the marks history read from `useCompletionsStore`.
+  - **Waiting on:** the owner's pick of round 8. The bento stays in the preview app until then.
 
 ### Medium — App requests of 2026-11-09
 

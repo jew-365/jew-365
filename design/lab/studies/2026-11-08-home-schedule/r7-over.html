@@ -5,6 +5,7 @@
 <div class="psheet-body">
 <div class="r7sw"><span class="pinm"><b>מצב חכם</b><span class="cap">הלוח פותח את הכרטיס שהכי חשוב עכשיו: זמן שנגמר בקרוב, יום מיוחד, ומחמישי בלילה את השבת</span></span><button class="r7tog" role="switch" aria-checked="{{r7.smartOn}}" onClick="{{r7CfgSmart}}" aria-label="מצב חכם"><i></i></button></div>
 <div class="r7sw"><span class="pinm"><b>מעבר אוטומטי</b><span class="cap">כל כמה שניות לכרטיס הבא, עד שבוחרים כרטיס</span></span><button class="r7tog" role="switch" aria-checked="{{r7.rotateOn}}" onClick="{{r7CfgRotate}}" aria-label="מעבר אוטומטי"><i></i></button></div>
+<sc-if value="{{r8On.any}}" hint-placeholder-val="{{ false }}"><div class="r7sw"><span class="pinm"><b>ללמוד מהסימונים שלי</b><span class="cap">הלוח מבחין מתי אתה מתפלל ומקדים את הזמן שחשוב לך (✦)</span></span><button class="r7tog" role="switch" aria-checked="{{r8LearnOn}}" onClick="{{r8CfgLearn}}" aria-label="ללמוד מהסימונים שלי"><i></i></button></div></sc-if>
 <p class="plabel">כרטיסים בלוח</p>
 <div class="pchips"><sc-for list="{{r7CfgPages}}" as="c" hint-placeholder-count="4"><button class="pchip" aria-pressed="{{c.on}}" onClick="{{c.toggle}}">{{c.name}}</button></sc-for></div>
 <p class="plabel">מה יופיע ב״שלי״ (עד שלושה)</p>

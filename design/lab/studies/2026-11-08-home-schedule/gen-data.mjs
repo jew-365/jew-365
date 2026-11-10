@@ -19,14 +19,18 @@ const { MITZVOT } = await app('data/mitzvot.ts');
 const { CITIES } = await app('data/cities.ts');
 const { dayWindow } = await app('utils/buildDayTimeline.ts');
 const { hilulotOn } = await app('data/hilulot.ts');
+const { dayFeatures, liturgicalDay, matchesCondition } = await app('utils/siddur.ts');
+const { siddurPlace, standaloneAvailability } = await app('data/siddur.ts');
 
 const loc = CITIES.find((c) => c.cityId === 'jerusalem');
 const settings = { nusach: 'sefard', halachicOpinions: { ksSofZman: 'gra' }, inIsrael: true };
 const FIRST = [2026, 10, 25];
 const DAYS = 75;
-const WIN_IDS = ['tefillin', 'krias_shma_shacharit', 'shacharit', 'mincha', 'maariv', 'krias_shma_al_hamita', 'candle_lighting', 'havdalah', 'chanukah_candles', 'kiddush_levana'];
+// Sample weeks of other seasons, for the calendar's smart lines: Shabbat Zachor, the Omer, Selichot.
+const EXTRA = [[2027, 3, 14, 9], [2027, 5, 2, 9], [2027, 9, 24, 8]];
+const WIN_IDS = ['tefillin', 'krias_shma_shacharit', 'shacharit', 'mincha', 'maariv', 'krias_shma_al_hamita', 'candle_lighting', 'havdalah', 'chanukah_candles', 'kiddush_levana', 'sefirat_haomer'];
 
-const plain = (s) => String(s).replace(/[֑-ׇ]/g, '').replace(/\s+/g, ' ').trim();
+const plain = (s) => String(s).replace(/\u05BE/g, ' ').replace(/[֑-ׇ]/g, '').replace(/\s+/g, ' ').trim();
 const WEEKDAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 const MONTHS = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
 const iso = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -36,8 +40,12 @@ const minOf = (day, d) => (d ? Math.floor((d.getTime() - day.getTime()) / 60000)
 const days = {};
 const blocks = new Map();
 const events = [];
-for (let i = 0; i < DAYS; i++) {
-  const day = new Date(FIRST[0], FIRST[1] - 1, FIRST[2] + i);
+const DATES = [];
+for (let i = 0; i < DAYS; i++) DATES.push(new Date(FIRST[0], FIRST[1] - 1, FIRST[2] + i));
+for (const [y, mo, d, n] of EXTRA) for (let i = 0; i < n; i++) DATES.push(new Date(y, mo - 1, d + i));
+const place = siddurPlace(loc, true);
+const omerOf = (h) => { const n = h.abs() - new hc.HDate(15, 'Nisan', h.getFullYear()).abs(); return n >= 1 && n <= 49 ? n : null; };
+for (const day of DATES) {
   const key = iso(day);
   const noon = new Date(day.getTime() + 12 * 3600000);
   const z = ZmanimService.getZmanim(noon, loc);
@@ -96,6 +104,10 @@ for (let i = 0; i < DAYS; i++) {
     win,
     hilulaToday: hil(hd),
     hilulaTonight: hil(hdNight),
+    omerTonight: omerOf(hdNight),
+    omerToday: omerOf(hd),
+    selichotTonight: matchesCondition(standaloneAvailability('selichot', 'sefard').available, dayFeatures(liturgicalDay(day, true), place)),
+    special: day.getDay() === 6 ? (hc.HebrewCalendar.calendar({ start: day, end: day, il: true }).filter((e) => e.getFlags() & hc.flags.SPECIAL_SHABBAT).map((e) => plain(e.render('he')))[0] || '') : '',
   };
 }
 

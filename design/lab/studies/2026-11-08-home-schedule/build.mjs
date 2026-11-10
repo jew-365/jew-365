@@ -10,8 +10,8 @@ copyFileSync(join(here, '..', '..', 'runtime', 'support.js'), join(outDir, 'supp
 const DATA = readFileSync(join(here, 'data.json'), 'utf8').trim();
 const CORE_JS = readFileSync(join(here, 'core.js'), 'utf8').replace('/*DATA*/ null', DATA);
 if (CORE_JS.includes('/*DATA*/')) throw new Error('data not injected');
-const CORE_CSS = readFileSync(join(here, 'core.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'sched.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r3.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r4.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r6.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r7.css'), 'utf8').trim();
-const SCHED_JS = readFileSync(join(here, 'sched.js'), 'utf8').trimEnd() + '\n\n' + readFileSync(join(here, 'r6.js'), 'utf8') + '\n' + readFileSync(join(here, 'r7.js'), 'utf8');
+const CORE_CSS = readFileSync(join(here, 'core.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'sched.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r3.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r4.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r6.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r7.css'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r8.css'), 'utf8').trim();
+const SCHED_JS = readFileSync(join(here, 'sched.js'), 'utf8').trimEnd() + '\n\n' + readFileSync(join(here, 'r6.js'), 'utf8') + '\n' + readFileSync(join(here, 'r7.js'), 'utf8') + '\n' + readFileSync(join(here, 'r8.js'), 'utf8');
 const SCHED_HTML = readFileSync(join(here, 'sched.html'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r3-card.html'), 'utf8').trim();
 const SCHED_TOP = readFileSync(join(here, 'sched-top.html'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r3-top.html'), 'utf8').trim();
 const LAYERS = readFileSync(join(here, 'r3-layers.html'), 'utf8').trim();
@@ -180,7 +180,7 @@ const PROPS = JSON.stringify({
   theme: { editor: 'enum', options: ['gold', 'rose', 'night'], default: 'gold', section: 'תצוגה' },
   bigText: { editor: 'boolean', default: false, section: 'תצוגה' },
   startTime: { editor: 'enum', options: ['live', '07:42', '08:15', '12:30', '15:30', '20:15'], default: 'live', section: 'שעה' },
-  date: { editor: 'enum', options: ['', '2026-11-09', '2026-11-10', '2026-11-13', '2026-11-14', '2026-11-17', '2026-12-06', '2026-12-11', '2026-12-20'], default: '', section: 'יום' },
+  date: { editor: 'enum', options: ['', '2026-11-09', '2026-11-10', '2026-11-13', '2026-11-14', '2026-11-17', '2026-12-06', '2026-12-11', '2026-12-20', '2027-03-16', '2027-05-05', '2027-09-26'], default: '', section: 'יום' },
   userName: { editor: 'text', default: 'דוד', section: 'אישי' },
   $preview: { width: 390, height: 844 },
 });
@@ -200,7 +200,7 @@ function build(name) {
   if (!markup.includes('<!--NAMECARD-->')) throw new Error(`${name}: markup needs <!--NAMECARD-->`);
   if (!script.includes('/*CORE*/')) throw new Error(`${name}: script needs /*CORE*/`);
   if (/<x-dc|<helmet|class="ph[ "]/.test(markup)) throw new Error(`${name}: markup must not contain the shell (.ph, x-dc, helmet)`);
-  markup = expand(markup.replace('<!--NAMECARD-->', NAMECARD).replace('<!--SCHEDCARD-->', SCHED_HTML).replace('<!--SCHEDTOP-->', SCHED_TOP).replace('<!--HEROBENTO-->', readFileSync(join(here, 'r4-hero.html'), 'utf8').trim()).replace('<!--HEROLINE-->', readFileSync(join(here, 'r6-line.html'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r7-line.html'), 'utf8').trim()).replace('<!--PLATE-->', readFileSync(join(here, 'r6-plate.html'), 'utf8').trim()));
+  markup = expand(markup.replace('<!--NAMECARD-->', NAMECARD).replace('<!--SCHEDCARD-->', SCHED_HTML).replace('<!--SCHEDTOP-->', SCHED_TOP).replace('<!--HEROBENTO-->', readFileSync(join(here, 'r4-hero.html'), 'utf8').trim()).replace('<!--HEROLINE-->', readFileSync(join(here, 'r6-line.html'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r7-line.html'), 'utf8').trim() + '\n' + readFileSync(join(here, 'r8-line.html'), 'utf8').trim()).replace('<!--PLATE-->', readFileSync(join(here, 'r6-plate.html'), 'utf8').trim()));
   script = script.replace('/*CORE*/', CORE_JS.trimEnd()).replace('/*SCHED*/', SCHED_JS.trimEnd());
   const leftover = markup.match(/\[\[[^\]]*\]\]/);
   if (leftover) throw new Error(`${name}: unknown macro ${leftover[0]}`);

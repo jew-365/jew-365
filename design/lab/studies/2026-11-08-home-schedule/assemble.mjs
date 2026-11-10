@@ -67,7 +67,7 @@ const H = 844;
 const GX = 80;
 const boards = {};
 const notes = {
-  title1: { x: 0, y: -300, text: 'מסך הבית · הערימה החכמה · סבב 7', kind: 'title1', maxW: 4 * (W + GX) },
+  title1: { x: 0, y: -300, text: 'מסך הבית · גוון התקופה · סבב 8', kind: 'title1', maxW: 4 * (W + GX) },
   howto: { x: 4 * (W + GX), y: 0, w: 320, size: 's', fill: 'gray', text: 'בכל לוח: Play כדי ללחוץ ולגרור. הלוח נפתח על השעה של עכשיו בירושלים. Tweaks: יום (ראש חודש, ערב שבת, מוצאי שבת, קידוש לבנה, חנוכה, ערב שבת חנוכה, עשרה בטבת), שעה קבועה ופלטה.' },
 };
 dirs.forEach((d, i) => {

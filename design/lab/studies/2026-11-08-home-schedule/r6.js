@@ -43,7 +43,7 @@
     const hil = [...(day.hilulaToday || []), ...(day.hilulaTonight || [])];
     if (hil.length) push(day.hilulaToday.length ? 'היום' : 'הלילה', 'הילולת ' + hil.join(' ו'), 'flame');
     // The season's words in the Amidah (in Israel, from 7 Cheshvan to Pesach; every day of this study's data is inside it).
-    push('התקופה', 'בתפילה: משיב הרוח ומוריד הגשם · ותן טל ומטר', 'cal');
+    push('התקופה', /חשון|כסלו|טבת|שבט|אדר/.test(day.hebLbl) ? 'בתפילה: משיב הרוח ומוריד הגשם · ותן טל ומטר' : 'בתפילה: מוריד הטל · ותן ברכה', 'cal');
     if (!ctx.some((c) => c.kicker === 'השבוע')) push('השבוע', day.parasha, 'cal');
     const RANK = { 'היום': 0, 'הלילה': 0, 'השבוע': 1, 'התקופה': 2 };
     ctx.sort((a, b) => RANK[a.kicker] - RANK[b.kicker]);

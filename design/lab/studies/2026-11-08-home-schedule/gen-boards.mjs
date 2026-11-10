@@ -35,6 +35,11 @@ const variants = [
   { board: 'R7Dark', sched: 'D', title: 'ערימה כהה' },
   { board: 'R7Lanes', sched: 'E', title: 'שלוש שורות' },
   { board: 'R7Native', sched: 'F', title: 'מחוץ לאפליקציה' },
+  { board: 'R8Tone', sched: 'G', title: 'גוון התקופה, קרוסלה חיה', k: '168 / 216' },
+  { board: 'R8Pill', sched: 'H', title: 'גלולת התקופה', k: '160 / 216' },
+  { board: 'R8Inset', sched: 'I', title: 'כרטיס בתוך השמיים', k: '176 / 216' },
+  { board: 'R8NoArc', sched: 'J', title: 'בלי קשת' },
+  { board: 'R8Sticky', sched: 'K', title: 'נשאר למעלה בגלילה', k: '168 / 216' },
 ];
 for (const v of variants) {
   let out = now;

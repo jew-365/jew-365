@@ -1,0 +1,21 @@
+<sc-if value="{{r8On.card}}" hint-placeholder-val="{{ false }}">
+<section class="r8c {{r7.toneCls}}" aria-label="הלוח החכם">
+<sc-if value="{{r8On.clock}}" hint-placeholder-val="{{ false }}"><div class="r8clock" aria-hidden="true"><b class="num">{{nowT}}</b><span>{{r8.period}}</span><i class="r8day"><i style="{{r8.dayStyle}}"></i></i></div></sc-if>
+<div class="r8row">
+<button class="r8main pg-{{r7.cur.id}}" onClick="{{r7.next}}" aria-label="{{r7.cur.aria}}. לחיצה לכרטיס הבא">
+<span class="r8h"><span class="r6ic">[[icB:r7.cur]]</span><b>{{r7.cur.title}}</b></span>
+<span class="r7facts"><sc-for list="{{r7.cur.facts}}" as="f" hint-placeholder-count="2"><span class="r7f {{f.cls}}"><span class="k">{{f.k}}</span><b class="v num">{{f.v}}</b></span></sc-for></span>
+</button>
+<div class="r8side">
+<div class="r8tabs" role="tablist" aria-label="מה מוצג בלוח"><sc-for list="{{r7.pages}}" as="p" hint-placeholder-count="3"><button class="r8t {{p.cls}}" role="tab" aria-selected="{{p.on}}" aria-label="{{p.name}}" onClick="{{p.pick}}">{{p.name}}</button></sc-for></div>
+<button class="r7more" onClick="{{r7CfgOpen}}" aria-label="התאמת הלוח"><i></i><i></i><i></i></button>
+</div>
+</div>
+</section>
+</sc-if>
+<sc-if value="{{sb.H}}" hint-placeholder-val="{{ false }}">
+<div class="r8pillrow">
+<button class="r8pill {{r7.toneCls}}" onClick="{{r7.next}}" aria-label="{{r7.cur.aria}}. לחיצה לכרטיס הבא"><span class="r8pk">{{r7.cur.name}}</span><span class="r6ic">[[icB:r7.cur]]</span><span class="r8pt"><b>{{r7.cur.title}}</b><span class="r8pl"> · {{r8.curLine}}</span></span><span class="r6dots" aria-hidden="true"><sc-for list="{{r7.pages}}" as="p" hint-placeholder-count="3"><i class="{{p.cls}}"></i></sc-for></span></button>
+<button class="r7more r8pm {{r7.toneCls}}" onClick="{{r7CfgOpen}}" aria-label="התאמת הלוח"><i></i><i></i><i></i></button>
+</div>
+</sc-if>

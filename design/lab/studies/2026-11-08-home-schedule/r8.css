@@ -1,0 +1,59 @@
+/* Round 8: the period's tone on a compact card; the live fill moves into the carousel. */
+.hero.r8 .block{padding-bottom:4px}
+.hero.r8 .zchips{padding-top:4px;padding-bottom:10px}
+.r8c{position:relative;z-index:2;margin:0 16px 4px;border-radius:22px;color:#FFF;box-shadow:0 10px 26px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.25);overflow:hidden}
+.r8row{display:flex;align-items:stretch}
+.r8main{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;padding:10px 14px 10px 6px;border:0;background:none;color:inherit;font:inherit;text-align:start;cursor:pointer}
+.r8h{display:flex;align-items:center;gap:8px;min-width:0}
+.r8h>b{font-family:'Frank Ruhl Libre',serif;font-size:18px;line-height:22px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r8main.pg-day{animation:r7in2 .38s cubic-bezier(.2,.8,.2,1)}.r8main.pg-week{animation:r7in3 .38s cubic-bezier(.2,.8,.2,1)}.r8main.pg-mine{animation:r7in4 .38s cubic-bezier(.2,.8,.2,1)}
+.r8side{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 4px;border-inline-start:1px solid rgba(255,255,255,.18)}
+.r8tabs{display:flex;flex-direction:column;gap:1px}
+.r8tabs>.sc-interp{display:contents}
+.r8t{position:relative;min-height:22px;padding:0 9px;border:0;border-radius:11px;background:none;color:inherit;font:inherit;font-size:11px;font-weight:600;opacity:.72;cursor:pointer}
+.r8t::after{content:'';position:absolute;inset:-4px -2px}
+.r8t[aria-selected="true"]{opacity:1;font-weight:800;background:rgba(255,255,255,.2)}
+.r8t.smart::before{content:'';display:inline-block;width:4px;height:4px;margin-inline-end:4px;border-radius:50%;background:#FFE29A;vertical-align:middle}
+.r8side .r7more{height:24px;width:36px}
+.r8clock{display:flex;align-items:center;gap:10px;padding:10px 14px 0}
+.r8clock b{font-family:'Frank Ruhl Libre',serif;font-size:26px;line-height:28px;font-weight:700}
+.r8clock span{font-size:12px;font-weight:700;opacity:.8}
+.r8day{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.22);overflow:hidden}
+.r8day>i{display:block;height:100%;border-radius:2px;background:#FFE29A}
+
+/* ח · the pill: one line of the period's tone. */
+.r8pillrow{position:relative;z-index:2;display:flex;gap:6px;margin:0 16px 2px}
+.r8pill{flex:1;min-width:0;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:0;border-radius:22px;color:#FFF;font:inherit;text-align:start;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.18)}
+.r8pk{flex:none;font-size:11px;font-weight:800;opacity:.8}
+.r8pt{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r8pt b{font-weight:800}
+.r8pl{opacity:.86}
+.r8pm{width:44px;height:44px;border-radius:22px;color:#FFF;box-shadow:0 8px 20px rgba(0,0,0,.18)}
+
+/* The carousel: a chip whose window is running carries a thin bar; the live one fills in the period's colour. */
+.hero.r8{--fill:rgba(240,138,60,.42);--bar:#F08A3C}
+.hero.tn-dawn{--fill:rgba(198,140,230,.45);--bar:#C68CE6}
+.hero.tn-morning{--fill:rgba(245,140,90,.45);--bar:#F2845A}
+.hero.tn-noon{--fill:rgba(70,150,225,.42);--bar:#3B8FD9}
+.hero.tn-evening{--fill:rgba(224,96,126,.42);--bar:#E0607E}
+.hero.tn-night{--fill:rgba(110,120,230,.45);--bar:#8A93F0}
+.hero.tn-shabbat{--fill:rgba(246,196,83,.5);--bar:#F6C453}
+.hero.tn-chanukah{--fill:rgba(80,130,240,.45);--bar:#F6C453}
+.hero.tn-fast{--fill:rgba(140,150,165,.5);--bar:#9CA3AF}
+.hero.tn-rc{--fill:rgba(160,180,235,.5);--bar:#A9B9E8}
+.zc.k-prog{position:relative;overflow:hidden}
+.zc.k-prog::after{content:'';position:absolute;bottom:4px;right:10px;height:3px;width:calc((100% - 20px) * var(--q));border-radius:2px;background:var(--bar)}
+.zc.k-prog::before{content:'';position:absolute;bottom:4px;right:10px;left:10px;height:3px;border-radius:2px;background:color-mix(in srgb,currentColor 16%,transparent)}
+.zc.k-live{min-width:150px;background-image:linear-gradient(to left,var(--fill) var(--p),transparent var(--p))!important;border-color:var(--bar)!important}
+.zc.k-live::after,.zc.k-live::before{display:none}
+.zc.k-live .zl{font-weight:800}
+.zc.k-live .zt{font-size:18px}
+.zc.k-learn .zl::after{content:' ✦';color:#FFE29A}
+
+/* ט · inset: the card sits over the bottom of the sky, in the scene's own room. */
+.hero.r8I .r8c{margin-top:-34px}
+/* י · no arc: the scene goes, the card carries the clock and a line of the day. */
+.hero.r8J .scene,.hero.r8J .backw{display:none}
+.hero.r8J .block{padding-top:4px}
+/* כ · the hero scrolls away and its card and carousel stay pinned at the top. */
+.hero.r8K{position:sticky;top:-251px;z-index:20}

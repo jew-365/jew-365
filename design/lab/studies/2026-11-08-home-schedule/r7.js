@@ -4,7 +4,7 @@
   // Four pages: עכשיו (the live countdown, relative only: the carousel prints the clock time and marks it), היום
   // (what the day is and what the prayer adds), השבוע (the parasha, Shabbat's entry and exit, what the week brings)
   // and שלי (facts the user picks). Shabbat's times live in השבוע alone, so the carousel drops its candle and exit chips.
-  r7Vals(zchips, kit, plan) {
+  r7Vals(zchips, kit, plan, opts = {}) {
     const r6 = this.r6Vals(zchips, kit, plan);
     const s = this.state;
     const t = this.now();
@@ -15,7 +15,7 @@
     const clock = (sec) => this.clock(sec);
     const ui = s.ui || {};
     const setUi = (k, v) => () => this.setState({ ui: { ...(this.state.ui || {}), [k]: typeof v === 'function' ? v((this.state.ui || {})[k]) : v } });
-    const cfg = { smart: true, rotate: true, pages: { now: true, day: true, week: true, mine: true }, mine: ['toShabbat', 'kl', 'hilula'], ...(ui.r7cfg || {}) };
+    const cfg = { smart: true, rotate: true, pages: { now: !opts.noNow, day: true, week: true, mine: true }, mine: opts.mine || ['toShabbat', 'kl', 'hilula'], learn: true, ...(ui.r7cfg || {}) };
     const setCfg = (patch) => () => this.setState({ ui: { ...(this.state.ui || {}), r7cfg: { ...cfg, ...(typeof patch === 'function' ? patch(cfg) : patch) } } });
     const wdName = (k) => (D.days[k] ? D.days[k].weekday.replace('יום ', '') : '');
     const WD = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
@@ -59,13 +59,22 @@
     const klOpen = klBadge && /פתוח/.test(klBadge.text) ? { until: klBadge.text.split(' · ').slice(1).join(' · ') } : null;
     const special = rc ? { text: rc.title, icon: 'moon' } : chan ? { text: chan.title.replace(/^חנוכה: /, 'חנוכה · ') + ' הערב', icon: 'candle' } : fast ? { text: fast.title + ' · צום', icon: 'star' } : erev ? { text: 'ערב ' + erev.title.replace('שבת פרשת ', 'שבת '), icon: 'candle' } : motzash ? { text: 'מוצאי ' + motzash.title.replace('שבת פרשת ', 'שבת '), icon: 'star' } : hil.length ? { text: 'הילולת ' + hil.join(' ו'), icon: 'flame' } : null;
     const wd = D.days[key].wd;
-    const prayer = rc ? 'יעלה ויבוא · חצי הלל · מוסף' : chan ? 'על הניסים · הלל שלם' : fast ? 'עננו · אבינו מלכנו' : (wd === 1 || wd === 4) ? 'קריאת התורה · והוא רחום' : 'ותן טל ומטר';
+    // Tal umatar from 7 Cheshvan to Pesach (in Israel); the study's dates fall in Cheshvan to Adar, Iyar and Elul.
+    const winter = /חשון|כסלו|טבת|שבט|אדר/.test(day.hebLbl);
+    const prayer = rc ? 'יעלה ויבוא · חצי הלל · מוסף' : chan ? 'על הניסים · הלל שלם' : fast ? 'עננו · אבינו מלכנו' : (wd === 1 || wd === 4) ? 'קריאת התורה · והוא רחום' : winter ? 'ותן טל ומטר' : 'ותן ברכה · מוריד הטל';
     const TEH = [['א', 'כט'], ['ל', 'נ'], ['נא', 'עב'], ['עג', 'פט'], ['צ', 'קו'], ['קז', 'קיט'], ['קכ', 'קנ']];
+    // The calendar (round 8): the Omer's count, Selichot tonight; and what the user's marks teach (demo history).
+    const night = t >= z.shkia * 60;
+    const omerN = night ? day.omerTonight : day.omerToday;
+    const omer = omerN ? { k: 'ספירת העומר', v: (night ? 'הלילה ' : 'היום ') + omerN + ' לעומר' } : null;
+    const selichot = day.selichotTonight ? { k: 'סליחות', v: 'הלילה, מחצות' } : null;
+    const learn = opts.learn && cfg.learn ? this.r8Habits(plan) : null;
     const dayFacts = [
       { k: 'בתפילה', v: prayer },
-      klOpen ? { k: 'קידוש לבנה', v: 'פתוח · ' + klOpen.until } : hil.length && special && special.icon !== 'flame' ? { k: 'הילולא', v: hil.join(' ו') } : { k: 'תהילים היום', v: TEH[wd][0] + '–' + TEH[wd][1] },
+      learn ? { k: learn.k, v: learn.text } : klOpen ? { k: 'קידוש לבנה', v: 'פתוח · ' + klOpen.until } : omer && special ? omer : selichot && special ? selichot : hil.length && special && special.icon !== 'flame' ? { k: 'הילולא', v: hil.join(' ו') } : { k: 'תהילים היום', v: TEH[wd][0] + '–' + TEH[wd][1] },
     ];
-    const dayPage = { id: 'day', name: 'היום', title: special ? special.text : 'יום ' + wdName(key) + ' רגיל', icon: special ? special.icon : 'cal', facts: dayFacts };
+    const calTitle = !special && omer ? { text: night ? 'הלילה סופרים ' + omerN + ' לעומר' : 'היום ' + omerN + ' לעומר', icon: 'star' } : !special && selichot ? { text: 'סליחות הלילה', icon: 'moon' } : null;
+    const dayPage = { id: 'day', name: 'היום', title: special ? special.text : calTitle ? calTitle.text : 'יום ' + wdName(key) + ' רגיל', icon: special ? special.icon : calTitle ? calTitle.icon : 'cal', facts: dayFacts };
 
     // השבוע: the parasha, Shabbat's entry and exit, what the week brings.
     let shab = null;
@@ -74,7 +83,7 @@
       if (b) shab = { ...b, inDays: i };
     }
     const weekFacts = [];
-    if (shab) weekFacts.push({ k: 'כניסה', v: (shab.inDays === 0 ? 'היום ' : WD[D.days[shab.erev].wd] + ' ') + clock(shab.candle * 60) }, { k: 'יציאה', v: WD[D.days[shab.end].wd] + ' ' + clock(shab.exit * 60) });
+    if (shab) weekFacts.push({ k: 'כניסה', v: shab.inDays === 0 && opts.keepCandle ? 'בעוד ' + this.leftText(Math.max(60, shab.candle * 60 - t)) : (shab.inDays === 0 ? 'היום ' : WD[D.days[shab.erev].wd] + ' ') + clock(shab.candle * 60) }, { k: 'יציאה', v: WD[D.days[shab.end].wd] + ' ' + clock(shab.exit * 60) });
     let soon = null;
     for (let i = 1; i <= 7 && !soon; i++) {
       const k = this.shiftDate(key, i);
@@ -92,6 +101,8 @@
       const mm = mol && mol.he.match(/ביום (\S+) בשבוע, בשעה (\d+)[^,]*, ו-(\d+) דקות ו-(\d+) חלקים/);
       weekFacts.push({ k: 'שבת מברכים', v: 'מולד ' + month + (mm ? ' · ' + mm[1] + ' ' + String(mm[2]).padStart(2, '0') + ':' + String(mm[3]).padStart(2, '0') + ' ו-' + mm[4] + ' חל׳' : '') });
     }
+    const spec = shab && D.days[shab.end] && D.days[shab.end].special;
+    if (spec) weekFacts.push({ k: 'השבת', v: spec + (/זכור/.test(spec) ? ' · לשמוע את הקריאה' : /פרה/.test(spec) ? ' · קריאת פרה' : '') });
     if (soon) weekFacts.push(soon);
     const weekPage = { id: 'week', name: 'השבוע', title: shab ? shab.title.replace(/^שבת /, '') : day.parasha, icon: 'cal', facts: weekFacts.slice(0, 3) };
 
@@ -113,7 +124,7 @@
     const all = [nowPage, dayPage, weekPage, minePage].filter((p) => cfg.pages[p.id]);
     const pages = all.length ? all : [nowPage];
     const thuNight = wd === 4 && t >= z.tzeit * 60;
-    const smartId = lead && mins <= 60 ? 'now' : special ? 'day' : thuNight || wd === 5 ? 'week' : 'now';
+    const smartId = !opts.noNow && lead && mins <= 60 ? 'now' : special || calTitle || learn ? 'day' : thuNight || wd === 5 ? 'week' : opts.noNow ? 'day' : 'now';
     const tick = Math.floor(this.state.e / 6);
     const rotating = cfg.rotate && !ui.r7page;
     const startId = cfg.smart ? smartId : pages[0].id;
@@ -142,7 +153,7 @@
 
     // The carousel: Shabbat's times leave it for השבוע; the live time is marked.
     const leadKey = lead ? lead.zid || lead.id : null;
-    let chips = r6.zchips.filter((c) => c.id !== 'candle' && c.id !== 'exit').map((c) => ({ ...c, cls: c.cls.replace(/\bmk\b/, '').trim() }));
+    let chips = r6.zchips.filter((c) => !(c.id === 'candle' && !opts.keepCandle) && c.id !== 'exit').map((c) => ({ ...c, cls: c.cls.replace(/\bmk\b/, '').trim() }));
     const mk = chips.find((c) => c.id === leadKey) || chips.find((c) => /k6/.test(c.cls) && !/k-past|k-sep/.test(c.cls));
     if (mk) chips = chips.map((c) => (c === mk ? { ...c, cls: c.cls + ' mk' } : c));
 
