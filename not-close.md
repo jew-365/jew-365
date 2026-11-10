@@ -505,6 +505,11 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done:** 2026-11-10: the card's colour follows the part of the day only (dawn, morning, noon, evening, night), a muted gradient drawn at 0.72 over the land so the sky shows through; white text holds 4.5:1 on it every 10 minutes of three days of the year ([src/theme/__tests__/periodTone.test.ts](src/theme/__tests__/periodTone.test.ts)). Checked in the web build at 06:10, 15:40 and 20:30. Verified: `typecheck`, `lint`, `check:dox`, the full suite (6676 passed), `test:tz` on the tone, the card and the guide.
   - **Status:** 1.0.21 · Committed: `58fc45e` fix(home): the card's colour follows the time of day and lets the sky show through · Pushed: yes · Live: preview `1.0.21-74` (group `31498385-82ea-4ab0-a100-1dd97f14aa4f`, from `58fc45e`, 2026-11-10); production no · Channel: preview
 
+- [ ] Apply a downloaded update by itself on the return to the app (deferred)
+  - **Flag:** `OTA`.
+  - **Source:** the owner's question of 2026-11-10: some users miss the green ready-update banner. Proposed: reload into a downloaded update on the return from the background, as the return to home already does, never after a flow the app opened (`holdCovers()`) nor inside a holy block, the banner kept; a wait at a cold launch (`fallbackToCacheTimeout`) would need a build. The owner's answer the same day: "לא כרגע" (not now).
+  - **Status:** not started · Committed: no · Pushed: no · Live: no · Channel: none
+
 - [ ] The carousel's star and fill that work
   - **Flag:** `OTA`.
   - **Source:** the owner's report of 2026-11-10 on preview `1.0.21-77`, with a screenshot at 21:31: the star in the carousel does not work and its meaning is unclear, Mine has room for one starred time only, and the chip does not fill as planned.
