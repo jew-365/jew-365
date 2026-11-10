@@ -15,7 +15,7 @@ const card = (wallClock: string, over: Partial<CardInput> = {}) =>
     t,
     habit: null,
     mine: DEFAULT_MINE,
-    pinNames: [],
+    pinNext: null,
     kiddushLevana: null,
     ...over,
   });
@@ -84,10 +84,13 @@ describe('the smart card', () => {
   });
 
   it('mine: what the user picked, an empty pick saying where to pick', () => {
-    const m = card('2026-11-12T08:15', { mine: ['toShabbat', 'pins'], pinNames: ['זמן תו״ט'] });
+    const m = card('2026-11-12T08:15', {
+      mine: ['toShabbat', 'pins'],
+      pinNext: { name: 'חצות לילה', at: at(J, '2026-11-12T23:23') },
+    });
     expect(m.pages.mine.facts).toEqual([
       { label: 'עד השבת', value: '32:11 שעות' },
-      { label: 'הזמנים שבחרת', value: 'זמן תו״ט' },
+      { label: 'עד חצות לילה', value: '15:08 שעות' },
     ]);
     expect(card('2026-11-12T08:15', { mine: [] }).pages.mine.facts).toEqual([
       { label: 'עוד לא בחרת', value: 'בוחרים ב⋯' },
@@ -102,7 +105,7 @@ describe('the smart card', () => {
     expect(m.pages.mine.facts[0].value).toBe('לא בימים הקרובים');
     expect(m.pages.mine.facts[2].value).toBe('פרקים צ–קו');
     expect(card('2026-11-12T08:15', { mine: ['pins'] }).pages.mine.facts).toEqual([
-      { label: 'הזמנים שבחרת', value: 'בוחרים ב⭐ שבקרוסלה' },
+      { label: 'המועדף הבא', value: 'מסמנים ב⭐ בקרוסלה' },
     ]);
   });
 

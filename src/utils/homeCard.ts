@@ -46,7 +46,8 @@ export type CardInput = {
   t: Translate;
   habit: Habit | null;
   mine: readonly MineFactId[];
-  pinNames: readonly string[];
+  // The next starred time (`pinnedAhead()`'s first), by its short name.
+  pinNext: { name: string; at: Date } | null;
   // The Kiddush Levana window, while the user keeps it: open now, or the next one.
   kiddushLevana: { start: Date; end: Date } | null;
 };
@@ -286,10 +287,13 @@ export function homeCard(input: CardInput): CardModel {
       case 'tehillim':
         return { label: t('home.card.tehillim'), value: tehillimRange(hd.getDay(), language, t) };
       case 'pins':
-        return {
-          label: t('home.card.mine.pins'),
-          value: input.pinNames.length ? input.pinNames.join(' · ') : t('home.card.pinsNone'),
-        };
+        // The next starred time as the time left until it, the way Shabbat is shown beside it.
+        return input.pinNext
+          ? {
+              label: t('home.card.pinsUntil', { name: input.pinNext.name }),
+              value: formatRemaining(input.pinNext.at.getTime() - input.now.getTime(), t),
+            }
+          : { label: t('home.card.mine.pins'), value: t('home.card.pinsNone') };
     }
   };
   const mineFacts = input.mine

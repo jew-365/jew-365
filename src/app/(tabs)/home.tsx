@@ -55,7 +55,7 @@ import { Mitzvah } from '@/types/mitzvah';
 import { TaharahEvent, TaharahSettings } from '@/types/taharah';
 import { Location } from '@/types/zmanim';
 import { dayFrameFor, moreZmanimFor, type CardGlass } from '@/utils/dayArc';
-import { learnedHabit, markStat, timeChips } from '@/utils/homeTimes';
+import { learnedHabit, markStat, pinnedAhead, timeChips } from '@/utils/homeTimes';
 import { homeCard, markHistory } from '@/utils/homeCard';
 import { MITZVOT } from '@/data/mitzvot';
 import { offeredMoreZmanim, type ZmanId } from '@/utils/zmanIds';
@@ -553,6 +553,21 @@ export default function HomeScreen() {
     const kl = MITZVOT.find((m) => m.id === 'kiddush_levana');
     const klOpenWindow = kl && isOn(kl.id) ? currentOrNextWindow(kl, location, settings, now) : null;
     const klWindow = klOpenWindow && !completions[dateKey(klOpenWindow.date)]?.kiddush_levana ? klOpenWindow : null;
+    // Today's and tomorrow's times shown in the carousel: the circle's less the hidden, and the times the user added
+    // under the Shema opinion in force (the circle never shows them). Tomorrow's serve the starred times at any hour,
+    // and the morning after tzeit.
+    const ks = settings.halachicOpinions.ksSofZman;
+    const added = offeredMoreZmanim(ks).filter((id) => addedZmanim.includes(id));
+    const nextDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    const nextFrame = dayFrameFor(nextDate, location, ks);
+    const todayTimes = [
+      ...frame.zmanim.filter((z) => !hiddenZmanim.includes(z.id)),
+      ...moreZmanimFor(today, location, added),
+    ];
+    const nextDay = nextFrame
+      ? [...nextFrame.zmanim.filter((z) => !hiddenZmanim.includes(z.id)), ...moreZmanimFor(nextDate, location, added)]
+      : null;
+    const pinNext = pinnedAhead({ now, pins: zmanPins, zmanim: todayTimes, nextDay })[0] ?? null;
     const card = homeCard({
       now,
       location,
@@ -562,26 +577,15 @@ export default function HomeScreen() {
       t,
       habit,
       mine: homeCardMine,
-      pinNames: zmanPins.map((id) => t(`home.zman.${id}.name`)),
+      pinNext: pinNext ? { name: t(`home.zman.${pinNext.id}.short`), at: pinNext.at } : null,
       kiddushLevana: klWindow,
     });
     // The Chanukah candles of the day, while the user keeps them.
     const chanukahWindow =
       [...allCurrent, ...upcoming].find((item) => item.mitzvah.id === 'chanukah_candles')?.window ?? null;
-    const tomorrowFrame =
-      now.getTime() >= frame.tzeit.getTime()
-        ? dayFrameFor(
-            new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1),
-            location,
-            settings.halachicOpinions.ksSofZman,
-          )
-        : null;
-    // The times the user added, under the Shema opinion in force (the circle never shows them).
-    const ks = settings.halachicOpinions.ksSofZman;
-    const added = offeredMoreZmanim(ks).filter((id) => addedZmanim.includes(id));
     const { chips, lead, next } = timeChips({
       now,
-      zmanim: [...frame.zmanim.filter((z) => !hiddenZmanim.includes(z.id)), ...moreZmanimFor(today, location, added)],
+      zmanim: todayTimes,
       extras: [
         ...(card.candleLighting
           ? [{ id: 'candleLighting' as const, at: card.candleLighting.at, from: card.candleLighting.from }]
@@ -589,12 +593,8 @@ export default function HomeScreen() {
         ...(chanukahWindow ? [{ id: 'chanukahCandles' as const, at: chanukahWindow.start, from: null }] : []),
         ...(card.fastEnd ? [{ id: 'fastEnd' as const, at: card.fastEnd.at, from: card.fastEnd.from }] : []),
       ],
-      tomorrow: tomorrowFrame
-        ? [
-            ...tomorrowFrame.zmanim.filter((z) => !hiddenZmanim.includes(z.id)),
-            ...moreZmanimFor(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1), location, added),
-          ]
-        : null,
+      tomorrow: now.getTime() >= frame.tzeit.getTime() ? nextDay : null,
+      nextDay,
       openWindows: allCurrent
         .filter((item) => !item.marked)
         .map((item) => ({ start: item.window.start, end: item.window.end })),

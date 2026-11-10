@@ -5,6 +5,7 @@ import { ListRow } from '@/components/ListRow';
 import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { SectionLabel } from '@/components/SectionLabel';
 import { ZmanimSheet } from '@/components/ZmanimSheet';
+import { useUserStore } from '@/stores/useUserStore';
 import { useI18n } from '@/i18n';
 import { BRAND } from '@/theme/colors';
 import { scaled } from '@/theme/scale';
@@ -69,6 +70,7 @@ export function HomeTimes(props: HomeTimesProps) {
   const { t } = useI18n();
   const [focus, setFocus] = useState<string | null>(null);
   const [pinsOpen, setPinsOpen] = useState(false);
+  const setPinned = useUserStore((s) => s.setZmanPinned);
   const [moreOpen, setMoreOpen] = useState(false);
   const [tabsWidth, setTabsWidth] = useState(0);
   const { card, now, tz } = props;
@@ -85,8 +87,13 @@ export function HomeTimes(props: HomeTimesProps) {
   const focused = focus && running.has(focus) ? focus : props.lead;
   const firstUpcoming = props.next;
 
+  // A starred time already past today leads the carousel with tomorrow's time, and says so.
   const chipLabel = (c: Extract<TimeChip, { type: 'time' }>) =>
-    c.zman ? t(`home.zman.${c.zman}.short`) : t(`home.times.extra.${c.extra}`);
+    c.zman
+      ? c.pinned && c.kind === 'tomorrow'
+        ? t('home.times.tomorrowChip', { label: t(`home.zman.${c.zman}.short`) })
+        : t(`home.zman.${c.zman}.short`)
+      : t(`home.times.extra.${c.extra}`);
   const chipName = (c: Extract<TimeChip, { type: 'time' }>) =>
     c.zman ? t(`home.zman.${c.zman}.name`) : t(`home.times.extra.${c.extra}`);
 
@@ -224,15 +231,21 @@ export function HomeTimes(props: HomeTimesProps) {
             : zman && isZmanId(zman) && c.kind !== 'tomorrow'
               ? () => props.onPickZman(zman)
               : undefined;
+          // A long press stars a time of the day, or takes its star off (the owner's report of 2026-11-10).
+          const starLabel = t(c.pinned ? 'home.times.longPressUnstar' : 'home.times.longPressStar');
+          const onLongPress = zman ? () => setPinned(zman, !c.pinned) : undefined;
           return (
             <Pressable
               key={c.key}
               testID={`home-times-${c.key}`}
-              accessibilityRole={onPress ? 'button' : 'text'}
+              accessibilityRole={onPress || onLongPress ? 'button' : 'text'}
               accessibilityLabel={[aria, ...extras].join(', ')}
               accessibilityState={{ selected }}
-              disabled={!onPress}
+              accessibilityActions={onLongPress ? [{ name: 'longpress', label: starLabel }] : undefined}
+              onAccessibilityAction={(e) => e.nativeEvent.actionName === 'longpress' && onLongPress?.()}
+              disabled={!onPress && !onLongPress}
               onPress={onPress}
+              onLongPress={onLongPress}
               style={[
                 styles.chip,
                 {
@@ -255,7 +268,9 @@ export function HomeTimes(props: HomeTimesProps) {
                 />
               ) : null}
               <View style={styles.chipLabel}>
-                {c.pinned ? <MitzvahIcon name="star" size={MARK_ICON} color={colors.gold} /> : null}
+                {c.pinned ? (
+                  <MitzvahIcon name="star" size={MARK_ICON} color={colors.gold} variant="duotone" tint={colors.gold} />
+                ) : null}
                 {c.learned ? <MitzvahIcon name="sparkle" size={MARK_ICON} color={colors.gold} /> : null}
                 <Text
                   style={[live ? typography.captionBold : typography.small, { color: ink, lineHeight: LABEL_LINE }]}

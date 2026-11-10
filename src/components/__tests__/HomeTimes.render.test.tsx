@@ -108,6 +108,32 @@ describe('HomeTimes', () => {
     ]);
   });
 
+  it('a long press stars a time in the carousel, and takes the star off a starred one', () => {
+    useUserStore.getState().reset();
+    useUserStore.getState().setZmanPinned('plag', true);
+    renderTimes();
+    act(() => fireEvent(screen.getByTestId('home-times-shkia'), 'longPress'));
+    expect(useUserStore.getState().zmanPins).toEqual(['plag', 'shkia']);
+    act(() => fireEvent(screen.getByTestId('home-times-plag'), 'longPress'));
+    expect(useUserStore.getState().zmanPins).toEqual(['shkia']);
+  });
+
+  it("names tomorrow on a starred time that leads with tomorrow's time", () => {
+    const nextDay = ZMANIM.map((z) => ({ id: z.id, at: new Date(z.at.getTime() + 86400000) }));
+    const { chips, lead, next } = timeChips({
+      now: NOW,
+      zmanim: ZMANIM,
+      extras: [],
+      tomorrow: null,
+      nextDay,
+      openWindows: [],
+      pins: ['netz'],
+      learned: null,
+    });
+    renderTimes({ chips, lead, next });
+    expect(within(screen.getByTestId('home-times-tomorrow-netz')).getByText('הנץ מחר')).toBeOnTheScreen();
+  });
+
   it('an added time is shown but previews nothing on the circle', () => {
     const { chips, lead, next } = timeChips({
       now: NOW,

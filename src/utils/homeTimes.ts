@@ -2,7 +2,8 @@
 // design/lab/studies/2026-11-08-home-schedule): the hero's zmanim strip as a live carousel. Every time of the
 // day is printed once: upcoming first, the period's own times (candle lighting, the Chanukah candles, the end
 // of a fast) among them, tomorrow's morning after tzeit, the past last. A time that closes a window open now
-// carries its progress; the most urgent one fills (the lead), the others fill when touched. Pure: no store,
+// carries its progress; the most urgent one fills (the lead), the others fill when touched; with none, the next time
+// fills from the time before it. Pure: no store,
 // no service.
 import { CAROUSEL_ZMANIM, isCarouselZmanId, type CarouselZmanId, type ZmanId } from './zmanIds';
 
@@ -32,6 +33,8 @@ export type TimesInput = {
   extras: readonly { id: ExtraId; at: Date; from: Date | null }[];
   // Tomorrow's morning, given once tonight has begun.
   tomorrow: readonly { id: CarouselZmanId; at: Date }[] | null;
+  // Tomorrow's times shown, at any hour: a starred time already past today comes first with tomorrow's.
+  nextDay?: readonly { id: CarouselZmanId; at: Date }[] | null;
   // The windows of the user's mitzvot open now and not marked: a zman equal to one's end carries its progress.
   openWindows: readonly ChipProgress[];
   pins: readonly CarouselZmanId[];
@@ -51,8 +54,27 @@ export function progressShare(progress: ChipProgress, now: Date): number {
   return Math.max(MIN_SHARE, Math.min(1, (now.getTime() - progress.start.getTime()) / span));
 }
 
-// The starred times come first among the upcoming ones (the owner's call, 2026-11-10), each group by time; `next` is
-// the time that comes next whatever its place, and tomorrow's morning holds the starred times of tomorrow too.
+// The starred times, each at its next time: today's while it is ahead, else tomorrow's, soonest first. They lead the
+// carousel and Mine's fact (the owner's report of 2026-11-10: a star on a time already past did nothing to be seen).
+export function pinnedAhead(input: {
+  now: Date;
+  pins: readonly CarouselZmanId[];
+  zmanim: readonly { id: CarouselZmanId; at: Date }[];
+  nextDay?: readonly { id: CarouselZmanId; at: Date }[] | null;
+}): { id: CarouselZmanId; at: Date; tomorrow: boolean }[] {
+  const t = input.now.getTime();
+  return input.pins
+    .flatMap((id) => {
+      const today = input.zmanim.find((z) => z.id === id && z.at.getTime() > t);
+      if (today) return [{ id, at: today.at, tomorrow: false }];
+      const next = input.nextDay?.find((z) => z.id === id);
+      return next ? [{ id, at: next.at, tomorrow: true }] : [];
+    })
+    .sort((a, b) => a.at.getTime() - b.at.getTime());
+}
+
+// The starred times lead the carousel at their next time (`pinnedAhead()`), then the rest by time; `next` is the
+// time of today that comes next whatever its place.
 export function timeChips(input: TimesInput): { chips: TimeChip[]; lead: string | null; next: string | null } {
   const t = input.now.getTime();
   const running = (at: Date): ChipProgress | null => {
@@ -86,11 +108,33 @@ export function timeChips(input: TimesInput): { chips: TimeChip[]; lead: string 
     })),
   ].sort((a, b) => a.at.getTime() - b.at.getTime());
   const byTime = day.filter((c) => c.kind === 'upcoming');
-  const upcoming = [...byTime.filter((c) => c.pinned), ...byTime.filter((c) => !c.pinned)];
-  const past = day.filter((c) => c.kind === 'past');
+  // With no window of the user's closing at a time, the time that comes next fills from the one before it, so a chip
+  // always shows how long is left (the owner's report of 2026-11-10: at night nothing filled).
+  const passed = day.filter((c) => c.kind === 'past');
+  const before = passed[passed.length - 1];
+  if (byTime[0] && before && !byTime.some((c) => c.progress))
+    byTime[0].progress = { start: before.at, end: byTime[0].at };
+  const ahead = pinnedAhead(input);
+  const aheadIds = new Set(ahead.map((p) => p.id));
+  const head: TimeChipOf<'time'>[] = ahead.map((p) =>
+    p.tomorrow
+      ? {
+          type: 'time',
+          key: 'tomorrow-' + p.id,
+          zman: p.id,
+          extra: null,
+          at: p.at,
+          kind: 'tomorrow',
+          pinned: true,
+          learned: false,
+          progress: null,
+        }
+      : (byTime.find((c) => c.zman === p.id) as TimeChipOf<'time'>),
+  );
+  const upcoming = [...head, ...byTime.filter((c) => !(c.zman && aheadIds.has(c.zman)))];
+  const past = day.filter((c) => c.kind === 'past' && !(c.zman && aheadIds.has(c.zman)));
   const tomorrow: TimeChipOf<'time'>[] = (input.tomorrow ?? [])
-    .filter((z) => TOMORROW_ZMANIM.includes(z.id) || input.pins.includes(z.id))
-    .sort((a, b) => a.at.getTime() - b.at.getTime())
+    .filter((z) => TOMORROW_ZMANIM.includes(z.id) && !aheadIds.has(z.id))
     .map((z) => ({
       type: 'time',
       key: 'tomorrow-' + z.id,

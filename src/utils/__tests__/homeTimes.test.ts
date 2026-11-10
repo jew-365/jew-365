@@ -1,6 +1,7 @@
 import {
   learnedHabit,
   markStat,
+  pinnedAhead,
   progressShare,
   suggestedPins,
   timeChips,
@@ -68,8 +69,10 @@ describe('the live carousel', () => {
       base({ now: at(15, 30), extras: [{ id: 'candleLighting', at: at(16, 27), from: at(15, 53) }] }),
     );
     expect(keys(chips).slice(0, 4)).toEqual(['plag', 'candleLighting', 'shkia', 'tzeit']);
-    // Plag has not come yet, so candle lighting's progress has not begun either.
-    expect(lead).toBeNull();
+    // Plag has not come yet, so candle lighting's progress has not begun: plag, the next time, fills from chatzot.
+    expect(lead).toBe('plag');
+    const plag = chips.find((c) => c.key === 'plag');
+    expect(plag && plag.type === 'time' && plag.progress).toEqual({ start: at(11, 23), end: at(15, 53) });
     const later = timeChips(
       base({ now: at(16, 0), extras: [{ id: 'candleLighting', at: at(16, 27), from: at(15, 53) }] }),
     );
@@ -94,19 +97,51 @@ describe('the live carousel', () => {
     expect(timeChips(base({ now: at(18) })).next).toBeNull();
   });
 
-  it('places an added time by its time, and brings a starred time into tomorrow', () => {
+  it('places an added time by its time, and at night leads with a starred time of tomorrow', () => {
     const { chips } = timeChips(base({ zmanim: [...ZMANIM, { id: 'minchaKetana', at: at(14, 50) }] }));
     expect(keys(chips).slice(2, 5)).toEqual(['chatzot', 'minchaKetana', 'plag']);
     const tomorrow = ZMANIM.map((z) => ({ id: z.id, at: new Date(z.at.getTime() + 86400000) }));
-    const night = timeChips(base({ now: at(20), tomorrow, pins: ['chatzot'] }));
+    const night = timeChips(base({ now: at(20), tomorrow, nextDay: tomorrow, pins: ['chatzot'] }));
     expect(keys(night.chips).slice(0, 6)).toEqual([
+      'tomorrow-chatzot',
       'sep-tomorrow',
       'tomorrow-netz',
       'tomorrow-sofShma',
       'tomorrow-sofTfila',
-      'tomorrow-chatzot',
       'sep-earlier',
     ]);
+  });
+
+  it("leads with a starred time already past today at tomorrow's time, and keeps it out of the earlier times", () => {
+    const nextDay = ZMANIM.map((z) => ({ id: z.id, at: new Date(z.at.getTime() + 86400000) }));
+    const { chips, next } = timeChips(base({ pins: ['alot', 'plag'], nextDay }));
+    expect(keys(chips).slice(0, 3)).toEqual(['plag', 'tomorrow-alot', 'sofShma']);
+    const alot = chips.find((c) => c.key === 'tomorrow-alot');
+    expect(alot && alot.type === 'time' && alot.kind === 'tomorrow' && alot.pinned).toBe(true);
+    expect(keys(chips)).not.toContain('alot');
+    expect(next).toBe('sofShma');
+    // Without tomorrow's times a starred time past today stays among the earlier ones.
+    expect(keys(timeChips(base({ pins: ['alot'] })).chips)).toContain('alot');
+  });
+
+  it('pinnedAhead gives each starred time at its next time, soonest first', () => {
+    const nextDay = ZMANIM.map((z) => ({ id: z.id, at: new Date(z.at.getTime() + 86400000) }));
+    expect(pinnedAhead({ now: at(8, 15), pins: ['alot', 'chatzot', 'minchaKetana'], zmanim: ZMANIM, nextDay })).toEqual(
+      [
+        { id: 'chatzot', at: at(11, 23), tomorrow: false },
+        { id: 'alot', at: new Date(at(4, 52).getTime() + 86400000), tomorrow: true },
+      ],
+    );
+  });
+
+  it('fills the next time from the one before it when no window of the user closes at a time, and not before alot', () => {
+    const { lead, chips } = timeChips(
+      base({ now: at(20), zmanim: [...ZMANIM, { id: 'chatzotLayla', at: at(22, 23) }] }),
+    );
+    expect(lead).toBe('chatzotLayla');
+    const night = chips.find((c) => c.key === 'chatzotLayla');
+    expect(night && night.type === 'time' && night.progress).toEqual({ start: at(17, 1), end: at(22, 23) });
+    expect(timeChips(base({ now: at(4) })).lead).toBeNull();
   });
 
   it('measures a share of the window, never below a sliver', () => {
