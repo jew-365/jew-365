@@ -565,7 +565,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** Spec 6.1: the `kitzur` track's fixed schedule has no source yet.
   - **Expected result:** A schedule file whose every day points inside the 221 simanim and whose days together cover every se'if once, checked by the build test; or, if no luach can be established, Q29 answered and the fallback division written instead.
   - **Done:** 2026-11-10. The luach is the Kitzur Shulchan Aruch Yomi of `@hebcal/learning` 6.13.1 (BSD-2-Clause), transcribed to [scripts/halacha/schedules/kitzur.json](scripts/halacha/schedules/kitzur.json) with its licence; 16 broken entries corrected, each with its published value and reason; the leap-year, short-Kislev, long-Cheshvan and 15 Elul rules written into the file and spec 6.1. Q29 is not needed. Verified: [scripts/halacha/__tests__/build.test.js](scripts/halacha/__tests__/build.test.js) reads the published units and finds every one of the 2765 se'ifim read exactly once in a year of the luach.
-  - **Status:** Version: content only, no app change (`docs/halacha/` waits for the batch's release) · Committed: pending · Pushed: no · Live: no (Pages publishes `docs/halacha/` on the push to `main`; the app does not read it yet) · Channel: none
+  - **Status:** Version: content only, no app change · Committed: yes, `315ca42` feat(halacha): build the daily-halacha add-on from Sefaria with the Kitzur luach and the Rambam cycle · Pushed: yes · Live: `docs/halacha/` on Pages with the push to `main`; the app does not read it yet · Channel: none
 
 - [x] Build the halacha add-on from Sefaria
   - **Flag:** `docs/halacha/` on Pages.
@@ -573,7 +573,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** Spec 5: the text both mitzvot read.
   - **Expected result:** `scripts/halacha/__tests__/build.test.js` green on the checks of spec 5.4 (no se'if or halacha missing or twice, every hash matching, every schedule day inside the text); the size of each track written into the spec's section 14.
   - **Done:** 2026-11-10. [scripts/halacha/build.js](scripts/halacha/build.js), [scripts/halacha/tracks.js](scripts/halacha/tracks.js), `pnpm halacha:build` and [scripts/halacha/AGENTS.md](scripts/halacha/AGENTS.md); one manifest per track (a deviation from spec 5.2's single manifest, written back into the spec, so each track is an add-on on the shared core). Sizes in spec 14: Kitzur 0.60 MB (+0.54 MB English), Ben Ish Chai 0.63 MB, Rambam 2.42 MB, gzipped. Ben Ish Chai's 1898 Jerusalem version on Sefaria has empty halachot, so its text is the Wikisource one; twelve Rambam books come from Wikisource's CC-BY-SA text, each unit crediting its version. Verified: `pnpm test -- scripts/halacha` 26 of 26 green; a second `pnpm halacha:build` writes 0 files.
-  - **Status:** Version: content only, no app change (`docs/halacha/` waits for the batch's release) · Committed: pending · Pushed: no · Live: no (Pages publishes `docs/halacha/` on the push to `main`; the app does not read it yet) · Channel: none
+  - **Status:** Version: content only, no app change · Committed: yes, `315ca42` feat(halacha): build the daily-halacha add-on from Sefaria with the Kitzur luach and the Rambam cycle · Pushed: yes · Live: `docs/halacha/` on Pages with the push to `main`; the app does not read it yet · Channel: none
 
 - [x] Write the Rambam cycle from Sefaria's calendar
   - **Flag:** none; part of the build's committed data.
@@ -581,7 +581,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** The `rambam` track's fixed public schedule.
   - **Expected result:** The suite pins 2026-11-10 as Hilchot Issurei Biah chapter 22 and the last and first day of a cycle; the cycle covers every chapter once.
   - **Done:** 2026-11-10. `node scripts/halacha/build.js --rambam-cycle 2026-02-03` wrote [scripts/halacha/schedules/rambam.json](scripts/halacha/schedules/rambam.json): 1017 days from 2026-02-03, checked to repeat on day 1017 and identical to a second, independent crawl of the same calendar. Verified: the suite pins 2026-11-10 as Forbidden Intercourse 22 and the cycle's first and last days; the cycle reads the text in book order, each halacha at most once, and leaves out only twelve (Wikisource's Negative Mitzvot 366-370 and the Order of Prayer's fifth chapter), which the suite pins, so "covers every chapter once" holds for the chapters the calendar reads, not for those twelve.
-  - **Status:** Version: content only, no app change (`docs/halacha/` waits for the batch's release) · Committed: pending · Pushed: no · Live: no (Pages publishes `docs/halacha/` on the push to `main`; the app does not read it yet) · Channel: none
+  - **Status:** Version: content only, no app change · Committed: yes, `315ca42` feat(halacha): build the daily-halacha add-on from Sefaria with the Kitzur luach and the Rambam cycle · Pushed: yes · Live: `docs/halacha/` on Pages with the push to `main`; the app does not read it yet · Channel: none
 
 - [x] Cut the festival units for each track
   - **Flag:** `docs/halacha/` on Pages.
@@ -589,7 +589,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** Spec 7.2: the content of `hilchot_hachag`.
   - **Expected result:** The build test finds a non-empty unit for every festival a track covers; every gap (a festival a track lacks) is listed in the spec and reported to the owner before any other book fills it.
   - **Done:** 2026-11-10. The ranges of spec 7.2 checked against the siman titles and the halachot themselves and corrected (Shavuot is Kitzur 98-103 without 120; Tisha B'Av 122-126 and the minor fasts 121; Ben Ish Chai's Purim is Tetzaveh 24-46; Chanukah its own node). Material shorter than a period fills its last days, one segment a day (Ben Ish Chai's Rosh Hashanah, the Rambam's Tisha B'Av). **Reported to the owner:** Ben Ish Chai has no halachot of the four minor fasts, so that track has no festival window on those days. Verified: the suite finds a non-empty portion for every day of every festival each track covers, and pins the minor fasts as Ben Ish Chai's only gap.
-  - **Status:** Version: content only, no app change (`docs/halacha/` waits for the batch's release) · Committed: pending · Pushed: no · Live: no (Pages publishes `docs/halacha/` on the push to `main`; the app does not read it yet) · Channel: none
+  - **Status:** Version: content only, no app change · Committed: yes, `315ca42` feat(halacha): build the daily-halacha add-on from Sefaria with the Kitzur luach and the Rambam cycle · Pushed: yes · Live: `docs/halacha/` on Pages with the push to `main`; the app does not read it yet · Channel: none
 
 - [x] Measure and add the English translations
   - **Flag:** `docs/halacha/` on Pages.
@@ -597,7 +597,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** D5, "תרגום אם יש חופשי".
   - **Expected result:** The coverage of each version written into the spec; the build test pins which tracks ship English and fails on an English segment with no Hebrew twin.
   - **Done:** 2026-11-10. Coverage (spec 2.3): Kitzur 99.0% (Metsudah, CC-BY), Ben Ish Chai 3.8%, Mishneh Torah 27.5%; with a 90% threshold only the Kitzur ships English, under its translator's credit. Verified: the suite pins that the Kitzur alone ships English, every English file aligned with its unit's Hebrew segments, and no `en/` folder for the other two; spot-checked 1:1, 105:1 and 221:8 against the Hebrew.
-  - **Status:** Version: content only, no app change (`docs/halacha/` waits for the batch's release) · Committed: pending · Pushed: no · Live: no (Pages publishes `docs/halacha/` on the push to `main`; the app does not read it yet) · Channel: none
+  - **Status:** Version: content only, no app change · Committed: yes, `315ca42` feat(halacha): build the daily-halacha add-on from Sefaria with the Kitzur luach and the Rambam cycle · Pushed: yes · Live: `docs/halacha/` on Pages with the push to `main`; the app does not read it yet · Channel: none
 
 - [x] Add the portion and period logic
   - **Flag:** `OTA`.
@@ -605,7 +605,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** Which text a day reads, for every track and festival.
   - **Expected result:** `src/utils/__tests__/halacha.test.ts` green under `pnpm test:tz` on the cases of spec 11 (Shabbat, a leap-year Adar, a cycle's edge, a double parasha, Israel against abroad, each festival's first and last day in 5787 and 5788, a deferred fast, both overlaps).
   - **Done:** 2026-11-10. [src/types/halacha.ts](src/types/halacha.ts), [src/data/halacha.ts](src/data/halacha.ts) (`defaultHalachaTrack()`, `effectiveHalachaTrack()`, `FESTIVAL_PERIOD_DAYS`) and [src/utils/halacha.ts](src/utils/halacha.ts) (`halachaPortion()`, `festivalDays()`, `festivalPeriodsOn()`, `festivalPortion()`), pure over the published manifest; `useUserStore.halachaTrack` with its default, setter, reset and merge repair. Ben Ish Chai's year is an argument and reads nothing without one (Q30); a parasha the second year lacks reads the first year's (Q30's proposal). `festivalPeriodsOn()` takes no `inIsrael`, since no festival of spec 7.1 differs (written back into the spec). Verified: [src/utils/__tests__/halacha.test.ts](src/utils/__tests__/halacha.test.ts) (29 cases on the published schedules: a plain day, Shabbat, 2026-11-10 as the long Cheshvan's 30th, a leap-year Adar I and II, a short Kislev, every se'if once in three common years and in the leap year 5787, the Rambam cycle's edges, Ben Ish Chai's week, a double week, a missing second year, Israel against abroad, the observed fasts against hebcal for 5785-5790, the deferred Tisha B'Av of 5789 moving its period, each festival's first and last day in 5787 and 5788, the leap-year Purim and Pesach, both overlaps, the minor-fast gap) green under `pnpm test:tz`, and the store cases in [src/stores/__tests__/stores.test.ts](src/stores/__tests__/stores.test.ts).
-  - **Status:** Version: OTA (nothing reads it yet) · Committed: pending · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA (nothing reads it yet) · Committed: yes, `fd53608` feat(halacha): which portion a day reads and the festival periods · Pushed: yes · Live: no · Channel: none
 
 - [ ] Add the halacha add-on's store and download service
   - **Flag:** `OTA`.
