@@ -34,6 +34,7 @@ import {
   CARD_EDGE_ALPHA,
   CARD_MIX,
   cardGlass,
+  moreZmanimFor,
 } from '../dayArc';
 import { appDay, appDayEnd, locationNoon } from '../locationDay';
 import { CITIES } from '@/data/cities';
@@ -72,6 +73,20 @@ describe('dayFrameFor', () => {
   it('is null without zmanim', () => {
     const svalbard: Location = { lat: 78.2, lng: 15.6, tz: 'Arctic/Longyearbyen', name: 'Svalbard', inIsrael: false };
     expect(dayFrameFor(new Date(2026, 11, 21), svalbard, 'GRA')).toBeNull();
+  });
+});
+
+describe('moreZmanimFor', () => {
+  it("reads the added times of the location's day, and nothing without zmanim", () => {
+    const z = zmanimFor(locationNoon(day, J), J);
+    expect(moreZmanimFor(day, J, ['minchaKetana', 'sofShmaMga', 'sofShmaGra'])).toEqual([
+      { id: 'minchaKetana', at: z.minchaKetana },
+      { id: 'sofShmaMga', at: z.sofZmanShmaMA },
+      { id: 'sofShmaGra', at: z.sofZmanShmaGra },
+    ]);
+    expect(moreZmanimFor(day, J, [])).toEqual([]);
+    const svalbard: Location = { lat: 78.2, lng: 15.6, tz: 'Arctic/Longyearbyen', name: 'Svalbard', inIsrael: false };
+    expect(moreZmanimFor(new Date(2026, 11, 21), svalbard, ['minchaKetana'])).toEqual([]);
   });
 });
 

@@ -97,7 +97,8 @@ import type { Location } from '@/types/zmanim';
 import { minutesToTime, timeToMinutes } from '@/utils/clock';
 import { quietBoundsValid, quietHoursOf, type QuietBound } from '@/utils/quietHours';
 import { SETTINGS_SEARCH_ITEMS, type SettingsSearchItem, type SettingsSectionKey } from '@/utils/settingsSearch';
-import { ARC_ZMANIM } from '@/utils/zmanIds';
+import { ARC_ZMANIM, offeredMoreZmanim } from '@/utils/zmanIds';
+import { ZmanimSheet } from '@/components/ZmanimSheet';
 
 const LANGS = ['he', 'en'] as const;
 const OPINIONS = ['GRA', 'MA'] as const;
@@ -159,6 +160,8 @@ export default function SettingsScreen() {
       benIshChaiYearSwapped: s.benIshChaiYearSwapped,
       setBenIshChaiYearSwapped: s.setBenIshChaiYearSwapped,
       hiddenZmanim: s.hiddenZmanim,
+      addedZmanim: s.addedZmanim,
+      zmanPins: s.zmanPins,
       taharahEnabled: s.taharahEnabled,
       weeklyReportEnabled: s.weeklyReportEnabled,
       quietBefore: s.quietBefore,
@@ -183,7 +186,6 @@ export default function SettingsScreen() {
       setSiddurVoice: s.setSiddurVoice,
       setChokCommentaryOpen: s.setChokCommentaryOpen,
       setChokThuNightDay: s.setChokThuNightDay,
-      setZmanShown: s.setZmanShown,
       setWeeklyReportEnabled: s.setWeeklyReportEnabled,
       setQuietBefore: s.setQuietBefore,
       setQuietAfter: s.setQuietAfter,
@@ -210,6 +212,7 @@ export default function SettingsScreen() {
   const [nameDraft, setNameDraft] = useState(user.profileName);
   const [phoneDraft, setPhoneDraft] = useState(user.profilePhone);
   const [resetVisible, setResetVisible] = useState(false);
+  const [zmanimOpen, setZmanimOpen] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [backupBusy, setBackupBusy] = useState(false);
   const [pendingBackup, setPendingBackup] = useState<Backup | null>(null);
@@ -650,19 +653,24 @@ export default function SettingsScreen() {
                   <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>
                     {t('settings.zmanimShownHint')}
                   </Text>
-                  {ARC_ZMANIM.map((id) => {
-                    const shown = !user.hiddenZmanim.includes(id);
-                    return (
-                      <SwitchRow
-                        key={id}
-                        testID={`settings-zman-${id}`}
-                        label={t(`home.zman.${id}.name`)}
-                        value={shown}
-                        disabled={shown && user.hiddenZmanim.length === ARC_ZMANIM.length - 1}
-                        onValueChange={(value) => user.setZmanShown(id, value)}
-                      />
-                    );
-                  })}
+                  <Card style={styles.zmanimCard}>
+                    <ListRow
+                      icon="star"
+                      title={t('home.times.pins.title')}
+                      caption={t('settings.zmanimCount', {
+                        shown:
+                          ARC_ZMANIM.length -
+                          user.hiddenZmanim.length +
+                          offeredMoreZmanim(user.halachicOpinions.ksSofZman).filter((id) =>
+                            user.addedZmanim.includes(id),
+                          ).length,
+                        pins: user.zmanPins.length,
+                      })}
+                      accessibilityLabel={t('home.times.pins.title')}
+                      onPress={() => setZmanimOpen(true)}
+                    />
+                  </Card>
+                  <ZmanimSheet visible={zmanimOpen} onClose={() => setZmanimOpen(false)} />
                 </Anchor>
               </SettingsSection>
 
@@ -1390,6 +1398,9 @@ const styles = StyleSheet.create({
   },
   note: {
     marginTop: spacing.sm,
+  },
+  zmanimCard: {
+    marginTop: spacing.md,
   },
   groupGap: {
     marginTop: spacing.lg,

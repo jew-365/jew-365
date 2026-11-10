@@ -31,3 +31,22 @@ export function withZmanShown(hidden: readonly ZmanId[], id: ZmanId, shown: bool
   if (hidden.includes(id) || hidden.length + 1 >= ARC_ZMANIM.length) return hidden;
   return ARC_ZMANIM.filter((x) => x === id || hidden.includes(x));
 }
+
+// Times the app computes that the circle never shows: the carousel shows them only once the user adds them
+// from the times sheet (the owner's call, 2026-11-10). Each Shema time is offered only under the other opinion,
+// since the circle's sofShma already is the chosen one.
+export const MORE_ZMANIM = ['minchaKetana', 'sofShmaMga', 'sofShmaGra'] as const;
+export type MoreZmanId = (typeof MORE_ZMANIM)[number];
+export type CarouselZmanId = ZmanId | MoreZmanId;
+export const CAROUSEL_ZMANIM: readonly CarouselZmanId[] = [...ARC_ZMANIM, ...MORE_ZMANIM];
+
+export const isMoreZmanId = (value: unknown): value is MoreZmanId => MORE_ZMANIM.includes(value as MoreZmanId);
+export const isCarouselZmanId = (value: unknown): value is CarouselZmanId => isZmanId(value) || isMoreZmanId(value);
+
+// The more times offered under the user's Shema opinion.
+export const offeredMoreZmanim = (ks: 'GRA' | 'MA'): MoreZmanId[] =>
+  MORE_ZMANIM.filter((id) => id !== (ks === 'MA' ? 'sofShmaMga' : 'sofShmaGra'));
+
+// A saved list of added times cleaned for this build: known ids only, once each, in order.
+export const addedZmanimOf = (saved: unknown): MoreZmanId[] =>
+  Array.isArray(saved) ? MORE_ZMANIM.filter((id) => saved.includes(id)) : [];

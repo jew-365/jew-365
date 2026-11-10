@@ -505,6 +505,12 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done:** 2026-11-10: the card's colour follows the part of the day only (dawn, morning, noon, evening, night), a muted gradient drawn at 0.72 over the land so the sky shows through; white text holds 4.5:1 on it every 10 minutes of three days of the year ([src/theme/__tests__/periodTone.test.ts](src/theme/__tests__/periodTone.test.ts)). Checked in the web build at 06:10, 15:40 and 20:30. Verified: `typecheck`, `lint`, `check:dox`, the full suite (6676 passed), `test:tz` on the tone, the card and the guide.
   - **Status:** 1.0.21 · Committed: `58fc45e` fix(home): the card's colour follows the time of day and lets the sky show through · Pushed: yes · Live: preview `1.0.21-74` (group `31498385-82ea-4ab0-a100-1dd97f14aa4f`, from `58fc45e`, 2026-11-10); production no · Channel: preview
 
+- [ ] The carousel's times in one sheet: add, remove and favourites
+  - **Flag:** `OTA`.
+  - **Source:** the owner's message of 2026-11-10: the + in the carousel (stars) and Settings → זמני הלכה (show or hide) looked like two copies of one feature; the + should also add times from the app's list. The owner chose option א (one sheet), with the added times on the carousel only, not the circle.
+  - **Done:** 2026-11-10: [src/components/ZmanimSheet.tsx](src/components/ZmanimSheet.tsx), opened by the + chip and by Settings → זמני הלכה: each time in the carousel with a star and a remove button, then the times to add, the circle's hidden zmanim and `MORE_ZMANIM` (Mincha Ketana and the other opinion's latest Shema), carousel only. A star shows its time, comes first among the upcoming times and is named on Mine; a time taken off loses its star; the gold border stays on the time that comes next by the clock. Store fields `addedZmanim` and `setZmanPinned()`; no `STORE_VERSION` bump. Checked in the web build (the carousel with a starred plag first, the sheet). Verified: `typecheck`, `lint`, `format:check`, `check:dox`, the full suite (6689 passed), `test:tz` on the carousel, the arc, the sheet, home and Settings.
+  - **Status:** 1.0.21 · Committed: pending · Pushed: no · Live: no · Channel: none
+
 - [ ] Home's card in the sky's own glass
   - **Flag:** `OTA`.
   - **Source:** the owner's message of 2026-11-10 on preview `1.0.21-74`, with a screenshot: the card still stands out, is not in the hue of the sky behind it, and at night sinks into the sky; the screenshot shows a 05:45 preview at 20:01 with the card still night navy.

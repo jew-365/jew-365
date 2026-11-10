@@ -1,4 +1,13 @@
-import { ARC_ZMANIM, hiddenZmanimOf, isZmanId, withZmanShown } from '../zmanIds';
+import {
+  addedZmanimOf,
+  ARC_ZMANIM,
+  hiddenZmanimOf,
+  isCarouselZmanId,
+  isZmanId,
+  MORE_ZMANIM,
+  offeredMoreZmanim,
+  withZmanShown,
+} from '../zmanIds';
 
 describe('zmanIds', () => {
   it('lists the eleven zmanim of the hero in order', () => {
@@ -35,5 +44,19 @@ describe('zmanIds', () => {
     expect(withZmanShown(plag, 'alot', true)).toBe(plag);
     const allButTzeit = ARC_ZMANIM.filter((id) => id !== 'tzeit');
     expect(withZmanShown(allButTzeit, 'tzeit', false)).toBe(allButTzeit);
+  });
+
+  it('offers the times the circle never shows, one Shema time under the other opinion', () => {
+    expect(MORE_ZMANIM).toEqual(['minchaKetana', 'sofShmaMga', 'sofShmaGra']);
+    expect(offeredMoreZmanim('GRA')).toEqual(['minchaKetana', 'sofShmaMga']);
+    expect(offeredMoreZmanim('MA')).toEqual(['minchaKetana', 'sofShmaGra']);
+    expect(addedZmanimOf(['sofShmaGra', 'plag', 'minchaKetana', 'minchaKetana'])).toEqual([
+      'minchaKetana',
+      'sofShmaGra',
+    ]);
+    expect(addedZmanimOf(null)).toEqual([]);
+    expect(isCarouselZmanId('minchaKetana')).toBe(true);
+    expect(isCarouselZmanId('plag')).toBe(true);
+    expect(isCarouselZmanId('candleLighting')).toBe(false);
   });
 });

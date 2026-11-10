@@ -1,6 +1,7 @@
-import { fireEvent, screen, within } from '@testing-library/react-native';
+import { act, fireEvent, screen, within } from '@testing-library/react-native';
 import { HomeTimes, type HomeTimesProps } from '../HomeTimes';
 import { renderWithTheme } from '@/testing/render';
+import { useUserStore } from '@/stores/useUserStore';
 import type { CardModel } from '@/utils/homeCard';
 import { timeChips } from '@/utils/homeTimes';
 import type { ZmanId } from '@/utils/zmanIds';
@@ -26,7 +27,7 @@ const CARD: CardModel = {
 };
 
 function renderTimes(over: Partial<HomeTimesProps> = {}) {
-  const { chips, lead } = timeChips({
+  const { chips, lead, next } = timeChips({
     now: NOW,
     zmanim: ZMANIM,
     extras: [],
@@ -44,16 +45,13 @@ function renderTimes(over: Partial<HomeTimesProps> = {}) {
     onPage: jest.fn(),
     chips,
     lead,
+    next,
     now: NOW,
     tz: 'UTC',
     inks: { plain: '#000000', next: '#000000' },
     glass: { fill: '#FFFFFF9E', ink: '#0A1228', edge: '#0A122847' },
     selected: null,
     onPickZman: jest.fn(),
-    pins: ['plag'],
-    suggestions: [{ id: 'plag', reason: 'mincha' }],
-    hidden: [],
-    onPinsChange: jest.fn(),
     mine: ['toShabbat'],
     onMineChange: jest.fn(),
     learn: true,
@@ -91,14 +89,39 @@ describe('HomeTimes', () => {
     expect(within(screen.getByTestId('home-times-sofShma')).getByTestId('home-times-fill')).toBeOnTheScreen();
   });
 
-  it('previews a plain time, stars a pin and opens the pins sheet', () => {
+  it('previews a plain time and marks a starred one', () => {
     const props = renderTimes();
     fireEvent.press(screen.getByTestId('home-times-plag'));
     expect(props.onPickZman).toHaveBeenCalledWith('plag');
-    expect(screen.getByTestId('home-times-plag').props.accessibilityLabel).toContain('בחרת להציג');
-    fireEvent.press(screen.getByTestId('home-times-pin'));
-    fireEvent.press(screen.getByText('פלג המנחה'));
-    expect(props.onPinsChange).toHaveBeenCalledWith([]);
+    expect(screen.getByTestId('home-times-plag').props.accessibilityLabel).toContain('מועדף');
+  });
+
+  it('puts the starred times first, the rest by time', () => {
+    renderTimes();
+    const keys = screen.getAllByTestId(/^home-times-(netz|sofShma|sofTfila|plag|shkia)$/).map((n) => n.props.testID);
+    expect(keys).toEqual([
+      'home-times-plag',
+      'home-times-sofShma',
+      'home-times-sofTfila',
+      'home-times-shkia',
+      'home-times-netz',
+    ]);
+  });
+
+  it('an added time is shown but previews nothing on the circle', () => {
+    const { chips, lead, next } = timeChips({
+      now: NOW,
+      zmanim: [...ZMANIM, { id: 'minchaKetana', at: at(12, 50) }],
+      extras: [],
+      tomorrow: null,
+      openWindows: [],
+      pins: [],
+      learned: null,
+    });
+    const props = renderTimes({ chips, lead, next });
+    expect(screen.getByTestId('home-times-minchaKetana')).toBeOnTheScreen();
+    fireEvent.press(screen.getByTestId('home-times-minchaKetana'));
+    expect(props.onPickZman).not.toHaveBeenCalled();
   });
 
   it('customizes the board: the smart choice, the learning switch and what Mine shows', () => {
@@ -122,10 +145,58 @@ describe('HomeTimes', () => {
     expect(props.onMineChange).toHaveBeenCalledWith(['toShabbat', 'pins']);
   });
 
-  it('names the pins chip and opens its sheet', () => {
-    renderTimes();
-    expect(within(screen.getByTestId('home-times-pin')).getByText('הזמנים שלי')).toBeOnTheScreen();
-    fireEvent.press(screen.getByTestId('home-times-pin'));
-    expect(screen.getByText('זמן שתבחר יקבל ⭐ בקרוסלה כל יום, ויופיע בדף ״שלי״ שבכרטיס.')).toBeOnTheScreen();
+  describe('the times sheet', () => {
+    beforeEach(() => useUserStore.getState().reset());
+
+    it('opens from the chip: the times shown, each with a star and a remove button, then the times to add', () => {
+      useUserStore.setState({ hiddenZmanim: ['plag'] });
+      renderTimes();
+      expect(within(screen.getByTestId('home-times-pin')).getByText('הזמנים שלי')).toBeOnTheScreen();
+      fireEvent.press(screen.getByTestId('home-times-pin'));
+      expect(screen.getByText('הזמנים בקרוסלה')).toBeOnTheScreen();
+      expect(screen.getByTestId('zmanim-row-alot')).toBeOnTheScreen();
+      expect(screen.queryByTestId('zmanim-row-plag')).toBeNull();
+      expect(screen.getByText('פלג המנחה')).toBeOnTheScreen();
+      expect(screen.getByText('מנחה קטנה')).toBeOnTheScreen();
+      // Under the GRA opinion the other Shema time is the Magen Avraham's.
+      expect(screen.getByText('סוף זמן קריאת שמע לשיטת המג״א')).toBeOnTheScreen();
+      expect(screen.queryByText('סוף זמן קריאת שמע לשיטת הגר״א')).toBeNull();
+    });
+
+    it('stars, removes and adds through the store', () => {
+      renderTimes();
+      fireEvent.press(screen.getByTestId('home-times-pin'));
+      act(() => fireEvent.press(screen.getByTestId('zmanim-star-chatzot')));
+      expect(useUserStore.getState().zmanPins).toEqual(['chatzot']);
+      expect(screen.getByTestId('zmanim-star-chatzot').props.accessibilityState).toMatchObject({ selected: true });
+      act(() => fireEvent.press(screen.getByTestId('zmanim-remove-chatzot')));
+      expect(useUserStore.getState().hiddenZmanim).toEqual(['chatzot']);
+      expect(useUserStore.getState().zmanPins).toEqual([]);
+      act(() => fireEvent.press(screen.getByText('מנחה קטנה')));
+      expect(useUserStore.getState().addedZmanim).toEqual(['minchaKetana']);
+      expect(screen.getByTestId('zmanim-row-minchaKetana')).toBeOnTheScreen();
+    });
+
+    it('never removes the last zman of the circle', () => {
+      useUserStore.setState({
+        hiddenZmanim: [
+          'alot',
+          'misheyakir',
+          'netz',
+          'sofShma',
+          'sofTfila',
+          'chatzot',
+          'minchaGedola',
+          'plag',
+          'shkia',
+          'tzeit',
+        ],
+      });
+      renderTimes();
+      fireEvent.press(screen.getByTestId('home-times-pin'));
+      expect(screen.getByTestId('zmanim-remove-chatzotLayla').props.accessibilityState).toMatchObject({
+        disabled: true,
+      });
+    });
   });
 });

@@ -24,7 +24,15 @@ import {
   type QuietBound,
 } from '@/utils/quietHours';
 import { DEFAULT_NAG_LEVEL, isNagLevel, type NagLevel } from '@/utils/nagging';
-import { hiddenZmanimOf, withZmanShown, type ZmanId } from '@/utils/zmanIds';
+import {
+  addedZmanimOf,
+  hiddenZmanimOf,
+  isZmanId,
+  withZmanShown,
+  type CarouselZmanId,
+  type MoreZmanId,
+  type ZmanId,
+} from '@/utils/zmanIds';
 import {
   DEFAULT_MINE,
   isCardPage,
@@ -153,7 +161,8 @@ type UserState = {
   halachaTrack: HalachaTrack | null;
   benIshChaiYearSwapped: boolean;
   hiddenZmanim: readonly ZmanId[];
-  zmanPins: readonly ZmanId[];
+  addedZmanim: readonly MoreZmanId[];
+  zmanPins: readonly CarouselZmanId[];
   homeCardPage: CardPageId | null;
   homeCardMine: readonly MineFactId[];
   homeLearn: boolean;
@@ -194,8 +203,8 @@ type UserState = {
   setNagLevel: (level: NagLevel) => void;
   setChokDoubleChoice: (choice: ChokDoubleChoice) => void;
   setChokCommentaryOpen: (open: boolean) => void;
-  setZmanShown: (id: ZmanId, shown: boolean) => void;
-  setZmanPins: (pins: readonly ZmanId[]) => void;
+  setZmanShown: (id: CarouselZmanId, shown: boolean) => void;
+  setZmanPinned: (id: CarouselZmanId, pinned: boolean) => void;
   setHomeCardPage: (page: CardPageId | null) => void;
   setHomeCardMine: (facts: readonly MineFactId[]) => void;
   setHomeLearn: (on: boolean) => void;
@@ -221,6 +230,7 @@ type PersistedUserState = Partial<
 > & {
   theme?: unknown;
   hiddenZmanim?: unknown;
+  addedZmanim?: unknown;
   amidahVerses?: unknown;
   amidahPrayer?: unknown;
   zmanPins?: unknown;
@@ -238,15 +248,49 @@ const savedThemeName = (saved: unknown): ThemeName => {
   return DEFAULT_THEME;
 };
 
+// The starred times that are shown: a zman of the circle not hidden, an added time added.
+const shownPins = (
+  pins: readonly CarouselZmanId[],
+  hidden: readonly ZmanId[],
+  added: readonly MoreZmanId[],
+): CarouselZmanId[] => pins.filter((id) => (isZmanId(id) ? !hidden.includes(id) : added.includes(id)));
+
+function withShown(
+  s: Pick<UserState, 'hiddenZmanim' | 'addedZmanim' | 'zmanPins'>,
+  id: CarouselZmanId,
+  shown: boolean,
+): Partial<UserState> {
+  const hiddenZmanim = isZmanId(id) ? withZmanShown(s.hiddenZmanim, id, shown) : s.hiddenZmanim;
+  const addedZmanim = isZmanId(id)
+    ? s.addedZmanim
+    : addedZmanimOf(shown ? [...s.addedZmanim, id] : s.addedZmanim.filter((x) => x !== id));
+  const zmanPins = shownPins(s.zmanPins, hiddenZmanim, addedZmanim);
+  if (hiddenZmanim === s.hiddenZmanim && addedZmanim.join() === s.addedZmanim.join()) return {};
+  return { hiddenZmanim, addedZmanim, zmanPins };
+}
+
 const mergeSavedUserState = (persisted: unknown, current: UserState): UserState => {
-  const { theme, hiddenZmanim, amidahVerses, amidahPrayer, zmanPins, homeCardPage, homeCardMine, homeLearn, ...saved } =
-    (persisted ?? {}) as PersistedUserState;
+  const {
+    theme,
+    hiddenZmanim,
+    addedZmanim,
+    amidahVerses,
+    amidahPrayer,
+    zmanPins,
+    homeCardPage,
+    homeCardMine,
+    homeLearn,
+    ...saved
+  } = (persisted ?? {}) as PersistedUserState;
+  const hidden = hiddenZmanimOf(hiddenZmanim);
+  const added = addedZmanimOf(addedZmanim);
   const merged = {
     ...current,
     ...saved,
     theme: theme === undefined ? current.theme : savedThemeName(theme),
-    hiddenZmanim: hiddenZmanimOf(hiddenZmanim),
-    zmanPins: zmanPinsOf(zmanPins),
+    hiddenZmanim: hidden,
+    addedZmanim: added,
+    zmanPins: shownPins(zmanPinsOf(zmanPins), hidden, added),
     homeCardPage: isCardPage(homeCardPage) ? homeCardPage : null,
     homeCardMine: mineFactsOf(homeCardMine),
     homeLearn: homeLearn !== false,
@@ -312,6 +356,7 @@ export const useUserStore = create<UserState>()(
       halachaTrack: null,
       benIshChaiYearSwapped: false,
       hiddenZmanim: [],
+      addedZmanim: [],
       zmanPins: [],
       homeCardPage: null,
       homeCardMine: [...DEFAULT_MINE],
@@ -376,19 +421,28 @@ export const useUserStore = create<UserState>()(
       setNagLevel: (level) => set((s) => (isNagLevel(level) ? { nagLevel: level } : s)),
       setChokDoubleChoice: (choice) => set({ chokDoubleChoice: choice }),
       setChokCommentaryOpen: (open) => set({ chokCommentaryOpen: open }),
+      // The times sheet (the owner's call, 2026-11-10): a zman of the circle is shown or hidden, an added time
+      // added or removed; a time taken off the carousel loses its star, since a starred time is always shown.
       setZmanShown: (id, shown) =>
         set((s) => {
-          const hiddenZmanim = withZmanShown(s.hiddenZmanim, id, shown);
-          return hiddenZmanim === s.hiddenZmanim ? s : { hiddenZmanim };
+          const change = withShown(s, id, shown);
+          return Object.keys(change).length ? change : s;
         }),
-      // The first time a zman is starred, the starred times join Mine when it has room, so the star shows somewhere.
-      setZmanPins: (pins) =>
-        set((state) => {
-          const zmanPins = zmanPinsOf(pins);
-          const mine = state.homeCardMine;
-          const join =
-            state.zmanPins.length === 0 && zmanPins.length > 0 && !mine.includes('pins') && mine.length < MINE_MAX;
-          return join ? { zmanPins, homeCardMine: mineFactsOf([...mine, 'pins']) } : { zmanPins };
+      // A star shows its time, and the first star joins the starred times to Mine when it has room, so it shows there.
+      setZmanPinned: (id, pinned) =>
+        set((s) => {
+          if (!pinned) return s.zmanPins.includes(id) ? { zmanPins: s.zmanPins.filter((p) => p !== id) } : s;
+          if (s.zmanPins.includes(id)) return s;
+          const shown = { ...s, ...withShown(s, id, true) };
+          const zmanPins = zmanPinsOf([...s.zmanPins, id]);
+          const mine = s.homeCardMine;
+          const join = s.zmanPins.length === 0 && !mine.includes('pins') && mine.length < MINE_MAX;
+          return {
+            hiddenZmanim: shown.hiddenZmanim,
+            addedZmanim: shown.addedZmanim,
+            zmanPins,
+            ...(join ? { homeCardMine: mineFactsOf([...mine, 'pins']) } : {}),
+          };
         }),
       setHomeCardPage: (page) => set({ homeCardPage: isCardPage(page) ? page : null }),
       setHomeCardMine: (facts) => set({ homeCardMine: mineFactsOf(facts) }),
@@ -439,6 +493,7 @@ export const useUserStore = create<UserState>()(
           halachaTrack: null,
           benIshChaiYearSwapped: false,
           hiddenZmanim: [],
+          addedZmanim: [],
           zmanPins: [],
           homeCardPage: null,
           homeCardMine: [...DEFAULT_MINE],

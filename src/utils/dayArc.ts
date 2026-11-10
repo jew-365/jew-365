@@ -5,7 +5,7 @@ import { SKY, SKY_SCENE, type SkyStop } from '@/theme/sky';
 import { formatRemaining } from '@/utils/clock';
 import type { HalachicOpinion } from '@/types/mitzvah';
 import type { Location } from '@/types/zmanim';
-import { ARC_ZMANIM, type ZmanId } from './zmanIds';
+import { ARC_ZMANIM, type MoreZmanId, type ZmanId } from './zmanIds';
 
 export type Translate = (scope: string, options?: Record<string, unknown>) => string;
 
@@ -47,6 +47,23 @@ export function dayFrameFor(day: Date, location: Location, ks: HalachicOpinion):
   const ordered = times.every((ms, i) => Number.isFinite(ms) && (i === 0 || ms > times[i - 1]));
   if (!ordered || times[times.length - 1] >= end.getTime()) return null;
   return { start: z.alotHaShachar, tzeit: z.tzeitHakochavim, end, zmanim };
+}
+
+// The added times of a day (not on the circle): the ones asked for, at the location's noon of `day`.
+export function moreZmanimFor(
+  day: Date,
+  location: Location,
+  ids: readonly MoreZmanId[],
+): { id: MoreZmanId; at: Date }[] {
+  if (!ids.length) return [];
+  const z = ZmanimService.getZmanim(locationNoon(day, location), location);
+  if (!z) return [];
+  const at: Record<MoreZmanId, Date> = {
+    minchaKetana: z.minchaKetana,
+    sofShmaMga: z.sofZmanShmaMA,
+    sofShmaGra: z.sofZmanShmaGra,
+  };
+  return ids.map((id) => ({ id, at: at[id] })).filter((x) => Number.isFinite(x.at?.getTime()));
 }
 
 export function arcFraction(at: Date, f: DayFrame): { night: boolean; fraction: number } {

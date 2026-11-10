@@ -4,7 +4,7 @@
 // of a fast) among them, tomorrow's morning after tzeit, the past last. A time that closes a window open now
 // carries its progress; the most urgent one fills (the lead), the others fill when touched. Pure: no store,
 // no service.
-import { ARC_ZMANIM, isZmanId, type ZmanId } from './zmanIds';
+import { CAROUSEL_ZMANIM, isCarouselZmanId, type CarouselZmanId, type ZmanId } from './zmanIds';
 
 export type ExtraId = 'candleLighting' | 'chanukahCandles' | 'fastEnd';
 export type TimeChipKind = 'upcoming' | 'tomorrow' | 'past';
@@ -14,7 +14,7 @@ export type TimeChip =
   | {
       type: 'time';
       key: string;
-      zman: ZmanId | null;
+      zman: CarouselZmanId | null;
       extra: ExtraId | null;
       at: Date;
       kind: TimeChipKind;
@@ -26,20 +26,20 @@ export type TimeChipOf<T extends TimeChip['type']> = Extract<TimeChip, { type: T
 
 export type TimesInput = {
   now: Date;
-  // Today's zmanim, the hidden ones already left out.
-  zmanim: readonly { id: ZmanId; at: Date }[];
+  // Today's zmanim, the hidden ones already left out, and the times the user added.
+  zmanim: readonly { id: CarouselZmanId; at: Date }[];
   // The period's times, each with the start its progress counts from (none: no progress).
   extras: readonly { id: ExtraId; at: Date; from: Date | null }[];
   // Tomorrow's morning, given once tonight has begun.
-  tomorrow: readonly { id: ZmanId; at: Date }[] | null;
+  tomorrow: readonly { id: CarouselZmanId; at: Date }[] | null;
   // The windows of the user's mitzvot open now and not marked: a zman equal to one's end carries its progress.
   openWindows: readonly ChipProgress[];
-  pins: readonly ZmanId[];
+  pins: readonly CarouselZmanId[];
   learned: ZmanId | null;
 };
 
 // The zmanim of tomorrow's morning shown after tzeit.
-export const TOMORROW_ZMANIM: readonly ZmanId[] = ['misheyakir', 'netz', 'sofShma', 'sofTfila'];
+export const TOMORROW_ZMANIM: readonly CarouselZmanId[] = ['misheyakir', 'netz', 'sofShma', 'sofTfila'];
 // A zman closes a window when the two are within this much of each other (both are floored to the minute).
 const SAME_TIME_MS = 60 * 1000;
 // The least share a running chip shows, so a window just opened is still seen to run.
@@ -51,7 +51,9 @@ export function progressShare(progress: ChipProgress, now: Date): number {
   return Math.max(MIN_SHARE, Math.min(1, (now.getTime() - progress.start.getTime()) / span));
 }
 
-export function timeChips(input: TimesInput): { chips: TimeChip[]; lead: string | null } {
+// The starred times come first among the upcoming ones (the owner's call, 2026-11-10), each group by time; `next` is
+// the time that comes next whatever its place, and tomorrow's morning holds the starred times of tomorrow too.
+export function timeChips(input: TimesInput): { chips: TimeChip[]; lead: string | null; next: string | null } {
   const t = input.now.getTime();
   const running = (at: Date): ChipProgress | null => {
     const window = input.openWindows.find(
@@ -83,10 +85,12 @@ export function timeChips(input: TimesInput): { chips: TimeChip[]; lead: string 
       progress: x.from && x.from.getTime() <= t && x.at.getTime() > t ? { start: x.from, end: x.at } : null,
     })),
   ].sort((a, b) => a.at.getTime() - b.at.getTime());
-  const upcoming = day.filter((c) => c.kind === 'upcoming');
+  const byTime = day.filter((c) => c.kind === 'upcoming');
+  const upcoming = [...byTime.filter((c) => c.pinned), ...byTime.filter((c) => !c.pinned)];
   const past = day.filter((c) => c.kind === 'past');
   const tomorrow: TimeChipOf<'time'>[] = (input.tomorrow ?? [])
-    .filter((z) => TOMORROW_ZMANIM.includes(z.id))
+    .filter((z) => TOMORROW_ZMANIM.includes(z.id) || input.pins.includes(z.id))
+    .sort((a, b) => a.at.getTime() - b.at.getTime())
     .map((z) => ({
       type: 'time',
       key: 'tomorrow-' + z.id,
@@ -101,8 +105,8 @@ export function timeChips(input: TimesInput): { chips: TimeChip[]; lead: string 
   const chips: TimeChip[] = [...upcoming];
   if (tomorrow.length) chips.push({ type: 'sep', key: 'sep-tomorrow' }, ...tomorrow);
   if (past.length) chips.push({ type: 'sep', key: 'sep-earlier' }, ...past);
-  const lead = upcoming.find((c) => c.progress) ?? null;
-  return { chips, lead: lead ? lead.key : null };
+  const lead = byTime.find((c) => c.progress) ?? null;
+  return { chips, lead: lead ? lead.key : null, next: byTime[0]?.key ?? null };
 }
 
 // Pins suggested from the mitzvot the user keeps, each with the reason it is suggested.
@@ -114,8 +118,8 @@ export function suggestedPins(enabled: ReadonlySet<string>): { id: ZmanId; reaso
   return out;
 }
 
-export const zmanPinsOf = (saved: unknown): ZmanId[] =>
-  Array.isArray(saved) ? ARC_ZMANIM.filter((id) => saved.some((x) => isZmanId(x) && x === id)) : [];
+export const zmanPinsOf = (saved: unknown): CarouselZmanId[] =>
+  Array.isArray(saved) ? CAROUSEL_ZMANIM.filter((id) => saved.some((x) => isCarouselZmanId(x) && x === id)) : [];
 
 // What the user's marks teach: how many of the recent marks came after a time (Shacharit after the end of the
 // Shema, Mincha after plag), and the habit it makes once enough of them do.

@@ -84,6 +84,31 @@ describe('the live carousel', () => {
     expect(netz && netz.type === 'time' && netz.pinned).toBe(true);
   });
 
+  it('puts the starred times first, while the lead and the next time follow the clock', () => {
+    const { chips, lead, next } = timeChips(
+      base({ pins: ['plag'], openWindows: [{ start: at(6, 4), end: at(8, 40) }] }),
+    );
+    expect(keys(chips).slice(0, 4)).toEqual(['plag', 'sofShma', 'sofTfila', 'chatzot']);
+    expect(lead).toBe('sofShma');
+    expect(next).toBe('sofShma');
+    expect(timeChips(base({ now: at(18) })).next).toBeNull();
+  });
+
+  it('places an added time by its time, and brings a starred time into tomorrow', () => {
+    const { chips } = timeChips(base({ zmanim: [...ZMANIM, { id: 'minchaKetana', at: at(14, 50) }] }));
+    expect(keys(chips).slice(2, 5)).toEqual(['chatzot', 'minchaKetana', 'plag']);
+    const tomorrow = ZMANIM.map((z) => ({ id: z.id, at: new Date(z.at.getTime() + 86400000) }));
+    const night = timeChips(base({ now: at(20), tomorrow, pins: ['chatzot'] }));
+    expect(keys(night.chips).slice(0, 6)).toEqual([
+      'sep-tomorrow',
+      'tomorrow-netz',
+      'tomorrow-sofShma',
+      'tomorrow-sofTfila',
+      'tomorrow-chatzot',
+      'sep-earlier',
+    ]);
+  });
+
   it('measures a share of the window, never below a sliver', () => {
     expect(progressShare({ start: at(6), end: at(8) }, at(7))).toBe(0.5);
     expect(progressShare({ start: at(6), end: at(8) }, at(6))).toBe(0.03);
@@ -95,6 +120,7 @@ describe('the pins', () => {
     expect(suggestedPins(new Set(['tefillin', 'mincha'])).map((s) => s.id)).toEqual(['misheyakir', 'plag']);
     expect(zmanPinsOf(['plag', 'nope', 'alot'])).toEqual(['alot', 'plag']);
     expect(zmanPinsOf('plag')).toEqual([]);
+    expect(zmanPinsOf(['sofShmaGra', 'minchaKetana', 'plag'])).toEqual(['plag', 'minchaKetana', 'sofShmaGra']);
   });
 });
 

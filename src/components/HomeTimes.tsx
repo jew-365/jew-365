@@ -4,6 +4,7 @@ import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { ListRow } from '@/components/ListRow';
 import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { SectionLabel } from '@/components/SectionLabel';
+import { ZmanimSheet } from '@/components/ZmanimSheet';
 import { useI18n } from '@/i18n';
 import { BRAND } from '@/theme/colors';
 import { scaled } from '@/theme/scale';
@@ -22,7 +23,7 @@ import {
   type MineFactId,
   type TimeChip,
 } from '@/utils/homeTimes';
-import { ARC_ZMANIM, type ZmanId } from '@/utils/zmanIds';
+import { isZmanId, type ZmanId } from '@/utils/zmanIds';
 
 const CHIP_MIN = scaled(44);
 const CHIP_PAD_X = scaled(14);
@@ -48,6 +49,8 @@ export type HomeTimesProps = {
   onPage: (page: CardPageId | null) => void;
   chips: readonly TimeChip[];
   lead: string | null;
+  // The time that comes next, whatever its place in the carousel (the starred times come first).
+  next: string | null;
   now: Date;
   tz: string;
   inks: { plain: string; next: string };
@@ -55,10 +58,6 @@ export type HomeTimesProps = {
   glass: CardGlass;
   selected: ZmanId | null;
   onPickZman: (id: ZmanId) => void;
-  pins: readonly ZmanId[];
-  suggestions: readonly { id: ZmanId; reason: string }[];
-  hidden: readonly ZmanId[];
-  onPinsChange: (pins: ZmanId[]) => void;
   mine: readonly MineFactId[];
   onMineChange: (facts: MineFactId[]) => void;
   learn: boolean;
@@ -84,17 +83,13 @@ export function HomeTimes(props: HomeTimesProps) {
     [props.chips],
   );
   const focused = focus && running.has(focus) ? focus : props.lead;
-  const firstUpcoming = props.chips.find((c) => c.type === 'time' && c.kind === 'upcoming')?.key ?? null;
+  const firstUpcoming = props.next;
 
   const chipLabel = (c: Extract<TimeChip, { type: 'time' }>) =>
     c.zman ? t(`home.zman.${c.zman}.short`) : t(`home.times.extra.${c.extra}`);
   const chipName = (c: Extract<TimeChip, { type: 'time' }>) =>
     c.zman ? t(`home.zman.${c.zman}.name`) : t(`home.times.extra.${c.extra}`);
 
-  const pinChoices = ARC_ZMANIM.filter((id) => !props.hidden.includes(id));
-  const suggested = props.suggestions.filter((s) => pinChoices.includes(s.id));
-  const togglePin = (id: ZmanId) =>
-    props.onPinsChange(props.pins.includes(id) ? props.pins.filter((p) => p !== id) : [...props.pins, id]);
   const toggleMine = (id: MineFactId) => {
     if (props.mine.includes(id)) props.onMineChange(props.mine.filter((m) => m !== id));
     else if (props.mine.length < MINE_MAX) props.onMineChange([...props.mine, id]);
@@ -222,10 +217,12 @@ export function HomeTimes(props: HomeTimesProps) {
             : c.kind === 'tomorrow'
               ? t('home.times.tomorrowA11y', { name: chipName(c), time })
               : `${chipName(c)}, ${time}`;
+          // An added time is not on the circle, so it previews nothing.
+          const zman = c.zman;
           const onPress = c.progress
             ? () => setFocus(live && c.key !== props.lead ? null : c.key)
-            : c.zman && c.kind !== 'tomorrow'
-              ? () => props.onPickZman(c.zman as ZmanId)
+            : zman && isZmanId(zman) && c.kind !== 'tomorrow'
+              ? () => props.onPickZman(zman)
               : undefined;
           return (
             <Pressable
@@ -300,36 +297,7 @@ export function HomeTimes(props: HomeTimesProps) {
         </Pressable>
       </ScrollView>
 
-      <BottomSheet
-        visible={pinsOpen}
-        title={t('home.times.pins.title')}
-        caption={t('home.times.pins.caption')}
-        onClose={() => setPinsOpen(false)}
-      >
-        <ScrollView style={styles.sheetBody}>
-          {suggested.length ? <SectionLabel variant="field" text={t('home.times.pins.suggested')} /> : null}
-          {suggested.map((s) => (
-            <SheetAction
-              key={`s-${s.id}`}
-              label={t(`home.zman.${s.id}.name`)}
-              caption={t(`home.times.reason.${s.reason}`)}
-              selected={props.pins.includes(s.id)}
-              onPress={() => togglePin(s.id)}
-            />
-          ))}
-          <SectionLabel variant="field" text={t('home.times.pins.more')} />
-          {pinChoices
-            .filter((id) => !suggested.some((s) => s.id === id))
-            .map((id) => (
-              <SheetAction
-                key={id}
-                label={t(`home.zman.${id}.name`)}
-                selected={props.pins.includes(id)}
-                onPress={() => togglePin(id)}
-              />
-            ))}
-        </ScrollView>
-      </BottomSheet>
+      <ZmanimSheet visible={pinsOpen} onClose={() => setPinsOpen(false)} />
 
       <BottomSheet visible={moreOpen} title={t('home.card.more')} onClose={() => setMoreOpen(false)}>
         <ScrollView style={styles.sheetBody}>

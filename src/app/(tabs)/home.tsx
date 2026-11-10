@@ -54,11 +54,11 @@ import { checkInLastDay, checkInPhraseKey, latestCheckIn, overlapsBlock, tracked
 import { Mitzvah } from '@/types/mitzvah';
 import { TaharahEvent, TaharahSettings } from '@/types/taharah';
 import { Location } from '@/types/zmanim';
-import { dayFrameFor, type CardGlass } from '@/utils/dayArc';
-import { learnedHabit, markStat, suggestedPins, timeChips } from '@/utils/homeTimes';
+import { dayFrameFor, moreZmanimFor, type CardGlass } from '@/utils/dayArc';
+import { learnedHabit, markStat, timeChips } from '@/utils/homeTimes';
 import { homeCard, markHistory } from '@/utils/homeCard';
 import { MITZVOT } from '@/data/mitzvot';
-import type { ZmanId } from '@/utils/zmanIds';
+import { offeredMoreZmanim, type ZmanId } from '@/utils/zmanIds';
 import { computeStreak } from '@/utils/historyStats';
 import { DayEntry, dayEntryStatusText, firstName, greetingKey, heroCaption, orderDayEntries } from '@/utils/homeDay';
 import { hilulaMessage, holyBlockMessage, roshChodeshMessage, streakMessage } from '@/utils/homeMessages';
@@ -200,10 +200,10 @@ export default function HomeScreen() {
   const homeLook = useUserStore((s) => s.homeLook);
   const hiddenZmanim = useUserStore((s) => s.hiddenZmanim);
   const zmanPins = useUserStore((s) => s.zmanPins);
+  const addedZmanim = useUserStore((s) => s.addedZmanim);
   const homeCardPage = useUserStore((s) => s.homeCardPage);
   const homeCardMine = useUserStore((s) => s.homeCardMine);
   const homeLearn = useUserStore((s) => s.homeLearn);
-  const setZmanPins = useUserStore((s) => s.setZmanPins);
   const setHomeCardPage = useUserStore((s) => s.setHomeCardPage);
   const setHomeCardMine = useUserStore((s) => s.setHomeCardMine);
   const setHomeLearn = useUserStore((s) => s.setHomeLearn);
@@ -528,7 +528,6 @@ export default function HomeScreen() {
   // The board in the hero (the owner's pick of 2026-11-10, "גוון התקופה, קרוסלה חיה"): the period's card over
   // the live carousel of the day's times.
   const enabledIds = useMemo(() => new Set(enabled.map((m) => m.id)), [enabled]);
-  const pinSuggestions = useMemo(() => suggestedPins(enabledIds), [enabledIds]);
   const board = useMemo(() => {
     if (!frame) return null;
     const isOn = (id: string) => enabledIds.has(id);
@@ -577,9 +576,12 @@ export default function HomeScreen() {
             settings.halachicOpinions.ksSofZman,
           )
         : null;
-    const { chips, lead } = timeChips({
+    // The times the user added, under the Shema opinion in force (the circle never shows them).
+    const ks = settings.halachicOpinions.ksSofZman;
+    const added = offeredMoreZmanim(ks).filter((id) => addedZmanim.includes(id));
+    const { chips, lead, next } = timeChips({
       now,
-      zmanim: frame.zmanim.filter((z) => !hiddenZmanim.includes(z.id)),
+      zmanim: [...frame.zmanim.filter((z) => !hiddenZmanim.includes(z.id)), ...moreZmanimFor(today, location, added)],
       extras: [
         ...(card.candleLighting
           ? [{ id: 'candleLighting' as const, at: card.candleLighting.at, from: card.candleLighting.from }]
@@ -587,14 +589,19 @@ export default function HomeScreen() {
         ...(chanukahWindow ? [{ id: 'chanukahCandles' as const, at: chanukahWindow.start, from: null }] : []),
         ...(card.fastEnd ? [{ id: 'fastEnd' as const, at: card.fastEnd.at, from: card.fastEnd.from }] : []),
       ],
-      tomorrow: tomorrowFrame ? tomorrowFrame.zmanim.filter((z) => !hiddenZmanim.includes(z.id)) : null,
+      tomorrow: tomorrowFrame
+        ? [
+            ...tomorrowFrame.zmanim.filter((z) => !hiddenZmanim.includes(z.id)),
+            ...moreZmanimFor(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1), location, added),
+          ]
+        : null,
       openWindows: allCurrent
         .filter((item) => !item.marked)
         .map((item) => ({ start: item.window.start, end: item.window.end })),
       pins: zmanPins,
       learned: habit?.zman ?? null,
     });
-    return { card, chips, lead };
+    return { card, chips, lead, next };
   }, [
     frame,
     enabledIds,
@@ -613,6 +620,7 @@ export default function HomeScreen() {
     zmanPins,
     today,
     hiddenZmanim,
+    addedZmanim,
   ]);
   const renderBoard = useCallback(
     ({
@@ -633,37 +641,20 @@ export default function HomeScreen() {
           onPage={setHomeCardPage}
           chips={board.chips}
           lead={board.lead}
+          next={board.next}
           now={now}
           tz={location.tz}
           inks={inks}
           glass={glass}
           selected={selected}
           onPickZman={pick}
-          pins={zmanPins}
-          suggestions={pinSuggestions}
-          hidden={hiddenZmanim}
-          onPinsChange={setZmanPins}
           mine={homeCardMine}
           onMineChange={setHomeCardMine}
           learn={homeLearn}
           onLearnChange={setHomeLearn}
         />
       ) : null,
-    [
-      board,
-      homeCardPage,
-      setHomeCardPage,
-      now,
-      location.tz,
-      zmanPins,
-      pinSuggestions,
-      hiddenZmanim,
-      setZmanPins,
-      homeCardMine,
-      setHomeCardMine,
-      homeLearn,
-      setHomeLearn,
-    ],
+    [board, homeCardPage, setHomeCardPage, now, location.tz, homeCardMine, setHomeCardMine, homeLearn, setHomeLearn],
   );
 
   const todayTime = today.getTime();
