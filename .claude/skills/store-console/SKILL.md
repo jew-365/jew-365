@@ -53,6 +53,7 @@ A read runs without asking. Every state-changing command - an upload, a release 
 - The built-in browser has no file upload, so graphics and every other file go through Chrome. It can fill the forms when the user signs in there (Play Console was filled that way as 365jew on 2026-10-20), but prefer Chrome for consoles: it is already signed in.
 - Uploads read only files inside the session folders and cap at 10 MB. Copy graphics to the session scratchpad first. An AAB is above the cap: the user uploads every AAB, you do the rest of the release.
 - Play Console URL shape: `https://play.google.com/console/u/0/developers/6395219355356380365/app/4975091190006669419/<page>` (developer id and app id of `com.jew365.app`).
+- Production releases go through the account owner avi6190i at `/console/u/1/` in the owner's Chrome (365jew at `/u/0/` is an admin, and `play.mjs` has no production release permission). The first production release (2026-11-10) found the Production track with no countries, and Play offers no staged rollout for a first release.
 
 ## 3. How to click and type
 
@@ -63,6 +64,9 @@ A read runs without asking. Every state-changing command - an upload, a release 
 - Material dropdowns and radio groups: click the ref, then re-read the page to confirm the selected value, not only the screenshot.
 - Language fields: Play's default listing language is Hebrew (`iw-IL`, the code Play lists for Hebrew, also in release-note tags `<iw-IL>...</iw-IL>`), English (`en-US`) is a translation. Both descriptions name both app names so either search finds the app.
 - After Save, reload the page and read the saved values back. A listing saved only as a draft is not published: use Next, then Save, then check the Publishing overview.
+- Play's asset library (Add assets) keeps only the last file of a quick series: upload one file, wait until the field's count rises (about 8 seconds), then the next. Removing an asset re-renders the group, so read it again before the next remove.
+- A Play listing language with no graphics of its own inherits the default listing's; a translation that should differ gets its own files (`en-US` has its own English screenshots and feature graphic since 2026-11-10). New graphics reset the AI asset declaration, so label them again before Save.
+- Play's "Send changes for review" while a review runs asks to restart it, and the restart folds the pending changes into that review. It is a submission: a yes to replace or upload does not cover it, and on 2026-11-10 the permission classifier refused the click until the owner said yes to sending.
 
 ## 4. Stop and hand over to the user
 
