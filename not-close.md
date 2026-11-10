@@ -739,7 +739,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** A credit that claims nothing the source does not.
   - **Expected result:** The published manifest and units credit "Shemirat HaLashon -- Torat Emet 370, via Sefaria" with no licence, at a raised version; the reader shows it so.
   - **Done:** 2026-11-10. Verified: `node scripts/halacha/build.js shemirat_halashon` (version 2, `wrote 0 files` on the rerun), [scripts/halacha/__tests__/build.test.js](scripts/halacha/__tests__/build.test.js) (the exact credit and the manifest's credit line), the Shemirat HaLashon reader case of [src/app/__tests__/halachaReader.render.test.tsx](src/app/__tests__/halachaReader.render.test.tsx), the guide's web copy rebuilt.
-  - **Status:** Version: OTA, with `docs/` on Pages · Committed: pending · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, with `docs/` on Pages · Committed: yes, `d48b589` fix(halacha): credit Shemirat HaLashon with no licence (full `pnpm test:tz` green in all four zones, 6676 tests and 1 skipped) · Pushed: yes · Live: Pages serves the manifest at version 2 with no licence in its credit (checked 2026-11-10); the reader's change is in no update yet · Channel: Pages
 
 - [ ] Publish the Chofetz Chaim and Shemirat HaLashon on Pages and a preview update
   - **Flag:** `docs/halacha/chafetz_chaim/` and `docs/halacha/shemirat_halashon/` on Pages, then `OTA` to preview.
