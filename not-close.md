@@ -552,7 +552,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 - **Spec:** [.claude/specs/halacha-yomit.md](.claude/specs/halacha-yomit.md) holds the research, the tracks, every decision with the owner's words, the add-on layout, the schedules, the periods, the reader, the wiring, the tests and the release order. A task below names the spec section it implements; the spec is the contract, this file the queue.
 - **Flag:** every task is `OTA` plus `docs/halacha/` on Pages: pure JavaScript, no native module, no field of [app.json](app.json), no version raise, no `SCHEDULE_FORMAT` raise. A task that turns out to need one stops and says so.
 - **Decisions taken:** the owner's D1 to D7 and Claude's D8 to D16 in the spec's section 4. In short: three tracks by nusach with the user's override (Kitzur Shulchan Aruch for Ashkenaz and Sefard, Ben Ish Chai for Edot HaMizrach, Rambam one chapter a day for Chabad and Teiman); a schedule fixed by the date; a window on every day, Shabbat's portion asked in the check-in and offered as a make-up; the two mitzvot side by side; an English text only under a usable licence; one release of everything; the rav before production.
-- **Pending:** Q31 under [For the owner](#for-the-owner) and R17 under [For the rav](#for-the-rav). Q29 was not needed and Q30 was answered on 2026-11-10.
+- **Pending:** R17 under [For the rav](#for-the-rav). Q29 was not needed; Q30 and Q31 were answered on 2026-11-10 (Q31 became the batch "Licence requests, 2026-11-10").
 - **Not verified:** the printed source behind Hebcal's Kitzur Shulchan Aruch Yomi luach (spec 6.1). The luach itself, the festival ranges, the English coverage and the add-on's size were established on 2026-11-10 by the content tasks below.
 - **Done means:** both dictionaries updated with every key the task adds; a DOX pass on every touched AGENTS.md; the spec section the task names implemented as written, or the deviation written back into the spec; the search finding everything the task adds; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green. No update to preview or production without the owner's word.
 - **Order:** the High tasks in the order written (content, then logic, then the mitzvot and the reader); the Medium tasks after them in any order; the release tasks last.
@@ -629,7 +629,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** D2 and the reading itself.
   - **Expected result:** `src/app/__tests__/halachaReader.render.test.tsx` green under `pnpm test:tz`, and the Chok LeYisrael and Shnayim Mikra reader suites green unchanged.
   - **Done:** 2026-11-10. The reader of [src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>) reads both ids by date (the spec's date-keyed choice, the Chok LeYisrael program untouched): `halachaReadingsOn()` of [src/data/halachaContent.ts](src/data/halachaContent.ts) gives the day's portions, `halachaText()` of [src/utils/halachaText.ts](src/utils/halachaText.ts) builds the text from the installed units (each piece grouped by its siman or chapter, a festival heading and the portion's label above each reading, the units' credits under the text, the Kitzur's English beside the Hebrew in English while its pack is installed, else a Hebrew-only banner). "סיימתי" only while the mitzvah is on; `halachaMakeUpDays()` folds the last seven unmarked days that ended after the switch-on, newest first, the festival halachot only of the periods in effect; a `DayStepper` browses other days read only (the festival halachot within the period) with a note and a way back. `hasSiddurText()` answers both ids and `nextMitzvahTextWindow()` finds the next period off season. Verified: `src/app/__tests__/halachaReader.render.test.tsx` (11) green under `pnpm test:tz`, over the published units of [docs/halacha/](docs/halacha); the Chok LeYisrael, Shnayim Mikra, siddur reader, linked-text, mitzvah, smoke and design-system suites green unchanged.
-  - **Status:** Version: OTA (nothing offers the download yet) · Committed: pending · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA (nothing offers the download yet) · Committed: yes, `5d27430` feat(halacha): read the daily halacha and the festival halachot in the reader (full `pnpm test:tz` green in all four zones, 6583 tests) · Pushed: yes · Live: no · Channel: none
 
 ### Medium — Daily halacha and festival halachot
 
@@ -674,6 +674,67 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** Spec 12, steps 3 and 4: apply each R17 answer that is not "נכון", then `pnpm update:production` on the owner's word.
   - **What it solves:** D7 and the release itself.
   - **Expected result:** A numbered production update whose `gitCommitHash` contains the batch's commits; the batch's items move to [action-log.md](action-log.md).
+
+### Licence requests, 2026-11-10 — batch rules
+
+- **Requested:** the owner, 2026-11-10, in a cloud session, in Hebrew: "אני רוצה שתרשום משימות לבקש מכל האלה שהם ברשיון סגור רשות להשתמש. תמצא אימייל ודרכי פניה לכל אחד מהם ותנסח מיילים מותאמים". This answers Q31 (yes, ask), and Claude extended it to every source the app already uses whose own terms are narrower than the licence the app shows.
+- **Drafts and contacts:** [release/licence-requests.md](release/licence-requests.md) holds, per source, what the app takes or wants, the terms as read on 2026-11-10, every contact channel marked verified or reported, and the email ready to send. A task below names its section there.
+- **Flag:** none: an email or a call the owner makes from `365jew@gmail.com`. Claude sends nothing. A source that refuses, or stays silent past the deadline the owner sets, turns its fallback into a new task.
+- **Done means:** the request sent (the date, the channel), and the answer quoted and dated in the task and in the Status column of the drafts file's summary table; a written permission is saved where the owner chooses, and the app's credit follows any wording it asks for.
+
+### High — Licence requests
+
+- [ ] Ask Mechon Mamre for the Positive Mitzvot, or replace them
+  - **Flag:** none for the request; the fallback ships on `docs/halacha/` on Pages.
+  - **What it is:** section 1 of [release/licence-requests.md](release/licence-requests.md): one unit of the Rambam add-on, "מצוות עשה", comes from Mechon Mamre's edition through Sefaria, and that file is already published on GitHub Pages. Mechon Mamre's copyright page allows private study and teaching only, "not for publishing in any form, including any Web site". The request goes through the form at mechon-mamre.org/contact.htm, which has no email address.
+  - **What it solves:** a published file that breaks its source's terms.
+  - **Expected result:** their written permission, recorded with its date; or the unit rebuilt from an open version (Torat Emet 363 or Wikisource, the missing chapter from Wikisource) with `pnpm halacha:build`, the old file gone from [docs/halacha/rambam/](docs/halacha/rambam) and the Rambam test suites green.
+
+### Medium — Licence requests
+
+- [ ] Ask the rights holders of Chok LeYisrael for written permission
+  - **Flag:** none.
+  - **What it is:** section 2 of [release/licence-requests.md](release/licence-requests.md). The Chok LeYisrael add-on (in production since 1.0.21-1) is the Torat Emet edition, "כל הזכויות שמורות" to R' Pinchas Reuven, R' Sagiv Mahfud and the J. Alan Groves Center, under CC BY-NC-SA 2.5, and Torat Emet forbids any commercial use. Torat Emet's contact page is closed ("לא ניתן ליצור עמנו קשר בשלב זה"), so the email goes to R' Sagiv Mahfud through his publisher "נוסח תימן" (nosachteiman.co.il; its contact page refused an automated read), asking him to forward it to R' Pinchas Reuven and Torat Emet. A courtesy email goes to the Groves Center (info@GrovesCenter.org, reported), whose site calls the Westminster Leningrad Codex public domain.
+  - **What it solves:** the app sits in commercial app stores under a non-commercial licence; written permission removes the doubt.
+  - **Expected result:** R' Mahfud's answer, and R' Reuven's or Torat Emet's if reached, quoted and dated; the Groves Center's reply recorded; the credit in [src/components/ChokLicenseNotice.tsx](src/components/ChokLicenseNotice.tsx) changed only if one of them asks.
+
+- [ ] Ask Sefaria what its Public Domain and CC-BY labels rest on
+  - **Flag:** none.
+  - **What it is:** section 3 of [release/licence-requests.md](release/licence-requests.md): the app takes Torat Emet 357 and 363, the Torat Emet Onkelos and Selichot Edot HaMizrach, "Daat Siddur Ashkenaz" and "Mechon-mamre Mishneh Torah" as Public Domain, and the Metsudah English as CC-BY, as Sefaria labels them, while Torat Emet's and Mechon Mamre's own sites say otherwise. One email to hello@sefaria.org (their general address; confirm it on sefaria.org/contact in a browser).
+  - **What it solves:** the Kitzur and Rambam tracks, the Sefard and Chabad siddur, the Onkelos of Shnayim Mikra and the English siddur all rest on those labels.
+  - **Expected result:** Sefaria's answer recorded per version; a version it says should be read more narrowly becomes a task to replace it or to ask its source.
+
+- [ ] Ask Daat about its Ashkenaz siddur text
+  - **Flag:** none.
+  - **What it is:** section 4 of [release/licence-requests.md](release/licence-requests.md): nine Ashkenaz texts of the bundled siddur take their Hebrew from "Daat Siddur Ashkenaz" (Sefaria: Public Domain); daat.ac.il shows no terms. Email urisaf@gmail.com, the site manager's address on daat.ac.il/contact.asp (verified), or its form.
+  - **What it solves:** a source whose terms the app has not seen.
+  - **Expected result:** Daat's answer recorded, with any credit wording it asks for applied in [scripts/siddur/manifest.js](scripts/siddur/manifest.js) and a `pnpm siddur:build`.
+
+- [ ] Ask for Yalkut Yosef as a daily-halacha track
+  - **Flag:** none.
+  - **What it is:** section 5 of [release/licence-requests.md](release/licence-requests.md): permission to add Yalkut Yosef or Kitzur Shulchan Aruch Yalkut Yosef as a track for Edot HaMizrach (Q31), and whether a digital text or a daily order exists. Through the form at yalkutyosef.co.il/צרו-קשר/ or phone 077-2249906 (both verified); the publisher Ash Pituchim through Otzar HaSefarim (sales@sefer.org.il, 074-703-7171, reported) only for a referral.
+  - **What it solves:** Q31, for the many Sephardim who learn by Rav Ovadia's rulings.
+  - **Expected result:** the answer recorded; a yes with its terms becomes a spec section and tasks for a new track.
+
+- [ ] Ask Halacha Yomit for its daily halacha
+  - **Flag:** none.
+  - **What it is:** section 6 of [release/licence-requests.md](release/licence-requests.md): permission to show halachayomit.co.il's daily halacha (Rav Ovadia Yosef's rulings) with credit and a link, or only its title with a link, and whether a feed exists. Its site reserves every right to the author. Email info@HalachaYomit.co.il (verified).
+  - **What it solves:** Q31, a ready daily order by Rav Ovadia's rulings.
+  - **Expected result:** the answer recorded; a yes with its terms becomes a spec section and tasks.
+
+- [ ] Ask Rav Ratzabi's office for Shulchan Aruch HaMekutzar
+  - **Flag:** none.
+  - **What it is:** section 7 of [release/licence-requests.md](release/licence-requests.md): permission to add Shulchan Aruch HaMekutzar as the track for nusach Teiman (Q31). No channel was verified: call the Peulat Tzadik office (03-6780070, Kushnir 5, Bnei Brak, reported) and ask where to send the letter; or@shtaygen.co.il (reported on the page of an app of the book, role unknown) and P.O. Box 1719, Bnei Brak 51117 (reported, may be old) are the fallbacks.
+  - **What it solves:** Q31, the book Yemenite users learn.
+  - **Expected result:** the address confirmed and the letter sent; the answer recorded; a yes with its terms becomes a spec section and tasks.
+
+### Low — Licence requests
+
+- [ ] Tell Peninei Halakha about the use, if it becomes a track
+  - **Flag:** none.
+  - **What it is:** section 8 of [release/licence-requests.md](release/licence-requests.md): Peninei Halakha is CC BY 4.0 with a no-resale clause (verified on ph.yhb.org.il/terms), so a free app needs no permission. Only if the owner wants it as a track: a courtesy email to admin@yhb.org.il (verified) confirming the credit and asking for the order of "הפנינה היומית".
+  - **What it solves:** a credit they approve and a schedule shared with their learners.
+  - **Expected result:** the owner's decision recorded; if sent, the answer recorded.
 
 ## Bugs
 
@@ -942,6 +1003,7 @@ Q29 to Q31 are the batch "Daily halacha and festival halachot, 2026-11-10" ([.cl
 - **Q31 — Permission for the books in copyright.**
   - **Question:** Does the owner want to ask for written permission to add Yalkut Yosef (or the Kitzur Shulchan Aruch with Rav Ovadia's rulings) and Shulchan Aruch HaMekutzar of Rav Ratzabi as later tracks?
   - **Why it is open:** many Sephardim and Yemenites use them daily, and both are in copyright; the batch ships without them. Blocks nothing.
+  - **Answered, 2026-11-10:** the owner, in Hebrew: "אני רוצה שתרשום משימות לבקש מכל האלה שהם ברשיון סגור רשות להשתמש. תמצא אימייל ודרכי פניה לכל אחד מהם ותנסח מיילים מותאמים". Yes: the requests are the batch "Licence requests, 2026-11-10" under Tasks, with Halacha Yomit (halachayomit.co.il) added beside the two books, and the drafts in [release/licence-requests.md](release/licence-requests.md). Peninei Halakha turned out to be CC BY 4.0, so it needs no permission.
 
 ## Other Open Items
 

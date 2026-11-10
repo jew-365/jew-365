@@ -9,7 +9,8 @@
 - [APP_STORE_METADATA_HE.md](APP_STORE_METADATA_HE.md) and [APP_STORE_METADATA_EN.md](APP_STORE_METADATA_EN.md) own App Store listing copy. The English file also holds the App Privacy answers.
 - [PLAY_CONSOLE_METADATA.md](PLAY_CONSOLE_METADATA.md) owns Google Play listing copy (Hebrew default as `iw-IL`, English translation), the Data safety answers, the App content answers as submitted, the content rating notes, the store graphics in use, and the closed test (track, testers group, release notes, the testers' invitation). A change in the Play Console is recorded there in the same pass.
 - [RELEASE_LOG.md](RELEASE_LOG.md) is the chronological record of every step toward the stores: what was done, what it produced, and every failure that blocked progress with how it was cleared.
-- The published privacy policy lives in [../docs/privacy/index.html](../docs/privacy/index.html) and [../docs/privacy/en/index.html](../docs/privacy/en/index.html), not here. This folder owns store copy only.
+- [licence-requests.md](licence-requests.md) owns the requests for permission to use texts whose terms are narrower than the app's use: per source what the app takes or wants, its terms as read, its contact channels marked verified or reported, the email to send, and the answer once received. Its tasks are the batch "Licence requests, 2026-11-10" in [../not-close.md](../not-close.md).
+- The published privacy policy lives in [../docs/privacy/index.html](../docs/privacy/index.html) and [../docs/privacy/en/index.html](../docs/privacy/en/index.html), not here. This folder owns store copy, the release log and the licence requests.
 
 ## Local Contracts
 
