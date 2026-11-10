@@ -158,6 +158,8 @@ describe('AppResetService.reset', () => {
     for (const store of Object.values(HALACHA_STORES)) expect(store.getState().installed).toBeNull();
     expect(mockDeleteHalachaFiles.mock.calls.map(([pack]) => pack).sort()).toEqual([
       'ben_ish_chai',
+      'chafetz_chaim',
+      'chafetz_chaim_en',
       'kitzur',
       'kitzur_en',
       'rambam',
