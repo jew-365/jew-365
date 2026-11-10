@@ -46,6 +46,20 @@ function luachPortion(day: HDate, schedule: Extract<HalachaManifest['schedule'],
   return portion && next ? joined(portion, next) : portion;
 }
 
+// The Chofetz Chaim's luach: by Hebrew month and day, from its common-year or leap-year table; the 29th of a short
+// Cheshvan or a short Kislev reads the 30th's entry too, as hebcal's chofetzChaim() does.
+function yearPortion(day: HDate, schedule: Extract<HalachaManifest['schedule'], { kind: 'hebrewYear' }>) {
+  const list = (day.isLeapYear() ? schedule.leap : schedule.common)[day.getMonthName()];
+  const portion = list?.[day.getDate() - 1] ?? null;
+  const month = day.getMonth();
+  const short =
+    day.getDate() === 29 &&
+    (month === months.CHESHVAN || month === months.KISLEV) &&
+    HDate.daysInMonth(month, day.getFullYear()) === 29;
+  const next = short ? list?.[29] : null;
+  return portion && next ? joined(portion, next) : portion;
+}
+
 // The Daily Rambam: the cycle's day counted from its anchor (a `YYYY-MM-DD` civil date).
 function cyclePortion(day: HDate, schedule: Extract<HalachaManifest['schedule'], { kind: 'cycle' }>) {
   const [y, m, d] = schedule.anchor.split('-').map(Number);
@@ -115,7 +129,7 @@ export function benIshChaiYearOf(day: HDate, swapped = false): BenIshChaiYear {
   return odd !== swapped ? 1 : 2;
 }
 
-// The portion a Hebrew day reads in a track, or `null` on a day the schedule gives nothing.
+// The portion a Hebrew day reads in a book, or `null` on a day the schedule gives nothing.
 export function halachaPortion(
   day: HDate,
   manifest: Schedule,
@@ -125,6 +139,7 @@ export function halachaPortion(
   const { schedule } = manifest;
   if (schedule.kind === 'hebrew') return luachPortion(day, schedule);
   if (schedule.kind === 'cycle') return cyclePortion(day, schedule);
+  if (schedule.kind === 'hebrewYear') return yearPortion(day, schedule);
   return parashaPortion(day, manifest, inIsrael, benIshChaiYearOf(day, benIshChaiSwapped));
 }
 

@@ -9,12 +9,13 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 import { createHash } from 'crypto';
-import { HALACHA_TRACKS } from '@/data/halacha';
+import { HALACHA_BOOKS, HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID, LASHON_HARA_ID } from '@/data/halacha';
 import { halachaScheduleOf, hasHalachaContent } from '@/data/halachaContent';
 import { AddonDownloadError } from '@/services/addons/addonContent';
 import {
   HALACHA_BASE_URL,
   HALACHA_SIZE_ESTIMATE_MB,
+  switchHalachaOn,
   deleteHalacha,
   installHalacha,
   parseHalachaManifest,
@@ -23,6 +24,7 @@ import {
 import { HALACHA_SCHEDULE_FILE } from '@/services/halachaFiles';
 import { clearHalachaCache, loadHalachaEnglish, loadHalachaUnit } from '@/services/SiddurService';
 import { HALACHA_PACKS, HALACHA_STORES, resetHalachaStores } from '@/stores/useHalachaStore';
+import { selectActive, useMitzvotStore } from '@/stores/useMitzvotStore';
 import { fileSystemState, resetFileSystem } from '@/testing/expoFileSystem';
 import type { AddonManifest } from '@/types/addon';
 import type { HalachaPack } from '@/types/halacha';
@@ -103,14 +105,17 @@ beforeEach(() => {
 });
 
 describe('the published halacha manifests', () => {
-  it.each(HALACHA_TRACKS)('accepts the published %s manifest', (track) => {
+  it.each(HALACHA_BOOKS)('accepts the published %s manifest', (track) => {
     const manifest = published(track);
     expect(parseHalachaManifest(track, manifest)).toBe(manifest);
   });
 
-  it("accepts the Kitzur's published English manifest", () => {
+  it("accepts the Kitzur's and the Chofetz Chaim's published English manifests, each only for its own book", () => {
     const manifest = published('kitzur/en');
     expect(parseHalachaManifest('kitzur_en', manifest)).toBe(manifest);
+    const chafetzChaim = published('chafetz_chaim/en');
+    expect(parseHalachaManifest('chafetz_chaim_en', chafetzChaim)).toBe(chafetzChaim);
+    expectUnavailable(() => parseHalachaManifest('chafetz_chaim_en', manifest));
   });
 
   it.each([
@@ -118,6 +123,8 @@ describe('the published halacha manifests', () => {
     ['kitzur_en', 'kitzur/en'],
     ['ben_ish_chai', 'ben_ish_chai'],
     ['rambam', 'rambam'],
+    ['chafetz_chaim', 'chafetz_chaim'],
+    ['chafetz_chaim_en', 'chafetz_chaim/en'],
   ] as const)('estimates the %s download within 0.1 MB of its manifest', (pack, dir) => {
     expect(Math.abs(HALACHA_SIZE_ESTIMATE_MB[pack] - published(dir).gzipBytes / 1e6)).toBeLessThanOrEqual(0.1);
   });
@@ -128,6 +135,8 @@ describe('the published halacha manifests', () => {
       kitzur_en: 'https://jew-365.github.io/jew-365/halacha/kitzur/en/',
       ben_ish_chai: 'https://jew-365.github.io/jew-365/halacha/ben_ish_chai/',
       rambam: 'https://jew-365.github.io/jew-365/halacha/rambam/',
+      chafetz_chaim: 'https://jew-365.github.io/jew-365/halacha/chafetz_chaim/',
+      chafetz_chaim_en: 'https://jew-365.github.io/jew-365/halacha/chafetz_chaim/en/',
     });
   });
 });
@@ -205,7 +214,7 @@ describe('a halacha install', () => {
     await installHalacha('kitzur_en', en.manifest);
     expect(HALACHA_STORES.kitzur_en.getState().enablePrompt).toBe(false);
     expect(fileSystemState.fs.has(`file:///doc/halacha-kitzur-en/v1/${HALACHA_SCHEDULE_FILE}`)).toBe(false);
-    await expect(loadHalachaEnglish(UNITS[0])).resolves.toMatchObject({ en: [`${UNITS[0]} in English`] });
+    await expect(loadHalachaEnglish('kitzur_en', UNITS[0])).resolves.toMatchObject({ en: [`${UNITS[0]} in English`] });
     deleteHalacha('kitzur_en');
     expect(HALACHA_STORES.kitzur_en.getState().installed).toBeNull();
     expect(HALACHA_STORES.kitzur.getState().installed?.version).toBe(1);
@@ -220,5 +229,17 @@ describe('a halacha install', () => {
     expect(HALACHA_STORES.kitzur.getState().installed?.version).toBe(1);
     expect(HALACHA_STORES.rambam.getState().installed?.version).toBe(1);
     expect(hasHalachaContent('kitzur') && hasHalachaContent('rambam')).toBe(true);
+  });
+});
+
+describe("the enable prompt's yes", () => {
+  const on = (id: string) => selectActive(id)(useMitzvotStore.getState()).enabled;
+  beforeEach(() => useMitzvotStore.getState().reset());
+
+  it('switches on the mitzvot its book serves, and only those', () => {
+    switchHalachaOn('chafetz_chaim');
+    expect([on(LASHON_HARA_ID), on(HALACHA_YOMIT_ID), on(HILCHOT_HACHAG_ID)]).toEqual([true, false, false]);
+    switchHalachaOn('rambam');
+    expect([on(HALACHA_YOMIT_ID), on(HILCHOT_HACHAG_ID)]).toEqual([true, true]);
   });
 });

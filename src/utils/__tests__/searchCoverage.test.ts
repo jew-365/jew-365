@@ -247,7 +247,28 @@ describe('search results', () => {
     expect(byId.get('halachaTrack')).toMatchObject({ section: 'prayer' });
   });
 
+  it('finds the laws of lashon hara by the book, its parts and the words people type', () => {
+    for (const query of ['לשון הרע', 'חפץ חיים', 'שמירת הלשון', 'רכילות', 'lashon hara', 'chofetz chaim']) {
+      expect(close(query)).toContain('mitzvah:lashon_hara');
+    }
+  });
+
   it('opens the halacha mitzvot in the reader only once their book is installed', () => {
+    const lashonHara = (chafetzChaimInstalled: boolean) =>
+      settingsContentItems({
+        mitzvot: MITZVOT,
+        nusach: 'sefard',
+        voice: null,
+        maritalStatus: 'married',
+        chokInstalled: false,
+        halachaInstalled: true,
+        chafetzChaimInstalled,
+        now: at(JERUSALEM, '2026-10-28T12:00'),
+        location: JERUSALEM,
+        inIsrael: true,
+      }).map((item) => item.id);
+    expect(lashonHara(false)).not.toContain('siddur:lashon_hara');
+    expect(lashonHara(true)).toContain('siddur:lashon_hara');
     const items = (halachaInstalled: boolean) =>
       settingsContentItems({
         mitzvot: MITZVOT,

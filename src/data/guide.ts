@@ -273,7 +273,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
   {
     id: 'halacha',
     icon: 'chok',
-    title: { he: 'הלכה יומית והלכות החג', en: 'Daily halacha and the halachot of the festival' },
+    title: {
+      he: 'הלכה יומית, הלכות החג ולשון הרע',
+      en: 'Daily halacha, the halachot of the festival and lashon hara',
+    },
     body: [
       {
         he: 'שתי מצוות לימוד מתוך ספר הלכה אחד: ״הלכה יומית״, מנה בכל יום, ו״הלכות החג״, בשלושים הימים שלפני פסח, שבועות וסוכות, ובימים שלפני ראש השנה, יום הכיפורים, חנוכה, פורים, תשעה באב והצומות. הספר לפי הנוסח: קיצור שולחן ערוך לאשכנז ולספרד, בן איש חי לעדות המזרח, ומשנה תורה לרמב״ם, פרק ליום, לחב״ד ולתימן. בהגדרות ← תפילה וסידור אפשר לבחור ספר אחר, ובבן איש חי גם להחליף בין שתי השנים שלו.',
@@ -286,6 +289,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
       {
         he: 'הקורא מציג את הלימוד של היום, ושורת ימים מאפשרת לקרוא יום אחר, בלי ״סיימתי״. כשהמצווה פעילה ״סיימתי״ מסמן את היום, וכל אחד משבעת הימים הקודמים שלא סומנו מופיע כהשלמה מקופלת. המצוות פתוחות מעלות השחר עד עלות השחר שלמחרת, גם בשבת ובחג, שנשאלים עליהם אחריהם, ותזכורות ברירת המחדל ב־08:00 להלכה היומית וב־19:00 להלכות החג.',
         en: "The reader shows the day's learning, and a row of days reads another day, without Done. While the mitzvah is on, Done marks the day, and each of the seven days before it left unmarked appears as a folded make-up. The mitzvot are open from dawn to the next dawn, on Shabbat and Yom Tov too, which are asked about after them, with default reminders at 08:00 for the daily halacha and 19:00 for the festival's halachot.",
+      },
+      {
+        he: '״הלכות לשון הרע״ היא מצוות לימוד שלישית, לכל נוסח ובלי קשר לספר שנבחר: ספר חפץ חיים לפי הלוח היומי, שלושה מחזורים בשנה, הקדמה, פתיחה, הלכות לשון הרע, הלכות רכילות והציורים. הספר הוא תוסף נפרד שיורד באותם מקומות, עם תרגום לאנגלית, והקורא, ״סיימתי״ וההשלמות פועלים כמו בהלכה היומית. תזכורת ברירת המחדל ב־13:00.',
+        en: 'Laws of Lashon Hara is a third learning mitzvah, for every nusach and whatever book was chosen: Sefer Chofetz Chaim by its daily luach, three cycles a year, through the preface, the introduction, the laws of lashon hara, the laws of rechilut and the illustrations. The book is an add-on of its own, downloaded from the same places, with an English translation, and the reader, Done and the make-ups work as for the daily halacha. Its default reminder is at 13:00.',
       },
     ],
     routes: [],
@@ -454,6 +461,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
     label: '1.0.21-18',
     date: '2026-11-09',
     items: [
+      {
+        he: 'הלכות לשון הרע: מצוות לימוד יומית מספר חפץ חיים לפי הלוח היומי, שלושה מחזורים בשנה, לכל נוסח. תוסף להורדה עם תרגום לאנגלית, עם תזכורת, ״סיימתי״, השלמות ושורת ימים, כמו ההלכה היומית.',
+        en: 'Laws of Lashon Hara: a daily learning mitzvah from Sefer Chofetz Chaim by its daily luach, three cycles a year, for every nusach. An add-on to download, with an English translation, a reminder, Done, make-ups and a row of days, like the daily halacha.',
+      },
       {
         he: 'הלכה יומית והלכות החג: שתי מצוות לימוד מספר הלכה לפי הנוסח (קיצור שולחן ערוך, בן איש חי או רמב״ם, פרק ליום), תוסף להורדה, עם תזכורת, ״סיימתי״, השלמות של שבעת הימים הקודמים ושורת ימים לקריאה ביום אחר. הלכות החג נלמדות בשלושים הימים שלפני פסח, שבועות וסוכות ובימים שלפני שאר החגים והצומות. את הספר אפשר להחליף בהגדרות ← תפילה וסידור.',
         en: "Daily Halacha and Halachot of the Festival: two learning mitzvot from a halacha book by nusach (Kitzur Shulchan Aruch, Ben Ish Chai or the Rambam, a chapter a day), an add-on to download, with a reminder, Done, make-ups of the seven days before and a row of days to read another day. The festival's halachot are learned in the thirty days before Pesach, Shavuot and Sukkot and in the days before the other festivals and fasts. The book can be changed in Settings → Prayer and siddur.",

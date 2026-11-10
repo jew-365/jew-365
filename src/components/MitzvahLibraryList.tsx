@@ -9,7 +9,7 @@ import { iconFor, type IconName } from '@/components/MitzvahIcon';
 import { SectionLabel } from '@/components/SectionLabel';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
-import { HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID, effectiveHalachaTrack } from '@/data/halacha';
+import { effectiveHalachaTrack, halachaBookOf, isHalachaMitzvah } from '@/data/halacha';
 import { addonCaption } from '@/components/AddonCard';
 import { HALACHA_SIZE_ESTIMATE_MB } from '@/services/HalachaContentService';
 import { HALACHA_STORES } from '@/stores/useHalachaStore';
@@ -54,25 +54,32 @@ export function MitzvahLibraryList({ showMine, navigable }: MitzvahLibraryListPr
   const active = useMitzvotStore((s) => s.activeMitzvot);
   const chokDownload = useChokStore((s) => s.download);
   const shnayimDownload = useShnayimStore((s) => s.download);
-  // The halacha mitzvot read the user's track: its pack must be installed before they can be switched on.
+  // The halacha mitzvot read a book (the user's track, or the Chofetz Chaim): its pack must be installed before they can
+  // be switched on.
   const halachaTrack = effectiveHalachaTrack(
     useUserStore((s) => s.halachaTrack),
     useUserStore((s) => s.nusach),
   );
-  const halachaInstalled = HALACHA_STORES[halachaTrack]((s) => s.installed !== null);
-  const halachaDownload = HALACHA_STORES[halachaTrack]((s) => s.download);
+  const trackInstalled = HALACHA_STORES[halachaTrack]((s) => s.installed !== null);
+  const trackDownload = HALACHA_STORES[halachaTrack]((s) => s.download);
+  const chafetzChaimInstalled = HALACHA_STORES.chafetz_chaim((s) => s.installed !== null);
+  const chafetzChaimDownload = HALACHA_STORES.chafetz_chaim((s) => s.download);
+  const halachaPack = (item: Mitzvah) =>
+    halachaBookOf(item.id, halachaTrack) === 'chafetz_chaim'
+      ? { book: 'chafetz_chaim' as const, installed: chafetzChaimInstalled, download: chafetzChaimDownload }
+      : { book: halachaTrack, installed: trackInstalled, download: trackDownload };
   const customItems = useCustomMitzvotStore((s) => s.items);
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
   const roshChodeshEnabled = useUserStore((s) => s.roshChodeshEnabled);
   const gender = useUserStore((s) => s.gender);
   const todayKey = appDayKey(new Date(), location);
   const opener = (href: Href) => (navigable ? () => router.push(href) : NOTHING);
-  const isHalacha = (item: Mitzvah) => item.id === HALACHA_YOMIT_ID || item.id === HILCHOT_HACHAG_ID;
-  // A learning add-on not yet downloaded: Chok LeYisrael, Shnayim Mikra or the user's halacha track.
+  const isHalacha = (item: Mitzvah) => isHalachaMitzvah(item.id);
+  // A learning add-on not yet downloaded: Chok LeYisrael, Shnayim Mikra or a halacha book.
   const missingAddon = (item: Mitzvah) =>
     (item.id === CHOK_TEXT_ID && !chokInstalled) ||
     (item.id === SHNAYIM_TEXT_ID && !shnayimInstalled) ||
-    (isHalacha(item) && !halachaInstalled);
+    (isHalacha(item) && !halachaPack(item).installed);
   const listed = (item: Mitzvah) => navigable || !missingAddon(item);
 
   const settingRows: SettingRow[] = [
@@ -127,7 +134,12 @@ export function MitzvahLibraryList({ showMine, navigable }: MitzvahLibraryListPr
               ? item.id === SHNAYIM_TEXT_ID
                 ? shnayimAddonCaption(shnayimDownload, t)
                 : isHalacha(item)
-                  ? addonCaption('halacha.addon', HALACHA_SIZE_ESTIMATE_MB[halachaTrack], halachaDownload, t)
+                  ? addonCaption(
+                      'halacha.addon',
+                      HALACHA_SIZE_ESTIMATE_MB[halachaPack(item).book],
+                      halachaPack(item).download,
+                      t,
+                    )
                   : chokAddonCaption(chokDownload, t)
               : gender === 'female' && isMensMitzvah(item.id)
                 ? t('library.notForWomen')

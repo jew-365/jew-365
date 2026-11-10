@@ -1,11 +1,30 @@
-import { FestivalKey, HalachaTrack } from '@/types/halacha';
+import { FestivalKey, HalachaBook, HalachaTrack } from '@/types/halacha';
 import { Nusach } from '@/types/mitzvah';
 
 // The two halacha mitzvot (.claude/specs/halacha-yomit.md): the daily portion and the halachot before a festival.
 export const HALACHA_YOMIT_ID = 'halacha_yomit';
 export const HILCHOT_HACHAG_ID = 'hilchot_hachag';
 
+// The daily lashon hara halachot (the owner's request of 2026-11-10): Sefer Chofetz Chaim by its daily luach, for every
+// nusach, whatever the track.
+export const LASHON_HARA_ID = 'lashon_hara';
+
 export const HALACHA_TRACKS: readonly HalachaTrack[] = ['kitzur', 'ben_ish_chai', 'rambam'];
+
+// Every book of the halacha add-on: the tracks, then the Chofetz Chaim.
+export const HALACHA_BOOKS: readonly HalachaBook[] = [...HALACHA_TRACKS, 'chafetz_chaim'];
+
+// The mitzvot that read a halacha book: the two of the user's track and the lashon hara halachot.
+export const isHalachaMitzvah = (id: string): boolean =>
+  id === HALACHA_YOMIT_ID || id === HILCHOT_HACHAG_ID || id === LASHON_HARA_ID;
+
+// The book a halacha mitzvah reads: the Chofetz Chaim for the lashon hara halachot, else the user's track.
+export const halachaBookOf = (id: string, track: HalachaTrack): HalachaBook =>
+  id === LASHON_HARA_ID ? 'chafetz_chaim' : track;
+
+// The mitzvot a book's download serves, which its enable prompt switches on.
+export const halachaMitzvotOf = (book: HalachaBook): readonly string[] =>
+  book === 'chafetz_chaim' ? [LASHON_HARA_ID] : [HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID];
 
 // The book each nusach learns by default (spec 3, the owner's table of 2026-11-10; R17.1 for the rav).
 const DEFAULT_TRACK: Readonly<Record<Nusach, HalachaTrack>> = {

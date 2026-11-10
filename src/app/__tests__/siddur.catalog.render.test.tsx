@@ -135,7 +135,14 @@ describe('the siddur tab’s catalog', () => {
       openClosed(WEDNESDAY);
       expect(screen.getByText(/^חק לישראל · שניים מקרא ואחד תרגום · הלכה יומית/)).toBeOnTheScreen();
       fireEvent.press(screen.getByText('לימוד'));
-      expect(idsIn('siddur-learning')).toEqual(['chok_leyisrael', 'shnayim_mikra', 'halacha_yomit', 'hilchot_hachag']);
+      expect(idsIn('siddur-learning')).toEqual([
+        'chok_leyisrael',
+        'shnayim_mikra',
+        'halacha_yomit',
+        'hilchot_hachag',
+        'lashon_hara',
+      ]);
+      expect(within(rowOf('lashon_hara')).getByText('תוסף להורדה · כ־0.2 MB')).toBeOnTheScreen();
       expect(within(rowOf('shnayim_mikra')).getByText('תוסף להורדה · כ־1.2 MB')).toBeOnTheScreen();
       expect(listRowOf('shnayim_mikra').props.iconTone).toBe('muted');
       act(() =>

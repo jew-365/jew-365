@@ -36,6 +36,7 @@ export const PERFORM_MIN: Readonly<Record<string, PerformMin>> = {
   chok_leyisrael: { alone: 15 },
   halacha_yomit: { alone: 10 },
   hilchot_hachag: { alone: 10 },
+  lashon_hara: { alone: 5 },
   shnayim_mikra: { alone: 20 },
 };
 // A registry mitzvah the table does not name (a blessing, the Omer count, lighting candles) takes minutes.
@@ -87,6 +88,7 @@ export const NAG_ZONE_KIND: Readonly<Record<string, NagZoneKind>> = {
   chok_leyisrael: 'learning',
   halacha_yomit: 'learning',
   hilchot_hachag: 'learning',
+  lashon_hara: 'learning',
   shnayim_mikra: 'learning',
 };
 
@@ -129,6 +131,7 @@ const NAG_VERB_IDS: ReadonlySet<string> = new Set([
   'shnayim_mikra',
   'halacha_yomit',
   'hilchot_hachag',
+  'lashon_hara',
   'ushpizin',
   'selichot',
   'kiddush_levana',

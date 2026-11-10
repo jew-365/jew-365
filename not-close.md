@@ -684,6 +684,42 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** D7 and the release itself.
   - **Expected result:** A numbered production update whose `gitCommitHash` contains the batch's commits; the batch's items move to [action-log.md](action-log.md).
 
+### Laws of lashon hara, 2026-11-10 — batch rules
+
+- **Requested:** the owner, 2026-11-10, in a cloud session, in Hebrew: "אני רוצה להוסיף גם הלכות לשון הרע יומיות".
+- **Scope (Claude's defaults, open to the owner's change):** one learning mitzvah, `lashon_hara`, for every nusach, reading Sefer Chofetz Chaim by the daily luach Hebcal publishes (three cycles a year), off by default, a reminder at 13:00, as a fourth book of the halacha add-on with its own download and its English. Sefer Shemirat HaLashon is left out: Sefaria's Hebrew of it (Torat Emet 370) carries no known licence.
+- **Spec:** section 15 of [.claude/specs/halacha-yomit.md](.claude/specs/halacha-yomit.md).
+
+### High — Laws of lashon hara
+
+- [x] Build Sefer Chofetz Chaim into the halacha add-on
+  - **Flag:** [docs/halacha/](docs/halacha) on Pages.
+  - **What it is:** The luach transcribed to [scripts/halacha/schedules/chafetz_chaim.json](scripts/halacha/schedules/chafetz_chaim.json) and the book built by [scripts/halacha/build.js](scripts/halacha/build.js) into [docs/halacha/chafetz_chaim/](docs/halacha/chafetz_chaim) and its `en/`.
+  - **What it solves:** The text and the daily portion the mitzvah reads.
+  - **Expected result:** The build passes twice with `wrote 0 files` the second time, each third of a year reads every segment once in a common and a leap year, and the other three books are unchanged.
+  - **Done:** 2026-11-10. 22 units, 290 segments, 0.16 MB gzipped, English (Silverstein, CC-BY) on 96.2% of the segments; the Hebrew is Wikisource's (CC-BY-SA) without the Be'er Mayim Chaim's letters, the author's footnote glosses kept as paragraphs. The build also stopped turning a paragraph that opens with a parenthesis into a note when references are not notes (no published file of the other books changed). Verified: `node scripts/halacha/build.js <book>` for all four (`wrote 0 files` on the rerun, the other three untouched), [scripts/halacha/__tests__/build.test.js](scripts/halacha/__tests__/build.test.js) 37 green (7 new: the cleanup helpers, the luach entry reader, both tables' lengths, three readings a year in each table, the labels).
+  - **Status:** Version: OTA, with `docs/` on Pages · Committed: pending · Pushed: no · Live: no · Channel: none
+
+- [x] Register the laws of lashon hara and wire every surface
+  - **Flag:** `OTA`.
+  - **What it is:** `LASHON_HARA` in [src/data/mitzvot.ts](src/data/mitzvot.ts), the `chafetz_chaim` and `chafetz_chaim_en` packs (types, stores, files, service, `HALACHA_BOOKS`), the reader, the mitzvah screen's add-on card, the library, the More tab and siddur tab's learning rows, the enable prompt, the scheduler's rebuild on install, the nag tables, the search words, the guide and `WHATS_NEW`, the privacy policies.
+  - **What it solves:** The owner's request.
+  - **Expected result:** With the book downloaded the mitzvah opens on today's portion, marks done, folds make-ups and schedules its 13:00 reminder; without it every surface offers the download; the full suite green in four zones.
+  - **Done:** 2026-11-10. Verified: the `the laws of lashon hara` block of [src/data/__tests__/halachaMitzvot.test.ts](src/data/__tests__/halachaMitzvot.test.ts) (6: entry, no window before install, alot to alot every day for every nusach, the 5787 leap table, the short Kislev fold, the 13:00 plan and its English body), the lashon hara reader cases of [src/app/__tests__/halachaReader.render.test.tsx](src/app/__tests__/halachaReader.render.test.tsx) (3), [src/components/__tests__/halachaAddon.render.test.tsx](src/components/__tests__/halachaAddon.render.test.tsx) (3 new), [src/services/__tests__/HalachaContentService.test.ts](src/services/__tests__/HalachaContentService.test.ts) (the published manifests, the size estimates, the folders, `switchHalachaOn(book)`), [src/utils/__tests__/searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) (2 new), and the library, onboarding, More tab and siddur catalog suites updated to the new row.
+  - **Status:** Version: OTA, with `docs/` on Pages · Committed: pending · Pushed: no · Live: no · Channel: none
+
+- [ ] Publish the Chofetz Chaim on Pages and a preview update
+  - **Flag:** `docs/halacha/chafetz_chaim/` on Pages, then `OTA` to preview.
+  - **What it is:** Push to `main`, confirm `https://jew-365.github.io/jew-365/halacha/chafetz_chaim/manifest.json` answers 200, then `pnpm update:preview` on the owner's word.
+  - **What it solves:** The first place the owner can try it.
+  - **Expected result:** On the preview app the book downloads, the mitzvah opens on today's portion, marks done and schedules its reminder.
+
+- [ ] Publish to production with the halacha batch
+  - **Flag:** `OTA` to production.
+  - **What it is:** The production update that carries the daily halacha (its `WHATS_NEW` item is under `1.0.21-18` with it), on the owner's word.
+  - **What it solves:** The release itself.
+  - **Expected result:** A numbered production update whose `gitCommitHash` contains this batch's commits; its items move to [action-log.md](action-log.md).
+
 ### Licence requests, 2026-11-10 — batch rules
 
 - **Requested:** the owner, 2026-11-10, in a cloud session, in Hebrew: "אני רוצה שתרשום משימות לבקש מכל האלה שהם ברשיון סגור רשות להשתמש. תמצא אימייל ודרכי פניה לכל אחד מהם ותנסח מיילים מותאמים". This answers Q31 (yes, ask), and Claude extended it to every source the app already uses whose own terms are narrower than the licence the app shows.

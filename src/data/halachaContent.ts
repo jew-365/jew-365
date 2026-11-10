@@ -1,29 +1,36 @@
 import { HDate } from '@hebcal/core';
-import { HALACHA_YOMIT_ID, effectiveHalachaTrack } from '@/data/halacha';
+import { HILCHOT_HACHAG_ID, effectiveHalachaTrack, halachaBookOf } from '@/data/halacha';
 import { readHalachaScheduleSync } from '@/services/halachaFiles';
 import { HALACHA_STORES } from '@/stores/useHalachaStore';
 import { Completions, dateKey } from '@/stores/useCompletionsStore';
 import { useUserStore } from '@/stores/useUserStore';
-import { FestivalPeriod, HalachaLabel, HalachaPortion, HalachaScheduleFile, HalachaTrack } from '@/types/halacha';
+import {
+  FestivalPeriod,
+  HalachaBook,
+  HalachaLabel,
+  HalachaPortion,
+  HalachaScheduleFile,
+  HalachaTrack,
+} from '@/types/halacha';
 import { Nusach } from '@/types/mitzvah';
 import { Location } from '@/types/zmanim';
 import { festivalPortion, halachaPortion } from '@/utils/halacha';
 import { appDayEnd } from '@/utils/locationDay';
 
-// The installed track's schedule, read once per installed version: what a window and the reader ask of a day. Kept
+// The installed book's schedule, read once per installed version: what a window and the reader ask of a day. Kept
 // apart from ./halacha.ts, which the user store imports, so that store imports no other store.
 const read = new Map<string, HalachaScheduleFile | null>();
 
-export function halachaScheduleOf(track: HalachaTrack): HalachaScheduleFile | null {
-  const install = HALACHA_STORES[track].getState().installed;
+export function halachaScheduleOf(book: HalachaBook): HalachaScheduleFile | null {
+  const install = HALACHA_STORES[book].getState().installed;
   if (!install) return null;
-  const key = `${track}/${install.version}/${install.installedAt}`;
-  if (!read.has(key)) read.set(key, readHalachaScheduleSync(track, install));
+  const key = `${book}/${install.version}/${install.installedAt}`;
+  if (!read.has(key)) read.set(key, readHalachaScheduleSync(book, install));
   return read.get(key) ?? null;
 }
 
-export function hasHalachaContent(track: HalachaTrack): boolean {
-  return halachaScheduleOf(track) !== null;
+export function hasHalachaContent(book: HalachaBook): boolean {
+  return halachaScheduleOf(book) !== null;
 }
 
 // The track a user learns: the one chosen in Settings, else the nusach's.
@@ -31,16 +38,30 @@ export function halachaTrackFor(nusach: Nusach): HalachaTrack {
   return effectiveHalachaTrack(useUserStore.getState().halachaTrack, nusach);
 }
 
-export type HalachaDay = { track: HalachaTrack; book: HalachaLabel; portion: HalachaPortion };
+// The book a halacha mitzvah reads for this user: the Chofetz Chaim, or the user's track.
+export function halachaBookFor(id: string, nusach: Nusach): HalachaBook {
+  return halachaBookOf(id, halachaTrackFor(nusach));
+}
 
-// The daily portion of a civil day (its device-local midnight, the day a window is keyed on), or `null` while the track
-// is not installed or the schedule gives the day nothing.
-export function halachaYomitOn(day: Date, nusach: Nusach, inIsrael: boolean): HalachaDay | null {
-  const track = halachaTrackFor(nusach);
-  const schedule = halachaScheduleOf(track);
+export type HalachaDay = { track: HalachaBook; book: HalachaLabel; portion: HalachaPortion };
+
+// A book's daily portion of a civil day (its device-local midnight, the day a window is keyed on), or `null` while the
+// book is not installed or its schedule gives the day nothing.
+function dailyPortionOn(book: HalachaBook, day: Date, inIsrael: boolean): HalachaDay | null {
+  const schedule = halachaScheduleOf(book);
   if (!schedule) return null;
   const portion = halachaPortion(new HDate(day), schedule, inIsrael, useUserStore.getState().benIshChaiYearSwapped);
-  return portion ? { track, book: schedule.book, portion } : null;
+  return portion ? { track: book, book: schedule.book, portion } : null;
+}
+
+// The daily halacha of the user's track.
+export function halachaYomitOn(day: Date, nusach: Nusach, inIsrael: boolean): HalachaDay | null {
+  return dailyPortionOn(halachaTrackFor(nusach), day, inIsrael);
+}
+
+// The day's Chofetz Chaim.
+export function lashonHaraOn(day: Date): HalachaDay | null {
+  return dailyPortionOn('chafetz_chaim', day, false);
 }
 
 export type HachagDay = HalachaDay & { period: FestivalPeriod };
@@ -58,15 +79,15 @@ export function hilchotHachagOn(day: Date, nusach: Nusach): HachagDay[] {
   }));
 }
 
-// What one of the two halacha mitzvot reads on a civil day: the daily portion, or the festival portions of the day.
+// What a halacha mitzvah reads on a civil day: the festival portions of the day, or its book's daily portion.
 export function halachaReadingsOn(
   id: string,
   day: Date,
   nusach: Nusach,
   inIsrael: boolean,
 ): (HalachaDay | HachagDay)[] {
-  if (id !== HALACHA_YOMIT_ID) return hilchotHachagOn(day, nusach);
-  const portion = halachaYomitOn(day, nusach, inIsrael);
+  if (id === HILCHOT_HACHAG_ID) return hilchotHachagOn(day, nusach);
+  const portion = dailyPortionOn(halachaBookFor(id, nusach), day, inIsrael);
   return portion ? [portion] : [];
 }
 

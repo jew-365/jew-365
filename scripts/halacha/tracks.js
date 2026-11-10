@@ -1,18 +1,19 @@
-// What the halacha add-on (scripts/halacha/build.js) reads from Sefaria and how it cuts it: the three tracks, the
-// versions each pins, the festival material of each track and the Ben Ish Chai parasha map.
+// What the halacha add-on (scripts/halacha/build.js) reads from Sefaria and how it cuts it: the three tracks and the
+// Chofetz Chaim, the versions each pins, the festival material of each track and the Ben Ish Chai parasha map.
 const path = require('path');
 
 const SEFARIA = 'https://www.sefaria.org';
 const SITE_DIR = path.join(__dirname, '..', '..', 'docs', 'halacha');
 const SCHEDULE_DIR = path.join(__dirname, 'schedules');
 const FORMAT = 1;
-const TRACKS = ['kitzur', 'ben_ish_chai', 'rambam'];
+const TRACKS = ['kitzur', 'ben_ish_chai', 'rambam', 'chafetz_chaim'];
 
 // The book of each track, as the credit and the portion labels name it.
 const BOOK = {
   kitzur: { he: 'קיצור שולחן ערוך', en: 'Kitzur Shulchan Aruch' },
   ben_ish_chai: { he: 'בן איש חי', en: 'Ben Ish Chai' },
   rambam: { he: 'משנה תורה לרמב״ם', en: "Rambam's Mishneh Torah" },
+  chafetz_chaim: { he: 'ספר חפץ חיים', en: 'Sefer Chofetz Chaim' },
 };
 
 // Kitzur Shulchan Aruch: one Hebrew version, a unit per block of simanim.
@@ -32,6 +33,23 @@ const BEN_ISH_CHAI = {
   years: ['Halachot 1st Year', 'Halachot 2nd Year'],
   // The second year's Vayeshev is only the author's note that he teaches the laws of Chanukah in it every year.
   skip: [[2, 'Vayeshev']],
+};
+
+// Sefer Chofetz Chaim, the book of the laws of lashon hara the `lashon_hara` mitzvah reads (the owner's request of
+// 2026-11-10): Wikisource's transcription (CC-BY-SA), its parts without the responsa at the end, which no day reads.
+const CHAFETZ_CHAIM = {
+  index: 'Chafetz Chaim',
+  he: 'Chofetz Chaim',
+  preface: 'Preface',
+  introduction: 'Introduction to the Laws of the Prohibition of Lashon Hara and Rechilut',
+  parts: {
+    lashonHara: 'Part One, The Prohibition Against Lashon Hara',
+    rechilut: 'Part Two, The Prohibition Against Rechilut',
+  },
+  illustrations: 'Illustrations',
+  // Paragraphs the source leaves empty (read 2026-11-10): the eighth of the negative commandments holds the eighth and
+  // ninth, "(ח-ט)". Any other empty paragraph fails the build.
+  empty: ['negative 9'],
 };
 
 // Mishneh Torah: a Hebrew version per book, the first of these the book has (the introduction books have no Torat
@@ -142,6 +160,7 @@ module.exports = {
   BOOK,
   KITZUR,
   BEN_ISH_CHAI,
+  CHAFETZ_CHAIM,
   RAMBAM_HE,
   BANNED_SOURCE,
   RAMBAM_EMPTY,

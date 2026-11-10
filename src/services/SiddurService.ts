@@ -15,7 +15,7 @@ import { useChokStore } from '@/stores/useChokStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
 import { halachaUnitFile, readHalachaEnglish, readHalachaUnit } from '@/services/halachaFiles';
 import { HALACHA_STORES } from '@/stores/useHalachaStore';
-import { HalachaEnglishUnit, HalachaPack, HalachaTrack, HalachaUnit } from '@/types/halacha';
+import { HalachaBook, HalachaEnglishUnit, HalachaPack, HalachaUnit } from '@/types/halacha';
 
 const loaded = new Map<string, Promise<unknown>>();
 
@@ -73,7 +73,7 @@ export function clearSelichotCache(): void {
   }
 }
 
-// A unit of a halacha track, or the English of a Kitzur unit, from the installed pack.
+// A unit of a halacha book, or the English of one, from the installed pack.
 function loadHalachaFile<T>(pack: HalachaPack, unit: string, read: (file: File) => Promise<T>): Promise<T> {
   const install = HALACHA_STORES[pack].getState().installed;
   const file = install ? halachaUnitFile(pack, install, unit) : null;
@@ -81,12 +81,12 @@ function loadHalachaFile<T>(pack: HalachaPack, unit: string, read: (file: File) 
   return loadOnce(`halacha/${pack}/${install.version}/${unit}`, () => read(file));
 }
 
-export function loadHalachaUnit(track: HalachaTrack, unit: string): Promise<HalachaUnit> {
+export function loadHalachaUnit(track: HalachaBook, unit: string): Promise<HalachaUnit> {
   return loadHalachaFile(track, unit, readHalachaUnit);
 }
 
-export function loadHalachaEnglish(unit: string): Promise<HalachaEnglishUnit> {
-  return loadHalachaFile('kitzur_en', unit, readHalachaEnglish);
+export function loadHalachaEnglish(pack: HalachaPack, unit: string): Promise<HalachaEnglishUnit> {
+  return loadHalachaFile(pack, unit, readHalachaEnglish);
 }
 
 export function clearHalachaCache(pack: HalachaPack): void {

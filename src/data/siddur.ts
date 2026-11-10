@@ -17,7 +17,7 @@ import {
 } from '@/types/siddur';
 import { CHOK_TEXT_ID } from './chok';
 import { SHNAYIM_TEXT_ID } from './shnayim';
-import { HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID } from './halacha';
+import { isHalachaMitzvah } from './halacha';
 import { halachaReadingsOn } from './halachaContent';
 import { DayWindow, dayWindow } from '@/utils/buildDayTimeline';
 import { SELICHOT_NUSCHAOT, SELICHOT_TEXT_ID, hasSelichotContent } from './selichot';
@@ -392,8 +392,8 @@ export function siddurPlace(location: Location, inIsrael: boolean): Place {
   return { inIsrael, jerusalem: isJerusalem(location), location };
 }
 
-// The two halacha mitzvot read the installed track's portion of the window's day (.claude/specs/halacha-yomit.md, 9).
-export const isHalachaText = (id: string): boolean => id === HALACHA_YOMIT_ID || id === HILCHOT_HACHAG_ID;
+// The halacha mitzvot read their installed book's portion of the window's day (.claude/specs/halacha-yomit.md, 9).
+export const isHalachaText = isHalachaMitzvah;
 
 export function hasSiddurText(mitzvah: Mitzvah, nusach: Nusach, windowDate: Date, place: Place): boolean {
   if (mitzvah.isCustom) return customSiddurText(mitzvah, nusach) !== null;

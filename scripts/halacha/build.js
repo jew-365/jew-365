@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // pnpm halacha:build: the halacha add-on in docs/halacha, one folder per track (Kitzur Shulchan Aruch, Ben Ish Chai,
-// Mishneh Torah): content-addressed gzips of the text by unit, a manifest with each unit's title, the daily schedule and
+// Mishneh Torah) and one for Sefer Chofetz Chaim: content-addressed gzips of the text by unit, a manifest with each unit's title, the daily schedule and
 // the festival portions, and an English folder for a track whose translation covers enough of it.
 // `--rambam-cycle <YYYY-MM-DD>` instead rewrites schedules/rambam.json from Sefaria's "Daily Rambam" calendar, starting
 // on that day, the first of a cycle.
@@ -20,6 +20,7 @@ const {
   BOOK,
   KITZUR,
   BEN_ISH_CHAI,
+  CHAFETZ_CHAIM,
   RAMBAM_HE,
   BANNED_SOURCE,
   RAMBAM_EMPTY,
@@ -134,7 +135,7 @@ function runsOf(html, { notes = false } = {}) {
       for (const part of paragraph.split(pattern)) {
         if (!part) continue;
         if (part.startsWith('<b>')) push(part, 'b');
-        else if (part.startsWith('<small>') || part.startsWith('(')) push(part, 'n');
+        else if (part.startsWith('<small>') || (notes && part.startsWith('('))) push(part, 'n');
         else push(part);
       }
       if (runs.length) {
@@ -146,10 +147,13 @@ function runsOf(html, { notes = false } = {}) {
     .filter((runs) => runs.length);
 }
 
-// Drops every <i class="footnote"> with the <i> elements nested inside it.
-function withoutFootnotes(html) {
+// Takes every <i class="footnote"> out, with the <i> elements nested inside it: the text left and each footnote's
+// inner HTML, in order.
+function splitFootnotes(html) {
+  const open = '<i class="footnote">';
   let out = html;
-  for (let start = out.indexOf('<i class="footnote">'); start !== -1; start = out.indexOf('<i class="footnote">')) {
+  const notes = [];
+  for (let start = out.indexOf(open); start !== -1; start = out.indexOf(open)) {
     const tags = /<i[\s>]|<\/i>/g;
     tags.lastIndex = start + 1;
     let depth = 1;
@@ -161,10 +165,13 @@ function withoutFootnotes(html) {
         break;
       }
     }
+    notes.push(out.slice(start + open.length, end - 4));
     out = out.slice(0, start) + out.slice(end);
   }
-  return out;
+  return { text: out, notes };
 }
+
+const withoutFootnotes = (html) => splitFootnotes(html).text;
 
 function englishOf(html) {
   const text = withoutFootnotes(String(html ?? ''))
@@ -416,8 +423,221 @@ function buildRambam({ books }) {
   return { units, list };
 }
 
+async function readChafetzChaim() {
+  const he = await readText(CHAFETZ_CHAIM.index, 'he', CHAFETZ_CHAIM.he);
+  const versions = await cached(
+    'chafetz-chaim/versions',
+    `${SEFARIA}/api/texts/versions/${encodeURIComponent(CHAFETZ_CHAIM.index)}`,
+  );
+  const english = [];
+  for (const v of englishCandidates(versions)) english.push(await readText(CHAFETZ_CHAIM.index, 'en', v.versionTitle));
+  return { he, english };
+}
+
+// The parts of the book a day reads by paragraph, as the luach names them, with their place in the text and title.
+const CC_SECTIONS = {
+  opening: { node: 'Opening Comments', he: 'פתיחה', en: 'Introduction' },
+  negative: { node: 'Negative Commandments', he: 'פתיחה, לאוין', en: 'Introduction, negative commandments' },
+  positive: { node: 'Positive Commandments', he: 'פתיחה, עשין', en: 'Introduction, positive commandments' },
+  curses: { node: 'Curses', he: 'פתיחה, ארורין', en: 'Introduction, curses' },
+};
+const CC_PARTS = {
+  lashonHara: { he: 'הלכות לשון הרע', en: 'Lashon hara', unit: 'lashon-hara' },
+  rechilut: { he: 'הלכות רכילות', en: 'Rechilut', unit: 'rechilut' },
+};
+
+// A paragraph of the Chofetz Chaim's Hebrew: its runs, then each of its footnotes (the author's glosses) as a
+// paragraph of its own opened by the asterisk the text marks it with.
+// The letters in parentheses the text carries, "(א)" or "(ח-ט)", point into the Be'er Mayim Chaim, which the add-on
+// does not ship, so they are dropped. Every other parenthesis stays in the text: the author writes halacha in them too.
+const BMC_MARKER = /\s*\((?:[קרשת]?(?:[יכלמנסעפצ]|טו|טז)?[א-ט]?)(?:-[קרשת]?(?:[יכלמנסעפצ]|טו|טז)?[א-ט]?)?\)/g;
+
+function ccParagraphs(html) {
+  const { text, notes: glosses } = splitFootnotes(
+    String(html)
+      .replace(/<sup class="footnote-marker">(.*?)<\/sup>/g, '$1')
+      .replace(BMC_MARKER, (marker) => (/\(\)/.test(marker) ? marker : '')),
+  );
+  return [...runsOf(text), ...glosses.flatMap((gloss) => runsOf(`* ${gloss}`))];
+}
+
+function ccSegment(key, label, sources, meta, where) {
+  const paragraphs = [].concat(sources).flatMap((source) => ccParagraphs(source));
+  if (!paragraphs.length) throw new Error(`Chafetz Chaim ${where}: empty`);
+  return { ...segment(key, label, paragraphs), meta };
+}
+
+function buildChafetzChaim({ he }) {
+  const text = he.text;
+  const units = [];
+  const list = [];
+  const add = (unit) => addUnit('chafetz_chaim', units, list, unit);
+  const preface = { he: 'הקדמה', en: 'Preface' };
+  add({
+    id: 'preface',
+    title: preface,
+    sections: [
+      {
+        ref: CHAFETZ_CHAIM.preface,
+        title: preface,
+        segments: text[CHAFETZ_CHAIM.preface].map((source, i) =>
+          ccSegment(
+            `chafetz_chaim:preface:${i + 1}`,
+            number(i + 1),
+            source,
+            { part: 'preface', n: i + 1 },
+            `preface ${i + 1}`,
+          ),
+        ),
+      },
+    ],
+  });
+  const introduction = text[CHAFETZ_CHAIM.introduction];
+  add({
+    id: 'introduction',
+    title: { he: 'פתיחה', en: 'Introduction' },
+    sections: Object.entries(CC_SECTIONS).map(([part, { node, ...title }]) => ({
+      ref: `${CHAFETZ_CHAIM.introduction}, ${node}`,
+      title,
+      segments: introduction[node].flatMap((source, i) =>
+        CHAFETZ_CHAIM.empty.includes(`${part} ${i + 1}`)
+          ? []
+          : [
+              ccSegment(
+                `chafetz_chaim:${part}:${i + 1}`,
+                number(i + 1),
+                source,
+                { part, n: i + 1 },
+                `${part} ${i + 1}`,
+              ),
+            ],
+      ),
+    })),
+  });
+  for (const [part, name] of Object.entries(CC_PARTS)) {
+    const principles = text[CHAFETZ_CHAIM.parts[part]];
+    Object.keys(principles).forEach((node, p) => {
+      const principle = p + 1;
+      if (node !== `Principle ${principle}`) throw new Error(`Chafetz Chaim: ${node} is not principle ${principle}`);
+      const title = { he: `${name.he}, כלל ${number(principle)}`, en: `${name.en}, principle ${principle}` };
+      const meta = (seif) => ({ part, principle, seif });
+      add({
+        id: `${name.unit}-${String(principle).padStart(2, '0')}`,
+        title,
+        sections: [
+          {
+            ref: `${CHAFETZ_CHAIM.parts[part]}, ${node}`,
+            title,
+            segments: [
+              ccSegment(
+                `chafetz_chaim:${part}:${principle}:0`,
+                'פתיחה',
+                principles[node]['Opening Comments'],
+                meta(0),
+                `${part} ${principle} opening`,
+              ),
+              ...principles[node][''].map((seif, i) =>
+                ccSegment(
+                  `chafetz_chaim:${part}:${principle}:${i + 1}`,
+                  number(i + 1),
+                  seif,
+                  meta(i + 1),
+                  `${part} ${principle}:${i + 1}`,
+                ),
+              ),
+            ],
+          },
+        ],
+      });
+    });
+  }
+  const illustrations = { he: 'ציורים', en: 'Illustrations' };
+  add({
+    id: 'illustrations',
+    title: illustrations,
+    sections: [
+      {
+        ref: CHAFETZ_CHAIM.illustrations,
+        title: illustrations,
+        segments: Object.entries(text[CHAFETZ_CHAIM.illustrations]).map(([node, source], i) => {
+          if (node !== `Illustration ${i + 1}`) throw new Error(`Chafetz Chaim: ${node} is not illustration ${i + 1}`);
+          return ccSegment(
+            `chafetz_chaim:illustrations:${i + 1}`,
+            number(i + 1),
+            source,
+            { part: 'illustrations', n: i + 1 },
+            node,
+          );
+        }),
+      },
+    ],
+  });
+  return { units, list };
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // Portions: a run of segments in book order as the pieces of units it reads, with a label.
+
+// "1, 3–5" of numbers, in gematriya for Hebrew.
+function numberRanges(numbers, he) {
+  const runs = [];
+  for (const n of numbers) {
+    const run = runs[runs.length - 1];
+    if (run && run[1] === n - 1) run[1] = n;
+    else runs.push([n, n]);
+  }
+  const show = (n) => (he ? number(n) : `${n}`);
+  return runs.map(([a, b]) => (a === b ? show(a) : `${show(a)}–${show(b)}`)).join(', ');
+}
+
+// A Chofetz Chaim portion's place: each part or principle it reads, with its paragraphs, se'ifim or illustrations
+// unless it reads the whole of it.
+function chafetzChaimLabel(segments, list) {
+  const groups = [];
+  for (const s of segments) {
+    const id = s.principle ? `${s.part}:${s.principle}` : s.part;
+    const group = groups[groups.length - 1];
+    if (group && group.id === id) group.items.push(s);
+    else groups.push({ id, items: [s] });
+  }
+  const one = (group, he) => {
+    const s = group.items[0];
+    const whole =
+      group.items.length ===
+      list.filter((x) => (x.principle ? `${x.part}:${x.principle}` : x.part) === group.id).length;
+    if (s.principle) {
+      const name = he
+        ? `${CC_PARTS[s.part].he}, כלל ${number(s.principle)}`
+        : `${CC_PARTS[s.part].en}, principle ${s.principle}`;
+      if (whole) return name;
+      const opening = group.items[0].seif === 0;
+      const seifim = group.items.map((x) => x.seif).filter(Boolean);
+      const noun = he ? (seifim.length === 1 ? 'סעיף' : 'סעיפים') : seifim.length === 1 ? "se'if" : "se'ifim";
+      const parts = [
+        opening ? (he ? 'פתיחה' : 'opening') : null,
+        seifim.length ? `${noun} ${numberRanges(seifim, he)}` : null,
+      ];
+      return `${name}, ${parts.filter(Boolean).join(he ? ' ו' : ' and ')}`;
+    }
+    const title =
+      s.part === 'preface'
+        ? { he: 'הקדמה', en: 'Preface' }
+        : s.part === 'illustrations'
+          ? { he: 'ציורים', en: 'Illustrations' }
+          : CC_SECTIONS[s.part];
+    const name = he ? title.he : title.en;
+    return whole
+      ? name
+      : `${name} ${numberRanges(
+          group.items.map((x) => x.n),
+          he,
+        )}`;
+  };
+  return {
+    he: groups.map((group) => one(group, true)).join('; '),
+    en: groups.map((group) => one(group, false)).join('; '),
+  };
+}
 
 const LABEL = {
   kitzur(first, last) {
@@ -484,8 +704,9 @@ const LABEL = {
   },
 };
 
-// Segments (from the track's list) as a portion: consecutive segments of one unit become one piece.
-function portionOf(track, segments) {
+// Segments (from the track's list) as a portion: consecutive segments of one unit become one piece. The Chofetz
+// Chaim's label reads every segment, against the whole list (`list`).
+function portionOf(track, segments, list) {
   if (!segments.length) throw new Error(`${track}: an empty portion`);
   const pieces = [];
   for (const s of segments) {
@@ -493,7 +714,11 @@ function portionOf(track, segments) {
     if (last && last.u === s.unit && last.to === s.index - 1) last.to = s.index;
     else pieces.push({ u: s.unit, from: s.index, to: s.index });
   }
-  return { label: LABEL[track](segments[0], segments[segments.length - 1]), pieces };
+  const label =
+    track === 'chafetz_chaim'
+      ? chafetzChaimLabel(segments, list)
+      : LABEL[track](segments[0], segments[segments.length - 1]);
+  return { label, pieces };
 }
 
 function positions(list) {
@@ -532,6 +757,53 @@ function kitzurSchedule(luach, built, text) {
     ),
     leapReview: luach.leapReview.map((entry, i) => day(entry, `Kitzur leap review ${i + 1}`)),
   };
+}
+
+// ---- Chofetz Chaim schedule ("lashonHara 1.1-1.2" by Hebrew month and day of a common or a leap year, from
+// schedules/chafetz_chaim.json)
+
+const CC_PARAGRAPH_PARTS = ['preface', 'opening', 'negative', 'positive', 'curses', 'illustrations'];
+
+function chafetzChaimSegments(entry, list) {
+  const match = /^([a-zA-Z]+)(?: (.+))?$/.exec(entry);
+  const part = match?.[1];
+  const inPart = list.filter((s) => s.part === part);
+  if (!match || !inPart.length) throw new Error(`Chafetz Chaim luach: unreadable entry "${entry}"`);
+  const spec = match[2];
+  if (!spec) return inPart;
+  if (CC_PARAGRAPH_PARTS.includes(part)) {
+    const wanted = spec.split(',').flatMap((range) => {
+      const [a, b = a] = range.split('-').map(Number);
+      if (!(a >= 1 && b >= a)) throw new Error(`Chafetz Chaim luach: unreadable range in "${entry}"`);
+      return Array.from({ length: b - a + 1 }, (_, i) => a + i);
+    });
+    const picked = wanted
+      .filter((n) => !CHAFETZ_CHAIM.empty.includes(`${part} ${n}`))
+      .map((n) => inPart.find((s) => s.n === n));
+    if (picked.some((s) => !s)) throw new Error(`Chafetz Chaim luach: "${entry}" is outside the text`);
+    return picked;
+  }
+  // principle.se'if to principle.se'if; a range opened at a principle's first se'if reads its opening comments first.
+  const [from, to = from] = spec.split('-').map((at) => at.split('.').map(Number));
+  if (from.length !== 2 || to.length !== 2) throw new Error(`Chafetz Chaim luach: unreadable range in "${entry}"`);
+  const at = (principle, seif) => inPart.findIndex((s) => s.principle === principle && s.seif === seif);
+  const a = at(from[0], from[1] === 1 ? 0 : from[1]);
+  const b = at(to[0], to[1]);
+  if (a === -1 || b === -1 || a > b) throw new Error(`Chafetz Chaim luach: "${entry}" is outside the text`);
+  return inPart.slice(a, b + 1);
+}
+
+function chafetzChaimSchedule(luach, built) {
+  const table = (months, year) =>
+    Object.fromEntries(
+      Object.entries(months).map(([month, days]) => [
+        month,
+        days.map((entry) =>
+          entry ? portionOf('chafetz_chaim', chafetzChaimSegments(entry, built.list), built.list) : null,
+        ),
+      ]),
+    );
+  return { kind: 'hebrewYear', common: table(luach.simple, 'common'), leap: table(luach.leap, 'leap') };
 }
 
 // ---- Rambam schedule (a cycle of days from an anchor date)
@@ -610,7 +882,7 @@ function divide(segments, periodDays) {
 
 function festivalPortions(track, built) {
   return Object.fromEntries(
-    Object.entries(FESTIVAL_MATERIAL[track]).map(([festival, material]) => {
+    Object.entries(FESTIVAL_MATERIAL[track] ?? {}).map(([festival, material]) => {
       const days = divide(festivalSegments(track, material, built), FESTIVALS[festival].days);
       return [festival, days.map((segments) => portionOf(track, segments))];
     }),
@@ -626,6 +898,14 @@ function englishAt(track, version, s) {
   if (track === 'ben_ish_chai') {
     const halacha = text[BEN_ISH_CHAI.years[s.year - 1]]?.[s.node]?.['']?.[s.source];
     return englishOf([].concat(halacha ?? []).join('<br>'));
+  }
+  if (track === 'chafetz_chaim') {
+    const joined = (value) => englishOf([].concat(value ?? []).join('<br>'));
+    if (s.part === 'preface') return joined(text[CHAFETZ_CHAIM.preface]?.[s.n - 1]);
+    if (s.part === 'illustrations') return joined(text[CHAFETZ_CHAIM.illustrations]?.[`Illustration ${s.n}`]);
+    if (CC_SECTIONS[s.part]) return joined(text[CHAFETZ_CHAIM.introduction]?.[CC_SECTIONS[s.part].node]?.[s.n - 1]);
+    const principle = text[CHAFETZ_CHAIM.parts[s.part]]?.[`Principle ${s.principle}`];
+    return joined(s.seif ? principle?.['']?.[s.seif - 1] : principle?.['Opening Comments']);
   }
   return englishOf(s.depth === 1 ? text[s.halacha - 1] : text[s.chapter - 1]?.[s.halacha - 1]);
 }
@@ -671,6 +951,10 @@ const SCHEDULE_CREDIT = {
   rambam: {
     he: 'לוח הלימוד: הרמב״ם היומי, פרק אחד ליום, כפי שספריא מפרסמת',
     en: 'Schedule: the Daily Rambam, one chapter a day, as Sefaria publishes it',
+  },
+  chafetz_chaim: {
+    he: 'לוח הלימוד: חפץ חיים היומי, שלושה מחזורים בשנה, כפי ש־Hebcal מפרסם (BSD)',
+    en: 'Schedule: the daily Chofetz Chaim, three cycles a year, as Hebcal publishes it (BSD)',
   },
 };
 
@@ -795,6 +1079,17 @@ async function buildTrack(track) {
       english: englishFor(track, sources, built),
     };
   }
+  if (track === 'chafetz_chaim') {
+    const sources = await readChafetzChaim();
+    const built = buildChafetzChaim(sources);
+    return {
+      built,
+      heVersions: [sources.he],
+      schedule: chafetzChaimSchedule(readSchedule('chafetz_chaim'), built),
+      festivals: {},
+      english: englishFor(track, sources, built),
+    };
+  }
   const cycle = readSchedule('rambam');
   const sources = await readRambam(cycle);
   const built = buildRambam(sources);
@@ -916,6 +1211,10 @@ if (require.main === module) {
 module.exports = {
   runsOf,
   englishOf,
+  splitFootnotes,
+  numberRanges,
+  BMC_MARKER,
+  chafetzChaimSegments,
   rambamRef,
   kitzurRange,
   divide,

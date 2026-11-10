@@ -4,8 +4,8 @@ import { ComputeContext, LibraryGroup, Mitzvah, MitzvahWindow, Nusach } from '@/
 import { Location, Zmanim } from '@/types/zmanim';
 import { CHOK_TEXT_ID, hasChokContent } from '@/data/chok';
 import { SHNAYIM_TEXT_ID, hasShnayimContent } from '@/data/shnayim';
-import { FESTIVAL_NAMES, HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID } from '@/data/halacha';
-import { halachaYomitOn, hilchotHachagOn } from '@/data/halachaContent';
+import { FESTIVAL_NAMES, HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID, LASHON_HARA_ID } from '@/data/halacha';
+import { halachaYomitOn, hilchotHachagOn, lashonHaraOn } from '@/data/halachaContent';
 import { NUSACH_IDS } from '@/data/nuschaot';
 import { hasSelichotContent } from '@/data/selichot';
 import { MIDNIGHT_TO_MORNING_PRAYER, siddurPlace, standaloneAvailability } from '@/data/siddur';
@@ -238,6 +238,42 @@ export const HILCHOT_HACHAG: Mitzvah = {
   },
   bodyKey: 'notifications.hilchotHachag',
   computeWindow: (ctx) => (hilchotHachagOf(ctx) ? win(ctx.zmanim.alotHaShachar, nextAlot(ctx)) : null),
+};
+
+const lashonHaraOf = (ctx: ComputeContext) => lashonHaraOn(civilDayOf(ctx));
+
+// The daily laws of lashon hara (the owner's request of 2026-11-10): Sefer Chofetz Chaim by its daily luach, three
+// cycles a year, for every nusach whatever the halacha track; every day from alot to the next alot, Shabbat and Yom
+// Tov included as for the daily halacha, `null` until the book is installed.
+export const LASHON_HARA: Mitzvah = {
+  id: LASHON_HARA_ID,
+  name: { he: 'הלכות לשון הרע', en: 'Laws of Lashon Hara' },
+  icon: 'chok',
+  timeType: 'range-within-day',
+  category: 'learning',
+  group: 'other',
+  skipOn: [],
+  nuschaotSupported: ALL_NUSCHAOT,
+  defaultReminders: [
+    {
+      anchor: 'clock',
+      offsetMin: 13 * 60,
+      label: 'זמן הלכות לשון הרע',
+      bodyVariants: [
+        'זמן הלכות לשון הרע: %{portion}',
+        'כמה דקות של שמירת הלשון: %{portion}',
+        'החפץ חיים של היום מחכה לך: %{portion}',
+      ],
+    },
+  ],
+  bodyParams: (ctx) => {
+    const today = lashonHaraOf(ctx);
+    if (!today) return null;
+    const { book, portion } = today;
+    return { portion: { he: `${book.he}, ${portion.label.he}`, en: `${book.en}, ${portion.label.en}` } };
+  },
+  bodyKey: 'notifications.lashonHara',
+  computeWindow: (ctx) => (lashonHaraOf(ctx) ? win(ctx.zmanim.alotHaShachar, nextAlot(ctx)) : null),
 };
 
 // Shnayim Mikra ve'Echad Targum (the owner's call, 2026-11-09): Chok LeYisrael's learning day and add-on, an aliyah a day.
@@ -628,6 +664,7 @@ export const MITZVOT: Mitzvah[] = [
   },
   HALACHA_YOMIT,
   HILCHOT_HACHAG,
+  LASHON_HARA,
   SHNAYIM_MIKRA,
   CHOK_LEYISRAEL,
 ];

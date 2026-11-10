@@ -4,7 +4,7 @@ import { placeCaption, placeName, searchPlaces, type PlaceIndex } from '@/data/p
 import { iconFor, type IconName } from '@/components/MitzvahIcon';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
-import { FESTIVAL_KEYS, FESTIVAL_NAMES, HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID } from '@/data/halacha';
+import { FESTIVAL_KEYS, FESTIVAL_NAMES, HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID, LASHON_HARA_ID } from '@/data/halacha';
 import { GUIDE_TOPICS } from '@/data/guide';
 import { HALACHA_LINES, phoneLabel, type HalachaRuling } from '@/data/halachaLines';
 import { hilulaPage } from '@/data/hilulaPages';
@@ -893,13 +893,21 @@ export type SettingsContentInput = {
   shnayimInstalled?: boolean;
   // The user's halacha track is installed, so both halacha mitzvot open in the reader.
   halachaInstalled?: boolean;
+  // The Chofetz Chaim is installed, so the lashon hara halachot open in the reader.
+  chafetzChaimInstalled?: boolean;
   now: Date;
   location: Location;
   inIsrael: boolean;
 };
 
 type ContentText = {
-  id: SiddurTextId | typeof CHOK_TEXT_ID | typeof SHNAYIM_TEXT_ID | typeof HALACHA_YOMIT_ID | typeof HILCHOT_HACHAG_ID;
+  id:
+    | SiddurTextId
+    | typeof CHOK_TEXT_ID
+    | typeof SHNAYIM_TEXT_ID
+    | typeof HALACHA_YOMIT_ID
+    | typeof HILCHOT_HACHAG_ID
+    | typeof LASHON_HARA_ID;
   title: SettingsSearchName;
   icon: IconName;
   chapters: readonly SiddurChapterTitle[];
@@ -931,8 +939,30 @@ const HALACHA_BOOK_TERMS = [
   'rambam',
   'mishneh torah',
 ];
+// The words people type for the daily laws of lashon hara: the book, its two parts and their subjects.
+const LASHON_HARA_TERMS = [
+  'לשון הרע',
+  'לה"ר',
+  'חפץ חיים',
+  'החפץ חיים',
+  'ספר חפץ חיים',
+  'חפץ חיים יומי',
+  'שמירת הלשון',
+  'שמירת הדיבור',
+  'רכילות',
+  'הלכות רכילות',
+  'הלכות לשון הרע',
+  'lashon hara',
+  'loshon hora',
+  'chofetz chaim',
+  'chafetz chaim',
+  'rechilut',
+  'proper speech',
+  'guarding the tongue',
+];
 const MITZVAH_TERMS: Readonly<Record<string, readonly string[]>> = {
   [SHNAYIM_TEXT_ID]: SHNAYIM_TERMS,
+  [LASHON_HARA_ID]: LASHON_HARA_TERMS,
   [HALACHA_YOMIT_ID]: [...HALACHA_BOOK_TERMS, 'לימוד יומי', 'daily learning'],
   // Each festival by its name, "הלכות פסח" and "laws of Pesach", so a festival finds the screen of its halachot.
   [HILCHOT_HACHAG_ID]: [
@@ -959,6 +989,7 @@ export function settingsContentItems({
   chokInstalled,
   shnayimInstalled = false,
   halachaInstalled = false,
+  chafetzChaimInstalled = false,
   now,
   location,
   inIsrael,
@@ -979,8 +1010,8 @@ export function settingsContentItems({
         texts.push({ id: mitzvah.id, title: nameOf(mitzvah), icon: iconFor(mitzvah.icon), chapters: [] });
       continue;
     }
-    if (mitzvah.id === HALACHA_YOMIT_ID || mitzvah.id === HILCHOT_HACHAG_ID) {
-      if (halachaInstalled)
+    if (mitzvah.id === HALACHA_YOMIT_ID || mitzvah.id === HILCHOT_HACHAG_ID || mitzvah.id === LASHON_HARA_ID) {
+      if (mitzvah.id === LASHON_HARA_ID ? chafetzChaimInstalled : halachaInstalled)
         texts.push({ id: mitzvah.id, title: nameOf(mitzvah), icon: iconFor(mitzvah.icon), chapters: [] });
       continue;
     }

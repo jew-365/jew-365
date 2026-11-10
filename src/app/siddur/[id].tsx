@@ -43,7 +43,13 @@ import Svg, { Path } from 'react-native-svg';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { CHOK_PARASHIYOT, CHOK_TEXT_ID } from '@/data/chok';
 import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
-import { FESTIVAL_NAMES, HALACHA_YOMIT_ID, effectiveHalachaTrack } from '@/data/halacha';
+import {
+  FESTIVAL_NAMES,
+  HALACHA_YOMIT_ID,
+  HILCHOT_HACHAG_ID,
+  effectiveHalachaTrack,
+  halachaBookOf,
+} from '@/data/halacha';
 import { HachagDay, HalachaDay, halachaMakeUpDays, halachaReadingsOn } from '@/data/halachaContent';
 import { findMitzvah } from '@/data/mitzvot';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
@@ -995,11 +1001,15 @@ export default function SiddurScreen() {
   const chokOnly = useChokStore((s) => s.installed);
   const shnayimInstall = useShnayimStore((s) => s.installed);
   const chokInstall = shnayim ? shnayimInstall : chokOnly;
-  // The daily halacha and the halachot of the festival read the user's track day by day (spec 9).
+  // The daily halacha and the halachot of the festival read the user's track day by day (spec 9), and the lashon hara
+  // halachot the Chofetz Chaim.
   const halachaId = isHalachaText(params.id) ? params.id : null;
-  const halachaTrack = effectiveHalachaTrack(
-    useUserStore((s) => s.halachaTrack),
-    nusach,
+  const halachaTrack = halachaBookOf(
+    params.id,
+    effectiveHalachaTrack(
+      useUserStore((s) => s.halachaTrack),
+      nusach,
+    ),
   );
   const halachaInstall = HALACHA_STORES[halachaTrack]((s) => s.installed);
   const englishPack = HALACHA_ENGLISH_PACK[halachaTrack];
@@ -1133,7 +1143,7 @@ export default function SiddurScreen() {
   );
   // A day of the period the festival halachot browse within: from the first day of the longest period to the erev.
   const halachaBounds = useMemo(() => {
-    if (halachaId === HALACHA_YOMIT_ID || !halachaInstall) return null;
+    if (halachaId !== HILCHOT_HACHAG_ID || !halachaInstall) return null;
     const periods = halachaReadingsOn(halachaId ?? '', windowDate, nusach, inIsrael).flatMap((reading) =>
       'period' in reading ? [reading.period] : [],
     );
@@ -1361,7 +1371,7 @@ export default function SiddurScreen() {
       const task = afterPaint(() => {
         // The English is optional: a unit without it reads in Hebrew.
         const english = halachaEnglish
-          ? Promise.all(halachaUnits.map(loadHalachaEnglish))
+          ? Promise.all(halachaUnits.map((unit) => loadHalachaEnglish(englishPack ?? halachaTrack, unit)))
               .then((list) => new Map(list.map((unit) => [unit.unit, unit])))
               .catch(() => null)
           : Promise.resolve(null);
@@ -1447,6 +1457,7 @@ export default function SiddurScreen() {
     halachaUnits,
     halachaTrack,
     halachaEnglish,
+    englishPack,
   ]);
 
   useEffect(() => {

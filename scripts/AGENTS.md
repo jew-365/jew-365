@@ -25,7 +25,7 @@
 - Script tests live in [__tests__/](__tests__/). [__tests__/appConfig.test.js](__tests__/appConfig.test.js) covers [../app.config.js](../app.config.js), the preview variant's config switch, and the PNGs and locales it names.
 - [siddur/AGENTS.md](siddur/AGENTS.md) owns the siddur content build, the Selichot add-on in [../docs/selichot/](../docs/selichot) included.
 - [chok/AGENTS.md](chok/AGENTS.md) owns the build from the Torat Emet text of חק לישראל to the downloadable Chok LeYisrael add-on in [../docs/chok/](../docs/chok).
-- [halacha/AGENTS.md](halacha/AGENTS.md) owns `pnpm halacha:build`, the halacha add-on in [../docs/halacha/](../docs/halacha) (Kitzur Shulchan Aruch, Ben Ish Chai and Mishneh Torah from Sefaria, with the Kitzur luach and the Rambam cycle it schedules by).
+- [halacha/AGENTS.md](halacha/AGENTS.md) owns `pnpm halacha:build`, the halacha add-on in [../docs/halacha/](../docs/halacha) (Kitzur Shulchan Aruch, Ben Ish Chai, Mishneh Torah and Sefer Chofetz Chaim from Sefaria, with the Kitzur luach, the Rambam cycle and the Chofetz Chaim luach it schedules by).
 - [shnayim/build.js](shnayim/build.js) backs `pnpm shnayim:build`, the Shnayim Mikra add-on in [../docs/shnayim/](../docs/shnayim): it downloads into a gitignored `.cache` beside it the Torah (`Tanach with Nikkud`, the Westminster Leningrad Codex), Targum Onkelos (Torat Emet, public domain), Rashi (`On Your Way`, public domain; each verse's comments as one optional segment labelled `רש״י` / `Rashi` after it, the dibur hamatchil bold and the references as notes) and each book's parasha structure from Sefaria, cuts every parasha (the 54 of [chok/manifest.js](chok/manifest.js), in order) into its seven aliyot, reads the qere and points the Divine Name as the siddur build does, keeps Onkelos's bracketed variants as notes, and writes one content-addressed gzip per parasha (`fflate`, `mtime: 0`) and the manifest, whose `version` rises only when a file changes. The build fails unless the aliyot cover every verse of each book once and every verse has its targum. Suite: [shnayim/__tests__/build.test.js](shnayim/__tests__/build.test.js), which also checks the published files against their manifest and counts 5846 verses.
 
 ## Local Contracts
@@ -61,4 +61,4 @@
 
 - [siddur/AGENTS.md](siddur/AGENTS.md) - Build from pinned Sefaria and Wikisource sources to the bundled, day-conditioned nusach texts.
 - [chok/AGENTS.md](chok/AGENTS.md) - Build from the Torat Emet text of חק לישראל to the downloadable Chok LeYisrael add-on in [../docs/chok/](../docs/chok).
-- [halacha/AGENTS.md](halacha/AGENTS.md) - Build of the daily-halacha add-on in [../docs/halacha/](../docs/halacha): three tracks from Sefaria, their schedules and festival portions.
+- [halacha/AGENTS.md](halacha/AGENTS.md) - Build of the halacha add-on in [../docs/halacha/](../docs/halacha): three tracks and the Chofetz Chaim from Sefaria, their schedules and festival portions.

@@ -3,7 +3,7 @@ const mockPush = jest.fn();
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock('@/services/halachaFiles', () => ({
   ...jest.requireActual('@/services/halachaFiles'),
-  readHalachaScheduleSync: (pack: 'kitzur' | 'ben_ish_chai' | 'rambam') =>
+  readHalachaScheduleSync: (pack: 'kitzur' | 'ben_ish_chai' | 'rambam' | 'chafetz_chaim') =>
     require('@/testing/halacha').publishedHalachaSchedule(pack),
 }));
 jest.mock('@/services/HalachaContentService', () => ({
@@ -18,7 +18,7 @@ import { HalachaAddonCard } from '@/components/HalachaAddonCard';
 import { HalachaEnablePrompt } from '@/components/HalachaEnablePrompt';
 import { LearningRow, useLearningRows } from '@/components/LearningRows';
 import { CITIES } from '@/data/cities';
-import { halachaYomitOn } from '@/data/halachaContent';
+import { halachaYomitOn, lashonHaraOn } from '@/data/halachaContent';
 import { prepareHalachaDownload } from '@/services/HalachaContentService';
 import { HALACHA_STORES, resetHalachaStores } from '@/stores/useHalachaStore';
 import { selectActive, useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -48,6 +48,17 @@ describe('the halacha add-on card', () => {
     expect(screen.getByText('הורדה')).toBeOnTheScreen();
   });
 
+  it('offers the Chofetz Chaim, and in English its translation once it is installed', () => {
+    renderWithTheme(<HalachaAddonCard track="chafetz_chaim" />);
+    expect(screen.getByText('תוסף ההלכה: ספר חפץ חיים')).toBeOnTheScreen();
+    expect(screen.getByText(/^ספר חפץ חיים יורד פעם אחת/)).toBeOnTheScreen();
+    screen.unmount();
+    useUserStore.setState({ language: 'en' });
+    installHalachaFixture('chafetz_chaim');
+    renderWithTheme(<HalachaAddonCard track="chafetz_chaim" />);
+    expect(screen.getByText('Halacha add-on: Sefer Chofetz Chaim in English')).toBeOnTheScreen();
+  });
+
   it("shows, in English, the Kitzur's English beside an installed Kitzur, and not before", () => {
     useUserStore.setState({ language: 'en' });
     const { rerender } = renderWithTheme(<HalachaAddonCard track="kitzur" />);
@@ -69,6 +80,17 @@ describe('the enable prompt after a first download', () => {
     expect(selectActive('halacha_yomit')(useMitzvotStore.getState()).enabled).toBe(true);
     expect(selectActive('hilchot_hachag')(useMitzvotStore.getState()).enabled).toBe(true);
     expect(HALACHA_STORES.rambam.getState().enablePrompt).toBe(false);
+  });
+
+  it('names the Chofetz Chaim and switches only the laws of lashon hara on', () => {
+    renderWithTheme(<HalachaEnablePrompt />);
+    act(() => HALACHA_STORES.chafetz_chaim.getState().setEnablePrompt(true));
+    expect(screen.getByText('ספר חפץ חיים הותקן')).toBeOnTheScreen();
+    expect(screen.getByText('להפעיל תזכורות ומעקב להלכות לשון הרע היומיות?')).toBeOnTheScreen();
+    fireEvent.press(screen.getByText('כן'));
+    expect(selectActive('lashon_hara')(useMitzvotStore.getState()).enabled).toBe(true);
+    expect(selectActive('halacha_yomit')(useMitzvotStore.getState()).enabled).toBe(false);
+    expect(HALACHA_STORES.chafetz_chaim.getState().enablePrompt).toBe(false);
   });
 
   it('leaves the mitzvot off on no', () => {
@@ -97,6 +119,22 @@ describe('the learning rows of the two halacha mitzvot', () => {
     await act(async () => yomit.onPress());
     expect(prepareHalachaDownload).toHaveBeenCalledWith('kitzur');
     expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('offer the Chofetz Chaim on the lashon hara row, its own download, then its portion in the reader', async () => {
+    installHalachaFixture('kitzur');
+    const { result, rerender } = rowsAt();
+    let lashonHara = row(result.current.rows, 'lashon_hara');
+    expect(lashonHara.title).toBe('הלכות לשון הרע');
+    expect(lashonHara.caption).toBe('תוסף להורדה · כ־0.2 MB');
+    await act(async () => lashonHara.onPress());
+    expect(prepareHalachaDownload).toHaveBeenCalledWith('chafetz_chaim');
+    act(() => void installHalachaFixture('chafetz_chaim'));
+    rerender({});
+    lashonHara = row(result.current.rows, 'lashon_hara');
+    expect(lashonHara.caption).toBe(lashonHaraOn(appDay(NOW, JERUSALEM))!.portion.label.he);
+    lashonHara.onPress();
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/siddur/[id]', params: { id: 'lashon_hara' } });
   });
 
   it("follow the user's chosen track", () => {

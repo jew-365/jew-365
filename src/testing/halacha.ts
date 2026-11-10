@@ -3,13 +3,13 @@ import path from 'path';
 import { HALACHA_STORES } from '@/stores/useHalachaStore';
 import { IDLE_DOWNLOAD } from '@/stores/addonState';
 import { AddonInstall } from '@/types/addon';
-import { HalachaManifest, HalachaScheduleFile, HalachaTrack } from '@/types/halacha';
+import { HalachaBook, HalachaManifest, HalachaScheduleFile } from '@/types/halacha';
 
 const SITE = path.join(__dirname, '../../docs/halacha');
-const manifests = new Map<HalachaTrack, HalachaManifest>();
+const manifests = new Map<HalachaBook, HalachaManifest>();
 
-// A track's published manifest (docs/halacha), read once per test file.
-export function publishedHalachaManifest(track: HalachaTrack): HalachaManifest {
+// A book's published manifest (docs/halacha), read once per test file.
+export function publishedHalachaManifest(track: HalachaBook): HalachaManifest {
   if (!manifests.has(track)) {
     manifests.set(track, JSON.parse(fs.readFileSync(path.join(SITE, track, 'manifest.json'), 'utf8')));
   }
@@ -17,7 +17,7 @@ export function publishedHalachaManifest(track: HalachaTrack): HalachaManifest {
 }
 
 // What an install of the published track keeps in `schedule.json`.
-export function publishedHalachaSchedule(track: HalachaTrack): HalachaScheduleFile {
+export function publishedHalachaSchedule(track: HalachaBook): HalachaScheduleFile {
   const { version, book, credit, credits, units, schedule, festivals } = publishedHalachaManifest(track);
   return { track, version, book, credit, credits, units, schedule, festivals };
 }
@@ -27,7 +27,7 @@ let installs = 0;
 // An install of the published track's units in its store (with `latestVersion` and `checkedAt` set, so no update
 // check fires). A suite that reads its schedule mocks `readHalachaScheduleSync()` of the files module with
 // `publishedHalachaSchedule()`.
-export function installHalachaFixture(track: HalachaTrack): AddonInstall {
+export function installHalachaFixture(track: HalachaBook): AddonInstall {
   const manifest = publishedHalachaManifest(track);
   const installed: AddonInstall = {
     version: manifest.version,

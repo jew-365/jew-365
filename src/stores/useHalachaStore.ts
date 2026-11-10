@@ -14,7 +14,14 @@ type HalachaPackState = AddonStoreState & {
 
 export const selectHalachaUpdateAvailable = selectAddonUpdateAvailable;
 
-export const HALACHA_PACKS: readonly HalachaPack[] = ['kitzur', 'kitzur_en', 'ben_ish_chai', 'rambam'];
+export const HALACHA_PACKS: readonly HalachaPack[] = [
+  'kitzur',
+  'kitzur_en',
+  'ben_ish_chai',
+  'rambam',
+  'chafetz_chaim',
+  'chafetz_chaim_en',
+];
 
 // One pack of the halacha add-on, device-only like chok-store (`halacha-<pack>-store`): what is installed, the latest
 // version seen and when it was checked; the download and the post-download enable prompt live in memory only. Each
@@ -60,6 +67,8 @@ export const HALACHA_STORES: Readonly<Record<HalachaPack, HalachaPackStore>> = {
   kitzur_en: createHalachaPackStore('kitzur_en'),
   ben_ish_chai: createHalachaPackStore('ben_ish_chai'),
   rambam: createHalachaPackStore('rambam'),
+  chafetz_chaim: createHalachaPackStore('chafetz_chaim'),
+  chafetz_chaim_en: createHalachaPackStore('chafetz_chaim_en'),
 };
 
 export function resetHalachaStores(): void {

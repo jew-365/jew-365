@@ -5,6 +5,10 @@ import { SiddurCredit, SiddurSegment } from './siddur';
 // halacha mitzvot.
 export type HalachaTrack = 'kitzur' | 'ben_ish_chai' | 'rambam';
 
+// Every book the halacha add-on ships: the tracks, and Sefer Chofetz Chaim, which the `lashon_hara` mitzvah reads
+// whatever the track (the owner's request of 2026-11-10).
+export type HalachaBook = HalachaTrack | 'chafetz_chaim';
+
 // The festivals `hilchot_hachag` learns before (spec 7.1).
 export type FestivalKey =
   | 'pesach'
@@ -27,8 +31,9 @@ export type HalachaPiece = { u: string; from: number; to: number };
 
 export type HalachaPortion = { label: HalachaLabel; pieces: HalachaPiece[] };
 
-// What a track's manifest says each day reads (spec 6): by Hebrew month and day, by a cycle from an anchor date, or by
-// the week's parasha, divided over the week by the app.
+// What a book's manifest says each day reads (spec 6): by Hebrew month and day, by a cycle from an anchor date, by the
+// week's parasha, divided over the week by the app, or by Hebrew month and day with a table of its own for a leap year
+// (the Chofetz Chaim).
 export type HalachaSchedule =
   | {
       kind: 'hebrew';
@@ -36,12 +41,17 @@ export type HalachaSchedule =
       leapReview: readonly (HalachaPortion | null)[];
     }
   | { kind: 'cycle'; anchor: string; days: readonly HalachaPortion[] }
-  | { kind: 'parasha'; parashiyot: Readonly<Record<string, Readonly<Partial<Record<'1' | '2', string>>>>> };
+  | { kind: 'parasha'; parashiyot: Readonly<Record<string, Readonly<Partial<Record<'1' | '2', string>>>>> }
+  | {
+      kind: 'hebrewYear';
+      common: Readonly<Record<string, readonly (HalachaPortion | null)[]>>;
+      leap: Readonly<Record<string, readonly (HalachaPortion | null)[]>>;
+    };
 
 export type HalachaUnitInfo = { he: string; en: string; count: number };
 
 export type HalachaManifest = AddonManifest & {
-  track: HalachaTrack;
+  track: HalachaBook;
   book: HalachaLabel;
   credit: HalachaLabel;
   credits: SiddurCredit[];
@@ -53,7 +63,7 @@ export type HalachaManifest = AddonManifest & {
 
 // One unit file of a track: its sections of keyed segments.
 export type HalachaUnit = {
-  track: HalachaTrack;
+  track: HalachaBook;
   unit: string;
   title: HalachaLabel;
   credits: SiddurCredit[];
@@ -64,12 +74,12 @@ export type HalachaUnit = {
 // the festival (1 on the erev).
 export type FestivalPeriod = { festival: FestivalKey; day: number; days: number; daysLeft: number };
 
-// What the device downloads: a track's Hebrew text, and the Kitzur's English beside it (the one track that ships
-// English, scripts/halacha/build.js).
-export type HalachaPack = HalachaTrack | 'kitzur_en';
+// What the device downloads: a book's Hebrew text, and the English beside it of the books that ship one (the Kitzur and
+// the Chofetz Chaim, scripts/halacha/build.js).
+export type HalachaPack = HalachaBook | 'kitzur_en' | 'chafetz_chaim_en';
 
 // The English of one unit: a translation or `null` per Hebrew segment, in order.
-export type HalachaEnglishUnit = { track: HalachaTrack; unit: string; credits: SiddurCredit[]; en: (string | null)[] };
+export type HalachaEnglishUnit = { track: HalachaBook; unit: string; credits: SiddurCredit[]; en: (string | null)[] };
 
 // What an install keeps of its manifest beside the units (`schedule.json`), so a window can read its day at once.
 export type HalachaScheduleFile = Pick<

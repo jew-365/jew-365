@@ -2,7 +2,20 @@ const fs = require('fs');
 const path = require('path');
 const { gunzipSync, strFromU8 } = require('fflate');
 const { createHash } = require('crypto');
-const { runsOf, englishOf, rambamRef, kitzurRange, divide, portionOf, versioned, bihName } = require('../build');
+const {
+  runsOf,
+  englishOf,
+  rambamRef,
+  kitzurRange,
+  divide,
+  portionOf,
+  versioned,
+  bihName,
+  splitFootnotes,
+  numberRanges,
+  BMC_MARKER,
+  chafetzChaimSegments,
+} = require('../build');
 const { TRACKS, FESTIVALS, FESTIVAL_MATERIAL, MINOR_FASTS, KITZUR, BANNED_SOURCE } = require('../tracks');
 const { PARASHIYOT } = require('../../chok/manifest');
 
@@ -21,6 +34,7 @@ describe('the source cleanup', () => {
 
   it('keeps a parenthesis as text when references are not notes, and drops empty paragraphs', () => {
     expect(runsOf('משקה של (קפה)<br> <br>', {})).toEqual([[{ t: 'משקה של (קפה)' }]]);
+    expect(runsOf('(ואחלה להקורא) וכו׳')).toEqual([[{ t: '(ואחלה להקורא) וכו׳' }]]);
     expect(runsOf("נ''א")).toEqual([[{ t: 'נ״א' }]]);
   });
 
@@ -65,6 +79,42 @@ describe('the source cleanup', () => {
     expect(portion.label).toEqual({ he: 'סימן י:ה – סימן יא:א', en: 'Siman 10:5–11:1' });
   });
 
+  it("takes footnotes out with their nested markup, and drops the Be'er Mayim Chaim's letters only", () => {
+    expect(splitFootnotes('א*<i class="footnote">הגה <i>ב</i> ג</i> ד')).toEqual({
+      text: 'א* ד',
+      notes: ['הגה <i>ב</i> ג'],
+    });
+    const drop = (text) => text.replace(BMC_MARKER, (marker) => (/\(\)/.test(marker) ? marker : ''));
+    expect(drop('עַל (א) אֱמֶת, גַּם כֵּן (ח-ט) עַל (יג)')).toBe('עַל אֱמֶת, גַּם כֵּן עַל');
+    expect(drop('שֶׁנֶּאֱמַר (ויקרא יט, טז) (עשה) (דף ט"ו)')).toBe('שֶׁנֶּאֱמַר (ויקרא יט, טז) (עשה) (דף ט"ו)');
+  });
+
+  it('writes number runs as ranges, in gematriya for Hebrew', () => {
+    expect(numberRanges([1, 2, 3, 5, 7, 8], false)).toBe('1–3, 5, 7–8');
+    expect(numberRanges([28, 33, 34], true)).toBe('כח, לג–לד');
+  });
+
+  it("reads a Chofetz Chaim luach entry, a principle's opening with its first se'if", () => {
+    const list = [
+      { part: 'preface', n: 1 },
+      { part: 'preface', n: 2 },
+      { part: 'preface', n: 3 },
+      { part: 'lashonHara', principle: 1, seif: 9 },
+      { part: 'lashonHara', principle: 2, seif: 0 },
+      { part: 'lashonHara', principle: 2, seif: 1 },
+      { part: 'lashonHara', principle: 2, seif: 2 },
+      { part: 'curses', n: 1 },
+    ];
+    expect(chafetzChaimSegments('preface 1,3', list)).toEqual([list[0], list[2]]);
+    expect(chafetzChaimSegments('lashonHara 1.9-2.1', list)).toEqual(list.slice(3, 6));
+    expect(chafetzChaimSegments('lashonHara 2.1-2.2', list)).toEqual(list.slice(4, 7));
+    expect(chafetzChaimSegments('lashonHara 2.2', list)).toEqual([list[6]]);
+    expect(chafetzChaimSegments('curses', list)).toEqual([list[7]]);
+    expect(() => chafetzChaimSegments('preface 4', list)).toThrow(/outside/);
+    expect(() => chafetzChaimSegments('lashonHara 2.2-1.9', list)).toThrow(/outside/);
+    expect(() => chafetzChaimSegments('tziyurim 1', list)).toThrow(/unreadable/);
+  });
+
   it('raises a manifest version only when its content changes', () => {
     const first = versioned({ a: 1 }, undefined);
     expect(first.version).toBe(1);
@@ -81,6 +131,7 @@ describe('the source cleanup', () => {
 describe('the schedules', () => {
   const kitzur = readJson(path.join(SCHEDULES, 'kitzur.json'));
   const rambam = readJson(path.join(SCHEDULES, 'rambam.json'));
+  const chafetzChaim = readJson(path.join(SCHEDULES, 'chafetz_chaim.json'));
 
   it('keeps each Kitzur month at its length and lists every correction with the published value', () => {
     const lengths = Object.fromEntries(Object.entries(kitzur.months).map(([m, days]) => [m, days.length]));
@@ -105,6 +156,28 @@ describe('the schedules', () => {
       expect(c.published).not.toBe(c.used);
     }
     expect(kitzur.source.license).toMatch(/BSD 2-Clause/);
+  });
+
+  it('gives the Chofetz Chaim an entry for every day of each month of a common and a leap year', () => {
+    const lengths = (table) => Object.fromEntries(Object.entries(table).map(([m, days]) => [m, days.length]));
+    const common = { Tishrei: 30, Cheshvan: 30, Kislev: 30, Tevet: 29, "Sh'vat": 30, Adar: 29 };
+    const rest = { Nisan: 30, Iyyar: 29, Sivan: 30, Tamuz: 29, Av: 30, Elul: 29 };
+    expect(lengths(chafetzChaim.simple)).toEqual({ ...common, ...rest });
+    const { Adar, ...beforeAdar } = common;
+    expect(lengths(chafetzChaim.leap)).toEqual({ ...beforeAdar, 'Adar I': 30, 'Adar II': 29, ...rest });
+    for (const table of [chafetzChaim.simple, chafetzChaim.leap]) {
+      for (const entry of Object.values(table).flat()) expect(entry).toMatch(/^[a-zA-Z]+( [\d.,-]+)?$/);
+    }
+    // Three cycles: the Preface opens on 1 Tishrei, 1 Sh'vat and 1 Sivan of a common year.
+    expect([chafetzChaim.simple.Tishrei[0], chafetzChaim.simple["Sh'vat"][0], chafetzChaim.simple.Sivan[0]]).toEqual([
+      'preface 1-4',
+      'preface 1-4',
+      'preface 1-4',
+    ]);
+    expect(chafetzChaim.simple.Tishrei[5]).toBe('preface 28,33-34');
+    expect(chafetzChaim.simple["Sh'vat"][5]).toBe('preface 28-34');
+    expect(chafetzChaim.corrections).toEqual([]);
+    expect(chafetzChaim.source.license).toMatch(/BSD 2-Clause/);
   });
 
   it('holds one Rambam cycle of 1017 days from 3 Feb 2026, every day once', () => {
@@ -181,6 +254,37 @@ describe('the published add-on', () => {
     expect(manifests.kitzur.schedule.leapReview.every(Boolean)).toBe(true);
   });
 
+  it.each(['common', 'leap'])(
+    "reads every paragraph and se'if of the Chofetz Chaim three times in a %s year, once in each cycle",
+    (kind) => {
+      const keys = allKeys('chafetz_chaim');
+      const read = Object.values(manifests.chafetz_chaim.schedule[kind])
+        .flat()
+        .filter(Boolean)
+        .flatMap((portion) => portionKeys('chafetz_chaim', portion));
+      expect(read).toHaveLength(keys.length * 3);
+      const cycle = read.length / 3;
+      for (let c = 0; c < 3; c++) {
+        // A third of the year's reading is one whole cycle; sorted, since the luach reads the Preface's 33-34 before its 29-32.
+        expect([...read.slice(c * cycle, (c + 1) * cycle)].sort()).toEqual([...keys].sort());
+      }
+    },
+  );
+
+  it("labels a Chofetz Chaim day by its part, principle and se'ifim", () => {
+    const { common } = manifests.chafetz_chaim.schedule;
+    expect(common.Tishrei[5].label).toEqual({ he: 'הקדמה כח, לג–לד', en: 'Preface 28, 33–34' });
+    expect(common.Tishrei[24].label).toEqual({ he: 'פתיחה, ארורין', en: 'Introduction, curses' });
+    expect(common.Tishrei[25].label).toEqual({
+      he: 'הלכות לשון הרע, כלל א, פתיחה וסעיפים א–ב',
+      en: "Lashon hara, principle 1, opening and se'ifim 1–2",
+    });
+    expect(common.Cheshvan[16].label.en).toBe(
+      "Lashon hara, principle 4, se'if 12; Lashon hara, principle 5, opening and se'if 1",
+    );
+    expect(common.Tevet[24].label).toEqual({ he: 'ציורים א–ג', en: 'Illustrations 1–3' });
+  });
+
   it("labels a Kitzur day by its siman and se'ifim", () => {
     const { months } = manifests.kitzur.schedule;
     expect(months.Nisan[20].label).toEqual({ he: 'סימן קה:א – סימן קו:ח', en: 'Siman 105:1–106:8' });
@@ -241,7 +345,7 @@ describe('the published add-on', () => {
 
   it.each(TRACKS)('%s: a non-empty portion for every day of every festival it covers', (track) => {
     const { festivals } = manifests[track];
-    expect(Object.keys(festivals).sort()).toEqual(Object.keys(FESTIVAL_MATERIAL[track]).sort());
+    expect(Object.keys(festivals).sort()).toEqual(Object.keys(FESTIVAL_MATERIAL[track] ?? {}).sort());
     for (const [festival, days] of Object.entries(festivals)) {
       // Material shorter than the period fills its last days.
       expect(days.length).toBe(
@@ -258,7 +362,7 @@ describe('the published add-on', () => {
 
   it('ships English only for a track whose translation covers enough of it, aligned with its Hebrew', () => {
     const ships = TRACKS.filter((track) => manifests[track].english.ships);
-    expect(ships).toEqual(['kitzur']);
+    expect(ships).toEqual(['kitzur', 'chafetz_chaim']);
     for (const track of ships) {
       const en = readJson(path.join(SITE, track, 'en', 'manifest.json'));
       expect(Object.keys(en.gz)).toEqual(Object.keys(manifests[track].gz));

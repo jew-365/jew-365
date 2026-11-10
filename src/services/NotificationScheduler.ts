@@ -24,7 +24,7 @@ import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useChokStore } from '@/stores/useChokStore';
 import { useShnayimStore } from '@/stores/useShnayimStore';
 import { HALACHA_STORES } from '@/stores/useHalachaStore';
-import { HALACHA_TRACKS } from '@/data/halacha';
+import { HALACHA_BOOKS } from '@/data/halacha';
 import { selectSelichotNusach, useSelichotStore } from '@/stores/useSelichotStore';
 import { applyGenderDefaultsToNew } from '@/stores/taharahOptIn';
 import {
@@ -573,8 +573,8 @@ export function initNotificationHandlers(): () => void {
       if (selectSelichotNusach(state) !== selectSelichotNusach(prev))
         NotificationScheduler.rebuild().catch(reportScheduleError);
     }),
-    // A halacha track's windows exist only while its pack is installed.
-    ...HALACHA_TRACKS.map((track) =>
+    // A halacha book's windows exist only while its pack is installed.
+    ...HALACHA_BOOKS.map((track) =>
       HALACHA_STORES[track].subscribe((state, prev) => {
         if ((state.installed === null) !== (prev.installed === null))
           NotificationScheduler.rebuild().catch(reportScheduleError);

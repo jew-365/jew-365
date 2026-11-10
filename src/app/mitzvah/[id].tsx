@@ -18,7 +18,7 @@ import { SelichotAddonCard } from '@/components/SelichotAddonCard';
 import { WindowTimeline } from '@/components/WindowTimeline';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
-import { effectiveHalachaTrack } from '@/data/halacha';
+import { effectiveHalachaTrack, halachaBookOf } from '@/data/halacha';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import {
@@ -103,11 +103,14 @@ export default function MitzvahDetailScreen() {
   const isLearning = isChok || isShnayim;
   const chokInstalled = useChokStore((s) => s.installed !== null);
   const shnayimInstalled = useShnayimStore((s) => s.installed !== null);
-  // The two halacha mitzvot read the user's track, so its pack is the add-on they wait for.
+  // The halacha mitzvot read a book (the user's track, or the Chofetz Chaim), so its pack is the add-on they wait for.
   const isHalacha = Boolean(mitzvah && isHalachaText(mitzvah.id));
-  const halachaTrack = effectiveHalachaTrack(
-    useUserStore((s) => s.halachaTrack),
-    nusach,
+  const halachaTrack = halachaBookOf(
+    mitzvah?.id ?? '',
+    effectiveHalachaTrack(
+      useUserStore((s) => s.halachaTrack),
+      nusach,
+    ),
   );
   const halachaInstalled = HALACHA_STORES[halachaTrack]((s) => s.installed !== null);
   const awaitingAddon =
