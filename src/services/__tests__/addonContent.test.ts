@@ -36,7 +36,19 @@ import {
   reconcileSelichotInstall,
   verifySelichotInstall,
 } from '@/services/SelichotContentService';
-import { clearChokCache, clearSelichotCache } from '@/services/SiddurService';
+import {
+  cancelHalachaDownload,
+  checkHalachaUpdate,
+  deleteHalacha,
+  HALACHA_BASE_URL,
+  installHalacha,
+  parseHalachaManifest,
+  prepareHalachaDownload,
+  reconcileHalachaInstalls,
+  verifyHalachaInstall,
+} from '@/services/HalachaContentService';
+import { clearChokCache, clearHalachaCache, clearSelichotCache } from '@/services/SiddurService';
+import { HALACHA_STORES, resetHalachaStores } from '@/stores/useHalachaStore';
 import { AddonStoreState, selectAddonUpdateAvailable } from '@/stores/addonState';
 import { useChokStore } from '@/stores/useChokStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -70,6 +82,8 @@ type AddonCase = {
   reconcile: () => void;
   clearCache: () => void;
 };
+
+const HALACHA_UNITS = ['simanim-001-010', 'simanim-011-020', 'simanim-021-030'];
 
 const chokStem = (parasha: string) =>
   parasha
@@ -124,6 +138,34 @@ const CASES: AddonCase[] = [
     verify: verifySelichotInstall,
     reconcile: reconcileSelichotInstall,
     clearCache: clearSelichotCache,
+  },
+  {
+    name: 'Halacha (Kitzur)',
+    baseUrl: HALACHA_BASE_URL.kitzur,
+    manifestUrl: `${HALACHA_BASE_URL.kitzur}manifest.json`,
+    root: 'halacha-kitzur',
+    keys: HALACHA_UNITS,
+    wanted: HALACHA_UNITS,
+    extension: '.json.gz',
+    stem: (unit) => unit,
+    folder: (version) => `v${version}`,
+    extra: {
+      track: 'kitzur',
+      credit: { he: 'קרדיט', en: 'credit' },
+      units: Object.fromEntries(HALACHA_UNITS.map((unit) => [unit, { he: unit, en: unit, count: 1 }])),
+      schedule: { kind: 'hebrew', months: {}, leapReview: [] },
+      festivals: {},
+    },
+    store: HALACHA_STORES.kitzur,
+    parse: (raw) => parseHalachaManifest('kitzur', raw),
+    prepare: () => prepareHalachaDownload('kitzur'),
+    install: (manifest) => installHalacha('kitzur', manifest),
+    cancel: () => cancelHalachaDownload('kitzur'),
+    remove: () => deleteHalacha('kitzur'),
+    check: (now) => checkHalachaUpdate('kitzur', now),
+    verify: () => verifyHalachaInstall('kitzur'),
+    reconcile: reconcileHalachaInstalls,
+    clearCache: () => clearHalachaCache('kitzur'),
   },
 ];
 
@@ -218,6 +260,7 @@ describe.each(CASES)('the add-on core with $name', (c) => {
     (global as unknown as { fetch: typeof fetchMock }).fetch = fetchMock;
     useChokStore.getState().reset();
     useSelichotStore.getState().reset();
+    resetHalachaStores();
     useMitzvotStore.getState().reset();
   });
 

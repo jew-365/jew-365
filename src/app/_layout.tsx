@@ -35,6 +35,7 @@ import { captureException } from '@/services/crashReporting';
 import { reloadApp } from '@/services/appReload';
 import { reconcileChokInstall } from '@/services/ChokContentService';
 import { reconcileShnayimInstall } from '@/services/ShnayimContentService';
+import { reconcileHalachaInstalls } from '@/services/HalachaContentService';
 import { reconcileSelichotInstall } from '@/services/SelichotContentService';
 import { afterPaint } from '@/utils/afterPaint';
 import { reconcileEndedCustomMitzvot } from '@/stores/customMitzvahLifecycle';
@@ -360,6 +361,7 @@ function RootLayout() {
     reconcileChokInstall();
     reconcileShnayimInstall();
     reconcileSelichotInstall();
+    reconcileHalachaInstalls();
     return initNotificationHandlers();
   }, [ready]);
 

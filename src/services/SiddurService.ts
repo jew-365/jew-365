@@ -1,3 +1,4 @@
+import { File } from 'expo-file-system';
 import { Nusach } from '@/types/mitzvah';
 import { ChokAsset } from '@/types/chok';
 import { SiddurText, SiddurTextId } from '@/types/siddur';
@@ -12,6 +13,9 @@ import { useShnayimStore } from '@/stores/useShnayimStore';
 import { shnayimAsChok } from '@/utils/shnayim';
 import { useChokStore } from '@/stores/useChokStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
+import { halachaUnitFile, readHalachaEnglish, readHalachaUnit } from '@/services/halachaFiles';
+import { HALACHA_STORES } from '@/stores/useHalachaStore';
+import { HalachaEnglishUnit, HalachaPack, HalachaTrack, HalachaUnit } from '@/types/halacha';
 
 const loaded = new Map<string, Promise<unknown>>();
 
@@ -66,5 +70,27 @@ export function clearChokCache(): void {
 export function clearSelichotCache(): void {
   for (const key of [...loaded.keys()]) {
     if (key.startsWith('selichot/')) loaded.delete(key);
+  }
+}
+
+// A unit of a halacha track, or the English of a Kitzur unit, from the installed pack.
+function loadHalachaFile<T>(pack: HalachaPack, unit: string, read: (file: File) => Promise<T>): Promise<T> {
+  const install = HALACHA_STORES[pack].getState().installed;
+  const file = install ? halachaUnitFile(pack, install, unit) : null;
+  if (!install || !file) return Promise.reject(new Error(`no halacha unit ${pack}/${unit}`));
+  return loadOnce(`halacha/${pack}/${install.version}/${unit}`, () => read(file));
+}
+
+export function loadHalachaUnit(track: HalachaTrack, unit: string): Promise<HalachaUnit> {
+  return loadHalachaFile(track, unit, readHalachaUnit);
+}
+
+export function loadHalachaEnglish(unit: string): Promise<HalachaEnglishUnit> {
+  return loadHalachaFile('kitzur_en', unit, readHalachaEnglish);
+}
+
+export function clearHalachaCache(pack: HalachaPack): void {
+  for (const key of [...loaded.keys()]) {
+    if (key.startsWith(`halacha/${pack}/`)) loaded.delete(key);
   }
 }

@@ -70,10 +70,14 @@ export type AddonConfig = {
   baseUrl: string;
   root: string;
   format: number;
-  keys: readonly string[];
+  // The keys every manifest holds, or, for an add-on whose keys the manifest itself lists (the halacha units), how to
+  // read them from it; an install then takes every key of the manifest.
+  keys: readonly string[] | ((raw: Record<string, unknown>) => readonly string[]);
   gzPath: RegExp;
   parseExtra?: (raw: Record<string, unknown>) => void;
   dirName: (version: number, keys: readonly string[]) => string;
+  // Files written beside the downloaded ones before the install is recorded (the halacha schedule), by name.
+  extraFiles?: (manifest: AddonManifest) => Record<string, string>;
   store: AddonStoreApi;
   clearCache: () => void;
   onForget?: () => void;
@@ -117,7 +121,8 @@ export function createAddonContent<M extends AddonManifest>(config: AddonConfig)
     if (!isRecord(raw) || raw.format !== config.format) throw unavailable();
     const { version, gzipBytes, gz } = raw;
     if (!Number.isInteger(version) || (version as number) < 1) throw unavailable();
-    if (gzipBytes !== addonEntriesBytes(gz, config.keys, config.gzPath)) throw unavailable();
+    const keys = typeof config.keys === 'function' ? config.keys(raw) : config.keys;
+    if (gzipBytes !== addonEntriesBytes(gz, keys, config.gzPath)) throw unavailable();
     config.parseExtra?.(raw);
     return raw as unknown as M;
   }
@@ -257,6 +262,12 @@ export function createAddonContent<M extends AddonManifest>(config: AddonConfig)
       bytes += file.bytes;
       setDownload({ status: 'downloading', done: index + 1, total, bytes, totalBytes });
     }
+    try {
+      for (const [name, text] of Object.entries(config.extraFiles?.(manifest) ?? {}))
+        new File(target, name).write(text);
+    } catch {
+      throw new AddonDownloadError('storage');
+    }
     if (signal.aborted) throw new AddonDownloadError('cancelled');
     setInstalled({
       version: manifest.version,
@@ -295,7 +306,10 @@ export function createAddonContent<M extends AddonManifest>(config: AddonConfig)
     }
   }
 
-  function install(manifest: M, keys: readonly string[] = config.keys): Promise<boolean> {
+  function install(
+    manifest: M,
+    keys: readonly string[] = typeof config.keys === 'function' ? Object.keys(manifest.gz) : config.keys,
+  ): Promise<boolean> {
     if (running) return running;
     if (!addonDownloadSupported()) return Promise.resolve(false);
     const aborter = new AbortController();

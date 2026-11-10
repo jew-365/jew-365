@@ -39,6 +39,12 @@ jest.mock('@/services/shnayimFiles', () => ({
   deleteShnayimFiles: () => mockDeleteShnayimFiles(),
 }));
 
+const mockDeleteHalachaFiles = jest.fn();
+jest.mock('@/services/halachaFiles', () => ({
+  ...jest.requireActual('@/services/halachaFiles'),
+  deleteHalachaFiles: (pack: string) => mockDeleteHalachaFiles(pack),
+}));
+
 const mockDeleteSelichotFiles = jest.fn();
 jest.mock('@/services/selichotFiles', () => ({
   ...jest.requireActual('@/services/selichotFiles'),
@@ -47,6 +53,7 @@ jest.mock('@/services/selichotFiles', () => ({
 
 import { AppResetService } from '../AppResetService';
 import { useShnayimStore } from '@/stores/useShnayimStore';
+import { HALACHA_STORES } from '@/stores/useHalachaStore';
 import { taharahStorage } from '../TaharahStorage';
 import { useUserStore } from '@/stores/useUserStore';
 import { DEFAULT_UI_SCALE, __setUiScaleForTests } from '@/theme/scale';
@@ -137,6 +144,24 @@ describe('AppResetService.reset', () => {
 
     expect(useShnayimStore.getState().installed).toBeNull();
     expect(mockDeleteShnayimFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('forgets every pack of the halacha add-on and deletes its files', async () => {
+    const install = { version: 1, bytes: 1, installedAt: 1, files: { unit: 'unit.json.gz' } };
+    HALACHA_STORES.kitzur.getState().setInstalled(install);
+    HALACHA_STORES.kitzur_en.getState().setInstalled(install);
+    HALACHA_STORES.rambam.getState().setInstalled(install);
+    mockDeleteHalachaFiles.mockClear();
+
+    await AppResetService.reset();
+
+    for (const store of Object.values(HALACHA_STORES)) expect(store.getState().installed).toBeNull();
+    expect(mockDeleteHalachaFiles.mock.calls.map(([pack]) => pack).sort()).toEqual([
+      'ben_ish_chai',
+      'kitzur',
+      'kitzur_en',
+      'rambam',
+    ]);
   });
 
   it('hydrates the mitzvot store as a fresh install: default-on mitzvot stamped with the reset, no check-in for the Shabbat before it', async () => {

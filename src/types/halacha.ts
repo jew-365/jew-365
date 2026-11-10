@@ -63,3 +63,16 @@ export type HalachaUnit = {
 // The days of a festival's period a day falls in (spec 7.1): its 0-based index in the period and the days left until
 // the festival (1 on the erev).
 export type FestivalPeriod = { festival: FestivalKey; day: number; days: number; daysLeft: number };
+
+// What the device downloads: a track's Hebrew text, and the Kitzur's English beside it (the one track that ships
+// English, scripts/halacha/build.js).
+export type HalachaPack = HalachaTrack | 'kitzur_en';
+
+// The English of one unit: a translation or `null` per Hebrew segment, in order.
+export type HalachaEnglishUnit = { track: HalachaTrack; unit: string; credits: SiddurCredit[]; en: (string | null)[] };
+
+// What an install keeps of its manifest beside the units (`schedule.json`), so a window can read its day at once.
+export type HalachaScheduleFile = Pick<
+  HalachaManifest,
+  'track' | 'version' | 'book' | 'credit' | 'credits' | 'units' | 'schedule' | 'festivals'
+>;

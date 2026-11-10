@@ -5,6 +5,9 @@ import { clearTaharahStorage } from '@/services/TaharahStorage';
 import { clearLastError, reportError } from '@/services/errors';
 import { cancelChokDownload } from '@/services/ChokContentService';
 import { cancelShnayimDownload } from '@/services/ShnayimContentService';
+import { cancelHalachaDownloads } from '@/services/HalachaContentService';
+import { deleteHalachaFiles } from '@/services/halachaFiles';
+import { HALACHA_PACKS, resetHalachaStores } from '@/stores/useHalachaStore';
 import { cancelSelichotDownload } from '@/services/SelichotContentService';
 import { deleteChokFiles } from '@/services/chokFiles';
 import { deleteShnayimFiles } from '@/services/shnayimFiles';
@@ -35,6 +38,7 @@ export const AppResetService = {
       cancelChokDownload();
       cancelShnayimDownload();
       cancelSelichotDownload();
+      cancelHalachaDownloads();
       useUserStore.getState().reset();
       useMitzvotStore.persist.clearStorage();
       await useMitzvotStore.persist.rehydrate();
@@ -46,6 +50,7 @@ export const AppResetService = {
       useChokStore.getState().reset();
       useShnayimStore.getState().reset();
       useSelichotStore.getState().reset();
+      resetHalachaStores();
       try {
         await NotificationScheduler.cancelAll();
       } catch (error) {
@@ -76,6 +81,13 @@ export const AppResetService = {
           deleteSelichotFiles();
         } catch (error) {
           reportError('reset', error);
+        }
+        for (const pack of HALACHA_PACKS) {
+          try {
+            deleteHalachaFiles(pack);
+          } catch (error) {
+            reportError('reset', error);
+          }
         }
       }
     } finally {

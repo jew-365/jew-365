@@ -44,9 +44,12 @@ class File {
       typeof content === 'string' ? { dir: false, text: content } : { dir: false, data: content },
     );
   }
-  async text() {
+  textSync() {
     const entry = fileSystemState.fs.get(this.uri);
     return entry?.text ?? (entry?.data ? new TextDecoder().decode(entry.data) : '');
+  }
+  async text() {
+    return this.textSync();
   }
   async bytes() {
     const entry = fileSystemState.fs.get(this.uri);

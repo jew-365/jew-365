@@ -214,7 +214,7 @@ The existing `LearningProgram` is keyed by parasha and week slot (`ChokSlot` has
 | Types | `HalachaTrack`, the asset and manifest types in `src/types/halacha.ts`; both ids in the mitzvah registry |
 | Data | `src/data/halacha.ts`: ids, `hasHalachaContent(track)`, `halachaAsset()`, `defaultHalachaTrack()`, `effectiveHalachaTrack()` |
 | Logic | `src/utils/halacha.ts`: `halachaPortion()`, `festivalPeriodsOn()`, `festivalPortion()` |
-| Store | `useHalachaStore` (`halacha-store`): the installs per track, the latest version seen, when it was checked; device-only, out of the backup file, its `merge` dropping an install whose files are gone |
+| Store | `useHalachaStore` (as built: `HALACHA_STORES`, one store per pack, `halacha-<pack>-store`, so the shared add-on core drives each as it drives Chok LeYisrael's): the install, the latest version seen, when it was checked; device-only, out of the backup file, its `merge` dropping an install whose files are gone. A Hebrew install keeps its schedule in `schedule.json` beside its units, read by `halachaScheduleOf()` |
 | User store | `halachaTrack`, `null` by default, reset to `null`; no `STORE_VERSION` bump (a new optional field) |
 | Service | `src/services/HalachaContentService.ts` on the shared core in [src/services/addons/](../../src/services/addons) |
 | Mitzvot | `HALACHA_YOMIT` and `HILCHOT_HACHAG` in [src/data/mitzvot.ts](../../src/data/mitzvot.ts); `MITZVAH_STANDALONE_TEXT` is not used (they read the add-on) |
