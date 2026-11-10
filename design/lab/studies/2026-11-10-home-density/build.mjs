@@ -3,7 +3,8 @@
 // DOX check; its
 // node_modules hard-linked, src a real copy), the variant's edits applied to that copy's src, a web export, and
 // home captured by the store screenshot script (its seeded install and pinned clock) at 400x800 and 402x874.
-// The repository's own src is never written. Usage: node build.mjs [--only id,id]
+// The repository's own src is never written. Usage: node build.mjs [--only id,id] [--at HH:MM]; --at captures at
+// another hour of the same day (into shots/<id>@HHMM), through a copy of the screenshot script in the app copy.
 import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -44,7 +45,10 @@ function apply(edits) {
   }
 }
 
-const only = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1].split(',') : null;
+const arg = (flag) => (process.argv.includes(flag) ? process.argv[process.argv.indexOf(flag) + 1] : null);
+const only = arg('--only')?.split(',') ?? null;
+const at = arg('--at');
+if (at && !/^\d\d:\d\d$/.test(at)) throw new Error('--at takes HH:MM');
 for (const v of VARIANTS.filter((x) => !only || only.includes(x.id))) {
   console.log(`\n=== ${v.id}: ${v.name}`);
   prepare();
@@ -52,7 +56,15 @@ for (const v of VARIANTS.filter((x) => !only || only.includes(x.id))) {
   const dist = join(APP, 'dist-density', v.id);
   rmSync(dist, { recursive: true, force: true });
   run(process.execPath, [join(APP, 'node_modules', 'expo', 'bin', 'cli'), 'export', '-p', 'web', '--output-dir', dist], APP);
-  const shots = join(OUT, 'shots', v.id);
+  const shots = join(OUT, 'shots', at ? `${v.id}@${at.replace(':', '')}` : v.id);
   rmSync(shots, { recursive: true, force: true });
-  run(process.execPath, [join(ROOT, 'scripts', 'store', 'screenshots.mjs'), '--dist', dist, '--out', shots, '--sets', SETS, '--screens', '1-home'], ROOT);
+  let script = join(ROOT, 'scripts', 'store', 'screenshots.mjs');
+  if (at) {
+    const from = "const NOW = { date: '2026-11-04', time: '15:40' };";
+    const text = readFileSync(script, 'utf8');
+    if (!text.includes(from)) throw new Error('the screenshot script lost its NOW');
+    script = join(APP, 'scripts', 'store', 'screenshots-at.mjs');
+    writeFileSync(script, text.replace(from, `const NOW = { date: '2026-11-04', time: '${at}' };`));
+  }
+  run(process.execPath, [script, '--dist', dist, '--out', shots, '--sets', SETS, '--screens', '1-home'], ROOT);
 }

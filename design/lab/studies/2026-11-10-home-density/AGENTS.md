@@ -8,13 +8,14 @@
 ## Ownership
 
 - This study shows the real app, not a template: a size is the question, and the app's own layout answers it best. [build.mjs](build.mjs) copies the repository to `jew-365-density-app` beside it, outside the repository so Jest, Metro and the DOX check never see the copy (its `node_modules` hard-linked, `src` a real copy, the web exports in its `dist-density`), applies a variant's edits to that copy (each names the exact text it replaces and fails when the app moved it), exports the web build and captures home through [../../../../scripts/store/screenshots.mjs](../../../../scripts/store/screenshots.mjs) (its seeded install and its clock, Wednesday 2026-11-04 15:40 in Jerusalem) at 400 by 800 and 402 by 874. The repository's `src` is never written.
-- [assemble.mjs](assemble.mjs) writes the gallery into the build output's `site` folder: each capture as a JPEG, the height of each hero measured off its capture (the first row of the page colour under the land, in points), the radius from the variant's scene rule, and the size table. It needs python3 with Pillow.
+- [build.mjs](build.mjs) `--at HH:MM` captures the same day at another hour through a copy of the screenshot script in the app copy, with only its `NOW` time changed, into `shots/<id>@HHMM`.
+- [assemble.mjs](assemble.mjs) writes the gallery into the build output's `site` folder: each capture as a JPEG, the height of each hero measured off its capture (the first row of the page colour under the land, in points), the radius from the variant's scene rule, and the size table, then a section of the other hours' captures in pairs when there are any. It needs python3 with Pillow.
 - There is no canvas: the boards of earlier studies draw a copy of home, and this question needs the app itself.
 
 ## Local Contracts
 
 - Published as one private Artifact; republish to the same link after a change: https://claude.ai/artifact/GyqeKYGChr3rYCwAGXr2An (the build output's `site` folder as `root`, its `index.html` as the file, the ten JPEGs under `shots/` in `files`).
-- The owner's pick: none yet.
+- The owner's pick: none yet; on 2026-11-10 the owner was choosing between א and ג ("מתלבט בין א לג"), so both were also captured at 06:10, 17:00 and 20:30 (`node build.mjs --only balanced,openSky --at HH:MM`), shown in pairs on the gallery.
 
 ## Work Guidance
 

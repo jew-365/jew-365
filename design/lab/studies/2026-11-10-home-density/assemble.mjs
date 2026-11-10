@@ -2,7 +2,7 @@
 // height of each variant's hero measured off its capture (the first row of the page colour under the land),
 // and the size table from variants.mjs. Needs python3 with Pillow for the JPEGs and the measure.
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NOW, VARIANTS } from './variants.mjs';
@@ -38,6 +38,12 @@ const jobs = VARIANTS.flatMap((v) =>
     scale: s.scale,
   })),
 );
+// Captures at other hours (build.mjs --at), shown in pairs at 400 by 800.
+const hours = existsSync(join(OUT, 'shots'))
+  ? readdirSync(join(OUT, 'shots')).filter((d) => d.includes('@')).sort()
+  : [];
+for (const d of hours)
+  jobs.push({ key: d, src: join(OUT, 'shots', d, 'play-he', '1-home.png'), dst: join(SITE, 'shots', `${d.replace('@', '-at-')}.jpg`), scale: 2.7 });
 const r = spawnSync('python3', ['-c', py, JSON.stringify(jobs)], { encoding: 'utf8' });
 if (r.status !== 0) throw new Error(r.stderr);
 const hero = JSON.parse(r.stdout);
@@ -76,6 +82,21 @@ const phones = (set) =>
 </figure>`;
   }).join('\n');
 
+const times = [...new Set(hours.map((d) => d.split('@')[1]))].sort();
+const hourIds = VARIANTS.filter((v) => hours.some((d) => d.startsWith(v.id + '@')));
+const hourSection = times.length
+  ? `<h2>${hourIds.map((v) => esc(v.name)).join(' מול ')}, בשעות אחרות של היום</h2>
+<p class="note">אותו יום, 400 × 800. בלי רקע לברכה (ג) הכתב יושב ישר על השמיים, ולכן כדאי לראות אותו גם בשחר, בשקיעה ובלילה.</p>
+${times
+  .map(
+    (t) => `<div class="hour"><h3>${t.slice(0, 2)}:${t.slice(2)}</h3><div class="pair">${hourIds
+      .map(
+        (v) => `<figure><img src="shots/${v.id}-at-${t}.jpg" alt="${esc(v.name)} בשעה ${t.slice(0, 2)}:${t.slice(2)}" width="400" height="800"><figcaption>${esc(v.name)}</figcaption></figure>`,
+      )
+      .join('')}</div></div>`,
+  )
+  .join('\n')}`
+  : '';
 const html = `<title>גדלים בדף הבית</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -114,6 +135,12 @@ tr:last-child td{border-bottom:0}
 thead th{font-weight:700;background:var(--wash)}
 tbody th{font-weight:500;color:var(--sub);white-space:nowrap}
 .note{margin:0;max-width:72ch;font-size:13px;color:var(--sub)}
+.hours{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:20px}
+.hour{display:flex;flex-direction:column;gap:8px;min-width:0}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pair figure{margin:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.pair img{display:block;width:100%;height:auto;border-radius:16px;border:1px solid var(--line)}
+.pair figcaption{font-size:13px;color:var(--sub)}
 </style>
 <div class="wrap" dir="rtl" lang="he">
 <h1>גדלים בדף הבית</h1>
@@ -122,6 +149,7 @@ tbody th{font-weight:500;color:var(--sub);white-space:nowrap}
 ${SETS.map((s, i) => `<button type="button" id="set-${s.id}" data-set="${s.id}" aria-pressed="${i === 0}">${s.label}</button>`).join('')}
 </div>
 ${SETS.map((s, i) => `<div class="row" data-row="${s.id}"${i ? ' hidden' : ''}>\n${phones(s)}\n</div>`).join('\n')}
+${hourSection ? hourSection.replace(/(<\/p>\n)/, '$1<div class="hours">') + '</div>' : ''}
 <h2>הגדלים, אחד ליד השני</h2>
 <div class="tbl"><table>
 <thead><tr><th>מה</th>${VARIANTS.map((v) => `<th>${esc(v.name)}</th>`).join('')}</tr></thead>
