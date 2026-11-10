@@ -1,58 +1,57 @@
 {
   "format": 1,
-  "version": 1,
+  "version": 2,
   "track": "shemirat_halashon",
   "book": {
     "he": "ספר שמירת הלשון",
     "en": "Sefer Shemirat HaLashon"
   },
   "credit": {
-    "he": "ספר שמירת הלשון: Shemirat HaLashon -- Torat Emet 370 (CC-BY-NC-SA 2.5 (Torat Emet, no commercial use)), דרך ספריא. לוח הלימוד: שמירת הלשון היומי, מחזור בשנה, כפי ש־Hebcal מפרסם (BSD)",
-    "en": "Sefer Shemirat HaLashon: Shemirat HaLashon -- Torat Emet 370 (CC-BY-NC-SA 2.5 (Torat Emet, no commercial use)), via Sefaria. Schedule: the daily Shemirat HaLashon, one cycle a year, as Hebcal publishes it (BSD)"
+    "he": "ספר שמירת הלשון: Shemirat HaLashon -- Torat Emet 370, דרך ספריא. לוח הלימוד: שמירת הלשון היומי, מחזור בשנה, כפי ש־Hebcal מפרסם (BSD)",
+    "en": "Sefer Shemirat HaLashon: Shemirat HaLashon -- Torat Emet 370, via Sefaria. Schedule: the daily Shemirat HaLashon, one cycle a year, as Hebcal publishes it (BSD)"
   },
   "credits": [
     {
       "title": "Shemirat HaLashon -- Torat Emet 370, via Sefaria",
-      "license": "CC-BY-NC-SA 2.5 (Torat Emet, no commercial use)",
       "url": "http://www.ateret4u.com/online/f_01605.html"
     }
   ],
-  "gzipBytes": 315446,
+  "gzipBytes": 315010,
   "gz": {
     "introduction": {
-      "path": "introduction.779aca8f.json.gz",
-      "sha256": "779aca8fe3131b3c18bcf1ab6a490bf7d3a0372092c2bbf5a0714625bf5ddd5d",
-      "bytes": 11398
+      "path": "introduction.40f67a8c.json.gz",
+      "sha256": "40f67a8c02875c255a4c3146b20cc03ac71e7ef64f1c7757480169316d9c8ab0",
+      "bytes": 11338
     },
     "remembering": {
-      "path": "remembering.46b9ef80.json.gz",
-      "sha256": "46b9ef80c68096bb5f1bd9edbdc7c2a7dc733ecce3019b982c522e4089edcf24",
-      "bytes": 61126
+      "path": "remembering.f2fa73a1.json.gz",
+      "sha256": "f2fa73a107e198a5d17d51f2ddfa4db32acd02a300d51d3d0d28c05d3ffba511",
+      "bytes": 61063
     },
     "discerning": {
-      "path": "discerning.b4250d94.json.gz",
-      "sha256": "b4250d941eadd380e2de13cb479ab16a951c59e0f814f3f274115f65e335b746",
-      "bytes": 58938
+      "path": "discerning.bf931f30.json.gz",
+      "sha256": "bf931f309c88f8b5496d2028bf6884b6110ba646b8692b2b65dc9247d5eabeaf",
+      "bytes": 58873
     },
     "torah": {
-      "path": "torah.4e8d05be.json.gz",
-      "sha256": "4e8d05bedd9b2e6fc0617ee7655d597f4d106d3aa23bb0d866e3df8a3be7deea",
-      "bytes": 60951
+      "path": "torah.ee84474e.json.gz",
+      "sha256": "ee84474ee95a13459def149f948f337d042a7ba46a8c773644122d9df280b39f",
+      "bytes": 60889
     },
     "epilogue-1": {
-      "path": "epilogue-1.24f7f52f.json.gz",
-      "sha256": "24f7f52ff3d2e210f21d56a4adb81e36efc301553618d53fb39c223717eb9db0",
-      "bytes": 18959
+      "path": "epilogue-1.9f2c2941.json.gz",
+      "sha256": "9f2c294159eb1ce181f016970620d0ea4da188f9989634a81de951ef7d5a9040",
+      "bytes": 18897
     },
     "chapters": {
-      "path": "chapters.debe586c.json.gz",
-      "sha256": "debe586cbcbb98954020ed1d587490167689e17ac8d66d94b6112c1e087e4852",
-      "bytes": 88747
+      "path": "chapters.f12cf383.json.gz",
+      "sha256": "f12cf383fd636eef8be97369fb26734542b6d2df7781fe557fadb3f191f5cfd9",
+      "bytes": 88685
     },
     "epilogue-2": {
-      "path": "epilogue-2.ab196a26.json.gz",
-      "sha256": "ab196a26d77b035db95099c70650dc9f7b15939c68b3b449dea8a7046499c35e",
-      "bytes": 15327
+      "path": "epilogue-2.8d44e9d8.json.gz",
+      "sha256": "8d44e9d883421370e15ee2b6950c8749f290ad73b2c8e2add901fc4de2e60ec7",
+      "bytes": 15265
     }
   },
   "units": {

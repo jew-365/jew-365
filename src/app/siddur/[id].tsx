@@ -2705,7 +2705,7 @@ export default function SiddurScreen() {
                           accessibilityRole="link"
                         >
                           <Text style={[typography.caption, { color: colors.textMuted, marginTop: spacing.xs }]}>
-                            {credit.title} · {credit.license}
+                            {credit.license ? `${credit.title} · ${credit.license}` : credit.title}
                           </Text>
                         </Pressable>
                       ))}

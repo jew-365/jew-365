@@ -1099,9 +1099,10 @@ function englishFor(track, sources, built) {
 // ---------------------------------------------------------------------------------------------------------------
 // Outputs
 
+// A version whose `license` is null names none (Shemirat HaLashon).
 const credit = (v) => ({
   title: `${v.version}, via Sefaria`,
-  license: v.license || 'unknown',
+  ...(v.license === null ? {} : { license: v.license || 'unknown' }),
   url: v.source || SEFARIA,
 });
 
@@ -1126,7 +1127,7 @@ const SCHEDULE_CREDIT = {
 };
 
 function trackCredit(track, versions) {
-  const named = versions.map((v) => `${v.version} (${v.license})`).join('; ');
+  const named = versions.map((v) => (v.license === null ? v.version : `${v.version} (${v.license})`)).join('; ');
   return {
     he: `${BOOK[track].he}: ${named}, דרך ספריא. ${SCHEDULE_CREDIT[track].he}`,
     en: `${BOOK[track].en}: ${named}, via Sefaria. ${SCHEDULE_CREDIT[track].en}`,

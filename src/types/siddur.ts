@@ -137,7 +137,8 @@ export type SegmentBlock = {
 
 export type SiddurCredit = {
   title: string;
-  license: string;
+  // Absent when the source names no licence (Shemirat HaLashon, whose rights are the author's).
+  license?: string;
   url: string;
 };
 

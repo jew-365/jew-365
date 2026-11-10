@@ -60,7 +60,8 @@ const CHAFETZ_CHAIM = {
 const SHEMIRAT_HALASHON = {
   index: 'Shemirat HaLashon',
   he: 'Shemirat HaLashon -- Torat Emet 370',
-  license: 'CC-BY-NC-SA 2.5 (Torat Emet, no commercial use)',
+  // Torat Emet's file names only the author as the rights holder, so the credit names no licence (the owner's call, 2026-11-10).
+  license: null,
   parts: {
     introduction: { node: ['Book I', 'Introduction'], he: 'הקדמה', en: 'Introduction' },
     remembering: { node: ['Book I', 'The Gate of Remembering'], he: 'שער הזכירה', en: 'The Gate of Remembering' },

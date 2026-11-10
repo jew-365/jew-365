@@ -295,8 +295,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'Laws of Lashon Hara is a third learning mitzvah, for every nusach and whatever book was chosen: Sefer Chofetz Chaim by its daily luach, three cycles a year, through the preface, the introduction, the laws of lashon hara, the laws of rechilut and the illustrations. The book is an add-on of its own, downloaded from the same places, with an English translation, and the reader, Done and the make-ups work as for the daily halacha. Its default reminder is at 13:00.',
       },
       {
-        he: '״שמירת הלשון״ היא מצוות לימוד רביעית, לכל נוסח: ספר שמירת הלשון של החפץ חיים, שערי הזכירה, התבונה והתורה וחלק ב, פעם אחת בשנה לפי הלוח היומי. הטקסט במהדורת תורת אמת, ברישיון CC BY-NC-SA 2.5 (בלי שימוש מסחרי), עם הקרדיט בקורא. גם הוא תוסף נפרד עם תרגום לאנגלית, ותזכורת ברירת המחדל ב־20:30.',
-        en: "Shemirat HaLashon is a fourth learning mitzvah, for every nusach: the Chofetz Chaim's Sefer Shemirat HaLashon, the Gates of Remembering, Discernment and Torah and Book II, once a year by the daily luach. The text is the Torat Emet edition, under CC BY-NC-SA 2.5 (no commercial use), credited in the reader. It is an add-on of its own too, with an English translation, and its default reminder is at 20:30.",
+        he: '״שמירת הלשון״ היא מצוות לימוד רביעית, לכל נוסח: ספר שמירת הלשון של החפץ חיים, שערי הזכירה, התבונה והתורה וחלק ב, פעם אחת בשנה לפי הלוח היומי. גם הוא תוסף נפרד עם תרגום לאנגלית, ותזכורת ברירת המחדל ב־20:30.',
+        en: "Shemirat HaLashon is a fourth learning mitzvah, for every nusach: the Chofetz Chaim's Sefer Shemirat HaLashon, the Gates of Remembering, Discernment and Torah and Book II, once a year by the daily luach. It is an add-on of its own too, with an English translation, and its default reminder is at 20:30.",
       },
     ],
     routes: [],

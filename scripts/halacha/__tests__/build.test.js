@@ -333,14 +333,17 @@ describe('the published add-on', () => {
     },
   );
 
-  it("labels a Shemirat HaLashon day by its part, chapter and paragraphs, and credits Torat Emet's terms", () => {
+  it('labels a Shemirat HaLashon day by its part, chapter and paragraphs, and credits its source with no licence', () => {
     const { common } = manifests.shemirat_halashon.schedule;
     expect(common.Tishrei[0].label).toEqual({ he: 'הקדמה, א–ב', en: 'Introduction 1–2' });
     expect(common.Tishrei[10].label).toEqual({ he: 'שער הזכירה, פרק א, א–ד', en: 'The Gate of Remembering 1:1–4' });
     expect(common.Av[13].label).toEqual({ he: 'חלק ב, פרק יט, הגהה לסעיף יא', en: 'Book II 19, gloss on 11' });
     expect(manifests.shemirat_halashon.credits).toEqual([
-      expect.objectContaining({ license: 'CC-BY-NC-SA 2.5 (Torat Emet, no commercial use)' }),
+      { title: 'Shemirat HaLashon -- Torat Emet 370, via Sefaria', url: 'http://www.ateret4u.com/online/f_01605.html' },
     ]);
+    expect(manifests.shemirat_halashon.credit.en).toBe(
+      'Sefer Shemirat HaLashon: Shemirat HaLashon -- Torat Emet 370, via Sefaria. Schedule: the daily Shemirat HaLashon, one cycle a year, as Hebcal publishes it (BSD)',
+    );
   });
 
   it("labels a Chofetz Chaim day by its part, principle and se'ifim", () => {

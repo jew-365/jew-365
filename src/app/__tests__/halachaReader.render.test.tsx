@@ -272,7 +272,7 @@ describe('the Shemirat HaLashon reader', () => {
     await openAt('2026-11-18T12:00', labelOn('shemirat_halashon', '2026-11-18'));
     expect(screen.getAllByText('שמירת הלשון').length).toBeGreaterThan(0);
     expect(screen.getByText('ספר שמירת הלשון')).toBeOnTheScreen();
-    expect(screen.getByText(/Torat Emet, no commercial use/)).toBeOnTheScreen();
+    expect(screen.getByText('Shemirat HaLashon -- Torat Emet 370, via Sefaria')).toBeOnTheScreen();
     fireEvent.press(screen.getByText('סיימתי'));
     expect(marked('2026-11-18', 'shemirat_halashon')).toBe(true);
   });
