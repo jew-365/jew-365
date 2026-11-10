@@ -37,6 +37,10 @@ jest.mock('@/services/shnayimFiles', () => ({
   ...jest.requireActual('@/services/shnayimFiles'),
   deleteShnayimFiles: jest.fn(),
 }));
+jest.mock('@/services/halachaFiles', () => ({
+  ...jest.requireActual('@/services/halachaFiles'),
+  deleteHalachaFiles: jest.fn(),
+}));
 jest.mock('@/services/selichotFiles', () => ({
   ...jest.requireActual('@/services/selichotFiles'),
   deleteSelichotFiles: jest.fn(),
