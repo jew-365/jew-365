@@ -511,6 +511,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Found:** the fixed part-of-day tones were their own colours, not the sky's, and followed the clock, not the hour previewed.
   - **Done:** 2026-11-10: the card is `cardGlass()` of the sky shown ([src/utils/dayArc.ts](src/utils/dayArc.ts)): the sky's own middle colour taken 55% toward the dark ink or white, at 0.62, with a hairline edge in the ink that keeps it apart from the night sky; a preview's hour sets it too. Its ink holds 4.5:1 or more every 10 minutes of three days of the year ([src/utils/__tests__/dayArc.test.ts](src/utils/__tests__/dayArc.test.ts)); the period tones are removed. Checked in the web build at 06:10, 15:40, 17:00 and 20:30. Verified: `typecheck`, `lint`, `format:check`, `check:dox`, the full suite (6676 passed).
   - **Status:** 1.0.21 · Committed: `34dc236` fix(home): the card in the sky's own glass, following the preview · Pushed: yes · Live: preview `1.0.21-75` (group `34966558-5e01-41ae-a0de-ca35fa7a97bf`, from `52fc7ce`, 2026-11-10); production no · Channel: preview
+  - **Checked:** the owner on the preview app, 2026-11-10: "בדקתי בטלפון, עובד".
 
 - [ ] Home's board answers and the return to home on every return
   - **Flag:** `OTA`.
