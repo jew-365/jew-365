@@ -167,14 +167,15 @@ Questionnaire notes:
 
 ## Store Graphics
 
-The redesigned set made on 2026-10-21 replaced the temporary graphics of 2026-10-20 in the Hebrew default listing the same day. The icon and the feature graphic still are that set, in the user's `Downloads\jew365-play-assets\redesign`, and still show the four-symbol logo the app replaced with the bell and the open book on 2026-11-02:
+Since 2026-11-10 (the owner's request, "תחליף", and "מאשר" to send it) every graphic carries the logo of 2026-11-02, the bell and the open book; the set of 2026-10-21, with the four-symbol logo, is retired (`Downloads\jew365-play-assets\redesign`). The files live in the user's `Downloads\jew365-play-assets\2026-11-10`:
 
-- App icon: 512x512, a downscale of the launcher icon of that day.
-- Feature graphic: 1024x500, a cream background with the full logo, the name, the tagline and a one-line description.
+- App icon: `icon-512.png`, 512x512 RGB, a Lanczos downscale of [../assets/icon.png](../assets/icon.png), the launcher icon. On the default listing; the `en-US` translation inherits it.
+- Feature graphic, 1024x500 RGB, a cream page (`#F6F1E8`) with a soft orange glow behind the full mark (`mark-o.svg`) on the left and Rubik text on the right in the gold palette's colours: `feature-graphic-he-1024x500.png` on the default listing ("יהודי 365", "כל מצווה בזמנה", "תזכורות, סידור בנוסח שלך ומעקב יומי") and `feature-graphic-en-1024x500.png` on `en-US` ("Jew 365", "Every mitzvah in its time", "Reminders, a siddur in your nusach and daily tracking"), drawn in headless Chrome from an HTML page built around the mark.
+- AI asset declaration: the icon and both feature graphics are labelled created or edited using AI (the owner's answer of 2026-11-10: the image the logo was traced from was made or edited with AI); the screenshots are not labelled.
 
 Phone screenshots since 2026-11-10 (the owner's request, "תחליף את הצילומים שיתאימו לגרסה הנוכחית"): the `play-he` and `play-en` sets of `pnpm store:screenshots`, rendered from `acaa72f`, the commit of AAB versionCode 10, 1080x2160, seven each in this order: Home, Siddur tab, Reader (Mincha on Ashrei), History, Settings, Rabbi Shimon bar Yochai's page, the weekly report of 25–31.10. The Hebrew set is on the default listing (`iw-IL`, files `1-home.png` to `7-report.png`); the English set is on the `en-US` translation (`en-1-home.png` to `en-7-report.png`), which until then showed copies of the Hebrew ones. Not labelled as AI assets. Play took the 1:2 images without an error although its form names 16:9 and 9:16. The files live in the user's `Downloads\jew365-play-assets\2026-11-10\he` and `\en`.
 
-In the console (checked 2026-11-10) the default listing carries `v3-icon-512.png` and `v2-feature-graphic-1024x500.png`; the English translation showed the same two on 2026-10-23.
+In the console (checked 2026-11-10) the default listing carries `icon-512.png`, `feature-graphic-he-1024x500.png` and the seven Hebrew screenshots, and `en-US` carries `feature-graphic-en-1024x500.png` and the seven English ones, with the icon inherited.
 
 ## Closed Test
 
@@ -283,4 +284,4 @@ Jew 365 arrives in the store: a reminder for each mitzvah in its halachic time a
 </en-US>
 ```
 
-The store listing's text and its icon and feature graphic went out as they stood (2026-10-23); its phone screenshots were replaced the same day with the set of `acaa72f` ([Store Graphics](#store-graphics)) and sent to review with the release. The copy of 2026-11-01 stays held by the owner.
+The store listing's text went out as it stood (2026-10-23); its icon, feature graphics and phone screenshots were replaced the same day ([Store Graphics](#store-graphics)) and sent to review with the release. The copy of 2026-11-01 stays held by the owner.
