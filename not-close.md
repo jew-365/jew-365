@@ -648,7 +648,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** D8 and the owner's "שינתן למשתמש אפשרות להחליף".
   - **Expected result:** The settings, siddur catalog, More tab, library and smoke suites extended and green: the select shows the nusach's default, a change offers that track's download, and both mitzvot follow it.
   - **Done:** 2026-11-10. [src/components/HalachaAddonCard.tsx](src/components/HalachaAddonCard.tsx) on both mitzvah screens (the user's track by its book, the Kitzur's English beside it in English once installed); the two rows in `useLearningRows()` of [src/components/LearningRows.tsx](src/components/LearningRows.tsx), so the More tab and the siddur tab's learning group list them (the add-on caption, or the day's portion, one download for both; the More tab checks every pack's version on focus); [src/components/HalachaEnablePrompt.tsx](src/components/HalachaEnablePrompt.tsx) mounted by the root layout, its yes `switchHalachaOn()`; Settings → Prayer's book chips (a pick of the nusach's own book stores `null`) and, for Ben Ish Chai, the year swap with this year's reading in its hint; both privacy policies name Shnayim Mikra and the daily-halacha books among the add-ons (Shnayim Mikra had been left out). Verified: [src/components/__tests__/halachaAddon.render.test.tsx](src/components/__tests__/halachaAddon.render.test.tsx) (7), [src/app/__tests__/settings.halachaTrack.render.test.tsx](src/app/__tests__/settings.halachaTrack.render.test.tsx) (4), two new cases in [src/app/__tests__/mitzvah.render.test.tsx](src/app/__tests__/mitzvah.render.test.tsx), and the More tab and siddur catalog suites updated to the two new rows.
-  - **Status:** Version: OTA, with `docs/` on Pages · Committed: pending · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, with `docs/` on Pages · Committed: yes, `af50d99` feat(halacha): offer the download, the book choice, the search, the guide and R17 (full `pnpm test:tz` green in all four zones, 6615 tests) · Pushed: yes · Live: no · Channel: none
 
 - [x] Make the search find both mitzvot, the tracks and the festivals
   - **Flag:** `OTA`.
@@ -656,7 +656,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** The root AGENTS.md rule "Search Finds Everything".
   - **Expected result:** [src/utils/__tests__/searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) and the settings search suites green with cases for "הלכה יומית", "קיצור", "בן איש חי", "רמב״ם" and "הלכות פסח" opening where each lives.
   - **Done:** 2026-11-10. The `halachaTrack` setting item, and the books and every festival as words of the two mitzvah items (`MITZVAH_TERMS` in [src/utils/settingsSearch.ts](src/utils/settingsSearch.ts)), so "הלכות פסח" opens the festival halachot's screen first; both open the reader as texts while the track is installed. Verified: two new cases in [src/utils/__tests__/searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) ("הלכה יומית", "קיצור שולחן ערוך", "קצש״ע", "בן איש חי", "רמב״ם", "הלכות פסח", "הלכות החג", "laws of sukkot", "daily halacha"; the reader items only once installed), the settings search suites green.
-  - **Status:** Version: OTA, with `docs/` on Pages · Committed: pending · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, with `docs/` on Pages · Committed: yes, `af50d99` feat(halacha): offer the download, the book choice, the search, the guide and R17 (full `pnpm test:tz` green in all four zones, 6615 tests) · Pushed: yes · Live: no · Channel: none
 
 - [x] Write the guide topics and the what's-new item
   - **Flag:** `OTA` and [docs/guide/](docs/guide) on Pages.
@@ -664,15 +664,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** The checklist item "User-visible change", and the publish script's what's-new check.
   - **Expected result:** [src/data/__tests__/guide.test.ts](src/data/__tests__/guide.test.ts) and the guide render suite green.
   - **Done:** 2026-11-10. One topic, `halacha`, after `chok`, for both mitzvot (as `chok` covers two), and the item under `1.0.21-18`, the next production label; `pnpm guide:build` rewrote [docs/guide/](docs/guide). Verified: [src/data/__tests__/guide.test.ts](src/data/__tests__/guide.test.ts) (the order with the new topic, 16 topics) and the guide render suite green.
-  - **Status:** Version: OTA, with `docs/` on Pages · Committed: pending · Pushed: no · Live: no · Channel: none
-
-- [x] Put R17 on the rav's review page
-  - **Flag:** [docs/halacha-review.html](docs/halacha-review.html) on Pages.
-  - **What it is:** R17.1 to R17.8 as items with answer fields, and `RULES_VERSION` raised by one.
-  - **What it solves:** D7: the rav answers before production.
-  - **Expected result:** The page shows the eight items and submits them; after the push, `curl -sI https://jew-365.github.io/jew-365/halacha-review.html` answers 200.
-  - **Done:** 2026-11-10. R17.1 to R17.8 in a group of their own, "הלכה יומית והלכות החג", on [docs/halacha-review.html](docs/halacha-review.html), each with what the app does, its source and its place in the code, and `RULES_VERSION` raised from 7 to 8. Verified in Chromium at 375 px: 42 items, the progress line "סומנו 0 מתוך 42" moving with a choice, an empty submit marking all 42, no horizontal scroll and no page error.
-  - **Status:** Version: `docs/` on Pages · Committed: pending · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, with `docs/` on Pages · Committed: yes, `af50d99` feat(halacha): offer the download, the book choice, the search, the guide and R17 (full `pnpm test:tz` green in all four zones, 6615 tests) · Pushed: yes · Live: no · Channel: none
 
 - [ ] Update the DOX chain for the halacha add-on
   - **Flag:** none (docs).

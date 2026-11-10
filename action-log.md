@@ -17,6 +17,12 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-11-10 — Pages: R17 on the rav's review page
+
+- **R17 on the rav's review page** — R17.1 to R17.8, the daily halacha and the halachot of the festival, in a group of their own, "הלכה יומית והלכות החג", on [docs/halacha-review.html](docs/halacha-review.html), each with what the app does, its source and its place in the code; `RULES_VERSION` 8.
+  - Requested: the batch "Daily halacha and festival halachot, 2026-11-10" (spec 12; D7: the rav answers before production), and the owner's "תעשה את 4 המשימות שנשארו" of 2026-11-10. Done: 2026-11-10. Verified in Chromium at 375 px: 42 items, the progress line moving with a choice, an empty submit marking all 42, no horizontal scroll and no page error; `curl` of the live page on 2026-11-10 read the eight R17 items and `RULES_VERSION = '8'`.
+  - Version: Pages · Committed: yes, `af50d99` feat(halacha): offer the download, the book choice, the search, the guide and R17 · Pushed: yes · Live: https://jew-365.github.io/jew-365/halacha-review.html (read 2026-11-10) · Channel: —
+
 ## 2026-11-10 — Pages: the Rambam add-on without Mechon Mamre's text
 
 - **No Mechon Mamre text in the Rambam add-on** — the build refuses any Sefaria version whose source is mechon-mamre.org, whatever its title (`BANNED_SOURCE` in [scripts/halacha/tracks.js](scripts/halacha/tracks.js), checked in `readRambam()` of [scripts/halacha/build.js](scripts/halacha/build.js)), so the Positive Mitzvot come from Wikisource (CC-BY-SA, all 248) and the Rambam track of [docs/halacha/rambam/](docs/halacha/rambam) rose to version 2. Mechon Mamre's terms allow private study and teaching only, "not for publishing in any form, including any Web site", and Sefaria serves its text under two titles. No request was sent; the drafted message stays in section 1 of [release/licence-requests.md](release/licence-requests.md).
