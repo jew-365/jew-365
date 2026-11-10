@@ -689,7 +689,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 ### Laws of lashon hara, 2026-11-10 — batch rules
 
 - **Requested:** the owner, 2026-11-10, in a cloud session, in Hebrew: "אני רוצה להוסיף גם הלכות לשון הרע יומיות".
-- **Scope (Claude's defaults, open to the owner's change):** one learning mitzvah, `lashon_hara`, for every nusach, reading Sefer Chofetz Chaim by the daily luach Hebcal publishes (three cycles a year), off by default, a reminder at 13:00, as a fourth book of the halacha add-on with its own download and its English. Sefer Shemirat HaLashon is left out: Sefaria's Hebrew of it (Torat Emet 370) carries no known licence.
+- **Scope (Claude's defaults, open to the owner's change):** one learning mitzvah, `lashon_hara`, for every nusach, reading Sefer Chofetz Chaim by the daily luach Hebcal publishes (three cycles a year), off by default, a reminder at 13:00, as a fourth book of the halacha add-on with its own download and its English. Sefer Shemirat HaLashon is left out (checked 2026-11-10): no Hebrew text of it under a free licence was found. Sefaria's only Hebrew (Torat Emet 370, from ateret4u.com, labelled `unknown`) is the Torat Emet database's, CC BY-NC-SA 2.5 with no commercial use, the terms of the Chok LeYisrael text ([release/licence-requests.md](release/licence-requests.md), section 2); Hebrew Wikisource deleted its copy for that reason ("מקורו היה במאגר תורת אמת, ורשיונו המקורי לא תואם"), and only part two, chapter 19, is left there. The English is free: Shraga Silverstein's translation on Sefaria, CC-BY, 843 of 890 segments.
 - **Spec:** section 15 of [.claude/specs/halacha-yomit.md](.claude/specs/halacha-yomit.md).
 
 ### High — Laws of lashon hara
