@@ -15,7 +15,7 @@ import { AddonManifest } from '@/types/addon';
 import { HalachaBook, HalachaManifest, HalachaPack, HalachaScheduleFile } from '@/types/halacha';
 
 // The halacha add-on (.claude/specs/halacha-yomit.md, section 10): each book's Hebrew text, and the English of the
-// Kitzur and the Chofetz Chaim, downloaded on request from GitHub Pages, one pack at a time, on the shared add-on core.
+// Kitzur, the Chofetz Chaim and Shemirat HaLashon, downloaded on request from GitHub Pages, one pack at a time, on the shared add-on core.
 const HALACHA_SITE = 'https://jew-365.github.io/jew-365/halacha/';
 
 export const HALACHA_BASE_URL: Readonly<Record<HalachaPack, string>> = {
@@ -25,6 +25,8 @@ export const HALACHA_BASE_URL: Readonly<Record<HalachaPack, string>> = {
   rambam: `${HALACHA_SITE}rambam/`,
   chafetz_chaim: `${HALACHA_SITE}chafetz_chaim/`,
   chafetz_chaim_en: `${HALACHA_SITE}chafetz_chaim/en/`,
+  shemirat_halashon: `${HALACHA_SITE}shemirat_halashon/`,
+  shemirat_halashon_en: `${HALACHA_SITE}shemirat_halashon/en/`,
 };
 
 export const HALACHA_FORMAT = 1;
@@ -37,6 +39,8 @@ export const HALACHA_SIZE_ESTIMATE_MB: Readonly<Record<HalachaPack, number>> = {
   rambam: 2.4,
   chafetz_chaim: 0.2,
   chafetz_chaim_en: 0.1,
+  shemirat_halashon: 0.3,
+  shemirat_halashon_en: 0.2,
 };
 
 export const halachaSpaceNeededMb = (pack: HalachaPack): number =>
@@ -46,12 +50,14 @@ export const halachaSpaceNeededMb = (pack: HalachaPack): number =>
 export const HALACHA_ENGLISH_PACK: Readonly<Partial<Record<HalachaBook, HalachaPack>>> = {
   kitzur: 'kitzur_en',
   chafetz_chaim: 'chafetz_chaim_en',
+  shemirat_halashon: 'shemirat_halashon_en',
 };
 
 // The book an English pack translates.
 const ENGLISH_OF: Readonly<Partial<Record<HalachaPack, HalachaBook>>> = {
   kitzur_en: 'kitzur',
   chafetz_chaim_en: 'chafetz_chaim',
+  shemirat_halashon_en: 'shemirat_halashon',
 };
 
 export const halachaDownloadSupported = addonDownloadSupported;
@@ -122,6 +128,8 @@ const PACKS: Readonly<Record<HalachaPack, AddonContent<AddonManifest>>> = {
   rambam: createPack('rambam'),
   chafetz_chaim: createPack('chafetz_chaim'),
   chafetz_chaim_en: createPack('chafetz_chaim_en'),
+  shemirat_halashon: createPack('shemirat_halashon'),
+  shemirat_halashon_en: createPack('shemirat_halashon_en'),
 };
 
 export const parseHalachaManifest = (pack: HalachaPack, raw: unknown) => PACKS[pack].parseManifest(raw);

@@ -4,6 +4,13 @@ import { HALACHA_BOOKS } from '@/data/halacha';
 import { useI18n } from '@/i18n';
 import { switchHalachaOn } from '@/services/HalachaContentService';
 import { HALACHA_STORES } from '@/stores/useHalachaStore';
+import { HalachaBook } from '@/types/halacha';
+
+// The question of a book that serves a mitzvah of its own.
+const PROMPT_BODY: Partial<Record<HalachaBook, string>> = {
+  chafetz_chaim: 'halacha.enablePrompt.bodyLashonHara',
+  shemirat_halashon: 'halacha.enablePrompt.bodyShemiratHaLashon',
+};
 
 // After a first download of a halacha book while its mitzvot are off: switch them on? (as ChokEnablePrompt does).
 export function HalachaEnablePrompt() {
@@ -13,6 +20,7 @@ export function HalachaEnablePrompt() {
     HALACHA_STORES.ben_ish_chai((s) => s.enablePrompt),
     HALACHA_STORES.rambam((s) => s.enablePrompt),
     HALACHA_STORES.chafetz_chaim((s) => s.enablePrompt),
+    HALACHA_STORES.shemirat_halashon((s) => s.enablePrompt),
   ];
   const pending = HALACHA_BOOKS.find((_, i) => asking[i]);
   const close = () => {
@@ -23,7 +31,7 @@ export function HalachaEnablePrompt() {
     <ConfirmDialog
       visible={Boolean(pending)}
       title={t('halacha.enablePrompt.title', { book: pending ? t(`halacha.book.${pending}`) : '' })}
-      body={t(pending === 'chafetz_chaim' ? 'halacha.enablePrompt.bodyLashonHara' : 'halacha.enablePrompt.body')}
+      body={t(PROMPT_BODY[pending ?? 'kitzur'] ?? 'halacha.enablePrompt.body')}
       confirmLabel={t('common.yes')}
       cancelLabel={t('common.no')}
       onConfirm={() => {

@@ -1,26 +1,25 @@
 import React from 'react';
 import { useRouter } from 'expo-router';
 import { chokAddonCaption, useChokDownloadFlow } from '@/components/ChokAddonCard';
-import { halachaAddonCaption, useHalachaDownloadFlow } from '@/components/HalachaAddonCard';
+import { HalachaPackState, halachaAddonCaption, useHalachaPack } from '@/components/HalachaAddonCard';
 import { shnayimAddonCaption, useShnayimDownloadFlow } from '@/components/ShnayimAddonCard';
 import {
   FESTIVAL_NAMES,
   HALACHA_YOMIT_ID,
   HILCHOT_HACHAG_ID,
   LASHON_HARA_ID,
+  SHEMIRAT_HALASHON_ID,
   effectiveHalachaTrack,
 } from '@/data/halacha';
-import { hilchotHachagOn, halachaYomitOn, lashonHaraOn } from '@/data/halachaContent';
+import { dailyPortionOn, hilchotHachagOn, halachaYomitOn } from '@/data/halachaContent';
 import { findMitzvah } from '@/data/mitzvot';
 import { useI18n } from '@/i18n';
 import { halachaDownloadSupported } from '@/services/HalachaContentService';
 import { chokDownloadSupported } from '@/services/ChokContentService';
 import { shnayimDownloadSupported } from '@/services/ShnayimContentService';
 import { useChokStore } from '@/stores/useChokStore';
-import { HALACHA_STORES } from '@/stores/useHalachaStore';
 import { useShnayimStore } from '@/stores/useShnayimStore';
 import { useUserStore } from '@/stores/useUserStore';
-import { HalachaBook } from '@/types/halacha';
 import { CHOK_PROGRAM, LearningProgram, chokPortionAt, chokWeekName } from '@/utils/chok';
 import { appDay } from '@/utils/locationDay';
 import { SHNAYIM_PROGRAM } from '@/utils/shnayim';
@@ -56,18 +55,9 @@ export function useLearningRows(now: Date): { rows: LearningRow[]; dialogs: Reac
     nusach,
   );
   useUserStore((s) => s.benIshChaiYearSwapped);
-  const halacha = {
-    book: track as HalachaBook,
-    installed: HALACHA_STORES[track]((s) => s.installed !== null),
-    download: HALACHA_STORES[track]((s) => s.download),
-    flow: useHalachaDownloadFlow(track),
-  };
-  const chafetzChaim = {
-    book: 'chafetz_chaim' as HalachaBook,
-    installed: HALACHA_STORES.chafetz_chaim((s) => s.installed !== null),
-    download: HALACHA_STORES.chafetz_chaim((s) => s.download),
-    flow: useHalachaDownloadFlow('chafetz_chaim'),
-  };
+  const halacha = useHalachaPack(track);
+  const chafetzChaim = useHalachaPack('chafetz_chaim');
+  const shemiratHaLashon = useHalachaPack('shemirat_halashon');
 
   const row = (
     program: LearningProgram,
@@ -98,7 +88,7 @@ export function useLearningRows(now: Date): { rows: LearningRow[]; dialogs: Reac
     };
   };
 
-  const halachaRow = (id: string, pack: typeof halacha, caption: () => string): LearningRow => {
+  const halachaRow = (id: string, pack: HalachaPackState, caption: () => string): LearningRow => {
     const name = findMitzvah(id)?.name;
     return {
       id,
@@ -124,10 +114,15 @@ export function useLearningRows(now: Date): { rows: LearningRow[]; dialogs: Reac
       ? `${t('halacha.before', { chag: FESTIVAL_NAMES[day.period.festival][language] })} · ${day.portion.label[language]}`
       : t('halacha.hachag.notNow');
   });
-  const lashonHara = halachaRow(LASHON_HARA_ID, chafetzChaim, () => {
-    const day = lashonHaraOn(today);
-    return day ? day.portion.label[language] : t('chok.nothingToday');
-  });
+  // A book of its own: the day's label.
+  const ownBookRow = (id: string, pack: HalachaPackState) =>
+    halachaRow(
+      id,
+      pack,
+      () => dailyPortionOn(pack.book, today, inIsrael)?.portion.label[language] ?? t('chok.nothingToday'),
+    );
+  const lashonHara = ownBookRow(LASHON_HARA_ID, chafetzChaim);
+  const shemirat = ownBookRow(SHEMIRAT_HALASHON_ID, shemiratHaLashon);
 
   return {
     rows: [
@@ -154,6 +149,7 @@ export function useLearningRows(now: Date): { rows: LearningRow[]; dialogs: Reac
       yomit,
       hachag,
       lashonHara,
+      shemirat,
     ],
     dialogs: (
       <>
@@ -161,6 +157,7 @@ export function useLearningRows(now: Date): { rows: LearningRow[]; dialogs: Reac
         {shnayimFlow.dialog}
         {halacha.flow.dialog}
         {chafetzChaim.flow.dialog}
+        {shemiratHaLashon.flow.dialog}
       </>
     ),
   };

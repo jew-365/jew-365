@@ -1,12 +1,12 @@
-// What the halacha add-on (scripts/halacha/build.js) reads from Sefaria and how it cuts it: the three tracks and the
-// Chofetz Chaim, the versions each pins, the festival material of each track and the Ben Ish Chai parasha map.
+// What the halacha add-on (scripts/halacha/build.js) reads from Sefaria and how it cuts it: the three tracks, the
+// Chofetz Chaim and Shemirat HaLashon, the versions each pins, the festival material of each track and the Ben Ish Chai parasha map.
 const path = require('path');
 
 const SEFARIA = 'https://www.sefaria.org';
 const SITE_DIR = path.join(__dirname, '..', '..', 'docs', 'halacha');
 const SCHEDULE_DIR = path.join(__dirname, 'schedules');
 const FORMAT = 1;
-const TRACKS = ['kitzur', 'ben_ish_chai', 'rambam', 'chafetz_chaim'];
+const TRACKS = ['kitzur', 'ben_ish_chai', 'rambam', 'chafetz_chaim', 'shemirat_halashon'];
 
 // The book of each track, as the credit and the portion labels name it.
 const BOOK = {
@@ -14,6 +14,7 @@ const BOOK = {
   ben_ish_chai: { he: 'בן איש חי', en: 'Ben Ish Chai' },
   rambam: { he: 'משנה תורה לרמב״ם', en: "Rambam's Mishneh Torah" },
   chafetz_chaim: { he: 'ספר חפץ חיים', en: 'Sefer Chofetz Chaim' },
+  shemirat_halashon: { he: 'ספר שמירת הלשון', en: 'Sefer Shemirat HaLashon' },
 };
 
 // Kitzur Shulchan Aruch: one Hebrew version, a unit per block of simanim.
@@ -50,6 +51,25 @@ const CHAFETZ_CHAIM = {
   // Paragraphs the source leaves empty (read 2026-11-10): the eighth of the negative commandments holds the eighth and
   // ninth, "(ח-ט)". Any other empty paragraph fails the build.
   empty: ['negative 9'],
+};
+
+// Sefer Shemirat HaLashon, which the `shemirat_halashon` mitzvah reads (the owner's call of 2026-11-10). Its only
+// Hebrew is the Torat Emet database's (Sefaria labels it "unknown"); Torat Emet's terms are CC BY-NC-SA 2.5 with no
+// commercial use (its copyright page, read for Chok LeYisrael: release/licence-requests.md, section 2), so the credit
+// names those terms. Each part, the Sefaria node it is read from and its titles.
+const SHEMIRAT_HALASHON = {
+  index: 'Shemirat HaLashon',
+  he: 'Shemirat HaLashon -- Torat Emet 370',
+  license: 'CC-BY-NC-SA 2.5 (Torat Emet, no commercial use)',
+  parts: {
+    introduction: { node: ['Book I', 'Introduction'], he: 'הקדמה', en: 'Introduction' },
+    remembering: { node: ['Book I', 'The Gate of Remembering'], he: 'שער הזכירה', en: 'The Gate of Remembering' },
+    discerning: { node: ['Book I', 'The Gate of Discerning'], he: 'שער התבונה', en: 'The Gate of Discerning' },
+    torah: { node: ['Book I', 'The Gate of Torah'], he: 'שער התורה', en: 'The Gate of Torah' },
+    epilogue1: { node: ['Book I', 'Epilogue'], he: 'חלק א, חתימת הספר', en: 'Book I, epilogue' },
+    chapters: { node: ['Book II', ''], he: 'חלק ב', en: 'Book II' },
+    epilogue2: { node: ['Book II', 'Epilogue'], he: 'חלק ב, חתימת הספר', en: 'Book II, epilogue' },
+  },
 };
 
 // Mishneh Torah: a Hebrew version per book, the first of these the book has (the introduction books have no Torat
@@ -161,6 +181,7 @@ module.exports = {
   KITZUR,
   BEN_ISH_CHAI,
   CHAFETZ_CHAIM,
+  SHEMIRAT_HALASHON,
   RAMBAM_HE,
   BANNED_SOURCE,
   RAMBAM_EMPTY,

@@ -50,6 +50,16 @@ export function useHalachaDownloadFlow(track: HalachaBook): {
   return useAddonDownloadFlow({ copy: 'halacha.addon', source: SOURCES[track], installed, params: bookOf(track, t) });
 }
 
+// A book's install, download and download flow, for a row that offers it.
+export function useHalachaPack(book: HalachaBook) {
+  const installed = HALACHA_STORES[book]((s) => s.installed !== null);
+  const download = HALACHA_STORES[book]((s) => s.download);
+  const flow = useHalachaDownloadFlow(book);
+  return { book, installed, download, flow };
+}
+
+export type HalachaPackState = ReturnType<typeof useHalachaPack>;
+
 function PackCard({ pack }: { pack: HalachaPack }) {
   const { t } = useI18n();
   const store = HALACHA_STORES[pack];

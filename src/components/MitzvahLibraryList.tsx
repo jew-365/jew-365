@@ -62,12 +62,23 @@ export function MitzvahLibraryList({ showMine, navigable }: MitzvahLibraryListPr
   );
   const trackInstalled = HALACHA_STORES[halachaTrack]((s) => s.installed !== null);
   const trackDownload = HALACHA_STORES[halachaTrack]((s) => s.download);
-  const chafetzChaimInstalled = HALACHA_STORES.chafetz_chaim((s) => s.installed !== null);
-  const chafetzChaimDownload = HALACHA_STORES.chafetz_chaim((s) => s.download);
-  const halachaPack = (item: Mitzvah) =>
-    halachaBookOf(item.id, halachaTrack) === 'chafetz_chaim'
-      ? { book: 'chafetz_chaim' as const, installed: chafetzChaimInstalled, download: chafetzChaimDownload }
-      : { book: halachaTrack, installed: trackInstalled, download: trackDownload };
+  // The books of their own mitzvot, whatever the track.
+  const own = {
+    chafetz_chaim: {
+      installed: HALACHA_STORES.chafetz_chaim((s) => s.installed !== null),
+      download: HALACHA_STORES.chafetz_chaim((s) => s.download),
+    },
+    shemirat_halashon: {
+      installed: HALACHA_STORES.shemirat_halashon((s) => s.installed !== null),
+      download: HALACHA_STORES.shemirat_halashon((s) => s.download),
+    },
+  };
+  const halachaPack = (item: Mitzvah) => {
+    const book = halachaBookOf(item.id, halachaTrack);
+    return book === 'chafetz_chaim' || book === 'shemirat_halashon'
+      ? { book, ...own[book] }
+      : { book, installed: trackInstalled, download: trackDownload };
+  };
   const customItems = useCustomMitzvotStore((s) => s.items);
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
   const roshChodeshEnabled = useUserStore((s) => s.roshChodeshEnabled);

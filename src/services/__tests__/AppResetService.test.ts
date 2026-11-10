@@ -163,6 +163,8 @@ describe('AppResetService.reset', () => {
       'kitzur',
       'kitzur_en',
       'rambam',
+      'shemirat_halashon',
+      'shemirat_halashon_en',
     ]);
   });
 

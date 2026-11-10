@@ -17,6 +17,8 @@ export const HALACHA_DIRECTORY: Readonly<Record<HalachaPack, string>> = {
   rambam: 'halacha-rambam',
   chafetz_chaim: 'halacha-chafetz-chaim',
   chafetz_chaim_en: 'halacha-chafetz-chaim-en',
+  shemirat_halashon: 'halacha-shemirat-halashon',
+  shemirat_halashon_en: 'halacha-shemirat-halashon-en',
 };
 
 export const HALACHA_SCHEDULE_FILE = 'schedule.json';

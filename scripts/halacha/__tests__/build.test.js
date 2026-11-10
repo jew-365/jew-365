@@ -15,6 +15,7 @@ const {
   numberRanges,
   BMC_MARKER,
   chafetzChaimSegments,
+  shemiratHaLashonSegments,
 } = require('../build');
 const { TRACKS, FESTIVALS, FESTIVAL_MATERIAL, MINOR_FASTS, KITZUR, BANNED_SOURCE } = require('../tracks');
 const { PARASHIYOT } = require('../../chok/manifest');
@@ -115,6 +116,31 @@ describe('the source cleanup', () => {
     expect(() => chafetzChaimSegments('tziyurim 1', list)).toThrow(/unreadable/);
   });
 
+  it('reads a Shemirat HaLashon luach entry, a gloss alone and a range without the glosses read alone', () => {
+    const seg = (part, chapter, n, gloss = false) => ({
+      key: `shemirat_halashon:${part}:${chapter}:${n}${gloss ? '*' : ''}`,
+      part,
+      chapter,
+      n,
+      ...(gloss ? { gloss } : {}),
+    });
+    const list = [
+      seg('chapters', 19, 10),
+      seg('chapters', 19, 11),
+      seg('chapters', 19, 11, true),
+      seg('chapters', 19, 12),
+    ];
+    expect(shemiratHaLashonSegments('chapters 19.11*', list, new Set())).toEqual([list[2]]);
+    expect(shemiratHaLashonSegments('chapters 19.10-19.11', list, new Set())).toEqual(list.slice(0, 3));
+    expect(shemiratHaLashonSegments('chapters 19.10-19.12', list, new Set([list[2].key]))).toEqual([
+      list[0],
+      list[1],
+      list[3],
+    ]);
+    expect(() => shemiratHaLashonSegments('chapters 19.12-19.10', list, new Set())).toThrow(/outside/);
+    expect(() => shemiratHaLashonSegments('chapters 20.1*', list, new Set())).toThrow(/no gloss/);
+  });
+
   it('raises a manifest version only when its content changes', () => {
     const first = versioned({ a: 1 }, undefined);
     expect(first.version).toBe(1);
@@ -132,6 +158,7 @@ describe('the schedules', () => {
   const kitzur = readJson(path.join(SCHEDULES, 'kitzur.json'));
   const rambam = readJson(path.join(SCHEDULES, 'rambam.json'));
   const chafetzChaim = readJson(path.join(SCHEDULES, 'chafetz_chaim.json'));
+  const shemiratHaLashon = readJson(path.join(SCHEDULES, 'shemirat_halashon.json'));
 
   it('keeps each Kitzur month at its length and lists every correction with the published value', () => {
     const lengths = Object.fromEntries(Object.entries(kitzur.months).map(([m, days]) => [m, days.length]));
@@ -178,6 +205,23 @@ describe('the schedules', () => {
     expect(chafetzChaim.simple["Sh'vat"][5]).toBe('preface 28-34');
     expect(chafetzChaim.corrections).toEqual([]);
     expect(chafetzChaim.source.license).toMatch(/BSD 2-Clause/);
+  });
+
+  it('gives Shemirat HaLashon an entry for every day of a common and a leap year, its corrections applied', () => {
+    const lengths = (table) => Object.fromEntries(Object.entries(table).map(([m, days]) => [m, days.length]));
+    expect(lengths(shemiratHaLashon.simple)).toEqual(lengths(chafetzChaim.simple));
+    expect(lengths(shemiratHaLashon.leap)).toEqual(lengths(chafetzChaim.leap));
+    for (const table of [shemiratHaLashon.simple, shemiratHaLashon.leap]) {
+      for (const entry of Object.values(table).flat()) expect(entry).toMatch(/^[a-z]+\d? [\d.*-]+$/);
+    }
+    expect(shemiratHaLashon.simple.Tishrei[0]).toBe('introduction 1-2');
+    expect(shemiratHaLashon.simple.Av[13]).toBe('chapters 19.11*');
+    for (const c of shemiratHaLashon.corrections) {
+      expect(shemiratHaLashon[c.table][c.month][c.day - 1]).toBe(c.used);
+      expect(c.published).not.toBe(c.used);
+    }
+    expect(shemiratHaLashon.corrections).toHaveLength(6);
+    expect(shemiratHaLashon.source.license).toMatch(/BSD 2-Clause/);
   });
 
   it('holds one Rambam cycle of 1017 days from 3 Feb 2026, every day once', () => {
@@ -236,8 +280,15 @@ describe('the published add-on', () => {
     for (const [id, unit] of Object.entries(units[track])) {
       const segments = unit.sections.flatMap((s) => s.segments);
       expect(segments).toHaveLength(manifests[track].units[id].count);
-      // Text beyond its number: plain, or bold (the Overview's book headings).
-      for (const seg of segments) expect(seg.he.flat().some((run) => run.s !== 'n' && run.t.trim())).toBe(true);
+      // Text beyond its number, which opens it: plain, bold (the Overview's book headings), or small (the translations
+      // of the Zohar that Shemirat HaLashon prints in small type).
+      for (const seg of segments)
+        expect(
+          seg.he
+            .flat()
+            .slice(1)
+            .some((run) => run.t.trim()),
+        ).toBe(true);
     }
   });
 
@@ -270,6 +321,27 @@ describe('the published add-on', () => {
       }
     },
   );
+
+  it.each(['common', 'leap'])(
+    'reads every paragraph and gloss of Shemirat HaLashon once in a %s year, in book order',
+    (kind) => {
+      const read = Object.values(manifests.shemirat_halashon.schedule[kind])
+        .flat()
+        .filter(Boolean)
+        .flatMap((portion) => portionKeys('shemirat_halashon', portion));
+      expect(read).toEqual(allKeys('shemirat_halashon'));
+    },
+  );
+
+  it("labels a Shemirat HaLashon day by its part, chapter and paragraphs, and credits Torat Emet's terms", () => {
+    const { common } = manifests.shemirat_halashon.schedule;
+    expect(common.Tishrei[0].label).toEqual({ he: 'הקדמה, א–ב', en: 'Introduction 1–2' });
+    expect(common.Tishrei[10].label).toEqual({ he: 'שער הזכירה, פרק א, א–ד', en: 'The Gate of Remembering 1:1–4' });
+    expect(common.Av[13].label).toEqual({ he: 'חלק ב, פרק יט, הגהה לסעיף יא', en: 'Book II 19, gloss on 11' });
+    expect(manifests.shemirat_halashon.credits).toEqual([
+      expect.objectContaining({ license: 'CC-BY-NC-SA 2.5 (Torat Emet, no commercial use)' }),
+    ]);
+  });
 
   it("labels a Chofetz Chaim day by its part, principle and se'ifim", () => {
     const { common } = manifests.chafetz_chaim.schedule;
@@ -362,7 +434,7 @@ describe('the published add-on', () => {
 
   it('ships English only for a track whose translation covers enough of it, aligned with its Hebrew', () => {
     const ships = TRACKS.filter((track) => manifests[track].english.ships);
-    expect(ships).toEqual(['kitzur', 'chafetz_chaim']);
+    expect(ships).toEqual(['kitzur', 'chafetz_chaim', 'shemirat_halashon']);
     for (const track of ships) {
       const en = readJson(path.join(SITE, track, 'en', 'manifest.json'));
       expect(Object.keys(en.gz)).toEqual(Object.keys(manifests[track].gz));

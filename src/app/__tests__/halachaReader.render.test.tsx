@@ -28,7 +28,7 @@ jest.mock('expo-keep-awake', () => ({
 }));
 jest.mock('@/services/halachaFiles', () => ({
   ...jest.requireActual('@/services/halachaFiles'),
-  readHalachaScheduleSync: (pack: 'kitzur' | 'ben_ish_chai' | 'rambam' | 'chafetz_chaim') =>
+  readHalachaScheduleSync: (pack: import('@/types/halacha').HalachaBook) =>
     require('@/testing/halacha').publishedHalachaSchedule(pack),
 }));
 jest.mock('@/services/HalachaContentService', () => ({
@@ -260,6 +260,43 @@ describe('the lashon hara reader', () => {
     expect(screen.getByText('הטקסט של ספר חפץ חיים עוד לא הורד למכשיר.')).toBeOnTheScreen();
     fireEvent.press(screen.getByText('למסך ההורדה'));
     expect(mockPush).toHaveBeenCalledWith('/mitzvah/lashon_hara');
+  });
+});
+
+describe('the Shemirat HaLashon reader', () => {
+  afterEach(() => jest.useRealTimers());
+
+  it("reads the day's portion under its label, with the Torat Emet credit and done while it is on", async () => {
+    reset({ id: 'shemirat_halashon', enabledSince: '2026-11-18T08:00' });
+    installHalachaFixture('shemirat_halashon');
+    await openAt('2026-11-18T12:00', labelOn('shemirat_halashon', '2026-11-18'));
+    expect(screen.getAllByText('שמירת הלשון').length).toBeGreaterThan(0);
+    expect(screen.getByText('ספר שמירת הלשון')).toBeOnTheScreen();
+    expect(screen.getByText(/Torat Emet, no commercial use/)).toBeOnTheScreen();
+    fireEvent.press(screen.getByText('סיימתי'));
+    expect(marked('2026-11-18', 'shemirat_halashon')).toBe(true);
+  });
+
+  it('reads its English beside the Hebrew in English, when the English is installed', async () => {
+    reset({ id: 'shemirat_halashon' });
+    const installed = installHalachaFixture('shemirat_halashon');
+    HALACHA_STORES.shemirat_halashon_en.setState({ installed: { ...installed }, download: IDLE_DOWNLOAD });
+    useUserStore.setState({ language: 'en' });
+    const [reading] = readingsOn('shemirat_halashon', '2026-11-18');
+    await openAt('2026-11-18T12:00', reading.portion.label.en);
+    const [piece] = reading.portion.pieces;
+    const { loadHalachaEnglish } = jest.requireMock('@/services/SiddurService');
+    const english: string = (await loadHalachaEnglish('shemirat_halashon_en', piece.u)).en[piece.from];
+    expect(screen.getByText(english)).toBeOnTheScreen();
+  });
+
+  it('sends to its own download while the book is missing, the Chofetz Chaim installed or not', () => {
+    reset({ id: 'shemirat_halashon' });
+    installHalachaFixture('chafetz_chaim');
+    renderWithTheme(<SiddurScreen />);
+    expect(screen.getByText('הטקסט של ספר שמירת הלשון עוד לא הורד למכשיר.')).toBeOnTheScreen();
+    fireEvent.press(screen.getByText('למסך ההורדה'));
+    expect(mockPush).toHaveBeenCalledWith('/mitzvah/shemirat_halashon');
   });
 });
 

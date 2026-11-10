@@ -5,9 +5,10 @@ import { SiddurCredit, SiddurSegment } from './siddur';
 // halacha mitzvot.
 export type HalachaTrack = 'kitzur' | 'ben_ish_chai' | 'rambam';
 
-// Every book the halacha add-on ships: the tracks, and Sefer Chofetz Chaim, which the `lashon_hara` mitzvah reads
-// whatever the track (the owner's request of 2026-11-10).
-export type HalachaBook = HalachaTrack | 'chafetz_chaim';
+// Every book the halacha add-on ships: the tracks, and the two books a mitzvah of its own reads whatever the track
+// (the owner's requests of 2026-11-10): Sefer Chofetz Chaim (`lashon_hara`) and Sefer Shemirat HaLashon
+// (`shemirat_halashon`).
+export type HalachaBook = HalachaTrack | 'chafetz_chaim' | 'shemirat_halashon';
 
 // The festivals `hilchot_hachag` learns before (spec 7.1).
 export type FestivalKey =
@@ -74,9 +75,9 @@ export type HalachaUnit = {
 // the festival (1 on the erev).
 export type FestivalPeriod = { festival: FestivalKey; day: number; days: number; daysLeft: number };
 
-// What the device downloads: a book's Hebrew text, and the English beside it of the books that ship one (the Kitzur and
-// the Chofetz Chaim, scripts/halacha/build.js).
-export type HalachaPack = HalachaBook | 'kitzur_en' | 'chafetz_chaim_en';
+// What the device downloads: a book's Hebrew text, and the English beside it of the books that ship one (the Kitzur,
+// the Chofetz Chaim and Shemirat HaLashon, scripts/halacha/build.js).
+export type HalachaPack = HalachaBook | 'kitzur_en' | 'chafetz_chaim_en' | 'shemirat_halashon_en';
 
 // The English of one unit: a translation or `null` per Hebrew segment, in order.
 export type HalachaEnglishUnit = { track: HalachaBook; unit: string; credits: SiddurCredit[]; en: (string | null)[] };

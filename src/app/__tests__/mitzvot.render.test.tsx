@@ -133,7 +133,15 @@ describe('Mitzvot library', () => {
     expect(groupSwitches('weekly')).toEqual(names(['candle_lighting', 'havdalah']));
     expect(groupSwitches('seasonal')).toEqual(names(['sefirat_haomer', 'chanukah_candles', 'selichot', 'ushpizin']));
     expect(groupSwitches('other')).toEqual([
-      ...names(['kiddush_levana', 'halacha_yomit', 'hilchot_hachag', 'lashon_hara', 'shnayim_mikra', 'chok_leyisrael']),
+      ...names([
+        'kiddush_levana',
+        'halacha_yomit',
+        'hilchot_hachag',
+        'lashon_hara',
+        'shemirat_halashon',
+        'shnayim_mikra',
+        'chok_leyisrael',
+      ]),
       HILULOT,
       ROSH_CHODESH,
     ]);

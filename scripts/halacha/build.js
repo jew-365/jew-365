@@ -21,6 +21,7 @@ const {
   KITZUR,
   BEN_ISH_CHAI,
   CHAFETZ_CHAIM,
+  SHEMIRAT_HALASHON,
   RAMBAM_HE,
   BANNED_SOURCE,
   RAMBAM_EMPTY,
@@ -575,6 +576,71 @@ function buildChafetzChaim({ he }) {
   return { units, list };
 }
 
+async function readShemiratHaLashon() {
+  const he = await readText(SHEMIRAT_HALASHON.index, 'he', SHEMIRAT_HALASHON.he);
+  const versions = await cached(
+    'shemirat-halashon/versions',
+    `${SEFARIA}/api/texts/versions/${encodeURIComponent(SHEMIRAT_HALASHON.index)}`,
+  );
+  const english = [];
+  for (const v of englishCandidates(versions))
+    english.push(await readText(SHEMIRAT_HALASHON.index, 'en', v.versionTitle));
+  return { he: { ...he, license: SHEMIRAT_HALASHON.license }, english };
+}
+
+const shlNode = (text, part) => SHEMIRAT_HALASHON.parts[part].node.reduce((node, key) => node?.[key], text);
+
+// A paragraph of Shemirat HaLashon: its text, then the author's gloss (its footnotes) as a segment of its own, which
+// the luach reads on a day of its own once. <strong> reads as bold.
+function shlSegments(key, n, html, meta, where) {
+  const { text, notes } = splitFootnotes(
+    String(html)
+      .replace(/<sup class="footnote-marker">(.*?)<\/sup>/g, '$1')
+      .replace(/<(\/?)strong>/g, '<$1b>'),
+  );
+  const paragraphs = runsOf(text);
+  if (!paragraphs.length) throw new Error(`Shemirat HaLashon ${where}: empty`);
+  const out = [{ ...segment(key, number(n), paragraphs), meta: { ...meta, n } }];
+  const gloss = notes.flatMap((note) => runsOf(`* ${note.replace(/<(\/?)strong>/g, '<$1b>')}`));
+  if (gloss.length) out.push({ ...segment(`${key}*`, `${number(n)}*`, gloss), meta: { ...meta, n, gloss: true } });
+  return out;
+}
+
+function buildShemiratHaLashon({ he }) {
+  const units = [];
+  const list = [];
+  for (const [part, { he: partHe, en: partEn }] of Object.entries(SHEMIRAT_HALASHON.parts)) {
+    const node = shlNode(he.text, part);
+    if (!Array.isArray(node) || !node.length) throw new Error(`Shemirat HaLashon: no ${part}`);
+    const chapters = part === 'introduction' ? [node] : node;
+    addUnit('shemirat_halashon', units, list, {
+      id: part.replace(/(\d)$/, '-$1'),
+      title: { he: partHe, en: partEn },
+      sections: chapters.map((paragraphs, c) => {
+        const chapter = part === 'introduction' ? null : c + 1;
+        const title =
+          chapter === null
+            ? { he: partHe, en: partEn }
+            : { he: `${partHe}, פרק ${number(chapter)}`, en: `${partEn}, chapter ${chapter}` };
+        return {
+          ref: chapter === null ? part : `${part} ${chapter}`,
+          title,
+          segments: paragraphs.flatMap((html, i) =>
+            shlSegments(
+              `shemirat_halashon:${part}:${chapter === null ? '' : `${chapter}:`}${i + 1}`,
+              i + 1,
+              html,
+              { part, chapter },
+              `${part} ${chapter ?? ''}:${i + 1}`,
+            ),
+          ),
+        };
+      }),
+    });
+  }
+  return { units, list };
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // Portions: a run of segments in book order as the pieces of units it reads, with a label.
 
@@ -632,6 +698,39 @@ function chafetzChaimLabel(segments, list) {
           group.items.map((x) => x.n),
           he,
         )}`;
+  };
+  return {
+    he: groups.map((group) => one(group, true)).join('; '),
+    en: groups.map((group) => one(group, false)).join('; '),
+  };
+}
+
+// A Shemirat HaLashon portion's place: each part and chapter it reads with its paragraphs (a gloss read alone as
+// "הגהה" on its paragraph).
+function shemiratHaLashonLabel(segments) {
+  const groups = [];
+  for (const s of segments) {
+    const id = `${s.part}:${s.chapter}`;
+    const group = groups[groups.length - 1];
+    if (group && group.id === id) group.items.push(s);
+    else groups.push({ id, items: [s] });
+  }
+  const one = (group, he) => {
+    const s = group.items[0];
+    const part = SHEMIRAT_HALASHON.parts[s.part];
+    const name =
+      s.chapter === null
+        ? he
+          ? part.he
+          : part.en
+        : he
+          ? `${part.he}, פרק ${number(s.chapter)}`
+          : `${part.en} ${s.chapter}`;
+    const main = group.items.filter((x) => !x.gloss).map((x) => x.n);
+    if (!main.length) return he ? `${name}, הגהה לסעיף ${number(s.n)}` : `${name}, gloss on ${s.n}`;
+    return he
+      ? `${name}, ${numberRanges(main, true)}`
+      : `${name}${s.chapter === null ? ' ' : ':'}${numberRanges(main, false)}`;
   };
   return {
     he: groups.map((group) => one(group, true)).join('; '),
@@ -717,7 +816,9 @@ function portionOf(track, segments, list) {
   const label =
     track === 'chafetz_chaim'
       ? chafetzChaimLabel(segments, list)
-      : LABEL[track](segments[0], segments[segments.length - 1]);
+      : track === 'shemirat_halashon'
+        ? shemiratHaLashonLabel(segments)
+        : LABEL[track](segments[0], segments[segments.length - 1]);
   return { label, pieces };
 }
 
@@ -804,6 +905,61 @@ function chafetzChaimSchedule(luach, built) {
       ]),
     );
   return { kind: 'hebrewYear', common: table(luach.simple, 'common'), leap: table(luach.leap, 'leap') };
+}
+
+// ---- Shemirat HaLashon schedule ("remembering 2.6-2.9" by Hebrew month and day of a common or a leap year, from
+// schedules/shemirat_halashon.json)
+
+// A paragraph's place in the list: its own segment, or with `gloss` the author's gloss on it.
+function shlAt(inPart, chapter, n, gloss = false) {
+  return inPart.findIndex((s) => s.chapter === chapter && s.n === n && Boolean(s.gloss) === gloss);
+}
+
+function shemiratHaLashonSegments(entry, list, glossesAlone) {
+  const match = /^([a-z]+\d?) (.+)$/.exec(entry);
+  const part = match?.[1];
+  const inPart = list.filter((s) => s.part === part);
+  if (!match || !inPart.length) throw new Error(`Shemirat HaLashon luach: unreadable entry "${entry}"`);
+  const spec = match[2];
+  const place = (at) => {
+    const [a, b] = at.split('.');
+    return b === undefined ? [null, Number(a)] : [Number(a), Number(b)];
+  };
+  const gloss = /^(\d+)\.(\d+)\*$/.exec(spec);
+  if (gloss) {
+    const i = shlAt(inPart, Number(gloss[1]), Number(gloss[2]), true);
+    if (i === -1) throw new Error(`Shemirat HaLashon luach: no gloss for "${entry}"`);
+    return [inPart[i]];
+  }
+  const [from, to = from] = spec.split('-').map(place);
+  const a = shlAt(inPart, ...from);
+  const lastMain = shlAt(inPart, ...to);
+  if (a === -1 || lastMain === -1 || a > lastMain)
+    throw new Error(`Shemirat HaLashon luach: "${entry}" is outside the text`);
+  // The range ends with its last paragraph's gloss, unless the luach reads that gloss alone.
+  const b = inPart[lastMain + 1]?.gloss && inPart[lastMain + 1].n === to[1] ? lastMain + 1 : lastMain;
+  return inPart.slice(a, b + 1).filter((s) => !(s.gloss && glossesAlone.has(s.key)));
+}
+
+function shemiratHaLashonSchedule(luach, built) {
+  const entries = [...Object.values(luach.simple), ...Object.values(luach.leap)].flat().filter(Boolean);
+  const glossesAlone = new Set(
+    entries
+      .filter((entry) => entry.endsWith('*'))
+      .flatMap((entry) => shemiratHaLashonSegments(entry, built.list, new Set()).map((s) => s.key)),
+  );
+  const table = (months) =>
+    Object.fromEntries(
+      Object.entries(months).map(([month, days]) => [
+        month,
+        days.map((entry) =>
+          entry
+            ? portionOf('shemirat_halashon', shemiratHaLashonSegments(entry, built.list, glossesAlone), built.list)
+            : null,
+        ),
+      ]),
+    );
+  return { kind: 'hebrewYear', common: table(luach.simple), leap: table(luach.leap) };
 }
 
 // ---- Rambam schedule (a cycle of days from an anchor date)
@@ -899,6 +1055,13 @@ function englishAt(track, version, s) {
     const halacha = text[BEN_ISH_CHAI.years[s.year - 1]]?.[s.node]?.['']?.[s.source];
     return englishOf([].concat(halacha ?? []).join('<br>'));
   }
+  if (track === 'shemirat_halashon') {
+    const node = shlNode(text, s.part);
+    const html = s.chapter === null ? node?.[s.n - 1] : node?.[s.chapter - 1]?.[s.n - 1];
+    if (!s.gloss) return englishOf(html);
+    const { notes } = splitFootnotes(String(html ?? ''));
+    return englishOf(notes.join('<br>'));
+  }
   if (track === 'chafetz_chaim') {
     const joined = (value) => englishOf([].concat(value ?? []).join('<br>'));
     if (s.part === 'preface') return joined(text[CHAFETZ_CHAIM.preface]?.[s.n - 1]);
@@ -951,6 +1114,10 @@ const SCHEDULE_CREDIT = {
   rambam: {
     he: 'לוח הלימוד: הרמב״ם היומי, פרק אחד ליום, כפי שספריא מפרסמת',
     en: 'Schedule: the Daily Rambam, one chapter a day, as Sefaria publishes it',
+  },
+  shemirat_halashon: {
+    he: 'לוח הלימוד: שמירת הלשון היומי, מחזור בשנה, כפי ש־Hebcal מפרסם (BSD)',
+    en: 'Schedule: the daily Shemirat HaLashon, one cycle a year, as Hebcal publishes it (BSD)',
   },
   chafetz_chaim: {
     he: 'לוח הלימוד: חפץ חיים היומי, שלושה מחזורים בשנה, כפי ש־Hebcal מפרסם (BSD)',
@@ -1076,6 +1243,17 @@ async function buildTrack(track) {
       heVersions: [sources.he],
       schedule: bihSchedule(built),
       festivals: festivalPortions(track, built),
+      english: englishFor(track, sources, built),
+    };
+  }
+  if (track === 'shemirat_halashon') {
+    const sources = await readShemiratHaLashon();
+    const built = buildShemiratHaLashon(sources);
+    return {
+      built,
+      heVersions: [sources.he],
+      schedule: shemiratHaLashonSchedule(readSchedule('shemirat_halashon'), built),
+      festivals: {},
       english: englishFor(track, sources, built),
     };
   }
@@ -1215,6 +1393,7 @@ module.exports = {
   numberRanges,
   BMC_MARKER,
   chafetzChaimSegments,
+  shemiratHaLashonSegments,
   rambamRef,
   kitzurRange,
   divide,

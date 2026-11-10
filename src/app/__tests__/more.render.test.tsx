@@ -188,7 +188,7 @@ describe('More tab', () => {
       else useChokStore.getState().reset();
       const { unmount } = renderAt('2026-11-16T12:00');
       const rows = screen.getAllByRole('button');
-      expect(rows).toHaveLength(12);
+      expect(rows).toHaveLength(13);
       expect(within(rows[rows.length - 5]).getByText('תהילים')).toBeOnTheScreen();
       expect(within(rows[rows.length - 5]).getByText('מחולק לפי ימי השבוע')).toBeOnTheScreen();
       expect(within(rows[rows.length - 4]).getByText('הילולות צדיקים')).toBeOnTheScreen();
@@ -213,7 +213,7 @@ describe('More tab', () => {
     expect(cards).toHaveLength(2);
     expect(within(cards[0]).getByLabelText('חיפוש')).toBeOnTheScreen();
     expect(cards[1].props.divided).toBe(true);
-    expect(within(cards[1]).UNSAFE_getAllByType(ListRow)).toHaveLength(12);
+    expect(within(cards[1]).UNSAFE_getAllByType(ListRow)).toHaveLength(13);
   });
 
   it('opens the hilulot from its row', () => {
@@ -264,9 +264,11 @@ describe('More tab', () => {
     expect(within(rows[4]).getByText('הלכות החג')).toBeOnTheScreen();
     expect(within(rows[5]).getByText('הלכות לשון הרע')).toBeOnTheScreen();
     expect(within(rows[5]).getByText('תוסף להורדה · כ־0.2 MB')).toBeOnTheScreen();
-    expect(within(rows[6]).getByText('סליחות')).toBeOnTheScreen();
-    expect(within(rows[6]).getByText('להורדה בנוסח אשכנז · כ־1 MB')).toBeOnTheScreen();
-    expect(within(rows[7]).getByText('תהילים')).toBeOnTheScreen();
+    expect(within(rows[6]).getByText('שמירת הלשון')).toBeOnTheScreen();
+    expect(within(rows[6]).getByText('תוסף להורדה · כ־0.3 MB')).toBeOnTheScreen();
+    expect(within(rows[7]).getByText('סליחות')).toBeOnTheScreen();
+    expect(within(rows[7]).getByText('להורדה בנוסח אשכנז · כ־1 MB')).toBeOnTheScreen();
+    expect(within(rows[8]).getByText('תהילים')).toBeOnTheScreen();
   });
 
   it('starts the Selichot download from its row, and installs the nusach on confirm', async () => {

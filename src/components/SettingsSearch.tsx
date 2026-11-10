@@ -93,6 +93,7 @@ export function useSettingsSearch(visit: number) {
   );
   const halachaInstalled = HALACHA_STORES[halachaTrack]((s) => s.installed !== null);
   const chafetzChaimInstalled = HALACHA_STORES.chafetz_chaim((s) => s.installed !== null);
+  const shemiratHaLashonInstalled = HALACHA_STORES.shemirat_halashon((s) => s.installed !== null);
   const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(user.nusach));
   const customMitzvot = useCustomMitzvotStore((s) => s.items);
   const [query, setQuery] = useState('');
@@ -121,6 +122,7 @@ export function useSettingsSearch(visit: number) {
       shnayimInstalled,
       halachaInstalled,
       chafetzChaimInstalled,
+      shemiratHaLashonInstalled,
       selichotInstalled,
       customMitzvot,
       appDayKey(now, user.location),
@@ -145,7 +147,10 @@ export function useSettingsSearch(visit: number) {
           chokInstalled,
           shnayimInstalled,
           halachaInstalled,
-          chafetzChaimInstalled,
+          ownBooksInstalled: [
+            ...(chafetzChaimInstalled ? (['chafetz_chaim'] as const) : []),
+            ...(shemiratHaLashonInstalled ? (['shemirat_halashon'] as const) : []),
+          ],
           now,
           location: user.location,
           inIsrael: user.inIsrael,
@@ -186,6 +191,7 @@ export function useSettingsSearch(visit: number) {
       shnayimInstalled,
       halachaInstalled,
       chafetzChaimInstalled,
+      shemiratHaLashonInstalled,
       selichotInstalled,
       customMitzvot,
     ],
@@ -253,6 +259,7 @@ export function useSettingsSearch(visit: number) {
     shnayimInstalled,
     halachaInstalled,
     chafetzChaimInstalled,
+    shemiratHaLashonInstalled,
     selichotInstalled,
     customMitzvot,
   ]);

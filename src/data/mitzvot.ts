@@ -2,10 +2,17 @@ import { HDate, months } from '@hebcal/core';
 import { DateTime } from 'luxon';
 import { ComputeContext, LibraryGroup, Mitzvah, MitzvahWindow, Nusach } from '@/types/mitzvah';
 import { Location, Zmanim } from '@/types/zmanim';
+import { HalachaBook } from '@/types/halacha';
 import { CHOK_TEXT_ID, hasChokContent } from '@/data/chok';
 import { SHNAYIM_TEXT_ID, hasShnayimContent } from '@/data/shnayim';
-import { FESTIVAL_NAMES, HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID, LASHON_HARA_ID } from '@/data/halacha';
-import { halachaYomitOn, hilchotHachagOn, lashonHaraOn } from '@/data/halachaContent';
+import {
+  FESTIVAL_NAMES,
+  HALACHA_YOMIT_ID,
+  HILCHOT_HACHAG_ID,
+  LASHON_HARA_ID,
+  SHEMIRAT_HALASHON_ID,
+} from '@/data/halacha';
+import { dailyPortionOn, halachaYomitOn, hilchotHachagOn } from '@/data/halachaContent';
 import { NUSACH_IDS } from '@/data/nuschaot';
 import { hasSelichotContent } from '@/data/selichot';
 import { MIDNIGHT_TO_MORNING_PRAYER, siddurPlace, standaloneAvailability } from '@/data/siddur';
@@ -240,41 +247,72 @@ export const HILCHOT_HACHAG: Mitzvah = {
   computeWindow: (ctx) => (hilchotHachagOf(ctx) ? win(ctx.zmanim.alotHaShachar, nextAlot(ctx)) : null),
 };
 
-const lashonHaraOf = (ctx: ComputeContext) => lashonHaraOn(civilDayOf(ctx));
-
-// The daily laws of lashon hara (the owner's request of 2026-11-10): Sefer Chofetz Chaim by its daily luach, three
-// cycles a year, for every nusach whatever the halacha track; every day from alot to the next alot, Shabbat and Yom
-// Tov included as for the daily halacha, `null` until the book is installed.
-export const LASHON_HARA: Mitzvah = {
-  id: LASHON_HARA_ID,
-  name: { he: 'הלכות לשון הרע', en: 'Laws of Lashon Hara' },
-  icon: 'chok',
-  timeType: 'range-within-day',
-  category: 'learning',
-  group: 'other',
-  skipOn: [],
-  nuschaotSupported: ALL_NUSCHAOT,
-  defaultReminders: [
-    {
-      anchor: 'clock',
-      offsetMin: 13 * 60,
-      label: 'זמן הלכות לשון הרע',
-      bodyVariants: [
-        'זמן הלכות לשון הרע: %{portion}',
-        'כמה דקות של שמירת הלשון: %{portion}',
-        'החפץ חיים של היום מחכה לך: %{portion}',
-      ],
+// A learning mitzvah that reads a book of its own by its daily luach, whatever the track (the owner's requests of
+// 2026-11-10): every day from alot to the next alot, Shabbat and Yom Tov included as for the daily halacha, `null` until
+// the book is installed; one `clock` reminder whose bodies name the day's portion.
+function ownBookMitzvah(
+  id: string,
+  book: HalachaBook,
+  name: Mitzvah['name'],
+  reminder: { offsetMin: number; label: string; bodyVariants: string[] },
+  bodyKey: string,
+): Mitzvah {
+  const today = (ctx: ComputeContext) => dailyPortionOn(book, civilDayOf(ctx), false);
+  return {
+    id,
+    name,
+    icon: 'chok',
+    timeType: 'range-within-day',
+    category: 'learning',
+    group: 'other',
+    skipOn: [],
+    nuschaotSupported: ALL_NUSCHAOT,
+    defaultReminders: [{ anchor: 'clock', ...reminder }],
+    bodyParams: (ctx) => {
+      const day = today(ctx);
+      if (!day) return null;
+      return {
+        portion: { he: `${day.book.he}, ${day.portion.label.he}`, en: `${day.book.en}, ${day.portion.label.en}` },
+      };
     },
-  ],
-  bodyParams: (ctx) => {
-    const today = lashonHaraOf(ctx);
-    if (!today) return null;
-    const { book, portion } = today;
-    return { portion: { he: `${book.he}, ${portion.label.he}`, en: `${book.en}, ${portion.label.en}` } };
+    bodyKey,
+    computeWindow: (ctx) => (today(ctx) ? win(ctx.zmanim.alotHaShachar, nextAlot(ctx)) : null),
+  };
+}
+
+// The daily laws of lashon hara: Sefer Chofetz Chaim, three cycles a year.
+export const LASHON_HARA = ownBookMitzvah(
+  LASHON_HARA_ID,
+  'chafetz_chaim',
+  { he: 'הלכות לשון הרע', en: 'Laws of Lashon Hara' },
+  {
+    offsetMin: 13 * 60,
+    label: 'זמן הלכות לשון הרע',
+    bodyVariants: [
+      'זמן הלכות לשון הרע: %{portion}',
+      'כמה דקות של שמירת הלשון: %{portion}',
+      'החפץ חיים של היום מחכה לך: %{portion}',
+    ],
   },
-  bodyKey: 'notifications.lashonHara',
-  computeWindow: (ctx) => (lashonHaraOf(ctx) ? win(ctx.zmanim.alotHaShachar, nextAlot(ctx)) : null),
-};
+  'notifications.lashonHara',
+);
+
+// Sefer Shemirat HaLashon by its daily luach, one cycle a year.
+export const SHEMIRAT_HALASHON = ownBookMitzvah(
+  SHEMIRAT_HALASHON_ID,
+  'shemirat_halashon',
+  { he: 'שמירת הלשון', en: 'Shemirat HaLashon' },
+  {
+    offsetMin: 20 * 60 + 30,
+    label: 'זמן שמירת הלשון',
+    bodyVariants: [
+      'זמן שמירת הלשון: %{portion}',
+      'כמה דקות של מוסר הלשון: %{portion}',
+      'שמירת הלשון של היום מחכה לך: %{portion}',
+    ],
+  },
+  'notifications.shemiratHaLashon',
+);
 
 // Shnayim Mikra ve'Echad Targum (the owner's call, 2026-11-09): Chok LeYisrael's learning day and add-on, an aliyah a day.
 export const SHNAYIM_MIKRA: Mitzvah = {
@@ -665,6 +703,7 @@ export const MITZVOT: Mitzvah[] = [
   HALACHA_YOMIT,
   HILCHOT_HACHAG,
   LASHON_HARA,
+  SHEMIRAT_HALASHON,
   SHNAYIM_MIKRA,
   CHOK_LEYISRAEL,
 ];

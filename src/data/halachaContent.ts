@@ -47,7 +47,7 @@ export type HalachaDay = { track: HalachaBook; book: HalachaLabel; portion: Hala
 
 // A book's daily portion of a civil day (its device-local midnight, the day a window is keyed on), or `null` while the
 // book is not installed or its schedule gives the day nothing.
-function dailyPortionOn(book: HalachaBook, day: Date, inIsrael: boolean): HalachaDay | null {
+export function dailyPortionOn(book: HalachaBook, day: Date, inIsrael: boolean): HalachaDay | null {
   const schedule = halachaScheduleOf(book);
   if (!schedule) return null;
   const portion = halachaPortion(new HDate(day), schedule, inIsrael, useUserStore.getState().benIshChaiYearSwapped);
@@ -57,11 +57,6 @@ function dailyPortionOn(book: HalachaBook, day: Date, inIsrael: boolean): Halach
 // The daily halacha of the user's track.
 export function halachaYomitOn(day: Date, nusach: Nusach, inIsrael: boolean): HalachaDay | null {
   return dailyPortionOn(halachaTrackFor(nusach), day, inIsrael);
-}
-
-// The day's Chofetz Chaim.
-export function lashonHaraOn(day: Date): HalachaDay | null {
-  return dailyPortionOn('chafetz_chaim', day, false);
 }
 
 export type HachagDay = HalachaDay & { period: FestivalPeriod };

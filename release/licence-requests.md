@@ -11,7 +11,7 @@ Read on 2026-11-10. "Verified" means the address or terms were read on the sourc
 | # | Source | What | Terms as read | Channel | Status |
 |---|---|---|---|---|---|
 | 1 | Mechon Mamre | Positive Mitzvot of the Mishneh Torah, one unit of the Rambam add-on, already on GitHub Pages | Private study and teaching only; no publishing on any website; other use needs written permission (verified) | Contact form, mechon-mamre.org/contact.htm (verified; no email address published) | Not needed: the unit was rebuilt from Wikisource on 2026-11-10, and the build refuses Mechon Mamre's text |
-| 2 | Chok LeYisrael, Torat Emet edition: R' Pinchas Reuven, R' Sagiv Mahfud, the J. Alan Groves Center | The Chok LeYisrael add-on, in production since 1.0.21-1 | CC BY-NC-SA 2.5; Torat Emet adds "no commercial use" (verified) | Torat Emet's contact page is closed (verified). R' Sagiv Mahfud runs "נוסח תימן" (reported); the Groves Center at info@GrovesCenter.org (reported) | Not sent |
+| 2 | Chok LeYisrael and Shemirat HaLashon, Torat Emet edition: R' Pinchas Reuven, R' Sagiv Mahfud, the J. Alan Groves Center | The Chok LeYisrael add-on, in production since 1.0.21-1, and the Shemirat HaLashon add-on (built 2026-11-10) | CC BY-NC-SA 2.5; Torat Emet adds "no commercial use" (verified) | Torat Emet's contact page is closed (verified). R' Sagiv Mahfud runs "נוסח תימן" (reported); the Groves Center at info@GrovesCenter.org (reported) | Not sent |
 | 3 | Sefaria | The licence labels of the Torat Emet, Daat and Metsudah versions it serves | Sefaria marks them Public Domain or CC-BY; the sources' own sites say otherwise for Torat Emet and possibly Daat | hello@sefaria.org (Sefaria's public address; its site refuses automated reads, so not verified) | Not sent |
 | 4 | Daat (daat.ac.il) | "Daat Siddur Ashkenaz", in nine Ashkenaz texts of the bundled siddur | Sefaria marks it Public Domain; no terms page was found on daat.ac.il | urisaf@gmail.com, the site manager (verified on daat.ac.il/contact.asp), and the form on the same page | Not sent |
 | 5 | Yalkut Yosef, Rav Yitzchak Yosef | A daily-halacha track from Yalkut Yosef or Kitzur Shulchan Aruch Yalkut Yosef (Q31) | In copyright | Contact form, yalkutyosef.co.il/צרו-קשר/ (verified), phone 077-2249906 (verified). Publisher Ash Pituchim through Otzar HaSefarim, sales@sefer.org.il, 074-703-7171 (reported, a retailer) | Not sent |
@@ -42,15 +42,16 @@ Sources whose terms are open and need no request: Hebrew Wikisource (CC-BY-SA), 
 > [שם]
 > 365jew@gmail.com · https://jew-365.github.io/jew-365/
 
-## 2. Chok LeYisrael — the Torat Emet edition
+## 2. Chok LeYisrael and Shemirat HaLashon — the Torat Emet edition
 
 - **What:** the Chok LeYisrael add-on ([../docs/chok/](../docs/chok)), built from the committed Torat Emet files in [../scripts/chok/source/](../scripts/chok/source), in production since update 1.0.21-1. The reader shows the credit and the licence ([../src/components/ChokLicenseNotice.tsx](../src/components/ChokLicenseNotice.tsx)).
+- **Also:** the Shemirat HaLashon add-on ([../docs/halacha/shemirat_halashon/](../docs/halacha/shemirat_halashon)), built on 2026-11-10 from the Torat Emet text Sefaria serves as "Shemirat HaLashon -- Torat Emet 370" (the owner's choice: no free Hebrew text was found; Wikisource deleted its copy, which came from Torat Emet). Sefaria labels it CC BY-NC-SA, and the build credits it under Torat Emet's terms, CC BY-NC-SA 2.5 with no commercial use ([../scripts/halacha/tracks.js](../scripts/halacha/tracks.js)). Its English is Sefaria's translation by Rabbi Shraga Silverstein, CC-BY. The same request covers it.
 - **Terms:** each part of the edition opens with "כל הזכויות שמורות (c) ל ר' פנחס ראובן שליט''א ול ר' שגיב מחפוד שליט''א ול- J. Alan Groves Center - תחת תנאי רשיון CC-2.5" (verified on toratemetfreeware.com/online). Torat Emet's copyright page (verified): the rights belong to the authors and publishers, who allowed free distribution "שלא למטרות רוח", "אין לעשות בתוכן מאגר זה או בחלק ממנו שימוש מסחרי", under CC BY-NC-SA 2.5, and "ניתן לוותר על כל אחד מתנאים אלו בכפוף לקבלת רשות מבעלי זכויות היוצרים". A free app with no ads arguably meets the non-commercial term, but app stores are commercial venues, so written permission removes the doubt.
 - **Channel:** Torat Emet's own contact page says "עקב ריבוי הפניות וההצעות לא ניתן ליצור עמנו קשר בשלב זה" (verified). R' Sagiv Mahfud, the second rights holder, runs the publisher "נוסח תימן – המרכז להפצת יהדות תימן" (nosachteiman.co.il, which refused an automated read: open its contact page in a browser). No contact was found for R' Pinchas Reuven; the email asks R' Mahfud to forward it. The J. Alan Groves Center (info@GrovesCenter.org) holds the Tanach text; its site calls the Westminster Leningrad Codex public domain, so it gets a short courtesy email.
 
 **Email to R' Sagiv Mahfud (Hebrew):**
 
-Subject: בקשת רשות לשימוש בחק לישראל (מהדורת תורת אמת) באפליקציה חינמית
+Subject: בקשת רשות לשימוש בחק לישראל ובשמירת הלשון (מהדורת תורת אמת) באפליקציה חינמית
 
 > לכבוד הרב שגיב מחפוד שליט״א,
 >
@@ -58,9 +59,9 @@ Subject: בקשת רשות לשימוש בחק לישראל (מהדורת תור
 >
 > אני [שם], מפתח האפליקציה החינמית "יהודי 365" (Jew 365) לאנדרואיד ולאייפון, המזכירה מצוות בזמנן וכוללת סידור ולימוד יומי לכל הנוסחאות.
 >
-> באפליקציה יש תוסף אופציונלי של חק לישראל, מתוך המהדורה שבמאגר תורת אמת, שכבודו ור' פנחס ראובן שליט״א ומרכז J. Alan Groves בעלי הזכויות בה. התוסף יורד רק לבקשת המשתמש, ובכל פתיחה מוצגים הקרדיט לכבודו ולשותפיו ותנאי הרישיון CC BY-NC-SA 2.5. האפליקציה אינה גובה כסף, אין בה פרסומות, רכישות או חשבון משתמש, והטקסט לא נמכר בשום צורה.
+> באפליקציה יש תוספים אופציונליים של חק לישראל ושל ספר שמירת הלשון, מתוך המהדורות שבמאגר תורת אמת, שכבודו ור' פנחס ראובן שליט״א ומרכז J. Alan Groves בעלי הזכויות בהן. כל תוסף יורד רק לבקשת המשתמש, ובכל פתיחה מוצגים הקרדיט לכבודו ולשותפיו ותנאי הרישיון CC BY-NC-SA 2.5. האפליקציה אינה גובה כסף, אין בה פרסומות, רכישות או חשבון משתמש, והטקסטים אינם נמכרים בשום צורה.
 >
-> הרישיון מתיר שימוש שאינו מסחרי, ואנו מקפידים על כך. עם זאת, האפליקציה מופצת בחנויות האפליקציות של Google ו־Apple, ולכן נשמח לקבל את רשותכם המפורשת בכתב להמשיך ולהפיץ בה את הטקסט כך, עם הקרדיט המלא.
+> הרישיון מתיר שימוש שאינו מסחרי, ואנו מקפידים על כך. עם זאת, האפליקציה מופצת בחנויות האפליקציות של Google ו־Apple, ולכן נשמח לקבל את רשותכם המפורשת בכתב להמשיך ולהפיץ בה את שני הטקסטים כך, עם הקרדיט המלא.
 >
 > כמו כן, לא מצאנו דרך ליצור קשר עם הרב פנחס ראובן שליט״א ועם מנהלי תורת אמת. נודה מאוד אם כבודו יוכל להעביר אליהם פנייה זו, או להפנות אותנו אליהם.
 >

@@ -3,7 +3,7 @@ const mockPush = jest.fn();
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock('@/services/halachaFiles', () => ({
   ...jest.requireActual('@/services/halachaFiles'),
-  readHalachaScheduleSync: (pack: 'kitzur' | 'ben_ish_chai' | 'rambam' | 'chafetz_chaim') =>
+  readHalachaScheduleSync: (pack: import('@/types/halacha').HalachaBook) =>
     require('@/testing/halacha').publishedHalachaSchedule(pack),
 }));
 jest.mock('@/services/HalachaContentService', () => ({
@@ -18,7 +18,7 @@ import { HalachaAddonCard } from '@/components/HalachaAddonCard';
 import { HalachaEnablePrompt } from '@/components/HalachaEnablePrompt';
 import { LearningRow, useLearningRows } from '@/components/LearningRows';
 import { CITIES } from '@/data/cities';
-import { halachaYomitOn, lashonHaraOn } from '@/data/halachaContent';
+import { dailyPortionOn, halachaYomitOn } from '@/data/halachaContent';
 import { prepareHalachaDownload } from '@/services/HalachaContentService';
 import { HALACHA_STORES, resetHalachaStores } from '@/stores/useHalachaStore';
 import { selectActive, useMitzvotStore } from '@/stores/useMitzvotStore';
@@ -59,6 +59,17 @@ describe('the halacha add-on card', () => {
     expect(screen.getByText('Halacha add-on: Sefer Chofetz Chaim in English')).toBeOnTheScreen();
   });
 
+  it('offers Shemirat HaLashon, and in English its translation once it is installed', () => {
+    renderWithTheme(<HalachaAddonCard track="shemirat_halashon" />);
+    expect(screen.getByText('תוסף ההלכה: ספר שמירת הלשון')).toBeOnTheScreen();
+    expect(screen.getByText(/^ספר שמירת הלשון יורד פעם אחת/)).toBeOnTheScreen();
+    screen.unmount();
+    useUserStore.setState({ language: 'en' });
+    installHalachaFixture('shemirat_halashon');
+    renderWithTheme(<HalachaAddonCard track="shemirat_halashon" />);
+    expect(screen.getByText('Halacha add-on: Sefer Shemirat HaLashon in English')).toBeOnTheScreen();
+  });
+
   it("shows, in English, the Kitzur's English beside an installed Kitzur, and not before", () => {
     useUserStore.setState({ language: 'en' });
     const { rerender } = renderWithTheme(<HalachaAddonCard track="kitzur" />);
@@ -91,6 +102,17 @@ describe('the enable prompt after a first download', () => {
     expect(selectActive('lashon_hara')(useMitzvotStore.getState()).enabled).toBe(true);
     expect(selectActive('halacha_yomit')(useMitzvotStore.getState()).enabled).toBe(false);
     expect(HALACHA_STORES.chafetz_chaim.getState().enablePrompt).toBe(false);
+  });
+
+  it('names Shemirat HaLashon and switches only its mitzvah on', () => {
+    renderWithTheme(<HalachaEnablePrompt />);
+    act(() => HALACHA_STORES.shemirat_halashon.getState().setEnablePrompt(true));
+    expect(screen.getByText('ספר שמירת הלשון הותקן')).toBeOnTheScreen();
+    expect(screen.getByText('להפעיל תזכורות ומעקב ללימוד היומי בשמירת הלשון?')).toBeOnTheScreen();
+    fireEvent.press(screen.getByText('כן'));
+    expect(selectActive('shemirat_halashon')(useMitzvotStore.getState()).enabled).toBe(true);
+    expect(selectActive('lashon_hara')(useMitzvotStore.getState()).enabled).toBe(false);
+    expect(HALACHA_STORES.shemirat_halashon.getState().enablePrompt).toBe(false);
   });
 
   it('leaves the mitzvot off on no', () => {
@@ -132,9 +154,25 @@ describe('the learning rows of the two halacha mitzvot', () => {
     act(() => void installHalachaFixture('chafetz_chaim'));
     rerender({});
     lashonHara = row(result.current.rows, 'lashon_hara');
-    expect(lashonHara.caption).toBe(lashonHaraOn(appDay(NOW, JERUSALEM))!.portion.label.he);
+    expect(lashonHara.caption).toBe(dailyPortionOn('chafetz_chaim', appDay(NOW, JERUSALEM), true)!.portion.label.he);
     lashonHara.onPress();
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/siddur/[id]', params: { id: 'lashon_hara' } });
+  });
+
+  it('offer Shemirat HaLashon on its own row, its own download, then its portion in the reader', async () => {
+    installHalachaFixture('chafetz_chaim');
+    const { result, rerender } = rowsAt();
+    let shemirat = row(result.current.rows, 'shemirat_halashon');
+    expect(shemirat.title).toBe('שמירת הלשון');
+    expect(shemirat.caption).toBe('תוסף להורדה · כ־0.3 MB');
+    await act(async () => shemirat.onPress());
+    expect(prepareHalachaDownload).toHaveBeenCalledWith('shemirat_halashon');
+    act(() => void installHalachaFixture('shemirat_halashon'));
+    rerender({});
+    shemirat = row(result.current.rows, 'shemirat_halashon');
+    expect(shemirat.caption).toBe(dailyPortionOn('shemirat_halashon', appDay(NOW, JERUSALEM), true)!.portion.label.he);
+    shemirat.onPress();
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/siddur/[id]', params: { id: 'shemirat_halashon' } });
   });
 
   it("follow the user's chosen track", () => {

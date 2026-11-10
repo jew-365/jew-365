@@ -21,6 +21,8 @@ export const HALACHA_PACKS: readonly HalachaPack[] = [
   'rambam',
   'chafetz_chaim',
   'chafetz_chaim_en',
+  'shemirat_halashon',
+  'shemirat_halashon_en',
 ];
 
 // One pack of the halacha add-on, device-only like chok-store (`halacha-<pack>-store`): what is installed, the latest
@@ -69,6 +71,8 @@ export const HALACHA_STORES: Readonly<Record<HalachaPack, HalachaPackStore>> = {
   rambam: createHalachaPackStore('rambam'),
   chafetz_chaim: createHalachaPackStore('chafetz_chaim'),
   chafetz_chaim_en: createHalachaPackStore('chafetz_chaim_en'),
+  shemirat_halashon: createHalachaPackStore('shemirat_halashon'),
+  shemirat_halashon_en: createHalachaPackStore('shemirat_halashon_en'),
 };
 
 export function resetHalachaStores(): void {

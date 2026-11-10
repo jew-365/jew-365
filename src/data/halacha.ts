@@ -6,25 +6,36 @@ export const HALACHA_YOMIT_ID = 'halacha_yomit';
 export const HILCHOT_HACHAG_ID = 'hilchot_hachag';
 
 // The daily lashon hara halachot (the owner's request of 2026-11-10): Sefer Chofetz Chaim by its daily luach, for every
-// nusach, whatever the track.
+// nusach, whatever the track; and Sefer Shemirat HaLashon by its own luach (the owner's call of the same day).
 export const LASHON_HARA_ID = 'lashon_hara';
+export const SHEMIRAT_HALASHON_ID = 'shemirat_halashon';
+
+// The mitzvot that read a book of their own, whatever the track.
+const OWN_BOOK: Readonly<Record<string, HalachaBook>> = {
+  [LASHON_HARA_ID]: 'chafetz_chaim',
+  [SHEMIRAT_HALASHON_ID]: 'shemirat_halashon',
+};
 
 export const HALACHA_TRACKS: readonly HalachaTrack[] = ['kitzur', 'ben_ish_chai', 'rambam'];
 
-// Every book of the halacha add-on: the tracks, then the Chofetz Chaim.
-export const HALACHA_BOOKS: readonly HalachaBook[] = [...HALACHA_TRACKS, 'chafetz_chaim'];
+// Every book of the halacha add-on: the tracks, then the books of their own mitzvot.
+export const HALACHA_BOOKS: readonly HalachaBook[] = [...HALACHA_TRACKS, 'chafetz_chaim', 'shemirat_halashon'];
 
-// The mitzvot that read a halacha book: the two of the user's track and the lashon hara halachot.
+// The book of a mitzvah that reads one of its own, else `undefined`.
+export const ownBookOf = (id: string): HalachaBook | undefined => OWN_BOOK[id];
+
+// The mitzvot that read a halacha book: the two of the user's track and those with a book of their own.
 export const isHalachaMitzvah = (id: string): boolean =>
-  id === HALACHA_YOMIT_ID || id === HILCHOT_HACHAG_ID || id === LASHON_HARA_ID;
+  id === HALACHA_YOMIT_ID || id === HILCHOT_HACHAG_ID || ownBookOf(id) !== undefined;
 
-// The book a halacha mitzvah reads: the Chofetz Chaim for the lashon hara halachot, else the user's track.
-export const halachaBookOf = (id: string, track: HalachaTrack): HalachaBook =>
-  id === LASHON_HARA_ID ? 'chafetz_chaim' : track;
+// The book a halacha mitzvah reads: its own book, else the user's track.
+export const halachaBookOf = (id: string, track: HalachaTrack): HalachaBook => ownBookOf(id) ?? track;
 
 // The mitzvot a book's download serves, which its enable prompt switches on.
-export const halachaMitzvotOf = (book: HalachaBook): readonly string[] =>
-  book === 'chafetz_chaim' ? [LASHON_HARA_ID] : [HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID];
+export const halachaMitzvotOf = (book: HalachaBook): readonly string[] => {
+  const own = Object.keys(OWN_BOOK).filter((id) => OWN_BOOK[id] === book);
+  return own.length ? own : [HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID];
+};
 
 // The book each nusach learns by default (spec 3, the owner's table of 2026-11-10; R17.1 for the rav).
 const DEFAULT_TRACK: Readonly<Record<Nusach, HalachaTrack>> = {

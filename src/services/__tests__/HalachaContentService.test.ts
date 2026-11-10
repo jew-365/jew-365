@@ -9,7 +9,13 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 import { createHash } from 'crypto';
-import { HALACHA_BOOKS, HALACHA_YOMIT_ID, HILCHOT_HACHAG_ID, LASHON_HARA_ID } from '@/data/halacha';
+import {
+  HALACHA_BOOKS,
+  HALACHA_YOMIT_ID,
+  HILCHOT_HACHAG_ID,
+  LASHON_HARA_ID,
+  SHEMIRAT_HALASHON_ID,
+} from '@/data/halacha';
 import { halachaScheduleOf, hasHalachaContent } from '@/data/halachaContent';
 import { AddonDownloadError } from '@/services/addons/addonContent';
 import {
@@ -116,6 +122,9 @@ describe('the published halacha manifests', () => {
     const chafetzChaim = published('chafetz_chaim/en');
     expect(parseHalachaManifest('chafetz_chaim_en', chafetzChaim)).toBe(chafetzChaim);
     expectUnavailable(() => parseHalachaManifest('chafetz_chaim_en', manifest));
+    const shemiratHaLashon = published('shemirat_halashon/en');
+    expect(parseHalachaManifest('shemirat_halashon_en', shemiratHaLashon)).toBe(shemiratHaLashon);
+    expectUnavailable(() => parseHalachaManifest('shemirat_halashon_en', chafetzChaim));
   });
 
   it.each([
@@ -125,6 +134,8 @@ describe('the published halacha manifests', () => {
     ['rambam', 'rambam'],
     ['chafetz_chaim', 'chafetz_chaim'],
     ['chafetz_chaim_en', 'chafetz_chaim/en'],
+    ['shemirat_halashon', 'shemirat_halashon'],
+    ['shemirat_halashon_en', 'shemirat_halashon/en'],
   ] as const)('estimates the %s download within 0.1 MB of its manifest', (pack, dir) => {
     expect(Math.abs(HALACHA_SIZE_ESTIMATE_MB[pack] - published(dir).gzipBytes / 1e6)).toBeLessThanOrEqual(0.1);
   });
@@ -137,6 +148,8 @@ describe('the published halacha manifests', () => {
       rambam: 'https://jew-365.github.io/jew-365/halacha/rambam/',
       chafetz_chaim: 'https://jew-365.github.io/jew-365/halacha/chafetz_chaim/',
       chafetz_chaim_en: 'https://jew-365.github.io/jew-365/halacha/chafetz_chaim/en/',
+      shemirat_halashon: 'https://jew-365.github.io/jew-365/halacha/shemirat_halashon/',
+      shemirat_halashon_en: 'https://jew-365.github.io/jew-365/halacha/shemirat_halashon/en/',
     });
   });
 });
@@ -239,6 +252,8 @@ describe("the enable prompt's yes", () => {
   it('switches on the mitzvot its book serves, and only those', () => {
     switchHalachaOn('chafetz_chaim');
     expect([on(LASHON_HARA_ID), on(HALACHA_YOMIT_ID), on(HILCHOT_HACHAG_ID)]).toEqual([true, false, false]);
+    switchHalachaOn('shemirat_halashon');
+    expect([on(SHEMIRAT_HALASHON_ID), on(HALACHA_YOMIT_ID)]).toEqual([true, false]);
     switchHalachaOn('rambam');
     expect([on(HALACHA_YOMIT_ID), on(HILCHOT_HACHAG_ID)]).toEqual([true, true]);
   });

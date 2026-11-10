@@ -5,7 +5,7 @@ jest.mock('@/services/notifications/ids', () => ({
 jest.mock('@/services/notifications/planners/horizonEnd', () => ({ planHorizonEnd: () => [] }));
 jest.mock('@/services/halachaFiles', () => ({
   ...jest.requireActual('@/services/halachaFiles'),
-  readHalachaScheduleSync: (pack: 'kitzur' | 'ben_ish_chai' | 'rambam' | 'chafetz_chaim') =>
+  readHalachaScheduleSync: (pack: import('@/types/halacha').HalachaBook) =>
     require('@/testing/halacha').publishedHalachaSchedule(pack),
 }));
 
@@ -13,7 +13,7 @@ import { HDate, months } from '@hebcal/core';
 import { DateTime } from 'luxon';
 import { setLocale } from '@/i18n';
 import { CITIES } from '@/data/cities';
-import { HALACHA_YOMIT, HILCHOT_HACHAG, LASHON_HARA, MITZVOT, findMitzvah } from '@/data/mitzvot';
+import { HALACHA_YOMIT, HILCHOT_HACHAG, LASHON_HARA, MITZVOT, SHEMIRAT_HALASHON, findMitzvah } from '@/data/mitzvot';
 import { rulesFor } from '@/data/taharahPresets';
 import { HebcalService } from '@/services/HebcalService';
 import { buildPlan } from '@/services/notifications/plan';
@@ -35,6 +35,7 @@ const NEW_YORK = CITIES.find((city) => city.cityId === 'new-york')!;
 const ASHKENAZ: UserSettings = { nusach: 'ashkenaz', halachicOpinions: { ksSofZman: 'GRA' }, inIsrael: true };
 const KITZUR = publishedHalachaManifest('kitzur');
 const CHAFETZ_CHAIM = publishedHalachaManifest('chafetz_chaim');
+const SHEMIRAT_HALASHON_BOOK = publishedHalachaManifest('shemirat_halashon');
 
 const day = (iso: string) => {
   const [year, month, date] = iso.split('-').map(Number);
@@ -101,11 +102,12 @@ afterEach(() => setLocale('he'));
 describe('the two registry entries', () => {
   it('sit between Kiddush Levana and Shnayim Mikra, learning mitzvot of every nusach, off by default', () => {
     const ids = MITZVOT.map((mitzvah) => mitzvah.id);
-    expect(ids.slice(ids.indexOf('kiddush_levana'), ids.indexOf('kiddush_levana') + 5)).toEqual([
+    expect(ids.slice(ids.indexOf('kiddush_levana'), ids.indexOf('kiddush_levana') + 6)).toEqual([
       'kiddush_levana',
       'halacha_yomit',
       'hilchot_hachag',
       'lashon_hara',
+      'shemirat_halashon',
       'shnayim_mikra',
     ]);
     for (const mitzvah of [HALACHA_YOMIT, HILCHOT_HACHAG]) {
@@ -351,6 +353,62 @@ describe('the laws of lashon hara', () => {
     const [en] = reminders(planInput({ mitzvot: [LASHON_HARA], language: 'en' }), 'lashon_hara');
     expect(messageOf(en)).toBe(
       `Time for Laws of Lashon Hara: Sefer Chofetz Chaim, ${portionOf('2026-12-17').label.en}`,
+    );
+  });
+});
+
+describe('Shemirat HaLashon', () => {
+  const portionOf = (iso: string) => {
+    const hd = new HDate(day(iso));
+    const table = SHEMIRAT_HALASHON_BOOK.schedule.kind === 'hebrewYear' ? SHEMIRAT_HALASHON_BOOK.schedule : null;
+    return (hd.isLeapYear() ? table!.leap : table!.common)[hd.getMonthName()][hd.getDate() - 1]!;
+  };
+
+  it('is a learning mitzvah of every nusach after the laws of lashon hara, off by default, reminded at 20:30', () => {
+    expect(findMitzvah('shemirat_halashon')).toBe(SHEMIRAT_HALASHON);
+    expect(SHEMIRAT_HALASHON).toMatchObject({ category: 'learning', group: 'other', skipOn: [] });
+    expect(SHEMIRAT_HALASHON.nuschaotSupported).toHaveLength(5);
+    expect(DEFAULT_ON_MITZVOT).not.toContain('shemirat_halashon');
+    expect(performMinOf(SHEMIRAT_HALASHON)).toEqual({ alone: 5 });
+    expect(nagZoneKindOf('shemirat_halashon')).toBe('learning');
+    expect(nagVerbKey('shemirat_halashon')).toBe('nag.verb.shemirat_halashon');
+    const [reminder] = SHEMIRAT_HALASHON.defaultReminders;
+    expect(SHEMIRAT_HALASHON.defaultReminders).toHaveLength(1);
+    expect(reminder).toMatchObject({ anchor: 'clock', offsetMin: 20 * 60 + 30 });
+    expect(reminder.bodyVariants).toHaveLength(3);
+  });
+
+  it('has no window until its own book is installed, the Chofetz Chaim installed or not', () => {
+    installHalachaFixture('chafetz_chaim');
+    expect(windowOn(SHEMIRAT_HALASHON, '2026-12-17')).toBeNull();
+    installHalachaFixture('shemirat_halashon');
+    for (const iso of ['2026-12-17', '2026-12-19']) {
+      const window = windowOn(SHEMIRAT_HALASHON, iso)!;
+      expect(window.start).toEqual(zmanimFor(at(JERUSALEM, `${iso}T12:00`), JERUSALEM).alotHaShachar);
+      expect(clock(window.end, JERUSALEM).slice(0, 10)).toBe(shift(day(iso), 1));
+    }
+  });
+
+  it("names the day's portion, in Hebrew and in English", () => {
+    installHalachaFixture('shemirat_halashon');
+    const { label } = portionOf('2026-12-17');
+    expect(paramsOn(SHEMIRAT_HALASHON, '2026-12-17')).toEqual({
+      portion: { he: `ספר שמירת הלשון, ${label.he}`, en: `Sefer Shemirat HaLashon, ${label.en}` },
+    });
+  });
+
+  it('plans its 20:30 reminder, none inside Shabbat', () => {
+    installHalachaFixture('shemirat_halashon');
+    const input = planInput({ mitzvot: [SHEMIRAT_HALASHON] });
+    expect(reminders(input, 'shemirat_halashon').map((c) => [c.id, clock(c.trigger, JERUSALEM)])).toEqual([
+      ['shemirat_halashon__2026-12-17__0', '2026-12-17 20:30'],
+      ['shemirat_halashon__2026-12-19__0', '2026-12-19 20:30'],
+      ['shemirat_halashon__2026-12-20__0', '2026-12-20 20:30'],
+    ]);
+    setLocale('en');
+    const [en] = reminders(planInput({ mitzvot: [SHEMIRAT_HALASHON], language: 'en' }), 'shemirat_halashon');
+    expect(messageOf(en)).toBe(
+      `Time for Shemirat HaLashon: Sefer Shemirat HaLashon, ${portionOf('2026-12-17').label.en}`,
     );
   });
 });

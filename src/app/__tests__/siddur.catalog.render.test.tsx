@@ -141,7 +141,9 @@ describe('the siddur tab’s catalog', () => {
         'halacha_yomit',
         'hilchot_hachag',
         'lashon_hara',
+        'shemirat_halashon',
       ]);
+      expect(within(rowOf('shemirat_halashon')).getByText('תוסף להורדה · כ־0.3 MB')).toBeOnTheScreen();
       expect(within(rowOf('lashon_hara')).getByText('תוסף להורדה · כ־0.2 MB')).toBeOnTheScreen();
       expect(within(rowOf('shnayim_mikra')).getByText('תוסף להורדה · כ־1.2 MB')).toBeOnTheScreen();
       expect(listRowOf('shnayim_mikra').props.iconTone).toBe('muted');

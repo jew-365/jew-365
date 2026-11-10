@@ -247,14 +247,17 @@ describe('search results', () => {
     expect(byId.get('halachaTrack')).toMatchObject({ section: 'prayer' });
   });
 
-  it('finds the laws of lashon hara by the book, its parts and the words people type', () => {
-    for (const query of ['לשון הרע', 'חפץ חיים', 'שמירת הלשון', 'רכילות', 'lashon hara', 'chofetz chaim']) {
+  it('finds the laws of lashon hara and Shemirat HaLashon by their books, their parts and the words people type', () => {
+    for (const query of ['לשון הרע', 'חפץ חיים', 'רכילות', 'lashon hara', 'chofetz chaim']) {
       expect(close(query)).toContain('mitzvah:lashon_hara');
+    }
+    for (const query of ['שמירת הלשון', 'שער הזכירה', 'shemirat halashon', 'shmiras haloshon']) {
+      expect(close(query)).toContain('mitzvah:shemirat_halashon');
     }
   });
 
   it('opens the halacha mitzvot in the reader only once their book is installed', () => {
-    const lashonHara = (chafetzChaimInstalled: boolean) =>
+    const lashonHara = (installed: boolean) =>
       settingsContentItems({
         mitzvot: MITZVOT,
         nusach: 'sefard',
@@ -262,13 +265,14 @@ describe('search results', () => {
         maritalStatus: 'married',
         chokInstalled: false,
         halachaInstalled: true,
-        chafetzChaimInstalled,
+        ownBooksInstalled: installed ? ['chafetz_chaim', 'shemirat_halashon'] : [],
         now: at(JERUSALEM, '2026-10-28T12:00'),
         location: JERUSALEM,
         inIsrael: true,
       }).map((item) => item.id);
     expect(lashonHara(false)).not.toContain('siddur:lashon_hara');
-    expect(lashonHara(true)).toContain('siddur:lashon_hara');
+    expect(lashonHara(false)).not.toContain('siddur:shemirat_halashon');
+    expect(lashonHara(true)).toEqual(expect.arrayContaining(['siddur:lashon_hara', 'siddur:shemirat_halashon']));
     const items = (halachaInstalled: boolean) =>
       settingsContentItems({
         mitzvot: MITZVOT,
