@@ -152,7 +152,16 @@ Every step toward the stores, in order: what was done, what it produced, and eve
 
 - The OTA part of the hold lifted by the owner ("תעשה ota לפרודקשן וגם לפריויו"): production `1.0.21-17` (group `325dc965-a442-4f03-855b-d847444e1243`) and preview `1.0.21-62` (group `304164b5-a488-4f6c-ba25-aa2c01b1867f`), both from `8810f31`, a tree equal to `origin/main`. iOS build 1.0.21 (6), still in App Review, listens to `production` and downloads `1.0.21-17`. The store uploads stay held.
 
+## 2026-11-10
+
+- Status read, the owner's request ("מה המצב בחנויות"), in the owner's signed-in Chrome only ("Browser 1": Play as 365jew@gmail.com at `/console/u/0/`, App Store Connect signed in); no `asc` or `play.mjs` call, nothing changed in either console.
+- App Store Connect: iOS 1.0.21 "Waiting for Review". App Review › Submissions: one submission, iOS 1.0.21, 1 item, submitted Sunday 2026-11-08 12:22 Israel time by Avraham Shimon Sason, still Waiting for Review, no new message. TestFlight: build 6 "Ready to Submit" (group Team (Expo), expires in 88 days), build 5 "Testing" (Team (Expo) and Beta testers, expires in 82 days), build 4 expired.
+- Google Play: production access granted. The Dashboard's "Create and publish a release" reads "Congratulations! Your app has been granted Google Play production access" and "You can now also use open testing"; the console does not show the 365jew admin the grant date (Google's email goes to avi6190i). Production track: Inactive, no release, "Create new release" offered. Closed testing - Alpha: Active, release `8 (1.0.21)`. Publishing overview: nothing in review or waiting, managed publishing off, last published 2026-10-22. Policy status: "No issues found". Crashes and ANRs, last 28 days: the single cluster of 2026-11-08 (`JavascriptException` on `8 (1.0.21)`, last 7 days before the read), nothing new.
+- Play notification center, two unread from 2026-11-05: "Declare your trader status by February 1, 2027" (an account declaration under the developer details, so the account owner avi6190i's) and "Review changes to Google Play policies"; a "Declare your trader status" banner tops every console page. Not answered: whether the owner acts as a trader is the owner's call.
+- The Android part of the hold lifted by the owner after that read ("כן תעלה את הבילד לגוגל שיבדקו ומקסימום נעשה עוד בילד"): AAB versionCode 10 goes to Google's review without waiting for Apple.
+
 ## Next
 
-- iOS: wait for App Review's answer on 1.0.21 (6) (Waiting for Review since 2026-11-08 10:22 UTC, manual release). On approval, publish production OTA `1.0.21-17` and the owner's Release, each on the owner's yes; on a rejection, fix first.
-- Android: wait for Google's answer on production access (email to avi6190i). Then upload AAB versionCode 10 (EAS `041138bc`) to the closed test (`play.mjs upload`, a dry run first) and release it on the production track in the console as avi6190i, each on the owner's yes.
+- iOS: wait for App Review's answer on 1.0.21 (6) (Waiting for Review since 2026-11-08 10:22 UTC, manual release; production OTA `1.0.21-17` was published on 2026-11-09). On approval, the owner's Release; on a rejection, fix first.
+- Android: production access granted (read 2026-11-10) and the hold lifted that day: upload AAB versionCode 10 (EAS `041138bc`) to the closed test (`play.mjs upload`, a dry run first, `--commit` on the owner's yes) and release it on the production track in the console as avi6190i, then send it for Google's review.
+- Play trader status: the account owner avi6190i declares it by 2027-02-01 (Play Console › developer details).
