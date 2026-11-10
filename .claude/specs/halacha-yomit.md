@@ -1,0 +1,264 @@
+# Spec: daily halacha and the halachot before a festival
+
+Status: characterized with the owner on 2026-11-10 in a cloud session (three rounds of answers, quoted below). Planning only: the owner's word of 2026-11-10, "כרגע אל תבצע את התוכנית רק תבנה אותה מקצה לקצה". Nothing is built. The tasks are the batch "Daily halacha and festival halachot, 2026-11-10" in [not-close.md](../../not-close.md); this file is the contract, that file the queue.
+
+## 1. The request
+
+The owner, 2026-11-10: "אני רוצה להוסיף עוד שני מצוות שקשורות להלכות: 1 הלכות יומיות לפי מה שנהוג (תעשה מחקר) 2 הלכות של 30 יום לפני החג לפי מה שנהוג".
+
+Two learning mitzvot, both off by default, both reading a downloadable add-on, built on the pattern of Chok LeYisrael and Shnayim Mikra:
+
+- `halacha_yomit`: a daily halacha portion, from the book that fits the user's nusach.
+- `hilchot_hachag`: the halachot of the coming festival, in the days before it, from the same book.
+
+## 2. Research
+
+### 2.1 Daily halacha orders in use
+
+| Order | Portion | Cycle | Text |
+|---|---|---|---|
+| Kitzur Shulchan Aruch Yomi | a few se'ifim | one year | public domain |
+| Halacha Yomit (the 5714 enterprise) | 3 se'ifim of Shulchan Aruch Orach Chaim | about 4.5 years | public domain |
+| Daf HaYomi B'Halacha (Dirshu) | Mishnah Berurah | about 7 years (from memory, not verified) | public domain |
+| Rambam Yomi (the Lubavitcher Rebbe's takana) | 3 chapters, 1 chapter, or Sefer HaMitzvot | 1 or 3 years | public domain |
+| Ben Ish Chai | the halachot of the week's parasha | 2 years | public domain |
+| Yalkut Yosef, Rav Ovadia's Halacha Yomit, Peninei Halakha, Shulchan Aruch HaMekutzar (Rav Ratzabi) | — | — | in copyright; written permission needed |
+
+No single enterprise offers one official order per eda. Each eda has its accepted book, so the app maps a book to each nusach (section 3).
+
+Sources read on 2026-11-10: the Yeshiva.org.il wiki pages "הלכה יומית" and "שלושים יום קודם החג שואלים ודורשים בהלכות החג", HaMichlol "הדף היומי בהלכה", "קביעותא" and "בן איש חי (ספר)", and the Sefaria API (2.3).
+
+### 2.2 Thirty days before a festival
+
+- Source: "שואלין ודורשין בהלכות הפסח קודם הפסח שלושים יום" (Pesachim 6a; Shulchan Aruch OC 429:1).
+- Pesach: agreed by all, from Purim.
+- Shavuot and Sukkot: disputed. The Bach extends the thirty days to them (from 5 Iyar and 14 Elul); the Beit Yosef holds that close to and on the festival is enough.
+- Chanukah and Purim: no thirty days (Tzitz Eliezer 17:1 as cited on the wiki), but their laws are taught on the days themselves.
+- "הלכות חג בחג" (learning on the festival itself) cannot be served: the app is closed on Yom Tov.
+
+### 2.3 What Sefaria holds (read from its API, 2026-11-10)
+
+| Book | Hebrew version to pin | Licence | English versions with a usable licence |
+|---|---|---|---|
+| Kitzur Shulchan Arukh (221 simanim, 2765 se'ifim) | Torat Emet 357 | Public Domain | Metsudah 1996, trans. Avrohom Davis (CC-BY); Sefaria Community Translation (CC0) |
+| Ben Ish Hai (Halachot 1st Year: 52 nodes; 2nd Year: 47 nodes) | Ben Ish Hai -- Wikisource, or Jerusalem 1898 | Public Domain | Sefaria Community Translation (CC0); Wikisource (CC-BY-SA) |
+| Mishneh Torah | Torat Emet 363 | Public Domain | Sefaria Edition, trans. Francis Nataf 2019 (CC-BY); Community (CC0); Touger, Moznaim (CC-BY-NC) |
+
+- How complete each English version is was not measured; the build measures it (5.4).
+- Sefaria's calendar API (`/api/calendars`) gives "Daily Rambam" (one chapter): on 2026-11-10 it read "Forbidden Intercourse 22". It gives no Kitzur Shulchan Aruch Yomi and no Ben Ish Chai schedule.
+
+## 3. Tracks
+
+The owner approved the table on 2026-11-10 ("מאשר את הטבלה ואני רוצה שינתן למשתמש אפשרות להחליף, לחב"ד רמב"ם יומי"); Rambam is one chapter a day (the owner's pick, the same day).
+
+| Track id | Book | Default for nusach | Schedule |
+|---|---|---|---|
+| `kitzur` | Kitzur Shulchan Aruch | `ashkenaz`, `sefard` | the yearly luach in use, by Hebrew date (6.1) |
+| `ben_ish_chai` | Ben Ish Chai, halachot only | `edot_hamizrach` | the week's parasha, divided over the week's days (6.2) |
+| `rambam` | Mishneh Torah | `chabad`, `teiman` | one chapter a day, the public cycle (6.3) |
+
+- `defaultHalachaTrack(nusach)` is the one place the mapping lives, a `Record<Nusach, HalachaTrack>`, so a new nusach fails `pnpm typecheck` until it has a track.
+- `useUserStore.halachaTrack` is `HalachaTrack | null`; `null` means the nusach's default, so a later change of nusach moves a user who never chose. Settings → Prayer offers the three tracks through `OptionSelect`. One choice serves both mitzvot.
+- The mapping of a book to a nusach is a halachic decision and goes to the rav (R17.1).
+
+## 4. Decisions
+
+The owner's, 2026-11-10:
+
+| # | Decision | The owner's answer |
+|---|---|---|
+| D1 | The schedule is fixed by the date: everyone learns the same portion on the same day, and a user who switches the mitzvah on mid-cycle joins today's portion. | "לוח קבוע לפי התאריך" |
+| D2 | Shabbat and Yom Tov: the portion can be made up the next day, or marked as learned. | "אפשרות להשלמה מחר או סימון כבוצע" |
+| D3 | Festivals: Pesach, Shavuot, Sukkot; Rosh Hashanah and Yom Kippur; Chanukah and Purim; Tisha B'Av and the fasts. | all four options chosen |
+| D4 | The two mitzvot run side by side; each has its own switch. | "שתיהן במקביל" |
+| D5 | English: a translation only where one exists under a licence the app may use; otherwise the Hebrew text. | "תרגום אם יש חופשי" |
+| D6 | One release: both mitzvot with all three tracks. | "הכול יחד" |
+| D7 | The rav answers before production: preview first, then the review page, then production. | "לפני production" |
+
+Claude's, cheap to reverse, the owner may overrule:
+
+- **D8, where they show:** like Chok LeYisrael: the library, the mitzvah screen, the More tab and the siddur tab's learning group. Q10 of the first round was not asked again.
+- **D9, a window on every day:** unlike Chok LeYisrael, neither mitzvah has `skipOn`. A fixed public schedule has a portion on Shabbat too, and the app already treats Shabbat as an ordinary day for history: no notification fires inside a holy block, the block's check-in asks about the portion, and the reader offers a make-up fold afterwards. This is D2 with no new mechanism.
+- **D10, one add-on, a file set per track:** the user downloads only the chosen track (and its English, when the app is in English and the track has one). Switching track offers that track's download; a mitzvah's window is `null` until its track is installed.
+- **D11, periods** (section 7.1): thirty days for the three regalim; Rosh Hashanah from Rosh Chodesh Elul; Yom Kippur in the Ten Days; Chanukah and Purim fourteen days; Tisha B'Av from 17 Tammuz; each minor fast three days. To the rav as R17.4.
+- **D12, overlapping periods:** a day inside two periods (Elul: Rosh Hashanah and Sukkot; before Purim: Purim, then Pesach starts on Purim itself) carries both portions in one reading, the nearer festival first.
+- **D13, a period ends on the erev:** the last portion is the day before the festival (or the fast). Chanukah's and Purim's laws "on the day" are not added (R17.5).
+- **D14, default reminders:** `halacha_yomit` a `clock` reminder at 08:00, `hilchot_hachag` at 19:00, apart from Chok LeYisrael's 09:00 and Shnayim Mikra's 20:00. `PERFORM_MIN` 10 for each; the smart nag's zone as Chok LeYisrael's (shkia to chatzot).
+- **D15, icon:** both reuse the `chok` book icon, as Shnayim Mikra does. A drawing of their own would be a design-lab study.
+- **D16, registry place:** both sit in `MITZVOT` right before `shnayim_mikra`, `group: 'other'`, `category: 'learning'`, `nuschaotSupported: ALL_NUSCHAOT`.
+
+## 5. Content: the add-on
+
+### 5.1 Build
+
+`pnpm halacha:build` runs `scripts/halacha/build.js`, on the pattern of [scripts/shnayim/build.js](../../scripts/shnayim/build.js): it fetches the pinned Sefaria versions of 2.3, cleans them, and writes [docs/](../../docs)`halacha/`. A push to `main` publishes it on GitHub Pages. No file there is ever hand-edited.
+
+### 5.2 Layout
+
+```
+docs/halacha/manifest.json
+docs/halacha/<track>/<unit>.<hash>.json.gz        Hebrew
+docs/halacha/<track>/en/<unit>.<hash>.json.gz     English, only for a track that has it
+```
+
+- A unit is what a day's portion is read from: a group of simanim for `kitzur`, one parasha of one year for `ben_ish_chai`, one set of halachot (for example Chametz uMatzah) for `rambam`. Units keep a day's read to one small file.
+- `manifest.json`: `format`, and per track `version`, `gzipBytes`, `credit` (`{ he, en }`, the version titles and licences of 2.3), `gz` (unit → path and sha256), `en` (the same for English, absent when none), `schedule` (6), and `festivals` (7.2). A reader that needs a field refuses a manifest without it, as the Chok reader does.
+- A segment is one se'if (Kitzur, Ben Ish Chai) or one halacha (Rambam), with a stable `key` (`<track>:<siman or chapter ref>:<n>`), its Hebrew runs, and its English when the track has one.
+
+### 5.3 Credits and licences
+
+Every credit line is shown wherever the text is shown, through the existing `ChokLicenseNotice` pattern. CC-BY versions name the translator and publisher; a CC-BY-SA or CC-BY-NC version is used only if the build's licence check accepts it and the notice states it. Preference order for English: CC0, then CC-BY, then nothing.
+
+### 5.4 Build checks
+
+`scripts/halacha/__tests__/build.test.js` fails on: a se'if or halacha missing or twice, a unit whose hash does not match its manifest entry, a schedule day that points outside the text, a festival unit with no segments, and an English version that covers less than the threshold of its track (the threshold is decided when the coverage is measured; below it the track ships Hebrew only and the test pins that).
+
+## 6. Schedules
+
+A schedule answers one question: which segments are the portion of a location day. It is data in the manifest, read by one pure function, `halachaPortion(day, track, inIsrael)` in `src/utils/halacha.ts`, which returns `{ label: { he, en }, unit, from, to } | null`. The day is the location date the window was computed for.
+
+### 6.1 `kitzur`
+
+- The yearly luach in use, keyed by Hebrew month and day, with its own rule for a leap year and for the short and long Cheshvan and Kislev.
+- **Unknown:** the authoritative luach. No source was found on 2026-11-10 (Sefaria has no such calendar). The first content task finds the luach in use, records its source in this section, and transcribes it to `scripts/halacha/schedules/kitzur.json`. If none can be established, the fallback is the app's own even division of the 221 simanim over the Hebrew year, festival simanim placed before their festival, and the review page says so (Q29).
+
+### 6.2 `ben_ish_chai`
+
+- The parasha is the one the week reads, by the rule Chok LeYisrael already uses (`chokPortionOn()` in [src/utils/chok.ts](../../src/utils/chok.ts): a double week, Israel and abroad, and a week whose Shabbat is Yom Tov).
+- The parasha's numbered halachot are divided evenly over the week's seven days, Sunday to Shabbat, in order; a double week divides both parashiyot's halachot together.
+- **Open:** which Hebrew year reads the first year's halachot and which the second (Q30), and what a week reads when the second year has no entry for its parasha (47 nodes against 52; the proposal: that week reads the first year's).
+- The drashot are not included.
+
+### 6.3 `rambam`
+
+- One chapter a day, every day, the public cycle.
+- The build reads Sefaria's "Daily Rambam" calendar for every day of one full cycle and writes the cycle to `scripts/halacha/schedules/rambam.json` with its anchor date; the app computes any day from the anchor and the cycle length. The suite pins 2026-11-10 = Hilchot Issurei Biah 22 and the days around a cycle's end.
+
+### 6.4 Days that need the rav
+
+Tisha B'Av (Torah study is limited to its own topics) and a mourner's days are not handled: the portion shows as on any day (R17.6).
+
+## 7. `hilchot_hachag`
+
+### 7.1 Periods (D11)
+
+| Festival key | First day of learning | Last day | Days |
+|---|---|---|---|
+| `pesach` | 14 Adar (Adar II in a leap year) | 14 Nisan | 30 |
+| `shavuot` | 5 Iyar | 5 Sivan | 30 |
+| `sukkot` | 14 Elul | 14 Tishrei | 30 |
+| `rosh_hashanah` | 1 Elul | 29 Elul | 29 |
+| `yom_kippur` | 3 Tishrei | 9 Tishrei | 7 |
+| `chanukah` | 14 days before 25 Kislev | 24 Kislev | 14 |
+| `purim` | 14 days before 14 Adar (Adar II in a leap year) | 13 Adar | 14 |
+| `tisha_bav` | 17 Tammuz | 8 Av | 21 |
+| `tzom_gedaliah`, `asara_betevet`, `taanit_esther`, `shiva_asar_betammuz` | 3 days before | the day before | 3 |
+
+- A fast deferred from Shabbat moves its period with it; hebcal gives the observed day.
+- Purim is 14 Adar everywhere; Shushan Purim gets no period of its own.
+- `festivalPeriodsOn(day, inIsrael)` in `src/utils/halacha.ts` returns the periods a day is in, nearest festival first, each with the day's index and the days left.
+
+### 7.2 Content per track
+
+The build cuts each festival's material into as many portions as its period has days, evenly by segment count, in the book's order. The source units, to be confirmed against the siman and node titles when the build first runs:
+
+| Festival | `kitzur` (simanim) | `rambam` | `ben_ish_chai` (1st year unless noted) |
+|---|---|---|---|
+| Pesach | 107–119 | Chametz uMatzah | Tzav |
+| Shavuot | 120, and Yom Tov 98–103 | Shevitat Yom Tov | Bamidbar |
+| Sukkot | 134–138 | Shofar, Sukkah veLulav 4–8 | Ha'azinu, Vezot Haberakhah |
+| Rosh Hashanah | 128–130 | Shofar 1–3, Teshuvah | Nitzavim |
+| Yom Kippur | 131–133 | Shevitat Asor | Vayelech |
+| Chanukah | 139 | Megillah veChanukah 3–4 | Vayeshev |
+| Purim | 140–142 | Megillah veChanukah 1–2 | Tetzaveh |
+| Tisha B'Av and the fasts | 121–127 | Ta'aniyot 5 (and 1–4 for the minor fasts) | Devarim |
+
+These ranges are from memory and are not verified. A festival a track does not cover gets no window for that track; the gap is reported to the owner before any text from another book fills it (the owner's condition of 2026-11-10 for Ben Ish Chai).
+
+### 7.3 Window and reminder
+
+- `computeWindow`: `null` unless the track is installed and `festivalPeriodsOn()` returns a period the track covers; otherwise alot to the next alot.
+- `timeType: 'annual-seasonal'`, no `multiDay`: each day is its own window, so a missed day is a miss like any other mitzvah's.
+- `bodyParams` gives `chag` (a `{ he, en }` pair) and `days` (the days left to the festival); `bodyKey` is `notifications.hilchotHachag.body`. In an overlap it names the nearer festival.
+
+## 8. `halacha_yomit`
+
+- `computeWindow`: `null` unless the track is installed; otherwise alot to the next alot, every day (D9).
+- `timeType: 'range-within-day'`; `bodyParams` gives `portion` (the day's label, for example "קיצור שולחן ערוך, סימן י״ב"); `bodyKey` is `notifications.halachaYomit.body`.
+- A change of track changes the label and the text from that day on; marks are keyed by mitzvah and day, so history is untouched.
+
+## 9. The reader
+
+Both open in the nusach reader, [src/app/siddur/[id].tsx](../../src/app/siddur/%5Bid%5D.tsx), as Chok LeYisrael and Shnayim Mikra do:
+
+- Opened with no date, it shows the portion of the moment (the app's day, `appDay()`); with a `date`, that day's.
+- "סיימתי" while the mitzvah is on, filed under the window's day; a closed window asks when it was learned (the late-mark dialog), as everywhere.
+- A closed make-up fold for each of the last seven days that has a portion and no mark, the newest first (D2). `hilchot_hachag` folds only days of the current period.
+- A day row to browse other days of the cycle or the period, read only.
+- The credit and licence notice under the text; the English text when the app is in English and the track has one, else the Hebrew with the existing language note.
+- Bookmarks and the last reading position work through `useSiddurBookmarksStore` with a `null` nusach key, as for Chok LeYisrael.
+
+The existing `LearningProgram` is keyed by parasha and week slot (`ChokSlot` has no Shabbat). The implementation either adapts a week of portions into a `ChokAsset` with a Shabbat slot added, or gives the reader a date-keyed program; the choice is the implementer's, the behaviour above is the contract, and the Chok and Shnayim reader suites must stay green unchanged.
+
+## 10. App wiring
+
+| Area | Change |
+|---|---|
+| Types | `HalachaTrack`, the asset and manifest types in `src/types/halacha.ts`; both ids in the mitzvah registry |
+| Data | `src/data/halacha.ts`: ids, `hasHalachaContent(track)`, `halachaAsset()`, `defaultHalachaTrack()`, `effectiveHalachaTrack()` |
+| Logic | `src/utils/halacha.ts`: `halachaPortion()`, `festivalPeriodsOn()`, `festivalPortion()` |
+| Store | `useHalachaStore` (`halacha-store`): the installs per track, the latest version seen, when it was checked; device-only, out of the backup file, its `merge` dropping an install whose files are gone |
+| User store | `halachaTrack`, `null` by default, reset to `null`; no `STORE_VERSION` bump (a new optional field) |
+| Service | `src/services/HalachaContentService.ts` on the shared core in [src/services/addons/](../../src/services/addons) |
+| Mitzvot | `HALACHA_YOMIT` and `HILCHOT_HACHAG` in [src/data/mitzvot.ts](../../src/data/mitzvot.ts); `MITZVAH_STANDALONE_TEXT` is not used (they read the add-on) |
+| Nagging | `PERFORM_MIN`, `NAG_ZONE_KIND` and `nag.verb.<id>` for both ids in [src/utils/nagging.ts](../../src/utils/nagging.ts) |
+| Notifications | no new kind, category or id shape; `SCHEDULE_FORMAT` unchanged (two off-by-default mitzvot add no pending notification to an existing install) |
+| UI | the add-on card on both mitzvah screens (`AddonCard`), the More tab rows, the siddur tab's learning group, the track select in Settings → Prayer |
+| Enable prompt | after a download, the offer to switch the mitzvah on, as `ChokEnablePrompt` does |
+| i18n | both dictionaries: names, reminder labels and variants, body keys, the track names, the festival names, the settings labels, the notices |
+| Search | `SETTINGS_SEARCH_ITEMS` (`halachaTrack`), the two mitzvot (automatic through the registry), a content item per festival and per track book with the words people type (הלכה יומית, קיצור, קצש"ע, בן איש חי, רמב"ם, הלכות פסח …); the deep pass as it treats Chok LeYisrael |
+| Guide | a topic for each mitzvah in [src/data/guide.ts](../../src/data/guide.ts), a `WHATS_NEW` item under the next production label, `pnpm guide:build` |
+| Rav page | R17 on [docs/halacha-review.html](../../docs/halacha-review.html), `RULES_VERSION` raised by one |
+| Reset and backup | `AppResetService.reset()` clears the store and the files; `halacha-store` stays out of `STORES` in the backup service and out of the Android backup whitelist |
+| DOX | the root AGENTS.md (commands, release notes for the add-on, the mitzvah model, stores, tests), [src/data/AGENTS.md](../../src/data/AGENTS.md), [src/services/AGENTS.md](../../src/services/AGENTS.md), [src/stores/AGENTS.md](../../src/stores/AGENTS.md), [docs/AGENTS.md](../../docs/AGENTS.md), a new `scripts/halacha/AGENTS.md` |
+
+Everything ships as an over-the-air update plus the Pages content: no native module, no [app.json](../../app.json) field, no version raise.
+
+## 11. Tests
+
+Every dated fixture is an `at(location, …)` instant; every suite below also runs under `pnpm test:tz`.
+
+- `src/utils/__tests__/halacha.test.ts`: `halachaPortion()` per track on pinned days (a plain day, Shabbat, a leap-year Adar, a cycle's last and first day, a double parasha, Israel against abroad); `festivalPeriodsOn()` for each festival's first and last day in 5787 and 5788, the leap-year Purim and Pesach, a deferred fast, both overlaps; the even division of a festival unit.
+- `src/data/__tests__/halachaMitzvot.test.ts`: both registry entries; the windows with and without the add-on and with another track installed; home, history and the streak; the check-in after a Shabbat and after a two-day Yom Tov; the plan's reminders with `portion`, `chag` and `days` in Hebrew and English; nothing inside a block; the default track per nusach and the user's override.
+- `src/services/__tests__/HalachaContentService.test.ts` and the shared [addonContent.test.ts](../../src/services/__tests__/addonContent.test.ts): download, verify, update offer, a removed file, a track switch.
+- `src/app/__tests__/halachaReader.render.test.tsx`: the portion of the moment, "סיימתי", the make-up folds, the day row, an overlap day's two portions, the credit notice, English with and without a translation.
+- Existing suites extended: the settings search and `searchCoverage`, the settings sections (the track select), the siddur catalog's learning group, the More tab, the library, the guide, the smoke render of every screen, the reset and backup suites, the user-store defaults.
+
+## 12. Release order
+
+1. `pnpm halacha:build`, commit `docs/halacha/`, push to `main`, confirm `https://jew-365.github.io/jew-365/halacha/manifest.json` answers 200.
+2. `pnpm update:preview`, then a check on a phone: each track downloads, opens on today's portion, and reminds.
+3. The rav's answers to R17 through the review page; each answer that is not "נכון" becomes a change and a new `RULES_VERSION`.
+4. `pnpm update:production` with the guide's `WHATS_NEW` entry, on the owner's word.
+
+## 13. Open questions
+
+For the owner (in [not-close.md](../../not-close.md)): Q29 (the Kitzur luach when no authoritative one is found), Q30 (Ben Ish Chai's year), Q31 (permission for Yalkut Yosef and Shulchan Aruch HaMekutzar as later tracks).
+
+For the rav, R17:
+
+- R17.1 The book per nusach (section 3), Rambam for Chabad and for Teiman included.
+- R17.2 The Ben Ish Chai division: a parasha's halachot spread over the week, and the year rule.
+- R17.3 The Shabbat and Yom Tov portion learned or made up afterwards (D2, D9).
+- R17.4 The periods of section 7.1, the thirty days for Shavuot and Sukkot and the shorter ones.
+- R17.5 No portion on the festival itself, Chanukah and Purim included (D13).
+- R17.6 Tisha B'Av and the daily portion (6.4).
+- R17.7 The festival units per book (7.2), once confirmed against the texts.
+
+## 14. Risks
+
+- **Scope:** one release of two mitzvot and three books; users see nothing until the last part and the rav's answers are in.
+- **Ben Ish Chai and the festivals:** it may not cover every festival at the depth of the other two books (7.2).
+- **Rambam as a daily halacha:** a chapter is long and includes laws not practised today; it differs in kind from the Kitzur. The track select lets a user move.
+- **Add-on size:** unknown until the build runs; the whole Mishneh Torah in Hebrew and English is the largest. Shnayim Mikra is 1.2 MB and Chok LeYisrael 23 MB on disk for comparison.
+- **Unverified facts:** the Kitzur luach (6.1), the festival ranges (7.2), the English coverage (2.3), Dirshu's cycle length (2.1).

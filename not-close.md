@@ -546,6 +546,117 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done:** 2026-11-09. Verified: the reader suites pass; the layout itself is not measured under Jest, so it waits for the owner's phone.
   - **Status:** Version: OTA `1.0.21-18` (expected) · Committed: yes, `db0c013` fix(siddur): the commentary choice keeps its height when no section picker sits beside it · Pushed: yes · Live: preview `1.0.21-69` (group `8e46fa21-a672-4fd5-8f48-12b246022b17`, 2026-11-09, from `db0c013`), not production · Channel: preview
 
+### Daily halacha and festival halachot, 2026-11-10 — batch rules
+
+- **Requested:** the owner, 2026-11-10, in a cloud session, in Hebrew: "אני רוצה להוסיף עוד שני מצוות שקשורות להלכות: 1 הלכות יומיות לפי מה שנהוג (תעשה מחקר) 2 הלכות של 30 יום לפני החג לפי מה שנהוג"; characterized the same day in three rounds of answers; then "כרגע אל תבצע את התוכנית רק תבנה אותה מקצה לקצה": planning and tasks only, nothing is built.
+- **Spec:** [.claude/specs/halacha-yomit.md](.claude/specs/halacha-yomit.md) holds the research, the tracks, every decision with the owner's words, the add-on layout, the schedules, the periods, the reader, the wiring, the tests and the release order. A task below names the spec section it implements; the spec is the contract, this file the queue.
+- **Flag:** every task is `OTA` plus `docs/halacha/` on Pages: pure JavaScript, no native module, no field of [app.json](app.json), no version raise, no `SCHEDULE_FORMAT` raise. A task that turns out to need one stops and says so.
+- **Decisions taken:** the owner's D1 to D7 and Claude's D8 to D16 in the spec's section 4. In short: three tracks by nusach with the user's override (Kitzur Shulchan Aruch for Ashkenaz and Sefard, Ben Ish Chai for Edot HaMizrach, Rambam one chapter a day for Chabad and Teiman); a schedule fixed by the date; a window on every day, Shabbat's portion asked in the check-in and offered as a make-up; the two mitzvot side by side; an English text only under a usable licence; one release of everything; the rav before production.
+- **Pending:** Q29 to Q31 under [For the owner](#for-the-owner) and R17 under [For the rav](#for-the-rav). Q29 and Q30 block only the tasks that name them.
+- **Not verified:** the Kitzur Shulchan Aruch Yomi luach (no source found), the festival ranges per book (from memory), how complete each English version is, the add-on's size. Each is the first step of the task that needs it.
+- **Done means:** both dictionaries updated with every key the task adds; a DOX pass on every touched AGENTS.md; the spec section the task names implemented as written, or the deviation written back into the spec; the search finding everything the task adds; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green. No update to preview or production without the owner's word.
+- **Order:** the High tasks in the order written (content, then logic, then the mitzvot and the reader); the Medium tasks after them in any order; the release tasks last.
+
+### High — Daily halacha and festival halachot
+
+- [ ] Establish the Kitzur Shulchan Aruch Yomi luach
+  - **Flag:** none (research); its output is a committed schedule file.
+  - **What it is:** Find the yearly luach in use, record its source in the spec's section 6.1, and transcribe it to `scripts/halacha/schedules/kitzur.json` (Hebrew month and day → siman and se'if range, with its leap-year rule).
+  - **What it solves:** Spec 6.1: the `kitzur` track's fixed schedule has no source yet.
+  - **Expected result:** A schedule file whose every day points inside the 221 simanim and whose days together cover every se'if once, checked by the build test; or, if no luach can be established, Q29 answered and the fallback division written instead.
+
+- [ ] Build the halacha add-on from Sefaria
+  - **Flag:** `docs/halacha/` on Pages.
+  - **What it is:** `scripts/halacha/build.js` with the `pnpm halacha:build` script and `scripts/halacha/AGENTS.md`, on the pattern of [scripts/shnayim/build.js](scripts/shnayim/build.js): the pinned Hebrew versions of the spec's section 2.3 for the three books, cut into units, with the manifest of section 5.2 (per track: version, sizes, credits, files, schedule, festivals).
+  - **What it solves:** Spec 5: the text both mitzvot read.
+  - **Expected result:** `scripts/halacha/__tests__/build.test.js` green on the checks of spec 5.4 (no se'if or halacha missing or twice, every hash matching, every schedule day inside the text); the size of each track written into the spec's section 14.
+
+- [ ] Write the Rambam cycle from Sefaria's calendar
+  - **Flag:** none; part of the build's committed data.
+  - **What it is:** The build reads Sefaria's "Daily Rambam" calendar for every day of one full cycle and writes `scripts/halacha/schedules/rambam.json` with its anchor date and length (spec 6.3).
+  - **What it solves:** The `rambam` track's fixed public schedule.
+  - **Expected result:** The suite pins 2026-11-10 as Hilchot Issurei Biah chapter 22 and the last and first day of a cycle; the cycle covers every chapter once.
+
+- [ ] Cut the festival units for each track
+  - **Flag:** `docs/halacha/` on Pages.
+  - **What it is:** Confirm the ranges of the spec's section 7.2 against the siman and node titles, correct the table, and have the build cut each festival's material into as many portions as its period has days.
+  - **What it solves:** Spec 7.2: the content of `hilchot_hachag`.
+  - **Expected result:** The build test finds a non-empty unit for every festival a track covers; every gap (a festival a track lacks) is listed in the spec and reported to the owner before any other book fills it.
+
+- [ ] Measure and add the English translations
+  - **Flag:** `docs/halacha/` on Pages.
+  - **What it is:** For each book, measure how much of it the CC0 and CC-BY English versions of spec 2.3 cover; add the English files for a track that passes the threshold, with the translator and licence in its credit.
+  - **What it solves:** D5, "תרגום אם יש חופשי".
+  - **Expected result:** The coverage of each version written into the spec; the build test pins which tracks ship English and fails on an English segment with no Hebrew twin.
+
+- [ ] Add the portion and period logic
+  - **Flag:** `OTA`.
+  - **What it is:** `src/types/halacha.ts`, `src/data/halacha.ts` and `src/utils/halacha.ts`: `HalachaTrack`, `defaultHalachaTrack()`, `effectiveHalachaTrack()`, `halachaPortion()`, `festivalPeriodsOn()` and `festivalPortion()` (spec 3, 6, 7.1); `useUserStore.halachaTrack` with its default and reset. The Ben Ish Chai year rule waits for Q30.
+  - **What it solves:** Which text a day reads, for every track and festival.
+  - **Expected result:** `src/utils/__tests__/halacha.test.ts` green under `pnpm test:tz` on the cases of spec 11 (Shabbat, a leap-year Adar, a cycle's edge, a double parasha, Israel against abroad, each festival's first and last day in 5787 and 5788, a deferred fast, both overlaps).
+
+- [ ] Add the halacha add-on's store and download service
+  - **Flag:** `OTA`.
+  - **What it is:** `useHalachaStore` (`halacha-store`, device-only) and `src/services/HalachaContentService.ts` on the shared core in [src/services/addons/](src/services/addons): one install per track, the English files only when the app is in English, the update offer, the reset (spec 10).
+  - **What it solves:** D10: the user downloads only the chosen track.
+  - **Expected result:** `src/services/__tests__/HalachaContentService.test.ts` and the shared [addonContent.test.ts](src/services/__tests__/addonContent.test.ts) green: download, verify, update, a removed file dropping the install, a track switch; the store out of the backup file and the Android whitelist.
+
+- [ ] Add the two mitzvot to the registry
+  - **Flag:** `OTA`.
+  - **What it is:** `HALACHA_YOMIT` and `HILCHOT_HACHAG` in [src/data/mitzvot.ts](src/data/mitzvot.ts) before `shnayim_mikra` (spec 4 D9, D14 to D16, 7.3, 8): windows, default reminders, `bodyParams` and `bodyKey`, and their `PERFORM_MIN`, zone and verb in [src/utils/nagging.ts](src/utils/nagging.ts); both dictionaries.
+  - **What it solves:** The two mitzvot of the request, with reminders, home, history and the check-in.
+  - **Expected result:** `src/data/__tests__/halachaMitzvot.test.ts` green under `pnpm test:tz`: `null` windows without the track's add-on, a window every day with it, the check-in after Shabbat and a two-day Yom Tov, the reminder bodies naming the portion, the festival and the days left in both languages, nothing inside a block.
+
+- [ ] Read both mitzvot in the nusach reader
+  - **Flag:** `OTA`.
+  - **What it is:** The reader of [src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>) opens both ids as spec 9 says: the portion of the moment, "סיימתי", the make-up folds of the last seven days, the day row, an overlap day's two portions, the credit notice, English when available.
+  - **What it solves:** D2 and the reading itself.
+  - **Expected result:** `src/app/__tests__/halachaReader.render.test.tsx` green under `pnpm test:tz`, and the Chok LeYisrael and Shnayim Mikra reader suites green unchanged.
+
+### Medium — Daily halacha and festival halachot
+
+- [ ] Offer the download, the switches and the track choice
+  - **Flag:** `OTA`.
+  - **What it is:** `AddonCard` on both mitzvah screens, the More tab rows, the siddur tab's learning group, the library rows, the enable prompt after a download, and the track select (`OptionSelect`) in Settings → Prayer (spec 3, 10).
+  - **What it solves:** D8 and the owner's "שינתן למשתמש אפשרות להחליף".
+  - **Expected result:** The settings, siddur catalog, More tab, library and smoke suites extended and green: the select shows the nusach's default, a change offers that track's download, and both mitzvot follow it.
+
+- [ ] Make the search find both mitzvot, the tracks and the festivals
+  - **Flag:** `OTA`.
+  - **What it is:** The `halachaTrack` item in `SETTINGS_SEARCH_ITEMS`, a content item per track book and per festival with the Hebrew and English words people type, in [src/utils/settingsSearch.ts](src/utils/settingsSearch.ts) (spec 10).
+  - **What it solves:** The root AGENTS.md rule "Search Finds Everything".
+  - **Expected result:** [src/utils/__tests__/searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts) and the settings search suites green with cases for "הלכה יומית", "קיצור", "בן איש חי", "רמב״ם" and "הלכות פסח" opening where each lives.
+
+- [ ] Write the guide topics and the what's-new item
+  - **Flag:** `OTA` and [docs/guide/](docs/guide) on Pages.
+  - **What it is:** A topic for each mitzvah in [src/data/guide.ts](src/data/guide.ts), the `WHATS_NEW` item under the next production label, `pnpm guide:build`.
+  - **What it solves:** The checklist item "User-visible change", and the publish script's what's-new check.
+  - **Expected result:** [src/data/__tests__/guide.test.ts](src/data/__tests__/guide.test.ts) and the guide render suite green.
+
+- [ ] Put R17 on the rav's review page
+  - **Flag:** [docs/halacha-review.html](docs/halacha-review.html) on Pages.
+  - **What it is:** R17.1 to R17.7 as items with answer fields, and `RULES_VERSION` raised by one.
+  - **What it solves:** D7: the rav answers before production.
+  - **Expected result:** The page shows the seven items and submits them; after the push, `curl -sI https://jew-365.github.io/jew-365/halacha-review.html` answers 200.
+
+- [ ] Update the DOX chain for the halacha add-on
+  - **Flag:** none (docs).
+  - **What it is:** The root [AGENTS.md](AGENTS.md) (commands, the add-on's release rule, the mitzvah model, stores, tests, the checklist) and the child docs the spec's section 10 names.
+  - **What it solves:** The DOX closeout.
+  - **Expected result:** `pnpm check:dox` green and every new file linked from its nearest AGENTS.md.
+
+- [ ] Publish the add-on and a preview update
+  - **Flag:** `docs/halacha/` on Pages, then `OTA` to preview.
+  - **What it is:** Spec 12, steps 1 and 2: push the content to `main`, confirm the manifest answers 200, then `pnpm update:preview` on the owner's word.
+  - **What it solves:** The first place the owner can try it.
+  - **Expected result:** On the preview app, each of the three tracks downloads, opens on today's portion, marks done and schedules its reminder; the result recorded in this item.
+
+- [ ] Publish to production after the rav's answers
+  - **Flag:** `OTA` to production.
+  - **What it is:** Spec 12, steps 3 and 4: apply each R17 answer that is not "נכון", then `pnpm update:production` on the owner's word.
+  - **What it solves:** D7 and the release itself.
+  - **Expected result:** A numbered production update whose `gitCommitHash` contains the batch's commits; the batch's items move to [action-log.md](action-log.md).
+
 ## Bugs
 
 - [ ] Psalm 67:1 reads "לַמְנַצֵּח" without its furtive patach
@@ -682,6 +793,18 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
     - Selichot: the passages the page says only "if there is time" fold closed; "כַּת יֵשׁ לְמַעְלָה … לָמָּה לְךָ" is said every night as rendered; only the Aramaic Targum of the 13 Middot carries a minyan label, as the page marks; "לך ה׳ הצדקה" and "ה׳ אלהי הצבאות" are the Edot HaMizrach wording the page transcludes.
   - **Lives in:** the `teiman` builders in [scripts/siddur/manifest.js](scripts/siddur/manifest.js) (`teimanMincha()`, `teimanShacharit()`, `teimanNishmat()`, `teimanHallel()`, `teimanMusaf()`, `teimanBirkatHamazon()`, `teimanMaariv()`, `teimanSelichot()` and the others), with `tiklalNote()` for the renderings; the transcriptions in `scripts/siddur/source/tiklal-1894/`, which a file never changes after it is pinned, so a corrected answer is a manifest edit and a rebuild.
 
+- **R17 — Daily halacha and the halachot before a festival.** (the batch "Daily halacha and festival halachot, 2026-11-10"; not built; goes on the review page with the batch)
+  - **Question:** Are the books, the schedules and the periods right as planned?
+  - **Assumption:** each as written in [.claude/specs/halacha-yomit.md](.claude/specs/halacha-yomit.md):
+    - R17.1 The book per nusach: Kitzur Shulchan Aruch for Ashkenaz and Sefard, Ben Ish Chai for Edot HaMizrach, the Rambam one chapter a day for Chabad and for Teiman; the user may choose another.
+    - R17.2 Ben Ish Chai: the halachot of the week's parasha spread evenly over the week's days, and which year reads which part (Q30).
+    - R17.3 The portion of a Shabbat or Yom Tov is learned that day from a book and marked afterwards, or made up on the next weekday.
+    - R17.4 The periods: thirty days before Pesach, Shavuot and Sukkot; Rosh Hashanah from Rosh Chodesh Elul; Yom Kippur in the Ten Days; Chanukah and Purim fourteen days; Tisha B'Av from 17 Tammuz; each minor fast three days.
+    - R17.5 No portion on the festival itself, Chanukah and Purim included.
+    - R17.6 Tisha B'Av: the daily portion shows as on any day.
+    - R17.7 The simanim, halachot and parashiyot taken for each festival from each book (the spec's section 7.2, once confirmed).
+  - **Lives in:** nothing yet; planned for `src/utils/halacha.ts`, `src/data/halacha.ts` and `scripts/halacha/`.
+
 ### For the owner
 
 Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were answered by the owner on 2026-10-26 and became the tasks "Add an English (U.K.) localization on the App Store" and "Ask for a store rating inside the app". Q3 to Q7, from the app requests of 2026-10-26, were answered the same day and are written into their tasks (App requests of 2026-10-26 — batch rules). None is open.
@@ -782,6 +905,22 @@ Q27 and Q28 are the batch "Nusach Teiman, 2026-11-02", found while building its 
   - **What it affects:** A Baladi user called to the Torah, the Sukkot and Chanukah mornings, and motzaei Shabbat.
   - **Why it is not a structural change:** A filled passage is one more pinned source or transcription unit and a spec in the same builder.
   - **Partly answered, 2026-11-03:** on transcribing the Hoshanot and Psalm 30, "אם יש חוסר אז כן": transcribe them, the task "Transcribe the Teiman Hoshanot and Psalm 30 for Chanukah". On the passages the print gives only as an instruction (the oleh's blessings, Mi Sheberach and the blessing for the government, the Chanukah and Chol HaMoed readings, "ויתן לך"), given those examples, the owner chose "או להשאיר רק את ההוראה כמו היום": the instruction stays as printed and nothing is borrowed, as the Assumption says.
+
+Q29 to Q31 are the batch "Daily halacha and festival halachot, 2026-11-10" ([.claude/specs/halacha-yomit.md](.claude/specs/halacha-yomit.md)).
+
+- **Q29 — The Kitzur Shulchan Aruch Yomi luach.**
+  - **Question:** If no authoritative yearly luach can be established, may the app divide the 221 simanim over the Hebrew year itself, the festival simanim placed before their festival?
+  - **Why it is open:** no source for the luach in use was found on 2026-11-10; Sefaria has no such calendar. Asked only if the task "Establish the Kitzur Shulchan Aruch Yomi luach" finds none.
+  - **Blocks:** the `kitzur` track's schedule.
+
+- **Q30 — Ben Ish Chai: which year reads which part.**
+  - **Question:** Which Hebrew year reads the first year's halachot and which the second's, and what does a week read when the second year has no entry for its parasha (47 against 52)?
+  - **Proposal:** the owner's or the rav's word on the year (no accepted rule was found); a missing week reads the first year's halachot.
+  - **Blocks:** the `ben_ish_chai` track's schedule.
+
+- **Q31 — Permission for the books in copyright.**
+  - **Question:** Does the owner want to ask for written permission to add Yalkut Yosef (or the Kitzur Shulchan Aruch with Rav Ovadia's rulings) and Shulchan Aruch HaMekutzar of Rav Ratzabi as later tracks?
+  - **Why it is open:** many Sephardim and Yemenites use them daily, and both are in copyright; the batch ships without them. Blocks nothing.
 
 ## Other Open Items
 
