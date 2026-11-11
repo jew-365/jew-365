@@ -1,12 +1,12 @@
 {
   "format": 1,
-  "version": 2,
-  "gzipBytes": 1466384,
+  "version": 3,
+  "gzipBytes": 1466404,
   "gz": {
     "ashkenaz": {
-      "path": "ashkenaz.7a8f16e5.siddur.gz",
-      "sha256": "7a8f16e50ace96e8c88321bb9b7a8cb0c3fb30f58f71dac39cf48ce26b9f2458",
-      "bytes": 631793
+      "path": "ashkenaz.d2c3d2d8.siddur.gz",
+      "sha256": "d2c3d2d8806e3e5f697333c7afbdc4dbe61c87741e1c6d38cb7edc3c62d28523",
+      "bytes": 631803
     },
     "sefard": {
       "path": "sefard.d9fece4a.siddur.gz",
@@ -19,9 +19,9 @@
       "bytes": 45343
     },
     "chabad": {
-      "path": "chabad.06dcb3f2.siddur.gz",
-      "sha256": "06dcb3f242680da8fedc94e873927264e9d7e60774c0f5248ccfde9b717ad11c",
-      "bytes": 414292
+      "path": "chabad.8c5f515e.siddur.gz",
+      "sha256": "8c5f515e38da7571be7a44a3a8a458c0247501ce255809286bc176dee58aa12c",
+      "bytes": 414302
     },
     "teiman": {
       "path": "teiman.ed9dda54.siddur.gz",

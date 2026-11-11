@@ -509,6 +509,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         he: 'כשאין מצווה פתוחה, ההודעות מופיעות במקום ״פתוח עכשיו״. הודעת השבת הקרובה מופיעה מליל חמישי.',
         en: 'When no mitzvah is open, the messages take the place of Open now. The coming Shabbat shows from Thursday night.',
       },
+      {
+        he: 'תיקוני נוסח בסידור: ״לַמְנַצֵּחַ״ בתהילים ס״ז עם הפתח הגנוב, ״וְצֶאֱצָאֵי עַמְּךָ״ בברכות התורה בנוסח ספרד, הפסוק האחרון של ״יושב בסתר״ פעמיים בערבית של עדות המזרח, ו״אַל תִּירָאוּ״ בסליחות.',
+        en: 'Siddur text fixes: "Lamnatzeach" in Psalm 67 with its vowel, "the offspring of Your people" in the Torah blessings of Nusach Sefard, the last verse of "Yoshev Beseter" said twice in the Maariv of Edot HaMizrach, and a vowel in the Selichot.',
+      },
     ],
   },
   {

@@ -260,6 +260,8 @@ const SOURCES = {
     title: 'Psalms',
     lang: 'he',
     version: 'Tanach with Nikkud',
+    // Psalm 67:1 alone of the 55 "לַמְנַצֵּחַ" in Psalms lacks its furtive patach (checked 2026-11-11).
+    patches: [{ from: 'לַמְנַצֵּח בִּנְגִינֹת מִזְמוֹר', to: 'לַמְנַצֵּחַ בִּנְגִינֹת מִזְמוֹר', count: 1 }],
     credit: { title: 'Psalms — Tanach with Nikkud', license: 'Public Domain', url: `${SEFARIA}/Psalms` },
   },
   wikiTikkunHaklali: {
@@ -1072,6 +1074,8 @@ const SEFARD_PARNASSA_BEFORE_SHOMEA_TEFILLAH = [
 ];
 
 const RAVS_PRAYER_NOTE = 'יש אומרים תפילת רב מגמרה ברכות ט"ז ע"ב שכתב החיד"א ז"ל בסידורו';
+// Sefaria corrected the weekday Shacharit's copy of the note to "מגמרא" after the assets were built (read 2026-11-11).
+const RAVS_PRAYER_NOTE_SHACHARIT = RAVS_PRAYER_NOTE.replace('מגמרה', 'מגמרא');
 
 const SOME_SAY = {
   some: { he: 'יש אומרים', en: 'Some say' },
@@ -6230,7 +6234,7 @@ function edotShacharit() {
       reviewed: [8, 44, 51, 52, 53, 55, 56, 57, 59, 60, 61, 62, 64, 67, 69, 71],
       edits: [
         { seg: 30, ...EDOT_SANSAN_LEYAIR },
-        { seg: 69, from: RAVS_PRAYER_NOTE, to: '' },
+        { seg: 69, from: RAVS_PRAYER_NOTE_SHACHARIT, to: '' },
       ],
       drop: [6, 7, 14, 42, 43, 50, 58],
       enMoves: [edotNetzorMove(67)],
