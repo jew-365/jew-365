@@ -52,7 +52,7 @@ Reminders are local notifications scheduled on the device for each mitzvah's hal
 
 ## Draft Status
 
-The subtitle, promotional text, description and keywords below were entered in App Store Connect on 2026-11-02 and read back, on the English (U.S.) page and on the English (U.K.) page created that day (name `Jew 365`, the same subtitle, the English Privacy Policy URL, support and marketing URLs `https://jew-365.github.io/jew-365/`), with build 1.0.21 (5); the version was resubmitted the same day ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-02).
+The subtitle, promotional text, description and keywords below were entered in App Store Connect on 2026-11-02 and read back, on the English (U.S.) page and on the English (U.K.) page created that day (name `Jew 365`, the same subtitle, the English Privacy Policy URL, support and marketing URLs `https://jew-365.github.io/jew-365/`), with build 1.0.21 (5); the version was resubmitted the same day ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-02). The promotional text and description below were redrafted on 2026-11-11 for build 1.0.21 (6), built from `acaa72f` like AAB versionCode 10 (five nusachim with Teiman Baladi, the smart nag, the notification timeline, the time left in every reminder, the zmanim by the Ohr HaChaim luach), approved by the owner on 2026-11-11 ("מאשר") and not yet entered; until it is entered, App Store Connect holds the text of 2026-11-02, which this file held at `f4a448e`.
 
 ## App Name
 
@@ -66,56 +66,59 @@ The same on the English (U.S.) and English (U.K.) pages; the tagline `Every mitz
 
 ## Promotional Text
 
-Every mitzvah in its time: accurate zmanim, reminders inside each mitzvah's window, a siddur in four nusachim, and an app that rests on Shabbat and Yom Tov. No account.
+Every mitzvah in its time: accurate zmanim, reminders inside each mitzvah's window, a siddur in five nusachim, and an app that rests on Shabbat and Yom Tov. No account.
 
 ## Description
 
-Jew 365: every mitzvah in its time. The app calculates halachic times from your location and reminds you inside each mitzvah's exact window.
+Jew 365: every mitzvah in its time. The app calculates halachic times from your location and reminds you inside each mitzvah's window.
 
 Mitzvot, on time
 - Daily prayers and mitzvot, such as tefillin, Shema, Shacharit, Mincha, Maariv, the morning blessings and the bedtime Shema
 - Shabbat and Yom Tov mitzvot, such as candle lighting and Havdalah
-- Seasonal and monthly mitzvot that appear only in their time, such as the Omer, Chanukah candles, Selichot, Kiddush Levana and Ushpizin
+- Seasonal and monthly mitzvot, shown only in their time, such as the Omer, Chanukah candles, Selichot, Kiddush Levana and Ushpizin
 - A mitzvah library that grows with updates, each mitzvah on its own switch
-- Your own mitzvot: set the hours, schedule them by weekdays, a date range or a number of days in a row, and add the reminders you want
-- A home screen with the day-and-night arc and the day's halachic times: what is open now and how much time is left
-- Hebrew calendar, parasha, holidays and halachic opinions, set for Israel or the Diaspora
+- Your own mitzvot: hours, weekdays, a date range or a run of days, and your reminders, even after the window ends
+- Home: the day-and-night arc with the day's zmanim, what is open now, how long is left and what is done
+- Zmanim by the method of the Ohr HaChaim luach, with the latest Shema by both the Magen Avraham and the Gra
+- Hebrew calendar, parasha, holidays and halachic opinions, for Israel or the Diaspora
 
 Reminders
-- As many reminders as you like for each mitzvah: before its window opens, from its start, before its end or at a set time
-- Two buttons on the notification itself: "Done" marks the mitzvah without opening the app, and "Open text" opens its text
-- For your own mitzvot, a reminder after the window ends if the mitzvah is not marked yet
-- Quiet hours: no notifications before or after the times you choose
+- Any number per mitzvah: before its window opens, at its start, before its end or at a set time
+- Each says how long is left and until when, such as "45 min left · until 09:32"
+- A smart nag at the level you pick, for the app or each mitzvah: nags gather in the critical time, and one always comes at the last time to start
+- The notification timeline: each notification is a dot on the mitzvah's time window, to drag, open or add
+- "Done" on the notification marks the mitzvah without opening the app, and "Open text" opens its text
+- Quiet hours: no notifications before or after the times you pick
 
-A siddur in four nusachim
-Ashkenaz, Sefard, Edot HaMizrach or Chabad, adjusted to the day: the prayers with each day's additions, blessings and prayers for meals, the home, the road, festivals and celebrations, Tikkun HaKlali, and the whole of Tehillim divided by the days of the week. A man's or a woman's wording, following your profile. Auto-scroll, bookmarks, and a return to where you left off. In English, the translation appears under the Hebrew wherever the source has one. Selichot download in your nusach. The siddur keeps growing with updates.
+A siddur in five nusachim
+Ashkenaz, Sefard, Edot HaMizrach, Chabad or Teiman Baladi, adjusted to the day: each day's prayers with their additions, blessings and prayers for meals, the home, the road, festivals and celebrations, Tikkun HaKlali, and all of Tehillim by the days of the week. A man's or a woman's wording, by your profile. Auto-scroll, bookmarks, and a return to the very line where you stopped. In English, the translation sits under the Hebrew where the source has one. Selichot download in your nusach. The siddur keeps growing with updates.
 
 Chok LeYisrael (Hok LeIsrael)
-An optional add-on downloaded from within the app: the day's portion of the week's parasha, with a mark for each day and make-ups for the days you missed that week.
+An optional in-app download: the day's portion of the week's parasha, with daily marks and make-ups for days missed that week.
 
 Shabbat and Yom Tov
-The app rests on Shabbat and Yom Tov: no notifications and a quiet screen. When it ends, mark what you did so your streak holds. An hour before it begins, a notice gives candle-lighting and exit times.
+The app rests: no notifications and a quiet screen. When it ends, mark what you did so your streak holds. An hour before, a notice gives candle-lighting and exit times.
 
 Rosh Chodesh and hilulot of tzaddikim
-Optional Rosh Chodesh and hilula notices, on the days and times you choose. Each tzaddik has a page: his life, lessons, stories and the way to his resting place.
+Optional notices on the days and times you choose. Each tzaddik has a page: his life, lessons, stories and the way to his resting place.
 
 Tracking and the weekly report
-A tracking tab with your streak, consistency per mitzvah, trends, achievements and on-time marks, and a day, week and month schedule. After Shabbat, a notification opens your weekly report: what you marked, what to improve and what the coming week holds.
+Your streak, consistency per mitzvah, trends, achievements, on-time and late marks, and how often you read each siddur text, with a day, week and month schedule. After Shabbat, your weekly report: what you marked, what to improve and what the coming week holds.
 
 Family purity tracking (optional)
-Track the count, the bedikot and the mikveh night, with reminders by halachic times and the minhag you choose. Offered to married users only and off until you turn it on. Notification wording is discreet, the screens are locked with biometrics, and the data is kept encrypted. The app does not rule on halacha; in any doubt, ask a rav.
+The count, the bedikot and the mikveh night, with reminders by halachic times and your minhag. Offered to married users only, off until you turn it on. Discreet notifications, biometric lock and encrypted data. The app does not rule on halacha; in any doubt, ask a rav.
 
 And more
-- Prayer compass: the direction of the Kotel from where you stand
+- Prayer compass: the direction of the Kotel and the distance to it, also from the siddur
 - Halacha hotline: call a rav on a line that follows your nusach's rulings, some by WhatsApp too
-- A search that finds everything: settings, mitzvot, siddur texts and their sections, tzaddikim and screens, even with a typo
-- A user guide inside the app, with what's new in each update
+- A search that finds everything, even with a typo
+- An in-app user guide, with what's new in each update
 
 Private by design
 - No account and no sign-up
-- Cities in Israel and around the world, and times that follow your phone's location
-- Backup and restore: through the device's iCloud backup, and a backup file you can export and restore on any phone
-- Hebrew and English, themes in several colors, light and dark, and a display size of your choice
+- Any locality in Israel or city worldwide by name, or times that follow your phone
+- Backup through the device's iCloud backup, and a backup file to restore on any phone
+- Hebrew and English, color themes, light and dark, and your display size
 - Crash reports are technical, with no personal information
 
 ## Keywords
