@@ -392,7 +392,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
 - **Spec:** [.claude/specs/nusach-teiman.md](.claude/specs/nusach-teiman.md), the source map.
 - **Source of the missing texts:** the 1894 Tiklal, transcribed (Q16, answered 2026-11-03). The network block that held the batch earlier the same day (the cloud environment denied `www.sefaria.org` and `he.wikisource.org`, the two hosts [scripts/siddur/build.js](scripts/siddur/build.js) fetches) was lifted by the owner on 2026-11-02 (Other Open Items).
 - **Done means:** the standing rule above (every siddur text ships for all nuschaot or not at all), so the nusach reaches the app only together with all its texts; every halachic choice listed under [For the rav](#for-the-rav); both dictionaries, the search, the guide and a `WHATS_NEW` item; a DOX pass; `pnpm siddur:build` twice with no change on the second run; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, `pnpm test:tz` green.
-- **Pending, 2026-11-03:** R14 and R16 under [For the rav](#for-the-rav), both on the review page; Q27 and Q28 under [For the owner](#for-the-owner); nothing of the batch after the source map is committed.
+- **Pending, 2026-11-03:** R14 and R16 under [For the rav](#for-the-rav), both on the review page; Q27 and Q28 answered on 2026-11-03 (in [action-log.md](action-log.md) since 2026-11-11); nothing of the batch after the source map is committed.
 
 ### High — Nusach Teiman
 
@@ -1006,98 +1006,13 @@ Q8 (should a city picked by hand follow the phone too) was answered by the owner
 
 Q9 to Q15, the seven questions of the nagging batch, were all answered by the owner on 2026-11-01 and are written into the batch rules, its tasks and [.claude/specs/nagging-levels.md](.claude/specs/nagging-levels.md) (section 10): Q9, Q10, Q11, Q12 and Q15 approved as proposed; Q13 no, "אין שום תזכורת בסוף הזמן", with the placement rule (a start or set-time reminder nags before or after itself as the user chooses, a before-the-end reminder and the bedtime Shema only before); Q14 with four levels instead of five, level 4 the top on iPhone and Android alike. None is open.
 
-- **Q16 — Nusach Teiman: the texts with no Baladi source.** (the batch Nusach Teiman, 2026-11-02; [.claude/specs/nusach-teiman.md](.claude/specs/nusach-teiman.md))
-  - **Question:** The standing rule ships a nusach only with every text. Hebrew Wikisource builds 14 Baladi texts and part of Shacharit, and Sefaria has none. Eight have no Baladi source anywhere the build reads: candle lighting, havdalah, Kiddush Levana, the Chanukah candles, Tefilat HaDerech, the food and fragrance blessings, the blessings on sights and the mezuzah. Shacharit lacks its ending (the Monday and Thursday Tachanun, the Torah reading, Uva LeTzion, the song of the day, Aleinu) and Hallel and Musaf. How should they be filled?
-  - **Options:**
-    - (a) Wait for Wikisource: its Shacharit page was being written on 2026-11-02, but the rest has no date.
-    - (b) A typed source: someone enters the missing texts from a printed Tiklal into Wikisource (the 1894 Tiklal Etz Chaim is in the public domain), and the build pins those pages.
-    - (c) The one-line blessings (candle lighting, mezuzah, the food blessings, the Chanukah blessings) from the Rambam's own wording, which the Baladi follow, as the rav approves; the long orders still need (a) or (b).
-    - (d) Ship Teiman with the texts it has and hide the others for it, as Ushpizin is hidden for Chabad; Shacharit still needs its ending first.
-  - **Owner's word, 2026-11-02:** "ולך על ההמלצות שלך" (go with your recommendations), leaving for the night. The recommendation is (c) with (b): the one-line blessings from the Rambam's wording once the rav approves, and a typed source for the long orders. Until then Teiman stays staged, so nothing incomplete reaches users.
-  - **Answered, 2026-11-03:** (1) "אתה תקליד עם ביקורת גבוהה שלא תעשה טעות": Claude types the missing texts; (2) "כן קח ותוסיף את זה בשאלון לאישור רב": the rav approves them on the review page; (3) "מעולה" for R14. The same morning the 1894 Tiklal Etz Chaim itself was found on archive.org (public domain, the National Library's scan), so the missing texts are transcribed from the Baladi print, not from the Rambam's wording, by the double-typing contract of [.claude/specs/nusach-teiman.md](.claude/specs/nusach-teiman.md) section 5, and the rav reviews the transcription (R16; this line named R15 before the zmanim batch took that number).
-  - **Assumption:** As answered: the texts with no Baladi page are transcribed from the 1894 Tiklal, the Wikisource pages keep the texts they already build, and the rav reviews both (R16). Built on 2026-11-03; what the print does not give is Q28.
-  - **Lives in:** `tiklalSources()` in [scripts/siddur/manifest.js](scripts/siddur/manifest.js) and the pinned files in `scripts/siddur/source/tiklal-1894/`.
+Q16 to Q28 come from the batches "Nusach Teiman, 2026-11-02" and "Zmanim per the Ohr HaChaim luach, 2026-11-03" ([.claude/specs/ohr-hachaim-zmanim.md](.claude/specs/ohr-hachaim-zmanim.md), sections 10 and 13). All but Q24 were answered on 2026-11-03; their answers are in production `1.0.21-13`, and on 2026-11-11 they moved to [action-log.md](action-log.md). Q24 is the one still open.
 
-Q17 to Q26 are the points of the batch "Zmanim per the Ohr HaChaim luach, 2026-11-03" ([.claude/specs/ohr-hachaim-zmanim.md](.claude/specs/ohr-hachaim-zmanim.md), sections 10 and 13). All but Q24 were answered on 2026-11-03.
-
-- **Q17 — Sunrise and sunset at the city's height.**
-  - **Question:** Take sunrise and sunset at the city's height, as the luach does (Jerusalem's sunset 4 to 5 minutes after the sea-level one), and give a GPS fix far from every city a height of 0?
-  - **Assumption:** Yes to both.
-  - **Lives in:** `buildCalendar()` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts) and `elevation` in [src/data/cities.ts](src/data/cities.ts).
-  - **What it affects:** Every zman, candle lighting, the exit, the Hebrew date's turn.
-  - **Answered, 2026-11-03:** Yes, settled by the printed page: its sunset is the city's, 2 to 5 minutes after sea level; the four printed cities carry fitted heights (spec section 13), a far fix 0.
-- **Q18 — The luach's visible sunrise is out of reach.**
-  - **Question:** The luach prints the visible sunrise of the Bechoray Yosef tables, which depend on the hills around each city and cannot be reproduced; the app would use the astronomical sunrise at the city's height, a few minutes before the printed one in Jerusalem. Acceptable?
-  - **Assumption:** Yes.
-  - **Lives in:** the same `buildCalendar()`.
-  - **What it affects:** The start of shacharit and the Shema, and the GRA times by a minute or two.
-  - **Answered, 2026-11-03:** The sea-level sunrise stands in for the visible one, as before and as the official implementation (royzmanim.com) does; it is within a minute of the printed one in Jerusalem and Haifa and 3 to 5 minutes earlier in Tel Aviv and Be'er Sheva.
-- **Q19 — The exit's margin.**
-  - **Question:** The luach ends Shabbat and Yom Tov 30 minutes after sunset in Israel and 40 abroad. Show and use that time exactly, or keep the 10-minute margin of 2026-10-10 on top of it (40 and 50)?
-  - **Assumption:** The luach's time exactly, the margin dropped (`HOLY_BLOCK_EXIT_MIN` 0).
-  - **Lives in:** `holyBlockExit()` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts).
-  - **What it affects:** The Shabbat screen, havdalah, the pre-block notice's exit line, the check-in nudges, every night window of a block's last day.
-  - **Answered, 2026-11-03:** The owner, 2026-11-03: "כמו בלוח": the luach's time exactly, the margin dropped.
-- **Q20 — Candle lighting minutes per city.**
-  - **Question:** What does the luach print for each city of `CITIES`? Known customs: Jerusalem 40, Haifa 30, most Israeli cities 20, and 18 for a city abroad the luach does not print; today the app uses 18 in Israel outside Jerusalem and 20 abroad.
-  - **Assumption:** Jerusalem 40, Haifa 30, every other Israeli city 20, abroad 18.
-  - **Lives in:** `candleLightingMinutes()` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts) and `candleLightingMinutes` on the entries of [src/data/cities.ts](src/data/cities.ts).
-  - **What it affects:** The block's start, the `candle_lighting` window, the pre-block notice.
-  - **Answered, 2026-11-03:** The owner, 2026-11-03, on Jerusalem: "כמו בלוח": 20 minutes, the luach's main line (it prints 40 beside it for those who keep it). The printed page lights every city at 20, Haifa included.
-- **Q21 — The Shema time's default and the schedule's row.**
-  - **Question:** Keep the GRA / MGA choice in Settings; which is the default for a new install (the luach prints both; Rav Ovadia holds MGA lechatchila), and should the schedule show both rows as the luach does, or the chosen one?
-  - **Assumption:** The choice stays, the default stays GRA for every install, and the schedule's row follows the setting.
-  - **Lives in:** `halachicOpinions.ksSofZman` in [src/stores/useUserStore.ts](src/stores/useUserStore.ts) and `ZMAN_KEYS` in [src/utils/buildDayTimeline.ts](src/utils/buildDayTimeline.ts).
-  - **What it affects:** The Shema window's end, the strip, the schedule.
-  - **Answered, 2026-11-03:** Taken with the assumption, shown to the owner on 2026-11-03: the setting and its GRA default stay, and the schedule shows both rows as the luach does.
-- **Q22 — Plag hamincha.**
-  - **Question:** Plag 1.25 seasonal hours before tzeit, as Yalkut Yosef and the luach have it (12 to 20 minutes later than today), rather than before sunset (the Halacha Berurah)?
-  - **Assumption:** Before tzeit.
-  - **Lives in:** `plagHaMincha` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts).
-  - **What it affects:** The Chanukah candles on the erev of a holy block, the strip, the schedule.
-  - **Answered, 2026-11-03:** Before tzeit, settled by the printed page (the sunset-based plag misses it by 14 minutes).
-- **Q23 — Scope.**
-  - **Question:** The luach for every user, every nusach (Ashkenaz, Sefard and Chabad included), in Israel and abroad, with no setting for another method?
-  - **Assumption:** Yes.
-  - **Lives in:** [src/services/ZmanimService.ts](src/services/ZmanimService.ts), the one method.
-  - **What it affects:** Every user.
-  - **Answered, 2026-11-03:** Yes, the owner's request of 2026-11-02 ("שכל הזמנים יהיו לפי זמני אור החיים").
 - **Q24 — Rabbeinu Tam.**
   - **Question:** Show Rabbeinu Tam (72 seasonal minutes after sunset) on the home strip and the schedule, as the luach prints it beside tzeit?
   - **Assumption:** Not shown; the Low task waits.
   - **Lives in:** not built yet: task "Show Rabbeinu Tam on the strip and the schedule".
   - **What it affects:** The strip and the schedule only; no window reads it.
-- **Q25 — Misheyakir.**
-  - **Question:** The luach's "טלית ותפילין" is alot plus 6 seasonal minutes (66 before sunrise)? KosherKotlin's set of the luach also carries a 60-minute variant.
-  - **Assumption:** 66.
-  - **Lives in:** `misheyakir` in [src/services/ZmanimService.ts](src/services/ZmanimService.ts).
-  - **What it affects:** The tefillin window's start and its first reminder.
-  - **Answered, 2026-11-03:** 66, settled by the printed page's tallit time (60 misses it by 5 to 7 minutes).
-- **Q26 — The calibration material.**
-  - **Question:** The printed pages of the luach (or the values of the לוח המאור app) for Jerusalem and one more city, a winter day and a summer day, every zman of the day and a Shabbat's candles and exit; the owner's own bug case (the zman, the date and city, the luach's value); what the luach uses its 20 fixed minutes after sunset for, and when a fast ends by it.
-  - **Assumption:** Until they arrive, the calibration suite holds only the Tel Aviv Shabbat of 2026-10-02/03 and the fast's end stays at tzeit.
-  - **Lives in:** not built yet: task "Pin the luach's printed zmanim in a calibration suite".
-  - **What it affects:** The proof of every task of the batch.
-  - **Answered, 2026-11-03:** Partly: the older printed page became the existing calibration suite; a fast ends 20 fixed minutes after sunset according to the older introduction and the independent reconstruction, not official publisher code.
-  - **Material supplied, 2026-11-04:** The owner supplied 5787 pages 21 and 95 (2026-10-25 to 2026-10-31 and 2027-06-06 to 2027-06-12), all four printed cities, daily/weekly times, candles and exit. Both photographs and their full transcription are preserved in [.claude/specs/ohr-hachaim-5787/](.claude/specs/ohr-hachaim-5787), committed in `b6b2379` and pushed to origin/main on 2026-11-04. The preview comparison still fails; do not request these two weeks again. Publisher reference inputs and the owner's exact installed version/GPS coordinates are still unknown; these are distinct from the now-supplied calibration material.
-
-Q27 and Q28 are the batch "Nusach Teiman, 2026-11-02", found while building its texts on 2026-11-03.
-
-- **Q27 — Nusach Teiman: which Baladi witness rules where they differ.**
-  - **Question:** The 1894 Tiklal and the Hebrew Wikisource Baladi pages differ in words. Me'ein Shalosh (built from Wikisource): the Tiklal prints "וְהִנְחַלְתָּ אֶת אֲבוֹתֵינוּ" for "לַאֲבֹתֵינוּ", "עָלֵינוּ וְעַל יִשְׂרָאֵל" for "עַל יִשְׂרָאֵל", "וְנֹאכַל מִפִּרְיָהּ וְנִשְׂבַּע מִטּוּבָהּ" and "כִּי אֵל טוֹב וּמֵטִיב אַתָּה" as said text where the page has them in parentheses, and adds "וְעַל תְּנוּבַת הַשָּׂדֶה". The Amidah: Mincha (from the Tiklal) reads "אַתָּה גִּבּוֹר לְעוֹלָם אֲדֹנָי" for "יְיָ", and differs from the Wikisource Shacharit and Maariv in Retzeh's "בְּאַהֲבָה", the Ten Days "אֵל חָי" and "לְחַיִּים טוֹבִים" and Yaaleh Veyavo's "לְפָנֶיךָ", "לִבְרָכָה" and "רַחוּם וְחַנּוּן". Birkat HaMazon's two Wikisource pages differ too ("(וּמֵזִין)", "(בְּקָרוֹב)"). Should one witness rule every text, so one user reads one wording at every service?
-  - **Assumption:** Each text follows the source it is built from, the Wikisource page where one exists and the Tiklal elsewhere, and Birkat HaMazon follows "בלדי 2".
-  - **Lives in:** the source each `teiman` spec names in [scripts/siddur/manifest.js](scripts/siddur/manifest.js) (`baladiSources()` or `tiklalSources()`).
-  - **What it affects:** The wording of Me'ein Shalosh, Birkat HaMazon and the Amidah; today a Baladi user reads two Amidah wordings, one at Mincha and another at Shacharit and Maariv.
-  - **Why it is not a structural change:** Both witnesses are pinned, so a switch is a manifest edit and a rebuild.
-  - **Answered, 2026-11-03:** the owner chose "כל טקסט נשאר לפי המקור שממנו נבנה (כך היום)": each text follows the source it is built from, as the Assumption says; nothing changes.
-
-- **Q28 — Nusach Teiman: what the print does not give.**
-  - **Question:** The Tiklal prints only instructions for the weekday Torah reading (no oleh blessings, no Mi Sheberach, no blessing for the government), for the Chanukah and Chol HaMoed readings, and for "ויתן לך" after havdalah ("ויתן לך האלהים … ופסוקים אחרים כמו שנהגו", V1 324, no list anywhere in either volume). The Hoshanot (V2 131) and Psalm 30 on Chanukah (V1 345) are printed but not yet transcribed. Should the app fill the first group from another Baladi source the rav approves, from the Edot HaMizrach texts, or leave the instructions, and should the second group be transcribed now?
-  - **Assumption:** The instructions stay as printed and nothing is borrowed; the Hoshanot and Psalm 30 wait for the owner's word, since the app is closed on the Yom Tov days and only Chol HaMoed and Chanukah read them.
-  - **Lives in:** `teimanShacharit()` and `teimanHavdalah()` in [scripts/siddur/manifest.js](scripts/siddur/manifest.js).
-  - **What it affects:** A Baladi user called to the Torah, the Sukkot and Chanukah mornings, and motzaei Shabbat.
-  - **Why it is not a structural change:** A filled passage is one more pinned source or transcription unit and a spec in the same builder.
-  - **Partly answered, 2026-11-03:** on transcribing the Hoshanot and Psalm 30, "אם יש חוסר אז כן": transcribe them, the task "Transcribe the Teiman Hoshanot and Psalm 30 for Chanukah". On the passages the print gives only as an instruction (the oleh's blessings, Mi Sheberach and the blessing for the government, the Chanukah and Chol HaMoed readings, "ויתן לך"), given those examples, the owner chose "או להשאיר רק את ההוראה כמו היום": the instruction stays as printed and nothing is borrowed, as the Assumption says.
 
 Q29 to Q31 are the batch "Daily halacha and festival halachot, 2026-11-10" ([.claude/specs/halacha-yomit.md](.claude/specs/halacha-yomit.md)).
 
