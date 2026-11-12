@@ -474,6 +474,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: 'A sound of our own for notifications: four to choose from, Bells, Call, Harp and Drop, so you know at once a notification is from Jew 365. In Settings → Device and notifications → Notification sound. The sound comes with the next version from the store; until then notifications use the phone’s sound.',
       },
       {
+        he: 'זמן הנץ בירושלים, בתל אביב, בחיפה ובבאר שבע הוא עכשיו הזריחה הנראית מעל ההרים, כמו שלוח אור החיים מדפיס אותה, והשקיעה בירושלים נקבעה מחדש לפי הלוח. כל הזמנים של ארבע הערים, שנבדקו מול שלושה דפים מודפסים של הלוח, יוצאים בתוך דקה ממנו.',
+        en: "Sunrise in Jerusalem, Tel Aviv, Haifa and Be'er Sheva is now the visible sunrise over the hills, as the Ohr HaChaim luach prints it, and Jerusalem's sunset was set anew by the luach. Every time of the four cities, checked against three printed pages of the luach, is within a minute of it.",
+      },
+      {
         he: 'הזמנים בקרוסלה במקום אחד: ה-+ שבקרוסלה פותח מסך שבו מסירים זמן, מוסיפים זמנים שהעיגול לא מראה (מנחה קטנה, וסוף זמן קריאת שמע לשיטה השנייה) ומסמנים מועדפים בכוכב. זמן מועדף תמיד מוצג, עומד ראשון בקרוסלה בזמן הבא שלו, גם אם זה מחר, ו״שלי״ מראה כמה נשאר עד המועדף הבא. לחיצה ארוכה על זמן בקרוסלה מסמנת אותו בכוכב. אותה רשימה מופיעה בהגדרות ← זמני הלכה ובהגדרה הראשונית של האפליקציה.',
         en: "The carousel's times in one place: the + in the carousel opens a sheet where you remove a time, add times the circle does not show (Mincha Ketana, and the latest Shema by the other opinion) and star favourites. A favourite always shows, leads the carousel at its next time, tomorrow's too, and Mine shows how long until the next favourite. A long press on a time in the carousel stars it. The same list is in Settings → Halachic times and in the app's first setup.",
       },

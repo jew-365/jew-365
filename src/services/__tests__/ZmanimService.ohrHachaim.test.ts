@@ -114,10 +114,40 @@ const EXIT: Record<string, Record<CityKey, string>> = {
   '2020-10-03': { J: '18:57', T: '18:54', H: '18:55', B: '18:56' },
 };
 
+// The printed visible sunrise (זריחה) of the 5781 page above and of the two 5787 pages in
+// .claude/specs/ohr-hachaim-5787/printed.json; a decimal is a fraction of a minute (Jerusalem prints quarters).
+const NETZ: Record<string, Record<CityKey, string>> = {
+  '2020-09-27': { J: '06:30', T: '06:37', H: '06:30', B: '06:36' },
+  '2020-09-28': { J: '06:30.5', T: '06:38', H: '06:31', B: '06:36' },
+  '2020-09-29': { J: '06:31.25', T: '06:38', H: '06:32', B: '06:36' },
+  '2020-09-30': { J: '06:31.75', T: '06:39', H: '06:32', B: '06:37' },
+  '2020-10-01': { J: '06:32.5', T: '06:40', H: '06:33', B: '06:38' },
+  '2020-10-02': { J: '06:33', T: '06:41', H: '06:34', B: '06:38' },
+  '2020-10-03': { J: '06:33.75', T: '06:41', H: '06:35', B: '06:39' },
+  '2026-10-25': { J: '05:48.75', T: '05:58', H: '05:52', B: '05:54' },
+  '2026-10-26': { J: '05:49.25', T: '05:58', H: '05:52', B: '05:55' },
+  '2026-10-27': { J: '05:50', T: '05:59', H: '05:53', B: '05:55' },
+  '2026-10-28': { J: '05:51', T: '06:00', H: '05:54', B: '05:56' },
+  '2026-10-29': { J: '05:51.75', T: '06:01', H: '05:55', B: '05:57' },
+  '2026-10-30': { J: '05:52.5', T: '06:02', H: '05:55', B: '05:58' },
+  '2026-10-31': { J: '05:53.75', T: '06:03', H: '05:56', B: '05:59' },
+  '2027-06-06': { J: '05:33.5', T: '05:39', H: '05:35', B: '05:42' },
+  '2027-06-07': { J: '05:33.5', T: '05:38', H: '05:35', B: '05:42' },
+  '2027-06-08': { J: '05:33.5', T: '05:38', H: '05:35', B: '05:42' },
+  '2027-06-09': { J: '05:33', T: '05:38', H: '05:34', B: '05:42' },
+  '2027-06-10': { J: '05:33', T: '05:38', H: '05:34', B: '05:42' },
+  '2027-06-11': { J: '05:33', T: '05:38', H: '05:34', B: '05:41' },
+  '2027-06-12': { J: '05:33', T: '05:38', H: '05:34', B: '05:41' },
+};
+
 const MINUTE = 60_000;
 const minutesOff = (actual: Date, loc: Location, day: string, printed: string) =>
   (actual.getTime() - at(loc, `${day}T${printed}`).getTime()) / MINUTE;
 const keys = Object.keys(CITY) as CityKey[];
+const printedAt = (loc: Location, day: string, printed: string) => {
+  const [clock, fraction = '0'] = printed.split('.');
+  return new Date(at(loc, `${day}T${clock}`).getTime() + Number(`0.${fraction}`) * MINUTE);
+};
 
 describe('the zmanim of the printed Ohr HaChaim luach', () => {
   describe.each(Object.keys(DAILY))('%s', (day) => {
@@ -129,6 +159,14 @@ describe('the zmanim of the printed Ohr HaChaim luach', () => {
           off: true,
         });
       });
+    });
+  });
+
+  it.each(keys)('%s: the visible sunrise over the city horizon, on 21 printed days in three seasons', (k) => {
+    Object.entries(NETZ).forEach(([day, byCity]) => {
+      const netz = zmanimFor(at(CITY[k], `${day}T12:00`), CITY[k]).netzHaChama;
+      const off = (netz.getTime() - printedAt(CITY[k], day, byCity[k]).getTime()) / MINUTE;
+      expect({ day, off: Math.abs(off) <= 1 }).toEqual({ day, off: true });
     });
   });
 
@@ -183,12 +221,21 @@ describe('the luach rules', () => {
     Object.values(z()).forEach((value) => expect((value as Date).getTime() % MINUTE).toBe(0));
   });
 
-  it('shows the sea-level sunrise, rounded up, for the visible sunrise the luach prints', () => {
-    const cal = new ComplexZmanimCalendar(new GeoLocation(j.name, j.lat, j.lng, j.elevation ?? 0, j.tz));
-    cal.setDate(DateTime.fromISO('2026-11-02T12:00', { zone: j.tz }));
-    const seaLevel = cal.getSeaLevelSunrise()!.toJSDate().getTime();
-    expect(z().netzHaChama.getTime()).toBe(Math.ceil(seaLevel / MINUTE) * MINUTE);
-    expect(cal.getSunrise()!.toJSDate().getTime()).toBeLessThan(seaLevel - 3 * MINUTE);
+  it('reads the visible sunrise from the printed city horizon only inside the city', () => {
+    const seaLevelNetz = (loc: Location, day: string) => {
+      const cal = new ComplexZmanimCalendar(new GeoLocation(loc.name, loc.lat, loc.lng, loc.elevation ?? 0, loc.tz));
+      cal.setDate(DateTime.fromISO(`${day}T12:00`, { zone: loc.tz }));
+      return Math.ceil(cal.getSeaLevelSunrise()!.toJSDate().getTime() / MINUTE) * MINUTE;
+    };
+    // In the city the horizon decides, not sea level (the printed days above pin the minutes).
+    expect(z().netzHaChama.getTime()).not.toBe(seaLevelNetz(j, '2026-11-02'));
+    // Outside the printed cities, and 15 km from one, sea level stands in, as before.
+    const ny = city('new-york');
+    expect(zmanimFor(at(ny, '2026-11-02T12:00'), ny).netzHaChama.getTime()).toBe(seaLevelNetz(ny, '2026-11-02'));
+    const beyond: Location = { ...j, lat: j.lat + 0.135, elevation: undefined };
+    expect(zmanimFor(at(beyond, '2026-11-02T12:00'), beyond).netzHaChama.getTime()).toBe(
+      seaLevelNetz(beyond, '2026-11-02'),
+    );
   });
 
   it('ends Shabbat 40 minutes after shkia abroad', () => {

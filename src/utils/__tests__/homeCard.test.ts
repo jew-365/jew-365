@@ -32,8 +32,8 @@ describe('the smart card', () => {
     ]);
     expect(m.pages.week.title).toBe('פרשת תולדות');
     expect(m.pages.week.facts).toEqual([
-      { label: 'כניסה', value: 'ו׳ 16:26' },
-      { label: 'יציאה', value: 'ש׳ 17:16' },
+      { label: 'כניסה', value: 'ו׳ 16:25' },
+      { label: 'יציאה', value: 'ש׳ 17:15' },
     ]);
     expect(m.smart).toBe('day');
     expect(m.candleLighting).toBeNull();
@@ -47,7 +47,7 @@ describe('the smart card', () => {
     const m = card('2026-11-13T12:30');
     expect(m.pages.day.title).toBe('ערב שבת פרשת תולדות');
     expect(m.candleLighting).not.toBeNull();
-    expect(m.pages.week.facts[0]).toEqual({ label: 'כניסה', value: 'בעוד 3:56 שעות' });
+    expect(m.pages.week.facts[0]).toEqual({ label: 'כניסה', value: 'בעוד 3:55 שעות' });
   });
 
   it('Rosh Chodesh, Chanukah and a fast name the day and what the prayer adds', () => {
@@ -89,7 +89,7 @@ describe('the smart card', () => {
       pinNext: { name: 'חצות לילה', at: at(J, '2026-11-12T23:23') },
     });
     expect(m.pages.mine.facts).toEqual([
-      { label: 'עד השבת', value: '32:11 שעות' },
+      { label: 'עד השבת', value: '32:10 שעות' },
       { label: 'עד חצות לילה', value: '15:08 שעות' },
     ]);
     expect(card('2026-11-12T08:15', { mine: [] }).pages.mine.facts).toEqual([
@@ -113,7 +113,7 @@ describe('the smart card', () => {
     setLocale('en');
     const m = card('2026-11-10T09:00', { language: 'en' });
     expect(m.pages.day.facts[0].value).toBe("Ya'aleh Veyavo · Half Hallel · Musaf");
-    expect(m.pages.week.facts[0]).toEqual({ label: 'Begins', value: 'Fri 16:26' });
+    expect(m.pages.week.facts[0]).toEqual({ label: 'Begins', value: 'Fri 16:25' });
   });
 });
 

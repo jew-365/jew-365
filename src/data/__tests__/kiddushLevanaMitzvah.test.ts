@@ -341,7 +341,7 @@ describe('the Kiddush Levana reminders', () => {
     // Between the two, the smart nag opens the period's last three nights at nightfall on 2026-09-24.
     expect(idsAndTriggers(edot)).toEqual([
       ['kiddush_levana__2026-09-21__0', blockEndOn(JERUSALEM, '2026-09-21')],
-      ['kiddush_levana__2026-09-21__n1', at(JERUSALEM, '2026-09-24T18:53')],
+      ['kiddush_levana__2026-09-21__n1', at(JERUSALEM, '2026-09-24T18:52')],
       ['kiddush_levana__2026-09-21__1', exit('2026-09-26')],
     ]);
     const abroad = levanaPlan({
@@ -355,7 +355,7 @@ describe('the Kiddush Levana reminders', () => {
     ]);
     expect(idsAndTriggers(levanaPlan({ now }))).toEqual([
       ['kiddush_levana__2026-09-21__0', blockEndOn(JERUSALEM, '2026-09-21')],
-      ['kiddush_levana__2026-09-21__n1', at(JERUSALEM, '2026-09-23T18:54')],
+      ['kiddush_levana__2026-09-21__n1', at(JERUSALEM, '2026-09-23T18:53')],
     ]);
   });
 

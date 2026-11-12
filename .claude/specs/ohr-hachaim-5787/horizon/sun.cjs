@@ -22,6 +22,6 @@ function sunPos(date, lat, lng) {
   const R = 0.9999 * (1.000001018 * (1 - e * e)) / (1 + e * Math.cos((M + C) * rad)); // AU approx
   return { alt, az, sd: 0.2666 / R };
 }
-// Bennett refraction (deg) for apparent altitude ha (deg)
-const refr = (h) => 1 / Math.tan((h + 7.31 / (h + 4.4)) * rad) / 60;
+// Saemundsson's refraction (deg) for a TRUE (geometric) altitude h (deg); the callers pass the geometric upper limb.
+const refr = (h) => (1.02 / Math.tan((h + 10.3 / (h + 5.11)) * rad)) / 60;
 module.exports = { sunPos, refr, rad, deg };

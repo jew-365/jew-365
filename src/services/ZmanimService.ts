@@ -2,7 +2,9 @@
 import './zoneOffsetCache';
 import { ComplexZmanimCalendar, GeoLocation } from 'kosher-zmanim';
 import { DateTime } from 'luxon';
+import { cityInside } from '@/data/cities';
 import { Location, Zmanim } from '@/types/zmanim';
+import { horizonProfileFor, visibleSunrise } from '@/utils/visibleSunrise';
 
 // The zmanim of the Ohr HaChaim luach (the owner's call, 2026-11-03): seasonal minutes of the day
 // from sunrise to sunset at the city's height, each rounded to the minute the way the luach prints
@@ -94,7 +96,7 @@ function civilDayKey(date: Date, tz: string): string {
 }
 
 function cacheKey(date: Date, loc: Location): string {
-  return [civilDayKey(date, loc.tz), loc.lat, loc.lng, loc.elevation ?? 0, loc.tz, loc.inIsrael].join('|');
+  return [civilDayKey(date, loc.tz), loc.lat, loc.lng, loc.elevation ?? 0, loc.tz, loc.inIsrael, loc.cityId].join('|');
 }
 
 function cloneZmanim(zmanim: Zmanim): Zmanim {
@@ -143,12 +145,18 @@ export const ZmanimService = {
     }
 
     const cal = buildCalendar(date, loc);
+    const sunsetElevation = cityInside(loc)?.sunsetElevation;
+    const sunsetCal = sunsetElevation === undefined ? cal : buildCalendar(date, { ...loc, elevation: sunsetElevation });
     const sunrise = toDateOrNull(cal.getSunrise());
-    const sunset = toDateOrNull(cal.getSunset());
-    // The luach prints the visible sunrise, which no formula gives; sea level stands in for it.
-    const visibleSunrise = toDateOrNull(cal.getSeaLevelSunrise());
+    const sunset = toDateOrNull(sunsetCal.getSunset());
+    // The luach prints the visible sunrise over its city's terrain horizon; elsewhere sea level stands in for it.
+    const seaLevelSunrise = toDateOrNull(cal.getSeaLevelSunrise());
     const transit = toDateOrNull(cal.getSunTransit());
-    if (!sunrise || !sunset || !visibleSunrise || !transit) return null;
+    if (!sunrise || !sunset || !seaLevelSunrise || !transit) return null;
+    // The luach prints that sunrise as computed (Jerusalem to the quarter minute), so it is rounded to the nearest
+    // minute; the sea-level stand-in keeps the stringent rounding of a start.
+    const profile = horizonProfileFor(loc);
+    const visible = profile ? visibleSunrise(seaLevelSunrise, profile) : null;
 
     const hour = (sunset.getTime() - sunrise.getTime()) / 12;
     const zmaniyot = (minutes: number) => (minutes * hour) / 60;
@@ -159,7 +167,7 @@ export const ZmanimService = {
     const zmanim: Zmanim = {
       alotHaShachar: earlier(alot),
       misheyakir: later(after(sunrise, -zmaniyot(66))),
-      netzHaChama: later(visibleSunrise),
+      netzHaChama: visible ? nearest(visible) : later(seaLevelSunrise),
       sofZmanShmaGra: earlier(after(sunrise, 3 * hour)),
       sofZmanShmaMA: earlier(after(alot, 3 * mgaHour)),
       sofZmanTfilaGra: earlier(after(sunrise, 4 * hour)),

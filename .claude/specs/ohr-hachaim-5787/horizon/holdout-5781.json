@@ -1,0 +1,55 @@
+{
+  "source": "Ohr HaChaim luach 5781, page 27 (2020-09-27 to 2020-10-03), https://i.imgur.com/QqGAtTB.jpg, the page already transcribed in src/services/__tests__/ZmanimService.ohrHachaim.test.ts; saved here as page-5781-27.jpg. Only its visible sunrise (זריחה) row is transcribed here, read from a 3x enlargement on 2026-11-12. Israel summer time (UTC+3) throughout. A decimal is a fraction of a minute.",
+  "sha256": "4b7205306e06b71e18faab9cece12f50725a87dfafaafbbf089e8cdaa514e20f",
+  "cityOrder": [
+    "jerusalem",
+    "tel-aviv",
+    "haifa",
+    "beer-sheva"
+  ],
+  "utcOffsetHours": 3,
+  "netz": {
+    "2020-09-27": [
+      "06:30",
+      "06:37",
+      "06:30",
+      "06:36"
+    ],
+    "2020-09-28": [
+      "06:30.5",
+      "06:38",
+      "06:31",
+      "06:36"
+    ],
+    "2020-09-29": [
+      "06:31.25",
+      "06:38",
+      "06:32",
+      "06:36"
+    ],
+    "2020-09-30": [
+      "06:31.75",
+      "06:39",
+      "06:32",
+      "06:37"
+    ],
+    "2020-10-01": [
+      "06:32.5",
+      "06:40",
+      "06:33",
+      "06:38"
+    ],
+    "2020-10-02": [
+      "06:33",
+      "06:41",
+      "06:34",
+      "06:38"
+    ],
+    "2020-10-03": [
+      "06:33.75",
+      "06:41",
+      "06:35",
+      "06:39"
+    ]
+  }
+}

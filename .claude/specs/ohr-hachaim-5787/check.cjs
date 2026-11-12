@@ -19,7 +19,12 @@ function load(relative) {
   }).outputText;
   const module = { exports: {} };
   new Function('require', 'module', 'exports', code)(
-    (name) => (name.startsWith('@/') ? load(`src/${name.slice(2)}.ts`) : req(name)),
+    (name) =>
+      name.startsWith('@/')
+        ? load(`src/${name.slice(2)}.ts`)
+        : name.startsWith('.')
+          ? load(`${path.posix.join(path.posix.dirname(relative), name)}.ts`)
+          : req(name),
     module,
     module.exports,
   );

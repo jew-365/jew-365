@@ -454,7 +454,7 @@ describe('zmanim chip strip', () => {
     dark: { dawn: 10.7, noon: 5.86, sunset: 6.85, night: 14.2 },
   };
   const DAY_FLOOR = {
-    chip: { light: { surface: 3.54, goldLight: 3.51 }, dark: { surface: 3.8, goldLight: 3.63 } },
+    chip: { light: { surface: 3.54, goldLight: 3.5 }, dark: { surface: 3.8, goldLight: 3.63 } },
     edge: { light: 4.07, dark: 3.89 },
     back: { light: 5.86, dark: 4.84 },
   } as const;

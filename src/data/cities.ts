@@ -2,7 +2,9 @@ import type { LocationSource } from '@/services/LocationService';
 import { Location } from '@/types/zmanim';
 import { distanceKm } from '@/utils/compass';
 
-export type City = Location & { cityId: string };
+// `sunsetElevation`: a luach city whose printed sunset comes from another height than its sunrise (Jerusalem, the
+// luach's "highest place in the city"), fitted on every printed value; absent, the sunset takes `elevation`.
+export type City = Location & { cityId: string; sunsetElevation?: number };
 
 // Heights for the zmanim: Jerusalem, Tel Aviv, Haifa and Be'er Sheva carry the effective height that
 // matches the printed Ohr HaChaim luach (Tishrei 5781, ZmanimService.ohrHachaim.test.ts); the rest are
@@ -17,6 +19,7 @@ export const CITIES: City[] = [
     tz: 'Asia/Jerusalem',
     inIsrael: true,
     elevation: 1150,
+    sunsetElevation: 745,
   },
   {
     cityId: 'tel-aviv',
@@ -234,6 +237,12 @@ export const CITY_HEIGHT_KM = 10;
 
 export function heightAt(city: City, point: { lat: number; lng: number }): number | undefined {
   return distanceKm(point, city) <= CITY_HEIGHT_KM ? city.elevation : undefined;
+}
+
+/** The luach city a location lies inside (its `cityId`, within `CITY_HEIGHT_KM` of its point), whose fitted values it takes. */
+export function cityInside(location: Location): City | undefined {
+  const city = location.cityId ? findCityById(location.cityId) : undefined;
+  return city && distanceKm(location, city) <= CITY_HEIGHT_KM ? city : undefined;
 }
 
 export function refreshSavedLocation(saved: Location, source: LocationSource): Location {

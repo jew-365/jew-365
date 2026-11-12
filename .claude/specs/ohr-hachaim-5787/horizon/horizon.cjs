@@ -43,4 +43,21 @@ function visibleSunrise(day, offH, lat, lng, hObs, k) {
   }
   return NaN;
 }
-module.exports = { elev, horizon, visibleSunrise };
+// A horizon profile sampled every 0.1 deg over the given azimuth bands, interpolated linearly.
+function profile(lat, lng, hObs, bands, k = 0.13) {
+  const pts = new Map();
+  for (const [a, b] of bands) for (let i = Math.round(a * 10); i <= Math.round(b * 10); i++) pts.set(i, horizon(lat, lng, hObs, i / 10, k));
+  return (az) => {
+    const i = Math.floor(az * 10), f = az * 10 - i, A = pts.get(i), B = pts.get(i + 1);
+    return A === undefined || B === undefined ? NaN : A * (1 - f) + B * f;
+  };
+}
+// Visible sunrise (minutes after the UTC midnight of baseMs) within 25 minutes of guessMin, by bisection; NaN outside.
+function riseNear(baseMs, guessMin, lat, lng, prof) {
+  let lo = baseMs + (guessMin - 25) * 60000, hi = baseMs + (guessMin + 25) * 60000;
+  const g = (t) => { const s = sunPos(new Date(t), lat, lng); return s.alt + s.sd + refr(s.alt + s.sd) - prof(s.az); };
+  if (!(g(lo) < 0 && g(hi) > 0)) return NaN;
+  for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; g(m) < 0 ? (lo = m) : (hi = m); }
+  return (hi - baseMs) / 60000;
+}
+module.exports = { elev, horizon, visibleSunrise, profile, riseNear };
