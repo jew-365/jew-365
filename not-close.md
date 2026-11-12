@@ -835,7 +835,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** section 3 of [release/licence-requests.md](release/licence-requests.md): the app takes Torat Emet 357 and 363, the Torat Emet Onkelos and Selichot Edot HaMizrach, and "Daat Siddur Ashkenaz" as Public Domain, and the Metsudah English as CC-BY, as Sefaria labels them, while Torat Emet's own site says otherwise. One email to hello@sefaria.org (their general address; confirm it on sefaria.org/contact in a browser).
   - **What it solves:** the Kitzur and Rambam tracks, the Sefard and Chabad siddur, the Onkelos of Shnayim Mikra and the English siddur all rest on those labels.
   - **Expected result:** Sefaria's answer recorded per version; a version it says should be read more narrowly becomes a task to replace it or to ask its source.
-  - **Sent:** 2026-11-12, by Claude on the owner's word, through the Gmail connector on 365jew@gmail.com, to hello@sefaria.org, the draft of the drafts file signed אברהם / Avraham with the owner's phone. No bounce in the first minutes. Answer: none yet.
+  - **Sent:** 2026-11-12, by Claude on the owner's word, through the Gmail connector on 365jew@gmail.com, to hello@sefaria.org, the draft of the drafts file signed אברהם / Avraham with the owner's phone. No bounce in the first minutes. Answer: an automatic acknowledgement from hello+noreply@sefaria.org the same minute (a reply in 1-2 business days); no answer yet.
 
 - [ ] Ask Daat about its Ashkenaz siddur text
   - **Flag:** none.
