@@ -1235,7 +1235,7 @@ type NotificationSoundBlockProps = {
 };
 
 // The app's own notification sounds (the owner's calls of 2026-11-12): one for the plain notifications, one
-// for the orange ⚠️ before the last and one for the red ❗ last. Only the sounds this build carries are
+// for the orange one before the last and one for the red last one. Only the sounds this build carries are
 // offered; a build from before them keeps the phone's sound, and the choice takes effect with the next one.
 function NotificationSoundBlock({ choice, onSelect }: NotificationSoundBlockProps) {
   const { colors } = useTheme();
