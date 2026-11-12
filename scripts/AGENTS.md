@@ -7,6 +7,7 @@
 ## Ownership
 
 - [withExactAlarmPermissions.js](withExactAlarmPermissions.js) caps `SCHEDULE_EXACT_ALARM` at `maxSdkVersion=32` so exact alarms work on every Android version without triggering Google's exact-alarm declaration form.
+- [sounds/generate.py](sounds/generate.py) writes the four notification sounds of [../assets/sounds/](../assets/sounds) (`python3 ../../scripts/sounds/generate.py` from that folder; numpy, seeded, so the output is the same each run).
 - [free-port.js](free-port.js) frees a local TCP port before `pnpm web`, cross-platform.
 - [test-timezones.js](test-timezones.js) runs the suite once per zone (UTC, Asia/Jerusalem, America/Los_Angeles, Pacific/Kiritimati). It puts `TZ` and `JEST_TZ` in the environment of the Jest process it spawns, so Node resolves the zone at startup and every worker inherits it. Extra arguments are forwarded to Jest.
 - [jest-timezone-setup.js](jest-timezone-setup.js) is a Jest `setupFiles` guard. When `JEST_TZ` is set, it fails the run unless the test process really runs in that zone.

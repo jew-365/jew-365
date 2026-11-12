@@ -1,9 +1,14 @@
 import { Platform } from 'react-native';
 import { holdScreenOnReturn } from '../externalFlow';
 import * as Notifications from 'expo-notifications';
+import { File, Paths } from 'expo-file-system';
 import { t } from '@/i18n';
+import { useUserStore } from '@/stores/useUserStore';
+import { NOTIFICATION_SOUNDS, notificationSoundFile, type NotificationSound } from '@/data/notificationSounds';
 import {
   ANDROID_CHANNELS,
+  androidSoundChannelId,
+  SOUND_PREVIEW_KIND,
   MARK_DONE_ACTION,
   MITZVAH_REMINDER_CATEGORY,
   MITZVAH_TEXT_CATEGORY,
@@ -21,40 +26,118 @@ export type NotificationResponse = Notifications.NotificationResponse;
 // A notification as the scheduler reasons about it, scheduled or in the tray.
 export type TrayNotification = { identifier: string; data: PendingNotificationMeta; presentedAt?: Date };
 
+type ChannelKey = keyof typeof ANDROID_CHANNELS;
+type ChannelSettings = Omit<Notifications.NotificationChannelInput, 'sound'>;
+
+function channelSettings(): Record<ChannelKey, ChannelSettings> {
+  return {
+    mitzvot: {
+      name: t('notifications.channelName'),
+      importance: Notifications.AndroidImportance.HIGH,
+      enableVibrate: true,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#C9922A',
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+    },
+    hilulot: {
+      name: t('hilulot.title'),
+      importance: Notifications.AndroidImportance.DEFAULT,
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+    },
+    roshChodesh: {
+      name: t('roshChodesh.title'),
+      importance: Notifications.AndroidImportance.DEFAULT,
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+    },
+    taharah: {
+      name: t('taharah.home.title'),
+      importance: Notifications.AndroidImportance.HIGH,
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PRIVATE,
+    },
+    system: {
+      name: t('notifications.channelSystem'),
+      importance: Notifications.AndroidImportance.DEFAULT,
+    },
+  };
+}
+
+const CHANNEL_KEYS = Object.keys(ANDROID_CHANNELS) as ChannelKey[];
+let soundsInBinary: boolean | null = null;
+
+// Whether this binary carries the app's sound files. They are native resources, so a bundle that
+// reached an older build over the air must not use them: an Android channel created with a missing
+// sound plays the phone's default forever, since its sound never changes. Android answers through a
+// probe channel created with the bells and read back (`custom` only when the resource resolved), its id
+// new each time because a re-created channel id comes back with its old sound; iOS looks for the file
+// in the app bundle. A yes is kept for the process, a no is asked again next process.
+export async function customSoundsAvailable(): Promise<boolean> {
+  if (soundsInBinary !== null) return soundsInBinary;
+  try {
+    if (Platform.OS === 'android') {
+      const probeId = `sound-probe-${Date.now()}`;
+      const probe = await Notifications.setNotificationChannelAsync(probeId, {
+        name: 'sound probe',
+        importance: Notifications.AndroidImportance.MIN,
+        sound: notificationSoundFile('bells'),
+      });
+      await Notifications.deleteNotificationChannelAsync(probeId);
+      // Before Android 8 there are no channels and a missing sound falls back to the default per notification.
+      soundsInBinary = probe == null || probe.sound === 'custom';
+    } else if (Platform.OS === 'ios') {
+      soundsInBinary = new File(Paths.bundle, notificationSoundFile('bells')).exists;
+    } else {
+      return false;
+    }
+  } catch {
+    return false;
+  }
+  return soundsInBinary;
+}
+
+function currentSound(): NotificationSound {
+  return useUserStore.getState().notificationSound;
+}
+
+// What a request names, read after ensureChannels() settled whether the binary has the sounds.
+function channelIdOf(key: ChannelKey): string {
+  return soundsInBinary ? androidSoundChannelId(key, currentSound()) : ANDROID_CHANNELS[key];
+}
+
+function soundOfContent(): string {
+  return soundsInBinary ? notificationSoundFile(currentSound()) : 'default';
+}
+
 export async function ensureChannels(): Promise<void> {
-  if (Platform.OS !== 'android') return;
-  await Notifications.setNotificationChannelAsync(ANDROID_CHANNELS.mitzvot, {
-    name: t('notifications.channelName'),
-    importance: Notifications.AndroidImportance.HIGH,
-    sound: 'default',
-    enableVibrate: true,
-    vibrationPattern: [0, 250, 250, 250],
-    lightColor: '#C9922A',
-    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-  });
-  await Notifications.setNotificationChannelAsync(ANDROID_CHANNELS.hilulot, {
-    name: t('hilulot.title'),
-    importance: Notifications.AndroidImportance.DEFAULT,
-    sound: 'default',
-    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-  });
-  await Notifications.setNotificationChannelAsync(ANDROID_CHANNELS.roshChodesh, {
-    name: t('roshChodesh.title'),
-    importance: Notifications.AndroidImportance.DEFAULT,
-    sound: 'default',
-    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-  });
-  await Notifications.setNotificationChannelAsync(ANDROID_CHANNELS.taharah, {
-    name: t('taharah.home.title'),
-    importance: Notifications.AndroidImportance.HIGH,
-    sound: 'default',
-    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PRIVATE,
-  });
-  await Notifications.setNotificationChannelAsync(ANDROID_CHANNELS.system, {
-    name: t('notifications.channelSystem'),
-    importance: Notifications.AndroidImportance.DEFAULT,
-    sound: 'default',
-  });
+  if (Platform.OS !== 'android') {
+    await customSoundsAvailable();
+    return;
+  }
+  const settings = channelSettings();
+  if (!(await customSoundsAvailable())) {
+    for (const key of CHANNEL_KEYS) {
+      await Notifications.setNotificationChannelAsync(ANDROID_CHANNELS[key], { ...settings[key], sound: 'default' });
+    }
+    return;
+  }
+  const sound = currentSound();
+  for (const key of CHANNEL_KEYS) {
+    await Notifications.setNotificationChannelAsync(androidSoundChannelId(key, sound), {
+      ...settings[key],
+      sound: notificationSoundFile(sound),
+    });
+  }
+  // The channels of the other sounds and of the binaries before them leave the phone's settings.
+  const stale = new Set<string>(Object.values(ANDROID_CHANNELS));
+  for (const other of NOTIFICATION_SOUNDS) {
+    if (other !== sound) for (const key of CHANNEL_KEYS) stale.add(androidSoundChannelId(key, other));
+  }
+  try {
+    for (const channel of await Notifications.getNotificationChannelsAsync()) {
+      if (stale.has(channel.id)) await Notifications.deleteNotificationChannelAsync(channel.id);
+    }
+  } catch {
+    // A channel left behind only lingers in the phone's settings; nothing is sent to it.
+  }
 }
 
 export async function ensureCategories(): Promise<void> {
@@ -95,7 +178,8 @@ export function contentHash(candidate: ScheduleCandidate): string {
     candidate.body,
     candidate.trigger.getTime(),
     candidate.categoryIdentifier ?? null,
-    candidate.channel,
+    channelIdOf(candidate.channel),
+    soundOfContent(),
     candidate.data,
   ]);
   let hash = 0x811c9dc5;
@@ -117,14 +201,14 @@ function requestFor(candidate: ScheduleCandidate): Notifications.NotificationReq
       ...(candidate.categoryIdentifier && { categoryIdentifier: candidate.categoryIdentifier }),
       autoDismiss: true,
       sticky: false,
-      sound: 'default',
+      sound: soundOfContent(),
     },
     // Android resolves the channel from the trigger. Without it every notification lands on
     // expo's "Miscellaneous" fallback channel and the configured one is dead.
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DATE,
       date: candidate.trigger,
-      channelId: ANDROID_CHANNELS[candidate.channel],
+      channelId: channelIdOf(candidate.channel),
     },
   };
 }
@@ -175,9 +259,26 @@ export async function presentNow(notice: {
       data: notice.data,
       autoDismiss: true,
       sticky: false,
-      sound: 'default',
+      sound: soundOfContent(),
     },
-    trigger: Platform.OS === 'android' ? { channelId: ANDROID_CHANNELS.system } : null,
+    trigger: Platform.OS === 'android' ? { channelId: channelIdOf('system') } : null,
+  });
+}
+
+// Plays the chosen sound once, as a notification on the mitzvot channel, the one most notices use.
+export async function presentSoundPreview(): Promise<void> {
+  await ensureChannels();
+  await Notifications.scheduleNotificationAsync({
+    identifier: SOUND_PREVIEW_KIND,
+    content: {
+      title: t('settings.notificationSound.previewTitle'),
+      body: t(`settings.notificationSound.${currentSound()}`),
+      data: { kind: SOUND_PREVIEW_KIND },
+      autoDismiss: true,
+      sticky: false,
+      sound: soundOfContent(),
+    },
+    trigger: Platform.OS === 'android' ? { channelId: channelIdOf('mitzvot') } : null,
   });
 }
 

@@ -34,7 +34,8 @@ export type PendingNotificationMeta = {
     | 'hilula'
     | 'roshChodesh'
     | 'report'
-    | 'horizonEnd';
+    | 'horizonEnd'
+    | 'soundPreview';
   taharah?: { task: TaharahTaskKind | 'tevilaPrep' | 'postBlock' | 'preBlock'; day: number; onah?: OnahKind };
   hilula?: { day: number; when: 'before' | 'evening'; ids?: string[] };
   roshChodesh?: { day: number; when: 'before' | 'evening' | 'day' };
@@ -84,6 +85,14 @@ export async function syncNotificationPermissionStatus(): Promise<boolean> {
 
 export async function notificationPermissionState(): Promise<'granted' | 'missing' | 'blocked' | null> {
   return null;
+}
+
+export async function notificationSoundsAvailable(): Promise<boolean> {
+  return false;
+}
+
+export async function previewNotificationSound(): Promise<boolean> {
+  return false;
 }
 
 export async function requestNotificationPermissions(): Promise<boolean> {

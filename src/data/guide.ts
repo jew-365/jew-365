@@ -452,6 +452,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'For a halachic question, the halacha hotline in the More tab dials a line by the nusach in Settings: Ashkenazi lines, and for Edot HaMizrach and Teiman a line following Maran, by WhatsApp too.',
       },
       {
+        he: 'להתראות של האפליקציה יש צליל משלה, כדי לזהות מיד שהן מיהודי 365: פעמונים, קריאה, נבל או טיפה, ופעמונים כברירת מחדל. בוחרים בהגדרות ← מכשיר והתראות ← צליל ההתראות, ובחירה משמיעה את הצליל. באנדרואיד אפשר לשנות את הצליל גם בהגדרות ההתראות של הטלפון.',
+        en: 'The app’s notifications have a sound of their own, so you know at once they are from Jew 365: Bells, Call, Harp or Drop, the bells by default. Choose it in Settings → Device and notifications → Notification sound, and a choice plays it. On Android the sound can also be changed in the phone’s notification settings.',
+      },
+      {
         he: 'האפליקציה אינה פוסקת הלכה. הזמנים והכללים שהיא מיישמת נמסרים לעיון רב, וכל תשובה שלו משנה את הכלל שלה. בכל ספק יש לשאול רב.',
         en: 'The app does not rule on halacha. The times and rules it applies are given to a rav for review, and each answer changes that one rule. In any doubt, ask a rav.',
       },
@@ -465,6 +469,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
     label: '1.0.21-18',
     date: '2026-11-09',
     items: [
+      {
+        he: 'צליל משלנו להתראות: ארבעה צלילים לבחירה, פעמונים, קריאה, נבל וטיפה, כדי לזהות מיד שההתראה מיהודי 365. בהגדרות ← מכשיר והתראות ← צליל ההתראות. הצליל מגיע עם הגרסה הבאה מהחנות; עד אז ההתראות בצליל של הטלפון.',
+        en: 'A sound of our own for notifications: four to choose from, Bells, Call, Harp and Drop, so you know at once a notification is from Jew 365. In Settings → Device and notifications → Notification sound. The sound comes with the next version from the store; until then notifications use the phone’s sound.',
+      },
       {
         he: 'הזמנים בקרוסלה במקום אחד: ה-+ שבקרוסלה פותח מסך שבו מסירים זמן, מוסיפים זמנים שהעיגול לא מראה (מנחה קטנה, וסוף זמן קריאת שמע לשיטה השנייה) ומסמנים מועדפים בכוכב. זמן מועדף תמיד מוצג, עומד ראשון בקרוסלה בזמן הבא שלו, גם אם זה מחר, ו״שלי״ מראה כמה נשאר עד המועדף הבא. לחיצה ארוכה על זמן בקרוסלה מסמנת אותו בכוכב. אותה רשימה מופיעה בהגדרות ← זמני הלכה ובהגדרה הראשונית של האפליקציה.',
         en: "The carousel's times in one place: the + in the carousel opens a sheet where you remove a time, add times the circle does not show (Mincha Ketana, and the latest Shema by the other opinion) and star favourites. A favourite always shows, leads the carousel at its next time, tomorrow's too, and Mine shows how long until the next favourite. A long press on a time in the carousel stars it. The same list is in Settings → Halachic times and in the app's first setup.",

@@ -75,7 +75,13 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#002767"
+          "color": "#002767",
+          "sounds": [
+            "./assets/sounds/jew365_bells.wav",
+            "./assets/sounds/jew365_call.wav",
+            "./assets/sounds/jew365_harp.wav",
+            "./assets/sounds/jew365_drop.wav"
+          ]
         }
       ],
       "./scripts/withMitzvahNotificationAction",

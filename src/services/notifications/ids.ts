@@ -9,8 +9,8 @@ export const MITZVAH_TEXT_CATEGORY = 'mitzvah_reminder_text';
 export const TAHARAH_BEDIKA_CATEGORY = 'taharah_bedika';
 export const MARK_DONE_ACTION = 'MARK_DONE';
 export const OPEN_TEXT_ACTION = 'OPEN_TEXT';
-// The mitzvot channel keeps the id `default` so installs that already hold it keep the sound and
-// importance the user chose for it.
+// The channel ids of a binary without the app's sounds (every build up to 1.0.21 on Android): the
+// mitzvot channel keeps the id `default`, so those installs keep the sound the user chose for it.
 export const ANDROID_CHANNELS = {
   mitzvot: 'default',
   hilulot: 'hilulot',
@@ -18,6 +18,18 @@ export const ANDROID_CHANNELS = {
   taharah: 'taharah',
   system: 'system',
 } as const;
+// A binary that carries the app's sounds names each channel after its sound (`mitzvot-bells`), because
+// Android fixes a channel's sound when the channel is created: a new sound needs a new channel.
+export const ANDROID_SOUND_CHANNEL_BASES = {
+  mitzvot: 'mitzvot',
+  hilulot: 'hilulot',
+  roshChodesh: 'rosh-chodesh',
+  taharah: 'taharah',
+  system: 'system',
+} as const;
+export function androidSoundChannelId(key: keyof typeof ANDROID_SOUND_CHANNEL_BASES, sound: string): string {
+  return `${ANDROID_SOUND_CHANNEL_BASES[key]}-${sound}`;
+}
 export const PENDING_LIMIT = 400;
 export const IOS_MAX = 64;
 export const IOS_HEADROOM = 4;
@@ -34,6 +46,7 @@ export const HILULA_KIND = 'hilula';
 export const ROSH_CHODESH_KIND = 'roshChodesh';
 export const REPORT_KIND = 'report';
 export const HORIZON_END_KIND = 'horizonEnd';
+export const SOUND_PREVIEW_KIND = 'soundPreview';
 
 export function planCap(platform: string): number {
   return platform === 'ios' ? IOS_MAX - IOS_HEADROOM : PENDING_LIMIT;
@@ -51,7 +64,8 @@ export type PendingNotificationMeta = {
     | typeof HILULA_KIND
     | typeof ROSH_CHODESH_KIND
     | typeof REPORT_KIND
-    | typeof HORIZON_END_KIND;
+    | typeof HORIZON_END_KIND
+    | typeof SOUND_PREVIEW_KIND;
   taharah?: { task: TaharahTaskKind | 'tevilaPrep' | 'postBlock' | 'preBlock'; day: number; onah?: OnahKind };
   hilula?: { day: number; when: HilulaWhen; ids?: string[] };
   roshChodesh?: { day: number; when: RoshChodeshWhen };

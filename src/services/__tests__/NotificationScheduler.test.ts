@@ -1189,7 +1189,7 @@ describe('NotificationScheduler', () => {
     expect(channelsOf((p) => p.content.data.kind === 'checkin')).toEqual(['system']);
   });
 
-  it('6.14c on Android all five channels exist, the mitzvot one under its original id', async () => {
+  it('6.14c on Android without the sound files all five channels keep their original ids', async () => {
     const restore = jest.replaceProperty(Platform, 'OS', 'android');
     try {
       setupEnabled(['tefillin']);
@@ -1198,7 +1198,8 @@ describe('NotificationScheduler', () => {
       restore.restore();
     }
 
-    expect(mockSetChannel.mock.calls.map(([id]) => id)).toEqual([
+    // The probe fails here (the mock has no deleteNotificationChannelAsync), as on a binary without the sounds.
+    expect(mockSetChannel.mock.calls.map(([id]) => id).filter((id) => !id.startsWith('sound-probe-'))).toEqual([
       'default',
       'hilulot',
       'rosh-chodesh',
@@ -1206,6 +1207,7 @@ describe('NotificationScheduler', () => {
       'system',
     ]);
     const channels = Object.fromEntries(mockSetChannel.mock.calls) as Record<string, Record<string, unknown>>;
+    expect(channels.default).toMatchObject({ sound: 'default' });
     expect(channels.default).toMatchObject({
       name: 'מצוות',
       importance: 'high',

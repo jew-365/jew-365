@@ -20,9 +20,12 @@ import { appVersionLabel } from '@/services/appUpdates';
 import { LocationService, type LocationStatus } from '@/services/LocationService';
 import {
   NotificationScheduler,
+  notificationSoundsAvailable,
+  previewNotificationSound,
   requestNotificationPermissions,
   syncNotificationPermissionStatus,
 } from '@/services/NotificationScheduler';
+import { NOTIFICATION_SOUNDS, type NotificationSound } from '@/data/notificationSounds';
 import { AppResetService } from '@/services/AppResetService';
 import {
   backupDateLabel,
@@ -160,6 +163,8 @@ export default function SettingsScreen() {
       setBenIshChaiYearSwapped: s.setBenIshChaiYearSwapped,
       taharahEnabled: s.taharahEnabled,
       weeklyReportEnabled: s.weeklyReportEnabled,
+      notificationSound: s.notificationSound,
+      setNotificationSound: s.setNotificationSound,
       quietBefore: s.quietBefore,
       quietAfter: s.quietAfter,
       nagLevel: s.nagLevel,
@@ -682,6 +687,9 @@ export default function SettingsScreen() {
                     value={user.notificationsEnabled}
                     onValueChange={onToggleNotifications}
                   />
+                </Anchor>
+                <Anchor {...anchor('notificationSound')}>
+                  <NotificationSoundBlock selected={user.notificationSound} onSelect={user.setNotificationSound} />
                 </Anchor>
                 <Anchor {...anchor('nagLevel')}>
                   <NagLevelPicker level={user.nagLevel} onChange={user.setNagLevel} style={styles.fieldLabel} />
@@ -1213,6 +1221,52 @@ function QuietHoursBlock({
 }
 
 type DisplaySizeBlockProps = { stored: number; onApply: (scale: number) => void };
+
+type NotificationSoundBlockProps = { selected: NotificationSound; onSelect: (sound: NotificationSound) => void };
+
+// The app's own notification sound (the owner's call, 2026-11-12). A build from before the sounds
+// keeps the phone's sound: the choice is saved and takes effect with the next build from the store.
+function NotificationSoundBlock({ selected, onSelect }: NotificationSoundBlockProps) {
+  const { colors } = useTheme();
+  const { t } = useI18n();
+  const [available, setAvailable] = useState<boolean | null>(null);
+  useEffect(() => {
+    let alive = true;
+    notificationSoundsAvailable().then((value) => alive && setAvailable(value));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  // The store write is synchronous, so the preview already plays the new sound on its new channel.
+  const choose = (sound: NotificationSound) => {
+    onSelect(sound);
+    if (available) previewNotificationSound().catch(() => {});
+  };
+  return (
+    <View>
+      <SectionLabel variant="field" text={t('settings.notificationSound')} style={styles.fieldLabel} />
+      <ChipRow
+        values={NOTIFICATION_SOUNDS}
+        selected={selected}
+        onSelect={choose}
+        renderLabel={(value) => t(`settings.notificationSound.${value}`)}
+      />
+      {available ? (
+        <Button
+          label={t('settings.notificationSound.preview')}
+          icon="bell"
+          variant="secondary"
+          size="compact"
+          onPress={() => previewNotificationSound().catch(() => {})}
+          style={styles.buttonGap}
+        />
+      ) : null}
+      <Text style={[typography.small, styles.hint, { color: colors.textMuted }]}>
+        {t(available === false ? 'settings.notificationSound.needsBuild' : 'settings.notificationSound.hint')}
+      </Text>
+    </View>
+  );
+}
 
 function DisplaySizeBlock({ stored, onApply }: DisplaySizeBlockProps) {
   const { colors } = useTheme();

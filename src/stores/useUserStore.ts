@@ -24,6 +24,7 @@ import {
   type QuietBound,
 } from '@/utils/quietHours';
 import { DEFAULT_NAG_LEVEL, isNagLevel, type NagLevel } from '@/utils/nagging';
+import { DEFAULT_NOTIFICATION_SOUND, isNotificationSound, type NotificationSound } from '@/data/notificationSounds';
 import {
   addedZmanimOf,
   hiddenZmanimOf,
@@ -155,6 +156,7 @@ type UserState = {
   quietBefore: QuietBound;
   quietAfter: QuietBound;
   nagLevel: NagLevel;
+  notificationSound: NotificationSound;
   chokDoubleChoice: ChokDoubleChoice | null;
   chokCommentaryOpen: boolean;
   chokThuNightDay: ChokThuNightDay | null;
@@ -201,6 +203,7 @@ type UserState = {
   setQuietBefore: (bound: QuietBound) => void;
   setQuietAfter: (bound: QuietBound) => void;
   setNagLevel: (level: NagLevel) => void;
+  setNotificationSound: (sound: NotificationSound) => void;
   setChokDoubleChoice: (choice: ChokDoubleChoice) => void;
   setChokCommentaryOpen: (open: boolean) => void;
   setZmanShown: (id: CarouselZmanId, shown: boolean) => void;
@@ -316,6 +319,7 @@ const mergeSavedUserState = (persisted: unknown, current: UserState): UserState 
     merged.quietAfter = { ...merged.quietAfter, enabled: false };
   }
   if (!isNagLevel(merged.nagLevel)) merged.nagLevel = DEFAULT_NAG_LEVEL;
+  if (!isNotificationSound(merged.notificationSound)) merged.notificationSound = DEFAULT_NOTIFICATION_SOUND;
   return merged;
 };
 
@@ -350,6 +354,7 @@ export const useUserStore = create<UserState>()(
       quietBefore: DEFAULT_QUIET_BEFORE,
       quietAfter: DEFAULT_QUIET_AFTER,
       nagLevel: DEFAULT_NAG_LEVEL,
+      notificationSound: DEFAULT_NOTIFICATION_SOUND,
       chokDoubleChoice: null,
       chokCommentaryOpen: false,
       chokThuNightDay: null,
@@ -419,6 +424,7 @@ export const useUserStore = create<UserState>()(
             : s,
         ),
       setNagLevel: (level) => set((s) => (isNagLevel(level) ? { nagLevel: level } : s)),
+      setNotificationSound: (sound) => set((s) => (isNotificationSound(sound) ? { notificationSound: sound } : s)),
       setChokDoubleChoice: (choice) => set({ chokDoubleChoice: choice }),
       setChokCommentaryOpen: (open) => set({ chokCommentaryOpen: open }),
       // The times sheet (the owner's call, 2026-11-10): a zman of the circle is shown or hidden, an added time
@@ -487,6 +493,7 @@ export const useUserStore = create<UserState>()(
           quietBefore: DEFAULT_QUIET_BEFORE,
           quietAfter: DEFAULT_QUIET_AFTER,
           nagLevel: DEFAULT_NAG_LEVEL,
+          notificationSound: DEFAULT_NOTIFICATION_SOUND,
           chokDoubleChoice: null,
           chokCommentaryOpen: false,
           chokThuNightDay: null,

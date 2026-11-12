@@ -434,6 +434,19 @@ export async function notificationPermissionState(): Promise<'granted' | 'missin
   return os.getPermissionState().catch(() => null);
 }
 
+// Whether this binary carries the app's own sounds (false on a build from before them, whose
+// notifications keep the phone's sound); Settings offers the sound choice only then.
+export async function notificationSoundsAvailable(): Promise<boolean> {
+  return os.customSoundsAvailable().catch(() => false);
+}
+
+// Plays the chosen sound once as a notification, never inside a holy block or without permission.
+export async function previewNotificationSound(): Promise<boolean> {
+  if (!hasNotificationPermission() || isQuietAt(new Date(), useUserStore.getState().location)) return false;
+  await os.presentSoundPreview();
+  return true;
+}
+
 export async function requestNotificationPermissions(): Promise<boolean> {
   await os.ensureChannels();
   if (await os.getPermissions()) {
@@ -532,6 +545,7 @@ export function initNotificationHandlers(): () => void {
         state.quietBefore !== prev.quietBefore ||
         state.quietAfter !== prev.quietAfter ||
         state.nagLevel !== prev.nagLevel ||
+        state.notificationSound !== prev.notificationSound ||
         state.weeklyReportEnabled !== prev.weeklyReportEnabled
       ) {
         NotificationScheduler.rebuild().catch(reportScheduleError);
