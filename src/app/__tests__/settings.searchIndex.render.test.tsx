@@ -19,6 +19,8 @@ jest.mock('expo-router', () => {
 jest.mock('@/services/NotificationScheduler', () => ({
   NotificationScheduler: { rebuild: jest.fn(async () => {}), cancelAll: jest.fn(async () => {}) },
   requestNotificationPermissions: jest.fn(async () => true),
+  notificationSoundsAvailable: jest.fn(async () => true),
+  previewNotificationSound: jest.fn(async () => true),
   syncNotificationPermissionStatus: jest.fn(async () => true),
   notificationPermissionState: jest.fn(async () => 'granted'),
 }));
