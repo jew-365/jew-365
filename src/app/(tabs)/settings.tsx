@@ -20,12 +20,19 @@ import { appVersionLabel } from '@/services/appUpdates';
 import { LocationService, type LocationStatus } from '@/services/LocationService';
 import {
   NotificationScheduler,
-  notificationSoundsAvailable,
+  availableNotificationSounds,
   previewNotificationSound,
   requestNotificationPermissions,
   syncNotificationPermissionStatus,
 } from '@/services/NotificationScheduler';
-import { NOTIFICATION_SOUNDS, type NotificationSound } from '@/data/notificationSounds';
+import {
+  SOUND_ROLES,
+  effectiveSound,
+  type NotificationSound,
+  type NotificationSoundChoice,
+  type SoundRole,
+} from '@/data/notificationSounds';
+import { OptionSelect } from '@/components/OptionSelect';
 import { AppResetService } from '@/services/AppResetService';
 import {
   backupDateLabel,
@@ -163,7 +170,7 @@ export default function SettingsScreen() {
       setBenIshChaiYearSwapped: s.setBenIshChaiYearSwapped,
       taharahEnabled: s.taharahEnabled,
       weeklyReportEnabled: s.weeklyReportEnabled,
-      notificationSound: s.notificationSound,
+      notificationSounds: s.notificationSounds,
       setNotificationSound: s.setNotificationSound,
       quietBefore: s.quietBefore,
       quietAfter: s.quietAfter,
@@ -689,7 +696,7 @@ export default function SettingsScreen() {
                   />
                 </Anchor>
                 <Anchor {...anchor('notificationSound')}>
-                  <NotificationSoundBlock selected={user.notificationSound} onSelect={user.setNotificationSound} />
+                  <NotificationSoundBlock choice={user.notificationSounds} onSelect={user.setNotificationSound} />
                 </Anchor>
                 <Anchor {...anchor('nagLevel')}>
                   <NagLevelPicker level={user.nagLevel} onChange={user.setNagLevel} style={styles.fieldLabel} />
@@ -1222,47 +1229,58 @@ function QuietHoursBlock({
 
 type DisplaySizeBlockProps = { stored: number; onApply: (scale: number) => void };
 
-type NotificationSoundBlockProps = { selected: NotificationSound; onSelect: (sound: NotificationSound) => void };
+type NotificationSoundBlockProps = {
+  choice: NotificationSoundChoice;
+  onSelect: (role: SoundRole, sound: NotificationSound) => void;
+};
 
-// The app's own notification sound (the owner's call, 2026-11-12). A build from before the sounds
-// keeps the phone's sound: the choice is saved and takes effect with the next build from the store.
-function NotificationSoundBlock({ selected, onSelect }: NotificationSoundBlockProps) {
+// The app's own notification sounds (the owner's calls of 2026-11-12): one for the plain notifications, one
+// for the orange ⚠️ before the last and one for the red ❗ last. Only the sounds this build carries are
+// offered; a build from before them keeps the phone's sound, and the choice takes effect with the next one.
+function NotificationSoundBlock({ choice, onSelect }: NotificationSoundBlockProps) {
   const { colors } = useTheme();
   const { t } = useI18n();
-  const [available, setAvailable] = useState<boolean | null>(null);
+  const [available, setAvailable] = useState<NotificationSound[] | null>(null);
   useEffect(() => {
     let alive = true;
-    notificationSoundsAvailable().then((value) => alive && setAvailable(value));
+    availableNotificationSounds().then((sounds) => alive && setAvailable(sounds));
     return () => {
       alive = false;
     };
   }, []);
-  // The store write is synchronous, so the preview already plays the new sound on its new channel.
-  const choose = (sound: NotificationSound) => {
-    onSelect(sound);
-    if (available) previewNotificationSound().catch(() => {});
-  };
+  const offered = available ?? [];
+  const has = new Set(offered);
+  const options = offered.map((sound) => ({ value: sound, title: t(`settings.notificationSound.${sound}`) }));
+  const play = (role: SoundRole) => previewNotificationSound(role).catch(() => {});
   return (
     <View>
       <SectionLabel variant="field" text={t('settings.notificationSound')} style={styles.fieldLabel} />
-      <ChipRow
-        values={NOTIFICATION_SOUNDS}
-        selected={selected}
-        onSelect={choose}
-        renderLabel={(value) => t(`settings.notificationSound.${value}`)}
-      />
-      {available ? (
-        <Button
-          label={t('settings.notificationSound.preview')}
-          icon="bell"
-          variant="secondary"
-          size="compact"
-          onPress={() => previewNotificationSound().catch(() => {})}
-          style={styles.buttonGap}
-        />
-      ) : null}
+      {offered.length
+        ? SOUND_ROLES.map((role) => (
+            <View key={role} style={styles.soundRole} testID={`settings-sound-${role}`}>
+              <OptionSelect
+                label={t(`settings.notificationSound.role.${role}`)}
+                options={options}
+                value={effectiveSound(choice, role, has) ?? offered[0]}
+                onChange={(sound) => {
+                  onSelect(role, sound);
+                  play(role);
+                }}
+              />
+              <Button
+                label={t('settings.notificationSound.preview')}
+                accessibilityLabel={`${t('settings.notificationSound.preview')}: ${t(`settings.notificationSound.role.${role}`)}`}
+                icon="bell"
+                variant="secondary"
+                size="compact"
+                onPress={() => play(role)}
+                style={styles.buttonGap}
+              />
+            </View>
+          ))
+        : null}
       <Text style={[typography.small, styles.hint, { color: colors.textMuted }]}>
-        {t(available === false ? 'settings.notificationSound.needsBuild' : 'settings.notificationSound.hint')}
+        {t(available && !offered.length ? 'settings.notificationSound.needsBuild' : 'settings.notificationSound.hint')}
       </Text>
     </View>
   );
@@ -1406,6 +1424,9 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
+  },
+  soundRole: {
+    marginTop: spacing.sm,
   },
   buttonGap: {
     marginTop: spacing.md,

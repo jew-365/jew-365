@@ -80,7 +80,15 @@
             "./assets/sounds/jew365_bells.wav",
             "./assets/sounds/jew365_call.wav",
             "./assets/sounds/jew365_harp.wav",
-            "./assets/sounds/jew365_drop.wav"
+            "./assets/sounds/jew365_drop.wav",
+            "./assets/sounds/jew365_chime.wav",
+            "./assets/sounds/jew365_glass.wav",
+            "./assets/sounds/jew365_kalimba.wav",
+            "./assets/sounds/jew365_dew.wav",
+            "./assets/sounds/jew365_music_box.wav",
+            "./assets/sounds/jew365_flute.wav",
+            "./assets/sounds/jew365_bowl.wav",
+            "./assets/sounds/jew365_piano.wav"
           ]
         }
       ],

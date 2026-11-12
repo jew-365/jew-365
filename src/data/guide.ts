@@ -452,8 +452,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: 'For a halachic question, the halacha hotline in the More tab dials a line by the nusach in Settings: Ashkenazi lines, and for Edot HaMizrach and Teiman a line following Maran, by WhatsApp too.',
       },
       {
-        he: 'להתראות של האפליקציה יש צליל משלה, כדי לזהות מיד שהן מיהודי 365: פעמונים, קריאה, נבל או טיפה, ופעמונים כברירת מחדל. בוחרים בהגדרות ← מכשיר והתראות ← צליל ההתראות, ובחירה משמיעה את הצליל. באנדרואיד אפשר לשנות את הצליל גם בהגדרות ההתראות של הטלפון.',
-        en: 'The app’s notifications have a sound of their own, so you know at once they are from Jew 365: Bells, Call, Harp or Drop, the bells by default. Choose it in Settings → Device and notifications → Notification sound, and a choice plays it. On Android the sound can also be changed in the phone’s notification settings.',
+        he: 'להתראות של האפליקציה יש צלילים משלה, כדי לזהות מיד שהן מיהודי 365: שנים עשר צלילים לבחירה, ביניהם שמונה רכים ועדינים, וצליל נפרד לכל סוג התראה: הרגילה (פעמונים כברירת מחדל), הכתומה שלפני האחרונה (קלימבה) והאחרונה עם סימן הקריאה (תיבת נגינה). בוחרים בהגדרות ← מכשיר והתראות ← צליל ההתראות, ובחירה משמיעה את הצליל. באנדרואיד אפשר לשנות את הצליל גם בהגדרות ההתראות של הטלפון.',
+        en: 'The app’s notifications have sounds of their own, so you know at once they are from Jew 365: twelve to choose from, eight of them soft and gentle, and a separate sound for each kind of notification: the plain one (Bells by default), the orange one before the last (Kalimba) and the last one with the exclamation mark (Music box). Choose them in Settings → Device and notifications → Notification sound, and a choice plays it. On Android the sound can also be changed in the phone’s notification settings.',
       },
       {
         he: 'האפליקציה אינה פוסקת הלכה. הזמנים והכללים שהיא מיישמת נמסרים לעיון רב, וכל תשובה שלו משנה את הכלל שלה. בכל ספק יש לשאול רב.',
@@ -470,8 +470,8 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
     date: '2026-11-09',
     items: [
       {
-        he: 'צליל משלנו להתראות: ארבעה צלילים לבחירה, פעמונים, קריאה, נבל וטיפה, כדי לזהות מיד שההתראה מיהודי 365. בהגדרות ← מכשיר והתראות ← צליל ההתראות. הצליל מגיע עם הגרסה הבאה מהחנות; עד אז ההתראות בצליל של הטלפון.',
-        en: 'A sound of our own for notifications: four to choose from, Bells, Call, Harp and Drop, so you know at once a notification is from Jew 365. In Settings → Device and notifications → Notification sound. The sound comes with the next version from the store; until then notifications use the phone’s sound.',
+        he: 'צלילים משלנו להתראות: שנים עשר צלילים לבחירה, ביניהם שמונה רכים ועדינים (פעמוני רוח, זכוכית, קלימבה, טל, תיבת נגינה, חליל, קערה מזמרת ופסנתר רך), וצליל נפרד להתראה הרגילה, לכתומה שלפני האחרונה ולאחרונה. בהגדרות ← מכשיר והתראות ← צליל ההתראות. הצלילים מגיעים עם הגרסה הבאה מהחנות; עד אז ההתראות בצליל של הטלפון.',
+        en: 'Sounds of our own for notifications: twelve to choose from, eight of them soft and gentle (Wind chime, Glass, Kalimba, Dew, Music box, Flute, Singing bowl and Soft piano), and a separate sound for the plain notification, the orange one before the last and the last one. In Settings → Device and notifications → Notification sound. The sounds come with the next version from the store; until then notifications use the phone’s sound.',
       },
       {
         he: 'זמן הנץ בירושלים, בתל אביב, בחיפה ובבאר שבע הוא עכשיו הזריחה הנראית מעל ההרים, כמו שלוח אור החיים מדפיס אותה, והשקיעה בירושלים נקבעה מחדש לפי הלוח. כל הזמנים של ארבע הערים, שנבדקו מול שלושה דפים מודפסים של הלוח, יוצאים בתוך דקה ממנו.',

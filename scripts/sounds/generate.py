@@ -44,3 +44,50 @@ notes=[62,63,66,67,69]
 save('jew365_harp.wav',place(1.9,[(i*.12,pluck(n2f(n+12),1.9-i*.12)) for i,n in enumerate(notes)]))
 # 4 marimba: two-note minimal
 save('jew365_drop.wav',place(1.1,[(0,marimba(n2f(79),1.1)),(.14,marimba(n2f(86),.95))]))
+
+# The eight gentle sounds of 2026-11-12 (the owner's request: pleasant, soft, never loud or harsh): pure
+# tones, slow attacks, few and quiet overtones, and a lower peak than the first four.
+def soft_save(name, x, peak=0.6):
+    x = x / np.max(np.abs(x)) * peak
+    fade = int(SR * .08); x[-fade:] *= np.linspace(1, 0, fade) ** 2
+    with wave.open(name, 'wb') as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
+        w.writeframes((x * 32767).astype('<i2').tobytes())
+def tone(f, dur, attack=.012, decay=.6, parts=((1, 1),)):
+    t = np.arange(int(SR * dur)) / SR
+    s = sum(a * np.sin(2 * np.pi * f * r * t) * np.exp(-t / (decay / r ** .7)) for r, a in parts)
+    return s * (1 - np.exp(-t / attack))
+# chime: a wind chime, five pentatonic glass bells falling softly into place
+save_chime = place(2.2, [(at, tone(n2f(n), 2.2 - at, .006, .9, ((1, 1), (2.76, .12)))) for at, n in
+                         ((0, 84), (.18, 88), (.31, 81), (.52, 86), (.70, 91))])
+soft_save('jew365_chime.wav', save_chime, .5)
+# glass: two pure glass-harmonica notes that swell in
+soft_save('jew365_glass.wav', place(1.8, [(0, tone(n2f(76), 1.8, .09, .7, ((1, 1), (2, .08)))),
+                                          (.35, tone(n2f(83), 1.45, .09, .7, ((1, 1), (2, .08))))]))
+# kalimba: three soft thumb-piano notes, falling
+soft_save('jew365_kalimba.wav', place(1.3, [(at, tone(n2f(n), 1.3 - at, .004, .28, ((1, 1), (5.4, .05)))) for at, n in
+                                            ((0, 79), (.16, 76), (.32, 72))]))
+# dew: a single drop of water, a soft sine that slides down
+t = np.arange(int(SR * .9)) / SR
+f = n2f(86) * np.exp(-t * 2.2)
+soft_save('jew365_dew.wav', np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / .22) * (1 - np.exp(-t / .006)), .55)
+# music_box: a short four-note melody on a music box
+soft_save('jew365_music_box.wav', place(1.9, [(at, tone(n2f(n), 1.9 - at, .003, .45, ((1, 1), (3, .1), (4.2, .04)))) for at, n in
+                                              ((0, 88), (.2, 91), (.4, 95), (.6, 93))]))
+# flute: two breathy flute notes with a light vibrato
+def flute(f, dur):
+    t = np.arange(int(SR * dur)) / SR
+    vib = 1 + .006 * np.sin(2 * np.pi * 5 * t)
+    ph = 2 * np.pi * np.cumsum(f * vib) / SR
+    breath = np.random.RandomState(7).normal(0, .03, len(t))
+    env = np.minimum(t / .12, 1) * np.clip((dur - t) / .3, 0, 1)
+    return (np.sin(ph) + .15 * np.sin(2 * ph) + breath) * env
+soft_save('jew365_flute.wav', place(1.6, [(0, flute(n2f(74), .7)), (.65, flute(n2f(79), .95))]), .3)
+# bowl: a singing bowl, warm low partials that beat slowly
+t = np.arange(int(SR * 2.6)) / SR
+bowl = sum(a * np.sin(2 * np.pi * f0 * t) * np.exp(-t / d) for f0, a, d in
+           ((n2f(64), 1, 1.6), (n2f(64) * 1.004, .7, 1.6), (n2f(64) * 2.71, .25, .9), (n2f(64) * 5.1, .06, .5)))
+soft_save('jew365_bowl.wav', bowl * (1 - np.exp(-t / .02)), .55)
+# piano: a soft felt piano, a gentle rising fifth
+soft_save('jew365_piano.wav', place(1.6, [(at, tone(n2f(n), 1.6 - at, .005, .55, ((1, 1), (2, .3), (3, .1)))) for at, n in
+                                          ((0, 72), (.22, 79))]))

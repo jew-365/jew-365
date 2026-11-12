@@ -9,7 +9,20 @@ jest.mock('expo-router', () => {
 jest.mock('@/services/NotificationScheduler', () => ({
   NotificationScheduler: { rebuild: jest.fn(async () => {}), cancelAll: jest.fn(async () => {}) },
   requestNotificationPermissions: jest.fn(async () => true),
-  notificationSoundsAvailable: jest.fn(async () => true),
+  availableNotificationSounds: jest.fn(async () => [
+    'bells',
+    'call',
+    'harp',
+    'drop',
+    'chime',
+    'glass',
+    'kalimba',
+    'dew',
+    'music_box',
+    'flute',
+    'bowl',
+    'piano',
+  ]),
   previewNotificationSound: jest.fn(async () => true),
   syncNotificationPermissionStatus: jest.fn(async () => true),
   notificationPermissionState: jest.fn(async () => 'granted'),
@@ -34,6 +47,12 @@ async function renderDevice() {
   await act(async () => {});
 }
 
+const ROLES = ['regular', 'soon', 'last'] as const;
+const field = (role: (typeof ROLES)[number], sound: string) =>
+  screen.getByRole('button', {
+    name: `${he(`settings.notificationSound.role.${role}`)}: ${he(`settings.notificationSound.${sound}`)}`,
+  });
+
 describe('Settings › the notification sound', () => {
   beforeEach(() => {
     useUserStore.getState().reset();
@@ -48,34 +67,42 @@ describe('Settings › the notification sound', () => {
     jest.clearAllMocks();
   });
 
-  it('offers the four sounds with the bells chosen, and a choice saves and plays it', async () => {
+  it('offers a sound for the plain, the orange and the last notification, each on its default', async () => {
     await renderDevice();
     expect(screen.getByText(he('settings.notificationSound'))).toBeTruthy();
-    for (const sound of ['bells', 'call', 'harp', 'drop']) {
-      expect(screen.getByText(he(`settings.notificationSound.${sound}`))).toBeTruthy();
-    }
-    expect(
-      screen.getByRole('button', { name: he('settings.notificationSound.bells') }).props.accessibilityState,
-    ).toMatchObject({ selected: true });
-
-    fireEvent.press(screen.getByText(he('settings.notificationSound.harp')));
-    await act(async () => {});
-    expect(useUserStore.getState().notificationSound).toBe('harp');
-    expect(Scheduler.previewNotificationSound).toHaveBeenCalledTimes(1);
-
-    fireEvent.press(screen.getByText(he('settings.notificationSound.preview')));
-    expect(Scheduler.previewNotificationSound).toHaveBeenCalledTimes(2);
+    expect(field('regular', 'bells')).toBeTruthy();
+    expect(field('soon', 'kalimba')).toBeTruthy();
+    expect(field('last', 'music_box')).toBeTruthy();
     expect(screen.getByText(he('settings.notificationSound.hint'))).toBeTruthy();
   });
 
-  it('keeps the choice but plays nothing on a build without the sound files, and says so', async () => {
-    (Scheduler.notificationSoundsAvailable as jest.Mock).mockResolvedValue(false);
+  it('saves the sound chosen for one role, plays it, and plays a role again from its own button', async () => {
     await renderDevice();
-    expect(screen.queryByText(he('settings.notificationSound.preview'))).toBeNull();
-    expect(screen.getByText(he('settings.notificationSound.needsBuild'))).toBeTruthy();
-    fireEvent.press(screen.getByText(he('settings.notificationSound.drop')));
+    fireEvent.press(field('last', 'music_box'));
+    fireEvent.press(screen.getByText(he('settings.notificationSound.bowl')));
     await act(async () => {});
-    expect(useUserStore.getState().notificationSound).toBe('drop');
+    expect(useUserStore.getState().notificationSounds).toEqual({ regular: 'bells', soon: 'kalimba', last: 'bowl' });
+    expect(Scheduler.previewNotificationSound).toHaveBeenCalledWith('last');
+
+    const playSoon = `${he('settings.notificationSound.preview')}: ${he('settings.notificationSound.role.soon')}`;
+    fireEvent.press(screen.getByRole('button', { name: playSoon }));
+    expect(Scheduler.previewNotificationSound).toHaveBeenLastCalledWith('soon');
+  });
+
+  it('offers only the sounds the build carries, showing a role whose choice it lacks on what it plays', async () => {
+    (Scheduler.availableNotificationSounds as jest.Mock).mockResolvedValue(['bells', 'call', 'harp', 'drop']);
+    await renderDevice();
+    expect(field('soon', 'bells')).toBeTruthy();
+    fireEvent.press(field('regular', 'bells'));
+    expect(screen.queryByText(he('settings.notificationSound.piano'))).toBeNull();
+    expect(screen.getAllByText(he('settings.notificationSound.harp')).length).toBeGreaterThan(0);
+  });
+
+  it('keeps the choice and plays nothing on a build without the sound files, and says so', async () => {
+    (Scheduler.availableNotificationSounds as jest.Mock).mockResolvedValue([]);
+    await renderDevice();
+    for (const role of ROLES) expect(screen.queryByTestId(`settings-sound-${role}`)).toBeNull();
+    expect(screen.getByText(he('settings.notificationSound.needsBuild'))).toBeTruthy();
     expect(Scheduler.previewNotificationSound).not.toHaveBeenCalled();
   });
 });

@@ -24,7 +24,14 @@ import {
   type QuietBound,
 } from '@/utils/quietHours';
 import { DEFAULT_NAG_LEVEL, isNagLevel, type NagLevel } from '@/utils/nagging';
-import { DEFAULT_NOTIFICATION_SOUND, isNotificationSound, type NotificationSound } from '@/data/notificationSounds';
+import {
+  DEFAULT_NOTIFICATION_SOUNDS,
+  isNotificationSound,
+  notificationSoundsOf,
+  type NotificationSound,
+  type NotificationSoundChoice,
+  type SoundRole,
+} from '@/data/notificationSounds';
 import {
   addedZmanimOf,
   hiddenZmanimOf,
@@ -156,7 +163,7 @@ type UserState = {
   quietBefore: QuietBound;
   quietAfter: QuietBound;
   nagLevel: NagLevel;
-  notificationSound: NotificationSound;
+  notificationSounds: NotificationSoundChoice;
   chokDoubleChoice: ChokDoubleChoice | null;
   chokCommentaryOpen: boolean;
   chokThuNightDay: ChokThuNightDay | null;
@@ -203,7 +210,7 @@ type UserState = {
   setQuietBefore: (bound: QuietBound) => void;
   setQuietAfter: (bound: QuietBound) => void;
   setNagLevel: (level: NagLevel) => void;
-  setNotificationSound: (sound: NotificationSound) => void;
+  setNotificationSound: (role: SoundRole, sound: NotificationSound) => void;
   setChokDoubleChoice: (choice: ChokDoubleChoice) => void;
   setChokCommentaryOpen: (open: boolean) => void;
   setZmanShown: (id: CarouselZmanId, shown: boolean) => void;
@@ -319,7 +326,10 @@ const mergeSavedUserState = (persisted: unknown, current: UserState): UserState 
     merged.quietAfter = { ...merged.quietAfter, enabled: false };
   }
   if (!isNagLevel(merged.nagLevel)) merged.nagLevel = DEFAULT_NAG_LEVEL;
-  if (!isNotificationSound(merged.notificationSound)) merged.notificationSound = DEFAULT_NOTIFICATION_SOUND;
+  // The first preview build saved one sound for every notification, `notificationSound`: it becomes the plain one.
+  const sounds = saved as { notificationSounds?: unknown; notificationSound?: unknown };
+  merged.notificationSounds = notificationSoundsOf(sounds.notificationSounds ?? { regular: sounds.notificationSound });
+  delete (merged as { notificationSound?: unknown }).notificationSound;
   return merged;
 };
 
@@ -354,7 +364,7 @@ export const useUserStore = create<UserState>()(
       quietBefore: DEFAULT_QUIET_BEFORE,
       quietAfter: DEFAULT_QUIET_AFTER,
       nagLevel: DEFAULT_NAG_LEVEL,
-      notificationSound: DEFAULT_NOTIFICATION_SOUND,
+      notificationSounds: DEFAULT_NOTIFICATION_SOUNDS,
       chokDoubleChoice: null,
       chokCommentaryOpen: false,
       chokThuNightDay: null,
@@ -424,7 +434,12 @@ export const useUserStore = create<UserState>()(
             : s,
         ),
       setNagLevel: (level) => set((s) => (isNagLevel(level) ? { nagLevel: level } : s)),
-      setNotificationSound: (sound) => set((s) => (isNotificationSound(sound) ? { notificationSound: sound } : s)),
+      setNotificationSound: (role, sound) =>
+        set((s) =>
+          isNotificationSound(sound) && role in s.notificationSounds && s.notificationSounds[role] !== sound
+            ? { notificationSounds: { ...s.notificationSounds, [role]: sound } }
+            : s,
+        ),
       setChokDoubleChoice: (choice) => set({ chokDoubleChoice: choice }),
       setChokCommentaryOpen: (open) => set({ chokCommentaryOpen: open }),
       // The times sheet (the owner's call, 2026-11-10): a zman of the circle is shown or hidden, an added time
@@ -493,7 +508,7 @@ export const useUserStore = create<UserState>()(
           quietBefore: DEFAULT_QUIET_BEFORE,
           quietAfter: DEFAULT_QUIET_AFTER,
           nagLevel: DEFAULT_NAG_LEVEL,
-          notificationSound: DEFAULT_NOTIFICATION_SOUND,
+          notificationSounds: DEFAULT_NOTIFICATION_SOUNDS,
           chokDoubleChoice: null,
           chokCommentaryOpen: false,
           chokThuNightDay: null,

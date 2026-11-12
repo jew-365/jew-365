@@ -495,6 +495,7 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thi
         // line opens the body instead (the owner's pick, round 4 א+ב, 2026-11-05).
         ...(ios ? { subtitle: line, body: message } : { body: `${line}\n${message}` }),
         color: TIME_STAGE_COLOR[stage],
+        stage,
         data: {
           mitzvahId: mitzvah.id,
           windowEnd: planned.window.end.toISOString(),

@@ -4,7 +4,16 @@ import * as Notifications from 'expo-notifications';
 import { File, Paths } from 'expo-file-system';
 import { t } from '@/i18n';
 import { useUserStore } from '@/stores/useUserStore';
-import { NOTIFICATION_SOUNDS, notificationSoundFile, type NotificationSound } from '@/data/notificationSounds';
+import {
+  NOTIFICATION_SOUNDS,
+  SOUND_GROUPS,
+  SOUND_ROLES,
+  effectiveSound,
+  notificationSoundFile,
+  type NotificationSound,
+  type SoundRole,
+} from '@/data/notificationSounds';
+import type { TimeStage } from '@/utils/timeLeft';
 import {
   ANDROID_CHANNELS,
   androidSoundChannelId,
@@ -62,74 +71,125 @@ function channelSettings(): Record<ChannelKey, ChannelSettings> {
 }
 
 const CHANNEL_KEYS = Object.keys(ANDROID_CHANNELS) as ChannelKey[];
-let soundsInBinary: boolean | null = null;
+// The sounds this binary is known to hold, filled by availableSounds(); null until it has asked.
+let soundsInBinary: Set<NotificationSound> | null = null;
 
-// Whether this binary carries the app's sound files. They are native resources, so a bundle that
-// reached an older build over the air must not use them: an Android channel created with a missing
-// sound plays the phone's default forever, since its sound never changes. Android answers through a
-// probe channel created with the bells and read back (`custom` only when the resource resolved), its id
-// new each time because a re-created channel id comes back with its old sound; iOS looks for the file
-// in the app bundle. A yes is kept for the process, a no is asked again next process.
-export async function customSoundsAvailable(): Promise<boolean> {
-  if (soundsInBinary !== null) return soundsInBinary;
-  try {
-    if (Platform.OS === 'android') {
-      const probeId = `sound-probe-${Date.now()}`;
-      const probe = await Notifications.setNotificationChannelAsync(probeId, {
-        name: 'sound probe',
-        importance: Notifications.AndroidImportance.MIN,
-        sound: notificationSoundFile('bells'),
-      });
-      await Notifications.deleteNotificationChannelAsync(probeId);
-      // Before Android 8 there are no channels and a missing sound falls back to the default per notification.
-      soundsInBinary = probe == null || probe.sound === 'custom';
-    } else if (Platform.OS === 'ios') {
-      soundsInBinary = new File(Paths.bundle, notificationSoundFile('bells')).exists;
-    } else {
-      return false;
-    }
-  } catch {
-    return false;
+async function groupInBinary(marker: NotificationSound): Promise<boolean> {
+  if (Platform.OS === 'android') {
+    const probeId = `sound-probe-${marker}-${Date.now()}`;
+    const probe = await Notifications.setNotificationChannelAsync(probeId, {
+      name: 'sound probe',
+      importance: Notifications.AndroidImportance.MIN,
+      sound: notificationSoundFile(marker),
+    });
+    await Notifications.deleteNotificationChannelAsync(probeId);
+    // Before Android 8 there are no channels and a missing sound falls back to the default per notification.
+    return probe == null || probe.sound === 'custom';
   }
-  return soundsInBinary;
+  return new File(Paths.bundle, notificationSoundFile(marker)).exists;
 }
 
-function currentSound(): NotificationSound {
-  return useUserStore.getState().notificationSound;
+// The app's sounds this binary carries. They are native resources, so a bundle that reached an older
+// build over the air must not use one it lacks: an Android channel created with a missing sound plays
+// the phone's default forever, since its sound never changes. Each group of SOUND_GROUPS is asked by its
+// marker: Android through a probe channel created with it and read back (`custom` only when the resource
+// resolved), its id new each time because a re-created channel id comes back with its old sound; iOS
+// looks for the file in the app bundle. A complete answer is kept for the process; a group missing or a
+// failed probe is asked again next process.
+export async function availableSounds(): Promise<ReadonlySet<NotificationSound>> {
+  if (soundsInBinary) return soundsInBinary;
+  const found = new Set<NotificationSound>();
+  if (Platform.OS !== 'android' && Platform.OS !== 'ios') return found;
+  let complete = true;
+  for (const group of SOUND_GROUPS) {
+    try {
+      if (await groupInBinary(group.marker)) group.sounds.forEach((sound) => found.add(sound));
+      else complete = false;
+    } catch {
+      complete = false;
+    }
+  }
+  if (complete) soundsInBinary = found;
+  return found;
 }
 
-// What a request names, read after ensureChannels() settled whether the binary has the sounds.
-function channelIdOf(key: ChannelKey): string {
-  return soundsInBinary ? androidSoundChannelId(key, currentSound()) : ANDROID_CHANNELS[key];
+export async function customSoundsAvailable(): Promise<boolean> {
+  return (await availableSounds()).size > 0;
 }
 
-function soundOfContent(): string {
-  return soundsInBinary ? notificationSoundFile(currentSound()) : 'default';
+// The sound of each role on this binary, read after ensureChannels() settled what it holds; null roles
+// play the phone's sound on the original channels.
+let resolved: Record<SoundRole, NotificationSound | null> = { regular: null, soon: null, last: null };
+
+function resolveSounds(available: ReadonlySet<NotificationSound>): void {
+  const choice = useUserStore.getState().notificationSounds;
+  resolved = {
+    regular: effectiveSound(choice, 'regular', available),
+    soon: effectiveSound(choice, 'soon', available),
+    last: effectiveSound(choice, 'last', available),
+  };
+}
+
+function roleOf(stage: TimeStage | undefined): SoundRole {
+  return stage === 'orange' ? 'soon' : stage === 'red' ? 'last' : 'regular';
+}
+
+// A notice and a plain reminder take the regular sound; only a mitzvah reminder's stage picks another.
+function soundOf(key: ChannelKey, stage?: TimeStage): NotificationSound | null {
+  return resolved[key === 'mitzvot' ? roleOf(stage) : 'regular'];
+}
+
+function channelIdOf(key: ChannelKey, stage?: TimeStage): string {
+  const sound = soundOf(key, stage);
+  return sound ? androidSoundChannelId(key, sound) : ANDROID_CHANNELS[key];
+}
+
+function soundOfContent(key: ChannelKey, stage?: TimeStage): string {
+  const sound = soundOf(key, stage);
+  return sound ? notificationSoundFile(sound) : 'default';
+}
+
+// Every channel the current choice needs: each kind on the regular sound, and the mitzvot also on the soon
+// and last sounds, named by its sound so the phone's settings tell them apart.
+function wantedChannels(): Map<string, { key: ChannelKey; sound: NotificationSound }> {
+  const wanted = new Map<string, { key: ChannelKey; sound: NotificationSound }>();
+  for (const key of CHANNEL_KEYS) {
+    const roles: SoundRole[] = key === 'mitzvot' ? [...SOUND_ROLES] : ['regular'];
+    for (const role of roles) {
+      const sound = resolved[role];
+      if (sound) wanted.set(androidSoundChannelId(key, sound), { key, sound });
+    }
+  }
+  return wanted;
 }
 
 export async function ensureChannels(): Promise<void> {
-  if (Platform.OS !== 'android') {
-    await customSoundsAvailable();
-    return;
-  }
+  const available = await availableSounds();
+  resolveSounds(available);
+  if (Platform.OS !== 'android') return;
   const settings = channelSettings();
-  if (!(await customSoundsAvailable())) {
+  if (!resolved.regular) {
     for (const key of CHANNEL_KEYS) {
       await Notifications.setNotificationChannelAsync(ANDROID_CHANNELS[key], { ...settings[key], sound: 'default' });
     }
     return;
   }
-  const sound = currentSound();
-  for (const key of CHANNEL_KEYS) {
-    await Notifications.setNotificationChannelAsync(androidSoundChannelId(key, sound), {
+  const wanted = wantedChannels();
+  for (const [id, { key, sound }] of wanted) {
+    const name = `${settings[key].name} · ${t(`settings.notificationSound.${sound}`)}`;
+    await Notifications.setNotificationChannelAsync(id, {
       ...settings[key],
+      name,
       sound: notificationSoundFile(sound),
     });
   }
   // The channels of the other sounds and of the binaries before them leave the phone's settings.
   const stale = new Set<string>(Object.values(ANDROID_CHANNELS));
-  for (const other of NOTIFICATION_SOUNDS) {
-    if (other !== sound) for (const key of CHANNEL_KEYS) stale.add(androidSoundChannelId(key, other));
+  for (const sound of NOTIFICATION_SOUNDS) {
+    for (const key of CHANNEL_KEYS) {
+      const id = androidSoundChannelId(key, sound);
+      if (!wanted.has(id)) stale.add(id);
+    }
   }
   try {
     for (const channel of await Notifications.getNotificationChannelsAsync()) {
@@ -178,8 +238,8 @@ export function contentHash(candidate: ScheduleCandidate): string {
     candidate.body,
     candidate.trigger.getTime(),
     candidate.categoryIdentifier ?? null,
-    channelIdOf(candidate.channel),
-    soundOfContent(),
+    channelIdOf(candidate.channel, candidate.stage),
+    soundOfContent(candidate.channel, candidate.stage),
     candidate.data,
   ]);
   let hash = 0x811c9dc5;
@@ -201,14 +261,14 @@ function requestFor(candidate: ScheduleCandidate): Notifications.NotificationReq
       ...(candidate.categoryIdentifier && { categoryIdentifier: candidate.categoryIdentifier }),
       autoDismiss: true,
       sticky: false,
-      sound: soundOfContent(),
+      sound: soundOfContent(candidate.channel, candidate.stage),
     },
     // Android resolves the channel from the trigger. Without it every notification lands on
     // expo's "Miscellaneous" fallback channel and the configured one is dead.
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DATE,
       date: candidate.trigger,
-      channelId: channelIdOf(candidate.channel),
+      channelId: channelIdOf(candidate.channel, candidate.stage),
     },
   };
 }
@@ -259,26 +319,28 @@ export async function presentNow(notice: {
       data: notice.data,
       autoDismiss: true,
       sticky: false,
-      sound: soundOfContent(),
+      sound: soundOfContent('system'),
     },
     trigger: Platform.OS === 'android' ? { channelId: channelIdOf('system') } : null,
   });
 }
 
-// Plays the chosen sound once, as a notification on the mitzvot channel, the one most notices use.
-export async function presentSoundPreview(): Promise<void> {
+// Plays one role's sound once, as a notification on the mitzvot channel of that sound.
+export async function presentSoundPreview(role: SoundRole): Promise<void> {
   await ensureChannels();
+  const stage: TimeStage | undefined = role === 'soon' ? 'orange' : role === 'last' ? 'red' : undefined;
+  const sound = soundOf('mitzvot', stage);
   await Notifications.scheduleNotificationAsync({
     identifier: SOUND_PREVIEW_KIND,
     content: {
       title: t('settings.notificationSound.previewTitle'),
-      body: t(`settings.notificationSound.${currentSound()}`),
+      body: `${t(`settings.notificationSound.role.${role}`)}: ${sound ? t(`settings.notificationSound.${sound}`) : ''}`,
       data: { kind: SOUND_PREVIEW_KIND },
       autoDismiss: true,
       sticky: false,
-      sound: soundOfContent(),
+      sound: soundOfContent('mitzvot', stage),
     },
-    trigger: Platform.OS === 'android' ? { channelId: channelIdOf('mitzvot') } : null,
+    trigger: Platform.OS === 'android' ? { channelId: channelIdOf('mitzvot', stage) } : null,
   });
 }
 

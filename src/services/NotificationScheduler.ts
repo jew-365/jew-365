@@ -65,6 +65,7 @@ import {
 import { checkInInputOf } from '@/services/notifications/planners/checkIn';
 import { bodyForReminder, buildTriggerTime, nextReminderAt } from '@/services/notifications/planners/mitzvot';
 import { bedikotMissingIn } from '@/services/notifications/planners/taharah';
+import { NOTIFICATION_SOUNDS, type NotificationSound, type SoundRole } from '@/data/notificationSounds';
 
 const REBUILD_HOUR = 0;
 const REBUILD_MINUTE = 15;
@@ -434,16 +435,17 @@ export async function notificationPermissionState(): Promise<'granted' | 'missin
   return os.getPermissionState().catch(() => null);
 }
 
-// Whether this binary carries the app's own sounds (false on a build from before them, whose
-// notifications keep the phone's sound); Settings offers the sound choice only then.
-export async function notificationSoundsAvailable(): Promise<boolean> {
-  return os.customSoundsAvailable().catch(() => false);
+// The app's own sounds this binary carries, in menu order (none on a build from before them, whose
+// notifications keep the phone's sound); Settings offers only these.
+export async function availableNotificationSounds(): Promise<NotificationSound[]> {
+  const available = await os.availableSounds().catch(() => new Set<NotificationSound>());
+  return NOTIFICATION_SOUNDS.filter((sound) => available.has(sound));
 }
 
-// Plays the chosen sound once as a notification, never inside a holy block or without permission.
-export async function previewNotificationSound(): Promise<boolean> {
+// Plays one role's sound once as a notification, never inside a holy block or without permission.
+export async function previewNotificationSound(role: SoundRole): Promise<boolean> {
   if (!hasNotificationPermission() || isQuietAt(new Date(), useUserStore.getState().location)) return false;
-  await os.presentSoundPreview();
+  await os.presentSoundPreview(role);
   return true;
 }
 
@@ -545,7 +547,7 @@ export function initNotificationHandlers(): () => void {
         state.quietBefore !== prev.quietBefore ||
         state.quietAfter !== prev.quietAfter ||
         state.nagLevel !== prev.nagLevel ||
-        state.notificationSound !== prev.notificationSound ||
+        state.notificationSounds !== prev.notificationSounds ||
         state.weeklyReportEnabled !== prev.weeklyReportEnabled
       ) {
         NotificationScheduler.rebuild().catch(reportScheduleError);

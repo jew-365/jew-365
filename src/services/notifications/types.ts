@@ -1,3 +1,4 @@
+import type { TimeStage } from '@/utils/timeLeft';
 import type { PlatformOSType } from 'react-native';
 import type { AppLanguage } from '@/i18n';
 import type { ManualNag, Mitzvah, Reminder, UserSettings } from '@/types/mitzvah';
@@ -24,6 +25,9 @@ export type ScheduleCandidate = {
   subtitle?: string;
   // Android's accent colour (the small icon, and the app name on Android 11 and older); a reminder's time stage.
   color?: string;
+  // A mitzvah reminder's time stage, which picks its sound (orange: the soon sound, red: the last one); a
+  // notice has none and takes the plain sound.
+  stage?: TimeStage;
   body: string;
   data: PendingNotificationMeta;
 };

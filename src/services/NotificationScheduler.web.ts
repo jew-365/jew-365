@@ -1,6 +1,7 @@
 import type { Mitzvah, Reminder } from '@/types/mitzvah';
 import type { OnahKind, TaharahTaskKind } from '@/types/taharah';
 import { useUserStore } from '@/stores/useUserStore';
+import type { NotificationSound, SoundRole } from '@/data/notificationSounds';
 import { mitzvahName, reminderLabel } from '@/utils/mitzvahName';
 
 const DAILY_REBUILD_TASK = 'jew-365-daily-rebuild';
@@ -87,11 +88,11 @@ export async function notificationPermissionState(): Promise<'granted' | 'missin
   return null;
 }
 
-export async function notificationSoundsAvailable(): Promise<boolean> {
-  return false;
+export async function availableNotificationSounds(): Promise<NotificationSound[]> {
+  return [];
 }
 
-export async function previewNotificationSound(): Promise<boolean> {
+export async function previewNotificationSound(_role: SoundRole): Promise<boolean> {
   return false;
 }
 
