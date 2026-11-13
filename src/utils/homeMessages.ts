@@ -90,36 +90,50 @@ function shownFrom(erev: Date, location: Location): Date {
   return z ? HebcalService.nightfall(z, location) : appDayEnd(before, location);
 }
 
-export function holyBlockMessage(now: Date, location: Location, t: Translate): HomeMessage | null {
+// The next Shabbat or Yom Tov while it is "coming": from the nightfall before its erev until candle lighting,
+// with its erev's app day; else null. Home's Messages row and the candle-lighting offer share this window.
+export function upcomingHolyBlock(
+  now: Date,
+  location: Location,
+): { block: NonNullable<ReturnType<typeof HebcalService.holyBlockOn>>; erev: Date } | null {
   const today = appDay(now, location);
   for (let o = 0; o <= HOLY_BLOCK_LOOKAHEAD_DAYS; o++) {
     const block = HebcalService.holyBlockOn(locationNoon(addDays(today, o), location), location);
     if (!block || block.start.getTime() <= now.getTime()) continue;
     const erev = appDay(block.start, location);
-    if (now.getTime() < shownFrom(erev, location).getTime()) return null;
-    const when = dateKey(erev) === dateKey(today) ? t('common.today') : t('common.tomorrow');
-    const labels = holyBlockLabelKeys(block);
-    const times = t('holyBlock.notice.body', {
-      start: clockOf(block.start, location.tz),
-      exit: t(labels.exit),
-      end: clockOf(block.end, location.tz),
-    });
-    return {
-      id: 'holyBlock',
-      icon: 'candles',
-      title: t(`home.msg.block.${block.kind}`),
-      caption: `${when} · ${times}`,
-      href: null,
-    };
+    return now.getTime() < shownFrom(erev, location).getTime() ? null : { block, erev };
   }
   return null;
 }
 
+export function holyBlockMessage(now: Date, location: Location, t: Translate): HomeMessage | null {
+  const coming = upcomingHolyBlock(now, location);
+  if (!coming) return null;
+  const { block, erev } = coming;
+  const when = dateKey(erev) === dateKey(appDay(now, location)) ? t('common.today') : t('common.tomorrow');
+  const labels = holyBlockLabelKeys(block);
+  const times = t('holyBlock.notice.body', {
+    start: clockOf(block.start, location.tz),
+    exit: t(labels.exit),
+    end: clockOf(block.end, location.tz),
+  });
+  return {
+    id: 'holyBlock',
+    icon: 'candles',
+    title: t(`home.msg.block.${block.kind}`),
+    caption: `${when} · ${times}`,
+    href: null,
+  };
+}
+
+// With its notices off, the row also says a reminder is one tap away (spec C3): it opens the Rosh Chodesh screen,
+// whose switch turns them on.
 export function roshChodeshMessage(
   now: Date,
   location: Location,
   language: Language,
   t: Translate,
+  noticesOn = true,
 ): HomeMessage | null {
   const today = appDay(now, location);
   const ref = civilHebrewDayAt(locationNoon(today, location), location);
@@ -133,7 +147,7 @@ export function roshChodeshMessage(
     id: 'roshChodesh',
     icon: 'moon',
     title,
-    caption,
+    caption: noticesOn ? caption : `${caption} · ${t('home.msg.roshChodesh.noticesOff')}`,
     href: '/rosh-chodesh',
   });
   if (n <= 0) {

@@ -76,6 +76,8 @@ import { currentOnah } from '@/utils/taharah/onot';
 import { renderHint, stageHint, visibleStage } from '@/utils/taharah/summary';
 import { taharahTasksFor } from '@/utils/taharah/tasks';
 import { ZmanimService } from '@/services/ZmanimService';
+import { useCapabilityAction, useOffer } from '@/hooks/useOffer';
+import { OfferSheet } from '@/components/OfferSheet';
 import {
   askForNotifications,
   NotificationScheduler,
@@ -206,6 +208,7 @@ export default function HomeScreen() {
   const taharahEnabled = useUserStore((s) => s.taharahEnabled);
   const profileName = useUserStore((s) => s.profileName);
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
+  const roshChodeshEnabled = useUserStore((s) => s.roshChodeshEnabled);
   const whatsNewState = useUserStore((s) => s.discovery.whatsNew);
   const setWhatsNew = useUserStore((s) => s.setWhatsNew);
   const homeLook = useUserStore((s) => s.homeLook);
@@ -444,6 +447,10 @@ export default function HomeScreen() {
     const next = nextWhatsNew(whatsNewState, Date.now());
     if (next !== whatsNewState) setWhatsNew(next ?? { label: '', since: Date.now(), seen: true });
   }, [whatsNewState, setWhatsNew]);
+  // One offer at a time in Messages (spec C2, C3), evaluated after paint and on the app day, never on the tick.
+  const { offer, close: closeOffer } = useOffer(todayKey);
+  const { run: runCapability, dialog: capabilityDialog } = useCapabilityAction();
+  const [offerOpen, setOfferOpen] = useState(false);
   // A user who finished setup without ever being asked about notifications is asked once on home (spec A1):
   // askForNotifications() prompts only when the OS still can, and the hint keeps it to one ask.
   const notifAsked = useUserStore((s) => s.discovery.hints.includes('notifAsked'));
@@ -462,10 +469,10 @@ export default function HomeScreen() {
         whatsNewMessage(whatsNewState, now.getTime(), t),
         streakMessage(streak, t),
         holyBlockMessage(now, location, t),
-        roshChodeshMessage(now, location, language, t),
+        roshChodeshMessage(now, location, language, t, roshChodeshEnabled),
         hilulaMessage(now, location, inIsrael, hilulotEnabled, language, t),
       ].filter(nonNull),
-    [streak, now, language, inIsrael, hilulotEnabled, whatsNewState, location, t],
+    [streak, now, language, inIsrael, hilulotEnabled, roshChodeshEnabled, whatsNewState, location, t],
   );
 
   const stamping = useMemo(() => new Set(stampingIds), [stampingIds]);
@@ -883,7 +890,7 @@ export default function HomeScreen() {
   }, []);
 
   const nextUpcoming = upcoming[0];
-  const messageCount = (errorScope ? 1 : 0) + (banner ? 1 : 0) + messages.length;
+  const messageCount = (errorScope ? 1 : 0) + (banner ? 1 : 0) + (offer ? 1 : 0) + messages.length;
   // Nothing open now: the messages take the open-now slot (the owner's call, 2026-11-09).
   const messagesFirst = current.length === 0 && messageCount > 0;
   const messagesBlock = messageCount ? (
@@ -897,9 +904,20 @@ export default function HomeScreen() {
         />
       ) : null}
       {banner ? <Banner tone={banner.tone} text={banner.text} onPress={banner.onPress} /> : null}
-      {messages.length ? (
+      {messages.length || offer ? (
         <View testID="home-messages">
           <Card divided>
+            {offer ? (
+              <View testID="home-offer">
+                <ListRow
+                  icon={offer.icon}
+                  title={t(`offer.${offer.id}.title`)}
+                  caption={t(`offer.${offer.id}.body`)}
+                  onPress={() => setOfferOpen(true)}
+                  chevron
+                />
+              </View>
+            ) : null}
             {messages.map((message) => (
               <ListRow
                 key={message.id}
@@ -1069,8 +1087,19 @@ export default function HomeScreen() {
           }}
         />
       </BottomSheet>
+      <OfferSheet
+        offer={offer}
+        visible={offerOpen}
+        onClose={() => setOfferOpen(false)}
+        onChoose={(chosen, accepted) => {
+          setOfferOpen(false);
+          closeOffer(chosen.key);
+          if (accepted) runCapability(chosen.action);
+        }}
+      />
       {selichotFlow.dialog}
       {lateMark.dialog}
+      {capabilityDialog}
     </SkyFrame>
   );
 }

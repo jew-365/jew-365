@@ -26,7 +26,9 @@ export function planReport(input: PlanInput, horizon: Horizon): ScheduleCandidat
         trigger,
         channel: 'system',
         title: t('report.notice.title'),
-        body: t('report.notice.body'),
+        body: input.weeklyTip
+          ? `${t('report.notice.body')}\n${t('report.notice.tip', { tip: t(`offer.${input.weeklyTip}.title`) })}`
+          : t('report.notice.body'),
         data: { kind: REPORT_KIND, report: { week } },
       },
     ];

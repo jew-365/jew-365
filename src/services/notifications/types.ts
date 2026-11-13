@@ -1,3 +1,4 @@
+import type { OfferId } from '@/utils/offers';
 import type { TimeStage } from '@/utils/timeLeft';
 import type { PlatformOSType } from 'react-native';
 import type { AppLanguage } from '@/i18n';
@@ -61,6 +62,8 @@ export type PlanInput = {
   hilulaNotices: HilulaNotices;
   roshChodeshNotices: RoshChodeshNotices;
   weeklyReportEnabled: boolean;
+  // The weekly report's tip (spec C6): an offer read once per plan, absent in fixtures that do not need it.
+  weeklyTip?: OfferId | null;
   quietHours?: QuietHours;
   taharahEnabled: boolean;
   taharah: {

@@ -408,6 +408,18 @@ describe('buildPlan', () => {
       expect(report.data).toEqual({ kind: 'report', report: { week: '2026-11-14' } });
     });
 
+    it("adds the week's tip as one line of the report's body, and nothing else (spec C6)", () => {
+      const plan = (weeklyTip: 'candles' | null) =>
+        buildPlan(planInput({ now: FRIDAY, mitzvot: [byId('shacharit')], weeklyReportEnabled: true, weeklyTip }));
+      const report = (weeklyTip: 'candles' | null) => plan(weeklyTip).find((c) => c.id.startsWith('report:'))!;
+      expect(report('candles').body).toBe(
+        `${t('report.notice.body')}\n${t('report.notice.tip', { tip: t('offer.candles.title') })}`,
+      );
+      expect(report(null).body).toBe(t('report.notice.body'));
+      // The same notifications, one body changed: no notification is added.
+      expect(plan('candles').map((c) => c.id)).toEqual(plan(null).map((c) => c.id));
+    });
+
     it('leaves the weekly report out while its setting is off', () => {
       expect(plan().filter((candidate) => candidate.id.startsWith('report:'))).toEqual([]);
     });

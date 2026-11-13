@@ -8,9 +8,13 @@ import { Card } from '@/components/Card';
 import { iconFor } from '@/components/MitzvahIcon';
 import { ListRow } from '@/components/ListRow';
 import { HeaderPill, ScreenHeader } from '@/components/ScreenHeader';
+import { OfferSheet } from '@/components/OfferSheet';
 import { SectionLabel } from '@/components/SectionLabel';
 import { useDayModel } from '@/hooks/useDayModel';
 import { useNow } from '@/hooks/useNow';
+import { useCapabilityAction } from '@/hooks/useOffer';
+import { offerInputAt } from '@/services/offerInput';
+import { weeklyTip } from '@/utils/offers';
 import { HebcalService } from '@/services/HebcalService';
 import { parseDateKey } from '@/services/notifications/ids';
 import { RETENTION_DAYS, dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
@@ -49,6 +53,12 @@ export default function ReportScreen() {
   useEffect(() => setChosen(week), [week]);
   const locale = language === 'en' ? 'en' : 'he';
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
+  // "A tip for next week" (spec C6): the report notice's tip, recomputed as the user acts on it.
+  const offers = useUserStore((s) => s.discovery.offers);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- offers, activeMap and completions re-read the stores
+  const tip = useMemo(() => weeklyTip(offerInputAt(new Date())), [offers, activeMap, hilulotEnabled, completions]);
+  const [tipOpen, setTipOpen] = useState(false);
+  const { run: runCapability, dialog: capabilityDialog } = useCapabilityAction();
 
   const nav = useMemo(() => {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -244,7 +254,37 @@ export default function ReportScreen() {
         ) : (
           <Banner tone="info" text={t('report.nextWeekNone')} />
         )}
+
+        {tip ? (
+          <View testID="report-tip">
+            <SectionLabel text={t('report.tip')} />
+            <Card style={styles.cardGap}>
+              <ListRow
+                icon={tip.icon}
+                title={t(`offer.${tip.id}.title`)}
+                caption={t(`offer.${tip.id}.body`)}
+                onPress={() => setTipOpen(true)}
+                chevron
+              />
+            </Card>
+          </View>
+        ) : null}
       </ScrollView>
+      <OfferSheet
+        offer={tip}
+        visible={tipOpen}
+        onClose={() => setTipOpen(false)}
+        onChoose={(chosen, accepted) => {
+          setTipOpen(false);
+          const store = useUserStore.getState();
+          store.recordOffer(chosen.key, {
+            shownAt: store.discovery.offers[chosen.key]?.shownAt ?? Date.now(),
+            closedAt: Date.now(),
+          });
+          if (accepted) runCapability(chosen.action);
+        }}
+      />
+      {capabilityDialog}
     </SafeAreaView>
   );
 }

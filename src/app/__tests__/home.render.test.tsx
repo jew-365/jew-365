@@ -789,3 +789,69 @@ describe('home asks for notifications after setup', () => {
     expect(mockAsk).toHaveBeenCalled();
   });
 });
+
+describe("home's offer in Messages", () => {
+  const DAY = '2027-06-15T12:00';
+  const TOUR = 'סיור קצר בדף הבית';
+  beforeEach(() => {
+    mockFocused = true;
+    mockTabIndex = 0;
+    mockPush.mockClear();
+    useUserStore.getState().reset();
+    useUserStore.setState({
+      language: 'he',
+      location: JERUSALEM,
+      inIsrael: true,
+      nusach: 'ashkenaz',
+      isOnboarded: true,
+      locationStatus: 'ready',
+      locationSource: 'manual',
+      notificationsEnabled: true,
+      notificationPermission: 'granted',
+      gender: 'male',
+      maritalStatus: 'single',
+      homeLook: 'rings',
+    });
+    useCompletionsStore.getState().reset();
+    useCustomMitzvotStore.getState().reset();
+    useTaharahStore.getState().reset();
+    enableOnly('maariv');
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  async function renderOnInstallDay() {
+    useUserStore.getState().setFirstOpenedAt(at(JERUSALEM, DAY).getTime());
+    renderAt(DAY);
+    await act(async () => {});
+  }
+
+  it('offers nothing before the install is stamped', async () => {
+    renderAt(DAY);
+    await act(async () => {});
+    expect(screen.queryByTestId('home-offer')).toBeNull();
+    expect(useUserStore.getState().discovery.offers).toEqual({});
+  });
+
+  it('shows the tour on the install day, records it, and accepting opens the guide on home', async () => {
+    await renderOnInstallDay();
+    expect(within(screen.getByTestId('home-offer')).getByText(TOUR)).toBeOnTheScreen();
+    expect(useUserStore.getState().discovery.offers.tour.shownAt).toBe(Date.now());
+    fireEvent.press(screen.getByText(TOUR));
+    fireEvent.press(screen.getByText('לסיור'));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/guide', params: { topic: 'home' } });
+    expect(useUserStore.getState().discovery.offers.tour.closedAt).toBe(Date.now());
+    await act(async () => {});
+    expect(screen.queryByTestId('home-offer')).toBeNull();
+  });
+
+  it('closes it for good on "don\'t suggest" without acting', async () => {
+    await renderOnInstallDay();
+    fireEvent.press(screen.getByText(TOUR));
+    fireEvent.press(screen.getByText('לא להציע שוב'));
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(useUserStore.getState().discovery.offers.tour.closedAt).toBe(Date.now());
+    await act(async () => {});
+    expect(screen.queryByTestId('home-offer')).toBeNull();
+  });
+});

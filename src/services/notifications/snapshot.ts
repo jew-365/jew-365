@@ -1,3 +1,5 @@
+import { offerInputAt } from '@/services/offerInput';
+import { weeklyTip } from '@/utils/offers';
 import { Platform } from 'react-native';
 import type { ManualNag, Mitzvah, Reminder, UserSettings } from '@/types/mitzvah';
 import type { Location } from '@/types/zmanim';
@@ -96,6 +98,7 @@ export function readPlanInput(now: Date, scope: PlanScope = currentScope(now)): 
     hilulaNotices: user.hilulaNotices,
     roshChodeshNotices: user.roshChodeshNotices,
     weeklyReportEnabled: user.weeklyReportEnabled,
+    weeklyTip: user.weeklyReportEnabled ? (weeklyTip(offerInputAt(now))?.id ?? null) : null,
     quietHours: quietHoursOf(user.quietBefore, user.quietAfter),
     taharahEnabled: user.taharahEnabled,
     taharah: {

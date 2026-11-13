@@ -142,6 +142,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 - **Change (internal):** one list of about 25 capabilities, each pointing at what already exists (a bundle, a learning program, a notice topic, a tool screen, a setting), with a plain title, a one-line benefit, its state for this user (on, off, not installed, out of season) and its action.
 - **User gain:** the offers, the hub and the capabilities screen use the same words for the same things, and a new feature cannot be forgotten: a coverage suite fails when a mitzvah group, add-on or screen has no entry.
 - **How:** new `src/data/capabilities.ts` over A3's bundles; the suite follows `searchCoverage.test.ts`.
+- **Built (2026-11-13):** 28 capabilities over the registry, the add-ons, the notice topics, the More tab's screens, two settings and the battery exemption (the bundles of A3 come with phase 3, so the list stands on its own until then). The states are on, off, not installed and unavailable; "out of season" is left to the capabilities screen (C4), if its study needs it.
 
 **C2. Offers** · P1 · M
 
@@ -151,6 +152,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 - **Fixes:** F5.
 - **User gain:** the app introduces itself gradually, like a good host: one relevant suggestion with one button, never a wall of switches.
 - **How:** a `discovery` field in `useUserStore` (`hints`, `offers`, `whatsNew`; `wants` joins it with phase 3, the first code that writes it, so phase 1 reads it as empty; it rides the backup and the reset, with no version bump; built 2026-11-13 over the pure `src/utils/discovery.ts`); pure `src/utils/offers.ts` with `pickOffer(input)`; a hook `useOffer()` that evaluates after paint and memoises on the app day, never on the clock tick. Accepting goes through `setMitzvahEnabled()`, `setNoticesEnabled()`, `requestIgnoreBatteryOptimizations()` or a route. It returns nothing while `firstOpenedAt` is unset, which keeps today's home suites untouched. The models are the rating rule (`src/utils/rating.ts`) and the Selichot offer.
+- **Built (2026-11-13), with these readings of the policy:** the battery offer (G1) may come on the install day beside the tour, because a blocked delivery is the first offer; the tour comes only in the install's first two app days, so an existing install never sees it; an offer that stops applying before it is closed (the user turned the mitzvah on elsewhere) counts its two-day gap from its showing. Not in phase 1: the learning programs asked for in setup (with A3's `wants`, phase 3), the catch-up of A6 (phase 2, it opens the capabilities screen) and the profile questions (home's existing profile prompt stays until A2 moves them).
 
 **C3. The offer on home, in Messages** · P1 · S to M
 
@@ -176,6 +178,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 - **Change:** the weekly report notification (motzaei Shabbat, on by default) carries one tip line, and the report screen shows the offer as "a tip for next week" with its action. The weekly-report switch controls it; no notification is added.
 - **User gain:** one gentle weekly reminder of something useful, on a notification the user already receives.
 - **How:** `planReport()` in `src/services/notifications/planners/report.ts`, with the tip read once in `readPlanInput()`; `src/app/report.tsx`.
+- **Built (2026-11-13):** the tip is `weeklyTip()`: candle lighting and havdalah while either is off (the report goes out at motzaei Shabbat, so the coming-Shabbat window does not apply), else the first other offer that applies, never the tour, the battery or the Tracking tab, and never one the user closed; the report screen shows it as a card whose sheet runs its action or closes it.
 
 **C7. "What's new" comes to the user** · P0 · S
 

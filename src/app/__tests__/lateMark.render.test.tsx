@@ -312,3 +312,27 @@ describe("a late entry in home's My day", () => {
     },
   );
 });
+
+describe("the weekly report's tip for next week", () => {
+  it('names candle lighting while it is off, and its action switches both mitzvot on', () => {
+    setUp('2026-10-25T12:00');
+    useUserStore.getState().setFirstOpenedAt(at(JERUSALEM, '2026-10-01T12:00').getTime());
+    renderWithTheme(<ReportScreen />);
+    const tip = within(screen.getByTestId('report-tip'));
+    expect(tip.getByText('טיפ לשבוע הבא')).toBeOnTheScreen();
+    fireEvent.press(tip.getByText('תזכורת לנרות שבת ולהבדלה'));
+    fireEvent.press(screen.getByText('להפעלת התזכורות'));
+    const active = useMitzvotStore.getState().activeMitzvot;
+    expect(active.candle_lighting?.enabled).toBe(true);
+    expect(active.havdalah?.enabled).toBe(true);
+    expect(useUserStore.getState().discovery.offers.candles.closedAt).toBe(Date.now());
+    // The tip moves on: never candle lighting again.
+    expect(screen.queryByText('תזכורת לנרות שבת ולהבדלה')).toBeNull();
+  });
+
+  it('shows no tip before the install is stamped', () => {
+    setUp('2026-10-25T12:00');
+    renderWithTheme(<ReportScreen />);
+    expect(screen.queryByTestId('report-tip')).toBeNull();
+  });
+});
