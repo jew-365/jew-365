@@ -379,7 +379,6 @@ export default function MitzvahDetailScreen() {
                   <View style={styles.flex}>
                     <Button
                       variant="secondary"
-                      icon="close"
                       label={t('home.quick.skipToday')}
                       accessibilityLabel={t('home.quick.skipToday')}
                       onPress={() => markSkipped(mitzvah.id, todayMark.window.date)}
