@@ -286,6 +286,19 @@ describe('BackupService', () => {
       expect(useUserStore.getState().quietAfter).toEqual({ enabled: true, minutes: 1290 });
     });
 
+    it('carries the discovery state', async () => {
+      fillSource();
+      useUserStore.getState().learnHint('dragSun');
+      useUserStore.getState().recordOffer('battery', { shownAt: 10, closedAt: 20 });
+      const backup = createBackup(CREATED);
+      resetAll();
+
+      await restoreBackup(parseBackup(JSON.stringify(backup)));
+
+      expect(useUserStore.getState().discovery.hints).toEqual(['dragSun']);
+      expect(useUserStore.getState().discovery.offers).toEqual({ battery: { shownAt: 10, closedAt: 20 } });
+    });
+
     it('carries the app’s and each mitzvah’s nagging level', async () => {
       fillSource();
       useUserStore.getState().setNagLevel(3);

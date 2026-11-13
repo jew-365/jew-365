@@ -51,6 +51,14 @@ import {
   type MineFactId,
 } from '@/utils/homeTimes';
 import { amidahPrayerOf, amidahVersesOf } from '@/utils/personalPrayer';
+import {
+  discoveryOf,
+  EMPTY_DISCOVERY,
+  withHint,
+  type DiscoveryState,
+  type OfferRecord,
+  type WhatsNewState,
+} from '@/utils/discovery';
 
 export type Language = 'he' | 'en';
 export type NotificationPermissionStatus = 'unknown' | 'granted' | 'denied';
@@ -183,6 +191,7 @@ type UserState = {
   taharahEnabled: boolean;
   ratingAskedAt: number | null;
   firstOpenedAt: number | null;
+  discovery: DiscoveryState;
   setNusach: (n: Nusach) => void;
   setLocation: (l: Location) => void;
   setLocationState: (l: Location, status: LocationStatus, source: LocationSource) => void;
@@ -229,6 +238,9 @@ type UserState = {
   setTaharahEnabled: (v: boolean) => void;
   setRatingAskedAt: (at: number) => void;
   setFirstOpenedAt: (at: number) => void;
+  learnHint: (id: string) => void;
+  recordOffer: (key: string, offer: OfferRecord) => void;
+  setWhatsNew: (whatsNew: WhatsNewState) => void;
   reset: () => void;
 };
 
@@ -247,6 +259,7 @@ type PersistedUserState = Partial<
   homeCardPage?: unknown;
   homeCardMine?: unknown;
   homeLearn?: unknown;
+  discovery?: unknown;
 };
 
 const DEFAULT_LOCATION = CITIES[0];
@@ -290,6 +303,7 @@ const mergeSavedUserState = (persisted: unknown, current: UserState): UserState 
     homeCardPage,
     homeCardMine,
     homeLearn,
+    discovery,
     ...saved
   } = (persisted ?? {}) as PersistedUserState;
   const hidden = hiddenZmanimOf(hiddenZmanim);
@@ -306,6 +320,7 @@ const mergeSavedUserState = (persisted: unknown, current: UserState): UserState 
     homeLearn: homeLearn !== false,
     amidahVerses: amidahVersesOf(amidahVerses),
     amidahPrayer: amidahPrayerOf(amidahPrayer),
+    discovery: discoveryOf(discovery),
   };
   if (merged.taharahEnabled && merged.maritalStatus == null) merged.maritalStatus = 'married';
   if (!isUiScale(merged.uiScale)) merged.uiScale = DEFAULT_UI_SCALE;
@@ -384,6 +399,7 @@ export const useUserStore = create<UserState>()(
       taharahEnabled: false,
       ratingAskedAt: null,
       firstOpenedAt: null,
+      discovery: EMPTY_DISCOVERY,
       setNusach: (n) => set({ nusach: n }),
       setLocation: (l) => set({ location: l, inIsrael: l.inIsrael }),
       setLocationState: (l, status, source) =>
@@ -479,6 +495,14 @@ export const useUserStore = create<UserState>()(
       setTaharahEnabled: (v) => set({ taharahEnabled: v }),
       setRatingAskedAt: (at) => set({ ratingAskedAt: at }),
       setFirstOpenedAt: (at) => set({ firstOpenedAt: at }),
+      learnHint: (id) =>
+        set((s) => {
+          const discovery = withHint(s.discovery, id);
+          return discovery === s.discovery ? s : { discovery };
+        }),
+      recordOffer: (key, offer) =>
+        set((s) => ({ discovery: { ...s.discovery, offers: { ...s.discovery.offers, [key]: offer } } })),
+      setWhatsNew: (whatsNew) => set((s) => ({ discovery: { ...s.discovery, whatsNew } })),
       reset: () =>
         set({
           nusach: 'ashkenaz',
@@ -528,6 +552,7 @@ export const useUserStore = create<UserState>()(
           taharahEnabled: false,
           ratingAskedAt: null,
           firstOpenedAt: null,
+          discovery: EMPTY_DISCOVERY,
         }),
     }),
     {

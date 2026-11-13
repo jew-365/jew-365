@@ -588,6 +588,24 @@ describe('DayArcHero', () => {
     expect(screen.getByText('גררו את השמש')).toBeOnTheScreen();
     fireEvent.press(screen.getByTestId('home-zman-shkia'));
     expect(screen.queryByText('גררו את השמש')).toBeNull();
+    // A chip press hides the hint for this visit only.
+    expect(useUserStore.getState().discovery.hints).toEqual([]);
+  });
+
+  it('hides the drag hint for good once the sun is grabbed, across a remount', () => {
+    const { view } = setup();
+    const o = arcPoint(NOON, F, true);
+    const grab = screen.getByTestId('home-arc-grab');
+    act(() => {
+      fireEvent(grab, 'responderGrant', {
+        nativeEvent: { locationX: o.x, locationY: o.y, pageX: 500, pageY: 500 },
+      });
+      fireEvent(grab, 'responderRelease', { nativeEvent: {} });
+    });
+    expect(useUserStore.getState().discovery.hints).toEqual(['dragSun']);
+    view.unmount();
+    setup();
+    expect(screen.queryByText('גררו את השמש')).toBeNull();
   });
 
   it('names the moon at night', () => {
