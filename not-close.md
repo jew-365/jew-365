@@ -882,7 +882,8 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done so far:** 2026-11-13: the video is rendered with music and captions; the narration script is [vo.md](design/lab/studies/2026-11-13-promo-video/vo.md).
   - **Status:** — · Committed: `01c982e` feat(design): the promo video study · Pushed: yes · Live: — · Channel: —
   - **Round 2 (2026-11-13):** the owner asked for Phonikud's narration and for more traditional characters. Two voices recorded and checked by transcription; five figures (avrech, chassid, Sephardi, yeshiva bachur, dati-leumi) on the page https://claude.ai/artifact/2WddyBo6En5LwiLR5iDh9C, with draft 2 (Shaul's voice, draft 1's figure).
-  - **Open:** the owner picks a figure and a voice; then the video is rendered with that figure in every scene.
+  - **Round 3 (2026-11-13):** the owner picked figure ה and voice א, then asked for less mechanical voices, more of the app in less time and the figure in motion. Voice א turned out non-commercial (the Phonikud checkpoints' licence), so the narration moved to VoxCPM2 (Apache 2.0) with four voices designed from a description; three cuts with the figure in full body ("יום אחד" 59 s, "כל האפליקציה בדקה" 64 s, "לפני ואחרי" 31 s) on the same page.
+  - **Open:** the owner picks a cut and a voice; "שניים מקרא" should be checked by ear (the transcription heard "נקרא" in every take).
   - **Open:** the end card says "זמין ב־Google Play" while the Play production release is still in review (state.md, 2026-11-10); confirm before the video is published.
 
 ### Discoverability and ease of use, 2026-11-13 — batch rules

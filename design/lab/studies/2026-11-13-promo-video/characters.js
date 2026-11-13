@@ -212,6 +212,7 @@
       </g>`;
     return `
     <g id="${prefix}" data-character="${key}">
+      <g id="${prefix}Legs"></g>
       ${body(c, prefix)}
       <g id="${prefix}Head">
         ${both(`<ellipse cx="-122" cy="798" rx="23" ry="35" fill="${c.skin}"/><ellipse cx="-124" cy="800" rx="10" ry="19" fill="${c.shade}" opacity=".7"/>`)}
@@ -235,7 +236,7 @@
   }
 
   // Face state: blink 0-1, closed 0-1, gaze [dx, dy] (iris shift), smile 0-1, brow 0-1, glow 0-1.
-  function characterFace(prefix, { blink = 0, closed = 0, gaze = [0, 0], smile = 0.4, brow = 0, glow = 0 }) {
+  function characterFace(prefix, { blink = 0, closed = 0, gaze = [0, 0], smile = 0.4, brow = 0, glow = 0, open = 0 }) {
     const shut = Math.max(blink, closed);
     for (const [s, x] of [['L', -44], ['R', 44]]) {
       document.getElementById(prefix + 'Eye' + s).setAttribute('transform', `translate(0 778) scale(1 ${Math.max(0.08, 1 - shut)}) translate(0 -778)`);
@@ -244,7 +245,11 @@
     document.getElementById(prefix + 'Brows').setAttribute('transform', `translate(0 ${-brow * 12})`);
     const w = 28 + smile * 8, d = smile * 32;
     const mouth = document.getElementById(prefix + 'Mouth');
-    if (smile > 0.7) {
+    if (open > 0.05) {
+      const h = 6 + open * 26;
+      mouth.setAttribute('d', `M-20,868 C-20,${868 + h} 20,${868 + h} 20,868 C14,862 -14,862 -20,868 Z`);
+      mouth.setAttribute('fill', '#5A1E16');
+    } else if (smile > 0.7) {
       mouth.setAttribute('d', `M${-w},872 Q0,${872 + d * 1.25} ${w},872 Q0,${876 + d * 0.3} ${-w},872 Z`);
       mouth.setAttribute('fill', '#FFFFFF');
     } else {
@@ -271,5 +276,39 @@
       <ellipse cx="${H[0] + (S[0] < 0 ? 26 : -26)}" cy="${H[1] - 18}" rx="14" ry="22" fill="${c.skin}" stroke="${c.shade}" stroke-width="3" transform="rotate(${S[0] < 0 ? 30 : -30} ${H[0]} ${H[1]})"/>`;
   }
 
-  Object.assign(window, { CHARACTERS, characterSVG, characterFace, characterArm });
+
+  // Legs for a full figure, drawn into the figure's Legs group (behind the shirt). Front view: the hips sit at
+  // y 1480, the soles at 2290. lift = [left, right], each 0-1, raises that foot for a step toward the viewer.
+  function characterLegs(el, key, { lift = [0, 0], spread = 0, shabbat = false } = {}) {
+    const c = outfit(CHARACTERS[key], shabbat);
+    const pants = c.pants || (c.coat ? c.jacket : '#2E3550');
+    const edge = darken(pants, 0.35);
+    const shoe = c.shoes || '#2B211B';
+    const leg = (side, l) => {
+      const sx = side * 64, hip = [sx, 1470];
+      const foot = [sx + side * (18 + spread), 2250 - l * 70];
+      const knee = [sx + side * (8 + l * 26), 1880 - l * 55];
+      const path = `M${hip[0]},${hip[1]} L${knee[0]},${knee[1]} L${foot[0]},${foot[1]}`;
+      return `
+        <path d="${path}" fill="none" stroke="${edge}" stroke-width="112" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="${path}" fill="none" stroke="${pants}" stroke-width="98" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M${hip[0] - side * 22},${hip[1] + 40} L${knee[0] - side * 22},${knee[1]}" stroke="#FFFFFF" stroke-width="10" opacity=".08" stroke-linecap="round"/>
+        <ellipse cx="${foot[0] + side * 6}" cy="${foot[1] + 42 - l * 4}" rx="${62 - l * 8}" ry="${30 - l * 6}" fill="${shoe}"/>
+        <ellipse cx="${foot[0] + side * 2}" cy="${foot[1] + 30 - l * 4}" rx="${40 - l * 6}" ry="${10}" fill="#FFFFFF" opacity=".12"/>`;
+    };
+    el.innerHTML = `<ellipse cx="0" cy="2300" rx="210" ry="34" fill="#000" opacity=".14"/>${leg(-1, lift[0])}${leg(1, lift[1])}`;
+  }
+
+  // A front-view walk cycle at phase p (radians): feet, arm swing and body bob.
+  function walkPose(p) {
+    const s = Math.sin(p);
+    const lift = [Math.max(0, s), Math.max(0, -s)];
+    const bob = -Math.abs(s) * 14;
+    const swing = s * 34;
+    const R = [[-212, 1060], [-252 - swing * 0.2, 1290], [-238 - swing * 0.3, 1500 - swing]];
+    const L = [[212, 1060], [252 - swing * 0.2, 1290], [238 - swing * 0.3, 1500 + swing]];
+    return { lift, bob, R, L };
+  }
+
+  Object.assign(window, { CHARACTERS, characterSVG, characterFace, characterArm, characterLegs, walkPose });
 })();

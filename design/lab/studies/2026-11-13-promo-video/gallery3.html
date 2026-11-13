@@ -1,0 +1,123 @@
+<title>דמויות לסרטון יהודי 365</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+<style>
+  /* Layout: a screening room. Three vertical cuts side by side, then the voices to compare, then the research notes and the earlier round. */
+  :root {
+    --page: #F6F1E8; --card: #FFFDF9; --ink: #1D2240; --sub: #69645D; --accent: #F08A3C; --accentText: #A04A0C;
+    --line: #E6DCCB; --good: #2C7A55; --bad: #B03A2E;
+    --ui: 'Rubik', 'Segoe UI', Arial, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --page: #141831; --card: #1D2240; --ink: #F3EEE4; --sub: #B9B2A6; --accent: #F59A4A; --accentText: #FFB774; --line: #2E3459; --good: #6FD3A4; --bad: #FF8A7A; color-scheme: dark; }
+  }
+  :root[data-theme="dark"] { --page: #141831; --card: #1D2240; --ink: #F3EEE4; --sub: #B9B2A6; --accent: #F59A4A; --accentText: #FFB774; --line: #2E3459; --good: #6FD3A4; --bad: #FF8A7A; color-scheme: dark; }
+  body { background: var(--page); color: var(--ink); font-family: var(--ui); direction: rtl; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 44px; }
+  header { display: grid; gap: 8px; }
+  h1 { margin: 0; font-size: clamp(28px, 4vw, 40px); font-weight: 800; text-wrap: balance; }
+  .lede { margin: 0; color: var(--sub); font-size: 17px; line-height: 1.6; max-width: 66ch; }
+  h2 { margin: 0 0 14px; font-size: 22px; font-weight: 700; }
+  .cuts { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+  .cut { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .cut video { width: 100%; aspect-ratio: 9 / 16; border-radius: 16px; background: #000; display: block; max-width: 100%; }
+  .cut h3 { margin: 0; font-size: 20px; display: flex; gap: 10px; align-items: baseline; }
+  .cut h3 .len { font-size: 14px; color: var(--sub); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .cut p { margin: 0; color: var(--sub); font-size: 15px; line-height: 1.55; }
+  .cut details summary { cursor: pointer; font-size: 14px; color: var(--accentText); font-weight: 500; }
+  .cut ol { margin: 8px 0 0; padding-inline-start: 18px; font-size: 14px; line-height: 1.65; }
+  .voices { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+  .voice { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: grid; gap: 8px; }
+  .voice h3 { margin: 0; font-size: 18px; }
+  .voice p { margin: 0; color: var(--sub); font-size: 14px; line-height: 1.5; }
+  audio { width: 100%; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; background: var(--card); border-radius: 16px; overflow: hidden; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; }
+  th, td { text-align: start; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 13px; color: var(--sub); font-weight: 500; letter-spacing: .02em; }
+  tr:last-child td { border-bottom: 0; }
+  .ok { color: var(--good); font-weight: 700; } .no { color: var(--bad); font-weight: 700; }
+  .note { background: var(--card); border: 1px solid var(--line); border-inline-start: 6px solid var(--accent); border-radius: 14px; padding: 14px 18px; font-size: 15px; line-height: 1.6; }
+  details.round2 > summary { cursor: pointer; font-size: 18px; font-weight: 700; }
+  .cast { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-top: 16px; }
+  .who { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px; display: grid; gap: 8px; }
+  .who svg { width: 100%; height: auto; border-radius: 12px; display: block; }
+  .who h3 { margin: 0; font-size: 17px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>סבב 3: הדמות בתנועה, שלוש גרסאות</h1>
+    <p class="lede">הדמות שבחרת (ה׳, הדתי־לאומי) עכשיו בגוף מלא: מתעורר, הולך ברחוב, עוצר כשהטלפון רוטט, עובד, מתפלל ונח בשבת. כל התראה בסרטונים היא ההתראה האמיתית של האפליקציה, בשעה ובזמנים האמיתיים של ירושלים ביום רביעי, כ״ד בחשוון. הקריינות במודל חדש, טבעי יותר ומותר לשימוש מסחרי.</p>
+  </header>
+
+  <section>
+    <h2>שלוש גרסאות</h2>
+    <div class="cuts" id="cuts"></div>
+  </section>
+
+  <section>
+    <h2>ארבעה קולות לבחירה</h2>
+    <p class="lede" style="margin-bottom:14px">אותו טקסט של ״יום אחד״, על המוזיקה. כל קול עוצב מתיאור מילולי, ולא שוכפל מאדם אמיתי. הסרטונים למעלה בקול ״חם וצעיר״; הקול שתבחר ייכנס לכל הגרסאות.</p>
+    <div class="voices" id="voices"></div>
+  </section>
+
+  <section>
+    <h2>מה בדקתי בקריינות</h2>
+    <div class="note" style="margin-bottom:14px"><b>חשוב:</b> קול א׳ (שאול) מסבב 2 ושאר הקולות של Phonikud מתפרסמים ברישיון לא מסחרי בלבד, ולכן אי אפשר להשתמש בהם בפרסומת. הקולות כאן הם של VoxCPM2, ברישיון Apache 2.0, שמתיר שימוש מסחרי.</div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>מודל</th><th>עברית</th><th>רישיון</th><th>מה קרה</th></tr></thead>
+      <tbody>
+        <tr><td>VoxCPM2 (OpenBMB)</td><td>כן</td><td class="ok">Apache 2.0, מסחרי</td><td>נבחר. קול טבעי עם אינטונציה, עיצוב קול מתיאור, ותמלול אוטומטי החזיר כמעט כל מילה במדויק.</td></tr>
+        <tr><td>Phonikud + Piper (סבב 2)</td><td>כן</td><td class="no">לא מסחרי</td><td>נשמע מכני יותר, והרישיון אוסר פרסומת.</td></tr>
+        <tr><td>Chatterbox Multilingual (Resemble)</td><td>כן</td><td class="ok">MIT, מסחרי</td><td>הורד, אבל לא נכנס בדיסק של סביבת העבודה יחד עם VoxCPM2. אפשר לבדוק בסבב הבא.</td></tr>
+        <tr><td>Zonos-Hebrew</td><td>כן</td><td class="no">CC BY-NC</td><td>נפסל בגלל הרישיון.</td></tr>
+        <tr><td>OmniVoice, MMS-TTS</td><td>כן</td><td class="no">CC BY-NC</td><td>נפסלו בגלל הרישיון.</td></tr>
+        <tr><td>ElevenLabs, MiniMax, Google, Azure</td><td>כן</td><td>בתשלום, מסחרי</td><td>הטבעיים ביותר בעברית לפי השוואות. צריך חשבון ומפתח API; אם יש לך, אפיק בהם.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <details class="round2">
+      <summary>סבב 2: חמש הדמויות</summary>
+      <div class="cast" id="cast"></div>
+    </details>
+  </section>
+</div>
+
+<script>/*CHARACTERS*/</script>
+<script>
+  const VARIANTS = /*VARIANTS*/{};
+  const CUTS = /*CUTS*/[];
+  const VOICES = [
+    ['warm', 'חם וצעיר', 'גבר צעיר, חייכן ובטוח, קצב שיחה טבעי. בו הוקלטו הסרטונים.'],
+    ['deep', 'עמוק ובוטח', 'בריטון בשנות הארבעים, רגוע ומקצועי, קול פרסומות קלאסי.'],
+    ['lively', 'אנרגטי', 'צעיר ונמרץ, מהיר יותר, מתאים לגרסה המהירה.'],
+    ['woman', 'קריינית', 'אישה צעירה, חמה וברורה, אם רוצים לפנות גם לנשים.'],
+  ];
+  document.getElementById('cuts').innerHTML = CUTS.map(({ id, seconds }) => {
+    const v = VARIANTS[id];
+    return `<article class="cut"><video id="v-${id}" controls playsinline preload="metadata" src="video/${id}.mp4"></video>
+      <h3>${v.title}<span class="len">${Math.round(seconds)} שניות</span></h3><p>${v.pitch}</p>
+      <details><summary>הקריינות</summary><ol>${v.beats.map((b) => `<li>${b.vo}</li>`).join('')}</ol></details></article>`;
+  }).join('');
+  document.getElementById('voices').innerHTML = VOICES.map(([id, name, about]) =>
+    `<div class="voice"><h3>${name}</h3><p>${about}</p><audio id="a-${id}" controls preload="none" src="audio/${id}.mp3"></audio></div>`).join('');
+
+  const ARMS = { R: [[-212, 1060], [-276, 1300], [-128, 1384]], L: [[212, 1060], [276, 1300], [128, 1384]] };
+  const cast = document.getElementById('cast');
+  Object.keys(CHARACTERS).forEach((key, i) => {
+    const card = document.createElement('div');
+    card.className = 'who';
+    card.innerHTML = `<h3>${'אבגדה'[i]}׳ · ${CHARACTERS[key].name}${key === 'dati' ? ' (נבחר)' : ''}</h3>
+      <svg viewBox="-330 470 660 960" role="img" aria-label="${CHARACTERS[key].name}"><rect x="-330" y="470" width="660" height="960" fill="#F3E8D6"/>${characterSVG(key, 'r2' + key)}<rect x="-330" y="1356" width="660" height="80" fill="#C98F5B"/></svg>`;
+    cast.appendChild(card);
+    characterArm(document.getElementById('r2' + key + 'ArmR'), key, ...ARMS.R);
+    characterArm(document.getElementById('r2' + key + 'ArmL'), key, ...ARMS.L);
+    characterFace('r2' + key, { smile: 0.55 });
+  });
+  document.querySelectorAll('audio, video').forEach((m) => m.addEventListener('play', () => document.querySelectorAll('audio, video').forEach((o) => o !== m && o.pause())));
+</script>

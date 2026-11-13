@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Promo Engine</title>
+<style>
+  @font-face { font-family: Rubik; font-weight: 400; src: url(fonts/Rubik_400Regular.ttf); }
+  @font-face { font-family: Rubik; font-weight: 500; src: url(fonts/Rubik_500Medium.ttf); }
+  @font-face { font-family: Rubik; font-weight: 600; src: url(fonts/Rubik_600SemiBold.ttf); }
+  @font-face { font-family: Rubik; font-weight: 700; src: url(fonts/Rubik_700Bold.ttf); }
+  @font-face { font-family: Rubik; font-weight: 800; src: url(fonts/Rubik_800ExtraBold.ttf); }
+  :root { --bg: #F6F1E8; --surface: #FFFDF9; --text: #1D2240; --sub: #69645D; --gold: #F08A3C; --goldText: #A04A0C; }
+  html, body { margin: 0; background: #000; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg);
+    font-family: Rubik, 'Noto Color Emoji', sans-serif; color: var(--text); direction: rtl; }
+  .scene { position: absolute; inset: 0; visibility: hidden; transform-origin: 50% 50%; }
+  .scene > svg.bg, .scene > svg.fg { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+  .notif { position: absolute; width: 960px; left: 60px; top: 150px; box-sizing: border-box; padding: 32px 40px 26px;
+    background: rgba(255, 253, 249, 0.97); border-radius: 44px; box-shadow: 0 24px 60px rgba(29, 34, 64, .3); z-index: 20; }
+  .notif .app { display: flex; align-items: center; gap: 14px; font-size: 30px; color: var(--sub); font-weight: 500; }
+  .notif .app img { width: 46px; height: 46px; border-radius: 12px; background: #fff; }
+  .notif .title { margin-top: 12px; font-size: 46px; font-weight: 700; }
+  .notif .line { margin-top: 6px; font-size: 40px; font-weight: 600; }
+  .notif .line.orange { color: #B3560F; } .notif .line.red { color: #C0392B; } .notif .line.green { color: #2C7A55; }
+  .notif .body { margin-top: 4px; font-size: 40px; }
+  .notif .buttons { display: flex; gap: 70px; margin-top: 20px; font-size: 36px; font-weight: 600; color: var(--goldText); }
+  .phone { position: absolute; background: #12162B; border-radius: 78px; padding: 18px; box-sizing: border-box;
+    box-shadow: 0 50px 110px rgba(29, 34, 64, .35), 0 0 0 3px #2B3150 inset; }
+  .phone .screen { position: relative; width: 100%; height: 100%; border-radius: 62px; overflow: hidden; background: var(--bg); }
+  .phone .screen img { position: absolute; left: 0; top: 0; width: 100%; }
+  .phone .island { position: absolute; top: 34px; left: 50%; width: 120px; height: 34px; margin-left: -60px; border-radius: 20px; background: #0B0E1C; z-index: 3; }
+  .clock { position: absolute; top: 56px; right: 60px; padding: 10px 26px; border-radius: 999px; background: rgba(29,34,64,.82);
+    color: #FFFDF9; font-size: 40px; font-weight: 700; font-variant-numeric: tabular-nums; z-index: 30; direction: ltr; }
+  #sub { position: absolute; left: 60px; right: 60px; bottom: 250px; text-align: center; z-index: 50; }
+  #sub .box { display: inline-block; padding: 20px 40px 24px; border-radius: 36px; background: rgba(29, 34, 64, .9);
+    color: #FFFDF9; box-shadow: 0 18px 40px rgba(0,0,0,.18); max-width: 960px; }
+  #sub .tag { display: block; font-size: 30px; font-weight: 700; color: #FFB774; margin-bottom: 4px; }
+  #sub .txt { display: block; font-size: 44px; line-height: 1.32; font-weight: 600; }
+  .chip { position: absolute; padding: 18px 34px; border-radius: 999px; background: var(--surface); color: var(--text);
+    font-size: 42px; font-weight: 700; white-space: nowrap; box-shadow: 0 14px 34px rgba(160, 74, 12, .2); z-index: 25; }
+  .badge { position: absolute; width: 120px; height: 120px; border-radius: 50%; background: var(--gold); color: #1D2240;
+    display: grid; place-items: center; font-size: 56px; font-weight: 800; z-index: 26; }
+  .ripple { position: absolute; width: 140px; height: 140px; margin: -70px 0 0 -70px; border-radius: 50%;
+    border: 10px solid var(--gold); box-sizing: border-box; z-index: 22; }
+  .bigtext { position: absolute; left: 0; right: 0; text-align: center; font-weight: 800; z-index: 24; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="sub"><span class="box"><span class="tag"></span><span class="txt"></span></span></div></div>
+<script src="characters.js"></script>
+<script src="plan.js"></script>
+<script>
+// ---------- helpers ----------
+const NS = 'http://www.w3.org/2000/svg';
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const ease = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+const easeOut = (p) => 1 - Math.pow(1 - p, 3);
+const easeIn = (p) => p * p * p;
+const back = (p) => { const c = 1.7; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+const seg = (t, a, b, f = ease) => f(clamp((t - a) / (b - a)));
+const win = (t, a, b, fade = 0.3) => Math.min(seg(t, a, a + fade, easeOut), 1 - seg(t, b - fade, b, easeIn));
+const lp = (A, B, p) => [lerp(A[0], B[0], p), lerp(A[1], B[1], p)];
+const mixPose = (A, B, p) => A.map((pt, i) => lp(pt, B[i], p));
+const KEY = 'dati';
+const C = CHARACTERS[KEY];
+const stage = document.getElementById('stage');
+const el = (tag, cls, html, parent) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; (parent || stage).appendChild(e); return e; };
+const $ = (id) => document.getElementById(id);
+
+function notifHTML(n, compact) {
+  const buttons = n.stage === 'plain' ? '' : '<div class="buttons"><span>פתח נוסח</span><span>עשיתי</span></div>';
+  return `<div class="app"><img src="logo.svg" alt=""><span>יהודי 365 · ${n.clock ? n.clock : 'עכשיו'}</span></div>
+    <div class="title">${n.title}</div>${n.line ? `<div class="line ${n.stage}">${n.line}</div>` : ''}
+    <div class="body">${n.body}</div>${compact ? '' : buttons}`;
+}
+function phoneHTML(src, w, extra = '') {
+  return `<div class="island"></div><div class="screen"><img src="screens/${src}.png" alt="">${extra}</div>`;
+}
+
+// ---------- poses (character coordinates) ----------
+const P = {
+  typeR: [[-212, 1060], [-286, 1290], [-150, 1372]], typeL: [[212, 1060], [286, 1290], [150, 1372]],
+  reachR: [[-212, 1060], [-330, 1250], [-372, 1392]],
+  holdR: [[-212, 1060], [-270, 1270], [-92, 1150]], holdL: [[212, 1060], [262, 1280], [70, 1168]],
+  restR: [[-212, 1060], [-280, 1300], [-130, 1385]], restL: [[212, 1060], [280, 1300], [130, 1385]],
+  sideR: [[-212, 1060], [-250, 1290], [-238, 1500]], sideL: [[212, 1060], [250, 1290], [238, 1500]],
+  upR: [[-212, 1060], [-330, 860], [-300, 640]], upL: [[212, 1060], [330, 860], [300, 640]],
+  pointL: [[212, 1060], [400, 1040], [580, 960]], waveL: [[212, 1060], [360, 900], [330, 700]],
+  thumbL: [[212, 1060], [330, 1200], [250, 1020]], watchL: [[212, 1060], [300, 1240], [110, 1110]],
+  flowersL: [[212, 1060], [270, 1270], [180, 1330]],
+};
+
+// A character instance: an SVG group with the figure, its props layer and a hands layer above them.
+let charCount = 0;
+function makeChar(svg, { shabbat = false } = {}) {
+  const prefix = 'c' + charCount++;
+  const g = document.createElementNS(NS, 'g');
+  g.innerHTML = characterSVG(KEY, prefix, { shabbat }) + `<g id="${prefix}Prop"></g><g id="${prefix}Hands"></g>`;
+  svg.appendChild(g);
+  return { prefix, g, shabbat };
+}
+// state: { x, y, s (scale), R, L, legs: {lift}|null, face: {...}, head: {dx, dy, rot}, prop: svg string, handsFront }
+function pose(ch, st) {
+  const { prefix } = ch;
+  ch.g.setAttribute('transform', `translate(${st.x} ${st.y}) scale(${st.s}) translate(0 ${-(st.anchor ?? 2290)})`);
+  characterArm($(prefix + 'ArmR'), KEY, ...st.R, { shabbat: ch.shabbat });
+  characterArm($(prefix + 'ArmL'), KEY, ...st.L, { shabbat: ch.shabbat });
+  if (st.legs) characterLegs($(prefix + 'Legs'), KEY, { ...st.legs, shabbat: ch.shabbat });
+  else $(prefix + 'Legs').innerHTML = '';
+  characterFace(prefix, st.face || {});
+  const h = st.head || {};
+  $(prefix + 'Head').setAttribute('transform', `translate(${h.dx || 0} ${h.dy || 0}) rotate(${h.rot || 0} 0 900)`);
+  $(prefix + 'Prop').innerHTML = st.prop || '';
+  const skin = `fill="${C.skin}" stroke="${C.shade}" stroke-width="4"`;
+  $(prefix + 'Hands').innerHTML = (st.handsFront || []).map((H) => `<circle cx="${H[0]}" cy="${H[1]}" r="38" ${skin}/>`).join('');
+}
+const BLINKS = [];
+const blinkAt = (t) => { const c = (t + 0.7) % 3.7; return Math.max(0, 1 - Math.abs(c - 3.55) / 0.08); };
+
+// props in character coordinates
+const heldPhone = (H, lit = 0) => `<g transform="translate(${H[0] + 40} ${H[1] - 70}) rotate(-6)">
+  <rect x="-78" y="-148" width="156" height="296" rx="30" fill="#12162B" stroke="#3A4166" stroke-width="5"/>
+  <rect x="-54" y="-126" width="52" height="64" rx="15" fill="#2B3150"/><circle cx="-36" cy="-108" r="9" fill="#0B0E1C"/><circle cx="-18" cy="-82" r="9" fill="#0B0E1C"/>
+  ${lit ? `<circle r="150" fill="#FFF3D6" opacity="${0.18 * lit}"/>` : ''}</g>`;
+const buzzArcs = (x, y, k) => k <= 0 ? '' : [0, 1].map((i) => `<path d="M${x + 40 + i * 26},${y - 40 - i * 12} q20,40 0,80" fill="none" stroke="#F08A3C" stroke-width="10" stroke-linecap="round" opacity="${k}"/>
+  <path d="M${x - 40 - i * 26},${y - 40 - i * 12} q-20,40 0,80" fill="none" stroke="#F08A3C" stroke-width="10" stroke-linecap="round" opacity="${k}"/>`).join('');
+const bouquet = (H) => `<g transform="translate(${H[0]} ${H[1]})">
+  <path d="M-10,-10 L-60,-210 M0,-10 L-10,-230 M10,-10 L50,-200 M0,-10 L30,-240" stroke="#4E8A5C" stroke-width="10" stroke-linecap="round"/>
+  ${[[-60, -220, '#E85D75'], [-12, -244, '#FFD25A'], [52, -212, '#F08A3C'], [30, -256, '#E85D75'], [-36, -262, '#FFFFFF'], [8, -200, '#FFFFFF']].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="26" fill="${c}"/><circle cx="${x}" cy="${y}" r="9" fill="#F7C548"/>`).join('')}
+  <path d="M-40,-60 L40,-60 L20,40 L-20,40 Z" fill="#F3E3C3" stroke="#D9C49C" stroke-width="5"/></g>`;
+const challahBag = (H) => `<g transform="translate(${H[0]} ${H[1]})"><path d="M-70,0 L70,0 L60,170 L-60,170 Z" fill="#E9D8B8" stroke="#C9B58E" stroke-width="5"/>
+  <path d="M-40,0 C-40,-60 40,-60 40,0" fill="none" stroke="#C9B58E" stroke-width="10"/><ellipse cx="0" cy="10" rx="60" ry="26" fill="#D9963F"/><path d="M-40,8 q20,-18 40,0 q20,-18 40,0" stroke="#B57425" stroke-width="5" fill="none"/></g>`;
+const wristwatch = (H) => `<g transform="translate(${H[0] + 22} ${H[1] + 34})"><rect x="-26" y="-14" width="52" height="28" rx="8" fill="#3A3F55"/><circle r="24" fill="#FFFDF9" stroke="#3A3F55" stroke-width="7"/><path d="M0,0 L0,-14 M0,0 L10,6" stroke="#1D2240" stroke-width="4" stroke-linecap="round"/></g>`;
+
+// ---------- backgrounds ----------
+const SKY = {
+  dawn: ['#2C3566', '#7B6AA0', '#F2A65A'], morning: ['#9FD0F2', '#CFE6F5', '#FDEFD6'], noon: ['#8CC8F0', '#BFE0F5', '#F4F0E4'],
+  sunset: ['#4B4C8C', '#E2876A', '#FFC27A'], golden: ['#7FB2E0', '#F5C98E', '#FFDDA0'], night: ['#121633', '#1F2550', '#3A3F75'],
+};
+function skyDefs(id, name) {
+  const [a, b, c] = SKY[name];
+  return `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset=".55" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></linearGradient>`;
+}
+function jerusalemStreet(id, sky) {
+  const stone = sky === 'sunset' ? '#E9B98E' : sky === 'golden' ? '#F0CFA0' : '#EAD9B6';
+  const stoneD = sky === 'sunset' ? '#C98F68' : '#CDB58C';
+  const block = (x, y, w, h, flip) => {
+    let rows = '';
+    for (let yy = y + 40; yy < y + h; yy += 44) rows += `<line x1="${x}" y1="${yy}" x2="${x + w}" y2="${yy}" stroke="${stoneD}" stroke-width="3" opacity=".5"/>`;
+    let wins = '';
+    for (let yy = y + 90; yy < y + h - 120; yy += 210) for (let xx = x + 50; xx < x + w - 90; xx += 150)
+      wins += `<path d="M${xx},${yy + 110} L${xx},${yy + 30} Q${xx + 40},${yy - 14} ${xx + 80},${yy + 30} L${xx + 80},${yy + 110} Z" fill="#5C6E8A" opacity=".75"/><rect x="${xx - 8}" y="${yy + 108}" width="96" height="12" fill="${stoneD}"/>`;
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${stone}"/>${rows}${wins}`;
+  };
+  return `<defs>${skyDefs(id, sky)}</defs><rect width="1080" height="1920" fill="url(#${id})"/>
+    ${sky === 'sunset' || sky === 'golden' ? `<circle cx="540" cy="760" r="120" fill="#FFE2A0" opacity=".8"/>` : `<circle cx="760" cy="300" r="70" fill="#FFF3C4" opacity=".9"/>`}
+    <path d="M0,820 L120,800 L120,700 L260,690 L300,760 L420,740 L420,690 L560,700 L660,660 L760,700 L880,690 L1080,740 L1080,1000 L0,1000 Z" fill="${stoneD}" opacity=".55"/>
+    ${block(-40, 360, 380, 1100)}${block(740, 300, 380, 1160)}
+    <path d="M340,1000 L740,1000 L740,1460 L340,1460 Z" fill="${stone}" opacity=".7"/>
+    <path d="M0,1460 L1080,1460 L1080,1920 L0,1920 Z" fill="#CBBFA8"/>
+    <path d="M330,1460 L750,1460 L1080,1920 L0,1920 Z" fill="#BDB09A"/>
+    ${[0, 1, 2, 3, 4, 5].map((i) => `<line x1="${330 - i * 64}" y1="${1460 + i * 90}" x2="${750 + i * 64}" y2="${1460 + i * 90}" stroke="#A99C86" stroke-width="3" opacity=".5"/>`).join('')}
+    <g transform="translate(150 1460)"><rect x="-14" y="-430" width="28" height="430" fill="#6B4E37"/><circle cx="0" cy="-470" r="130" fill="#5E9C6B"/><circle cx="-80" cy="-410" r="90" fill="#6FB27C"/><circle cx="80" cy="-420" r="96" fill="#4E8A5C"/></g>
+    <g transform="translate(930 1470)"><rect x="-8" y="-380" width="16" height="380" fill="#6B7180"/><rect x="-70" y="-420" width="140" height="70" rx="12" fill="#2F6D3A"/><text x="0" y="-372" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="34" fill="#FFFFFF">תחנה</text></g>`;
+}
+
+// ---------- scenes ----------
+const SCENES = {};
+
+SCENES.bedroom = (root, beat) => {
+  const svg = svgIn(root, 'bg');
+  svg.innerHTML = `<defs>${skyDefs('bd' + beat.i, 'dawn')}</defs>
+    <rect width="1080" height="1920" fill="#3E4677"/><rect width="1080" height="1920" fill="#F2A65A" opacity=".08"/>
+    <g transform="translate(640 260)"><rect width="380" height="560" rx="24" fill="#2A3058"/><rect x="18" y="18" width="344" height="524" rx="10" fill="url(#bd${beat.i})"/>
+      <circle cx="250" cy="120" r="30" fill="#FFF6DA" opacity=".7"/><rect x="182" y="18" width="16" height="524" fill="#2A3058"/></g>
+    <rect x="160" y="960" width="760" height="560" rx="40" fill="#8A5A3B"/><rect x="190" y="990" width="700" height="500" rx="28" fill="#9E6B49"/>
+    <rect x="250" y="1010" width="580" height="200" rx="90" fill="#F4F1EA"/><rect x="250" y="1010" width="580" height="200" rx="90" fill="none" stroke="#E2DCCF" stroke-width="6"/>`;
+  const ch = makeChar(svg);
+  const fg = svgIn(root, 'fg');
+  fg.innerHTML = `<path d="M60,1420 C200,1350 880,1350 1020,1420 L1080,1920 L0,1920 Z" fill="#9FB8DE"/>
+    ${[0, 1, 2, 3].map((i) => `<path d="M${40 + i * 10},${1500 + i * 110} C300,${1440 + i * 110} 780,${1440 + i * 110} ${1040 - i * 10},${1500 + i * 110}" stroke="#86A2CC" stroke-width="10" fill="none"/>`).join('')}
+    <rect x="0" y="1300" width="230" height="620" fill="#7A4F35"/><rect x="0" y="1290" width="250" height="30" rx="8" fill="#8E5E40"/>
+    <path d="M90,1290 L110,1150 L150,1150 L170,1290 Z" fill="#F3E3C3"/><rect x="118" y="1060" width="24" height="90" fill="#C9B58E"/>
+    <g id="bdPhone${beat.i}"></g>`;
+  return (lt, dur) => {
+    const wake = seg(lt, 0.8, 1.2), stretch = win(lt, 1.3, 2.4, 0.35), reach = seg(lt, 2.4, 3.1);
+    const R = reach > 0 ? mixPose(P.upR, P.holdR, reach) : mixPose(P.restR, P.upR, stretch);
+    const L = reach > 0 ? mixPose(P.upL, P.holdL, reach) : mixPose(P.restL, P.upL, stretch);
+    const held = reach > 0.5;
+    pose(ch, {
+      x: 540, y: 300, s: 0.9, anchor: 0, R, L,
+      face: { closed: 1 - wake, blink: blinkAt(lt), open: stretch * 0.8, smile: held ? 0.6 : 0.3, gaze: held ? [0, 7] : [-6, 0], glow: held ? 0.1 : 0 },
+      head: { rot: lerp(-8, 0, wake), dy: held ? 12 : 0 },
+      prop: held ? heldPhone(P.holdR[2], 1) : '', handsFront: held ? [P.holdR[2], P.holdL[2]] : [],
+    });
+    const buzz = win(lt, 0.4, 2.0, 0.05);
+    const shake = Math.sin(lt * 90) * 6 * buzz;
+    $('bdPhone' + beat.i).innerHTML = held ? '' : `<g transform="translate(${140 + shake} 1270)"><circle r="140" fill="#FFF1D6" opacity="${0.35 * buzz}"/>
+      <path d="M-70,-18 L70,-18 L84,18 L-84,18 Z" fill="#12162B"/><path d="M-62,-12 L62,-12 L74,12 L-74,12 Z" fill="${buzz > 0 ? '#FFF1D6' : '#2B3150'}"/></g>${buzzArcs(140, 1230, buzz)}`;
+  };
+};
+
+function streetScene(root, beat, { flowers = false, gray = false, stopAt = 0.42 } = {}) {
+  const svg = svgIn(root, 'bg');
+  svg.innerHTML = jerusalemStreet('st' + beat.i, beat.sky || 'morning');
+  const ch = makeChar(svg);
+  if (gray) svg.style.filter = 'grayscale(0.85) contrast(0.95)';
+  return (lt, dur) => {
+    const stopT = dur * stopAt;
+    const walkAmt = 1 - seg(lt, stopT - 0.3, stopT + 0.2);
+    const phase = lt * 7.5;
+    const w = walkPose(phase);
+    const progress = Math.min(lt, stopT + 0.2) / dur;
+    const raise = seg(lt, stopT + 0.25, stopT + 0.95);
+    const baseR = flowers ? P.sideR : w.R.map((pt, i) => lp(P.sideR[i], pt, walkAmt));
+    const baseL = flowers ? P.flowersL : w.L.map((pt, i) => lp(P.sideL[i], pt, walkAmt));
+    const R = gray ? baseR : mixPose(baseR, P.holdR, raise);
+    const L = flowers ? P.flowersL : mixPose(baseL, gray ? P.watchL : P.holdL, raise);
+    const held = raise > 0.5 && !gray;
+    const buzz = beat.notif ? win(lt, stopT - 0.4, stopT + 0.5, 0.05) : 0;
+    const look = raise;
+    let prop = held ? heldPhone(P.holdR[2], 1) : gray ? wristwatch(L[2]) : '';
+    if (flowers) prop += bouquet(P.flowersL[2]);
+    prop += buzzArcs(-150, 1440, buzz);
+    pose(ch, {
+      x: 540, y: lerp(1620, 1760, progress) + w.bob * walkAmt * 0.6, s: lerp(0.5, 0.6, progress), R, L,
+      legs: { lift: w.lift.map((v) => v * walkAmt) },
+      face: { blink: blinkAt(lt), gaze: gray ? [look * 8, look * 6] : [0, look * 7], smile: gray ? lerp(0.3, -0.2, seg(lt, dur * 0.7, dur * 0.85)) : 0.45 + 0.4 * seg(lt, stopT + 1.4, stopT + 1.9), brow: gray ? seg(lt, dur * 0.7, dur * 0.85) : buzz * 0.6 },
+      head: { dy: look * 12, rot: Math.sin(phase) * 1.5 * walkAmt },
+      prop, handsFront: held ? [P.holdR[2], ...(flowers ? [] : [P.holdL[2]])] : [],
+    });
+  };
+}
+SCENES.street = (root, beat) => streetScene(root, beat);
+SCENES.nag = (root, beat) => streetScene(root, { ...beat, notif: beat.notifs[0] }, { stopAt: 0.12 });
+
+SCENES.office = (root, beat) => {
+  const svg = svgIn(root, 'bg');
+  svg.innerHTML = `<defs>${skyDefs('of' + beat.i, 'noon')}</defs><rect width="1080" height="1920" fill="#F3E8D6"/>
+    <g transform="translate(70 230)"><rect width="430" height="600" rx="26" fill="#FFFDF9"/><rect x="22" y="22" width="386" height="556" rx="12" fill="url(#of${beat.i})"/>
+      <circle cx="300" cy="150" r="58" fill="#FFD574"/><path d="M22,470 L70,440 L70,400 L120,400 L120,430 L170,410 L210,430 L210,380 L250,360 L290,380 L290,420 L340,410 L408,440 L408,578 L22,578 Z" fill="#E7D3AE"/>
+      <rect x="205" y="22" width="18" height="556" fill="#FFFDF9"/></g>
+    <g transform="translate(860 1060)"><path d="M-60,180 L-46,90 L46,90 L60,180 Z" fill="#C86E3A"/><path d="M0,95 C-60,40 -110,-10 -90,-90 C-40,-60 -10,0 0,95 Z" fill="#5E9C6B"/><path d="M0,95 C40,20 80,-60 40,-150 C0,-90 -10,0 0,95 Z" fill="#6FB27C"/></g>`;
+  const ch = makeChar(svg);
+  const fg = svgIn(root, 'fg');
+  fg.innerHTML = `<rect x="0" y="1370" width="1080" height="550" fill="#C98F5B"/><rect x="0" y="1356" width="1080" height="30" fill="#DDA571"/>
+    <path d="M360,1150 L720,1150 Q736,1150 736,1166 L736,1372 L344,1372 L344,1166 Q344,1150 360,1150 Z" fill="#C7CBD3"/><circle cx="540" cy="1262" r="26" fill="#B2B7C1"/>
+    <rect x="320" y="1366" width="440" height="16" rx="8" fill="#A7ACB6"/><g id="ofPhone${beat.i}"></g>`;
+  const compass = beat.compass ? radar(root, beat.i) : null;
+  return (lt, dur) => {
+    const reach = seg(lt, 1.2, 1.6), lift = seg(lt, 1.6, 2.2);
+    const bob = Math.sin(lt * 22) * 6 * (1 - seg(lt, 0.6, 1.0));
+    let R = lift > 0 ? mixPose(P.reachR, P.holdR, lift) : mixPose(P.typeR, P.reachR, reach);
+    const L = mixPose(P.typeL, P.holdL, seg(lt, 1.7, 2.2));
+    if (reach === 0) R = R.map((pt, i) => (i === 2 ? [pt[0], pt[1] + bob] : pt));
+    const held = lift > 0.4;
+    pose(ch, { x: 540, y: 0, s: 1, anchor: 0, R, L,
+      face: { blink: blinkAt(lt), gaze: held ? [0, 7] : [lerp(0, -16, seg(lt, 0.5, 0.9)), 4], smile: held ? 0.65 : 0.35, glow: held ? 0.1 : 0 },
+      head: { dy: held ? 12 : 0, dx: held ? 0 : -10 * seg(lt, 0.5, 0.9) },
+      prop: held ? heldPhone([-92, 1150], 1) : '', handsFront: held ? [P.holdR[2], P.holdL[2]] : [] });
+    const buzz = win(lt, 0.4, 1.4, 0.05), shake = Math.sin(lt * 90) * 6 * buzz;
+    $('ofPhone' + beat.i).innerHTML = held ? '' : `<g transform="translate(${170 + shake} 1420)"><circle r="150" fill="#FFF1D6" opacity="${0.35 * buzz}"/><path d="M-92,-26 L92,-26 L112,26 L-112,26 Z" fill="#12162B"/><path d="M-84,-20 L84,-20 L101,20 L-101,20 Z" fill="${buzz > 0 ? '#FFF1D6' : '#2B3150'}"/></g>`;
+    if (compass) compass(lt - dur * 0.45, dur);
+    if (compass) root.querySelectorAll('.notif').forEach((n) => (n.style.opacity = 1 - seg(lt, dur * 0.45, dur * 0.45 + 0.3)));
+  };
+};
+
+// The prayer compass, drawn as the app's sonar radar: the Kotel 65° from north, 2.2 km away (the app's own
+// figures for the seed's place in Jerusalem).
+function radar(root, i) {
+  const wrap = el('div', '', `<svg viewBox="0 0 900 900" width="900" height="900"><circle cx="450" cy="450" r="430" fill="#14193A"/>
+    ${[110, 220, 330, 420].map((r) => `<circle cx="450" cy="450" r="${r}" fill="none" stroke="#2C3A6E" stroke-width="4"/>`).join('')}
+    <g id="rdSweep${i}"><path d="M450,450 L450,30 A420,420 0 0 1 760,170 Z" fill="url(#rdg${i})"/></g>
+    <defs><linearGradient id="rdg${i}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2FD08A" stop-opacity="0"/><stop offset="1" stop-color="#2FD08A" stop-opacity=".45"/></linearGradient></defs>
+    <text x="450" y="80" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="44" fill="#9AA6D6">צ</text>
+    <g id="rdDot${i}"><circle r="34" fill="#F08A3C"/><circle r="60" fill="#F08A3C" opacity=".25"/></g>
+    <g id="rdArrow${i}"><path d="M450,450 L450,140" stroke="#FFFDF9" stroke-width="14" stroke-linecap="round"/><path d="M420,170 L450,120 L480,170 Z" fill="#FFFDF9"/></g>
+    <circle cx="450" cy="450" r="18" fill="#FFFDF9"/></svg>
+    <div style="margin-top:26px;text-align:center;font-size:44px;font-weight:700;color:#FFFDF9" id="rdText${i}"></div>
+    <div style="text-align:center;font-size:36px;color:#B9C2E6">2.2 ק״מ עד הכותל · 65° מהצפון</div>`, root);
+  wrap.style.cssText = 'position:absolute;left:90px;top:330px;width:900px;padding:40px 0 50px;border-radius:60px;background:#1D2240;box-shadow:0 40px 90px rgba(0,0,0,.35);z-index:21;opacity:0';
+  return (t) => {
+    const show = seg(t, 0, 0.45, back);
+    wrap.style.opacity = clamp(show * 2);
+    wrap.style.transform = `translateY(${lerp(500, 0, show)}px) scale(${lerp(0.85, 1, show)})`;
+    const turn = seg(t, 0.4, 2.2);
+    const heading = lerp(-50, 65, turn);
+    $('rdSweep' + i).setAttribute('transform', `rotate(${t * 140} 450 450)`);
+    const rel = (65 - heading) * Math.PI / 180;
+    $('rdDot' + i).setAttribute('transform', `translate(${450 + Math.sin(rel) * 330} ${450 - Math.cos(rel) * 330})`);
+    const facing = turn > 0.97;
+    $('rdDot' + i).querySelector('circle').setAttribute('fill', facing ? '#2FD08A' : '#F08A3C');
+    $('rdText' + i).textContent = facing ? 'פונה לכותל ✓' : `סובב ${Math.round(65 - heading)}° ימינה`;
+    $('rdText' + i).style.color = facing ? '#2FD08A' : '#FFFDF9';
+  };
+}
+
+SCENES.sofa = (root, beat) => {
+  const svg = svgIn(root, 'bg');
+  svg.innerHTML = `<defs>${skyDefs('sf' + beat.i, 'night')}<radialGradient id="lamp${beat.i}" cx=".82" cy=".42" r=".5"><stop offset="0" stop-color="#FFC77A" stop-opacity=".5"/><stop offset="1" stop-color="#FFC77A" stop-opacity="0"/></radialGradient></defs>
+    <rect width="1080" height="1920" fill="#232A52"/><rect width="1080" height="1920" fill="url(#lamp${beat.i})"/>
+    <g transform="translate(70 250)"><rect width="400" height="560" rx="24" fill="#1A2045"/><rect x="18" y="18" width="364" height="524" rx="10" fill="url(#sf${beat.i})"/>
+      <circle cx="270" cy="140" r="54" fill="#FFF6DA"/><circle cx="292" cy="124" r="54" fill="#1F2550"/>
+      ${[[80, 90], [150, 210], [320, 330], [110, 400], [250, 460]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#FFF6DA"/>`).join('')}
+      <rect x="192" y="18" width="16" height="524" fill="#1A2045"/></g>
+    <g transform="translate(900 1500)"><rect x="-8" y="-760" width="16" height="760" fill="#C9B58E"/><path d="M-90,-760 L90,-760 L60,-880 L-60,-880 Z" fill="#F3E3C3"/></g>
+    <path d="M90,1180 C90,1100 990,1100 990,1180 L990,1400 L90,1400 Z" fill="#6E4C7E"/>`;
+  const ch = makeChar(svg);
+  const fg = svgIn(root, 'fg');
+  fg.innerHTML = `<path d="M40,1360 C40,1300 1040,1300 1040,1360 L1040,1700 L40,1700 Z" fill="#7E5A8F"/><rect x="0" y="1360" width="140" height="360" rx="50" fill="#6E4C7E"/><rect x="940" y="1360" width="140" height="360" rx="50" fill="#6E4C7E"/>
+    <rect x="0" y="1700" width="1080" height="220" fill="#3A2F4E"/>`;
+  const phone = el('div', 'phone', phoneHTML('more'), root);
+  phone.style.cssText += ';width:400px;height:866px;left:620px;top:300px;opacity:0;z-index:15';
+  return (lt, dur) => {
+    pose(ch, { x: 440, y: 120, s: 0.95, anchor: 0, R: P.holdR, L: P.holdL,
+      face: { blink: blinkAt(lt), gaze: [0, 7], smile: 0.55, glow: 0.14 }, head: { dy: 12 },
+      prop: heldPhone(P.holdR[2], 1), handsFront: [P.holdR[2], P.holdL[2]] });
+    const show = seg(lt, dur * 0.42, dur * 0.42 + 0.6, back);
+    phone.style.opacity = clamp(show * 2);
+    phone.style.transform = `translateX(${lerp(500, 0, show)}px) rotate(${lerp(10, 3, show)}deg)`;
+  };
+};
+
+SCENES.tracking = (root, beat) => {
+  const hist = el('img', '', null, root); hist.src = 'screens/history.png'; hist.style.cssText = 'position:absolute;left:0;top:0;width:1080px;transform-origin:540px 450px';
+  const cards = ['report', 'achievements'].map((s, k) => { const p = el('div', 'phone', phoneHTML(s), root); p.style.cssText += `;width:420px;height:910px;top:820px;left:${k ? 600 : 60}px;z-index:15;opacity:0`; return p; });
+  return (lt, dur) => {
+    hist.style.transform = `scale(${1 + 0.25 * seg(lt, 0, dur)})`;
+    cards.forEach((p, k) => { const s = seg(lt, 0.9 + k * 0.35, 1.5 + k * 0.35, back); p.style.opacity = clamp(s * 2); p.style.transform = `translateY(${lerp(700, 0, s)}px) rotate(${(k ? 6 : -6) * s}deg)`; });
+  };
+};
+
+SCENES.friday = (root, beat) => {
+  const streetRoot = el('div', 'scene', null, root); streetRoot.style.visibility = 'visible';
+  const walk = streetScene(streetRoot, { ...beat, sky: 'golden' }, { flowers: true, stopAt: 0.2 });
+  const tableRoot = el('div', 'scene', null, root);
+  const svg = svgIn(tableRoot, 'bg');
+  svg.innerHTML = `<defs><linearGradient id="dk${beat.i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26295A"/><stop offset=".55" stop-color="#6A4C8C"/><stop offset="1" stop-color="#F3A15F"/></linearGradient>
+    <radialGradient id="wm${beat.i}" cx=".3" cy=".72" r=".6"><stop offset="0" stop-color="#FFC77A" stop-opacity=".55"/><stop offset="1" stop-color="#FFC77A" stop-opacity="0"/></radialGradient>
+    <radialGradient id="fg${beat.i}"><stop offset="0" stop-color="#FFE3A3" stop-opacity=".9"/><stop offset="1" stop-color="#FFB45A" stop-opacity="0"/></radialGradient></defs>
+    <rect width="1080" height="1920" fill="#3A3360"/><g transform="translate(90 210)"><rect width="470" height="640" rx="28" fill="#4A4375"/><rect x="22" y="22" width="426" height="596" rx="12" fill="url(#dk${beat.i})"/><rect x="225" y="22" width="18" height="596" fill="#4A4375"/></g>
+    <rect width="1080" height="1920" fill="url(#wm${beat.i})"/>`;
+  const ch = makeChar(svg, { shabbat: true });
+  const fg = svgIn(tableRoot, 'fg');
+  fg.innerHTML = `<rect x="0" y="1370" width="1080" height="550" fill="#FBF7EE"/><rect x="0" y="1356" width="1080" height="30" fill="#FFFFFF"/><rect x="0" y="1460" width="1080" height="14" fill="#E6C68E"/>
+    ${[150, 290].map((x, k) => `<g transform="translate(${x} 1360)"><circle cx="0" cy="-330" r="120" fill="url(#fg${beat.i})"/><path d="M-46,0 L46,0 L30,-26 L12,-36 L12,-120 L28,-132 L-28,-132 L-12,-120 L-12,-36 L-30,-26 Z" fill="#C9CCD6"/>
+      <rect x="-20" y="-270" width="40" height="142" rx="6" fill="#FFFDF4"/><path class="fl" d="M0,-350 C18,-320 22,-296 0,-284 C-22,-296 -18,-320 0,-350 Z" fill="#FFB347"/></g>`).join('')}
+    <g transform="translate(420 1350)"><path d="M-150,0 C-150,-70 -90,-96 0,-96 C90,-96 150,-70 150,0 Z" fill="#2B3A78"/><text x="0" y="-30" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="40" fill="#E6C68E">שבת קודש</text></g>`;
+  const phones = ['shabbat', 'checkin'].map((s) => { const p = el('div', 'phone', phoneHTML(s), tableRoot); p.style.cssText += ';width:400px;height:866px;left:660px;top:290px;opacity:0;z-index:15'; return p; });
+  return (lt, dur) => {
+    const cut = dur * 0.5;
+    walk(lt, cut + 0.4);
+    const on = seg(lt, cut, cut + 0.5);
+    streetRoot.style.opacity = 1 - on;
+    tableRoot.style.visibility = on > 0 ? 'visible' : 'hidden';
+    tableRoot.style.opacity = on;
+    root.querySelectorAll(':scope > .notif, :scope > .clock').forEach((n) => (n.style.visibility = on > 0.5 ? 'hidden' : 'visible'));
+    if (on > 0) {
+      const tl = lt - cut;
+      pose(ch, { x: 400, y: 0, s: 1, anchor: 0, R: P.restR, L: P.restL, face: { blink: blinkAt(lt), smile: 0.9, gaze: [-6, 2], closed: seg(tl, 0.8, 1.1) * (1 - seg(tl, 1.8, 2.1)) } });
+      fg.querySelectorAll('.fl').forEach((f, k) => f.setAttribute('transform', `translate(0 ${-284 * (1 - (1 + 0.08 * Math.sin(lt * (13 + k * 3))))}) scale(1 ${1 + 0.08 * Math.sin(lt * (13 + k * 3))})`));
+      const a = seg(tl, 0.2, 0.8, back), b = seg(tl, dur - cut - 1.4, dur - cut - 0.8, back);
+      phones[0].style.opacity = clamp(a * 2) * (1 - b); phones[0].style.transform = `translateX(${lerp(420, 0, a)}px) rotate(4deg)`;
+      phones[1].style.opacity = clamp(b * 2); phones[1].style.transform = `translateX(${lerp(420, 0, b)}px) rotate(4deg)`;
+    }
+  };
+};
+
+// The phone in the hand: the screen, a tap, then the next screen pushed in and scrolled.
+SCENES.phone = (root, beat) => {
+  const svg = svgIn(root, 'bg');
+  svg.innerHTML = `<defs><radialGradient id="hb${beat.i}" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="#FFF4E4"/><stop offset=".6" stop-color="#F8DFC0"/><stop offset="1" stop-color="#EBC59A"/></radialGradient></defs>
+    <rect width="1080" height="1920" fill="url(#hb${beat.i})"/><circle cx="930" cy="1500" r="300" fill="#F08A3C" opacity=".12"/>
+    <path d="M760,1920 C760,1700 780,1560 840,1450 L1080,1380 L1080,1920 Z" fill="${C.shirt}"/>
+    <path d="M420,1500 C380,1560 400,1700 520,1760 C640,1820 820,1760 860,1640 C890,1560 860,1480 800,1440 Z" fill="${C.skin}"/>`;
+  const rig = el('div', '', null, root); rig.style.cssText = 'position:absolute;inset:0;transform-origin:540px 900px';
+  const phone = el('div', 'phone', `<div class="island"></div><div class="screen"><img class="a" src="screens/${beat.screen}.png" alt=""><img class="b" src="screens/${beat.then}.png" alt="" style="opacity:0">${beat.done ? '<img class="c" src="screens/home-done.png" alt="" style="opacity:0">' : ''}</div>`, rig);
+  phone.style.cssText += ';left:240px;top:250px;width:600px;height:1299px';
+  const front = svgIn(rig, 'fg');
+  front.innerHTML = `${[0, 1, 2, 3].map((k) => `<rect x="206" y="${960 + k * 120}" width="96" height="74" rx="37" fill="${C.skin}" transform="rotate(-6 250 ${1000 + k * 120})"/>`).join('')}
+    <path d="M810,1300 C870,1290 910,1340 880,1400 C850,1460 790,1470 760,1440 C740,1400 760,1330 810,1300 Z" fill="${C.skin}"/>
+    <g id="thumb${beat.i}"><path d="M770,1250 C800,1236 836,1250 846,1286 C860,1330 830,1380 790,1372 C760,1360 744,1300 770,1250 Z" fill="${C.skin}"/></g>`;
+  const ripple = el('div', 'ripple', null, phone.querySelector('.screen'));
+  const stamp = el('div', '', `<svg viewBox="-100 -100 200 200" width="300" height="300"><circle r="92" fill="#F08A3C"/><path d="M-40,2 L-10,32 L44,-28" fill="none" stroke="#1D2240" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/></svg>`, root);
+  stamp.style.cssText = 'position:absolute;left:390px;top:700px;opacity:0;z-index:30';
+  const k = 564 / 1080;
+  const [tx, ty] = beat.tap;
+  return (lt, dur) => {
+    const tapAt = 1.0, pushAt = 1.35;
+    const r = seg(lt, tapAt, tapAt + 0.5, easeOut);
+    ripple.style.cssText += `;left:${tx * k}px;top:${ty * k}px;opacity:${r > 0 && r < 1 ? 1 - r : 0};transform:scale(${0.4 + 1.6 * r})`;
+    const push = seg(lt, pushAt, pushAt + 0.45);
+    const a = phone.querySelector('.a'), b = phone.querySelector('.b');
+    a.style.transform = `translateX(${300 * push * k}px)`; a.style.filter = `brightness(${1 - 0.25 * push})`;
+    b.style.opacity = push > 0 ? 1 : 0;
+    const panEnd = beat.done ? dur - 1.5 : dur - 0.2;
+    b.style.transform = `translateX(${-1080 * k * (1 - push)}px) translateY(${-2600 * k * seg(lt, pushAt + 0.5, panEnd)}px)`;
+    const thumbPress = win(lt, tapAt - 0.25, tapAt + 0.15, 0.12) + (beat.done ? win(lt, dur - 1.45, dur - 1.05, 0.12) : 0);
+    $('thumb' + beat.i).setAttribute('transform', `translate(${-70 * thumbPress} ${-90 * thumbPress})`);
+    rig.style.transform = `scale(${lerp(0.96, 1.06, seg(lt, 0, dur))}) translateY(${Math.sin(lt * 1.8) * 8}px) rotate(${lerp(-3, 0, seg(lt, 0, dur))}deg)`;
+    if (beat.done) {
+      const c = phone.querySelector('.c'), d = seg(lt, dur - 1.1, dur - 0.8);
+      c.style.opacity = d;
+      const st = seg(lt, dur - 1.1, dur - 0.7, back) * (1 - seg(lt, dur - 0.25, dur));
+      stamp.style.opacity = clamp(st * 2); stamp.style.transform = `scale(${st})`;
+    }
+  };
+};
+
+// ---------- the rapid variant ----------
+let presenter = null;
+function presenterLayer() {
+  if (presenter) return presenter;
+  const layer = el('div', '', null, stage); layer.style.cssText = 'position:absolute;inset:0;z-index:40;pointer-events:none;visibility:hidden';
+  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 1080 1920'); svg.style.cssText = 'position:absolute;inset:0;width:1080px;height:1920px';
+  layer.appendChild(svg);
+  presenter = { layer, ch: makeChar(svg) };
+  return presenter;
+}
+function featureBg(root) {
+  const svg = svgIn(root, 'bg');
+  svg.innerHTML = `<defs><linearGradient id="fbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6EA"/><stop offset="1" stop-color="#F7D9B6"/></linearGradient></defs>
+    <rect width="1080" height="1920" fill="url(#fbg)"/><circle cx="160" cy="320" r="260" fill="#F08A3C" opacity=".1"/><circle cx="920" cy="1640" r="340" fill="#F08A3C" opacity=".1"/>`;
+}
+SCENES.presenterIntro = (root, beat) => {
+  featureBg(root);
+  const logo = el('img', '', null, root); logo.src = 'logo.svg'; logo.style.cssText = 'position:absolute;left:340px;top:200px;width:400px;height:400px';
+  const title = el('div', 'bigtext', 'כל האפליקציה בדקה', root); title.style.cssText += ';top:640px;font-size:96px;color:#1D2240';
+  return (lt, dur) => {
+    const a = seg(lt, 0.1, 0.7, back); logo.style.transform = `scale(${a})`;
+    const b = seg(lt, 0.5, 1.0, easeOut); title.style.opacity = b; title.style.transform = `translateY(${lerp(40, 0, b)}px)`;
+  };
+};
+SCENES.feature = (root, beat) => {
+  featureBg(root);
+  const phone = el('div', 'phone', phoneHTML(beat.screen, 0, beat.notif ? `<div class="notif" style="transform-origin:0 0;transform:scale(.56);left:12px;top:70px">${notifHTML(beat.notif, true)}</div>` : ''), root);
+  phone.style.cssText += ';width:520px;height:1126px;left:470px;top:300px';
+  const chip = el('div', 'chip', beat.chip, root); chip.style.cssText += ';right:60px;top:150px;max-width:860px';
+  const badge = el('div', 'badge', String(beat.n), root); badge.style.cssText += ';left:60px;top:140px';
+  return (lt, dur) => {
+    const a = seg(lt, 0, 0.45, back);
+    phone.style.transform = `translateY(${lerp(900, 0, a)}px) rotate(${lerp(8, beat.n % 2 ? 2 : -2, a)}deg)`;
+    if (beat.pan || beat.screen.endsWith('tall')) phone.querySelector('img').style.transform = `translateY(${-2200 * (500 / 1080) * seg(lt, 0.5, dur)}px)`;
+    const c = seg(lt, 0.15, 0.5, back); chip.style.transform = `scale(${c})`; chip.style.opacity = clamp(c * 2);
+    badge.style.transform = `scale(${seg(lt, 0, 0.35, back)}) rotate(${lerp(-90, 0, seg(lt, 0, 0.35))}deg)`;
+  };
+};
+SCENES.featureCompass = (root, beat) => {
+  featureBg(root);
+  const chip = el('div', 'chip', beat.chip, root); chip.style.cssText += ';right:60px;top:150px';
+  const badge = el('div', 'badge', String(beat.n), root); badge.style.cssText += ';left:60px;top:140px';
+  const r = radar(root, 'f' + beat.i);
+  return (lt, dur) => { r(lt, dur); chip.style.transform = `scale(${seg(lt, 0.15, 0.5, back)})`; badge.style.transform = `scale(${seg(lt, 0, 0.35, back)})`; };
+};
+
+// ---------- the before / after variant ----------
+SCENES.beforeMiss = (root, beat) => {
+  const walk = streetScene(root, { ...beat, sky: 'morning' }, { gray: true, stopAt: 0.25 });
+  const svgW = svgIn(root, 'fg');
+  const bubble = el('div', '', `<div style="font-size:44px;font-weight:700">סוף זמן קריאת שמע?</div><div style="font-size:64px;font-weight:800;direction:ltr">08:04 · 08:37 ?</div>`, root);
+  bubble.style.cssText = 'position:absolute;left:180px;top:300px;width:720px;padding:30px;border-radius:48px;background:#FFFDF9;text-align:center;z-index:22;opacity:0';
+  const missed = el('div', 'bigtext', 'הזמן עבר', root); missed.style.cssText += ';top:560px;font-size:120px;color:#C0392B;opacity:0';
+  const clock = el('div', 'clock', '08:30', root);
+  return (lt, dur) => {
+    walk(lt, dur);
+    const b = win(lt, dur * 0.3, dur * 0.66, 0.3); bubble.style.opacity = b; bubble.style.transform = `scale(${lerp(0.8, 1, b)})`;
+    const m = seg(lt, dur * 0.68, dur * 0.8, back); missed.style.opacity = clamp(m * 2); missed.style.transform = `scale(${m})`;
+    const minutes = Math.round(lerp(30, 41, seg(lt, 0, dur * 0.75, (p) => p)));
+    clock.textContent = '08:' + String(minutes).padStart(2, '0');
+    clock.style.background = minutes > 37 ? 'rgba(192,57,43,.9)' : 'rgba(29,34,64,.82)';
+  };
+};
+SCENES.montage3 = (root, beat) => {
+  featureBg(root);
+  const items = [['home-noon', '11:53 · מנחה'], ['home-night', '21:00 · קריאת שמע'], ['shabbat', 'שבת · שקט']];
+  const ps = items.map(([s, label], k) => {
+    const p = el('div', 'phone', phoneHTML(s), root); p.style.cssText += `;width:440px;height:953px;left:${320}px;top:${330}px;opacity:0`;
+    const c = el('div', 'chip', label, root); c.style.cssText += ';left:50%;top:1330px;opacity:0';
+    return [p, c];
+  });
+  return (lt, dur) => {
+    const step = dur / 3;
+    ps.forEach(([p, c], k) => {
+      const a = seg(lt, k * step, k * step + 0.45, back), b = k < 2 ? seg(lt, (k + 1) * step, (k + 1) * step + 0.35) : 0;
+      p.style.opacity = clamp(a * 2) * (1 - b); p.style.transform = `translateX(${lerp(-700, 0, a) + 700 * b}px) rotate(${lerp(-10, 0, a)}deg)`;
+      c.style.opacity = clamp(a * 2) * (1 - b); c.style.transform = `translateX(-50%) scale(${a})`;
+    });
+  };
+};
+SCENES.streak = (root, beat) => {
+  featureBg(root);
+  const svg = svgIn(root, 'fg');
+  svg.innerHTML = `<circle cx="540" cy="820" r="300" fill="none" stroke="#EADFCB" stroke-width="54"/><circle id="stRing" cx="540" cy="820" r="300" fill="none" stroke="#F08A3C" stroke-width="54" stroke-linecap="round" transform="rotate(-90 540 820)" stroke-dasharray="1885" stroke-dashoffset="1885"/>
+    <text id="stNum" x="540" y="860" text-anchor="middle" font-family="Rubik" font-weight="800" font-size="200" fill="#1D2240">1</text>
+    <text x="540" y="960" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="60" fill="#1D2240">ימים ברצף</text>
+    <text x="540" y="1230" text-anchor="middle" font-family="Rubik" font-weight="600" font-size="48" fill="#A04A0C">עוד 15 ימים ליעד 30</text>`;
+  return (lt, dur) => {
+    const p = seg(lt, 0.1, dur - 0.8, easeOut), n = Math.max(1, Math.round(p * 15));
+    svg.querySelector('#stNum').textContent = n;
+    svg.querySelector('#stRing').setAttribute('stroke-dashoffset', 1885 * (1 - n / 30));
+  };
+};
+
+SCENES.end = (root) => {
+  const svg = svgIn(root, 'bg');
+  svg.innerHTML = `<defs><radialGradient id="eg" cx=".5" cy=".36" r=".7"><stop offset="0" stop-color="#FFFDF9"/><stop offset="1" stop-color="#F3E6D2"/></radialGradient></defs><rect width="1080" height="1920" fill="url(#eg)"/>`;
+  const logo = el('img', '', null, root); logo.src = 'logo.svg'; logo.style.cssText = 'position:absolute;left:340px;top:380px;width:400px;height:400px';
+  const t1 = el('div', 'bigtext', 'יהודי 365', root); t1.style.cssText += ';top:880px;font-size:150px';
+  const t2 = el('div', 'bigtext', 'כל מצווה – בזמנה', root); t2.style.cssText += ';top:1080px;font-size:76px;color:#A04A0C;font-weight:700';
+  const t3 = el('div', 'bigtext', 'בלי חשבון · הכול נשמר אצלך בטלפון', root); t3.style.cssText += ';top:1200px;font-size:40px;color:#69645D;font-weight:500';
+  const t4 = el('div', 'bigtext', '<span style="display:inline-block;padding:26px 56px;border-radius:999px;background:#1D2240;color:#FFFDF9;font-size:48px">זמין ב־Google Play</span>', root); t4.style.cssText += ';top:1320px';
+  return (lt) => {
+    const a = seg(lt, 0.1, 0.8, back); logo.style.transform = `scale(${lerp(0.3, 1, a)}) rotate(${lerp(-20, 0, a)}deg)`; logo.style.opacity = clamp(a * 2);
+    [t1, t2, t3, t4].forEach((t, k) => { const p = seg(lt, 0.6 + k * 0.35, 1.1 + k * 0.35, easeOut); t.style.opacity = p; t.style.transform = `translateY(${lerp(40, 0, p)}px)`; });
+  };
+};
+
+function svgIn(root, cls) {
+  const s = document.createElementNS(NS, 'svg'); s.setAttribute('viewBox', '0 0 1080 1920'); s.setAttribute('class', cls); root.appendChild(s); return s;
+}
+
+// ---------- build the plan ----------
+const beats = PLAN.beats.map((beat, i) => {
+  const root = el('div', 'scene');
+  const b = { ...beat, i };
+  const draw = SCENES[beat.scene](root, b);
+  let notif = null;
+  const list = beat.notifs || (beat.notif && !['feature'].includes(beat.scene) ? [{ ...beat.notif, at: beat.scene === 'street' ? b.dur * 0.42 - 0.2 : beat.scene === 'friday' ? b.dur * 0.2 - 0.2 : 0.7 }] : []);
+  const notifs = list.map((n) => { const e = el('div', 'notif', notifHTML(n), root); e.style.zIndex = 20; return { n, e }; });
+  const clock = beat.time && !['beforeMiss'].includes(beat.scene) ? el('div', 'clock', beat.time, root) : null;
+  return { ...b, root, draw, notifs, clock };
+});
+const presenterBeats = beats.filter((b) => b.scene.startsWith('feature'));
+
+function render(t) {
+  for (const b of beats) {
+    const lt = t - b.start;
+    const visible = lt > -0.001 && lt < b.dur + 0.4;
+    b.root.style.visibility = visible ? 'visible' : 'hidden';
+    if (!visible) continue;
+    const fadeIn = b.i === 0 ? 1 : seg(lt, 0, 0.35, easeOut);
+    b.root.style.opacity = fadeIn;
+    b.root.style.zIndex = 1 + b.i;
+    b.root.style.transform = `scale(${lerp(1.04, 1, fadeIn)})`;
+    b.draw(lt, b.dur);
+    b.notifs.forEach(({ n, e }, k) => {
+      const inn = seg(lt, n.at, n.at + 0.5, back);
+      const stack = b.notifs.length > 1 && k === 0 ? seg(lt, b.notifs[1].n.at, b.notifs[1].n.at + 0.4) : 0;
+      e.style.transform = `translateY(${lerp(-520, 0, inn) + 400 * stack}px) scale(${1 - 0.1 * stack})`;
+      if (!b.compass) e.style.opacity = 1 - 0.3 * stack;
+      if (b.clock && n.clock) b.clock.textContent = lt > n.at ? n.clock : b.time;
+    });
+  }
+  // the presenter of the rapid variant
+  if (presenterBeats.length) {
+    const pr = presenterLayer();
+    const cur = presenterBeats.find((b) => t >= b.start && t < b.start + b.dur);
+    const first = presenterBeats[0], last = presenterBeats[presenterBeats.length - 1];
+    const on = seg(t, first.start, first.start + 0.5) * (1 - seg(t, last.start + last.dur - 0.2, last.start + last.dur + 0.3));
+    pr.layer.style.visibility = on > 0 ? 'visible' : 'hidden';
+    pr.layer.style.opacity = on;
+    if (cur || on > 0) {
+      const b = cur || last, lt = t - b.start;
+      const gesture = b.n % 3 === 0 ? P.thumbL : P.pointL;
+      const g = seg(lt, 0.15, 0.5, back);
+      const L = mixPose(P.sideL, gesture, g);
+      pose(pr.ch, { x: 230, y: 1840, s: 0.52, R: P.sideR, L, legs: { lift: [0, 0] },
+        face: { blink: blinkAt(t), smile: 0.75 + 0.2 * Math.sin(t * 2), gaze: [6, -2], open: 0.35 * Math.max(0, Math.sin(t * 11)) },
+        head: { rot: 3 * Math.sin(t * 1.4) } });
+    }
+  }
+  // subtitles
+  const sub = document.getElementById('sub');
+  const cur = PLAN.beats.find((b) => b.vo && t >= b.voStart && t <= b.voStart + b.voLen + 0.25);
+  if (cur && cur.scene !== 'end') {
+    sub.style.opacity = win(t, cur.voStart, cur.voStart + cur.voLen + 0.25, 0.2);
+    sub.querySelector('.txt').textContent = cur.vo.replace('יהודי שלוש מאות שישים וחמש', 'יהודי 365');
+    const tag = sub.querySelector('.tag'); tag.textContent = cur.caption || ''; tag.style.display = cur.caption ? 'block' : 'none';
+  } else sub.style.opacity = 0;
+}
+window.render = render;
+window.DURATION = PLAN.duration;
+render(0);
+</script>
+</body>
+</html>

@@ -6,7 +6,9 @@ D major, 96 BPM, I-V-vi-IV. Sections follow the video's timeline (seconds):
   22-29  full: kick, clap, bass, arpeggio (the montage)
   29-35  calm: pad and bells only (Shabbat)
   35-end outro: swell and a final chord
-Usage: python3 music.py <out.wav> [duration seconds]
+Usage: python3 music.py <out.wav> [duration seconds] [name=value ...]
+  The sections move with name=value: arp, kick, bass, full, calmA, calmB, outro (seconds) and bells (a comma list
+  of the bell motif's start times); the defaults are draft 1's timeline above.
 """
 import sys
 import wave
@@ -17,6 +19,9 @@ SR = 44100
 BPM = 96
 BEAT = 60 / BPM
 DUR = float(sys.argv[2]) if len(sys.argv) > 2 else 42.0
+OPT = dict(a.split('=', 1) for a in sys.argv[3:])
+AT = {k: float(OPT.get(k, v)) for k, v in dict(arp=6, kick=11, bass=14.5, full=22, calmA=29, calmB=35, outro=35).items()}
+BELLS = [float(x) for x in OPT['bells'].split(',')] if 'bells' in OPT else [0.6, 5.4, 17.6, 29.6, 32.1, 36.0]
 N = int(SR * DUR)
 rng = np.random.default_rng(365)
 
@@ -52,12 +57,13 @@ def section_gain(t):
     def ramp(t, a, b):
         return np.clip((t - a) / (b - a), 0, 1)
 
-    pad = 0.55 + 0.25 * ramp(t, 22, 24) - 0.2 * ramp(t, 29, 30) + 0.35 * ramp(t, 35, 38)
-    bell = np.where(t < 7, 1.0, np.where((t > 29) & (t < 35.5), 0.9, 0.35))
-    arp = ramp(t, 6, 8) * (1 - ramp(t, 29, 29.6)) + 0.6 * ramp(t, 35, 36) * (1 - ramp(t, DUR - 3, DUR - 1))
-    kick = ramp(t, 11, 11.1) * (1 - ramp(t, 29, 29.2)) + ramp(t, 35.5, 35.6) * (1 - ramp(t, DUR - 3.5, DUR - 3.4))
-    clap = ramp(t, 22, 22.1) * (1 - ramp(t, 29, 29.2))
-    bass = ramp(t, 14.5, 15.5) * (1 - ramp(t, 29, 29.5)) + ramp(t, 35, 36) * (1 - ramp(t, DUR - 2, DUR - 0.5))
+    A, K, B, F, CA, CB, O = (AT[k] for k in ('arp', 'kick', 'bass', 'full', 'calmA', 'calmB', 'outro'))
+    pad = 0.55 + 0.25 * ramp(t, F, F + 2) - 0.2 * ramp(t, CA, CA + 1) + 0.35 * ramp(t, O, O + 3)
+    bell = np.where(t < A + 1, 1.0, np.where((t > CA) & (t < CB + 0.5), 0.9, 0.35))
+    arp = ramp(t, A, A + 2) * (1 - ramp(t, CA, CA + 0.6)) + 0.6 * ramp(t, O, O + 1) * (1 - ramp(t, DUR - 3, DUR - 1))
+    kick = ramp(t, K, K + 0.1) * (1 - ramp(t, CA, CA + 0.2)) + ramp(t, O + 0.5, O + 0.6) * (1 - ramp(t, DUR - 3.5, DUR - 3.4))
+    clap = ramp(t, F, F + 0.1) * (1 - ramp(t, CA, CA + 0.2))
+    bass = ramp(t, B, B + 1) * (1 - ramp(t, CA, CA + 0.5)) + ramp(t, O, O + 1) * (1 - ramp(t, DUR - 2, DUR - 0.5))
     return pad, bell, arp, kick, clap, bass
 
 
@@ -131,8 +137,9 @@ for b in range(bars):
         add(layers['bass'], start + i * 2 * BEAT, bass_note(hz(chord[0] - 24), 2 * BEAT - 0.05))
 
 # The notification motif: a rising three-note bell at 0.6 s, echoed later.
-for at, notes in ((0.6, [74, 78, 81]), (5.4, [74, 78, 81]), (17.6, [81, 86]), (29.6, [74, 78, 81, 86]),
-                  (32.1, [78, 81]), (36.0, [74, 78, 81, 86])):
+MOTIFS = [[74, 78, 81], [74, 78, 81], [81, 86], [74, 78, 81, 86], [78, 81], [74, 78, 81, 86]]
+for k, at in enumerate(BELLS):
+    notes = MOTIFS[k % len(MOTIFS)]
     for i, m in enumerate(notes):
         add(layers['bell'], at + i * 0.18, bell(hz(m)) * 0.7)
 
