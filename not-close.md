@@ -515,7 +515,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 - [ ] Apply a downloaded update by itself on the return to the app (deferred)
   - **Flag:** `OTA`.
   - **Source:** the owner's question of 2026-11-10: some users miss the green ready-update banner. Proposed: reload into a downloaded update on the return from the background, as the return to home already does, never after a flow the app opened (`holdCovers()`) nor inside a holy block, the banner kept; a wait at a cold launch (`fallbackToCacheTimeout`) would need a build. The owner's answer the same day: "לא כרגע" (not now).
-  - **Status:** not started · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** not started · Committed: yes, `39eabdd` fix(startup): the logo never waits for the fonts for good, and a stuck launch leaves its trace · Pushed: yes · Live: no · Channel: none
 
 - [ ] The carousel's star and fill that work
   - **Flag:** `OTA`.
@@ -891,7 +891,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** The app never stays on its logo; and when a launch still sticks, the next one says where.
   - **Expected result:** The splash goes once the fonts load or fail, or after 5 seconds without them, the app then showing in the system font until they arrive; every launch leaves a trace of its steps, and Settings › About and contact prints, under the version, the last launch that never painted or needed that fallback, with its last step and whether the JS thread was still running.
   - **Done:** 2026-11-13. `FONT_WAIT_MS` (5 s) in [src/app/_layout.tsx](src/app/_layout.tsx); the launch trace [src/services/bootTrace.ts](src/services/bootTrace.ts), started by [src/services/bootStart.ts](src/services/bootStart.ts) from [index.js](index.js) right after crash reporting (steps `entry`, `modules`, `layout`, `ready`, `hidden`, `painted`, the notes `fontsTimeout` and `fontError`, a heartbeat every second until the paint), and its line in Settings. Verified: [src/services/__tests__/bootTrace.test.ts](src/services/__tests__/bootTrace.test.ts) (9), the `the splash at launch` block of [src/app/__tests__/rootLayout.render.test.tsx](src/app/__tests__/rootLayout.render.test.tsx) (fonts loaded, never loaded, failed; the never-loaded case fails with the limit removed), the line in [src/app/__tests__/settings.contact.render.test.tsx](src/app/__tests__/settings.contact.render.test.tsx), typecheck, lint, DOX and the full suite. Not checked: a phone. If the logo still sticks, the line under the version names the step: before `modules` a module load (the taharah key's synchronous Keystore read is the first suspect), `layout` without `ready` with heartbeats the font wait, a heartbeat that stopped a blocked JS thread, `painted` reached a native splash that did not go.
-  - **Status:** Version: OTA, expected with the next update · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `39eabdd` fix(startup): the logo never waits for the fonts for good, and a stuck launch leaves its trace · Pushed: yes · Live: no · Channel: none
 
 - [ ] Psalm 67:1 reads "לַמְנַצֵּח" without its furtive patach
   - **Found:** 2026-11-03, building the Teiman Birkat HaMazon, which reads Psalm 67 from the same source.
