@@ -29,7 +29,7 @@
   "home.allDone": "All mitzvot are done!",
   "home.noActive": "No active mitzvot in this window right now.",
   "home.noLocation": "No precise location. Enable GPS or choose a city manually.",
-  "home.notificationsDenied": "Notifications are off. Tap to enable.",
+  "home.notificationsDenied": "Notifications are off. Tap to continue.",
   "home.gpsTimeout": "GPS timed out. Showing your saved city for now.",
   "home.zmanimUnavailable": "Zmanim cannot be calculated for this location on this date. Pick another city in Settings.",
   "home.updateReady": "A new version of the app is ready. Tap to load it.",

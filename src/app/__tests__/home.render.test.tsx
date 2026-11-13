@@ -785,7 +785,7 @@ describe('home asks for notifications after setup', () => {
     useUserStore.setState({ notificationPermission: 'denied' });
     useUserStore.getState().learnHint('notifAsked');
     renderAt(DAY);
-    fireEvent.press(screen.getByText('ההתראות כבויות. להפעלה'));
+    fireEvent.press(screen.getByText('ההתראות כבויות. להמשך'));
     expect(mockAsk).toHaveBeenCalled();
   });
 });
