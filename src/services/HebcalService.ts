@@ -21,9 +21,22 @@ function toHDate(date: Date): HDate {
 
 // The civil day at the LOCATION, matching the zmanim ZmanimService resolves for it. HDate reads a
 // Date through device-local getters, so it gets a local Date carrying the location's calendar date.
+// Every offset and transition is a whole number of 15-minute steps, so a 15-minute bucket never
+// straddles a local midnight: its day is kept (as the Hebrew day's abs), and a plan that asks about
+// thousands of instants does the Luxon zone work once per bucket.
+const CIVIL_DAY_BUCKET_MS = 15 * 60_000;
+const CIVIL_DAY_CACHE_LIMIT = 4000;
+const civilDayCache = new Map<string, number>();
+
 function civilDayAt(instant: Date, loc: Location): HDate {
+  const key = `${loc.tz}|${Math.floor(instant.getTime() / CIVIL_DAY_BUCKET_MS)}`;
+  const abs = civilDayCache.get(key);
+  if (abs !== undefined) return new HDate(abs);
   const { year, month, day } = DateTime.fromJSDate(instant).setZone(loc.tz);
-  return toHDate(new Date(year, month - 1, day, 12));
+  const hd = toHDate(new Date(year, month - 1, day, 12));
+  if (civilDayCache.size >= CIVIL_DAY_CACHE_LIMIT) civilDayCache.clear();
+  civilDayCache.set(key, hd.abs());
+  return hd;
 }
 
 const DAWN_FALLBACK_HOUR = 4;
@@ -113,7 +126,36 @@ function blockKind(days: HDate[], loc: Location): HolyBlockKind {
 // days of Rosh Hashana into a third that is Shabbat. The block opens at candle lighting on the
 // erev and closes at the exit of its last day, `holyBlockExit()` after its shkia. Where the sun
 // never sets the civil day stands in.
+// A block depends on the Hebrew day and on every location field the zmanim and candle lighting read,
+// and the planner asks about the same few days for every trigger it judges: each answer is kept, and
+// a caller gets its own copy.
+const BLOCK_CACHE_LIMIT = 400;
+const blockCache = new Map<string, HolyBlock | null>();
+
 function holyBlockAround(hd: HDate, loc: Location): HolyBlock | null {
+  const key = [
+    hd.abs(),
+    loc.lat,
+    loc.lng,
+    loc.elevation ?? 0,
+    loc.tz,
+    loc.inIsrael,
+    loc.cityId ?? '',
+    candleLightingMinutes(loc),
+  ].join('|');
+  let block = blockCache.get(key);
+  if (block === undefined) {
+    block = computeHolyBlock(hd, loc);
+    if (blockCache.size >= BLOCK_CACHE_LIMIT) {
+      const oldest = blockCache.keys().next().value;
+      if (oldest !== undefined) blockCache.delete(oldest);
+    }
+    blockCache.set(key, block);
+  }
+  return block && { ...block, start: new Date(block.start), end: new Date(block.end), days: [...block.days] };
+}
+
+function computeHolyBlock(hd: HDate, loc: Location): HolyBlock | null {
   if (!isHolyHebrewDay(hd, loc)) return null;
   let first = hd;
   while (isHolyHebrewDay(first.prev(), loc)) first = first.prev();

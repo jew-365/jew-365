@@ -41,6 +41,7 @@ import { currentOrNextWindow, windowDueToday } from '@/utils/buildDayTimeline';
 import { clockOf } from '@/utils/clock';
 import { catalogListsText, dayFeatures } from '@/utils/siddur';
 import { formatDate, useI18n } from '@/i18n';
+import { useDeferredTab } from '@/hooks/useDeferredTab';
 
 const MITZVAH_TEXTS = MITZVOT.filter((mitzvah) => mitzvahTextId(mitzvah.id));
 const PRAYER_IDS = ['shacharit', 'mincha', 'maariv'];
@@ -122,7 +123,7 @@ function CatalogSection({ sectionKey, title, subtitle, icon, open, onToggle, ren
   );
 }
 
-export default function SiddurScreen() {
+function SiddurScreenContent() {
   const { colors } = useTheme();
   const { t } = useI18n();
   const { settings, location, nusach, inIsrael, language, nameFor, selichotInstalled } = useDayModel();
@@ -461,3 +462,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
 });
+
+// Mounts after the tab shown at launch has painted, or when it gains focus ([useDeferredTab](../../hooks/useDeferredTab.ts)).
+export default function SiddurScreen() {
+  return useDeferredTab() ? <SiddurScreenContent /> : null;
+}

@@ -108,6 +108,7 @@ import { minutesToTime, timeToMinutes } from '@/utils/clock';
 import { quietBoundsValid, quietHoursOf, type QuietBound } from '@/utils/quietHours';
 import { SETTINGS_SEARCH_ITEMS, type SettingsSearchItem, type SettingsSectionKey } from '@/utils/settingsSearch';
 import { ZmanimPicker } from '@/components/ZmanimSheet';
+import { useDeferredTab } from '@/hooks/useDeferredTab';
 
 const LANGS = ['he', 'en'] as const;
 const OPINIONS = ['GRA', 'MA'] as const;
@@ -143,7 +144,7 @@ const selectDayEstimate =
       );
     }, 0);
 
-export default function SettingsScreen() {
+function SettingsScreenContent() {
   const { colors } = useTheme();
   const { t, language } = useI18n();
   const router = useRouter();
@@ -1527,3 +1528,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
 });
+
+// Mounts after the tab shown at launch has painted, or when it gains focus ([useDeferredTab](../../hooks/useDeferredTab.ts)).
+export default function SettingsScreen() {
+  return useDeferredTab() ? <SettingsScreenContent /> : null;
+}

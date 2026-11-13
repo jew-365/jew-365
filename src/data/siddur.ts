@@ -494,11 +494,12 @@ export function selichotSeason(year: number, nusach: Nusach, place: Place): Seli
 
 export function selichotOfferOn(today: Date, nusach: Nusach, place: Place): SelichotOffer | null {
   const hd = new HDate(today);
-  const season = selichotSeason(
-    hd.getMonth() === months.TISHREI ? hd.getFullYear() : hd.getFullYear() + 1,
-    nusach,
-    place,
-  );
+  const year = hd.getMonth() === months.TISHREI ? hd.getFullYear() : hd.getFullYear() + 1;
+  // No season opens before the night of 1 Elul nor runs past 9 Tishrei: most of the year that answers
+  // without the day-by-day scan, which cost home's first render a launch's worth of work.
+  const earliest = new HDate(1, months.ELUL, year - 1).abs() - 1 - SELICHOT_OFFER_LEAD_DAYS;
+  if (hd.abs() < earliest || hd.abs() > new HDate(9, months.TISHREI, year).abs()) return null;
+  const season = selichotSeason(year, nusach, place);
   if (!season) return null;
   const day = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
   const from = new Date(

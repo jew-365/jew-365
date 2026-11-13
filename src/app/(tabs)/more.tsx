@@ -28,8 +28,9 @@ import { spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import type { SettingsSearchItem } from '@/utils/settingsSearch';
 import { useI18n } from '@/i18n';
+import { useDeferredTab } from '@/hooks/useDeferredTab';
 
-export default function MoreScreen() {
+function MoreScreenContent() {
   const { colors } = useTheme();
   const { language, t } = useI18n();
   const router = useRouter();
@@ -223,3 +224,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
 });
+
+// Mounts after the tab shown at launch has painted, or when it gains focus ([useDeferredTab](../../hooks/useDeferredTab.ts)).
+export default function MoreScreen() {
+  return useDeferredTab() ? <MoreScreenContent /> : null;
+}

@@ -470,6 +470,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
     date: '2026-11-09',
     items: [
       {
+        he: 'האפליקציה נפתחת מהר יותר: מסך הלוגו לא נתקע עוד שניות ארוכות. דף הבית מוצג ראשון, ושאר הלשוניות נטענות אחריו ברקע, ובניית ההתראות אחרי הפתיחה מהירה יותר.',
+        en: 'The app opens faster: the logo screen no longer hangs for long seconds. Home shows first, the other tabs load behind it, and building the notifications after the app opens is quicker.',
+      },
+      {
         he: 'צלילים משלנו להתראות: שנים עשר צלילים לבחירה, ביניהם שמונה רכים ועדינים (פעמוני רוח, זכוכית, קלימבה, טל, תיבת נגינה, חליל, קערה מזמרת ופסנתר רך), וצליל נפרד להתראה הרגילה, לכתומה שלפני האחרונה ולאחרונה. בהגדרות ← מכשיר והתראות ← צליל ההתראות. הצלילים מגיעים עם הגרסה הבאה מהחנות; עד אז ההתראות בצליל של הטלפון.',
         en: 'Sounds of our own for notifications: twelve to choose from, eight of them soft and gentle (Wind chime, Glass, Kalimba, Dew, Music box, Flute, Singing bowl and Soft piano), and a separate sound for the plain notification, the orange one before the last and the last one. In Settings → Device and notifications → Notification sound. The sounds come with the next version from the store; until then notifications use the phone’s sound.',
       },

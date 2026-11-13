@@ -18,6 +18,7 @@ import { appDayWindow } from '@/utils/buildDayTimeline';
 import { calendarDay, checkInFor } from '@/utils/checkIn';
 import { judgeDay } from '@/utils/historyStats';
 import { appDayKey } from '@/utils/locationDay';
+import * as siddurFlags from '@/utils/siddur';
 
 const JERUSALEM = CITIES[0];
 const NEW_YORK = CITIES.find((city) => city.cityId === 'new-york')!;
@@ -198,6 +199,21 @@ describe('the Selichot mitzvah', () => {
       begun: false,
     });
     expect(offerOn('teiman', '2025-08-24')).toMatchObject({ begun: true });
+  });
+
+  // Home asks on every render; the day-by-day scan was half of its first render (2026-11-13).
+  it('answers outside the weeks around the season without computing a single day', () => {
+    const place = siddurPlace(JERUSALEM, true);
+    const features = jest.spyOn(siddurFlags, 'dayFeatures');
+    try {
+      for (const iso of ['2025-11-13', '2026-03-01', '2026-07-01', '2025-10-05'])
+        expect(selichotOfferOn(calendarDay(iso), 'teiman', place)).toBeNull();
+      expect(features).not.toHaveBeenCalled();
+      expect(selichotOfferOn(calendarDay('2025-08-17'), 'teiman', place)).not.toBeNull();
+      expect(features).toHaveBeenCalled();
+    } finally {
+      features.mockRestore();
+    }
   });
 
   it('follows Rosh Hashana on a Thursday in 2024, with Tzom Gedaliah deferred past the Shabbat after it', () => {

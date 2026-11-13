@@ -8,6 +8,7 @@ jest.mock('expo-router', () => ({
     },
     { Screen: () => null },
   ),
+  useNavigation: (...args: unknown[]) => jest.requireActual('expo-router').useNavigation(...args),
 }));
 
 import * as fs from 'fs';
@@ -16,6 +17,7 @@ import * as path from 'path';
 import React from 'react';
 import { Platform, StyleSheet, Text } from 'react-native';
 import TabsLayout from '../(tabs)/_layout';
+import { useDeferredTab } from '@/hooks/useDeferredTab';
 import { useUserStore } from '@/stores/useUserStore';
 import { renderWithTheme } from '@/testing/render';
 import { THEMES } from '@/theme/colors';
@@ -54,7 +56,11 @@ function navigationInstall() {
   return { routerDir, tabs, tabsDir: path.dirname(tabs), stackDir: path.dirname(stack) };
 }
 
-function renderRealTabs() {
+function DeferredTab({ name }: { name: string }) {
+  return useDeferredTab() ? <Text>{`tab ${name}`}</Text> : null;
+}
+
+function renderRealTabs(deferred = false) {
   const { Stack, Tabs: RealTabs, router } = jest.requireActual<typeof import('expo-router')>('expo-router');
   const testingLibrary =
     jest.requireActual<typeof import('expo-router/testing-library')>('expo-router/testing-library');
@@ -81,7 +87,8 @@ function renderRealTabs() {
     '(tabs)/_layout': ShippedTabs,
   };
   names.forEach((name) => {
-    routes[`(tabs)/${name}`] = () => <Text>{`tab ${name}`}</Text>;
+    routes[`(tabs)/${name}`] =
+      deferred && name !== 'home' ? () => <DeferredTab name={name} /> : () => <Text>{`tab ${name}`}</Text>;
   });
   testingLibrary.renderRouter(routes, { initialUrl: '/home' });
 
@@ -103,6 +110,8 @@ function renderRealTabs() {
     canGoBack: () => router.canGoBack(),
     back: () => testingLibrary.act(() => router.back()),
     focused: () => names.find((name) => displayOf(name) === 'flex'),
+    mounted: () =>
+      names.filter((name) => testingLibrary.screen.queryByText(`tab ${name}`, { includeHiddenElements: true })),
     advance: (ms: number) => testingLibrary.act(() => jest.advanceTimersByTime(ms)),
   };
 }
@@ -213,5 +222,39 @@ describe('tab visibility under the installed bottom-tabs', () => {
     }
     tabs.advance(1000);
     expect(tabs.displays()).toEqual(onlyDisplayed(tabs.names, order[(switches - 1) % order.length]));
+  });
+});
+
+// The splash stays until the first commit ends, so the tabs not shown mount after it (useDeferredTab).
+describe('the tabs not shown at launch', () => {
+  beforeEach(() => {
+    useUserStore.getState().reset();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('render nothing in the first commit, then mount one per frame after home has painted', () => {
+    const tabs = renderRealTabs(true);
+    expect(tabs.mounted()).toEqual(['home']);
+    const counts: number[] = [];
+    for (let step = 0; step < 50 && counts[counts.length - 1] !== tabs.names.length; step++) {
+      tabs.advance(1);
+      counts.push(tabs.mounted().length);
+    }
+    // One more tab after each painted frame, never all of them at once.
+    expect(new Set(counts).size).toBeGreaterThanOrEqual(tabs.names.length - 1);
+    expect(counts.every((count, i) => i === 0 || count - counts[i - 1] <= 1)).toBe(true);
+    tabs.advance(1000);
+    expect(tabs.mounted().sort()).toEqual([...tabs.names].sort());
+  });
+
+  it('mount at once when the user switches to one first', () => {
+    const tabs = renderRealTabs(true);
+    tabs.goTo('settings');
+    expect(tabs.mounted()).toEqual(expect.arrayContaining(['home', 'settings']));
+    expect(tabs.displayOf('settings')).toBe('flex');
   });
 });

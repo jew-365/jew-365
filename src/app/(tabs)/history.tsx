@@ -112,6 +112,7 @@ import { appDay, appDayKey } from '@/utils/locationDay';
 import { firstName } from '@/utils/homeDay';
 import { nextStreakGoal } from '@/utils/streakGoal';
 import { shabbatOf } from '@/utils/weeklyReport';
+import { useDeferredTab } from '@/hooks/useDeferredTab';
 
 const HISTORY_DAYS = 30;
 const HERO_HEIGHT = scaled(360);
@@ -1009,7 +1010,7 @@ function ReadingCard() {
   );
 }
 
-export default function HistoryScreen() {
+function HistoryScreenContent() {
   const { colors } = useTheme();
   const { t, language } = useI18n();
   const { allMitzvot, enabled, location, settings, nameFor } = useDayModel();
@@ -2218,3 +2219,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
 });
+
+// Mounts after the tab shown at launch has painted, or when it gains focus ([useDeferredTab](../../hooks/useDeferredTab.ts)).
+export default function HistoryScreen() {
+  return useDeferredTab() ? <HistoryScreenContent /> : null;
+}

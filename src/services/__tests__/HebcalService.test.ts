@@ -315,6 +315,20 @@ describe('HebcalService holy blocks', () => {
     expect(HebcalService.holyBlockAt(minutesFrom(block.end, 1), JERUSALEM_CITY)).toBeNull();
   });
 
+  it('keeps each block once, and a caller that changes its copy changes no other caller', () => {
+    const first = HebcalService.holyBlockOn(noonAt(JERUSALEM_CITY, '2026-04-25'), JERUSALEM_CITY)!;
+    const expected = { ...first, start: new Date(first.start), end: new Date(first.end), days: [...first.days] };
+    first.start.setTime(0);
+    first.end.setTime(0);
+    first.days.push('changed');
+    expect(HebcalService.holyBlockOn(noonAt(JERUSALEM_CITY, '2026-04-25'), JERUSALEM_CITY)).toEqual(expected);
+    expect(HebcalService.holyBlockAt(at(JERUSALEM_CITY, '2026-04-24T23:00'), JERUSALEM_CITY)).toEqual(expected);
+    // Another place's candle lighting is its own block, never the cached one.
+    const early: Location = { ...JERUSALEM_CITY, candleLightingMinutes: 40 };
+    const earlier = HebcalService.holyBlockOn(noonAt(early, '2026-04-25'), early)!;
+    expect(expected.start.getTime() - earlier.start.getTime()).toBe(20 * 60_000);
+  });
+
   it('isHolyDay is day-granular: Friday night is still a weekday', () => {
     expect(HebcalService.isHolyDay(at(JERUSALEM_CITY, '2026-04-24T23:00'), JERUSALEM_CITY)).toBe(false);
     expect(HebcalService.isHolyDay(at(JERUSALEM_CITY, '2026-04-25T06:00'), JERUSALEM_CITY)).toBe(true);
