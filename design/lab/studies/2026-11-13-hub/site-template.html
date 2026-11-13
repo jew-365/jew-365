@@ -1,0 +1,447 @@
+<title>מפת היכולות</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&display=swap">
+<style>
+/* Layout: an intro, one line of palette chips and one of names, then three sections (the More tab, the capabilities
+   screen, home's entry points), each a row of phones drawn in the app's own tokens (spacing 4-40, radius 4-24,
+   Rubik at the app's type scale) and in the palette chosen. The page chrome follows the viewer's theme. */
+:root {
+  --page: #F6F1E8; --card: #FFFDF9; --ink: #1D2240; --sub: #69645D; --line: #E6DCCB; --accent: #F08A3C; --on-accent: #2B1608; --mark: #A04A0C; --frame: #1D2240;
+  --font: "Rubik", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --page: #12152B; --card: #1B1F3A; --ink: #EEF0FA; --sub: #A9AEC8; --line: #2C3152; --accent: #F08A3C; --on-accent: #2B1608; --mark: #F5A86C; --frame: #050713; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --page: #12152B; --card: #1B1F3A; --ink: #EEF0FA; --sub: #A9AEC8; --line: #2C3152; --accent: #F08A3C; --on-accent: #2B1608; --mark: #F5A86C; --frame: #050713; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--font); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 22px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; }
+h1 { margin: 0; font-size: 28px; font-weight: 800; text-wrap: balance; }
+h2 { margin: 18px 0 0; font-size: 22px; font-weight: 800; text-wrap: balance; }
+.intro, .lead { margin: 0; color: var(--sub); line-height: 1.6; max-width: 72ch; font-size: 15px; }
+.bars { display: grid; gap: 8px; }
+@media (min-width: 900px) { .bars { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--page); padding-block: 8px; } }
+.bar { display: flex; flex-wrap: nowrap; gap: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.bar::-webkit-scrollbar { display: none; }
+.bar > * { flex: none; white-space: nowrap; }
+.bar > span { font-size: 14px; color: var(--sub); }
+.bar button, .bar a { font: 600 15px var(--font); min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+.bar button i { width: 16px; height: 16px; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 2px var(--card), 0 0 0 3px var(--line); }
+.bar button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--mark); outline-offset: 2px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(368px, 1fr)); gap: 22px; align-items: start; }
+@media (max-width: 420px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.opt { display: grid; gap: 10px; min-width: 0; justify-items: center; }
+.opt header { display: flex; align-items: baseline; gap: 10px; width: 100%; max-width: 376px; }
+.opt header .letter { font-weight: 800; font-size: 20px; color: var(--mark); }
+.opt header b { font-size: 17px; }
+.opt header .rec { margin-inline-start: auto; font-size: 12px; font-weight: 700; color: var(--on-accent); background: var(--accent); border-radius: 999px; padding: 3px 10px; }
+.opt p { margin: 0; color: var(--sub); font-size: 14px; line-height: 1.55; max-width: 376px; width: 100%; }
+.decide { background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 6px; max-width: 80ch; }
+.decide b { font-size: 16px; }
+.decide ol { margin: 0; padding-inline-start: 22px; color: var(--sub); line-height: 1.7; font-size: 15px; }
+
+/* The phone: a 360-point screen inside a frame, in the chosen palette (--p-*). */
+.phone { width: 100%; max-width: 376px; height: 760px; border: 8px solid var(--frame); border-radius: 40px; overflow: hidden; position: relative; background: var(--p-bg); color: var(--p-text); }
+.screen { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding-bottom: 96px; }
+.screen::-webkit-scrollbar { display: none; }
+.status { height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font-size: 13px; font-weight: 600; color: var(--p-text); }
+.body { padding: 0 16px; display: grid; gap: 0; }
+.navbar { padding: 12px 16px 8px; display: flex; align-items: center; gap: 12px; }
+.navbar h3 { margin: 0; font-size: 28px; line-height: 34px; font-weight: 900; flex: 1; }
+.sheader { padding: 8px 16px 8px; display: grid; gap: 8px; }
+.sheader .top { display: flex; align-items: center; gap: 8px; }
+.pill { min-height: 40px; min-width: 40px; border-radius: 999px; border: 0; background: var(--p-surface); color: var(--p-text); display: inline-grid; place-items: center; box-shadow: 0 2px 12px color-mix(in srgb, var(--p-text) 7%, transparent); font: 600 13px var(--font); padding: 0 12px; }
+.sheader h3 { margin: 0; font-size: 22px; line-height: 28px; font-weight: 800; }
+.sheader small { font-size: 13px; color: var(--p-textSub); line-height: 18px; }
+.label { margin: 12px 4px 8px; font-size: 17px; line-height: 24px; font-weight: 700; color: var(--p-text); display: flex; align-items: center; gap: 8px; }
+.label .link { margin-inline-start: auto; font: 600 13px var(--font); color: var(--p-goldText); background: none; border: 0; min-height: 44px; padding: 0 4px; }
+.card { background: var(--p-surface); border-radius: 20px; box-shadow: 0 2px 12px color-mix(in srgb, var(--p-text) 7%, transparent); overflow: hidden; }
+.card.pad { padding: 16px; }
+.card + .card { margin-top: 12px; }
+.row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 16px; background: none; border: 0; color: inherit; font: inherit; text-align: start; cursor: pointer; position: relative; }
+.card > .row + .row::before, .card > .row + .rowgroup::before, .divrow::before { content: ""; position: absolute; top: 0; inset-inline: 16px; height: 1px; background: var(--p-border); }
+.row .meta { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.row .t { font-size: 17px; line-height: 24px; font-weight: 700; }
+.row .c { font-size: 13px; line-height: 18px; color: var(--p-textSub); }
+.row.muted .t { color: var(--p-textMuted); }
+.tile { width: 44px; height: 44px; border-radius: 17.6px; display: grid; place-items: center; flex: none; background: var(--p-goldLight); }
+.tile.muted { background: var(--p-surface2); }
+.tile.sm { width: 32px; height: 32px; border-radius: 12.8px; }
+.chev { width: 20px; height: 20px; flex: none; color: var(--p-textMuted); }
+.act { flex: none; min-height: 36px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--p-gold); background: var(--p-surface); color: var(--p-goldText); font: 600 13px var(--font); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; position: relative; }
+.act::after { content: ""; position: absolute; inset: -6px -4px; }
+.act.fill { background: var(--p-gold); color: var(--p-onGold); }
+.state-on { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--p-safe); }
+.search { display: flex; align-items: center; gap: 12px; padding: 0 16px; min-height: 52px; color: var(--p-textMuted); font-size: 15px; width: 100%; border: 0; background: var(--p-surface); border-radius: 20px; box-shadow: 0 2px 12px color-mix(in srgb, var(--p-text) 7%, transparent); font-family: var(--font); cursor: text; text-align: start; }
+.search.big { min-height: 60px; font-size: 17px; border: 1.5px solid var(--p-gold); }
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 10px 0 2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; min-height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: var(--p-surface); color: var(--p-text); font: 500 13px var(--font); box-shadow: 0 1px 6px color-mix(in srgb, var(--p-text) 6%, transparent); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; position: relative; }
+.chip::after { content: ""; position: absolute; inset: -4px 0; }
+.chip[aria-pressed="true"] { background: var(--p-gold); color: var(--p-onGold); }
+.feature { padding: 16px; display: grid; gap: 12px; }
+.feature .head { display: flex; gap: 12px; align-items: center; }
+.feature .t { font-size: 17px; font-weight: 700; line-height: 24px; }
+.feature .c { font-size: 15px; line-height: 22px; color: var(--p-textSub); }
+.btn { min-height: 48px; border-radius: 16px; border: 0; background: var(--p-gold); color: var(--p-onGold); font: 700 15px var(--font); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; width: 100%; }
+.btn.ghost { background: transparent; color: var(--p-goldText); }
+.carousel { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px 8px; scroll-snap-type: x mandatory; }
+.carousel::-webkit-scrollbar { display: none; }
+.carousel .card { flex: 0 0 82%; scroll-snap-align: start; margin: 0; }
+.goals { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.goal { background: var(--p-surface); border-radius: 20px; box-shadow: 0 2px 12px color-mix(in srgb, var(--p-text) 7%, transparent); padding: 14px; display: grid; gap: 10px; border: 0; color: inherit; font: inherit; text-align: start; cursor: pointer; align-content: start; min-height: 112px; }
+.goal .t { font-size: 15px; font-weight: 700; line-height: 22px; }
+.goal .icons { display: flex; gap: 4px; flex-wrap: wrap; }
+.goal .icons span { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 8px; }
+.goal .icons .off { opacity: 0.38; filter: grayscale(1); }
+.gcard { padding: 0; }
+.gcard > .row { padding-block: 14px; }
+.gcard .strip { display: flex; gap: 4px; margin-top: 4px; }
+.gcard .strip span { width: 20px; height: 20px; display: grid; place-items: center; }
+.gcard .strip .off { opacity: 0.38; filter: grayscale(1); }
+.gcard .rows { display: none; }
+.gcard.open .rows { display: block; }
+.gcard .rows .row { padding-block: 12px; }
+.gcard .bundle { padding: 4px 16px 14px; }
+.flip { transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1); }
+.gcard.open .flip { transform: rotate(180deg); }
+
+/* Home's slice. */
+.hero { background: linear-gradient(180deg, #4B9DEB, #6DB4F1 55%, #A8D5F8); color: #0A1228; padding: 10px 16px 18px; display: grid; gap: 10px; }
+.hero .top { display: flex; align-items: center; gap: 10px; }
+.hero .greet { flex: 1; display: grid; }
+.hero .greet small { font-size: 12px; line-height: 16px; }
+.hero .greet b { font-size: 17px; line-height: 24px; }
+.logo { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(#ffffffcc, #ffffff00 72%); display: grid; place-items: center; font: 900 11px var(--font); color: #002767; letter-spacing: -0.3px; }
+.roundbtn { width: 44px; height: 44px; border-radius: 50%; border: 0; display: grid; place-items: center; background: #ffffffb3; color: #0A1228; cursor: pointer; }
+.hero .arc { height: 96px; border-radius: 20px; border: 1.5px dashed #0A122855; display: grid; place-items: center; font-size: 13px; color: #0A1228b0; text-align: center; padding: 0 20px; }
+.hero .spill { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px; border-radius: 999px; background: #ffffffd9; color: #3a4466; border: 0; font: 400 15px var(--font); cursor: text; }
+.now { display: grid; gap: 12px; }
+.nowcard { padding: 16px; display: grid; gap: 10px; }
+.nowcard .head { display: flex; align-items: center; gap: 12px; }
+.nowcard .t { font-size: 17px; font-weight: 700; flex: 1; }
+.bar2 { height: 6px; border-radius: 3px; background: var(--p-surface2); overflow: hidden; display: flex; }
+.bar2 i { display: block; height: 100%; background: var(--p-gold); }
+.nowcard .times { display: flex; justify-content: space-between; font-size: 12px; color: var(--p-textSub); font-variant-numeric: tabular-nums; }
+.textlink { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; margin-top: 4px; border: 0; background: none; color: var(--p-goldText); font: 600 15px var(--font); cursor: pointer; width: 100%; }
+.dayrow .time { font-size: 13px; color: var(--p-textSub); font-variant-numeric: tabular-nums; }
+
+/* The tab bar floats over the screen, as in the app. */
+.tabbar { position: absolute; inset-inline: 10px; bottom: 10px; height: 64px; border-radius: 24px; background: var(--p-tabBg); box-shadow: 0 4px 18px color-mix(in srgb, var(--p-text) 14%, transparent); display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; z-index: 2; }
+.tabbar span { display: grid; justify-items: center; gap: 2px; font-size: 11px; color: var(--p-textMuted); font-weight: 500; }
+.tabbar span.on { color: var(--p-goldText); font-weight: 700; }
+.toast { position: absolute; inset-inline: 16px; bottom: 86px; background: var(--p-text); color: var(--p-bg); border-radius: 14px; padding: 10px 14px; font-size: 14px; font-weight: 600; text-align: center; opacity: 0; transform: translateY(8px); transition: opacity 180ms, transform 180ms cubic-bezier(0.23, 1, 0.32, 1); pointer-events: none; z-index: 3; }
+.toast.on { opacity: 1; transform: none; }
+.tap { transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1); }
+.tap:active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) { .tap, .toast, .flip { transition: none; } }
+</style>
+
+<div class="wrap" dir="rtl" lang="he">
+  <h1>מפת היכולות</h1>
+  <p class="intro">סקיצות לשלב 2 של תוכנית הגילוי: לשונית ״עוד״ כמרכז של כל מה שהאפליקציה יודעת לעשות, מסך חדש של כל היכולות, ושתי דרכי כניסה מדף הבית (חיפוש וכל המצוות). הכול על המילים, האייקונים והמצב האמיתיים של התקנה חדשה בנוסח אשכנז בירושלים, ביום רביעי ח׳ בכסלו. אפשר ללחוץ: הפעלה, הורדה, פתיחה וקיפול. בחירה אחת לכל קבוצה, או שילוב, ואני מממש.</p>
+  <div class="bars">
+    <div class="bar" id="palettes" role="group" aria-label="ערכת צבעים"><span>ערכת צבעים</span></div>
+    <div class="bar" id="names" role="group" aria-label="שם הלשונית"><span>שם הלשונית</span></div>
+    <div class="bar"><span>קפיצה אל</span><a href="#hub">לשונית עוד</a><a href="#caps">כל היכולות</a><a href="#home">דף הבית</a><a href="#decide">מה להחליט</a></div>
+  </div>
+
+  <section id="hub" class="grid-wrap">
+    <h2>1. לשונית ״עוד״ כמרכז</h2>
+    <p class="lead">היום הלשונית היא רשימה אחת של שלוש־עשרה שורות בלי סדר. בשלושת הכיוונים החיפוש למעלה, עד שלוש הצעות מהמנגנון שכבר בנוי בדף הבית, כניסה למסך כל היכולות, ואחר כך קבוצות עם שם.</p>
+    <div class="grid" id="grid-hub"></div>
+  </section>
+
+  <section id="caps">
+    <h2>2. מסך ״כל היכולות״</h2>
+    <p class="lead">מסך חדש שעונה על ״מה עוד האפליקציה יכולה לעשות בשבילי״: 28 יכולות לפי שבעה נושאים, לכל אחת המצב שלה ופעולה אחת. מה שכבוי נראה מיד ונמצא במרחק הקשה. אין ציון ואין רשימה שנייה של מתגים: קבוצת מצוות פותחת את רשימת המצוות.</p>
+    <div class="grid" id="grid-caps"></div>
+  </section>
+
+  <section id="home">
+    <h2>3. כניסות מדף הבית</h2>
+    <p class="lead">החיפוש במרחק הקשה אחת (B1) ושורה לכל המצוות מתחת ל״היום שלי״ (B2). המעגל, הכרטיסים וההודעות נשארים כמו שהם.</p>
+    <div class="grid" id="grid-home"></div>
+  </section>
+
+  <section id="decide" class="decide">
+    <b>מה להחליט</b>
+    <ol>
+      <li>כיוון ללשונית: היום, א, ב או ג.</li>
+      <li>כיוון למסך כל היכולות: א או ב.</li>
+      <li>כניסות מדף הבית: א או ב, או שילוב (למשל סמל החיפוש של א עם הקישור של ב).</li>
+      <li>שם הלשונית: ״עוד״ או ״גלה״ (החלפה בשורה למעלה). ושם לרשימת המצוות, כדי ש״המצוות שלי״ יהיה רק למצוות שהוספת בעצמך: כאן ״כל המצוות״.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+const DATA = __DATA__;
+const { PALETTES, STRINGS, CAPS, GOALS, OFFERS, MORE_TODAY, DEFAULT_ON, DAY, ICONS } = DATA;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+// Icons: the drawn Jewish icons in tones of one colour (toneOf() of MitzvahIcon.tsx), the UI icons stroked.
+const hex = (v) => { const h = v.replace('#', ''); const f = h.length === 3 ? [...h].map((d) => d + d).join('') : h.slice(0, 6); return [0, 2, 4].map((i) => parseInt(f.slice(i, i + 2), 16)); };
+const toneOf = (color, role) => {
+  const tone = ICONS.TONES[role]; const base = hex(color);
+  if (!tone || base.some(Number.isNaN)) return color;
+  const other = hex(tone.with);
+  return '#' + base.map((c, i) => Math.round(c * tone.share + other[i] * (1 - tone.share)).toString(16).padStart(2, '0')).join('');
+};
+let gid = 0;
+const nodes = (list, color, grad) => list.map(({ t, c, id, fill, stroke, stopColor, ...attrs }) => {
+  const paint = (v) => (v === undefined || v === 'none' ? v : v.url ? `url(#${grad})` : toneOf(color, v.role));
+  const all = { ...attrs, fill: paint(fill), stroke: paint(stroke), 'stop-color': paint(stopColor) };
+  if (id) all.id = grad;
+  const at = Object.entries(all).filter(([, v]) => v !== undefined).map(([k, v]) => `${k.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())}="${v}"`).join(' ');
+  const tag = t === 'linearGradient' ? 'linearGradient' : t;
+  return `<${tag} ${at}>${c ? nodes(c, color, grad) : ''}</${tag}>`;
+}).join('');
+// Colours resolve when the palette is known, so icons are drawn per palette.
+let P = PALETTES.gold;
+const icon = (name, color, size = 24) => {
+  const j = ICONS.JEWISH[name];
+  if (j) return `<svg width="${size}" height="${size}" viewBox="2 2 44 44" aria-hidden="true">${nodes(j, color, `g${++gid}`)}</svg>`;
+  const ui = ICONS.UI[name] ?? ICONS.UI.star;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ui}</svg>`;
+};
+const tile = (name, tone = 'accent', small = false) =>
+  `<span class="tile${tone === 'muted' ? ' muted' : ''}${small ? ' sm' : ''}">${icon(name, tone === 'muted' ? P.textMuted : P.gold, small ? 18 : 24)}</span>`;
+const chevron = () => `<span class="chev">${icon('chevronLeft', P.textMuted, 20)}</span>`;
+const row = ({ icon: ic, tone, title, caption, trailing = chevron(), act, muted }) =>
+  `<button type="button" class="row tap${muted ? ' muted' : ''}" data-act="${esc(act ?? `נפתח: ${title}`)}">${tile(ic, tone)}<span class="meta"><span class="t">${esc(title)}</span>${caption ? `<span class="c">${esc(caption)}</span>` : ''}</span>${trailing}</button>`;
+const label = (text, link) => `<div class="label">${esc(text)}${link ? `<button type="button" class="link" data-act="${esc(link.act)}">${esc(link.text)}</button>` : ''}</div>`;
+
+let tabName = 'עוד';
+const tabbar = (active) => {
+  const tabs = [['more', tabName, 'sparkle'], ['siddur', STRINGS['nav.siddur'], 'siddur'], ['home', STRINGS['nav.home'], 'sun'], ['history', STRINGS['nav.history'], 'star'], ['settings', STRINGS['nav.settings'], 'sliders']];
+  return `<nav class="tabbar" aria-hidden="true">${tabs.map(([id, name, ic]) => `<span class="${id === active ? 'on' : ''}">${icon(ic, id === active ? P.goldText : P.textMuted, 22)}<span data-tabname="${id}">${esc(name)}</span></span>`).join('')}</nav>`;
+};
+const phone = (inner, active) => `<div class="phone"><div class="screen"><div class="status"><span>13:10</span><span>5G ▮▮▮</span></div>${inner}</div>${tabbar(active)}<div class="toast" role="status" aria-live="polite"></div></div>`;
+
+// The capability list with its fresh-install states, and the few words the app does not have yet (proposed copy).
+const capsOf = (goal) => CAPS.filter((c) => c.goal === goal);
+const capById = Object.fromEntries(CAPS.map((c) => [c.id, c]));
+const offerOf = (id) => OFFERS.find((o) => o.id === id);
+const inUse = DEFAULT_ON.length;
+const WORDS = {
+  worth: 'כדאי לנסות',
+  all: 'כל היכולות',
+  allCaption: 'מה פועל אצלך ומה אפשר להוסיף, לפי נושא',
+  learning: 'לימוד יומי',
+  prayerTools: 'תפילה: טקסטים וכלים',
+  calendar: 'לוח השנה',
+  app: 'האפליקציה',
+  library: 'כל המצוות',
+  libraryCaption: `${inUse} פעילות · הוספת מצווה משלך`,
+  turnOn: 'הפעלה',
+  download: 'הורדה',
+  on: 'פועל',
+  allOn: 'להפעיל הכול',
+  searchHint: 'חיפוש בכל האפליקציה',
+};
+const LEARNING = MORE_TODAY.filter((r) => r.muted && r.icon !== 'shofar');
+const rowFromToday = (r) => row({ icon: r.icon, tone: r.muted ? 'muted' : 'accent', title: r.title, caption: r.caption, muted: r.muted });
+const todayRow = (title) => MORE_TODAY.find((r) => r.title === title);
+const SEL = MORE_TODAY.find((r) => r.icon === 'shofar');
+const TEH = MORE_TODAY.find((r) => r.icon === 'tehillim');
+const COMPASS = MORE_TODAY.find((r) => r.icon === 'compass');
+const HOT = MORE_TODAY.find((r) => r.icon === 'phone');
+const GUIDE = MORE_TODAY.find((r) => r.icon === 'guide');
+const SCHED = MORE_TODAY.find((r) => r.icon === 'calendar');
+const HIL = MORE_TODAY.find((r) => r.icon === 'hilula');
+const RC = capById.roshChodesh;
+
+// Three offers that apply to this install on its fourth day: candle lighting toward Shabbat, Birchot HaShachar and a
+// learning program (src/utils/offers.ts).
+const HUB_OFFERS = ['candles', 'birchot', 'learning'].map((id) => ({ ...offerOf(id), icon: { candles: 'candles', birchot: 'brachot', learning: 'chok' }[id] }));
+const offerRow = (o) => row({ icon: o.icon, title: o.title, caption: o.body, trailing: `<span class="act" data-act="${esc(o.accept)}: ${esc(o.title)}">${esc(WORDS.turnOn)}</span>`, act: o.accept });
+const searchBox = (big) => `<button type="button" class="search tap${big ? ' big' : ''}" data-act="המקלדת נפתחת בחיפוש">${icon('search', P.textMuted, 20)}<span>${esc(STRINGS['more.searchPlaceholder'])}</span></button>`;
+const navbar = () => `<div class="navbar"><h3 data-tabtitle>${esc(tabName)}</h3></div>`;
+
+const HUB = [
+  {
+    id: 'today', name: 'היום באפליקציה',
+    note: 'חיפוש ואחריו כרטיס אחד של שלוש־עשרה שורות: לוח זמנים, חמש תוכניות לימוד, סליחות, תהילים, הילולות, מצפן, קו הלכה ומדריך. אין קבוצות, אין הצעות, וכל המצוות נמצאות רק בהגדרות.',
+    body: () => phone(`${navbar()}<div class="body">${searchBox()}<div style="height:12px"></div><div class="card">${MORE_TODAY.map(rowFromToday).join('')}</div></div>`, 'more'),
+  },
+  {
+    id: 'groups', name: 'קבוצות עם שם', rec: true,
+    note: 'כמו המבנה של ההגדרות: חיפוש, ״כדאי לנסות״ עם עד שלוש הצעות וכפתור הפעלה, שורה בולטת לכל היכולות, ואז ארבע קבוצות. כל המצוות עוברות לכאן עם מספר הפעילות. הכי קרוב למה שיש, ולכן הכי מהר לבנות ולבדוק.',
+    body: () => phone(`${navbar()}<div class="body">${searchBox()}
+      ${label(WORDS.worth)}<div class="card">${HUB_OFFERS.map(offerRow).join('')}</div>
+      <div style="height:12px"></div><div class="card">${row({ icon: 'sparkle', title: WORDS.all, caption: WORDS.allCaption, act: 'נפתח: כל היכולות' })}</div>
+      ${label(WORDS.learning)}<div class="card">${LEARNING.map(rowFromToday).join('')}</div>
+      ${label(WORDS.prayerTools)}<div class="card">${[SEL, TEH, COMPASS, HOT].map(rowFromToday).join('')}</div>
+      ${label(WORDS.calendar)}<div class="card">${rowFromToday(SCHED)}${row({ icon: RC.icon, tone: 'muted', title: RC.title, caption: RC.benefit })}${rowFromToday(HIL)}</div>
+      ${label(WORDS.app)}<div class="card">${row({ icon: 'shacharit', title: WORDS.library, caption: WORDS.libraryCaption, act: 'נפתח: כל המצוות' })}${rowFromToday(GUIDE)}</div>
+    </div>`, 'more'),
+  },
+  {
+    id: 'tiles', name: 'אריחי נושאים',
+    note: 'ההצעות בפס אופקי של כרטיסים, ומתחתיהן שבעה אריחים, אחד לכל נושא של מסך כל היכולות. בכל אריח האייקונים של היכולות שלו: צבעוני מה שפועל, אפור מה שעוד לא. לחיצה פותחת את המסך על הנושא. ויזואלי וקצר, אבל עוד הקשה עד לתוכנית לימוד.',
+    body: () => phone(`${navbar()}<div class="body">${searchBox()}
+      ${label(WORDS.worth)}<div class="carousel">${HUB_OFFERS.map((o) => `<div class="card feature"><div class="head">${tile(o.icon)}<span class="t">${esc(o.title)}</span></div><span class="c">${esc(o.body)}</span><button type="button" class="btn tap" data-act="${esc(o.accept)}: ${esc(o.title)}">${esc(o.accept)}</button></div>`).join('')}</div>
+      ${label(WORDS.all, { text: 'הכול ברשימה', act: 'נפתח: כל היכולות' })}
+      <div class="goals">${GOALS.map((g) => `<button type="button" class="goal tap" data-act="נפתח: כל היכולות, ${esc(g.title)}"><span class="t">${esc(g.title)}</span><span class="icons">${capsOf(g.id).map((c) => `<span class="${c.state === 'on' ? '' : 'off'}">${icon(c.icon, P.gold, 22)}</span>`).join('')}</span></button>`).join('')}
+        <button type="button" class="goal tap" data-act="נפתח: כל המצוות"><span class="t">${esc(WORDS.library)}</span><span class="c" style="font-size:13px;color:var(--p-textSub)">${esc(WORDS.libraryCaption)}</span></button></div>
+    </div>`, 'more'),
+  },
+  {
+    id: 'search', name: 'החיפוש קודם',
+    note: 'למשתמש שיודע מה הוא רוצה: שדה חיפוש גדול עם חיפושים נפוצים מתחתיו, הצעה אחת גדולה, ואז אינדקס של שבעת הנושאים כשורות. הכי שקט, אבל מסתיר את הכלים (מצפן, תהילים) עמוק יותר.',
+    body: () => phone(`${navbar()}<div class="body">${searchBox(true)}
+      <div class="chips">${['תהילים', 'שעות שקטות', 'ראש חודש', 'מצפן', 'חק לישראל'].map((q) => `<button type="button" class="chip tap" data-act="חיפוש: ${q}">${icon('search', P.textMuted, 14)}${q}</button>`).join('')}</div>
+      ${label(WORDS.worth)}<div class="card feature"><div class="head">${tile(HUB_OFFERS[0].icon)}<span class="t">${esc(HUB_OFFERS[0].title)}</span></div><span class="c">${esc(HUB_OFFERS[0].body)}</span><button type="button" class="btn tap" data-act="${esc(HUB_OFFERS[0].accept)}">${esc(HUB_OFFERS[0].accept)}</button><button type="button" class="btn ghost tap" data-act="${esc(STRINGS['offer.dismiss'])}">${esc(STRINGS['offer.dismiss'])}</button></div>
+      ${label(WORDS.all)}<div class="card">${GOALS.map((g) => row({ icon: capsOf(g.id)[0].icon, title: g.title, caption: capsOf(g.id).map((c) => c.title).slice(0, 3).join(' · '), act: `נפתח: כל היכולות, ${g.title}` })).join('')}${row({ icon: 'shacharit', title: WORDS.library, caption: WORDS.libraryCaption, act: 'נפתח: כל המצוות' })}</div>
+    </div>`, 'more'),
+  },
+];
+
+// The capabilities screen. Each phone keeps its own states, so a press turns a capability on there.
+const capState = {};
+const stateOf = (phoneId, c) => capState[phoneId]?.[c.id] ?? c.state;
+const trailingFor = (phoneId, c) => {
+  const st = stateOf(phoneId, c);
+  if (c.kind === 'route') return chevron();
+  if (st === 'on') return `<span class="state-on">${icon('check', P.safe, 16)}${esc(WORDS.on)}</span>`;
+  if (st === 'notInstalled') return `<span class="act" data-cap="${c.id}">${icon('cloud', P.goldText, 14)}${esc(WORDS.download)}</span>`;
+  if (st === 'unavailable') return '';
+  return `<span class="act" data-cap="${c.id}">${esc(WORDS.turnOn)}</span>`;
+};
+const capRow = (phoneId, c) => row({ icon: c.icon, tone: stateOf(phoneId, c) === 'on' ? 'accent' : 'muted', title: c.title, caption: c.benefit, trailing: trailingFor(phoneId, c), act: c.kind === 'route' ? `נפתח: ${c.title}` : c.kind === 'mitzvot' ? `נפתח: ${c.title} ברשימת המצוות` : `${c.title}` });
+const toggleable = (c) => ['mitzvot', 'notices', 'setting', 'battery'].includes(c.kind);
+const goalOff = (phoneId, g) => capsOf(g).filter((c) => toggleable(c) && stateOf(phoneId, c) === 'off');
+const capsHeader = () => `<div class="sheader"><div class="top"><button type="button" class="pill tap" data-act="חזרה" aria-label="חזרה">${icon('chevronRight', P.text, 20)}</button></div><h3>${esc(WORDS.all)}</h3><small>${esc(WORDS.allCaption)}</small></div>`;
+
+const CAPS_DIRS = [
+  {
+    id: 'list', name: 'רשימה לפי נושא', rec: true,
+    note: 'כל נושא כותרת עם ״להפעיל הכול״ כשיש בו משהו כבוי, ומתחתיה כרטיס של שורות: אייקון צבעוני כשפועל ואפור כשלא, שם, שורת תועלת, ובצד ״פועל״, ״הפעלה״, ״הורדה״ או חץ. פס נושאים למעלה קופץ לנושא. הכול גלוי בגלילה אחת.',
+    body: (pid) => phone(`${capsHeader()}<div class="body"><div class="chips">${GOALS.map((g, i) => `<button type="button" class="chip tap" data-jump="${g.id}" aria-pressed="${i === 0}">${esc(g.title)}</button>`).join('')}</div>
+      ${GOALS.map((g) => `<div data-goal="${g.id}">${label(g.title, goalOff(pid, g.id).length ? { text: WORDS.allOn, act: `${WORDS.allOn}: ${g.title}` } : null)}<div class="card">${capsOf(g.id).map((c) => capRow(pid, c)).join('')}</div></div>`).join('')}</div>`, 'more'),
+  },
+  {
+    id: 'folds', name: 'כרטיס מתקפל לכל נושא',
+    note: 'שבעה כרטיסים סגורים, בכל אחד פס של האייקונים של הנושא (צבעוני מה שפועל), כך שבמבט אחד רואים איפה יש מה להוסיף. לחיצה פותחת את השורות ואת ״להפעיל הכול״. קצר מאוד, אבל דורש הקשה נוספת עד ליכולת.',
+    body: (pid) => phone(`${capsHeader()}<div class="body">${GOALS.map((g, i) => `<div class="card gcard${i === 1 ? ' open' : ''}" style="margin-top:12px"><button type="button" class="row tap" data-fold><span class="meta"><span class="t">${esc(g.title)}</span><span class="strip">${capsOf(g.id).map((c) => `<span class="${stateOf(pid, c) === 'on' ? '' : 'off'}">${icon(c.icon, P.gold, 20)}</span>`).join('')}</span></span><span class="chev flip">${icon('chevronDown', P.textMuted, 20)}</span></button><div class="rows">${capsOf(g.id).map((c) => `<div class="divrow" style="position:relative">${capRow(pid, c)}</div>`).join('')}${goalOff(pid, g.id).length ? `<div class="bundle"><button type="button" class="btn tap" data-act="${esc(WORDS.allOn)}: ${esc(g.title)}">${esc(WORDS.allOn)}</button></div>` : ''}</div></div>`).join('')}</div>`, 'more'),
+  },
+];
+
+// Home's slice: the hero's top row, the open-now cards and My day on the sample day at 13:10.
+const W = DAY.windows;
+const NOW_MIN = 13 * 60 + 10;
+const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+const nowCard = (id, ic) => { const w = W[id]; const pct = Math.round(((NOW_MIN - w.startMin) / (toMin(w.end) - w.startMin)) * 100); return `<div class="card nowcard"><div class="head">${tile(ic)}<span class="t">${esc(w.name)}</span><span class="c" style="font-size:13px;color:var(--p-textSub)">עד ${w.end}</span></div><div class="bar2"><i style="width:${pct}%"></i></div><div class="times"><span>${w.start} - התחלה</span><span>${w.end} - סוף</span></div></div>`; };
+const dayRows = () => [['maariv', 'night'], ['krias_shma_al_hamita', 'shema']].map(([id, ic]) => `<button type="button" class="row tap dayrow" data-act="נפתח: ${esc(W[id].name)}">${tile(ic, 'muted')}<span class="meta"><span class="t">${esc(W[id].name)}</span><span class="time">מ־${W[id].start}</span></span></button>`).join('');
+const heroTop = (extra = '') => `<div class="top"><span class="greet"><small>${esc(DAY.label)} · ${esc(DAY.hebrew)}</small><b>${esc(STRINGS['home.greeting.afternoonNeutral'])}</b></span>${extra}<span class="logo">365</span></div>`;
+const arc = `<div class="arc">המעגל, השמש והזמנים: ללא שינוי (כאן מקוצר)</div>`;
+const homeBody = (hero, after) => phone(`<div class="hero">${hero}</div><div class="body">${label(STRINGS['home.openNow'] ?? 'פתוח עכשיו')}<div class="now">${nowCard('mincha', 'shacharit')}</div>${label(STRINGS['home.myDay'])}<div class="card">${dayRows()}${after.inCard ?? ''}</div>${after.below ?? ''}</div>`, 'home');
+
+const HOME = [
+  {
+    id: 'home-today', name: 'היום באפליקציה',
+    note: 'אין חיפוש בבית; הוא בלשונית ״עוד״ ובהגדרות. אין דרך מהבית לרשימת המצוות או להוספת מצווה: רק הגדרות ← מצוות.',
+    body: () => homeBody(`${heroTop()}${arc}`, {}),
+  },
+  {
+    id: 'home-a', name: 'סמל ליד הלוגו, שורה בכרטיס', rec: true,
+    note: 'כפתור עגול עם זכוכית מגדלת ליד הלוגו, שפותח את החיפוש עם המקלדת (בלי מסך חדש). שורת ״כל המצוות״ בתחתית כרטיס ״היום שלי״, עם מספר הפעילות והוספה. לא נוגע במעגל ולא מוסיף גובה.',
+    body: () => homeBody(`${heroTop(`<button type="button" class="roundbtn tap" data-act="המקלדת נפתחת בחיפוש" aria-label="${esc(WORDS.searchHint)}">${icon('search', '#0A1228', 22)}</button>`)}${arc}`, { inCard: row({ icon: 'plus', title: WORDS.library, caption: WORDS.libraryCaption, act: 'נפתח: כל המצוות' }) }),
+  },
+  {
+    id: 'home-b', name: 'שדה חיפוש, קישור מתחת',
+    note: 'שדה חיפוש מלא מתחת לברכה, שאי אפשר לפספס, ו״לכל המצוות״ כקישור טקסט מתחת לכרטיס. בולט יותר, אבל מוסיף שורה לראש המסך ודוחף את המעגל כחמישים נקודות למטה.',
+    body: () => homeBody(`${heroTop()}<button type="button" class="spill tap" data-act="המקלדת נפתחת בחיפוש">${icon('search', '#3a4466', 18)}${esc(WORDS.searchHint)}</button>${arc}`, { below: `<button type="button" class="textlink tap" data-act="נפתח: כל המצוות">${esc(WORDS.library)}${icon('chevronLeft', P.goldText, 18)}</button>` }),
+  },
+];
+
+const LETTERS = 'אבגד';
+function render() {
+  const draw = (target, list, lettered) => {
+    document.getElementById(target).innerHTML = list.map((o, i) => {
+      const letter = lettered === 'today' ? (i === 0 ? '' : LETTERS[i - 1]) : LETTERS[i];
+      return `<section class="opt" id="${o.id}"><header>${letter ? `<span class="letter">${letter}</span>` : ''}<b>${esc(o.name)}</b>${o.rec ? '<span class="rec">המלצה</span>' : ''}</header>${o.body(o.id)}<p>${esc(o.note)}</p></section>`;
+    }).join('');
+  };
+  draw('grid-hub', HUB, 'today');
+  draw('grid-caps', CAPS_DIRS, 'plain');
+  draw('grid-home', HOME, 'today');
+  const vars = Object.entries(P).map(([k, v]) => `--p-${k}:${v}`).join(';');
+  document.querySelectorAll('.phone').forEach((p) => p.setAttribute('style', vars));
+}
+
+function toast(el, text) {
+  const t = el.closest('.phone')?.querySelector('.toast');
+  if (!t) return;
+  t.textContent = text;
+  t.classList.add('on');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('on'), 1500);
+}
+document.addEventListener('click', (e) => {
+  const cap = e.target.closest('[data-cap]');
+  if (cap) {
+    e.stopPropagation();
+    const pid = cap.closest('.opt').id;
+    const c = capById[cap.dataset.cap];
+    (capState[pid] ??= {})[c.id] = 'on';
+    const scroll = cap.closest('.screen').scrollTop;
+    render();
+    document.getElementById(pid).querySelector('.screen').scrollTop = scroll;
+    toast(document.getElementById(pid).querySelector('.screen'), c.kind === 'addon' ? `מוריד: ${c.title}` : `הופעל: ${c.title}`);
+    return;
+  }
+  const fold = e.target.closest('[data-fold]');
+  if (fold) { fold.closest('.gcard').classList.toggle('open'); return; }
+  const jump = e.target.closest('[data-jump]');
+  if (jump) {
+    const screen = jump.closest('.screen');
+    jump.parentElement.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c === jump)));
+    const goal = screen.querySelector(`[data-goal="${jump.dataset.jump}"]`);
+    screen.scrollTo({ top: goal.offsetTop - 70, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    return;
+  }
+  const act = e.target.closest('[data-act]');
+  if (act && act.closest('.phone')) toast(act, act.dataset.act);
+});
+
+let palette = 'gold';
+try { palette = localStorage.getItem('hub-palette') || 'gold'; } catch {}
+if (!PALETTES[palette]) palette = 'gold';
+try { tabName = localStorage.getItem('hub-tab-name') || 'עוד'; } catch {}
+P = PALETTES[palette];
+const paletteBar = document.getElementById('palettes');
+for (const name of Object.keys(PALETTES)) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.dataset.palette = name;
+  b.setAttribute('aria-pressed', String(name === palette));
+  b.innerHTML = `<i style="background:${PALETTES[name].gold}"></i>${esc(STRINGS[`settings.theme.${name}`])}`;
+  b.addEventListener('click', () => {
+    palette = name; P = PALETTES[name];
+    try { localStorage.setItem('hub-palette', name); } catch {}
+    paletteBar.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    render();
+  });
+  paletteBar.appendChild(b);
+}
+const nameBar = document.getElementById('names');
+for (const name of ['עוד', 'גלה']) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = name;
+  b.setAttribute('aria-pressed', String(name === tabName));
+  b.addEventListener('click', () => {
+    tabName = name;
+    try { localStorage.setItem('hub-tab-name', name); } catch {}
+    nameBar.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    render();
+  });
+  nameBar.appendChild(b);
+}
+render();
+</script>

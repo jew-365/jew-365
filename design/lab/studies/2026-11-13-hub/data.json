@@ -1,0 +1,2687 @@
+{
+ "PALETTES": {
+  "gold": {
+   "bg": "#F6F1E8",
+   "surface": "#FFFDF9",
+   "surface2": "#F1EADF",
+   "text": "#1D2240",
+   "textSub": "#69645D",
+   "textMuted": "#6A655E",
+   "border": "#EBE3D6",
+   "gold": "#F08A3C",
+   "onGold": "#2B1608",
+   "goldLight": "#FDE9D5",
+   "goldText": "#A04A0C",
+   "safe": "#0F9060",
+   "tabBg": "#FFFDF9",
+   "urgent": "#CC2A2A"
+  },
+  "pink": {
+   "bg": "#FAEFEC",
+   "surface": "#FFFDFC",
+   "surface2": "#F6E7E4",
+   "text": "#2E1D2A",
+   "textSub": "#6E6068",
+   "textMuted": "#72646C",
+   "border": "#F1E0DC",
+   "gold": "#E2617F",
+   "onGold": "#2A0C15",
+   "goldLight": "#FBE3E6",
+   "goldText": "#A8304F",
+   "safe": "#0F9060",
+   "tabBg": "#FFFDFC",
+   "urgent": "#CC2A2A"
+  },
+  "purple": {
+   "bg": "#F3F0F9",
+   "surface": "#FDFDFF",
+   "surface2": "#ECE9F5",
+   "text": "#261C3F",
+   "textSub": "#6E6686",
+   "textMuted": "#746C8C",
+   "border": "#E6E1F0",
+   "gold": "#7538E0",
+   "onGold": "#FFFFFF",
+   "goldLight": "#EDE4FF",
+   "goldText": "#6C2BD5",
+   "safe": "#0F9060",
+   "tabBg": "#FDFDFF",
+   "urgent": "#CC2A2A"
+  },
+  "blue": {
+   "bg": "#ECF2FB",
+   "surface": "#FCFDFF",
+   "surface2": "#E4ECF6",
+   "text": "#14213D",
+   "textSub": "#5C6B84",
+   "textMuted": "#66758C",
+   "border": "#DCE5F1",
+   "gold": "#1F5FD0",
+   "onGold": "#FFFFFF",
+   "goldLight": "#DEE9FB",
+   "goldText": "#0F50C0",
+   "safe": "#0F9060",
+   "tabBg": "#FCFDFF",
+   "urgent": "#CC2A2A"
+  },
+  "dark": {
+   "bg": "#0E1626",
+   "surface": "#172238",
+   "surface2": "#222F4A",
+   "text": "#EEF1F7",
+   "textSub": "#9DA9BF",
+   "textMuted": "#A3AEC3",
+   "border": "#28354F",
+   "gold": "#F59A4A",
+   "onGold": "#1E1006",
+   "goldLight": "#3A2D26",
+   "goldText": "#F7A65E",
+   "safe": "#10B981",
+   "tabBg": "#172238",
+   "urgent": "#F45F5F"
+  },
+  "plum": {
+   "bg": "#1A1026",
+   "surface": "#261735",
+   "surface2": "#33224C",
+   "text": "#F4E9F8",
+   "textSub": "#BBA3CC",
+   "textMuted": "#C4AED3",
+   "border": "#3A2652",
+   "gold": "#F48FBC",
+   "onGold": "#2A0F20",
+   "goldLight": "#3C2238",
+   "goldText": "#FD97C4",
+   "safe": "#3DD598",
+   "tabBg": "#261735",
+   "urgent": "#FF6B6B"
+  }
+ },
+ "STRINGS": {
+  "nusach.ashkenaz": "אשכנז",
+  "nusach.sefard": "ספרד",
+  "nusach.edot_hamizrach": "עדות המזרח",
+  "nusach.chabad": "חב\"ד",
+  "nusach.teiman": "תימן בלדי",
+  "profile.gender.male": "גבר",
+  "profile.gender.female": "אישה",
+  "onboarding.welcomeTitle": "יהודי 365",
+  "onboarding.welcomeBody": "אל תפספס שום מצווה - הזמנים הנכונים, בזמן הנכון",
+  "onboarding.nusachTitle": "מה הנוסח שלך?",
+  "onboarding.nusachBody": "קובע את נוסח התפילה בסידור",
+  "onboarding.locationBody": "כדי לחשב את הזמנים ההלכתיים בדיוק לפי המקום שלכם. אפשר לשנות את זה תמיד בהגדרות.",
+  "onboarding.locationAllow": "אישור גישה למיקום",
+  "onboarding.locationOr": "או בחרו עיר או יישוב",
+  "onboarding.restore": "יש לי קובץ גיבוי",
+  "onboarding.nameLabel": "שם (לא חובה)",
+  "onboarding.notNow": "לא עכשיו, המשך בלי התראות",
+  "common.continue": "המשך ←",
+  "notifications.timeLeft.line": "נשארו  · עד ",
+  "notifications.timeFor": "זמן ",
+  "settings.quietBefore": "לא לשלוח התראות לפני השעה",
+  "settings.quietAfter": "לא לשלוח התראות אחרי השעה",
+  "onboarding.readyTitle": "הכל מוכן!",
+  "onboarding.finish": "להתחיל",
+  "library.addCustom": "הוסף מצווה חדשה",
+  "more.title": "עוד",
+  "more.search": "חיפוש",
+  "more.searchPlaceholder": "חיפוש: מצוות, תפילות, צדיקים, הגדרות…",
+  "nav.home": "בית",
+  "nav.siddur": "סידור",
+  "nav.history": "מעקב",
+  "nav.settings": "הגדרות",
+  "nav.more": "עוד",
+  "home.messages": "הודעות",
+  "home.myDay": "היום שלי",
+  "library.title": "המצוות שלי",
+  "library.subtitle": "נהל מצוות פעילות",
+  "offer.dismiss": "לא להציע שוב",
+  "home.greeting.afternoonNeutral": "צהריים טובים",
+  "settings.theme.gold": "כתום",
+  "settings.theme.pink": "ורוד",
+  "settings.theme.purple": "סגול",
+  "settings.theme.blue": "כחול",
+  "settings.theme.dark": "כהה",
+  "settings.theme.plum": "שזיף"
+ },
+ "CAPS": [
+  {
+   "id": "prayers",
+   "goal": "prayer",
+   "icon": "shacharit",
+   "kind": "mitzvot",
+   "state": "on",
+   "title": "שחרית, מנחה וערבית",
+   "benefit": "תזכורת לפני שנגמר זמן כל תפילה"
+  },
+  {
+   "id": "shema",
+   "goal": "prayer",
+   "icon": "shema",
+   "kind": "mitzvot",
+   "state": "on",
+   "title": "קריאת שמע של שחרית",
+   "benefit": "תזכורת לפני סוף זמן קריאת שמע"
+  },
+  {
+   "id": "tefillin",
+   "goal": "prayer",
+   "icon": "tefillin",
+   "kind": "mitzvot",
+   "state": "on",
+   "title": "תפילין",
+   "benefit": "תזכורת להניח תפילין בזמן"
+  },
+  {
+   "id": "birchot",
+   "goal": "prayer",
+   "icon": "brachot",
+   "kind": "mitzvot",
+   "state": "off",
+   "title": "ברכות השחר",
+   "benefit": "תזכורת לברכות השחר בבוקר"
+  },
+  {
+   "id": "bedtimeShema",
+   "goal": "prayer",
+   "icon": "night",
+   "kind": "mitzvot",
+   "state": "on",
+   "title": "קריאת שמע על המיטה",
+   "benefit": "תזכורת בערב, לפני חצות"
+  },
+  {
+   "id": "candles",
+   "goal": "shabbat",
+   "icon": "candles",
+   "kind": "mitzvot",
+   "state": "off",
+   "title": "הדלקת נרות והבדלה",
+   "benefit": "תזכורת להדליק נרות בזמן, ולהבדלה במוצאי שבת"
+  },
+  {
+   "id": "omer",
+   "goal": "shabbat",
+   "icon": "omer",
+   "kind": "mitzvot",
+   "state": "off",
+   "title": "ספירת העומר",
+   "benefit": "תזכורת לספור בכל ערב, עם מספר היום"
+  },
+  {
+   "id": "chanukah",
+   "goal": "shabbat",
+   "icon": "chanukiah",
+   "kind": "mitzvot",
+   "state": "on",
+   "title": "נרות חנוכה",
+   "benefit": "תזכורת להדליק בכל אחד משמונת הלילות"
+  },
+  {
+   "id": "selichot",
+   "goal": "shabbat",
+   "icon": "shofar",
+   "kind": "addon",
+   "state": "notInstalled",
+   "title": "סליחות",
+   "benefit": "הנוסח המלא בעונת הסליחות, עם תזכורת"
+  },
+  {
+   "id": "ushpizin",
+   "goal": "shabbat",
+   "icon": "sukkah",
+   "kind": "mitzvot",
+   "state": "on",
+   "title": "אושפיזין",
+   "benefit": "הזמנת האושפיזין בכל לילה בסוכה"
+  },
+  {
+   "id": "kiddushLevana",
+   "goal": "shabbat",
+   "icon": "moon",
+   "kind": "mitzvot",
+   "state": "on",
+   "title": "קידוש לבנה",
+   "benefit": "תזכורת בלילות שבהם אפשר לקדש"
+  },
+  {
+   "id": "chok",
+   "goal": "learning",
+   "icon": "chok",
+   "kind": "addon",
+   "state": "notInstalled",
+   "title": "חק לישראל",
+   "benefit": "הלימוד היומי, עם תזכורת"
+  },
+  {
+   "id": "shnayim",
+   "goal": "learning",
+   "icon": "chok",
+   "kind": "addon",
+   "state": "notInstalled",
+   "title": "שניים מקרא ואחד תרגום",
+   "benefit": "עלייה ליום, עם תזכורת"
+  },
+  {
+   "id": "halacha",
+   "goal": "learning",
+   "icon": "general",
+   "kind": "addon",
+   "state": "notInstalled",
+   "title": "הלכה יומית",
+   "benefit": "הלכה ליום, ולפני כל חג הלכותיו"
+  },
+  {
+   "id": "lashonHara",
+   "goal": "learning",
+   "icon": "general",
+   "kind": "addon",
+   "state": "notInstalled",
+   "title": "הלכות לשון הרע",
+   "benefit": "החפץ חיים, קטע ליום"
+  },
+  {
+   "id": "shemiratHalashon",
+   "goal": "learning",
+   "icon": "general",
+   "kind": "addon",
+   "state": "notInstalled",
+   "title": "שמירת הלשון",
+   "benefit": "קטע יומי מספר שמירת הלשון"
+  },
+  {
+   "id": "tehillim",
+   "goal": "learning",
+   "icon": "tehillim",
+   "kind": "route",
+   "state": "on",
+   "title": "תהילים",
+   "benefit": "ספר התהילים המלא, וחלוקה לימי השבוע"
+  },
+  {
+   "id": "roshChodesh",
+   "goal": "calendar",
+   "icon": "moon",
+   "kind": "notices",
+   "state": "off",
+   "title": "ראש חודש",
+   "benefit": "תזכורת לפני ראש חודש ובו"
+  },
+  {
+   "id": "hilulot",
+   "goal": "calendar",
+   "icon": "hilula",
+   "kind": "notices",
+   "state": "off",
+   "title": "הילולות צדיקים",
+   "benefit": "תזכורת ביום ההילולא, עם דף על הצדיק"
+  },
+  {
+   "id": "schedule",
+   "goal": "calendar",
+   "icon": "calendar",
+   "kind": "route",
+   "state": "on",
+   "title": "לוח זמנים",
+   "benefit": "הזמנים והמצוות של כל יום, שבוע וחודש"
+  },
+  {
+   "id": "tracking",
+   "goal": "tracking",
+   "icon": "star",
+   "kind": "route",
+   "state": "on",
+   "title": "מעקב",
+   "benefit": "הרצף, המגמות וההישגים שלך"
+  },
+  {
+   "id": "weeklyReport",
+   "goal": "tracking",
+   "icon": "night",
+   "kind": "setting",
+   "state": "on",
+   "title": "סיכום שבועי",
+   "benefit": "סיכום השבוע במוצאי שבת"
+  },
+  {
+   "id": "custom",
+   "goal": "personal",
+   "icon": "custom",
+   "kind": "route",
+   "state": "on",
+   "title": "מצווה משלך",
+   "benefit": "תזכורת לכל דבר שחשוב לך"
+  },
+  {
+   "id": "quietHours",
+   "goal": "personal",
+   "icon": "bell",
+   "kind": "setting",
+   "state": "off",
+   "title": "שעות שקטות",
+   "benefit": "בלי התראות בשעות הלילה"
+  },
+  {
+   "id": "compass",
+   "goal": "tools",
+   "icon": "compass",
+   "kind": "route",
+   "state": "on",
+   "title": "מצפן תפילה",
+   "benefit": "הכיוון לכותל מכל מקום"
+  },
+  {
+   "id": "hotline",
+   "goal": "tools",
+   "icon": "phone",
+   "kind": "route",
+   "state": "on",
+   "title": "קו הלכה",
+   "benefit": "שאלה לרב בטלפון או בווטסאפ"
+  },
+  {
+   "id": "guide",
+   "goal": "tools",
+   "icon": "guide",
+   "kind": "route",
+   "state": "on",
+   "title": "המדריך",
+   "benefit": "כל מה שהאפליקציה יודעת לעשות"
+  },
+  {
+   "id": "battery",
+   "goal": "tools",
+   "icon": "sliders",
+   "kind": "battery",
+   "state": "off",
+   "title": "תזכורות שמגיעות בזמן",
+   "benefit": "לוודא שהטלפון לא מעכב את התזכורות"
+  }
+ ],
+ "GOALS": [
+  {
+   "id": "prayer",
+   "title": "תפילה"
+  },
+  {
+   "id": "shabbat",
+   "title": "שבת וחגים"
+  },
+  {
+   "id": "learning",
+   "title": "לימוד יומי"
+  },
+  {
+   "id": "calendar",
+   "title": "לוח השנה"
+  },
+  {
+   "id": "tracking",
+   "title": "מעקב"
+  },
+  {
+   "id": "personal",
+   "title": "אישי"
+  },
+  {
+   "id": "tools",
+   "title": "כלים ועזרה"
+  }
+ ],
+ "OFFERS": [
+  {
+   "id": "battery",
+   "title": "שהתזכורות יגיעו בזמן",
+   "body": "הטלפון עלול לעכב תזכורות כדי לחסוך בסוללה. אפשר לפטור את האפליקציה מכך.",
+   "accept": "להמשך"
+  },
+  {
+   "id": "candles",
+   "title": "תזכורת לנרות שבת ולהבדלה",
+   "body": "תזכורת להדליק נרות בזמן, ולהבדלה במוצאי שבת",
+   "accept": "להפעלת התזכורות"
+  },
+  {
+   "id": "birchot",
+   "title": "גם ברכות השחר?",
+   "body": "תזכורת בבוקר לברכות השחר",
+   "accept": "להפעלת התזכורת"
+  },
+  {
+   "id": "learning",
+   "title": "לימוד יומי",
+   "body": "חק לישראל, הלכה יומית ועוד, עם תזכורת",
+   "accept": "לתוכניות הלימוד"
+  },
+  {
+   "id": "hilulot",
+   "title": "הילולה מתקרבת",
+   "body": "תזכורת ביום ההילולא של צדיקים, עם דף על כל צדיק",
+   "accept": "להפעלת התזכורות"
+  },
+  {
+   "id": "omer",
+   "title": "ספירת העומר מתחילה בקרוב",
+   "body": "תזכורת לספור בכל ערב, עם מספר היום",
+   "accept": "להפעלת התזכורת"
+  },
+  {
+   "id": "tracking",
+   "title": "יום ראשון מאחוריך",
+   "body": "במעקב רואים את הרצף, המגמות וההישגים",
+   "accept": "למעקב"
+  },
+  {
+   "id": "tour",
+   "title": "סיור קצר בדף הבית",
+   "body": "מה כל חלק בדף הבית עושה, בדקה אחת",
+   "accept": "לסיור"
+  }
+ ],
+ "MORE_TODAY": [
+  {
+   "icon": "calendar",
+   "title": "לוח זמנים",
+   "caption": "יום, שבוע וחודש"
+  },
+  {
+   "icon": "chok",
+   "title": "חק לישראל",
+   "caption": "תוסף להורדה · כ־5 MB",
+   "muted": true
+  },
+  {
+   "icon": "chok",
+   "title": "שניים מקרא ואחד תרגום",
+   "caption": "תוסף להורדה · כ־1.2 MB",
+   "muted": true
+  },
+  {
+   "icon": "general",
+   "title": "הלכה יומית",
+   "caption": "תוסף להורדה · כ־0.6 MB",
+   "muted": true
+  },
+  {
+   "icon": "general",
+   "title": "הלכות החג",
+   "caption": "תוסף להורדה · כ־0.6 MB",
+   "muted": true
+  },
+  {
+   "icon": "general",
+   "title": "הלכות לשון הרע",
+   "caption": "תוסף להורדה · כ־0.3 MB",
+   "muted": true
+  },
+  {
+   "icon": "general",
+   "title": "שמירת הלשון",
+   "caption": "תוסף להורדה · כ־0.3 MB",
+   "muted": true
+  },
+  {
+   "icon": "shofar",
+   "title": "סליחות",
+   "caption": "להורדה בנוסח אשכנז · כ־1 MB",
+   "muted": true
+  },
+  {
+   "icon": "tehillim",
+   "title": "תהילים",
+   "caption": "מחולק לפי ימי השבוע"
+  },
+  {
+   "icon": "hilula",
+   "title": "הילולות צדיקים",
+   "caption": "ימי פטירה של צדיקים, לפי הלוח העברי"
+  },
+  {
+   "icon": "compass",
+   "title": "מצפן תפילה",
+   "caption": "הכיוון לכותל מהמקום שלך"
+  },
+  {
+   "icon": "phone",
+   "title": "קו ההלכה",
+   "caption": "שאלה לרב, לפי פסקי אשכנז"
+  },
+  {
+   "icon": "guide",
+   "title": "מדריך למשתמש",
+   "caption": "איך עובד כל חלק באפליקציה, ומה חדש"
+  }
+ ],
+ "DEFAULT_ON": [
+  "tefillin",
+  "krias_shma_shacharit",
+  "shacharit",
+  "mincha",
+  "maariv",
+  "krias_shma_al_hamita",
+  "kiddush_levana",
+  "selichot",
+  "chanukah_candles",
+  "ushpizin"
+ ],
+ "DAY": {
+  "label": "יום רביעי, 18 בנובמבר",
+  "hebrew": "ח׳ בכסלו",
+  "city": "ירושלים",
+  "windows": {
+   "tefillin": {
+    "start": "05:06",
+    "end": "16:42",
+    "startMin": 306,
+    "name": "הנחת תפילין"
+   },
+   "krias_shma_shacharit": {
+    "start": "06:09",
+    "end": "08:43",
+    "startMin": 369,
+    "name": "קריאת שמע שחרית"
+   },
+   "shacharit": {
+    "start": "06:09",
+    "end": "09:37",
+    "startMin": 369,
+    "name": "תפילת שחרית"
+   },
+   "mincha": {
+    "start": "11:55",
+    "end": "16:42",
+    "startMin": 715,
+    "name": "תפילת מנחה"
+   },
+   "maariv": {
+    "start": "16:55",
+    "end": "05:01",
+    "startMin": 1015,
+    "name": "תפילת ערבית"
+   },
+   "krias_shma_al_hamita": {
+    "start": "16:55",
+    "end": "05:01",
+    "startMin": 1015,
+    "name": "קריאת שמע על המיטה"
+   }
+  },
+  "candles": {
+   "start": "16:22",
+   "end": "16:42",
+   "startMin": 982
+  },
+  "havdalah": {
+   "start": "17:12",
+   "end": "18:42",
+   "startMin": 1032
+  },
+  "zmanim": {
+   "sunrise": "06:09",
+   "shema": "08:43",
+   "shkia": "16:42"
+  }
+ },
+ "ICONS": {
+  "UI": {
+   "star": "<path d=\"M12,3.3L14.53,9.32L21.04,9.86L16.09,14.13L17.58,20.49L12,17.1L6.42,20.49L7.91,14.13L2.96,9.86L9.47,9.32Z\" fill=\"var(--tint,none)\"/>",
+   "custom": "<path d=\"M12,3.3L14.53,9.32L21.04,9.86L16.09,14.13L17.58,20.49L12,17.1L6.42,20.49L7.91,14.13L2.96,9.86L9.47,9.32Z\" fill=\"var(--tint,none)\"/>",
+   "calendar": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2.5\" fill=\"var(--tint,none)\"/> <line x1=\"3.5\" y1=\"10\" x2=\"20.5\" y2=\"10\"/> <line x1=\"8\" y1=\"3\" x2=\"8\" y2=\"7\"/> <line x1=\"16\" y1=\"3\" x2=\"16\" y2=\"7\"/>",
+   "chevronLeft": "<path d=\"M15,6L9,12L15,18\"/>",
+   "chevronRight": "<path d=\"M9,6L15,12L9,18\"/>",
+   "chevronDown": "<path d=\"M6,9L12,15L18,9\"/>",
+   "sparkle": "<path d=\"M12,2.8Q13.66,10.34 21.2,12Q13.66,13.66 12,21.2Q10.34,13.66 2.8,12Q10.34,10.34 12,2.8Z\" fill=\"var(--tint,none)\"/>",
+   "check": "<path d=\"M4.5,12.5L9.5,17.5L19.5,6.5\"/>",
+   "close": "<path d=\"M6,6L18,18M18,6L6,18\"/>",
+   "plus": "<path d=\"M12,5V19M5,12H19\"/>",
+   "sun": "<circle cx=\"12\" cy=\"12\" r=\"4.5\" fill=\"var(--tint,none)\"/> <path d=\"M19.5,12H21.8M17.3,6.7L18.93,5.07M12,4.5V2.2M6.7,6.7L5.07,5.07M4.5,12H2.2M6.7,17.3L5.07,18.93M12,19.5V21.8M17.3,17.3L18.93,18.93\"/> ), // Two arrows round a loop: a reminder's nag (the owner's pick of 2026-11-02, the nagging study's board ד).",
+   "bell": "<path d=\"M6,16.5V11A6,6 0 0 1 18,11V16.5L19.5,18H4.5Z\" fill=\"var(--tint,none)\"/> <path d=\"M10,20.5A2.2,2.2 0 0 0 14,20.5\"/>",
+   "search": "<circle cx=\"11\" cy=\"11\" r=\"6.5\" fill=\"var(--tint,none)\"/> <path d=\"M15.8,15.8L20.5,20.5\"/>",
+   "sliders": "<path d=\"M4,7H7M11,7H20M4,12H13M17,12H20M4,17H6M10,17H20\"/> <circle cx=\"9\" cy=\"7\" r=\"2\" fill=\"var(--tint,none)\"/> <circle cx=\"15\" cy=\"12\" r=\"2\" fill=\"var(--tint,none)\"/> <circle cx=\"8\" cy=\"17\" r=\"2\" fill=\"var(--tint,none)\"/>",
+   "phone": "<path d=\"M6.6,3.5H9.4L11,7.6L9,9.1Q10.5,12.6 14.9,15L16.4,13L20.5,14.6V17.4Q20.5,20.5 17.4,20.5Q11,20 7,16Q3,12 3.5,6.6Q3.5,3.5 6.6,3.5Z\" fill=\"var(--tint,none)\"/>",
+   "guide": "<circle cx=\"12\" cy=\"12\" r=\"8.5\" fill=\"var(--tint,none)\"/> <path d=\"M9.6,9.6A2.4,2.4 0 1 1 12,12V13.6\"/> <line x1=\"12\" y1=\"16.6\" x2=\"12\" y2=\"16.7\"/>",
+   "compass": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/> <path d=\"M15.6,8.4L13.4,13.4L8.4,15.6L10.6,10.6Z\" fill=\"var(--tint,none)\"/>",
+   "user": "<circle cx=\"12\" cy=\"8\" r=\"4\" fill=\"var(--tint,none)\"/> <path d=\"M4.5,20.5C5.4,16.6 8.4,14.5 12,14.5C15.6,14.5 18.6,16.6 19.5,20.5\"/>",
+   "chat": "<path d=\"M6,4.5H18A2.5,2.5 0 0 1 20.5,7V14.5A2.5,2.5 0 0 1 18,17H10.5L6.5,20.5V17H6A2.5,2.5 0 0 1 3.5,14.5V7A2.5,2.5 0 0 1 6,4.5Z\" fill=\"var(--tint,none)\"/> <path d=\"M8,9H16M8,12.5H13\"/>",
+   "cloud": "<path d=\"M7,19H17A4,4 0 0 0 17.6,11.05A6,6 0 0 0 6.25,10.2A4.5,4.5 0 0 0 7,19Z\" fill=\"var(--tint,none)\"/>"
+  },
+  "JEWISH": {
+   "shacharit": [
+    {
+     "t": "circle",
+     "cx": 24,
+     "cy": 20,
+     "r": 9,
+     "fill": {
+      "role": "flame"
+     },
+     "opacity": 0.3
+    },
+    {
+     "t": "path",
+     "d": "M18.4,20A5.6,5.6 0 0 1 29.6,20Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M24,11.6V9M17.2,14.8L15.3,12.9M30.8,14.8L32.7,12.9",
+     "stroke": {
+      "role": "flame2"
+     },
+     "strokeWidth": 1.6,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "path",
+     "d": "M8.75,23L4.9,39Q15.25,36 24,40Q32.75,36 43.1,39L39.25,23Z",
+     "fill": {
+      "role": "ink"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M10.35,21Q17.18,18 24,22V37Q15.25,33.5 6.5,36Z",
+     "fill": {
+      "role": "paper"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M37.65,21Q30.83,18 24,22V37Q32.75,33.5 41.5,36Z",
+     "fill": {
+      "role": "white"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M24,22V37",
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 1
+    },
+    {
+     "t": "g",
+     "stroke": {
+      "role": "line"
+     },
+     "strokeWidth": 1.3,
+     "strokeLinecap": "round",
+     "fill": "none",
+     "c": [
+      {
+       "t": "path",
+       "d": "M12.27,24.9Q16.63,24.3 21,25.9"
+      },
+      {
+       "t": "path",
+       "d": "M11.65,27.47Q16.32,26.87 21,28.47"
+      },
+      {
+       "t": "path",
+       "d": "M11.03,30.04Q16.01,29.44 21,31.04"
+      }
+     ]
+    },
+    {
+     "t": "path",
+     "d": "M32.75,24.52L35.52,29.32H29.98Z M32.75,30.92L29.98,26.12H35.52Z",
+     "stroke": {
+      "role": "gold2"
+     },
+     "strokeWidth": 1.3,
+     "strokeLinejoin": "round",
+     "fill": "none"
+    }
+   ],
+   "shema": [
+    {
+     "t": "circle",
+     "cx": 24,
+     "cy": 17,
+     "r": 10.85,
+     "fill": {
+      "role": "flame"
+     },
+     "opacity": 0.3
+    },
+    {
+     "t": "path",
+     "d": "M17,17A7,7 0 0 1 31,17Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M16.03,12.4L13.43,10.9M19.4,9.03L17.9,6.43M24,7.8L24,4.8M28.6,9.03L30.1,6.43M31.97,12.4L34.57,10.9",
+     "stroke": {
+      "role": "flame2"
+     },
+     "strokeWidth": 1.7,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "path",
+     "d": "M8,18Q24,15.6 40,18V42Q24,44.4 8,42Z",
+     "fill": {
+      "role": "paper"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 1.2
+    },
+    {
+     "t": "path",
+     "d": "M29.7,24.2V28.88Q29.7,32 32.82,32H34.38Q37.5,32 37.5,28.88V24.2M33.6,24.82V31.61M21.59,24.2H25.64Q28.14,24.2 28.14,26.7V32H23.93M20.5,23.58L21.74,24.98V31.69M18.78,22.64V28.07Q18.78,32 14.1,32H9.42M10.54,22.64Q11.67,27.88 18.78,28.44",
+     "stroke": {
+      "role": "ink"
+     },
+     "strokeWidth": 2.1,
+     "strokeLinecap": "round",
+     "strokeLinejoin": "round",
+     "fill": "none"
+    },
+    {
+     "t": "path",
+     "d": "M12,37.4H36",
+     "stroke": {
+      "role": "line"
+     },
+     "strokeWidth": 1.4,
+     "strokeLinecap": "round"
+    }
+   ],
+   "tefillin": [
+    {
+     "t": "path",
+     "d": "M14,39C12.5,42.5 9.5,44.5 6,45.5M34,39C35.5,42.5 38.5,44.5 42,45.5",
+     "stroke": {
+      "role": "ink"
+     },
+     "strokeWidth": 3,
+     "strokeLinecap": "round",
+     "fill": "none"
+    },
+    {
+     "t": "rect",
+     "x": 8,
+     "y": 34,
+     "width": 32,
+     "height": 6,
+     "rx": 1.6,
+     "fill": {
+      "role": "ink"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M12,15L18,9H38L32,15Z",
+     "fill": {
+      "role": "ink2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M32,15L38,9V29L32,35Z",
+     "fill": {
+      "role": "ink3"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 12,
+     "y": 15,
+     "width": 20,
+     "height": 20,
+     "rx": 1.2,
+     "fill": {
+      "role": "ink"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M16.6,19.6V26.6Q16.6,30 20,30H24Q27.4,30 27.4,26.6V19.6M22,20.2V29.8",
+     "stroke": {
+      "role": "gold"
+     },
+     "strokeWidth": 2.3,
+     "strokeLinecap": "round",
+     "strokeLinejoin": "round",
+     "fill": "none"
+    }
+   ],
+   "brachot": [
+    {
+     "t": "path",
+     "d": "M9.5,43V20Q9.5,5.5 24,5.5Q38.5,5.5 38.5,20V43Z",
+     "fill": {
+      "role": "wood"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M13,42V20.4Q13,9 24,9Q35,9 35,20.4V42Z",
+     "fill": {
+      "role": "paper"
+     }
+    },
+    {
+     "t": "circle",
+     "cx": 24,
+     "cy": 33,
+     "r": 9.6,
+     "fill": {
+      "role": "flame"
+     },
+     "opacity": 0.4
+    },
+    {
+     "t": "path",
+     "d": "M17.4,33A6.6,6.6 0 0 1 30.6,33Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M13,42V35.4Q18.6,30.8 24,34Q29.4,30.6 35,35.2V42Z",
+     "fill": {
+      "role": "leaf"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M24,9V42M13,22.6H35",
+     "stroke": {
+      "role": "wood"
+     },
+     "strokeWidth": 1.8
+    },
+    {
+     "t": "rect",
+     "x": 6.5,
+     "y": 41.6,
+     "width": 35,
+     "height": 3.6,
+     "rx": 1.6,
+     "fill": {
+      "role": "wood2"
+     }
+    }
+   ],
+   "night": [
+    {
+     "t": "path",
+     "d": "M34.68,4.51A6.5,6.5 0 1 0 40.94,13.64A5.6,5.6 0 0 1 34.68,4.51Z",
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M25,7L25.56,8.44L27,9L25.56,9.56L25,11L24.44,9.56L23,9L24.44,8.44Z",
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 5,
+     "y": 19,
+     "width": 5.5,
+     "height": 25,
+     "rx": 2,
+     "fill": {
+      "role": "wood"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 40,
+     "y": 36,
+     "width": 3.5,
+     "height": 8,
+     "rx": 1.2,
+     "fill": {
+      "role": "wood2"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 10,
+     "y": 33,
+     "width": 34,
+     "height": 5,
+     "rx": 1.5,
+     "fill": {
+      "role": "wood"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 11.5,
+     "y": 25,
+     "width": 11,
+     "height": 7.5,
+     "rx": 3.6,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 1
+    },
+    {
+     "t": "path",
+     "d": "M20,28.5Q20,26.5 22,26.5H41Q43,26.5 43,28.5V33H20Z",
+     "fill": {
+      "role": "acc"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M20,30.5H43V33H20Z",
+     "fill": {
+      "role": "acc2"
+     },
+     "opacity": 0.6
+    }
+   ],
+   "candles": [
+    {
+     "t": "circle",
+     "cx": 16,
+     "cy": 10.5,
+     "r": 6.5,
+     "fill": {
+      "role": "flame"
+     },
+     "opacity": 0.25
+    },
+    {
+     "t": "path",
+     "d": "M16,4C20.73,8.73 19.78,13.66 16,14.5C12.22,13.66 11.28,8.73 16,4Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M16,7.99C18.65,11.14 18.27,13.45 16,14.08C13.73,13.45 13.35,11.14 16,7.99Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M16,14.4V16.2",
+     "stroke": {
+      "role": "ink"
+     },
+     "strokeWidth": 1.2,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "rect",
+     "x": 13.2,
+     "y": 16,
+     "width": 5.6,
+     "height": 16.5,
+     "rx": 1.2,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 1
+    },
+    {
+     "t": "path",
+     "d": "M10.8,32.5H21.2L19.2,35.6H12.8Z",
+     "fill": {
+      "role": "metal"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 14.7,
+     "y": 35.4,
+     "width": 2.6,
+     "height": 5.8,
+     "fill": {
+      "role": "metal2"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 10.4,
+     "y": 40.6,
+     "width": 11.2,
+     "height": 3.2,
+     "rx": 1.6,
+     "fill": {
+      "role": "metal"
+     }
+    },
+    {
+     "t": "circle",
+     "cx": 32,
+     "cy": 10.5,
+     "r": 6.5,
+     "fill": {
+      "role": "flame"
+     },
+     "opacity": 0.25
+    },
+    {
+     "t": "path",
+     "d": "M32,4C36.73,8.73 35.78,13.66 32,14.5C28.22,13.66 27.28,8.73 32,4Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M32,7.99C34.65,11.14 34.27,13.45 32,14.08C29.73,13.45 29.35,11.14 32,7.99Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M32,14.4V16.2",
+     "stroke": {
+      "role": "ink"
+     },
+     "strokeWidth": 1.2,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "rect",
+     "x": 29.2,
+     "y": 16,
+     "width": 5.6,
+     "height": 16.5,
+     "rx": 1.2,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 1
+    },
+    {
+     "t": "path",
+     "d": "M26.8,32.5H37.2L35.2,35.6H28.8Z",
+     "fill": {
+      "role": "metal"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 30.7,
+     "y": 35.4,
+     "width": 2.6,
+     "height": 5.8,
+     "fill": {
+      "role": "metal2"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 26.4,
+     "y": 40.6,
+     "width": 11.2,
+     "height": 3.2,
+     "rx": 1.6,
+     "fill": {
+      "role": "metal"
+     }
+    }
+   ],
+   "omer": [
+    {
+     "t": "g",
+     "transform": "rotate(-24 24 33)",
+     "c": [
+      {
+       "t": "path",
+       "d": "M24,33V11",
+       "stroke": {
+        "role": "gold2"
+       },
+       "strokeWidth": 1.6,
+       "strokeLinecap": "round"
+      },
+      {
+       "t": "ellipse",
+       "cx": 24,
+       "cy": 7.6,
+       "rx": 1.9,
+       "ry": 3.2,
+       "fill": {
+        "role": "gold"
+       }
+      },
+      {
+       "t": "ellipse",
+       "cx": 21.6,
+       "cy": 11.4,
+       "rx": 1.8,
+       "ry": 3,
+       "transform": "rotate(-32 21.6 11.4)",
+       "fill": {
+        "role": "gold"
+       }
+      },
+      {
+       "t": "ellipse",
+       "cx": 26.4,
+       "cy": 11.4,
+       "rx": 1.8,
+       "ry": 3,
+       "transform": "rotate(32 26.4 11.4)",
+       "fill": {
+        "role": "gold"
+       }
+      },
+      {
+       "t": "ellipse",
+       "cx": 21.6,
+       "cy": 15.4,
+       "rx": 1.8,
+       "ry": 3,
+       "transform": "rotate(-32 21.6 15.4)",
+       "fill": {
+        "role": "gold"
+       }
+      },
+      {
+       "t": "ellipse",
+       "cx": 26.4,
+       "cy": 15.4,
+       "rx": 1.8,
+       "ry": 3,
+       "transform": "rotate(32 26.4 15.4)",
+       "fill": {
+        "role": "gold"
+       }
+      },
+      {
+       "t": "ellipse",
+       "cx": 21.6,
+       "cy": 19.4,
+       "rx": 1.8,
+       "ry": 3,
+       "transform": "rotate(-32 21.6 19.4)",
+       "fill": {
+        "role": "gold"
+       }
+      },
+      {
+       "t": "ellipse",
+       "cx": 26.4,
+       "cy": 19.4,
+       "rx": 1.8,
+       "ry": 3,
+       "transform": "rotate(32 26.4 19.4)",
+       "fill": {
+        "role": "gold"
+       }
+      }
+     ]
+    },
+    {
+     "t": "g",
+     "transform": "rotate(24 24 33)",
+     "c": [
+      {
+       "t": "path",
+       "d": "M24,33V11",
+       "stroke": {
+        "role": "gold2"
+       },
+       "strokeWidth": 1.6,
+       "strokeLinecap": "round"
+      },
+      {
+       "t": "ellipse",
+       "cx": 24,
+       "cy": 7.6,
+       "rx": 1.9,
+       "ry": 3.2,
+       "fill": {
+        "role": "gold"
+       }
+      },
+      {
+       "t": "ellipse",
+       "cx": 21.6,
+       "cy": 11.4,
+       "rx": 1.8,
+       "ry": 3,
+       "transform": "rotate(-32 21.6 11.4)",
+       "fill": {
+        "role": "gold"
+       }
+      },
+      {
+       "t": "ellipse",
+       "cx": 26.4,
+       "cy": 11.4,
+       "rx": 1.8,
+       "ry": 3,
+       "transform": "rotate(32 26.4 11.4)",
+       "fill": {
+        "role": "gold"
+       }
+      },
+      {
+       "t": "ellipse",
+       "cx": 21.6,
+       "cy": 15.4,
+       "rx": 1.8,
+       "ry": 3,
+       "transform": "rotate(-32 21.6 15.4)",
+       "fill": {
+        "role": "gold"
+       }
+      },
+      {
+       "t": "ellipse",
+       "cx": 26.4,
+       "cy": 15.4,
+       "rx": 1.8,
+       "ry": 3,
+       "transform": "rotate(32 26.4 15.4)",
+       "fill": {
+        "role": "gold"
+       }
+      },
+      {
+       "t": "ellipse",
+       "cx": 21.6,
+       "cy": 19.4,
+       "rx": 1.8,
+       "ry": 3,
+       "transform": "rotate(-32 21.6 19.4)",
+       "fill": {
+        "role": "gold"
+       }
+      },
+      {
+       "t": "ellipse",
+       "cx": 26.4,
+       "cy": 19.4,
+       "rx": 1.8,
+       "ry": 3,
+       "transform": "rotate(32 26.4 19.4)",
+       "fill": {
+        "role": "gold"
+       }
+      }
+     ]
+    },
+    {
+     "t": "path",
+     "d": "M24,33V11",
+     "stroke": {
+      "role": "gold2"
+     },
+     "strokeWidth": 1.6,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "ellipse",
+     "cx": 24,
+     "cy": 7.6,
+     "rx": 1.9,
+     "ry": 3.2,
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "ellipse",
+     "cx": 21.6,
+     "cy": 11.4,
+     "rx": 1.8,
+     "ry": 3,
+     "transform": "rotate(-32 21.6 11.4)",
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "ellipse",
+     "cx": 26.4,
+     "cy": 11.4,
+     "rx": 1.8,
+     "ry": 3,
+     "transform": "rotate(32 26.4 11.4)",
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "ellipse",
+     "cx": 21.6,
+     "cy": 15.4,
+     "rx": 1.8,
+     "ry": 3,
+     "transform": "rotate(-32 21.6 15.4)",
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "ellipse",
+     "cx": 26.4,
+     "cy": 15.4,
+     "rx": 1.8,
+     "ry": 3,
+     "transform": "rotate(32 26.4 15.4)",
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "ellipse",
+     "cx": 21.6,
+     "cy": 19.4,
+     "rx": 1.8,
+     "ry": 3,
+     "transform": "rotate(-32 21.6 19.4)",
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "ellipse",
+     "cx": 26.4,
+     "cy": 19.4,
+     "rx": 1.8,
+     "ry": 3,
+     "transform": "rotate(32 26.4 19.4)",
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M24,34L19,45M24,34L24,45.5M24,34L29,45",
+     "stroke": {
+      "role": "gold2"
+     },
+     "strokeWidth": 1.6,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "path",
+     "d": "M18.6,31.4Q24,34 29.4,31.4L30,35.4Q24,38 18,35.4Z",
+     "fill": {
+      "role": "acc"
+     }
+    }
+   ],
+   "chanukiah": [
+    {
+     "t": "path",
+     "d": "M5.5,8.6C8.2,11.3 7.66,14.12 5.5,14.6C3.34,14.12 2.8,11.3 5.5,8.6Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M5.5,10.88C7.01,12.68 6.8,14 5.5,14.36C4.2,14 3.99,12.68 5.5,10.88Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 4.55,
+     "y": 15,
+     "width": 1.9,
+     "height": 5.2,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 0.6
+    },
+    {
+     "t": "rect",
+     "x": 3.7,
+     "y": 20,
+     "width": 3.6,
+     "height": 2.6,
+     "rx": 0.8,
+     "fill": {
+      "role": "gold2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M9.8,8.6C12.5,11.3 11.96,14.12 9.8,14.6C7.64,14.12 7.1,11.3 9.8,8.6Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M9.8,10.88C11.31,12.68 11.1,14 9.8,14.36C8.5,14 8.29,12.68 9.8,10.88Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 8.85,
+     "y": 15,
+     "width": 1.9,
+     "height": 5.2,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 0.6
+    },
+    {
+     "t": "rect",
+     "x": 8,
+     "y": 20,
+     "width": 3.6,
+     "height": 2.6,
+     "rx": 0.8,
+     "fill": {
+      "role": "gold2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M14.1,8.6C16.8,11.3 16.26,14.12 14.1,14.6C11.94,14.12 11.4,11.3 14.1,8.6Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M14.1,10.88C15.61,12.68 15.4,14 14.1,14.36C12.8,14 12.59,12.68 14.1,10.88Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 13.15,
+     "y": 15,
+     "width": 1.9,
+     "height": 5.2,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 0.6
+    },
+    {
+     "t": "rect",
+     "x": 12.3,
+     "y": 20,
+     "width": 3.6,
+     "height": 2.6,
+     "rx": 0.8,
+     "fill": {
+      "role": "gold2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M18.4,8.6C21.1,11.3 20.56,14.12 18.4,14.6C16.24,14.12 15.7,11.3 18.4,8.6Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M18.4,10.88C19.91,12.68 19.7,14 18.4,14.36C17.1,14 16.89,12.68 18.4,10.88Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 17.45,
+     "y": 15,
+     "width": 1.9,
+     "height": 5.2,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 0.6
+    },
+    {
+     "t": "rect",
+     "x": 16.6,
+     "y": 20,
+     "width": 3.6,
+     "height": 2.6,
+     "rx": 0.8,
+     "fill": {
+      "role": "gold2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M29.6,8.6C32.3,11.3 31.76,14.12 29.6,14.6C27.44,14.12 26.9,11.3 29.6,8.6Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M29.6,10.88C31.11,12.68 30.9,14 29.6,14.36C28.3,14 28.09,12.68 29.6,10.88Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 28.65,
+     "y": 15,
+     "width": 1.9,
+     "height": 5.2,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 0.6
+    },
+    {
+     "t": "rect",
+     "x": 27.8,
+     "y": 20,
+     "width": 3.6,
+     "height": 2.6,
+     "rx": 0.8,
+     "fill": {
+      "role": "gold2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M33.9,8.6C36.6,11.3 36.06,14.12 33.9,14.6C31.74,14.12 31.2,11.3 33.9,8.6Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M33.9,10.88C35.41,12.68 35.2,14 33.9,14.36C32.6,14 32.39,12.68 33.9,10.88Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 32.95,
+     "y": 15,
+     "width": 1.9,
+     "height": 5.2,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 0.6
+    },
+    {
+     "t": "rect",
+     "x": 32.1,
+     "y": 20,
+     "width": 3.6,
+     "height": 2.6,
+     "rx": 0.8,
+     "fill": {
+      "role": "gold2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M38.2,8.6C40.9,11.3 40.36,14.12 38.2,14.6C36.04,14.12 35.5,11.3 38.2,8.6Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M38.2,10.88C39.71,12.68 39.5,14 38.2,14.36C36.9,14 36.69,12.68 38.2,10.88Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 37.25,
+     "y": 15,
+     "width": 1.9,
+     "height": 5.2,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 0.6
+    },
+    {
+     "t": "rect",
+     "x": 36.4,
+     "y": 20,
+     "width": 3.6,
+     "height": 2.6,
+     "rx": 0.8,
+     "fill": {
+      "role": "gold2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M42.5,8.6C45.2,11.3 44.66,14.12 42.5,14.6C40.34,14.12 39.8,11.3 42.5,8.6Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M42.5,10.88C44.01,12.68 43.8,14 42.5,14.36C41.2,14 40.99,12.68 42.5,10.88Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 41.55,
+     "y": 15,
+     "width": 1.9,
+     "height": 5.2,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 0.6
+    },
+    {
+     "t": "rect",
+     "x": 40.7,
+     "y": 20,
+     "width": 3.6,
+     "height": 2.6,
+     "rx": 0.8,
+     "fill": {
+      "role": "gold2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M24,2.1C26.7,4.8 26.16,7.62 24,8.1C21.84,7.62 21.3,4.8 24,2.1Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M24,4.38C25.51,6.18 25.3,7.5 24,7.86C22.7,7.5 22.49,6.18 24,4.38Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 23.05,
+     "y": 8.5,
+     "width": 1.9,
+     "height": 5.2,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 0.6
+    },
+    {
+     "t": "rect",
+     "x": 22.2,
+     "y": 13.5,
+     "width": 3.6,
+     "height": 2.6,
+     "rx": 0.8,
+     "fill": {
+      "role": "gold2"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 22.6,
+     "y": 18,
+     "width": 2.8,
+     "height": 6,
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 3.5,
+     "y": 22.4,
+     "width": 41,
+     "height": 3.2,
+     "rx": 1.6,
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 22.4,
+     "y": 25,
+     "width": 3.2,
+     "height": 11,
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M13.5,43.6Q13.5,36 24,36Q34.5,36 34.5,43.6Z",
+     "fill": {
+      "role": "gold2"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 23.2,
+     "y": 26,
+     "width": 1,
+     "height": 9.4,
+     "fill": {
+      "role": "white"
+     },
+     "opacity": 0.5
+    }
+   ],
+   "shofar": [
+    {
+     "t": "defs",
+     "c": [
+      {
+       "t": "linearGradient",
+       "id": true,
+       "x1": 6,
+       "y1": 42,
+       "x2": 42,
+       "y2": 9,
+       "gradientUnits": "userSpaceOnUse",
+       "c": [
+        {
+         "t": "stop",
+         "offset": 0,
+         "stopColor": {
+          "role": "wood2"
+         }
+        },
+        {
+         "t": "stop",
+         "offset": 0.55,
+         "stopColor": {
+          "role": "wood"
+         }
+        },
+        {
+         "t": "stop",
+         "offset": 1,
+         "stopColor": {
+          "role": "horn"
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "t": "path",
+     "d": "M5.5,42C9.5,31.5 19,30.6 27.4,25.4C33.6,21.6 36.6,15.6 37.6,7.6L44.6,10.2C44,20.2 40,27.6 32.2,31.8C23.8,36.2 13,35 7.6,43.6Z",
+     "fill": {
+      "url": true
+     }
+    },
+    {
+     "t": "ellipse",
+     "cx": 41.1,
+     "cy": 8.9,
+     "rx": 3.7,
+     "ry": 1.7,
+     "transform": "rotate(20 41.1 8.9)",
+     "fill": {
+      "role": "wood2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M29,25.2Q31.6,28.6 32.2,31.6M21,29.2Q23,31.8 23.4,34.6M13.6,33.4Q15,35.4 15.2,37.6",
+     "stroke": {
+      "role": "wood2"
+     },
+     "strokeWidth": 1.2,
+     "strokeLinecap": "round",
+     "fill": "none",
+     "opacity": 0.6
+    }
+   ],
+   "sukkah": [
+    {
+     "t": "rect",
+     "x": 9.5,
+     "y": 18.1,
+     "width": 29,
+     "height": 25.9,
+     "fill": {
+      "role": "paper"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 7,
+     "y": 16.6,
+     "width": 3.4,
+     "height": 26.9,
+     "rx": 1,
+     "fill": {
+      "role": "wood"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 37.6,
+     "y": 16.6,
+     "width": 3.4,
+     "height": 26.9,
+     "rx": 1,
+     "fill": {
+      "role": "wood"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 4,
+     "y": 42,
+     "width": 40,
+     "height": 3.4,
+     "rx": 1.7,
+     "fill": {
+      "role": "wood2"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 5.5,
+     "y": 15.6,
+     "width": 37,
+     "height": 2.8,
+     "rx": 1,
+     "fill": {
+      "role": "wood"
+     }
+    },
+    {
+     "t": "ellipse",
+     "cx": 10.5,
+     "cy": 13.6,
+     "rx": 6.5,
+     "ry": 4.2,
+     "fill": {
+      "role": "leaf"
+     }
+    },
+    {
+     "t": "ellipse",
+     "cx": 20,
+     "cy": 11.7,
+     "rx": 7.5,
+     "ry": 4.8,
+     "fill": {
+      "role": "leaf2"
+     }
+    },
+    {
+     "t": "ellipse",
+     "cx": 29,
+     "cy": 12.1,
+     "rx": 7.5,
+     "ry": 4.6,
+     "fill": {
+      "role": "leaf"
+     }
+    },
+    {
+     "t": "ellipse",
+     "cx": 38,
+     "cy": 13.7,
+     "rx": 6.5,
+     "ry": 4.2,
+     "fill": {
+      "role": "leaf2"
+     }
+    },
+    {
+     "t": "ellipse",
+     "cx": 24.5,
+     "cy": 14.5,
+     "rx": 6,
+     "ry": 2.8,
+     "fill": {
+      "role": "leaf"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M11,31H27.4L26.6,36.4H11.8Z",
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 1
+    },
+    {
+     "t": "path",
+     "d": "M13.4,36.4V42M25,36.4V42",
+     "stroke": {
+      "role": "wood2"
+     },
+     "strokeWidth": 1.8,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "rect",
+     "x": 15,
+     "y": 25.4,
+     "width": 1.8,
+     "height": 5.6,
+     "rx": 0.6,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 0.8
+    },
+    {
+     "t": "rect",
+     "x": 21.6,
+     "y": 25.4,
+     "width": 1.8,
+     "height": 5.6,
+     "rx": 0.6,
+     "fill": {
+      "role": "white"
+     },
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 0.8
+    },
+    {
+     "t": "path",
+     "d": "M15.9,20.2C18.15,22.45 17.7,24.8 15.9,25.2C14.1,24.8 13.65,22.45 15.9,20.2Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M15.9,22.1C17.16,23.6 16.98,24.7 15.9,25C14.82,24.7 14.64,23.6 15.9,22.1Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M22.5,20.2C24.75,22.45 24.3,24.8 22.5,25.2C20.7,24.8 20.25,22.45 22.5,20.2Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M22.5,22.1C23.76,23.6 23.58,24.7 22.5,25C21.42,24.7 21.24,23.6 22.5,22.1Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 33,
+     "y": 24.4,
+     "width": 2.6,
+     "height": 17.6,
+     "rx": 1.2,
+     "fill": {
+      "role": "wood2"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 28.6,
+     "y": 32.4,
+     "width": 7,
+     "height": 2.8,
+     "rx": 1,
+     "fill": {
+      "role": "wood"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M29.8,35V42",
+     "stroke": {
+      "role": "wood2"
+     },
+     "strokeWidth": 1.8,
+     "strokeLinecap": "round"
+    }
+   ],
+   "moon": [
+    {
+     "t": "circle",
+     "cx": 24,
+     "cy": 24,
+     "r": 20,
+     "fill": {
+      "role": "ink"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M19.88,13.19A12,12 0 1 0 33.23,29.22A10.6,10.6 0 0 1 19.88,13.19Z",
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M34,10.4L34.73,12.27L36.6,13L34.73,13.73L34,15.6L33.27,13.73L31.4,13L33.27,12.27Z",
+     "fill": {
+      "role": "white"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M37.5,24.4L37.95,25.55L39.1,26L37.95,26.45L37.5,27.6L37.05,26.45L35.9,26L37.05,25.55Z",
+     "fill": {
+      "role": "white"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M13,11.6L13.39,12.61L14.4,13L13.39,13.39L13,14.4L12.61,13.39L11.6,13L12.61,12.61Z",
+     "fill": {
+      "role": "white"
+     }
+    }
+   ],
+   "chok": [
+    {
+     "t": "path",
+     "d": "M3,14V40Q14,37 24,41Q34,37 45,40V14Z",
+     "fill": {
+      "role": "ink"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M5,12Q14,9 24,13V38Q14,34.5 5,37Z",
+     "fill": {
+      "role": "paper"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M43,12Q34,9 24,13V38Q34,34.5 43,37Z",
+     "fill": {
+      "role": "white"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M24,13V38",
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 1
+    },
+    {
+     "t": "g",
+     "stroke": {
+      "role": "line"
+     },
+     "strokeWidth": 1.4,
+     "strokeLinecap": "round",
+     "fill": "none",
+     "c": [
+      {
+       "t": "path",
+       "d": "M9,18Q14,17 20,18.8M28,18.8Q34,17 39,18"
+      },
+      {
+       "t": "path",
+       "d": "M9,22Q14,21 20,22.8M28,22.8Q34,21 39,22"
+      },
+      {
+       "t": "path",
+       "d": "M9,26Q14,25 20,26.8M28,26.8Q34,25 39,26"
+      }
+     ]
+    },
+    {
+     "t": "path",
+     "d": "M31,10.6V25L33.2,22.6L35.4,25V10.2Z",
+     "fill": {
+      "role": "acc"
+     }
+    }
+   ],
+   "general": [
+    {
+     "t": "rect",
+     "x": 12,
+     "y": 9,
+     "width": 24,
+     "height": 30,
+     "fill": {
+      "role": "paper"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M16,13.4H22.6M25.4,13.4H32",
+     "stroke": {
+      "role": "line"
+     },
+     "strokeWidth": 1.3,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "path",
+     "d": "M16,17H22.6M25.4,17H32",
+     "stroke": {
+      "role": "line"
+     },
+     "strokeWidth": 1.3,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "path",
+     "d": "M16,20.6H22.6M25.4,20.6H32",
+     "stroke": {
+      "role": "line"
+     },
+     "strokeWidth": 1.3,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "path",
+     "d": "M16,24.2H22.6M25.4,24.2H32",
+     "stroke": {
+      "role": "line"
+     },
+     "strokeWidth": 1.3,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "path",
+     "d": "M16,27.8H22.6M25.4,27.8H32",
+     "stroke": {
+      "role": "line"
+     },
+     "strokeWidth": 1.3,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "path",
+     "d": "M16,31.4H22.6M25.4,31.4H32",
+     "stroke": {
+      "role": "line"
+     },
+     "strokeWidth": 1.3,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "path",
+     "d": "M16,35H22.6M25.4,35H32",
+     "stroke": {
+      "role": "line"
+     },
+     "strokeWidth": 1.3,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "rect",
+     "x": 8.8,
+     "y": 2.5,
+     "width": 2.4,
+     "height": 6,
+     "fill": {
+      "role": "wood2"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 8.8,
+     "y": 39.5,
+     "width": 2.4,
+     "height": 6,
+     "fill": {
+      "role": "wood2"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 6,
+     "y": 7,
+     "width": 8,
+     "height": 34,
+     "rx": 4,
+     "fill": {
+      "role": "wood"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 7.6,
+     "y": 9,
+     "width": 1.8,
+     "height": 30,
+     "rx": 0.9,
+     "fill": {
+      "role": "white"
+     },
+     "opacity": 0.3
+    },
+    {
+     "t": "circle",
+     "cx": 10,
+     "cy": 2.8,
+     "r": 2.2,
+     "fill": {
+      "role": "gold"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 36.8,
+     "y": 2.5,
+     "width": 2.4,
+     "height": 6,
+     "fill": {
+      "role": "wood2"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 36.8,
+     "y": 39.5,
+     "width": 2.4,
+     "height": 6,
+     "fill": {
+      "role": "wood2"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 34,
+     "y": 7,
+     "width": 8,
+     "height": 34,
+     "rx": 4,
+     "fill": {
+      "role": "wood"
+     }
+    },
+    {
+     "t": "rect",
+     "x": 35.6,
+     "y": 9,
+     "width": 1.8,
+     "height": 30,
+     "rx": 0.9,
+     "fill": {
+      "role": "white"
+     },
+     "opacity": 0.3
+    },
+    {
+     "t": "circle",
+     "cx": 38,
+     "cy": 2.8,
+     "r": 2.2,
+     "fill": {
+      "role": "gold"
+     }
+    }
+   ],
+   "tehillim": [
+    {
+     "t": "path",
+     "d": "M12,10C21,10 31,17 39.5,34",
+     "stroke": {
+      "role": "gold"
+     },
+     "strokeWidth": 4.2,
+     "strokeLinecap": "round",
+     "fill": "none"
+    },
+    {
+     "t": "path",
+     "d": "M12,41.5L39.5,34",
+     "stroke": {
+      "role": "gold2"
+     },
+     "strokeWidth": 5,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "g",
+     "stroke": {
+      "role": "line2"
+     },
+     "strokeWidth": 1.1,
+     "strokeLinecap": "round",
+     "c": [
+      {
+       "t": "path",
+       "d": "M16.5,10.8V40.3M21.5,12.4V38.9M26.5,15.2V37.6M31.5,19.6V36.2M35.8,25.4V35"
+      }
+     ]
+    },
+    {
+     "t": "rect",
+     "x": 8.4,
+     "y": 8,
+     "width": 5.6,
+     "height": 35.5,
+     "rx": 2.8,
+     "fill": {
+      "role": "gold2"
+     }
+    },
+    {
+     "t": "circle",
+     "cx": 11.2,
+     "cy": 7.4,
+     "r": 3,
+     "fill": {
+      "role": "gold"
+     }
+    }
+   ],
+   "hilula": [
+    {
+     "t": "circle",
+     "cx": 24,
+     "cy": 11,
+     "r": 8,
+     "fill": {
+      "role": "flame"
+     },
+     "opacity": 0.25
+    },
+    {
+     "t": "path",
+     "d": "M24,3.6C29.85,9.45 28.68,15.56 24,16.6C19.32,15.56 18.15,9.45 24,3.6Z",
+     "fill": {
+      "role": "flame2"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M24,8.54C27.28,12.44 26.81,15.3 24,16.08C21.19,15.3 20.72,12.44 24,8.54Z",
+     "fill": {
+      "role": "flame"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M12.5,19H35.5L33.8,42.4Q24,45 14.2,42.4Z",
+     "fill": {
+      "role": "metal"
+     },
+     "opacity": 0.65,
+     "stroke": {
+      "role": "metal2"
+     },
+     "strokeWidth": 1.2
+    },
+    {
+     "t": "path",
+     "d": "M14,26H34L33.2,41.4Q24,43.6 14.8,41.4Z",
+     "fill": {
+      "role": "white"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M24,16.6V26",
+     "stroke": {
+      "role": "ink"
+     },
+     "strokeWidth": 1.3,
+     "strokeLinecap": "round"
+    },
+    {
+     "t": "rect",
+     "x": 16,
+     "y": 21,
+     "width": 2.2,
+     "height": 18.6,
+     "rx": 1.1,
+     "fill": {
+      "role": "white"
+     },
+     "opacity": 0.8
+    }
+   ],
+   "siddur": [
+    {
+     "t": "path",
+     "d": "M7.19,14L2.9,37Q14.25,34 24,38Q33.75,34 45.1,37L40.81,14Z",
+     "fill": {
+      "role": "ink"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M8.79,12Q16.4,9 24,13V35Q14.25,31.5 4.5,34Z",
+     "fill": {
+      "role": "paper"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M39.21,12Q31.61,9 24,13V35Q33.75,31.5 43.5,34Z",
+     "fill": {
+      "role": "white"
+     }
+    },
+    {
+     "t": "path",
+     "d": "M24,13V35",
+     "stroke": {
+      "role": "paper2"
+     },
+     "strokeWidth": 1
+    },
+    {
+     "t": "g",
+     "stroke": {
+      "role": "line"
+     },
+     "strokeWidth": 1.3,
+     "strokeLinecap": "round",
+     "fill": "none",
+     "c": [
+      {
+       "t": "path",
+       "d": "M10.95,15.9Q15.98,15.3 21,16.9"
+      },
+      {
+       "t": "path",
+       "d": "M10.1,20.47Q15.55,19.87 21,21.47"
+      },
+      {
+       "t": "path",
+       "d": "M9.25,25.04Q15.12,24.44 21,26.04"
+      }
+     ]
+    },
+    {
+     "t": "path",
+     "d": "M33.75,17.76L37.13,23.61H30.37Z M33.75,25.56L30.37,19.71H37.13Z",
+     "stroke": {
+      "role": "gold2"
+     },
+     "strokeWidth": 1.3,
+     "strokeLinejoin": "round",
+     "fill": "none"
+    }
+   ]
+  },
+  "TONES": {
+   "ink": {
+    "share": 0.55,
+    "with": "#2a1405"
+   },
+   "ink2": {
+    "share": 0.75,
+    "with": "#2a1405"
+   },
+   "ink3": {
+    "share": 0.4,
+    "with": "#2a1405"
+   },
+   "acc": {
+    "share": 1,
+    "with": "#fff"
+   },
+   "acc2": {
+    "share": 0.7,
+    "with": "#2a1405"
+   },
+   "paper": {
+    "share": 0.12,
+    "with": "#fff"
+   },
+   "paper2": {
+    "share": 0.4,
+    "with": "#fff"
+   },
+   "white": {
+    "share": 0,
+    "with": "#fff"
+   },
+   "line": {
+    "share": 0.55,
+    "with": "#fff"
+   },
+   "line2": {
+    "share": 0.15,
+    "with": "#fff"
+   },
+   "gold": {
+    "share": 0.85,
+    "with": "#fff"
+   },
+   "gold2": {
+    "share": 1,
+    "with": "#fff"
+   },
+   "flame": {
+    "share": 0.45,
+    "with": "#fff"
+   },
+   "flame2": {
+    "share": 1,
+    "with": "#fff"
+   },
+   "metal": {
+    "share": 0.22,
+    "with": "#fff"
+   },
+   "metal2": {
+    "share": 0.6,
+    "with": "#fff"
+   },
+   "wood": {
+    "share": 0.8,
+    "with": "#2a1405"
+   },
+   "wood2": {
+    "share": 0.55,
+    "with": "#2a1405"
+   },
+   "horn": {
+    "share": 0.35,
+    "with": "#fff"
+   },
+   "leaf": {
+    "share": 0.9,
+    "with": "#fff"
+   },
+   "leaf2": {
+    "share": 1,
+    "with": "#fff"
+   },
+   "wine": {
+    "share": 1,
+    "with": "#fff"
+   },
+   "wine2": {
+    "share": 0.7,
+    "with": "#2a1405"
+   },
+   "water": {
+    "share": 0.35,
+    "with": "#fff"
+   },
+   "blue": {
+    "share": 0.7,
+    "with": "#2a1405"
+   }
+  }
+ }
+}
