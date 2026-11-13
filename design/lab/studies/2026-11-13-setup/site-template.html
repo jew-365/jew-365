@@ -1,0 +1,462 @@
+<title>ההגדרה הקצרה</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&display=swap">
+<style>
+/* Layout: an intro and the switches (palette, phone), then the six setup screens in order, each a phone in the app's
+   tokens and the chosen palette, sharing one set of answers; then the second direction of the bundles screen. The
+   base styles are the hub study's (2026-11-13-hub), copied; the page chrome follows the viewer's theme. */
+:root {
+  --page: #F6F1E8; --card: #FFFDF9; --ink: #1D2240; --sub: #69645D; --line: #E6DCCB; --accent: #F08A3C; --on-accent: #2B1608; --mark: #A04A0C; --frame: #1D2240;
+  --font: "Rubik", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --page: #12152B; --card: #1B1F3A; --ink: #EEF0FA; --sub: #A9AEC8; --line: #2C3152; --accent: #F08A3C; --on-accent: #2B1608; --mark: #F5A86C; --frame: #050713; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --page: #12152B; --card: #1B1F3A; --ink: #EEF0FA; --sub: #A9AEC8; --line: #2C3152; --accent: #F08A3C; --on-accent: #2B1608; --mark: #F5A86C; --frame: #050713; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--font); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 22px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; }
+h1 { margin: 0; font-size: 28px; font-weight: 800; text-wrap: balance; }
+h2 { margin: 18px 0 0; font-size: 22px; font-weight: 800; text-wrap: balance; }
+.intro, .lead { margin: 0; color: var(--sub); line-height: 1.6; max-width: 72ch; font-size: 15px; }
+.bars { display: grid; gap: 8px; }
+@media (min-width: 900px) { .bars { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--page); padding-block: 8px; } }
+.bar { display: flex; flex-wrap: nowrap; gap: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.bar::-webkit-scrollbar { display: none; }
+.bar > * { flex: none; white-space: nowrap; }
+.bar > span { font-size: 14px; color: var(--sub); }
+.bar button, .bar a { font: 600 15px var(--font); min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+.bar button i { width: 16px; height: 16px; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 2px var(--card), 0 0 0 3px var(--line); }
+.bar button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--mark); outline-offset: 2px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(368px, 1fr)); gap: 22px; align-items: start; }
+@media (max-width: 420px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.opt { display: grid; gap: 10px; min-width: 0; justify-items: center; }
+.opt header { display: flex; align-items: baseline; gap: 10px; width: 100%; max-width: 376px; }
+.opt header .letter { font-weight: 800; font-size: 20px; color: var(--mark); }
+.opt header b { font-size: 17px; }
+.opt header .rec { margin-inline-start: auto; font-size: 12px; font-weight: 700; color: var(--on-accent); background: var(--accent); border-radius: 999px; padding: 3px 10px; }
+.opt p { margin: 0; color: var(--sub); font-size: 14px; line-height: 1.55; max-width: 376px; width: 100%; }
+.decide { background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; padding: 14px 16px; display: grid; gap: 6px; max-width: 80ch; }
+.decide b { font-size: 16px; }
+.decide ol { margin: 0; padding-inline-start: 22px; color: var(--sub); line-height: 1.7; font-size: 15px; }
+
+/* The phone: a 360-point screen inside a frame, in the chosen palette (--p-*). */
+.phone { width: 100%; max-width: 376px; height: 760px; border: 8px solid var(--frame); border-radius: 40px; overflow: hidden; position: relative; background: var(--p-bg); color: var(--p-text); }
+.screen { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; padding-bottom: 96px; }
+.screen::-webkit-scrollbar { display: none; }
+.status { height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font-size: 13px; font-weight: 600; color: var(--p-text); }
+.body { padding: 0 16px; display: grid; gap: 0; }
+.navbar { padding: 12px 16px 8px; display: flex; align-items: center; gap: 12px; }
+.navbar h3 { margin: 0; font-size: 28px; line-height: 34px; font-weight: 900; flex: 1; }
+.sheader { padding: 8px 16px 8px; display: grid; gap: 8px; }
+.sheader .top { display: flex; align-items: center; gap: 8px; }
+.pill { min-height: 40px; min-width: 40px; border-radius: 999px; border: 0; background: var(--p-surface); color: var(--p-text); display: inline-grid; place-items: center; box-shadow: 0 2px 12px color-mix(in srgb, var(--p-text) 7%, transparent); font: 600 13px var(--font); padding: 0 12px; }
+.sheader h3 { margin: 0; font-size: 22px; line-height: 28px; font-weight: 800; }
+.sheader small { font-size: 13px; color: var(--p-textSub); line-height: 18px; }
+.label { margin: 12px 4px 8px; font-size: 17px; line-height: 24px; font-weight: 700; color: var(--p-text); display: flex; align-items: center; gap: 8px; }
+.label .link { margin-inline-start: auto; font: 600 13px var(--font); color: var(--p-goldText); background: none; border: 0; min-height: 44px; padding: 0 4px; }
+.card { background: var(--p-surface); border-radius: 20px; box-shadow: 0 2px 12px color-mix(in srgb, var(--p-text) 7%, transparent); overflow: hidden; }
+.card.pad { padding: 16px; }
+.card + .card { margin-top: 12px; }
+.row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 16px; background: none; border: 0; color: inherit; font: inherit; text-align: start; cursor: pointer; position: relative; }
+.card > .row + .row::before, .card > .row + .rowgroup::before, .divrow::before { content: ""; position: absolute; top: 0; inset-inline: 16px; height: 1px; background: var(--p-border); }
+.row .meta { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.row .t { font-size: 17px; line-height: 24px; font-weight: 700; }
+.row .c { font-size: 13px; line-height: 18px; color: var(--p-textSub); }
+.row.muted .t { color: var(--p-textMuted); }
+.tile { width: 44px; height: 44px; border-radius: 17.6px; display: grid; place-items: center; flex: none; background: var(--p-goldLight); }
+.tile.muted { background: var(--p-surface2); }
+.tile.sm { width: 32px; height: 32px; border-radius: 12.8px; }
+.chev { width: 20px; height: 20px; flex: none; color: var(--p-textMuted); }
+.act { flex: none; min-height: 36px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--p-gold); background: var(--p-surface); color: var(--p-goldText); font: 600 13px var(--font); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; position: relative; }
+.act::after { content: ""; position: absolute; inset: -6px -4px; }
+.act.fill { background: var(--p-gold); color: var(--p-onGold); }
+.state-on { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--p-safe); }
+.search { display: flex; align-items: center; gap: 12px; padding: 0 16px; min-height: 52px; color: var(--p-textMuted); font-size: 15px; width: 100%; border: 0; background: var(--p-surface); border-radius: 20px; box-shadow: 0 2px 12px color-mix(in srgb, var(--p-text) 7%, transparent); font-family: var(--font); cursor: text; text-align: start; }
+.search.big { min-height: 60px; font-size: 17px; border: 1.5px solid var(--p-gold); }
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 10px 0 2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; min-height: 36px; padding: 0 14px; border-radius: 999px; border: 0; background: var(--p-surface); color: var(--p-text); font: 500 13px var(--font); box-shadow: 0 1px 6px color-mix(in srgb, var(--p-text) 6%, transparent); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; position: relative; }
+.chip::after { content: ""; position: absolute; inset: -4px 0; }
+.chip[aria-pressed="true"] { background: var(--p-gold); color: var(--p-onGold); }
+.feature { padding: 16px; display: grid; gap: 12px; }
+.feature .head { display: flex; gap: 12px; align-items: center; }
+.feature .t { font-size: 17px; font-weight: 700; line-height: 24px; }
+.feature .c { font-size: 15px; line-height: 22px; color: var(--p-textSub); }
+.btn { min-height: 48px; border-radius: 16px; border: 0; background: var(--p-gold); color: var(--p-onGold); font: 700 15px var(--font); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; width: 100%; }
+.btn.ghost { background: transparent; color: var(--p-goldText); }
+.carousel { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px 8px; scroll-snap-type: x mandatory; }
+.carousel::-webkit-scrollbar { display: none; }
+.carousel .card { flex: 0 0 82%; scroll-snap-align: start; margin: 0; }
+.goals { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.goal { background: var(--p-surface); border-radius: 20px; box-shadow: 0 2px 12px color-mix(in srgb, var(--p-text) 7%, transparent); padding: 14px; display: grid; gap: 10px; border: 0; color: inherit; font: inherit; text-align: start; cursor: pointer; align-content: start; min-height: 112px; }
+.goal .t { font-size: 15px; font-weight: 700; line-height: 22px; }
+.goal .icons { display: flex; gap: 4px; flex-wrap: wrap; }
+.goal .icons span { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 8px; }
+.goal .icons .off { opacity: 0.38; filter: grayscale(1); }
+.gcard { padding: 0; }
+.gcard > .row { padding-block: 14px; }
+.gcard .strip { display: flex; gap: 4px; margin-top: 4px; }
+.gcard .strip span { width: 20px; height: 20px; display: grid; place-items: center; }
+.gcard .strip .off { opacity: 0.38; filter: grayscale(1); }
+.gcard .rows { display: none; }
+.gcard.open .rows { display: block; }
+.gcard .rows .row { padding-block: 12px; }
+.gcard .bundle { padding: 4px 16px 14px; }
+.flip { transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1); }
+.gcard.open .flip { transform: rotate(180deg); }
+
+/* Home's slice. */
+.hero { background: linear-gradient(180deg, #4B9DEB, #6DB4F1 55%, #A8D5F8); color: #0A1228; padding: 10px 16px 18px; display: grid; gap: 10px; }
+.hero .top { display: flex; align-items: center; gap: 10px; }
+.hero .greet { flex: 1; display: grid; }
+.hero .greet small { font-size: 12px; line-height: 16px; }
+.hero .greet b { font-size: 17px; line-height: 24px; }
+.logo { width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(#ffffffcc, #ffffff00 72%); display: grid; place-items: center; font: 900 11px var(--font); color: #002767; letter-spacing: -0.3px; }
+.roundbtn { width: 44px; height: 44px; border-radius: 50%; border: 0; display: grid; place-items: center; background: #ffffffb3; color: #0A1228; cursor: pointer; }
+.hero .arc { height: 96px; border-radius: 20px; border: 1.5px dashed #0A122855; display: grid; place-items: center; font-size: 13px; color: #0A1228b0; text-align: center; padding: 0 20px; }
+.hero .spill { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px; border-radius: 999px; background: #ffffffd9; color: #3a4466; border: 0; font: 400 15px var(--font); cursor: text; }
+.now { display: grid; gap: 12px; }
+.nowcard { padding: 16px; display: grid; gap: 10px; }
+.nowcard .head { display: flex; align-items: center; gap: 12px; }
+.nowcard .t { font-size: 17px; font-weight: 700; flex: 1; }
+.bar2 { height: 6px; border-radius: 3px; background: var(--p-surface2); overflow: hidden; display: flex; }
+.bar2 i { display: block; height: 100%; background: var(--p-gold); }
+.nowcard .times { display: flex; justify-content: space-between; font-size: 12px; color: var(--p-textSub); font-variant-numeric: tabular-nums; }
+.textlink { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; margin-top: 4px; border: 0; background: none; color: var(--p-goldText); font: 600 15px var(--font); cursor: pointer; width: 100%; }
+.dayrow .time { font-size: 13px; color: var(--p-textSub); font-variant-numeric: tabular-nums; }
+
+/* The tab bar floats over the screen, as in the app. */
+.tabbar { position: absolute; inset-inline: 10px; bottom: 10px; height: 64px; border-radius: 24px; background: var(--p-tabBg); box-shadow: 0 4px 18px color-mix(in srgb, var(--p-text) 14%, transparent); display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; z-index: 2; }
+.tabbar span { display: grid; justify-items: center; gap: 2px; font-size: 11px; color: var(--p-textMuted); font-weight: 500; }
+.tabbar span.on { color: var(--p-goldText); font-weight: 700; }
+.toast { position: absolute; inset-inline: 16px; bottom: 86px; background: var(--p-text); color: var(--p-bg); border-radius: 14px; padding: 10px 14px; font-size: 14px; font-weight: 600; text-align: center; opacity: 0; transform: translateY(8px); transition: opacity 180ms, transform 180ms cubic-bezier(0.23, 1, 0.32, 1); pointer-events: none; z-index: 3; }
+.toast.on { opacity: 1; transform: none; }
+.tap { transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1); }
+.tap:active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) { .tap, .toast, .flip { transition: none; } }
+
+/* The setup screens: no tab bar; the dots and the step's actions sit at the bottom, over the page. */
+.phone.setup .screen { padding-bottom: 170px; }
+.step { padding: 8px 20px 0; display: grid; gap: 14px; }
+.step h3 { margin: 6px 0 0; font-size: 28px; line-height: 34px; font-weight: 900; text-wrap: balance; }
+.step .lead2 { margin: 0; font-size: 15px; line-height: 22px; color: var(--p-textSub); }
+.foot { position: absolute; inset: auto 0 0; padding: 12px 20px 18px; background: linear-gradient(transparent, var(--p-bg) 22%); display: grid; gap: 4px; z-index: 2; }
+.dots { display: flex; justify-content: center; gap: 6px; padding-bottom: 8px; }
+.dots i { width: 7px; height: 7px; border-radius: 4px; background: var(--p-border); }
+.dots i.on { width: 22px; background: var(--p-gold); }
+.field { display: grid; gap: 8px; }
+.field > span { font-size: 13px; font-weight: 700; color: var(--p-textSub); }
+.input { min-height: 52px; border-radius: 16px; background: var(--p-surface); box-shadow: 0 2px 12px color-mix(in srgb, var(--p-text) 7%, transparent); display: flex; align-items: center; gap: 10px; padding: 0 16px; font-size: 15px; color: var(--p-textMuted); }
+.input b { color: var(--p-text); font-weight: 500; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--p-surface2); border-radius: 16px; padding: 4px; gap: 4px; }
+.seg button { min-height: 44px; border: 0; border-radius: 12px; background: transparent; color: var(--p-textSub); font: 600 15px var(--font); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--p-surface); color: var(--p-text); box-shadow: 0 1px 6px color-mix(in srgb, var(--p-text) 10%, transparent); }
+.radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--p-border); flex: none; display: grid; place-items: center; }
+.radio.on { border-color: var(--p-gold); }
+.radio.on::after { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--p-gold); }
+.tick { width: 26px; height: 26px; border-radius: 9px; border: 2px solid var(--p-border); flex: none; display: grid; place-items: center; background: var(--p-surface); }
+.tick.on { background: var(--p-gold); border-color: var(--p-gold); }
+.bundle { padding: 14px 16px; display: grid; gap: 10px; border: 2px solid transparent; cursor: pointer; text-align: start; font: inherit; color: inherit; width: 100%; }
+.bundle.on { border-color: var(--p-gold); }
+.bundle .head { display: flex; align-items: center; gap: 12px; }
+.bundle .head .meta { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.bundle .t { font-size: 17px; font-weight: 700; line-height: 24px; }
+.bundle .c { font-size: 13px; line-height: 18px; color: var(--p-textSub); }
+.members { display: flex; flex-wrap: wrap; gap: 6px; }
+.members span { font-size: 12px; line-height: 16px; padding: 4px 9px; border-radius: 999px; background: var(--p-surface2); color: var(--p-textSub); }
+.members span.on { background: var(--p-goldLight); color: var(--p-goldText); font-weight: 600; }
+.members span.off { text-decoration: line-through; opacity: 0.7; }
+.rec2 { font-size: 11px; font-weight: 700; color: var(--p-goldText); }
+.sw { width: 48px; height: 28px; border-radius: 14px; background: var(--p-border); position: relative; flex: none; border: 0; cursor: pointer; }
+.sw::after { content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px #0003; transition: inset-inline-start 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+.sw[aria-checked="true"] { background: var(--p-gold); }
+.sw[aria-checked="true"]::after { inset-inline-start: 23px; }
+.qrow { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.qrow .meta { flex: 1; display: grid; gap: 2px; }
+.qrow .t { font-size: 15px; font-weight: 600; }
+.qrow .c { font-size: 13px; color: var(--p-textSub); line-height: 18px; }
+.time { min-height: 40px; padding: 0 12px; border-radius: 12px; background: var(--p-surface2); font: 600 15px var(--font); color: var(--p-text); display: inline-grid; place-items: center; font-variant-numeric: tabular-nums; border: 0; }
+.note { font-size: 12px; line-height: 16px; color: var(--p-textSub); padding: 0 16px 14px; }
+.link2 { min-height: 44px; border: 0; background: none; color: var(--p-goldText); font: 600 15px var(--font); cursor: pointer; }
+.btn.second { background: var(--p-goldLight); color: var(--p-goldText); }
+.daylist .row { cursor: default; padding-block: 12px; }
+.daylist .time2 { font-size: 13px; color: var(--p-textSub); font-variant-numeric: tabular-nums; flex: none; }
+.daylist .open { color: var(--p-goldText); font-weight: 700; }
+/* The system's own permission dialog and a delivered notification, drawn plainly as the phone shows them. */
+.os { position: absolute; inset: 0; background: #0006; display: none; place-items: center; z-index: 4; }
+.os.on { display: grid; }
+.os .box { width: 270px; border-radius: 14px; background: #F2F2F7EE; color: #000; text-align: center; overflow: hidden; font-family: system-ui, sans-serif; }
+.os .box p { margin: 0; padding: 18px 16px 14px; font-size: 15px; line-height: 20px; }
+.os .box p b { display: block; font-size: 17px; margin-bottom: 4px; }
+.os .box .btns { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #3c3c4349; }
+.os .box .btns button { min-height: 44px; border: 0; background: none; font: 400 17px system-ui, sans-serif; color: #007AFF; cursor: pointer; }
+.os .box .btns button + button { border-inline-start: 1px solid #3c3c4349; font-weight: 600; }
+.os.android .box { background: #ECE6F0; border-radius: 28px; width: 300px; text-align: start; }
+.os.android .box p { padding: 24px 24px 12px; }
+.os.android .box .btns { border: 0; display: flex; justify-content: flex-end; gap: 4px; padding: 8px 16px 18px; }
+.os.android .box .btns button { color: #65558F; font-weight: 600; font-size: 14px; border: 0; padding: 0 12px; }
+.notif { position: absolute; top: 34px; inset-inline: 10px; z-index: 5; border-radius: 22px; background: #F5F5F7F2; color: #000; box-shadow: 0 8px 30px #0004; padding: 12px 14px; display: none; gap: 4px; font-family: system-ui, sans-serif; text-align: start; }
+.notif.on { display: grid; animation: drop 260ms cubic-bezier(0.23, 1, 0.32, 1); }
+@keyframes drop { from { transform: translateY(-16px); opacity: 0; } }
+.notif .app { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #555; }
+.notif .app i { width: 18px; height: 18px; border-radius: 5px; background: #002767; display: inline-grid; place-items: center; color: #fff; font: 900 7px var(--font); font-style: normal; }
+.notif .app span { margin-inline-start: auto; }
+.notif b { font-size: 15px; }
+.notif .sub { font-size: 14px; font-weight: 600; }
+.notif .msg { font-size: 14px; color: #222; }
+.notif .acts { display: flex; gap: 18px; padding-top: 6px; }
+.notif .acts button { border: 0; background: none; font: 600 14px system-ui, sans-serif; color: #1a5fb4; min-height: 36px; padding: 0; cursor: pointer; }
+.notif .hint { font-size: 12px; color: #666; }
+.notif.android { border-radius: 26px; background: #F3EDF7F5; }
+@media (prefers-reduced-motion: reduce) { .notif.on { animation: none; } .sw::after { transition: none; } }
+</style>
+
+<div class="wrap" dir="rtl" lang="he">
+  <h1>ההגדרה הקצרה</h1>
+  <p class="intro">סקיצה לשלב 3 של תוכנית הגילוי: הגדרה ראשונה של שישה מסכים ובערך שמונה הקשות, במקום אחד־עשר מסכים היום. כל מסך שואל שאלה אחת, החבילות המומלצות מגיעות מסומנות, והמסך האחרון מראה את שאר היום האמיתי ושולח תזכורת לדוגמה. התשובות עוברות בין המסכים: מגדר במסך הראשון משנה את החבילות במסך הרביעי. המילים, הזמנים והמצוות של האפליקציה; ירושלים, נוסח אשכנז, יום רביעי ח׳ בכסלו בשעה 13:10.</p>
+  <div class="bars">
+    <div class="bar" id="palettes" role="group" aria-label="ערכת צבעים"><span>ערכת צבעים</span></div>
+    <div class="bar" id="platforms" role="group" aria-label="טלפון"><span>טלפון</span></div>
+    <div class="bar"><span>קפיצה אל</span><a href="#flow">ששת המסכים</a><a href="#alt">חבילות: כיוון ב</a><a href="#decide">מה להחליט</a></div>
+  </div>
+  <section id="flow">
+    <h2>ששת המסכים</h2>
+    <p class="lead">מימין לשמאל, לפי הסדר. ״המשך״ במסך ההתראות פותח את בקשת ההרשאה של המערכת (אפל דחתה את 1.0.21 על ״אפשר״ בכפתור כזה), ו״לא עכשיו״ הוא הדרך היחידה לעבור בלי לאשר. במסך האחרון אפשר לשלוח תזכורת לדוגמה.</p>
+    <div class="grid" id="grid-flow"></div>
+  </section>
+  <section id="alt">
+    <h2>מסך ״מה חשוב לך״: שני כיוונים</h2>
+    <p class="lead">א (בזרימה למעלה) כרטיסים שמסמנים בהקשה, ובתוכם המצוות שכל חבילה מפעילה, כל אחת ניתנת לביטול. ב רשימה אחת של מתגים, קצרה יותר, בלי פירוט עד שפותחים.</p>
+    <div class="grid" id="grid-alt"></div>
+  </section>
+  <section id="decide" class="decide">
+    <b>מה להחליט</b>
+    <ol>
+      <li>הזרימה כולה: שישה מסכים בסדר הזה, ומה שיצא ממנה (המצב המשפחתי והצעת הטהרה עוברים להצעה בדף הבית, הטלפון להגדרות, רשימת המצוות המלאה ובחירת הזמנים במרחק הקשה ב״בחירה מפורטת״).</li>
+      <li>מסך החבילות: כיוון א או ב.</li>
+      <li>שעות שקטות למשתמש חדש (החלטה 2): 23:00 עד 06:30, מסומן וניתן לשינוי, עם שורה שאומרת מה זה משנה.</li>
+      <li>הדלקת נרות לפי מגדר (החלטה 3): מסומנת לנשים ולמי שלא ענה, כבויה לגברים, שמקבלים בכל מקרה את ההודעה לפני שבת עם שעת ההדלקה. ספירת העומר מסומנת לכולם.</li>
+      <li>כפתור ״עשיתי״ בתזכורת לדוגמה (החלטה 6): הוא דורש חריגה כתובה מהכלל שאין כפתורי מצווה בהתראה שאינה של מצווה.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+const DATA = __DATA__;
+const { PALETTES, STRINGS, CAPS, DAY, ICONS } = DATA;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+// Icons: the drawn Jewish icons in tones of one colour (toneOf() of MitzvahIcon.tsx), the UI icons stroked.
+const hex = (v) => { const h = v.replace('#', ''); const f = h.length === 3 ? [...h].map((d) => d + d).join('') : h.slice(0, 6); return [0, 2, 4].map((i) => parseInt(f.slice(i, i + 2), 16)); };
+const toneOf = (color, role) => {
+  const tone = ICONS.TONES[role]; const base = hex(color);
+  if (!tone || base.some(Number.isNaN)) return color;
+  const other = hex(tone.with);
+  return '#' + base.map((c, i) => Math.round(c * tone.share + other[i] * (1 - tone.share)).toString(16).padStart(2, '0')).join('');
+};
+let gid = 0;
+const nodes = (list, color, grad) => list.map(({ t, c, id, fill, stroke, stopColor, ...attrs }) => {
+  const paint = (v) => (v === undefined || v === 'none' ? v : v.url ? `url(#${grad})` : toneOf(color, v.role));
+  const all = { ...attrs, fill: paint(fill), stroke: paint(stroke), 'stop-color': paint(stopColor) };
+  if (id) all.id = grad;
+  const at = Object.entries(all).filter(([, v]) => v !== undefined).map(([k, v]) => `${k.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())}="${v}"`).join(' ');
+  const tag = t === 'linearGradient' ? 'linearGradient' : t;
+  return `<${tag} ${at}>${c ? nodes(c, color, grad) : ''}</${tag}>`;
+}).join('');
+// Colours resolve when the palette is known, so icons are drawn per palette.
+let P = PALETTES.gold;
+const icon = (name, color, size = 24) => {
+  const j = ICONS.JEWISH[name];
+  if (j) return `<svg width="${size}" height="${size}" viewBox="2 2 44 44" aria-hidden="true">${nodes(j, color, `g${++gid}`)}</svg>`;
+  const ui = ICONS.UI[name] ?? ICONS.UI.star;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ui}</svg>`;
+};
+const tile = (name, tone = 'accent', small = false) =>
+  `<span class="tile${tone === 'muted' ? ' muted' : ''}${small ? ' sm' : ''}">${icon(name, tone === 'muted' ? P.textMuted : P.gold, small ? 18 : 24)}</span>`;
+const chevron = () => `<span class="chev">${icon('chevronLeft', P.textMuted, 20)}</span>`;
+const row = ({ icon: ic, tone, title, caption, trailing = chevron(), act, muted }) =>
+  `<button type="button" class="row tap${muted ? ' muted' : ''}" data-act="${esc(act ?? `נפתח: ${title}`)}">${tile(ic, tone)}<span class="meta"><span class="t">${esc(title)}</span>${caption ? `<span class="c">${esc(caption)}</span>` : ''}</span>${trailing}</button>`;
+const label = (text, link) => `<div class="label">${esc(text)}${link ? `<button type="button" class="link" data-act="${esc(link.act)}">${esc(link.text)}</button>` : ''}</div>`;
+
+
+// The setup's shared answers: every phone reads them, so a choice on one screen shows on the next.
+const S = { lang: 'he', gender: null, nusach: 'ashkenaz', platform: 'ios', bundles: null, members: null, quiet: true, battery: false, asked: null };
+const capById = Object.fromEntries(CAPS.map((c) => [c.id, c]));
+const MENS = new Set(['tefillin', 'kiddushLevana']);
+// The five goal bundles of A3, each a set of capabilities; `rec` arrives ticked (A4).
+const BUNDLES = [
+  { id: 'prayer', title: 'תפילות וזמני היום', caption: 'תזכורת לפני שנגמר הזמן של כל תפילה וקריאת שמע', icon: 'shacharit', members: ['prayers', 'shema', 'tefillin', 'bedtimeShema'], rec: true },
+  { id: 'shabbat', title: 'שבת וחגים', caption: `הדלקת נרות (ביום שישי הקרוב ב־${DAY.candles.start}), הבדלה, העומר ומצוות החגים`, icon: 'candles', members: ['candles', 'omer', 'chanukah', 'ushpizin', 'kiddushLevana'], rec: true },
+  { id: 'calendar', title: 'לוח השנה', caption: 'תזכורת לפני ראש חודש, ואם תרצו גם ביום ההילולא של צדיקים', icon: 'moon', members: ['roshChodesh', 'hilulot'], rec: true, recMembers: ['roshChodesh'] },
+  { id: 'learning', title: 'לימוד יומי', caption: 'בחרו תוכנית, והיא תוצע להורדה בדף הבית מיד אחרי ההגדרה', icon: 'chok', members: ['chok', 'shnayim', 'halacha', 'lashonHara', 'shemiratHalashon'], rec: false, pick: true },
+  { id: 'birchot', title: 'ברכות השחר', caption: 'תזכורת לברכות השחר בבוקר', icon: 'brachot', members: ['birchot'], rec: false },
+];
+// Candle lighting by gender (open decision 3): ticked for women and an unanswered gender, off for men.
+const memberDefault = (b, id) => {
+  if (b.pick) return false;
+  if (b.recMembers && !b.recMembers.includes(id)) return false;
+  if (id === 'candles') return S.gender !== 'male';
+  return true;
+};
+const resetBundles = () => {
+  S.bundles = Object.fromEntries(BUNDLES.map((b) => [b.id, b.rec]));
+  S.members = Object.fromEntries(BUNDLES.flatMap((b) => b.members.map((m) => [m, b.rec && memberDefault(b, m)])));
+};
+resetBundles();
+const visibleMembers = (b) => b.members.filter((m) => !(S.gender === 'female' && MENS.has(m)));
+const shortTitle = (id) => ({ prayers: 'שחרית, מנחה וערבית', shema: 'קריאת שמע', bedtimeShema: 'ק״ש על המיטה' })[id] ?? capById[id].title;
+
+const dots = (n) => `<div class="dots" aria-label="שלב ${n} מתוך 6">${[1, 2, 3, 4, 5, 6].map((i) => `<i class="${i === n ? 'on' : ''}"></i>`).join('')}</div>`;
+const setupPhone = (n, inner, foot) => `<div class="phone setup" data-step="${n}"><div class="screen"><div class="status"><span>13:10</span><span>5G ▮▮▮</span></div><div class="step">${inner}</div></div><div class="foot">${dots(n)}${foot}</div><div class="toast" role="status" aria-live="polite"></div>${n === 5 ? osDialog() : ''}${n === 6 ? notification() : ''}</div>`;
+const next = (label = STRINGS['common.continue'].replace(' ←', ''), act = 'למסך הבא') => `<button type="button" class="btn tap" data-act="${esc(act)}">${esc(label)}</button>`;
+
+const osDialog = () => S.platform === 'ios'
+  ? `<div class="os" data-os><div class="box"><p><b>״${esc(STRINGS['onboarding.welcomeTitle'])}״ רוצה לשלוח לך הודעות</b>ההודעות עשויות לכלול התראות, צלילים ותגים.</p><div class="btns"><button type="button" data-os-answer="refused">לא לאפשר</button><button type="button" data-os-answer="granted">לאפשר</button></div></div></div>`
+  : `<div class="os android" data-os><div class="box"><p><b>לאפשר ל-${esc(STRINGS['onboarding.welcomeTitle'])} לשלוח לך התראות?</b></p><div class="btns"><button type="button" data-os-answer="refused">אין אישור</button><button type="button" data-os-answer="granted">אישור</button></div></div></div>`;
+
+// The sample reminder: the open window's real notification as the planner words it, the time-left line on the
+// iPhone as the subtitle and on Android as the body's first line.
+const W = DAY.windows;
+const NOW_MIN = 13 * 60 + 10;
+const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+const leftOf = (end) => { const m = toMin(end) - NOW_MIN; return m >= 60 ? `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')} ${STRINGS['time.unit.hours']}` : `${m} ${STRINGS['time.unit.minutes']}`; };
+const notification = () => {
+  const w = W.mincha;
+  const line = STRINGS['notifications.timeLeft.line'].replace('%{left}', leftOf(w.end)).replace('%{end}', w.end);
+  const body = STRINGS['notifications.timeFor'].replace('%{name}', w.name);
+  const acts = `<div class="acts"><button type="button" data-act="נפתח הנוסח של ${esc(w.name)}">${esc(STRINGS['siddur.open'] ?? 'פתח נוסח')}</button><button type="button" data-act="סומן לדוגמה בלבד: שום יום לא נרשם">${esc(STRINGS['notifications.markDone'])}</button></div>`;
+  return S.platform === 'ios'
+    ? `<div class="notif" data-notif><div class="app"><i>365</i>${esc(STRINGS['onboarding.welcomeTitle'])}<span>עכשיו</span></div><b>${esc(w.name)}</b><span class="sub">${esc(line)}</span><span class="msg">${esc(body)}</span><span class="hint">באייפון הכפתורים מופיעים בלחיצה ארוכה:</span>${acts}</div>`
+    : `<div class="notif android" data-notif><div class="app"><i>365</i>${esc(STRINGS['onboarding.welcomeTitle'])} · עכשיו</div><b>${esc(w.name)}</b><span class="msg">${esc(line)}<br>${esc(body)}</span>${acts}</div>`;
+};
+
+const field = (label, value, ph) => `<div class="field"><span>${esc(label)}</span><div class="input">${value ? `<b>${esc(value)}</b>` : esc(ph ?? '')}</div></div>`;
+const NUSACHOT = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
+
+const bundleCard = (b) => {
+  const on = S.bundles[b.id];
+  const members = visibleMembers(b);
+  return `<div class="card bundle${on ? ' on' : ''}"><button type="button" class="head" data-bundle="${b.id}" style="border:0;background:none;padding:0;font:inherit;color:inherit;text-align:start;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%">${tile(b.icon, on ? 'accent' : 'muted')}<span class="meta"><span class="t">${esc(b.title)}${b.rec ? ' <span class="rec2">· מומלץ</span>' : ''}</span><span class="c">${esc(b.caption)}</span></span><span class="tick${on ? ' on' : ''}" role="checkbox" aria-checked="${on}">${on ? icon('check', P.onGold, 16) : ''}</span></button>
+    ${on || b.pick ? `<div class="members">${members.map((m) => `<button type="button" class="chip${S.members[m] ? '' : ' off'}" data-member="${m}" aria-pressed="${S.members[m]}" style="${S.members[m] ? 'background:var(--p-goldLight);color:var(--p-goldText);font-weight:600' : ''}">${S.members[m] ? icon('check', P.goldText, 12) : icon('plus', P.textMuted, 12)}${esc(shortTitle(m))}</button>`).join('')}</div>` : ''}
+    ${b.id === 'shabbat' && on && S.gender === 'male' ? '<span class="c">הדלקת נרות כבויה לגברים; ההודעה לפני שבת עם שעת ההדלקה מגיעה תמיד.</span>' : ''}</div>`;
+};
+
+const SCREENS = [
+  { n: 1, name: 'ברוכים הבאים', note: 'שפה, שם ומגדר, שתי השאלות האחרונות לא חובה. המגדר נשאר כי הוא קובע ברירות מחדל אמיתיות: תפילין, קידוש לבנה, נוסח התפילה בלשון נקבה וערכת הצבעים. ״יש לי קובץ גיבוי״ משחזר ומדלג על הכול.',
+    body: () => setupPhone(1, `<div class="logo" style="width:72px;height:72px;font-size:16px;background:var(--p-goldLight)">365</div><h3>${esc(S.gender === 'female' ? 'ברוכה הבאה' : STRINGS['onboarding.registerTitle'])}</h3><p class="lead2">${esc(STRINGS['onboarding.welcomeBody'])}</p>
+      <div class="seg" role="radiogroup">${[['he', 'עברית'], ['en', 'English']].map(([v, l]) => `<button type="button" data-lang="${v}" aria-pressed="${S.lang === v}">${l}</button>`).join('')}</div>
+      ${field(STRINGS['onboarding.nameLabel'], '', 'השם שלך')}
+      <div class="field"><span>${esc(STRINGS['onboarding.genderLabel'])}</span><div class="seg">${[['male', STRINGS['profile.gender.male']], ['female', STRINGS['profile.gender.female']]].map(([v, l]) => `<button type="button" data-gender="${v}" aria-pressed="${S.gender === v}">${esc(l)}</button>`).join('')}</div></div>`,
+      `${next()}<button type="button" class="link2" data-act="נפתח בוחר הקבצים לשחזור">${esc(STRINGS['onboarding.restore'])}</button>`) },
+  { n: 2, name: 'נוסח', note: 'כמו היום: חמשת הנוסחים, בחירה אחת. קובע את הסידור, וגם את מה שמוצע בהמשך (למשל בלי אושפיזין בחב״ד ובתימן).',
+    body: () => setupPhone(2, `<h3>${esc(STRINGS['onboarding.nusachTitle'])}</h3><p class="lead2">${esc(STRINGS['onboarding.nusachBody'])}</p><div class="card">${NUSACHOT.map((n) => `<button type="button" class="row tap" data-nusach="${n}"><span class="meta"><span class="t">${esc(STRINGS[`nusach.${n}`])}</span></span><span class="radio${S.nusach === n ? ' on' : ''}"></span></button>`).join('')}</div>`, next()) },
+  { n: 3, name: 'מיקום', note: 'הכפתור הראשי מבקש את המיקום של הטלפון, ולכן אומר ״המשך״ ולא ״אשר״. מי שלא רוצה בוחר עיר. המסך לא נועל את ״המשך״ (כלל 5.1.5 של אפל).',
+    body: () => setupPhone(3, `<h3>${esc(S.gender === 'female' ? 'איפה את נמצאת?' : STRINGS['onboarding.locationTitle'])}</h3><p class="lead2">${esc(STRINGS['onboarding.locationBody'])}</p><button type="button" class="btn tap" data-act="בקשת המיקום של המערכת">${icon('compass', P.onGold, 20)}המשך עם המיקום של הטלפון</button><div class="label" style="margin:4px 4px 0">${esc(STRINGS['onboarding.locationOr'])}</div><div class="card"><button type="button" class="row tap" data-act="נבחר: ${esc(DAY.city)}">${tile('calendar')}<span class="meta"><span class="t">${esc(DAY.city)}</span><span class="c">זריחה ${DAY.zmanim.sunrise} · סוף זמן ק״ש ${DAY.zmanim.shema} · שקיעה ${DAY.zmanim.shkia}</span></span><span class="radio on"></span></button></div>`, next()) },
+  { n: 4, name: 'מה חשוב לך (כיוון א)', rec: true, id: 'bundles', note: 'חמש חבילות לפי מטרה. שלוש מגיעות מסומנות (תפילות, שבת וחגים, ראש חודש), ו״המשך״ בלבד כבר מפעיל אותן. בתוך חבילה מסומנת כל מצווה ניתנת לביטול בהקשה. לימוד יומי נשמר כ״רוצה״ ומוצע להורדה בדף הבית, כי הורדה דורשת אישור גודל.',
+    body: () => setupPhone(4, `<h3>מה חשוב לך?</h3><p class="lead2">אפשר לשנות הכול אחר כך, מכל מקום באפליקציה.</p>${BUNDLES.map(bundleCard).join('')}`, `${next()}<button type="button" class="link2" data-act="נפתחת רשימת כל המצוות">בחירה מפורטת של כל המצוות</button>`) },
+  { n: 5, name: 'התראות', note: '״המשך״ פותח את בקשת ההרשאה של המערכת. שעות שקטות מסומנות מראש ונראות לעין, עם השעות שאפשר לשנות. באנדרואיד גם שורת הסוללה, שפותחת את חלון המערכת.',
+    body: () => setupPhone(5, `<h3>תזכורות שמגיעות בזמן</h3><p class="lead2">${esc(STRINGS['permissions.notifications.why'])}. ״המשך״ יבקש את אישור הטלפון לשלוח התראות.</p>
+      <div class="card"><div class="qrow"><span class="meta"><span class="t">שקט בלילה</span><span class="c">בלי התראות בין השעות שנבחרו. מה שנופל בהן יגיע בבוקר, אם הזמן עוד פתוח.</span></span><button type="button" class="sw" role="switch" aria-checked="${S.quiet}" data-quiet aria-label="שקט בלילה"></button></div>
+      ${S.quiet ? `<div class="qrow" style="padding-top:0"><span class="meta"><span class="c">${esc(STRINGS['settings.quietAfter'])}</span></span><button type="button" class="time" data-act="בוחר השעה נפתח">23:00</button></div><div class="qrow" style="padding-top:0"><span class="meta"><span class="c">${esc(STRINGS['settings.quietBefore'])}</span></span><button type="button" class="time" data-act="בוחר השעה נפתח">06:30</button></div><div class="note">${esc(STRINGS['settings.quietHoursNote'])}</div>` : ''}</div>
+      ${S.platform === 'android' ? `<div class="card"><div class="qrow"><span class="meta"><span class="t">${esc(STRINGS['permissions.battery.title'])}</span><span class="c">${esc(STRINGS['permissions.battery.why'])}</span></span>${S.battery ? `<span class="state-on">${icon('check', P.safe, 16)}פועל</span>` : '<button type="button" class="act" data-battery>להמשך</button>'}</div></div>` : ''}
+      ${S.asked ? `<div class="card pad" style="font-size:14px;color:var(--p-textSub)">${S.asked === 'granted' ? 'ההתראות פועלות. אפשר להמשיך.' : 'בלי התראות. בדף הבית יופיע פס שמבקש שוב בהקשה, כל עוד המערכת מאפשרת.'}</div>` : ''}`,
+      `${S.asked ? next() : `<button type="button" class="btn tap" data-ask>${esc(STRINGS['common.continue'].replace(' ←', ''))}</button>`}<button type="button" class="link2" data-act="ממשיכים בלי התראות">${esc(STRINGS['onboarding.notNow'])}</button>`) },
+  { n: 6, name: 'הכל מוכן', note: 'במקום רשימת שמות: שאר היום עם החלונות והשעות האמיתיים, ושבת הקרובה. ״שלחו לי תזכורת לדוגמה״ מציג עכשיו התראה אמיתית עם הכפתורים שלה, כדי ללמוד את הדרך התראה ← נוסח ← סימון לפני התזכורת הראשונה. ההודעה החשובה על דיוק הזמנים נשארת ככרטיס, והטקסט המלא בהקשה.',
+    body: () => {
+      const on = (id) => S.members.prayers || S.members[id];
+      const rows = [
+        ['mincha', 'shacharit', 'open'], ...(S.gender === 'female' ? [] : [['tefillin', 'tefillin', 'open']]), ['maariv', 'night'], ['krias_shma_al_hamita', 'shema'],
+      ].filter(([id]) => on(id));
+      return setupPhone(6, `<h3>${esc(STRINGS['onboarding.readyTitle'])}</h3><p class="lead2">שאר היום שלך, ${esc(DAY.label)} · ${esc(DAY.hebrew)}</p>
+        <div class="card daylist">${rows.map(([id, ic, open]) => `<div class="row">${tile(ic, open ? 'accent' : 'muted')}<span class="meta"><span class="t">${esc(W[id].name)}</span><span class="c ${open ? 'open' : ''}">${open ? `פתוח עכשיו · נשארו ${leftOf(W[id].end)}` : `מ־${W[id].start}`}</span></span><span class="time2" dir="ltr">${W[id].start}–${W[id].end}</span></div>`).join('')}
+        ${S.members.candles ? `<div class="row">${tile('candles', 'muted')}<span class="meta"><span class="t">הדלקת נרות</span><span class="c">יום שישי</span></span><span class="time2">${DAY.candles.start}</span></div>` : ''}</div>
+        <button type="button" class="btn second tap" data-sample>${icon('bell', P.goldText, 20)}שלחו לי תזכורת לדוגמה</button>
+        <div class="card pad" style="display:grid;gap:6px"><b style="font-size:15px">${esc(STRINGS['accuracy.title'])}</b><span style="font-size:13px;line-height:18px;color:var(--p-textSub)">${esc(STRINGS['accuracy.responsibility'])}</span></div>`,
+        next(STRINGS['onboarding.finish'], 'לדף הבית'));
+    } },
+];
+
+const ALT = [{ n: 4, name: 'מה חשוב לך (כיוון ב)', id: 'bundles-b', note: 'אותן חמש חבילות כרשימת מתגים בכרטיס אחד, כמו ההגדרות. קצר יותר ומוכר, אבל המצוות שכל חבילה מפעילה מופיעות רק בשורת ההסבר, ואי אפשר לבטל אחת מהן כאן.',
+  body: () => setupPhone(4, `<h3>מה חשוב לך?</h3><p class="lead2">אפשר לשנות הכול אחר כך, מכל מקום באפליקציה.</p><div class="card">${BUNDLES.map((b) => `<div class="qrow divrow" style="position:relative">${tile(b.icon, S.bundles[b.id] ? 'accent' : 'muted')}<span class="meta"><span class="t">${esc(b.title)}</span><span class="c">${esc(visibleMembers(b).filter((m) => !b.recMembers || b.recMembers.includes(m)).filter((m) => m !== 'candles' || S.gender !== 'male').map(shortTitle).join(' · '))}</span></span><button type="button" class="sw" role="switch" aria-checked="${S.bundles[b.id]}" data-bundle="${b.id}" aria-label="${esc(b.title)}"></button></div>`).join('')}</div>`, `${next()}<button type="button" class="link2" data-act="נפתחת רשימת כל המצוות">בחירה מפורטת של כל המצוות</button>`) }];
+
+function render() {
+  const draw = (target, list) => {
+    document.getElementById(target).innerHTML = list.map((o) => `<section class="opt" id="${o.id ?? `s${o.n}`}"><header><span class="letter">${o.n}</span><b>${esc(o.name)}</b>${o.rec ? '<span class="rec">המלצה</span>' : ''}</header>${o.body()}<p>${esc(o.note)}</p></section>`).join('');
+  };
+  draw('grid-flow', SCREENS);
+  draw('grid-alt', ALT);
+  const vars = Object.entries(P).map(([k, v]) => `--p-${k}:${v}`).join(';');
+  document.querySelectorAll('.phone').forEach((p) => p.setAttribute('style', vars));
+}
+
+function toast(el, text) {
+  const t = el.closest('.phone')?.querySelector('.toast');
+  if (!t) return;
+  t.textContent = text;
+  t.classList.add('on');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('on'), 1600);
+}
+const keepScroll = (fn) => {
+  const tops = [...document.querySelectorAll('.screen')].map((s) => s.scrollTop);
+  fn();
+  render();
+  document.querySelectorAll('.screen').forEach((s, i) => { s.scrollTop = tops[i] ?? 0; });
+};
+document.addEventListener('click', (e) => {
+  const el = (sel) => e.target.closest(sel);
+  if (el('[data-lang]')) return keepScroll(() => { S.lang = el('[data-lang]').dataset.lang; });
+  if (el('[data-gender]')) return keepScroll(() => { const g = el('[data-gender]').dataset.gender; S.gender = S.gender === g ? null : g; resetBundles(); });
+  if (el('[data-nusach]')) return keepScroll(() => { S.nusach = el('[data-nusach]').dataset.nusach; });
+  if (el('[data-member]')) return keepScroll(() => { const m = el('[data-member]').dataset.member; S.members[m] = !S.members[m]; const b = BUNDLES.find((x) => x.members.includes(m)); S.bundles[b.id] = visibleMembers(b).some((x) => S.members[x]); });
+  if (el('[data-bundle]')) return keepScroll(() => { const b = BUNDLES.find((x) => x.id === el('[data-bundle]').dataset.bundle); const on = !S.bundles[b.id]; S.bundles[b.id] = on; for (const m of b.members) S.members[m] = on && memberDefault(b, m); });
+  if (el('[data-quiet]')) return keepScroll(() => { S.quiet = !S.quiet; });
+  if (el('[data-battery]')) { const ph = el('.phone'); keepScroll(() => { S.battery = true; }); return; }
+  if (el('[data-ask]')) { el('.phone').querySelector('[data-os]').classList.add('on'); return; }
+  if (el('[data-os-answer]')) return keepScroll(() => { S.asked = el('[data-os-answer]').dataset.osAnswer; });
+  if (el('[data-sample]')) {
+    const n = el('.phone').querySelector('[data-notif]');
+    n.classList.remove('on'); void n.offsetWidth; n.classList.add('on');
+    clearTimeout(n._t); n._t = setTimeout(() => n.classList.remove('on'), 9000);
+    return;
+  }
+  const act = el('[data-act]');
+  if (act && act.closest('.phone')) { act.closest('[data-notif]')?.classList.remove('on'); toast(act, act.dataset.act); }
+});
+
+let palette = 'gold';
+try { palette = localStorage.getItem('setup-palette') || 'gold'; } catch {}
+if (!PALETTES[palette]) palette = 'gold';
+P = PALETTES[palette];
+const paletteBar = document.getElementById('palettes');
+for (const name of Object.keys(PALETTES)) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.setAttribute('aria-pressed', String(name === palette));
+  b.innerHTML = `<i style="background:${PALETTES[name].gold}"></i>${esc(STRINGS[`settings.theme.${name}`])}`;
+  b.addEventListener('click', () => {
+    P = PALETTES[name];
+    try { localStorage.setItem('setup-palette', name); } catch {}
+    paletteBar.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    keepScroll(() => {});
+  });
+  paletteBar.appendChild(b);
+}
+const platformBar = document.getElementById('platforms');
+for (const [id, name] of [['ios', 'אייפון'], ['android', 'אנדרואיד']]) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = name;
+  b.setAttribute('aria-pressed', String(id === S.platform));
+  b.addEventListener('click', () => {
+    platformBar.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    keepScroll(() => { S.platform = id; });
+  });
+  platformBar.appendChild(b);
+}
+render();
+</script>
