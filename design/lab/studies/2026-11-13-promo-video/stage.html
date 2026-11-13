@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Promo Stage</title>
+<style>
+  @font-face { font-family: Rubik; font-weight: 400; src: url(fonts/Rubik_400Regular.ttf); }
+  @font-face { font-family: Rubik; font-weight: 500; src: url(fonts/Rubik_500Medium.ttf); }
+  @font-face { font-family: Rubik; font-weight: 600; src: url(fonts/Rubik_600SemiBold.ttf); }
+  @font-face { font-family: Rubik; font-weight: 700; src: url(fonts/Rubik_700Bold.ttf); }
+  @font-face { font-family: Rubik; font-weight: 800; src: url(fonts/Rubik_800ExtraBold.ttf); }
+  :root {
+    --bg: #F6F1E8; --surface: #FFFDF9; --text: #1D2240; --sub: #69645D; --gold: #F08A3C; --goldText: #A04A0C;
+  }
+  html, body { margin: 0; padding: 0; background: #000; }
+  #stage {
+    position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg);
+    font-family: Rubik, 'Noto Color Emoji', sans-serif; color: var(--text);
+  }
+  .scene { position: absolute; inset: 0; opacity: 0; will-change: transform, opacity; transform-origin: 50% 50%; }
+  .scene svg.full { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+  .shot { position: absolute; left: 0; top: 0; width: 1080px; display: block; }
+
+  /* notification card */
+  .notif {
+    position: absolute; width: 960px; left: 60px; top: 110px; box-sizing: border-box; padding: 34px 40px 28px;
+    background: rgba(255, 253, 249, 0.97); border-radius: 44px; direction: rtl;
+    box-shadow: 0 24px 60px rgba(29, 34, 64, 0.28), 0 2px 0 rgba(255,255,255,.6) inset;
+  }
+  .notif .app { display: flex; align-items: center; gap: 16px; font-size: 30px; color: var(--sub); font-weight: 500; }
+  .notif .app img { width: 48px; height: 48px; border-radius: 12px; background: #fff; }
+  .notif .title { margin-top: 14px; font-size: 46px; font-weight: 700; }
+  .notif .line { margin-top: 8px; font-size: 40px; font-weight: 600; color: #B3560F; }
+  .notif .body { margin-top: 4px; font-size: 40px; color: var(--text); }
+  .notif .buttons { display: flex; gap: 70px; margin-top: 22px; font-size: 36px; font-weight: 600; color: var(--goldText); }
+
+  /* phone mockup */
+  .phone {
+    position: absolute; background: #12162B; border-radius: 78px; padding: 18px; box-sizing: border-box;
+    box-shadow: 0 50px 110px rgba(29, 34, 64, 0.35), 0 0 0 3px #2B3150 inset;
+  }
+  .phone .screen { position: relative; width: 100%; height: 100%; border-radius: 62px; overflow: hidden; background: var(--bg); }
+  .phone .screen img { position: absolute; left: 0; top: 0; width: 100%; }
+  .phone .island { position: absolute; top: 34px; left: 50%; width: 120px; height: 34px; margin-left: -60px; border-radius: 20px; background: #0B0E1C; z-index: 3; }
+
+  /* caption */
+  #caption {
+    position: absolute; left: 70px; right: 70px; bottom: 150px; text-align: center; opacity: 0; z-index: 50;
+  }
+  #caption span {
+    display: inline-block; padding: 26px 44px; border-radius: 40px; background: rgba(29, 34, 64, 0.9);
+    color: #FFFDF9; font-size: 52px; line-height: 1.32; font-weight: 600; box-shadow: 0 18px 40px rgba(0,0,0,.18);
+  }
+
+  .chip {
+    position: absolute; padding: 18px 34px; border-radius: 999px; background: var(--surface); color: var(--text);
+    font-size: 40px; font-weight: 700; white-space: nowrap; box-shadow: 0 14px 34px rgba(160, 74, 12, 0.18);
+    transform-origin: 50% 50%;
+  }
+  .ripple { position: absolute; width: 140px; height: 140px; margin: -70px 0 0 -70px; border-radius: 50%;
+    border: 10px solid var(--gold); opacity: 0; box-sizing: border-box; }
+  .finger { position: absolute; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%;
+    background: rgba(255, 253, 249, 0.75); border: 6px solid rgba(29,34,64,.55); opacity: 0; box-sizing: border-box; }
+  .hl { position: absolute; border: 8px solid var(--gold); border-radius: 48px; opacity: 0; box-sizing: border-box;
+    box-shadow: 0 0 0 9999px rgba(29, 34, 64, 0.0); }
+
+  #end h1 { position: absolute; left: 0; right: 0; top: 960px; margin: 0; text-align: center; font-size: 150px; font-weight: 800; color: var(--text); }
+  #end .tag { position: absolute; left: 0; right: 0; top: 1150px; text-align: center; font-size: 76px; font-weight: 700; color: var(--goldText); }
+  #end .small { position: absolute; left: 0; right: 0; top: 1270px; text-align: center; font-size: 40px; color: var(--sub); }
+  #end .store { position: absolute; left: 50%; top: 1420px; transform: translateX(-50%); padding: 28px 56px; border-radius: 999px;
+    background: var(--text); color: #FFFDF9; font-size: 48px; font-weight: 700; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- S1 / S4a: the office, morning -->
+  <div class="scene" id="office"><svg class="full" viewBox="0 0 1080 1920" id="officeSvg"></svg>
+    <div class="notif" id="notif">
+      <div class="app"><img src="logo.svg" alt=""><span>יהודי 365 · עכשיו</span></div>
+      <div class="title">קריאת שמע שחרית</div>
+      <div class="line">⚠️ נשארו 20 דק׳ · עד 08:37</div>
+      <div class="body">עוד מעט נגמר הזמן</div>
+      <div class="buttons"><span>פתח נוסח</span><span>עשיתי</span></div>
+    </div>
+  </div>
+
+  <!-- S2: the phone in his hand -->
+  <div class="scene" id="hand">
+    <svg class="full" viewBox="0 0 1080 1920" id="handBack"></svg>
+    <div id="handRig" style="position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:540px 900px">
+      <div class="phone" id="bigPhone" style="left:240px;top:250px;width:600px;height:1299px">
+        <div class="island"></div>
+        <div class="screen"><img src="screens/home-morning.png" alt="">
+          <div class="notif" id="miniNotif" style="transform-origin:0 0;transform:scale(0.52);left:12px;top:70px;"></div>
+        </div>
+      </div>
+      <svg class="full" viewBox="0 0 1080 1920" id="handFront" style="position:absolute;inset:0"></svg>
+    </div>
+  </div>
+
+  <!-- S3: the app, full screen -->
+  <div class="scene" id="app">
+    <img class="shot" id="appHome" src="screens/home-morning.png" alt="">
+    <img class="shot" id="appReader" src="screens/reader-tall.png" alt="" style="opacity:0">
+    <div class="finger" id="tap1"></div><div class="ripple" id="rip1"></div>
+  </div>
+
+  <!-- S4b: marked -->
+  <div class="scene" id="done">
+    <img class="shot" id="doneImg" src="screens/home-done.png" alt="">
+    <div class="hl" id="hlStreak"></div><div class="hl" id="hlDone"></div>
+  </div>
+  <div class="scene" id="hist"><img class="shot" id="histImg" src="screens/history.png" alt=""></div>
+
+  <!-- S5: montage -->
+  <div class="scene" id="montage">
+    <svg class="full" viewBox="0 0 1080 1920" id="montageBg"></svg>
+    <div class="phone m" id="m1" style="width:420px;height:910px"><div class="island"></div><div class="screen"><img src="screens/siddur-tab.png" alt=""></div></div>
+    <div class="phone m" id="m2" style="width:420px;height:910px"><div class="island"></div><div class="screen"><img src="screens/schedule.png" alt=""></div></div>
+    <div class="phone m" id="m3" style="width:420px;height:910px"><div class="island"></div><div class="screen"><img src="screens/hilula.png" alt=""></div></div>
+    <div class="chip" id="c1">סידור בנוסח שלך</div>
+    <div class="chip" id="c2">לוח זמנים מדויק</div>
+    <div class="chip" id="c3">הילולות צדיקים</div>
+    <div class="chip" id="c4" style="background:var(--gold);color:#1D2240">הכול במקום אחד</div>
+  </div>
+
+  <!-- S6: Shabbat -->
+  <div class="scene" id="shabbat"><svg class="full" viewBox="0 0 1080 1920" id="shabbatSvg"></svg>
+    <div class="phone" id="sPhone" style="width:400px;height:866px;left:660px;top:290px"><div class="island"></div><div class="screen"><img src="screens/shabbat.png" alt=""></div></div>
+  </div>
+
+  <!-- S7: end card -->
+  <div class="scene" id="end">
+    <svg class="full" viewBox="0 0 1080 1920" id="endBg"></svg>
+    <img id="endLogo" src="logo.svg" alt="" style="position:absolute;left:340px;top:440px;width:400px;height:400px;object-fit:contain">
+    <h1 id="endTitle">יהודי 365</h1>
+    <div class="tag" id="endTag">כל מצווה – בזמנה</div>
+    <div class="small" id="endSmall">זמנים לפי המיקום שלך · סידור בנוסח שלך</div>
+    <div class="store" id="endStore">זמין ב־Google Play</div>
+  </div>
+
+  <div id="caption"><span id="captionText"></span></div>
+</div>
+
+<script>
+// ---------- helpers ----------
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const easeInOut = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+const easeOut = (p) => 1 - Math.pow(1 - p, 3);
+const easeIn = (p) => p * p * p;
+const back = (p) => { const c = 1.6; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+const seg = (t, a, b, ease = easeInOut) => ease(clamp((t - a) / (b - a)));
+const win = (t, a, b, fade = 0.35) => Math.min(seg(t, a, a + fade, easeOut), 1 - seg(t, b - fade, b, easeIn));
+const lp = (A, B, p) => [lerp(A[0], B[0], p), lerp(A[1], B[1], p)];
+const NS = 'http://www.w3.org/2000/svg';
+
+// ---------- the character ----------
+const SKIN = '#E9B48A', SKIN_D = '#D39770', HAIR = '#2A1D15', INK = '#1D2240';
+function character(prefix, shirt, shirtDark) {
+  return `
+  <g id="${prefix}">
+    <rect x="-44" y="870" width="88" height="130" rx="30" fill="${SKIN_D}"/>
+    <path d="M-240,1080 C-236,1012 -180,986 -92,976 L92,976 C180,986 236,1012 240,1080 L262,1560 L-262,1560 Z" fill="${shirt}"/>
+    <path d="M-60,972 L0,1050 L60,972 L40,964 L0,1016 L-40,964 Z" fill="${shirtDark}"/>
+    <path d="M-40,964 L0,1016 L40,964 L0,990 Z" fill="${SKIN_D}"/>
+    <line x1="0" y1="1050" x2="0" y2="1560" stroke="${shirtDark}" stroke-width="4"/>
+    <circle cx="0" cy="1110" r="7" fill="${shirtDark}"/><circle cx="0" cy="1200" r="7" fill="${shirtDark}"/>
+    <g id="${prefix}Head">
+      <ellipse cx="0" cy="720" rx="142" ry="128" fill="${HAIR}"/>
+      <ellipse cx="-128" cy="790" rx="24" ry="36" fill="${SKIN}"/><ellipse cx="128" cy="790" rx="24" ry="36" fill="${SKIN}"/>
+      <ellipse cx="-128" cy="792" rx="11" ry="20" fill="${SKIN_D}"/><ellipse cx="128" cy="792" rx="11" ry="20" fill="${SKIN_D}"/>
+      <ellipse cx="0" cy="780" rx="126" ry="150" fill="${SKIN}"/>
+      <path d="M-124,790 C-122,885 -72,945 0,950 C72,945 122,885 124,790 C112,846 84,876 52,880 C30,866 -30,866 -52,880 C-84,876 -112,846 -124,790 Z" fill="${HAIR}"/>
+      <path d="M-46,862 Q0,842 46,862 Q24,858 0,860 Q-24,858 -46,862 Z" fill="${HAIR}"/>
+      <path id="${prefix}Mouth" d="" fill="#FFFFFF" stroke="#7A3424" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M-130,742 C-136,646 -80,600 0,600 C80,600 136,646 130,742 C116,694 66,668 0,668 C-66,668 -116,694 -130,742 Z" fill="${HAIR}"/>
+      <path d="M-74,612 Q0,566 74,612 Q0,626 -74,612 Z" fill="${INK}"/>
+      <path d="M-56,606 Q0,580 56,606" fill="none" stroke="#F08A3C" stroke-width="6" stroke-dasharray="10 8"/>
+      <circle cx="-62" cy="836" r="20" fill="#E58A7A" opacity=".22"/><circle cx="62" cy="836" r="20" fill="#E58A7A" opacity=".22"/>
+      <path d="M-6,780 Q-16,816 0,824 Q12,827 16,818" fill="none" stroke="${SKIN_D}" stroke-width="6" stroke-linecap="round"/>
+      <g id="${prefix}Eyes">
+        <ellipse id="${prefix}EyeL" cx="-46" cy="772" rx="11" ry="13" fill="${INK}"/>
+        <ellipse id="${prefix}EyeR" cx="46" cy="772" rx="11" ry="13" fill="${INK}"/>
+      </g>
+      <g id="${prefix}Brows" fill="none" stroke="${HAIR}" stroke-width="10" stroke-linecap="round">
+        <path d="M-78,734 Q-50,716 -20,728"/><path d="M78,734 Q50,716 20,728"/>
+      </g>
+      <ellipse id="${prefix}Glow" cx="0" cy="840" rx="150" ry="130" fill="#FFF3DA" opacity="0"/>
+    </g>
+    <g id="${prefix}ArmR"></g><g id="${prefix}ArmL"></g>
+  </g>`;
+}
+
+function arm(el, S, E, H, shirt, shirtDark, front = '') {
+  const cuff = lp(E, H, 0.8);
+  el.innerHTML = `
+    <path d="M${S[0]},${S[1]} L${E[0]},${E[1]} L${cuff[0]},${cuff[1]}" fill="none" stroke="${shirtDark}" stroke-width="92" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M${S[0]},${S[1]} L${E[0]},${E[1]} L${cuff[0]},${cuff[1]}" fill="none" stroke="${shirt}" stroke-width="78" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M${S[0] + (S[0] < 0 ? 14 : -14)},${S[1] + 10} L${E[0] + (S[0] < 0 ? 14 : -14)},${E[1]}" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" opacity=".18"/>
+    <line x1="${lp(E, H, 0.72)[0]}" y1="${lp(E, H, 0.72)[1]}" x2="${cuff[0]}" y2="${cuff[1]}" stroke="${shirtDark}" stroke-width="84" stroke-linecap="round" opacity=".35"/>
+    <circle cx="${H[0]}" cy="${H[1]}" r="38" fill="${SKIN}" stroke="${SKIN_D}" stroke-width="4"/>${front}`;
+}
+
+function face(prefix, { blink = 0, gaze = [0, 0], smile = 0.4, brow = 0, glow = 0, closed = 0 }) {
+  for (const s of ['L', 'R']) {
+    const e = $(prefix + 'Eye' + s);
+    const cx = (s === 'L' ? -46 : 46) + gaze[0];
+    e.setAttribute('cx', cx); e.setAttribute('cy', 772 + gaze[1]);
+    e.setAttribute('ry', Math.max(1.5, 13 * (1 - Math.max(blink, closed))));
+  }
+  $(prefix + 'Brows').setAttribute('transform', `translate(0 ${-brow * 14})`);
+  const w = 30 + smile * 8, d = smile * 34;
+  const mouth = $(prefix + 'Mouth');
+  if (smile > 0.7) {
+    mouth.setAttribute('d', `M${-w},880 Q0,${880 + d * 1.25} ${w},880 Q0,${884 + d * 0.3} ${-w},880 Z`);
+    mouth.setAttribute('fill', '#FFFFFF');
+  } else {
+    mouth.setAttribute('d', `M${-w},880 Q0,${880 + d} ${w},880`);
+    mouth.setAttribute('fill', 'none');
+  }
+  $(prefix + 'Glow').setAttribute('opacity', glow);
+}
+
+// blink at fixed beats so every render is the same
+const BLINKS = [2.9, 6.0, 17.6, 20.0, 31.0];
+const blinkAt = (t) => Math.max(0, ...BLINKS.map((b) => 1 - Math.abs(t - b) / 0.09));
+
+// ---------- office scene ----------
+const OFFICE_SHIRT = '#7FA7D9', OFFICE_DARK = '#4F78AE';
+$('officeSvg').innerHTML = `
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9FD0F2"/><stop offset="1" stop-color="#FDEFD6"/></linearGradient>
+    <radialGradient id="screenGlow"><stop offset="0" stop-color="#FFF6D8" stop-opacity=".95"/><stop offset="1" stop-color="#FFF6D8" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="#F3E8D6"/>
+  <rect x="0" y="1240" width="1080" height="140" fill="#EADAC0"/>
+  <g transform="translate(70 230)">
+    <rect width="430" height="600" rx="26" fill="#FFFDF9"/>
+    <rect x="22" y="22" width="386" height="556" rx="12" fill="url(#sky)"/>
+    <circle cx="300" cy="150" r="58" fill="#FFD574"/><circle cx="300" cy="150" r="90" fill="#FFD574" opacity=".25"/>
+    <path d="M22,470 L70,440 L70,400 L120,400 L120,430 L170,410 L210,430 L210,380 L250,360 L290,380 L290,420 L340,410 L408,440 L408,578 L22,578 Z" fill="#E7D3AE"/>
+    <path d="M22,520 L90,500 L160,510 L230,490 L300,505 L408,495 L408,578 L22,578 Z" fill="#D8BF94"/>
+    <rect x="205" y="22" width="18" height="556" fill="#FFFDF9"/><rect x="22" y="290" width="386" height="16" fill="#FFFDF9"/>
+  </g>
+  <g transform="translate(830 420)">
+    <circle r="104" fill="#FFFDF9" stroke="#1D2240" stroke-width="10"/>
+    ${Array.from({ length: 12 }, (_, i) => `<line x1="0" y1="-82" x2="0" y2="-70" stroke="#1D2240" stroke-width="7" transform="rotate(${i * 30})"/>`).join('')}
+    <line x1="0" y1="0" x2="0" y2="-50" stroke="#1D2240" stroke-width="12" stroke-linecap="round" transform="rotate(${(8 + 17 / 60) * 30})"/>
+    <line id="minuteHand" x1="0" y1="0" x2="0" y2="-76" stroke="#F08A3C" stroke-width="8" stroke-linecap="round" transform="rotate(102)"/>
+    <circle r="10" fill="#1D2240"/>
+  </g>
+  <g transform="translate(860 1060)">
+    <path d="M-60,180 L-46,90 L46,90 L60,180 Z" fill="#C86E3A"/>
+    <path d="M0,95 C-60,40 -110,-10 -90,-90 C-40,-60 -10,0 0,95 Z" fill="#5E9C6B"/>
+    <path d="M0,95 C40,20 80,-60 40,-150 C0,-90 -10,0 0,95 Z" fill="#6FB27C"/>
+    <path d="M0,95 C70,60 130,20 140,-40 C80,-40 30,20 0,95 Z" fill="#4E8A5C"/>
+  </g>
+  <g id="officeChar" transform="translate(540 0)">${character('oc', OFFICE_SHIRT, OFFICE_DARK)}</g>
+  <rect x="0" y="1370" width="1080" height="550" fill="#C98F5B"/>
+  <rect x="0" y="1356" width="1080" height="30" fill="#DDA571"/>
+  <g id="laptop">
+    <path d="M360,1150 L720,1150 Q736,1150 736,1166 L736,1372 L344,1372 L344,1166 Q344,1150 360,1150 Z" fill="#C7CBD3"/>
+    <circle cx="540" cy="1262" r="26" fill="#B2B7C1"/>
+    <rect x="320" y="1366" width="440" height="16" rx="8" fill="#A7ACB6"/>
+  </g>
+  <g transform="translate(860 1340)">
+    <path d="M-50,0 L50,0 L44,96 Q44,110 30,110 L-30,110 Q-44,110 -44,96 Z" fill="#FFFDF9"/>
+    <path d="M50,24 Q86,26 84,58 Q82,86 46,84" fill="none" stroke="#FFFDF9" stroke-width="12"/>
+    <rect x="-50" y="34" width="100" height="22" fill="#F08A3C"/>
+    <path id="steam1" d="M-14,-20 Q-30,-50 -14,-80 Q2,-110 -14,-140" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" opacity=".7"/>
+    <path id="steam2" d="M18,-30 Q2,-60 18,-90 Q34,-120 18,-150" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" opacity=".5"/>
+  </g>
+  <g id="deskPhone">
+    <circle id="deskGlow" cx="0" cy="0" r="170" fill="url(#screenGlow)" opacity="0"/>
+    <path d="M-92,-26 L92,-26 L112,26 L-112,26 Z" fill="#12162B"/>
+    <path id="deskScreen" d="M-84,-20 L84,-20 L101,20 L-101,20 Z" fill="#2B3150"/>
+  </g>
+  <g id="heldPhone" opacity="0">
+    <rect x="-80" y="-150" width="160" height="300" rx="30" fill="#12162B"/>
+    <rect x="-56" y="-128" width="54" height="66" rx="16" fill="#2B3150"/>
+    <circle cx="-38" cy="-110" r="10" fill="#0B0E1C"/><circle cx="-20" cy="-82" r="10" fill="#0B0E1C"/>
+    <rect x="-80" y="-150" width="160" height="300" rx="30" fill="none" stroke="#3A4166" stroke-width="5"/>
+  </g>
+  <g id="officeArmsFront"></g>
+  <g id="checkPop" opacity="0">
+    <circle r="92" fill="#F08A3C"/>
+    <path d="M-40,2 L-10,32 L44,-28" fill="none" stroke="#1D2240" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+`;
+
+// ---------- close-up hand ----------
+$('handBack').innerHTML = `
+  <defs><radialGradient id="hb" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="#FFF4E4"/><stop offset=".6" stop-color="#F8DFC0"/><stop offset="1" stop-color="#EBC59A"/></radialGradient></defs>
+  <rect width="1080" height="1920" fill="url(#hb)"/>
+  <circle cx="180" cy="380" r="230" fill="#FFFFFF" opacity=".35"/><circle cx="930" cy="1500" r="300" fill="#F08A3C" opacity=".12"/>
+  <path d="M760,1920 C760,1700 780,1560 840,1450 L1080,1380 L1080,1920 Z" fill="${OFFICE_SHIRT}"/>
+  <path d="M420,1500 C380,1560 400,1700 520,1760 C640,1820 820,1760 860,1640 C890,1560 860,1480 800,1440 Z" fill="${SKIN}"/>`;
+$('handFront').innerHTML = `
+  ${[0, 1, 2, 3].map((i) => `<rect x="${206}" y="${960 + i * 120}" width="96" height="74" rx="37" fill="${SKIN}" transform="rotate(-6 250 ${1000 + i * 120})"/>`).join('')}
+  <path d="M810,1300 C870,1290 910,1340 880,1400 C850,1460 790,1470 760,1440 C740,1400 760,1330 810,1300 Z" fill="${SKIN}"/>
+  <path d="M770,1250 C800,1236 836,1250 846,1286 C860,1330 830,1380 790,1372 C760,1360 744,1300 770,1250 Z" fill="${SKIN}"/>
+  <path d="M776,1262 C790,1254 812,1262 816,1282" fill="none" stroke="#F3CCAE" stroke-width="10" stroke-linecap="round"/>`;
+$('miniNotif').innerHTML = $('notif').innerHTML;
+
+// ---------- montage background ----------
+$('montageBg').innerHTML = `
+  <defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6EA"/><stop offset="1" stop-color="#F7D9B6"/></linearGradient></defs>
+  <rect width="1080" height="1920" fill="url(#mg)"/>
+  <circle id="mc1" cx="200" cy="300" r="260" fill="#F08A3C" opacity=".10"/>
+  <circle id="mc2" cx="900" cy="1600" r="340" fill="#F08A3C" opacity=".10"/>
+  <circle id="mc3" cx="980" cy="420" r="120" fill="#1D2240" opacity=".05"/>`;
+
+// ---------- Shabbat ----------
+const SH_SHIRT = '#FBFBF7', SH_DARK = '#D9D6CC';
+$('shabbatSvg').innerHTML = `
+  <defs>
+    <linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26295A"/><stop offset=".55" stop-color="#6A4C8C"/><stop offset="1" stop-color="#F3A15F"/></linearGradient>
+    <radialGradient id="warm" cx=".3" cy=".72" r=".6"><stop offset="0" stop-color="#FFC77A" stop-opacity=".55"/><stop offset="1" stop-color="#FFC77A" stop-opacity="0"/></radialGradient>
+    <radialGradient id="flameGlow"><stop offset="0" stop-color="#FFE3A3" stop-opacity=".9"/><stop offset="1" stop-color="#FFB45A" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="#3A3360"/>
+  <g transform="translate(90 210)">
+    <rect width="470" height="640" rx="28" fill="#4A4375"/>
+    <rect x="22" y="22" width="426" height="596" rx="12" fill="url(#dusk)"/>
+    ${[[90, 90], [200, 60], [330, 120], [140, 200], [380, 50], [260, 170]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#FFF6DA" opacity=".9"/>`).join('')}
+    <path d="M22,520 L80,490 L80,450 L140,450 L140,480 L200,460 L240,480 L240,430 L290,410 L330,430 L330,470 L380,460 L448,490 L448,618 L22,618 Z" fill="#2E2A55"/>
+    <rect x="225" y="22" width="18" height="596" fill="#4A4375"/>
+  </g>
+  <rect width="1080" height="1920" fill="url(#warm)"/>
+  <g id="shChar" transform="translate(400 0)">${character('sc', SH_SHIRT, SH_DARK)}</g>
+  <rect x="0" y="1370" width="1080" height="550" fill="#FBF7EE"/>
+  <rect x="0" y="1356" width="1080" height="30" fill="#FFFFFF"/>
+  <rect x="0" y="1460" width="1080" height="14" fill="#E6C68E"/><rect x="0" y="1490" width="1080" height="6" fill="#E6C68E"/>
+  ${[150, 290].map((x, i) => `
+    <g transform="translate(${x} 1360)">
+      <circle id="fg${i}" cx="0" cy="-330" r="120" fill="url(#flameGlow)"/>
+      <path d="M-46,0 L46,0 L30,-26 L12,-36 L12,-120 L28,-132 L-28,-132 L-12,-120 L-12,-36 L-30,-26 Z" fill="#C9CCD6"/>
+      <rect x="-20" y="-270" width="40" height="142" rx="6" fill="#FFFDF4"/>
+      <line x1="0" y1="-270" x2="0" y2="-286" stroke="#3A3360" stroke-width="4"/>
+      <path id="fl${i}" d="M0,-350 C18,-320 22,-296 0,-284 C-22,-296 -18,-320 0,-350 Z" fill="#FFB347"/>
+      <path id="fi${i}" d="M0,-322 C8,-306 9,-294 0,-288 C-9,-294 -8,-306 0,-322 Z" fill="#FFF3C4"/>
+    </g>`).join('')}
+  <g transform="translate(420 1350)">
+    <path d="M-150,0 C-150,-70 -90,-96 0,-96 C90,-96 150,-70 150,0 Z" fill="#2B3A78"/>
+    <path d="M-150,0 C-150,-70 -90,-96 0,-96 C90,-96 150,-70 150,0" fill="none" stroke="#E6C68E" stroke-width="10"/>
+    <text x="0" y="-30" text-anchor="middle" font-family="Rubik" font-weight="700" font-size="40" fill="#E6C68E">שבת קודש</text>
+  </g>
+  <g transform="translate(760 1360)">
+    <path d="M-50,-170 L50,-170 Q46,-90 0,-80 Q-46,-90 -50,-170 Z" fill="#D7DAE2"/>
+    <rect x="-8" y="-82" width="16" height="64" fill="#C4C8D2"/><ellipse cx="0" cy="-12" rx="46" ry="14" fill="#C4C8D2"/>
+    <path d="M-44,-160 L44,-160 Q40,-112 0,-104 Q-40,-112 -44,-160 Z" fill="#8E1F3A" opacity=".85"/>
+  </g>`;
+
+// ---------- end card ----------
+$('endBg').innerHTML = `
+  <defs><radialGradient id="eg" cx=".5" cy=".36" r=".7"><stop offset="0" stop-color="#FFFDF9"/><stop offset="1" stop-color="#F3E6D2"/></radialGradient></defs>
+  <rect width="1080" height="1920" fill="url(#eg)"/>
+  <circle id="er1" cx="540" cy="640" r="300" fill="none" stroke="#F08A3C" stroke-width="6" opacity="0"/>
+  <circle id="er2" cx="540" cy="640" r="300" fill="none" stroke="#F08A3C" stroke-width="4" opacity="0"/>`;
+
+// ---------- captions ----------
+const CAPTIONS = [
+  [0.5, 5.9, 'בין העבודה, הדרך והשגרה –<br>קל לפספס את הזמן'],
+  [6.4, 10.4, 'יהודי 365 יודע מה פתוח עכשיו<br>לפי המיקום שלך, וכמה זמן נשאר'],
+  [10.8, 16.8, 'לחיצה אחת – והנוסח שלך פתוח,<br>מותאם להיום'],
+  [17.2, 21.8, 'סיימת? סימון אחד,<br>והרצף שלך ממשיך', 'top'],
+  [22.4, 28.7, 'סידור בנוסח שלך, לוח זמנים, הילולות<br>ומעקב אישי – הכול במקום אחד'],
+  [29.4, 34.7, 'ובשבת ובחג – האפליקציה שותקת,<br>וחוזרת לבד בצאת השבת'],
+];
+
+// ---------- poses ----------
+// arm points (shoulder, elbow, hand) for the office character, relative to its centre
+const P = {
+  typeR: [[-212, 1060], [-286, 1290], [-150, 1372]],
+  typeL: [[212, 1060], [286, 1290], [150, 1372]],
+  reachR: [[-212, 1060], [-330, 1250], [-372, 1392]],
+  holdR: [[-212, 1060], [-270, 1270], [-92, 1150]],
+  holdL: [[212, 1060], [262, 1280], [70, 1168]],
+  restR: [[-212, 1060], [-280, 1300], [-130, 1385]],
+  restL: [[212, 1060], [280, 1300], [130, 1385]],
+};
+const mixPose = (A, B, p) => A.map((pt, i) => lp(pt, B[i], p));
+
+function setScene(id, opacity, transform = '') {
+  const el = $(id);
+  el.style.opacity = opacity;
+  el.style.visibility = opacity > 0.001 ? 'visible' : 'hidden';
+  el.style.transform = transform;
+}
+
+// ---------- render one frame ----------
+function render(t) {
+  // ===== office (S1 0-6.4, S4a 17-19.1) =====
+  const officeOn = Math.max(win(t, -1, 6.6, 0.4), win(t, 16.8, 19.1, 0.3));
+  const zoomOut = seg(t, 5.9, 6.6, easeIn);
+  setScene('office', officeOn, `scale(${1 + 0.5 * zoomOut + 0.03 * seg(t, 0, 6)}) translate(${60 * zoomOut}px, ${-80 * zoomOut}px)`);
+  if (officeOn > 0) {
+    const second = t > 12;
+    // arms
+    let R, L, phoneHeld = 0, phonePos = [-370, 1395];
+    if (!second) {
+      const reach = seg(t, 4.5, 5.1), lift = seg(t, 5.1, 5.95);
+      const typingBob = Math.sin(t * 22) * 6 * (1 - seg(t, 2.0, 2.4));
+      R = lift > 0 ? mixPose(P.reachR, P.holdR, lift) : mixPose(P.typeR, P.reachR, reach);
+      L = mixPose(P.typeL, P.holdL, seg(t, 5.3, 5.95));
+      R = R.map((pt, i) => (i === 2 && reach === 0 ? [pt[0], pt[1] + typingBob] : pt));
+      if (reach === 0) L = L.map((pt, i) => (i === 2 ? [pt[0], pt[1] - typingBob] : pt));
+      phoneHeld = lift;
+      phonePos = lift > 0 ? lp([-372, 1392], [-12, 1080], lift) : phonePos;
+    } else {
+      R = P.holdR; L = P.holdL; phoneHeld = 1; phonePos = [-12, 1080];
+    }
+    const tap = second ? seg(t, 17.9, 18.05) * (1 - seg(t, 18.05, 18.25)) : 0;
+    R = R.map((pt, i) => (i === 2 ? [pt[0] + 26 * tap, pt[1] - 20 * tap] : pt));
+    arm($('ocArmR'), ...R, OFFICE_SHIRT, OFFICE_DARK);
+    arm($('ocArmL'), ...L, OFFICE_SHIRT, OFFICE_DARK);
+    // head: turns to the phone on the buzz, then looks down at it
+    const look = second ? 1 : seg(t, 1.6, 2.1);
+    const down = second ? 1 : seg(t, 5.2, 6.0);
+    const headX = second ? 0 : lerp(0, -16, look) * (1 - down);
+    $('ocHead').setAttribute('transform', `translate(${headX} ${12 * down}) rotate(${second ? 0 : -6 * look * (1 - down)} 0 900)`);
+    face('oc', {
+      blink: blinkAt(t),
+      gaze: second ? [0, 7] : [lerp(0, -18, look) * (1 - down), lerp(0, 9, Math.max(look * 0.6, down))],
+      smile: second ? lerp(0.45, 1, seg(t, 18.1, 18.5)) : lerp(0.35, 0.05, seg(t, 1.8, 2.3)) + 0.4 * seg(t, 5.4, 6.0),
+      brow: second ? 0.3 * seg(t, 18.1, 18.5) : seg(t, 1.8, 2.2) * (1 - seg(t, 4.6, 5.3)),
+      glow: phoneHeld * 0.1,
+    });
+    // phones
+    const buzz = (Math.max(win(t, 1.0, 1.9, 0.05), win(t, 3.1, 3.8, 0.05))) * Math.sin(t * 90) * 7;
+    const dp = $('deskPhone');
+    dp.setAttribute('transform', `translate(${540 + phonePos[0] + buzz} ${phonePos[1]})`);
+    dp.setAttribute('opacity', phoneHeld > 0.35 ? 0 : 1);
+    const lit = second ? 0 : clamp(seg(t, 1.0, 1.15) * (1 - seg(t, 5.0, 5.4)));
+    $('deskScreen').setAttribute('fill', lit > 0.5 ? '#FFF1D6' : '#2B3150');
+    $('deskGlow').setAttribute('opacity', lit * (0.6 + 0.4 * Math.sin(t * 8)));
+    const hp = $('heldPhone');
+    hp.setAttribute('opacity', phoneHeld > 0.35 ? 1 : 0);
+    hp.setAttribute('transform', `translate(${540 + phonePos[0]} ${phonePos[1]}) rotate(${lerp(-30, -6, phoneHeld)}) scale(${lerp(0.6, 1, phoneHeld)})`);
+    // the arms in front of the held phone: the hands are drawn again over it
+    $('officeArmsFront').innerHTML = phoneHeld > 0.35
+      ? `<circle cx="${540 + R[2][0]}" cy="${R[2][1]}" r="38" fill="${SKIN}"/><circle cx="${540 + L[2][0]}" cy="${L[2][1]}" r="38" fill="${SKIN}"/>`
+      : '';
+    $('minuteHand').setAttribute('transform', `rotate(${(second ? 22 : 17) * 6 + seg(t, 0, 6) * 3})`);
+    $('steam1').setAttribute('transform', `translate(${Math.sin(t * 2) * 6} ${-((t * 30) % 30)})`);
+    $('steam2').setAttribute('transform', `translate(${Math.sin(t * 2 + 1) * 6} ${-((t * 30 + 15) % 30)})`);
+    $('officeChar').setAttribute('transform', `translate(540 ${Math.sin(t * 1.6) * 3})`);
+    // notification card
+    const nIn = seg(t, 1.25, 1.75, back), nOut = seg(t, 5.0, 5.5, easeIn);
+    $('notif').style.transform = `translateY(${lerp(-460, 0, nIn) - 460 * nOut}px)`;
+    $('notif').style.opacity = second ? 0 : 1;
+    // the tick pop
+    const pop = second ? seg(t, 18.1, 18.45, back) * (1 - seg(t, 18.8, 19.0)) : 0;
+    $('checkPop').setAttribute('opacity', pop > 0.01 ? 1 : 0);
+    $('checkPop').setAttribute('transform', `translate(${540 + 190} ${880 - 40 * pop}) scale(${pop})`);
+  }
+
+  // ===== close-up hand (S2 6.2-10.8) =====
+  const handOn = win(t, 6.2, 10.9, 0.45);
+  const handIn = seg(t, 6.2, 6.9, easeOut);
+  setScene('hand', handOn, `scale(${lerp(0.82, 1, handIn)})`);
+  if (handOn > 0) {
+    // the phone's screen is 564x1263 at left 258 top 268; zoom it until it fills the frame
+    const z = seg(t, 9.6, 10.8, easeInOut);
+    const sc = lerp(1, 1080 / 564, z);
+    const float = Math.sin(t * 1.8) * 8 * (1 - z);
+    const rot = lerp(-4, 0, z);
+    const cx = 540, cy = 268 + 1263 * 0.5;
+    // keep the screen's top-left heading for (0,0)
+    const tx = lerp(0, -258 * sc + (cx - cx * sc) * -1 + 0, z);
+    $('handRig').style.transformOrigin = '258px 268px';
+    $('handRig').style.transform = `translate(${-258 * z}px, ${-268 * z + float}px) rotate(${rot}deg) scale(${sc})`;
+    $('handFront').style.opacity = 1 - seg(t, 9.8, 10.4);
+    $('handBack').style.opacity = 1;
+    const mOut = seg(t, 7.6, 8.1, easeIn), mIn = seg(t, 6.5, 6.95, back);
+    $('miniNotif').style.transform = `translateY(${lerp(-300, 0, mIn) - 420 * mOut}px) scale(0.56)`;
+  }
+
+  // ===== app full screen (S3 10.6-17.1) =====
+  const appOn = win(t, 10.6, 17.1, 0.25);
+  setScene('app', appOn);
+  if (appOn > 0) {
+    const push = seg(t, 12.75, 13.25);
+    $('appHome').style.transform = `translateX(${300 * push}px)`;
+    $('appHome').style.filter = `brightness(${1 - 0.25 * push})`;
+    const pan = seg(t, 13.6, 16.9, easeInOut);
+    $('appReader').style.opacity = push > 0 ? 1 : 0;
+    $('appReader').style.transform = `translateX(${-1080 * (1 - push)}px) translateY(${-3600 * pan}px)`;
+    $('appReader').style.boxShadow = '0 0 60px rgba(0,0,0,.25)';
+    // the tap on "נוסח" of the Shema card (x 270, y 1607 on the 1080-wide shot)
+    const f = win(t, 11.9, 12.75, 0.15);
+    $('tap1').style.cssText += `;left:270px;top:1607px;opacity:${f};transform:scale(${1 - 0.15 * seg(t, 12.3, 12.4)})`;
+    const r = seg(t, 12.32, 12.8, easeOut);
+    $('rip1').style.cssText += `;left:270px;top:1607px;opacity:${r > 0 ? 1 - r : 0};transform:scale(${0.4 + 1.6 * r})`;
+  }
+
+  // ===== marked (S4b 18.9-20.6), history (20.4-22.3) =====
+  const doneOn = win(t, 18.9, 20.7, 0.25);
+  setScene('done', doneOn, `scale(${lerp(1.06, 1, seg(t, 18.9, 19.4, easeOut))})`);
+  if (doneOn > 0) {
+    const pan = seg(t, 19.0, 19.8);
+    $('doneImg').style.transform = `translateY(${-418 * pan}px)`;
+    const hs = $('hlStreak'), hd = $('hlDone');
+    hs.style.cssText += `;left:28px;top:${1300 - 418}px;width:1024px;height:200px;opacity:${seg(t, 19.7, 19.95)}`;
+    hd.style.cssText += `;left:28px;top:${1950 - 418}px;width:900px;height:210px;opacity:${seg(t, 20.0, 20.25)};border-color:#2E9E6A`;
+  }
+  const histOn = win(t, 20.45, 22.4, 0.25);
+  const hz = seg(t, 20.5, 22.3, easeInOut);
+  setScene('hist', histOn);
+  if (histOn > 0) {
+    $('histImg').style.transformOrigin = '540px 450px';
+    $('histImg').style.transform = `scale(${1 + 0.3 * hz})`;
+  }
+
+  // ===== montage (S5 22.2-29.2) =====
+  const monOn = win(t, 22.2, 29.3, 0.35);
+  setScene('montage', monOn);
+  if (monOn > 0) {
+    const ph = [
+      { id: 'm1', x: 330, y: 520, s: 1.0, at: 22.4, rot: 0, z: 3 },
+      { id: 'm2', x: -10, y: 640, s: 0.8, at: 23.0, rot: -7, z: 2 },
+      { id: 'm3', x: 670, y: 640, s: 0.8, at: 23.6, rot: 7, z: 2 },
+    ];
+    const drift = seg(t, 22.4, 29.2, (p) => p);
+    for (const p of ph) {
+      const e = seg(t, p.at, p.at + 0.6, back);
+      const el = $(p.id);
+      el.style.left = p.x + 'px'; el.style.top = p.y + 'px'; el.style.zIndex = p.z;
+      el.style.opacity = clamp(e * 2);
+      el.style.transform = `translateY(${lerp(500, 0, e) + Math.sin(t * 1.5 + p.at) * 10 - 40 * drift}px) rotate(${p.rot}deg) scale(${p.s * lerp(0.9, 1, e)})`;
+    }
+    const chips = [['c1', 540, 1470, 22.9], ['c2', 170, 1330, 23.5], ['c3', 900, 1330, 24.1], ['c4', 540, 310, 25.8]];
+    for (const [id, x, y, at] of chips) {
+      const e = seg(t, at, at + 0.45, back);
+      const el = $(id);
+      el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.zIndex = 9;
+      el.style.opacity = clamp(e * 2);
+      el.style.transform = `translate(-50%, -50%) scale(${lerp(0.6, 1, e)})`;
+    }
+    $('mc1').setAttribute('transform', `translate(${Math.sin(t) * 30} ${Math.cos(t) * 20})`);
+    $('mc2').setAttribute('transform', `translate(${Math.cos(t * 0.8) * 30} ${Math.sin(t * 0.8) * 20})`);
+  }
+
+  // ===== Shabbat (S6 29.0-35.3) =====
+  const shOn = win(t, 29.0, 35.4, 0.5);
+  setScene('shabbat', shOn, `scale(${1.08 - 0.08 * seg(t, 29.0, 35.4, (p) => p)})`);
+  if (shOn > 0) {
+    arm($('scArmR'), ...P.restR, SH_SHIRT, SH_DARK);
+    arm($('scArmL'), ...P.restL, SH_SHIRT, SH_DARK);
+    face('sc', { blink: blinkAt(t), gaze: [-6, 2], smile: 0.9, closed: seg(t, 32.2, 32.6) * (1 - seg(t, 33.8, 34.2)), brow: 0.15 });
+    $('scHead').setAttribute('transform', `rotate(${Math.sin(t * 1.2) * 1.5} 0 900)`);
+    for (const i of [0, 1]) {
+      const k = 1 + 0.08 * Math.sin(t * (13 + i * 3)) + 0.05 * Math.sin(t * (29 + i * 5));
+      const sway = Math.sin(t * (7 + i * 2)) * 3;
+      $('fl' + i).setAttribute('transform', `translate(${sway} ${-284 * (1 - k)}) scale(1 ${k})`);
+      $('fi' + i).setAttribute('transform', `translate(${sway * 0.6} ${-288 * (1 - k)}) scale(1 ${k})`);
+      $('fg' + i).setAttribute('opacity', 0.8 + 0.2 * Math.sin(t * (11 + i)));
+    }
+    const e = seg(t, 30.6, 31.3, back);
+    $('sPhone').style.opacity = clamp(e * 2);
+    $('sPhone').style.transform = `translateX(${lerp(420, 0, e)}px) rotate(${lerp(12, 4, e)}deg) translateY(${Math.sin(t * 1.4) * 8}px)`;
+  }
+
+  // ===== end card (S7 35.0-) =====
+  const endOn = seg(t, 35.0, 35.5, easeOut);
+  setScene('end', endOn);
+  if (endOn > 0) {
+    const lg = seg(t, 35.2, 35.9, back);
+    $('endLogo').style.transform = `scale(${lerp(0.3, 1, lg)}) rotate(${lerp(-20, 0, lg)}deg)`;
+    $('endLogo').style.opacity = clamp(lg * 2);
+    for (const [id, at, r] of [['er1', 35.6, 1], ['er2', 35.9, 1]]) {
+      const p = seg(t, at, at + 1.2, easeOut);
+      $(id).setAttribute('r', 200 + 260 * p); $(id).setAttribute('opacity', p > 0 ? 0.6 * (1 - p) : 0);
+    }
+    const items = [['endTitle', 35.9], ['endTag', 36.4], ['endSmall', 36.9], ['endStore', 37.4]];
+    for (const [id, at] of items) {
+      const p = seg(t, at, at + 0.5, easeOut);
+      $(id).style.opacity = p;
+      $(id).style.transform = (id === 'endStore' ? 'translateX(-50%) ' : '') + `translateY(${lerp(40, 0, p)}px)`;
+    }
+  }
+
+  // ===== caption =====
+  const cap = CAPTIONS.find(([a, b]) => t >= a && t <= b);
+  if (cap) {
+    const [a, b, text, place] = cap;
+    $('caption').style.bottom = place === 'top' ? '1560px' : '150px';
+    const p = win(t, a, b, 0.3);
+    $('captionText').innerHTML = text;
+    $('caption').style.opacity = p;
+    $('caption').style.transform = `translateY(${lerp(30, 0, seg(t, a, a + 0.35, easeOut))}px)`;
+  } else {
+    $('caption').style.opacity = 0;
+  }
+}
+window.render = render;
+render(0);
+</script>
+</body>
+</html>

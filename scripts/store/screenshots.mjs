@@ -32,7 +32,7 @@ const USAGE =
 
 const TIME_ZONE = 'Asia/Jerusalem';
 const JERUSALEM = { latitude: 31.7683, longitude: 35.2137 };
-const NOW = { date: '2026-11-04', time: '15:40' };
+export const NOW = { date: '2026-11-04', time: '15:40' };
 const HISTORY_DAYS = 30;
 const PORTS = [8091, 8092, 8093, 8094, 8095, 8096, 8097, 8098, 8099];
 const SIZES = {
@@ -251,7 +251,7 @@ function zoneOffsetMs(utcMs) {
   return Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second) - utcMs;
 }
 
-function inJerusalem(dateKey, time, extraMinutes = 0) {
+export function inJerusalem(dateKey, time, extraMinutes = 0) {
   const [y, m, d] = dateKey.split('-').map(Number);
   const [h, min] = time.split(':').map(Number);
   const wall = Date.UTC(y, m - 1, d, h, min + extraMinutes);
@@ -274,7 +274,7 @@ function defaultOnMitzvot() {
 
 // The persisted stores of an install opened every day for the month before NOW: a man in Jerusalem, nusach
 // Sefard, the default mitzvot switched on at its first morning, Shabbat marks made in each check-in.
-function seedStores(language) {
+export function seedStores(language) {
   const days = Array.from({ length: HISTORY_DAYS }, (_, i) => dayKey(NOW.date, i - HISTORY_DAYS));
   for (const key of [...Object.keys(MISSED), ...Object.keys(LATE), KIDDUSH_LEVANA.key]) {
     if (!days.includes(key)) throw new Error(`Seed day ${key} is outside the ${HISTORY_DAYS} days before ${NOW.date}`);
@@ -353,8 +353,7 @@ function seedStores(language) {
 
 // Runs before any app script: Date starts at NOW in Jerusalem and keeps ticking, and the app's
 // storage holds exactly the seed on every load.
-function pageSetup(origin, seed) {
-  const now = inJerusalem(NOW.date, NOW.time);
+export function pageSetup(origin, seed, now = inJerusalem(NOW.date, NOW.time)) {
   return `(() => {
   const RealDate = Date;
   const shift = ${now} - RealDate.now();
@@ -387,7 +386,7 @@ function exportWeb(dist) {
 // The web notification shim reports permission 'unknown' whatever the browser allows, so every page
 // would carry the "notifications are off" banner. The capture copy reports 'granted', as a phone that
 // allowed notifications does.
-function grantNotificationsInBundle(dist) {
+export function grantNotificationsInBundle(dist) {
   const dir = join(dist, '_expo', 'static', 'js', 'web');
   const pattern = /\.setNotificationPermission\((['"])unknown\1\)/g;
   const hits = readdirSync(dir)
@@ -430,7 +429,7 @@ function resolvePage(dist, pathname) {
   return dynamic ? join(folder, dynamic) : join(dist, 'index.html');
 }
 
-async function serve(dist) {
+export async function serve(dist) {
   const server = createServer((req, res) => {
     const file = resolvePage(dist, new URL(req.url, 'http://localhost').pathname);
     if (!file) {
@@ -690,7 +689,10 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(`store screenshots failed: ${error.message}`);
-  process.exit(1);
-});
+// Run only as a script: the promo video study imports the seed and the server from this file.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(`store screenshots failed: ${error.message}`);
+    process.exit(1);
+  });
+}

@@ -873,6 +873,16 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** a credit they approve and a schedule shared with their learners.
   - **Expected result:** the owner's decision recorded; if sent, the answer recorded.
 
+### Medium — Marketing, 2026-11-13
+
+- [ ] The promo video: a 42-second vertical Hebrew ad with a character, narration and music
+  - **Flag:** none (marketing material; nothing ships in the app).
+  - **Source:** the owner's request of 2026-11-13: an ad that shows the app, how it is used and its purpose, with Hebrew narration and music, a character who visibly gets the notifications and uses the app, and transitions from him into the app's screens.
+  - **What it is:** the study [design/lab/studies/2026-11-13-promo-video/](design/lab/studies/2026-11-13-promo-video/AGENTS.md): an illustrated young man gets the morning Shema's orange reminder at work (08:17, 20 minutes left), the camera goes into his phone and the real screens (home, the Shacharit reader, the mark, a 15-day streak), a montage (siddur tab, schedule, a tzaddik's page), the quiet Shabbat, an end card; captions, original music, 1080x1920 at 30 fps.
+  - **Done so far:** 2026-11-13: the video is rendered with music and captions; the narration script is [vo.md](design/lab/studies/2026-11-13-promo-video/vo.md).
+  - **Open:** the narration. This environment refused both text-to-speech routes (Microsoft's neural voices and the open Phonikud model from Hugging Face) on 2026-11-13; the owner chooses a recorded voice, an approved TTS route or an API key for a TTS service.
+  - **Open:** the end card says "זמין ב־Google Play" while the Play production release is still in review (state.md, 2026-11-10); confirm before the video is published.
+
 ## Bugs
 
 - [ ] The app still hangs on the logo screen at launch
