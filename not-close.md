@@ -881,7 +881,8 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** the study [design/lab/studies/2026-11-13-promo-video/](design/lab/studies/2026-11-13-promo-video/AGENTS.md): an illustrated young man gets the morning Shema's orange reminder at work (08:17, 20 minutes left), the camera goes into his phone and the real screens (home, the Shacharit reader, the mark, a 15-day streak), a montage (siddur tab, schedule, a tzaddik's page), the quiet Shabbat, an end card; captions, original music, 1080x1920 at 30 fps.
   - **Done so far:** 2026-11-13: the video is rendered with music and captions; the narration script is [vo.md](design/lab/studies/2026-11-13-promo-video/vo.md).
   - **Status:** — · Committed: `01c982e` feat(design): the promo video study · Pushed: yes · Live: — · Channel: —
-  - **Open:** the narration. This environment refused both text-to-speech routes (Microsoft's neural voices and the open Phonikud model from Hugging Face) on 2026-11-13; the owner chooses a recorded voice, an approved TTS route or an API key for a TTS service.
+  - **Round 2 (2026-11-13):** the owner asked for Phonikud's narration and for more traditional characters. Two voices recorded and checked by transcription; five figures (avrech, chassid, Sephardi, yeshiva bachur, dati-leumi) on the page https://claude.ai/artifact/2WddyBo6En5LwiLR5iDh9C, with draft 2 (Shaul's voice, draft 1's figure).
+  - **Open:** the owner picks a figure and a voice; then the video is rendered with that figure in every scene.
   - **Open:** the end card says "זמין ב־Google Play" while the Play production release is still in review (state.md, 2026-11-10); confirm before the video is published.
 
 ## Bugs

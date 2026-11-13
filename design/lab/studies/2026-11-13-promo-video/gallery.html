@@ -1,0 +1,167 @@
+<title>דמויות לסרטון יהודי 365</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+<style>
+  /* Layout: a casting sheet. Five figures in a grid, each a weekday frame and a Shabbat frame side by side; voices and the cut below. */
+  :root {
+    --page: #F6F1E8; --card: #FFFDF9; --ink: #1D2240; --sub: #69645D; --accent: #F08A3C; --accentText: #A04A0C;
+    --line: #E6DCCB; --wall: #F3E8D6; --desk: #C98F5B; --night: #3A3360; --cloth: #FBF7EE;
+    --ui: 'Rubik', 'Segoe UI', Arial, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --page: #141831; --card: #1D2240; --ink: #F3EEE4; --sub: #B9B2A6; --accent: #F59A4A; --accentText: #FFB774; --line: #2E3459; color-scheme: dark; }
+  }
+  :root[data-theme="dark"] { --page: #141831; --card: #1D2240; --ink: #F3EEE4; --sub: #B9B2A6; --accent: #F59A4A; --accentText: #FFB774; --line: #2E3459; color-scheme: dark; }
+  body { background: var(--page); color: var(--ink); font-family: var(--ui); direction: rtl; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 40px; }
+  header { display: grid; gap: 8px; }
+  h1 { margin: 0; font-size: clamp(28px, 4vw, 40px); font-weight: 800; text-wrap: balance; }
+  .lede { margin: 0; color: var(--sub); font-size: 17px; line-height: 1.6; max-width: 62ch; }
+  h2 { margin: 0 0 14px; font-size: 22px; font-weight: 700; }
+  .cast { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 20px; }
+  .who { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+  .frames { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .frames figure { margin: 0; display: grid; gap: 6px; }
+  .frames svg { width: 100%; height: auto; display: block; border-radius: 14px; }
+  .frames figcaption { font-size: 13px; color: var(--sub); text-align: center; }
+  .tag { display: flex; align-items: baseline; gap: 10px; }
+  .letter { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #1D2240; font-weight: 800; font-size: 17px; }
+  .tag h3 { margin: 0; font-size: 20px; font-weight: 700; }
+  .about { margin: 0; color: var(--sub); font-size: 15px; line-height: 1.5; }
+  .voices { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .voice { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: grid; gap: 10px; }
+  .voice h3 { margin: 0; font-size: 18px; }
+  .voice p { margin: 0; color: var(--sub); font-size: 14px; line-height: 1.5; }
+  audio { width: 100%; }
+  .cut { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 20px; align-items: start; }
+  .cut video { width: 100%; border-radius: 18px; background: #000; display: block; }
+  .cut ul { margin: 0; padding-inline-start: 20px; color: var(--sub); line-height: 1.7; font-size: 15px; }
+  @media (max-width: 620px) { .cut { grid-template-columns: 1fr; } .cut video { max-width: 300px; } }
+  .script { font-size: 15px; line-height: 1.8; margin: 0; padding-inline-start: 20px; }
+  .script time { color: var(--accentText); font-variant-numeric: tabular-nums; font-size: 13px; margin-inline-end: 8px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>בחירת דמות וקול לסרטון</h1>
+    <p class="lede">חמש דמויות במראה מסורתי. כל אחת מוצגת בבוקר יום חול ליד המחשב ובליל שבת ליד הנרות, כמו בסרטון. בחר אות, ואת הדמות שבחרת אשים בכל הסצנות: ההתראה בעבודה, הטלפון ביד וסעודת השבת.</p>
+  </header>
+
+  <section>
+    <h2>הדמויות</h2>
+    <div class="cast" id="cast"></div>
+  </section>
+
+  <section>
+    <h2>הקריינות</h2>
+    <div class="voices">
+      <div class="voice">
+        <h3>קול א׳: שאול</h3>
+        <p>קול גברי צעיר וחם, קצב רגוע. בבדיקה אוטומטית של זיהוי דיבור עברי, כל המשפטים זוהו מילה במילה.</p>
+        <audio id="vo-shaul" controls preload="none" src="audio/shaul.mp3"></audio>
+      </div>
+      <div class="voice">
+        <h3>קול ב׳</h3>
+        <p>קול גברי עמוק ומעט רשמי יותר. גם הוא זוהה במלואו בבדיקה האוטומטית.</p>
+        <audio id="vo-model" controls preload="none" src="audio/model.mp3"></audio>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>טיוטה 2: עם קריינות</h2>
+    <div class="cut">
+      <video id="draft2" controls playsinline preload="metadata" src="video/draft2.mp4"></video>
+      <div>
+        <p class="about">הסרטון עם קול א׳ והמוזיקה. הדמות כאן היא עדיין הדמות של טיוטה 1, והיא תוחלף בדמות שתבחר.</p>
+        <ol class="script" id="script"></ol>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>/*CHARACTERS*/</script>
+<script>
+  const LINES = /*LINES*/[];
+  const LETTERS = ['א', 'ב', 'ג', 'ד', 'ה'];
+  const ARMS = { R: [[-212, 1060], [-276, 1300], [-128, 1384]], L: [[212, 1060], [276, 1300], [128, 1384]] };
+
+  function scene(kind, key, prefix) {
+    const shabbat = kind === 'shabbat';
+    const back = shabbat
+      ? `<rect x="-330" y="470" width="660" height="960" fill="#3A3360"/>
+         <rect x="-300" y="520" width="200" height="300" rx="14" fill="#4A4375"/>
+         <rect x="-290" y="530" width="180" height="280" rx="8" fill="url(#dusk-${prefix})"/>
+         <circle cx="-210" cy="580" r="4" fill="#FFF6DA"/><circle cx="-160" cy="610" r="3" fill="#FFF6DA"/><circle cx="-250" cy="640" r="3" fill="#FFF6DA"/>
+         <rect x="-330" y="470" width="660" height="960" fill="url(#warm-${prefix})"/>`
+      : `<rect x="-330" y="470" width="660" height="960" fill="#F3E8D6"/>
+         <rect x="-310" y="520" width="200" height="300" rx="14" fill="#FFFDF9"/>
+         <rect x="-300" y="530" width="180" height="280" rx="8" fill="url(#sky-${prefix})"/>
+         <circle cx="-170" cy="590" r="30" fill="#FFD574"/>
+         <path d="M-300,760 L-270,740 L-240,750 L-210,720 L-180,740 L-150,730 L-120,750 L-120,810 L-300,810 Z" fill="#E1CBA3"/>`;
+    const front = shabbat
+      ? `<rect x="-330" y="1356" width="660" height="80" fill="#FBF7EE"/><rect x="-330" y="1390" width="660" height="8" fill="#E6C68E"/>
+         ${[-250, -160].map((x) => `<g transform="translate(${x} 1356)"><circle cx="0" cy="-330" r="80" fill="url(#flame-${prefix})"/>
+           <path d="M-34,0 L34,0 L22,-20 L9,-28 L9,-96 L22,-104 L-22,-104 L-9,-96 L-9,-28 L-22,-20 Z" fill="#C9CCD6"/>
+           <rect x="-15" y="-226" width="30" height="122" rx="5" fill="#FFFDF4"/>
+           <path class="flame" d="M0,-290 C14,-266 17,-246 0,-236 C-17,-246 -14,-266 0,-290 Z" fill="#FFB347"/></g>`).join('')}
+         <g transform="translate(220 1356)"><path d="M-36,-130 L36,-130 Q33,-70 0,-62 Q-33,-70 -36,-130 Z" fill="#D7DAE2"/><rect x="-6" y="-64" width="12" height="52" fill="#C4C8D2"/><ellipse cx="0" cy="-10" rx="34" ry="10" fill="#C4C8D2"/><path d="M-31,-122 L31,-122 Q28,-86 0,-80 Q-28,-86 -31,-122 Z" fill="#8E1F3A" opacity=".85"/></g>`
+      : `<rect x="-330" y="1356" width="660" height="80" fill="#C98F5B"/><rect x="-330" y="1350" width="660" height="18" fill="#DDA571"/>
+         <path d="M110,1180 L300,1180 Q312,1180 312,1192 L312,1360 L98,1360 L98,1192 Q98,1180 110,1180 Z" fill="#C7CBD3"/><circle cx="205" cy="1270" r="18" fill="#B2B7C1"/>`;
+    return `<svg viewBox="-330 470 660 960" role="img" aria-label="${CHARACTERS[key].name} ${shabbat ? 'בליל שבת' : 'ביום חול'}">
+      <defs>
+        <linearGradient id="sky-${prefix}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9FD0F2"/><stop offset="1" stop-color="#FDEFD6"/></linearGradient>
+        <linearGradient id="dusk-${prefix}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26295A"/><stop offset=".6" stop-color="#6A4C8C"/><stop offset="1" stop-color="#F3A15F"/></linearGradient>
+        <radialGradient id="warm-${prefix}" cx=".25" cy=".8" r=".7"><stop offset="0" stop-color="#FFC77A" stop-opacity=".45"/><stop offset="1" stop-color="#FFC77A" stop-opacity="0"/></radialGradient>
+        <radialGradient id="flame-${prefix}"><stop offset="0" stop-color="#FFE3A3" stop-opacity=".85"/><stop offset="1" stop-color="#FFB45A" stop-opacity="0"/></radialGradient>
+      </defs>
+      ${back}${characterSVG(key, prefix, { shabbat })}${front}</svg>`;
+  }
+
+  const cast = document.getElementById('cast');
+  const figures = [];
+  Object.keys(CHARACTERS).forEach((key, i) => {
+    const c = CHARACTERS[key];
+    const card = document.createElement('article');
+    card.className = 'who';
+    card.innerHTML = `
+      <div class="tag"><span class="letter">${LETTERS[i]}</span><h3>${c.name}</h3></div>
+      <div class="frames">
+        <figure>${scene('weekday', key, key + 'W')}<figcaption>יום חול, 08:17</figcaption></figure>
+        <figure>${scene('shabbat', key, key + 'S')}<figcaption>ליל שבת</figcaption></figure>
+      </div>
+      <p class="about">${c.about}</p>`;
+    cast.appendChild(card);
+    for (const [suffix, shabbat] of [['W', false], ['S', true]]) {
+      const prefix = key + suffix;
+      characterArm(document.getElementById(prefix + 'ArmR'), key, ...ARMS.R, { shabbat });
+      characterArm(document.getElementById(prefix + 'ArmL'), key, ...ARMS.L, { shabbat });
+      figures.push({ prefix, shabbat, phase: i * 1.37 + (shabbat ? 0.6 : 0) });
+    }
+  });
+
+  document.getElementById('script').innerHTML = LINES.map(([a, , text]) => `<li><time>${a.toFixed(1)}״</time>${text}</li>`).join('');
+
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function frame(now) {
+    const t = now / 1000;
+    for (const f of figures) {
+      const local = t + f.phase;
+      const cycle = local % 3.8;
+      const blink = Math.max(0, 1 - Math.abs(cycle - 3.6) / 0.09);
+      const gaze = [Math.sin(local * 0.7) * 5, Math.sin(local * 0.45) * 2];
+      characterFace(f.prefix, { blink: still ? 0 : blink, gaze: still ? [0, 0] : gaze, smile: f.shabbat ? 0.85 : 0.55, brow: 0.1 });
+    }
+    if (!still) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  document.querySelectorAll('.flame').forEach((el, i) => {
+    if (!still) el.animate([{ transform: 'scale(1, 1)' }, { transform: 'scale(0.92, 1.1)' }, { transform: 'scale(1, 0.96)' }], { duration: 900 + i * 70, iterations: Infinity, direction: 'alternate' });
+    el.style.transformOrigin = '0 -236px';
+    el.style.transformBox = 'view-box';
+  });
+  // only one sound at a time
+  document.querySelectorAll('audio, video').forEach((m) => m.addEventListener('play', () => document.querySelectorAll('audio, video').forEach((o) => o !== m && o.pause())));
+</script>
