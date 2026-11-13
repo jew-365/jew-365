@@ -515,7 +515,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 - [ ] Apply a downloaded update by itself on the return to the app (deferred)
   - **Flag:** `OTA`.
   - **Source:** the owner's question of 2026-11-10: some users miss the green ready-update banner. Proposed: reload into a downloaded update on the return from the background, as the return to home already does, never after a flow the app opened (`holdCovers()`) nor inside a holy block, the banner kept; a wait at a cold launch (`fallbackToCacheTimeout`) would need a build. The owner's answer the same day: "לא כרגע" (not now).
-  - **Status:** not started · Committed: yes, `39eabdd` fix(startup): the logo never waits for the fonts for good, and a stuck launch leaves its trace · Pushed: yes · Live: no · Channel: none
+  - **Status:** not started · Committed: no · Pushed: no · Live: no · Channel: none
 
 - [ ] The carousel's star and fill that work
   - **Flag:** `OTA`.
