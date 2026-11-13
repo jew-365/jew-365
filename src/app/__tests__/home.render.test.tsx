@@ -60,6 +60,7 @@ import { renderWithTheme } from '@/testing/render';
 import { at, zmanimFor } from '@/testing/zmanim';
 import type { CustomMitzvah } from '@/types/mitzvah';
 import { chokReaderPortion } from '@/utils/chok';
+import { WHATS_NEW } from '@/data/guide';
 import { clockOf } from '@/utils/clock';
 import { locationNoon } from '@/utils/locationDay';
 import { civilHebrewDayAt } from '@/utils/taharah/onot';
@@ -688,5 +689,51 @@ describe('home banners land on the right settings block', () => {
     renderAt(DAY);
     fireEvent.press(screen.getByText('המיקום לא אושר. לבחירת עיר'));
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/(tabs)/settings', params: { focus: 'location' } });
+  });
+});
+
+describe("home's what's-new message", () => {
+  const DAY = '2027-06-15T12:00';
+  const NEWEST = WHATS_NEW[0].label;
+  const TITLE = 'מה חדש בעדכון';
+  beforeEach(() => {
+    mockFocused = true;
+    mockTabIndex = 0;
+    mockPush.mockClear();
+    useUserStore.getState().reset();
+    useUserStore.setState({
+      language: 'he',
+      location: JERUSALEM,
+      inIsrael: true,
+      nusach: 'ashkenaz',
+      isOnboarded: true,
+      locationStatus: 'ready',
+      locationSource: 'manual',
+      notificationsEnabled: true,
+      notificationPermission: 'granted',
+      gender: 'male',
+      maritalStatus: 'single',
+      homeLook: 'rings',
+    });
+    useCompletionsStore.getState().reset();
+    useCustomMitzvotStore.getState().reset();
+    useTaharahStore.getState().reset();
+    enableOnly('maariv');
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  it('stamps the newest label as seen on a fresh install and shows no row', () => {
+    renderAt(DAY);
+    expect(screen.queryByText(TITLE)).toBeNull();
+    expect(useUserStore.getState().discovery.whatsNew).toEqual({ label: NEWEST, since: Date.now(), seen: true });
+  });
+
+  it('shows the row for an unseen label and marks it seen on open', () => {
+    useUserStore.getState().setWhatsNew({ label: NEWEST, since: at(JERUSALEM, DAY).getTime(), seen: false });
+    renderAt(DAY);
+    fireEvent.press(screen.getByText(TITLE));
+    expect(mockPush).toHaveBeenCalledWith('/guide');
+    expect(useUserStore.getState().discovery.whatsNew!.seen).toBe(true);
   });
 });

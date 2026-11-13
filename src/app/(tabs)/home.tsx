@@ -61,7 +61,15 @@ import { MITZVOT } from '@/data/mitzvot';
 import { offeredMoreZmanim, type ZmanId } from '@/utils/zmanIds';
 import { computeStreak } from '@/utils/historyStats';
 import { DayEntry, dayEntryStatusText, firstName, greetingKey, heroCaption, orderDayEntries } from '@/utils/homeDay';
-import { hilulaMessage, holyBlockMessage, roshChodeshMessage, streakMessage } from '@/utils/homeMessages';
+import {
+  hilulaMessage,
+  holyBlockMessage,
+  nextWhatsNew,
+  roshChodeshMessage,
+  streakMessage,
+  whatsNewMessage,
+  type HomeHref,
+} from '@/utils/homeMessages';
 import { appDay, appDayKey, locationNoon } from '@/utils/locationDay';
 import { deriveCycle } from '@/utils/taharah/cycle';
 import { currentOnah } from '@/utils/taharah/onot';
@@ -197,6 +205,8 @@ export default function HomeScreen() {
   const taharahEnabled = useUserStore((s) => s.taharahEnabled);
   const profileName = useUserStore((s) => s.profileName);
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
+  const whatsNewState = useUserStore((s) => s.discovery.whatsNew);
+  const setWhatsNew = useUserStore((s) => s.setWhatsNew);
   const homeLook = useUserStore((s) => s.homeLook);
   const hiddenZmanim = useUserStore((s) => s.hiddenZmanim);
   const zmanPins = useUserStore((s) => s.zmanPins);
@@ -427,15 +437,26 @@ export default function HomeScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- todayKey re-runs the streak when the app day turns
     [enabled, completions, skipped, checkIns, archivedDays, enabledSince, location, settings, todayKey],
   );
+  // Stamp the newest what's-new label once: seen at once on a first run, unseen when a newer label arrives,
+  // so a Messages row offers the guide after an update (spec C7). Never on the clock tick.
+  useEffect(() => {
+    const next = nextWhatsNew(whatsNewState, Date.now());
+    if (next !== whatsNewState) setWhatsNew(next ?? { label: '', since: Date.now(), seen: true });
+  }, [whatsNewState, setWhatsNew]);
+  const openWhatsNew = (href: HomeHref) => {
+    if (whatsNewState) setWhatsNew({ ...whatsNewState, seen: true });
+    router.push(href as never);
+  };
   const messages = useMemo(
     () =>
       [
+        whatsNewMessage(whatsNewState, now.getTime(), t),
         streakMessage(streak, t),
         holyBlockMessage(now, location, t),
         roshChodeshMessage(now, location, language, t),
         hilulaMessage(now, location, inIsrael, hilulotEnabled, language, t),
       ].filter(nonNull),
-    [streak, now, location, language, inIsrael, hilulotEnabled, t],
+    [streak, now, language, inIsrael, hilulotEnabled, whatsNewState, location, t],
   );
 
   const stamping = useMemo(() => new Set(stampingIds), [stampingIds]);
@@ -873,7 +894,12 @@ export default function HomeScreen() {
                 icon={message.icon}
                 title={message.title}
                 caption={message.caption}
-                onPress={message.href ? () => router.push(message.href as never) : undefined}
+                onPress={
+                  message.href
+                    ? () =>
+                        message.id === 'whatsNew' ? openWhatsNew(message.href!) : router.push(message.href as never)
+                    : undefined
+                }
                 chevron={Boolean(message.href)}
               />
             ))}

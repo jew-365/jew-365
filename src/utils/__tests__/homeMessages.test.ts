@@ -8,8 +8,16 @@ import { HebcalService } from '@/services/HebcalService';
 import { ZmanimService } from '@/services/ZmanimService';
 import { at } from '@/testing/zmanim';
 import { clockOf } from '../clock';
-import { holyBlockMessage, hilulaMessage, roshChodeshMessage, streakMessage } from '../homeMessages';
+import {
+  holyBlockMessage,
+  hilulaMessage,
+  nextWhatsNew,
+  roshChodeshMessage,
+  streakMessage,
+  whatsNewMessage,
+} from '../homeMessages';
 import { civilHebrewDayAt } from '../taharah/onot';
+import { WHATS_NEW } from '@/data/guide';
 
 const J = CITIES[0];
 
@@ -30,6 +38,49 @@ describe('streakMessage', () => {
 
   it('3. says one day left in the singular', () => {
     expect(streakMessage(6, t)!.caption).toBe('עוד יום אחד ליעד 7');
+  });
+
+  it('3a. celebrates the day a goal is reached and opens the achievements tab', () => {
+    for (const goal of [7, 30, 100, 365]) {
+      const m = streakMessage(goal, t)!;
+      expect(m.title).toContain('הגעת ליעד');
+      expect(m.caption).toBe('לצפייה בהישגים שלך');
+      expect(m.href).toEqual({ pathname: '/(tabs)/history', params: { tab: 'achievements' } });
+    }
+    // The day after a goal is an ordinary countdown to the next goal.
+    expect(streakMessage(8, t)!.href).toBe('/(tabs)/history');
+    expect(streakMessage(8, t)!.caption).toBe('עוד 22 ימים ליעד 30');
+  });
+});
+
+describe('whatsNewMessage and nextWhatsNew', () => {
+  const DAY = 86_400_000;
+  const newest = WHATS_NEW[0].label;
+
+  it('3b. stores the newest label as seen on a fresh install and shows no row', () => {
+    const stamped = nextWhatsNew(null, 1000)!;
+    expect(stamped).toEqual({ label: newest, since: 1000, seen: true });
+    expect(whatsNewMessage(stamped, 1000, t)).toBeNull();
+  });
+
+  it('3c. leaves a matching stored state untouched', () => {
+    const stored = { label: newest, since: 500, seen: false };
+    expect(nextWhatsNew(stored, 9000)).toBe(stored);
+  });
+
+  it('3d. stamps a newer label unseen and shows the row for three days', () => {
+    const stamped = nextWhatsNew({ label: 'old-0.0.0-0', since: 0, seen: true }, 2000, '9.9.9-9')!;
+    expect(stamped).toEqual({ label: '9.9.9-9', since: 2000, seen: false });
+    expect(whatsNewMessage(stamped, 2000, t)).toEqual({
+      id: 'whatsNew',
+      icon: 'guide',
+      title: 'מה חדש בעדכון',
+      caption: 'מה התחדש באפליקציה',
+      href: '/guide',
+    });
+    expect(whatsNewMessage(stamped, 2000 + DAY, t)).not.toBeNull();
+    expect(whatsNewMessage(stamped, 2000 + 3 * DAY, t)).toBeNull();
+    expect(whatsNewMessage({ ...stamped, seen: true }, 2000, t)).toBeNull();
   });
 });
 

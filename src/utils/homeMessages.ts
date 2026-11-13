@@ -10,15 +10,17 @@ import { clockOf } from '@/utils/clock';
 import { addDays } from '@/utils/historyStats';
 import { appDay, appDayEnd, locationNoon } from '@/utils/locationDay';
 import { holyBlockLabelKeys } from '@/utils/skipRules';
-import { nextStreakGoal } from '@/utils/streakGoal';
+import { nextStreakGoal, STREAK_GOALS } from '@/utils/streakGoal';
 import { civilHebrewDayAt } from '@/utils/taharah/onot';
+import { WHATS_NEW } from '@/data/guide';
+import type { WhatsNewState } from '@/utils/discovery';
 
 type Translate = (scope: string, options?: Record<string, unknown>) => string;
 type Language = 'he' | 'en';
 
 export type HomeHref = string | { pathname: string; params: Record<string, string> };
 export type HomeMessage = {
-  id: 'streak' | 'holyBlock' | 'roshChodesh' | 'hilula';
+  id: 'streak' | 'holyBlock' | 'roshChodesh' | 'hilula' | 'whatsNew';
   icon: IconName;
   title: string;
   caption: string;
@@ -27,9 +29,21 @@ export type HomeMessage = {
 
 const HOLY_BLOCK_LOOKAHEAD_DAYS = 2;
 const ROSH_CHODESH_LOOKAHEAD_DAYS = 7;
+const WHATS_NEW_SHOW_DAYS = 3;
 
 export function streakMessage(streak: number, t: Translate): HomeMessage | null {
   if (streak < 1) return null;
+  // The day a goal is reached, home says so and opens the achievements tab (spec F1), stateless: the streak
+  // grows by at most one a day, so landing exactly on a goal means today is the day it was reached.
+  if ((STREAK_GOALS as readonly number[]).includes(streak)) {
+    return {
+      id: 'streak',
+      icon: 'star',
+      title: t(streak === 1 ? 'home.streakGoal.title.once' : 'home.streakGoal.title', { count: streak }),
+      caption: t('home.streakGoal.caption'),
+      href: { pathname: '/(tabs)/history', params: { tab: 'achievements' } },
+    };
+  }
   const goal = nextStreakGoal(streak);
   const rem = goal - streak;
   return {
@@ -38,6 +52,33 @@ export function streakMessage(streak: number, t: Translate): HomeMessage | null 
     title: t(streak === 1 ? 'history.streak.once' : 'history.streak', { count: streak }),
     caption: t(rem === 1 ? 'history.goalCaption.once' : 'history.goalCaption', { count: rem, goal }),
     href: '/(tabs)/history',
+  };
+}
+
+// The newest what's-new label the guide holds, or null when there is none.
+export const newestWhatsNewLabel = (): string | null => WHATS_NEW[0]?.label ?? null;
+
+// The discovery `whatsNew` state to store for the newest label: unchanged while it already matches, else a
+// fresh stamp, seen at once on an install that stored nothing (so the first run after this ships shows no row)
+// and unseen when a newer label arrives (spec C7: the comparison is label to label, never the update number).
+export function nextWhatsNew(
+  stored: WhatsNewState | null,
+  now: number,
+  newestLabel: string | null = newestWhatsNewLabel(),
+): WhatsNewState | null {
+  if (!newestLabel) return stored;
+  if (stored?.label === newestLabel) return stored;
+  return { label: newestLabel, since: now, seen: stored == null };
+}
+
+export function whatsNewMessage(stored: WhatsNewState | null, now: number, t: Translate): HomeMessage | null {
+  if (!stored || stored.seen || now - stored.since >= WHATS_NEW_SHOW_DAYS * 86_400_000) return null;
+  return {
+    id: 'whatsNew',
+    icon: 'guide',
+    title: t('home.msg.whatsNew.title'),
+    caption: t('home.msg.whatsNew.caption'),
+    href: '/guide',
   };
 }
 
