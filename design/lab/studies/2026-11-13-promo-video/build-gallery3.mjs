@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = join(HERE, 'out');
 const SITE = join(OUT, 'site');
-const CUT_VOICE = process.argv[2] ?? 'warm';
+const ENGINES = ['chatterbox', 'warm'];
 rmSync(SITE, { recursive: true, force: true });
 mkdirSync(join(SITE, 'audio'), { recursive: true });
 mkdirSync(join(SITE, 'video'), { recursive: true });
@@ -26,11 +26,12 @@ const seconds = (file) =>
 
 const cuts = [];
 for (const id of Object.keys(variants)) {
-  const src = join(OUT, `promo-${id}-${CUT_VOICE}.mp4`);
-  if (!existsSync(src)) continue;
+  const engines = ENGINES.filter((e) => existsSync(join(OUT, `promo-${id}-${e}.mp4`)));
+  if (!engines.length) continue;
+  for (const e of engines) {
   ff([
     '-i',
-    src,
+    join(OUT, `promo-${id}-${e}.mp4`),
     '-vf',
     'scale=720:-2',
     '-c:v',
@@ -45,17 +46,18 @@ for (const id of Object.keys(variants)) {
     '128k',
     '-movflags',
     '+faststart',
-    join(SITE, 'video', `${id}.mp4`),
+    join(SITE, 'video', `${id}-${e}.mp4`),
   ]);
-  cuts.push({ id, seconds: seconds(src) });
+  }
+  cuts.push({ id, seconds: seconds(join(OUT, `promo-${id}-${engines[0]}.mp4`)), engines });
 }
 
-for (const voice of ['warm', 'deep', 'lively', 'woman']) {
+for (const voice of ['chatterbox', 'omnivoice', 'warm', 'deep', 'lively', 'woman']) {
   const index = join(OUT, 'vo', voice, 'day.json');
   if (!existsSync(index)) continue;
-  const lines = JSON.parse(readFileSync(index, 'utf8'));
+  const lines = JSON.parse(readFileSync(index, 'utf8')).filter(Boolean);
   let t = 0;
-  const starts = variants.day.beats.map((b, i) => {
+  const starts = variants.day.beats.slice(0, lines.length).map((b, i) => {
     const s = t + 0.3;
     t += Math.max(b.min, lines[i].seconds + 0.75);
     return s;
@@ -65,12 +67,12 @@ for (const voice of ['warm', 'deep', 'lively', 'woman']) {
     join(HERE, 'music.py'),
     music,
     String(t + 0.6),
-    `arp=${starts[1]}`,
-    `kick=${starts[1] + 3}`,
-    `full=${starts[4]}`,
-    `calmA=${starts[7] + 3}`,
-    `calmB=${starts[8]}`,
-    `outro=${starts[8]}`,
+    `arp=${(starts[1] ?? t)}`,
+    `kick=${(starts[1] ?? t) + 3}`,
+    `full=${(starts[4] ?? t)}`,
+    `calmA=${(starts[7] ?? t) + 3}`,
+    `calmB=${(starts[8] ?? t)}`,
+    `outro=${(starts[8] ?? t)}`,
   ]);
   const inputs = lines.flatMap((_, i) => ['-i', join(OUT, 'vo', voice, `day-${i}.wav`)]);
   const delays = lines

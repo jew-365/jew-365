@@ -33,6 +33,10 @@
   .voice h3 { margin: 0; font-size: 18px; }
   .voice p { margin: 0; color: var(--sub); font-size: 14px; line-height: 1.5; }
   audio { width: 100%; }
+  .engines { display: flex; gap: 8px; }
+  .eng { flex: 1; min-height: 44px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); font: 500 15px var(--ui); cursor: pointer; }
+  .eng.on { background: var(--accent); border-color: var(--accent); color: #1D2240; }
+  .eng:focus-visible { outline: 3px solid var(--accentText); outline-offset: 2px; }
   table { width: 100%; border-collapse: collapse; font-size: 15px; background: var(--card); border-radius: 16px; overflow: hidden; }
   .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; }
   th, td { text-align: start; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
@@ -49,8 +53,8 @@
 
 <div class="wrap">
   <header>
-    <h1>סבב 3: הדמות בתנועה, שלוש גרסאות</h1>
-    <p class="lede">הדמות שבחרת (ה׳, הדתי־לאומי) עכשיו בגוף מלא: מתעורר, הולך ברחוב, עוצר כשהטלפון רוטט, עובד, מתפלל ונח בשבת. כל התראה בסרטונים היא ההתראה האמיתית של האפליקציה, בשעה ובזמנים האמיתיים של ירושלים ביום רביעי, כ״ד בחשוון. הקריינות במודל חדש, טבעי יותר ומותר לשימוש מסחרי.</p>
+    <h1>סבב 4: שלוש גרסאות, שלושה מנועי קריינות</h1>
+    <p class="lede">הדמות שבחרת (ה׳, הדתי־לאומי) בגוף מלא: מתעורר, הולך ברחוב, עוצר כשהטלפון רוטט, עובד, מתפלל ונח בשבת. כל התראה בסרטונים היא ההתראה האמיתית של האפליקציה, בשעה ובזמנים האמיתיים של ירושלים ביום רביעי, כ״ד בחשוון. כל סרטון מוקלט בשני מנועי קריינות, ואפשר לעבור ביניהם מתחת לסרטון.</p>
   </header>
 
   <section>
@@ -59,8 +63,8 @@
   </section>
 
   <section>
-    <h2>ארבעה קולות לבחירה</h2>
-    <p class="lede" style="margin-bottom:14px">אותו טקסט של ״יום אחד״, על המוזיקה. כל קול עוצב מתיאור מילולי, ולא שוכפל מאדם אמיתי. הסרטונים למעלה בקול ״חם וצעיר״; הקול שתבחר ייכנס לכל הגרסאות.</p>
+    <h2>הקולות לבחירה</h2>
+    <p class="lede" style="margin-bottom:14px">אותו טקסט של ״יום אחד״, על המוזיקה. הקול ״חם וצעיר״ עוצב מתיאור מילולי ב-VoxCPM2, ו-Chatterbox ו-OmniVoice משכפלים אותו, כך שההבדל הוא במנוע ולא בקול. אף קול לא שוכפל מאדם אמיתי.</p>
     <div class="voices" id="voices"></div>
   </section>
 
@@ -70,11 +74,12 @@
     <div class="tablewrap"><table>
       <thead><tr><th>מודל</th><th>עברית</th><th>רישיון</th><th>מה קרה</th></tr></thead>
       <tbody>
-        <tr><td>VoxCPM2 (OpenBMB)</td><td>כן</td><td class="ok">Apache 2.0, מסחרי</td><td>נבחר. קול טבעי עם אינטונציה, עיצוב קול מתיאור, ותמלול אוטומטי החזיר כמעט כל מילה במדויק.</td></tr>
+        <tr><td>VoxCPM2 (OpenBMB)</td><td>כן</td><td class="ok">Apache 2.0, מסחרי</td><td>94% התאמה בתמלול. קול טבעי עם אינטונציה, ועיצוב קול מתיאור: ממנו נוצר הקול ״חם וצעיר״.</td></tr>
         <tr><td>Phonikud + Piper (סבב 2)</td><td>כן</td><td class="no">לא מסחרי</td><td>נשמע מכני יותר, והרישיון אוסר פרסומת.</td></tr>
-        <tr><td>Chatterbox Multilingual (Resemble)</td><td>כן</td><td class="ok">MIT, מסחרי</td><td>הורד, אבל לא נכנס בדיסק של סביבת העבודה יחד עם VoxCPM2. אפשר לבדוק בסבב הבא.</td></tr>
-        <tr><td>Zonos-Hebrew</td><td>כן</td><td class="no">CC BY-NC</td><td>נפסל בגלל הרישיון.</td></tr>
-        <tr><td>OmniVoice, MMS-TTS</td><td>כן</td><td class="no">CC BY-NC</td><td>נפסלו בגלל הרישיון.</td></tr>
+        <tr><td>Chatterbox Multilingual V3 (Resemble)</td><td>כן, עם הניקוד של Dicta</td><td class="ok">MIT, מסחרי</td><td>נבדק בסבב 4: 93% התאמה בתמלול האוטומטי. מהיר; לפי Resemble מועדף על ElevenLabs בהשוואות עיוורות. כל סרטון מוקלט גם בו.</td></tr>
+        <tr><td>OmniVoice (k2-fsa)</td><td>כן</td><td class="no">CC BY-NC</td><td>נבדק בסבב 4: 65% התאמה בלבד, משמיט מילים (״בין עבודה, דרך ושגרה״) ואיטי פי 15 מזמן אמת. דוגמה קצרה בלבד.</td></tr>
+        <tr><td>Zonos-Hebrew</td><td>כן</td><td class="no">CC BY-NC</td><td>רץ רק על כרטיס גרפי של NVIDIA, שאין בסביבת העבודה.</td></tr>
+        <tr><td>MMS-TTS</td><td>כן</td><td class="no">CC BY-NC</td><td>דור ישן, לא נבדק.</td></tr>
         <tr><td>ElevenLabs, MiniMax, Google, Azure</td><td>כן</td><td>בתשלום, מסחרי</td><td>הטבעיים ביותר בעברית לפי השוואות. צריך חשבון ומפתח API; אם יש לך, אפיק בהם.</td></tr>
       </tbody>
     </table></div>
@@ -92,15 +97,20 @@
 <script>
   const VARIANTS = /*VARIANTS*/{};
   const CUTS = /*CUTS*/[];
+  const ENGINE = { warm: 'VoxCPM2', chatterbox: 'Chatterbox' };
   const VOICES = [
-    ['warm', 'חם וצעיר', 'גבר צעיר, חייכן ובטוח, קצב שיחה טבעי. בו הוקלטו הסרטונים.'],
+    ['chatterbox', 'Chatterbox · חם וצעיר', 'Chatterbox Multilingual V3 משכפל את הקול ״חם וצעיר״. הטקסט מנוקד אוטומטית לפני ההקראה.'],
+    ['omnivoice', 'OmniVoice · דוגמה קצרה', 'שלושת המשפטים הראשונים בלבד: המנוע איטי מאוד ומשמיט מילים.'],
+    ['warm', 'VoxCPM2 · חם וצעיר', 'גבר צעיר, חייכן ובטוח, קצב שיחה טבעי.'],
     ['deep', 'עמוק ובוטח', 'בריטון בשנות הארבעים, רגוע ומקצועי, קול פרסומות קלאסי.'],
     ['lively', 'אנרגטי', 'צעיר ונמרץ, מהיר יותר, מתאים לגרסה המהירה.'],
     ['woman', 'קריינית', 'אישה צעירה, חמה וברורה, אם רוצים לפנות גם לנשים.'],
   ];
-  document.getElementById('cuts').innerHTML = CUTS.map(({ id, seconds }) => {
+  document.getElementById('cuts').innerHTML = CUTS.map(({ id, seconds, engines }) => {
     const v = VARIANTS[id];
-    return `<article class="cut"><video id="v-${id}" controls playsinline preload="metadata" src="video/${id}.mp4"></video>
+    const pick = engines.map((e, k) => `<button type="button" class="eng${k ? '' : ' on'}" data-cut="${id}" data-engine="${e}">${ENGINE[e]}</button>`).join('');
+    return `<article class="cut"><video id="v-${id}" controls playsinline preload="metadata" src="video/${id}-${engines[0]}.mp4#t=1.2"></video>
+      <div class="engines" role="group" aria-label="מנוע קריינות">${pick}</div>
       <h3>${v.title}<span class="len">${Math.round(seconds)} שניות</span></h3><p>${v.pitch}</p>
       <details><summary>הקריינות</summary><ol>${v.beats.map((b) => `<li>${b.vo}</li>`).join('')}</ol></details></article>`;
   }).join('');
@@ -119,5 +129,10 @@
     characterArm(document.getElementById('r2' + key + 'ArmL'), key, ...ARMS.L);
     characterFace('r2' + key, { smile: 0.55 });
   });
+  document.querySelectorAll('.eng').forEach((b) => b.addEventListener('click', () => {
+    const video = document.getElementById('v-' + b.dataset.cut);
+    video.src = `video/${b.dataset.cut}-${b.dataset.engine}.mp4#t=1.2`;
+    b.parentElement.querySelectorAll('.eng').forEach((o) => o.classList.toggle('on', o === b));
+  }));
   document.querySelectorAll('audio, video').forEach((m) => m.addEventListener('play', () => document.querySelectorAll('audio, video').forEach((o) => o !== m && o.pause())));
 </script>
