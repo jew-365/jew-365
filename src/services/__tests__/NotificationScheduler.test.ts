@@ -100,6 +100,7 @@ import {
   initNotificationHandlers,
   syncNotificationPermissionStatus,
   notificationPermissionState,
+  askForNotifications,
   refreshSchedulingOnForeground,
   LAST_REBUILD_KEY,
   SCHEDULE_FORMAT_KEY,
@@ -490,6 +491,40 @@ describe('NotificationScheduler', () => {
     expect(rebuild).not.toHaveBeenCalled(); // already granted — no repeat rebuild
 
     rebuild.mockRestore();
+  });
+
+  it('6.5a askForNotifications asks only when the OS can, and rebuilds once on a grant', async () => {
+    const Notifications = jest.requireMock('expo-notifications');
+    const read = Notifications.getPermissionsAsync as jest.Mock;
+    const request = Notifications.requestPermissionsAsync as jest.Mock;
+    const rebuild = jest.spyOn(NotificationScheduler, 'rebuild').mockResolvedValue();
+    useUserStore.getState().setOnboarded(true);
+
+    // Blocked: it never prompts, and nothing rebuilds.
+    read.mockResolvedValue({ status: 'denied', canAskAgain: false });
+    request.mockClear();
+    await expect(askForNotifications()).resolves.toBe('blocked');
+    expect(request).not.toHaveBeenCalled();
+    expect(rebuild).not.toHaveBeenCalled();
+
+    // Missing then granted: it prompts and rebuilds once.
+    read.mockResolvedValueOnce({ status: 'undetermined', canAskAgain: true });
+    read.mockResolvedValue({ status: 'undetermined', canAskAgain: true });
+    request.mockResolvedValueOnce({ status: 'granted' });
+    rebuild.mockClear();
+    await expect(askForNotifications()).resolves.toBe('granted');
+    expect(rebuild).toHaveBeenCalledTimes(1);
+
+    // Missing then refused: no rebuild.
+    read.mockResolvedValueOnce({ status: 'undetermined', canAskAgain: true });
+    read.mockResolvedValue({ status: 'undetermined', canAskAgain: true });
+    request.mockResolvedValueOnce({ status: 'denied' });
+    rebuild.mockClear();
+    await expect(askForNotifications()).resolves.toBe('refused');
+    expect(rebuild).not.toHaveBeenCalled();
+
+    rebuild.mockRestore();
+    read.mockResolvedValue({ status: 'granted', canAskAgain: true });
   });
 
   it('6.6 Shabbat is quiet: nothing fires between candle lighting and tzeit, and Sunday is covered', async () => {

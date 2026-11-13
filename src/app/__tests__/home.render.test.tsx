@@ -1,5 +1,6 @@
 const mockPush = jest.fn();
 const mockCancel = jest.fn(async (..._args: unknown[]) => {});
+const mockAsk = jest.fn(async (..._args: unknown[]) => 'granted');
 const mockListeners: { event: string; listener: () => void }[] = [];
 let mockFocused = true;
 let mockTabIndex = 0;
@@ -35,6 +36,7 @@ jest.mock('@/services/NotificationScheduler', () => ({
     settleCheckIn: async () => {},
     rebuild: async () => {},
   },
+  askForNotifications: (...args: unknown[]) => mockAsk(...args),
   syncNotificationPermissionStatus: async () => {},
   dismissCompletedPresentedNotifications: async () => {},
   refreshSchedulingOnForeground: async () => {},
@@ -735,5 +737,55 @@ describe("home's what's-new message", () => {
     fireEvent.press(screen.getByText(TITLE));
     expect(mockPush).toHaveBeenCalledWith('/guide');
     expect(useUserStore.getState().discovery.whatsNew!.seen).toBe(true);
+  });
+});
+
+describe('home asks for notifications after setup', () => {
+  const DAY = '2027-06-15T12:00';
+  beforeEach(() => {
+    mockFocused = true;
+    mockTabIndex = 0;
+    mockPush.mockClear();
+    mockAsk.mockClear();
+    useUserStore.getState().reset();
+    useUserStore.setState({
+      language: 'he',
+      location: JERUSALEM,
+      inIsrael: true,
+      nusach: 'ashkenaz',
+      isOnboarded: true,
+      locationStatus: 'ready',
+      locationSource: 'manual',
+      notificationsEnabled: true,
+      homeLook: 'rings',
+    });
+    useCompletionsStore.getState().reset();
+    useCustomMitzvotStore.getState().reset();
+    useTaharahStore.getState().reset();
+    enableOnly('maariv');
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  it('asks once when the permission was never requested, and records the hint', () => {
+    useUserStore.setState({ notificationPermission: 'unknown' });
+    renderAt(DAY);
+    expect(mockAsk).toHaveBeenCalledTimes(1);
+    expect(useUserStore.getState().discovery.hints).toContain('notifAsked');
+  });
+
+  it('never asks again once the hint is set, nor when already granted', () => {
+    useUserStore.setState({ notificationPermission: 'unknown' });
+    useUserStore.getState().learnHint('notifAsked');
+    renderAt(DAY);
+    expect(mockAsk).not.toHaveBeenCalled();
+  });
+
+  it('asks from the no-permission banner instead of jumping straight to settings', () => {
+    useUserStore.setState({ notificationPermission: 'denied' });
+    useUserStore.getState().learnHint('notifAsked');
+    renderAt(DAY);
+    fireEvent.press(screen.getByText('ההתראות כבויות. להפעלה'));
+    expect(mockAsk).toHaveBeenCalled();
   });
 });

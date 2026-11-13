@@ -8,6 +8,7 @@ jest.mock('expo-router', () => ({
 jest.mock('@/components/PermissionsList', () => ({ PermissionsList: () => null }));
 jest.mock('@/services/NotificationScheduler', () => ({
   requestNotificationPermissions: jest.fn(async () => true),
+  askForNotifications: jest.fn(async () => 'granted'),
   syncNotificationPermissionStatus: jest.fn(async () => {}),
   NotificationScheduler: { rebuild: jest.fn(async () => {}) },
 }));
@@ -90,11 +91,25 @@ describe('Onboarding Continue buttons', () => {
     expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
   });
 
-  it('Continue on the permissions step is enabled and goes to the important notice', () => {
+  it('allow and continue on the permissions step asks for notifications, then goes to the important notice', async () => {
+    const { askForNotifications } = jest.requireMock('@/services/NotificationScheduler');
+    askForNotifications.mockClear();
     renderWithTheme(<PermissionsScreen />);
-    const next = screen.getByRole('button', { name: he('common.continue') });
-    expect(next).toBeEnabled();
-    fireEvent.press(next);
+    const allow = screen.getByRole('button', { name: he('onboarding.allowNotifications') });
+    expect(allow).toBeEnabled();
+    await act(async () => {
+      fireEvent.press(allow);
+    });
+    expect(askForNotifications).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/notice');
+  });
+
+  it('not now on the permissions step continues without asking', () => {
+    const { askForNotifications } = jest.requireMock('@/services/NotificationScheduler');
+    askForNotifications.mockClear();
+    renderWithTheme(<PermissionsScreen />);
+    fireEvent.press(screen.getByText(he('onboarding.notNow')));
+    expect(askForNotifications).not.toHaveBeenCalled();
     expect(mockPush).toHaveBeenCalledWith('/onboarding/notice');
   });
 

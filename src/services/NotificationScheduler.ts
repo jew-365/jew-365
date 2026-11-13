@@ -460,6 +460,19 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   return granted;
 }
 
+// The one way the app asks for notification permission at the right moment (spec A1): `blocked` when the OS
+// will no longer show its prompt (the caller then sends the user to the phone's settings), else it requests
+// and returns `granted` or `refused`. A grant rebuilds once, since `requestNotificationPermissions()` never
+// does and an install that onboarded without allowing has an empty schedule; the ready step sets
+// `isOnboarded` before its own rebuild, so this covers every later ask (home, the banner).
+export async function askForNotifications(): Promise<'granted' | 'refused' | 'blocked'> {
+  if ((await notificationPermissionState()) === 'blocked') return 'blocked';
+  const granted = await requestNotificationPermissions();
+  if (!granted) return 'refused';
+  if (useUserStore.getState().isOnboarded) NotificationScheduler.rebuild().catch(reportScheduleError);
+  return 'granted';
+}
+
 if (applyGenderDefaultsToNew().length) StorageService.delete(SCHEDULE_FORMAT_KEY);
 
 TaskManager.defineTask(DAILY_REBUILD_TASK, async () => {

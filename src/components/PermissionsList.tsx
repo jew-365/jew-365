@@ -34,7 +34,7 @@ export type PermissionKind =
   'notifications' | 'location' | 'battery' | 'samsungSleep' | 'unusedApp' | 'backgroundRefresh';
 export type PermissionStatus = 'granted' | 'missing' | 'blocked' | 'unknown' | 'absent';
 
-type Statuses = Record<PermissionKind, PermissionStatus>;
+export type Statuses = Record<PermissionKind, PermissionStatus>;
 
 const ROWS: { kind: PermissionKind; icon: IconName }[] = [
   { kind: 'notifications', icon: 'bell' },
@@ -120,18 +120,31 @@ async function readStatuses(notificationsRefused: boolean): Promise<Statuses> {
   };
 }
 
-export function PermissionsList({ style }: { style?: StyleProp<ViewStyle> }) {
+export function PermissionsList({
+  style,
+  onStatuses,
+}: {
+  style?: StyleProp<ViewStyle>;
+  // The onboarding step reads the notification status from here, so its "allow and continue" button never
+  // prompts after the row already asked (spec A1).
+  onStatuses?: (statuses: Statuses) => void;
+}) {
   const { t } = useI18n();
   const [statuses, setStatuses] = useState<Statuses>(initialStatuses);
   const [busy, setBusy] = useState<PermissionKind | null>(null);
   const refused = useRef(false);
   const readSeq = useRef(0);
   const mounted = useRef(false);
+  const onStatusesRef = useRef(onStatuses);
+  onStatusesRef.current = onStatuses;
 
   const refresh = useCallback(async () => {
     const seq = ++readSeq.current;
     const next = await readStatuses(refused.current);
-    if (mounted.current && readSeq.current === seq) setStatuses(next);
+    if (mounted.current && readSeq.current === seq) {
+      setStatuses(next);
+      onStatusesRef.current?.(next);
+    }
   }, []);
 
   useEffect(() => {

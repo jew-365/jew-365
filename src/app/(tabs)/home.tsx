@@ -77,6 +77,7 @@ import { renderHint, stageHint, visibleStage } from '@/utils/taharah/summary';
 import { taharahTasksFor } from '@/utils/taharah/tasks';
 import { ZmanimService } from '@/services/ZmanimService';
 import {
+  askForNotifications,
   NotificationScheduler,
   syncNotificationPermissionStatus,
   dismissCompletedPresentedNotifications,
@@ -443,6 +444,14 @@ export default function HomeScreen() {
     const next = nextWhatsNew(whatsNewState, Date.now());
     if (next !== whatsNewState) setWhatsNew(next ?? { label: '', since: Date.now(), seen: true });
   }, [whatsNewState, setWhatsNew]);
+  // A user who finished setup without ever being asked about notifications is asked once on home (spec A1):
+  // askForNotifications() prompts only when the OS still can, and the hint keeps it to one ask.
+  const notifAsked = useUserStore((s) => s.discovery.hints.includes('notifAsked'));
+  useEffect(() => {
+    if (!isOnboarded || user.notificationPermission !== 'unknown' || notifAsked) return;
+    useUserStore.getState().learnHint('notifAsked');
+    askForNotifications().catch(() => {});
+  }, [isOnboarded, user.notificationPermission, notifAsked]);
   const openWhatsNew = (href: HomeHref) => {
     if (whatsNewState) setWhatsNew({ ...whatsNewState, seen: true });
     router.push(href as never);
@@ -785,7 +794,10 @@ export default function HomeScreen() {
       return {
         tone: 'urgent',
         text: t('home.notificationsDenied'),
-        onPress: () => openSystemSettings(),
+        // Ask inside the app while the OS still can (spec A1); only a blocked permission opens the settings.
+        onPress: async () => {
+          if ((await askForNotifications()) === 'blocked') openSystemSettings();
+        },
       };
     }
     if (checkIn) {

@@ -100,6 +100,12 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   return false;
 }
 
+// The web has no notification permission to ask for, so it answers `blocked` and writes nothing (the store
+// rating screenshots need exactly one `setNotificationPermission('unknown')` in the web bundle).
+export async function askForNotifications(): Promise<'granted' | 'refused' | 'blocked'> {
+  return 'blocked';
+}
+
 export async function dismissCompletedPresentedNotifications(_now?: Date): Promise<void> {}
 
 export async function registerDailyRebuildTask(): Promise<void> {}
