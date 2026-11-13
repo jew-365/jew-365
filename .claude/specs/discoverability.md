@@ -65,6 +65,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 - **Fixes:** F1.
 - **User gain:** the core promise, a reminder in time, works for everyone who taps the obvious button. Today a user who taps "Continue" gets a silent app.
 - **How:** one helper `askForNotifications()` in `src/services/NotificationScheduler.ts` over `notificationPermissionState()` and `requestNotificationPermissions()`, which also rebuilds the schedule on a grant (the request alone never does); `src/app/onboarding/permissions.tsx`; `PermissionsList.tsx` reports its statuses so a refusal on the row is not followed by a second prompt; `pickBanner()` in `home.tsx`; the web shim.
+- **Deviation (2026-11-13):** App Review rejected 1.0.21 (6) on 2026-11-12 under guideline 5.1.1(iv): a button that leads to a system permission prompt may not say "Allow", "Enable" or "Grant"; Apple asks for "Continue" or "Next". So the main button reads Continue (the step's body says Continue asks for the notification permission) and the home banner's copy says "tap to continue", not "allow and continue" or "enable". The behaviour is as above. Every later item (G1's battery offer, A5's sample, the short setup) follows the same rule.
 
 **A2. Short setup path** · P0 · L · study
 
@@ -149,7 +150,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 - **Policy:** one at a time; each offered once (a seasonal one once a year) and shown for five days at most; two days between offers; on the first day only the tour and what was asked for in setup; "don't suggest" closes it for good. The Shabbat screen already covers every surface it appears on.
 - **Fixes:** F5.
 - **User gain:** the app introduces itself gradually, like a good host: one relevant suggestion with one button, never a wall of switches.
-- **How:** a `discovery` field in `useUserStore` (`hints`, `offers`, `whatsNew`, `wants`; it rides the backup and the reset, with no version bump); pure `src/utils/offers.ts` with `pickOffer(input)`; a hook `useOffer()` that evaluates after paint and memoises on the app day, never on the clock tick. Accepting goes through `setMitzvahEnabled()`, `setNoticesEnabled()`, `requestIgnoreBatteryOptimizations()` or a route. It returns nothing while `firstOpenedAt` is unset, which keeps today's home suites untouched. The models are the rating rule (`src/utils/rating.ts`) and the Selichot offer.
+- **How:** a `discovery` field in `useUserStore` (`hints`, `offers`, `whatsNew`; `wants` joins it with phase 3, the first code that writes it, so phase 1 reads it as empty; it rides the backup and the reset, with no version bump; built 2026-11-13 over the pure `src/utils/discovery.ts`); pure `src/utils/offers.ts` with `pickOffer(input)`; a hook `useOffer()` that evaluates after paint and memoises on the app day, never on the clock tick. Accepting goes through `setMitzvahEnabled()`, `setNoticesEnabled()`, `requestIgnoreBatteryOptimizations()` or a route. It returns nothing while `firstOpenedAt` is unset, which keeps today's home suites untouched. The models are the rating rule (`src/utils/rating.ts`) and the Selichot offer.
 
 **C3. The offer on home, in Messages** · P1 · S to M
 
@@ -234,7 +235,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 
 ### H. Measure without collecting (F9)
 
-**H1. Usability test script:** eight tasks for the closed testers, run before phase 1 and after phases 2 and 3: finish setup and receive a reminder; find tomorrow's latest Shema; start a daily Chok LeYisrael reminder; get fewer notifications at night; mark from a notification and skip a mitzvah for today; open today's Tehillim; see the streak and last week's report; add a personal mitzvah. Nothing is collected by the app.
+**H1. Usability test script** ([usability-test.md](usability-test.md)): eight tasks for the closed testers, run before phase 1 and after phases 2 and 3: finish setup and receive a reminder; find tomorrow's latest Shema; start a daily Chok LeYisrael reminder; get fewer notifications at night; mark from a notification and skip a mitzvah for today; open today's Tehillim; see the streak and last week's report; add a personal mitzvah. Nothing is collected by the app.
 
 ### Deferred on purpose
 

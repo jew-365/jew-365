@@ -902,36 +902,50 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** `askForNotifications()` in [src/services/NotificationScheduler.ts](src/services/NotificationScheduler.ts) and its web shim (`'granted' | 'refused' | 'blocked'`, rebuilding the schedule on a grant once onboarded); the onboarding permissions step's main button "allow and continue" with an explicit "not now"; `PermissionsList` reporting its statuses; home asking once after setup when never asked; the no-permission banner asking in the app while the system still can, the phone's settings only when blocked.
   - **What it solves:** F1, reminders that silently never start.
   - **Expected result:** suites for the helper (granted, refused, blocked, the rebuild), the step's two buttons, the banner's two paths and the one-time ask on home; the web bundle still holds exactly one `setNotificationPermission('unknown')`. The setup half reaches new users with the next build.
+  - **Done:** 2026-11-13. `askForNotifications()` in [src/services/NotificationScheduler.ts](src/services/NotificationScheduler.ts) and the web shim (`'blocked'`, writing nothing); the permissions step's main button asks only while the OS can (reading `PermissionsList`'s new `onStatuses`) with an explicit `onboarding.notNow`; home asks once after setup (`notifAsked` hint); the banner asks in the app and opens the settings only when blocked. Verified: 6.5a of [NotificationScheduler.test.ts](src/services/__tests__/NotificationScheduler.test.ts) (blocked never prompts, a grant rebuilds once, a refusal does not), the permissions step's two buttons in [onboarding.cta.render.test.tsx](src/app/__tests__/onboarding.cta.render.test.tsx), the once-on-home ask and the banner in [home.render.test.tsx](src/app/__tests__/home.render.test.tsx) under `pnpm test:tz`, web parity. **Follow-up:** App Review rejected 1.0.21 (6) on 2026-11-12 under 5.1.1(iv) (a pre-prompt button may not say Allow); the store session is renaming the step's button to `common.continue` on `main`, and the home banner's `home.notificationsDenied` ("להפעלה" / "Tap to enable") still needs the same rewording once that lands. Not checked: a phone (Android 13+ and an iPhone, allow / not now / blocked). The setup half reaches new users with the next native build.
+  - **Status:** Version: OTA, expected with the next update (the setup half with the next build) · Committed: yes, `b00fae2` feat(discovery): ask for notifications at the right moment (A1) · Pushed: yes · Live: no · Channel: —
 
 - [ ] B3: "skip today" on the mitzvah screen
   - **What it is:** the today card of [src/app/mitzvah/[id].tsx](<src/app/mitzvah/[id].tsx>) gains "skip today" beside "mark as done" (and "undo" for a skipped day), through `markSkipped()` with the window's day.
   - **What it solves:** F6: skipping is a long press on home only.
   - **Expected result:** a render case: the button files a skip under the window's day, the card then shows the skipped state and its undo.
+  - **Done:** 2026-11-13. Two side-by-side secondary Buttons on the today card of [src/app/mitzvah/[id].tsx](<src/app/mitzvah/[id].tsx>): `notifications.markDone` and `home.quick.skipToday` (`markSkipped()` of the window's day); the undo stays. Verified: "skips an open window from the today card" in [lateMark.render.test.tsx](src/app/__tests__/lateMark.render.test.tsx) (the skip filed under the window's day, `state.skipped` shown, undo clears it). Not checked: a phone.
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `ff0b972` feat(discovery): skip-today on the mitzvah screen, banners that land on the right block · Pushed: yes · Live: no · Channel: —
 
 - [ ] B4: the user store's `discovery` field, and the sun hint that learns
   - **What it is:** `useUserStore.discovery` (`hints`, `offers`, `whatsNew`, `wants`) with its default, reset and a pure clean in the merge, no `STORE_VERSION` raise, carried by the backup file; "drag the sun" in [src/components/DayArcHero.tsx](src/components/DayArcHero.tsx) gone for good once dragged.
   - **What it solves:** F6, and the shared state C2, C7 and E1 need.
   - **Expected result:** store cases (default, merge of a malformed value, reset, backup round trip) and a hero case (the hint gone after a drag and after a relaunch).
+  - **Done:** 2026-11-13. `discovery` (`hints`, `offers`, `whatsNew`) in [src/stores/useUserStore.ts](src/stores/useUserStore.ts) over the pure [src/utils/discovery.ts](src/utils/discovery.ts) (`discoveryOf()`, `withHint()`), with `learnHint()`, `recordOffer()` and `setWhatsNew()`; [DayArcHero.tsx](src/components/DayArcHero.tsx) learns `dragSun` on a grab of the sun. `wants` is left out until phase 3 reads it (YAGNI; written back into the spec). Verified: [discovery.store.test.ts](src/stores/__tests__/discovery.store.test.ts), [discovery.test.ts](src/utils/__tests__/discovery.test.ts), the backup round trip in [BackupService.test.ts](src/services/__tests__/BackupService.test.ts), and the hero case (the hint gone after a grab and after a remount) in [DayArcHero.render.test.tsx](src/components/__tests__/DayArcHero.render.test.tsx).
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `b94aa20` feat(discovery): the user store's discovery state, and the sun hint that learns · Pushed: yes · Live: no · Channel: —
 
 - [ ] B5: banners land on the right spot
   - **What it is:** home's profile banner opens Settings on the gender question and the location banners on the location block, through Settings' `focus` param.
   - **What it solves:** F4: a banner lands on six closed sections.
   - **Expected result:** home render cases asserting each banner's route and `focus`.
+  - **Done:** 2026-11-13. Home's profile banner pushes Settings with `focus: 'gender'`, and the no-zmanim, no-location and GPS-timeout banners with `focus: 'location'` ([home.tsx](<src/app/(tabs)/home.tsx>)). Verified: "home banners land on the right settings block" in [home.render.test.tsx](src/app/__tests__/home.render.test.tsx).
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `ff0b972` feat(discovery): skip-today on the mitzvah screen, banners that land on the right block · Pushed: yes · Live: no · Channel: —
 
 - [ ] C7: "what's new" comes to the user
   - **What it is:** `whatsNewMessage()` in [src/utils/homeMessages.ts](src/utils/homeMessages.ts): after an update whose newest `WHATS_NEW` label differs from the stored one, a Messages row opens the guide's what's new, for three days or until opened; nothing stored means seen.
   - **What it solves:** F5: what an update brought is found only at the bottom of More.
   - **Expected result:** `homeMessages` cases (a new label, three days, opened, a fresh install) and a home render case.
+  - **Done:** 2026-11-13. `whatsNewMessage()`, `nextWhatsNew()` and `newestWhatsNewLabel()` in [src/utils/homeMessages.ts](src/utils/homeMessages.ts); home stamps the newest label in an effect and marks it seen on open. Verified: 3b to 3d of [homeMessages.test.ts](src/utils/__tests__/homeMessages.test.ts) and "home's what's-new message" in [home.render.test.tsx](src/app/__tests__/home.render.test.tsx), both under `pnpm test:tz`.
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `a39bb14` feat(discovery): the streak-goal moment and the what's-new message on home · Pushed: yes · Live: no · Channel: —
 
 - [ ] F1: the streak-goal moment
   - **What it is:** `streakMessage()` names a reached goal of `STREAK_GOALS` on the day it is reached and opens Tracking on its achievements tab.
   - **What it solves:** F7: a goal is reached silently.
   - **Expected result:** cases on a goal day, the day after, and between goals.
+  - **Done:** 2026-11-13. `streakMessage()` celebrates a streak equal to a goal of `STREAK_GOALS` (`home.streakGoal.*`) and opens `/(tabs)/history` with `tab: 'achievements'`. Verified: 3a of [homeMessages.test.ts](src/utils/__tests__/homeMessages.test.ts) (every goal, and the day after).
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `a39bb14` feat(discovery): the streak-goal moment and the what's-new message on home · Pushed: yes · Live: no · Channel: —
 
 - [ ] H1: write the usability test script, the baseline
   - **What it is:** the eight tasks of spec H1 as a script the owner runs with the closed testers, with the success and tap counts to write down, in [.claude/specs/](.claude/specs).
   - **What it solves:** G5 has no baseline.
   - **Expected result:** the script committed; the baseline run is the owner's (Other Open Items).
+  - **Done:** 2026-11-13. [.claude/specs/usability-test.md](.claude/specs/usability-test.md): how to run it, the eight tasks with what counts as success, and the score sheet. The baseline run is the owner's (Other Open Items).
+  - **Status:** Version: none (docs) · Committed: yes, with the records commit of 2026-11-13 · Pushed: yes · Live: n/a · Channel: —
 
 ### Medium — Discoverability, phase 1
 
@@ -1286,4 +1300,5 @@ Q32 to Q37 are the batch "Discoverability and ease of use, 2026-11-13", the open
 - **Rav review of the taharah rules.** [docs/taharah-review.html](docs/taharah-review.html) holds 14 "לאימות" items awaiting a rav's answers, now as an answer form (נכון / לא נכון and a note per item) that emails the answers to 365jew@gmail.com through Formspree; send the rav the page link: https://jew-365.github.io/jew-365/taharah-review.html. The rule table ships as initial. Each correction comes back as one preset edit in [src/data/taharahPresets.ts](src/data/taharahPresets.ts) that raises `TAHARAH_RULES_VERSION` and edits the same cell of the page.
 - **Halachic review of the siddur texts.** The open items are listed in [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md) (Work Guidance): meals, bedtime Shema, sights and food, Kiddush Levana, Sheva Berachot, Chanukah, Tehillim's Yehi Ratzon placement, and Shacharit's tallit and tefillin section.
 - **Taharah device checks are not recorded.** The biometric lock, the `expo-secure-store` key and the headless `MARK_DONE` of a bedika were built and tested in Jest only (2026-10-08); no device run is recorded since.
+- **Run the usability baseline (H1).** The owner runs [.claude/specs/usability-test.md](.claude/specs/usability-test.md) with the closed testers on today's production build, before phase 1 of the discoverability program reaches them, and keeps the filled score sheet with the release records.
 - **Merged local branches.** Seven local branches are fully merged into `main`. Five are checked out nowhere and wait only for the user to run `git branch -d fix/audit-remediation hok-leisrael master reduce-apk-size refactor` (the agent's own run was refused by the auto-mode classifier on 2026-10-12; `fix/audit-remediation` stays on `origin`). The other two, `claude/adoring-agnesi-250cfe` and `claude/magical-wozniak-a1d944`, are checked out in clean worktrees under [.claude/](.claude) that belong to two inactive desktop sessions ("Fix vacuous scheduler test 6.6", "Fix the no-op timezone test matrix…"): archive or delete those sessions, let Settings › Storage clean up their worktrees, then delete the two branches.
