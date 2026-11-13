@@ -746,8 +746,10 @@ export default function HomeScreen() {
   const openProfileIntro = () => {
     StorageService.set(PROFILE_INTRO_KEY, true);
     setIntroDismissed(true);
-    router.push('/(tabs)/settings');
+    router.push({ pathname: '/(tabs)/settings', params: { focus: 'gender' } });
   };
+
+  const openLocationSettings = () => router.push({ pathname: '/(tabs)/settings', params: { focus: 'location' } });
 
   const openSelichotOffer = () => {
     if (selichotDownload.status === 'downloading') router.push(`/mitzvah/${SELICHOT_TEXT_ID}`);
@@ -756,7 +758,7 @@ export default function HomeScreen() {
 
   const pickBanner = (): BannerSpec | null => {
     if (zmanimUnavailable) {
-      return { tone: 'warning', text: t('home.zmanimUnavailable'), onPress: () => router.push('/(tabs)/settings') };
+      return { tone: 'warning', text: t('home.zmanimUnavailable'), onPress: () => openLocationSettings() };
     }
     if (user.notificationPermission !== 'granted') {
       return {
@@ -778,9 +780,10 @@ export default function HomeScreen() {
       };
     }
     if (user.locationStatus === 'missing') {
-      return { tone: 'warning', text: t('home.noLocation'), onPress: () => router.push('/(tabs)/settings') };
+      return { tone: 'warning', text: t('home.noLocation'), onPress: () => openLocationSettings() };
     }
-    if (user.locationStatus === 'timeout') return { tone: 'warning', text: t('home.gpsTimeout') };
+    if (user.locationStatus === 'timeout')
+      return { tone: 'warning', text: t('home.gpsTimeout'), onPress: () => openLocationSettings() };
     if (isOnboarded && (gender === null || maritalStatus === null) && !introDismissed) {
       return { tone: 'accent', text: t('home.completeProfile'), onPress: openProfileIntro };
     }

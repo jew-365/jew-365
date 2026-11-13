@@ -84,6 +84,7 @@ export default function MitzvahDetailScreen() {
   const skipped = useCompletionsStore((s) => s.skipped);
   const late = useCompletionsStore((s) => s.late);
   const unmark = useCompletionsStore((s) => s.unmark);
+  const markSkipped = useCompletionsStore((s) => s.markSkipped);
   const lateMark = useLateMarkDialog();
   const ticked = useNow();
   const active = useMitzvotStore(selectActive(params.id));
@@ -363,15 +364,28 @@ export default function MitzvahDetailScreen() {
                   onPress={() => unmark(mitzvah.id, todayMark.window.date)}
                 />
               ) : (
-                <Button
-                  variant="secondary"
-                  icon="check"
-                  label={t('notifications.markDone')}
-                  accessibilityLabel={t('state.completeAction', { name })}
-                  onPress={() =>
-                    lateMark.mark({ id: mitzvah.id, name, date: todayMark.window.date, window: todayMark.window })
-                  }
-                />
+                <View style={styles.todayActions}>
+                  <View style={styles.flex}>
+                    <Button
+                      variant="secondary"
+                      icon="check"
+                      label={t('notifications.markDone')}
+                      accessibilityLabel={t('state.completeAction', { name })}
+                      onPress={() =>
+                        lateMark.mark({ id: mitzvah.id, name, date: todayMark.window.date, window: todayMark.window })
+                      }
+                    />
+                  </View>
+                  <View style={styles.flex}>
+                    <Button
+                      variant="secondary"
+                      icon="close"
+                      label={t('home.quick.skipToday')}
+                      accessibilityLabel={t('home.quick.skipToday')}
+                      onPress={() => markSkipped(mitzvah.id, todayMark.window.date)}
+                    />
+                  </View>
+                </View>
               )}
             </Card>
           </View>
@@ -670,6 +684,13 @@ const styles = StyleSheet.create({
   todayCaption: {
     marginTop: spacing.xs,
     marginBottom: spacing.md,
+  },
+  todayActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  flex: {
+    flex: 1,
   },
   row: {
     flexDirection: 'row',

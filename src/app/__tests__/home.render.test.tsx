@@ -646,3 +646,47 @@ describe("home's taharah card", () => {
     expect(screen.getByText(new RegExp(`עד ${clockOf(shkia, NEW_YORK.tz)}$`))).toBeOnTheScreen();
   });
 });
+
+describe('home banners land on the right settings block', () => {
+  const DAY = '2027-06-15T12:00';
+  beforeEach(() => {
+    mockFocused = true;
+    mockTabIndex = 0;
+    mockPush.mockClear();
+    useUserStore.getState().reset();
+    useUserStore.setState({
+      language: 'he',
+      location: JERUSALEM,
+      inIsrael: true,
+      nusach: 'ashkenaz',
+      isOnboarded: true,
+      locationStatus: 'ready',
+      locationSource: 'manual',
+      notificationsEnabled: true,
+      notificationPermission: 'granted',
+      gender: 'male',
+      maritalStatus: 'single',
+      homeLook: 'rings',
+    });
+    useCompletionsStore.getState().reset();
+    useCustomMitzvotStore.getState().reset();
+    useTaharahStore.getState().reset();
+    enableOnly('maariv');
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  it('opens Settings on the gender question from the profile prompt', () => {
+    useUserStore.setState({ gender: null, maritalStatus: null });
+    renderAt(DAY);
+    fireEvent.press(screen.getByText('התאמה אישית לפי מגדר ומצב משפחתי, לא חובה. להגדרה'));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/(tabs)/settings', params: { focus: 'gender' } });
+  });
+
+  it('opens Settings on the location block from the no-location banner', () => {
+    useUserStore.setState({ locationStatus: 'missing' });
+    renderAt(DAY);
+    fireEvent.press(screen.getByText('המיקום לא אושר. לבחירת עיר'));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/(tabs)/settings', params: { focus: 'location' } });
+  });
+});

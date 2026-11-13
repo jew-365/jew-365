@@ -177,6 +177,19 @@ describe("today's mark on the mitzvah screen", () => {
     expect(today.getByText(/^סומן ב-/)).toBeOnTheScreen();
   });
 
+  it('skips an open window from the today card', () => {
+    setUp('2026-10-28T08:00');
+    mockParams = { id: 'shacharit' };
+    renderWithTheme(<MitzvahDetailScreen />);
+    const today = () => within(screen.getByTestId('mitzvah-today-mark'));
+    fireEvent.press(today().getByText('דלג היום'));
+    expect(state().skipped['2026-10-28'].shacharit).toBeTruthy();
+    expect(state().completions).toEqual({});
+    expect(today().getByText('דולג להיום')).toBeOnTheScreen();
+    fireEvent.press(today().getByText('בטל'));
+    expect(state().skipped).toEqual({});
+  });
+
   it("keeps yesterday's closed window until alot, shows none before today's opens, and none while off", () => {
     setUp('2026-10-28T03:00');
     mockParams = { id: 'shacharit' };
