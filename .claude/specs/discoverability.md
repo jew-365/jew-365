@@ -1,6 +1,6 @@
 # Jew 365: discoverability and ease-of-use program
 
-Status: reviewed and planned on 2026-11-13, and approved by the owner the same day in the planning session. Nothing is built yet, and its tasks are not yet recorded in [not-close.md](../../not-close.md); when they are, this file is the contract they implement, and a task's deviation is written back here.
+Status: reviewed and planned on 2026-11-13, and approved by the owner the same day in the planning session. Its tasks are recorded in [not-close.md](../../not-close.md) as the batch "Discoverability and ease of use, 2026-11-13", and its six open decisions as Q32 to Q37 there. This file is the contract they implement; a task's deviation is written back here.
 
 Working title: "the whole app, without opening Settings".
 

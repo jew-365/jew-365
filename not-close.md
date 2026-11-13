@@ -885,6 +885,111 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Open:** the owner picks a figure and a voice; then the video is rendered with that figure in every scene.
   - **Open:** the end card says "זמין ב־Google Play" while the Play production release is still in review (state.md, 2026-11-10); confirm before the video is published.
 
+### Discoverability and ease of use, 2026-11-13 — batch rules
+
+- **Requested:** the owner, 2026-11-13, in a cloud planning session: the app is rich but a user cannot see its power and misses most of it; even the laziest user should reach most of it without opening Settings. The owner answered four questions in that session (onboarding, discovery, defaults, navigation), approved the plan the same day and handed its execution to the next session.
+- **Spec:** [.claude/specs/discoverability.md](.claude/specs/discoverability.md) is the contract: the findings F1 to F9, the improvements A1 to H1 (each with its change, what it fixes, the user's gain and how), the phases, the risks and the verification. A task below names the item it implements; a deviation is written back into the spec in the same change.
+- **Decisions taken:** the owner's four answers of 2026-11-13, in the spec's Context; `DEFAULT_ON_MITZVOT` and the stored defaults do not change (new users' broader defaults come from the ticked bundles of setup); nothing new is scheduled and no id changes, so `SCHEDULE_FORMAT` stays; no analytics and no account.
+- **Flag:** `OTA` for phases 0 to 2 (pure JavaScript); phase 3 (A2 to A5) reaches new users only with the next native build, because a new install's first session runs the binary's bundle (the spec's "What reaches whom, and when"). A task that turns out to need a native change stops and says so.
+- **Pending:** Q32 to Q37 under [For the owner](#for-the-owner). None blocks phase 0; Q36 touches C6, Q37 the sample reminder (A5, G1); Q33 to Q35 belong to the studies and phase 3; Q32 is release timing.
+- **Order:** phase 0 (High), phase 1 (Medium), then the two design studies; no code of phases 2 and 3 before the owner's pick in each study ([design/lab/AGENTS.md](design/lab/AGENTS.md)).
+- **Done means:** both dictionaries; the guide topic and its `WHATS_NEW` line with `pnpm guide:build`; the search words ([Search Finds Everything](AGENTS.md#search-finds-everything)); tests that fail without the change; the AGENTS.md updates of its DOX chain; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green. No update to preview or production without the owner's word.
+
+### High — Discoverability, phase 0
+
+- [ ] A1: ask for notifications at the right moment
+  - **What it is:** `askForNotifications()` in [src/services/NotificationScheduler.ts](src/services/NotificationScheduler.ts) and its web shim (`'granted' | 'refused' | 'blocked'`, rebuilding the schedule on a grant once onboarded); the onboarding permissions step's main button "allow and continue" with an explicit "not now"; `PermissionsList` reporting its statuses; home asking once after setup when never asked; the no-permission banner asking in the app while the system still can, the phone's settings only when blocked.
+  - **What it solves:** F1, reminders that silently never start.
+  - **Expected result:** suites for the helper (granted, refused, blocked, the rebuild), the step's two buttons, the banner's two paths and the one-time ask on home; the web bundle still holds exactly one `setNotificationPermission('unknown')`. The setup half reaches new users with the next build.
+
+- [ ] B3: "skip today" on the mitzvah screen
+  - **What it is:** the today card of [src/app/mitzvah/[id].tsx](<src/app/mitzvah/[id].tsx>) gains "skip today" beside "mark as done" (and "undo" for a skipped day), through `markSkipped()` with the window's day.
+  - **What it solves:** F6: skipping is a long press on home only.
+  - **Expected result:** a render case: the button files a skip under the window's day, the card then shows the skipped state and its undo.
+
+- [ ] B4: the user store's `discovery` field, and the sun hint that learns
+  - **What it is:** `useUserStore.discovery` (`hints`, `offers`, `whatsNew`, `wants`) with its default, reset and a pure clean in the merge, no `STORE_VERSION` raise, carried by the backup file; "drag the sun" in [src/components/DayArcHero.tsx](src/components/DayArcHero.tsx) gone for good once dragged.
+  - **What it solves:** F6, and the shared state C2, C7 and E1 need.
+  - **Expected result:** store cases (default, merge of a malformed value, reset, backup round trip) and a hero case (the hint gone after a drag and after a relaunch).
+
+- [ ] B5: banners land on the right spot
+  - **What it is:** home's profile banner opens Settings on the gender question and the location banners on the location block, through Settings' `focus` param.
+  - **What it solves:** F4: a banner lands on six closed sections.
+  - **Expected result:** home render cases asserting each banner's route and `focus`.
+
+- [ ] C7: "what's new" comes to the user
+  - **What it is:** `whatsNewMessage()` in [src/utils/homeMessages.ts](src/utils/homeMessages.ts): after an update whose newest `WHATS_NEW` label differs from the stored one, a Messages row opens the guide's what's new, for three days or until opened; nothing stored means seen.
+  - **What it solves:** F5: what an update brought is found only at the bottom of More.
+  - **Expected result:** `homeMessages` cases (a new label, three days, opened, a fresh install) and a home render case.
+
+- [ ] F1: the streak-goal moment
+  - **What it is:** `streakMessage()` names a reached goal of `STREAK_GOALS` on the day it is reached and opens Tracking on its achievements tab.
+  - **What it solves:** F7: a goal is reached silently.
+  - **Expected result:** cases on a goal day, the day after, and between goals.
+
+- [ ] H1: write the usability test script, the baseline
+  - **What it is:** the eight tasks of spec H1 as a script the owner runs with the closed testers, with the success and tap counts to write down, in [.claude/specs/](.claude/specs).
+  - **What it solves:** G5 has no baseline.
+  - **Expected result:** the script committed; the baseline run is the owner's (Other Open Items).
+
+### Medium — Discoverability, phase 1
+
+- [ ] C1: the capability list
+  - **What it is:** `src/data/capabilities.ts`: about 25 entries over the existing mitzvot, add-ons, notice topics, tool screens and settings, each with a title, a one-line benefit, its state for this user and its action; a coverage suite on the model of [searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts).
+  - **What it solves:** one vocabulary for the offers, the hub and the capabilities screen; a new feature cannot be forgotten.
+  - **Expected result:** the coverage suite fails on a library group, add-on or More screen with no entry.
+
+- [ ] C2: the offers rule
+  - **What it is:** pure `pickOffer(input)` in `src/utils/offers.ts` (one offer or none, the policy of spec C2) and `useOffer()`, evaluated after paint and memoised on the app day; accepting and "don't suggest" recorded in `discovery.offers`.
+  - **What it solves:** F5: nothing is offered at the moment it matters.
+  - **Expected result:** `offers.test.ts` under `pnpm test:tz`: each rule, once only, five days at most, two days apart, the install day, a holy block, nothing before `firstOpenedAt`.
+
+- [ ] C3: the offer on home, in Messages
+  - **What it is:** the current offer as a Messages row (icon, title, benefit, action); Rosh Chodesh's row worded by whether its notices are on.
+  - **What it solves:** F5, F3.
+  - **Expected result:** home render cases: an offer shown, accepted, declined; today's home suites unchanged.
+
+- [ ] C6: a tip in the weekly report
+  - **What it is:** one tip line in the weekly report notification's body and "a tip for next week" on the report screen, read once in `readPlanInput()`; no new notification (Q36).
+  - **What it solves:** F5.
+  - **Expected result:** report planner and report screen cases; the body changes only through `contentHash`.
+
+- [ ] G1: notification health
+  - **What it is:** the missing battery exemption as the first offer (Android), and "send a sample reminder" in Settings › Device once the sample exists (Q37).
+  - **What it solves:** F1: the user learns of a blocked delivery after missing a time.
+  - **Expected result:** an offers case for the exemption; the sample's cases with A5.
+
+### Medium — Discoverability, design studies and phase 2
+
+- [ ] Study: the hub, the capabilities screen and home's entry points
+  - **What it is:** a study under [design/lab/studies/](design/lab/studies) for C5, C4, B1 and B2 (and the names of Q35), published as a Design canvas and a gallery site.
+  - **What it solves:** spec items tagged "study" in phase 2.
+  - **Expected result:** both Artifact links in the study's AGENTS.md and here; the owner's pick recorded.
+
+- [ ] Phase 2: build the owner's pick (C5, C4, A6, B1, B2, D1, E1, E2, E3)
+  - **What it is:** the hub, `src/app/capabilities.tsx`, the catch-up offer, home's search and "all mitzvot" row, the benefit captions, one-time hints, guide pills and empty states, as the spec and the study's pick say; split into tasks when the pick is in.
+  - **What it solves:** F4, F5, F6, F8.
+  - **Expected result:** per item, the suites the spec's Verification names.
+
+### High — Discoverability, phase 3 (the next native build)
+
+- [ ] Study: the short setup path
+  - **What it is:** a study for A2, A3 and A5 (six screens, the bundles, the ready screen with today and the sample), with Q33 and Q34 shown as options.
+  - **What it solves:** F2.
+  - **Expected result:** both Artifact links recorded; the owner's pick recorded.
+
+- [ ] Phase 3: build the short setup (A2, A3, A4, A5)
+  - **What it is:** the six-screen setup, `src/data/bundles.ts`, the ticked recommended bundles and night quiet hours, the ready screen and `presentSampleReminder()`; split into tasks when the pick is in.
+  - **What it solves:** F1, F2, F3.
+  - **Expected result:** the suites of the spec's Verification; reaches new users with the next build (Q32).
+
+### Low — Discoverability
+
+- [ ] D2: a personal mitzvah from a template
+  - **What it is:** a small template gallery before the custom form, each created in one tap; a small study first.
+  - **What it solves:** F8: the ten-field form.
+  - **Expected result:** a render case creating each template with its hours and one reminder.
+
 ## Bugs
 
 - [ ] The app still hangs on the logo screen at launch
@@ -1088,6 +1193,45 @@ Q29 to Q31 are the batch "Daily halacha and festival halachot, 2026-11-10" ([.cl
   - **Question:** Does the owner want to ask for written permission to add Yalkut Yosef (or the Kitzur Shulchan Aruch with Rav Ovadia's rulings) and Shulchan Aruch HaMekutzar of Rav Ratzabi as later tracks?
   - **Why it is open:** many Sephardim and Yemenites use them daily, and both are in copyright; the batch ships without them. Blocks nothing.
   - **Answered, 2026-11-10:** the owner, in Hebrew: "אני רוצה שתרשום משימות לבקש מכל האלה שהם ברשיון סגור רשות להשתמש. תמצא אימייל ודרכי פניה לכל אחד מהם ותנסח מיילים מותאמים". Yes: the requests are the batch "Licence requests, 2026-11-10" under Tasks, with Halacha Yomit (halachayomit.co.il) added beside the two books, and the drafts in [release/licence-requests.md](release/licence-requests.md). Peninei Halakha turned out to be CC BY 4.0, so it needs no permission.
+
+Q32 to Q37 are the batch "Discoverability and ease of use, 2026-11-13", the open decisions 1 to 6 of [.claude/specs/discoverability.md](.claude/specs/discoverability.md).
+
+- **Q32 — The next native build.**
+  - **Question:** The first-run work (A2 to A5) reaches new users only with the next native build. When?
+  - **Proposal:** phases 0 to 2 over the air now, phase 3 in the next build.
+  - **Lives in:** release timing; nothing in code.
+  - **What it affects:** every new user's setup until that build.
+
+- **Q33 — Quiet hours for new users.**
+  - **Question:** Which night bounds arrive ticked on the new setup's notification screen?
+  - **Proposal:** 23:00 to 06:30, ticked and editable, with one line saying late alerts move or drop (Maariv's and the bedtime Shema's last chance, and after a late summer Shabbat abroad the weekly report).
+  - **Lives in:** not built yet: task "Phase 3: build the short setup".
+  - **What it affects:** new users only; existing installs keep their settings.
+
+- **Q34 — Candle lighting and the Omer by gender.**
+  - **Question:** Which of the Shabbat and festivals bundle arrives ticked for a man, a woman and an unanswered gender?
+  - **Proposal:** candle lighting ticked for women and an unanswered gender, off for men (who still get the pre-Shabbat notice with the lighting time); the Omer ticked for everyone until the rav says otherwise.
+  - **Lives in:** not built yet: `src/data/bundles.ts`.
+  - **What it affects:** new users' defaults, and an unmarked candle lighting reading as missed every week.
+
+- **Q35 — Names.**
+  - **Question:** The hub tab's name ("גלה" or "עוד") and the library's own name, so "המצוות שלי" means only personal mitzvot.
+  - **Proposal:** decided in the hub study and the copy sign-off.
+  - **Lives in:** `nav.more` and the library's keys in both dictionaries.
+  - **What it affects:** the tab bar, the library, the search words.
+
+- **Q36 — The weekly tip.**
+  - **Question:** A line inside the existing weekly report notification, or a separate weekly notification?
+  - **Proposal:** a line inside the existing one; a separate one adds noise.
+  - **Assumption:** built as the line (task C6).
+  - **Lives in:** `planReport()` in [src/services/notifications/planners/report.ts](src/services/notifications/planners/report.ts).
+  - **What it affects:** every user with the weekly report on.
+
+- **Q37 — The sample reminder's "done" button.**
+  - **Question:** May the sample reminder carry its own category with a "done" button, the one written exception to "no category outside a mitzvah"?
+  - **Proposal:** yes, so the user learns the mark path by doing it once.
+  - **Lives in:** not built yet: `presentSampleReminder()` (A5, G1).
+  - **What it affects:** the sample only; a tap on its "done" marks nothing.
 
 ## Other Open Items
 
