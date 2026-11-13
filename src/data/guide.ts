@@ -470,8 +470,8 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
     date: '2026-11-09',
     items: [
       {
-        he: 'האפליקציה נפתחת מהר יותר: מסך הלוגו לא נתקע עוד שניות ארוכות. דף הבית מוצג ראשון, ושאר הלשוניות נטענות אחריו ברקע, ובניית ההתראות אחרי הפתיחה מהירה יותר.',
-        en: 'The app opens faster: the logo screen no longer hangs for long seconds. Home shows first, the other tabs load behind it, and building the notifications after the app opens is quicker.',
+        he: 'האפליקציה נפתחת מהר יותר: מסך הלוגו לא נתקע עוד שניות ארוכות. דף הבית מוצג ראשון, ושאר הלשוניות נטענות אחריו ברקע, ובניית ההתראות אחרי הפתיחה מהירה יותר. מסך הלוגו גם לא נשאר עוד עד סגירת האפליקציה: אם הגופנים מתעכבים, האפליקציה נפתחת בלעדיהם, ופתיחה שנתקעה בכל זאת נרשמת בהגדרות › אודות ויצירת קשר, מתחת לגרסה.',
+        en: 'The app opens faster: the logo screen no longer hangs for long seconds. Home shows first, the other tabs load behind it, and building the notifications after the app opens is quicker. The logo screen also no longer stays until the app is closed: if the fonts are late, the app opens without them, and a launch that still gets stuck is noted in Settings › About and contact, under the version.',
       },
       {
         he: 'צלילים משלנו להתראות: שנים עשר צלילים לבחירה, ביניהם שמונה רכים ועדינים (פעמוני רוח, זכוכית, קלימבה, טל, תיבת נגינה, חליל, קערה מזמרת ופסנתר רך), וצליל נפרד להתראה הרגילה, לכתומה שלפני האחרונה ולאחרונה. בהגדרות ← מכשיר והתראות ← צליל ההתראות. הצלילים מגיעים עם הגרסה הבאה מהחנות; עד אז ההתראות בצליל של הטלפון.',

@@ -33,6 +33,7 @@ import { applyGenderDefaultsToNew } from '@/stores/taharahOptIn';
 import { initNotificationHandlers } from '@/services/NotificationScheduler';
 import { captureException } from '@/services/crashReporting';
 import { reloadApp } from '@/services/appReload';
+import { bootHeartbeat, markBoot, noteBoot } from '@/services/bootTrace';
 import { reconcileChokInstall } from '@/services/ChokContentService';
 import { reconcileShnayimInstall } from '@/services/ShnayimContentService';
 import { reconcileHalachaInstalls } from '@/services/HalachaContentService';
@@ -103,6 +104,12 @@ syncLayoutDirection(initialLanguage, needsRtlBootstrap);
 applyGenderDefaultsToNew();
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+markBoot('layout');
+
+// The splash waits for the fonts at most this long, then the app shows in the system font until they arrive: on
+// Android every Expo async call (a font's load among them) runs on one native thread, so a call stuck there kept
+// the logo up until the app was killed (the owner's report of 2026-11-13).
+export const FONT_WAIT_MS = 5000;
 
 const QUIET_RECHECK_MS = 60 * 60_000;
 
@@ -381,8 +388,8 @@ const errorStyles = StyleSheet.create({
 });
 
 function RootLayout() {
-  // A failed font fetch must not brick the app: `loaded` would stay false forever, leaving a bare
-  // spinner behind an un-hidden splash with notifications never initialised and no way out.
+  // A font load that fails or never settles must not brick the app: `loaded` would stay false forever, leaving a
+  // bare spinner behind an un-hidden splash with notifications never initialised and no way out (FONT_WAIT_MS).
   const [loaded, fontError] = useFonts({
     Rubik_400Regular,
     Rubik_500Medium,
@@ -392,16 +399,36 @@ function RootLayout() {
     NotoSerifHebrew_400Regular,
     NotoSerifHebrew_700Bold,
   });
-  const ready = loaded || Boolean(fontError);
+  const [fontWaitOver, setFontWaitOver] = useState(false);
+  const ready = loaded || Boolean(fontError) || fontWaitOver;
+
+  useEffect(() => {
+    const stopHeartbeat = bootHeartbeat();
+    const fontWait = setTimeout(() => setFontWaitOver(true), FONT_WAIT_MS);
+    return () => {
+      stopHeartbeat();
+      clearTimeout(fontWait);
+    };
+  }, []);
 
   useEffect(() => {
     if (!ready) return undefined;
+    markBoot('ready');
+    if (!loaded) noteBoot(fontError ? 'fontError' : 'fontsTimeout');
     SplashScreen.hideAsync().catch(() => {});
+    markBoot('hidden');
+    const painted = afterPaint(() => markBoot('painted'));
     reconcileChokInstall();
     reconcileShnayimInstall();
     reconcileSelichotInstall();
     reconcileHalachaInstalls();
-    return initNotificationHandlers();
+    const teardown = initNotificationHandlers();
+    return () => {
+      painted.cancel();
+      teardown();
+    };
+    // `loaded` and `fontError` are read once, when the splash goes: fonts that arrive later change nothing here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
   if (!ready) {

@@ -534,6 +534,7 @@
   "settings.logoutConfirmAction": "Yes, reset",
   "settings.deleteData": "Delete your data",
   "settings.version": "Version %{version}",
+  "settings.stuckLaunch": "Stuck launch: %{when} · last step %{stage} after %{at} s · alive until %{alive} s%{notes}",
   "settings.backup": "Backup, restore and reset",
   "settings.backupHint.android": "Settings, mitzvot, history and streak are backed up automatically to the phone's Google account and come back after a reinstall or on a new Android phone. To move to an iPhone, or to keep a copy of your own, export a backup file.",
   "settings.backupHint.ios": "Settings, mitzvot, history and streak are kept in the device's iCloud backup and move to a new iPhone restored from it. Deleting the app deletes them, so keep a backup file.",

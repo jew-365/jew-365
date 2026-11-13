@@ -104,7 +104,8 @@ import { NagLevel, Nusach } from '@/types/mitzvah';
 import { countsInDayEstimate, remindersPerDay } from '@/utils/nagging';
 import type { SiddurVoice } from '@/types/siddur';
 import type { Location } from '@/types/zmanim';
-import { minutesToTime, timeToMinutes } from '@/utils/clock';
+import { fireTimeText, minutesToTime, timeToMinutes } from '@/utils/clock';
+import { bootStoppedAt, stuckLaunch } from '@/services/bootTrace';
 import { quietBoundsValid, quietHoursOf, type QuietBound } from '@/utils/quietHours';
 import { SETTINGS_SEARCH_ITEMS, type SettingsSearchItem, type SettingsSectionKey } from '@/utils/settingsSearch';
 import { ZmanimPicker } from '@/components/ZmanimSheet';
@@ -833,6 +834,7 @@ function SettingsScreenContent() {
                   <Text style={[typography.small, styles.versionText, { color: colors.textMuted }]}>
                     {t('settings.version', { version: appVersionLabel() })}
                   </Text>
+                  <StuckLaunchLine />
                 </Anchor>
                 <Anchor {...anchor('accuracy')}>
                   <SectionLabel variant="field" text={t('accuracy.title')} style={styles.fieldLabel} />
@@ -1416,6 +1418,28 @@ function SwitchRow({ label, hint, value, onValueChange, disabled, testID, style 
 
 function openLink(url: string) {
   openExternalUrl(url);
+}
+
+// The last launch that never showed the app, or that needed a fallback ([bootTrace.ts](../../services/bootTrace.ts)),
+// under the version, so the owner can send it: absent while there is none.
+function StuckLaunchLine() {
+  const { colors } = useTheme();
+  const { t } = useI18n();
+  const tz = useUserStore((s) => s.location.tz);
+  const [trace] = useState(stuckLaunch);
+  if (!trace) return null;
+  const { stage, atSec, aliveSec } = bootStoppedAt(trace);
+  return (
+    <Text testID="settings-stuck-launch" style={[typography.small, { color: colors.textMuted }]}>
+      {t('settings.stuckLaunch', {
+        when: fireTimeText(new Date(trace.startedAt), tz),
+        stage: stage ?? '-',
+        at: atSec,
+        alive: aliveSec ?? '-',
+        notes: trace.notes?.length ? ` · ${trace.notes.join(', ')}` : '',
+      })}
+    </Text>
+  );
 }
 
 const styles = StyleSheet.create({

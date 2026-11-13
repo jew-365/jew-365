@@ -34,6 +34,9 @@ jest.mock('@/services/ContactService', () => ({
   sendContactMessage: jest.fn(async () => {}),
 }));
 
+import { BOOT_STUCK_KEY } from '@/services/bootTrace';
+import { StorageService } from '@/services/StorageService';
+import { fireTimeText } from '@/utils/clock';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Linking, Platform } from 'react-native';
@@ -97,6 +100,32 @@ describe('Settings contact', () => {
     expect(screen.getByText(he('settings.contactHint'))).toBeOnTheScreen();
     expect(screen.getByText(he('settings.contactSend'))).toBeOnTheScreen();
     expect(screen.getByText(he('settings.contactPrivacy'))).toBeOnTheScreen();
+  });
+
+  it('prints the last stuck launch under the version, and nothing without one', async () => {
+    StorageService.delete(BOOT_STUCK_KEY);
+    await openContactSection();
+    expect(screen.queryByTestId('settings-stuck-launch')).toBeNull();
+    screen.unmount();
+
+    const startedAt = Date.UTC(2026, 10, 13, 7, 42);
+    StorageService.set(BOOT_STUCK_KEY, {
+      startedAt,
+      stages: { entry: startedAt, layout: startedAt + 1000, ready: startedAt + 6000 },
+      alive: startedAt + 45_000,
+      notes: ['fontsTimeout'],
+    });
+    await openContactSection();
+    expect(screen.getByTestId('settings-stuck-launch')).toHaveTextContent(
+      he('settings.stuckLaunch', {
+        when: fireTimeText(new Date(startedAt), useUserStore.getState().location.tz),
+        stage: 'ready',
+        at: 6,
+        alive: 45,
+        notes: ' · fontsTimeout',
+      }),
+    );
+    StorageService.delete(BOOT_STUCK_KEY);
   });
 
   it('is titled about and contact, with the version first and the links last', async () => {

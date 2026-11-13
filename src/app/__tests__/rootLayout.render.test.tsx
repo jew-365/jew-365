@@ -19,9 +19,10 @@ jest.mock('react-native-safe-area-context', () => ({
 }));
 jest.mock('expo-dev-client', () => ({}));
 jest.mock('react-native-gesture-handler', () => ({ GestureHandlerRootView: require('react-native').View }));
+const mockHideSplash = jest.fn(() => Promise.resolve());
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: () => Promise.resolve(),
-  hideAsync: () => Promise.resolve(),
+  hideAsync: () => mockHideSplash(),
 }));
 jest.mock('expo-updates', () => ({
   useUpdates: () => ({ isUpdatePending: false }),
@@ -29,7 +30,8 @@ jest.mock('expo-updates', () => ({
   isEnabled: false,
 }));
 jest.mock('@sentry/react-native', () => ({ wrap: (component: unknown) => component }));
-jest.mock('@expo-google-fonts/rubik/useFonts', () => ({ useFonts: () => [true, null] }));
+const mockFonts = jest.fn((): [boolean, Error | null] => [true, null]);
+jest.mock('@expo-google-fonts/rubik/useFonts', () => ({ useFonts: () => mockFonts() }));
 jest.mock('@/services/NotificationScheduler', () => ({ initNotificationHandlers: () => () => {} }));
 jest.mock('@/services/ChokContentService', () => ({ reconcileChokInstall: () => {} }));
 jest.mock('@/services/SelichotContentService', () => ({ reconcileSelichotInstall: () => {} }));
@@ -56,7 +58,9 @@ const mockNotificationRecent = jest.fn(() => false);
 
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { AppState } from 'react-native';
-import RootLayout from '../_layout';
+import RootLayout, { FONT_WAIT_MS } from '../_layout';
+import { BOOT_CURRENT_KEY, type BootTrace } from '@/services/bootTrace';
+import { StorageService } from '@/services/StorageService';
 import { holdScreenOnReturn, takeScreenHold } from '@/services/externalFlow';
 import { HOLD_LEAD_MS, HOLD_MAX_MS, RETURN_HOME_DELAY_MS } from '@/utils/returnHome';
 import { CITIES } from '@/data/cities';
@@ -454,5 +458,51 @@ describe('the root layout returns to home', () => {
     useUserStore.setState({ isOnboarded: false });
     await away(10 * 60 * 1000);
     expect(mockRouter.navigate).not.toHaveBeenCalledWith('/(tabs)/home');
+  });
+});
+
+describe('the splash at launch', () => {
+  const trace = () => StorageService.get<BootTrace>(BOOT_CURRENT_KEY);
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: at(J, '2026-10-28T07:00'), doNotFake: ['nextTick', 'queueMicrotask', 'setImmediate'] });
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: J, inIsrael: true, nusach: 'ashkenaz', isOnboarded: true });
+    StorageService.delete(BOOT_CURRENT_KEY);
+    mockHideSplash.mockClear();
+  });
+
+  afterEach(() => {
+    mockFonts.mockImplementation(() => [true, null]);
+    jest.useRealTimers();
+  });
+
+  it('goes as soon as the fonts are loaded, and the launch is traced to its paint', () => {
+    renderWithTheme(<RootLayout />);
+    expect(mockHideSplash).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('stack')).toBeOnTheScreen();
+    act(() => jest.advanceTimersByTime(100));
+    expect(Object.keys(trace()?.stages ?? {})).toEqual(['ready', 'hidden', 'painted']);
+    expect(trace()?.notes).toBeUndefined();
+  });
+
+  it('goes after FONT_WAIT_MS when the fonts never load, and the app shows without them', () => {
+    mockFonts.mockImplementation(() => [false, null]);
+    renderWithTheme(<RootLayout />);
+    act(() => jest.advanceTimersByTime(FONT_WAIT_MS - 1));
+    expect(mockHideSplash).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('stack')).toBeNull();
+    expect(trace()?.alive).toBeDefined();
+    act(() => jest.advanceTimersByTime(1));
+    expect(mockHideSplash).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('stack')).toBeOnTheScreen();
+    expect(trace()?.notes).toEqual(['fontsTimeout']);
+  });
+
+  it('goes at once when the fonts fail, noted as such', () => {
+    mockFonts.mockImplementation(() => [false, new Error('font')]);
+    renderWithTheme(<RootLayout />);
+    expect(mockHideSplash).toHaveBeenCalledTimes(1);
+    expect(trace()?.notes).toEqual(['fontError']);
   });
 });
