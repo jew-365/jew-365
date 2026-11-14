@@ -64,7 +64,7 @@
   <h2>What does leave the device</h2>
   <p>Three technical components reach outward by themselves, and none carries personal data:</p>
   <ul>
-    <li><strong>Update checks (EAS Update) with Expo's servers</strong> — the app asks whether a newer JavaScript bundle exists when it opens, when you return to it, and in the hourly background refresh. The check transmits technical values only: app version, platform, update identifier, and a random installation identifier Expo uses to count installs, which is not tied to your name or details. It carries no personal data, no location, and no mitzvah history.</li>
+    <li><strong>Update checks (EAS Update) with Expo's servers</strong> — the app asks whether a newer JavaScript bundle exists when it opens, when you return to it, and in the hourly background refresh. The check transmits technical values only: app version, platform, update identifier, and a random installation identifier Expo uses to count installs, which is not tied to your name or details. It carries no personal data, no location, and no mitzvah history. We see those counts as anonymous statistics: how many installs there are and how many of them run each version and update.</li>
     <li><strong>Crash reports to Sentry</strong> — see the next section.</li>
     <li><strong>The add-ons' version check (Chok LeYisrael, Shnayim Mikra, Selichot and the daily-halacha books)</strong> — only while an add-on is installed; see “Downloading the add-ons” below.</li>
   </ul>
@@ -84,15 +84,19 @@
   <ul>
     <li><strong>What is sent</strong> — the stack trace of the crash, the device model, the operating system version, the app version and the update identifier.</li>
     <li><strong>What is not sent</strong> — personal data, family purity data and screen content. IP addresses are not stored.</li>
+    <li><strong>Use</strong> — to find and fix crashes, and to follow how stable each version is.</li>
     <li><strong>Control</strong> — the app has no switch to turn reporting off. Uninstalling the app stops it. Reports already sent are not linked to you, so resetting or uninstalling the app does not delete them.</li>
     <li><strong>Retention</strong> — Sentry keeps a report for at most 90 days and then deletes it.</li>
     <li>Sentry's privacy policy: <a href="https://sentry.io/privacy/">sentry.io/privacy</a></li>
   </ul>
 
+  <h2>Analytics</h2>
+  <p>The app's analytics are two anonymous, aggregate statistics, both from the components above: how many installs there are and how many of them run each version and update (counted by Expo from the update check's random installation identifier), and how often each version crashes (from the crash reports Sentry receives). We use them to confirm that updates reach users and to fix crashes. They are not tied to your name or details, hold nothing about what you do in the app (no screens, marks, reading, location or mitzvah history), are not used for advertising, and are given to no one.</p>
+
   <h2>What the app does not do</h2>
   <ul>
     <li>No advertising and no ad networks.</li>
-    <li>No analytics and no behavioural tracking.</li>
+    <li>No behavioural tracking: what you open, mark or read in the app does not leave the device, and there are no analytics beyond the two statistics above.</li>
     <li>No sale or sharing of personal data with third parties. Formspree forwards a message you sent to us and uses it for nothing else.</li>
     <li>No sign-up and no login.</li>
   </ul>

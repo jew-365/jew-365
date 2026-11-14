@@ -4,7 +4,7 @@
 
 The record is shared by both languages: see [APP_STORE_METADATA_EN.md](APP_STORE_METADATA_EN.md) (Apple ID `6825802248`, primary language Hebrew, name `יהודי 365`). The version page's language-independent fields (copyright, build, App Review information and notes, release option, TestFlight), the App Privacy answers and the pricing and availability (174 storefronts, every one but China mainland) are recorded there too, the App Review notes prepared on 2026-11-08 for build 1.0.21 (6) among them (English only, as App Review reads them; no Hebrew copy changes with them).
 
-The subtitle, promotional text, description and keywords below were entered in App Store Connect on 2026-11-02 and read back, with build 1.0.21 (5), and the version was resubmitted the same day ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-02; the owner: "כן שלח כולל כל הטקסטים והתיקונים והצילומים"). The promotional text and description below were redrafted on 2026-11-11 for build 1.0.21 (6), as in [APP_STORE_METADATA_EN.md](APP_STORE_METADATA_EN.md), approved by the owner on 2026-11-11 ("מאשר") and entered the same day ("2 כן") with `asc localizations update` on the `he` localization of 1.0.21, read back equal to this file at `b5ce9c3`, the version still Waiting for Review; the text of 2026-11-02 is in this file at `f4a448e`.
+The subtitle, promotional text, description and keywords below were entered in App Store Connect on 2026-11-02 and read back, with build 1.0.21 (5), and the version was resubmitted the same day ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-02; the owner: "כן שלח כולל כל הטקסטים והתיקונים והצילומים"). The promotional text and description below were redrafted on 2026-11-11 for build 1.0.21 (6), as in [APP_STORE_METADATA_EN.md](APP_STORE_METADATA_EN.md), approved by the owner on 2026-11-11 ("מאשר") and entered the same day ("2 כן") with `asc localizations update` on the `he` localization of 1.0.21, read back equal to this file at `b5ce9c3`, the version still Waiting for Review; the text of 2026-11-02 is in this file at `f4a448e`. On 2026-11-14 the promotional text and description below were entered on the `he` localization for build 1.0.21 (7) (`asc localizations update`, read back equal at `93735c8`), and the version was resubmitted. Later that day the owner had the Ohr HaChaim luach removed from the copy ("תמחק את התיאור אור החיים כי אנחנו לא עובדים איתם"): the promotional text and description below were entered again on the `he` localization the same day.
 
 ## App Name
 
@@ -18,7 +18,7 @@ The two most searched terms the owner named and the least contested one (the own
 
 ## Promotional Text
 
-כל מצווה בזמנה: זמני הלכה לפי לוח אור החיים, תזכורות בחלון הזמן של כל מצווה, סידור בחמישה נוסחים, ואפליקציה שנחה בשבת ובחג. בלי חשבון.
+כל מצווה בזמנה: זמני הלכה לפי המיקום שלך, תזכורות בחלון הזמן של כל מצווה, סידור בחמישה נוסחים, ואפליקציה שנחה בשבת ובחג. בלי חשבון.
 
 ## Description
 
@@ -31,7 +31,7 @@ The two most searched terms the owner named and the least contested one (the own
 - ספריית המצוות גדלה עם העדכונים, ולכל מצווה מתג משלה
 - מצוות אישיות משלך: שעות, תזמון לפי ימי השבוע, טווח תאריכים או מספר ימים ברצף, ותזכורות שאתה קובע
 - מסך בית עם מעגל היום והלילה וזמני ההלכה של היום: מה פתוח עכשיו, כמה זמן נשאר ומה כבר בוצע
-- זמני ההלכה מחושבים לפי שיטת לוח אור החיים, וסוף זמן קריאת שמע מוצג לפי המג״א ולפי הגר״א
+- סוף זמן קריאת שמע מוצג לפי המג״א ולפי הגר״א
 - לוח עברי, פרשת השבוע, חגים ודעות הלכתיות, לפי ישראל או חוץ לארץ
 
 תזכורות
@@ -106,11 +106,11 @@ https://jew-365.github.io/jew-365/privacy/
 
 הדירוג שנשמר ב-App Store Connect ב-22 באוקטובר 2026: 13+ ב-172 מדינות ואזורים. התשובות המלאות, כולל אזכורי היין בברכות ונושאי הטהרה כ-Infrequent, רשומות ב-[APP_STORE_METADATA_EN.md](APP_STORE_METADATA_EN.md).
 
-להזנה עם ההגשה של 1.0.21 (7) (החלטת הבעלים מ-13 בנובמבר 2026, ״כן, כל ההמלצות״): health or wellness topics Yes, כי מעקב טהרת המשפחה רושם תאריכים של המחזור; שאר התשובות לא משתנות, וההערות לבודק והתשובה ל-Apple רשומות ב-[APP_STORE_METADATA_EN.md](APP_STORE_METADATA_EN.md).
+הוזן ב-14 בנובמבר 2026 עם ההגשה של 1.0.21 (7) (החלטת הבעלים מ-13 בנובמבר 2026, ״כן, כל ההמלצות״): health or wellness topics Yes, כי מעקב טהרת המשפחה רושם תאריכים של המחזור; שאר התשובות לא השתנו, וההערות לבודק והתשובה ל-Apple רשומות ב-[APP_STORE_METADATA_EN.md](APP_STORE_METADATA_EN.md).
 
 ## Screenshot Plan
 
-Phone screenshots in use since 2026-11-02, 1206x2622 (iPhone 6.3 inch, the `APP_IPHONE_61` set), seven per page in this order: Home, Siddur tab, Reader (on Ashrei), History, Settings, a tzaddik page, the weekly report. Made by `pnpm store:screenshots --sets appstore-he,appstore-en` ([../scripts/store/screenshots.mjs](../scripts/store/screenshots.mjs)) from the tree of `00b6fa8` (the new logo, Rubik and the drawn icons): a seeded married man in Jerusalem, Sefard, the gold palette, a 15-day streak, the clock at Wednesday 2026-11-04 15:40 in Jerusalem. The Hebrew set replaced the five shots of 2026-10-22 on the Hebrew page; the English set went to the English (U.S.) and English (U.K.) pages (`asc screenshots upload --replace`), each read back `COMPLETE`. Local copies: the owner's Downloads folder `jew365-store-assets-2026-11`, `appstore-he` and `appstore-en` (the uploaded sets; its `play-*` folders still hold the 2026-11-01 sets with the old logo).
+Phone screenshots in use since 2026-11-14, rendered from `93735c8` (build 1.0.21 (7)) and uploaded to the `he`, `en-US` and `en-GB` pages ([APP_STORE_METADATA_EN.md](APP_STORE_METADATA_EN.md), Screenshot Plan). The set they replaced, in use from 2026-11-02, 1206x2622 (iPhone 6.3 inch, the `APP_IPHONE_61` set), seven per page in this order: Home, Siddur tab, Reader (on Ashrei), History, Settings, a tzaddik page, the weekly report. Made by `pnpm store:screenshots --sets appstore-he,appstore-en` ([../scripts/store/screenshots.mjs](../scripts/store/screenshots.mjs)) from the tree of `00b6fa8` (the new logo, Rubik and the drawn icons): a seeded married man in Jerusalem, Sefard, the gold palette, a 15-day streak, the clock at Wednesday 2026-11-04 15:40 in Jerusalem. The Hebrew set replaced the five shots of 2026-10-22 on the Hebrew page; the English set went to the English (U.S.) and English (U.K.) pages (`asc screenshots upload --replace`), each read back `COMPLETE`. Local copies: the owner's Downloads folder `jew365-store-assets-2026-11`, `appstore-he` and `appstore-en` (the uploaded sets; its `play-*` folders still hold the 2026-11-01 sets with the old logo).
 
 Target sizes (Apple scales down from the largest of each family):
 

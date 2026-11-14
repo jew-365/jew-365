@@ -28,7 +28,7 @@ Mitzvot, on time
 - A mitzvah library that grows with updates, each mitzvah on its own switch
 - Your own mitzvot: hours, weekdays, a date range or a run of days, and your reminders, even after the window ends
 - Home: the day-and-night arc with the day's zmanim, what is open now, how long is left and what is done
-- Zmanim by the method of the Ohr HaChaim luach, with the latest Shema by both the Magen Avraham and the Gra
+- The latest Shema by both the Magen Avraham and the Gra
 - Hebrew calendar, parasha, holidays and halachic opinions, for Israel or the Diaspora
 
 Reminders
@@ -81,7 +81,7 @@ Hebrew:
 - ספריית המצוות גדלה עם העדכונים, ולכל מצווה מתג משלה
 - מצוות אישיות משלך: שעות, תזמון לפי ימי השבוע, טווח תאריכים או מספר ימים ברצף, ותזכורות שאתה קובע
 - מסך בית עם מעגל היום והלילה וזמני ההלכה של היום: מה פתוח עכשיו, כמה זמן נשאר ומה כבר בוצע
-- זמני ההלכה מחושבים לפי שיטת לוח אור החיים, וסוף זמן קריאת שמע מוצג לפי המג״א ולפי הגר״א
+- סוף זמן קריאת שמע מוצג לפי המג״א ולפי הגר״א
 - לוח עברי, פרשת השבוע, חגים ודעות הלכתיות, לפי ישראל או חוץ לארץ
 
 תזכורות
@@ -291,4 +291,13 @@ Jew 365 arrives in the store: a reminder for each mitzvah in its halachic time a
 </en-US>
 ```
 
-The store listing's text went out as it stood (2026-10-23); its icon, feature graphics and phone screenshots were replaced the same day ([Store Graphics](#store-graphics)) and sent to review with the release. The copy of 2026-11-01 stays held by the owner.
+The store listing's icon, feature graphics and phone screenshots were replaced the same day ([Store Graphics](#store-graphics)) and sent to review with the release; on 2026-11-11 the short and full descriptions of `b5ce9c3` joined the same review.
+
+Google published all of it on 2026-11-14 at 08:43 (submission 6, sent 2026-11-11 08:20, 13 changes), read in the console that day: Production `10 (1.0.21)` full rollout to 177 countries and the rest of the world, the closed test, and the listing in both languages. The public page is https://play.google.com/store/apps/details?id=com.jew365.app.
+
+Store settings as of 2026-11-14: category Lifestyle; tags Lifestyle (החיים הטובים), the one Play suggests, Books & Reference (ספרים ועיון), for the learning, and Religious texts (טקסטים דתיים), all three chosen by the owner and applied that day; contact email 365jew@gmail.com, website https://jew-365.github.io/jew-365/, no phone, external marketing on.
+
+## Developer Account
+
+- Trader status: non-trader, declared on 2026-11-14 as the account owner avi6190i (the owner's call). Google shows the non-trader notice to users in the EEA and the UK, and the developer details worldwide under App support: the legal name אברהם שמעון ששון (from the Google payments profile), Israel, and the developer email avisason9314@gmail.com. The declaration can be updated at any time in Play Console › Account details › About you.
+- Developer profile website: https://jew-365.github.io/jew-365/, set on 2026-11-14 on the owner's request (it read https://avraham-sason.github.io/jew-in-time/, the previous app's site); not shown publicly and not verified in Google Search Console.

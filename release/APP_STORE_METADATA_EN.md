@@ -13,7 +13,7 @@ Created on 2026-10-22 under Avraham Shimon Sason (Individual, Team `KQ5K8G9ANH`)
 Saved on 2026-10-22 on the Hebrew version page; the English (U.S.) localization was added the same day with the English copy of this file and the English Privacy Policy URL. It reuses the Hebrew screenshots ("Using Existing Assets").
 
 - Copyright: `2026 Avraham Shimon Sason`.
-- Build: 1.0.21 (5), EAS build `7bbb9c15`, App Store Connect build `c193622a` (attached on 2026-11-02 in place of 1.0.21 (4), EAS `72c51b1e`, which App Review rejected under Guideline 2.1(a) on 2026-11-01).
+- Build: 1.0.21 (7), EAS build `2dc16f00`, App Store Connect build `e8c0ce24` (attached on 2026-11-14 in place of 1.0.21 (6), EAS `0e9cdd77`, App Store Connect `54ce5829`, which App Review rejected under 5.1.1(iv) and 5.1.5 on 2026-11-12; before it 1.0.21 (5), EAS `7bbb9c15`, rejected on 2026-11-07, and 1.0.21 (4), EAS `72c51b1e`, rejected under 2.1(a) on 2026-11-01).
 - App Review Information: sign-in required off; contact Avraham Sason, +972546559314, 365jew@gmail.com; no attachment.
 - App Review notes, as resubmitted on 2026-11-02 (the 2026-10-22 text pointed to a language switch reachable only after onboarding):
 
@@ -29,7 +29,7 @@ Reminders are local notifications scheduled on the device for each mitzvah's hal
 By design the app rests on Shabbat and Jewish holidays at the chosen city: from candle lighting until after nightfall it shows a rest screen and sends no notifications. If the review falls on a Friday evening or Saturday in Israel, pick a city in another time zone, such as New York, during onboarding.
 ```
 
-- App Review notes for build 1.0.21 (7), prepared on 2026-11-14 (the owner's "כן, כל ההמלצות" of 2026-11-13), not yet saved in App Store Connect. App Review rejected 1.0.21 (6) on 2026-11-12 under 5.1.1(iv) (a pre-permission button read "Allow location access") and 5.1.5 (setup could not go on without Location Services); its review device's clock read UTC, as build 5's did, and build 5 was reviewed on a Saturday. The UTC hours are the app's own rest windows for November 2026 to January 2027 (Honolulu's starts Saturday 03:28 to 03:50 UTC, Pago Pago's 05:13 to 05:38, Apia's ends 06:16 to 06:42), rounded to the safe side:
+- App Review notes for build 1.0.21 (7), prepared on 2026-11-14 (the owner's "כן, כל ההמלצות" of 2026-11-13) and saved in App Store Connect the same day (`asc review details-update`, read back), with build 7 resubmitted. App Review rejected 1.0.21 (6) on 2026-11-12 under 5.1.1(iv) (a pre-permission button read "Allow location access") and 5.1.5 (setup could not go on without Location Services); its review device's clock read UTC, as build 5's did, and build 5 was reviewed on a Saturday. The UTC hours are the app's own rest windows for November 2026 to January 2027 (Honolulu's starts Saturday 03:28 to 03:50 UTC, Pago Pago's 05:13 to 05:38, Apia's ends 06:16 to 06:42), rounded to the safe side:
 
 ```
 No account, login or payment anywhere in the app; every screen opens without signing in.
@@ -47,7 +47,7 @@ Reminders are local notifications scheduled on the device for each mitzvah's hal
 The optional add-ons (Chok LeYisrael, Shnayim Mikra, Selichot, the daily halacha books) are text the user downloads on request from our GitHub Pages site, after a confirmation that shows their size. They are plain text data, not code.
 ```
 
-- Reply to App Review for build 1.0.21 (7), prepared on 2026-11-14, not yet sent (sending it is the owner's yes):
+- Reply to App Review for build 1.0.21 (7), sent on 2026-11-14 under App Review's message, the owner's yes ("תמשיך את כל השרשרת"):
 
 ```
 Hello,
@@ -87,7 +87,7 @@ Reminders are local notifications scheduled on the device for each mitzvah's hal
 
 ## Draft Status
 
-The subtitle, promotional text, description and keywords below were entered in App Store Connect on 2026-11-02 and read back, on the English (U.S.) page and on the English (U.K.) page created that day (name `Jew 365`, the same subtitle, the English Privacy Policy URL, support and marketing URLs `https://jew-365.github.io/jew-365/`), with build 1.0.21 (5); the version was resubmitted the same day ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-02). The promotional text and description below were redrafted on 2026-11-11 for build 1.0.21 (6), built from `acaa72f` like AAB versionCode 10 (five nusachim with Teiman Baladi, the smart nag, the notification timeline, the time left in every reminder, the zmanim by the Ohr HaChaim luach), approved by the owner on 2026-11-11 ("מאשר"), and entered the same day ("2 כן") with `asc localizations update` on the version's `he`, `en-US` and `en-GB` localizations while 1.0.21 (6) waits for review; read back equal to these files at `b5ce9c3`, and the review state stayed Waiting for Review ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-11). The text of 2026-11-02 is in this file at `f4a448e`.
+The subtitle, promotional text, description and keywords below were entered in App Store Connect on 2026-11-02 and read back, on the English (U.S.) page and on the English (U.K.) page created that day (name `Jew 365`, the same subtitle, the English Privacy Policy URL, support and marketing URLs `https://jew-365.github.io/jew-365/`), with build 1.0.21 (5); the version was resubmitted the same day ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-02). The promotional text and description below were redrafted on 2026-11-11 for build 1.0.21 (6), built from `acaa72f` like AAB versionCode 10 (five nusachim with Teiman Baladi, the smart nag, the notification timeline, the time left in every reminder, the zmanim by the Ohr HaChaim luach), approved by the owner on 2026-11-11 ("מאשר"), and entered the same day ("2 כן") with `asc localizations update` on the version's `he`, `en-US` and `en-GB` localizations while 1.0.21 (6) waits for review; read back equal to these files at `b5ce9c3`, and the review state stayed Waiting for Review ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-11). The text of 2026-11-02 is in this file at `f4a448e`. On 2026-11-14 the promotional text and the description with the medical line were entered on the three localizations for build 1.0.21 (7) (`asc localizations update`, read back equal to these files at `93735c8`), and the version was resubmitted. Later that day the owner had the Ohr HaChaim luach removed from every store text ("תמחק את התיאור אור החיים כי אנחנו לא עובדים איתם", the app has no relationship with its publisher): the promotional text says "zmanim for your location" and the description drops the luach's name, entered again on the three localizations the same day.
 
 ## App Name
 
@@ -101,7 +101,7 @@ The same on the English (U.S.) and English (U.K.) pages; the tagline `Every mitz
 
 ## Promotional Text
 
-Every mitzvah in its time: zmanim by the Ohr HaChaim luach, reminders in each mitzvah's window, a siddur in five nusachim, and rest on Shabbat and Yom Tov. No account.
+Every mitzvah in its time: zmanim for your location, reminders in each mitzvah's window, a siddur in five nusachim, and rest on Shabbat and Yom Tov. No account.
 
 ## Description
 
@@ -114,7 +114,7 @@ Mitzvot, on time
 - A mitzvah library that grows with updates, each mitzvah on its own switch
 - Your own mitzvot: hours, weekdays, a date range or a run of days, and your reminders, even after the window ends
 - Home: the day-and-night arc with the day's zmanim, what is open now, how long is left and what is done
-- Zmanim by the method of the Ohr HaChaim luach, with the latest Shema by both the Magen Avraham and the Gra
+- The latest Shema by both the Magen Avraham and the Gra
 - Hebrew calendar, parasha, holidays and halachic opinions, for Israel or the Diaspora
 
 Reminders
@@ -188,12 +188,12 @@ Expected rating: the rating App Store Connect computes from its questionnaire, d
 
 Age rating as saved in App Store Connect on 2026-10-22 (the owner's approval), from Apple's seven-step questionnaire: no parental controls, age assurance, web access, user-generated content, social media, messaging or advertising; profanity, horror and every violence item none; alcohol, tobacco or drug references Infrequent (the wine blessings of Kiddush, Havdalah, Birkat Hamazon's cup and Sheva Berachot); medical or treatment information Infrequent and health or wellness topics No (the taharah tracker); mature or suggestive themes Infrequent (the taharah screens refer to marital separation periods), sexual content and graphic content none; simulated gambling, contests, gambling and loot boxes none; no override. Calculated rating 13+ in 172 countries or regions, with local equivalents (12+ in Brazil, separate ratings for Vietnam and Korea) and a global 12+ on operating systems earlier than version 26. Apple noted that the Lifestyle category keeps the app out of Afghanistan.
 
-To enter with the resubmission of 1.0.21 (7) (the owner's call of 2026-11-13, "כן, כל ההמלצות", after App Review's rejection of 1.0.21 (6)): health or wellness topics Yes (the family purity tracker records cycle-related dates), every other answer unchanged; take the rating App Store Connect computes.
+Entered on 2026-11-14 with the resubmission of 1.0.21 (7) (the owner's call of 2026-11-13, "כן, כל ההמלצות", after App Review's rejection of 1.0.21 (6)): health or wellness topics Yes (the family purity tracker records cycle-related dates), every other answer unchanged (`asc age-rating edit`, read back); the rating is the one App Store Connect computes.
 
 ## App Privacy Answers
 
 - Data collected: Diagnostics, Crash Data. Not linked to the user. Used for App Functionality and Analytics. Not used for tracking. Processor: Functional Software, Inc. (Sentry).
-- To enter with the resubmission of 1.0.21 (7) (the owner's call of 2026-11-13, "כן, כל ההמלצות", after App Review's rejection of 1.0.21 (6)): Crash Data and Device ID used for App Functionality only, not Analytics, matching the policy's "No analytics".
+- Analytics was removed from Crash Data and Device ID on 2026-11-14 (the owner's call of 2026-11-13, "כן, כל ההמלצות") and added back the same day, the owner's later call ("ותחזיר שיהיה אנליטיקס זה חשוב לי"), after the privacy policy gained its Analytics section (two anonymous, aggregate statistics: Expo's install count per version and update, and Sentry's crash count per version); both published on the App Privacy page and read back "Used for App Functionality, and Analytics".
 - The device's iCloud backup and the exported backup file do not reach the developer: the first is Apple's service in the user's account, the second goes only where the user sends it. Neither is data collection.
 - Data collected: Contact Info, Name and Phone Number, and User Content, Other User Content (the message). Sent only when the user sends a message from Settings → Contact us, through Formspree (Formspree, Inc.) to the developer's email. Linked to the user. Used for App Functionality (customer support). Not used for tracking.
 - Data collected: Identifiers, Device ID. expo-updates sends a random installation identifier (the EAS client id) with every update check, which Expo, a service provider, uses to count installs. Not linked to the user. Used for App Functionality and Analytics. Not used for tracking. The same answer as Play's Device or other IDs.
@@ -204,7 +204,7 @@ To enter with the resubmission of 1.0.21 (7) (the owner's call of 2026-11-13, "�
 
 ## Screenshot Plan
 
-Phone screenshots in use since 2026-11-02, 1206x2622 (iPhone 6.3 inch, the `APP_IPHONE_61` set), seven per page in this order: Home, Siddur tab, Reader (on Ashrei), History, Settings, a tzaddik page, the weekly report. Made by `pnpm store:screenshots --sets appstore-he,appstore-en` ([../scripts/store/screenshots.mjs](../scripts/store/screenshots.mjs)) from the tree of `00b6fa8` (the new logo, Rubik and the drawn icons): a seeded married man in Jerusalem, Sefard, the gold palette, a 15-day streak, the clock at Wednesday 2026-11-04 15:40 in Jerusalem. The Hebrew set replaced the five shots of 2026-10-22 on the Hebrew page; the English set went to the English (U.S.) and English (U.K.) pages (`asc screenshots upload --replace`), each read back `COMPLETE`. Local copies: the owner's Downloads folder `jew365-store-assets-2026-11`, `appstore-he` and `appstore-en` (the uploaded sets; its `play-*` folders still hold the 2026-11-01 sets with the old logo).
+Phone screenshots in use since 2026-11-14, 1206x2622 (iPhone 6.3 inch, the `APP_IPHONE_61` set), seven per page in this order: Home, Siddur tab, Reader (on Ashrei), History, Settings, a tzaddik page, the weekly report. Made by `pnpm store:screenshots --sets appstore-he,appstore-en` ([../scripts/store/screenshots.mjs](../scripts/store/screenshots.mjs)) from `93735c8`, the commit of build 1.0.21 (7), and uploaded to the `he`, `en-US` and `en-GB` pages with `asc screenshots upload --replace`, each read back; local copies in the owner's Downloads folder `jew365-store-assets-2026-11-14`. The set they replaced was made on 2026-11-02 from the tree of `00b6fa8` (the new logo, Rubik and the drawn icons): a seeded married man in Jerusalem, Sefard, the gold palette, a 15-day streak, the clock at Wednesday 2026-11-04 15:40 in Jerusalem. The Hebrew set replaced the five shots of 2026-10-22 on the Hebrew page; the English set went to the English (U.S.) and English (U.K.) pages (`asc screenshots upload --replace`), each read back `COMPLETE`. Local copies: the owner's Downloads folder `jew365-store-assets-2026-11`, `appstore-he` and `appstore-en` (the uploaded sets; its `play-*` folders still hold the 2026-11-01 sets with the old logo).
 
 Sizes (Apple scales down from the largest of each family):
 
