@@ -143,7 +143,7 @@ const STRINGS = Object.fromEntries(
     'more.title', 'more.search', 'more.searchPlaceholder', 'nav.home', 'nav.siddur', 'nav.history', 'nav.settings', 'nav.more',
     'home.messages', 'home.myDay', 'library.title', 'library.subtitle', 'offer.dismiss', 'home.greeting.afternoonNeutral',
     ...Object.keys(PALETTES).map((p) => `settings.theme.${p}`),
-  ].map((k) => [k, s(k)]),
+  ].map((k) => [k, s(k) === undefined ? '' : he[k]]), // s() checks the key; the page fills each %{…} itself
 );
 
 // The UI drawings of MitzvahIcon.tsx as SVG markup in a 24-unit box, stroked in currentColor.
