@@ -17,6 +17,12 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-11-14 — Pages `8dee183`
+
+- **Name the app's analytics in the privacy policy** — both languages of [docs/privacy/](docs/privacy) name the app's two anonymous, aggregate statistics (Expo's install count per version and update, from the update check's random installation identifier; Sentry's crash count per version) in an Analytics section, a Use line under Crash reports and no behavioural tracking under what the app does not do; the support page [docs/index.html](docs/index.html) drops "אין אנליטיקס"; the rule is in [docs/AGENTS.md](docs/AGENTS.md). App Store Connect's App Privacy carries Analytics on Crash Data and Device ID to match, and Play's Data safety already did.
+  - Requested: the owner, 2026-11-14 ("תתקן את מדיניות הפרטיות שתכלול אנליטיקס", then "ותחזיר שיהיה אנליטיקס זה חשוב לי"). Verified: both policy pages read live on Pages after the push, each with its Analytics heading and no "No analytics"; the App Privacy page read back "Used for App Functionality, and Analytics" on both data types.
+  - Version: Pages · Committed: yes, `8dee183` docs(store): 2026-11-14 store records, no luach name, analytics in the policy · Pushed: yes · Live: https://jew-365.github.io/jew-365/privacy/ and https://jew-365.github.io/jew-365/privacy/en/ · Channel: —
+
 ## 2026-11-14 — declined
 
 - **Declined: Align Play's Data safety with the policy's "No analytics"** — change Play's Data safety so crash logs and device or other IDs name no analytics purpose.
