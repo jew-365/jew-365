@@ -904,15 +904,15 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** `askForNotifications()` in [src/services/NotificationScheduler.ts](src/services/NotificationScheduler.ts) and its web shim (`'granted' | 'refused' | 'blocked'`, rebuilding the schedule on a grant once onboarded); the onboarding permissions step's main button "allow and continue" with an explicit "not now"; `PermissionsList` reporting its statuses; home asking once after setup when never asked; the no-permission banner asking in the app while the system still can, the phone's settings only when blocked.
   - **What it solves:** F1, reminders that silently never start.
   - **Expected result:** suites for the helper (granted, refused, blocked, the rebuild), the step's two buttons, the banner's two paths and the one-time ask on home; the web bundle still holds exactly one `setNotificationPermission('unknown')`. The setup half reaches new users with the next build.
-  - **Done:** 2026-11-13. `askForNotifications()` in [src/services/NotificationScheduler.ts](src/services/NotificationScheduler.ts) and the web shim (`'blocked'`, writing nothing); the permissions step's main button asks only while the OS can (reading `PermissionsList`'s new `onStatuses`) with an explicit `onboarding.notNow`; home asks once after setup (`notifAsked` hint); the banner asks in the app and opens the settings only when blocked. Verified: 6.5a of [NotificationScheduler.test.ts](src/services/__tests__/NotificationScheduler.test.ts) (blocked never prompts, a grant rebuilds once, a refusal does not), the permissions step's two buttons in [onboarding.cta.render.test.tsx](src/app/__tests__/onboarding.cta.render.test.tsx), the once-on-home ask and the banner in [home.render.test.tsx](src/app/__tests__/home.render.test.tsx) under `pnpm test:tz`, web parity. **Follow-up:** App Review rejected 1.0.21 (6) on 2026-11-12 under 5.1.1(iv) (a pre-prompt button may not say Allow); the store session is renaming the step's button to `common.continue` on `main`, and the home banner's `home.notificationsDenied` ("להפעלה" / "Tap to enable") still needs the same rewording once that lands. Not checked: a phone (Android 13+ and an iPhone, allow / not now / blocked). The setup half reaches new users with the next native build.
-  - **Status:** Version: OTA, expected with the next update (the setup half with the next build) · Committed: yes, `b00fae2` feat(discovery): ask for notifications at the right moment (A1) · Pushed: yes · Live: no · Channel: —
+  - **Done:** 2026-11-13. `askForNotifications()` in [src/services/NotificationScheduler.ts](src/services/NotificationScheduler.ts) and the web shim (`'blocked'`, writing nothing); the permissions step's main button asks only while the OS can (reading `PermissionsList`'s new `onStatuses`) with an explicit `onboarding.notNow`; home asks once after setup (`notifAsked` hint); the banner asks in the app and opens the settings only when blocked. Verified: 6.5a of [NotificationScheduler.test.ts](src/services/__tests__/NotificationScheduler.test.ts) (blocked never prompts, a grant rebuilds once, a refusal does not), the permissions step's two buttons in [onboarding.cta.render.test.tsx](src/app/__tests__/onboarding.cta.render.test.tsx), the once-on-home ask and the banner in [home.render.test.tsx](src/app/__tests__/home.render.test.tsx) under `pnpm test:tz`, web parity. **Follow-up:** App Review rejected 1.0.21 (6) on 2026-11-12 under 5.1.1(iv) (a pre-prompt button may not say Allow); the store session is renaming the step's button to `common.continue` on `main` (not there yet on 2026-11-14), and the home banner's `home.notificationsDenied` now reads "ההתראות כבויות. להמשך" / "Tap to continue." (`94abd8a`, its home case updated). Not checked: a phone (Android 13+ and an iPhone, allow / not now / blocked). The setup half reaches new users with the next native build.
+  - **Status:** Version: OTA, expected with the next update (the setup half with the next build) · Committed: yes, `b00fae2` feat(discovery): ask for notifications at the right moment (A1); `94abd8a` fix(home): the notifications banner says tap to continue, not enable (App Review 5.1.1(iv)) · Pushed: yes · Live: no · Channel: —
 
 - [ ] B3: "skip today" on the mitzvah screen
   - **What it is:** the today card of [src/app/mitzvah/[id].tsx](<src/app/mitzvah/[id].tsx>) gains "skip today" beside "mark as done" (and "undo" for a skipped day), through `markSkipped()` with the window's day.
   - **What it solves:** F6: skipping is a long press on home only.
   - **Expected result:** a render case: the button files a skip under the window's day, the card then shows the skipped state and its undo.
   - **Done:** 2026-11-13. Two side-by-side secondary Buttons on the today card of [src/app/mitzvah/[id].tsx](<src/app/mitzvah/[id].tsx>): `notifications.markDone` and `home.quick.skipToday` (`markSkipped()` of the window's day); the undo stays. Verified: "skips an open window from the today card" in [lateMark.render.test.tsx](src/app/__tests__/lateMark.render.test.tsx) (the skip filed under the window's day, `state.skipped` shown, undo clears it). Not checked: a phone.
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `ff0b972` feat(discovery): skip-today on the mitzvah screen, banners that land on the right block · Pushed: yes · Live: no · Channel: —
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `ff0b972` feat(discovery): skip-today on the mitzvah screen, banners that land on the right block; `ee1e3a7` fix(mitzvah): the skip-today button draws no icon, so the screen's close icons keep their scaled size · Pushed: yes · Live: no · Channel: —
 
 - [ ] B4: the user store's `discovery` field, and the sun hint that learns
   - **What it is:** `useUserStore.discovery` (`hints`, `offers`, `whatsNew`, `wants`) with its default, reset and a pure clean in the merge, no `STORE_VERSION` raise, carried by the backup file; "drag the sun" in [src/components/DayArcHero.tsx](src/components/DayArcHero.tsx) gone for good once dragged.
@@ -955,26 +955,36 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** `src/data/capabilities.ts`: about 25 entries over the existing mitzvot, add-ons, notice topics, tool screens and settings, each with a title, a one-line benefit, its state for this user and its action; a coverage suite on the model of [searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts).
   - **What it solves:** one vocabulary for the offers, the hub and the capabilities screen; a new feature cannot be forgotten.
   - **Expected result:** the coverage suite fails on a library group, add-on or More screen with no entry.
+  - **Done:** 2026-11-13. 28 capabilities in seven goals in [src/data/capabilities.ts](src/data/capabilities.ts), each with its action and `capabilityState()` (on, off, not installed, unavailable). Verified: [capabilities.test.ts](src/data/__tests__/capabilities.test.ts) (every mitzvah, library group, add-on and More destination covered, words in both dictionaries, each state), `pnpm test:tz`.
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: no · Channel: —
 
 - [ ] C2: the offers rule
   - **What it is:** pure `pickOffer(input)` in `src/utils/offers.ts` (one offer or none, the policy of spec C2) and `useOffer()`, evaluated after paint and memoised on the app day; accepting and "don't suggest" recorded in `discovery.offers`.
   - **What it solves:** F5: nothing is offered at the moment it matters.
   - **Expected result:** `offers.test.ts` under `pnpm test:tz`: each rule, once only, five days at most, two days apart, the install day, a holy block, nothing before `firstOpenedAt`.
+  - **Done:** 2026-11-13. `pickOffer()` and `weeklyTip()` in [src/utils/offers.ts](src/utils/offers.ts) over `offerInputAt()` of [src/services/offerInput.ts](src/services/offerInput.ts), and `useOffer()` in [src/hooks/useOffer.tsx](src/hooks/useOffer.tsx); the spec's readings (the battery offer on the install day, the tour in the first two app days, the gap from a showing) written into it. Verified: the 11 cases of [offers.test.ts](src/utils/__tests__/offers.test.ts) in the four zones.
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: no · Channel: —
 
 - [ ] C3: the offer on home, in Messages
   - **What it is:** the current offer as a Messages row (icon, title, benefit, action); Rosh Chodesh's row worded by whether its notices are on.
   - **What it solves:** F5, F3.
   - **Expected result:** home render cases: an offer shown, accepted, declined; today's home suites unchanged.
+  - **Done:** 2026-11-13. The offer leads home's Messages and opens [OfferSheet](src/components/OfferSheet.tsx), whose action runs through `useCapabilityAction()`; `roshChodeshMessage()` adds `home.msg.roshChodesh.noticesOff` while the notices are off. Verified: "home's offer in Messages" (shown, accepted, declined) in [home.render.test.tsx](src/app/__tests__/home.render.test.tsx); every other home suite unchanged. Not checked: a phone.
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: no · Channel: —
 
 - [ ] C6: a tip in the weekly report
   - **What it is:** one tip line in the weekly report notification's body and "a tip for next week" on the report screen, read once in `readPlanInput()`; no new notification (Q36).
   - **What it solves:** F5.
   - **Expected result:** report planner and report screen cases; the body changes only through `contentHash`.
+  - **Done:** 2026-11-13. `weeklyTip` read once in `readPlanInput()`, one `report.notice.tip` line in the report notice's body, and a `report.tip` card on [report.tsx](src/app/report.tsx). Verified: the tip line in [plan.test.ts](src/services/notifications/__tests__/plan.test.ts) and "the weekly report's tip for next week" in [lateMark.render.test.tsx](src/app/__tests__/lateMark.render.test.tsx); `SCHEDULE_FORMAT` unchanged.
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: no · Channel: —
 
 - [ ] G1: notification health
   - **What it is:** the missing battery exemption as the first offer (Android), and "send a sample reminder" in Settings › Device once the sample exists (Q37).
   - **What it solves:** F1: the user learns of a blocked delivery after missing a time.
   - **Expected result:** an offers case for the exemption; the sample's cases with A5.
+  - **Done (the battery half):** 2026-11-13. The missing exemption is the first offer on Android, its action `requestIgnoreBatteryOptimizations()`, its button "להמשך" (5.1.1(iv)). Verified: the battery cases of [offers.test.ts](src/utils/__tests__/offers.test.ts). Open: the sample reminder in Settings › Device waits for A5 and Q37.
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: no · Channel: —
 
 ### Medium — Discoverability, design studies and phase 2
 
@@ -982,6 +992,8 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** a study under [design/lab/studies/](design/lab/studies) for C5, C4, B1 and B2 (and the names of Q35), published as a Design canvas and a gallery site.
   - **What it solves:** spec items tagged "study" in phase 2.
   - **Expected result:** both Artifact links in the study's AGENTS.md and here; the owner's pick recorded.
+  - **Done (the study):** 2026-11-13. [design/lab/studies/2026-11-13-hub/](design/lab/studies/2026-11-13-hub/AGENTS.md), on the app's words, states and one real day: today's More tab beside three hub directions with the עוד / גלה switch, two directions of the capabilities screen, two of home's entry points. Published as one gallery Artifact, as the compass-button study was: https://claude.ai/artifact/2kobw5urktHPE9s8rjnvpJ. Checked at 1240 and 430 points (no horizontal scroll, no page error). Open: the owner's pick.
+  - **Status:** Version: none (design) · Committed: yes, `2ba199b` feat(design): the hub study · Pushed: yes · Live: the Artifact · Channel: —
 
 - [ ] Phase 2: build the owner's pick (C5, C4, A6, B1, B2, D1, E1, E2, E3)
   - **What it is:** the hub, `src/app/capabilities.tsx`, the catch-up offer, home's search and "all mitzvot" row, the benefit captions, one-time hints, guide pills and empty states, as the spec and the study's pick say; split into tasks when the pick is in.
@@ -994,6 +1006,8 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** a study for A2, A3 and A5 (six screens, the bundles, the ready screen with today and the sample), with Q33 and Q34 shown as options.
   - **What it solves:** F2.
   - **Expected result:** both Artifact links recorded; the owner's pick recorded.
+  - **Done (the study):** 2026-11-14. [design/lab/studies/2026-11-13-setup/](design/lab/studies/2026-11-13-setup/AGENTS.md): the six screens with shared answers (a gender sets the bundles), two directions of the bundles screen, Q33's quiet hours and Q34's candle rule shown, the system prompt and the sample reminder on iPhone and Android, every pre-prompt button saying Continue. Published as one gallery Artifact: https://claude.ai/artifact/HwB8eRAUxBLygyAmVsz9nM. Checked at 1240 and 430 points and by pressing (no page error). Open: the owner's pick.
+  - **Status:** Version: none (design) · Committed: yes, `c2d4340` wip(design): the setup study; `8f45b36` feat(design): the setup study published · Pushed: yes · Live: the Artifact · Channel: —
 
 - [ ] Phase 3: build the short setup (A2, A3, A4, A5)
   - **What it is:** the six-screen setup, `src/data/bundles.ts`, the ticked recommended bundles and night quiet hours, the ready screen and `presentSampleReminder()`; split into tasks when the pick is in.
