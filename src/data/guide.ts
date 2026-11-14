@@ -7,7 +7,11 @@ import { THEME_NAMES } from '@/theme/colors';
 import type { Nusach } from '@/types/mitzvah';
 import { mitzvahName } from '@/utils/mitzvahName';
 
-export type GuideText = { he: string; en: string };
+export type GuideText = { he: string; en: string; ios?: { he: string; en: string } };
+
+export function guideTextOn(text: GuideText, os: string): { he: string; en: string } {
+  return os === 'ios' && text.ios ? text.ios : text;
+}
 
 export type GuideTopicId =
   | 'start'
@@ -65,8 +69,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'תחילת הדרך', en: 'Getting started' },
     body: [
       {
-        he: 'בפתיחה הראשונה האפליקציה שואלת כמה שאלות קצרות: שם וטלפון, מגדר ומצב משפחתי (על כל אלה אפשר לדלג, והתשובות נשמרות רק במכשיר), נוסח התפילה, אחרי אילו מצוות לעקוב, והמקום לחישוב הזמנים: עם אישור גישה למיקום, המיקום מתעדכן לבד בכל פתיחה של האפליקציה, כך שהזמנים תמיד של המקום שבו הטלפון נמצא; בלי אישור, בוחרים כל יישוב בישראל או כל עיר בעולם בחיפוש לפי שם, והזמנים נשארים לפיו. אחר כך מסך הרשאות שמראה מה כבר מאושר ומאפשר לאשר את השאר. אחרי אישור ההתראות מצוות היום כבר מחכות בדף הבית.',
-        en: "The first time the app opens it asks a few short questions: name, phone, gender and marital status (all optional, and the answers stay on the device), your nusach, which mitzvot to track, and the place for the zmanim: with location access allowed, the location updates itself every time the app opens, so the times are always those of where the phone is; without it, you pick any locality in Israel or any city in the world by searching its name, and the times stay with it. Then comes a permissions screen that shows what is already allowed and lets you allow the rest. Once notifications are allowed, today's mitzvot are waiting on Home.",
+        he: 'בפתיחה הראשונה האפליקציה שואלת כמה שאלות קצרות: שם וטלפון, מגדר ומצב משפחתי (על כל אלה אפשר לדלג, והתשובות נשמרות רק במכשיר), נוסח התפילה, אחרי אילו מצוות לעקוב, והמקום לחישוב הזמנים: אפשר לבחור כל יישוב בישראל או כל עיר בעולם בחיפוש לפי שם, והזמנים נשארים לפיו; בלי בחירה, ״המשך״ מבקש את המיקום של הטלפון, ואם יש גישה המיקום מתעדכן לבד בכל פתיחה של האפליקציה, כך שהזמנים תמיד של המקום שבו הטלפון נמצא. גם בלי מיקום ובלי בחירה ממשיכים: הזמנים לפי ירושלים, ודף הבית מזכיר לבחור מקום. אחר כך מסך הרשאות שמראה מה כבר מאושר ומאפשר לאשר את השאר. אחרי אישור ההתראות מצוות היום כבר מחכות בדף הבית.',
+        en: "The first time the app opens it asks a few short questions: name, phone, gender and marital status (all optional, and the answers stay on the device), your nusach, which mitzvot to track, and the place for the zmanim: you can pick any locality in Israel or any city in the world by searching its name, and the times stay with it; without a pick, Continue asks for the phone's location, and with access the location updates itself every time the app opens, so the times are always those of where the phone is. Without a location or a pick you still go on: the times follow Jerusalem, and Home reminds you to choose a place. Then comes a permissions screen that shows what is already allowed and lets you allow the rest. Once notifications are allowed, today's mitzvot are waiting on Home.",
       },
       {
         he: 'במעבר לטלפון חדש מקישים במסך הפתיחה על ״יש לי קובץ גיבוי״ ומשחזרים את הקובץ שיוצא בטלפון הקודם.',
@@ -115,6 +119,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
       {
         he: 'במסך של כל מצווה מופיעים חלון הזמן של היום, ההתראה הבאה ורשימת התזכורות לפי סדר השליחה, ולצד כל אחת מתי היא תישלח בפעם הבאה. ״הוסף תזכורת״ מוסיף עוד אחת, וכל שינוי בתזכורות או בנודניקים פותח בציר ההתראות את ״איפוס ציר ההתראות״, שמחזיר את התזכורות המקוריות ואת הנודניק החכם. כל תזכורת כותבת גם כמה זמן נשאר ועד מתי הזמן: באייפון מתחת לכותרת, ובאנדרואיד בשורה הראשונה של התוכן. לכל מצווה יש בדיוק התראה אדומה אחת, הזמן האחרון, שנפתחת ב־❗, ואחת כתומה לפניה שנפתחת ב־⚠️ (בתפילה הזמן האחרון במניין, במצוות הלילה ״לכתחילה עד חצות״, ובשאר המצוות 15 דקות לפני האדומה), בכל טלפון; כל השאר רגילות. באנדרואיד שמציג את צבע ההתראה, הסמל ירוק, כתום בכתומה ואדום באדומה.',
         en: "Each mitzvah's screen shows today's time window, the next notification and its reminders in the order they go out, each with when it fires next. Add reminder adds one more, and any change to the reminders or the nags opens Reset notification timeline on the timeline, which brings back the original reminders and the smart nag. Every reminder also says how long is left and until when the time lasts: on the iPhone under its title, and on Android in the first line of its content. Each mitzvah has exactly one red notification, the last time, which opens with ❗, and one orange before it that opens with ⚠️ (for a prayer the last time with a minyan, for a night mitzvah “ideally before midnight”, for any other mitzvah 15 minutes before the red one), on every phone; all the rest are plain. On Android phones that show the notification colour, the icon is green, orange on the orange one and red on the red one.",
+        ios: {
+          he: 'במסך של כל מצווה מופיעים חלון הזמן של היום, ההתראה הבאה ורשימת התזכורות לפי סדר השליחה, ולצד כל אחת מתי היא תישלח בפעם הבאה. ״הוסף תזכורת״ מוסיף עוד אחת, וכל שינוי בתזכורות או בנודניקים פותח בציר ההתראות את ״איפוס ציר ההתראות״, שמחזיר את התזכורות המקוריות ואת הנודניק החכם. כל תזכורת כותבת גם כמה זמן נשאר ועד מתי הזמן, מתחת לכותרת. לכל מצווה יש בדיוק התראה אדומה אחת, הזמן האחרון, שנפתחת ב־❗, ואחת כתומה לפניה שנפתחת ב־⚠️ (בתפילה הזמן האחרון במניין, במצוות הלילה ״לכתחילה עד חצות״, ובשאר המצוות 15 דקות לפני האדומה), בכל טלפון; כל השאר רגילות.',
+          en: "Each mitzvah's screen shows today's time window, the next notification and its reminders in the order they go out, each with when it fires next. Add reminder adds one more, and any change to the reminders or the nags opens Reset notification timeline on the timeline, which brings back the original reminders and the smart nag. Every reminder also says how long is left and until when the time lasts, under its title. Each mitzvah has exactly one red notification, the last time, which opens with ❗, and one orange before it that opens with ⚠️ (for a prayer the last time with a minyan, for a night mitzvah “ideally before midnight”, for any other mitzvah 15 minutes before the red one), on every phone; all the rest are plain.",
+        },
       },
       {
         he: 'ב״מתי לשלוח״ בוחרים מתי התזכורת נשלחת: לפני תחילת הזמן (עד שלוש שעות לפני), בתחילת הזמן או אחריה, לפני סוף הזמן או בשעה קבועה, ומתחת קובעים כמה דקות. ״דלג אם כבר סומן״ מוותר עליה כשהמצווה כבר סומנה. במצווה אישית יש גם ״אחרי סוף הזמן, אם לא סימנת״, ובקידוש לבנה ״אחרי צאת שבת או חג״.',
@@ -135,6 +143,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
       {
         he: 'בהתראה עצמה ״עשיתי״ מסמן את המצווה בלי לפתוח את האפליקציה, ו״פתח נוסח״ פותח את הנוסח כשיש כזה. הקשה על ההתראה פותחת את הנוסח, או את מסך המצווה כשאין לה נוסח. בהגדרות ← מכשיר והתראות ← הרשאות רואים כל הרשאה שהאפליקציה צריכה ומאשרים את מה שחסר; באנדרואיד ״סוללה ללא הגבלה״ מאושרת בהקשה אחת, כדי שהתזכורות יגיעו בזמן.',
         en: "In the notification, Done marks the mitzvah without opening the app, and Open text opens its text when it has one. Tapping the notification opens the text, or the mitzvah's screen when there is none. Settings → Device and notifications → Permissions shows every permission the app needs and allows what is missing; on Android, Unrestricted battery takes one tap, so reminders arrive on time.",
+        ios: {
+          he: 'בהתראה עצמה ״עשיתי״ מסמן את המצווה בלי לפתוח את האפליקציה, ו״פתח נוסח״ פותח את הנוסח כשיש כזה. הקשה על ההתראה פותחת את הנוסח, או את מסך המצווה כשאין לה נוסח. בהגדרות ← מכשיר והתראות ← הרשאות רואים כל הרשאה שהאפליקציה צריכה ומאשרים את מה שחסר.',
+          en: "In the notification, Done marks the mitzvah without opening the app, and Open text opens its text when it has one. Tapping the notification opens the text, or the mitzvah's screen when there is none. Settings → Device and notifications → Permissions shows every permission the app needs and allows what is missing.",
+        },
       },
       {
         he: 'בהגדרות ← מכשיר והתראות אפשר לבחור ״לא לשלוח התראות לפני השעה״, ״לא לשלוח התראות אחרי השעה״, או את שתיהן. התראה שזמנה לפני השעה שנבחרה מגיעה בשעה הזו, והתראה שזמנה מאוחר יותר עוברת למחרת לשעה שנבחרה ב״החל מהשעה״, כל עוד זמן המצווה עוד פתוח; אחרת היא לא נשלחת. ההודעה לפני שבת וחג ותזכורות הסימון אחריהם נשלחות תמיד בזמנן.',
@@ -143,6 +155,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
       {
         he: 'התזכורות נקבעות מראש לימים הבאים, גם אם לא פותחים את האפליקציה: באנדרואיד לכחודש, ובאייפון לכשבוע וחצי, כשמהיום השלישי נשארת תזכורת אחת לכל מצווה. ביום האחרון שתוכנן מגיעה בשמונה בערב, או בשעה המותרת הקרובה כשנבחרו שעות בלי התראות, התראה ״התזכורות עומדות להיגמר״, וכל פתיחה של האפליקציה מתכננת מחדש.',
         en: 'Reminders are set ahead for the coming days even if the app is not opened: about a month on Android and about a week and a half on iPhone, where from the third day each mitzvah keeps one reminder. On the last planned day a notification at 8 pm, or the nearest allowed hour when notification hours are limited, says your reminders are about to run out, and every time the app opens it plans again.',
+        ios: {
+          he: 'התזכורות נקבעות מראש לכשבוע וחצי, גם אם לא פותחים את האפליקציה, כשמהיום השלישי נשארת תזכורת אחת לכל מצווה. ביום האחרון שתוכנן מגיעה בשמונה בערב, או בשעה המותרת הקרובה כשנבחרו שעות בלי התראות, התראה ״התזכורות עומדות להיגמר״, וכל פתיחה של האפליקציה מתכננת מחדש.',
+          en: 'Reminders are set ahead for about a week and a half even if the app is not opened, and from the third day each mitzvah keeps one reminder. On the last planned day a notification at 8 pm, or the nearest allowed hour when notification hours are limited, says your reminders are about to run out, and every time the app opens it plans again.',
+        },
       },
     ],
     routes: ['/mitzvah/[id]'],
@@ -175,8 +191,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'שבת ויום טוב', en: 'Shabbat and Yom Tov' },
     body: [
       {
-        he: 'בשבת וביום טוב האפליקציה נחה: מהדלקת הנרות ועד היציאה, 30 דקות אחרי השקיעה בארץ ו־40 בחוץ לארץ, לא נשלחות התראות, ובמקום המסכים מופיע מסך שקט עם שעת היציאה. זה במכוון, והאפליקציה חוזרת לפעול מעצמה.',
-        en: 'On Shabbat and Yom Tov the app rests: from candle lighting until the exit, 30 minutes after sunset in Israel and 40 abroad, no notifications go out, and a quiet screen with the exit time covers the app. This is by design, and the app comes back by itself.',
+        he: 'בשבת וביום טוב האפליקציה נחה: מהדלקת הנרות ועד היציאה, 30 דקות אחרי השקיעה בארץ ו־40 בחוץ לארץ, לא נשלחות התראות, ובמקום המסכים מופיע מסך שקט עם שעת היציאה והמקום שלפיו הזמנים. זה במכוון, והאפליקציה חוזרת לפעול מעצמה. מי שנמצא במקום אחר בוחר אותו במסך עצמו, והזמנים עוברים אליו. כל עוד לא אושר מקום (לא ניתנה גישה למיקום ולא נבחר מקום), המסך לא מופיע, וההתראות עדיין שותקות בשבת.',
+        en: 'On Shabbat and Yom Tov the app rests: from candle lighting until the exit, 30 minutes after sunset in Israel and 40 abroad, no notifications go out, and a quiet screen with the exit time and the place the times follow covers the app. This is by design, and the app comes back by itself. If you are somewhere else, choose your place on that screen and the times move to it. Until a place is confirmed (no location access and no place chosen), the screen does not show, and the notifications still stay quiet on Shabbat.',
       },
       {
         he: 'שעה לפני הדלקת הנרות מגיעה התראה עם זמני ההדלקה והיציאה, ולפי מה שמופעל גם ספירת העומר, ההילולות, ראש חודש והאושפיזין של הלילות שבתוך השבת או החג.',
@@ -417,6 +433,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
       {
         he: 'באנדרואיד ההגדרות, המצוות וההיסטוריה מגובות לחשבון Google, ובאייפון בגיבוי iCloud של המכשיר. בהגדרות ← גיבוי, שחזור ואיפוס אפשר גם לייצא קובץ גיבוי ולשחזר ממנו בכל טלפון; שחזור מחליף את מה שיש בטלפון. ״איפוס האפליקציה״ מוחק הכל, גם את נתוני הטהרה, שאינם נכללים בגיבוי.',
         en: "On Android your settings, mitzvot and history are backed up to your Google account, and on iPhone in the device's iCloud backup. Settings → Backup, restore and reset also exports a backup file and restores it on any phone; a restore replaces what is on the phone. Reset the app deletes everything, including the family purity data, which no backup holds.",
+        ios: {
+          he: 'ההגדרות, המצוות וההיסטוריה נשמרים בגיבוי iCloud של המכשיר. בהגדרות ← גיבוי, שחזור ואיפוס אפשר גם לייצא קובץ גיבוי ולשחזר ממנו בכל טלפון; שחזור מחליף את מה שיש בטלפון. ״איפוס האפליקציה״ מוחק הכל, גם את נתוני הטהרה, שאינם נכללים בגיבוי.',
+          en: "Your settings, mitzvot and history are kept in the device's iCloud backup. Settings → Backup, restore and reset also exports a backup file and restores it on any phone; a restore replaces what is on the phone. Reset the app deletes everything, including the family purity data, which no backup holds.",
+        },
       },
     ],
     routes: ['/(tabs)/settings'],
@@ -454,6 +474,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
       {
         he: 'להתראות של האפליקציה יש צלילים משלה, כדי לזהות מיד שהן מיהודי 365: שנים עשר צלילים לבחירה, ביניהם שמונה רכים ועדינים, וצליל נפרד לכל סוג התראה: הרגילה (פעמונים כברירת מחדל), הכתומה שלפני האחרונה (קלימבה) והאחרונה עם סימן הקריאה (תיבת נגינה). בוחרים בהגדרות ← מכשיר והתראות ← צליל ההתראות, ובחירה משמיעה את הצליל. באנדרואיד אפשר לשנות את הצליל גם בהגדרות ההתראות של הטלפון.',
         en: 'The app’s notifications have sounds of their own, so you know at once they are from Jew 365: twelve to choose from, eight of them soft and gentle, and a separate sound for each kind of notification: the plain one (Bells by default), the orange one before the last (Kalimba) and the last one with the exclamation mark (Music box). Choose them in Settings → Device and notifications → Notification sound, and a choice plays it. On Android the sound can also be changed in the phone’s notification settings.',
+        ios: {
+          he: 'להתראות של האפליקציה יש צלילים משלה, כדי לזהות מיד שהן מיהודי 365: שנים עשר צלילים לבחירה, ביניהם שמונה רכים ועדינים, וצליל נפרד לכל סוג התראה: הרגילה (פעמונים כברירת מחדל), הכתומה שלפני האחרונה (קלימבה) והאחרונה עם סימן הקריאה (תיבת נגינה). בוחרים בהגדרות ← מכשיר והתראות ← צליל ההתראות, ובחירה משמיעה את הצליל.',
+          en: 'The app’s notifications have sounds of their own, so you know at once they are from Jew 365: twelve to choose from, eight of them soft and gentle, and a separate sound for each kind of notification: the plain one (Bells by default), the orange one before the last (Kalimba) and the last one with the exclamation mark (Music box). Choose them in Settings → Device and notifications → Notification sound, and a choice plays it.',
+        },
       },
       {
         he: 'האפליקציה אינה פוסקת הלכה. הזמנים והכללים שהיא מיישמת נמסרים לעיון רב, וכל תשובה שלו משנה את הכלל שלה. בכל ספק יש לשאול רב.',
@@ -472,6 +496,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: 'האפליקציה מציגה מה היא יודעת לעשות: הצעה אחת בכל פעם תחת ״הודעות״ בדף הבית (למשל תזכורת לנרות שבת לקראת שבת, או ספירת העומר לפני שמתחילה), עם ״לא להציע שוב״; טיפ לשבוע הבא בסיכום השבועי; ״מה חדש בעדכון״ אחרי עדכון; ויום שהרצף מגיע בו ליעד. ״דלג היום״ גם במסך המצווה, וההודעות על מיקום או פרופיל פותחות את ההגדרה עצמה.',
         en: "The app shows what it can do: one suggestion at a time under Messages on Home (such as a reminder for Shabbat candles before Shabbat, or the Omer before it starts), with Don't suggest again; a tip for next week in the weekly report; What's new after an update; and the day your streak reaches a goal. Skip today is on the mitzvah screen too, and the location and profile messages open the setting itself.",
+      },
+      {
+        he: 'בהגדרה הראשונה אפשר להמשיך גם בלי לתת מיקום: הזמנים יחושבו לפי ירושלים עד שתבחרו מקום, ודף הבית יזכיר לבחור אותו. הכפתורים שמבקשים הרשאה נקראים עכשיו ״המשך״, במסך השבת אפשר לבחור מקום אחר, ובטופס יצירת הקשר רק תוכן הפנייה חובה.',
+        en: 'In the first setup you can go on without sharing your location: the times follow Jerusalem until you choose a place, and Home reminds you to choose it. The buttons that ask for a permission now read Continue, the Shabbat screen lets you choose another place, and the contact form needs only your message.',
       },
       {
         he: 'האפליקציה נפתחת מהר יותר: מסך הלוגו לא נתקע עוד שניות ארוכות. דף הבית מוצג ראשון, ושאר הלשוניות נטענות אחריו ברקע, ובניית ההתראות אחרי הפתיחה מהירה יותר. מסך הלוגו גם לא נשאר עוד עד סגירת האפליקציה: אם הגופנים מתעכבים, האפליקציה נפתחת בלעדיהם, ופתיחה שנתקעה בכל זאת נרשמת בהגדרות › אודות ויצירת קשר, מתחת לגרסה.',

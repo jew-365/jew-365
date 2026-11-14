@@ -40,7 +40,8 @@ export function isContactConfigured(formId: string = CONTACT_FORM_ID): boolean {
 }
 
 export function contactProblem({ name, phone, message }: ContactMessage): ContactProblem | null {
-  if (!name.trim() || !phone.trim() || !message.trim()) return 'missing';
+  if (!message.trim()) return 'missing';
+  if (!phone.trim()) return null;
   const digits = phone.replace(/\D/g, '').length;
   const allowed = /^\+?[\d\s\-().]+$/.test(phone.trim());
   return allowed && digits >= PHONE_DIGITS.min && digits <= PHONE_DIGITS.max ? null : 'phone';
@@ -54,9 +55,11 @@ export function dataDeletionUrl(language: AppLanguage): string {
   return `${PRODUCT_LINKS.privacy[language]}#delete`;
 }
 
+export const APP_STORE_RELEASED = false;
+
 export function storePageUrl(os: typeof Platform.OS = Platform.OS): string | null {
   if (os === 'android') return PRODUCT_LINKS.store.android;
-  if (os === 'ios') return PRODUCT_LINKS.store.ios;
+  if (os === 'ios') return APP_STORE_RELEASED ? PRODUCT_LINKS.store.ios : null;
   return null;
 }
 

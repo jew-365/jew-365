@@ -1,7 +1,7 @@
 const mockCheck = jest.fn();
 const mockFetch = jest.fn(async () => ({ isNew: true }));
 const mockReload = jest.fn(async () => {});
-const mockUpdates: { isEnabled: boolean; updateId: string | null; createdAt: Date | null } = {
+const mockUpdates: { isEnabled: boolean; updateId: string | null; createdAt: Date | null; channel?: string | null } = {
   isEnabled: true,
   updateId: 'running-id',
   createdAt: new Date('2026-10-08T12:00:00.000Z'),
@@ -10,6 +10,9 @@ const mockUpdates: { isEnabled: boolean; updateId: string | null; createdAt: Dat
 jest.mock('expo-updates', () => ({
   get isEnabled() {
     return mockUpdates.isEnabled;
+  },
+  get channel() {
+    return mockUpdates.channel ?? null;
   },
   get updateId() {
     return mockUpdates.updateId;
@@ -24,7 +27,13 @@ jest.mock('expo-updates', () => ({
 
 jest.mock('expo-constants', () => ({ __esModule: true, default: { expoConfig: { version: '1.0.17' } } }));
 
-import { appVersionLabel, downloadNewUpdate, isUpdateApplied, reloadIntoUpdate } from '../appUpdates';
+import {
+  appVersionLabel,
+  downloadNewUpdate,
+  isUpdateApplied,
+  onProductionChannel,
+  reloadIntoUpdate,
+} from '../appUpdates';
 
 const globals = globalThis as { __DEV__?: boolean };
 const AVAILABLE = { isAvailable: true, manifest: { id: 'u1', createdAt: '2026-10-08T14:00:00.000Z' } };
@@ -135,5 +144,21 @@ describe('appVersionLabel', () => {
 
     delete process.env.EXPO_PUBLIC_UPDATE_NUMBER;
     expect(appVersionLabel()).toBe('1.0.17-0');
+  });
+});
+
+describe('onProductionChannel', () => {
+  afterEach(() => {
+    mockUpdates.channel = null;
+  });
+
+  it.each([
+    ['production', true],
+    ['preview', false],
+    ['development', false],
+    [null, false],
+  ] as const)('reads the channel %s as production: %s', (channel, expected) => {
+    mockUpdates.channel = channel;
+    expect(onProductionChannel()).toBe(expected);
   });
 });

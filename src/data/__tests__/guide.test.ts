@@ -5,6 +5,7 @@ import {
   GUIDE_TOPICS,
   WHATS_NEW,
   guideList,
+  guideTextOn,
   latestWhatsNew,
   visibleGuideTopics,
   whatsNewHeading,
@@ -106,6 +107,15 @@ describe('the user guide topics', () => {
       }
       expect(topic.body.length).toBeGreaterThanOrEqual(1);
     }
+  });
+
+  it('names no other platform on iOS, in the topics and the latest news entries (App Review 2.3.10)', () => {
+    const shown = [...GUIDE_TOPICS.flatMap((topic) => topic.body), ...latestWhatsNew().flatMap((entry) => entry.items)];
+    for (const text of shown) {
+      const ios = guideTextOn(text, 'ios');
+      expect(`${ios.he} ${ios.en}`).not.toMatch(/אנדרואיד|Android|Google|גוגל|סמסונג|Samsung|Play/);
+    }
+    expect(guideTextOn(GUIDE_TOPICS[0].body[0], 'android')).toBe(GUIDE_TOPICS[0].body[0]);
   });
 
   it('names every screen under src/app in some topic', () => {

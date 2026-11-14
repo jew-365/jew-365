@@ -35,6 +35,9 @@ jest.mock('@expo-google-fonts/rubik/useFonts', () => ({ useFonts: () => mockFont
 jest.mock('@/services/NotificationScheduler', () => ({ initNotificationHandlers: () => () => {} }));
 jest.mock('@/services/ChokContentService', () => ({ reconcileChokInstall: () => {} }));
 jest.mock('@/services/SelichotContentService', () => ({ reconcileSelichotInstall: () => {} }));
+jest.mock('@/services/PlacesService', () => ({
+  loadPlaces: jest.fn(async () => jest.requireActual('@/testing/places').placesIndex()),
+}));
 const mockFollow = jest.fn(async (_options?: { fresh?: boolean }) => false);
 jest.mock('@/services/locationFollow', () => ({
   FOLLOW_INTERVAL_MS: 30_000,
@@ -274,6 +277,7 @@ describe('the root layout and the Chok LeYisrael prompt', () => {
 
   it('keeps the question behind the Shabbat screen and keeps it pending', async () => {
     jest.setSystemTime(at(J, '2026-10-31T12:00'));
+    useUserStore.setState({ locationStatus: 'ready', locationSource: 'manual' });
     useChokStore.getState().setEnablePrompt(true);
     renderWithTheme(<RootLayout />);
     await screen.findByText('שבת שלום');
@@ -353,13 +357,54 @@ describe('the root layout and the store rating', () => {
 describe('the root layout and the Shabbat screen', () => {
   beforeEach(() => {
     useUserStore.getState().reset();
-    useUserStore.setState({ language: 'he', location: J, inIsrael: true, nusach: 'ashkenaz', isOnboarded: true });
+    useUserStore.setState({
+      language: 'he',
+      location: J,
+      inIsrael: true,
+      nusach: 'ashkenaz',
+      isOnboarded: true,
+      locationStatus: 'ready',
+      locationSource: 'manual',
+    });
     jest.spyOn(AppState, 'addEventListener').mockImplementation(() => ({ remove: jest.fn() }) as never);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
     jest.useRealTimers();
+  });
+
+  const shabbatInJerusalem = () =>
+    jest.useFakeTimers({
+      now: at(J, '2026-10-30T18:00'),
+      doNotFake: ['nextTick', 'queueMicrotask', 'setImmediate', 'clearImmediate'],
+    });
+
+  it('rests only at a confirmed place: the unconfirmed default never covers the app (App Review 2.1, 5.1.5)', async () => {
+    shabbatInJerusalem();
+    useUserStore.setState({ locationStatus: 'denied', locationSource: 'manual' });
+    renderWithTheme(<RootLayout />);
+    await act(async () => {});
+    expect(screen.queryByText('שבת שלום')).toBeNull();
+  });
+
+  it('names the place on the rest screen and lifts the rest when a place out of Shabbat is picked there', async () => {
+    shabbatInJerusalem();
+    renderWithTheme(<RootLayout />);
+    await act(async () => {});
+    expect(screen.getByText('שבת שלום')).toBeOnTheScreen();
+    expect(screen.getByTestId('shabbat-place')).toHaveTextContent('הזמנים לפי ירושלים');
+    fireEvent.press(screen.getByRole('button', { name: /ירושלים/ }));
+    await act(async () => {});
+    const losAngeles = CITIES.find((city) => city.cityId === 'los-angeles')!;
+    fireEvent.press(screen.getByText(losAngeles.name));
+    await act(async () => {});
+    expect(useUserStore.getState()).toMatchObject({
+      location: losAngeles,
+      locationStatus: 'ready',
+      locationSource: 'manual',
+    });
+    expect(screen.queryByText('שבת שלום')).toBeNull();
   });
 
   it('turns the Hebrew date under the title at the shkia that opens the next day', async () => {

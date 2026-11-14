@@ -22,6 +22,14 @@ export function openExternalUrl(url: string): Promise<void> {
   return Linking.openURL(url).catch(() => {});
 }
 
+export function tryOpenExternalUrl(url: string): Promise<boolean> {
+  holdScreenOnReturn();
+  return Linking.openURL(url).then(
+    () => true,
+    () => false,
+  );
+}
+
 export function openSystemSettings(): Promise<void> {
   holdScreenOnReturn();
   return Linking.openSettings().catch(() => {});

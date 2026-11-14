@@ -17,8 +17,8 @@
       "bundleIdentifier": "com.jew365.app",
       "infoPlist": {
         "CFBundleDisplayName": "יהודי 365",
-        "NSLocationWhenInUseUsageDescription": "מיקום נדרש לחישוב זמני הלכה מדויקים לפי האזור שלך.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "מיקום נדרש לחישוב זמני הלכה מדויקים ולרענון יומי של התראות.",
+        "NSLocationWhenInUseUsageDescription": "יהודי 365 משתמש במיקום כדי לחשב את זמני ההלכה, כמו הזריחה והדלקת הנרות, במקום שבו אתם נמצאים, וכדי לכוון את מצפן התפילה לירושלים. אפשר גם לבחור מקום ידנית, בלי מיקום.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "יהודי 365 משתמש במיקום רק כשהאפליקציה פתוחה, כדי לחשב את זמני ההלכה ולכוון את מצפן התפילה. אפשר גם לבחור מקום ידנית, בלי מיקום.",
         "UIBackgroundModes": ["processing"],
         "CFBundleAllowMixedLocalizations": true,
         "ITSAppUsesNonExemptEncryption": false
@@ -67,8 +67,8 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "מיקום נדרש לחישוב זמני הלכה מדויקים ולרענון יומי של התראות.",
-          "locationAlwaysPermission": "מיקום נדרש לחישוב זמני הלכה מדויקים ולרענון יומי של התראות."
+          "locationAlwaysAndWhenInUsePermission": "יהודי 365 משתמש במיקום רק כשהאפליקציה פתוחה, כדי לחשב את זמני ההלכה ולכוון את מצפן התפילה. אפשר גם לבחור מקום ידנית, בלי מיקום.",
+          "locationAlwaysPermission": "יהודי 365 משתמש במיקום רק כשהאפליקציה פתוחה, כדי לחשב את זמני ההלכה ולכוון את מצפן התפילה. אפשר גם לבחור מקום ידנית, בלי מיקום."
         }
       ],
       [
@@ -108,7 +108,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "זיהוי הפנים משמש לנעילת מסכי הטהרה בלבד"
+          "faceIDPermission": "יהודי 365 משתמש ב-Face ID רק כדי לנעול את מסכי המעקב של טהרת המשפחה."
         }
       ],
       [

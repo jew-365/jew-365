@@ -34,6 +34,11 @@ jest.mock('@/services/ContactService', () => ({
   sendContactMessage: jest.fn(async () => {}),
 }));
 
+jest.mock('@/services/appUpdates', () => ({
+  ...(jest.requireActual('@/services/appUpdates') as object),
+  onProductionChannel: jest.fn(() => false),
+}));
+
 import { BOOT_STUCK_KEY } from '@/services/bootTrace';
 import { StorageService } from '@/services/StorageService';
 import { fireTimeText } from '@/utils/clock';
@@ -45,13 +50,14 @@ import SettingsScreen from '../(tabs)/settings';
 import { Card } from '@/components/Card';
 import { ListRow } from '@/components/ListRow';
 import {
+  APP_STORE_RELEASED,
   CONTACT_EMAIL,
   ContactError,
   contactMailUrl,
   isContactConfigured,
   sendContactMessage,
 } from '@/services/ContactService';
-import { appVersionLabel } from '@/services/appUpdates';
+import { appVersionLabel, onProductionChannel } from '@/services/appUpdates';
 import { translate } from '@/i18n';
 import { renderWithTheme } from '@/testing/render';
 import { useUserStore } from '@/stores/useUserStore';
@@ -128,6 +134,16 @@ describe('Settings contact', () => {
     StorageService.delete(BOOT_STUCK_KEY);
   });
 
+  it('keeps the stuck launch line off the production channel, where App Review would read it', async () => {
+    jest.mocked(onProductionChannel).mockReturnValue(true);
+    const startedAt = Date.UTC(2026, 10, 13, 7, 42);
+    StorageService.set(BOOT_STUCK_KEY, { startedAt, stages: { entry: startedAt }, notes: ['fontsTimeout'] });
+    await openContactSection();
+    expect(screen.queryByTestId('settings-stuck-launch')).toBeNull();
+    StorageService.delete(BOOT_STUCK_KEY);
+    jest.mocked(onProductionChannel).mockReturnValue(false);
+  });
+
   it('is titled about and contact, with the version first and the links last', async () => {
     renderWithTheme(<SettingsScreen />);
     await act(async () => {});
@@ -161,17 +177,18 @@ describe('Settings contact', () => {
       he('guide.title'),
       he('settings.linkSupport'),
       he('settings.linkPrivacy'),
-      he('settings.linkStore.ios'),
       he('settings.linkChok'),
     ]);
+    expect(APP_STORE_RELEASED).toBe(false);
+    expect(screen.queryByText(he('settings.linkStore.ios'))).toBeNull();
     expect(screen.getByLabelText(he('settings.contactMessage'))).toBeOnTheScreen();
   });
 
   it('fills the name and phone from the profile and leaves the message empty', async () => {
     await openContactSection();
 
-    expect(field('settings.profileName').props.value).toBe('Avraham Sason');
-    expect(field('settings.profilePhone').props.value).toBe('050-1234567');
+    expect(field('onboarding.nameLabel').props.value).toBe('Avraham Sason');
+    expect(field('onboarding.phoneLabel').props.value).toBe('050-1234567');
     expect(field('settings.contactMessage').props.value).toBe('');
   });
 
@@ -183,7 +200,7 @@ describe('Settings contact', () => {
     fireEvent.changeText(screen.getByPlaceholderText(he('settings.profileNamePlaceholder')), 'New Name');
     fireEvent.press(screen.getByText(he('settings.contact')));
 
-    expect(field('settings.profileName').props.value).toBe('New Name');
+    expect(field('onboarding.nameLabel').props.value).toBe('New Name');
   });
 
   it('sends the three fields, clears the message and confirms', async () => {
@@ -200,24 +217,30 @@ describe('Settings contact', () => {
     expect(useUserStore.getState().profileName).toBe('Avraham Sason');
   });
 
-  it.each([
-    ['message', 'settings.contactMessage', ''],
-    ['name', 'settings.profileName', '  '],
-    ['phone', 'settings.profilePhone', ''],
-  ])('refuses to send without a %s', async (_name, key, value) => {
+  it('refuses to send without a message', async () => {
     await openContactSection();
-    fireEvent.changeText(field('settings.contactMessage'), 'Hello');
-    fireEvent.changeText(field(key), value);
+    fireEvent.changeText(field('settings.contactMessage'), '');
     await send();
 
     expect(mockSend).not.toHaveBeenCalled();
     expect(screen.getByText(he('settings.contactMissing'))).toBeOnTheScreen();
   });
 
+  it('sends with only a message: the name and phone are optional (App Review 5.1.1)', async () => {
+    await openContactSection();
+    fireEvent.changeText(field('onboarding.nameLabel'), '  ');
+    fireEvent.changeText(field('onboarding.phoneLabel'), '');
+    fireEvent.changeText(field('settings.contactMessage'), 'Hello');
+    await send();
+
+    expect(mockSend).toHaveBeenCalledTimes(1);
+    expect(screen.getByText(he('settings.contactSent'))).toBeOnTheScreen();
+  });
+
   it('refuses a phone number that is not one', async () => {
     await openContactSection();
     fireEvent.changeText(field('settings.contactMessage'), 'Hello');
-    fireEvent.changeText(field('settings.profilePhone'), '123');
+    fireEvent.changeText(field('onboarding.phoneLabel'), '123');
     await send();
 
     expect(mockSend).not.toHaveBeenCalled();
@@ -277,7 +300,6 @@ describe('Settings contact', () => {
 
 describe('Settings about and contact links', () => {
   const SITE = 'https://jew-365.github.io/jew-365/';
-  const APP_STORE = 'https://apps.apple.com/app/id6825802248';
   const PLAY = 'https://play.google.com/store/apps/details?id=com.jew365.app';
   let openURL: jest.SpyInstance;
 
@@ -305,8 +327,6 @@ describe('Settings about and contact links', () => {
     ['en', 'settings.linkSupport', SITE],
     ['he', 'settings.linkPrivacy', `${SITE}privacy/`],
     ['en', 'settings.linkPrivacy', `${SITE}privacy/en/`],
-    ['he', 'settings.linkStore.ios', APP_STORE],
-    ['en', 'settings.linkStore.ios', APP_STORE],
   ] as const)('in %s, %s opens %s', async (language, key, url) => {
     await openAbout(language);
     fireEvent.press(screen.getByText(translate(key, undefined, language, null)));

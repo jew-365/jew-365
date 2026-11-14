@@ -1,10 +1,10 @@
 {
   "ios": {
     "CFBundleDisplayName": "Jew 365",
-    "NSLocationWhenInUseUsageDescription": "Location is needed to compute accurate halachic times for your area.",
-    "NSLocationAlwaysAndWhenInUseUsageDescription": "Location is needed to compute accurate halachic times and to refresh reminders daily.",
-    "NSLocationAlwaysUsageDescription": "Location is needed to compute accurate halachic times and to refresh reminders daily.",
-    "NSFaceIDUsageDescription": "Face ID only locks the taharah screens."
+    "NSLocationWhenInUseUsageDescription": "Jew 365 uses your location to calculate halachic times, such as sunrise and candle lighting, where you are, and to point the prayer compass to Jerusalem. You can also choose a place by hand, without location.",
+    "NSLocationAlwaysAndWhenInUseUsageDescription": "Jew 365 uses your location only while the app is open, to calculate halachic times and point the prayer compass. You can also choose a place by hand, without location.",
+    "NSLocationAlwaysUsageDescription": "Jew 365 uses your location only while the app is open, to calculate halachic times and point the prayer compass. You can also choose a place by hand, without location.",
+    "NSFaceIDUsageDescription": "Jew 365 uses Face ID only to lock the family purity tracker screens."
   },
   "android": {
     "app_name": "Jew 365"

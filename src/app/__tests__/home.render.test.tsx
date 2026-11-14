@@ -689,7 +689,7 @@ describe('home banners land on the right settings block', () => {
   it('opens Settings on the location block from the no-location banner', () => {
     useUserStore.setState({ locationStatus: 'missing' });
     renderAt(DAY);
-    fireEvent.press(screen.getByText('המיקום לא אושר. לבחירת עיר'));
+    fireEvent.press(screen.getByText('הזמנים מחושבים לפי ירושלים. לבחירת המקום שלכם'));
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/(tabs)/settings', params: { focus: 'location' } });
   });
 });

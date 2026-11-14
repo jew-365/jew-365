@@ -1,3 +1,4 @@
+import { Text } from 'react-native';
 import { screen } from '@testing-library/react-native';
 import { ShabbatScreen } from '../ShabbatScreen';
 import { IconTile } from '../IconTile';
@@ -45,6 +46,31 @@ describe('ShabbatScreen', () => {
   it("prints the exit on the location's clock, not the device's", () => {
     renderWithTheme(<ShabbatScreen block={{ ...BLOCK, end: at(NEW_YORK, '2026-11-14T17:10') }} tz={NEW_YORK.tz} />);
     expect(screen.getByText('צאת השבת 17:10')).toBeOnTheScreen();
+  });
+
+  it('names the place the times follow, so a reviewer sees the rest is tied to a place', () => {
+    renderWithTheme(<ShabbatScreen block={BLOCK} tz={JERUSALEM.tz} place="ירושלים" />);
+    expect(screen.getByTestId('shabbat-place')).toHaveTextContent('הזמנים לפי ירושלים');
+  });
+
+  it('offers its children under the change-place line, and nothing without them', () => {
+    const { unmount } = renderWithTheme(
+      <ShabbatScreen block={BLOCK} tz={JERUSALEM.tz} place="ירושלים">
+        <Text>picker</Text>
+      </ShabbatScreen>,
+    );
+    expect(screen.getByTestId('shabbat-change-place')).toHaveTextContent('במקום אחר? אפשר לבחור את המקום שלכם', {
+      exact: false,
+    });
+    expect(screen.getByText('picker')).toBeOnTheScreen();
+    unmount();
+    renderWithTheme(<ShabbatScreen block={BLOCK} tz={JERUSALEM.tz} place="ירושלים" />);
+    expect(screen.queryByTestId('shabbat-change-place')).toBeNull();
+  });
+
+  it('draws no place line without a place', () => {
+    renderWithTheme(<ShabbatScreen block={BLOCK} tz={JERUSALEM.tz} />);
+    expect(screen.queryByTestId('shabbat-place')).toBeNull();
   });
 
   it('draws the candles emblem at 72 points', () => {

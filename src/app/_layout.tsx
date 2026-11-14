@@ -52,8 +52,10 @@ import {
 } from '@/services/notificationResponseHandler';
 import { setLocale, t } from '@/i18n';
 import { StorageService } from '@/services/StorageService';
+import { getLocationName } from '@/data/cities';
 import { HebcalService } from '@/services/HebcalService';
 import { ZmanimService } from '@/services/ZmanimService';
+import { PlacePicker } from '@/components/PlacePicker';
 import { QuietBlockContext, ShabbatScreen } from '@/components/ShabbatScreen';
 import { UpdateBanner } from '@/components/UpdateBanner';
 import { ChokEnablePrompt } from '@/components/ChokEnablePrompt';
@@ -125,8 +127,8 @@ function nextShkia(now: Date, location: Location): Date | null {
 // The Shabbat / Yom Tov block the app is inside right now, re-read the moment candle lighting, tzeit or,
 // inside a block, shkia (where the Hebrew date under the Shabbat screen's title turns) passes while the
 // app is open, and on every return to the foreground — JS timers do not run while the app is in the
-// background. Before onboarding the location is only a default guess, so it cannot decide that the user
-// is inside Shabbat.
+// background. Before onboarding, and while the place is a default no one confirmed (location refused,
+// no place picked), the location is only a guess, so it cannot decide that the user is inside Shabbat.
 function useCurrentQuietBlock(location: Location, enabled: boolean): { block: HolyBlock | null; now: number } {
   const [now, setNow] = useState(() => Date.now());
   const block = useMemo(() => (enabled ? quietBlockAt(new Date(now), location) : null), [now, location, enabled]);
@@ -158,7 +160,8 @@ function RootInner() {
   const language = useUserStore((s) => s.language);
   const location = useUserStore((s) => s.location);
   const firstOpenedAt = useUserStore((s) => s.firstOpenedAt);
-  const { block: quietBlock, now } = useCurrentQuietBlock(location, isOnboarded);
+  const placeConfirmed = useUserStore((s) => s.locationStatus === 'ready');
+  const { block: quietBlock, now } = useCurrentQuietBlock(location, isOnboarded && placeConfirmed);
   const quiet = quietBlock !== null;
 
   useEffect(() => {
@@ -334,7 +337,15 @@ function RootInner() {
           block={quietBlock}
           tz={location.tz}
           subtitle={quietBlock ? HebcalService.getHebrewDateAt(new Date(now), location).hebrewDateStr : undefined}
-        />
+          place={getLocationName(location, language)}
+        >
+          <QuietBlockContext.Provider value={null}>
+            <PlacePicker
+              location={location}
+              onPick={(picked) => useUserStore.getState().setLocationState(picked, 'ready', 'manual')}
+            />
+          </QuietBlockContext.Provider>
+        </ShabbatScreen>
       </View>
     </QuietBlockContext.Provider>
   );

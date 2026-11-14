@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, type ReactNode } from 'react';
 import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HolyBlock } from '@/types/zmanim';
@@ -22,12 +22,12 @@ export function useQuietBlock(): HolyBlock | null {
   return useContext(QuietBlockContext);
 }
 
-type Props = { block: HolyBlock | null; tz: string; subtitle?: string };
+type Props = { block: HolyBlock | null; tz: string; subtitle?: string; place?: string; children?: ReactNode };
 
 // An overlay above the whole navigator rather than a Modal, so it can never fail to present
 // because a screen's own modal got there first. Android back closes the app instead of reaching a
 // route underneath.
-export function ShabbatScreen({ block, tz, subtitle }: Props) {
+export function ShabbatScreen({ block, tz, subtitle, place, children }: Props) {
   const { colors } = useTheme();
   const { language, t } = useI18n();
 
@@ -63,9 +63,25 @@ export function ShabbatScreen({ block, tz, subtitle }: Props) {
           <View testID="shabbat-until" style={[styles.untilPill, { backgroundColor: colors.goldLight }]}>
             <Text style={[typography.heading, styles.centered, { color: colors.goldText }]}>{until}</Text>
           </View>
+          {place ? (
+            <Text
+              testID="shabbat-place"
+              style={[typography.caption, styles.centered, styles.subtitle, { color: colors.textMuted }]}
+            >
+              {t('holyBlock.screen.place', { place })}
+            </Text>
+          ) : null}
           <Text style={[typography.body, styles.centered, styles.quiet, { color: colors.textSub }]}>
             {t('holyBlock.screen.quiet')}
           </Text>
+          {children ? (
+            <View testID="shabbat-change-place" style={styles.changePlace}>
+              <Text style={[typography.small, styles.centered, styles.changeLabel, { color: colors.textMuted }]}>
+                {t('holyBlock.screen.changePlace')}
+              </Text>
+              {children}
+            </View>
+          ) : null}
         </View>
       </SafeAreaView>
     </View>
@@ -104,5 +120,12 @@ const styles = StyleSheet.create({
   },
   quiet: {
     marginTop: spacing.lg,
+  },
+  changePlace: {
+    alignSelf: 'stretch',
+    marginTop: spacing.xxl,
+  },
+  changeLabel: {
+    marginBottom: spacing.sm,
   },
 });

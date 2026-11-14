@@ -46,7 +46,8 @@ import { arrowAngle, bearingTo } from '@/utils/compass';
 
 const JERUSALEM = CITIES[0];
 const NEW_YORK = CITIES.find((city) => city.cityId === 'new-york') ?? CITIES[1];
-const PERMISSION = 'אפשר גישה למיקום';
+const PERMISSION = 'המשך';
+const OPEN_SETTINGS = 'פתיחת הגדרות הטלפון';
 const CALIBRATE = 'המצפן לא מכויל. הזז את המכשיר בתנועת שמונה';
 const LESS_EXACT = 'הכיוון לפי צפון מגנטי, פחות מדויק';
 const NEEDS_PERMISSION = 'כדי להציג את הכיוון צריך גישה למיקום';
@@ -273,10 +274,26 @@ describe('Compass screen', () => {
     const open = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
     mockPermission.mockResolvedValue({ granted: false, canAskAgain: false });
     await renderScreen();
+    expect(screen.queryByRole('button', { name: PERMISSION })).toBeNull();
+    await act(async () => {
+      fireEvent.press(screen.getByRole('button', { name: OPEN_SETTINGS }));
+    });
+    expect(mockRequest).not.toHaveBeenCalled();
+    expect(open).toHaveBeenCalledTimes(1);
+    open.mockRestore();
+  });
+
+  it('stays on the screen after a fresh refusal, and offers the settings from then on (App Review 5.1.1(iv))', async () => {
+    const open = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
+    mockPermission.mockResolvedValue({ granted: false, canAskAgain: true });
+    mockRequest.mockResolvedValue({ granted: false, canAskAgain: false });
+    await renderScreen();
     await act(async () => {
       fireEvent.press(screen.getByRole('button', { name: PERMISSION }));
     });
-    expect(open).toHaveBeenCalledTimes(1);
+    expect(mockRequest).toHaveBeenCalledTimes(1);
+    expect(open).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: OPEN_SETTINGS })).toBeOnTheScreen();
     open.mockRestore();
   });
 

@@ -1,6 +1,8 @@
+import { Platform } from 'react-native';
 jest.mock('@/services/crashReporting', () => ({ crashReportingEnabled: false, captureException: jest.fn() }));
 
 import {
+  APP_STORE_RELEASED,
   CONTACT_EMAIL,
   CONTACT_FORM_ID,
   CONTACT_MESSAGE_MAX,
@@ -83,14 +85,21 @@ describe('ContactService', () => {
 
     it.each([
       ['android', 'https://play.google.com/store/apps/details?id=com.jew365.app'],
-      ['ios', 'https://apps.apple.com/app/id6825802248'],
+      ['ios', null],
       ['web', null],
     ] as const)('gives %s its store page', (os, url) => {
       expect(storePageUrl(os)).toBe(url);
     });
 
     it('reads the running platform by default', () => {
-      expect(storePageUrl()).toBe('https://apps.apple.com/app/id6825802248');
+      const os = jest.replaceProperty(Platform, 'OS', 'android');
+      expect(storePageUrl()).toBe('https://play.google.com/store/apps/details?id=com.jew365.app');
+      os.restore();
+    });
+
+    it('keeps the App Store page out until the app is released there, since it answers 404 before', () => {
+      expect(APP_STORE_RELEASED).toBe(false);
+      expect(PRODUCT_LINKS.store.ios).toBe('https://apps.apple.com/app/id6825802248');
     });
 
     it.each([
@@ -108,12 +117,14 @@ describe('ContactService', () => {
       expect(contactProblem({ ...VALID, phone: '(02) 536-3333' })).toBeNull();
     });
 
-    it.each([
-      ['name', { ...VALID, name: '   ' }],
-      ['phone', { ...VALID, phone: '' }],
-      ['message', { ...VALID, message: '\n ' }],
-    ])('rejects a blank %s as missing', (_field, input) => {
-      expect(contactProblem(input)).toBe('missing');
+    it('rejects a blank message as missing', () => {
+      expect(contactProblem({ ...VALID, message: '\n ' })).toBe('missing');
+    });
+
+    it('accepts a message without a name or a phone', () => {
+      expect(contactProblem({ ...VALID, name: '   ' })).toBeNull();
+      expect(contactProblem({ ...VALID, phone: '' })).toBeNull();
+      expect(contactProblem({ name: '', phone: ' ', message: 'Hi' })).toBeNull();
     });
 
     it.each(['12345', '0501234567890123', '050-abc-4567', '050 123 4567 ext'])('rejects the phone %s', (phone) => {

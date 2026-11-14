@@ -111,7 +111,7 @@ describe('PermissionsList', () => {
     await renderList();
     expect(screen.getByText(he('permissions.notifications.why'))).toBeTruthy();
     const user = userEvent.setup();
-    await user.press(screen.getByLabelText(label('notifications', 'permissions.allow')));
+    await user.press(screen.getByLabelText(label('notifications', 'permissions.continue')));
     expect(sched.requestNotificationPermissions).toHaveBeenCalledTimes(1);
     expect(screen.getByText(he('permissions.notifications.blocked'))).toBeTruthy();
     await user.press(screen.getByLabelText(label('notifications', 'permissions.openSettings')));
@@ -123,7 +123,7 @@ describe('PermissionsList', () => {
     sched.syncNotificationPermissionStatus.mockResolvedValue(false);
     useUserStore.setState({ isOnboarded: true });
     await renderList();
-    await userEvent.setup().press(screen.getByLabelText(label('notifications', 'permissions.allow')));
+    await userEvent.setup().press(screen.getByLabelText(label('notifications', 'permissions.continue')));
     expect(sched.NotificationScheduler.rebuild).toHaveBeenCalledTimes(1);
   });
 
@@ -131,14 +131,14 @@ describe('PermissionsList', () => {
     sched.syncNotificationPermissionStatus.mockResolvedValue(false);
     useUserStore.setState({ isOnboarded: false });
     await renderList();
-    await userEvent.setup().press(screen.getByLabelText(label('notifications', 'permissions.allow')));
+    await userEvent.setup().press(screen.getByLabelText(label('notifications', 'permissions.continue')));
     expect(sched.NotificationScheduler.rebuild).not.toHaveBeenCalled();
   });
 
   it('requests location when missing and shows the pill after the re-read', async () => {
     location.getPermissionStatus.mockResolvedValueOnce('missing');
     await renderList();
-    await userEvent.setup().press(screen.getByLabelText(label('location', 'permissions.allow')));
+    await userEvent.setup().press(screen.getByLabelText(label('location', 'permissions.continue')));
     expect(location.requestPermission).toHaveBeenCalled();
     expect(screen.getByLabelText(label('location', 'permissions.active'))).toBeTruthy();
   });
@@ -154,7 +154,7 @@ describe('PermissionsList', () => {
   it('survives a rejected location read', async () => {
     location.getPermissionStatus.mockRejectedValue(new Error('boom'));
     await renderList();
-    expect(screen.getByLabelText(label('location', 'permissions.allow'))).toBeTruthy();
+    expect(screen.getByLabelText(label('location', 'permissions.continue'))).toBeTruthy();
     expect(screen.queryByLabelText(label('location', 'permissions.active'))).toBeNull();
   });
 
@@ -162,7 +162,7 @@ describe('PermissionsList', () => {
     ds.supportsBatteryOptimizationSettings.mockReturnValue(true);
     ds.isIgnoringBatteryOptimizations.mockResolvedValue(false);
     await renderList();
-    await userEvent.setup().press(screen.getByLabelText(label('battery', 'permissions.allow')));
+    await userEvent.setup().press(screen.getByLabelText(label('battery', 'permissions.continue')));
     expect(ds.requestIgnoreBatteryOptimizations).toHaveBeenCalledTimes(1);
   });
 
@@ -170,7 +170,7 @@ describe('PermissionsList', () => {
     ds.supportsBatteryOptimizationSettings.mockReturnValue(true);
     ds.isIgnoringBatteryOptimizations.mockResolvedValue(null);
     await renderList();
-    expect(screen.getByLabelText(label('battery', 'permissions.allow'))).toBeTruthy();
+    expect(screen.getByLabelText(label('battery', 'permissions.continue'))).toBeTruthy();
     expect(screen.queryByLabelText(label('battery', 'permissions.active'))).toBeNull();
   });
 
@@ -229,14 +229,14 @@ describe('PermissionsList', () => {
     sched.syncNotificationPermissionStatus.mockResolvedValue(false);
     sched.notificationPermissionState.mockResolvedValue('missing');
     await renderList();
-    expect(screen.getByLabelText(label('notifications', 'permissions.allow'))).toBeTruthy();
+    expect(screen.getByLabelText(label('notifications', 'permissions.continue'))).toBeTruthy();
   });
 
   it('re-reads when the app returns to the foreground', async () => {
     ds.supportsBatteryOptimizationSettings.mockReturnValue(true);
     ds.isIgnoringBatteryOptimizations.mockResolvedValue(false);
     await renderList();
-    expect(screen.getByLabelText(label('battery', 'permissions.allow'))).toBeTruthy();
+    expect(screen.getByLabelText(label('battery', 'permissions.continue'))).toBeTruthy();
     ds.isIgnoringBatteryOptimizations.mockResolvedValue(true);
     await act(async () => {
       listeners.forEach((listener) => listener('active'));

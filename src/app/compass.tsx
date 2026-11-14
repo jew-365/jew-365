@@ -410,12 +410,14 @@ export default function CompassScreen() {
   }, []);
 
   const grantedRef = useRef<boolean | null>(null);
+  const [blocked, setBlocked] = useState(false);
   const applyStatus = useCallback(
     (status: LocationStatus) => {
       const ready = status === 'ready';
       const was = grantedRef.current;
       grantedRef.current = ready;
       setGranted(ready);
+      setBlocked(status === 'denied');
       if (ready && was !== true) void locate();
     },
     [locate],
@@ -442,11 +444,11 @@ export default function CompassScreen() {
   }, [applyStatus]);
 
   const askPermission = async () => {
-    const status = await LocationService.requestPermission();
-    if (status === 'ready') applyStatus(status);
-    else if (status === 'denied') {
+    if (blocked) {
       openSystemSettings();
+      return;
     }
+    applyStatus(await LocationService.requestPermission());
   };
 
   const point: GeoPoint = fix ?? saved;
@@ -545,7 +547,11 @@ export default function CompassScreen() {
         </View>
         <Text style={[typography.caption, styles.source, { color: colors.textMuted }]}>{sourceLine}</Text>
         {granted === false ? (
-          <Button label={t('compass.permission')} variant="secondary" onPress={askPermission} />
+          <Button
+            label={t(blocked ? 'settings.locationOpenSettings' : 'compass.permission')}
+            variant="secondary"
+            onPress={askPermission}
+          />
         ) : null}
       </ScrollView>
       {prayer && reached ? (

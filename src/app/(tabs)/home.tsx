@@ -819,8 +819,12 @@ export default function HomeScreen() {
         onPress: () => router.push('/checkin'),
       };
     }
-    if (user.locationStatus === 'missing') {
-      return { tone: 'warning', text: t('home.noLocation'), onPress: () => openLocationSettings() };
+    if (user.locationStatus === 'missing' || user.locationStatus === 'denied') {
+      return {
+        tone: 'warning',
+        text: t('home.noLocation', { city: getLocationName(location, language) }),
+        onPress: () => openLocationSettings(),
+      };
     }
     if (user.locationStatus === 'timeout')
       return { tone: 'warning', text: t('home.gpsTimeout'), onPress: () => openLocationSettings() };

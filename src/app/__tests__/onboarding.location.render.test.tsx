@@ -19,10 +19,11 @@ import { renderWithTheme } from '@/testing/render';
 import { useUserStore } from '@/stores/useUserStore';
 
 const he = (key: string, params?: Record<string, string>) => translate(key, params, 'he', null);
+const en = (key: string, params?: Record<string, string>) => translate(key, params, 'en', null);
 const continueButton = () => screen.getByRole('button', { name: he('common.continue') });
-const allow = () => screen.getByRole('button', { name: he('onboarding.locationAllow') });
 const openPicker = (place: string) =>
   fireEvent.press(screen.getByRole('button', { name: he('location.pick.open', { place }) }));
+const continueHint = () => he('onboarding.locationContinueHint', { city: getLocationName(CITIES[0], 'he') });
 
 describe('the onboarding location step', () => {
   beforeEach(() => {
@@ -32,16 +33,16 @@ describe('the onboarding location step', () => {
   });
   afterEach(() => jest.restoreAllMocks());
 
-  it('asks for the location first, and with it the times follow the phone', async () => {
+  it('asks for the location on Continue, and with it the times follow the phone', async () => {
     const telAviv = findCityById('tel-aviv')!;
     const lookup = jest
       .spyOn(LocationService, 'getCurrentLocation')
       .mockResolvedValue({ location: telAviv, status: 'ready', source: 'gps' });
     renderWithTheme(<OnboardingLocationScreen />);
-    expect(continueButton()).toBeDisabled();
-    expect(screen.getByText(he('onboarding.locationAllowHint'))).toBeOnTheScreen();
+    expect(continueButton()).toBeEnabled();
+    expect(screen.getByText(continueHint())).toBeOnTheScreen();
     await act(async () => {
-      fireEvent.press(allow());
+      fireEvent.press(continueButton());
     });
     expect(lookup).toHaveBeenCalledTimes(1);
     expect(useUserStore.getState()).toMatchObject({
@@ -49,21 +50,34 @@ describe('the onboarding location step', () => {
       locationStatus: 'ready',
       locationSource: 'gps',
     });
-    expect(screen.getByText(he('settings.locationFollows'))).toBeOnTheScreen();
-    expect(continueButton()).toBeEnabled();
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
   });
 
-  it('without the permission, any place is picked by searching for it', async () => {
+  it('continues with the default place when the location is refused', async () => {
     jest
       .spyOn(LocationService, 'getCurrentLocation')
       .mockResolvedValue({ location: null, status: 'denied', source: 'manual' });
     renderWithTheme(<OnboardingLocationScreen />);
     await act(async () => {
-      fireEvent.press(allow());
+      fireEvent.press(continueButton());
     });
-    expect(screen.getByText(he('settings.locationStatus.denied'))).toBeOnTheScreen();
-    expect(continueButton()).toBeDisabled();
+    expect(useUserStore.getState()).toMatchObject({ location: CITIES[0], locationStatus: 'denied' });
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
+  });
 
+  it('continues when the lookup itself fails', async () => {
+    jest.spyOn(LocationService, 'getCurrentLocation').mockRejectedValue(new Error('no location services'));
+    renderWithTheme(<OnboardingLocationScreen />);
+    await act(async () => {
+      fireEvent.press(continueButton());
+    });
+    expect(useUserStore.getState()).toMatchObject({ location: CITIES[0], locationStatus: 'missing' });
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
+  });
+
+  it('a place picked by searching for it continues without asking for the location', async () => {
+    const lookup = jest.spyOn(LocationService, 'getCurrentLocation');
+    renderWithTheme(<OnboardingLocationScreen />);
     openPicker(getLocationName(CITIES[0], 'he'));
     await act(async () => {});
     fireEvent.changeText(screen.getByLabelText(he('location.pick.search')), 'ביתר עילית');
@@ -76,21 +90,21 @@ describe('the onboarding location step', () => {
       locationSource: 'manual',
     });
     expect(screen.getByText(he('settings.locationPicked'))).toBeOnTheScreen();
-    expect(continueButton()).toBeEnabled();
+    expect(screen.queryByText(continueHint())).toBeNull();
+    await act(async () => {
+      fireEvent.press(continueButton());
+    });
+    expect(lookup).not.toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
   });
 
-  it('keeps a place already picked when the location is then refused', async () => {
-    jest
-      .spyOn(LocationService, 'getCurrentLocation')
-      .mockResolvedValue({ location: null, status: 'denied', source: 'manual' });
+  it('has no button that asks to allow before the system prompt (App Review 5.1.1(iv))', () => {
+    useUserStore.setState({ language: 'en' });
     renderWithTheme(<OnboardingLocationScreen />);
-    openPicker(getLocationName(CITIES[0], 'he'));
-    fireEvent.press(screen.getByText(getLocationName(CITIES[1], 'he')));
-    await act(async () => {
-      fireEvent.press(allow());
-    });
-    expect(useUserStore.getState()).toMatchObject({ location: CITIES[1], locationStatus: 'ready' });
-    expect(continueButton()).toBeEnabled();
+    const names = screen.getAllByRole('button').map((button) => String(button.props.accessibilityLabel ?? ''));
+    expect(names.join(' | ')).not.toMatch(/allow|enable|grant/i);
+    expect(screen.queryByText(/allow|enable|grant/i)).toBeNull();
+    expect(screen.getByRole('button', { name: en('common.continue') })).toBeEnabled();
   });
 
   it('drops the hint and the sources line while the keyboard is up, so the results keep the room', async () => {

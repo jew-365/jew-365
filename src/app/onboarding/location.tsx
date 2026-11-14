@@ -6,7 +6,7 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ONBOARDING_STEPS, OnboardingDots } from '@/components/OnboardingDots';
 import { PlacePicker } from '@/components/PlacePicker';
-import { LocationService, type LocationStatus } from '@/services/LocationService';
+import { LocationService } from '@/services/LocationService';
 import { useUserStore } from '@/stores/useUserStore';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
@@ -20,27 +20,23 @@ export default function OnboardingLocationScreen() {
   const router = useRouter();
   const user = useUserStore();
   const [busy, setBusy] = useState(false);
-  // Why the last request for the phone's location found none; a place picked since clears it.
-  const [failure, setFailure] = useState<LocationStatus | null>(null);
   const locationReady = user.locationStatus === 'ready';
+  const placeName = getLocationName(user.location, language);
 
-  const refreshLocation = async () => {
+  const proceed = async () => {
     if (busy) return;
-    setBusy(true);
-    try {
-      const resolved = await LocationService.getCurrentLocation();
-      if (resolved.location) {
-        user.setLocationState(resolved.location, resolved.status, resolved.source);
-        setFailure(null);
-      } else {
-        // A place already picked stays the place: a refused permission only says so.
-        if (useUserStore.getState().locationStatus !== 'ready') user.setLocationStatus(resolved.status);
-        setFailure(resolved.status);
+    if (useUserStore.getState().locationStatus !== 'ready') {
+      setBusy(true);
+      try {
+        const resolved = await LocationService.getCurrentLocation().catch(() => null);
+        const state = useUserStore.getState();
+        if (resolved?.location) state.setLocationState(resolved.location, resolved.status, resolved.source);
+        else if (resolved && state.locationStatus !== 'ready') state.setLocationStatus(resolved.status);
+      } finally {
+        setBusy(false);
       }
-    } finally {
-      // Without this a rejection left the button reading "..." forever, dead-ending onboarding.
-      setBusy(false);
     }
+    router.push('/onboarding/permissions');
   };
 
   return (
@@ -52,42 +48,28 @@ export default function OnboardingLocationScreen() {
       </Text>
 
       <Card padded style={styles.cardGap}>
-        <Text style={[typography.bodyBold, { color: colors.text }]}>{getLocationName(user.location, language)}</Text>
+        <Text style={[typography.bodyBold, { color: colors.text }]}>{placeName}</Text>
         <Text style={[typography.small, { color: colors.textMuted, marginTop: spacing.xs }]}>
           {t(
-            failure
-              ? `settings.locationStatus.${failure}`
-              : user.locationStatus !== 'ready'
-                ? `settings.locationStatus.${user.locationStatus}`
-                : user.locationSource === 'gps'
-                  ? 'settings.locationFollows'
-                  : 'settings.locationPicked',
+            !locationReady
+              ? `settings.locationStatus.${user.locationStatus}`
+              : user.locationSource === 'gps'
+                ? 'settings.locationFollows'
+                : 'settings.locationPicked',
           )}
-        </Text>
-        <Button label={t('onboarding.locationAllow')} onPress={refreshLocation} busy={busy} style={styles.buttonGap} />
-        <Text style={[typography.small, styles.allowHint, { color: colors.textSub }]}>
-          {t('onboarding.locationAllowHint')}
         </Text>
       </Card>
 
-      <Text style={[typography.captionBold, styles.or, { color: colors.textSub }]}>{t('onboarding.locationOr')}</Text>
-      <PlacePicker
-        location={user.location}
-        onPick={(location) => {
-          user.setLocationState(location, 'ready', 'manual');
-          setFailure(null);
-        }}
-      />
+      <Text style={[typography.captionBold, styles.pickLabel, { color: colors.textSub }]}>
+        {t('onboarding.locationPickLabel')}
+      </Text>
+      <PlacePicker location={user.location} onPick={(location) => user.setLocationState(location, 'ready', 'manual')} />
 
       <OnboardingDots step={5} total={ONBOARDING_STEPS} style={styles.dots} />
-      <Button
-        label={t('common.continue')}
-        onPress={() => router.push('/onboarding/permissions')}
-        disabled={!locationReady}
-      />
+      <Button label={t('common.continue')} onPress={proceed} busy={busy} />
       {locationReady ? null : (
         <Text style={[typography.small, styles.locationHint, { color: colors.textMuted }]}>
-          {t('onboarding.locationRequired')}
+          {t('onboarding.locationContinueHint', { city: placeName })}
         </Text>
       )}
       <Pressable onPress={() => router.back()} accessibilityRole="button" style={styles.backBtn}>
@@ -105,13 +87,7 @@ const styles = StyleSheet.create({
   cardGap: {
     marginTop: spacing.xl,
   },
-  buttonGap: {
-    marginTop: spacing.md,
-  },
-  allowHint: {
-    marginTop: spacing.sm,
-  },
-  or: {
+  pickLabel: {
     marginTop: spacing.xl,
     marginBottom: spacing.sm,
   },

@@ -787,7 +787,7 @@ const CASES: SmokeCase[] = [
     label: 'permissions',
     Screen: OnboardingPermissionsScreen,
     fresh: true,
-    check: text('מה האפליקציה צריכה', 'What the app needs'),
+    check: text('הרשאות', 'Permissions'),
   },
   {
     file: 'onboarding/profile',

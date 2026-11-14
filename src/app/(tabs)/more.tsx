@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Keyboard, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { openExternalUrl } from '@/services/externalFlow';
+import { openExternalUrl, tryOpenExternalUrl } from '@/services/externalFlow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { Banner } from '@/components/Banner';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
 import { Card } from '@/components/Card';
 import { useLearningRows } from '@/components/LearningRows';
@@ -37,6 +38,7 @@ function MoreScreenContent() {
   const now = useNow();
   const nusach = useUserStore((s) => s.nusach);
   const [halachaOpen, setHalachaOpen] = useState(false);
+  const [callNote, setCallNote] = useState<string | null>(null);
   const ruling = halachaRulingFor(nusach);
   const learning = useLearningRows(now);
   const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(nusach));
@@ -172,8 +174,12 @@ function MoreScreenContent() {
         visible={halachaOpen}
         title={t('more.halacha.title')}
         caption={t(`more.halacha.caption.${ruling}`)}
-        onClose={() => setHalachaOpen(false)}
+        onClose={() => {
+          setHalachaOpen(false);
+          setCallNote(null);
+        }}
       >
+        {callNote ? <Banner tone="info" text={callNote} /> : null}
         <ScrollView style={styles.lines}>
           {HALACHA_LINES[ruling].map((line) => {
             const whatsapp = whatsappUrl(line);
@@ -184,7 +190,14 @@ function MoreScreenContent() {
                 {line.hours ? (
                   <Text style={[typography.small, { color: colors.textMuted }]}>{line.hours[language]}</Text>
                 ) : null}
-                <SheetAction label={t('more.halacha.call', { number })} onPress={() => openLink(callUrl(line))} />
+                <SheetAction
+                  label={t('more.halacha.call', { number })}
+                  onPress={async () => {
+                    if (!(await tryOpenExternalUrl(callUrl(line)))) {
+                      setCallNote(t('more.halacha.callUnavailable', { number }));
+                    }
+                  }}
+                />
                 {whatsapp ? (
                   <SheetAction label={t('more.halacha.whatsapp', { number })} onPress={() => openLink(whatsapp)} />
                 ) : null}

@@ -71,13 +71,17 @@ describe('Onboarding Continue buttons', () => {
     expect(useUserStore.getState().maritalStatus).toBe('married');
   });
 
-  it('keeps Continue on the location step disabled until the location is confirmed', async () => {
+  it('never disables Continue on the location step, so setup goes on without Location Services', async () => {
     useUserStore.setState({ locationStatus: 'missing' });
     renderWithTheme(<OnboardingLocationScreen />);
     await act(async () => {});
     const next = () => screen.getByRole('button', { name: he('common.continue') });
-    expect(next()).toBeDisabled();
-    expect(screen.getByText(he('onboarding.locationRequired'))).toBeOnTheScreen();
+    expect(next()).toBeEnabled();
+    expect(
+      screen.getByText(
+        translate('onboarding.locationContinueHint', { city: getLocationName(CITIES[0], 'he') }, 'he', null),
+      ),
+    ).toBeOnTheScreen();
 
     fireEvent.press(
       screen.getByRole('button', {
@@ -87,15 +91,17 @@ describe('Onboarding Continue buttons', () => {
     fireEvent.press(screen.getByText(getLocationName(CITIES[1], 'he')));
 
     expect(next()).toBeEnabled();
-    fireEvent.press(next());
+    await act(async () => {
+      fireEvent.press(next());
+    });
     expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
   });
 
-  it('allow and continue on the permissions step asks for notifications, then goes to the important notice', async () => {
+  it('Continue on the permissions step asks for notifications, then goes to the important notice', async () => {
     const { askForNotifications } = jest.requireMock('@/services/NotificationScheduler');
     askForNotifications.mockClear();
     renderWithTheme(<PermissionsScreen />);
-    const allow = screen.getByRole('button', { name: he('onboarding.allowNotifications') });
+    const allow = screen.getByRole('button', { name: he('common.continue') });
     expect(allow).toBeEnabled();
     await act(async () => {
       fireEvent.press(allow);
@@ -104,12 +110,17 @@ describe('Onboarding Continue buttons', () => {
     expect(mockPush).toHaveBeenCalledWith('/onboarding/notice');
   });
 
-  it('not now on the permissions step continues without asking', () => {
+  it('has one button before the prompt, which moves on after a refusal too (App Review 5.1.1(iv))', async () => {
     const { askForNotifications } = jest.requireMock('@/services/NotificationScheduler');
     askForNotifications.mockClear();
+    askForNotifications.mockResolvedValueOnce('refused');
+    useUserStore.setState({ language: 'en' });
     renderWithTheme(<PermissionsScreen />);
-    fireEvent.press(screen.getByText(he('onboarding.notNow')));
-    expect(askForNotifications).not.toHaveBeenCalled();
+    expect(screen.queryByText(/not now|allow/i)).toBeNull();
+    await act(async () => {
+      fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
+    });
+    expect(askForNotifications).toHaveBeenCalledTimes(1);
     expect(mockPush).toHaveBeenCalledWith('/onboarding/notice');
   });
 

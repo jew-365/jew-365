@@ -95,12 +95,18 @@ describe('Onboarding welcome step: language switch and optional fields', () => {
     expect(screen.getByText('טלפון (לא חובה)')).toBeOnTheScreen();
   });
 
-  it('labels the fields as optional in English and says both are optional', () => {
+  it('labels the fields as optional and says both are optional and stay on the device, in both languages', () => {
     useUserStore.setState({ language: 'en' });
-    renderWithTheme(<WelcomeScreen />);
+    const { unmount } = renderWithTheme(<WelcomeScreen />);
     expect(screen.getByText('Name (optional)')).toBeOnTheScreen();
     expect(screen.getByText('Phone (optional)')).toBeOnTheScreen();
-    expect(screen.getByText('Both are optional. You can fill them in now or later in Settings.')).toBeOnTheScreen();
+    expect(
+      screen.getByText('Both are optional and stay on this device. You can fill them in now or later in Settings.'),
+    ).toBeOnTheScreen();
+    unmount();
+    useUserStore.setState({ language: 'he' });
+    renderWithTheme(<WelcomeScreen />);
+    expect(screen.getByText('שניהם לא חובה ונשמרים רק במכשיר. אפשר למלא עכשיו או אחר כך בהגדרות.')).toBeOnTheScreen();
   });
 
   it('continues to the profile step with both fields empty', () => {

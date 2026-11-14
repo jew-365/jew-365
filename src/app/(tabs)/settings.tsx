@@ -16,13 +16,13 @@ import {
 import { openExternalUrl, openSystemSettings } from '@/services/externalFlow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { appVersionLabel } from '@/services/appUpdates';
+import { appVersionLabel, onProductionChannel } from '@/services/appUpdates';
 import { LocationService, type LocationStatus } from '@/services/LocationService';
 import {
   NotificationScheduler,
   availableNotificationSounds,
   previewNotificationSound,
-  requestNotificationPermissions,
+  askForNotifications,
   syncNotificationPermissionStatus,
 } from '@/services/NotificationScheduler';
 import {
@@ -433,10 +433,10 @@ function SettingsScreenContent() {
 
   const onToggleNotifications = async (next: boolean) => {
     if (next) {
-      const granted = await requestNotificationPermissions();
-      if (!granted) {
+      const answer = await askForNotifications();
+      if (answer !== 'granted') {
         user.setNotificationsEnabled(false);
-        openOsSettings();
+        if (answer === 'blocked') openOsSettings();
         return;
       }
       user.setNotificationsEnabled(true);
@@ -844,23 +844,23 @@ function SettingsScreenContent() {
                   <Text style={[typography.small, { color: colors.textMuted }]}>{t('settings.contactHint')}</Text>
                   {isContactConfigured() ? (
                     <>
-                      <SectionLabel variant="field" text={t('settings.profileName')} style={styles.fieldLabel} />
+                      <SectionLabel variant="field" text={t('onboarding.nameLabel')} style={styles.fieldLabel} />
                       <TextInput
                         value={contactName}
                         onChangeText={setContactName}
                         placeholder={t('settings.profileNamePlaceholder')}
                         placeholderTextColor={colors.textMuted}
-                        accessibilityLabel={t('settings.profileName')}
+                        accessibilityLabel={t('onboarding.nameLabel')}
                         style={[styles.input, inputTone]}
                         autoCapitalize="words"
                       />
-                      <SectionLabel variant="field" text={t('settings.profilePhone')} style={styles.fieldLabel} />
+                      <SectionLabel variant="field" text={t('onboarding.phoneLabel')} style={styles.fieldLabel} />
                       <TextInput
                         value={contactPhone}
                         onChangeText={setContactPhone}
                         placeholder={t('settings.profilePhonePlaceholder')}
                         placeholderTextColor={colors.textMuted}
-                        accessibilityLabel={t('settings.profilePhone')}
+                        accessibilityLabel={t('onboarding.phoneLabel')}
                         keyboardType="phone-pad"
                         style={[styles.input, inputTone]}
                       />
@@ -1427,7 +1427,7 @@ function StuckLaunchLine() {
   const { t } = useI18n();
   const tz = useUserStore((s) => s.location.tz);
   const [trace] = useState(stuckLaunch);
-  if (!trace) return null;
+  if (!trace || onProductionChannel()) return null;
   const { stage, atSec, aliveSec } = bootStoppedAt(trace);
   return (
     <Text testID="settings-stuck-launch" style={[typography.small, { color: colors.textMuted }]}>

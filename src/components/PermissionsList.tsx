@@ -207,7 +207,7 @@ export function PermissionsList({
             ? t('permissions.openSettings')
             : kind === 'samsungSleep' || kind === 'unusedApp'
               ? t('permissions.open')
-              : t('permissions.allow');
+              : t('permissions.continue');
         return (
           <ListRow
             key={kind}

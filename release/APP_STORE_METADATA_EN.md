@@ -29,7 +29,42 @@ Reminders are local notifications scheduled on the device for each mitzvah's hal
 By design the app rests on Shabbat and Jewish holidays at the chosen city: from candle lighting until after nightfall it shows a rest screen and sends no notifications. If the review falls on a Friday evening or Saturday in Israel, pick a city in another time zone, such as New York, during onboarding.
 ```
 
-- App Review notes prepared on 2026-11-08 for the resubmission with build 1.0.21 (6), not yet saved in App Store Connect. App Review rejected 1.0.21 (5) on 2026-11-07 under 5.1.1(v) (gender and marital status were required in setup), 2.1(a) ("the app was not available at the time of review", reviewed on a Saturday) and 2.1 ("Does the app retain any information from the onboarding questions?"); the 2026-11-02 text sent a Saturday reviewer to New York, where it is Shabbat too:
+- App Review notes for build 1.0.21 (7), prepared on 2026-11-14 (the owner's "כן, כל ההמלצות" of 2026-11-13), not yet saved in App Store Connect. App Review rejected 1.0.21 (6) on 2026-11-12 under 5.1.1(iv) (a pre-permission button read "Allow location access") and 5.1.5 (setup could not go on without Location Services); its review device's clock read UTC, as build 5's did, and build 5 was reviewed on a Saturday. The UTC hours are the app's own rest windows for November 2026 to January 2027 (Honolulu's starts Saturday 03:28 to 03:50 UTC, Pago Pago's 05:13 to 05:38, Apia's ends 06:16 to 06:42), rounded to the safe side:
+
+```
+No account, login or payment anywhere in the app; every screen opens without signing in.
+
+The app opens in the device's language, with a Hebrew / English switch on the first screen. Every question in setup is optional: name and phone (they only prefill the contact form) and gender and marital status (they only adapt the prayer wording, the colors and whether the family purity tracker is offered). The answers stay on the device. Tap Continue to skip any of them.
+
+Location is optional. On the location step, Continue shows the system location prompt, and setup goes on whatever the answer. Without location, the times are calculated for Jerusalem until a place is chosen: on that step, from the banner on Home, or in Settings > Device and notifications, where any city in the world can be found by name. Notifications are optional too: Continue on the permissions step shows the system prompt once and goes on whatever the answer.
+
+By design the app rests on Shabbat and Jewish holidays at the user's place (a place they chose, or the device's location): from candle lighting until nightfall it shows a rest screen with the time the rest ends, and sends no notifications. This is a core religious feature, not an outage. Without a chosen place or location access, the rest screen never shows. The rest screen names the place and has a place search: pick a city where it is not Shabbat at that moment and the app opens at once. By UTC time: Friday 14:00 to Saturday 03:00, Honolulu; Saturday 03:00 to 05:00, Pago Pago; Saturday from 06:45, Apia. Between about 05:00 and 06:45 UTC on Saturday it is Shabbat in every city.
+
+Optional family purity tracker: Settings > Profile, set Gender and Marital status: Married, then turn on Family purity tracking. Its screens open with the device's own Face ID, Touch ID or passcode; on a device without biometrics the lock is off, and it can also be turned off in the tracker's settings. Its data is kept on the device, encrypted. It is not a medical tool.
+
+Reminders are local notifications scheduled on the device for each mitzvah's halachic time window at the chosen place. The hourly background task only plans these local notifications and checks for an app update.
+
+The optional add-ons (Chok LeYisrael, Shnayim Mikra, Selichot, the daily halacha books) are text the user downloads on request from our GitHub Pages site, after a confirmation that shows their size. They are plain text data, not code.
+```
+
+- Reply to App Review for build 1.0.21 (7), prepared on 2026-11-14, not yet sent (sending it is the owner's yes):
+
+```
+Hello,
+
+Thank you for the review. Build 1.0.21 (7) addresses both issues.
+
+Guideline 5.1.1(iv): every screen shown before a system permission prompt now has a single button titled "Continue". No button says "Allow", and those screens explain what the permission is used for without asking the user to grant it.
+
+Guideline 5.1.5: the app is fully functional without Location Services. If location is not allowed, setup continues and the prayer times are calculated for Jerusalem until the user picks any city in the world by name, on the location step, from a banner on the home screen, or in Settings > Device and notifications. Location is used only to find the user's place for the prayer times and to point the prayer compass.
+
+The App Review notes describe the rest the app takes on Shabbat and Jewish holidays and how to pick a city where it is not Shabbat at the time of the review.
+
+Thank you,
+Avraham Sason
+```
+
+- App Review notes saved with build 1.0.21 (6) on 2026-11-08 ([RELEASE_LOG.md](RELEASE_LOG.md), 2026-11-08), superseded by the text above. App Review rejected 1.0.21 (5) on 2026-11-07 under 5.1.1(v) (gender and marital status were required in setup), 2.1(a) ("the app was not available at the time of review", reviewed on a Saturday) and 2.1 ("Does the app retain any information from the onboarding questions?"); the 2026-11-02 text sent a Saturday reviewer to New York, where it is Shabbat too:
 
 ```
 No account, login or payment anywhere in the app; every screen opens without signing in.
@@ -47,7 +82,7 @@ Reminders are local notifications scheduled on the device for each mitzvah's hal
 
 - Release option: Manually release this version (saved 2026-10-23), so an approved version waits for the owner's Release.
 - TestFlight: internal group Team (Expo) (365jew@gmail.com); external group Beta testers with builds 1.0.21 (4) and, since 2026-11-02, 1.0.21 (5) (Beta App Review approved at once, Hebrew What to Test in [RELEASE_LOG.md](RELEASE_LOG.md)), public link https://testflight.apple.com/join/cZeSqPzG (open to anyone, no limit), Test Information: feedback 365jew@gmail.com, beta review contact Avraham Sason, +972546559314, 365jew@gmail.com, sign-in not required. The Beta App Review passed on 2026-10-23; that day the group listed 7 testers: moshechaim22@gmail.com invited, and 6 anonymous public-link installs of 1.0.21 (4) on iOS 26 and 27.
-- App Information: primary category Lifestyle, secondary category Reference (set on 2026-11-02). Content Rights: yes, third-party content with the necessary rights (the siddur texts, under Public Domain, CC0, CC-BY and CC-BY-SA, credited in the reader).
+- App Information: primary category Lifestyle, secondary category Reference (set on 2026-11-02). Content Rights: yes, third-party content with the necessary rights (the siddur texts, under Public Domain, CC0, CC-BY and CC-BY-SA, credited in the reader). Since then the downloadable add-ons added Torat Emet texts under CC BY-NC-SA 2.5 (Chok LeYisrael, credited beside the text; the app is free and carries no ads) and Sefer Shemirat HaLashon, credited to its source with no licence, whose rights holders were asked on 2026-11-12 ([licence-requests.md](licence-requests.md)); the owner keeps them until the answers arrive.
 - Pricing and Availability: free ($0.00, base country United States), available in 174 countries or regions and future ones: every storefront but China mainland, removed on 2026-10-26 (the owner's call: Chinese law requires apps with religious content to hold a permit). iPhone only on the App Store: Apple Silicon Mac and Apple Vision Pro availability off.
 
 ## Draft Status
@@ -66,7 +101,7 @@ The same on the English (U.S.) and English (U.K.) pages; the tagline `Every mitz
 
 ## Promotional Text
 
-Every mitzvah in its time: accurate zmanim, reminders inside each mitzvah's window, a siddur in five nusachim, and an app that rests on Shabbat and Yom Tov. No account.
+Every mitzvah in its time: zmanim by the Ohr HaChaim luach, reminders in each mitzvah's window, a siddur in five nusachim, and rest on Shabbat and Yom Tov. No account.
 
 ## Description
 
@@ -106,7 +141,7 @@ Tracking and the weekly report
 Your streak, consistency per mitzvah, trends, achievements, on-time and late marks, and how often you read each siddur text, with a day, week and month schedule. After Shabbat, your weekly report: what you marked, what to improve and what the coming week holds.
 
 Family purity tracking (optional)
-The count, the bedikot and the mikveh night, with reminders by halachic times and your minhag. Offered to married users only, off until you turn it on. Discreet notifications, biometric lock and encrypted data. The app does not rule on halacha; in any doubt, ask a rav.
+The count, the bedikot and the mikveh night, with reminders by halachic times and your minhag. Offered to married users only, off until you turn it on. Discreet notifications, biometric lock and encrypted data. The app does not rule on halacha; in any doubt, ask a rav. It is not a medical tool; medical questions go to a doctor.
 
 And more
 - Prayer compass: the direction of the Kotel and the distance to it, also from the siddur
@@ -153,9 +188,12 @@ Expected rating: the rating App Store Connect computes from its questionnaire, d
 
 Age rating as saved in App Store Connect on 2026-10-22 (the owner's approval), from Apple's seven-step questionnaire: no parental controls, age assurance, web access, user-generated content, social media, messaging or advertising; profanity, horror and every violence item none; alcohol, tobacco or drug references Infrequent (the wine blessings of Kiddush, Havdalah, Birkat Hamazon's cup and Sheva Berachot); medical or treatment information Infrequent and health or wellness topics No (the taharah tracker); mature or suggestive themes Infrequent (the taharah screens refer to marital separation periods), sexual content and graphic content none; simulated gambling, contests, gambling and loot boxes none; no override. Calculated rating 13+ in 172 countries or regions, with local equivalents (12+ in Brazil, separate ratings for Vietnam and Korea) and a global 12+ on operating systems earlier than version 26. Apple noted that the Lifestyle category keeps the app out of Afghanistan.
 
+To enter with the resubmission of 1.0.21 (7) (the owner's call of 2026-11-13, "כן, כל ההמלצות", after App Review's rejection of 1.0.21 (6)): health or wellness topics Yes (the family purity tracker records cycle-related dates), every other answer unchanged; take the rating App Store Connect computes.
+
 ## App Privacy Answers
 
 - Data collected: Diagnostics, Crash Data. Not linked to the user. Used for App Functionality and Analytics. Not used for tracking. Processor: Functional Software, Inc. (Sentry).
+- To enter with the resubmission of 1.0.21 (7) (the owner's call of 2026-11-13, "כן, כל ההמלצות", after App Review's rejection of 1.0.21 (6)): Crash Data and Device ID used for App Functionality only, not Analytics, matching the policy's "No analytics".
 - The device's iCloud backup and the exported backup file do not reach the developer: the first is Apple's service in the user's account, the second goes only where the user sends it. Neither is data collection.
 - Data collected: Contact Info, Name and Phone Number, and User Content, Other User Content (the message). Sent only when the user sends a message from Settings → Contact us, through Formspree (Formspree, Inc.) to the developer's email. Linked to the user. Used for App Functionality (customer support). Not used for tracking.
 - Data collected: Identifiers, Device ID. expo-updates sends a random installation identifier (the EAS client id) with every update check, which Expo, a service provider, uses to count installs. Not linked to the user. Used for App Functionality and Analytics. Not used for tracking. The same answer as Play's Device or other IDs.

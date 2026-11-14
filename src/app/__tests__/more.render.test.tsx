@@ -356,6 +356,16 @@ describe('Halacha hotline', () => {
     expect(openURL).toHaveBeenCalledWith('tel:0737246000');
   });
 
+  it('shows the number when the device cannot place the call (an iPad)', async () => {
+    openURL.mockRejectedValue(new Error('E_UNABLE_TO_OPEN_URL'));
+    renderAt('2026-11-16T12:00');
+    fireEvent.press(screen.getByText('קו ההלכה'));
+    await act(async () => {
+      fireEvent.press(screen.getByText('חיוג: 073-724-6000'));
+    });
+    expect(screen.getByText('אי אפשר להתקשר מהמכשיר הזה. המספר: 073-724-6000')).toBeOnTheScreen();
+  });
+
   it('offers Edot HaMizrach the Sephardi line by phone or WhatsApp', () => {
     useUserStore.setState({ nusach: 'edot_hamizrach' });
     renderAt('2026-11-16T12:00');

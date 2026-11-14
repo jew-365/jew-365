@@ -1,6 +1,10 @@
 import Constants from 'expo-constants';
 import * as Updates from 'expo-updates';
 
+export function onProductionChannel(): boolean {
+  return Updates.channel === 'production';
+}
+
 export type UpdateDownload = { id: string; createdAt: string };
 export type UpdateRef = { updateId?: string; updateCreatedAt?: string };
 

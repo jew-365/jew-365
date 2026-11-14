@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '@/components/Button';
@@ -9,6 +9,7 @@ import { SectionLabel } from '@/components/SectionLabel';
 import { SettingsSection } from '@/components/SettingsSection';
 import {
   guideList,
+  guideTextOn,
   latestWhatsNew,
   GUIDE_TOPICS,
   visibleGuideTopics,
@@ -79,7 +80,7 @@ export default function GuideScreen() {
                   key={paragraph.en}
                   style={[typography.body, index > 0 && styles.paragraphGap, { color: colors.text }]}
                 >
-                  {paragraph[language]}
+                  {guideTextOn(paragraph, Platform.OS)[language]}
                 </Text>
               ))}
               {list ? <GuideListBlock list={guideList(list, language, nusach)} /> : null}

@@ -16,7 +16,7 @@ export default function OnboardingPermissionsScreen() {
   const { t } = useI18n();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
-  // The notification status, read from the list, so "allow and continue" never prompts after the row did.
+  // The notification status, read from the list, so Continue never prompts after the row did.
   const notif = useRef<PermissionStatus>('unknown');
 
   const allowAndContinue = async () => {
@@ -41,10 +41,7 @@ export default function OnboardingPermissionsScreen() {
         <PermissionsList onStatuses={(s) => (notif.current = s.notifications)} />
       </ScrollView>
       <OnboardingDots step={6} total={ONBOARDING_STEPS} style={styles.dots} />
-      <Button label={t('onboarding.allowNotifications')} busy={busy} onPress={allowAndContinue} />
-      <Pressable onPress={() => router.push('/onboarding/notice')} accessibilityRole="button" style={styles.backBtn}>
-        <Text style={[typography.small, { color: colors.goldText }]}>{t('onboarding.notNow')}</Text>
-      </Pressable>
+      <Button label={t('common.continue')} busy={busy} onPress={allowAndContinue} />
       <Pressable onPress={() => router.back()} accessibilityRole="button" style={styles.backBtn}>
         <Text style={[typography.small, { color: colors.textSub }]}>{t('common.back')}</Text>
       </Pressable>
