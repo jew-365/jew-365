@@ -133,8 +133,9 @@ const STRINGS = Object.fromEntries(
   [
     'nusach.ashkenaz', 'nusach.sefard', 'nusach.edot_hamizrach', 'nusach.chabad', 'nusach.teiman',
     'profile.gender.male', 'profile.gender.female', 'onboarding.welcomeTitle', 'onboarding.welcomeBody',
-    'onboarding.nusachTitle', 'onboarding.nusachBody', 'onboarding.locationBody', 'onboarding.locationAllow',
-    'onboarding.locationOr', 'onboarding.restore', 'onboarding.nameLabel', 'onboarding.notNow', 'common.continue',
+    'onboarding.nusachTitle', 'onboarding.nusachBody', 'onboarding.locationBody',
+    'onboarding.locationPickLabel', 'onboarding.locationContinueHint', 'onboarding.permissionsBody',
+    'onboarding.restore', 'onboarding.nameLabel', 'common.continue',
     'notifications.timeLeft.line', 'notifications.timeFor', 'settings.quietBefore', 'settings.quietAfter',
     'onboarding.readyTitle', 'onboarding.finish', 'library.addCustom', 'accuracy.title', 'accuracy.effort',
     'accuracy.responsibility', 'notifications.markDone', 'time.unit.hours', 'time.unit.minutes', 'permissions.battery.title',

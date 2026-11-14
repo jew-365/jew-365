@@ -39,7 +39,7 @@ No record, spec or design study covers this topic yet.
 
 ## Goals, measures and non-goals
 
-- **G1:** no user finishes setup without deciding about notifications (allow, or an explicit "not now").
+- **G1:** no user finishes setup without deciding about notifications (allow or refuse in the system's own prompt; since 86739dc of 2026-11-14 there is no "not now" link, so Continue always reaches that prompt while the OS can ask).
 - **G2:** setup is 6 screens and about 8 taps, and ends on a live preview of today and a sample reminder.
 - **G3:** every capability is reachable from home in 2 taps, and can be switched on in 1 to 2 taps from wherever it is offered, without opening Settings.
 - **G4:** in the first weeks each relevant capability is offered once; never more than one offer at a time on home; never on Shabbat or Yom Tov.
@@ -65,7 +65,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 - **Fixes:** F1.
 - **User gain:** the core promise, a reminder in time, works for everyone who taps the obvious button. Today a user who taps "Continue" gets a silent app.
 - **How:** one helper `askForNotifications()` in `src/services/NotificationScheduler.ts` over `notificationPermissionState()` and `requestNotificationPermissions()`, which also rebuilds the schedule on a grant (the request alone never does); `src/app/onboarding/permissions.tsx`; `PermissionsList.tsx` reports its statuses so a refusal on the row is not followed by a second prompt; `pickBanner()` in `home.tsx`; the web shim.
-- **Deviation (2026-11-13):** App Review rejected 1.0.21 (6) on 2026-11-12 under guideline 5.1.1(iv): a button that leads to a system permission prompt may not say "Allow", "Enable" or "Grant"; Apple asks for "Continue" or "Next". So the main button reads Continue (the step's body says Continue asks for the notification permission) and the home banner's copy says "tap to continue", not "allow and continue" or "enable". The behaviour is as above. Every later item (G1's battery offer, A5's sample, the short setup) follows the same rule.
+- **Deviation (2026-11-13):** App Review rejected 1.0.21 (6) on 2026-11-12 under guideline 5.1.1(iv): a button that leads to a system permission prompt may not say "Allow", "Enable" or "Grant"; Apple asks for "Continue" or "Next". So the main button reads Continue (the step's body says Continue asks for the notification permission) and the home banner's copy says "tap to continue", not "allow and continue" or "enable". The App Review fix of 2026-11-14 (`86739dc`, the store session) also dropped the "not now" link: a refusal is made in the system's prompt and setup goes on after it; the location step became one Continue that asks for the phone's location and never blocks, under a place picker. The setup study follows both. The behaviour is as above. Every later item (G1's battery offer, A5's sample, the short setup) follows the same rule.
 
 **A2. Short setup path** · P0 · L · study
 
