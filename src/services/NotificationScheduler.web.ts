@@ -12,6 +12,8 @@ const TAHARAH_KIND = 'taharah';
 const UPDATE_KIND = 'update';
 const UPDATE_NOTIFIED_KEY = 'notifications:update-notified';
 const TAHARAH_BEDIKA_CATEGORY = 'taharah_bedika';
+const SAMPLE_CATEGORY = 'sample_reminder';
+const SAMPLE_KIND = 'sample';
 const MARK_DONE_ACTION = 'MARK_DONE';
 const OPEN_TEXT_ACTION = 'OPEN_TEXT';
 const ANDROID_CHANNELS = {
@@ -36,7 +38,8 @@ export type PendingNotificationMeta = {
     | 'roshChodesh'
     | 'report'
     | 'horizonEnd'
-    | 'soundPreview';
+    | 'soundPreview'
+    | typeof SAMPLE_KIND;
   taharah?: { task: TaharahTaskKind | 'tevilaPrep' | 'postBlock' | 'preBlock'; day: number; onah?: OnahKind };
   hilula?: { day: number; when: 'before' | 'evening'; ids?: string[] };
   roshChodesh?: { day: number; when: 'before' | 'evening' | 'day' };
@@ -94,6 +97,10 @@ export async function availableNotificationSounds(): Promise<NotificationSound[]
 
 export async function previewNotificationSound(_role: SoundRole): Promise<boolean> {
   return false;
+}
+
+export async function presentSampleReminder(_now?: Date): Promise<'sent' | 'noPermission' | 'quiet'> {
+  return 'noPermission';
 }
 
 export async function requestNotificationPermissions(): Promise<boolean> {
@@ -157,6 +164,8 @@ export {
   MITZVAH_TEXT_CATEGORY,
   TAHARAH_KIND,
   TAHARAH_BEDIKA_CATEGORY,
+  SAMPLE_CATEGORY,
+  SAMPLE_KIND,
   UPDATE_KIND,
   UPDATE_NOTIFIED_KEY,
   MARK_DONE_ACTION,

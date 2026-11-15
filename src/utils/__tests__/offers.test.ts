@@ -19,8 +19,12 @@ function input(over: Partial<OfferInput> = {}, wallClock = WEDNESDAY): OfferInpu
     offered: () => true,
     hilulotEnabled: true,
     roshChodeshEnabled: true,
-    gender: null,
+    gender: 'female',
     sawNewSetup: true,
+    wantsOpen: [],
+    maritalStatus: 'single',
+    taharahOffered: false,
+    taharahEnabled: false,
     batteryExempt: null,
     markedDays: 0,
     learningOn: true,
@@ -188,5 +192,39 @@ describe('hubOffers', () => {
   it('is empty before the install is stamped, and with nothing to offer', () => {
     expect(hubOffers(input({ ...several, firstOpenedAt: null }))).toEqual([]);
     expect(hubOffers(input({ offers: SEEN }))).toEqual([]);
+  });
+});
+
+describe('the offers that follow the short setup', () => {
+  it('offers the learning programs asked for in setup first, on the install day too, until they are on', () => {
+    const today = at(J, WEDNESDAY).getTime();
+    const wanted = pickOffer(input({ firstOpenedAt: today, wantsOpen: ['chok'] }))!;
+    expect(wanted.id).toBe('wanted');
+    expect(wanted.action).toEqual({ kind: 'route', href: { pathname: '/capabilities', params: { goal: 'learning' } } });
+    // Before the tour, after a missing battery exemption.
+    expect(pickOffer(input({ firstOpenedAt: today, wantsOpen: ['chok'], batteryExempt: false }))!.id).toBe('battery');
+    expect(pickOffer(input({ firstOpenedAt: today, wantsOpen: [] }))!.id).toBe('tour');
+    expect(weeklyTip(input({ wantsOpen: ['chok'] }))).toBeNull();
+  });
+
+  it('asks the profile questions the setup left out, never on the install day', () => {
+    const profile = pickOffer(input({ maritalStatus: null }))!;
+    expect(profile.id).toBe('profile');
+    expect(profile.action).toEqual({
+      kind: 'route',
+      href: { pathname: '/(tabs)/settings', params: { focus: 'gender' } },
+    });
+    expect(pickOffer(input({ gender: null }))!.id).toBe('profile');
+    expect(pickOffer(input({ maritalStatus: null, firstOpenedAt: at(J, WEDNESDAY).getTime() }))!.id).toBe('tour');
+    expect(weeklyTip(input({ maritalStatus: null }))).toBeNull();
+  });
+
+  it('offers family purity tracking only to a user it is offered to, while it is off', () => {
+    expect(pickOffer(input({ maritalStatus: 'married', taharahOffered: true }))!.id).toBe('taharah');
+    expect(pickOffer(input({ maritalStatus: 'married', taharahOffered: true, taharahEnabled: true }))).toBeNull();
+    // A single user, or one who did not answer, is never offered it.
+    expect(pickOffer(input({ maritalStatus: 'single', taharahOffered: false }))).toBeNull();
+    expect(hubOffers(input({ maritalStatus: null })).map((o) => o.id)).not.toContain('taharah');
+    expect(weeklyTip(input({ maritalStatus: 'married', taharahOffered: true }))).toBeNull();
   });
 });

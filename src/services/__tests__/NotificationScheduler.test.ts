@@ -101,6 +101,8 @@ import {
   syncNotificationPermissionStatus,
   notificationPermissionState,
   askForNotifications,
+  presentSampleReminder,
+  SAMPLE_CATEGORY,
   refreshSchedulingOnForeground,
   LAST_REBUILD_KEY,
   SCHEDULE_FORMAT_KEY,
@@ -1814,5 +1816,75 @@ describe('NotificationScheduler', () => {
       expect(shouldSuppressForCompletion(data, 'checkin:2026-11-14:1')).toBe(true);
       expect(mockState.pending.some((p) => p.identifier.startsWith('shacharit__'))).toBe(true);
     });
+  });
+});
+
+describe('the sample reminder (spec A5)', () => {
+  const NOON = at(CITIES[0], '2026-11-11T12:00'); // a plain Wednesday, the Mincha and tefillin windows open
+  beforeEach(() => {
+    mockState.pending = [];
+    mockSchedule.mockClear();
+    mockSetCategory.mockClear();
+    mockDismiss.mockClear();
+    mockNoteNotificationMark.mockClear();
+    useCompletionsStore.setState({ completions: {}, skipped: {}, checkIns: {}, archivedDays: [] });
+    useUserStore.getState().reset();
+    useUserStore.getState().setNotificationPermission('granted');
+    useUserStore.getState().setLocation(CITIES[0]);
+    setupEnabled(['mincha', 'maariv']);
+    jest.setSystemTime(NOON);
+  });
+
+  it('presents a real-looking reminder of the open window at once, under its own id, kind and category', async () => {
+    // Before onboarding is finished too: the ready step sends it.
+    expect(useUserStore.getState().isOnboarded).toBe(false);
+    await expect(presentSampleReminder()).resolves.toBe('sent');
+
+    expect(mockSchedule).toHaveBeenCalledTimes(1);
+    const sent = mockSchedule.mock.calls[0][0];
+    expect(sent.identifier).toBe('sample');
+    expect(sent.identifier).not.toContain('__');
+    expect(sent.content.data).toEqual({ kind: 'sample' });
+    expect(sent.content.categoryIdentifier).toBe(SAMPLE_CATEGORY);
+    expect(sent.content.title).toBe('תפילת מנחה');
+    expect(sent.content.body).toContain(t('notifications.timeFor', { name: 'תפילת מנחה' }));
+    expect(sent.content.body).toContain(t('notifications.sample.note'));
+    // Presented, never pending: no date trigger.
+    expect(sent.trigger?.date).toBeUndefined();
+    // Its category carries the done button alone, and no mitzvah category is reused.
+    const sample = mockSetCategory.mock.calls.filter(([id]) => id === SAMPLE_CATEGORY);
+    expect(sample.length).toBeGreaterThan(0);
+    expect(sample[0][1]).toEqual([expect.objectContaining({ identifier: MARK_DONE_ACTION })]);
+    expect([MITZVAH_REMINDER_CATEGORY, MITZVAH_TEXT_CATEGORY]).not.toContain(SAMPLE_CATEGORY);
+  });
+
+  it('words a plain sample when no window is left to show', async () => {
+    setupEnabled([]);
+    await expect(presentSampleReminder()).resolves.toBe('sent');
+    const sent = mockSchedule.mock.calls[0][0];
+    expect(sent.content.title).toBe(t('notifications.sample.title'));
+    expect(sent.content.body).toBe(t('notifications.sample.note'));
+  });
+
+  it('sends nothing inside a holy block, and nothing without the permission', async () => {
+    jest.setSystemTime(at(CITIES[0], '2026-11-14T11:00')); // Shabbat morning
+    await expect(presentSampleReminder()).resolves.toBe('quiet');
+    jest.setSystemTime(NOON);
+
+    const read = jest.requireMock('expo-notifications').getPermissionsAsync as jest.Mock;
+    read.mockResolvedValueOnce({ status: 'denied', canAskAgain: false });
+    await expect(presentSampleReminder()).resolves.toBe('noPermission');
+    useUserStore.getState().setNotificationPermission('denied');
+    await expect(presentSampleReminder()).resolves.toBe('noPermission');
+
+    expect(mockSchedule).not.toHaveBeenCalled();
+  });
+
+  it('its done button marks nothing and only clears it from the tray', async () => {
+    await expect(markDoneFromNotificationData({ kind: 'sample' }, 'sample')).resolves.toBe(false);
+    expect(useCompletionsStore.getState().completions).toEqual({});
+    expect(mockDismiss).toHaveBeenCalledWith('sample');
+    expect(mockNoteNotificationMark).not.toHaveBeenCalled();
+    expect(notificationTargetFromData({ kind: 'sample' }, 'sample')).toBeNull();
   });
 });

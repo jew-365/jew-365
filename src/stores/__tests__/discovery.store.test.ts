@@ -33,6 +33,7 @@ describe('the discovery state of the user store', () => {
       hints: ['dragSun'],
       offers: { battery: { shownAt: 10, closedAt: 20 } },
       whatsNew: { label: '1.0.21-81', since: 30, seen: false },
+      wants: [],
     });
   });
 
@@ -53,13 +54,26 @@ describe('the discovery state of the user store', () => {
         hints: ['dragSun', 3, '', 'dragSun', 'checkIn'],
         offers: { a: { shownAt: 5 }, b: { shownAt: 'x' }, c: { shownAt: 6, closedAt: -1 }, d: null },
         whatsNew: { label: 'v', since: 9, seen: 'no' },
+        wants: ['chok', 7, 'chok', '', 'halacha'],
       },
     });
     expect(merged.discovery).toEqual({
       hints: ['dragSun', 'checkIn'],
       offers: { a: { shownAt: 5 }, c: { shownAt: 6 } },
       whatsNew: null,
+      wants: ['chok', 'halacha'],
     });
+  });
+
+  it('keeps the learning programs asked for in setup, each once, and clears them on a reset', () => {
+    user().setWants(['chok', 'shnayim', 'chok']);
+    expect(user().discovery.wants).toEqual(['chok', 'shnayim']);
+    expect(merge({ discovery: { wants: ['chok'] } }).discovery.wants).toEqual(['chok']);
+    user().setWants([]);
+    expect(user().discovery.wants).toEqual([]);
+    user().setWants(['halacha']);
+    user().reset();
+    expect(user().discovery.wants).toEqual([]);
   });
 
   it('reads anything that is not an object as empty', () => {

@@ -127,7 +127,8 @@ export function handleNotificationResponse(response: Notifications.NotificationR
     return;
   }
 
-  if (data.kind === 'soundPreview') return;
+  // The sound preview and the sample reminder open nothing.
+  if (data.kind === 'soundPreview' || data.kind === 'sample') return;
 
   if (data.kind === 'horizonEnd') {
     if (response.actionIdentifier === DEFAULT_NOTIFICATION_ACTION) navigate(() => router.navigate('/(tabs)/home'));

@@ -11,6 +11,9 @@ import { afterPaint } from '@/utils/afterPaint';
 import { isQuietAt } from '@/utils/skipRules';
 import { inQuietHours, quietHoursOf } from '@/utils/quietHours';
 import { appDay, appDayEnd } from '@/utils/locationDay';
+import { appDayWindow } from '@/utils/buildDayTimeline';
+import { mitzvahName } from '@/utils/mitzvahName';
+import { timeLeftLine } from '@/utils/timeLeft';
 import { blockForDay, blockOfCheckIn, checkInFor } from '@/utils/checkIn';
 import { deriveCycle } from '@/utils/taharah/cycle';
 import { hebrewDay } from '@/utils/taharah/onot';
@@ -39,6 +42,8 @@ import {
   NOTIFICATION_ACTION_TASK,
   OPEN_TEXT_ACTION,
   PENDING_LIMIT,
+  SAMPLE_CATEGORY,
+  SAMPLE_KIND,
   SCHEDULE_FORMAT,
   SCHEDULE_FORMAT_KEY,
   TAHARAH_BEDIKA_CATEGORY,
@@ -256,6 +261,11 @@ export async function markDoneFromNotificationData(
   notificationId?: string,
 ): Promise<boolean> {
   if (data.kind === TAHARAH_KIND) return markTaharahBedikaDone(data, notificationId);
+  // The sample reminder's "done" marks nothing: it only leaves the tray, as a real one does.
+  if (data.kind === SAMPLE_KIND) {
+    await os.dismiss(notificationId ? [notificationId] : []);
+    return false;
+  }
   const target = notificationTargetFromData(data, notificationId);
   if (!target) return false;
   noteNotificationMark();
@@ -447,6 +457,37 @@ export async function previewNotificationSound(role: SoundRole): Promise<boolean
   if (!hasNotificationPermission() || isQuietAt(new Date(), useUserStore.getState().location)) return false;
   await os.presentSoundPreview(role);
   return true;
+}
+
+// The sample reminder (spec A5): what the next reminder will look like, presented at once so a new user meets
+// the notification and its buttons before the first real one. It is worded for the enabled mitzvah whose window
+// is open now, else the next one of the app day, with the real time-left line; with no window, a plain line.
+// Never inside a holy block, and only once the phone lets the app notify.
+export async function presentSampleReminder(now: Date = new Date()): Promise<'sent' | 'noPermission' | 'quiet'> {
+  const { location, language } = useUserStore.getState();
+  if (isQuietAt(now, location)) return 'quiet';
+  if (!hasNotificationPermission() || !(await os.getPermissions().catch(() => false))) return 'noPermission';
+  const settings = currentSettings();
+  const next = enabledMitzvot()
+    .flatMap((mitzvah) => {
+      const window = appDayWindow(mitzvah, location, settings, now);
+      return window && window.end.getTime() > now.getTime() ? [{ mitzvah, window }] : [];
+    })
+    .sort((a, b) => a.window.start.getTime() - b.window.start.getTime())[0];
+  const note = t('notifications.sample.note');
+  if (!next) {
+    await os.presentSample({ title: t('notifications.sample.title'), body: note });
+    return 'sent';
+  }
+  const name = mitzvahName(next.mitzvah, language);
+  const line = timeLeftLine(now, next.window, location.tz, t);
+  const message = `${t('notifications.timeFor', { name })}\n${note}`;
+  await os.presentSample(
+    Platform.OS === 'ios'
+      ? { title: name, subtitle: line, body: message }
+      : { title: name, body: `${line}\n${message}` },
+  );
+  return 'sent';
 }
 
 export async function requestNotificationPermissions(): Promise<boolean> {
@@ -660,6 +701,8 @@ export {
   MITZVAH_TEXT_CATEGORY,
   TAHARAH_KIND,
   TAHARAH_BEDIKA_CATEGORY,
+  SAMPLE_CATEGORY,
+  SAMPLE_KIND,
   UPDATE_KIND,
   UPDATE_NOTIFIED_KEY,
   MARK_DONE_ACTION,

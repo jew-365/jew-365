@@ -19,6 +19,9 @@ export function useOffer(todayKey: string): { offer: Offer | null; close: (key: 
   const roshChodeshEnabled = useUserStore((s) => s.roshChodeshEnabled);
   const gender = useUserStore((s) => s.gender);
   const hints = useUserStore((s) => s.discovery.hints);
+  const wants = useUserStore((s) => s.discovery.wants);
+  const maritalStatus = useUserStore((s) => s.maritalStatus);
+  const taharahEnabled = useUserStore((s) => s.taharahEnabled);
   const nusach = useUserStore((s) => s.nusach);
   const firstOpenedAt = useUserStore((s) => s.firstOpenedAt);
   const activeMitzvot = useMitzvotStore((s) => s.activeMitzvot);
@@ -39,7 +42,10 @@ export function useOffer(todayKey: string): { offer: Offer | null; close: (key: 
     hilulotEnabled,
     roshChodeshEnabled,
     gender,
+    maritalStatus,
+    taharahEnabled,
     hints,
+    wants,
     nusach,
     firstOpenedAt,
     activeMitzvot,

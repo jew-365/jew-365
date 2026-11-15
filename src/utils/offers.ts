@@ -25,7 +25,18 @@ export const BIRCHOT_AFTER_MARKED_DAYS = 2;
 export const SOON_DAYS = 7;
 
 export type OfferId =
-  'battery' | 'tour' | 'catchUp' | 'candles' | 'omer' | 'hilulot' | 'tracking' | 'birchot' | 'learning';
+  | 'battery'
+  | 'wanted'
+  | 'tour'
+  | 'catchUp'
+  | 'profile'
+  | 'taharah'
+  | 'candles'
+  | 'omer'
+  | 'hilulot'
+  | 'tracking'
+  | 'birchot'
+  | 'learning';
 export type Offer = { id: OfferId; key: string; icon: IconName; action: CapabilityAction };
 
 export type OfferInput = {
@@ -42,6 +53,12 @@ export type OfferInput = {
   gender: BundleGender;
   // Whether this install ran the short setup with the goal bundles (the `newSetup` discovery hint).
   sawNewSetup: boolean;
+  // The learning programs asked for in the first setup that are still not switched on (capability ids).
+  wantsOpen: readonly string[];
+  // The profile answers the short setup no longer asks, and the family-purity opt-in they lead to.
+  maritalStatus: 'married' | 'single' | null;
+  taharahOffered: boolean;
+  taharahEnabled: boolean;
   // false only where the battery exemption is known to be missing (Android); null elsewhere.
   batteryExempt: boolean | null;
   // How many app days hold a mark, and whether any learning mitzvah is switched on.
@@ -73,6 +90,15 @@ const CANDIDATES: readonly Candidate[] = [
     action: { kind: 'battery' },
   },
   {
+    // What the user asked for in the first setup (spec A3): a learning program needs a download and its size
+    // confirmation, which live outside onboarding, so home offers them first, on the install day too.
+    id: 'wanted',
+    icon: 'chok',
+    installDay: true,
+    eligible: (c) => c.wantsOpen.length > 0,
+    action: { kind: 'route', href: { pathname: '/capabilities', params: { goal: 'learning' } } },
+  },
+  {
     id: 'tour',
     icon: 'guide',
     installDay: true,
@@ -91,6 +117,21 @@ const CANDIDATES: readonly Candidate[] = [
       return mitzvot.some((id) => !c.enabled(id)) || (notices.includes('roshChodesh') && !c.roshChodeshEnabled);
     },
     action: { kind: 'route', href: { pathname: '/capabilities', params: { bundles: '1' } } },
+  },
+  {
+    // The questions the short setup left out (spec A2): the gender and the marital status, in Settings.
+    id: 'profile',
+    icon: 'user',
+    eligible: (c) => c.gender === null || c.maritalStatus === null,
+    action: { kind: 'route', href: { pathname: '/(tabs)/settings', params: { focus: 'gender' } } },
+  },
+  {
+    // Family purity tracking, only for a user it is offered to (married, the gender answered), so a single
+    // user never meets the topic.
+    id: 'taharah',
+    icon: 'calendar',
+    eligible: (c) => c.taharahOffered && !c.taharahEnabled,
+    action: { kind: 'route', href: { pathname: '/(tabs)/settings', params: { focus: 'taharah' } } },
   },
   {
     id: 'candles',
@@ -198,7 +239,16 @@ export function pickOffer(input: OfferInput): Offer | null {
 const strip = ({ id, key, icon, action }: Offer): Offer => ({ id, key, icon, action });
 
 const CANDLES = CANDIDATES.find((c) => c.id === 'candles')!;
-const TIP_EXCLUDED: ReadonlySet<OfferId> = new Set(['tour', 'battery', 'catchUp', 'tracking', 'candles']);
+const TIP_EXCLUDED: ReadonlySet<OfferId> = new Set([
+  'tour',
+  'battery',
+  'wanted',
+  'catchUp',
+  'profile',
+  'taharah',
+  'tracking',
+  'candles',
+]);
 
 // The weekly report's tip (spec C6): the first offer that still applies whatever the day, never one the user
 // already closed, and never the tour, the battery or the Tracking tab (the tip is about next week's mitzvot and

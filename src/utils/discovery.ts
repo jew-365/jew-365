@@ -10,13 +10,21 @@ export type DiscoveryState = {
   offers: Readonly<Record<string, OfferRecord>>;
   // The newest what's-new label this install knows of, since when, and whether it was opened.
   whatsNew: WhatsNewState | null;
+  // The learning programs (capability ids) the user asked for in the first setup; each needs a download, so
+  // home offers them after setup (spec A3).
+  wants: readonly string[];
 };
 
 // The hint the short setup with the goal bundles learns when it ends (spec A2); an install without it is
 // offered the catch-up once (A6).
 export const NEW_SETUP_HINT = 'newSetup';
 
-export const EMPTY_DISCOVERY: DiscoveryState = { hints: [], offers: {}, whatsNew: null };
+// Hints of the short setup's own steps: the recommended bundles were applied for this gender answer
+// (`setupBundles:<gender|none>`), and the notification step saved its quiet hours.
+export const setupBundlesHint = (gender: string | null): string => `setupBundles:${gender ?? 'none'}`;
+export const SETUP_QUIET_HINT = 'setupQuiet';
+
+export const EMPTY_DISCOVERY: DiscoveryState = { hints: [], offers: {}, whatsNew: null, wants: [] };
 
 const isTime = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -29,9 +37,9 @@ function offerOf(v: unknown): OfferRecord | null {
 // A saved value cleaned: unknown shapes dropped field by field, so one bad entry never loses the rest.
 export function discoveryOf(saved: unknown): DiscoveryState {
   if (!isRecord(saved)) return EMPTY_DISCOVERY;
-  const hints = Array.isArray(saved.hints)
-    ? [...new Set(saved.hints.filter((h): h is string => typeof h === 'string' && h.length > 0))]
-    : [];
+  const strings = (v: unknown): string[] =>
+    Array.isArray(v) ? [...new Set(v.filter((h): h is string => typeof h === 'string' && h.length > 0))] : [];
+  const hints = strings(saved.hints);
   const offers: Record<string, OfferRecord> = {};
   if (isRecord(saved.offers))
     for (const [key, v] of Object.entries(saved.offers)) {
@@ -43,7 +51,7 @@ export function discoveryOf(saved: unknown): DiscoveryState {
     isRecord(w) && typeof w.label === 'string' && isTime(w.since) && typeof w.seen === 'boolean'
       ? { label: w.label, since: w.since, seen: w.seen }
       : null;
-  return { hints, offers, whatsNew };
+  return { hints, offers, whatsNew, wants: strings(saved.wants) };
 }
 
 export const withHint = (d: DiscoveryState, id: string): DiscoveryState =>

@@ -92,7 +92,7 @@ describe('check-in', () => {
     expect(useUserStore.getState().discovery.hints).toContain('checkinTap');
     first.unmount();
 
-    useUserStore.setState({ discovery: { hints: [], offers: {}, whatsNew: null } });
+    useUserStore.setState({ discovery: { hints: [], offers: {}, whatsNew: null, wants: [] } });
     renderWithTheme(<CheckInRoute />);
     await screen.findByText(/מה עשית בשבת/);
     expect(screen.getByText(HINT)).toBeOnTheScreen();

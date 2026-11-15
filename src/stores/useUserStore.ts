@@ -240,6 +240,7 @@ type UserState = {
   setFirstOpenedAt: (at: number) => void;
   learnHint: (id: string) => void;
   recordOffer: (key: string, offer: OfferRecord) => void;
+  setWants: (ids: readonly string[]) => void;
   setWhatsNew: (whatsNew: WhatsNewState) => void;
   reset: () => void;
 };
@@ -502,6 +503,7 @@ export const useUserStore = create<UserState>()(
         }),
       recordOffer: (key, offer) =>
         set((s) => ({ discovery: { ...s.discovery, offers: { ...s.discovery.offers, [key]: offer } } })),
+      setWants: (ids) => set((s) => ({ discovery: { ...s.discovery, wants: [...new Set(ids)] } })),
       setWhatsNew: (whatsNew) => set((s) => ({ discovery: { ...s.discovery, whatsNew } })),
       reset: () =>
         set({

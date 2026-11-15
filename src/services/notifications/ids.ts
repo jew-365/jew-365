@@ -7,6 +7,9 @@ export const NOTIFICATION_ACTION_TASK = 'jew-365-notification-actions';
 export const MITZVAH_REMINDER_CATEGORY = 'mitzvah_reminder';
 export const MITZVAH_TEXT_CATEGORY = 'mitzvah_reminder_text';
 export const TAHARAH_BEDIKA_CATEGORY = 'taharah_bedika';
+// The sample reminder's own category (spec A5): the one category outside a mitzvah, so a new user meets the
+// reminder's buttons once. Its buttons mark and open nothing.
+export const SAMPLE_CATEGORY = 'sample_reminder';
 export const MARK_DONE_ACTION = 'MARK_DONE';
 export const OPEN_TEXT_ACTION = 'OPEN_TEXT';
 // The channel ids of a binary without the app's sounds (every build up to 1.0.21 on Android): the
@@ -47,6 +50,7 @@ export const ROSH_CHODESH_KIND = 'roshChodesh';
 export const REPORT_KIND = 'report';
 export const HORIZON_END_KIND = 'horizonEnd';
 export const SOUND_PREVIEW_KIND = 'soundPreview';
+export const SAMPLE_KIND = 'sample';
 
 export function planCap(platform: string): number {
   return platform === 'ios' ? IOS_MAX - IOS_HEADROOM : PENDING_LIMIT;
@@ -65,7 +69,8 @@ export type PendingNotificationMeta = {
     | typeof ROSH_CHODESH_KIND
     | typeof REPORT_KIND
     | typeof HORIZON_END_KIND
-    | typeof SOUND_PREVIEW_KIND;
+    | typeof SOUND_PREVIEW_KIND
+    | typeof SAMPLE_KIND;
   taharah?: { task: TaharahTaskKind | 'tevilaPrep' | 'postBlock' | 'preBlock'; day: number; onah?: OnahKind };
   hilula?: { day: number; when: HilulaWhen; ids?: string[] };
   roshChodesh?: { day: number; when: RoshChodeshWhen };

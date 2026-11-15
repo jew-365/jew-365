@@ -22,6 +22,8 @@ import {
   MITZVAH_REMINDER_CATEGORY,
   MITZVAH_TEXT_CATEGORY,
   OPEN_TEXT_ACTION,
+  SAMPLE_CATEGORY,
+  SAMPLE_KIND,
   TAHARAH_BEDIKA_CATEGORY,
   pendingNotificationMetaFromContent,
   type NotificationContentLike,
@@ -221,6 +223,8 @@ export async function ensureCategories(): Promise<void> {
     await Notifications.setNotificationCategoryAsync(TAHARAH_BEDIKA_CATEGORY, [
       { ...markDone, buttonTitle: t('taharah.notify.markDone') },
     ]);
+    // The sample reminder shows the "done" button of a real reminder; the action marks nothing.
+    await Notifications.setNotificationCategoryAsync(SAMPLE_CATEGORY, [markDone]);
   } catch (err) {
     if (__DEV__) {
       console.warn('[notifications] category registration failed', err);
@@ -341,6 +345,26 @@ export async function presentSoundPreview(role: SoundRole): Promise<void> {
       sound: soundOfContent('mitzvot', stage),
     },
     trigger: Platform.OS === 'android' ? { channelId: channelIdOf('mitzvot', stage) } : null,
+  });
+}
+
+// The sample reminder (spec A5): a real-looking mitzvah reminder presented at once, on the mitzvot channel with
+// the regular sound, under its own id, kind and category, so no mark or tap ever reads it as a window's.
+export async function presentSample(content: { title: string; subtitle?: string; body: string }): Promise<void> {
+  await ensureCategories();
+  await Notifications.scheduleNotificationAsync({
+    identifier: SAMPLE_KIND,
+    content: {
+      title: content.title,
+      ...(content.subtitle && { subtitle: content.subtitle }),
+      body: content.body,
+      data: { kind: SAMPLE_KIND },
+      categoryIdentifier: SAMPLE_CATEGORY,
+      autoDismiss: true,
+      sticky: false,
+      sound: soundOfContent('mitzvot'),
+    },
+    trigger: Platform.OS === 'android' ? { channelId: channelIdOf('mitzvot') } : null,
   });
 }
 

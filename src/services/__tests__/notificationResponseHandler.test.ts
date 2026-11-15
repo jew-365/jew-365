@@ -120,6 +120,22 @@ describe('notificationResponseHandler', () => {
     );
   });
 
+  it('opens nothing for a tap on the sample reminder, and hands its done button to the scheduler', () => {
+    initNotificationResponseHandler();
+    const listener = mockAddNotificationResponseReceivedListener.mock.calls[0][0];
+
+    listener(response(DEFAULT_NOTIFICATION_ACTION, { kind: 'sample' }, 'sample'));
+    listener(response('OPEN_TEXT', { kind: 'sample' }, 'sample'));
+    expect(mockRouterPush).not.toHaveBeenCalled();
+    expect(mockRouterNavigate).not.toHaveBeenCalled();
+    expect(mockMarkDoneFromNotificationData).not.toHaveBeenCalled();
+
+    // The scheduler ignores the sample's mark (its own suite); the handler only forwards it.
+    listener(response(MARK_DONE_ACTION, { kind: 'sample' }, 'sample'));
+    expect(mockMarkDoneFromNotificationData).toHaveBeenCalledWith({ kind: 'sample' }, 'sample');
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  });
+
   it('reads mitzvah metadata from native dataString notification payloads', () => {
     initNotificationResponseHandler();
     const listener = mockAddNotificationResponseReceivedListener.mock.calls[0][0];
