@@ -1083,6 +1083,9 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** Every entry of `NUSCHAOT` in [src/data/nuschaot.ts](src/data/nuschaot.ts) carries a `defaultKsOpinion` (Chabad `MA`, the rest `GRA`), and `defaultOpinionFor()` reads it, but nothing calls that function: `setNusach()` in [src/stores/useUserStore.ts](src/stores/useUserStore.ts) sets only the nusach, so a Chabad user keeps the store's default opinion until changing it in Settings → Prayer.
   - **What it solves:** The registry promises a per-nusach default that no surface applies; the Shema deadline a Chabad user sees may not be the one the nusach implies.
   - **Expected result:** Either onboarding's nusach step (and a nusach change in Settings, unless the user chose an opinion) applies `defaultOpinionFor()`, with a test, or the field and the function are removed; the owner picks.
+  - **The owner's pick, 2026-11-15:** asked whether choosing nusach Chabad should move the user to the Magen Avraham opinion: "התשובה היא לא". A nusach sets no Shema opinion; it stays the user's setting, the Gra by default.
+  - **Done:** 2026-11-15. `defaultKsOpinion` and `defaultOpinionFor()` removed from [src/data/nuschaot.ts](src/data/nuschaot.ts), with the test line that read them; no behavior changes, since nothing called them. R14.6 in [docs/halacha-review.html](docs/halacha-review.html) now says the Gra for every nusach until the user chooses otherwise, `RULES_VERSION` 10. Verified: no other reference in the repository (a search), `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and [src/data/__tests__/mitzvotExtras.test.ts](src/data/__tests__/mitzvotExtras.test.ts) green.
+  - **Status:** Version: OTA, expected with the next update (no visible change) · Committed: no · Pushed: no · Live: no · Channel: none
 
 ## Open Questions
 

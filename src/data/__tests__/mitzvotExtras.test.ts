@@ -8,7 +8,7 @@ import { CITIES } from '../cities';
 import { customToMitzvah } from '../customMitzvotAdapter';
 import { CUSTOM_ICON_CHOICES } from '../customIcons';
 import { ICON_NAMES } from '@/components/MitzvahIcon';
-import { NUSACH_IDS, NUSCHAOT, defaultOpinionFor } from '../nuschaot';
+import { NUSACH_IDS, NUSCHAOT } from '../nuschaot';
 import { HebcalService } from '@/services/HebcalService';
 import { at, zmanimFor } from '@/testing/zmanim';
 import { CustomMitzvah, UserSettings } from '@/types/mitzvah';
@@ -20,8 +20,6 @@ describe('Mitzvot extras', () => {
     const all = ['ashkenaz', 'sefard', 'edot_hamizrach', 'chabad', 'teiman'];
     expect([...NUSACH_IDS]).toEqual(all);
     expect(NUSCHAOT.find((nusach) => nusach.id === 'teiman')?.he).toBe('תימן בלדי');
-    // R14.6: the GRA Shema opinion is Teiman's default, as every nusach's but Chabad's.
-    expect(defaultOpinionFor('teiman')).toBe('GRA');
     for (const m of MITZVOT) {
       for (const n of m.nuschaotSupported) {
         expect(all).toContain(n);

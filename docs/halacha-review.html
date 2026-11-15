@@ -883,11 +883,11 @@ main .rv-rule li {
             <li>קו ההלכה במסך ״עוד״: קו ההלכה הספרדי (לפי פסקי מרן), כמו בעדות המזרח.</li>
             <li>ההפטרה בחק לישראל: ההפטרה הספרדית, כמו בעדות המזרח.</li>
             <li>שיטת ההתחלה בטהרת המשפחה: הרב עובדיה יוסף, כמו בעדות המזרח. המשתמש יכול לבחור אחרת.</li>
-            <li>סוף זמן קריאת שמע: לפי הגר״א, כמו בכל הנוסחים חוץ מחב״ד.</li>
+            <li>סוף זמן קריאת שמע: לפי הגר״א, כמו בכל הנוסחים, עד שהמשתמש בוחר אחרת בהגדרות.</li>
           </ul>
         </div>
         <p class="source">בלי מקור שנבדק. אלה החלטות של האפליקציה.</p>
-        <p class="source">מקום בקוד: <code>halachaRulingFor()</code> ב־<code>src/data/halachaLines.ts</code>, <code>HAFTARAH_VARIANT</code> ב־<code>src/utils/chok.ts</code>, <code>presetForNusach()</code> ב־<code>src/data/taharahPresets.ts</code>, <code>NUSCHAOT</code> ב־<code>src/data/nuschaot.ts</code>.</p>
+        <p class="source">מקום בקוד: <code>halachaRulingFor()</code> ב־<code>src/data/halachaLines.ts</code>, <code>HAFTARAH_VARIANT</code> ב־<code>src/utils/chok.ts</code>, <code>presetForNusach()</code> ב־<code>src/data/taharahPresets.ts</code>, <code>halachicOpinions</code> ב־<code>src/stores/useUserStore.ts</code>.</p>
         <div class="rv-choice" role="radiogroup" aria-label="פריט 14.6"><label><input type="radio" name="r14-6" value="נכון">נכון</label><label><input type="radio" name="r14-6" value="לא נכון">לא נכון</label></div>
         <label class="rv-note">הערה<textarea name="r14-6-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
         <span class="rv-err" aria-live="polite"></span>
@@ -1242,7 +1242,7 @@ main .rv-rule li {
 <script>
 (() => {
   const ENDPOINT = 'https://formspree.io/f/xwlvgagp';
-  const RULES_VERSION = '9';
+  const RULES_VERSION = '10';
   const DRAFT_KEY = 'jew365-halacha-review-v1';
   const RIGHT = 'נכון';
   const WRONG = 'לא נכון';
