@@ -105,13 +105,13 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 
 ### B. Home as the hub (F4, F6)
 
-**B1. Search from home** · P1 · S · study (the hero's top row)
+**B1. Search from home** · P1 · S · study (the hero's top row) · **dropped by the owner, 2026-11-15: home stays unchanged**
 
 - **Change:** a search control on home opens the app-wide search with the keyboard up.
 - **User gain:** "type what you want" is the fastest path for a lazy user, one tap from the first screen. The store listing already promises a search that finds everything.
 - **How:** navigate to the hub tab with a `search` param; `more.tsx` already reads an `open` param, and `SettingsSearchBox` gains a ref to focus after paint. No new route.
 
-**B2. "All mitzvot" under My day** · P1 · S · same study (placement)
+**B2. "All mitzvot" under My day** · P1 · S · same study (placement) · **dropped by the owner, 2026-11-15: home stays unchanged**
 
 - **Change:** a row under My day opens the library, where mitzvot are switched on and a personal one is added.
 - **User gain:** the place to add a mitzvah sits beside the list of today's mitzvot, not inside Settings.
@@ -289,6 +289,6 @@ Each phase ships to the preview channel on its own. Phases 2 and 3 run in parall
 1. **The next native build:** the first-run work reaches new users only with it. Recommended: phases 0 to 2 over the air now, and phase 3 in the next build.
 2. **Quiet hours for new users:** a night bound drops late alerts (Maariv's and the bedtime Shema's last-chance alerts, and after a late summer Shabbat abroad the weekly report). Recommended: 23:00 to 06:30, ticked and editable on the notification screen, with one line saying so. **Decided 2026-11-15:** as recommended (the owner approved the setup study).
 3. **Candle lighting and the Omer by gender:** for a man whose wife lights, an unmarked candle lighting would read as missed every week. Recommended: candle lighting ticked for women and for an unanswered gender, off for men, who still get the pre-Shabbat notice with the lighting time; the Omer ticked for everyone until the rav says otherwise. **Decided 2026-11-15:** as recommended (the owner approved the setup study).
-4. **Names:** the hub ("גלה" or "עוד") and the library's own name, in the study and the copy sign-off. The owner picked the hub's direction ב (goal tiles) on 2026-11-15; the names are still open.
+4. **Names:** the hub ("גלה" or "עוד") and the library's own name, in the study and the copy sign-off. **Decided 2026-11-15:** the hub is direction ב (goal tiles) and the tab stays "עוד"; the capabilities screen is direction ב; home is left unchanged, so B1 and B2 are dropped and home's way in is the Messages offer, perhaps named "גלה עוד". The library's own name is still open.
 5. **The weekly tip:** read here as a line inside the existing weekly report notification. A separate weekly notification is possible but adds noise.
 6. **The sample reminder's "done" button:** it needs the written exception of step 3 above. Recommended: yes.

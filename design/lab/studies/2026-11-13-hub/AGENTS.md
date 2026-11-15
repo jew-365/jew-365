@@ -16,11 +16,11 @@
 ## Local Contracts
 
 - Published as one private gallery Artifact, as the compass-button study was: https://claude.ai/artifact/2kobw5urktHPE9s8rjnvpJ. Republish to the same link after a change.
-- The owner's picks: the More tab is direction ב, the goal tiles (2026-11-15, "לגביי מסך עוד הכי אהבתי את ב"). Not picked yet: the capabilities screen, home's entry points and the tab's name (עוד or גלה). The More tab (C5) may be built on ב; C4, B1 and B2 wait for their picks.
+- The owner's picks (2026-11-15): the More tab is direction ב, the goal tiles ("לגביי מסך עוד הכי אהבתי את ב"), and keeps the name עוד; the capabilities screen is direction ב, a folding card per goal; home stays unchanged (neither entry-point direction), its way in being the offer in Messages, perhaps named "גלה עוד" ("מסך כל היכולות לך על ב לגביי מסך הבית תשאיר בלי שינוי אולי בהודעות לתת שם גלה עוד או משהו בסגנון ושם הטאב הוא עוד"). Phase 2 follows these.
 
 ## Work Guidance
 
-- The picks become C5 in [more.tsx](<../../../../src/app/(tabs)/more.tsx>), C4 as `src/app/capabilities.tsx` and B1 and B2 in [home.tsx](<../../../../src/app/(tabs)/home.tsx>), under the `src/` DOX chain; the home's hero in the boards is a placeholder, since the study does not change it.
+- The picks become C5 in [more.tsx](<../../../../src/app/(tabs)/more.tsx>) and C4 as `src/app/capabilities.tsx`, under the `src/` DOX chain; B1 and B2 in [home.tsx](<../../../../src/app/(tabs)/home.tsx>) are not built (the owner's call); the home's hero in the boards is a placeholder, since the study does not change it.
 
 ## Verification
 

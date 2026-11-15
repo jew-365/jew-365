@@ -1017,11 +1017,12 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** spec items tagged "study" in phase 2.
   - **Expected result:** both Artifact links in the study's AGENTS.md and here; the owner's pick recorded.
   - **Done (the study):** 2026-11-13. [design/lab/studies/2026-11-13-hub/](design/lab/studies/2026-11-13-hub/AGENTS.md), on the app's words, states and one real day: today's More tab beside three hub directions with the עוד / גלה switch, two directions of the capabilities screen, two of home's entry points. Published as one gallery Artifact, as the compass-button study was: https://claude.ai/artifact/2kobw5urktHPE9s8rjnvpJ. Checked at 1240 and 430 points (no horizontal scroll, no page error).
-  - **The owner's pick, 2026-11-15:** the More tab is direction ב, the goal tiles ("לגביי מסך עוד הכי אהבתי את ב"). Still open: the capabilities screen (א or ב), home's entry points (א or ב) and the tab's name (Q35).
+  - **The owner's pick, 2026-11-15:** the More tab is direction ב, the goal tiles ("לגביי מסך עוד הכי אהבתי את ב"). Later that day: the capabilities screen is direction ב, the folding card per goal; home stays as it is, with no search button and no "all mitzvot" row (B1 and B2 dropped), and the way in from home is the offer in Messages, perhaps under a name such as "גלה עוד"; the tab's name stays עוד ("מסך כל היכולות לך על ב לגביי מסך הבית תשאיר בלי שינוי אולי בהודעות לתת שם גלה עוד או משהו בסגנון ושם הטאב הוא עוד"). Nothing of the study is open; the wording of that Messages name goes to the copy sign-off.
   - **Status:** Version: none (design) · Committed: yes, `2ba199b` feat(design): the hub study · Pushed: yes · Live: the Artifact · Channel: —
 
-- [ ] Phase 2: build the owner's pick (C5, C4, A6, B1, B2, D1, E1, E2, E3)
-  - **What it is:** the hub, `src/app/capabilities.tsx`, the catch-up offer, home's search and "all mitzvot" row, the benefit captions, one-time hints, guide pills and empty states, as the spec and the study's pick say; split into tasks when the pick is in.
+- [ ] Phase 2: build the owner's pick (C5, C4, A6, D1, E1, E2, E3)
+  - **What it is:** the hub, `src/app/capabilities.tsx`, the catch-up offer, the benefit captions, one-time hints, guide pills and empty states, as the spec and the study's pick say; split into tasks when the owner asks for the build.
+  - **The owner's picks, 2026-11-15:** the More tab in direction ב (goal tiles), named עוד; the capabilities screen in direction ב (a folding card per goal); home unchanged, so B1 and B2 are not built, and home's way in is the Messages offer, perhaps named "גלה עוד".
   - **What it solves:** F4, F5, F6, F8.
   - **Expected result:** per item, the suites the spec's Verification names.
 
@@ -1266,7 +1267,7 @@ Q32 to Q37 are the batch "Discoverability and ease of use, 2026-11-13", the open
 - **Q35 — Names.**
   - **Question:** The hub tab's name ("גלה" or "עוד") and the library's own name, so "המצוות שלי" means only personal mitzvot.
   - **Proposal:** decided in the hub study and the copy sign-off.
-  - **Status, 2026-11-15:** the owner picked the hub's direction ב and named neither tab name; still open.
+  - **Answered in part, 2026-11-15:** the tab keeps its name, עוד ("ושם הטאב הוא עוד"); "גלה עוד" or the like may name the offer in home's Messages. Still open: the library's own name.
   - **Lives in:** `nav.more` and the library's keys in both dictionaries.
   - **What it affects:** the tab bar, the library, the search words.
 
