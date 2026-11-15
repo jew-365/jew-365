@@ -3,9 +3,9 @@ import { persist, createJSONStorage } from './zustandMiddleware';
 import { createZustandStorage } from '@/services/StorageService';
 import { STORE_VERSION, migrate, onRehydrateStorage } from './persistOptions';
 import { useUserStore } from './useUserStore';
-import { MITZVOT } from '@/data/mitzvot';
+import { MITZVOT, findMitzvah } from '@/data/mitzvot';
 import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
-import { ManualNag, Mitzvah, Reminder } from '@/types/mitzvah';
+import { ManualNag, Mitzvah, Nusach, Reminder } from '@/types/mitzvah';
 import { isManualNag, isNagLevel, type NagLevel } from '@/utils/nagging';
 
 export type ActiveMitzvahState = {
@@ -237,3 +237,12 @@ export function takeAddedOnHydrate(): string[] {
   if (added.length) useMitzvotStore.setState({ activeMitzvot: { ...useMitzvotStore.getState().activeMitzvot } });
   return added;
 }
+
+// Returns a number, so the subscription re-renders only when the count itself changes. A registry
+// mitzvah the nusach does not offer (Ushpizin for Chabad) is not counted, as the library does not show it.
+export const selectEnabledCount =
+  (nusach: Nusach) =>
+  (state: { activeMitzvot: Record<string, ActiveMitzvahState> }): number =>
+    Object.entries(state.activeMitzvot).filter(
+      ([id, active]) => active.enabled && (findMitzvah(id)?.nuschaotSupported.includes(nusach) ?? true),
+    ).length;

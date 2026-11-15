@@ -6,6 +6,7 @@
 import { HDate, months } from '@hebcal/core';
 import { upcomingHilulot } from '@/data/hilulot';
 import type { IconName } from '@/components/MitzvahIcon';
+import { RECOMMENDED_BUNDLES, bundleSelection, type BundleGender } from '@/data/bundles';
 import type { CapabilityAction } from '@/data/capabilities';
 import type { Location } from '@/types/zmanim';
 import type { OfferRecord } from '@/utils/discovery';
@@ -23,7 +24,8 @@ export const LEARNING_AFTER_MARKED_DAYS = 5;
 export const BIRCHOT_AFTER_MARKED_DAYS = 2;
 export const SOON_DAYS = 7;
 
-export type OfferId = 'battery' | 'tour' | 'candles' | 'omer' | 'hilulot' | 'tracking' | 'birchot' | 'learning';
+export type OfferId =
+  'battery' | 'tour' | 'catchUp' | 'candles' | 'omer' | 'hilulot' | 'tracking' | 'birchot' | 'learning';
 export type Offer = { id: OfferId; key: string; icon: IconName; action: CapabilityAction };
 
 export type OfferInput = {
@@ -36,6 +38,10 @@ export type OfferInput = {
   enabled: (id: string) => boolean;
   offered: (id: string) => boolean;
   hilulotEnabled: boolean;
+  roshChodeshEnabled: boolean;
+  gender: BundleGender;
+  // Whether this install ran the short setup with the goal bundles (the `newSetup` discovery hint).
+  sawNewSetup: boolean;
   // false only where the battery exemption is known to be missing (Android); null elsewhere.
   batteryExempt: boolean | null;
   // How many app days hold a mark, and whether any learning mitzvah is switched on.
@@ -72,6 +78,19 @@ const CANDIDATES: readonly Candidate[] = [
     installDay: true,
     eligible: (c) => c.installAge < TOUR_DAYS,
     action: { kind: 'route', href: { pathname: '/guide', params: { topic: 'home' } } },
+  },
+  {
+    // The catch-up (spec A6): an install that never saw the short setup is offered its bundles once, while a
+    // recommended one still has something off. It opens the capabilities screen; nothing changes until the
+    // user confirms there.
+    id: 'catchUp',
+    icon: 'sparkle',
+    eligible: (c) => {
+      if (c.sawNewSetup) return false;
+      const { mitzvot, notices } = bundleSelection(RECOMMENDED_BUNDLES, c.gender, c.offered);
+      return mitzvot.some((id) => !c.enabled(id)) || (notices.includes('roshChodesh') && !c.roshChodeshEnabled);
+    },
+    action: { kind: 'route', href: { pathname: '/capabilities', params: { bundles: '1' } } },
   },
   {
     id: 'candles',
@@ -179,7 +198,7 @@ export function pickOffer(input: OfferInput): Offer | null {
 const strip = ({ id, key, icon, action }: Offer): Offer => ({ id, key, icon, action });
 
 const CANDLES = CANDIDATES.find((c) => c.id === 'candles')!;
-const TIP_EXCLUDED: ReadonlySet<OfferId> = new Set(['tour', 'battery', 'tracking', 'candles']);
+const TIP_EXCLUDED: ReadonlySet<OfferId> = new Set(['tour', 'battery', 'catchUp', 'tracking', 'candles']);
 
 // The weekly report's tip (spec C6): the first offer that still applies whatever the day, never one the user
 // already closed, and never the tour, the battery or the Tracking tab (the tip is about next week's mitzvot and
@@ -198,4 +217,18 @@ export function weeklyTip(input: OfferInput): Offer | null {
     input.offers.candles?.closedAt === undefined;
   if (candles) return strip(eligibleOffersFrom(CANDLES, ctx, true)!);
   return tip ? strip(eligibleOffersFrom(tip, ctx, true)!) : null;
+}
+
+export const HUB_OFFERS_MAX = 3;
+
+// The More tab's "worth trying" strip (spec C5): up to three offers that apply now and that the user has not
+// closed, in priority order, whatever home's one-at-a-time pacing says; the user came here to explore. Never
+// the tour, which is home's, and nothing inside a holy block or before the install is stamped.
+export function hubOffers(input: OfferInput, max = HUB_OFFERS_MAX): Offer[] {
+  const ctx = contextOf(input);
+  if (!ctx || quietBlockAt(input.now, input.location)) return [];
+  return eligibleOffers(ctx)
+    .filter((o) => o.id !== 'tour' && input.offers[o.key]?.closedAt === undefined)
+    .slice(0, max)
+    .map(strip);
 }

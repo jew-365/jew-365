@@ -2,11 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import type { CapabilityAction } from '@/data/capabilities';
 import { useNeedsReminderDialog } from '@/hooks/useNeedsReminderDialog';
-import {
-  isIgnoringBatteryOptimizations,
-  requestIgnoreBatteryOptimizations,
-  supportsBatteryOptimizationSettings,
-} from '@/services/deviceSettings';
+import { useBatteryExempt } from '@/hooks/useCapabilities';
+import { requestIgnoreBatteryOptimizations } from '@/services/deviceSettings';
 import { offerInputAt } from '@/services/offerInput';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
@@ -19,25 +16,14 @@ import { pickOffer, type Offer } from '@/utils/offers';
 export function useOffer(todayKey: string): { offer: Offer | null; close: (key: string) => void } {
   const offers = useUserStore((s) => s.discovery.offers);
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
+  const roshChodeshEnabled = useUserStore((s) => s.roshChodeshEnabled);
+  const gender = useUserStore((s) => s.gender);
+  const hints = useUserStore((s) => s.discovery.hints);
   const nusach = useUserStore((s) => s.nusach);
   const firstOpenedAt = useUserStore((s) => s.firstOpenedAt);
   const activeMitzvot = useMitzvotStore((s) => s.activeMitzvot);
-  const [battery, setBattery] = useState<boolean | null>(null);
+  const battery = useBatteryExempt(todayKey);
   const [offer, setOffer] = useState<Offer | null>(null);
-
-  useEffect(() => {
-    if (!supportsBatteryOptimizationSettings()) return;
-    let live = true;
-    const task = afterPaint(() => {
-      isIgnoringBatteryOptimizations()
-        .then((exempt) => live && setBattery(exempt))
-        .catch(() => {});
-    });
-    return () => {
-      live = false;
-      task.cancel();
-    };
-  }, [todayKey]);
 
   useEffect(() => {
     const task = afterPaint(() => {
@@ -47,7 +33,18 @@ export function useOffer(todayKey: string): { offer: Offer | null; close: (key: 
       if (next && !(next.key in store.discovery.offers)) store.recordOffer(next.key, { shownAt: Date.now() });
     });
     return () => task.cancel();
-  }, [todayKey, offers, hilulotEnabled, nusach, firstOpenedAt, activeMitzvot, battery]);
+  }, [
+    todayKey,
+    offers,
+    hilulotEnabled,
+    roshChodeshEnabled,
+    gender,
+    hints,
+    nusach,
+    firstOpenedAt,
+    activeMitzvot,
+    battery,
+  ]);
 
   const close = useCallback((key: string) => {
     const store = useUserStore.getState();

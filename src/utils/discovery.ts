@@ -12,6 +12,10 @@ export type DiscoveryState = {
   whatsNew: WhatsNewState | null;
 };
 
+// The hint the short setup with the goal bundles learns when it ends (spec A2); an install without it is
+// offered the catch-up once (A6).
+export const NEW_SETUP_HINT = 'newSetup';
+
 export const EMPTY_DISCOVERY: DiscoveryState = { hints: [], offers: {}, whatsNew: null };
 
 const isTime = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;

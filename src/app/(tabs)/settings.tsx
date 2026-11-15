@@ -63,7 +63,7 @@ import {
   setTaharahTracking,
   taharahOffered,
 } from '@/stores/taharahOptIn';
-import { remindersOf, useMitzvotStore, type ActiveMitzvahState } from '@/stores/useMitzvotStore';
+import { remindersOf, selectEnabledCount, useMitzvotStore, type ActiveMitzvahState } from '@/stores/useMitzvotStore';
 import { useUserStore, type Gender, type PrayerMode } from '@/stores/useUserStore';
 import { useShallow } from 'zustand/react/shallow';
 import { BRAND } from '@/theme/colors';
@@ -94,7 +94,6 @@ import { typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
 import { getLocationName } from '@/data/cities';
 import type { ChokThuNightDay } from '@/types/chok';
-import { findMitzvah } from '@/data/mitzvot';
 import { NUSACH_IDS } from '@/data/nuschaot';
 import { HALACHA_TRACKS, defaultHalachaTrack, effectiveHalachaTrack } from '@/data/halacha';
 import { HDate } from '@hebcal/core';
@@ -120,15 +119,6 @@ const SIDDUR_VOICES: readonly SiddurVoice[] = ['male', 'female'];
 const CHOK_THU_NIGHT_DAYS: readonly ChokThuNightDay[] = ['thu', 'fri'];
 
 const FOCUS_HIGHLIGHT_MS = 2500;
-
-// Returns a number, so the subscription re-renders only when the count itself changes. A registry
-// mitzvah the nusach does not offer (Ushpizin for Chabad) is not counted, as the library does not show it.
-const selectEnabledCount =
-  (nusach: Nusach) =>
-  (state: { activeMitzvot: Record<string, ActiveMitzvahState> }): number =>
-    Object.entries(state.activeMitzvot).filter(
-      ([id, active]) => active.enabled && (findMitzvah(id)?.nuschaotSupported.includes(nusach) ?? true),
-    ).length;
 
 // About how many notifications a day the enabled mitzvot send: each everyday mitzvah's reminders once
 // plus its window's nags, at its own nagging level or the app's, or the ones placed by hand.

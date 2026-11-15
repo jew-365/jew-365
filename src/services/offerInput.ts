@@ -6,6 +6,7 @@ import { getAllMitzvot } from '@/data/customMitzvotAdapter';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
+import { NEW_SETUP_HINT } from '@/utils/discovery';
 import type { OfferInput } from '@/utils/offers';
 
 export function offerInputAt(now: Date, batteryExempt: boolean | null = null): OfferInput {
@@ -24,6 +25,9 @@ export function offerInputAt(now: Date, batteryExempt: boolean | null = null): O
     enabled,
     offered: (id) => offered.has(id),
     hilulotEnabled: user.hilulotEnabled,
+    roshChodeshEnabled: user.roshChodeshEnabled,
+    gender: user.gender,
+    sawNewSetup: user.discovery.hints.includes(NEW_SETUP_HINT),
     batteryExempt,
     markedDays: Object.values(completions).filter((day) => Object.keys(day).length > 0).length,
     learningOn: all.some((m) => m.category === 'learning' && enabled(m.id)),

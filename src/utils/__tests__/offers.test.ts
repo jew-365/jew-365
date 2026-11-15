@@ -1,7 +1,7 @@
 import { CITIES } from '@/data/cities';
 import { HebcalService } from '@/services/HebcalService';
 import { at } from '@/testing/zmanim';
-import { OFFER_GAP_DAYS, OFFER_SHOW_DAYS, pickOffer, weeklyTip, type OfferInput } from '../offers';
+import { OFFER_GAP_DAYS, OFFER_SHOW_DAYS, hubOffers, pickOffer, weeklyTip, type OfferInput } from '../offers';
 
 const J = CITIES[0];
 const DAY = 86_400_000;
@@ -18,6 +18,9 @@ function input(over: Partial<OfferInput> = {}, wallClock = WEDNESDAY): OfferInpu
     enabled: () => true,
     offered: () => true,
     hilulotEnabled: true,
+    roshChodeshEnabled: true,
+    gender: null,
+    sawNewSetup: true,
     batteryExempt: null,
     markedDays: 0,
     learningOn: true,
@@ -128,5 +131,62 @@ describe('weeklyTip', () => {
     // The report is the tracking itself, so the Tracking tab is never its tip.
     expect(weeklyTip(input({ markedDays: 3 }))).toBeNull();
     expect(weeklyTip(input())).toBeNull();
+  });
+});
+
+describe('the catch-up of an install that never saw the short setup (A6)', () => {
+  const candlesOff = { sawNewSetup: false, enabled: (id: string) => id !== 'candle_lighting', offers: SEEN };
+
+  it('is offered once, ahead of the seasonal offers, and opens the capabilities screen on its bundles', () => {
+    const offer = pickOffer(input(candlesOff))!;
+    expect(offer.id).toBe('catchUp');
+    expect(offer.action).toEqual({ kind: 'route', href: { pathname: '/capabilities', params: { bundles: '1' } } });
+    const closed = { ...SEEN, catchUp: { shownAt: ago(9), closedAt: ago(9) } };
+    expect(pickOffer(input({ ...candlesOff, offers: closed }))?.id).not.toBe('catchUp');
+  });
+
+  it('is not offered after the short setup, nor when every recommended bundle is already on', () => {
+    expect(pickOffer(input({ ...candlesOff, sawNewSetup: true }))?.id).not.toBe('catchUp');
+    expect(pickOffer(input({ sawNewSetup: false, offers: SEEN }))).toBeNull();
+  });
+
+  it('counts Rosh Chodesh notices, and for a man not candle lighting', () => {
+    expect(pickOffer(input({ sawNewSetup: false, roshChodeshEnabled: false, offers: SEEN }))!.id).toBe('catchUp');
+    expect(pickOffer(input({ ...candlesOff, gender: 'male' }))?.id).not.toBe('catchUp');
+    expect(pickOffer(input({ ...candlesOff, gender: 'female' }))!.id).toBe('catchUp');
+  });
+
+  it('never comes on the install day, and never as the weekly tip', () => {
+    expect(pickOffer(input({ ...candlesOff, offers: {}, firstOpenedAt: ago(0) }))!.id).toBe('tour');
+    expect(weeklyTip(input({ sawNewSetup: false, roshChodeshEnabled: false, offers: SEEN }))).toBeNull();
+  });
+});
+
+describe('hubOffers', () => {
+  const several = {
+    sawNewSetup: false,
+    enabled: (id: string) => !['candle_lighting', 'birchot_hashachar'].includes(id),
+    markedDays: 6,
+    learningOn: false,
+    hilulotEnabled: true,
+  };
+
+  it('lists up to three offers that apply, in priority order, whatever the pacing of home', () => {
+    // Home showed one yesterday and would wait two days; the More tab does not.
+    const offers = { tracking: { shownAt: ago(1), closedAt: ago(1) } };
+    expect(hubOffers(input({ ...several, offers })).map((o) => o.id)).toEqual(['catchUp', 'birchot', 'learning']);
+    expect(pickOffer(input({ ...several, offers }))).toBeNull();
+  });
+
+  it('leaves out an offer the user closed, the tour, and everything inside a holy block', () => {
+    const offers = { catchUp: { shownAt: ago(3), closedAt: ago(3) }, tracking: { shownAt: ago(1), closedAt: ago(1) } };
+    expect(hubOffers(input({ ...several, offers })).map((o) => o.id)).toEqual(['birchot', 'learning']);
+    expect(hubOffers(input({ ...several, firstOpenedAt: ago(0) })).map((o) => o.id)).not.toContain('tour');
+    expect(hubOffers(input(several, '2026-11-21T11:00'))).toEqual([]);
+  });
+
+  it('is empty before the install is stamped, and with nothing to offer', () => {
+    expect(hubOffers(input({ ...several, firstOpenedAt: null }))).toEqual([]);
+    expect(hubOffers(input({ offers: SEEN }))).toEqual([]);
   });
 });
