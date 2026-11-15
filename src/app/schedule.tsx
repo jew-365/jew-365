@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { DateTime } from 'luxon';
+import { GuidePill } from '@/components/GuidePill';
 import { Card } from '@/components/Card';
 import { MitzvahIcon, backIcon, forwardIcon } from '@/components/MitzvahIcon';
 import { HeaderPill, ScreenHeader } from '@/components/ScreenHeader';
@@ -153,7 +154,12 @@ export default function ScheduleScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScreenHeader title={t('schedule.title')} subtitle={subtitle} onBack={goBack}>
+      <ScreenHeader
+        title={t('schedule.title')}
+        subtitle={subtitle}
+        onBack={goBack}
+        actions={<GuidePill topic="schedule" />}
+      >
         <SegmentedControl
           options={VIEW_MODES.map((value) => ({ value, label: t(`schedule.${value}`) }))}
           value={view}

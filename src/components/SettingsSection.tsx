@@ -12,6 +12,8 @@ type Props = {
   title: string;
   subtitle?: string;
   icon?: IconName;
+  // A node under the subtitle, inside the header: the capabilities screen's icon strip.
+  headerExtra?: React.ReactNode;
   children: React.ReactNode;
   collapsible?: boolean;
   expanded?: boolean;
@@ -26,6 +28,7 @@ export function SettingsSection({
   title,
   subtitle,
   icon,
+  headerExtra,
   children,
   collapsible = false,
   expanded = false,
@@ -40,6 +43,7 @@ export function SettingsSection({
         {subtitle ? (
           <Text style={[typography.caption, styles.subtitle, { color: colors.textSub }]}>{subtitle}</Text>
         ) : null}
+        {headerExtra}
       </View>
     </>
   );

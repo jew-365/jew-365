@@ -160,7 +160,7 @@ describe('Onboarding mitzvot step', () => {
     renderWithTheme(<OnboardingMitzvotScreen />);
 
     expect(screen.getByRole('switch', { name: TEFILLIN })).toBeChecked();
-    expect(caption(TEFILLIN)).toBe('בוקר');
+    expect(caption(TEFILLIN)).toBe('תזכורת להניח תפילין בזמן');
     expect(screen.queryByText(NOT_FOR_WOMEN)).toBeNull();
   });
 

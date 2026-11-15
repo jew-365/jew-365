@@ -1,6 +1,10 @@
 const mockPush = jest.fn();
+const mockNavigate = jest.fn();
 
-jest.mock('expo-router', () => ({ useLocalSearchParams: () => ({}), useRouter: () => ({ push: mockPush }) }));
+jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => ({}),
+  useRouter: () => ({ push: mockPush, navigate: mockNavigate }),
+}));
 jest.mock('react-native-reanimated', () => ({
   __esModule: true,
   ...jest.requireActual('react-native-reanimated'),
@@ -308,6 +312,9 @@ describe('history', () => {
       await screen.findByTestId('history-calendar');
       expect(screen.getByText('קריאה בסידור')).toBeOnTheScreen();
       expect(screen.getByTestId('history-reading-empty')).toBeOnTheScreen();
+      // The empty state leads to what fills it (spec E3).
+      fireEvent.press(within(screen.getByTestId('history-reading-empty')).getByRole('button', { name: 'לסידור' }));
+      expect(mockNavigate).toHaveBeenLastCalledWith('/(tabs)/siddur');
     });
 
     it('counts the psalms and each text, all, this week and this Hebrew month, most read first', async () => {

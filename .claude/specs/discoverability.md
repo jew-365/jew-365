@@ -76,6 +76,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 - **How:** `src/app/onboarding/*`, `ONBOARDING_STEPS`, the routes and smoke suites, the guide's "start" topic. Gender stays as one optional tap (`chooseGender()`), because it sets real defaults: tefillin, Kiddush Levana, the siddur voice, the palette.
 
 **A3. Bundles ("חבילות")** · P0 · M · same study
+- **Built, the data (2026-11-15):** `src/data/bundles.ts`, five bundles as capability ids with `bundleSelection()`; the gender rule is kept per mitzvah, so a man's candle capability switches havdalah on and leaves candle lighting off (the study drew the whole capability off for a man). The setup screen that ticks them comes with phase 3, which must also learn the `newSetup` discovery hint when setup ends, so the catch-up (A6) is not offered to those installs.
 
 - **Change:** about five goal cards, each switching a whole group on with one tap: prayers and daily times; Shabbat and festivals (candle lighting, havdalah, the Omer and the seasonal ones); the calendar (Rosh Chodesh, hilulot); daily learning (choose programs); morning blessings. The same bundles appear later on the capabilities screen (C4).
 - **Fixes:** F2, F3.
@@ -97,6 +98,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 - **How:** per enabled mitzvah `appDayWindow()`, `clockRange()` and `nextReminderAt()`, falling back to the names list when there is no row (a holy block, a polar day). `presentSampleReminder()` in the scheduler facade and the web shim, after `previewNotificationSound()`: id `sample`, `data.kind = 'sample'`, its own category carrying the "done" action, never a real window's id, never inside a holy block; `markDoneFromNotificationData()` and the tap router ignore it. Also offered in Settings › Device.
 
 **A6. Catch-up for installs that never saw the new setup** · P1 · S (on top of C4)
+- **Built (2026-11-15):** the `catchUp` offer, after the tour and before the seasonal offers, while the install has no `newSetup` hint and a recommended bundle still has something off for the user's gender; it opens `/capabilities` with `bundles=1`, whose ticks switch on only what is ticked and still off, on confirm. The learning bundle is left out of the ticks: each program is a download with its own row.
 
 - **Change:** once, as the first offer on home after the update: "choose what matters to you", which opens the capabilities screen on its bundles with the recommended ones ticked. Nothing changes until the user confirms.
 - **Fixes:** F3, for every existing user and for new users who ran the old binary's setup.
@@ -161,12 +163,14 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 - **How:** `home.tsx`'s messages block and `src/utils/homeMessages.ts`, built from `ListRow`, `BottomSheet` and `SheetAction`; the offer adds nothing to the banner chain of `pickBanner()`. `roshChodeshMessage()` words its caption by whether the notices are on.
 
 **C4. "All capabilities" screen** · P1 · L · study
+- **Built (2026-11-15), direction ב of the hub study:** `src/app/capabilities.tsx`, a folding card per goal with its icon strip. "Turn all on" works per goal on what one tap can switch on (mitzvot, notice topics, installed add-ons), not per bundle; the bundles appear as ticks only in the catch-up. A learning program that is not installed opens its mitzvah screen for the download.
 
 - **Change:** a new screen ("כל היכולות") lists everything the app can do, by goal: prayer, Shabbat and festivals, daily learning, the calendar, tracking, personal, tools and help. Each item shows its state and one action (turn on, download, open); a goal has "turn all on" (A3's bundles). A mitzvah group opens the library for its per-mitzvah switches, so there is no second list of switches and no score.
 - **User gain:** one place answers "what else can this app do for me?", with what is off visible and one tap from on.
 - **How:** new route `src/app/capabilities.tsx` over C1, with its routes, smoke, guide-topic and search-coverage entries.
 
 **C5. The More tab becomes the hub** · P1 · M · same study
+- **Built (2026-11-15), direction ב of the hub study, the name staying "עוד":** the search, the worth-trying strip (`hubOffers()`, up to three, no pacing), the link to all capabilities, a tile per goal and the all-mitzvot tile. The tab no longer lists its old rows: each is a capability under its goal, one tap deeper, and the learning programs' in-place download from this tab went with them (the siddur tab's learning group keeps it).
 
 - **Change:** the search on top; "worth trying", up to three offers from C2; the entry to "all capabilities"; then labelled groups: daily learning; prayer texts and tools; the calendar (schedule, Rosh Chodesh, hilulot); the app (all mitzvot with the count in use, the guide). The tab's name is decided in the study (working name "גלה").
 - **Fixes:** F4.
@@ -189,6 +193,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 ### D. Words that explain (F4, F8)
 
 **D1. Names and benefit captions** · P1 · M · copy sign-off
+- **Built (2026-11-15):** `library.benefit.<id>` on every registry row of the library, the capability benefits on the hub and the capabilities screen, both search boxes labelled as searching the whole app, and the Prayer summary without the compass. Open: the library's own name (Q35) and the copy sign-off.
 
 - **Change:** every row in the library, the hub and the capabilities screen says what the user gets ("a reminder before the end of the Shema's time"), never a category ("morning"). The library gets a name of its own, so "המצוות שלי" means only personal mitzvot. The search box says it searches the whole app. The Prayer section's summary stops naming a compass control that is not there. "רמת נודניקיות", the owner's term, stays.
 - **User gain:** the user understands a row without trying it.
@@ -203,18 +208,21 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 ### E. Teach in place (F5, F6)
 
 **E1. One-time hints** · P1 · S to M
+- **Built (2026-11-15):** `useOneTimeHint()`, the sun hint moved onto it, and the check-in's tap hint. Home's cards have no "⋯" control (the quick actions are a long press), so that hint is not built.
 
 - **Change:** one mechanism for a hint that shows once: "drag the sun" (B4) first, then the check-in after Shabbat and the home card's "⋯". A hint inside the siddur reader waits: it touches the reader's scroll math.
 - **User gain:** a hidden gesture is taught exactly where it is used, once.
 - **How:** `useOneTimeHint(id)` over `discovery.hints`, drawn with the hero's `hint` prop or an `info` `Banner`.
 
 **E2. A guide button on the complex screens** · P1 · S
+- **Built (2026-11-15):** `GuidePill`, icon-only, on the mitzvah screen, the schedule, the report, the check-in, the hilulot and Rosh Chodesh.
 
 - **Change:** the mitzvah screen, the schedule, the report, the check-in and the notice screens get a small "guide" pill in their header that opens the guide on their topic.
 - **User gain:** help is where the question arises, not at the bottom of a list.
 - **How:** a `HeaderPill` in `ScreenHeader`'s `actions`, to `/guide` with its `topic` param.
 
 **E3. Empty states that lead somewhere** · P2 · S
+- **Built (2026-11-15):** the per-mitzvah, trends and reading empty states of Tracking; the achievements tab always shows its next badges, so it has no empty state.
 
 - **Change:** the empty states of Tracking ("not enough history yet", trends, achievements, reading) gain one line on what will appear and a button to the action that fills them.
 - **User gain:** a new user who opens Tracking on day one understands what it will become, instead of meeting blank cards.

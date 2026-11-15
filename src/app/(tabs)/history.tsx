@@ -944,6 +944,7 @@ const EMPTY_STATS: HistoryStats = { streak: 0, daily: [], perMitzvah: {}, missed
 // then every text read at least once, from the reader's counts (utils/reading.ts).
 function ReadingCard() {
   const { t, language } = useI18n();
+  const router = useRouter();
   const location = useUserStore((s) => s.location);
   const texts = useReadingStore((s) => s.texts);
   const psalms = useReadingStore((s) => s.psalms);
@@ -975,6 +976,13 @@ function ReadingCard() {
               iconTone="muted"
               title={t('history.reading.emptyTitle')}
               caption={t('history.reading.empty')}
+            />
+            <Button
+              variant="secondary"
+              size="compact"
+              label={t('history.reading.emptyAction')}
+              onPress={() => router.navigate('/(tabs)/siddur')}
+              style={styles.emptyAction}
             />
           </View>
         ) : null}
@@ -1422,7 +1430,19 @@ function HistoryScreenContent() {
             );
           })}
           {!rows.length ? (
-            <Text style={[typography.body, styles.emptyText, { color: colors.textMuted }]}>{t('history.empty')}</Text>
+            <View testID="history-empty" style={styles.emptyBlock}>
+              <Text style={[typography.body, styles.emptyText, { color: colors.textMuted }]}>{t('history.empty')}</Text>
+              <Text style={[typography.caption, styles.emptyHint, { color: colors.textSub }]}>
+                {t('history.emptyHint')}
+              </Text>
+              <Button
+                variant="secondary"
+                size="compact"
+                label={t('history.emptyAction')}
+                onPress={() => router.navigate('/(tabs)/home')}
+                style={styles.emptyButton}
+              />
+            </View>
           ) : null}
         </Card>
         {leader ? (
@@ -1533,9 +1553,21 @@ function HistoryScreenContent() {
     return (
       <>
         {allEmpty ? (
-          <Text style={[typography.body, styles.emptyText, { color: colors.textMuted }]}>
-            {t('history.trends.empty')}
-          </Text>
+          <View testID="history-trends-empty" style={styles.emptyBlock}>
+            <Text style={[typography.body, styles.emptyText, { color: colors.textMuted }]}>
+              {t('history.trends.empty')}
+            </Text>
+            <Text style={[typography.caption, styles.emptyHint, { color: colors.textSub }]}>
+              {t('history.trends.emptyHint')}
+            </Text>
+            <Button
+              variant="secondary"
+              size="compact"
+              label={t('history.emptyAction')}
+              onPress={() => router.navigate('/(tabs)/home')}
+              style={styles.emptyButton}
+            />
+          </View>
         ) : (
           <>
             <SectionLabel text={t('history.weeks.title')} />
@@ -2070,7 +2102,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   insightText: { flex: 1 },
-  emptyText: { padding: spacing.lg },
+  emptyText: { padding: spacing.lg, paddingBottom: spacing.xs },
+  emptyBlock: { paddingBottom: spacing.lg, alignItems: 'flex-start' },
+  emptyButton: { marginHorizontal: spacing.lg },
+  emptyHint: { paddingHorizontal: spacing.lg, marginBottom: spacing.md },
+  emptyAction: { alignSelf: 'flex-start', marginHorizontal: spacing.lg, marginBottom: spacing.lg },
   sectionHint: { paddingHorizontal: spacing.xs, marginBottom: spacing.sm },
   calHeader: {
     flexDirection: 'row',

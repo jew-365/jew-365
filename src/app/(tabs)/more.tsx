@@ -1,27 +1,29 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Keyboard, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { openExternalUrl, tryOpenExternalUrl } from '@/services/externalFlow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Banner } from '@/components/Banner';
 import { BottomSheet, SheetAction } from '@/components/BottomSheet';
-import { Card } from '@/components/Card';
-import { useLearningRows } from '@/components/LearningRows';
-import { ListRow } from '@/components/ListRow';
+import { GoalTile, OfferCard } from '@/components/CapabilityViews';
 import { NavBar } from '@/components/NavBar';
+import { HeaderPill } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
 import { SettingsSearchBox, SettingsSearchResults, useSettingsSearch } from '@/components/SettingsSearch';
-import { selichotAddonCaption, useSelichotDownloadFlow } from '@/components/SelichotAddonCard';
-import { SELICHOT_TEXT_ID } from '@/data/selichot';
-import { STANDALONE_TEXTS } from '@/data/siddur';
 import { HALACHA_LINES, callUrl, halachaRulingFor, phoneLabel, whatsappUrl } from '@/data/halachaLines';
+import { CAPABILITIES, CAPABILITY_GOALS } from '@/data/capabilities';
+import { useBatteryExempt, useCapabilityStates } from '@/hooks/useCapabilities';
 import { useNow } from '@/hooks/useNow';
+import { useCapabilityAction } from '@/hooks/useOffer';
+import { offerInputAt } from '@/services/offerInput';
+import { selectEnabledCount, useMitzvotStore } from '@/stores/useMitzvotStore';
+import { appDayKey } from '@/utils/locationDay';
+import { hubOffers, type Offer } from '@/utils/offers';
 import { checkChokUpdate } from '@/services/ChokContentService';
 import { checkShnayimUpdate } from '@/services/ShnayimContentService';
 import { checkHalachaUpdate } from '@/services/HalachaContentService';
 import { HALACHA_PACKS } from '@/stores/useHalachaStore';
-import { checkSelichotUpdate, selichotDownloadSupported } from '@/services/SelichotContentService';
-import { selectSelichotInstalledFor, useSelichotStore } from '@/stores/useSelichotStore';
+import { checkSelichotUpdate } from '@/services/SelichotContentService';
 import { useUserStore } from '@/stores/useUserStore';
 import { scaled } from '@/theme/scale';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -37,13 +39,34 @@ function MoreScreenContent() {
   const router = useRouter();
   const now = useNow();
   const nusach = useUserStore((s) => s.nusach);
+  const location = useUserStore((s) => s.location);
   const [halachaOpen, setHalachaOpen] = useState(false);
   const [callNote, setCallNote] = useState<string | null>(null);
   const ruling = halachaRulingFor(nusach);
-  const learning = useLearningRows(now);
-  const selichotInstalled = useSelichotStore(selectSelichotInstalledFor(nusach));
-  const selichotDownload = useSelichotStore((s) => s.download);
-  const selichotFlow = useSelichotDownloadFlow();
+  const todayKey = appDayKey(now, location);
+  const { stateOf } = useCapabilityStates(todayKey);
+  const battery = useBatteryExempt(todayKey);
+  const { run, dialog } = useCapabilityAction();
+  const enabledCount = useMitzvotStore(selectEnabledCount(nusach));
+  const closedOffers = useUserStore((s) => s.discovery.offers);
+  const activeMitzvot = useMitzvotStore((s) => s.activeMitzvot);
+  const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
+  const roshChodeshEnabled = useUserStore((s) => s.roshChodeshEnabled);
+  // Up to three offers that apply now (spec C5): by the app day and what they read, never by the clock tick.
+  const offers = useMemo(
+    () => hubOffers(offerInputAt(new Date(), battery)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the stores are read at once; these are their changes
+    [todayKey, battery, closedOffers, activeMitzvot, hilulotEnabled, roshChodeshEnabled, nusach],
+  );
+  // An offer accepted here is closed for good, as on home; its action runs through the shared path.
+  const acceptOffer = (offer: Offer) => {
+    const store = useUserStore.getState();
+    store.recordOffer(offer.key, {
+      shownAt: store.discovery.offers[offer.key]?.shownAt ?? Date.now(),
+      closedAt: Date.now(),
+    });
+    run(offer.action);
+  };
   const [visit, setVisit] = useState(0);
   const { query, setQuery, searching, results, tiers, pending } = useSettingsSearch(visit);
   useFocusEffect(
@@ -72,14 +95,6 @@ function MoreScreenContent() {
     else if (item.route) router.push(item.route);
     else router.push({ pathname: '/(tabs)/settings', params: { focus: item.id } });
   };
-  const openSelichot = () => {
-    if (selichotInstalled || !selichotDownloadSupported() || selichotDownload.status === 'downloading') {
-      router.push(`/mitzvah/${SELICHOT_TEXT_ID}`);
-    } else {
-      void selichotFlow.prepare();
-    }
-  };
-
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
       <NavBar title={t('more.title')} />
@@ -96,79 +111,69 @@ function MoreScreenContent() {
         {searching ? (
           <SettingsSearchResults query={query} tiers={tiers} pending={pending} onChoose={chooseResult} />
         ) : null}
-        <Card divided style={searching ? styles.hidden : undefined}>
-          <ListRow
-            icon="calendar"
-            title={t('schedule.title')}
-            caption={t('more.scheduleCaption')}
-            chevron
-            onPress={() => router.push('/schedule')}
-          />
-          {learning.rows.map((row) => (
-            <ListRow
-              key={row.id}
-              icon="chok"
-              iconTone={row.installed ? 'accent' : 'muted'}
-              title={row.title}
-              caption={row.caption}
-              chevron
-              disabled={row.disabled}
-              onPress={row.onPress}
+        <View style={searching ? styles.hidden : undefined} testID="more-hub">
+          {offers.length ? (
+            <>
+              <SectionLabel text={t('more.worth')} />
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.offers}
+                style={styles.offerStrip}
+                testID="more-offers"
+              >
+                {offers.map((offer) => (
+                  <OfferCard
+                    key={offer.key}
+                    testID={`more-offer-${offer.id}`}
+                    icon={offer.icon}
+                    title={t(`offer.${offer.id}.title`)}
+                    body={t(`offer.${offer.id}.body`)}
+                    accept={t(`offer.${offer.id}.accept`)}
+                    onAccept={() => acceptOffer(offer)}
+                  />
+                ))}
+              </ScrollView>
+            </>
+          ) : null}
+          <View style={styles.allRow}>
+            <SectionLabel text={t('more.all')} style={styles.allLabel} />
+            <HeaderPill label={t('more.allLink')} onPress={() => router.push('/capabilities')} />
+          </View>
+          <View style={styles.goals}>
+            {CAPABILITY_GOALS.map((goal) => {
+              const caps = CAPABILITIES.filter((c) => c.goal === goal)
+                .map((cap) => ({ id: cap.id, icon: cap.icon, on: stateOf(cap) === 'on', state: stateOf(cap) }))
+                .filter((cap) => cap.state !== 'unavailable');
+              if (!caps.length) return null;
+              const title = t(`capability.goal.${goal}`);
+              return (
+                <GoalTile
+                  key={goal}
+                  testID={`more-goal-${goal}`}
+                  title={title}
+                  icons={caps}
+                  accessibilityLabel={t('more.goalLabel', {
+                    goal: title,
+                    on: caps.filter((cap) => cap.on).length,
+                    total: caps.length,
+                  })}
+                  onPress={() => router.push({ pathname: '/capabilities', params: { goal } })}
+                />
+              );
+            })}
+            <GoalTile
+              testID="more-library"
+              title={t('more.library')}
+              caption={t('more.libraryCaption', { count: enabledCount })}
+              accessibilityLabel={`${t('more.library')}: ${t('more.libraryCaption', { count: enabledCount })}`}
+              onPress={() => router.push('/mitzvot')}
             />
-          ))}
-          <ListRow
-            icon="shofar"
-            iconTone={selichotInstalled ? 'accent' : 'muted'}
-            title={STANDALONE_TEXTS.selichot.name[language]}
-            caption={
-              selichotInstalled
-                ? t('selichot.addon.installedShort', { nusach: t(`nusach.${nusach}`) })
-                : selichotAddonCaption(selichotDownload, t(`nusach.${nusach}`), t)
-            }
-            chevron
-            disabled={selichotFlow.preparing}
-            onPress={openSelichot}
-          />
-          <ListRow
-            icon="tehillim"
-            title={STANDALONE_TEXTS.tehillim.name[language]}
-            caption={t('more.tehillimCaption')}
-            chevron
-            onPress={() => router.push({ pathname: '/siddur/[id]', params: { id: 'tehillim' } })}
-          />
-          <ListRow
-            icon="hilula"
-            title={t('hilulot.title')}
-            caption={t('hilulot.subtitle')}
-            chevron
-            onPress={() => router.push('/hilulot')}
-          />
-          <ListRow
-            icon="compass"
-            title={t('compass.title')}
-            caption={t('compass.caption')}
-            chevron
-            onPress={() => router.push('/compass')}
-          />
-          <ListRow
-            icon="phone"
-            title={t('more.halacha.title')}
-            caption={t(`more.halacha.caption.${ruling}`)}
-            chevron
-            onPress={() => setHalachaOpen(true)}
-          />
-          <ListRow
-            icon="guide"
-            title={t('guide.title')}
-            caption={t('more.guideCaption')}
-            chevron
-            onPress={() => router.push('/guide')}
-          />
-        </Card>
+          </View>
+        </View>
       </ScrollView>
 
-      {learning.dialogs}
-      {selichotFlow.dialog}
+      {dialog}
 
       <BottomSheet
         visible={halachaOpen}
@@ -228,6 +233,28 @@ const styles = StyleSheet.create({
   },
   hidden: {
     display: 'none',
+  },
+  offerStrip: {
+    marginHorizontal: -spacing.lg,
+  },
+  offers: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+    gap: spacing.md,
+  },
+  allRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.sm,
+  },
+  allLabel: {
+    flex: 1,
+  },
+  goals: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
   },
   line: {
     marginBottom: spacing.md,

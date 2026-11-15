@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
+import { Banner } from '@/components/Banner';
+import { GuidePill } from '@/components/GuidePill';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { CompletedRow } from '@/components/CompletedRow';
@@ -12,6 +14,7 @@ import { MitzvahCard } from '@/components/MitzvahCard';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
 import { useDayModel } from '@/hooks/useDayModel';
+import { useOneTimeHint } from '@/hooks/useOneTimeHint';
 import { useViewport, ViewportContext } from '@/hooks/useInView';
 import { StorageService } from '@/services/StorageService';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
@@ -44,6 +47,8 @@ export default function CheckInRoute() {
   const late = useCompletionsStore((s) => s.late);
   const unmark = useCompletionsStore((s) => s.unmark);
   const markDone = useCompletionsStore((s) => s.markDone);
+  // Taught once (spec E1): a card here is marked by a tap, with no button to look for.
+  const tapHint = useOneTimeHint('checkinTap');
   const finishCheckIn = useCompletionsStore((s) => s.finishCheckIn);
 
   // The block whose check-in was open on arrival. It stays on screen after the last mark, which
@@ -79,6 +84,7 @@ export default function CheckInRoute() {
   // Nothing could be marked during the block, so a closed window is filed as a mark in time, never asked about
   // (the owner's call, 2026-10-31).
   const mark = (item: CheckInItem, date: Date) => {
+    tapHint.learn();
     if (!checkIn || Date.now() >= checkIn.deadline.getTime()) {
       close();
       return;
@@ -111,7 +117,12 @@ export default function CheckInRoute() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top', 'bottom']}>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScreenHeader title={title} subtitle={checkIn ? t('checkin.subtitle', { deadline }) : undefined} onBack={close} />
+      <ScreenHeader
+        title={title}
+        subtitle={checkIn ? t('checkin.subtitle', { deadline }) : undefined}
+        onBack={close}
+        actions={<GuidePill topic="shabbat" />}
+      />
       {checkIn ? (
         <>
           <ViewportContext.Provider value={viewport.bus}>
@@ -122,6 +133,9 @@ export default function CheckInRoute() {
               onContentSizeChange={viewport.notify}
               scrollEventThrottle={motion.inViewThrottleMs}
             >
+              {tapHint.show ? (
+                <Banner tone="info" text={t('checkin.hint')} onPress={tapHint.learn} style={styles.hint} />
+              ) : null}
               {checkIn.days.map((day) => (
                 <View key={day.key} style={styles.day}>
                   <SectionLabel text={formatDayLine(day.date, language)} />
@@ -185,6 +199,9 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
+  },
+  hint: {
+    marginBottom: spacing.md,
   },
   day: {
     marginBottom: spacing.lg,

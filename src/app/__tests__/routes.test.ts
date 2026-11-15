@@ -35,6 +35,7 @@ describe('expo-router routes', () => {
     expect(routes).toContain('schedule');
     expect(routes).toContain('guide');
     expect(routes).toContain('compass');
+    expect(routes).toContain('capabilities');
   });
 
   it('discovers taharah routes', () => {

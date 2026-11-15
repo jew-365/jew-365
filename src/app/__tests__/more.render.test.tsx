@@ -1,60 +1,39 @@
 const mockPush = jest.fn();
+const mockParams: { open?: string } = {};
+const mockRouter = { push: mockPush, setParams: jest.fn() };
 
 jest.mock('expo-router', () => ({
-  useLocalSearchParams: () => ({}),
-  useRouter: () => ({ push: mockPush }),
+  useLocalSearchParams: () => mockParams,
+  useRouter: () => mockRouter,
   useFocusEffect: (effect: () => void) => require('react').useEffect(effect, [effect]),
 }));
 jest.mock('@/services/ChokContentService', () => ({
   ...jest.requireActual('@/services/ChokContentService'),
   checkChokUpdate: jest.fn(async () => {}),
-  prepareChokDownload: jest.fn(),
-  installChok: jest.fn(async () => true),
 }));
 jest.mock('@/services/SelichotContentService', () => ({
   ...jest.requireActual('@/services/SelichotContentService'),
   checkSelichotUpdate: jest.fn(async () => {}),
-  prepareSelichotDownload: jest.fn(),
-  installSelichot: jest.fn(async () => true),
 }));
 
 import { Linking } from 'react-native';
 import { act, fireEvent, screen, within } from '@testing-library/react-native';
 import MoreScreen from '../(tabs)/more';
-import { Card } from '@/components/Card';
-import { ListRow } from '@/components/ListRow';
 import { CITIES } from '@/data/cities';
-import {
-  CHOK_SIZE_ESTIMATE_MB,
-  checkChokUpdate,
-  installChok,
-  prepareChokDownload,
-} from '@/services/ChokContentService';
-import { checkSelichotUpdate, installSelichot, prepareSelichotDownload } from '@/services/SelichotContentService';
+import { CAPABILITY_GOALS } from '@/data/capabilities';
+import { checkChokUpdate } from '@/services/ChokContentService';
+import { checkSelichotUpdate } from '@/services/SelichotContentService';
 import { useChokStore } from '@/stores/useChokStore';
+import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
 import { installChokFixture } from '@/testing/chok';
 import { renderWithTheme } from '@/testing/render';
-import { installSelichotFixture } from '@/testing/selichot';
 import { at } from '@/testing/zmanim';
 import { useUserStore } from '@/stores/useUserStore';
-import type { AddonManifest } from '@/types/addon';
-import type { ChokManifest } from '@/types/chok';
 
 const JERUSALEM = CITIES[0];
 const mockCheck = jest.mocked(checkChokUpdate);
-const mockPrepare = jest.mocked(prepareChokDownload);
-const mockInstall = jest.mocked(installChok);
 const mockSelichotCheck = jest.mocked(checkSelichotUpdate);
-const mockSelichotPrepare = jest.mocked(prepareSelichotDownload);
-const mockSelichotInstall = jest.mocked(installSelichot);
-const MANIFEST = { version: 3, bytes: 18_600_000 } as ChokManifest;
-const SELICHOT_MANIFEST: AddonManifest = {
-  format: 1,
-  version: 1,
-  gzipBytes: 631_793,
-  gz: { ashkenaz: { path: 'ashkenaz.0a0b0c0d.siddur.gz', sha256: '0'.repeat(64), bytes: 631_793 } },
-};
 const ONLY_DATE = [
   'nextTick',
   'queueMicrotask',
@@ -66,10 +45,13 @@ const ONLY_DATE = [
   'clearTimeout',
 ] as const;
 
+// The offers are picked after the paint, so each render lets that frame pass.
 function renderAt(wallClock: string) {
   jest.useFakeTimers({ now: at(JERUSALEM, wallClock), doNotFake: [...ONLY_DATE] });
   return renderWithTheme(<MoreScreen />);
 }
+const DAY = 86_400_000;
+const stamp = (wallClock: string, daysAgo: number) => at(JERUSALEM, wallClock).getTime() - daysAgo * DAY;
 
 afterEach(() => {
   useChokStore.getState().reset();
@@ -77,243 +59,109 @@ afterEach(() => {
 });
 
 describe('More tab', () => {
+  const NOON = '2026-11-18T12:00';
+  const FRIDAY = '2026-11-20T10:00';
+
   beforeEach(() => {
+    delete mockParams.open;
     useUserStore.getState().reset();
-    useUserStore.setState({ location: JERUSALEM, inIsrael: true });
+    useMitzvotStore.getState().reset();
+    // An install of two weeks, so the offers are not held to the install day.
+    useUserStore.setState({ location: JERUSALEM, inIsrael: true, firstOpenedAt: stamp(NOON, 14) });
     mockPush.mockReset();
     mockCheck.mockClear();
-    mockPrepare.mockReset();
-    mockInstall.mockClear();
     mockSelichotCheck.mockClear();
-    mockSelichotPrepare.mockReset();
-    mockSelichotInstall.mockClear();
-    useSelichotStore.getState().reset();
-    installChokFixture();
   });
 
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  it("captions the Chok LeYisrael row with today's parasha and day, and opens the reader", () => {
-    renderAt('2026-11-16T12:00');
-    expect(screen.getByText('חק לישראל')).toBeOnTheScreen();
-    expect(screen.getByText('פרשת ויצא · יום שני')).toBeOnTheScreen();
-    fireEvent.press(screen.getByText('חק לישראל'));
-    expect(mockPush).toHaveBeenCalledWith({ pathname: '/siddur/[id]', params: { id: 'chok_leyisrael' } });
+  it('opens with the search, then a tile per goal and the all-mitzvot tile', () => {
+    renderAt(NOON);
+    expect(screen.getByLabelText('חיפוש בכל האפליקציה')).toBeOnTheScreen();
+    for (const goal of CAPABILITY_GOALS) expect(screen.getByTestId(`more-goal-${goal}`)).toBeOnTheScreen();
+    expect(within(screen.getByTestId('more-goal-shabbat')).getByText('שבת וחגים')).toBeOnTheScreen();
+    expect(within(screen.getByTestId('more-library')).getByText('כל המצוות')).toBeOnTheScreen();
   });
 
-  it('names both parashiyot of a double week and Thursday night', () => {
-    renderAt('2028-03-23T21:00');
-    expect(screen.getByText('פרשת ויקהל־פקודי · ליל שישי')).toBeOnTheScreen();
+  it('opens the capabilities screen on a goal from its tile, and the full list from the link', () => {
+    renderAt(NOON);
+    fireEvent.press(screen.getByTestId('more-goal-learning'));
+    expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/capabilities', params: { goal: 'learning' } });
+    fireEvent.press(screen.getByRole('button', { name: 'הכול ברשימה' }));
+    expect(mockPush).toHaveBeenLastCalledWith('/capabilities');
   });
 
-  it('says there is nothing to learn on the Friday of Vezot Haberakhah', () => {
-    renderAt('2026-10-02T08:00');
-    expect(screen.getByText('אין לימוד היום')).toBeOnTheScreen();
+  it('lights the icon of a capability that is on and mutes one that is off', () => {
+    renderAt(NOON);
+    const prayer = within(screen.getByTestId('more-goal-prayer'));
+    // The prayers are on by default; Birchot HaShachar is not.
+    expect(prayer.getByTestId('capability-icon-prayers-on', { includeHiddenElements: true })).toBeTruthy();
+    expect(prayer.getByTestId('capability-icon-birchot-off', { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.getByTestId('more-goal-prayer').props.accessibilityLabel).toMatch(/^תפילה: \d+ מתוך 5 פועלים$/);
   });
 
-  it('captions in English', () => {
+  it('leaves a capability the user is not offered out of its tile', () => {
+    useUserStore.setState({ gender: 'female' });
+    renderAt(NOON);
+    const prayer = within(screen.getByTestId('more-goal-prayer'));
+    expect(prayer.queryByTestId(/capability-icon-tefillin/, { includeHiddenElements: true })).toBeNull();
+    expect(screen.getByTestId('more-goal-prayer').props.accessibilityLabel).toMatch(/מתוך 4 פועלים$/);
+  });
+
+  it('counts the mitzvot in use on the all-mitzvot tile and opens the library', () => {
+    renderAt(NOON);
+    const count = Object.values(useMitzvotStore.getState().activeMitzvot).filter((m) => m.enabled).length;
+    expect(screen.getByText(`${count} פעילות · הוספת מצווה משלך`)).toBeOnTheScreen();
+    fireEvent.press(screen.getByTestId('more-library'));
+    expect(mockPush).toHaveBeenLastCalledWith('/mitzvot');
+  });
+
+  it('offers up to three things worth trying, and an accepted one runs and is closed for good', () => {
+    // No setup with the bundles yet, and candle lighting is off on a Friday morning.
+    renderAt(FRIDAY);
+    const strip = within(screen.getByTestId('more-offers'));
+    expect(screen.getByText('כדאי לנסות')).toBeOnTheScreen();
+    expect(strip.getByTestId('more-offer-catchUp')).toBeOnTheScreen();
+    expect(strip.getByTestId('more-offer-candles')).toBeOnTheScreen();
+    expect(strip.getAllByRole('button').length).toBeLessThanOrEqual(3);
+
+    fireEvent.press(strip.getByRole('button', { name: 'לבחירה: מה חשוב לך?' }));
+    expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/capabilities', params: { bundles: '1' } });
+    expect(useUserStore.getState().discovery.offers.catchUp.closedAt).toEqual(expect.any(Number));
+    expect(screen.queryByTestId('more-offer-catchUp')).toBeNull();
+  });
+
+  it('switches a mitzvah on from its offer', () => {
+    renderAt(FRIDAY);
+    fireEvent.press(screen.getByRole('button', { name: 'להפעלת התזכורות: תזכורת לנרות שבת ולהבדלה' }));
+    const { activeMitzvot } = useMitzvotStore.getState();
+    expect(activeMitzvot.candle_lighting.enabled).toBe(true);
+    expect(activeMitzvot.havdalah.enabled).toBe(true);
+  });
+
+  it('shows no strip when nothing is worth trying, and none before the install is stamped', () => {
+    useUserStore.setState({ firstOpenedAt: null });
+    renderAt(NOON);
+    expect(screen.queryByText('כדאי לנסות')).toBeNull();
+    expect(screen.queryByTestId('more-offers')).toBeNull();
+    expect(screen.getByTestId('more-goal-tools')).toBeOnTheScreen();
+  });
+
+  it('reads in English', () => {
     useUserStore.setState({ language: 'en' });
-    renderAt('2026-11-16T12:00');
-    expect(screen.getByText('Parashat Vayetzei · Monday')).toBeOnTheScreen();
+    renderAt(NOON);
+    expect(screen.getByLabelText('Search the whole app')).toBeOnTheScreen();
+    expect(screen.getByText('Worth trying')).toBeOnTheScreen();
+    expect(screen.getByText('All mitzvot')).toBeOnTheScreen();
+    expect(screen.getByText('Daily learning')).toBeOnTheScreen();
   });
 
-  it('starts the download from the Chok LeYisrael row while the add-on is not installed', async () => {
-    useChokStore.getState().reset();
-    mockPrepare.mockResolvedValue(MANIFEST);
-    renderAt('2026-11-16T12:00');
-    expect(screen.getByText('חק לישראל')).toBeOnTheScreen();
-    expect(screen.getByText(`תוסף להורדה · כ־${CHOK_SIZE_ESTIMATE_MB} MB`)).toBeOnTheScreen();
-    await act(async () => {
-      fireEvent.press(screen.getByText('חק לישראל'));
-    });
-    expect(mockPrepare).toHaveBeenCalledTimes(1);
-    expect(mockPush).not.toHaveBeenCalled();
-    expect(screen.getByText('הורדת חק לישראל')).toBeOnTheScreen();
-    await act(async () => {
-      fireEvent.press(screen.getAllByText('הורדה').at(-1)!);
-    });
-    expect(mockInstall).toHaveBeenCalledWith(MANIFEST);
-  });
-
-  it('shows no dialog when the manifest could not be fetched', async () => {
-    useChokStore.getState().reset();
-    mockPrepare.mockResolvedValue(null);
-    renderAt('2026-11-16T12:00');
-    await act(async () => {
-      fireEvent.press(screen.getByText('חק לישראל'));
-    });
-    expect(mockPrepare).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText('הורדת חק לישראל')).toBeNull();
-    expect(mockInstall).not.toHaveBeenCalled();
-  });
-
-  it('opens the mitzvah screen from the row while the download runs', () => {
-    useChokStore.getState().reset();
-    useChokStore.getState().setDownload({ status: 'downloading', done: 3, total: 54, bytes: 1, totalBytes: 2 });
-    renderAt('2026-11-16T12:00');
-    fireEvent.press(screen.getByText('חק לישראל'));
-    expect(mockPush).toHaveBeenCalledWith('/mitzvah/chok_leyisrael');
-    expect(mockPrepare).not.toHaveBeenCalled();
-  });
-
-  it('says in the row that the download failed and offers another try', async () => {
-    useChokStore.getState().reset();
-    useChokStore.getState().setDownload({ status: 'failed', reason: 'offline' });
-    mockPrepare.mockResolvedValue(null);
-    renderAt('2026-11-16T12:00');
-    expect(screen.getByText('ההורדה נכשלה · הקישו לניסיון נוסף')).toBeOnTheScreen();
-    await act(async () => {
-      fireEvent.press(screen.getByText('חק לישראל'));
-    });
-    expect(mockPrepare).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows the download progress in the row', () => {
-    useChokStore.getState().reset();
-    useChokStore.getState().setDownload({ status: 'downloading', done: 3, total: 54, bytes: 1, totalBytes: 2 });
-    renderAt('2026-11-16T12:00');
-    expect(screen.getByText('בהורדה: 3/54')).toBeOnTheScreen();
-  });
-
-  it('checks for a newer add-on version when the tab is focused', () => {
-    renderAt('2026-11-16T12:00');
+  it('checks for newer add-on versions when the tab is focused', () => {
+    installChokFixture();
+    renderAt(NOON);
     expect(mockCheck).toHaveBeenCalled();
-  });
-
-  it('lists Tehillim, the hilulot and the compass before the halacha hotline, with or without Chok LeYisrael, and opens it in the reader', () => {
-    for (const chok of [true, false]) {
-      if (chok) installChokFixture();
-      else useChokStore.getState().reset();
-      const { unmount } = renderAt('2026-11-16T12:00');
-      const rows = screen.getAllByRole('button');
-      expect(rows).toHaveLength(13);
-      expect(within(rows[rows.length - 5]).getByText('תהילים')).toBeOnTheScreen();
-      expect(within(rows[rows.length - 5]).getByText('מחולק לפי ימי השבוע')).toBeOnTheScreen();
-      expect(within(rows[rows.length - 4]).getByText('הילולות צדיקים')).toBeOnTheScreen();
-      expect(within(rows[rows.length - 3]).getByText('מצפן תפילה')).toBeOnTheScreen();
-      expect(within(rows[rows.length - 2]).getByText('קו ההלכה')).toBeOnTheScreen();
-      fireEvent.press(screen.getByText('תהילים'));
-      expect(mockPush).toHaveBeenLastCalledWith({ pathname: '/siddur/[id]', params: { id: 'tehillim' } });
-      unmount();
-    }
-  });
-
-  it('names Tehillim in English', () => {
-    useUserStore.setState({ language: 'en' });
-    renderAt('2026-11-16T12:00');
-    expect(screen.getByText('Tehillim')).toBeOnTheScreen();
-    expect(screen.getByText('Divided by the days of the week')).toBeOnTheScreen();
-  });
-
-  it('opens with the search card, then every destination on one divided card', () => {
-    renderAt('2026-11-16T08:00');
-    const cards = screen.UNSAFE_getAllByType(Card);
-    expect(cards).toHaveLength(2);
-    expect(within(cards[0]).getByLabelText('חיפוש')).toBeOnTheScreen();
-    expect(cards[1].props.divided).toBe(true);
-    expect(within(cards[1]).UNSAFE_getAllByType(ListRow)).toHaveLength(13);
-  });
-
-  it('opens the hilulot from its row', () => {
-    renderAt('2026-11-16T12:00');
-    fireEvent.press(screen.getByText('הילולות צדיקים'));
-    expect(mockPush).toHaveBeenLastCalledWith('/hilulot');
-  });
-
-  it('opens the compass from its row', () => {
-    renderAt('2026-11-16T12:00');
-    expect(screen.getByText('הכיוון לכותל מהמקום שלך')).toBeOnTheScreen();
-    fireEvent.press(screen.getByText('מצפן תפילה'));
-    expect(mockPush).toHaveBeenLastCalledWith('/compass');
-  });
-
-  it('names the hilulot and the compass in English', () => {
-    useUserStore.setState({ language: 'en' });
-    renderAt('2026-11-16T12:00');
-    expect(screen.getByText('Hilulot of tzaddikim')).toBeOnTheScreen();
-    expect(screen.getByText('Prayer compass')).toBeOnTheScreen();
-  });
-
-  it('ends with the user guide, which opens it', () => {
-    renderAt('2026-11-16T12:00');
-    const rows = screen.getAllByRole('button');
-    const last = rows[rows.length - 1];
-    expect(within(last).getByText('מדריך למשתמש')).toBeOnTheScreen();
-    expect(within(last).getByText('איך עובד כל חלק באפליקציה, ומה חדש')).toBeOnTheScreen();
-    fireEvent.press(last);
-    expect(mockPush).toHaveBeenLastCalledWith('/guide');
-  });
-
-  it('names the guide in English', () => {
-    useUserStore.setState({ language: 'en' });
-    renderAt('2026-11-16T12:00');
-    expect(screen.getByText('User guide')).toBeOnTheScreen();
-    expect(screen.getByText("How each part of the app works, and what's new")).toBeOnTheScreen();
-  });
-
-  it('lists Chok LeYisrael, Shnayim Mikra, the halacha mitzvot and Selichot before Tehillim, each with its download', () => {
-    renderAt('2026-11-16T12:00');
-    const rows = screen.getAllByRole('button');
-    expect(within(rows[1]).getByText('חק לישראל')).toBeOnTheScreen();
-    expect(within(rows[2]).getByText('שניים מקרא ואחד תרגום')).toBeOnTheScreen();
-    expect(within(rows[2]).getByText('תוסף להורדה · כ־1.2 MB')).toBeOnTheScreen();
-    expect(within(rows[3]).getByText('הלכה יומית')).toBeOnTheScreen();
-    expect(within(rows[3]).getByText('תוסף להורדה · כ־0.6 MB')).toBeOnTheScreen();
-    expect(within(rows[4]).getByText('הלכות החג')).toBeOnTheScreen();
-    expect(within(rows[5]).getByText('הלכות לשון הרע')).toBeOnTheScreen();
-    expect(within(rows[5]).getByText('תוסף להורדה · כ־0.2 MB')).toBeOnTheScreen();
-    expect(within(rows[6]).getByText('שמירת הלשון')).toBeOnTheScreen();
-    expect(within(rows[6]).getByText('תוסף להורדה · כ־0.3 MB')).toBeOnTheScreen();
-    expect(within(rows[7]).getByText('סליחות')).toBeOnTheScreen();
-    expect(within(rows[7]).getByText('להורדה בנוסח אשכנז · כ־1 MB')).toBeOnTheScreen();
-    expect(within(rows[8]).getByText('תהילים')).toBeOnTheScreen();
-  });
-
-  it('starts the Selichot download from its row, and installs the nusach on confirm', async () => {
-    mockSelichotPrepare.mockResolvedValue(SELICHOT_MANIFEST);
-    renderAt('2026-11-16T12:00');
-    await act(async () => {
-      fireEvent.press(screen.getByText('סליחות'));
-    });
-    expect(mockSelichotPrepare).toHaveBeenCalledTimes(1);
-    expect(mockPush).not.toHaveBeenCalled();
-    expect(screen.getByText('הורדת הסליחות בנוסח אשכנז')).toBeOnTheScreen();
-    await act(async () => {
-      fireEvent.press(screen.getAllByText('הורדה').at(-1)!);
-    });
-    expect(mockSelichotInstall).toHaveBeenCalledWith(SELICHOT_MANIFEST, 'ashkenaz');
-  });
-
-  it('says the nusach is installed and opens the mitzvah screen from the Selichot row', () => {
-    installSelichotFixture(['ashkenaz']);
-    renderAt('2026-11-16T12:00');
-    expect(screen.getByText('מותקן בנוסח אשכנז')).toBeOnTheScreen();
-    fireEvent.press(screen.getByText('סליחות'));
-    expect(mockPush).toHaveBeenCalledWith('/mitzvah/selichot');
-    expect(mockSelichotPrepare).not.toHaveBeenCalled();
-  });
-
-  it('offers the download again when only another nusach is installed', () => {
-    installSelichotFixture(['ashkenaz']);
-    useUserStore.setState({ nusach: 'sefard' });
-    renderAt('2026-11-16T12:00');
-    expect(screen.getByText('להורדה בנוסח ספרד · כ־1 MB')).toBeOnTheScreen();
-    expect(screen.queryByText('מותקן בנוסח אשכנז')).toBeNull();
-  });
-
-  it('opens the mitzvah screen from the Selichot row while its download runs', () => {
-    useSelichotStore.getState().setDownload({ status: 'downloading', done: 0, total: 1, bytes: 1, totalBytes: 2 });
-    renderAt('2026-11-16T12:00');
-    expect(screen.getByText('בהורדה…')).toBeOnTheScreen();
-    fireEvent.press(screen.getByText('סליחות'));
-    expect(mockPush).toHaveBeenCalledWith('/mitzvah/selichot');
-    expect(mockSelichotPrepare).not.toHaveBeenCalled();
-  });
-
-  it('checks for a newer Selichot version when the tab is focused', () => {
-    renderAt('2026-11-16T12:00');
     expect(mockSelichotCheck).toHaveBeenCalled();
   });
 });
@@ -325,10 +173,14 @@ describe('Halacha hotline', () => {
     useUserStore.getState().reset();
     useUserStore.setState({ location: JERUSALEM, inIsrael: true });
     useChokStore.getState().reset();
+    mockPush.mockReset();
+    // The sheet opens from the capabilities screen's row and from the search, both through `open=halacha`.
+    mockParams.open = 'halacha';
     openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
   });
 
   afterEach(() => {
+    delete mockParams.open;
     openURL.mockRestore();
     jest.useRealTimers();
   });
@@ -338,7 +190,6 @@ describe('Halacha hotline', () => {
       useUserStore.setState({ nusach });
       const { unmount } = renderAt('2026-11-16T12:00');
       expect(screen.getByText('שאלה לרב, לפי פסקי אשכנז')).toBeOnTheScreen();
-      fireEvent.press(screen.getByText('קו ההלכה'));
       expect(screen.getByText('בית ההוראה של הרב נסים קרליץ זצ״ל')).toBeOnTheScreen();
       expect(screen.getByText('חיוג: 072-215-2222')).toBeOnTheScreen();
       expect(screen.getByText('חיוג: 073-724-6000')).toBeOnTheScreen();
@@ -351,7 +202,6 @@ describe('Halacha hotline', () => {
 
   it('dials the chosen Ashkenazi line', () => {
     renderAt('2026-11-16T12:00');
-    fireEvent.press(screen.getByText('קו ההלכה'));
     fireEvent.press(screen.getByText('חיוג: 073-724-6000'));
     expect(openURL).toHaveBeenCalledWith('tel:0737246000');
   });
@@ -359,7 +209,6 @@ describe('Halacha hotline', () => {
   it('shows the number when the device cannot place the call (an iPad)', async () => {
     openURL.mockRejectedValue(new Error('E_UNABLE_TO_OPEN_URL'));
     renderAt('2026-11-16T12:00');
-    fireEvent.press(screen.getByText('קו ההלכה'));
     await act(async () => {
       fireEvent.press(screen.getByText('חיוג: 073-724-6000'));
     });
@@ -370,7 +219,6 @@ describe('Halacha hotline', () => {
     useUserStore.setState({ nusach: 'edot_hamizrach' });
     renderAt('2026-11-16T12:00');
     expect(screen.getByText('שאלה לרב, לפי פסקי מרן')).toBeOnTheScreen();
-    fireEvent.press(screen.getByText('קו ההלכה'));
     expect(screen.queryByText('חיוג: 072-215-2222')).toBeNull();
 
     fireEvent.press(screen.getByText('חיוג: 073-786-0860'));
@@ -384,7 +232,6 @@ describe('Halacha hotline', () => {
     useUserStore.setState({ nusach: 'teiman' });
     renderAt('2026-11-16T12:00');
     expect(screen.getByText('שאלה לרב, לפי פסקי מרן')).toBeOnTheScreen();
-    fireEvent.press(screen.getByText('קו ההלכה'));
     expect(screen.queryByText('חיוג: 072-215-2222')).toBeNull();
     expect(screen.getByText('חיוג: 073-786-0860')).toBeOnTheScreen();
   });
@@ -392,26 +239,30 @@ describe('Halacha hotline', () => {
   it('names the hotline in English', () => {
     useUserStore.setState({ language: 'en', nusach: 'edot_hamizrach' });
     renderAt('2026-11-16T12:00');
-    fireEvent.press(screen.getByText('Halacha hotline'));
+    expect(screen.getByText('Halacha hotline')).toBeOnTheScreen();
     expect(screen.getByText('WhatsApp 073-786-0860')).toBeOnTheScreen();
   });
 
   describe('the search', () => {
-    const type = (text: string) => fireEvent.changeText(screen.getByLabelText('חיפוש'), text);
+    beforeEach(() => {
+      delete mockParams.open;
+    });
+
+    const type = (text: string) => fireEvent.changeText(screen.getByLabelText('חיפוש בכל האפליקציה'), text);
 
     it('opens a setting on its section in Settings', () => {
       renderAt('2026-11-16T12:00');
       type('שפה');
-      expect(screen.queryByText('לוח זמנים')).toBeNull();
+      expect(screen.getByTestId('more-hub', { includeHiddenElements: true })).toHaveStyle({ display: 'none' });
       fireEvent.press(screen.getAllByText('שפה')[0]);
       expect(mockPush).toHaveBeenCalledWith({ pathname: '/(tabs)/settings', params: { focus: 'language' } });
-      expect(screen.getByLabelText('חיפוש').props.value).toBe('');
+      expect(screen.getByLabelText('חיפוש בכל האפליקציה').props.value).toBe('');
     });
 
     it('opens a text where the Settings search would', () => {
       renderAt('2026-11-16T12:00');
       type('תהילים');
-      fireEvent(screen.getByLabelText('חיפוש'), 'submitEditing');
+      fireEvent(screen.getByLabelText('חיפוש בכל האפליקציה'), 'submitEditing');
       expect(mockPush).toHaveBeenCalledWith({ pathname: '/siddur/[id]', params: { id: 'tehillim' } });
     });
 

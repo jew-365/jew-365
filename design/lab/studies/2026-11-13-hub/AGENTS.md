@@ -20,7 +20,7 @@
 
 ## Work Guidance
 
-- The picks become C5 in [more.tsx](<../../../../src/app/(tabs)/more.tsx>) and C4 as `src/app/capabilities.tsx`, under the `src/` DOX chain; B1 and B2 in [home.tsx](<../../../../src/app/(tabs)/home.tsx>) are not built (the owner's call); the home's hero in the boards is a placeholder, since the study does not change it.
+- The picks become C5 in [more.tsx](<../../../../src/app/(tabs)/more.tsx>) and C4 as [capabilities.tsx](../../../../src/app/capabilities.tsx), under the `src/` DOX chain; B1 and B2 in [home.tsx](<../../../../src/app/(tabs)/home.tsx>) are not built (the owner's call); the home's hero in the boards is a placeholder, since the study does not change it.
 
 ## Verification
 

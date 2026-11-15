@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { HDate } from '@hebcal/core';
 import { hilulaDateLabel, upcomingHilulot } from '@/data/hilulot';
+import { GuidePill } from '@/components/GuidePill';
 import { Card } from '@/components/Card';
 import { ListRow } from '@/components/ListRow';
 import { NoticeSettingsCard, type NoticeKindOption } from '@/components/NoticeSettingsCard';
@@ -54,7 +55,12 @@ export default function HilulotScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScreenHeader title={t('hilulot.title')} subtitle={t('hilulot.subtitle')} onBack={goBack} />
+      <ScreenHeader
+        title={t('hilulot.title')}
+        subtitle={t('hilulot.subtitle')}
+        onBack={goBack}
+        actions={<GuidePill topic="roshChodesh" />}
+      />
       <ScrollView ref={scrollRef} contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
         <SettingsSection title={t('hilulot.notifications')}>
           <View style={styles.switchRow}>

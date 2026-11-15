@@ -223,7 +223,7 @@ describe('Mitzvot library', () => {
     installChokFixture();
     renderWithTheme(<MitzvotScreen />);
     expect(screen.queryByText(`תוסף להורדה · כ־${CHOK_SIZE_ESTIMATE_MB} MB`)).toBeNull();
-    expect(screen.getAllByText('לימוד')).toHaveLength(1);
+    expect(screen.getAllByText('הלימוד היומי של חק לישראל, עם תזכורת')).toHaveLength(1);
     fireEvent(screen.getByRole('switch', { name: 'חק לישראל' }), 'valueChange', true);
     expect(useMitzvotStore.getState().activeMitzvot.chok_leyisrael.enabled).toBe(true);
     expect(mockPush).not.toHaveBeenCalled();
@@ -327,17 +327,17 @@ describe('Mitzvot library', () => {
 
     expect(caption(TEFILLIN)).toBe('לא נהוג אצל נשים');
     expect(screen.getAllByText('לא נהוג אצל נשים')).toHaveLength(MENS_MITZVOT.filter((id) => findMitzvah(id)).length);
-    expect(caption(names(['shacharit'])[0])).toBe('בוקר');
+    expect(caption(names(['shacharit'])[0])).toBe('תזכורת לפני שנגמר זמן התפילה בבוקר');
 
     fireEvent(screen.getByRole('switch', { name: TEFILLIN }), 'valueChange', true);
     expect(useMitzvotStore.getState().activeMitzvot.tefillin.enabled).toBe(true);
   });
 
-  it.each(['male', null] as const)('keeps the time caption on tefillin for %s', (gender) => {
+  it.each(['male', null] as const)('keeps the benefit caption on tefillin for %s', (gender) => {
     useUserStore.setState({ gender });
     renderWithTheme(<MitzvotScreen />);
 
-    expect(caption(TEFILLIN)).toBe('בוקר');
+    expect(caption(TEFILLIN)).toBe('תזכורת להניח תפילין בזמן');
     expect(screen.queryByText('לא נהוג אצל נשים')).toBeNull();
   });
 

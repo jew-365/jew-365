@@ -14,8 +14,8 @@ import Svg, { Circle, Defs, LinearGradient, RadialGradient, Rect, Stop } from 'r
 import { AppLogo } from './AppLogo';
 import { DaySkyScene, PLATE_TOP, clockLine } from './DaySkyScene';
 import { MitzvahIcon } from './MitzvahIcon';
-import { useUserStore } from '@/stores/useUserStore';
 import { useIsFocused } from '@/hooks/useIsFocused';
+import { useOneTimeHint } from '@/hooks/useOneTimeHint';
 import { useRowMirrored } from '@/hooks/useRowMirrored';
 import { useI18n } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -155,7 +155,7 @@ export const DayArcHero = React.memo(function DayArcHero({
   const [preview, setPreview] = useState<Preview | null>(null);
   const [touched, setTouched] = useState(false);
   // "Drag the sun" teaches once: a drag or press on the sun hides it for good (spec B4), a chip press for this visit.
-  const sunLearned = useUserStore((s) => s.discovery.hints.includes(SUN_HINT));
+  const sunHint = useOneTimeHint(SUN_HINT);
   const drag = useRef<DragRef | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const chipLayouts = useRef<Record<string, { x: number; width: number }>>({});
@@ -323,7 +323,7 @@ export const DayArcHero = React.memo(function DayArcHero({
           startPageY: e.nativeEvent.pageY,
         };
         setTouched(true);
-        useUserStore.getState().learnHint(SUN_HINT);
+        sunHint.learn();
         onScrubChange(true);
       }}
       onResponderMove={(e: GestureResponderEvent) => {
@@ -399,7 +399,7 @@ export const DayArcHero = React.memo(function DayArcHero({
           ink={ink}
           clock={clockOf(shown, tz)}
           caption={preview ? '' : caption}
-          hint={!touched && !sunLearned && !preview ? t(night ? 'home.arc.dragMoon' : 'home.arc.dragSun') : null}
+          hint={!touched && sunHint.show && !preview ? t(night ? 'home.arc.dragMoon' : 'home.arc.dragSun') : null}
           edgeStart={{ label: t('home.zman.alot.short'), time: clockOf(frame.start, tz) }}
           edgeEnd={{ label: t('home.zman.tzeit.short'), time: clockOf(frame.tzeit, tz) }}
           grab={grab}

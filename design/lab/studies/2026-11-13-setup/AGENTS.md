@@ -20,7 +20,7 @@
 
 ## Work Guidance
 
-- The picks become A2 to A5 in [../../../../src/app/onboarding/](../../../../src/app/onboarding) and `src/data/bundles.ts`, under the `src/` DOX chain; they reach users with the next native build.
+- The picks become A2 to A5 in [../../../../src/app/onboarding/](../../../../src/app/onboarding) and [bundles.ts](../../../../src/data/bundles.ts), under the `src/` DOX chain; they reach users with the next native build.
 
 ## Verification
 

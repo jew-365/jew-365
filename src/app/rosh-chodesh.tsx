@@ -5,6 +5,7 @@ import { Stack, useRouter } from 'expo-router';
 import { HDate } from '@hebcal/core';
 import { hilulaDateLabel } from '@/data/hilulot';
 import { roshChodeshLabel, upcomingRoshChodesh } from '@/data/roshChodesh';
+import { GuidePill } from '@/components/GuidePill';
 import { Card } from '@/components/Card';
 import { ListRow } from '@/components/ListRow';
 import { NoticeSettingsCard, type NoticeKindOption } from '@/components/NoticeSettingsCard';
@@ -62,7 +63,12 @@ export default function RoshChodeshScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top']}>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScreenHeader title={t('roshChodesh.title')} subtitle={t('roshChodesh.subtitle')} onBack={goBack} />
+      <ScreenHeader
+        title={t('roshChodesh.title')}
+        subtitle={t('roshChodesh.subtitle')}
+        onBack={goBack}
+        actions={<GuidePill topic="roshChodesh" />}
+      />
       <ScrollView ref={scrollRef} contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
         <SettingsSection title={t('roshChodesh.notifications')}>
           <View style={styles.switchRow}>

@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-nat
 import { openExternalUrl } from '@/services/externalFlow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { GuidePill } from '@/components/GuidePill';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChokAddonCard } from '@/components/ChokAddonCard';
@@ -293,13 +294,16 @@ export default function MitzvahDetailScreen() {
         onBack={goBack}
         leading={<IconTile name={iconFor(mitzvah.icon)} tone="accent" size={scaled(46)} />}
         actions={
-          mitzvah.isCustom ? (
-            <HeaderPill
-              icon="sliders"
-              label={t('detail.editCustom')}
-              onPress={() => router.push({ pathname: '/custom-mitzvah', params: { id: mitzvah.id } })}
-            />
-          ) : undefined
+          <>
+            <GuidePill topic="reminders" />
+            {mitzvah.isCustom ? (
+              <HeaderPill
+                icon="sliders"
+                label={t('detail.editCustom')}
+                onPress={() => router.push({ pathname: '/custom-mitzvah', params: { id: mitzvah.id } })}
+              />
+            ) : null}
+          </>
         }
       >
         {nextTrigger ? (

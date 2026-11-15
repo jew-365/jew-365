@@ -154,7 +154,10 @@ export function MitzvahLibraryList({ showMine, navigable }: MitzvahLibraryListPr
                   : chokAddonCaption(chokDownload, t)
               : gender === 'female' && isMensMitzvah(item.id)
                 ? t('library.notForWomen')
-                : t(`library.category.${item.category}`)
+                : // What the user gets (spec D1); a personal mitzvah has no benefit line, so it keeps its category.
+                  item.isCustom
+                  ? t(`library.category.${item.category}`)
+                  : t(`library.benefit.${item.id}`)
         }
         onPress={navigable ? mitzvahScreen : undefined}
         trailing={

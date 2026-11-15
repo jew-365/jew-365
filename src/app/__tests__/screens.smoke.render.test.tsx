@@ -169,6 +169,7 @@ import { DateTime } from 'luxon';
 import RootLayout from '../_layout';
 import RootIndex from '../index';
 import CheckInScreen from '../checkin';
+import CapabilitiesScreen from '../capabilities';
 import CompassScreen from '../compass';
 import CustomMitzvahScreen from '../custom-mitzvah';
 import DayScreen from '../day/[date]';
@@ -530,6 +531,19 @@ const CASES: SmokeCase[] = [
     check: text('משהו השתבש. נסה שוב.', 'Something went wrong. Try again.'),
   },
   { file: 'compass', label: 'default', Screen: CompassScreen, check: text('מצפן תפילה', 'Prayer compass') },
+  {
+    file: 'capabilities',
+    label: 'default',
+    Screen: CapabilitiesScreen,
+    check: text('כל היכולות', 'Everything the app can do'),
+  },
+  {
+    file: 'capabilities',
+    label: 'on a goal, with the bundles',
+    Screen: CapabilitiesScreen,
+    params: { goal: 'shabbat', bundles: '1' },
+    check: text('מה חשוב לך?', 'What matters to you?'),
+  },
   { file: 'hilulot', label: 'default', Screen: HilulotScreen, check: text('הילולות צדיקים', 'Hilulot of tzaddikim') },
   {
     file: 'mitzvah/[id]',

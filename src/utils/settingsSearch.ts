@@ -82,6 +82,7 @@ export type ScreenPath =
   | '/mitzvot'
   | '/schedule'
   | '/compass'
+  | '/capabilities'
   | '/report'
   | '/late-marks'
   | '/checkin'
@@ -98,6 +99,7 @@ export type SettingsSearchHref =
   | { pathname: '/(tabs)/siddur'; params: { group: string } }
   | { pathname: '/(tabs)/more'; params: { open: 'halacha' } }
   | { pathname: '/guide'; params: { topic: string } }
+  | { pathname: '/capabilities'; params: { goal: string } }
   | { pathname: '/(tabs)/settings'; params: { focus: 'location'; place: string } }
   | ScreenPath;
 
@@ -1325,6 +1327,47 @@ export const SEARCH_SCREENS: readonly ScreenEntry[] = [
     href: '/compass',
     terms: ['מצפן', 'כותל', 'כיוון', 'מזרח', 'ירושלים', 'רדאר', 'compass', 'kotel', 'direction', 'east', 'mizrach'],
   },
+  {
+    id: 'capabilities',
+    icon: 'sparkle',
+    titleKey: 'capabilities.title',
+    captionKey: 'capabilities.subtitle',
+    href: '/capabilities',
+    terms: [
+      'כל היכולות',
+      'יכולות',
+      'מה האפליקציה יודעת',
+      'מה אפשר',
+      'אפשרויות',
+      'פיצרים',
+      'מה חשוב לך',
+      'חבילות',
+      'capabilities',
+      'features',
+      'what can the app do',
+      'everything',
+      'bundles',
+    ],
+  },
+  // One entry per goal of the capabilities screen, opening it on that goal's card.
+  ...(
+    [
+      ['prayer', 'shacharit', ['תפילה', 'תפילות', 'יכולות תפילה', 'prayer features']],
+      ['shabbat', 'candles', ['שבת וחגים', 'חגים', 'מועדים', 'shabbat and festivals', 'holidays']],
+      ['learning', 'chok', ['לימוד יומי', 'תוכניות לימוד', 'לימוד', 'daily learning', 'learning programs']],
+      ['calendar', 'calendar', ['לוח השנה', 'לוח עברי', 'the calendar', 'jewish calendar']],
+      ['tracking', 'star', ['מעקב', 'יכולות מעקב', 'tracking features']],
+      ['personal', 'custom', ['אישי', 'התאמה אישית', 'personal', 'personalise']],
+      ['tools', 'compass', ['כלים ועזרה', 'כלים', 'עזרה', 'tools and help', 'tools', 'help']],
+    ] as const
+  ).map(([goal, icon, terms]): ScreenEntry => ({
+    id: `capabilities-${goal}`,
+    icon,
+    titleKey: `capability.goal.${goal}`,
+    captionKey: 'capabilities.title',
+    href: { pathname: '/capabilities', params: { goal } },
+    terms,
+  })),
   {
     id: 'report',
     icon: 'check',

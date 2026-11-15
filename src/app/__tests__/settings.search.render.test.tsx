@@ -545,7 +545,7 @@ describe('Settings search', () => {
     useUserStore.setState({ language: 'en' });
     await renderSettings();
     await act(async () => {
-      fireEvent.changeText(screen.getByLabelText('Search settings'), 'Selichot');
+      fireEvent.changeText(screen.getByLabelText('Search the whole app'), 'Selichot');
     });
     expect(screen.getByText('From Leil Selichot to Erev Yom Kippur')).toBeOnTheScreen();
     const rows = screen.getAllByRole('button', { name: /From Leil Selichot to Erev Yom Kippur/ });
@@ -566,7 +566,7 @@ describe('Settings search', () => {
     useUserStore.setState({ language: 'en' });
     await renderSettings();
     await act(async () => {
-      fireEvent.changeText(screen.getByLabelText('Search settings'), 'Maariv');
+      fireEvent.changeText(screen.getByLabelText('Search the whole app'), 'Maariv');
     });
     expect(screen.getByText('Mitzvah')).toBeOnTheScreen();
     expect(screen.getByText('Siddur')).toBeOnTheScreen();

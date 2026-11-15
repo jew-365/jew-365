@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { DateTime } from 'luxon';
+import { GuidePill } from '@/components/GuidePill';
 import { Banner } from '@/components/Banner';
 import { Card } from '@/components/Card';
 import { iconFor } from '@/components/MitzvahIcon';
@@ -140,6 +141,7 @@ export default function ReportScreen() {
         onBack={goBack}
         actions={
           <>
+            <GuidePill topic="history" />
             <HeaderPill
               label={t('report.prevWeek')}
               accessibilityLabel={t('report.prevWeek')}

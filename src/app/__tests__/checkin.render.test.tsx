@@ -1,9 +1,10 @@
 const mockBack = jest.fn();
 const mockReplace = jest.fn();
 
+const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
-  useRouter: () => ({ back: mockBack, replace: mockReplace, push: jest.fn(), canGoBack: () => true }),
+  useRouter: () => ({ back: mockBack, replace: mockReplace, push: mockPush, canGoBack: () => true }),
 }));
 jest.mock('@/services/NotificationScheduler', () => ({
   NotificationScheduler: {
@@ -80,6 +81,31 @@ describe('check-in', () => {
     fireEvent.press(screen.getByRole('button', { name: 'סיימתי' }));
     expect(Object.keys(useCompletionsStore.getState().checkIns)).toHaveLength(1);
     expect(mockBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('explains once that a tap marks, until the first mark or a tap on the note (E1)', async () => {
+    const HINT = 'הקישו על מצווה שקיימתם בשבת או בחג כדי לסמן אותה. הקשה כאן סוגרת את ההסבר.';
+    const first = renderWithTheme(<CheckInRoute />);
+    await screen.findByText(/מה עשית בשבת/);
+    fireEvent.press(screen.getByText(HINT));
+    expect(screen.queryByText(HINT)).toBeNull();
+    expect(useUserStore.getState().discovery.hints).toContain('checkinTap');
+    first.unmount();
+
+    useUserStore.setState({ discovery: { hints: [], offers: {}, whatsNew: null } });
+    renderWithTheme(<CheckInRoute />);
+    await screen.findByText(/מה עשית בשבת/);
+    expect(screen.getByText(HINT)).toBeOnTheScreen();
+    act(() => screen.UNSAFE_getAllByType(MitzvahCard)[0].props.onComplete());
+    expect(screen.queryByText(HINT)).toBeNull();
+    expect(useUserStore.getState().discovery.hints).toContain('checkinTap');
+  });
+
+  it('opens the guide on its topic from the header (E2)', async () => {
+    renderWithTheme(<CheckInRoute />);
+    await screen.findByText(/מה עשית בשבת/);
+    fireEvent.press(screen.getByRole('button', { name: 'מדריך: איך המסך הזה עובד' }));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/guide', params: { topic: 'shabbat' } });
   });
 
   it('draws each card with its mitzvah icon', async () => {
