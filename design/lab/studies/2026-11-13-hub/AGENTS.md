@@ -16,7 +16,7 @@
 ## Local Contracts
 
 - Published as one private gallery Artifact, as the compass-button study was: https://claude.ai/artifact/2kobw5urktHPE9s8rjnvpJ. Republish to the same link after a change.
-- The owner's picks: none yet. No code of phase 2 starts before them.
+- The owner's picks: the More tab is direction ב, the goal tiles (2026-11-15, "לגביי מסך עוד הכי אהבתי את ב"). Not picked yet: the capabilities screen, home's entry points and the tab's name (עוד or גלה). The More tab (C5) may be built on ב; C4, B1 and B2 wait for their picks.
 
 ## Work Guidance
 

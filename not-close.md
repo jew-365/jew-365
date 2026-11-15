@@ -470,7 +470,7 @@ The user reports that screens sometimes stick, navigation sometimes does nothing
   - **What it is:** `pnpm update:preview`, then on the preview app against the luach: the home strip of the day, a Friday's candles and the Saturday's exit on the schedule, and a mitzvah screen's next reminder; then `pnpm update:production` with the `WHATS_NEW` entry, each on the owner's approval.
   - **What it solves:** The batch reaches installs only as an update (root [AGENTS.md](AGENTS.md), Release and Updates).
   - **Expected result:** The preview app shows the luach's values within a minute on the day checked; the production update's group id in [state.md](state.md) and the entries moved to [action-log.md](action-log.md).
-  - **Status 2026-11-11:** both updates are out: preview `1.0.21-39` (group `d5903de2-8db4-4e22-9037-53e7bdef4a3d`, from `2ae19ce`, 2026-11-03) and production `1.0.21-13` (group `c9a7a50c-98d7-45e4-8b3d-78843293222b`, from `db08066`, which contains `2ae19ce`, 2026-11-04), as [state.md](state.md) records. Left: the check on a phone against the luach, which the independent 5787 calibration (63 of 492 comparisons outside a minute, the task above) now governs, and the entries' move to [action-log.md](action-log.md) once it passes.
+  - **Status 2026-11-11:** both updates are out: preview `1.0.21-39` (group `d5903de2-8db4-4e22-9037-53e7bdef4a3d`, from `2ae19ce`, 2026-11-03) and production `1.0.21-13` (group `c9a7a50c-98d7-45e4-8b3d-78843293222b`, from `db08066`, which contains `2ae19ce`, 2026-11-04), as [state.md](state.md) records. Left: the check on a phone against the luach, and the entries' move to [action-log.md](action-log.md) once it passes. Since 2026-11-12 the correction (`abdd500`: the visible sunrise in the four cities and Jerusalem's sunset height, 0 of 492 comparisons outside a minute) is on preview `1.0.21-80` and not in production; the check runs on that preview.
 
 ### Low — Zmanim per the Ohr HaChaim luach
 
@@ -1016,7 +1016,8 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** a study under [design/lab/studies/](design/lab/studies) for C5, C4, B1 and B2 (and the names of Q35), published as a Design canvas and a gallery site.
   - **What it solves:** spec items tagged "study" in phase 2.
   - **Expected result:** both Artifact links in the study's AGENTS.md and here; the owner's pick recorded.
-  - **Done (the study):** 2026-11-13. [design/lab/studies/2026-11-13-hub/](design/lab/studies/2026-11-13-hub/AGENTS.md), on the app's words, states and one real day: today's More tab beside three hub directions with the עוד / גלה switch, two directions of the capabilities screen, two of home's entry points. Published as one gallery Artifact, as the compass-button study was: https://claude.ai/artifact/2kobw5urktHPE9s8rjnvpJ. Checked at 1240 and 430 points (no horizontal scroll, no page error). Open: the owner's pick.
+  - **Done (the study):** 2026-11-13. [design/lab/studies/2026-11-13-hub/](design/lab/studies/2026-11-13-hub/AGENTS.md), on the app's words, states and one real day: today's More tab beside three hub directions with the עוד / גלה switch, two directions of the capabilities screen, two of home's entry points. Published as one gallery Artifact, as the compass-button study was: https://claude.ai/artifact/2kobw5urktHPE9s8rjnvpJ. Checked at 1240 and 430 points (no horizontal scroll, no page error).
+  - **The owner's pick, 2026-11-15:** the More tab is direction ב, the goal tiles ("לגביי מסך עוד הכי אהבתי את ב"). Still open: the capabilities screen (א or ב), home's entry points (א or ב) and the tab's name (Q35).
   - **Status:** Version: none (design) · Committed: yes, `2ba199b` feat(design): the hub study · Pushed: yes · Live: the Artifact · Channel: —
 
 - [ ] Phase 2: build the owner's pick (C5, C4, A6, B1, B2, D1, E1, E2, E3)
@@ -1030,7 +1031,8 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** a study for A2, A3 and A5 (six screens, the bundles, the ready screen with today and the sample), with Q33 and Q34 shown as options.
   - **What it solves:** F2.
   - **Expected result:** both Artifact links recorded; the owner's pick recorded.
-  - **Done (the study):** 2026-11-14. [design/lab/studies/2026-11-13-setup/](design/lab/studies/2026-11-13-setup/AGENTS.md): the six screens with shared answers (a gender sets the bundles), two directions of the bundles screen, Q33's quiet hours and Q34's candle rule shown, the system prompt and the sample reminder on iPhone and Android, every pre-prompt button saying Continue. Published as one gallery Artifact: https://claude.ai/artifact/HwB8eRAUxBLygyAmVsz9nM. Checked at 1240 and 430 points and by pressing (no page error). Open: the owner's pick.
+  - **Done (the study):** 2026-11-14. [design/lab/studies/2026-11-13-setup/](design/lab/studies/2026-11-13-setup/AGENTS.md): the six screens with shared answers (a gender sets the bundles), two directions of the bundles screen, Q33's quiet hours and Q34's candle rule shown, the system prompt and the sample reminder on iPhone and Android, every pre-prompt button saying Continue. Published as one gallery Artifact: https://claude.ai/artifact/HwB8eRAUxBLygyAmVsz9nM. Checked at 1240 and 430 points and by pressing (no page error).
+  - **The owner's pick, 2026-11-15:** every screen approved, the bundles screen (the fourth) in direction א, the five goal cards ("לגביי מסכי ההתחלה מאשר הכל ולךע 4אופציה א", read as: and for screen 4, option א). With it Q33 and Q34 are answered as the study shows them. Nothing of the study is open; phase 3 may be split into tasks.
   - **Status:** Version: none (design) · Committed: yes, `c2d4340` wip(design): the setup study; `8f45b36` feat(design): the setup study published · Pushed: yes · Live: the Artifact · Channel: —
 
 - [ ] Phase 3: build the short setup (A2, A3, A4, A5)
@@ -1252,16 +1254,19 @@ Q32 to Q37 are the batch "Discoverability and ease of use, 2026-11-13", the open
   - **Proposal:** 23:00 to 06:30, ticked and editable, with one line saying late alerts move or drop (Maariv's and the bedtime Shema's last chance, and after a late summer Shabbat abroad the weekly report).
   - **Lives in:** not built yet: task "Phase 3: build the short setup".
   - **What it affects:** new users only; existing installs keep their settings.
+  - **Answered, 2026-11-15:** as proposed, 23:00 to 06:30 ticked and editable: the owner approved every screen of the setup study, which shows it ("לגביי מסכי ההתחלה מאשר הכל").
 
 - **Q34 — Candle lighting and the Omer by gender.**
   - **Question:** Which of the Shabbat and festivals bundle arrives ticked for a man, a woman and an unanswered gender?
   - **Proposal:** candle lighting ticked for women and an unanswered gender, off for men (who still get the pre-Shabbat notice with the lighting time); the Omer ticked for everyone until the rav says otherwise.
   - **Lives in:** not built yet: `src/data/bundles.ts`.
   - **What it affects:** new users' defaults, and an unmarked candle lighting reading as missed every week.
+  - **Answered, 2026-11-15:** as proposed (candle lighting ticked for women and an unanswered gender, off for men; the Omer ticked for everyone): the owner approved every screen of the setup study, which shows it ("לגביי מסכי ההתחלה מאשר הכל").
 
 - **Q35 — Names.**
   - **Question:** The hub tab's name ("גלה" or "עוד") and the library's own name, so "המצוות שלי" means only personal mitzvot.
   - **Proposal:** decided in the hub study and the copy sign-off.
+  - **Status, 2026-11-15:** the owner picked the hub's direction ב and named neither tab name; still open.
   - **Lives in:** `nav.more` and the library's keys in both dictionaries.
   - **What it affects:** the tab bar, the library, the search words.
 

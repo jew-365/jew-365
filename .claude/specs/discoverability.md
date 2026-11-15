@@ -287,8 +287,8 @@ Each phase ships to the preview channel on its own. Phases 2 and 3 run in parall
 ## Open decisions for the owner
 
 1. **The next native build:** the first-run work reaches new users only with it. Recommended: phases 0 to 2 over the air now, and phase 3 in the next build.
-2. **Quiet hours for new users:** a night bound drops late alerts (Maariv's and the bedtime Shema's last-chance alerts, and after a late summer Shabbat abroad the weekly report). Recommended: 23:00 to 06:30, ticked and editable on the notification screen, with one line saying so.
-3. **Candle lighting and the Omer by gender:** for a man whose wife lights, an unmarked candle lighting would read as missed every week. Recommended: candle lighting ticked for women and for an unanswered gender, off for men, who still get the pre-Shabbat notice with the lighting time; the Omer ticked for everyone until the rav says otherwise.
-4. **Names:** the hub ("גלה" or "עוד") and the library's own name, in the study and the copy sign-off.
+2. **Quiet hours for new users:** a night bound drops late alerts (Maariv's and the bedtime Shema's last-chance alerts, and after a late summer Shabbat abroad the weekly report). Recommended: 23:00 to 06:30, ticked and editable on the notification screen, with one line saying so. **Decided 2026-11-15:** as recommended (the owner approved the setup study).
+3. **Candle lighting and the Omer by gender:** for a man whose wife lights, an unmarked candle lighting would read as missed every week. Recommended: candle lighting ticked for women and for an unanswered gender, off for men, who still get the pre-Shabbat notice with the lighting time; the Omer ticked for everyone until the rav says otherwise. **Decided 2026-11-15:** as recommended (the owner approved the setup study).
+4. **Names:** the hub ("גלה" or "עוד") and the library's own name, in the study and the copy sign-off. The owner picked the hub's direction ב (goal tiles) on 2026-11-15; the names are still open.
 5. **The weekly tip:** read here as a line inside the existing weekly report notification. A separate weekly notification is possible but adds noise.
 6. **The sample reminder's "done" button:** it needs the written exception of step 3 above. Recommended: yes.

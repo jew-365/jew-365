@@ -16,7 +16,7 @@
 
 - Published as one private gallery Artifact: https://claude.ai/artifact/HwB8eRAUxBLygyAmVsz9nM. Republish to the same link after a change.
 - No button that leads to a system permission prompt says Allow, Enable or Grant (App Review 5.1.1(iv)); they say Continue.
-- The owner's picks: none yet. No code of phase 3 starts before them.
+- The owner's picks: every screen approved, the bundles screen in direction א, the five goal cards (2026-11-15, "לגביי מסכי ההתחלה מאשר הכל ולךע 4אופציה א"), and with them the quiet hours shown (23:00 to 06:30, ticked) and the gender rule shown (candle lighting off for men). Phase 3 follows this study as it stands.
 
 ## Work Guidance
 
