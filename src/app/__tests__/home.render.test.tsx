@@ -186,12 +186,12 @@ describe('home between midnight and alot', () => {
   });
 
   it('puts the messages in the open-now slot while nothing is open, and after My day otherwise', () => {
-    useUserStore.setState({ gender: null });
+    useUserStore.setState({ locationStatus: 'missing' });
     const { unmount } = renderAt(AFTER_ALOT);
     expect(screen.queryByText(/^פתוח עכשיו/)).toBeNull();
     expect(screen.queryByText('אין מצווה פתוחה ברגע זה')).toBeNull();
     expect(screen.getByText(/^הודעות/)).toBeOnTheScreen();
-    expect(screen.getByText('התאמה אישית לפי מגדר ומצב משפחתי, לא חובה. להגדרה')).toBeOnTheScreen();
+    expect(screen.getByText('הזמנים מחושבים לפי ירושלים. לבחירת המקום שלכם')).toBeOnTheScreen();
     unmount();
     jest.useRealTimers();
     renderAt(NIGHT_OF_THE_14TH);
@@ -679,11 +679,11 @@ describe('home banners land on the right settings block', () => {
 
   afterEach(() => jest.useRealTimers());
 
-  it('opens Settings on the gender question from the profile prompt', () => {
+  it('shows no profile banner: the unanswered questions are an offer in Messages, not a priority banner', () => {
     useUserStore.setState({ gender: null, maritalStatus: null });
     renderAt(DAY);
-    fireEvent.press(screen.getByText('התאמה אישית לפי מגדר ומצב משפחתי, לא חובה. להגדרה'));
-    expect(mockPush).toHaveBeenCalledWith({ pathname: '/(tabs)/settings', params: { focus: 'gender' } });
+    expect(screen.queryByText(/מגדר ומצב משפחתי/)).toBeNull();
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it('opens Settings on the location block from the no-location banner', () => {

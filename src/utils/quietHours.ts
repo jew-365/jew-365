@@ -6,6 +6,10 @@ export type QuietHours = { before: number | null; after: number | null };
 export const QUIET_BEFORE_DEFAULT_MIN = 420;
 export const QUIET_AFTER_DEFAULT_MIN = 1320;
 export const QUIET_MIN_OPEN_MIN = 60;
+// The night quiet hours the first setup shows ticked (the owner's call of 2026-11-15, Q33): 23:00 to 06:30.
+// The stored defaults above are unchanged, so an existing install keeps what it has.
+export const SETUP_QUIET_AFTER_MIN = 23 * 60;
+export const SETUP_QUIET_BEFORE_MIN = 6 * 60 + 30;
 export const NO_QUIET_HOURS: QuietHours = { before: null, after: null };
 export const DEFAULT_QUIET_BEFORE: QuietBound = { enabled: false, minutes: QUIET_BEFORE_DEFAULT_MIN };
 export const DEFAULT_QUIET_AFTER: QuietBound = { enabled: false, minutes: QUIET_AFTER_DEFAULT_MIN };

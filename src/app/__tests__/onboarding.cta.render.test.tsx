@@ -1,27 +1,29 @@
 const mockPush = jest.fn();
+const mockBack = jest.fn();
 
 jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
-  useRouter: () => ({ push: mockPush, back: jest.fn(), replace: jest.fn() }),
+  useRouter: () => ({ push: mockPush, back: mockBack, replace: jest.fn() }),
   useLocalSearchParams: () => ({}),
 }));
 jest.mock('@/components/PermissionsList', () => ({ PermissionsList: () => null }));
 jest.mock('@/services/NotificationScheduler', () => ({
   requestNotificationPermissions: jest.fn(async () => true),
   askForNotifications: jest.fn(async () => 'granted'),
+  presentSampleReminder: jest.fn(async () => 'sent'),
+  nextReminderAt: jest.fn(() => null),
   syncNotificationPermissionStatus: jest.fn(async () => {}),
   NotificationScheduler: { rebuild: jest.fn(async () => {}) },
 }));
 
 import type { ComponentType } from 'react';
 import { act, fireEvent, screen } from '@testing-library/react-native';
+import OnboardingBundlesScreen from '../onboarding/bundles';
 import WelcomeScreen from '../onboarding/index';
 import OnboardingLocationScreen from '../onboarding/location';
 import OnboardingMitzvotScreen from '../onboarding/mitzvot';
-import NoticeScreen from '../onboarding/notice';
 import NusachScreen from '../onboarding/nusach';
 import PermissionsScreen from '../onboarding/permissions';
-import ProfileScreen from '../onboarding/profile';
 import ReadyScreen from '../onboarding/ready';
 import OnboardingZmanimScreen from '../onboarding/zmanim';
 import { ONBOARDING_STEPS, OnboardingDots } from '@/components/OnboardingDots';
@@ -33,7 +35,6 @@ import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useUserStore } from '@/stores/useUserStore';
 
 const he = (key: string) => translate(key, undefined, 'he', null);
-const en = (key: string) => translate(key, undefined, 'en', null);
 
 describe('Onboarding Continue buttons', () => {
   beforeEach(() => {
@@ -41,14 +42,13 @@ describe('Onboarding Continue buttons', () => {
     useUserStore.setState({ language: 'he' });
     useMitzvotStore.getState().reset();
     mockPush.mockClear();
+    mockBack.mockClear();
   });
 
-  it('lets the profile step continue with gender and marital status unanswered, both marked optional', () => {
-    renderWithTheme(<ProfileScreen />);
+  it('lets the welcome step continue with the name and the gender unanswered, the gender marked optional', () => {
+    renderWithTheme(<WelcomeScreen />);
     expect(screen.getByLabelText(he('onboarding.genderLabel'))).toHaveProp('accessibilityRole', 'radiogroup');
-    expect(screen.getByLabelText(he('onboarding.maritalStatusLabel'))).toHaveProp('accessibilityRole', 'radiogroup');
     expect(he('onboarding.genderLabel')).toContain('לא חובה');
-    expect(he('onboarding.maritalStatusLabel')).toContain('לא חובה');
 
     const next = screen.getByRole('button', { name: he('common.continue') });
     expect(next).toBeEnabled();
@@ -59,16 +59,17 @@ describe('Onboarding Continue buttons', () => {
     expect(useUserStore.getState().maritalStatus).toBeNull();
   });
 
-  it('continues from the profile step with both answers given and keeps them', () => {
-    renderWithTheme(<ProfileScreen />);
-    fireEvent.press(screen.getByText(he('profile.gender.male')));
-    fireEvent.press(screen.getByText(he('profile.maritalStatus.married.male')));
+  it('keeps a gender chosen on the welcome step, with its defaults, and asks nothing about marital status', () => {
+    renderWithTheme(<WelcomeScreen />);
+    fireEvent.press(screen.getByText(he('profile.gender.female')));
+    expect(useUserStore.getState().gender).toBe('female');
+    expect(useUserStore.getState().siddurVoice).toBe('female');
+    expect(useMitzvotStore.getState().activeMitzvot.tefillin?.enabled).toBe(false);
+    expect(screen.queryByText(/משפחתי/)).toBeNull();
+    expect(screen.queryByText(he('onboarding.phoneLabel'))).toBeNull();
 
     fireEvent.press(screen.getByRole('button', { name: he('common.continue') }));
-
     expect(mockPush).toHaveBeenCalledWith('/onboarding/nusach');
-    expect(useUserStore.getState().gender).toBe('male');
-    expect(useUserStore.getState().maritalStatus).toBe('married');
   });
 
   it('never disables Continue on the location step, so setup goes on without Location Services', async () => {
@@ -94,10 +95,17 @@ describe('Onboarding Continue buttons', () => {
     await act(async () => {
       fireEvent.press(next());
     });
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/bundles');
+  });
+
+  it('Continue on the bundles step goes to the notification step', async () => {
+    renderWithTheme(<OnboardingBundlesScreen />);
+    await act(async () => {});
+    fireEvent.press(screen.getByRole('button', { name: he('common.continue') }));
     expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
   });
 
-  it('Continue on the permissions step asks for notifications, then goes to the important notice', async () => {
+  it('Continue on the notification step asks for notifications, then goes to the ready step', async () => {
     const { askForNotifications } = jest.requireMock('@/services/NotificationScheduler');
     askForNotifications.mockClear();
     renderWithTheme(<PermissionsScreen />);
@@ -107,7 +115,7 @@ describe('Onboarding Continue buttons', () => {
       fireEvent.press(allow);
     });
     expect(askForNotifications).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith('/onboarding/notice');
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/ready');
   });
 
   it('has one button before the prompt, which moves on after a refusal too (App Review 5.1.1(iv))', async () => {
@@ -121,36 +129,14 @@ describe('Onboarding Continue buttons', () => {
       fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
     });
     expect(askForNotifications).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith('/onboarding/notice');
-  });
-
-  it("the important notice says the times are the user's responsibility and where to report a mistake", () => {
-    renderWithTheme(<NoticeScreen />);
-    expect(screen.getByRole('header', { name: he('accuracy.title') })).toBeOnTheScreen();
-    for (const key of ['accuracy.effort', 'accuracy.responsibility', 'accuracy.report']) {
-      expect(screen.getByText(he(key))).toBeOnTheScreen();
-    }
-    expect(he('accuracy.report')).toContain(he('settings.contact'));
-    expect(en('accuracy.report')).toContain(en('settings.contact'));
-    fireEvent.press(screen.getByRole('button', { name: he('onboarding.noticeAccept') }));
     expect(mockPush).toHaveBeenCalledWith('/onboarding/ready');
   });
 
-  it('Continue on the nusach step goes to the mitzvot step', () => {
+  it('Continue on the nusach step goes to the location step', () => {
     renderWithTheme(<NusachScreen />);
     fireEvent.press(screen.getByRole('button', { name: he('common.continue') }));
     expect(mockPush).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith('/onboarding/mitzvot');
-  });
-
-  it('the ready step lists the enabled mitzvot by name, and its edit link opens the mitzvot step', () => {
-    useMitzvotStore.setState({ activeMitzvot: { shacharit: { enabled: true }, mincha: { enabled: true } } });
-    renderWithTheme(<ReadyScreen />);
-    expect(screen.getByText('תפילת שחרית · תפילת מנחה')).toBeOnTheScreen();
-
-    fireEvent.press(screen.getByText(he('onboarding.readyEdit')));
-    expect(mockPush).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith({ pathname: '/onboarding/mitzvot', params: { from: 'ready' } });
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/location');
   });
 
   it('the ready step marks onboarding done before it rebuilds the schedule', async () => {
@@ -165,29 +151,34 @@ describe('Onboarding Continue buttons', () => {
     });
 
     expect(seen).toEqual([true]);
+    // An install that finished this setup is never offered the catch-up.
+    expect(useUserStore.getState().discovery.hints).toContain('newSetup');
   });
 
   it.each<[string, ComponentType, number]>([
     ['welcome', WelcomeScreen, 0],
-    ['profile', ProfileScreen, 1],
-    ['nusach', NusachScreen, 2],
-    ['mitzvot', OnboardingMitzvotScreen, 3],
-    ['zmanim', OnboardingZmanimScreen, 4],
-    ['location', OnboardingLocationScreen, 5],
-    ['permissions', PermissionsScreen, 6],
-    ['notice', NoticeScreen, 7],
-    ['ready', ReadyScreen, 8],
+    ['nusach', NusachScreen, 1],
+    ['location', OnboardingLocationScreen, 2],
+    ['bundles', OnboardingBundlesScreen, 3],
+    ['permissions', PermissionsScreen, 4],
+    ['ready', ReadyScreen, 5],
   ])('draws the %s step as dot %i of ONBOARDING_STEPS', async (_name, Screen, step) => {
     renderWithTheme(<Screen />);
     await act(async () => {});
     expect(screen.UNSAFE_getByType(OnboardingDots).props).toMatchObject({ step, total: ONBOARDING_STEPS });
   });
 
-  it('counts nine onboarding steps', () => {
-    expect(ONBOARDING_STEPS).toBe(9);
+  it('counts six onboarding steps, and the two detail screens draw no dots', async () => {
+    expect(ONBOARDING_STEPS).toBe(6);
+    for (const Screen of [OnboardingMitzvotScreen, OnboardingZmanimScreen]) {
+      const view = renderWithTheme(<Screen />);
+      await act(async () => {});
+      expect(screen.UNSAFE_queryByType(OnboardingDots)).toBeNull();
+      view.unmount();
+    }
   });
 
-  it("the times step: the carousel's list, a star saved, and Continue to the location", async () => {
+  it("the times screen: the carousel's list, a star saved, and Continue back to the setup", async () => {
     renderWithTheme(<OnboardingZmanimScreen />);
     await act(async () => {});
     expect(screen.getByText(he('onboarding.zmanim.title'))).toBeOnTheScreen();
@@ -195,6 +186,7 @@ describe('Onboarding Continue buttons', () => {
     await act(async () => fireEvent.press(screen.getByTestId('zmanim-star-plag')));
     expect(useUserStore.getState().zmanPins).toEqual(['plag']);
     fireEvent.press(screen.getByRole('button', { name: he('common.continue') }));
-    expect(mockPush).toHaveBeenCalledWith('/onboarding/location');
+    expect(mockBack).toHaveBeenCalledTimes(1);
+    expect(mockPush).not.toHaveBeenCalled();
   });
 });

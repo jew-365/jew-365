@@ -21,6 +21,7 @@ import { LocationService, type LocationStatus } from '@/services/LocationService
 import {
   NotificationScheduler,
   availableNotificationSounds,
+  presentSampleReminder,
   previewNotificationSound,
   askForNotifications,
   syncNotificationPermissionStatus,
@@ -690,6 +691,9 @@ function SettingsScreenContent() {
                 <Anchor {...anchor('notificationSound')}>
                   <NotificationSoundBlock choice={user.notificationSounds} onSelect={user.setNotificationSound} />
                 </Anchor>
+                <Anchor {...anchor('sampleReminder')}>
+                  <SampleReminderBlock />
+                </Anchor>
                 <Anchor {...anchor('nagLevel')}>
                   <NagLevelPicker level={user.nagLevel} onChange={user.setNagLevel} style={styles.fieldLabel} />
                   <NagLevelExample
@@ -992,6 +996,41 @@ function TaharahBlock({ enabled, gender, onOpen }: TaharahBlockProps) {
 }
 
 type AnchorTarget = Omit<AnchorProps, 'children'>;
+
+// A sample reminder on demand (spec A5, G1): what the next reminder will look like, and at once whether the
+// phone lets it through.
+function SampleReminderBlock() {
+  const { colors } = useTheme();
+  const { t } = useI18n();
+  const [result, setResult] = useState<'sent' | 'noPermission' | 'quiet' | null>(null);
+  const [sending, setSending] = useState(false);
+  const send = async () => {
+    if (sending) return;
+    setSending(true);
+    setResult(await presentSampleReminder().catch(() => 'noPermission' as const));
+    setSending(false);
+  };
+  const text =
+    result === 'sent'
+      ? t(Platform.OS === 'ios' ? 'onboarding.ready.sampleSent.ios' : 'onboarding.ready.sampleSent.android')
+      : result === 'quiet'
+        ? t('onboarding.ready.sampleQuiet')
+        : result === 'noPermission'
+          ? t('onboarding.ready.sampleNoPermission')
+          : t('settings.sampleReminderHint');
+  return (
+    <View style={styles.fieldLabel}>
+      <Button variant="secondary" icon="bell" label={t('settings.sampleReminder')} onPress={send} busy={sending} />
+      <Text
+        testID="settings-sample-result"
+        accessibilityLiveRegion="polite"
+        style={[typography.small, styles.note, { color: colors.textMuted }]}
+      >
+        {text}
+      </Text>
+    </View>
+  );
+}
 
 type QuietHoursBlockProps = {
   before: QuietBound;

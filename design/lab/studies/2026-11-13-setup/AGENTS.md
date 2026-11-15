@@ -20,7 +20,7 @@
 
 ## Work Guidance
 
-- The picks become A2 to A5 in [../../../../src/app/onboarding/](../../../../src/app/onboarding) and [bundles.ts](../../../../src/data/bundles.ts), under the `src/` DOX chain; they reach users with the next native build.
+- The picks were built on 2026-11-15 as A2 to A5 in [../../../../src/app/onboarding/](../../../../src/app/onboarding) over [bundles.ts](../../../../src/data/bundles.ts), with the deviations the spec records; they reach new users with the next native build.
 
 ## Verification
 

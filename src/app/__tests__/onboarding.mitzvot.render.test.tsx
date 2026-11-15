@@ -236,25 +236,10 @@ describe('Onboarding mitzvot step', () => {
     expect(screen.UNSAFE_getAllByType(Button).map((button) => button.props.label)).toEqual([he('common.continue')]);
   });
 
-  it('Continue goes on to the location step', () => {
-    renderWithTheme(<OnboardingMitzvotScreen />);
-    fireEvent.press(continueButton());
-    expect(mockPush).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith('/onboarding/zmanim');
-    expect(mockBack).not.toHaveBeenCalled();
-  });
-
-  it('Continue returns to the ready step that opened it', () => {
-    mockParams.from = 'ready';
+  it('Continue returns to the setup step that opened it, with no dots and no step of its own', () => {
     renderWithTheme(<OnboardingMitzvotScreen />);
     fireEvent.press(continueButton());
     expect(mockBack).toHaveBeenCalledTimes(1);
     expect(mockPush).not.toHaveBeenCalled();
-  });
-
-  it('Back returns to the previous step', () => {
-    renderWithTheme(<OnboardingMitzvotScreen />);
-    fireEvent.press(screen.getByRole('button', { name: he('common.back') }));
-    expect(mockBack).toHaveBeenCalledTimes(1);
   });
 });

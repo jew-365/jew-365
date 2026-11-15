@@ -36,7 +36,7 @@ export default function OnboardingLocationScreen() {
         setBusy(false);
       }
     }
-    router.push('/onboarding/permissions');
+    router.push('/onboarding/bundles');
   };
 
   return (
@@ -65,7 +65,7 @@ export default function OnboardingLocationScreen() {
       </Text>
       <PlacePicker location={user.location} onPick={(location) => user.setLocationState(location, 'ready', 'manual')} />
 
-      <OnboardingDots step={5} total={ONBOARDING_STEPS} style={styles.dots} />
+      <OnboardingDots step={2} total={ONBOARDING_STEPS} style={styles.dots} />
       <Button label={t('common.continue')} onPress={proceed} busy={busy} />
       {locationReady ? null : (
         <Text style={[typography.small, styles.locationHint, { color: colors.textMuted }]}>

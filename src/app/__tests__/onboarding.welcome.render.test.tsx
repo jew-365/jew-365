@@ -48,23 +48,20 @@ describe('Onboarding welcome step: language switch and optional fields', () => {
     expect(screen.getByTestId('welcome-language').props.accessibilityLabel).toBe(text('settings.language', 'en'));
   });
 
-  it('stores the typed name and phone, then sets the language, when English is pressed', () => {
-    const seenAtChange: { name: string; phone: string }[] = [];
+  it('stores the typed name, then sets the language, when English is pressed', () => {
+    const seenAtChange: { name: string }[] = [];
     const unsubscribe = useUserStore.subscribe((state, previous) => {
-      if (state.language !== previous.language)
-        seenAtChange.push({ name: state.profileName, phone: state.profilePhone });
+      if (state.language !== previous.language) seenAtChange.push({ name: state.profileName });
     });
     renderWithTheme(<WelcomeScreen />);
     fireEvent.changeText(screen.getByPlaceholderText(text('settings.profileNamePlaceholder', 'he')), '  Dana  ');
-    fireEvent.changeText(screen.getByPlaceholderText(text('settings.profilePhonePlaceholder', 'he')), ' 0501234567 ');
 
     fireEvent.press(screen.getByRole('radio', { name: 'English' }));
     unsubscribe();
 
     expect(useUserStore.getState().language).toBe('en');
     expect(useUserStore.getState().profileName).toBe('Dana');
-    expect(useUserStore.getState().profilePhone).toBe('0501234567');
-    expect(seenAtChange).toEqual([{ name: 'Dana', phone: '0501234567' }]);
+    expect(seenAtChange).toEqual([{ name: 'Dana' }]);
     expect(screen.getByRole('radio', { name: 'English' })).toBeSelected();
   });
 
@@ -92,14 +89,16 @@ describe('Onboarding welcome step: language switch and optional fields', () => {
   it('labels the fields as optional in Hebrew', () => {
     renderWithTheme(<WelcomeScreen />);
     expect(screen.getByText('שם (לא חובה)')).toBeOnTheScreen();
-    expect(screen.getByText('טלפון (לא חובה)')).toBeOnTheScreen();
+    expect(screen.getByText('מגדר (לא חובה)')).toBeOnTheScreen();
+    // The phone number left the setup for Settings (spec A2).
+    expect(screen.queryByText('טלפון (לא חובה)')).toBeNull();
   });
 
   it('labels the fields as optional and says both are optional and stay on the device, in both languages', () => {
     useUserStore.setState({ language: 'en' });
     const { unmount } = renderWithTheme(<WelcomeScreen />);
     expect(screen.getByText('Name (optional)')).toBeOnTheScreen();
-    expect(screen.getByText('Phone (optional)')).toBeOnTheScreen();
+    expect(screen.getByText('Gender (optional)')).toBeOnTheScreen();
     expect(
       screen.getByText('Both are optional and stay on this device. You can fill them in now or later in Settings.'),
     ).toBeOnTheScreen();
@@ -109,12 +108,12 @@ describe('Onboarding welcome step: language switch and optional fields', () => {
     expect(screen.getByText('שניהם לא חובה ונשמרים רק במכשיר. אפשר למלא עכשיו או אחר כך בהגדרות.')).toBeOnTheScreen();
   });
 
-  it('continues to the profile step with both fields empty', () => {
+  it('continues to the nusach step with both fields empty', () => {
     renderWithTheme(<WelcomeScreen />);
     fireEvent.press(screen.getByRole('button', { name: text('common.continue', 'he') }));
     expect(mockPush).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith('/onboarding/profile');
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/nusach');
     expect(useUserStore.getState().profileName).toBe('');
-    expect(useUserStore.getState().profilePhone).toBe('');
+    expect(useUserStore.getState().gender).toBeNull();
   });
 });

@@ -1,9 +1,8 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { Button } from '@/components/Button';
-import { ONBOARDING_STEPS, OnboardingDots } from '@/components/OnboardingDots';
 import { ZmanimPicker } from '@/components/ZmanimSheet';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
@@ -27,11 +26,7 @@ export default function OnboardingZmanimScreen() {
       <ScrollView contentContainerStyle={styles.list}>
         <ZmanimPicker />
       </ScrollView>
-      <OnboardingDots step={4} total={ONBOARDING_STEPS} style={styles.dots} />
-      <Button label={t('common.continue')} onPress={() => router.push('/onboarding/location')} />
-      <Pressable onPress={() => router.back()} accessibilityRole="button" style={styles.backBtn}>
-        <Text style={[typography.small, { color: colors.textSub }]}>{t('common.back')}</Text>
-      </Pressable>
+      <Button label={t('common.continue')} onPress={() => router.back()} style={styles.done} />
     </SafeAreaView>
   );
 }
@@ -46,13 +41,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.lg,
     flexGrow: 1,
   },
-  dots: {
+  done: {
     marginTop: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  backBtn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.sm,
   },
 });

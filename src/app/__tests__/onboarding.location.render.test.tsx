@@ -50,7 +50,7 @@ describe('the onboarding location step', () => {
       locationStatus: 'ready',
       locationSource: 'gps',
     });
-    expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/bundles');
   });
 
   it('continues with the default place when the location is refused', async () => {
@@ -62,7 +62,7 @@ describe('the onboarding location step', () => {
       fireEvent.press(continueButton());
     });
     expect(useUserStore.getState()).toMatchObject({ location: CITIES[0], locationStatus: 'denied' });
-    expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/bundles');
   });
 
   it('continues when the lookup itself fails', async () => {
@@ -72,7 +72,7 @@ describe('the onboarding location step', () => {
       fireEvent.press(continueButton());
     });
     expect(useUserStore.getState()).toMatchObject({ location: CITIES[0], locationStatus: 'missing' });
-    expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/bundles');
   });
 
   it('a place picked by searching for it continues without asking for the location', async () => {
@@ -95,7 +95,7 @@ describe('the onboarding location step', () => {
       fireEvent.press(continueButton());
     });
     expect(lookup).not.toHaveBeenCalled();
-    expect(mockPush).toHaveBeenCalledWith('/onboarding/permissions');
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/bundles');
   });
 
   it('has no button that asks to allow before the system prompt (App Review 5.1.1(iv))', () => {

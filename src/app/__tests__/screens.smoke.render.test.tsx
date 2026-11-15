@@ -191,13 +191,12 @@ import TabsIndexScreen from '../(tabs)/index';
 import MoreScreen from '../(tabs)/more';
 import SettingsScreen from '../(tabs)/settings';
 import SiddurTabScreen from '../(tabs)/siddur';
+import OnboardingBundlesScreen from '../onboarding/bundles';
 import OnboardingWelcomeScreen from '../onboarding/index';
 import OnboardingLocationScreen from '../onboarding/location';
 import OnboardingMitzvotScreen from '../onboarding/mitzvot';
 import OnboardingNusachScreen from '../onboarding/nusach';
-import OnboardingNoticeScreen from '../onboarding/notice';
 import OnboardingPermissionsScreen from '../onboarding/permissions';
-import OnboardingProfileScreen from '../onboarding/profile';
 import OnboardingReadyScreen from '../onboarding/ready';
 import OnboardingZmanimScreen from '../onboarding/zmanim';
 import TaharahLayout from '../taharah/_layout';
@@ -790,25 +789,18 @@ const CASES: SmokeCase[] = [
     check: both(text('מה הנוסח שלך?', 'Which nusach are you?'), text('תימן בלדי', 'Teiman Baladi')),
   },
   {
-    file: 'onboarding/notice',
-    label: 'notice',
-    Screen: OnboardingNoticeScreen,
+    file: 'onboarding/bundles',
+    label: 'bundles',
+    Screen: OnboardingBundlesScreen,
     fresh: true,
-    check: text('הודעה חשובה', 'Important notice'),
+    check: both(text('מה חשוב לך?', 'What matters to you?'), text('לימוד יומי', 'Daily learning')),
   },
   {
     file: 'onboarding/permissions',
     label: 'permissions',
     Screen: OnboardingPermissionsScreen,
     fresh: true,
-    check: text('הרשאות', 'Permissions'),
-  },
-  {
-    file: 'onboarding/profile',
-    label: 'profile',
-    Screen: OnboardingProfileScreen,
-    fresh: true,
-    check: text('קצת עליך', 'About you'),
+    check: both(text('תזכורות שמגיעות בזמן', 'Reminders that arrive on time'), text('שקט בלילה', 'Quiet at night')),
   },
   {
     file: 'onboarding/ready',

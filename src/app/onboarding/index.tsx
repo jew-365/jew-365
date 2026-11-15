@@ -5,9 +5,11 @@ import { Stack, useRouter } from 'expo-router';
 import { AppLogo } from '@/components/AppLogo';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { ChipRow } from '@/components/ChipRow';
 import { ONBOARDING_STEPS, OnboardingDots } from '@/components/OnboardingDots';
 import { SectionLabel } from '@/components/SectionLabel';
 import { SegmentedControl } from '@/components/SegmentedControl';
+import { chooseGender } from '@/stores/taharahOptIn';
 import { useUserStore, type Language } from '@/stores/useUserStore';
 import { backupFailureKey, pickBackup, reloadIfScaleChanged, restoreBackup } from '@/services/BackupService';
 import { NotificationScheduler, requestNotificationPermissions } from '@/services/NotificationScheduler';
@@ -20,35 +22,31 @@ import { useI18n } from '@/i18n';
 
 const WELCOME_LOGO_SIZE = scaled(112);
 const LANGUAGE_SWITCH_WIDTH = scaled(220);
+const GENDERS = ['male', 'female'] as const;
 
 export default function WelcomeScreen() {
   const { colors } = useTheme();
   const { t, language } = useI18n();
   const router = useRouter();
   const profileName = useUserStore((s) => s.profileName);
-  const profilePhone = useUserStore((s) => s.profilePhone);
+  const gender = useUserStore((s) => s.gender);
   const setProfileName = useUserStore((s) => s.setProfileName);
-  const setProfilePhone = useUserStore((s) => s.setProfilePhone);
   const setLanguage = useUserStore((s) => s.setLanguage);
   const [name, setName] = useState(profileName);
-  const [phone, setPhone] = useState(profilePhone);
   const [error, setError] = useState('');
   const [restoring, setRestoring] = useState(false);
   const [restoreError, setRestoreError] = useState('');
 
-  // Name and phone are stored locally and used by no feature, so nothing is gained by blocking
-  // onboarding on them.
+  // The name and the gender are both optional (App Review 5.1.1(v)): Continue works with neither.
   const submit = () => {
     setProfileName(name.trim());
-    setProfilePhone(phone.trim());
-    router.push('/onboarding/profile');
+    router.push('/onboarding/nusach');
   };
 
   // The root layout reloads the app on native when the direction changes, so what was typed is saved first.
   const chooseLanguage = (value: Language) => {
     if (value === language) return;
     setProfileName(name.trim());
-    setProfilePhone(phone.trim());
     setLanguage(value);
   };
 
@@ -129,15 +127,22 @@ export default function WelcomeScreen() {
               <Text style={[typography.small, { color: colors.urgent, marginTop: spacing.xs }]}>{error}</Text>
             ) : null}
 
-            <SectionLabel variant="field" text={t('onboarding.phoneLabel')} style={styles.secondLabel} />
-            <TextInput
-              value={phone}
-              onChangeText={setPhone}
-              placeholder={t('settings.profilePhonePlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              keyboardType="phone-pad"
-              style={[styles.input, inputStyle]}
-            />
+            <SectionLabel variant="field" text={t('onboarding.genderLabel')} style={styles.secondLabel} />
+            <View
+              accessibilityRole="radiogroup"
+              accessibilityLabel={t('onboarding.genderLabel')}
+              testID="welcome-gender"
+            >
+              <ChipRow
+                values={GENDERS}
+                selected={gender}
+                onSelect={chooseGender}
+                renderLabel={(value) => t(`profile.gender.${value}`)}
+              />
+            </View>
+            <Text style={[typography.small, styles.genderHint, { color: colors.textMuted }]}>
+              {t('onboarding.genderHint')}
+            </Text>
           </Card>
         </ScrollView>
         <View style={styles.footer}>
@@ -198,6 +203,9 @@ const styles = StyleSheet.create({
   },
   secondLabel: {
     marginTop: spacing.lg,
+  },
+  genderHint: {
+    marginTop: spacing.sm,
   },
   input: {
     borderRadius: radius.md,

@@ -68,6 +68,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 - **Deviation (2026-11-13):** App Review rejected 1.0.21 (6) on 2026-11-12 under guideline 5.1.1(iv): a button that leads to a system permission prompt may not say "Allow", "Enable" or "Grant"; Apple asks for "Continue" or "Next". So the main button reads Continue (the step's body says Continue asks for the notification permission) and the home banner's copy says "tap to continue", not "allow and continue" or "enable". The App Review fix of 2026-11-14 (`86739dc`, the store session) also dropped the "not now" link: a refusal is made in the system's prompt and setup goes on after it; the location step became one Continue that asks for the phone's location and never blocks, under a place picker. The setup study follows both. The behaviour is as above. Every later item (G1's battery offer, A5's sample, the short setup) follows the same rule.
 
 **A2. Short setup path** · P0 · L · study
+- **Built (2026-11-15), as the owner approved the setup study:** six screens in `src/app/onboarding` (welcome, nusach, location, bundles, notifications, ready), `ONBOARDING_STEPS` 6; the profile and notice steps are gone, the mitzvot list and the times are detail screens reached from the bundles step (and the list from the ready step). The marital status and the taharah opt-in are the `profile` and `taharah` offers; home's profile banner is removed. Deviation: the phone field left the welcome step with no replacement there (Settings › Profile already has it).
 
 - **Change:** six screens: welcome (language, optional name and gender, "I have a backup"), nusach, location, "what matters to you" (A3), notifications (A1, with the night quiet hours shown and editable, and the battery row on Android), ready (A5).
 - **Where today's steps go:** the marital status and the taharah offer move to an offer after setup (C2); the full mitzvot list and the carousel's times stay one tap away as "detailed choice", and in Settings as today; the accuracy notice stays in setup as a card on the ready screen with the full text one tap away; the phone number moves to Settings.
@@ -77,6 +78,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 
 **A3. Bundles ("חבילות")** · P0 · M · same study
 - **Built, the data (2026-11-15):** `src/data/bundles.ts`, five bundles as capability ids with `bundleSelection()`; the gender rule is kept per mitzvah, so a man's candle capability switches havdalah on and leaves candle lighting off (the study drew the whole capability off for a man). The setup screen that ticks them comes with phase 3, which must also learn the `newSetup` discovery hint when setup ends, so the catch-up (A6) is not offered to those installs.
+- **Built (2026-11-15), direction א:** `src/app/onboarding/bundles.tsx` over `src/services/setupBundles.ts`. Deviations: the ticks are the stores themselves, so a tap applies at once and the detailed list and this step never disagree (the spec had Continue apply them); a bundle reads as ticked while any member is on; the gender rule is per mitzvah as `bundles.ts` holds it (a man's candle capability switches havdalah on and leaves candle lighting off; the study drew the whole capability off); the wanted learning is one `wanted` offer that opens the capabilities screen on its learning goal, not one offer per program.
 
 - **Change:** about five goal cards, each switching a whole group on with one tap: prayers and daily times; Shabbat and festivals (candle lighting, havdalah, the Omer and the seasonal ones); the calendar (Rosh Chodesh, hilulot); daily learning (choose programs); morning blessings. The same bundles appear later on the capabilities screen (C4).
 - **Fixes:** F2, F3.
@@ -84,6 +86,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 - **How:** new `src/data/bundles.ts` (ids of mitzvot, notice topics and add-ons). A bundle is "on" when every member the nusach and gender offer is on; a tap goes through `setMitzvahEnabled()` and `setNoticesEnabled()` of `useNeedsReminderDialog`. Learning choices are saved as "wanted" and offered first on home after setup, since a download needs its size confirmation and routes outside onboarding.
 
 **A4. Broader defaults for new users, visible in setup** · P0 · S
+- **Built (2026-11-15):** the recommended bundles are switched on when the bundles step first opens, once per gender answer, and never switch anything off; the quiet hours 23:00 to 06:30 are shown ticked and saved by the notification step's Continue (Q33 and Q34 as the owner decided).
 
 - **Change:** the recommended bundles arrive ticked: Shabbat and festivals, Rosh Chodesh notices, and quiet hours at night on the notification screen. "Continue" applies them. `DEFAULT_ON_MITZVOT` and the stored defaults do not change, so an existing install keeps exactly what it has.
 - **Fixes:** F3.
@@ -91,6 +94,7 @@ Each item: the change, what it fixes, what the user gains, and how (what is reus
 - **How:** the ticked state of A3's bundles; `setQuietBefore()` and `setQuietAfter()` on the notification screen. Open decisions 2 and 3 settle the quiet bounds and the gender rule first.
 
 **A5. The ready screen shows today and sends a sample reminder** · P0 · M · same study
+- **Built (2026-11-15):** `restOfDay()` rows with the next reminder, the coming candle lighting, the names as the fallback, `presentSampleReminder()` in the facade and the web shim, and the sample also in Settings › Device (G1's second half). Deviations: the sample's category carries the done button alone (no open-text button: the reader is outside setup), pending the owner's answer to Q37, and removing the button is one line in `ensureCategories()`; the sample is worded for the earliest window open now or still to come, whichever mitzvah that is.
 
 - **Change:** instead of a list of names: "the rest of your day", with the real windows, times and next reminder, and a button "send me a sample reminder" that delivers a real-looking notification with its buttons. On the iPhone the text says the buttons appear on a long press.
 - **Fixes:** F2, F1.

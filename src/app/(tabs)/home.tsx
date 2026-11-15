@@ -30,7 +30,6 @@ import { getLocationName } from '@/data/cities';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import { hasSiddurText, selichotOfferOn, siddurPlace } from '@/data/siddur';
 import { HebcalService } from '@/services/HebcalService';
-import { StorageService } from '@/services/StorageService';
 import { CompletionService } from '@/services/CompletionService';
 import { selichotDownloadSupported } from '@/services/SelichotContentService';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
@@ -97,8 +96,6 @@ type LiveItem = {
   hasText: boolean;
   marked: boolean;
 };
-
-const PROFILE_INTRO_KEY = 'profile:intro-dismissed';
 
 type CompletedItem = {
   id: string;
@@ -203,8 +200,6 @@ export default function HomeScreen() {
     })),
   );
   const isOnboarded = useUserStore((s) => s.isOnboarded);
-  const gender = useUserStore((s) => s.gender);
-  const maritalStatus = useUserStore((s) => s.maritalStatus);
   const taharahEnabled = useUserStore((s) => s.taharahEnabled);
   const profileName = useUserStore((s) => s.profileName);
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
@@ -290,7 +285,6 @@ export default function HomeScreen() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [scrubbing, setScrubbing] = useState(false);
   const lastError = useLastError();
-  const [introDismissed, setIntroDismissed] = useState(() => StorageService.get<boolean>(PROFILE_INTRO_KEY) === true);
   const skySetter = useRef<(next: SkyTop | null) => void>(() => {});
 
   const {
@@ -780,12 +774,6 @@ export default function HomeScreen() {
     await CompletionService.unmark(id, date).catch(() => {});
   };
 
-  const openProfileIntro = () => {
-    StorageService.set(PROFILE_INTRO_KEY, true);
-    setIntroDismissed(true);
-    router.push({ pathname: '/(tabs)/settings', params: { focus: 'gender' } });
-  };
-
   const openLocationSettings = () => router.push({ pathname: '/(tabs)/settings', params: { focus: 'location' } });
 
   const openSelichotOffer = () => {
@@ -828,9 +816,6 @@ export default function HomeScreen() {
     }
     if (user.locationStatus === 'timeout')
       return { tone: 'warning', text: t('home.gpsTimeout'), onPress: () => openLocationSettings() };
-    if (isOnboarded && (gender === null || maritalStatus === null) && !introDismissed) {
-      return { tone: 'accent', text: t('home.completeProfile'), onPress: openProfileIntro };
-    }
     if (
       selichotOffer &&
       !selichotInstalled &&
