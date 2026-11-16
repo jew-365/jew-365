@@ -81,7 +81,7 @@ describe('ChokAddonCard', () => {
       expect(screen.getByText('זכויות יוצרים ורישיון')).toBeOnTheScreen();
       expect(
         screen.getByText(
-          "זכויות היוצרים שמורות לר' פנחס ראובן שליט״א, ר' שגיב מחפוד שליט״א ומרכז J. Alan Groves. הטקסט מתוך מאגר תורת אמת, תחת רישיון CC BY-NC-SA 2.5",
+          "זכויות היוצרים שמורות לר' פנחס ראובן שליט״א ולר' שגיב מחפוד שליט״א. הטקסט מתוך מאגר תורת אמת, תחת רישיון CC BY-NC-SA 2.5. נוסח המקרא: The Groves Center Westminster Leningrad Codex, The J. Alan Groves Center for Advanced Biblical Research (The Groves Center)",
         ),
       ).toBeOnTheScreen();
       expect(screen.getByText('העיבוד של יהודי 365 מפורסם תחת אותו רישיון.')).toBeOnTheScreen();
@@ -111,7 +111,7 @@ describe('ChokAddonCard', () => {
       expect(screen.getByText('Copyright and license')).toBeOnTheScreen();
       expect(
         screen.getByText(
-          "Copyright R' Pinchas Reuven, R' Sagiv Mahfud and the J. Alan Groves Center. The text comes from the Torat Emet database, under CC BY-NC-SA 2.5",
+          "Copyright R' Pinchas Reuven and R' Sagiv Mahfud. The text comes from the Torat Emet database, under CC BY-NC-SA 2.5. Hebrew Bible text: The Groves Center Westminster Leningrad Codex, The J. Alan Groves Center for Advanced Biblical Research (The Groves Center)",
         ),
       ).toBeOnTheScreen();
       expect(screen.getByText("Jew 365's processing is published under the same license.")).toBeOnTheScreen();

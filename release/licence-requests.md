@@ -11,7 +11,7 @@ Read on 2026-11-10. "Verified" means the address or terms were read on the sourc
 | # | Source | What | Terms as read | Channel | Status |
 |---|---|---|---|---|---|
 | 1 | Mechon Mamre | Positive Mitzvot of the Mishneh Torah, one unit of the Rambam add-on, already on GitHub Pages | Private study and teaching only; no publishing on any website; other use needs written permission (verified) | Contact form, mechon-mamre.org/contact.htm (verified; no email address published) | Not needed: the unit was rebuilt from Wikisource on 2026-11-10, and the build refuses Mechon Mamre's text |
-| 2 | Chok LeYisrael, Torat Emet edition: R' Pinchas Reuven, R' Sagiv Mahfud, the J. Alan Groves Center | The Chok LeYisrael add-on, in production since 1.0.21-1 | CC BY-NC-SA 2.5; Torat Emet adds "no commercial use" (verified) | Torat Emet's contact page is closed (verified). R' Sagiv Mahfud runs "נוסח תימן", nosachteiman@gmail.com (verified on nosachteiman.co.il, 2026-11-12); the Groves Center at info@GrovesCenter.org (reported) | Sent 2026-11-12 from 365jew@gmail.com to nosachteiman@gmail.com and info@GrovesCenter.org; no bounce; no answer yet |
+| 2 | Chok LeYisrael, Torat Emet edition: R' Pinchas Reuven, R' Sagiv Mahfud, the J. Alan Groves Center | The Chok LeYisrael add-on, in production since 1.0.21-1 | CC BY-NC-SA 2.5; Torat Emet adds "no commercial use" (verified) | Torat Emet's contact page is closed (verified). R' Sagiv Mahfud runs "נוסח תימן", nosachteiman@gmail.com (verified on nosachteiman.co.il, 2026-11-12); the Groves Center at info@GrovesCenter.org (reported) | Sent 2026-11-12 from 365jew@gmail.com to nosachteiman@gmail.com and info@GrovesCenter.org; no bounce. The Groves Center answered on 2026-11-16: public domain, any use, a credit wording suggested (section 2); R' Mahfud: no answer yet |
 | 3 | Sefaria | The licence labels of the Torat Emet, Daat and Metsudah versions it serves | Sefaria marks them Public Domain or CC-BY; the sources' own sites say otherwise for Torat Emet and possibly Daat | hello@sefaria.org (Sefaria's public address; its site refuses automated reads, so not verified) | Sent 2026-11-12 from 365jew@gmail.com to hello@sefaria.org; no bounce; no answer yet |
 | 4 | Daat (daat.ac.il) | "Daat Siddur Ashkenaz", in nine Ashkenaz texts of the bundled siddur | Sefaria marks it Public Domain; no terms page was found on daat.ac.il | urisaf@gmail.com, the site manager (verified on daat.ac.il/contact.asp), and the form on the same page | Sent 2026-11-12 from 365jew@gmail.com to urisaf@gmail.com; no bounce; no answer yet |
 | 5 | Yalkut Yosef, Rav Yitzchak Yosef | A daily-halacha track from Yalkut Yosef or Kitzur Shulchan Aruch Yalkut Yosef (Q31) | In copyright | Contact form, yalkutyosef.co.il/צרו-קשר/ (verified), phone 077-2249906 (verified). Publisher Ash Pituchim through Otzar HaSefarim, sales@sefer.org.il, 074-703-7171 (reported, a retailer) | Not sent: the form refused a submission from a cloud browser as spam (Akismet), 2026-11-12; the owner submits it or calls |
@@ -19,7 +19,7 @@ Read on 2026-11-10. "Verified" means the address or terms were read on the sourc
 | 7 | Shulchan Aruch HaMekutzar, Rav Yitzchak Ratzabi, Peulat Tzadik | A track for nusach Teiman (Q31) | In copyright | Peulat Tzadik office, 03-6780070, Kushnir 5, Bnei Brak (reported, d.co.il); P.O. Box 1719, Bnei Brak 51117 (reported, may be old); or@shtaygen.co.il, named on the page of an app of the book (reported, role unknown) | Not sent |
 | 8 | Peninei Halakha, Rav Eliezer Melamed, Yeshivat Har Bracha | A possible later track | CC BY 4.0 with a no-resale clause: commercial use allowed with credit (verified on ph.yhb.org.il/terms) | admin@yhb.org.il, +972-2-997-4836 (verified on the terms page) | No permission needed; a courtesy note is optional |
 
-Sources whose terms are open and need no request: Hebrew Wikisource (CC-BY-SA), the Westminster Leningrad Codex (public domain by the Groves Center's own site, reported), Hebcal (BSD), GeoNames (CC BY 4.0), the Tiklal Etz Chaim of 1894 (public domain), the Sefaria community translations (CC0) and the fonts (OFL).
+Sources whose terms are open and need no request: Hebrew Wikisource (CC-BY-SA), the Westminster Leningrad Codex (public domain, confirmed by the Groves Center's email of 2026-11-16, section 2), Hebcal (BSD), GeoNames (CC BY 4.0), the Tiklal Etz Chaim of 1894 (public domain), the Sefaria community translations (CC0) and the fonts (OFL).
 
 ## 1. Mechon Mamre — the Positive Mitzvot in the Rambam add-on
 
@@ -84,6 +84,18 @@ Subject: Chok LeYisrael (Torat Emet edition) in a free app: credit and permissio
 > With thanks for your work,
 > [Name]
 > 365jew@gmail.com · https://jew-365.github.io/jew-365/
+
+**Answer from the Groves Center (2026-11-16, info@grovescenter.org, signed "Steve for the Groves Center", read in the 365jew@gmail.com inbox):**
+
+> There was a short period of time where the Groves Center mistakenly asserted a copyright over the Westminster Leningrad Codex. The WLC is in fact in the public domain and you may use it in any way you wish. You do not have to give us credit, but we would very much appreciate such credit. Our suggestion would be to say something like this:
+>
+> **Hebrew text: The Groves Center Westminster Leningrad Codex, The J. Alan Groves Center for Advanced Biblical Research (The Groves Center)**
+>
+> Note that we are using the name "Groves Center Westminster Leningrad Codex" to better connect our electronic text to our organization.
+
+- **What it settles:** the Groves Center's part only. It holds no copyright in the Bible text and allows any use. The rest of the edition (R' Reuven's and R' Mahfud's work, and Torat Emet's non-commercial term) still waits for R' Mahfud's answer.
+- **What changed (2026-11-16, the owner's word):** the in-app credit (`chok.credit`) and `MANIFEST_CREDIT` in [../scripts/chok/manifest.js](../scripts/chok/manifest.js), so [../docs/chok/manifest.json](../docs/chok/manifest.json) and [../docs/chok/LICENSE.txt](../docs/chok/LICENSE.txt), name R' Reuven and R' Mahfud as the copyright holders and credit the Bible text to the Groves Center in its wording, as "Hebrew Bible text" / "נוסח המקרא", since the edition also holds Mishnah, Gemara, Zohar, halacha and mussar. The credit inside each parasha file (`CREDIT.title`) is unchanged: changing it would make every install download the add-on again.
+- **Thanks:** a reply drafted in the same Gmail thread on 2026-11-16 for the owner to send.
 
 ## 2a. Shemirat HaLashon — the Torat Emet text (checked 2026-11-10, no request drafted)
 

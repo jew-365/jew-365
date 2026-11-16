@@ -263,7 +263,7 @@ describe('the Chok LeYisrael reader with the mitzvah switched on', () => {
     await openAt('2026-11-18T12:00');
     expect(
       screen.getByText(
-        "זכויות היוצרים שמורות לר' פנחס ראובן שליט״א, ר' שגיב מחפוד שליט״א ומרכז J. Alan Groves. הטקסט מתוך מאגר תורת אמת, תחת רישיון CC BY-NC-SA 2.5",
+        "זכויות היוצרים שמורות לר' פנחס ראובן שליט״א ולר' שגיב מחפוד שליט״א. הטקסט מתוך מאגר תורת אמת, תחת רישיון CC BY-NC-SA 2.5. נוסח המקרא: The Groves Center Westminster Leningrad Codex, The J. Alan Groves Center for Advanced Biblical Research (The Groves Center)",
       ),
     ).toBeOnTheScreen();
     expect(screen.getByText('העיבוד של יהודי 365 מפורסם תחת אותו רישיון.')).toBeOnTheScreen();

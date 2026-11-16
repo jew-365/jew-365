@@ -71,8 +71,8 @@ const CREDIT = {
 };
 
 const MANIFEST_CREDIT = {
-  he: "ר' פנחס ראובן שליט״א, ר' שגיב מחפוד שליט״א ומרכז J. Alan Groves, תחת רישיון CC BY-NC-SA 2.5, מתוך מאגר תורת אמת",
-  en: "R' Pinchas Reuven, R' Sagiv Mahfud and the J. Alan Groves Center, under CC BY-NC-SA 2.5, from the Torat Emet database",
+  he: "ר' פנחס ראובן שליט״א ור' שגיב מחפוד שליט״א, תחת רישיון CC BY-NC-SA 2.5, מתוך מאגר תורת אמת. נוסח המקרא: The Groves Center Westminster Leningrad Codex, The J. Alan Groves Center for Advanced Biblical Research (The Groves Center)",
+  en: "R' Pinchas Reuven and R' Sagiv Mahfud, under CC BY-NC-SA 2.5, from the Torat Emet database. Hebrew Bible text: The Groves Center Westminster Leningrad Codex, The J. Alan Groves Center for Advanced Biblical Research (The Groves Center)",
 };
 
 const LICENSE = {
