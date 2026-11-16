@@ -10,6 +10,7 @@ import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import type { PlanInput } from '@/services/notifications/types';
 import { quietHoursOf } from '@/utils/quietHours';
+import { bodySpanSupported } from '@/services/notifications/bodySpan';
 import type { NagLevel } from '@/utils/nagging';
 
 // What a plan is made for: the horizon's start, the mitzvot to plan, and the place and settings they
@@ -80,6 +81,7 @@ export function readPlanInput(now: Date, scope: PlanScope = currentScope(now)): 
     now,
     fromDate: scope.fromDate,
     platform: Platform.OS,
+    bodySpan: bodySpanSupported(),
     hasPermission: hasNotificationPermission(),
     language: user.language,
     location: scope.location,

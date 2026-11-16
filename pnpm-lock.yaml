@@ -12,6 +12,11 @@ overrides:
   '@react-navigation/native-stack': 7.14.12
   '@react-navigation/routers': 7.6.0
 
+patchedDependencies:
+  expo-notifications@0.32.17:
+    hash: ecb9c4052e601eb0623a740cd11173b70bcf3c8b62bc423bc1262215cdb0239e
+    path: patches/expo-notifications@0.32.17.patch
+
 importers:
 
   .:
@@ -72,7 +77,7 @@ importers:
         version: 19.0.8(expo@54.0.37)
       expo-notifications:
         specifier: ~0.32.16
-        version: 0.32.17(expo@54.0.37)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
+        version: 0.32.17(patch_hash=ecb9c4052e601eb0623a740cd11173b70bcf3c8b62bc423bc1262215cdb0239e)(expo@54.0.37)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
       expo-router:
         specifier: ~6.0.24
         version: 6.0.24(816b3632cf6197338ddf570eec4075fc)
@@ -8695,7 +8700,7 @@ snapshots:
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)
 
-  expo-notifications@0.32.17(expo@54.0.37)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3):
+  expo-notifications@0.32.17(patch_hash=ecb9c4052e601eb0623a740cd11173b70bcf3c8b62bc423bc1262215cdb0239e)(expo@54.0.37)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3):
     dependencies:
       '@expo/image-utils': 0.8.13(typescript@5.9.3)
       '@ide/backoff': 1.0.0

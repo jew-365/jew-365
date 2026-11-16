@@ -56,6 +56,7 @@ export type PendingNotificationMeta = {
   skipIfDone?: boolean;
   hasText?: boolean;
   fullContent?: unknown[] | null;
+  bodySpan?: { start: number; end: number; color: string };
 };
 
 export function pendingNotificationMetaFromContent(_content?: unknown): PendingNotificationMeta {

@@ -1,0 +1,78 @@
+diff --git a/android/src/main/java/expo/modules/notifications/notifications/presentation/ExpoNotificationPresentationModule.kt b/android/src/main/java/expo/modules/notifications/notifications/presentation/ExpoNotificationPresentationModule.kt
+index c7b932b368f4b8e77f54186eca3774354c5aa3d5..82b8b9e488d22e5d79ee464f9bb615a3f3a3d5a9 100644
+--- a/android/src/main/java/expo/modules/notifications/notifications/presentation/ExpoNotificationPresentationModule.kt
++++ b/android/src/main/java/expo/modules/notifications/notifications/presentation/ExpoNotificationPresentationModule.kt
+@@ -25,6 +25,9 @@ open class ExpoNotificationPresentationModule : Module() {
+   override fun definition() = ModuleDefinition {
+     Name("ExpoNotificationPresenter")
+ 
++    // jew-365 patch: this binary colours data.bodySpan (src/services/notifications/bodySpan.ts reads the marker).
++    Constants("jew365BodySpan" to 1)
++
+     AsyncFunction("getPresentedNotificationsAsync") { promise: Promise ->
+       getAllPresented(
+         context,
+diff --git a/android/src/main/java/expo/modules/notifications/notifications/presentation/builders/ExpoNotificationBuilder.kt b/android/src/main/java/expo/modules/notifications/notifications/presentation/builders/ExpoNotificationBuilder.kt
+index 610d3039cefd589647538ad8ba14587d29fab338..1c7719e7a4cea9c50bc66e204ca52bb229b565b6 100644
+--- a/android/src/main/java/expo/modules/notifications/notifications/presentation/builders/ExpoNotificationBuilder.kt
++++ b/android/src/main/java/expo/modules/notifications/notifications/presentation/builders/ExpoNotificationBuilder.kt
+@@ -5,10 +5,14 @@ import android.content.Context
+ import android.content.pm.PackageManager
+ import android.graphics.Bitmap
+ import android.graphics.BitmapFactory
++import android.graphics.Color
+ import android.os.Build
+ import android.os.Bundle
+ import android.os.Parcel
+ import android.provider.Settings
++import android.text.SpannableString
++import android.text.Spanned
++import android.text.style.ForegroundColorSpan
+ import android.util.Log
+ import androidx.core.app.NotificationCompat
+ import androidx.core.app.RemoteInput
+@@ -102,11 +106,13 @@ open class ExpoNotificationBuilder(
+ 
+     // see "Notification anatomy" https://developer.android.com/develop/ui/views/notifications#Templates
+     builder.setContentTitle(content.title)
+-    builder.setContentText(content.text)
++    // jew-365 patch: a body span from data.bodySpan, drawn in its colour.
++    val text = styledText(content)
++    builder.setContentText(text)
+     builder.setSubText(content.subText)
+     // Sets the text/contentText as the bigText to allow the notification to be expanded and the
+     // entire text to be viewed.
+-    builder.setStyle(NotificationCompat.BigTextStyle().bigText(content.text))
++    builder.setStyle(NotificationCompat.BigTextStyle().bigText(text))
+ 
+     color?.let { builder.color = it.toInt() }
+     notificationContent.badgeCount?.toInt()?.let { builder.setNumber(it) }
+@@ -156,6 +162,28 @@ open class ExpoNotificationBuilder(
+     return builder.build()
+   }
+ 
++  // jew-365 patch: data.bodySpan = { start, end, color } (UTF-16 offsets into the body, a #RRGGBB colour) draws that
++  // range of the body in the colour. Anything missing, out of range or unreadable leaves the plain text.
++  private fun styledText(content: INotificationContent): CharSequence? {
++    val text = content.text ?: return null
++    val span = content.body?.optJSONObject("bodySpan") ?: return text
++    return try {
++      val start = span.getInt("start")
++      val end = span.getInt("end")
++      if (start < 0 || end > text.length || start >= end) return text
++      val styled = SpannableString(text)
++      styled.setSpan(
++        ForegroundColorSpan(Color.parseColor(span.getString("color"))),
++        start,
++        end,
++        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
++      )
++      styled
++    } catch (e: Exception) {
++      text
++    }
++  }
++
+   private fun applySoundsAndVibrations(content: INotificationContent, builder: NotificationCompat.Builder) {
+     val shouldPlaySound = shouldPlaySound()
+     val shouldVibrate = shouldVibrate()

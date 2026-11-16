@@ -17,7 +17,7 @@ import { MULTI_DAY_LOOKAHEAD_DAYS } from '@/utils/buildDayTimeline';
 import { locationNoon } from '@/utils/locationDay';
 import { interpolate, t, translate } from '@/i18n';
 import { reminderLabel } from '@/utils/mitzvahName';
-import { TIME_STAGE_COLOR, sendStage, timeLeftLine, type SendKind, type TimeStage } from '@/utils/timeLeft';
+import { TIME_STAGE_COLOR, sendStage, timeLeftParts, type SendKind, type TimeStage } from '@/utils/timeLeft';
 import {
   BEDTIME_ZONE_MIN,
   ORANGE_LEAD_MIN,
@@ -461,6 +461,9 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thi
 
   const english = input.language === 'en';
   const ios = input.platform === 'ios';
+  // An Android binary whose builder colours a span of the body: the end time is drawn in the stage colour there, so
+  // the line drops its stage mark. Any other phone keeps the mark and gets no span.
+  const coloured = !ios && input.platform === 'android' && input.bodySpan === true;
   const title = mitzvahTitle(mitzvah, english);
   const hasText = hasSiddurText(mitzvah, settings.nusach, date, siddurPlace(location, settings.inIsrael));
   const params = bodyParamsOn(mitzvah, date, location, settings);
@@ -483,7 +486,7 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thi
       entry.type === 'reminder'
         ? bodyForReminder(entry.reminder, mitzvah, trigger, english, params)
         : nagMessage(entry, mitzvah.id);
-    const line = timeLeftLine(trigger, planned.window, location.tz, t, stage);
+    const { line, span } = timeLeftParts(trigger, planned.window, location.tz, t, stage, coloured);
     return {
       candidate: {
         id,
@@ -514,6 +517,8 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thi
           skipIfDone: entry.type === 'reminder' ? skipsIfDone(entry.reminder) : true,
           hasText: offersText,
           fullContent: mitzvah.contentBlocks ?? null,
+          // The line opens the body, so its offsets are the body's.
+          ...(coloured ? { bodySpan: { ...span, color: TIME_STAGE_COLOR[stage] } } : {}),
         },
       },
       moved,
