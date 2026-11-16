@@ -172,13 +172,6 @@ Finished, committed and pushed, and native or store-side: each reaches users onl
   - **What it solves:** closes the checks the items moved to [action-log.md](action-log.md) on 2026-11-14 could not run before the release (the Hebrew Android name, the permissions step's native module).
   - **Expected result:** each check above passes on the Play install, or a bug item names what failed.
   - **Requested:** the project records rule (a check that could not run stays open), 2026-11-14.
-- [ ] Declare the Google Play trader status by 2027-02-01
-  - **What it is:** Play Console's notification of 2026-11-05 and the banner on every console page: under the updated Google Play policies the developer account declares whether it operates as a trader, by 2027-02-01 (Play Console › developer details, the account owner avi6190i). Read 2026-11-10 ([release/RELEASE_LOG.md](release/RELEASE_LOG.md)).
-  - **What it solves:** keeps the account within Play's policy after the deadline.
-  - **Expected result:** the banner is gone and the developer details show the declared status, recorded in [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md).
-  - **Requested:** Google Play, found in the owner's status read of 2026-11-10; whether the account is a trader is the owner's call.
-  - **Done:** 2026-11-14, the owner's calls that day ("תמלא ותשלח", "חשבון שאינו עסק", and for the public profile "להסכים ולשמור ככה"): Account details › About you › Declare status, "This is a non-trader account", the public profile review (the legal name אברהם שמעון ששון, Israel, the developer email avisason9314@gmail.com, shown worldwide under App support; the non-trader notice in the EEA and the UK), consent ticked, Save, and the non-trader confirmation. Verified: after a reload the page reads "Business status: Non-trader", and the declaration banner and the account home's card are gone. Google's help: the declaration can be updated at any time in Play Console.
-  - **Status:** Version: none (an account declaration) · Committed: no · Pushed: no · Live: in effect on the developer account since 2026-11-14 · Channel: Play Console
 - [ ] iOS build 1.0.21 (4)
   - **Done:** 2026-10-22. Verified: build `72c51b1e` FINISHED after `052c2db2` and `1b4f562b` errored ([release/RELEASE_LOG.md](release/RELEASE_LOG.md)).
   - **Status:** Version: Build `1.0.21` (4), expected on the App Store · Committed: yes, `42e961d` fix(ios): give expo.name Latin letters so EAS finds the Xcode target; `a035ab3` feat(ios): keep the taharah fallback out of iCloud, ship iPhone only; `04500e7` fix(ios): add @sentry/cli as a direct dev dependency · Pushed: yes · Live: `72c51b1e` on TestFlight (public link); rejected by App Review on 2026-11-01 (Guideline 2.1(a), see "Answer App Review's 2.1(a) on 1.0.21"); App Store release not yet · Channel: TestFlight
@@ -312,15 +305,6 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
   - **What it solves:** the secondary category is empty, and Reference fits a siddur and a halachic-times tool.
   - **Expected result:** App Information shows Lifestyle and Reference after a reload, and the App Information line of [release/APP_STORE_METADATA_EN.md](release/APP_STORE_METADATA_EN.md) says so.
 
-- [ ] Choose the Play tags
-  - **Ships as:** a console change in the Play Console, no build.
-  - **What it is:** Store presence → Store settings → Tags: read what is set (nothing is recorded), and choose up to five of Play's own tags that describe a siddur, Tehillim and halachic times, shown to the owner before saving.
-  - **What it solves:** tags place the app among similar apps on Play, and none is recorded today.
-  - **Expected result:** Store settings shows the tags after a reload, and [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md) lists them.
-  - **Status 2026-11-14:** read in Store settings: category Lifestyle, no tags, and Play suggests only Lifestyle ([release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md), Production Release). The app is public since 2026-11-14, so the pick now shapes its first placement; the tags are the owner's choice.
-  - **Done:** 2026-11-14, the owner's pick ("כן מאשר החיים הטובים"): Store settings › Manage tags › the suggested tag Lifestyle (החיים הטובים), Apply, and later that day Books & Reference (ספרים ועיון), for the learning ("תוסיף תאג של ספרים ועיון כי יש גם לימוד"), and Religious texts (טקסטים דתיים, "תוסיף אותה גם"). Verified: after a reload Store settings shows the tags "החיים הטובים, טקסטים דתיים, ספרים ועיון", and Publishing overview holds no unsent change (a tag applies without review).
-  - **Status:** Version: Play store settings · Committed: no · Pushed: no · Live: public on Google Play since 2026-11-14 · Channel: production (Play)
-
 - [ ] Make English screenshots and a screenshot of a reminder
   - **Ships as:** a console change in both consoles, no build.
   - **What it is:**
@@ -371,7 +355,6 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
 - **Done means:** both dictionaries updated, a DOX pass on every touched AGENTS.md, the guide topic and a `WHATS_NEW` item with `pnpm guide:build` for every user-visible change, `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green, and the screen checked in the `expo-web` preview at 375 points in Hebrew and English, or on the Android emulator through [android-native-verify](.claude/skills/android-native-verify/SKILL.md) for a native path. No commit and no OTA without the user's per-action approval.
 
 ### High — App requests of 2026-10-26
-
 
 ### High — Performance, App requests of 2026-10-26
 
@@ -762,14 +745,6 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done:** 2026-11-10. One topic, `halacha`, after `chok`, for both mitzvot (as `chok` covers two), and the item under `1.0.21-18`, the next production label; `pnpm guide:build` rewrote [docs/guide/](docs/guide). Verified: [src/data/__tests__/guide.test.ts](src/data/__tests__/guide.test.ts) (the order with the new topic, 16 topics) and the guide render suite green.
   - **Status:** Version: OTA, with `docs/` on Pages · Committed: yes, `af50d99` feat(halacha): offer the download, the book choice, the search, the guide and R17 (full `pnpm test:tz` green in all four zones, 6615 tests) · Pushed: yes · Live: preview `1.0.21-71` (group `c1d57685-0883-43ec-8812-a086cdab2553`, 2026-11-10, from `f4cf330`) · Channel: preview
 
-- [ ] Update the DOX chain for the halacha add-on
-  - **Flag:** none (docs).
-  - **What it is:** The root [AGENTS.md](AGENTS.md) (commands, the add-on's release rule, the mitzvah model, stores, tests, the checklist) and the child docs the spec's section 10 names.
-  - **What it solves:** The DOX closeout.
-  - **Expected result:** `pnpm check:dox` green and every new file linked from its nearest AGENTS.md.
-  - **Done:** 2026-11-11, found already done by the batch's own commits. Verified: `pnpm check:dox` green (43 AGENTS.md files); every tracked halacha, lashon hara and Shemirat HaLashon file outside `docs/halacha/<book>/` is named by its nearest AGENTS.md ([scripts/halacha/AGENTS.md](scripts/halacha/AGENTS.md), [src/data/AGENTS.md](src/data/AGENTS.md), [src/services/AGENTS.md](src/services/AGENTS.md), [src/stores/AGENTS.md](src/stores/AGENTS.md), [src/components/AGENTS.md](src/components/AGENTS.md), [docs/AGENTS.md](docs/AGENTS.md)), and the root [AGENTS.md](AGENTS.md) carries the command, the release rule, the three mitzvot, the stores and the services.
-  - **Status:** Version: none (internal docs; moves with the next production release) · Committed: yes, in the batch's commits · Pushed: yes · Live: n/a · Channel: —
-
 - [ ] Publish the add-on and a preview update
   - **Flag:** `docs/halacha/` on Pages, then `OTA` to preview.
   - **What it is:** Spec 12, steps 1 and 2: push the content to `main`, confirm the manifest answers 200, then `pnpm update:preview` on the owner's word.
@@ -899,19 +874,6 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 ### Medium — Marketing, 2026-11-13
 
-- [ ] The promo video: a 42-second vertical Hebrew ad with a character, narration and music
-  - **Flag:** none (marketing material; nothing ships in the app).
-  - **Source:** the owner's request of 2026-11-13: an ad that shows the app, how it is used and its purpose, with Hebrew narration and music, a character who visibly gets the notifications and uses the app, and transitions from him into the app's screens.
-  - **What it is:** the study [design/lab/studies/2026-11-13-promo-video/](design/lab/studies/2026-11-13-promo-video/AGENTS.md): an illustrated young man gets the morning Shema's orange reminder at work (08:17, 20 minutes left), the camera goes into his phone and the real screens (home, the Shacharit reader, the mark, a 15-day streak), a montage (siddur tab, schedule, a tzaddik's page), the quiet Shabbat, an end card; captions, original music, 1080x1920 at 30 fps.
-  - **Done so far:** 2026-11-13: the video is rendered with music and captions; the narration script is [vo.md](design/lab/studies/2026-11-13-promo-video/vo.md).
-  - **Status:** — · Committed: `c8c3c85` feat(design): promo video round 4, Chatterbox and OmniVoice narration beside VoxCPM2 (after `01c982e`, `5c70789` and `d4ee9d0`) · Pushed: yes · Live: — · Channel: —
-  - **Round 2 (2026-11-13):** the owner asked for Phonikud's narration and for more traditional characters. Two voices recorded and checked by transcription; five figures (avrech, chassid, Sephardi, yeshiva bachur, dati-leumi) on the page https://claude.ai/artifact/2WddyBo6En5LwiLR5iDh9C, with draft 2 (Shaul's voice, draft 1's figure).
-  - **Round 3 (2026-11-13):** the owner picked figure ה and voice א, then asked for less mechanical voices, more of the app in less time and the figure in motion. Voice א turned out non-commercial (the Phonikud checkpoints' licence), so the narration moved to VoxCPM2 (Apache 2.0) with four voices designed from a description; three cuts with the figure in full body ("יום אחד" 59 s, "כל האפליקציה בדקה" 64 s, "לפני ואחרי" 31 s) on the same page.
-  - **Round 4 (2026-11-13):** the owner allowed any narration model whatever its licence. Chatterbox Multilingual V3 (MIT, Hebrew pointed by Dicta's nakdan) and OmniVoice (CC BY-NC) were run on the designed `warm` voice: on "יום אחד" Hebrew Whisper matched 94% of VoxCPM2's words, 93% of Chatterbox's and 65% of OmniVoice's (which also runs 15 times slower than real time); Zonos-Hebrew needs an NVIDIA GPU. Each cut is on the page in Chatterbox and in VoxCPM2; voices cloned from real people stay out.
-  - **Combined cut (2026-11-13):** the owner liked "יום אחד" and "לפני ואחרי" and asked for them combined: `combo` in variants.json (the gray miss at 08:37, then the same morning in color and the whole day to Shabbat and the streak), 52 s, in both engines, first on the page.
-  - **Open:** the owner picks a cut and an engine and voice; "שניים מקרא" should be checked by ear (the transcription heard "נקרא" in every VoxCPM2 take).
-  - **Open:** the end card says "זמין ב־Google Play" while the Play production release is still in review (state.md, 2026-11-10); confirm before the video is published.
-
 ### Discoverability and ease of use, 2026-11-13 — batch rules
 
 - **Requested:** the owner, 2026-11-13, in a cloud planning session: the app is rich but a user cannot see its power and misses most of it; even the laziest user should reach most of it without opening Settings. The owner answered four questions in that session (onboarding, discovery, defaults, navigation), approved the plan the same day and handed its execution to the next session.
@@ -929,49 +891,42 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** F1, reminders that silently never start.
   - **Expected result:** suites for the helper (granted, refused, blocked, the rebuild), the step's two buttons, the banner's two paths and the one-time ask on home; the web bundle still holds exactly one `setNotificationPermission('unknown')`. The setup half reaches new users with the next build.
   - **Done:** 2026-11-13. `askForNotifications()` in [src/services/NotificationScheduler.ts](src/services/NotificationScheduler.ts) and the web shim (`'blocked'`, writing nothing); the permissions step's main button asks only while the OS can (reading `PermissionsList`'s new `onStatuses`), first labelled `onboarding.allowNotifications` beside an explicit `onboarding.notNow`, both replaced by the store session's `86739dc` (one `common.continue`, no "not now", App Review 5.1.1(iv)); home asks once after setup (`notifAsked` hint); the banner asks in the app and opens the settings only when blocked. Verified: 6.5a of [NotificationScheduler.test.ts](src/services/__tests__/NotificationScheduler.test.ts) (blocked never prompts, a grant rebuilds once, a refusal does not), the permissions step's two buttons in [onboarding.cta.render.test.tsx](src/app/__tests__/onboarding.cta.render.test.tsx), the once-on-home ask and the banner in [home.render.test.tsx](src/app/__tests__/home.render.test.tsx) under `pnpm test:tz`, web parity. **Follow-up:** App Review rejected 1.0.21 (6) on 2026-11-12 under 5.1.1(iv) (a pre-prompt button may not say Allow); the store session renamed the step's button to `common.continue` and removed the "not now" link in `86739dc` (2026-11-14), and the home banner's `home.notificationsDenied` now reads "ההתראות כבויות. להמשך" / "Tap to continue." (`94abd8a`, its home case updated). Not checked: a phone (Android 13+ and an iPhone, allow / refuse in the prompt / blocked). The setup half reaches new users with the next native build.
-  - **Status:** Version: OTA, expected with the next update (the setup half with the next build) · Committed: yes, `b00fae2` feat(discovery): ask for notifications at the right moment (A1); `94abd8a` fix(home): the notifications banner says tap to continue, not enable (App Review 5.1.1(iv)) · Pushed: yes · Live: no · Channel: —
+  - **Status:** Version: OTA, expected with the next update (the setup half with the next build) · Committed: yes, `b00fae2` feat(discovery): ask for notifications at the right moment (A1); `94abd8a` fix(home): the notifications banner says tap to continue, not enable (App Review 5.1.1(iv)) · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 - [ ] B3: "skip today" on the mitzvah screen
   - **What it is:** the today card of [src/app/mitzvah/[id].tsx](<src/app/mitzvah/[id].tsx>) gains "skip today" beside "mark as done" (and "undo" for a skipped day), through `markSkipped()` with the window's day.
   - **What it solves:** F6: skipping is a long press on home only.
   - **Expected result:** a render case: the button files a skip under the window's day, the card then shows the skipped state and its undo.
   - **Done:** 2026-11-13. Two side-by-side secondary Buttons on the today card of [src/app/mitzvah/[id].tsx](<src/app/mitzvah/[id].tsx>): `notifications.markDone` and `home.quick.skipToday` (`markSkipped()` of the window's day); the undo stays. Verified: "skips an open window from the today card" in [lateMark.render.test.tsx](src/app/__tests__/lateMark.render.test.tsx) (the skip filed under the window's day, `state.skipped` shown, undo clears it). Not checked: a phone.
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `ff0b972` feat(discovery): skip-today on the mitzvah screen, banners that land on the right block; `ee1e3a7` fix(mitzvah): the skip-today button draws no icon, so the screen's close icons keep their scaled size · Pushed: yes · Live: no · Channel: —
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `ff0b972` feat(discovery): skip-today on the mitzvah screen, banners that land on the right block; `ee1e3a7` fix(mitzvah): the skip-today button draws no icon, so the screen's close icons keep their scaled size · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 - [ ] B4: the user store's `discovery` field, and the sun hint that learns
   - **What it is:** `useUserStore.discovery` (`hints`, `offers`, `whatsNew`, `wants`) with its default, reset and a pure clean in the merge, no `STORE_VERSION` raise, carried by the backup file; "drag the sun" in [src/components/DayArcHero.tsx](src/components/DayArcHero.tsx) gone for good once dragged.
   - **What it solves:** F6, and the shared state C2, C7 and E1 need.
   - **Expected result:** store cases (default, merge of a malformed value, reset, backup round trip) and a hero case (the hint gone after a drag and after a relaunch).
   - **Done:** 2026-11-13. `discovery` (`hints`, `offers`, `whatsNew`) in [src/stores/useUserStore.ts](src/stores/useUserStore.ts) over the pure [src/utils/discovery.ts](src/utils/discovery.ts) (`discoveryOf()`, `withHint()`), with `learnHint()`, `recordOffer()` and `setWhatsNew()`; [DayArcHero.tsx](src/components/DayArcHero.tsx) learns `dragSun` on a grab of the sun. `wants` is left out until phase 3 reads it (YAGNI; written back into the spec). Verified: [discovery.store.test.ts](src/stores/__tests__/discovery.store.test.ts), [discovery.test.ts](src/utils/__tests__/discovery.test.ts), the backup round trip in [BackupService.test.ts](src/services/__tests__/BackupService.test.ts), and the hero case (the hint gone after a grab and after a remount) in [DayArcHero.render.test.tsx](src/components/__tests__/DayArcHero.render.test.tsx).
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `b94aa20` feat(discovery): the user store's discovery state, and the sun hint that learns · Pushed: yes · Live: no · Channel: —
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `b94aa20` feat(discovery): the user store's discovery state, and the sun hint that learns · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 - [ ] B5: banners land on the right spot
   - **What it is:** home's profile banner opens Settings on the gender question and the location banners on the location block, through Settings' `focus` param.
   - **What it solves:** F4: a banner lands on six closed sections.
   - **Expected result:** home render cases asserting each banner's route and `focus`.
   - **Done:** 2026-11-13. Home's profile banner pushes Settings with `focus: 'gender'`, and the no-zmanim, no-location and GPS-timeout banners with `focus: 'location'` ([home.tsx](<src/app/(tabs)/home.tsx>)). Verified: "home banners land on the right settings block" in [home.render.test.tsx](src/app/__tests__/home.render.test.tsx).
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `ff0b972` feat(discovery): skip-today on the mitzvah screen, banners that land on the right block · Pushed: yes · Live: no · Channel: —
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `ff0b972` feat(discovery): skip-today on the mitzvah screen, banners that land on the right block · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 - [ ] C7: "what's new" comes to the user
   - **What it is:** `whatsNewMessage()` in [src/utils/homeMessages.ts](src/utils/homeMessages.ts): after an update whose newest `WHATS_NEW` label differs from the stored one, a Messages row opens the guide's what's new, for three days or until opened; nothing stored means seen.
   - **What it solves:** F5: what an update brought is found only at the bottom of More.
   - **Expected result:** `homeMessages` cases (a new label, three days, opened, a fresh install) and a home render case.
   - **Done:** 2026-11-13. `whatsNewMessage()`, `nextWhatsNew()` and `newestWhatsNewLabel()` in [src/utils/homeMessages.ts](src/utils/homeMessages.ts); home stamps the newest label in an effect and marks it seen on open. Verified: 3b to 3d of [homeMessages.test.ts](src/utils/__tests__/homeMessages.test.ts) and "home's what's-new message" in [home.render.test.tsx](src/app/__tests__/home.render.test.tsx), both under `pnpm test:tz`.
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `a39bb14` feat(discovery): the streak-goal moment and the what's-new message on home · Pushed: yes · Live: no · Channel: —
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `a39bb14` feat(discovery): the streak-goal moment and the what's-new message on home · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 - [ ] F1: the streak-goal moment
   - **What it is:** `streakMessage()` names a reached goal of `STREAK_GOALS` on the day it is reached and opens Tracking on its achievements tab.
   - **What it solves:** F7: a goal is reached silently.
   - **Expected result:** cases on a goal day, the day after, and between goals.
   - **Done:** 2026-11-13. `streakMessage()` celebrates a streak equal to a goal of `STREAK_GOALS` (`home.streakGoal.*`) and opens `/(tabs)/history` with `tab: 'achievements'`. Verified: 3a of [homeMessages.test.ts](src/utils/__tests__/homeMessages.test.ts) (every goal, and the day after).
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `a39bb14` feat(discovery): the streak-goal moment and the what's-new message on home · Pushed: yes · Live: no · Channel: —
-
-- [ ] H1: write the usability test script, the baseline
-  - **What it is:** the eight tasks of spec H1 as a script the owner runs with the closed testers, with the success and tap counts to write down, in [.claude/specs/](.claude/specs).
-  - **What it solves:** G5 has no baseline.
-  - **Expected result:** the script committed; the baseline run is the owner's (Other Open Items).
-  - **Done:** 2026-11-13. [.claude/specs/usability-test.md](.claude/specs/usability-test.md): how to run it, the eight tasks with what counts as success, and the score sheet. The baseline run is the owner's (Other Open Items).
-  - **Status:** Version: none (docs) · Committed: yes, with the records commit of 2026-11-13 · Pushed: yes · Live: n/a · Channel: —
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `a39bb14` feat(discovery): the streak-goal moment and the what's-new message on home · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 ### Medium — Discoverability, phase 1
 
@@ -980,45 +935,37 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** one vocabulary for the offers, the hub and the capabilities screen; a new feature cannot be forgotten.
   - **Expected result:** the coverage suite fails on a library group, add-on or More screen with no entry.
   - **Done:** 2026-11-13. 28 capabilities in seven goals in [src/data/capabilities.ts](src/data/capabilities.ts), each with its action and `capabilityState()` (on, off, not installed, unavailable). Verified: [capabilities.test.ts](src/data/__tests__/capabilities.test.ts) (every mitzvah, library group, add-on and More destination covered, words in both dictionaries, each state), `pnpm test:tz`.
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: no · Channel: —
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 - [ ] C2: the offers rule
   - **What it is:** pure `pickOffer(input)` in `src/utils/offers.ts` (one offer or none, the policy of spec C2) and `useOffer()`, evaluated after paint and memoised on the app day; accepting and "don't suggest" recorded in `discovery.offers`.
   - **What it solves:** F5: nothing is offered at the moment it matters.
   - **Expected result:** `offers.test.ts` under `pnpm test:tz`: each rule, once only, five days at most, two days apart, the install day, a holy block, nothing before `firstOpenedAt`.
   - **Done:** 2026-11-13. `pickOffer()` and `weeklyTip()` in [src/utils/offers.ts](src/utils/offers.ts) over `offerInputAt()` of [src/services/offerInput.ts](src/services/offerInput.ts), and `useOffer()` in [src/hooks/useOffer.tsx](src/hooks/useOffer.tsx); the spec's readings (the battery offer on the install day, the tour in the first two app days, the gap from a showing) written into it. Verified: the 11 cases of [offers.test.ts](src/utils/__tests__/offers.test.ts) in the four zones.
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: no · Channel: —
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 - [ ] C3: the offer on home, in Messages
   - **What it is:** the current offer as a Messages row (icon, title, benefit, action); Rosh Chodesh's row worded by whether its notices are on.
   - **What it solves:** F5, F3.
   - **Expected result:** home render cases: an offer shown, accepted, declined; today's home suites unchanged.
   - **Done:** 2026-11-13. The offer leads home's Messages and opens [OfferSheet](src/components/OfferSheet.tsx), whose action runs through `useCapabilityAction()`; `roshChodeshMessage()` adds `home.msg.roshChodesh.noticesOff` while the notices are off. Verified: "home's offer in Messages" (shown, accepted, declined) in [home.render.test.tsx](src/app/__tests__/home.render.test.tsx); every other home suite unchanged. Not checked: a phone.
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: no · Channel: —
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 - [ ] C6: a tip in the weekly report
   - **What it is:** one tip line in the weekly report notification's body and "a tip for next week" on the report screen, read once in `readPlanInput()`; no new notification (Q36).
   - **What it solves:** F5.
   - **Expected result:** report planner and report screen cases; the body changes only through `contentHash`.
   - **Done:** 2026-11-13. `weeklyTip` read once in `readPlanInput()`, one `report.notice.tip` line in the report notice's body, and a `report.tip` card on [report.tsx](src/app/report.tsx). Verified: the tip line in [plan.test.ts](src/services/notifications/__tests__/plan.test.ts) and "the weekly report's tip for next week" in [lateMark.render.test.tsx](src/app/__tests__/lateMark.render.test.tsx); `SCHEDULE_FORMAT` unchanged.
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: no · Channel: —
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 - [ ] G1: notification health
   - **What it is:** the missing battery exemption as the first offer (Android), and "send a sample reminder" in Settings › Device once the sample exists (Q37).
   - **What it solves:** F1: the user learns of a blocked delivery after missing a time.
   - **Expected result:** an offers case for the exemption; the sample's cases with A5.
   - **Done (the battery half):** 2026-11-13. The missing exemption is the first offer on Android, its action `requestIgnoreBatteryOptimizations()`, its button "להמשך" (5.1.1(iv)). Verified: the battery cases of [offers.test.ts](src/utils/__tests__/offers.test.ts). Open: the sample reminder in Settings › Device waits for A5 and Q37.
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: no · Channel: —
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `77ee004` feat(discovery): the capability list, the offers on home and the weekly tip (C1, C2, C3, C6, G1) · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 ### Medium — Discoverability, design studies and phase 2
-
-- [ ] Study: the hub, the capabilities screen and home's entry points
-  - **What it is:** a study under [design/lab/studies/](design/lab/studies) for C5, C4, B1 and B2 (and the names of Q35), published as a Design canvas and a gallery site.
-  - **What it solves:** spec items tagged "study" in phase 2.
-  - **Expected result:** both Artifact links in the study's AGENTS.md and here; the owner's pick recorded.
-  - **Done (the study):** 2026-11-13. [design/lab/studies/2026-11-13-hub/](design/lab/studies/2026-11-13-hub/AGENTS.md), on the app's words, states and one real day: today's More tab beside three hub directions with the עוד / גלה switch, two directions of the capabilities screen, two of home's entry points. Published as one gallery Artifact, as the compass-button study was: https://claude.ai/artifact/2kobw5urktHPE9s8rjnvpJ. Checked at 1240 and 430 points (no horizontal scroll, no page error).
-  - **The owner's pick, 2026-11-15:** the More tab is direction ב, the goal tiles ("לגביי מסך עוד הכי אהבתי את ב"). Later that day: the capabilities screen is direction ב, the folding card per goal; home stays as it is, with no search button and no "all mitzvot" row (B1 and B2 dropped), and the way in from home is the offer in Messages, perhaps under a name such as "גלה עוד"; the tab's name stays עוד ("מסך כל היכולות לך על ב לגביי מסך הבית תשאיר בלי שינוי אולי בהודעות לתת שם גלה עוד או משהו בסגנון ושם הטאב הוא עוד"). Nothing of the study is open; the wording of that Messages name goes to the copy sign-off.
-  - **Status:** Version: none (design) · Committed: yes, `2ba199b` feat(design): the hub study · Pushed: yes · Live: the Artifact · Channel: —
 
 - [ ] Phase 2: build the owner's pick (C5, C4, A6, D1, E1, E2, E3)
   - **What it is:** the hub, `src/app/capabilities.tsx`, the catch-up offer, the benefit captions, one-time hints, guide pills and empty states, as the spec and the study's pick say; split into tasks when the owner asks for the build.
@@ -1070,7 +1017,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** The app never stays on its logo; and when a launch still sticks, the next one says where.
   - **Expected result:** The splash goes once the fonts load or fail, or after 5 seconds without them, the app then showing in the system font until they arrive; every launch leaves a trace of its steps, and Settings › About and contact prints, under the version, the last launch that never painted or needed that fallback, with its last step and whether the JS thread was still running.
   - **Done:** 2026-11-13. `FONT_WAIT_MS` (5 s) in [src/app/_layout.tsx](src/app/_layout.tsx); the launch trace [src/services/bootTrace.ts](src/services/bootTrace.ts), started by [src/services/bootStart.ts](src/services/bootStart.ts) from [index.js](index.js) right after crash reporting (steps `entry`, `modules`, `layout`, `ready`, `hidden`, `painted`, the notes `fontsTimeout` and `fontError`, a heartbeat every second until the paint), and its line in Settings. Verified: [src/services/__tests__/bootTrace.test.ts](src/services/__tests__/bootTrace.test.ts) (9), the `the splash at launch` block of [src/app/__tests__/rootLayout.render.test.tsx](src/app/__tests__/rootLayout.render.test.tsx) (fonts loaded, never loaded, failed; the never-loaded case fails with the limit removed), the line in [src/app/__tests__/settings.contact.render.test.tsx](src/app/__tests__/settings.contact.render.test.tsx), typecheck, lint, DOX and the full suite. Not checked: a phone. If the logo still sticks, the line under the version names the step: before `modules` a module load (the taharah key's synchronous Keystore read is the first suspect), `layout` without `ready` with heartbeats the font wait, a heartbeat that stopped a blocked JS thread, `painted` reached a native splash that did not go.
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `39eabdd` fix(startup): the logo never waits for the fonts for good, and a stuck launch leaves its trace · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `39eabdd` fix(startup): the logo never waits for the fonts for good, and a stuck launch leaves its trace · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 - [ ] Psalm 67:1 reads "לַמְנַצֵּח" without its furtive patach
   - **Found:** 2026-11-03, building the Teiman Birkat HaMazon, which reads Psalm 67 from the same source.
@@ -1089,7 +1036,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** Either onboarding's nusach step (and a nusach change in Settings, unless the user chose an opinion) applies `defaultOpinionFor()`, with a test, or the field and the function are removed; the owner picks.
   - **The owner's pick, 2026-11-15:** asked whether choosing nusach Chabad should move the user to the Magen Avraham opinion: "התשובה היא לא". A nusach sets no Shema opinion; it stays the user's setting, the Gra by default.
   - **Done:** 2026-11-15. `defaultKsOpinion` and `defaultOpinionFor()` removed from [src/data/nuschaot.ts](src/data/nuschaot.ts), with the test line that read them; no behavior changes, since nothing called them. R14.6 in [docs/halacha-review.html](docs/halacha-review.html) now says the Gra for every nusach until the user chooses otherwise, `RULES_VERSION` 10. Verified: no other reference in the repository (a search), `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and [src/data/__tests__/mitzvotExtras.test.ts](src/data/__tests__/mitzvotExtras.test.ts) green.
-  - **Status:** Version: OTA, expected with the next update (no visible change) · Committed: yes, `157461f` fix(nusach): a nusach sets no Shema opinion, the unused default removed · Pushed: yes · Live: no (the rav page on Pages with the push) · Channel: none
+  - **Status:** Version: OTA, expected with the next update (no visible change) · Committed: yes, `157461f` fix(nusach): a nusach sets no Shema opinion, the unused default removed · Pushed: yes · Live: the preview build `584b7ed4` (Android, `com.jew365.app.preview`, from `5e9d0eb`, finished 2026-11-15) in its own bundle; no OTA on any channel · Channel: preview (build)
 
 ## Open Questions
 

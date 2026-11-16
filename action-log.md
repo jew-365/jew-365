@@ -17,6 +17,64 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-11-16 — with the Play production release `10 (1.0.21)`
+
+Two Play Console changes live on Google Play since 2026-11-14, and four pieces of internal work (docs, a test script, a design study, marketing material) pushed before Google published `10 (1.0.21)` on 2026-11-14 at 08:43, the first production release after them (root [AGENTS.md](AGENTS.md), Project records).
+
+- **Declare the Google Play trader status by 2027-02-01**
+  - Moved 2026-11-16. Verified: its Done line below.
+  - Version: none (an account declaration) · Committed: no · Pushed: no · Live: in effect on the developer account since 2026-11-14 · Channel: Play Console
+  - **What it is:** Play Console's notification of 2026-11-05 and the banner on every console page: under the updated Google Play policies the developer account declares whether it operates as a trader, by 2027-02-01 (Play Console › developer details, the account owner avi6190i). Read 2026-11-10 ([release/RELEASE_LOG.md](release/RELEASE_LOG.md)).
+  - **What it solves:** keeps the account within Play's policy after the deadline.
+  - **Expected result:** the banner is gone and the developer details show the declared status, recorded in [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md).
+  - **Requested:** Google Play, found in the owner's status read of 2026-11-10; whether the account is a trader is the owner's call.
+  - **Done:** 2026-11-14, the owner's calls that day ("תמלא ותשלח", "חשבון שאינו עסק", and for the public profile "להסכים ולשמור ככה"): Account details › About you › Declare status, "This is a non-trader account", the public profile review (the legal name אברהם שמעון ששון, Israel, the developer email avisason9314@gmail.com, shown worldwide under App support; the non-trader notice in the EEA and the UK), consent ticked, Save, and the non-trader confirmation. Verified: after a reload the page reads "Business status: Non-trader", and the declaration banner and the account home's card are gone. Google's help: the declaration can be updated at any time in Play Console.
+- **Choose the Play tags**
+  - Moved 2026-11-16. Verified: its Done line below.
+  - Version: Play store settings · Committed: no · Pushed: no · Live: public on Google Play since 2026-11-14 · Channel: production (Play)
+  - **Ships as:** a console change in the Play Console, no build.
+  - **What it is:** Store presence → Store settings → Tags: read what is set (nothing is recorded), and choose up to five of Play's own tags that describe a siddur, Tehillim and halachic times, shown to the owner before saving.
+  - **What it solves:** tags place the app among similar apps on Play, and none is recorded today.
+  - **Expected result:** Store settings shows the tags after a reload, and [release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md) lists them.
+  - **Status 2026-11-14:** read in Store settings: category Lifestyle, no tags, and Play suggests only Lifestyle ([release/PLAY_CONSOLE_METADATA.md](release/PLAY_CONSOLE_METADATA.md), Production Release). The app is public since 2026-11-14, so the pick now shapes its first placement; the tags are the owner's choice.
+  - **Done:** 2026-11-14, the owner's pick ("כן מאשר החיים הטובים"): Store settings › Manage tags › the suggested tag Lifestyle (החיים הטובים), Apply, and later that day Books & Reference (ספרים ועיון), for the learning ("תוסיף תאג של ספרים ועיון כי יש גם לימוד"), and Religious texts (טקסטים דתיים, "תוסיף אותה גם"). Verified: after a reload Store settings shows the tags "החיים הטובים, טקסטים דתיים, ספרים ועיון", and Publishing overview holds no unsent change (a tag applies without review).
+- **Update the DOX chain for the halacha add-on**
+  - Moved 2026-11-16. Verified: its Done line below.
+  - Version: none (internal docs; moves with the next production release) · Committed: yes, in the batch's commits · Pushed: yes · Live: n/a; moved with the Play production release `10 (1.0.21)` (AAB `041138bc`, published 2026-11-14 08:43), the first production release after its push · Channel: —
+  - **Flag:** none (docs).
+  - **What it is:** The root [AGENTS.md](AGENTS.md) (commands, the add-on's release rule, the mitzvah model, stores, tests, the checklist) and the child docs the spec's section 10 names.
+  - **What it solves:** The DOX closeout.
+  - **Expected result:** `pnpm check:dox` green and every new file linked from its nearest AGENTS.md.
+  - **Done:** 2026-11-11, found already done by the batch's own commits. Verified: `pnpm check:dox` green (43 AGENTS.md files); every tracked halacha, lashon hara and Shemirat HaLashon file outside `docs/halacha/<book>/` is named by its nearest AGENTS.md ([scripts/halacha/AGENTS.md](scripts/halacha/AGENTS.md), [src/data/AGENTS.md](src/data/AGENTS.md), [src/services/AGENTS.md](src/services/AGENTS.md), [src/stores/AGENTS.md](src/stores/AGENTS.md), [src/components/AGENTS.md](src/components/AGENTS.md), [docs/AGENTS.md](docs/AGENTS.md)), and the root [AGENTS.md](AGENTS.md) carries the command, the release rule, the three mitzvot, the stores and the services.
+- **The promo video: a 42-second vertical Hebrew ad with a character, narration and music**
+  - Moved 2026-11-16. Verified: its Done line below.
+  - — · Committed: `c8c3c85` feat(design): promo video round 4, Chatterbox and OmniVoice narration beside VoxCPM2 (after `01c982e`, `5c70789` and `d4ee9d0`) · Pushed: yes · Live: n/a; moved with the Play production release `10 (1.0.21)` (AAB `041138bc`, published 2026-11-14 08:43), the first production release after its push · Channel: —
+  - **Flag:** none (marketing material; nothing ships in the app).
+  - **Source:** the owner's request of 2026-11-13: an ad that shows the app, how it is used and its purpose, with Hebrew narration and music, a character who visibly gets the notifications and uses the app, and transitions from him into the app's screens.
+  - **What it is:** the study [design/lab/studies/2026-11-13-promo-video/](design/lab/studies/2026-11-13-promo-video/AGENTS.md): an illustrated young man gets the morning Shema's orange reminder at work (08:17, 20 minutes left), the camera goes into his phone and the real screens (home, the Shacharit reader, the mark, a 15-day streak), a montage (siddur tab, schedule, a tzaddik's page), the quiet Shabbat, an end card; captions, original music, 1080x1920 at 30 fps.
+  - **Done so far:** 2026-11-13: the video is rendered with music and captions; the narration script is [vo.md](design/lab/studies/2026-11-13-promo-video/vo.md).
+  - **Round 2 (2026-11-13):** the owner asked for Phonikud's narration and for more traditional characters. Two voices recorded and checked by transcription; five figures (avrech, chassid, Sephardi, yeshiva bachur, dati-leumi) on the page https://claude.ai/artifact/2WddyBo6En5LwiLR5iDh9C, with draft 2 (Shaul's voice, draft 1's figure).
+  - **Round 3 (2026-11-13):** the owner picked figure ה and voice א, then asked for less mechanical voices, more of the app in less time and the figure in motion. Voice א turned out non-commercial (the Phonikud checkpoints' licence), so the narration moved to VoxCPM2 (Apache 2.0) with four voices designed from a description; three cuts with the figure in full body ("יום אחד" 59 s, "כל האפליקציה בדקה" 64 s, "לפני ואחרי" 31 s) on the same page.
+  - **Round 4 (2026-11-13):** the owner allowed any narration model whatever its licence. Chatterbox Multilingual V3 (MIT, Hebrew pointed by Dicta's nakdan) and OmniVoice (CC BY-NC) were run on the designed `warm` voice: on "יום אחד" Hebrew Whisper matched 94% of VoxCPM2's words, 93% of Chatterbox's and 65% of OmniVoice's (which also runs 15 times slower than real time); Zonos-Hebrew needs an NVIDIA GPU. Each cut is on the page in Chatterbox and in VoxCPM2; voices cloned from real people stay out.
+  - **Combined cut (2026-11-13):** the owner liked "יום אחד" and "לפני ואחרי" and asked for them combined: `combo` in variants.json (the gray miss at 08:37, then the same morning in color and the whole day to Shabbat and the streak), 52 s, in both engines, first on the page.
+  - **Open:** the owner picks a cut and an engine and voice; "שניים מקרא" should be checked by ear (the transcription heard "נקרא" in every VoxCPM2 take).
+  - **Open:** the end card says "זמין ב־Google Play" while the Play production release is still in review (state.md, 2026-11-10); confirm before the video is published.
+- **H1: write the usability test script, the baseline**
+  - Moved 2026-11-16. Verified: its Done line below.
+  - Version: none (docs) · Committed: yes, with the records commit of 2026-11-13 · Pushed: yes · Live: n/a; moved with the Play production release `10 (1.0.21)` (AAB `041138bc`, published 2026-11-14 08:43), the first production release after its push · Channel: —
+  - **What it is:** the eight tasks of spec H1 as a script the owner runs with the closed testers, with the success and tap counts to write down, in [.claude/specs/](.claude/specs).
+  - **What it solves:** G5 has no baseline.
+  - **Expected result:** the script committed; the baseline run is the owner's (Other Open Items).
+  - **Done:** 2026-11-13. [.claude/specs/usability-test.md](.claude/specs/usability-test.md): how to run it, the eight tasks with what counts as success, and the score sheet. The baseline run is the owner's (Other Open Items).
+- **Study: the hub, the capabilities screen and home's entry points**
+  - Moved 2026-11-16. Verified: its Done line below.
+  - Version: none (design) · Committed: yes, `2ba199b` feat(design): the hub study · Pushed: yes · Live: n/a; moved with the Play production release `10 (1.0.21)` (AAB `041138bc`, published 2026-11-14 08:43), the first production release after its push · Channel: —
+  - **What it is:** a study under [design/lab/studies/](design/lab/studies) for C5, C4, B1 and B2 (and the names of Q35), published as a Design canvas and a gallery site.
+  - **What it solves:** spec items tagged "study" in phase 2.
+  - **Expected result:** both Artifact links in the study's AGENTS.md and here; the owner's pick recorded.
+  - **Done (the study):** 2026-11-13. [design/lab/studies/2026-11-13-hub/](design/lab/studies/2026-11-13-hub/AGENTS.md), on the app's words, states and one real day: today's More tab beside three hub directions with the עוד / גלה switch, two directions of the capabilities screen, two of home's entry points. Published as one gallery Artifact, as the compass-button study was: https://claude.ai/artifact/2kobw5urktHPE9s8rjnvpJ. Checked at 1240 and 430 points (no horizontal scroll, no page error).
+  - **The owner's pick, 2026-11-15:** the More tab is direction ב, the goal tiles ("לגביי מסך עוד הכי אהבתי את ב"). Later that day: the capabilities screen is direction ב, the folding card per goal; home stays as it is, with no search button and no "all mitzvot" row (B1 and B2 dropped), and the way in from home is the offer in Messages, perhaps under a name such as "גלה עוד"; the tab's name stays עוד ("מסך כל היכולות לך על ב לגביי מסך הבית תשאיר בלי שינוי אולי בהודעות לתת שם גלה עוד או משהו בסגנון ושם הטאב הוא עוד"). Nothing of the study is open; the wording of that Messages name goes to the copy sign-off.
+
 ## 2026-11-14 — Pages `8dee183`
 
 - **Name the app's analytics in the privacy policy** — both languages of [docs/privacy/](docs/privacy) name the app's two anonymous, aggregate statistics (Expo's install count per version and update, from the update check's random installation identifier; Sentry's crash count per version) in an Analytics section, a Use line under Crash reports and no behavioural tracking under what the app does not do; the support page [docs/index.html](docs/index.html) drops "אין אנליטיקס"; the rule is in [docs/AGENTS.md](docs/AGENTS.md). App Store Connect's App Privacy carries Analytics on Crash Data and Device ID to match, and Play's Data safety already did.
