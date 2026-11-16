@@ -100,6 +100,18 @@ function isChanukah(hd: HDate): boolean {
 
 const USHPIZIN_NIGHTS = [1, 2, 3, 4, 5, 6, 7] as const;
 
+const HOSHANOT_DAYS = [1, 2, 3, 4, 5, 6] as const;
+
+// The Hoshanot of a day of Sukkot by the Tiklal's rule (V2 154): none on Shabbat or on Hoshana Rabba, which says
+// them all; on the other days the sets are said in order, one each day Hoshanot are said, while the hakafa is the
+// festival day's own, so a Shabbat earlier in the festival puts the set one behind the hakafa.
+export function hoshanotOf(hd: HDate): { set: number; hakafa: number } | null {
+  const day = hd.getMonth() === months.TISHREI ? hd.getDate() - 14 : 0;
+  if (day < 1 || day > HOSHANOT_DAYS.length || hd.getDay() === 6) return null;
+  const shabbatBefore = Array.from({ length: day - 1 }, (_, i) => (hd.getDay() + 6 - i) % 7).includes(6);
+  return { set: shabbatBefore ? day - 1 : day, hakafa: day };
+}
+
 export function ushpizinNight(hd: HDate): number | null {
   const night = hd.getMonth() === months.TISHREI ? hd.getDate() - 14 : 0;
   return night >= 1 && night <= USHPIZIN_NIGHTS.length ? night : null;
@@ -404,6 +416,13 @@ function computeDayFeatures(hd: HDate, place: Place): DayFeatures {
   const ushpiz = ushpizinNight(hd);
   add('sukkotNight', ushpiz !== null);
   for (const night of USHPIZIN_NIGHTS) add(`ushpizinNight${night}`, ushpiz === night);
+  const hoshanot = hoshanotOf(hd);
+  add('hoshanot', hoshanot !== null);
+  add('hoshanotShifted', hoshanot !== null && hoshanot.set !== hoshanot.hakafa);
+  for (const day of HOSHANOT_DAYS) {
+    add(`hoshanotSet${day}`, hoshanot?.set === day);
+    add(`hoshanotHakafa${day}`, hoshanot?.hakafa === day);
+  }
 
   const tachanun = HebrewCalendar.tachanun(hd, place.inIsrael);
   add('tachanunShacharit', tachanun.shacharit);

@@ -569,6 +569,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         he: 'תיקוני נוסח בסידור: ״לַמְנַצֵּחַ״ בתהילים ס״ז עם הפתח הגנוב, ״וְצֶאֱצָאֵי עַמְּךָ״ בברכות התורה בנוסח ספרד, הפסוק האחרון של ״יושב בסתר״ פעמיים בערבית של עדות המזרח, ו״אַל תִּירָאוּ״ בסליחות.',
         en: 'Siddur text fixes: "Lamnatzeach" in Psalm 67 with its vowel, "the offspring of Your people" in the Torah blessings of Nusach Sefard, the last verse of "Yoshev Beseter" said twice in the Maariv of Edot HaMizrach, and a vowel in the Selichot.',
       },
+      {
+        he: 'נוסח תימן בלדי: ההושענות של סוכות מתוך התכלאל, בכל יום מימי החג שאינו שבת אחרי ההלל, עם סדר היום וההקפה שלו (שבת שבאמצע מזיזה את הסדרים, כמו שכתב רב סעדיה גאון), ושבע ההקפות של הושענא רבה וחבטת הערבה. בחנוכה ״מזמור שיר חנוכת הבית״ אחרי שיר של יום.',
+        en: 'Nusach Teiman Baladi: the Hoshanot of Sukkot from the Tiklal, on every day of the festival that is not Shabbat, after Hallel, with the day’s set and hakafa (a Shabbat in between shifts the sets, as R. Saadia Gaon wrote), and the seven hakafot of Hoshana Rabba with the beating of the willow. On Chanukah, Psalm 30 after the Song of the Day.',
+      },
     ],
   },
   {

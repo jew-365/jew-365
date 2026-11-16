@@ -5029,6 +5029,162 @@ describe('tehillim', () => {
   });
 });
 
+describe('nusach Teiman: the Hoshanot and the Chanukah psalm from the Tiklal', () => {
+  const sectionsOn = (features: DayFeatures) => resolveSiddurText(load('teiman', 'shacharit'), features);
+  const titles = (features: DayFeatures) => sectionsOn(features).map((section) => section.title.he);
+  const sectionText = (features: DayFeatures, title: string, keep: (run: Run) => boolean = () => true) =>
+    letters(
+      forVoice(sectionsOn(features), null)
+        .filter((section) => section.title.he === title)
+        .flatMap((section) =>
+          section.segments.flatMap((segment) =>
+            segment.he.map((runs) =>
+              runs
+                .filter(keep)
+                .map((run) => run.t)
+                .join(''),
+            ),
+          ),
+        )
+        .join(' '),
+    );
+  // Each day's set ends with these words (the ones Hoshana Rabba's pointers name), and each hakafa opens with these.
+  const SET_ENDS = [/התאובים שעלו במחשבה/, /והדברים עתיקים/, /להגן זה על זה/, /ונסיכים שמנה/, /ממעל ומתחת/];
+  const HAKAFA_OPENS = [
+    /אנא אל אחד ושמו אחד/,
+    /אנא אל אחד ומביש אומרי שנים/,
+    /אנא אל אחד הנקדש בקדושות שלשה/,
+    /אנא השם בכסאו חיות ארבע/,
+    /אנא המיחד לכבודו שמות חמשה/,
+    /אנא הבורא עולמו בימים ששה/,
+  ];
+  const expectHoshanot = (features: DayFeatures, set: number, hakafa: number) => {
+    const said = sectionText(features, 'הושענות');
+    SET_ENDS.forEach((end, i) =>
+      expect({ set: i + 1, said: end.test(said) }).toEqual({ set: i + 1, said: i + 1 === set }),
+    );
+    HAKAFA_OPENS.forEach((open, i) =>
+      expect({ hakafa: i + 1, said: open.test(said) }).toEqual({ hakafa: i + 1, said: i + 1 === hakafa }),
+    );
+    expect(said).toMatch(/תתפרקון ותשתיזבון מן חרבא/);
+    expect(said.search(SET_ENDS[set - 1])).toBeLessThan(said.search(HAKAFA_OPENS[hakafa - 1]));
+  };
+
+  it('says each day’s set and hakafa on Chol HaMoed, the sets shifted by the first day’s Shabbat in 5787 and 5788', () => {
+    for (const year of [5787, 5788])
+      for (const [date, set, hakafa] of [
+        [16, 1, 2],
+        [17, 2, 3],
+        [18, 3, 4],
+        [19, 4, 5],
+        [20, 5, 6],
+      ]) {
+        const features = day(date, months.TISHREI, year);
+        expect(features.flags.has('cholHamoedSukkot')).toBe(true);
+        expectHoshanot(features, set, hakafa);
+        expect(sectionText(features, 'הושענות')).toMatch(/לא יסד הושענות ליום ששי/);
+      }
+  });
+
+  it('says the day’s own set and hakafa when no Shabbat came before, and none on Shabbat (5786)', () => {
+    for (const [date, set] of [
+      [15, 1],
+      [16, 2],
+      [17, 3],
+      [18, 4],
+    ]) {
+      expectHoshanot(day(date, months.TISHREI, 5786), set, set);
+      expect(sectionText(day(date, months.TISHREI, 5786), 'הושענות')).not.toMatch(/לא יסד הושענות/);
+    }
+    expect(titles(day(19, months.TISHREI, 5786))).not.toContain('הושענות');
+    expectHoshanot(day(20, months.TISHREI, 5786), 5, 6);
+  });
+
+  it('places the Hoshanot after Hallel, with the scroll out, and moves Kaddish Titkabel after them', () => {
+    const cholHamoed = day(18, months.TISHREI, 5787);
+    const order = titles(cholHamoed);
+    expect(order.indexOf('הלל')).toBeLessThan(order.indexOf('הושענות'));
+    expect(order.indexOf('הושענות')).toBe(order.indexOf('קריאת התורה') - 1);
+    const hoshanot = sectionText(cholHamoed, 'הושענות');
+    expect(hoshanot.indexOf('ויהי בנסע הארן')).toBeLessThan(hoshanot.indexOf('הושענא'));
+    expect(hoshanot).toMatch(/תתקבל צלותכון/);
+    expect(hoshanot.lastIndexOf('תתפרקון')).toBeLessThan(hoshanot.indexOf('תתקבל צלותכון'));
+    expect(sectionText(cholHamoed, 'הלל')).not.toMatch(/תתקבל צלותכון/);
+    expect(sectionText(cholHamoed, 'קריאת התורה')).not.toMatch(/ויהי בנסע הארן/);
+    const roshChodesh = day(1, months.CHESHVAN, 5787);
+    expect(titles(roshChodesh)).not.toContain('הושענות');
+    expect(sectionText(roshChodesh, 'הלל')).toMatch(/תתקבל צלותכון/);
+  });
+
+  it('says the seven hakafot of Hoshana Rabba, each after the part of a day’s set its pointer names', () => {
+    const hoshanaRabba = day(21, months.TISHREI, 5787);
+    const shown = sectionText(hoshanaRabba, 'הושענות');
+    const steps = [
+      /עד שמגיע אל התאבים שעלו במחשבה/,
+      /התאובים שעלו במחשבה/,
+      /הקפה ראשונה אברהם/,
+      /של יום ב עד והדברים עתיקים/,
+      /והדברים עתיקים/,
+      /הקפה שנית יצחק/,
+      /של יום ג עד להגן זה על זה/,
+      /להגן זה על זה/,
+      /הקפה שלישית יעקב/,
+      /של יום ד עד ונסיכים שמתה/,
+      /ונסיכים שמנה/,
+      /הקפה רביעית משה/,
+      /של יום ה עד ממעל ומתחת/,
+      /ממעל ומתחת/,
+      /הקפה חמישית אהרן/,
+      /של יום ו עד למענך דורשנו/,
+      /למענך דורשנו/,
+      /הקפה ששית פינחס/,
+      /ואומר הושענות עד למענך דורשנו/,
+      /למענך דורשנו/,
+      /הקפה שביעית דוד/,
+      /תתפרקון ותשתיזבון/,
+      /תתקבל צלותכון/,
+    ];
+    let from = 0;
+    for (const step of steps) {
+      const at = shown.slice(from).search(step);
+      expect({ step: step.source, found: at >= 0 }).toEqual({ step: step.source, found: true });
+      from += at + 1;
+    }
+    for (const open of HAKAFA_OPENS) expect(shown).not.toMatch(open);
+    // The sixth day's litany is said only as far as its pointer reaches, without the "הושענא, ואומר" before its hakafa.
+    expect(shown).not.toMatch(/דורשנו הו הושענא ואומר/);
+    expect(count(shown, /ושונין כל ההושענות/)).toBe(1);
+    expect(shown).not.toMatch(/יהות/);
+    expect(count(shown, /ועיע יי עשה למען/)).toBeGreaterThanOrEqual(2);
+    const order = titles(hoshanaRabba);
+    expect(order[order.length - 1]).toBe('חבטת ערבה');
+    expect(sectionText(hoshanaRabba, 'חבטת ערבה')).toMatch(/וחובטין הערבה .* חבט חבט ולא בריך$/);
+    expect(titles(day(20, months.TISHREI, 5787))).not.toContain('חבטת ערבה');
+    expect(sectionText(day(21, months.TISHREI, 5787), 'נטילת לולב')).not.toMatch(/ושונין כל ההושענות/);
+  });
+
+  it('says Psalm 30 as the Tiklal prints it right after the song of the day on Chanukah', () => {
+    const chanukah = day(26, months.KISLEV, 5787);
+    const song = sectionText(chanukah, 'שיר של יום', (run) => run.s !== 'n');
+    const psalm = song.indexOf('מזמור שיר חנוכת הבית לדוד');
+    expect(psalm).toBeGreaterThan(0);
+    expect(psalm).toBeLessThan(song.indexOf('לדוד אליך'));
+    expect(song).toMatch(/חייתני מירדי בור/);
+    expect(song).toMatch(/ואל יי אתחנן/);
+    expect(sectionText(chanukah, 'שיר של יום')).toMatch(/ואחר מזמור של יום אומר מזמור של חנוכה/);
+    const roshChodeshTevet = sectionText(day(1, months.TEVET, 5787), 'שיר של יום', (run) => run.s !== 'n');
+    expect(roshChodeshTevet.indexOf('שירו ליי שיר חדש')).toBeLessThan(roshChodeshTevet.indexOf('חנוכת הבית'));
+    expect(roshChodeshTevet.indexOf('חנוכת הבית')).toBeLessThan(roshChodeshTevet.indexOf('לדוד אליך'));
+  });
+
+  it('says none of them on a plain weekday', () => {
+    const weekday = day(9, months.CHESHVAN, 5787);
+    const shown = shownOn('teiman', 'shacharit', weekday);
+    expect(titles(weekday)).not.toContain('הושענות');
+    expect(titles(weekday)).not.toContain('חבטת ערבה');
+    expect(shown).not.toMatch(/חנוכת הבית|תתפרקון|הושענא/);
+  });
+});
 describe('shacharit chapters', () => {
   // The section picker lists a long text's chapters, not every section: the user's division of
   // Shacharit (2026-10-10), with the Rosh Chodesh and Chol HaMoed additions as their own stops.
