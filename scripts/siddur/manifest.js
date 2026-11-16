@@ -371,6 +371,10 @@ const SOURCES = {
     tiklalVihiNoam: ['vihi_noam', "Maariv after Shabbat: Vihi No'am and V'Atah Kadosh"],
     tiklalTishaBavMaariv: ['tisha_bav_maariv', "Maariv of Tisha B'Av"],
     tiklalLulav: ['lulav', 'Taking the Lulav'],
+    tiklalHoshanot14: ['hoshanot_1-4', 'Hoshanot of Sukkot: the First to Fourth Days'],
+    tiklalHoshanot56: ['hoshanot_5-6', 'Hoshanot of Sukkot: the Fifth and Sixth Days'],
+    tiklalHoshanaRabba: ['hoshana_rabba', 'The Order of Hoshana Rabba'],
+    tiklalChanukahPsalm: ['chanukah_psalm', 'The Psalm of Chanukah'],
   }),
   wikiBeforePsalms: {
     wikisource: 'תפילה לפני אמירת תהלים',
@@ -541,6 +545,8 @@ const T = {
   vidui: { he: 'וידוי וי"ג מידות', en: 'Confession and the Thirteen Attributes' },
   halfKaddish: { he: 'חצי קדיש', en: 'Half Kaddish' },
   lulav: { he: 'נטילת לולב', en: 'Taking the Lulav' },
+  hoshanot: { he: 'הושענות', en: 'Hoshanot' },
+  willowBeating: { he: 'חבטת ערבה', en: 'Beating the Willow' },
   hallel: { he: 'הלל', en: 'Hallel' },
   torahReading: { he: 'קריאת התורה', en: 'The Torah Reading' },
   uvaLetzion: { he: 'אשרי ובא לציון', en: 'Ashrei and Uva Letzion' },
@@ -3759,7 +3765,12 @@ function teimanHallel() {
       ],
     },
     { ...TEIMAN_HALF_KADDISH, title: T.hallel, optional: SOME_SAY.hallel, when: UNDISPUTED_HALLEL },
-    { ...TIKLAL_TITKABEL, title: T.hallel, optional: SOME_SAY.hallel, when: UNDISPUTED_HALLEL },
+    {
+      ...TIKLAL_TITKABEL,
+      title: T.hallel,
+      optional: SOME_SAY.hallel,
+      when: { ...UNDISPUTED_HALLEL, none: HOSHANOT_DAY.any },
+    },
   ];
 }
 
@@ -3833,10 +3844,234 @@ function teimanMusaf() {
   ]);
 }
 
+// The Hoshanot from the Tiklal (V2 135-168). The print says them every day of Sukkot but Shabbat after Hallel, once
+// the Torah scroll is out, then Kaddish Titkabel and the reading (V2 129-131, and V2 132 for Hoshana Rabba), so on
+// those days the scroll's taking out opens this section and the Kaddish Titkabel that closes Hallel on other days
+// closes it instead. Each day prints a set (the הושענא litany and its ענה stanzas) and a hakafa (the אנא stanzas);
+// by the rule of R. Saadia the print gives on V2 154, a Shabbat shifts the sets, said in order on the days Hoshanot
+// are said, but not the hakafa, which is the festival day's own (`hoshanotOf()` in src/utils/siddur.ts), and the rule
+// itself shows on a day it shifts. Every day ends with "תתפרקון", printed in full only on the first day, which the
+// print's own note says is said every day: the closing cues that point to it and to the Kaddish give way to the text.
+// Hoshana Rabba (V2 156-168) says all seven hakafot, each after the part of a day's set its small-type pointer names
+// ("עד …"), resolved to the segments of that day's set that end with those words; the seventh names no day, and its
+// words end the sixth day's litany, which is used. The print's misprinted Name, יְהֹוָת on V2 161 and 163, is read
+// as the Name; every other misprint stays as printed (hoshanot.reconciliation.md, R16). The beating of the willow
+// comes at the end of the service, after Aleinu, as V2 168 says.
+const TIKLAL_HOSHANOT_14 = { ...TIKLAL, he: 'tiklalHoshanot14' };
+const TIKLAL_HOSHANOT_56 = { ...TIKLAL, he: 'tiklalHoshanot56' };
+const TIKLAL_HOSHANA_RABBA = { ...TIKLAL, he: 'tiklalHoshanaRabba' };
+const HOSHANOT_DAY = { any: ['hoshanot', 'hoshanaRabba'] };
+const HOSHANA_RABBA = { all: ['hoshanaRabba'] };
+// Per day: its set and its hakafa as segment ranges, the groups that join a line a leaf break cut, the day's heading
+// (the second to fourth days print it in the large type, unpointed) and the closing cue a hakafa ends with.
+const HOSHANOT = [
+  {
+    set: {
+      page: TIKLAL_HOSHANOT_14,
+      from: 0,
+      to: 4,
+      groups: [
+        [1, 2],
+        [3, 4],
+      ],
+    },
+    hakafa: { page: TIKLAL_HOSHANOT_14, from: 5, to: 10, groups: [[5, 6]] },
+  },
+  {
+    set: { page: TIKLAL_HOSHANOT_14, from: 15, to: 18, groups: [[17, 18]], heading: 'ליום שׁני.' },
+    hakafa: { page: TIKLAL_HOSHANOT_14, from: 19, to: 24, groups: [[21, 22]] },
+  },
+  {
+    set: {
+      page: TIKLAL_HOSHANOT_14,
+      from: 26,
+      to: 30,
+      groups: [
+        [27, 28],
+        [29, 30],
+      ],
+      heading: 'ליוֹם שׁלישׁי.',
+    },
+    hakafa: { page: TIKLAL_HOSHANOT_14, from: 31, to: 36, groups: [[34, 35]] },
+  },
+  {
+    set: { page: TIKLAL_HOSHANOT_14, from: 38, to: 43, groups: [[39, 40]], heading: 'ליוֹם רביעי.' },
+    hakafa: {
+      page: TIKLAL_HOSHANOT_14,
+      from: 44,
+      to: 48,
+      close: ['הושיעני. תבנה: תתפרקון. קדיש תתקבל.', 'הושיעני. תבנה:'],
+    },
+  },
+  {
+    set: { page: TIKLAL_HOSHANOT_56, from: 0, to: 12, groups: [[0, 1]], heading: '<small>ליום חמישי.</small>' },
+    hakafa: {
+      page: TIKLAL_HOSHANOT_56,
+      from: 13,
+      to: 14,
+      groups: [[13, 14]],
+      close: ['הושיענו. תבנה: הושענא. תתפרקון.', 'הושיענו. תבנה: הושענא.'],
+    },
+  },
+  {
+    set: { page: TIKLAL_HOSHANOT_56, from: 17, to: 17, heading: '<small>ליום ששי.</small>' },
+    hakafa: {
+      page: TIKLAL_HOSHANOT_56,
+      from: 18,
+      to: 20,
+      groups: [[18, 20]],
+      close: ['הושיענו. תבנה: הושענא תתפרקון וקדיש:', 'הושיענו. תבנה: הושענא'],
+    },
+  },
+];
+const HOSHANOT_SHIFT_RULE = 16;
+const HOSHANA_RABBA_SIXTH_POINTER = ` <small>ואומר הושענות של יום ו' עד למענך דורשנו:</small>`;
+
+function hoshanotPart({ page, from, to, groups }, edits = [], extra = {}) {
+  return {
+    ...page,
+    title: T.hoshanot,
+    from,
+    to,
+    ...(groups ? { groups } : {}),
+    ...(edits.length ? { edits } : {}),
+    ...extra,
+  };
+}
+
+// A day's set on its own day: the heading as a note. Inside Hoshana Rabba: no heading, and the sixth day's set only
+// as far as its pointer reaches ("עד למענך דורשנו"), without the "הושענא, ואומר" that leads into its hakafa.
+function hoshanotSet(set, when, insideHoshanaRabba) {
+  const edits = [];
+  if (set.heading && insideHoshanaRabba) edits.push({ seg: set.from, from: `${set.heading} `, to: '' });
+  else if (set.heading && !set.heading.startsWith('<small>'))
+    edits.push({ seg: set.from, from: `${set.heading} `, to: `<small>${set.heading}</small> ` });
+  if (insideHoshanaRabba && set.page === TIKLAL_HOSHANOT_56 && set.from === 17)
+    edits.push({ seg: 17, from: ' הוֹשַׁעְנָא <small>ואומר</small>', to: '' });
+  return hoshanotPart(set, edits, { when });
+}
+
+function hoshanaRabba() {
+  const page = { page: TIKLAL_HOSHANA_RABBA };
+  // The print's Name with a final tav (V2 161, 163): a misprint a siddur cannot show, read as the Name.
+  const theName = (seg) => ({ seg, from: 'יְהֹוָת', to: 'יְהֹוָה' });
+  const part = (from, to, groups, edits) => hoshanotPart({ ...page, from, to, groups }, edits, { when: HOSHANA_RABBA });
+  const set = (day) => hoshanotSet(HOSHANOT[day - 1].set, HOSHANA_RABBA, true);
+  return [
+    part(0, 1),
+    set(1),
+    part(2, 8, [[3, 4]]),
+    part(9, 9),
+    set(2),
+    part(10, 17, [
+      [11, 12],
+      [16, 17],
+    ]),
+    part(18, 18),
+    set(3),
+    part(19, 25, [[23, 24]], [theName(25)]),
+    part(26, 26),
+    set(4),
+    part(
+      27,
+      34,
+      [
+        [28, 29],
+        [33, 34],
+      ],
+      [theName(34)],
+    ),
+    part(35, 35),
+    set(5),
+    part(36, 42, [[40, 41]], [{ seg: 42, from: HOSHANA_RABBA_SIXTH_POINTER, to: '' }]),
+    {
+      ...part(42, 42),
+      transform: compose(excerpt(42, HOSHANA_RABBA_SIXTH_POINTER.trim(), 'דורשנו:</small>'), tiklalName),
+    },
+    set(6),
+    part(43, 49, [[48, 49]]),
+    part(50, 50),
+    set(6),
+    part(51, 58, [[57, 58]]),
+  ];
+}
+
+function teimanHoshanot() {
+  const torah = { ...TIKLAL, he: 'tiklalShacharitTorah' };
+  return chapter(T.hoshanot, [
+    hoshanotPart({ page: torah, from: 0, to: 4, groups: [[1, 2]] }, [], { when: HOSHANOT_DAY }),
+    hoshanotPart({ page: TIKLAL_HOSHANOT_56, from: HOSHANOT_SHIFT_RULE, to: HOSHANOT_SHIFT_RULE }, [], {
+      when: { all: ['hoshanotShifted'] },
+    }),
+    ...HOSHANOT.map(({ set }, i) => hoshanotSet(set, { all: [`hoshanotSet${i + 1}`] }, false)),
+    ...HOSHANOT.map(({ hakafa }, i) =>
+      hoshanotPart(
+        hakafa,
+        hakafa.close
+          ? [{ seg: hakafa.to, from: `<small>${hakafa.close[0]}</small>`, to: `<small>${hakafa.close[1]}</small>` }]
+          : [],
+        { when: { all: [`hoshanotHakafa${i + 1}`] } },
+      ),
+    ),
+    ...hoshanaRabba(),
+    hoshanotPart(
+      { page: TIKLAL_HOSHANOT_14, from: 11, to: 13, groups: [[12, 13]] },
+      [
+        tiklalNote(
+          11,
+          "והדא אלקול יקאל כל יום בעד אן יכטל אלסדר חק כל יום והו הד'א:",
+          'וזה אומרים בכל יום אחר סדר אותו היום, וזהו:',
+        ),
+      ],
+      { when: HOSHANOT_DAY },
+    ),
+    { ...TIKLAL_TITKABEL, title: T.hoshanot, when: HOSHANOT_DAY },
+  ]);
+}
+
+// The beating of the willow on Hoshana Rabba, after Aleinu (V2 168): the print's sentence from where it turns to
+// the willow, the rest of it being the order this text already follows.
+const TIKLAL_WILLOW_BEATING = {
+  ...TIKLAL_HOSHANA_RABBA,
+  title: T.willowBeating,
+  from: 59,
+  to: 59,
+  when: HOSHANA_RABBA,
+  edits: [
+    {
+      seg: 59,
+      from: "<small>הושענא. תתפרקון. קדיש תתקבל. וקורין ד' גוברי ביום הששי וביום השביעי כסדר שקראו אתמול. וקדיש מה רב טובך והוא רחום וסדרא דיומא ועומדין ומתפללין מוסף כמו אתמול ופטום הקטרת ועלינו לשבח, ",
+      to: '<small>',
+    },
+  ],
+};
+
+// Psalm 30 on Chanukah, as the print gives it (V1 345-346, not the Masoretic text: hoshanot.reconciliation.md lists
+// where it differs), right after the song of the day by its instruction; the instruction's start, on V1 344, repeats
+// the order this text already follows. On Rosh Chodesh Tevet it follows the Rosh Chodesh psalm, a placing the print
+// does not state (R16).
+const TIKLAL_CHANUKAH_PSALM = {
+  ...TIKLAL,
+  he: 'tiklalChanukahPsalm',
+  title: T.songOfDay,
+  from: 1,
+  to: 3,
+  groups: [[2, 3]],
+  when: CHANUKAH,
+  edits: [
+    tiklalNote(
+      1,
+      "אומרים למנצח וקורין ובא לציון וסדר היום ומזמור היום ובעדה יקול מזמור אלחנוכה והו הד'א:",
+      'ואחר מזמור של יום אומר מזמור של חנוכה, וזה הוא:',
+    ),
+  ],
+};
+
 // Weekday Shacharit from the page, its empty headings filled from the 1894 Tiklal in the print's order: on Chol
 // HaMoed Sukkot the lulav blessing, with the Shehecheyanu of the Chanukah page on its first day, then Hallel
-// with its Kaddish Titkabel after the Amidah, the Torah service before "סדר היום", then Uva LeTzion, the songs
-// of the day with the Rosh Chodesh psalm, Ein Keloheinu, the Kaddish, Musaf with its Kaddish Titkabel, the
+// with its Kaddish Titkabel after the Amidah (on the days of Sukkot after the Hoshanot instead), the Torah service
+// before "סדר היום", then Uva LeTzion, the songs of the day with the Rosh Chodesh psalm and the Chanukah psalm,
+// Ein Keloheinu, the Kaddish, Musaf with its Kaddish Titkabel, the
 // Ketoret, Kaddish DeAtid, Barchu and Aleinu. Where the print points to a passage, the passage is the one this
 // text already holds: the page's half Kaddish for "קדיש לעילא", and Psalm 25 and "אמר רבי אלעזר", printed
 // once, after every day's song. On Rosh Chodesh the print opens the ark with another verse and calls four, as
@@ -3982,7 +4217,6 @@ function teimanShacharit() {
       when: CHOL_HAMOED_SUKKOT,
       at: { 5: { all: ['lulavShehecheyanu'] } },
     },
-    { ...TIKLAL, he: 'tiklalLulav', title: T.lulav, from: 4, to: 4, when: { all: ['hoshanaRabba'] } },
     ...chapter(T.hallel, teimanHallel()),
     tachanun('# נפילת אפים', {
       when: TACHANUN_SHACHARIT,
@@ -4004,6 +4238,7 @@ function teimanShacharit() {
     }),
     tachanun('# אבינו מלכנו אבינו אתה', { when: TACHANUN_SHACHARIT }),
     { ...halfKaddish, title: T.halfKaddish, when: NO_UNDISPUTED_HALLEL },
+    ...teimanHoshanot(),
     {
       ...torah,
       title: T.torahReading,
@@ -4015,7 +4250,11 @@ function teimanShacharit() {
         [22, 24],
         [28, 29],
       ],
-      at: { ...each(0, 2, NOT_ROSH_CHODESH), 30: NOT_ROSH_CHODESH },
+      at: {
+        ...each(0, 2, { none: ['roshChodesh', ...HOSHANOT_DAY.any] }),
+        ...each(3, 4, { none: HOSHANOT_DAY.any }),
+        30: NOT_ROSH_CHODESH,
+      },
       edits: [{ seg: 30, from: ' ואומרים הקהל</small>', to: '</small>' }],
       minyanParts: [{ from: 25, to: 29, label: SAID_BY.chazzanAndCongregation }],
     },
@@ -4073,6 +4312,7 @@ function teimanShacharit() {
       when: ROSH_CHODESH,
       edits: [tiklalNote(81, TIKLAL_ROSH_CHODESH_ORDER, 'ואחריו מביא מזמור ראש חודש, וזה הוא:')],
     },
+    TIKLAL_CHANUKAH_PSALM,
     { ...close, title: T.songOfDay, from: 10, to: 32 },
     {
       ...close,
@@ -4110,6 +4350,7 @@ function teimanShacharit() {
         [132, 133],
       ],
     },
+    TIKLAL_WILLOW_BEATING,
   ];
 }
 

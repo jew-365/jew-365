@@ -10,6 +10,7 @@ import {
   firstPlace,
   forMaritalStatus,
   forVoice,
+  hoshanotOf,
   isTextStart,
   liturgicalDay,
   matchesCondition,
@@ -481,6 +482,33 @@ describe('dayFeatures', () => {
     expect(named(at(13, months.ADAR_I, 5788))).toEqual([]);
     expect(named(at(17, months.TAMUZ, 5786))).toEqual(['tzomTammuz']);
     expect(named(at(9, months.AV, 5786))).toEqual([]);
+  });
+
+  it('names the Hoshanot set and hakafa of each day of Sukkot, a Shabbat shifting the sets only (V2 154)', () => {
+    const table = (year: number) =>
+      [15, 16, 17, 18, 19, 20, 21].map((date) => {
+        const hoshanot = hoshanotOf(new HDate(date, months.TISHREI, year));
+        const flags = at(date, months.TISHREI, year);
+        const set = [1, 2, 3, 4, 5, 6].filter((n) => flags.has(`hoshanotSet${n}` as DayFlag));
+        const hakafa = [1, 2, 3, 4, 5, 6].filter((n) => flags.has(`hoshanotHakafa${n}` as DayFlag));
+        expect(flags.has('hoshanot')).toBe(hoshanot !== null);
+        expect(flags.has('hoshanotShifted')).toBe(hoshanot !== null && hoshanot.set !== hoshanot.hakafa);
+        expect(hoshanot ? [[hoshanot.set], [hoshanot.hakafa]] : [[], []]).toEqual([set, hakafa]);
+        return hoshanot && `${hoshanot.set}/${hoshanot.hakafa}`;
+      });
+    // The first day on Shabbat: no Hoshanot that day, then the first set with the second day's hakafa.
+    expect(new HDate(15, months.TISHREI, 5787).getDay()).toBe(6);
+    expect(table(5787)).toEqual([null, '1/2', '2/3', '3/4', '4/5', '5/6', null]);
+    expect(new HDate(15, months.TISHREI, 5788).getDay()).toBe(6);
+    expect(table(5788)).toEqual([null, '1/2', '2/3', '3/4', '4/5', '5/6', null]);
+    // A Shabbat in Chol HaMoed (19 Tishrei 5786): the day after it says the fifth set with the sixth hakafa.
+    expect(new HDate(19, months.TISHREI, 5786).getDay()).toBe(6);
+    expect(table(5786)).toEqual(['1/1', '2/2', '3/3', '4/4', null, '5/6', null]);
+    // The sixth day on Shabbat (20 Tishrei 5790): nothing shifts.
+    expect(table(5790)).toEqual(['1/1', '2/2', '3/3', '4/4', '5/5', null, null]);
+    expect(at(17, months.TISHREI, 5787, DIASPORA).has('hoshanotSet2')).toBe(true);
+    expect(at(14, months.TISHREI, 5787).has('hoshanot')).toBe(false);
+    expect(at(22, months.TISHREI, 5787).has('hoshanot')).toBe(false);
   });
 
   it('marks the day after Yom Kippur and Hoshana Rabba', () => {

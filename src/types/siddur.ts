@@ -7,6 +7,11 @@ export type SukkotOfferingFlag = `sukkotOffering${2 | 3 | 4 | 5 | 6 | 7}`;
 
 export type UshpizinNightFlag = `ushpizinNight${1 | 2 | 3 | 4 | 5 | 6 | 7}`;
 
+// The Hoshanot of a Sukkot day that is not Shabbat (the Tiklal's rule, V2 154): the set said is the next in order
+// of the days Hoshanot were said, and the hakafa is the festival day's own, so a Shabbat shifts the sets only.
+export type HoshanotSetFlag = `hoshanotSet${1 | 2 | 3 | 4 | 5 | 6}`;
+export type HoshanotHakafaFlag = `hoshanotHakafa${1 | 2 | 3 | 4 | 5 | 6}`;
+
 // The Ashkenazi selichot days that carry a selichot of their own: the Nth weekday from Leil Selichot,
 // and the Nth weekday of the Ten Days, Tzom Gedaliah (`tzomGedaliah`) being the first.
 export type SelichotDayFlag = `selichotDay${1 | 2 | 3 | 4 | 5 | 6 | 7}`;
@@ -75,7 +80,11 @@ export type DayFlag =
   | SelichotTeshuvaFlag
   | SukkotOfferingFlag
   | 'sukkotNight'
-  | UshpizinNightFlag;
+  | UshpizinNightFlag
+  | 'hoshanot'
+  | 'hoshanotShifted'
+  | HoshanotSetFlag
+  | HoshanotHakafaFlag;
 
 export type Place = { inIsrael: boolean; jerusalem: boolean; location?: Location };
 
