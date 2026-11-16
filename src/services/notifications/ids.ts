@@ -94,6 +94,8 @@ export type PendingNotificationMeta = {
   skipIfDone?: boolean;
   hasText?: boolean;
   fullContent?: ContentBlock[] | null;
+  // On an Android mitzvah notification of a binary that colours it: the body's range (UTF-16 offsets) drawn in `color`.
+  bodySpan?: { start: number; end: number; color: string };
 };
 
 export type NotificationContentLike = {

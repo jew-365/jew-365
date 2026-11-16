@@ -65,6 +65,9 @@ export type PlanInput = {
   // The weekly report's tip (spec C6): an offer read once per plan, absent in fixtures that do not need it.
   weeklyTip?: OfferId | null;
   quietHours?: QuietHours;
+  // Whether this binary's Android builder colours `data.bodySpan` (the patched expo-notifications, `bodySpanSupported()`
+  // of bodySpan.ts). Absent or false: the time-left line keeps its stage mark and no span is sent.
+  bodySpan?: boolean;
   taharahEnabled: boolean;
   taharah: {
     events: TaharahEvent[];

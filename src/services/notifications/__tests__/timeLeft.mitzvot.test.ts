@@ -164,4 +164,67 @@ describe('the time-left line of a mitzvah reminder', () => {
     expect('subtitle' in sent.content).toBe(false);
     expect(sent.content.body).toBe(android.body);
   });
+
+  describe('on an Android binary that colours the end time (the patched builder, data.bodySpan)', () => {
+    const coloured = (platform: PlanInput['platform'] = 'android') => ({
+      ...planInput(NIGHT_BEFORE, 3, platform),
+      bodySpan: true,
+    });
+
+    it('drops the stage mark and spans the end time in the stage colour', () => {
+      const plain = day(buildPlan(planInput(NIGHT_BEFORE, 3, 'android')));
+      const spanned = day(buildPlan(coloured()));
+      expect(spanned.map((c) => c.id)).toEqual(plain.map((c) => c.id));
+      expect(new Set(spanned.map(stageOf))).toEqual(new Set(['green', 'orange', 'red']));
+      spanned.forEach((c, i) => {
+        expect(c.body).toBe(plain[i].body.replace(/^(❗|⚠️) /, ''));
+        expect(c.body).not.toMatch(/❗|⚠️/);
+        const span = c.data.bodySpan!;
+        expect(span.color).toBe(c.color);
+        expect(c.body.slice(span.start, span.end)).toMatch(/^\d\d:\d\d$/);
+        expect(c.body.slice(span.start, span.end)).toBe(c.body.split('\n')[0].slice(-5));
+      });
+      expect(spanned[spanned.length - 1].data.bodySpan?.color).toBe(TIME_STAGE_COLOR.red);
+    });
+
+    it('spans the English end time too', () => {
+      setLocale('en');
+      try {
+        const spanned = day(buildPlan({ ...coloured(), language: 'en' }));
+        expect(spanned.length).toBeGreaterThan(0);
+        for (const c of spanned) {
+          expect(c.body.slice(0, c.data.bodySpan!.end)).toMatch(/left · until \d\d:\d\d$/);
+        }
+      } finally {
+        setLocale('he');
+      }
+    });
+
+    it('leaves the iPhone as it was: the mark in the subtitle and no span', () => {
+      const ios = day(buildPlan(planInput(NIGHT_BEFORE, 3, 'ios')));
+      const iosFlagged = day(buildPlan(coloured('ios')));
+      expect(iosFlagged).toEqual(ios);
+      for (const c of iosFlagged) expect(c.data.bodySpan).toBeUndefined();
+      expect(iosFlagged[iosFlagged.length - 1].subtitle?.startsWith('❗ ')).toBe(true);
+    });
+
+    it('sends no span and keeps the mark on a binary without the patch', () => {
+      const plain = day(buildPlan(planInput(NIGHT_BEFORE, 3, 'android')));
+      for (const c of plain) expect(c.data.bodySpan).toBeUndefined();
+      expect(plain[plain.length - 1].body.startsWith('❗ ')).toBe(true);
+    });
+
+    it('is part of what the hash covers and reaches expo in the data', async () => {
+      const [candidate] = day(buildPlan(coloured()));
+      const { bodySpan, ...rest } = candidate.data;
+      expect(bodySpan).toBeDefined();
+      expect(contentHash(candidate)).not.toBe(contentHash({ ...candidate, data: rest }));
+      (Notifications.scheduleNotificationAsync as jest.Mock).mockClear();
+      await schedule([candidate]);
+      const request = (Notifications.scheduleNotificationAsync as jest.Mock).mock
+        .calls[0][0] as Notifications.NotificationRequestInput;
+      expect(request.content.data?.bodySpan).toEqual(bodySpan);
+      expect(request.content.body).toBe(candidate.body);
+    });
+  });
 });
