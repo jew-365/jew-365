@@ -1007,6 +1007,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** a small template gallery before the custom form, each created in one tap; a small study first.
   - **What it solves:** F8: the ten-field form.
   - **Expected result:** a render case creating each template with its hours and one reminder.
+  - **The owner, 2026-11-16:** stays open, no decision now ("תשאיר את זה כנושא פתוח לא רוצה להחליט עליו עכשיו").
   - **Study, 2026-11-16:** [design/lab/studies/2026-11-16-templates/](design/lab/studies/2026-11-16-templates/AGENTS.md): direction א, a sheet of template cards over the screen it opens from (the recommendation), and direction ב, a full screen with groups and a search; eleven proposed templates, what one tap creates (the mitzvah with its hours, its days and one reminder, landing on its screen with an undo) and the path to edit. Published as one gallery Artifact: https://claude.ai/artifact/7sPdTnjvUbbicqztMYRgm2. Checked at 1240 and 430 points (no horizontal scroll, no page error, every press shows its result). Open: the owner's pick, and the six decisions at the page's end (among them a template anchored to a zman, which needs a new field, and a Sun–Fri template that runs into Shabbat in winter). No code starts before the pick.
 
 ## Bugs
@@ -1247,7 +1248,7 @@ Q32 to Q37 are the batch "Discoverability and ease of use, 2026-11-13", the open
   - **Question:** May the sample reminder carry its own category with a "done" button, the one written exception to "no category outside a mitzvah"?
   - **Proposal:** yes, so the user learns the mark path by doing it once.
   - **Lives in:** `presentSampleReminder()` and `ensureCategories()` in [src/services/notifications/os.ts](src/services/notifications/os.ts) (A5, G1).
-  - **Assumption:** built with the button on 2026-11-15, as proposed; the owner has not answered.
+  - **Answered, 2026-11-16:** keep it ("לגביי הכפתור תשאיר אותו"); built that way on 2026-11-15.
   - **What it affects:** the sample only; a tap on its "done" marks nothing.
 
 ## Other Open Items
