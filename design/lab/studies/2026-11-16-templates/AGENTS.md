@@ -13,7 +13,7 @@
 
 ## Local Contracts
 
-- Published: pending. Publish as one private gallery Artifact from the build output's site page, then record the link here and republish to it after a change.
+- Published as one private gallery Artifact: https://claude.ai/artifact/7sPdTnjvUbbicqztMYRgm2 (2026-11-16). Republish to the same link after a change. Publish as one private gallery Artifact from the build output's site page, then record the link here and republish to it after a change.
 - The owner's picks: none yet.
 - Every template icon is one of `CUSTOM_ICON_CHOICES` of [../../../../src/data/customIcons.ts](../../../../src/data/customIcons.ts); [gen-data.mjs](gen-data.mjs) throws otherwise.
 - No template makes a halachic claim beyond a plain habit name, and every time is modest and editable. A template anchored to a zman (Tehillim, from the latest Shacharit to sunset) needs a field the custom form does not have; the page marks it as a new field.

@@ -1004,6 +1004,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** a small template gallery before the custom form, each created in one tap; a small study first.
   - **What it solves:** F8: the ten-field form.
   - **Expected result:** a render case creating each template with its hours and one reminder.
+  - **Study, 2026-11-16:** [design/lab/studies/2026-11-16-templates/](design/lab/studies/2026-11-16-templates/AGENTS.md): direction א, a sheet of template cards over the screen it opens from (the recommendation), and direction ב, a full screen with groups and a search; eleven proposed templates, what one tap creates (the mitzvah with its hours, its days and one reminder, landing on its screen with an undo) and the path to edit. Published as one gallery Artifact: https://claude.ai/artifact/7sPdTnjvUbbicqztMYRgm2. Checked at 1240 and 430 points (no horizontal scroll, no page error, every press shows its result). Open: the owner's pick, and the six decisions at the page's end (among them a template anchored to a zman, which needs a new field, and a Sun–Fri template that runs into Shabbat in winter). No code starts before the pick.
 
 ## Bugs
 
