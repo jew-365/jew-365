@@ -152,5 +152,14 @@
     "*.{json,yml,yaml}": [
       "prettier --write"
     ]
+  },
+  "expo": {
+    "autolinking": {
+      "android": {
+        "buildFromSource": [
+          "expo-notifications"
+        ]
+      }
+    }
   }
 }

@@ -31,6 +31,12 @@ describe('the expo-notifications patch', () => {
     expect(fs.existsSync(path.join(root, file))).toBe(true);
   });
 
+  it('builds expo-notifications from source on Android, since its prebuilt AAR would skip the patch', () => {
+    const prebuilt = path.join(path.dirname(require.resolve('expo-notifications/package.json')), 'local-maven-repo');
+    expect(fs.existsSync(prebuilt)).toBe(true);
+    expect(pkg.expo.autolinking.android.buildFromSource).toContain('expo-notifications');
+  });
+
   it('colours data.bodySpan in the builder and carries the marker the JavaScript reads', () => {
     const { BODY_SPAN_MARKER, BODY_SPAN_VERSION } = jest.requireActual('../../src/services/notifications/bodySpan');
     const patch = fs.readFileSync(path.join(root, file), 'utf8');
