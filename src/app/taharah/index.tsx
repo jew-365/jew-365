@@ -8,7 +8,7 @@ import { BottomSheet } from '@/components/BottomSheet';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChipRow } from '@/components/ChipRow';
-import { formatDayLine } from '@/components/DayStepper';
+import { formatDayLineWithHebrew } from '@/components/DayStepper';
 import { MitzvahIcon } from '@/components/MitzvahIcon';
 import { HeaderPill, ScreenHeader } from '@/components/ScreenHeader';
 import { SectionLabel } from '@/components/SectionLabel';
@@ -26,7 +26,15 @@ import { clockOf } from '@/utils/clock';
 import { locationNoon } from '@/utils/locationDay';
 import { cleanDayIndex, deriveCycle } from '@/utils/taharah/cycle';
 import { civilHebrewDayAt, currentOnah, hebrewDay, onahIndex } from '@/utils/taharah/onot';
-import { eventDate, eventDetail, onahStartDate, renderHint, stageHint, visibleStage } from '@/utils/taharah/summary';
+import {
+  eventDate,
+  eventDetail,
+  eventHebrewDay,
+  onahStartDate,
+  renderHint,
+  stageHint,
+  visibleStage,
+} from '@/utils/taharah/summary';
 import { taharahTasksFor } from '@/utils/taharah/tasks';
 import { kavuaHints, perishaOnot } from '@/utils/taharah/vestot';
 
@@ -85,7 +93,7 @@ export default function TaharahDashboard() {
     stage === 'safek'
       ? null
       : stageHint(state, events, settings.rules, settings.role, location, now, {
-          date: (civil) => formatDayLine(civil, language),
+          date: (civil) => formatDayLineWithHebrew(civil, language),
           clock: (instant) => clockOf(instant, location.tz),
         });
   const hint = renderHint(stageLine, t);
@@ -213,7 +221,7 @@ export default function TaharahDashboard() {
                 <View key={onahIndex(entry.onah)} style={styles.row}>
                   <View style={styles.rowMain}>
                     <Text style={[typography.bodyBold, { color: colors.text }]}>
-                      {formatDayLine(onahStartDate(entry.onah), language)}
+                      {formatDayLineWithHebrew(onahStartDate(entry.onah), language, hebrewDay(entry.onah.abs))}
                     </Text>
                     <Text style={[typography.caption, { color: colors.textSub }]}>
                       {entry.reasons.map((reason) => t(`taharah.reason.${reason}`)).join(' · ')}
@@ -242,7 +250,12 @@ export default function TaharahDashboard() {
                       {t(`taharah.event.${event.type}`)}
                     </Text>
                     <Text style={[typography.caption, { color: colors.textSub }]}>
-                      {[formatDayLine(eventDate(event), language), eventDetail(event, t)].filter(Boolean).join(' · ')}
+                      {[
+                        formatDayLineWithHebrew(eventDate(event), language, hebrewDay(eventHebrewDay(event))),
+                        eventDetail(event, t),
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
                     </Text>
                   </View>
                   {index === 0 ? (
@@ -447,7 +460,10 @@ function BedikaSheet({ target, index, past, onClose, onSave }: SheetProps) {
   }, [target]);
 
   const subtitle = target
-    ? [formatDayLine(hebrewDay(target.day).greg(), language), index ? t('taharah.cleanDays.day', { index }) : null]
+    ? [
+        formatDayLineWithHebrew(hebrewDay(target.day).greg(), language),
+        index ? t('taharah.cleanDays.day', { index }) : null,
+      ]
         .filter(Boolean)
         .join(' · ')
     : '';

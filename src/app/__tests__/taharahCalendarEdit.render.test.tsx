@@ -8,8 +8,9 @@ jest.mock('expo-router', () => ({
 }));
 
 import { HDate } from '@hebcal/core';
-import { act, fireEvent, screen } from '@testing-library/react-native';
+import { act, fireEvent, screen, within } from '@testing-library/react-native';
 import TaharahCalendar from '../taharah/calendar';
+import TaharahDashboard from '../taharah/index';
 import TaharahLog from '../taharah/log';
 import { formatDayLine } from '@/components/DayStepper';
 import { CITIES } from '@/data/cities';
@@ -122,5 +123,18 @@ describe('taharah: recording on any past day', () => {
     const confirms = screen.getAllByText(he('common.delete'));
     await act(async () => fireEvent.press(confirms[confirms.length - 1]));
     expect(useTaharahStore.getState().events).toHaveLength(0);
+  });
+  it('shows the Hebrew months over the grid and each Hebrew day in letters', async () => {
+    renderWithTheme(<TaharahCalendar />);
+    expect(screen.getByText('תשרי–חשון תשפ״ז')).toBeTruthy();
+    const cell = await screen.findByLabelText(formatDayLine(PAST, 'he'));
+    expect(within(cell).getByText('ט׳')).toBeTruthy();
+    expect(within(screen.getByLabelText(formatDayLine(new Date(2026, 9, 12), 'he'))).getByText('א׳ חשון')).toBeTruthy();
+  });
+
+  it("names the Hebrew date beside the civil one in the dashboard's entries", () => {
+    useTaharahStore.getState().addEvent({ type: 'onset', onah: { abs: absOf(2026, 10, 20), kind: 'day' } });
+    renderWithTheme(<TaharahDashboard />);
+    expect(screen.getByText(`${formatDayLine(PAST, 'he')} · ט׳ בחשון · ${he('taharah.onah.day')}`)).toBeTruthy();
   });
 });

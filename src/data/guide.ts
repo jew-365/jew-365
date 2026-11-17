@@ -406,8 +406,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "The family purity screen records an onset, the hefsek tahara, bedikot and the tevila, and shows today's tasks, the coming onot and the month's calendar. Taharah settings choose the custom, who uses it (a woman, or a husband who sees only the onot and the tevila night), discreet notification wording and a biometric lock.",
       },
       {
-        he: 'את היום של רישום אפשר לבחור בחצים, או ב״בחירה מהלוח״ בהקשה אחת, גם חודשים אחורה. בלוח הטהרה הקשה על יום מראה מה רשום בו, עם מחיקה, ומאפשרת לרשום בו ראייה, הפסק טהרה, טבילה או השהיה.',
-        en: 'The day of an entry is chosen with the arrows, or with Pick from the calendar in one tap, months back too. In the taharah calendar a tap on a day shows what is recorded on it, with a delete, and records an onset, a hefsek tahara, a tevila or a pause on it.',
+        he: 'את היום של רישום אפשר לבחור בחצים, או ב״בחירה מהלוח״ בהקשה אחת, גם חודשים אחורה. בלוח הטהרה מופיעים גם התאריכים העבריים, וליד כל תאריך במסך הטהרה כתוב גם התאריך העברי. הקשה על יום בלוח מראה מה רשום בו, עם מחיקה, ומאפשרת לרשום בו ראייה, הפסק טהרה, טבילה או השהיה.',
+        en: 'The day of an entry is chosen with the arrows, or with Pick from the calendar in one tap, months back too. The taharah calendar shows the Hebrew dates too, and every date on the taharah screen carries its Hebrew date. A tap on a day of the calendar shows what is recorded on it, with a delete, and records an onset, a hefsek tahara, a tevila or a pause on it.',
       },
       {
         he: 'הנתונים נשמרים מוצפנים ואינם נכללים בגיבוי. ״מחיקת הרישומים״ מתחילה ספירה חדשה, ו״איפוס מעקב הטהרה״ מוחק גם את ההגדרות ומכבה את המעקב. האפליקציה אינה פוסקת הלכה: בכל ספק היא עוצרת את הספירה עד שרושמים את הוראת הרב.',

@@ -1,4 +1,4 @@
-import { HDate, Locale, months } from '@hebcal/core';
+import { HDate, Locale, gematriya, months } from '@hebcal/core';
 
 export type RoshChodeshOccurrence = { first: HDate; days: 1 | 2; month: HDate };
 
@@ -17,6 +17,13 @@ export function roshChodeshMonth(day: HDate): HDate {
 export function roshChodeshLabel(monthFirst: HDate, language: 'he' | 'en'): string {
   const name = monthFirst.getMonthName();
   return language === 'en' ? name : Locale.gettext(name, 'he-x-NoNikud');
+}
+
+// A Hebrew date as people say it: "כ״ז בחשון" (with "תשפ״ז"), or "27 Cheshvan" (with 5787).
+export function hebrewDateLabel(hd: HDate, language: 'he' | 'en', withYear: boolean): string {
+  if (language === 'en') return `${hd.getDate()} ${hd.getMonthName()}${withYear ? ` ${hd.getFullYear()}` : ''}`;
+  const base = `${gematriya(hd.getDate())} ב${roshChodeshLabel(hd, 'he')}`;
+  return withYear ? `${base} ${gematriya(hd.getFullYear() % 1000)}` : base;
 }
 
 export function upcomingRoshChodesh(today: HDate, count: number): RoshChodeshOccurrence[] {

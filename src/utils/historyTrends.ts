@@ -1,5 +1,5 @@
 import { HDate, HebrewCalendar, Locale, flags, getSedra, gematriya } from '@hebcal/core';
-import { roshChodeshLabel } from '@/data/roshChodesh';
+import { hebrewDateLabel, roshChodeshLabel } from '@/data/roshChodesh';
 import { HebcalService } from '@/services/HebcalService';
 import { RETENTION_DAYS, dateKey } from '@/stores/useCompletionsStore';
 import type { Location } from '@/types/zmanim';
@@ -427,10 +427,7 @@ export function calendarInsight(month: CalendarMonth): { marked: number; past: n
 }
 
 export function hebrewDayLabel(key: string, language: Language, withYear: boolean): string {
-  const hd = new HDate(calendarDay(key));
-  if (language === 'en') return `${hd.getDate()} ${hd.getMonthName()}${withYear ? ` ${hd.getFullYear()}` : ''}`;
-  const base = `${gematriya(hd.getDate())} ב${roshChodeshLabel(hd, 'he')}`;
-  return withYear ? `${base} ${gematriya(hd.getFullYear() % 1000)}` : base;
+  return hebrewDateLabel(new HDate(calendarDay(key)), language, withYear);
 }
 
 export function hebrewRangeLabel(fromKey: string, toKey: string, language: Language): string {

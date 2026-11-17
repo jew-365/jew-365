@@ -903,6 +903,14 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done:** 2026-11-17. [src/app/__tests__/taharahCalendarEdit.render.test.tsx](src/app/__tests__/taharahCalendarEdit.render.test.tsx), 7 cases (the date param and a future one ignored, a pick in one tap, a month back and the disabled tomorrow, the add on an empty past day, nothing to add on a future day, the delete after its confirmation), green under `pnpm test:tz`; the full `pnpm test` green (6912 tests), `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and the guide's web copy rebuilt. No WHATS_NEW item: the what's-new list shows to every user, and the topic is offered only to a married user (`taharahOffered()`), so the change is described only in the guide's taharah topic. Not checked on a phone yet.
   - **Status:** Version: OTA, expected with the next update · Committed: yes, `a63975b` feat(taharah): pick an entry's day from a calendar, and see, add and delete entries on the taharah calendar · Pushed: yes · Live: no (in no update yet) · Channel: none
 
+- [ ] Hebrew dates throughout the taharah screens
+  - **Asked by:** the owner, 2026-11-17, with two screenshots of the calendar and the dashboard ("תוסיף עדכון בטהרה תצוגה שיוצגו גם התאריכים העבריים").
+  - **Flag:** OTA (no native change).
+  - **What it is:** the calendar shows the Hebrew months under the civil month (`תשרי–חשון תשפ״ז`) and each cell's Hebrew day in letters, with the month's name on its first day; every date on the dashboard (the stage hint, the perisha onot, the recent entries, the bedika sheet) carries its Hebrew date through `formatDayLineWithHebrew()` of [src/components/DayStepper.tsx](src/components/DayStepper.tsx), a night onah and an event by their own Hebrew day. `hebrewDateLabel()` moved to [src/data/roshChodesh.ts](src/data/roshChodesh.ts).
+  - **Expected result:** no taharah date without its Hebrew date.
+  - **Done:** 2026-11-17. Two cases in [src/app/__tests__/taharahCalendarEdit.render.test.tsx](src/app/__tests__/taharahCalendarEdit.render.test.tsx) (the month band and the cells; a history row reading `יום שלישי · 20 אוקטובר · ט׳ בחשון · עונת יום`), green under `pnpm test:tz`; the full `pnpm test` green (6914), `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, the guide's web copy rebuilt. Not checked on a phone yet.
+  - **Status:** Version: OTA, expected with the next update · Committed: no · Pushed: no · Live: no · Channel: none
+
 ### High — Discoverability, phase 0
 
 - [ ] A1: ask for notifications at the right moment

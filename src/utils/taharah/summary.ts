@@ -121,6 +121,11 @@ export function eventCellDay(event: TaharahEvent): number {
   return event.type === 'tevila' ? event.day - 1 : event.day;
 }
 
+// The Hebrew day an event belongs to: an onset's onah, a tevila's night, any other event's day.
+export function eventHebrewDay(event: TaharahEvent): number {
+  return event.type === 'onset' ? event.onah.abs : event.day;
+}
+
 export function eventDate(event: TaharahEvent): Date {
   return hebrewDay(eventCellDay(event)).greg();
 }

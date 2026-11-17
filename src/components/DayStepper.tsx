@@ -8,6 +8,8 @@ import { shadowPresets, shadowStyle } from '@/theme/shadowStyle';
 import { radius, spacing } from '@/theme/tokens';
 import { typography } from '@/theme/typography';
 import { AppLanguage, formatDate, useI18n } from '@/i18n';
+import { HDate } from '@hebcal/core';
+import { hebrewDateLabel } from '@/data/roshChodesh';
 
 type Props = {
   value: Date;
@@ -18,6 +20,12 @@ type Props = {
 
 export function formatDayLine(date: Date, language: AppLanguage): string {
   return formatDate(date, language === 'he' ? 'cccc · d LLLL' : 'cccc · LLL d', language);
+}
+
+// The day line with its Hebrew date: the civil date's own, or `hebrew` when the line stands for another
+// Hebrew day (a night onah shown on the evening before belongs to the next one).
+export function formatDayLineWithHebrew(date: Date, language: AppLanguage, hebrew?: HDate): string {
+  return `${formatDayLine(date, language)} · ${hebrewDateLabel(hebrew ?? new HDate(date), language, false)}`;
 }
 
 const ARROW_SIZE = scaled(20);

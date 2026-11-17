@@ -20,6 +20,8 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies, typography } from '@/theme/typography';
 import { formatDate, useI18n } from '@/i18n';
+import { HDate, gematriya } from '@hebcal/core';
+import { roshChodeshLabel } from '@/data/roshChodesh';
 import { Onah, OnahKind, PerishaOnah, TaharahEvent } from '@/types/taharah';
 import { locationNoon } from '@/utils/locationDay';
 import { deriveCycle } from '@/utils/taharah/cycle';
@@ -44,7 +46,7 @@ type Cell = {
   isToday: boolean;
   isFuture: boolean;
   abs: number;
-  hebrewDay: number;
+  hebrewDay: string;
   marks: DayMarks | undefined;
 };
 
@@ -63,6 +65,26 @@ const MARK_ICON_SIZE = scaled(14);
 
 // A night onah opens at the previous day's shkia, so it is drawn on the evening cell before its own day.
 const cellOf = (onah: Onah) => (onah.kind === 'night' ? onah.abs - 1 : onah.abs);
+// The Hebrew day in a cell: in letters in Hebrew ("כ״ז"), with the month's name on its first day.
+function hebrewDayOf(hd: HDate, language: 'he' | 'en'): string {
+  const day = language === 'he' ? gematriya(hd.getDate()) : String(hd.getDate());
+  return hd.getDate() === 1 ? `${day} ${roshChodeshLabel(hd, language)}` : day;
+}
+
+// The Hebrew months a civil month spans: "חשון–כסלו תשפ״ז", "Elul 5786 – Tishrei 5787".
+function hebrewMonthsOf(month: DateTime, language: 'he' | 'en'): string {
+  const first = new HDate(month.startOf('month').toJSDate());
+  const last = new HDate(month.endOf('month').startOf('day').toJSDate());
+  const year = (hd: HDate) => (language === 'he' ? gematriya(hd.getFullYear() % 1000) : String(hd.getFullYear()));
+  const name = (hd: HDate) => roshChodeshLabel(hd, language);
+  if (first.getFullYear() !== last.getFullYear()) {
+    return `${name(first)} ${year(first)} – ${name(last)} ${year(last)}`;
+  }
+  return first.getMonth() === last.getMonth()
+    ? `${name(first)} ${year(last)}`
+    : `${name(first)}–${name(last)} ${year(last)}`;
+}
+
 const markIconOf = (kind: OnahKind): IconName => (kind === 'day' ? 'sun' : 'moon');
 
 function Mark({ icon, color }: { icon: IconName; color: string }) {
@@ -158,12 +180,12 @@ export default function TaharahCalendar() {
         isToday: day.hasSame(DateTime.fromJSDate(now), 'day'),
         isFuture: day.startOf('day') > DateTime.fromJSDate(now).startOf('day'),
         abs,
-        hebrewDay: HebcalService.getHebrewDate(date).day,
+        hebrewDay: hebrewDayOf(new HDate(date), language),
         marks: marksByDay.get(abs),
       };
     });
     return Array.from({ length: WEEKS }, (_, week) => cells.slice(week * 7, week * 7 + 7));
-  }, [ready, cursor, location, marksByDay, now]);
+  }, [ready, cursor, location, marksByDay, now, language]);
 
   const monthEmpty = ready && !weeks.some((week) => week.some((cell) => cell.inMonth && cell.marks));
   const monthLabel = (month: DateTime) => formatDate(month, 'LLLL yyyy', language);
@@ -194,7 +216,10 @@ export default function TaharahCalendar() {
             onPress={() => setCursor((prev) => prev.minus({ months: 1 }))}
             accessibilityLabel={monthLabel(cursor.minus({ months: 1 }))}
           />
-          <Text style={[typography.captionBold, { color: colors.text }]}>{monthLabel(cursor)}</Text>
+          <View style={styles.monthTitle}>
+            <Text style={[typography.captionBold, { color: colors.text }]}>{monthLabel(cursor)}</Text>
+            <Text style={[typography.small, { color: colors.goldText }]}>{hebrewMonthsOf(cursor, language)}</Text>
+          </View>
           <HeaderPill
             icon={forwardIcon(language)}
             onPress={() => setCursor((prev) => prev.plus({ months: 1 }))}
@@ -361,7 +386,9 @@ function DayCell({ cell, onPress }: { cell: Cell; onPress: () => void }) {
         </View>
       ) : null}
       <Text style={[typography.captionBold, { color: colors.text }]}>{cell.day.day}</Text>
-      <Text style={[typography.micro, { color: colors.textMuted }]}>{cell.hebrewDay}</Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit style={[typography.micro, { color: colors.textSub }]}>
+        {cell.hebrewDay}
+      </Text>
       <View style={styles.marks}>
         {marks?.onsets.length ? <View style={[styles.onsetDot, { backgroundColor: colors.gold }]} /> : null}
         {marks?.tevila ? <Mark icon="moon" color={colors.optional} /> : null}
@@ -385,6 +412,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  monthTitle: {
+    alignItems: 'center',
+    gap: scaled(2),
   },
   content: {
     paddingHorizontal: spacing.lg,
