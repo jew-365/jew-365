@@ -508,7 +508,7 @@ SCENES.end = (root) => {
   const logo = el('img', '', null, root); logo.src = 'logo.svg'; logo.style.cssText = 'position:absolute;left:340px;top:380px;width:400px;height:400px';
   const t1 = el('div', 'bigtext', 'יהודי 365', root); t1.style.cssText += ';top:880px;font-size:150px';
   const t2 = el('div', 'bigtext', 'כל מצווה – בזמנה', root); t2.style.cssText += ';top:1080px;font-size:76px;color:#A04A0C;font-weight:700';
-  const t3 = el('div', 'bigtext', 'בלי חשבון · הכול נשמר אצלך בטלפון', root); t3.style.cssText += ';top:1200px;font-size:40px;color:#69645D;font-weight:500';
+  const t3 = el('div', 'bigtext', 'בלי הרשמה · הכול נשמר אצלך בטלפון', root); t3.style.cssText += ';top:1200px;font-size:40px;color:#69645D;font-weight:500';
   const t4 = el('div', 'bigtext', '<span style="display:inline-block;padding:26px 56px;border-radius:999px;background:#1D2240;color:#FFFDF9;font-size:48px">זמין ב־Google Play</span>', root); t4.style.cssText += ';top:1320px';
   return (lt) => {
     const a = seg(lt, 0.1, 0.8, back); logo.style.transform = `scale(${lerp(0.3, 1, a)}) rotate(${lerp(-20, 0, a)}deg)`; logo.style.opacity = clamp(a * 2);

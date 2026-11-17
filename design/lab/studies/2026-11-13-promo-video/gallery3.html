@@ -53,8 +53,8 @@
 
 <div class="wrap">
   <header>
-    <h1>סבב 5: יום אחד, עם האופס</h1>
-    <p class="lede">״יום אחד״ במרכז, עם הרגע האפור של ״לפני ואחרי״: הזמן עובר, הסרט נגלל אחורה ל-05:52, והיום כולו עובר עם יהודי 365. קריינית, בלשון פנייה לגבר, וכל משפט נבדק הברה אחר הברה. כל התראה בסרטונים היא ההתראה האמיתית של האפליקציה, בשעה ובזמנים האמיתיים של ירושלים ביום רביעי, כ״ד בחשוון.</p>
+    <h1>סבב 5ב: יום אחד, עם האופס</h1>
+    <p class="lede">״יום אחד״ במרכז, עם הרגע האפור של ״לפני ואחרי״: הזמן עובר, הסרט נגלל אחורה ל-05:52, והיום כולו עובר עם יהודי 365. קריינית, בלשון פנייה לגבר, וכל משפט נבדק הברה אחר הברה. בסבב הזה הטקסט נכתב מחדש, קצר וחד יותר, ו״יהודי 365״ חזר לפתיחה. המילים ״גלילה״ ו״התראה״ הוצאו מהקריינות, ובמקום ״התראה״ נאמר ״התזכורת״. גם הקצב והמנגינה של הקריינית חיים יותר. כל התראה בסרטונים היא ההתראה האמיתית של האפליקציה, בשעה ובזמנים האמיתיים של ירושלים ביום רביעי, כ״ד בחשוון.</p>
   </header>
 
   <section>
@@ -64,9 +64,9 @@
 
   <section id="ipa-section">
     <h2>בדיקת ההגייה של הקריינית</h2>
-    <p class="lede" style="margin-bottom:14px">כל משפט הוקלט בכמה טייקים. מודל שמתמלל דיבור עברי להברות (<span dir="ltr">whisper-heb-ipa</span>) תמלל כל טייק, וההשוואה נעשתה מול ההגייה המדויקת בלשון זכר. נבחר הטייק הקרוב ביותר. מילים שהמנוע קרא בלשון נקבה (״שלך״ נקרא ״שֶׁלָּךְ״) נוסחו מחדש כך שיש להן קריאה אחת בלבד, למשל ״לפי המקום שבו אתה נמצא״.</p>
+    <p class="lede" style="margin-bottom:14px">כל משפט הוקלט בכמה טייקים. מודל שמתמלל דיבור עברי להברות (<span dir="ltr">whisper-heb-ipa</span>) תמלל כל טייק, וההשוואה נעשתה מול ההגייה המדויקת בלשון זכר. כל טייק נמדד גם לפי ״חיות״: כמה גובה הקול זז במשפט (בחצאי טון; מתחת ל-2.5 הקול נשמע מונוטוני) וכמה תנועות נאמרות בשנייה (מתחת ל-5 הקצב איטי). נבחר הטייק המדויק והחי ביותר. מילים שהמנוע קרא בלשון נקבה (״שלך״ נקרא ״שֶׁלָּךְ״) נוסחו מחדש כך שיש להן קריאה אחת בלבד, למשל ״לפי המקום שבו אתה נמצא״.</p>
     <div class="tablewrap"><table>
-      <thead><tr><th>המשפט</th><th>התאמה</th><th dir="ltr">מה נשמע (IPA)</th></tr></thead>
+      <thead><tr><th>המשפט</th><th>התאמה</th><th>מנגינה</th><th>קצב</th><th dir="ltr">מה נשמע (IPA)</th></tr></thead>
       <tbody id="ipa"></tbody>
     </table></div>
   </section>
@@ -140,7 +140,7 @@
     characterFace('r2' + key, { smile: 0.55 });
   });
   document.getElementById('ipa').innerHTML = IPA.filter(Boolean).map((r) =>
-    `<tr><td>${r.text}</td><td style="font-variant-numeric:tabular-nums">${Math.round(r.score * 100)}%</td><td dir="ltr" style="font-size:13px;color:var(--sub)">${r.heard}</td></tr>`).join('');
+    `<tr><td>${r.text}</td><td style="font-variant-numeric:tabular-nums">${Math.round((r.match ?? r.score) * 100)}%</td><td style="font-variant-numeric:tabular-nums">${r.spread ?? '–'}</td><td style="font-variant-numeric:tabular-nums">${r.rate ?? '–'}</td><td dir="ltr" style="font-size:13px;color:var(--sub)">${r.heard}</td></tr>`).join('');
   if (!IPA.length) document.getElementById('ipa-section').hidden = true;
   document.querySelectorAll('.eng').forEach((b) => b.addEventListener('click', () => {
     const video = document.getElementById('v-' + b.dataset.cut);

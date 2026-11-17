@@ -103,7 +103,7 @@ const page = readFileSync(join(HERE, 'gallery3.html'), 'utf8')
   .replace('/*CUTS*/[]', () => JSON.stringify(cuts))
   .replace('/*IPA*/[]', () => {
     const report = join(OUT, 'vo', 'woman', 'daymiss-ipa.json');
-    return existsSync(report) ? JSON.stringify(JSON.parse(readFileSync(report, 'utf8')).map((r) => r && { text: r.text, score: r.score, heard: r.heard })) : '[]';
+    return existsSync(report) ? JSON.stringify(JSON.parse(readFileSync(report, 'utf8')).map((r) => r && { text: r.text, score: r.score, match: r.paced?.match ?? r.match, spread: r.paced?.spread ?? r.spread, rate: r.paced?.rate ?? r.rate, heard: r.paced?.heard ?? r.heard })) : '[]';
   });
 writeFileSync(join(SITE, 'index.html'), page);
 console.log('wrote', SITE, cuts);
