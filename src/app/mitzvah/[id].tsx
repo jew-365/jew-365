@@ -4,6 +4,7 @@ import { openExternalUrl } from '@/services/externalFlow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { GuidePill } from '@/components/GuidePill';
+import { Banner } from '@/components/Banner';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { ChokAddonCard } from '@/components/ChokAddonCard';
@@ -71,7 +72,7 @@ export default function MitzvahDetailScreen() {
   const { colors } = useTheme();
   const { language, t } = useI18n();
   const router = useRouter();
-  const params = useLocalSearchParams<{ id: string; highlightContent?: string }>();
+  const params = useLocalSearchParams<{ id: string; highlightContent?: string; added?: string }>();
   const mitzvah = useMemo(() => findAnyMitzvah(params.id), [params.id]);
   const custom = useCustomMitzvotStore((s) => s.items[params.id]);
   const location = useUserStore((s) => s.location);
@@ -195,6 +196,12 @@ export default function MitzvahDetailScreen() {
   }, [mitzvah, showNext, reminders, window, location, settings, completions, skipped, quietHours, nagLevel, ticked]);
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'));
+  // A mitzvah just created from a template (`added=1`, the template sheet) can be taken back in one tap.
+  const undoAdd = () => {
+    goBack();
+    useCustomMitzvotStore.getState().remove(params.id);
+    useMitzvotStore.getState().removeMitzvah(params.id);
+  };
 
   if (!mitzvah) {
     return (
@@ -314,6 +321,12 @@ export default function MitzvahDetailScreen() {
       </ScreenHeader>
 
       <ScrollView ref={scrollRef} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        {params.added === '1' && custom?.template ? (
+          <View>
+            <Banner tone="safe" text={t('templates.addedBanner', { name })} />
+            <Button variant="secondary" icon="undo" label={t('templates.undo')} onPress={undoAdd} />
+          </View>
+        ) : null}
         <Card>
           <ListRow
             icon={iconFor(mitzvah.icon)}

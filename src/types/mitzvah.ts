@@ -108,6 +108,8 @@ export type CustomMitzvah = {
   icon?: string;
   // Minutes to perform it, for its last-chance point (absent: `CUSTOM_PERFORM_MIN_DEFAULT`).
   performMin?: number;
+  // The id of the template of CUSTOM_TEMPLATES it was created from, so the gallery marks that template added.
+  template?: string;
   createdAt: number;
 };
 

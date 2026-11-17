@@ -945,4 +945,44 @@ describe('Mitzvah screen', () => {
       },
     );
   });
+  describe('a mitzvah just added from a template', () => {
+    const ID = 'custom_1800000000000_tpl';
+    const addFromTemplate = (template?: string) => {
+      useCustomMitzvotStore.getState().add({
+        id: ID,
+        name: 'צדקה יומית',
+        startHHMM: '08:00',
+        endHHMM: '14:00',
+        skipOn: ['shabbat', 'yomtov'],
+        reminders: [{ anchor: 'start', offsetMin: 0, label: 'צדקה יומית' }],
+        template,
+        createdAt: 1,
+      });
+      useMitzvotStore.getState().setEnabled(ID, true);
+    };
+
+    afterEach(() => useCustomMitzvotStore.getState().reset());
+
+    it('offers to undo the add, and the undo removes the mitzvah and goes back', () => {
+      addFromTemplate('tzedakah');
+      renderMitzvah({ id: ID, added: '1' });
+      expect(screen.getByText('נוספה: צדקה יומית')).toBeTruthy();
+      fireEvent.press(screen.getByRole('button', { name: 'ביטול ההוספה' }));
+      expect(mockBack).toHaveBeenCalledTimes(1);
+      expect(useCustomMitzvotStore.getState().items[ID]).toBeUndefined();
+      expect(useMitzvotStore.getState().activeMitzvot[ID]).toBeUndefined();
+    });
+
+    it('offers no undo on a later visit', () => {
+      addFromTemplate('tzedakah');
+      renderMitzvah({ id: ID });
+      expect(screen.queryByRole('button', { name: 'ביטול ההוספה' })).toBeNull();
+    });
+
+    it('offers no undo for a mitzvah made in the form', () => {
+      addFromTemplate();
+      renderMitzvah({ id: ID, added: '1' });
+      expect(screen.queryByRole('button', { name: 'ביטול ההוספה' })).toBeNull();
+    });
+  });
 });

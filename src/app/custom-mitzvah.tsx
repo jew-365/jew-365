@@ -49,6 +49,7 @@ import {
   cleanContentBlocks,
   currentSchedule,
   scheduleDateLabel,
+  firstReminder,
   scheduleOnSave,
   siddurTextName,
   streakEndedOnSave,
@@ -63,7 +64,7 @@ import {
   isNagLevel,
   validPerformMin,
 } from '@/utils/nagging';
-import { CustomSchedule, NagLevel, Nusach, Reminder, SkipContext, Weekday } from '@/types/mitzvah';
+import { CustomSchedule, NagLevel, Nusach, SkipContext, Weekday } from '@/types/mitzvah';
 import { MitzvahTextId, SiddurTextId } from '@/types/siddur';
 
 type ScheduleMode = CustomSchedule['mode'];
@@ -77,12 +78,6 @@ function siddurChoices(nusach: Nusach): SiddurTextId[] {
     ...(Object.keys(SIDDUR_TEXTS) as MitzvahTextId[]),
     ...SIDDUR_GROUPS.flatMap((group) => standaloneTextsIn(group, nusach)),
   ];
-}
-
-// The one reminder a new custom mitzvah starts with, at the start of its time; the rest are added, moved and deleted on
-// its screen's timeline (the owner's call, 2026-11-05).
-function firstReminder(name: string): Reminder {
-  return { anchor: 'start', offsetMin: 0, label: name };
 }
 
 function Hint({ text, style }: { text: string; style?: StyleProp<TextStyle> }) {

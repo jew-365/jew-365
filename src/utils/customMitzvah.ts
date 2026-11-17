@@ -236,3 +236,9 @@ export function cleanContentBlocks(blocks: DraftBlock[]): ContentBlock[] | undef
   const cleaned = blocks.map(cleanContentBlock).filter((block): block is ContentBlock => block !== null);
   return cleaned.length ? cleaned : undefined;
 }
+
+// The one reminder a new custom mitzvah starts with, at the start of its time; the rest are added, moved and deleted on
+// its screen's timeline (the owner's call, 2026-11-05).
+export function firstReminder(name: string): Reminder {
+  return { anchor: 'start', offsetMin: 0, label: name };
+}

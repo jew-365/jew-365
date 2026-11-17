@@ -1,4 +1,5 @@
 import { CITIES } from '@/data/cities';
+import { CUSTOM_TEMPLATES, templateBenefitKey, templateNameKey } from '@/data/customTemplates';
 import { normalizeSearchText } from './searchText';
 import { placeCaption, placeName, searchPlaces, type PlaceIndex } from '@/data/places';
 import { iconFor, type IconName } from '@/components/MitzvahIcon';
@@ -100,6 +101,7 @@ export type SettingsSearchHref =
   | { pathname: '/(tabs)/more'; params: { open: 'halacha' } }
   | { pathname: '/guide'; params: { topic: string } }
   | { pathname: '/capabilities'; params: { goal: string } }
+  | { pathname: '/mitzvot'; params: { add: '1' } }
   | { pathname: '/(tabs)/settings'; params: { focus: 'location'; place: string } }
   | ScreenPath;
 
@@ -1644,6 +1646,20 @@ export function appContentItems({
       ),
       terms: [...inGroup.flatMap(textsOfName), ...textsOfName(name('library.title'))],
       href: '/mitzvot',
+    });
+  }
+  // Each template of the "add a mitzvah" sheet, opening the library with that sheet.
+  for (const template of CUSTOM_TEMPLATES) {
+    const benefit = name(templateBenefitKey(template.id));
+    items.push({
+      id: `template:${template.id}`,
+      kind: 'category',
+      icon: iconFor(template.icon),
+      title: name(templateNameKey(template.id)),
+      caption: withPrefix(name, 'settings.search.kind.template', benefit),
+      terms: textsOfName(name(templateNameKey(template.id))),
+      body: textsOfName(benefit),
+      href: { pathname: '/mitzvot', params: { add: '1' } },
     });
   }
   for (const group of SIDDUR_TAB_GROUPS) {

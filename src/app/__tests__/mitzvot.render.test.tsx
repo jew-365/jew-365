@@ -1,7 +1,9 @@
 const mockPush = jest.fn();
+let mockParams: { add?: string } = {};
 
 jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
+  useLocalSearchParams: () => mockParams,
   useRouter: () => ({ push: mockPush, replace: jest.fn(), back: jest.fn(), canGoBack: () => true }),
 }));
 
@@ -247,8 +249,12 @@ describe('Mitzvot library', () => {
     expect(screen.UNSAFE_getAllByType(MitzvahIcon).filter((icon) => icon.props.name === 'plus')).toHaveLength(1);
     expect(screen.queryByText('+')).toBeNull();
     expect(within(screen.getByTestId('library-scroll')).queryByRole('button', { name: ADD })).toBeNull();
+    expect(screen.queryByText('מה להוסיף?')).toBeNull();
     fireEvent.press(screen.getByRole('button', { name: ADD }));
+    expect(screen.getByText('מה להוסיף?')).toBeTruthy();
+    fireEvent.press(screen.getByText('מצווה משלי'));
     expect(mockPush).toHaveBeenCalledWith('/custom-mitzvah');
+    expect(screen.queryByText('מה להוסיף?')).toBeNull();
   });
 
   it('draws no active / available segmented control', () => {

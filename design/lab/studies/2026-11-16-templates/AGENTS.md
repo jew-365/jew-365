@@ -14,7 +14,7 @@
 ## Local Contracts
 
 - Published as one private gallery Artifact: https://claude.ai/artifact/7sPdTnjvUbbicqztMYRgm2 (2026-11-16). Republish to the same link after a change.
-- The owner's picks: none yet.
+- The owner's pick, 2026-11-17 ("לך עם ההמלצה שלך"): direction א, and the page's recommendation on each decision: one tap adds at once with an undo on the mitzvah's screen, all eleven templates as proposed, no field for a time by a zman (Tehillim is saved as 09:30 to 16:30), a Sunday to Friday template left as it is on Friday, and a template already added marked and opening the mitzvah it made. Built in the app the same day ([../../../../src/components/TemplateSheet.tsx](../../../../src/components/TemplateSheet.tsx), [../../../../src/data/customTemplates.ts](../../../../src/data/customTemplates.ts)); one difference from the page: the capabilities screen's personal goal opens the library with the sheet, not a sheet over the capabilities screen.
 - Every template icon is one of `CUSTOM_ICON_CHOICES` of [../../../../src/data/customIcons.ts](../../../../src/data/customIcons.ts); [gen-data.mjs](gen-data.mjs) throws otherwise.
 - No template makes a halachic claim beyond a plain habit name, and every time is modest and editable. A template anchored to a zman (Tehillim, from the latest Shacharit to sunset) needs a field the custom form does not have; the page marks it as a new field.
 

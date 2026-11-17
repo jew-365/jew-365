@@ -104,7 +104,7 @@ export const CAPABILITIES: readonly Capability[] = [
   { id: 'schedule', goal: 'calendar', icon: 'calendar', action: route('/schedule') },
   { id: 'tracking', goal: 'tracking', icon: 'star', action: route('/(tabs)/history') },
   { id: 'weeklyReport', goal: 'tracking', icon: 'night', action: { kind: 'setting', focus: 'weeklyReport' } },
-  { id: 'custom', goal: 'personal', icon: 'custom', action: route('/custom-mitzvah') },
+  { id: 'custom', goal: 'personal', icon: 'custom', action: route({ pathname: '/mitzvot', params: { add: '1' } }) },
   { id: 'quietHours', goal: 'personal', icon: 'bell', action: { kind: 'setting', focus: 'quietBefore' } },
   { id: 'compass', goal: 'tools', icon: 'compass', action: route('/compass') },
   {
