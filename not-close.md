@@ -909,7 +909,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** the calendar shows the Hebrew months under the civil month (`תשרי–חשון תשפ״ז`) and each cell's Hebrew day in letters, with the month's name on its first day; every date on the dashboard (the stage hint, the perisha onot, the recent entries, the bedika sheet) carries its Hebrew date through `formatDayLineWithHebrew()` of [src/components/DayStepper.tsx](src/components/DayStepper.tsx), a night onah and an event by their own Hebrew day. `hebrewDateLabel()` moved to [src/data/roshChodesh.ts](src/data/roshChodesh.ts).
   - **Expected result:** no taharah date without its Hebrew date.
   - **Done:** 2026-11-17. Two cases in [src/app/__tests__/taharahCalendarEdit.render.test.tsx](src/app/__tests__/taharahCalendarEdit.render.test.tsx) (the month band and the cells; a history row reading `יום שלישי · 20 אוקטובר · ט׳ בחשון · עונת יום`), green under `pnpm test:tz`; the full `pnpm test` green (6914), `pnpm typecheck`, `pnpm lint`, `pnpm check:dox`, the guide's web copy rebuilt. Not checked on a phone yet.
-  - **Status:** Version: OTA, expected with the next update · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `1f258d6` feat(taharah): the Hebrew date beside every taharah date, and the Hebrew months and days on its calendar · Pushed: yes · Live: no (in no update yet) · Channel: none
 
 ### High — Discoverability, phase 0
 
