@@ -455,8 +455,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'עדכונים', en: 'Updates' },
     body: [
       {
-        he: 'רוב העדכונים מגיעים לבד: האפליקציה בודקת אם יש עדכון בכל פתיחה וחזרה אליה ומורידה אותו ברקע. כשהוא מוכן מופיע הפס ״גרסה חדשה של האפליקציה מוכנה״, והקשה עליו טוענת אותה. גם כשהאפליקציה ברקע מגיעה התראה כשעדכון מוכן, כשההתראות פעילות, לא בשבת ובחג ולא בשעות בלי התראות.',
-        en: 'Most updates arrive by themselves: the app checks for one each time it opens or comes back, and downloads it in the background. When it is ready a strip says “A new version of the app is ready”, and tapping it loads it. Even with the app in the background, a notification says when an update is ready, while notifications are on, never on Shabbat or Yom Tov and never in hours without notifications.',
+        he: 'רוב העדכונים מגיעים לבד: האפליקציה בודקת אם יש עדכון בכל פתיחה וחזרה אליה ומורידה אותו ברקע. כשהוא מוכן מופיע הפס ״גרסה חדשה של האפליקציה מוכנה״, והקשה עליו טוענת אותה; גם בלי הקשה, עדכון שכבר ירד נטען לבד בפעם הבאה שחוזרים לאפליקציה, לא בשבת ובחג. גם כשהאפליקציה ברקע מגיעה התראה כשעדכון מוכן, כשההתראות פעילות, לא בשבת ובחג ולא בשעות בלי התראות.',
+        en: 'Most updates arrive by themselves: the app checks for one each time it opens or comes back, and downloads it in the background. When it is ready a strip says “A new version of the app is ready”, and tapping it loads it; without a tap, an update that is already downloaded loads by itself the next time you come back to the app, never on Shabbat or Yom Tov. Even with the app in the background, a notification says when an update is ready, while notifications are on, never on Shabbat or Yom Tov and never in hours without notifications.',
       },
       {
         he: 'מספר הגרסה מופיע בהגדרות ← אודות ויצירת קשר, בצורה גרסה־מספר עדכון. מה שהשתנה בכל עדכון מופיע ב״מה חדש״ בראש המדריך הזה. שינויים שדורשים גרסה חדשה של האפליקציה מגיעים דרך החנות.',
@@ -496,6 +496,16 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 ];
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
+  {
+    label: '1.0.21-20',
+    date: '2026-11-17',
+    items: [
+      {
+        he: 'עדכון שכבר ירד נטען לבד בפעם הבאה שחוזרים לאפליקציה, גם בלי להקיש על הפס הירוק. לא בשבת ובחג.',
+        en: 'An update that is already downloaded loads by itself the next time you come back to the app, without a tap on the green strip. Never on Shabbat or Yom Tov.',
+      },
+    ],
+  },
   {
     label: '1.0.21-19',
     date: '2026-11-17',

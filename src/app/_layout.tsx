@@ -32,7 +32,9 @@ import { useUserStore } from '@/stores/useUserStore';
 import { applyGenderDefaultsToNew } from '@/stores/taharahOptIn';
 import { initNotificationHandlers } from '@/services/NotificationScheduler';
 import { captureException } from '@/services/crashReporting';
+import * as Updates from 'expo-updates';
 import { reloadApp } from '@/services/appReload';
+import { reloadIntoUpdate } from '@/services/appUpdates';
 import { bootHeartbeat, markBoot, noteBoot } from '@/services/bootTrace';
 import { reconcileChokInstall } from '@/services/ChokContentService';
 import { reconcileShnayimInstall } from '@/services/ShnayimContentService';
@@ -224,8 +226,11 @@ function RootInner() {
   // The app always opens on home (the owner's call, 2026-11-10): every return from the background unwinds every
   // pushed screen and selects the home tab, unless the app itself opened what it left for (a permission dialog,
   // the settings, the share sheet, a link: externalFlow's hold) or a notification tap opened a screen just now.
-  const returnState = useRef({ isOnboarded, quiet });
-  returnState.current = { isOnboarded, quiet };
+  // A return that goes home also loads an update that was already downloaded (the owner's call, 2026-11-17: some
+  // users miss the ready-update banner); a failed reload leaves the app on home with the banner.
+  const { isUpdatePending } = Updates.useUpdates();
+  const returnState = useRef({ isOnboarded, quiet, isUpdatePending });
+  returnState.current = { isOnboarded, quiet, isUpdatePending };
   useEffect(() => {
     let awayAt: number | null = null;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -243,6 +248,7 @@ function RootInner() {
       timer = setTimeout(() => {
         timer = null;
         if (notificationNavigatedWithin(NOTIFICATION_WINS_MS)) return;
+        if (returnState.current.isUpdatePending) void reloadIntoUpdate();
         try {
           if (router.canDismiss()) router.dismissAll();
           router.navigate('/(tabs)/home');

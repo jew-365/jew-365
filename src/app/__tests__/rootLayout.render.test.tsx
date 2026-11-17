@@ -25,10 +25,12 @@ jest.mock('expo-splash-screen', () => ({
   hideAsync: () => mockHideSplash(),
 }));
 jest.mock('expo-updates', () => ({
-  useUpdates: () => ({ isUpdatePending: false }),
-  reloadAsync: () => Promise.resolve(),
+  useUpdates: () => ({ isUpdatePending: mockUpdatePending() }),
+  reloadAsync: () => mockReload(),
   isEnabled: false,
 }));
+const mockUpdatePending = jest.fn(() => false);
+const mockReload = jest.fn(() => Promise.resolve());
 jest.mock('@sentry/react-native', () => ({ wrap: (component: unknown) => component }));
 const mockFonts = jest.fn((): [boolean, Error | null] => [true, null]);
 jest.mock('@expo-google-fonts/rubik/useFonts', () => ({ useFonts: () => mockFonts() }));
@@ -438,6 +440,8 @@ describe('the root layout returns to home', () => {
     mockRouter.dismissAll.mockClear();
     mockRouter.canDismiss.mockReturnValue(true);
     mockNotificationRecent.mockReturnValue(false);
+    mockUpdatePending.mockReturnValue(false);
+    mockReload.mockClear();
     listeners = [];
     jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) => {
       listeners.push(listener as (state: string) => void);
@@ -501,8 +505,43 @@ describe('the root layout returns to home', () => {
 
   it('does nothing before onboarding is done', async () => {
     useUserStore.setState({ isOnboarded: false });
+    mockUpdatePending.mockReturnValue(true);
     await away(10 * 60 * 1000);
     expect(mockRouter.navigate).not.toHaveBeenCalledWith('/(tabs)/home');
+    expect(mockReload).not.toHaveBeenCalled();
+  });
+
+  it('loads a downloaded update on the return, and no reload without one', async () => {
+    await away(2000);
+    expect(mockReload).not.toHaveBeenCalled();
+    mockUpdatePending.mockReturnValue(true);
+    await act(async () => {});
+    send('background');
+    jest.setSystemTime(Date.now() + 2000);
+    send('active');
+    act(() => jest.advanceTimersByTime(RETURN_HOME_DELAY_MS));
+    expect(mockReload).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps a downloaded update for later on a return from something the app opened', async () => {
+    mockUpdatePending.mockReturnValue(true);
+    await away(3 * 60 * 1000, () => holdScreenOnReturn());
+    expect(mockReload).not.toHaveBeenCalled();
+  });
+
+  it('keeps a downloaded update for later when a notification tap opened a screen', async () => {
+    mockUpdatePending.mockReturnValue(true);
+    mockNotificationRecent.mockReturnValue(true);
+    await away(2000);
+    expect(mockReload).not.toHaveBeenCalled();
+  });
+
+  it('keeps a downloaded update for later inside a holy block', async () => {
+    jest.setSystemTime(at(J, '2026-10-31T10:00'));
+    useUserStore.setState({ locationStatus: 'ready' });
+    mockUpdatePending.mockReturnValue(true);
+    await away(2000);
+    expect(mockReload).not.toHaveBeenCalled();
   });
 });
 

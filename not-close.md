@@ -526,10 +526,14 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done:** 2026-11-10: the card's colour follows the part of the day only (dawn, morning, noon, evening, night), a muted gradient drawn at 0.72 over the land so the sky shows through; white text holds 4.5:1 on it every 10 minutes of three days of the year (`src/theme/__tests__/periodTone.test.ts` (since removed)). Checked in the web build at 06:10, 15:40 and 20:30. Verified: `typecheck`, `lint`, `check:dox`, the full suite (6676 passed), `test:tz` on the tone, the card and the guide.
   - **Status:** 1.0.21 · Committed: `58fc45e` fix(home): the card's colour follows the time of day and lets the sky show through · Pushed: yes · Live: preview `1.0.21-74` (group `31498385-82ea-4ab0-a100-1dd97f14aa4f`, from `58fc45e`, 2026-11-10); production no · Production Android: `1.0.21-18` (group `7cac54fe-8e51-477f-aa30-f15a5499f0bf`, from `37b90c8`, 2026-11-17, Android only); iOS production still `1.0.21-17` until Apple approves 1.0.21 · Channel: preview
 
-- [ ] Apply a downloaded update by itself on the return to the app (deferred)
+- [ ] Apply a downloaded update by itself on the return to the app
   - **Flag:** `OTA`.
-  - **Source:** the owner's question of 2026-11-10: some users miss the green ready-update banner. Proposed: reload into a downloaded update on the return from the background, as the return to home already does, never after a flow the app opened (`holdCovers()`) nor inside a holy block, the banner kept; a wait at a cold launch (`fallbackToCacheTimeout`) would need a build. The owner's answer the same day: "לא כרגע" (not now).
-  - **Status:** not started · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Source:** the owner's question of 2026-11-10: some users miss the green ready-update banner. The owner's answer that day was "לא כרגע"; on 2026-11-17 the owner brought it back ("תחזיר").
+  - **What it is:** the root layout's return to home ([src/app/_layout.tsx](src/app/_layout.tsx)) also reloads into an update that was already downloaded when the app came back; the banner stays for an update that finishes downloading while the app is open. A wait at a cold launch (`fallbackToCacheTimeout`) would need a build and is not part of this.
+  - **What it solves:** a user who never taps the banner stays on an old bundle until the app is killed.
+  - **Expected result:** with an update downloaded, leaving the app and coming back loads it; never after a flow the app opened (`holdCovers()`), a notification tap that opened a screen, inside a holy block or before onboarding.
+  - **Done:** 2026-11-17. Five cases in the `the root layout returns to home` block of [src/app/__tests__/rootLayout.render.test.tsx](src/app/__tests__/rootLayout.render.test.tsx) (a reload with a pending update and none without, none on a held return, after a notification tap, inside a holy block and before onboarding), the guide's updates topic and the WHATS_NEW entry `1.0.21-20`. Not checked on a phone: only a real update on a device can show the reload.
+  - **Status:** Version: OTA, expected with the next update · Committed: no · Pushed: no · Live: no · Channel: none
 
 - [ ] The carousel's star and fill that work
   - **Flag:** `OTA`.
