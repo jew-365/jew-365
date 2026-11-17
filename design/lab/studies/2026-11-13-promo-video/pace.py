@@ -1,8 +1,10 @@
-"""Brisker narration (round 5b, 2026-11-17): the owner found the voice too slow.
+"""A slightly brisker narration (round 5b, 2026-11-17).
 
 For each line of a variant, after tts_ipa.py: every pause inside the line longer than MAX_PAUSE is shortened to it,
-then the line is stretched with ffmpeg's rubberband filter (tempo only, the pitch kept) to TARGET vowels a second,
-never faster than MAX_TEMPO and never slower than it was. The vowels are counted in the line's wanted IPA from
+then the line is sped up with ffmpeg's atempo filter (time-domain, the pitch kept) toward TARGET vowels a second,
+never faster than MAX_TEMPO and never slower than it was. The owner heard the first pass (rubberband, a phase
+vocoder, up to 1.25 times toward 6 vowels a second) as metallic and too fast, so the nudge stays small: a faster
+narration comes from a brisker reference (tts_liveref.py), not from stretching. The vowels are counted in the line's wanted IPA from
 <variant>-ipa.json. The untouched takes are kept as <variant>-<n>.raw.wav, so a rerun starts from them.
 
 With IPA_MODEL set (the whisper-heb-ipa folder), each paced line is transcribed again and its match and pitch spread
@@ -23,7 +25,7 @@ from pathlib import Path
 import numpy as np
 import soundfile as sf
 
-TARGET, MAX_TEMPO, MAX_PAUSE = 6.0, 1.25, 0.2
+TARGET, MAX_TEMPO, MAX_PAUSE = 5.3, 1.08, 0.25
 
 out, voice, variant = Path(sys.argv[1]), sys.argv[2], sys.argv[3]
 folder = out / 'vo' / voice
@@ -87,7 +89,7 @@ for n, line in enumerate(lines):
     if tempo > 1.001:
         tmp = folder / f'{variant}-{n}.tmp.wav'
         subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', str(wav_path), '-af',
-                        f'rubberband=tempo={tempo:.3f}:pitchq=quality:transients=smooth', str(tmp)], check=True)
+                        f'atempo={tempo:.3f}', str(tmp)], check=True)
         tmp.replace(wav_path)
     final = sf.info(wav_path).duration
     line['seconds'] = round(final, 3)
