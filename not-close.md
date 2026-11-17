@@ -232,10 +232,12 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
 
 ### Medium — Chok LeYisrael source defects
 
-- [ ] Decide on the Torat Emet text defects
-  - **What it is:** The 2026-10-23 cross-check against the old raktora text found defects in Torat Emet itself: the Onkelos of Numbers 26:22 and 31:44 lacks "וַחֲמֵשׁ מְאָה", two words are run together in Numbers 2:12 (צוּרִישַׁדָּֽי) and 7:54 (פְּדָהצֽוּר), the Onkelos of Leviticus 4:5 reads וְיִםַב for וְיִסַב, and spacing glitches remain in the Onkelos of Leviticus 4:7 and 4:34. The build fixes markup by rule only, never text. Options: report them to Torat Emet, or add a reviewed text-patch list to the build.
+- [ ] Correct the Torat Emet text defects in the build
+  - **What it is:** The 2026-10-23 cross-check against the old raktora text found defects in Torat Emet itself. The owner's decision, 2026-11-17: "לתקן אצלינו". A scan of every Onkelos verse of the source against the Onkelos Sefaria prints found the two listed classes throughout, so the build now corrects 85 places, all in Targum Onkelos ([scripts/chok/textPatches.js](scripts/chok/textPatches.js)): 27 words cut by a space or a line break, 52 colons in place of a sheva or a space, 4 final mems in place of a samekh, one stray letter after a verse, and the missing "וַחֲמֵשׁ מְאָה" of Numbers 26:22. Two of the items first listed were not defects and stay as printed: Numbers 2:12 and 7:54 match the Masoretic text, and the Onkelos of Numbers 31:44 has no five hundred, as the verse has none.
   - **What it solves:** A reader of those verses sees the correct text.
-  - **Expected result:** The user's decision, and either a sent report or a patch list with tests.
+  - **Expected result:** a patch list with tests; the add-on's content version rises and installs are offered the update.
+  - **Done:** 2026-11-17. `pnpm chok:build` writes content version 3 (41 parashiyot changed, each with its gzip) and a second run writes nothing; `pnpm test -- scripts/chok` green (65 tests: each patch found once, none left in the source as the build reads it, the count in the licence note); a rescan of [docs/chok/](docs/chok) finds no mid-word colon or final letter in any verse. Not read by a rav or a second reader; the spelling follows the source, checked against Sefaria's consonants.
+  - **Status:** Version: content version 3 of the add-on · Committed: no · Pushed: no · Live: no, GitHub Pages serves it after the push to `main` · Channel: Pages
 
 ### Low — Chok LeYisrael follow-ups
 

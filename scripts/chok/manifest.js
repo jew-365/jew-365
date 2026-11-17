@@ -1,4 +1,5 @@
 const path = require('path');
+const { TEXT_PATCHES } = require('./textPatches');
 
 const TEAMIM = false;
 
@@ -114,6 +115,7 @@ module.exports = {
   MANIFEST_CREDIT,
   LICENSE,
   DEDICATION,
+  TEXT_PATCHES,
   SITE_DIR,
   assetSlug,
   assetFileName,

@@ -4,8 +4,15 @@ const path = require('path');
 const zlib = require('zlib');
 const { Buffer } = require('buffer');
 const { createHash } = require('crypto');
-const { readSources, readParashiyot, buildOutputs, nextContentVersion, licenseText } = require('../build');
-const { PARASHIYOT, SITE_DIR, assetGzFileName } = require('../manifest');
+const {
+  applyTextPatches,
+  readSources,
+  readParashiyot,
+  buildOutputs,
+  nextContentVersion,
+  licenseText,
+} = require('../build');
+const { PARASHIYOT, SITE_DIR, TEXT_PATCHES, assetGzFileName, sourceFiles } = require('../manifest');
 const { SLOTS } = require('../validate');
 
 jest.setTimeout(120000);
@@ -49,6 +56,38 @@ describe('readSources', () => {
   it('names the missing nikud files', () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'chok-'));
     expect(() => readSources(false, dir)).toThrow(/^source files missing: y_hok10\.txt/);
+  });
+});
+
+describe('applyTextPatches', () => {
+  const patches = [
+    { file: 'a.txt', ref: 'one', find: 'abc', replace: 'abd' },
+    { file: 'b.txt', ref: 'two', find: 'xyz', replace: 'xy' },
+  ];
+
+  it('replaces the text of the patches of its own file only', () => {
+    expect(applyTextPatches('1 abc 2 xyz', 'a.txt', patches)).toBe('1 abd 2 xyz');
+    expect(applyTextPatches('1 abc 2 xyz', 'c.txt', patches)).toBe('1 abc 2 xyz');
+  });
+
+  it('fails when the text is absent or appears twice, naming the file and the verse', () => {
+    expect(() => applyTextPatches('nothing', 'a.txt', patches)).toThrow(
+      'a.txt: the text patch of one found its text 0 times, not once',
+    );
+    expect(() => applyTextPatches('abc abc', 'a.txt', patches)).toThrow('found its text 2 times, not once');
+  });
+
+  it('leaves no defect in the committed source as the build reads it, and counts them in the license note', () => {
+    const names = sourceFiles();
+    const texts = readSources();
+    expect(TEXT_PATCHES).toHaveLength(85);
+    expect(licenseText()).toContain('The processing corrects 85 typing errors in Targum Onkelos');
+    expect(licenseText()).toContain('בעיבוד תוקנו 85 שגיאות הקלדה בתרגום אונקלוס');
+    for (const { file, find, replace } of TEXT_PATCHES) {
+      const text = texts[names.indexOf(file)];
+      expect(text.includes(find)).toBe(false);
+      expect(text.includes(replace)).toBe(true);
+    }
   });
 });
 

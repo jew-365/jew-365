@@ -13,6 +13,7 @@ const {
   MANIFEST_CREDIT,
   LICENSE,
   DEDICATION,
+  TEXT_PATCHES,
   sourceFiles,
   assetFileName,
   assetGzFileName,
@@ -41,7 +42,17 @@ function readSources(teamim = TEAMIM, dir = SOURCE_DIR) {
       `source files missing: ${missing.join(', ')}. They are committed in scripts/chok/source; restore them with git checkout -- scripts/chok/source`,
     );
   }
-  return names.map((name) => decodeSource(fs.readFileSync(path.join(dir, name))));
+  return names.map((name) => applyTextPatches(decodeSource(fs.readFileSync(path.join(dir, name))), name));
+}
+
+function applyTextPatches(text, name, patches = TEXT_PATCHES) {
+  return patches
+    .filter((patch) => patch.file === name)
+    .reduce((patched, { ref, find, replace }) => {
+      const count = patched.split(find).length - 1;
+      if (count !== 1) throw new Error(`${name}: the text patch of ${ref} found its text ${count} times, not once`);
+      return patched.replace(find, replace);
+    }, text);
 }
 
 function readParashiyot() {
@@ -90,11 +101,13 @@ function licenseText(teamim = TEAMIM) {
     'חק לישראל, מתוך מאגר תורת אמת',
     `${MANIFEST_CREDIT.he}.`,
     `קובצי ה-JSON בתיקייה זו, הרגילים והדחוסים ב-gzip, הם עיבוד של יהודי 365 לטקסט של חק לישראל ממאגר תורת אמת (${marksHe}), ומפורסמים תחת אותו רישיון: ${LICENSE.name} (ייחוס, שימוש לא מסחרי, שיתוף זהה).`,
+    `בעיבוד תוקנו ${TEXT_PATCHES.length} שגיאות הקלדה בתרגום אונקלוס (מילה שנחתכה לשתיים, נקודתיים במקום שווא או רווח, אות שגויה).`,
     `נוסח הרישיון: ${LICENSE.urlHe}`,
     '',
     'Chok LeYisrael, from the Torat Emet database',
     `${MANIFEST_CREDIT.en}.`,
     `The JSON files in this folder, plain and gzipped, are Jew 365's processing of the Chok LeYisrael text of the Torat Emet database (${marksEn}), published under the same license: ${LICENSE.name} (Attribution, NonCommercial, ShareAlike).`,
+    `The processing corrects ${TEXT_PATCHES.length} typing errors in Targum Onkelos (a word cut in two, a colon in place of a vowel or a space, a wrong letter).`,
     `License: ${LICENSE.url}`,
     '',
   ].join('\n');
@@ -181,4 +194,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { readSources, readParashiyot, buildOutputs, nextContentVersion, licenseText };
+module.exports = { applyTextPatches, readSources, readParashiyot, buildOutputs, nextContentVersion, licenseText };

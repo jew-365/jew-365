@@ -504,6 +504,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         he: 'עדכון שכבר ירד נטען לבד בפעם הבאה שחוזרים לאפליקציה, גם בלי להקיש על הפס הירוק. לא בשבת ובחג.',
         en: 'An update that is already downloaded loads by itself the next time you come back to the app, without a tap on the green strip. Never on Shabbat or Yom Tov.',
       },
+      {
+        he: 'חק לישראל: תוקנו 85 שגיאות הקלדה בתרגום אונקלוס (מילים שנחתכו לשתיים, נקודתיים במקום שווא או רווח). במסך המצווה מוצע עדכון של התוסף.',
+        en: 'Chok LeYisrael: 85 typing errors in Targum Onkelos are corrected (words cut in two, a colon in place of a vowel or a space). The mitzvah screen offers the add-on update.',
+      },
     ],
   },
   {
