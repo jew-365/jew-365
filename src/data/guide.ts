@@ -54,7 +54,10 @@ export type GuideTopic = {
 
 export type WhatsNewLabel = `${number}.${number}.${number}-${number}`;
 
-export type WhatsNewEntry = { label: WhatsNewLabel; date: string; items: readonly GuideText[] };
+// An item marked `taharahOnly` is shown only to a user family purity is offered to, as the taharah topic is.
+export type WhatsNewItem = GuideText & { taharahOnly?: true };
+
+export type WhatsNewEntry = { label: WhatsNewLabel; date: string; items: readonly WhatsNewItem[] };
 
 export type GuideListGroup = { key: string; label: string | null; items: readonly string[] };
 
@@ -493,6 +496,22 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 ];
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
+  {
+    label: '1.0.21-19',
+    date: '2026-11-17',
+    items: [
+      {
+        he: 'טהרת המשפחה: את היום של רישום אפשר לבחור ב״בחירה מהלוח״ בהקשה אחת, גם חודשים אחורה, ובלוח הטהרה הקשה על יום מראה מה רשום בו, עם מחיקה, ומאפשרת לרשום בו ראייה, הפסק טהרה, טבילה או השהיה.',
+        en: 'Family purity: the day of an entry can be chosen with Pick from the calendar in one tap, months back too, and in the taharah calendar a tap on a day shows what is recorded on it, with a delete, and records an onset, a hefsek tahara, a tevila or a pause on it.',
+        taharahOnly: true,
+      },
+      {
+        he: 'טהרת המשפחה: ליד כל תאריך במסך הטהרה כתוב גם התאריך העברי, ובלוח הטהרה מופיעים החודשים העבריים והימים באותיות.',
+        en: 'Family purity: every date on the taharah screen carries its Hebrew date, and the taharah calendar shows the Hebrew months and days.',
+        taharahOnly: true,
+      },
+    ],
+  },
   {
     label: '1.0.21-18',
     date: '2026-11-09',
@@ -1007,6 +1026,13 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
 
 export function latestWhatsNew(entries: readonly WhatsNewEntry[] = WHATS_NEW, count = GUIDE_WHATS_NEW_SHOWN) {
   return entries.slice(0, count);
+}
+
+// The entries a user sees: the items family purity hides dropped, and an entry left empty with them.
+export function visibleWhatsNew(taharahVisible: boolean, entries: readonly WhatsNewEntry[] = WHATS_NEW) {
+  return entries
+    .map((entry) => ({ ...entry, items: entry.items.filter((item) => taharahVisible || !item.taharahOnly) }))
+    .filter((entry) => entry.items.length > 0);
 }
 
 export function whatsNewHeading(entry: WhatsNewEntry, language: AppLanguage): string {

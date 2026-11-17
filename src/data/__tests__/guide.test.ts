@@ -296,3 +296,30 @@ describe('guide web copy', () => {
     expect(fs.readFileSync(target, 'utf8').replace(/\r\n/g, '\n')).toBe(html);
   });
 });
+
+describe("what's new kept from a user family purity is not offered to", () => {
+  const { visibleWhatsNew, WHATS_NEW: entries } = jest.requireActual<typeof import('../guide')>('../guide');
+  const { newestWhatsNewLabel } = jest.requireActual<typeof import('@/utils/homeMessages')>('@/utils/homeMessages');
+  const sample = [
+    { label: '9.9.9-2' as const, date: '2026-11-17', items: [{ he: 'א', en: 'a', taharahOnly: true as const }] },
+    {
+      label: '9.9.9-1' as const,
+      date: '2026-11-16',
+      items: [
+        { he: 'ב', en: 'b' },
+        { he: 'ג', en: 'c', taharahOnly: true as const },
+      ],
+    },
+  ];
+
+  it('drops the family purity items, and an entry they leave empty', () => {
+    expect(visibleWhatsNew(false, sample)).toEqual([{ ...sample[1], items: [{ he: 'ב', en: 'b' }] }]);
+    expect(visibleWhatsNew(true, sample)).toEqual(sample);
+  });
+
+  it("points home's what's-new message only at an entry the user sees", () => {
+    const newestShared = entries.find((entry) => entry.items.some((item) => !item.taharahOnly))!.label;
+    expect(newestWhatsNewLabel(false)).toBe(newestShared);
+    expect(newestWhatsNewLabel(true)).toBe(entries[0].label);
+  });
+});

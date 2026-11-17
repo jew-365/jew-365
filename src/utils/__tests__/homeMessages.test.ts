@@ -17,7 +17,7 @@ import {
   whatsNewMessage,
 } from '../homeMessages';
 import { civilHebrewDayAt } from '../taharah/onot';
-import { WHATS_NEW } from '@/data/guide';
+import { visibleWhatsNew } from '@/data/guide';
 
 const J = CITIES[0];
 
@@ -55,7 +55,7 @@ describe('streakMessage', () => {
 
 describe('whatsNewMessage and nextWhatsNew', () => {
   const DAY = 86_400_000;
-  const newest = WHATS_NEW[0].label;
+  const newest = visibleWhatsNew(false)[0].label;
 
   it('3b. stores the newest label as seen on a fresh install and shows no row', () => {
     const stamped = nextWhatsNew(null, 1000)!;

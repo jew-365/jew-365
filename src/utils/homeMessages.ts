@@ -12,7 +12,7 @@ import { appDay, appDayEnd, locationNoon } from '@/utils/locationDay';
 import { holyBlockLabelKeys } from '@/utils/skipRules';
 import { nextStreakGoal, STREAK_GOALS } from '@/utils/streakGoal';
 import { civilHebrewDayAt } from '@/utils/taharah/onot';
-import { WHATS_NEW } from '@/data/guide';
+import { visibleWhatsNew } from '@/data/guide';
 import type { WhatsNewState } from '@/utils/discovery';
 
 type Translate = (scope: string, options?: Record<string, unknown>) => string;
@@ -55,8 +55,10 @@ export function streakMessage(streak: number, t: Translate): HomeMessage | null 
   };
 }
 
-// The newest what's-new label the guide holds, or null when there is none.
-export const newestWhatsNewLabel = (): string | null => WHATS_NEW[0]?.label ?? null;
+// The newest what's-new label the guide shows this user, or null when there is none: an entry of family purity
+// items alone never reaches a user it is not offered to.
+export const newestWhatsNewLabel = (taharahVisible = false): string | null =>
+  visibleWhatsNew(taharahVisible)[0]?.label ?? null;
 
 // The discovery `whatsNew` state to store for the newest label: unchanged while it already matches, else a
 // fresh stamp, seen at once on an install that stored nothing (so the first run after this ships shows no row)

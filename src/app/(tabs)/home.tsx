@@ -32,6 +32,7 @@ import { hasSiddurText, selichotOfferOn, siddurPlace } from '@/data/siddur';
 import { HebcalService } from '@/services/HebcalService';
 import { CompletionService } from '@/services/CompletionService';
 import { selichotDownloadSupported } from '@/services/SelichotContentService';
+import { taharahOffered } from '@/stores/taharahOptIn';
 import { dateKey, useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
@@ -63,6 +64,7 @@ import { DayEntry, dayEntryStatusText, firstName, greetingKey, heroCaption, orde
 import {
   hilulaMessage,
   holyBlockMessage,
+  newestWhatsNewLabel,
   nextWhatsNew,
   roshChodeshMessage,
   streakMessage,
@@ -201,6 +203,7 @@ export default function HomeScreen() {
   );
   const isOnboarded = useUserStore((s) => s.isOnboarded);
   const taharahEnabled = useUserStore((s) => s.taharahEnabled);
+  const taharahVisible = useUserStore((s) => taharahOffered(s));
   const profileName = useUserStore((s) => s.profileName);
   const hilulotEnabled = useUserStore((s) => s.hilulotEnabled);
   const roshChodeshEnabled = useUserStore((s) => s.roshChodeshEnabled);
@@ -438,9 +441,9 @@ export default function HomeScreen() {
   // Stamp the newest what's-new label once: seen at once on a first run, unseen when a newer label arrives,
   // so a Messages row offers the guide after an update (spec C7). Never on the clock tick.
   useEffect(() => {
-    const next = nextWhatsNew(whatsNewState, Date.now());
+    const next = nextWhatsNew(whatsNewState, Date.now(), newestWhatsNewLabel(taharahVisible));
     if (next !== whatsNewState) setWhatsNew(next ?? { label: '', since: Date.now(), seen: true });
-  }, [whatsNewState, setWhatsNew]);
+  }, [whatsNewState, setWhatsNew, taharahVisible]);
   // One offer at a time in Messages (spec C2, C3), evaluated after paint and on the app day, never on the tick.
   const { offer, close: closeOffer } = useOffer(todayKey);
   const { run: runCapability, dialog: capabilityDialog } = useCapabilityAction();

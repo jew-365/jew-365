@@ -62,7 +62,7 @@ import { renderWithTheme } from '@/testing/render';
 import { at, zmanimFor } from '@/testing/zmanim';
 import type { CustomMitzvah } from '@/types/mitzvah';
 import { chokReaderPortion } from '@/utils/chok';
-import { WHATS_NEW } from '@/data/guide';
+import { visibleWhatsNew } from '@/data/guide';
 import { clockOf } from '@/utils/clock';
 import { locationNoon } from '@/utils/locationDay';
 import { civilHebrewDayAt } from '@/utils/taharah/onot';
@@ -696,7 +696,8 @@ describe('home banners land on the right settings block', () => {
 
 describe("home's what's-new message", () => {
   const DAY = '2027-06-15T12:00';
-  const NEWEST = WHATS_NEW[0].label;
+  // The test user is not offered family purity, so an entry of its items alone is not theirs.
+  const NEWEST = visibleWhatsNew(false)[0].label;
   const TITLE = 'מה חדש בעדכון';
   beforeEach(() => {
     mockFocused = true;

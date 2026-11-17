@@ -11,6 +11,7 @@ import {
   guideList,
   guideTextOn,
   latestWhatsNew,
+  visibleWhatsNew,
   GUIDE_TOPICS,
   visibleGuideTopics,
   whatsNewHeading,
@@ -51,7 +52,7 @@ export default function GuideScreen() {
       <ScrollView contentContainerStyle={styles.list}>
         <SectionLabel text={t('guide.whatsNew')} />
         <Card padded style={styles.whatsNew}>
-          {latestWhatsNew().map((entry, index) => (
+          {latestWhatsNew(visibleWhatsNew(taharahVisible)).map((entry, index) => (
             <View key={entry.label} style={index > 0 ? styles.entryGap : undefined}>
               <Text style={[typography.captionBold, { color: colors.goldText }]}>
                 {whatsNewHeading(entry, language)}

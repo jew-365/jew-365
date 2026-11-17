@@ -10,7 +10,14 @@ import { fireEvent, screen, within } from '@testing-library/react-native';
 import GuideScreen from '../guide';
 import { MitzvahLibraryList } from '@/components/MitzvahLibraryList';
 import { SettingsSection } from '@/components/SettingsSection';
-import { GUIDE_TOPICS, latestWhatsNew, visibleGuideTopics, whatsNewHeading } from '@/data/guide';
+import {
+  GUIDE_TOPICS,
+  WHATS_NEW,
+  latestWhatsNew,
+  visibleGuideTopics,
+  visibleWhatsNew,
+  whatsNewHeading,
+} from '@/data/guide';
 import { LIBRARY_GROUPS } from '@/data/mitzvot';
 import { SIDDUR_GROUPS, STANDALONE_TEXTS, standaloneTextsIn } from '@/data/siddur';
 import { translate } from '@/i18n';
@@ -38,10 +45,23 @@ describe('User guide screen', () => {
 
   it("shows the latest what's-new entries with their headings", () => {
     renderWithTheme(<GuideScreen />);
-    for (const entry of latestWhatsNew()) {
+    for (const entry of latestWhatsNew(visibleWhatsNew(false))) {
       expect(screen.getByText(whatsNewHeading(entry, 'he'))).toBeOnTheScreen();
       for (const item of entry.items) expect(screen.getByText(item.he)).toBeOnTheScreen();
     }
+  });
+
+  it('keeps the family purity news from a single user and shows it to a married one', () => {
+    const taharahItems = WHATS_NEW.flatMap((entry) => entry.items).filter((item) => item.taharahOnly);
+    expect(taharahItems.length).toBeGreaterThan(0);
+    useUserStore.setState({ gender: 'male', maritalStatus: 'single' });
+    const { unmount } = renderWithTheme(<GuideScreen />);
+    for (const item of taharahItems) expect(screen.queryByText(item.he)).toBeNull();
+    unmount();
+    useUserStore.setState({ gender: 'female', maritalStatus: 'married' });
+    renderWithTheme(<GuideScreen />);
+    const shown = latestWhatsNew(visibleWhatsNew(true)).flatMap((entry) => entry.items);
+    for (const item of shown.filter((entry) => entry.taharahOnly)) expect(screen.getByText(item.he)).toBeOnTheScreen();
   });
 
   it('lists the topics closed, without family purity for a single user', () => {
