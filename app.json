@@ -67,6 +67,8 @@
       [
         "expo-location",
         {
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": false,
           "locationAlwaysAndWhenInUsePermission": "יהודי 365 משתמש במיקום רק כשהאפליקציה פתוחה, כדי לחשב את זמני ההלכה ולכוון את מצפן התפילה. אפשר גם לבחור מקום ידנית, בלי מיקום.",
           "locationAlwaysPermission": "יהודי 365 משתמש במיקום רק כשהאפליקציה פתוחה, כדי לחשב את זמני ההלכה ולכוון את מצפן התפילה. אפשר גם לבחור מקום ידנית, בלי מיקום."
         }

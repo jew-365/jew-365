@@ -2068,5 +2068,10 @@
   "template.shabbatPrep.name": "Getting ready for Shabbat",
   "template.shabbatPrep.benefit": "One Friday-morning list, without the last-minute rush",
   "template.grandparents.name": "Shabbat shalom to grandparents",
-  "template.grandparents.benefit": "A short call before Shabbat"
+  "template.grandparents.benefit": "A short call before Shabbat",
+  "settings.backgroundLocation": "Update my location when the app is closed too",
+  "settings.backgroundLocationHint": "When the phone moves to another place, the times and reminders update without opening the app. The system sets how often, about a few times an hour.",
+  "settings.backgroundLocationAskTitle": "Background location",
+  "settings.backgroundLocationAskBody": "Jew 365 collects location data to update the zmanim and your reminders for where you are, even when the app is closed or not in use. Your location stays on the device and is not sent anywhere. On the next screen choose “Allow all the time”.",
+  "settings.backgroundLocationDenied": "Without “Allow all the time” the location updates only while the app is open. You can change this in the phone settings."
 }

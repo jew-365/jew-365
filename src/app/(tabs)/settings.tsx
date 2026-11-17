@@ -17,6 +17,13 @@ import { openExternalUrl, openSystemSettings } from '@/services/externalFlow';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { appVersionLabel, onProductionChannel } from '@/services/appUpdates';
+import {
+  backgroundLocationActive,
+  backgroundLocationSupported,
+  disableBackgroundLocation,
+  enableBackgroundLocation,
+  syncBackgroundLocation,
+} from '@/services/backgroundLocation';
 import { LocationService, type LocationStatus } from '@/services/LocationService';
 import {
   NotificationScheduler,
@@ -1159,6 +1166,7 @@ function LocationBlock({ request }: { request: PlaceRequest | null }) {
             />
           ) : null}
           <PlacePicker location={location} onPick={pickPlace} request={request} showField={false} />
+          {permission === 'ready' ? <BackgroundLocationRow /> : null}
         </>
       ) : (
         <>
@@ -1410,6 +1418,82 @@ function Anchor({ id, focus, onReveal, children }: AnchorProps) {
       style={focused ? [styles.focused, { backgroundColor: colors.goldWashStrong }] : undefined}
     >
       {children}
+    </View>
+  );
+}
+
+// "My location" while the app is closed, offered only by a binary that declares the background permission.
+// The dialog is the disclosure Google Play asks for before the system prompt; its button reads Continue.
+function BackgroundLocationRow() {
+  const { colors } = useTheme();
+  const { t } = useI18n();
+  const source = useUserStore((s) => s.locationSource);
+  const [supported, setSupported] = useState(false);
+  const [active, setActive] = useState(false);
+  const [asking, setAsking] = useState(false);
+  const [denied, setDenied] = useState(false);
+
+  useEffect(() => {
+    let live = true;
+    const read = () =>
+      syncBackgroundLocation()
+        .then(() => Promise.all([backgroundLocationSupported(), backgroundLocationActive()]))
+        .then(([canRun, runs]) => {
+          if (!live) return;
+          setSupported(canRun);
+          setActive(runs);
+        });
+    read();
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') read();
+    });
+    return () => {
+      live = false;
+      subscription.remove();
+    };
+  }, [source]);
+
+  if (!supported) return null;
+  const toggle = (next: boolean) => {
+    setDenied(false);
+    if (next) setAsking(true);
+    else disableBackgroundLocation().then(() => setActive(false));
+  };
+  const confirm = async () => {
+    setAsking(false);
+    const result = await enableBackgroundLocation();
+    setActive(result === 'on');
+    setDenied(result === 'denied');
+  };
+
+  return (
+    <View testID="settings-background-location">
+      <SwitchRow
+        label={t('settings.backgroundLocation')}
+        hint={t('settings.backgroundLocationHint')}
+        value={active}
+        onValueChange={toggle}
+        style={styles.buttonGap}
+      />
+      {denied ? (
+        <>
+          <Text style={[typography.small, styles.note, { color: colors.textMuted }]}>
+            {t('settings.backgroundLocationDenied')}
+          </Text>
+          <Pressable onPress={() => openSystemSettings()} accessibilityRole="link" style={styles.link}>
+            <Text style={[typography.bodyBold, { color: colors.goldText }]}>{t('settings.locationOpenSettings')}</Text>
+          </Pressable>
+        </>
+      ) : null}
+      <ConfirmDialog
+        visible={asking}
+        title={t('settings.backgroundLocationAskTitle')}
+        body={t('settings.backgroundLocationAskBody')}
+        confirmLabel={t('permissions.continue')}
+        cancelLabel={t('common.cancel')}
+        onConfirm={confirm}
+        onCancel={() => setAsking(false)}
+      />
     </View>
   );
 }

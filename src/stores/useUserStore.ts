@@ -168,6 +168,9 @@ type UserState = {
   hilulaNotices: HilulaNotices;
   roshChodeshNotices: RoshChodeshNotices;
   weeklyReportEnabled: boolean;
+  // "My location" also while the app is closed (the owner's call, 2026-11-17); off by default, and only a
+  // binary with the background location permission offers it ([../services/backgroundLocation.ts]).
+  backgroundLocation: boolean;
   quietBefore: QuietBound;
   quietAfter: QuietBound;
   nagLevel: NagLevel;
@@ -216,6 +219,7 @@ type UserState = {
   setHilulaNotice: (kind: HilulaWhen, setting: NoticeSetting) => void;
   setRoshChodeshNotice: (kind: RoshChodeshWhen, setting: NoticeSetting) => void;
   setWeeklyReportEnabled: (v: boolean) => void;
+  setBackgroundLocation: (v: boolean) => void;
   setQuietBefore: (bound: QuietBound) => void;
   setQuietAfter: (bound: QuietBound) => void;
   setNagLevel: (level: NagLevel) => void;
@@ -377,6 +381,7 @@ export const useUserStore = create<UserState>()(
       hilulaNotices: DEFAULT_HILULA_NOTICES,
       roshChodeshNotices: DEFAULT_ROSH_CHODESH_NOTICES,
       weeklyReportEnabled: true,
+      backgroundLocation: false,
       quietBefore: DEFAULT_QUIET_BEFORE,
       quietAfter: DEFAULT_QUIET_AFTER,
       nagLevel: DEFAULT_NAG_LEVEL,
@@ -438,6 +443,7 @@ export const useUserStore = create<UserState>()(
             : s,
         ),
       setWeeklyReportEnabled: (v) => set({ weeklyReportEnabled: v }),
+      setBackgroundLocation: (v) => set({ backgroundLocation: v }),
       setQuietBefore: (bound) =>
         set((s) =>
           isQuietBound(bound) && quietBoundsValid(bound, s.quietAfter)
@@ -531,6 +537,7 @@ export const useUserStore = create<UserState>()(
           hilulaNotices: DEFAULT_HILULA_NOTICES,
           roshChodeshNotices: DEFAULT_ROSH_CHODESH_NOTICES,
           weeklyReportEnabled: true,
+          backgroundLocation: false,
           quietBefore: DEFAULT_QUIET_BEFORE,
           quietAfter: DEFAULT_QUIET_AFTER,
           nagLevel: DEFAULT_NAG_LEVEL,

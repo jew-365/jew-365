@@ -37,13 +37,26 @@ async function follow(fresh: boolean): Promise<boolean> {
       ? await LocationService.getCurrentPoint()
       : ((await LocationService.getLastKnownPoint()) ?? (await LocationService.getPrecisePoint()));
     if (!point) return false;
-    const user = useUserStore.getState();
     // A place written while the fix was on its way (a city picked, "locate me") wins over this fix.
-    if (user.location !== before) return false;
-    if (user.locationStatus === 'ready' && distanceKm(user.location, point) < FOLLOW_MIN_KM) return false;
-    user.setLocationState(LocationService.locationAt(point.lat, point.lng), 'ready', 'gps');
-    return true;
+    if (useUserStore.getState().location !== before) return false;
+    return moveTo(point);
   } catch {
     return false;
   }
+}
+
+// Writes the place of a fix unless it is within FOLLOW_MIN_KM of the saved one; true when it wrote.
+function moveTo(point: { lat: number; lng: number }): boolean {
+  const user = useUserStore.getState();
+  if (user.locationStatus === 'ready' && distanceKm(user.location, point) < FOLLOW_MIN_KM) return false;
+  user.setLocationState(LocationService.locationAt(point.lat, point.lng), 'ready', 'gps');
+  return true;
+}
+
+// A fix the OS delivered while the app was closed (the background location task): the same rule as a
+// follow, with no permission read and no fix of its own.
+export function followDevicePoint(point: { lat: number; lng: number }): boolean {
+  const { locationSource, locationStatus } = useUserStore.getState();
+  if (locationSource === 'manual' && locationStatus === 'ready') return false;
+  return moveTo(point);
 }

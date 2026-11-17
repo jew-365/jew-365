@@ -9,6 +9,8 @@ import 'expo-router/entry';
 // a background task — never renders the router tree, so route-module imports never run there.
 // This import is the only thing that makes TaskManager.defineTask execute in that mode.
 import './src/services/NotificationScheduler';
+// The background location task is defined at this module's scope, for the same reason.
+import './src/services/backgroundLocation';
 import { markBoot } from './src/services/bootTrace';
 
 markBoot('modules');

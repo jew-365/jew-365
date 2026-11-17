@@ -35,6 +35,7 @@ import { captureException } from '@/services/crashReporting';
 import * as Updates from 'expo-updates';
 import { reloadApp } from '@/services/appReload';
 import { reloadIntoUpdate } from '@/services/appUpdates';
+import { syncBackgroundLocation } from '@/services/backgroundLocation';
 import { bootHeartbeat, markBoot, noteBoot } from '@/services/bootTrace';
 import { reconcileChokInstall } from '@/services/ChokContentService';
 import { reconcileShnayimInstall } from '@/services/ShnayimContentService';
@@ -209,7 +210,10 @@ function RootInner() {
   // The zmanim follow the phone: on launch and on every return to the app (`now` turns on both).
   useEffect(() => {
     if (quiet || !isOnboarded) return;
-    const task = afterPaint(() => void followDeviceLocation());
+    const task = afterPaint(() => {
+      void followDeviceLocation();
+      void syncBackgroundLocation();
+    });
     return () => task.cancel();
   }, [quiet, isOnboarded, now]);
 

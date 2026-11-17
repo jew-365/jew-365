@@ -2068,5 +2068,10 @@
   "template.shabbatPrep.name": "הכנות לשבת",
   "template.shabbatPrep.benefit": "רשימה אחת ביום שישי בבוקר, בלי לחץ של הרגע האחרון",
   "template.grandparents.name": "שבת שלום לסבא וסבתא",
-  "template.grandparents.benefit": "שיחה קצרה לפני שבת"
+  "template.grandparents.benefit": "שיחה קצרה לפני שבת",
+  "settings.backgroundLocation": "לעדכן את המיקום גם כשהאפליקציה סגורה",
+  "settings.backgroundLocationHint": "כשהטלפון עובר למקום אחר, הזמנים וההתראות מתעדכנים גם בלי לפתוח את האפליקציה. מערכת ההפעלה קובעת את התדירות, בערך כמה פעמים בשעה.",
+  "settings.backgroundLocationAskTitle": "מיקום ברקע",
+  "settings.backgroundLocationAskBody": "יהודי 365 אוסף נתוני מיקום כדי לעדכן את זמני ההלכה ואת ההתראות לפי המקום שבו אתם נמצאים, גם כשהאפליקציה סגורה או לא בשימוש. המיקום נשאר במכשיר ולא נשלח לשום מקום. במסך הבא בוחרים ״כל הזמן״.",
+  "settings.backgroundLocationDenied": "בלי ההרשאה ״כל הזמן״ המיקום מתעדכן רק כשהאפליקציה פתוחה. אפשר לשנות בהגדרות הטלפון."
 }

@@ -232,12 +232,6 @@ Standing constraint: the app stays non-commercial (no ads, no paid tier) while i
 
 ### Medium — Chok LeYisrael source defects
 
-- [ ] Correct the Torat Emet text defects in the build
-  - **What it is:** The 2026-10-23 cross-check against the old raktora text found defects in Torat Emet itself. The owner's decision, 2026-11-17: "לתקן אצלינו". A scan of every Onkelos verse of the source against the Onkelos Sefaria prints found the two listed classes throughout, so the build now corrects 85 places, all in Targum Onkelos ([scripts/chok/textPatches.js](scripts/chok/textPatches.js)): 27 words cut by a space or a line break, 52 colons in place of a sheva or a space, 4 final mems in place of a samekh, one stray letter after a verse, and the missing "וַחֲמֵשׁ מְאָה" of Numbers 26:22. Two of the items first listed were not defects and stay as printed: Numbers 2:12 and 7:54 match the Masoretic text, and the Onkelos of Numbers 31:44 has no five hundred, as the verse has none.
-  - **What it solves:** A reader of those verses sees the correct text.
-  - **Expected result:** a patch list with tests; the add-on's content version rises and installs are offered the update.
-  - **Done:** 2026-11-17. `pnpm chok:build` writes content version 3 (41 parashiyot changed, each with its gzip) and a second run writes nothing; `pnpm test -- scripts/chok` green (65 tests: each patch found once, none left in the source as the build reads it, the count in the licence note); a rescan of [docs/chok/](docs/chok) finds no mid-word colon or final letter in any verse. Not read by a rav or a second reader; the spelling follows the source, checked against Sefaria's consonants.
-  - **Status:** Version: content version 3 of the add-on · Committed: no · Pushed: no · Live: no, GitHub Pages serves it after the push to `main` · Channel: Pages
 
 ### Low — Chok LeYisrael follow-ups
 
@@ -490,11 +484,15 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 ### Medium — App requests of 2026-11-05
 
-- [ ] Decide: "my location" every 10 minutes while the app is closed
-  - **Flag:** `Build`.
-  - **Source:** the owner's request of 2026-11-07: "פעם ב10 דקות שהיא לא פעילה ... עדכון של המיקום של המשתמש". The half-minute update while the app is open shipped in production `1.0.21-16` ([action-log.md](action-log.md)).
-  - **What it is:** a background location update. It needs the "Allow all the time" permission (`ACCESS_BACKGROUND_LOCATION`, iOS "Always"), a native build, Google Play's background-location declaration and an App Store justification, and the OS still sets the cadence (15 minutes at the least on Android).
-  - **Waiting on:** the owner's decision whether to build it.
+- [ ] "My location" while the app is closed
+  - **Flag:** `Build` (Android); the JavaScript is OTA and inert until then.
+  - **Source:** the owner's request of 2026-11-07: "פעם ב10 דקות שהיא לא פעילה ... עדכון של המיקום של המשתמש". The half-minute update while the app is open shipped in production `1.0.21-16` ([action-log.md](action-log.md)). The owner's decision, 2026-11-17: "כן".
+  - **What it is:** a switch under Settings → Device → my location, "לעדכן את המיקום גם כשהאפליקציה סגורה", shown only on an Android binary that declares the background permission and while location access is granted. It opens a disclosure (what is collected and why, "even when the app is closed or not in use", a Continue button), then Android's "Allow all the time"; on, the OS hands the app a fix when the phone has moved about a kilometre, the saved place follows it and the reminders are planned again ([src/services/backgroundLocation.ts](src/services/backgroundLocation.ts)). The app asks for a fix every 10 minutes; without a foreground service, which it does not run, Android gives a few an hour. Nothing moves inside a holy block or for a place picked by hand.
+  - **What it solves:** a user who travels without opening the app keeps getting reminders by the previous place's times.
+  - **Expected result:** with the switch on and the app closed, a move to another city changes the place and the pending reminders' times within the hour.
+  - **Done (code):** 2026-11-17. The service, its web shim, the store field, the Settings row with its disclosure, the search words, and `isAndroidBackgroundLocationEnabled` in [app.json](app.json). [src/services/__tests__/backgroundLocation.test.ts](src/services/__tests__/backgroundLocation.test.ts) (27 cases: the task, the rule of a fix, the binary probe, enable, disable and sync, the entry import, the build config, the web shim) and [src/app/__tests__/settings.backgroundLocation.render.test.tsx](src/app/__tests__/settings.backgroundLocation.render.test.tsx) (8 cases); the full `pnpm test` green (6,977). Nothing ran on a device: no build carries the permission yet.
+  - **Left, in order:** (1) an Android preview build (`pnpm build:android:preview:apk`), installed, and the expected result checked on a phone, the cadence included; (2) before any production AAB with the permission: Google Play's background-location declaration (App content → Sensitive permissions, with a short video of the disclosure and the switch) and the privacy policy in both languages saying that the location is also read in the background when the user turns this on, still never sent off the device; (3) the guide's location topic and a WHATS_NEW item in the update that goes with that build; (4) iOS: not built. It needs the `location` background mode and the "Always" permission, which App Review reads closely, and 1.0.21 is still in review after three rejections around location; the owner decides after the approval whether to ask for it.
+  - **Status:** Version: 1.0.21, the next Android build · Committed: no · Pushed: no · Live: no · Channel: none
 
 ### Medium — App requests of 2026-11-08
 
@@ -535,7 +533,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** a user who never taps the banner stays on an old bundle until the app is killed.
   - **Expected result:** with an update downloaded, leaving the app and coming back loads it; never after a flow the app opened (`holdCovers()`), a notification tap that opened a screen, inside a holy block or before onboarding.
   - **Done:** 2026-11-17. Five cases in the `the root layout returns to home` block of [src/app/__tests__/rootLayout.render.test.tsx](src/app/__tests__/rootLayout.render.test.tsx) (a reload with a pending update and none without, none on a held return, after a notification tap, inside a holy block and before onboarding), the guide's updates topic and the WHATS_NEW entry `1.0.21-20`. Not checked on a phone: only a real update on a device can show the reload.
-  - **Status:** Version: OTA, expected with the next update · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `bd2c899` · Pushed: yes · Live: no · Channel: none
 
 - [ ] The carousel's star and fill that work
   - **Flag:** `OTA`.
@@ -1047,7 +1045,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Study, 2026-11-16:** [design/lab/studies/2026-11-16-templates/](design/lab/studies/2026-11-16-templates/AGENTS.md): direction א, a sheet of template cards over the screen it opens from (the recommendation), and direction ב, a full screen with groups and a search; eleven proposed templates, what one tap creates (the mitzvah with its hours, its days and one reminder, landing on its screen with an undo) and the path to edit. Published as one gallery Artifact: https://claude.ai/artifact/7sPdTnjvUbbicqztMYRgm2. Checked at 1240 and 430 points (no horizontal scroll, no page error, every press shows its result). Open: the owner's pick, and the six decisions at the page's end (among them a template anchored to a zman, which needs a new field, and a Sun–Fri template that runs into Shabbat in winter). No code starts before the pick.
   - **The owner, 2026-11-17:** "לך עם ההמלצה שלך": direction א and the study's recommendation on each of its six decisions (add at once with an undo; all eleven templates; no zman field, Tehillim saved as 09:30 to 16:30; Friday left as it is; an added template marked and opening its mitzvah).
   - **Done:** 2026-11-17. [src/data/customTemplates.ts](src/data/customTemplates.ts), [src/components/TemplateSheet.tsx](src/components/TemplateSheet.tsx) opened by the library's add button and by `add=1`, the undo on the mitzvah screen, each template in the search, the guide's topic and the WHATS_NEW entry `1.0.21-20`. [src/app/__tests__/templates.render.test.tsx](src/app/__tests__/templates.render.test.tsx) (14 cases: the list, each of the eleven created with its hours, days from today, one reminder and switched on, an added one never doubled, `add=1` and English), three undo cases in [src/app/__tests__/mitzvah.render.test.tsx](src/app/__tests__/mitzvah.render.test.tsx) and the template cases of [src/utils/__tests__/searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts). The copy is the study's proposed copy, not reviewed word by word by the owner; not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `e07487c` · Pushed: yes · Live: no · Channel: none
 
 ## Bugs
 

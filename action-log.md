@@ -17,6 +17,12 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-11-17 — Chok LeYisrael content version 3 on Pages
+
+- **Correct the Torat Emet text defects in the build** — 85 typing errors of Targum Onkelos corrected by a reviewed patch list applied before the parse ([scripts/chok/textPatches.js](scripts/chok/textPatches.js), `applyTextPatches()` in [scripts/chok/build.js](scripts/chok/build.js)): 27 words cut by a space or a line break, 52 colons in place of a sheva or a space, 4 final mems in place of a samekh, one stray letter after a verse and the missing "וַחֲמֵשׁ מְאָה" of Numbers 26:22; the count is stated in [docs/chok/LICENSE.txt](docs/chok/LICENSE.txt). Two items first listed were not defects and stay as printed (Numbers 2:12 and 7:54 match the Masoretic text; the Onkelos of Numbers 31:44 has no five hundred).
+  - Requested: found by the cross-check of 2026-10-23; the owner's decision of 2026-11-17, "לתקן אצלינו". Verified: every Onkelos verse of the source scanned against the Onkelos Sefaria prints and each correction read against it; `pnpm chok:build` writes content version 3 (41 parashiyot changed) and a second run writes nothing; `pnpm test -- scripts/chok` green (65 tests); a rescan of the output finds no mid-word colon or final letter in a verse; `https://jew-365.github.io/jew-365/chok/manifest.json` answered version 3 on 2026-11-17. Not read by a rav or a second reader; no install's update offer was watched on a phone.
+  - Version: Pages, content version 3 · Committed: yes, `77dc308` fix(chok): correct 85 typing errors of Targum Onkelos in the build, content version 3 · Pushed: yes · Live: https://jew-365.github.io/jew-365/chok/manifest.json (version 3, read 2026-11-17); the what's-new line about it rides the next production update · Channel: —
+
 ## 2026-11-16 — with the Play production release `10 (1.0.21)`
 
 Two Play Console changes live on Google Play since 2026-11-14, and four pieces of internal work (docs, a test script, a design study, marketing material) pushed before Google published `10 (1.0.21)` on 2026-11-14 at 08:43, the first production release after them (root [AGENTS.md](AGENTS.md), Project records).
