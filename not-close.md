@@ -893,6 +893,16 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 - **Order:** phase 0 (High), phase 1 (Medium), then the two design studies; no code of phases 2 and 3 before the owner's pick in each study ([design/lab/AGENTS.md](design/lab/AGENTS.md)).
 - **Done means:** both dictionaries; the guide topic and its `WHATS_NEW` line with `pnpm guide:build`; the search words ([Search Finds Everything](AGENTS.md#search-finds-everything)); tests that fail without the change; the AGENTS.md updates of its DOX chain; `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and `pnpm test:tz` green. No update to preview or production without the owner's word.
 
+### High — Family purity, 2026-11-17
+
+- [ ] Record a past day in the taharah tracker from a calendar, and edit entries on it
+  - **Asked by:** the owner, 2026-11-17 ("תוסיף במנגנון הטהרה אפשרות של סימון ראיה חדשה וביצוע לא רק על ידי לחיצה גלילה בחיצים, אלא גם פתיחה של לוח שתאפשר סימון רטרואקטיבי לאחור בקלות מבלי ללחוץ מלא לחיצות, וככה תמיד אפשר לראות לערוך את הנתונים על הלוח").
+  - **Flag:** OTA (no native change).
+  - **What it is:** in [src/app/taharah/log.tsx](src/app/taharah/log.tsx) a "בחירה מהלוח" button under the day arrows opens a month grid ([src/components/CalendarRangePicker.tsx](src/components/CalendarRangePicker.tsx) in a new `day` mode with `minKey` / `maxKey`, two years back to today) where one tap picks the day, and a `date` param seeds the day; in [src/app/taharah/calendar.tsx](src/app/taharah/calendar.tsx) every day opens its sheet, which lists the entries recorded on it with a delete behind a confirmation and, on a day not after today, a button per type the role may log that opens the log on that day. `eventCellDay()`, `eventDate()` and `eventDetail()` moved to [src/utils/taharah/summary.ts](src/utils/taharah/summary.ts), shared by the dashboard and the calendar.
+  - **Expected result:** an onset weeks back is recorded in three taps from the log or two from the calendar; a day's entries are visible and deletable on the calendar.
+  - **Done:** 2026-11-17. [src/app/__tests__/taharahCalendarEdit.render.test.tsx](src/app/__tests__/taharahCalendarEdit.render.test.tsx), 7 cases (the date param and a future one ignored, a pick in one tap, a month back and the disabled tomorrow, the add on an empty past day, nothing to add on a future day, the delete after its confirmation), green under `pnpm test:tz`; the full `pnpm test` green (6912 tests), `pnpm typecheck`, `pnpm lint`, `pnpm check:dox` and the guide's web copy rebuilt. No WHATS_NEW item: the what's-new list shows to every user, and the topic is offered only to a married user (`taharahOffered()`), so the change is described only in the guide's taharah topic. Not checked on a phone yet.
+  - **Status:** Version: OTA, expected with the next update · Committed: no · Pushed: no · Live: no · Channel: none
+
 ### High — Discoverability, phase 0
 
 - [ ] A1: ask for notifications at the right moment

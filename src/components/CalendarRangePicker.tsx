@@ -53,17 +53,24 @@ type Props = {
   value: DateRange;
   todayKey: string;
   onChange: (next: DateRange) => void;
+  // `day` picks one day: every tap sets `start` and clears `end`.
+  mode?: 'range' | 'day';
+  // The selectable bounds; today through `rangeMaxKey()` by default.
+  minKey?: string;
+  maxKey?: string;
   style?: StyleProp<ViewStyle>;
 };
 
-export function CalendarRangePicker({ value, todayKey, onChange, style }: Props) {
+export function CalendarRangePicker({ value, todayKey, onChange, mode = 'range', minKey, maxKey, style }: Props) {
   const { colors } = useTheme();
   const { language, t } = useI18n();
-  const maxKey = rangeMaxKey(todayKey);
-  const firstMonth = todayKey.slice(0, 7);
-  const lastMonth = maxKey.slice(0, 7);
+  const min = minKey ?? todayKey;
+  const max = maxKey ?? rangeMaxKey(todayKey);
+  const firstMonth = min.slice(0, 7);
+  const lastMonth = max.slice(0, 7);
   const [cursor, setCursor] = useState(() => {
-    const month = value.start && value.start > todayKey ? value.start.slice(0, 7) : firstMonth;
+    const anchor = value.start ?? (todayKey > max ? max : todayKey);
+    const month = anchor.slice(0, 7);
     return month < firstMonth ? firstMonth : month > lastMonth ? lastMonth : month;
   });
   const weeks = useMemo(() => monthWeeks(cursor), [cursor]);
@@ -97,7 +104,7 @@ export function CalendarRangePicker({ value, todayKey, onChange, style }: Props)
         <View key={week[0].key} style={styles.weekRow}>
           {week.map((cell) => {
             if (!cell.inMonth) return <View key={cell.key} style={styles.cell} />;
-            const disabled = cell.key < todayKey || cell.key > maxKey;
+            const disabled = cell.key < min || cell.key > max;
             const endpoint = cell.key === value.start || cell.key === value.end;
             const inRange =
               endpoint ||
@@ -106,7 +113,7 @@ export function CalendarRangePicker({ value, todayKey, onChange, style }: Props)
               <Pressable
                 key={cell.key}
                 testID={`calendar-day-${cell.key}`}
-                onPress={() => onChange(nextRange(value, cell.key))}
+                onPress={() => onChange(mode === 'day' ? { start: cell.key, end: null } : nextRange(value, cell.key))}
                 disabled={disabled}
                 accessibilityRole="button"
                 accessibilityLabel={formatDayLine(cell.date, language)}

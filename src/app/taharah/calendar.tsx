@@ -5,6 +5,8 @@ import { Stack, useRouter } from 'expo-router';
 import { DateTime } from 'luxon';
 import { useShallow } from 'zustand/react/shallow';
 import { BottomSheet } from '@/components/BottomSheet';
+import { Button } from '@/components/Button';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { formatDayLine } from '@/components/DayStepper';
 import { IconName, MitzvahIcon, backIcon, forwardIcon } from '@/components/MitzvahIcon';
 import { HeaderPill, ScreenHeader } from '@/components/ScreenHeader';
@@ -18,10 +20,11 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies, typography } from '@/theme/typography';
 import { formatDate, useI18n } from '@/i18n';
-import { Onah, OnahKind, PerishaOnah } from '@/types/taharah';
+import { Onah, OnahKind, PerishaOnah, TaharahEvent } from '@/types/taharah';
 import { locationNoon } from '@/utils/locationDay';
 import { deriveCycle } from '@/utils/taharah/cycle';
 import { civilHebrewDayAt } from '@/utils/taharah/onot';
+import { eventCellDay, eventDetail } from '@/utils/taharah/summary';
 import { perishaOnot } from '@/utils/taharah/vestot';
 import { afterPaint } from '@/utils/afterPaint';
 
@@ -39,11 +42,23 @@ type Cell = {
   day: DateTime;
   inMonth: boolean;
   isToday: boolean;
+  isFuture: boolean;
+  abs: number;
   hebrewDay: number;
   marks: DayMarks | undefined;
 };
 
 const WEEKS = 6;
+// What the day sheet offers to record, the log's own types (a husband: onset and tevila).
+const ADD_TYPES = ['onset', 'hefsek', 'tevila', 'pause'] as const;
+const HUSBAND_ADD_TYPES: readonly (typeof ADD_TYPES)[number][] = ['onset', 'tevila'];
+const HUSBAND_EVENTS = new Set<TaharahEvent['type']>(['onset', 'tevila']);
+const ADD_LABEL: Record<(typeof ADD_TYPES)[number], string> = {
+  onset: 'taharah.log.onset',
+  hefsek: 'taharah.event.hefsek',
+  tevila: 'taharah.log.tevila',
+  pause: 'taharah.log.pause',
+};
 const MARK_ICON_SIZE = scaled(14);
 
 // A night onah opens at the previous day's shkia, so it is drawn on the evening cell before its own day.
@@ -94,12 +109,15 @@ export default function TaharahCalendar() {
   const { language, t } = useI18n();
   const router = useRouter();
   const { events, settings } = useTaharahStore(useShallow((s) => ({ events: s.events, settings: s.settings })));
+  const removeEvent = useTaharahStore((s) => s.removeEvent);
+  // A native modal cannot open over another, so the day sheet closes while the delete is confirmed and reopens after.
+  const [deleting, setDeleting] = useState<{ event: TaharahEvent; dayKey: string } | null>(null);
   const location = useUserStore((s) => s.location);
   const husband = settings.role === 'husband';
   const now = useNow();
   const [cursor, setCursor] = useState(() => DateTime.now().startOf('month'));
   const [ready, setReady] = useState(false);
-  const [selected, setSelected] = useState<Cell | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   useEffect(() => {
     const task = afterPaint(() => setReady(true));
@@ -138,6 +156,8 @@ export default function TaharahCalendar() {
         day,
         inMonth: day.month === cursor.month,
         isToday: day.hasSame(DateTime.fromJSDate(now), 'day'),
+        isFuture: day.startOf('day') > DateTime.fromJSDate(now).startOf('day'),
+        abs,
         hebrewDay: HebcalService.getHebrewDate(date).day,
         marks: marksByDay.get(abs),
       };
@@ -151,7 +171,18 @@ export default function TaharahCalendar() {
     if (router.canGoBack()) router.back();
     else router.replace('/taharah');
   };
+  const selected = selectedKey ? (weeks.flat().find((cell) => cell.key === selectedKey) ?? null) : null;
   const items = selected?.marks ? cellItems(selected.marks, t) : [];
+  const dayEvents = selected
+    ? events.filter((event) => eventCellDay(event) === selected.abs && (!husband || HUSBAND_EVENTS.has(event.type)))
+    : [];
+  const addTypes = husband ? HUSBAND_ADD_TYPES : ADD_TYPES;
+  const addOn = (type: string) => {
+    if (!selected) return;
+    const date = selected.key;
+    setSelectedKey(null);
+    router.push({ pathname: '/taharah/log', params: { type, date } });
+  };
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]} edges={['top', 'bottom']}>
@@ -183,7 +214,7 @@ export default function TaharahCalendar() {
         {weeks.map((week) => (
           <View key={week[0].key} style={styles.weekRow}>
             {week.map((cell) => (
-              <DayCell key={cell.key} cell={cell} onPress={() => setSelected(cell)} />
+              <DayCell key={cell.key} cell={cell} onPress={() => setSelectedKey(cell.key)} />
             ))}
           </View>
         ))}
@@ -221,7 +252,7 @@ export default function TaharahCalendar() {
         visible={selected !== null}
         title={selected ? formatDayLine(selected.day.toJSDate(), language) : undefined}
         caption={selected ? HebcalService.getHebrewDate(selected.day.toJSDate()).hebrewDateStr : undefined}
-        onClose={() => setSelected(null)}
+        onClose={() => setSelectedKey(null)}
       >
         {items.map((item) => (
           <View key={item.key} style={[styles.sheetRow, { borderTopColor: colors.border }]}>
@@ -232,7 +263,72 @@ export default function TaharahCalendar() {
             ) : null}
           </View>
         ))}
+        {dayEvents.length ? (
+          <Text style={[typography.captionBold, styles.sheetHeading, { color: colors.goldText }]}>
+            {t('taharah.calendar.recorded')}
+          </Text>
+        ) : null}
+        {dayEvents.map((event) => (
+          <View key={event.id} style={[styles.sheetRow, styles.eventRow, { borderTopColor: colors.border }]}>
+            <View style={styles.eventMain}>
+              <Text style={[typography.bodyBold, { color: colors.text }]}>{t(`taharah.event.${event.type}`)}</Text>
+              <Text style={[typography.caption, { color: colors.textSub }]}>{eventDetail(event, t)}</Text>
+            </View>
+            <Button
+              variant="danger"
+              size="compact"
+              label={t('common.delete')}
+              accessibilityLabel={t('taharah.calendar.deleteEntry', { entry: t(`taharah.event.${event.type}`) })}
+              onPress={() => {
+                setDeleting({ event, dayKey: selected?.key ?? '' });
+                setSelectedKey(null);
+              }}
+            />
+          </View>
+        ))}
+        {selected && !selected.isFuture ? (
+          <>
+            <Text style={[typography.captionBold, styles.sheetHeading, { color: colors.goldText }]}>
+              {t('taharah.calendar.addOnDay')}
+            </Text>
+            <View style={styles.addRow}>
+              {addTypes.map((type) => (
+                <Button
+                  key={type}
+                  variant={type === 'onset' ? 'primary' : 'secondary'}
+                  size="compact"
+                  icon="plus"
+                  label={t(ADD_LABEL[type])}
+                  onPress={() => addOn(type)}
+                />
+              ))}
+            </View>
+          </>
+        ) : null}
+        {selected && selected.isFuture && !items.length ? (
+          <Text style={[typography.caption, { color: colors.textSub }]}>{t('taharah.calendar.futureDay')}</Text>
+        ) : null}
       </BottomSheet>
+
+      <ConfirmDialog
+        visible={deleting !== null}
+        title={t('taharah.calendar.deleteTitle')}
+        body={deleting ? `${t(`taharah.event.${deleting.event.type}`)} · ${eventDetail(deleting.event, t)}` : undefined}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        destructive
+        onConfirm={() => {
+          if (deleting) {
+            removeEvent(deleting.event.id);
+            setSelectedKey(deleting.dayKey);
+          }
+          setDeleting(null);
+        }}
+        onCancel={() => {
+          setSelectedKey(deleting?.dayKey ?? null);
+          setDeleting(null);
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -247,7 +343,6 @@ function DayCell({ cell, onPress }: { cell: Cell; onPress: () => void }) {
   return (
     <Pressable
       onPress={onPress}
-      disabled={!marks}
       accessibilityRole="button"
       accessibilityLabel={formatDayLine(cell.day.toJSDate(), language)}
       style={[
@@ -367,6 +462,24 @@ const styles = StyleSheet.create({
     height: scaled(14),
     borderRadius: radius.xs,
     borderWidth: 2,
+  },
+  sheetHeading: {
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  eventRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  eventMain: {
+    flex: 1,
+    gap: scaled(2),
+  },
+  addRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
   sheetRow: {
     borderTopWidth: StyleSheet.hairlineWidth,

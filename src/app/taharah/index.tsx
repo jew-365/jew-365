@@ -21,16 +21,15 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { radius, spacing } from '@/theme/tokens';
 import { fontFamilies, typography } from '@/theme/typography';
 import { useI18n } from '@/i18n';
-import { BedikaResult, BedikaSlot, CleanDay, TaharahEvent, TaharahTask } from '@/types/taharah';
+import { BedikaResult, BedikaSlot, CleanDay, TaharahTask } from '@/types/taharah';
 import { clockOf } from '@/utils/clock';
 import { locationNoon } from '@/utils/locationDay';
 import { cleanDayIndex, deriveCycle } from '@/utils/taharah/cycle';
 import { civilHebrewDayAt, currentOnah, hebrewDay, onahIndex } from '@/utils/taharah/onot';
-import { onahStartDate, renderHint, stageHint, visibleStage } from '@/utils/taharah/summary';
+import { eventDate, eventDetail, onahStartDate, renderHint, stageHint, visibleStage } from '@/utils/taharah/summary';
 import { taharahTasksFor } from '@/utils/taharah/tasks';
 import { kavuaHints, perishaOnot } from '@/utils/taharah/vestot';
 
-type Translate = (scope: string, options?: Record<string, unknown>) => string;
 type BedikaTarget = { day: number; slot: BedikaSlot };
 
 const UPCOMING_LIMIT = 6;
@@ -44,30 +43,6 @@ function resultColor(colors: ThemeColors, result: BedikaResult | null): string {
   if (result === 'notClean') return colors.urgent;
   if (result === 'doubtful') return colors.warning;
   return colors.border;
-}
-
-function eventDate(event: TaharahEvent): Date {
-  if (event.type === 'onset') return onahStartDate(event.onah);
-  return hebrewDay(event.type === 'tevila' ? event.day - 1 : event.day).greg();
-}
-
-function eventDetail(event: TaharahEvent, t: Translate): string {
-  switch (event.type) {
-    case 'onset':
-      return t(`taharah.onah.${event.onah.kind}`);
-    case 'hefsek':
-      return t(`taharah.bedika.result.${event.result}`);
-    case 'bedika':
-      return `${t(`taharah.bedika.${event.slot}`)} · ${t(`taharah.bedika.result.${event.result}`)}`;
-    case 'tevila':
-      return t('taharah.onah.night');
-    case 'pause':
-      return t(`taharah.pause.${event.reason}`);
-    case 'ruling':
-      return t(`taharah.ruling.${event.decision}`);
-    default:
-      return '';
-  }
 }
 
 export default function TaharahDashboard() {

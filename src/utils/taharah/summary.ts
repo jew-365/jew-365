@@ -114,3 +114,32 @@ export function stageHint(
       return state.safekReason ? { key: `taharah.safek.${state.safekReason}` } : null;
   }
 }
+
+// The Hebrew day whose civil date shows an event: a night onah and the tevila night on the evening before.
+export function eventCellDay(event: TaharahEvent): number {
+  if (event.type === 'onset') return event.onah.kind === 'night' ? event.onah.abs - 1 : event.onah.abs;
+  return event.type === 'tevila' ? event.day - 1 : event.day;
+}
+
+export function eventDate(event: TaharahEvent): Date {
+  return hebrewDay(eventCellDay(event)).greg();
+}
+
+export function eventDetail(event: TaharahEvent, t: Translate): string {
+  switch (event.type) {
+    case 'onset':
+      return t(`taharah.onah.${event.onah.kind}`);
+    case 'hefsek':
+      return t(`taharah.bedika.result.${event.result}`);
+    case 'bedika':
+      return `${t(`taharah.bedika.${event.slot}`)} · ${t(`taharah.bedika.result.${event.result}`)}`;
+    case 'tevila':
+      return t('taharah.onah.night');
+    case 'pause':
+      return t(`taharah.pause.${event.reason}`);
+    case 'ruling':
+      return t(`taharah.ruling.${event.decision}`);
+    default:
+      return '';
+  }
+}

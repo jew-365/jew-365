@@ -5,7 +5,9 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { DateTime } from 'luxon';
 import { useShallow } from 'zustand/react/shallow';
 import { Banner } from '@/components/Banner';
+import { BottomSheet } from '@/components/BottomSheet';
 import { Button } from '@/components/Button';
+import { CalendarRangePicker } from '@/components/CalendarRangePicker';
 import { Card } from '@/components/Card';
 import { ChipRow } from '@/components/ChipRow';
 import { DayStepper, formatDayLine } from '@/components/DayStepper';
@@ -45,7 +47,22 @@ const ONAH_KINDS: OnahKind[] = ['day', 'night'];
 const BEDIKA_RESULTS: BedikaResult[] = ['clean', 'notClean', 'doubtful'];
 const PAUSE_REASONS: PauseReason[] = ['pregnancy', 'postpartum', 'menopause', 'other'];
 
+// How far back the calendar sheet reaches.
+const PICK_BACK_YEARS = 2;
+
 const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+const keyOf = (date: Date) => DateTime.fromJSDate(date).toISODate() ?? '';
+const dateOfKey = (key: string) => {
+  const day = DateTime.fromISO(key);
+  return day.isValid ? new Date(day.year, day.month - 1, day.day) : null;
+};
+
+// A `date` param (YYYY-MM-DD, from the calendar screen) seeds the day, never past today.
+function initialDate(raw: string | undefined): Date {
+  const today = startOfDay(new Date());
+  const picked = typeof raw === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? dateOfKey(raw) : null;
+  return picked && picked.getTime() <= today.getTime() ? picked : today;
+}
 const hebrewDateOf = (abs: number) => HebcalService.getHebrewDate(hebrewDay(abs).greg()).hebrewDateStr;
 const HEFSEK_BLOCKED_KEY: Partial<Record<HefsekOutcome, string>> = {
   noCycle: 'taharah.log.hefsekNoCycle',
@@ -57,7 +74,7 @@ export default function TaharahLog() {
   const { colors } = useTheme();
   const { language, t } = useI18n();
   const router = useRouter();
-  const { type: rawType } = useLocalSearchParams<{ type?: string }>();
+  const { type: rawType, date: rawDate } = useLocalSearchParams<{ type?: string; date?: string }>();
   const { events, settings } = useTaharahStore(useShallow((s) => ({ events: s.events, settings: s.settings })));
   const addEvent = useTaharahStore((s) => s.addEvent);
   const location = useUserStore((s) => s.location);
@@ -65,7 +82,8 @@ export default function TaharahLog() {
   const [, refresh] = useReducer((count: number) => count + 1, 0);
   const types: readonly LogType[] = settings.role === 'husband' ? HUSBAND_TYPES : LOG_TYPES;
   const [type, setType] = useState<LogType>(() => types.find((value) => value === rawType) ?? 'onset');
-  const [date, setDate] = useState(() => startOfDay(new Date()));
+  const [date, setDate] = useState(() => initialDate(rawDate));
+  const [picking, setPicking] = useState(false);
   const [time, setTime] = useState(() => clockOf(new Date(), location.tz));
   const [timeUnknown, setTimeUnknown] = useState(false);
   const [kind, setKind] = useState<OnahKind>('day');
@@ -179,6 +197,14 @@ export default function TaharahLog() {
 
         <SectionLabel variant="field" text={t('taharah.log.date')} style={styles.label} />
         <DayStepper value={date} onChange={setDate} max={today} />
+        <Button
+          variant="secondary"
+          size="compact"
+          icon="calendar"
+          label={t('taharah.log.pickDate')}
+          onPress={() => setPicking(true)}
+          style={styles.pickButton}
+        />
 
         {type === 'onset' ? (
           <>
@@ -324,6 +350,26 @@ export default function TaharahLog() {
         ) : null}
       </ScrollView>
 
+      <BottomSheet
+        visible={picking}
+        title={t('taharah.log.pickDate')}
+        caption={t('taharah.log.pickDateHint')}
+        onClose={() => setPicking(false)}
+      >
+        <CalendarRangePicker
+          mode="day"
+          value={{ start: keyOf(date), end: null }}
+          todayKey={keyOf(today)}
+          minKey={keyOf(new Date(today.getFullYear() - PICK_BACK_YEARS, today.getMonth(), today.getDate()))}
+          maxKey={keyOf(today)}
+          onChange={(next) => {
+            const picked = next.start ? dateOfKey(next.start) : null;
+            if (picked) setDate(picked);
+            setPicking(false);
+          }}
+        />
+      </BottomSheet>
+
       <View style={styles.footer}>
         <Button
           label={saved ? t('taharah.log.saved') : t('common.save')}
@@ -346,6 +392,9 @@ const styles = StyleSheet.create({
   },
   label: {
     marginTop: spacing.xl,
+  },
+  pickButton: {
+    marginTop: spacing.md,
   },
   input: {
     borderRadius: radius.md,

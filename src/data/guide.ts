@@ -406,6 +406,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         en: "The family purity screen records an onset, the hefsek tahara, bedikot and the tevila, and shows today's tasks, the coming onot and the month's calendar. Taharah settings choose the custom, who uses it (a woman, or a husband who sees only the onot and the tevila night), discreet notification wording and a biometric lock.",
       },
       {
+        he: 'את היום של רישום אפשר לבחור בחצים, או ב״בחירה מהלוח״ בהקשה אחת, גם חודשים אחורה. בלוח הטהרה הקשה על יום מראה מה רשום בו, עם מחיקה, ומאפשרת לרשום בו ראייה, הפסק טהרה, טבילה או השהיה.',
+        en: 'The day of an entry is chosen with the arrows, or with Pick from the calendar in one tap, months back too. In the taharah calendar a tap on a day shows what is recorded on it, with a delete, and records an onset, a hefsek tahara, a tevila or a pause on it.',
+      },
+      {
         he: 'הנתונים נשמרים מוצפנים ואינם נכללים בגיבוי. ״מחיקת הרישומים״ מתחילה ספירה חדשה, ו״איפוס מעקב הטהרה״ מוחק גם את ההגדרות ומכבה את המעקב. האפליקציה אינה פוסקת הלכה: בכל ספק היא עוצרת את הספירה עד שרושמים את הוראת הרב.',
         en: "The data is stored encrypted and is not part of the backup. Delete the records starts a new count, and Reset family purity tracking also deletes the settings and turns tracking off. The app does not rule on halacha: on any doubt it stops the count until the rav's instruction is recorded.",
       },
