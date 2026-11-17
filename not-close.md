@@ -883,6 +883,13 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 ### Medium — Marketing, 2026-11-13
 
+- [ ] The promo video, round 5: "יום אחד" with the gray miss, narrated by the female voice in masculine forms
+  - **Flag:** none (marketing material; nothing ships in the app). Rounds 1 to 4 are in [action-log.md](action-log.md).
+  - **Source:** the owner, 2026-11-17: "יום אחד, כל הזמנים" as the center, with "לפני ואחרי"'s gray "oops, the time passed"; the female narration in masculine forms, every word pronounced accurately, fluently and as spoken; then "words that do not come out well and have no fix: remove them from the sound and the text".
+  - **Done:** 2026-11-17: `daymiss` in the study [design/lab/studies/2026-11-13-promo-video/](design/lab/studies/2026-11-13-promo-video/AGENTS.md), 66.5 s: the gray miss (08:30 to 08:41, "הזמן עבר"), a rewind to 05:52, then the whole day to motzaei Shabbat. Verified: each of the ten lines is the best of up to six VoxCPM2 takes, transcribed into IPA by `notmax123/whisper-heb-ipa` and matched against its exact masculine pronunciation, 95% to 99.5% on every line; the gendered words are reworded to forms read only as masculine (אתה), the misread words respelled (מינחה, חוק) or cut ("חמישה נוסחים", "שניים מקרא"). First on the page https://claude.ai/artifact/2WddyBo6En5LwiLR5iDh9C with its per-line table.
+  - **Status:** — · Committed: `3203775` feat(design): promo video round 5, the day with the miss and a phoneme-checked female narration · Pushed: yes · Live: — · Channel: —
+  - **Open:** the owner's verdict by ear; "שלוש מאות" in the name is said "shalosh me'ot", the spoken form, and can be cut too if wanted; the end card's "זמין ב־Google Play" stands now that Play production is live.
+
 ### Discoverability and ease of use, 2026-11-13 — batch rules
 
 - **Requested:** the owner, 2026-11-13, in a cloud planning session: the app is rich but a user cannot see its power and misses most of it; even the laziest user should reach most of it without opening Settings. The owner answered four questions in that session (onboarding, discovery, defaults, navigation), approved the plan the same day and handed its execution to the next session.
