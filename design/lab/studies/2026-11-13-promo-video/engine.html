@@ -529,8 +529,33 @@ const beats = PLAN.beats.map((beat, i) => {
   const list = beat.notifs || (beat.notif && !['feature'].includes(beat.scene) ? [{ ...beat.notif, at: beat.scene === 'street' ? b.dur * 0.42 - 0.2 : beat.scene === 'friday' ? b.dur * 0.2 - 0.2 : 0.7 }] : []);
   const notifs = list.map((n) => { const e = el('div', 'notif', notifHTML(n), root); e.style.zIndex = 20; return { n, e }; });
   const clock = beat.time && !['beforeMiss'].includes(beat.scene) ? el('div', 'clock', beat.time, root) : null;
-  return { ...b, root, draw, notifs, clock };
+  const rewind = beat.rewindIn ? rewindLayer(root) : null;
+  return { ...b, root, draw, notifs, clock, rewind };
 });
+
+// The rewind out of the gray "time passed" beat: tape lines, the clock running back to the beat's time and the
+// colour coming back, over the first REWIND seconds of a beat with rewindIn (its narration waits for it: lead).
+const REWIND = 1.4;
+function rewindLayer(root) {
+  const layer = el('div', '', `<div class="rw-lines"></div><div class="rw-icon">⏪</div><div class="rw-clock">08:41</div>`, root);
+  layer.style.cssText = 'position:absolute;inset:0;z-index:70;pointer-events:none;';
+  layer.querySelector('.rw-lines').style.cssText = 'position:absolute;inset:0;background:repeating-linear-gradient(0deg, rgba(29,34,64,.18) 0 6px, transparent 6px 22px);mix-blend-mode:multiply';
+  layer.querySelector('.rw-icon').style.cssText = 'position:absolute;left:0;right:0;top:640px;text-align:center;font-size:150px;color:#FFFDF9;text-shadow:0 10px 40px rgba(0,0,0,.4)';
+  layer.querySelector('.rw-clock').style.cssText = 'position:absolute;left:0;right:0;top:830px;text-align:center;font-size:170px;font-weight:800;color:#FFFDF9;direction:ltr;font-variant-numeric:tabular-nums;text-shadow:0 10px 40px rgba(0,0,0,.45)';
+  return layer;
+}
+function drawRewind(b, lt) {
+  const p = clamp(lt / REWIND);
+  b.rewind.style.visibility = p < 1 ? 'visible' : 'hidden';
+  b.rewind.style.opacity = 1 - seg(lt, REWIND - 0.3, REWIND);
+  const [h, m] = b.time.split(':').map(Number);
+  const from = 8 * 60 + 41, to = h * 60 + m, now = Math.round(lerp(from, to, easeInOut(p)));
+  b.rewind.querySelector('.rw-clock').textContent = `${String(Math.floor(now / 60)).padStart(2, '0')}:${String(now % 60).padStart(2, '0')}`;
+  b.rewind.querySelector('.rw-lines').style.transform = `translateY(${(lt * 900) % 22}px)`;
+  b.root.style.filter = `grayscale(${1 - seg(lt, REWIND * 0.45, REWIND)}) blur(${2 * (1 - seg(lt, 0, REWIND * 0.6))}px)`;
+  if (b.clock) b.clock.style.opacity = seg(lt, REWIND - 0.25, REWIND);
+}
+function easeInOut(p) { return ease(p); }
 const presenterBeats = beats.filter((b) => b.scene.startsWith('feature'));
 
 function render(t) {
@@ -543,13 +568,15 @@ function render(t) {
     b.root.style.opacity = fadeIn;
     b.root.style.zIndex = 1 + b.i;
     b.root.style.transform = `scale(${lerp(1.04, 1, fadeIn)})`;
-    b.draw(lt, b.dur);
+    const off = b.rewind ? REWIND : 0;
+    if (b.rewind) drawRewind(b, lt);
+    b.draw(Math.max(0, lt - off), b.dur - off);
     b.notifs.forEach(({ n, e }, k) => {
-      const inn = seg(lt, n.at, n.at + 0.5, back);
+      const inn = seg(lt - off, n.at, n.at + 0.5, back);
       const stack = b.notifs.length > 1 && k === 0 ? seg(lt, b.notifs[1].n.at, b.notifs[1].n.at + 0.4) : 0;
       e.style.transform = `translateY(${lerp(-520, 0, inn) + 400 * stack}px) scale(${1 - 0.1 * stack})`;
       if (!b.compass) e.style.opacity = 1 - 0.3 * stack;
-      if (b.clock && n.clock) b.clock.textContent = lt > n.at ? n.clock : b.time;
+      if (b.clock && n.clock) b.clock.textContent = lt - off > n.at ? n.clock : b.time;
     });
   }
   // the presenter of the rapid variant
@@ -575,7 +602,7 @@ function render(t) {
   const cur = PLAN.beats.find((b) => b.vo && t >= b.voStart && t <= b.voStart + b.voLen + 0.25);
   if (cur && cur.scene !== 'end') {
     sub.style.opacity = win(t, cur.voStart, cur.voStart + cur.voLen + 0.25, 0.2);
-    sub.querySelector('.txt').textContent = cur.vo.replace('יהודי שלוש מאות שישים וחמש', 'יהודי 365');
+    sub.querySelector('.txt').textContent = (cur.sub || cur.vo).replace('יהודי שלוש מאות שישים וחמש', 'יהודי 365');
     const tag = sub.querySelector('.tag'); tag.textContent = cur.caption || ''; tag.style.display = cur.caption ? 'block' : 'none';
   } else sub.style.opacity = 0;
 }

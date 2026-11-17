@@ -30,8 +30,9 @@ const lengths = existsSync(join(voDir, `${variant}.json`))
 
 let t = 0;
 const beats = data.beats.map((b, i) => {
-  const dur = Math.max(b.min, lengths[i] + LEAD + TAIL);
-  const beat = { ...b, start: +t.toFixed(3), dur: +dur.toFixed(3), voStart: +(t + LEAD).toFixed(3), voLen: lengths[i] };
+  const lead = b.lead ?? LEAD; // a beat that opens with a rewind holds its narration until the rewind ends
+  const dur = Math.max(b.min + (b.lead ? b.lead - LEAD : 0), lengths[i] + lead + TAIL);
+  const beat = { ...b, start: +t.toFixed(3), dur: +dur.toFixed(3), voStart: +(t + lead).toFixed(3), voLen: lengths[i] };
   t += dur;
   return beat;
 });

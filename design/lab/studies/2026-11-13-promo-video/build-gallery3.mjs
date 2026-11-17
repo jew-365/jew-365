@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = join(HERE, 'out');
 const SITE = join(OUT, 'site');
-const ENGINES = ['chatterbox', 'warm'];
+const ENGINES = ['woman', 'chatterbox', 'warm'];
 rmSync(SITE, { recursive: true, force: true });
 mkdirSync(join(SITE, 'audio'), { recursive: true });
 mkdirSync(join(SITE, 'video'), { recursive: true });
@@ -100,6 +100,10 @@ for (const voice of ['chatterbox', 'omnivoice', 'warm', 'deep', 'lively', 'woman
 const page = readFileSync(join(HERE, 'gallery3.html'), 'utf8')
   .replace('/*CHARACTERS*/', () => readFileSync(join(HERE, 'characters.js'), 'utf8'))
   .replace('/*VARIANTS*/{}', () => JSON.stringify(variants))
-  .replace('/*CUTS*/[]', () => JSON.stringify(cuts));
+  .replace('/*CUTS*/[]', () => JSON.stringify(cuts))
+  .replace('/*IPA*/[]', () => {
+    const report = join(OUT, 'vo', 'woman', 'daymiss-ipa.json');
+    return existsSync(report) ? JSON.stringify(JSON.parse(readFileSync(report, 'utf8')).map((r) => r && { text: r.text, score: r.score, heard: r.heard })) : '[]';
+  });
 writeFileSync(join(SITE, 'index.html'), page);
 console.log('wrote', SITE, cuts);
