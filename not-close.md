@@ -533,7 +533,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** a user who never taps the banner stays on an old bundle until the app is killed.
   - **Expected result:** with an update downloaded, leaving the app and coming back loads it; never after a flow the app opened (`holdCovers()`), a notification tap that opened a screen, inside a holy block or before onboarding.
   - **Done:** 2026-11-17. Five cases in the `the root layout returns to home` block of [src/app/__tests__/rootLayout.render.test.tsx](src/app/__tests__/rootLayout.render.test.tsx) (a reload with a pending update and none without, none on a held return, after a notification tap, inside a holy block and before onboarding), the guide's updates topic and the WHATS_NEW entry `1.0.21-20`. Not checked on a phone: only a real update on a device can show the reload.
-  - **Status:** Version: OTA, expected with the next update · Committed: yes, `bd2c899` · Pushed: yes · Live: preview `1.0.21-82` (group `ee06df39-92c7-45fa-b5df-b2359c800187`, from `8f3ba4a`, 2026-11-18, read from the publish output) · Channel: preview
+  - **Status:** Version: OTA, expected with the next update · Committed: yes, `bd2c899` · Pushed: yes · Live: preview `1.0.21-82` (group `ee06df39-92c7-45fa-b5df-b2359c800187`, from `8f3ba4a`, 2026-11-18, read from the publish output), and in `1.0.21-83` after it · Channel: preview
 
 - [ ] The carousel's star and fill that work
   - **Flag:** `OTA`.
@@ -1052,7 +1052,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **The owner, 2026-11-17:** "לך עם ההמלצה שלך": direction א and the study's recommendation on each of its six decisions (add at once with an undo; all eleven templates; no zman field, Tehillim saved as 09:30 to 16:30; Friday left as it is; an added template marked and opening its mitzvah).
   - **Done:** 2026-11-17. `src/data/customTemplates.ts`, `src/components/TemplateSheet.tsx` opened by the library's add button and by `add=1`, the undo on the mitzvah screen, each template in the search, the guide's topic and the WHATS_NEW entry `1.0.21-20`. `src/app/__tests__/templates.render.test.tsx` (14 cases: the list, each of the eleven created with its hours, days from today, one reminder and switched on, an added one never doubled, `add=1` and English), three undo cases in [src/app/__tests__/mitzvah.render.test.tsx](src/app/__tests__/mitzvah.render.test.tsx) and the template cases of [src/utils/__tests__/searchCoverage.test.ts](src/utils/__tests__/searchCoverage.test.ts). The copy is the study's proposed copy, not reviewed word by word by the owner; not checked on a phone.
   - **Withdrawn, the owner, 2026-11-18** (after preview `1.0.21-82`): "כל ההצעות שכתבת בהוספת מצווה חדשה אני רוצה אותם בתור מצוות באפליקציה ... ואת היצירת מצווה חדשה תחזיר למה שהיה עם הטופס המלא". The sheet, its data, its undo and its search items are removed; "add a mitzvah" opens the full form again. The eleven proposals are the habit mitzvot of the next item. A custom mitzvah a preview user made from a template stays as it is.
-  - **Status:** Version: OTA · Committed: yes, `e07487c` (built), withdrawn in `8967543` · Pushed: yes · Live: preview `1.0.21-82` still shows the sheet until the next preview update · Channel: preview
+  - **Status:** Version: OTA · Committed: yes, `e07487c` (built), withdrawn in `8967543` · Pushed: yes · Live: preview `1.0.21-83` no longer carries the sheet (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, 2026-11-18) · Channel: preview
 
 - [ ] The habit mitzvot (twenty-four): registry mitzvot off by default, in new groups, offered on home and in the first setup
   - **Asked by:** the owner, 2026-11-18 (the request quoted above, and: "שתשייך אותם לקטגוריות מתאימות ואם אין אז תיצור חדשות כמו חסדים", "שיהיה הצעות למשתמש על המצוות האלה במידה והוא לא הפעיל אותם", "אפשרות באנבורדינג להפעיל אותם").
@@ -1064,7 +1064,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Fourteen more, the owner, 2026-11-18** ("אני רוצה כל מה שהצעת חוץ מ 9 ו 12 ו 15 ו 16 ו 19 ואני רוצה שתאחד את 17 ו 18"): Daf Yomi (Sunday to Friday, until 13:00 on Friday), Mishna Yomit, Pirkei Avot (Wednesday evening), Iggeret HaRamban (Sunday morning), visiting the sick (Tuesday), a call to a lonely friend or relative (Monday), hosting guests (Wednesday), a kind word to the spouse, one-on-one time with each child (Sunday), maaser once a month (the 10th of the civil month, Sunday the 11th when the 10th is Shabbat), cheshbon nefesh, hitbodedut, "חלות, יין ודבר תורה לשבת" on Thursday (17 and 18 merged) and the mikveh on erev Shabbat (a men's mitzvah). Each with its capability, offer and bundle place; the prayer bundle keeps its four recommended members and `bundleOn()` counts only those. A change of gender back to a man restores only the default-on men's mitzvot. Declined by the owner: the daily Tanach chapter (9), the weekly review (12), Asher Yatzar (15), a hundred blessings (16) and hafrashat challah (19). The weekdays and hours of the weekly ones are Claude's choice, not the owner's.
   - **Maaser removed, the owner, 2026-11-18** ("תמחק תמעשר אני ביקשתי שלא להוסיף"): `maaser` and its monthly rule are deleted from the registry, the capabilities, the bundle, the offers, the strings and the guide, in `18fde7e`, pushed; no update carried it, so nothing is retired. Twenty-four remain. Verified: the full `pnpm test` green (7,048), `typecheck`, `lint` and `check:dox`.
   - **Done (the fourteen):** 2026-11-18. [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) now pins all twenty-five (the monthly maaser and Daf Yomi's Friday end included), with the offers, bundle, library, onboarding and gender suites updated; the full `pnpm test` green (7,047). Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `8967543` and `f8f50f2` · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `8967543` and `f8f50f2` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 
 - [ ] Rosh Chodesh and hilula notices on by default
   - **Asked by:** the owner, 2026-11-18: "כל המצוות שהוספת שהם בדיפולט יהיו מכובים וההתראות על ראש חודש והילולת צדיקים שיהיו פעילים בברירת מחדל". The first half holds already: none of the twenty-five habit mitzvot is in `DEFAULT_ON_MITZVOT`.
@@ -1073,7 +1073,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** a new user hears about Rosh Chodesh and hilulot without finding their switches.
   - **Expected result:** a fresh install has both switches on; an existing install has both on after the update, once, and a later switch-off is kept across launches.
   - **Done:** 2026-11-18. The notice cases of [src/stores/__tests__/stores.test.ts](src/stores/__tests__/stores.test.ts) (the defaults, the one-time switch-on, the mark keeping a later choice, every kind off), [src/data/__tests__/bundles.test.ts](src/data/__tests__/bundles.test.ts), [src/services/__tests__/setupBundles.test.ts](src/services/__tests__/setupBundles.test.ts), [src/app/__tests__/onboarding.bundles.render.test.tsx](src/app/__tests__/onboarding.bundles.render.test.tsx) and the catch-up case of [src/utils/__tests__/offers.test.ts](src/utils/__tests__/offers.test.ts); the full `pnpm test` green. Not checked on a phone. Open with the owner: switching existing installs on was the agent's reading of "default", after the rule for a newly default-on mitzvah; one line of the `merge` to drop if only new installs are meant.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `11c3497` · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `11c3497` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 
 ### Reader texts for the habit mitzvot, 2026-11-18 — batch rules
 
@@ -1093,7 +1093,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** the two habits whose text the app already holds open nothing today.
   - **Expected result:** each mitzvah's screen and home card open the text; the reader's "סיימתי" marks the habit; the search finds both.
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 
 - [ ] Pirkei Avot as a reader text for "פרקי אבות"
   - **Flag:** OTA.
@@ -1102,7 +1102,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** the text opens from the mitzvah and from the siddur tab's learning group, on the chapter the user picks; on the chapter the user picks.
   - **As built:** the Hebrew is Sefaria's "Pirkei Avot" in "Torat Emet 357", so that Kulp's English aligns mishnah by mishnah; the Edot HaMizrach leaf gives only the opening and closing passages. In the siddur tab under General. The reader picks the chapter by hand, for good: the owner's call of 2026-11-18 ("פרקי אבות לבחור פרק ידנית"), so no weekly cycle is built and R18 is dropped.
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 
 - [ ] Iggeret HaRamban as a reader text
   - **Flag:** OTA.
@@ -1111,7 +1111,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** the text opens from `iggeret_haramban` and the siddur tab, with its credit.
   - **As built:** Sefaria's "HeWiki" version of the Wikisource text (CC BY-SA), which the Community Translation aligns with.
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 
 ### Medium — Reader texts for the habit mitzvot
 
@@ -1122,7 +1122,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** one text of three sections opens from `visit_sick`; the list of psalms is the one R19 confirms, read from a print, never from memory.
   - **As built:** Yoreh De'ah 335:5-6 with Denburg's English, and Mi Sheberach from Torat Emet Sefard (better vocalized than Daat's), its Shabbat and Yom Tov wording cut. The psalms are not in it: they wait for R19. Until then the reader ends with a button that opens Tehillim (the owner, 2026-11-18: "בינתיים שים קישור לתהילים בקורא"; `TEXT_OPENS_ALSO` in [src/data/siddur.ts](src/data/siddur.ts)).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 
 - [ ] Bedtime forgiveness and vidui for "חשבון נפש", and Mesillat Yesharim 3 as study
   - **Flag:** OTA.
@@ -1131,7 +1131,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** the mitzvah opens the bedtime Shema on that section in the user's nusach; the study text with Sebag's English ("CC-BY"), the owner's yes of 2026-11-18 (Q38).
   - **As built:** one text, Mesillat Yesharim chapter 3 with Sebag's English, under a note that points to the bedtime Shema for the forgiveness and vidui, and ending with a button that opens the bedtime Shema (the owner's yes of 2026-11-18; `TEXT_OPENS_ALSO`).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 
 - [ ] Likutei Moharan II:25 for "התבודדות ותפילה אישית"
   - **Flag:** OTA.
@@ -1140,7 +1140,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** the text opens from `hitbodedut` (the owner's yes of 2026-11-18, Q38).
   - **As built:** Hebrew only: the Community Translation holds nothing for this lesson.
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 
 - [ ] Verses for the two children's habits
   - **Flag:** OTA.
@@ -1149,7 +1149,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** one short text opens from both mitzvot.
   - **As built:** the three verses with JPS 1917; the blessing of the children is dropped for good, at the owner's word of 2026-11-18 ("ברכת הבנים תסיר לגמרי").
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 
 - [ ] Daf Yomi: links to the day's daf
   - **Flag:** OTA.
@@ -1158,7 +1158,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** the reminder's body and the screen name today's daf; each link opens the right page for three dapim checked by hand, one of them on a tractate's first day.
   - **As built:** the mitzvah screen shows the day's daf by name with a link to the page (Sefaria, as `@hebcal/learning` 5.1.2 links it; a pure-JS dependency added for it, which also makes `HebcalService.getDafYomi()` find the daf) and to Hadran's shiur; every tractate's first Hadran page read 200 on 2026-11-18. The reminder names the day's daf too (`bodyParams` and `notifications.dafYomi`: "דף יומי: בכורות דף ס״א"). Suite: [src/utils/__tests__/dafYomi.test.ts](src/utils/__tests__/dafYomi.test.ts).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 
 - [ ] The Mishnah add-on for "שתי משניות" and "משנה יומית"
   - **Flag:** a `docs/` add-on, then OTA.
@@ -1182,7 +1182,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** a source to read beside the reminder.
   - **Expected result:** one short text opens from the three mitzvot, with English (Kulp, JPS 1917); the owner's yes of 2026-11-18 (Q38).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 
 - [ ] Permission for the vocalized Mishnah of Torat Emet
   - **Flag:** none: an email from `365jew@gmail.com`.
@@ -1199,7 +1199,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** a starred time hours away hid the time that is running now.
   - **Expected result:** on home the first chip is the time that comes next, a star or not; the starred ones follow it.
   - **Done:** 2026-11-18. [src/utils/__tests__/homeTimes.test.ts](src/utils/__tests__/homeTimes.test.ts) pins the order with a starred later time and with a starred time already past; the full `pnpm test` green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `7936359` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 
 ## Bugs
 
@@ -1208,7 +1208,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Cause:** not the scroll. The reader's load effect listed `halachaUnits`, an array rebuilt whenever `location` changed identity (through the halacha make-up memo, added with the daily halacha, in production since `1.0.21-18`). "My location" reads a fresh fix every 30 seconds and writes a new place when it is a kilometre from the saved one (typically the first fix after the app opens somewhere new, a minute or so in), so the effect ran again, the list was hidden while the text loaded and it was drawn anew from its top, for every text. The window choice was also re-read with the new place, against its contract.
   - **Fix:** `halachaUnits` keyed by its content and `windowChoice` fixed at open ([src/app/siddur/[id].tsx](<src/app/siddur/[id].tsx>)).
   - **Done:** 2026-11-18. Two cases in [src/app/__tests__/siddurReader.render.test.tsx](src/app/__tests__/siddurReader.render.test.tsx) (Shacharit opened with and without a date keeps its list when the place moves), failing on the code before the fix and passing after it; the five reader suites green under `pnpm test:tz` (261 per zone). Reproduced in Jest only, not on a phone: the owner's report did not name the moment of a location update, so the phone check is to read Shacharit for several minutes after opening the app away from the last place.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `fc0c827` · Pushed: yes · Live: preview `1.0.21-82` (group `ee06df39-92c7-45fa-b5df-b2359c800187`, from `8f3ba4a`, 2026-11-18, read from the publish output) · Channel: preview
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `fc0c827` · Pushed: yes · Live: preview `1.0.21-82` (group `ee06df39-92c7-45fa-b5df-b2359c800187`, from `8f3ba4a`, 2026-11-18, read from the publish output), and in `1.0.21-83` after it · Channel: preview
 
 - [ ] The app still hangs on the logo screen at launch
   - **Found:** 2026-11-13, the owner's screen recording (13 seconds on the dark splash, the production icon) and words: "היה באג שדיברתי איתך עליו שהמסך נתקע בעליה ואמרת שסידרת אותו, אז זהו שלא". The fix of 2026-11-06 (`517a628`, the Luxon zone-offset cache, production `1.0.21-15`, [action-log.md](action-log.md)) cut one cost but was inferred, never measured on a phone, and did not end the hang.
