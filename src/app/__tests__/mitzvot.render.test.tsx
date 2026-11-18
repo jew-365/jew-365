@@ -146,28 +146,19 @@ describe('Mitzvot library', () => {
   it('lists each mitzvah under its group in registry order, and the hilulot and Rosh Chodesh rows last under More', () => {
     renderWithTheme(<MitzvotScreen />);
     expect(groupSwitches('prayers')).toEqual(names(['shacharit', 'mincha', 'maariv']));
-    expect(groupSwitches('daily')).toEqual(
+    const inGroup = (group: string) => MITZVOT.filter((m) => m.group === group).map((m) => m.name.he);
+    expect(groupSwitches('daily')).toEqual(inGroup('daily'));
+    expect(groupSwitches('daily').slice(0, 4)).toEqual(
       names(['tefillin', 'krias_shma_shacharit', 'birchot_hashachar', 'krias_shma_al_hamita']),
     );
-    expect(groupSwitches('weekly')).toEqual(names(['candle_lighting', 'havdalah', 'shabbat_prep']));
+    expect(groupSwitches('weekly')).toEqual(inGroup('weekly'));
+    expect(groupSwitches('weekly').slice(0, 3)).toEqual(names(['candle_lighting', 'havdalah', 'shabbat_prep']));
     expect(groupSwitches('seasonal')).toEqual(names(['sefirat_haomer', 'chanukah_candles', 'selichot', 'ushpizin']));
-    expect(groupSwitches('learning')).toEqual(
-      names([
-        'tehillim_chapter',
-        'two_mishnayot',
-        'learning_on_the_way',
-        'torah_class',
-        'halacha_yomit',
-        'hilchot_hachag',
-        'lashon_hara',
-        'shemirat_halashon',
-        'shnayim_mikra',
-        'chok_leyisrael',
-      ]),
-    );
-    expect(groupSwitches('chesed')).toEqual(
-      names(['daily_tzedakah', 'call_parents', 'kids_learning', 'kids_story', 'gratitude', 'grandparents_call']),
-    );
+    expect(groupSwitches('learning')).toEqual(inGroup('learning'));
+    expect(groupSwitches('learning')[0]).toBe(names(['tehillim_chapter'])[0]);
+    expect(groupSwitches('learning').slice(-1)).toEqual(names(['chok_leyisrael']));
+    expect(groupSwitches('chesed')).toEqual(inGroup('chesed'));
+    expect(groupSwitches('chesed')).toEqual(expect.arrayContaining(names(['daily_tzedakah', 'visit_sick', 'maaser'])));
     expect(groupSwitches('other')).toEqual([...names(['kiddush_levana']), HILULOT, ROSH_CHODESH]);
   });
 

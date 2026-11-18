@@ -5,6 +5,7 @@ import { HABIT_IDS, LIBRARY_GROUPS, MITZVOT, findMitzvah } from '@/data/mitzvot'
 import { hasSiddurText, siddurPlace } from '@/data/siddur';
 import en from '@/i18n/en.json';
 import he from '@/i18n/he.json';
+import { isMensMitzvah } from '@/stores/taharahOptIn';
 import { DEFAULT_ON_MITZVOT } from '@/stores/useMitzvotStore';
 import { ZmanimService } from '@/services/ZmanimService';
 import { at } from '@/testing/zmanim';
@@ -20,7 +21,8 @@ const SETTINGS: UserSettings = { nusach: 'ashkenaz', halachicOpinions: { ksSofZm
 const WEEK = ['2026-11-15', '2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19', '2026-11-20', '2026-11-21'];
 const SUN_TO_FRI = [0, 1, 2, 3, 4, 5];
 const SUN_TO_THU = [0, 1, 2, 3, 4];
-const EXPECTED: Record<string, { group: string; hours: [string, string]; days: number[] }> = {
+// `maaser` is monthly and has its own case below.
+const EXPECTED: Record<string, { group: string; hours: [string, string]; days: number[]; friday?: string }> = {
   tehillim_chapter: { group: 'learning', hours: ['09:30', '16:30'], days: SUN_TO_FRI },
   two_mishnayot: { group: 'learning', hours: ['06:30', '08:30'], days: SUN_TO_FRI },
   learning_on_the_way: { group: 'learning', hours: ['07:00', '09:30'], days: SUN_TO_THU },
@@ -32,6 +34,19 @@ const EXPECTED: Record<string, { group: string; hours: [string, string]; days: n
   gratitude: { group: 'chesed', hours: ['21:00', '23:30'], days: SUN_TO_THU },
   grandparents_call: { group: 'chesed', hours: ['09:00', '13:00'], days: [5] },
   shabbat_prep: { group: 'weekly', hours: ['08:00', '12:00'], days: [5] },
+  daf_yomi: { group: 'learning', hours: ['07:00', '23:00'], days: SUN_TO_FRI, friday: '13:00' },
+  mishna_yomit: { group: 'learning', hours: ['18:00', '23:00'], days: SUN_TO_THU },
+  pirkei_avot: { group: 'learning', hours: ['20:00', '22:30'], days: [3] },
+  iggeret_haramban: { group: 'learning', hours: ['07:00', '10:00'], days: [0] },
+  visit_sick: { group: 'chesed', hours: ['17:00', '21:00'], days: [2] },
+  friend_call: { group: 'chesed', hours: ['18:00', '21:00'], days: [1] },
+  shabbat_guest: { group: 'chesed', hours: ['18:00', '21:00'], days: [3] },
+  kind_word: { group: 'chesed', hours: ['07:00', '10:00'], days: SUN_TO_FRI },
+  child_time: { group: 'chesed', hours: ['17:00', '19:30'], days: [0] },
+  cheshbon_nefesh: { group: 'daily', hours: ['21:30', '23:30'], days: SUN_TO_THU },
+  hitbodedut: { group: 'daily', hours: ['19:30', '22:30'], days: SUN_TO_THU },
+  shabbat_shopping: { group: 'weekly', hours: ['16:00', '21:00'], days: [4] },
+  mikveh_erev_shabbat: { group: 'weekly', hours: ['08:00', '13:00'], days: [5] },
 };
 
 const windowOn = (id: string, dayKey: string, location: Location) => {
@@ -41,8 +56,9 @@ const windowOn = (id: string, dayKey: string, location: Location) => {
 };
 
 describe('the habit mitzvot', () => {
-  it('are the eleven of the owner’s list, registry mitzvot off by default, before Kiddush Levana', () => {
-    expect([...HABIT_IDS].sort()).toEqual(Object.keys(EXPECTED).sort());
+  it('are the twenty-five of the owner’s lists, registry mitzvot off by default, before Kiddush Levana', () => {
+    expect([...HABIT_IDS].sort()).toEqual([...Object.keys(EXPECTED), 'maaser'].sort());
+    expect(HABIT_IDS).toHaveLength(25);
     const ids = MITZVOT.map((mitzvah) => mitzvah.id);
     expect(ids.slice(ids.indexOf(HABIT_IDS[0]), ids.indexOf('kiddush_levana'))).toEqual(HABIT_IDS);
     expect(ids[ids.length - 1]).toBe('chok_leyisrael');
@@ -76,12 +92,33 @@ describe('the habit mitzvot', () => {
           if (!want.days.includes(weekday)) return expect([dayKey, window]).toEqual([dayKey, null]);
           expect([dayKey, clockOf(window!.start, location.tz), clockOf(window!.end, location.tz)]).toEqual([
             dayKey,
-            ...want.hours,
+            want.hours[0],
+            weekday === 5 && want.friday ? want.friday : want.hours[1],
           ]);
         });
       }
     },
   );
+
+  it('opens maaser once a month, on the 10th, or on Sunday the 11th when the 10th is Shabbat', () => {
+    expect(findMitzvah('maaser')).toMatchObject({ group: 'chesed', skipOn: ['shabbat', 'yomtov'] });
+    for (const location of [JERUSALEM, NEW_YORK]) {
+      // Tuesday 2026-11-10; Saturday 2026-10-10 moves to Sunday the 11th; no other day of either month opens.
+      const open = (month: string) =>
+        Array.from({ length: 30 }, (_, i) => `${month}-${String(i + 1).padStart(2, '0')}`).filter(
+          (dayKey) => windowOn('maaser', dayKey, location) !== null,
+        );
+      expect(open('2026-11')).toEqual(['2026-11-10']);
+      expect(open('2026-10')).toEqual(['2026-10-11']);
+      const window = windowOn('maaser', '2026-11-10', location)!;
+      expect([clockOf(window.start, location.tz), clockOf(window.end, location.tz)]).toEqual(['09:00', '21:00']);
+    }
+  });
+
+  it('keeps the mikveh of erev Shabbat a men’s mitzvah', () => {
+    expect(isMensMitzvah('mikveh_erev_shabbat')).toBe(true);
+    expect(isMensMitzvah('shabbat_shopping')).toBe(false);
+  });
 
   it('is skipped on a Yom Tov that falls on one of its weekdays', () => {
     // Thursday 2027-04-22 is the first day of Pesach.
@@ -118,5 +155,6 @@ describe('the habit mitzvot', () => {
     for (const id of HABIT_IDS) expect(recommended).not.toContain(id);
     expect(bundleSelection(['habits'], null, all).mitzvot).toEqual(['tehillim_chapter']);
     expect(bundleSelection(['chesed'], null, all).mitzvot).toEqual(['daily_tzedakah', 'call_parents', 'gratitude']);
+    expect(bundleSelection(['prayer'], null, all).mitzvot).not.toContain('hitbodedut');
   });
 });

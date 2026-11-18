@@ -112,10 +112,12 @@ describe('Onboarding mitzvot step', () => {
   it('lists each registry mitzvah of the nusach under its group, the setting rows last under More, and no learning add-on', () => {
     renderWithTheme(<OnboardingMitzvotScreen />);
     expect(groupSwitches('prayers')).toEqual(names(['shacharit', 'mincha', 'maariv']));
-    expect(groupSwitches('daily')).toEqual(
+    const inGroup = (group: string) => MITZVOT.filter((m) => m.group === group).map((m) => m.name.he);
+    expect(groupSwitches('daily')).toEqual(inGroup('daily'));
+    expect(groupSwitches('daily').slice(0, 4)).toEqual(
       names(['tefillin', 'krias_shma_shacharit', 'birchot_hashachar', 'krias_shma_al_hamita']),
     );
-    expect(groupSwitches('weekly')).toEqual(names(['candle_lighting', 'havdalah', 'shabbat_prep']));
+    expect(groupSwitches('weekly')).toEqual(inGroup('weekly'));
     expect(groupSwitches('seasonal')).toEqual(expect.arrayContaining(names(['sefirat_haomer'])));
     expect(groupSwitches('other').slice(-2)).toEqual([HILULOT, ROSH_CHODESH]);
     expect([...switchLabels()].sort()).toEqual(

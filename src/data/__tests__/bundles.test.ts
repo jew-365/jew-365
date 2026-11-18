@@ -56,6 +56,8 @@ describe('the goal bundles', () => {
       'prayers',
       'shema',
       'bedtimeShema',
+      'cheshbon_nefesh',
+      'hitbodedut',
     ]);
   });
 

@@ -361,11 +361,16 @@ type Habit = {
   end: readonly [number, number];
   // Sunday is 0.
   days: readonly number[];
+  // An earlier end on Friday, so the window never reaches candle lighting.
+  fridayEnd?: readonly [number, number];
+  // Once a month: only on this civil day of the month, or the day after it when it falls on Shabbat.
+  monthDay?: number;
 };
 
 const SUN_TO_FRI = [0, 1, 2, 3, 4, 5];
 const SUN_TO_THU = [0, 1, 2, 3, 4];
 const FRIDAY = [5];
+const ALL_WEEK = [0, 1, 2, 3, 4, 5, 6];
 
 const HABITS: readonly Habit[] = [
   {
@@ -506,6 +511,219 @@ const HABITS: readonly Habit[] = [
     end: [12, 0],
     days: FRIDAY,
   },
+  {
+    id: 'daf_yomi',
+    he: 'דף יומי',
+    en: 'Daf Yomi',
+    benefit: {
+      he: 'דף גמרא בכל יום, עם לומדי הדף היומי בעולם',
+      en: 'A page of Gemara every day, with Daf Yomi learners everywhere',
+    },
+    icon: 'chok',
+    group: 'learning',
+    category: 'learning',
+    start: [7, 0],
+    end: [23, 0],
+    days: SUN_TO_FRI,
+    fridayEnd: [13, 0],
+  },
+  {
+    id: 'mishna_yomit',
+    he: 'משנה יומית',
+    en: 'Mishna Yomit',
+    benefit: {
+      he: 'שתי משניות ביום לפי סדר המשנה היומית',
+      en: 'Two mishnayot a day in the order of Mishna Yomit',
+    },
+    icon: 'siddur',
+    group: 'learning',
+    category: 'learning',
+    start: [18, 0],
+    end: [23, 0],
+    days: SUN_TO_FRI,
+    fridayEnd: [13, 0],
+  },
+  {
+    id: 'pirkei_avot',
+    he: 'פרקי אבות',
+    en: 'Pirkei Avot',
+    benefit: {
+      he: 'פרק אחד בשבוע, ביום רביעי בערב',
+      en: 'One chapter a week, on Wednesday evening',
+    },
+    icon: 'guide',
+    group: 'learning',
+    category: 'weekly',
+    start: [20, 0],
+    end: [22, 30],
+    days: [3],
+  },
+  {
+    id: 'iggeret_haramban',
+    he: 'אגרת הרמב״ן',
+    en: 'Iggeret HaRamban',
+    benefit: {
+      he: 'קריאת האגרת פעם בשבוע, ביום ראשון בבוקר',
+      en: 'Reading the letter once a week, on Sunday morning',
+    },
+    icon: 'tehillim',
+    group: 'learning',
+    category: 'weekly',
+    start: [7, 0],
+    end: [10, 0],
+    days: [0],
+  },
+  {
+    id: 'visit_sick',
+    he: 'ביקור חולים',
+    en: 'Visiting the sick',
+    benefit: {
+      he: 'ביקור או טלפון לחולה, פעם בשבוע',
+      en: 'A visit or a call to someone unwell, once a week',
+    },
+    icon: 'phone',
+    group: 'chesed',
+    category: 'weekly',
+    start: [17, 0],
+    end: [21, 0],
+    days: [2],
+  },
+  {
+    id: 'friend_call',
+    he: 'שיחה עם חבר או קרוב בודד',
+    en: 'A call to a lonely friend or relative',
+    benefit: {
+      he: 'שיחה אחת בשבוע עם מי שישמח לשמוע ממך',
+      en: 'One call a week to someone who will be glad to hear from you',
+    },
+    icon: 'chat',
+    group: 'chesed',
+    category: 'weekly',
+    start: [18, 0],
+    end: [21, 0],
+    days: [1],
+  },
+  {
+    id: 'shabbat_guest',
+    he: 'הכנסת אורחים',
+    en: 'Hosting guests',
+    benefit: {
+      he: 'להזמין אורח לשבת, כבר ביום רביעי',
+      en: 'Inviting a guest for Shabbat, already on Wednesday',
+    },
+    icon: 'meals',
+    group: 'chesed',
+    category: 'weekly',
+    start: [18, 0],
+    end: [21, 0],
+    days: [3],
+  },
+  {
+    id: 'kind_word',
+    he: 'מילה טובה לבן או בת הזוג',
+    en: 'A kind word to my spouse',
+    benefit: {
+      he: 'מילה טובה אחת בכל בוקר',
+      en: 'One kind word every morning',
+    },
+    icon: 'rings',
+    group: 'chesed',
+    category: 'daily-morning',
+    start: [7, 0],
+    end: [10, 0],
+    days: SUN_TO_FRI,
+  },
+  {
+    id: 'child_time',
+    he: 'זמן אישי עם כל ילד',
+    en: 'One-on-one time with each child',
+    benefit: {
+      he: 'זמן של אחד על אחד, פעם בשבוע',
+      en: 'Time one on one, once a week',
+    },
+    icon: 'user',
+    group: 'chesed',
+    category: 'weekly',
+    start: [17, 0],
+    end: [19, 30],
+    days: [0],
+  },
+  {
+    id: 'maaser',
+    he: 'מעשר כספים',
+    en: 'Maaser from my income',
+    benefit: {
+      he: 'הפרשת מעשר מהמשכורת, פעם בחודש ב־10 לחודש',
+      en: 'Setting aside a tenth of the salary, once a month on the 10th',
+    },
+    icon: 'sparkle',
+    group: 'chesed',
+    category: 'seasonal',
+    start: [9, 0],
+    end: [21, 0],
+    days: ALL_WEEK,
+    monthDay: 10,
+  },
+  {
+    id: 'cheshbon_nefesh',
+    he: 'חשבון נפש',
+    en: 'Cheshbon nefesh',
+    benefit: {
+      he: 'כמה דקות של חשבון נפש לפני השינה',
+      en: 'A few minutes of taking stock before bed',
+    },
+    icon: 'night',
+    group: 'daily',
+    category: 'daily-evening',
+    start: [21, 30],
+    end: [23, 30],
+    days: SUN_TO_THU,
+  },
+  {
+    id: 'hitbodedut',
+    he: 'התבודדות ותפילה אישית',
+    en: 'Hitbodedut and personal prayer',
+    benefit: {
+      he: 'רבע שעה ביום של תפילה במילים שלך',
+      en: 'A quarter of an hour a day of prayer in your own words',
+    },
+    icon: 'sun',
+    group: 'daily',
+    category: 'daily-evening',
+    start: [19, 30],
+    end: [22, 30],
+    days: SUN_TO_THU,
+  },
+  {
+    id: 'shabbat_shopping',
+    he: 'חלות, יין ודבר תורה לשבת',
+    en: 'Challot, wine and a dvar Torah for Shabbat',
+    benefit: {
+      he: 'קונים חלות ויין ומכינים דבר תורה לשולחן, כבר ביום חמישי',
+      en: 'Buying challot and wine and preparing a dvar Torah for the table, already on Thursday',
+    },
+    icon: 'challah',
+    group: 'weekly',
+    category: 'weekly',
+    start: [16, 0],
+    end: [21, 0],
+    days: [4],
+  },
+  {
+    id: 'mikveh_erev_shabbat',
+    he: 'טבילה במקווה בערב שבת',
+    en: 'Mikveh on erev Shabbat',
+    benefit: {
+      he: 'טבילה לכבוד שבת, ביום שישי בבוקר',
+      en: 'Immersing in honour of Shabbat, on Friday morning',
+    },
+    icon: 'waterGlass',
+    group: 'weekly',
+    category: 'weekly',
+    start: [8, 0],
+    end: [13, 0],
+    days: FRIDAY,
+  },
 ];
 
 export const HABIT_IDS: readonly string[] = HABITS.map((habit) => habit.id);
@@ -523,10 +741,15 @@ const habitMitzvah = (habit: Habit): Mitzvah => ({
   defaultReminders: [{ anchor: 'start', offsetMin: 0, label: habit.he }],
   computeWindow: ({ zmanim, location }) => {
     const day = dayOf(zmanim, location);
-    if (!habit.days.includes(day.weekday % 7)) return null;
+    const weekday = day.weekday % 7;
+    if (!habit.days.includes(weekday)) return null;
+    if (habit.monthDay !== undefined) {
+      const moved = weekday === SUNDAY && day.day === habit.monthDay + 1;
+      if (!(moved || (day.day === habit.monthDay && weekday !== 6))) return null;
+    }
     const at = ([hour, minute]: readonly [number, number]) =>
       day.set({ hour, minute, second: 0, millisecond: 0 }).toJSDate();
-    return win(at(habit.start), at(habit.end));
+    return win(at(habit.start), at(weekday === 5 && habit.fridayEnd ? habit.fridayEnd : habit.end));
   },
 });
 

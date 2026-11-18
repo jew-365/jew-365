@@ -54,9 +54,11 @@ describe('taharahOptIn', () => {
     });
 
     it("switches the registered men's mitzvot off for a woman and leaves the prayers on", () => {
-      expect(MENS_MITZVOT).toEqual(['tefillin', 'kiddush_levana']);
+      expect(MENS_MITZVOT).toEqual(['tefillin', 'kiddush_levana', 'mikveh_erev_shabbat']);
       const mens = MENS_MITZVOT.filter((id) => findMitzvah(id));
-      expect(mens).toEqual(['tefillin', 'kiddush_levana']);
+      expect(mens).toEqual(['tefillin', 'kiddush_levana', 'mikveh_erev_shabbat']);
+      // The mikveh of erev Shabbat is off by default; the user switches it on here.
+      useMitzvotStore.getState().setEnabled('mikveh_erev_shabbat', true);
       expect(mens.map(enabled)).toEqual(mens.map(() => true));
       chooseGender('female');
       expect(mens.map(enabled)).toEqual(mens.map(() => false));
@@ -72,10 +74,11 @@ describe('taharahOptIn', () => {
 
     it("restores the registered men's mitzvot when the answer changes from woman to man", () => {
       const mens = MENS_MITZVOT.filter((id) => findMitzvah(id));
-      expect(mens).toEqual(['tefillin', 'kiddush_levana']);
+      expect(mens).toEqual(['tefillin', 'kiddush_levana', 'mikveh_erev_shabbat']);
       chooseGender('female');
       chooseGender('male');
-      expect(mens.map(enabled)).toEqual(mens.map(() => true));
+      // Only the default-on ones return; the mikveh of erev Shabbat stays off, as before the user chose it.
+      expect(mens.map(enabled)).toEqual([true, true, false]);
     });
 
     it("never writes a men's mitzvah the registry lacks", () => {

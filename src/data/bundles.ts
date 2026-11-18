@@ -23,11 +23,26 @@ export type Bundle = {
 };
 
 export const BUNDLES: readonly Bundle[] = [
-  { id: 'prayer', icon: 'shacharit', members: ['prayers', 'shema', 'tefillin', 'bedtimeShema'], recommended: true },
+  {
+    id: 'prayer',
+    icon: 'shacharit',
+    members: ['prayers', 'shema', 'tefillin', 'bedtimeShema', 'cheshbon_nefesh', 'hitbodedut'],
+    recommended: true,
+    recommendedMembers: ['prayers', 'shema', 'tefillin', 'bedtimeShema'],
+  },
   {
     id: 'shabbat',
     icon: 'candles',
-    members: ['candles', 'omer', 'chanukah', 'ushpizin', 'kiddushLevana', 'shabbat_prep'],
+    members: [
+      'candles',
+      'omer',
+      'chanukah',
+      'ushpizin',
+      'kiddushLevana',
+      'shabbat_prep',
+      'shabbat_shopping',
+      'mikveh_erev_shabbat',
+    ],
     recommended: true,
     recommendedMembers: ['candles', 'omer', 'chanukah', 'ushpizin', 'kiddushLevana'],
   },
@@ -51,14 +66,36 @@ export const BUNDLES: readonly Bundle[] = [
   {
     id: 'habits',
     icon: 'tehillim',
-    members: ['tehillim_chapter', 'two_mishnayot', 'learning_on_the_way', 'torah_class'],
+    members: [
+      'tehillim_chapter',
+      'two_mishnayot',
+      'learning_on_the_way',
+      'torah_class',
+      'daf_yomi',
+      'mishna_yomit',
+      'pirkei_avot',
+      'iggeret_haramban',
+    ],
     recommended: false,
     recommendedMembers: ['tehillim_chapter'],
   },
   {
     id: 'chesed',
     icon: 'sparkle',
-    members: ['daily_tzedakah', 'call_parents', 'gratitude', 'kids_learning', 'kids_story', 'grandparents_call'],
+    members: [
+      'daily_tzedakah',
+      'call_parents',
+      'gratitude',
+      'kids_learning',
+      'kids_story',
+      'grandparents_call',
+      'visit_sick',
+      'friend_call',
+      'shabbat_guest',
+      'kind_word',
+      'child_time',
+      'maaser',
+    ],
     recommended: false,
     recommendedMembers: ['daily_tzedakah', 'call_parents', 'gratitude'],
   },
@@ -77,9 +114,11 @@ export function bundleMembers(bundle: Bundle, state: (cap: Capability) => Capabi
   });
 }
 
-// On when every member the user is offered is on; a bundle with no member offered is never on.
+// On when every member the user is offered is on, counting only the recommended members of a bundle that names
+// them (the rest are extras the user adds one by one); a bundle with no such member offered is never on.
 export function bundleOn(bundle: Bundle, state: (cap: Capability) => CapabilityState): boolean {
-  const members = bundleMembers(bundle, state);
+  const named = bundle.recommendedMembers;
+  const members = bundleMembers(bundle, state).filter((cap) => !named || named.includes(cap.id));
   return members.length > 0 && members.every((cap) => state(cap) === 'on');
 }
 

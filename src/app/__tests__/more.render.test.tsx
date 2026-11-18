@@ -99,7 +99,7 @@ describe('More tab', () => {
     // The prayers are on by default; Birchot HaShachar is not.
     expect(prayer.getByTestId('capability-icon-prayers-on', { includeHiddenElements: true })).toBeTruthy();
     expect(prayer.getByTestId('capability-icon-birchot-off', { includeHiddenElements: true })).toBeTruthy();
-    expect(screen.getByTestId('more-goal-prayer').props.accessibilityLabel).toMatch(/^תפילה: \d+ מתוך 5 פועלים$/);
+    expect(screen.getByTestId('more-goal-prayer').props.accessibilityLabel).toMatch(/^תפילה: \d+ מתוך 7 פועלים$/);
   });
 
   it('leaves a capability the user is not offered out of its tile', () => {
@@ -107,7 +107,7 @@ describe('More tab', () => {
     renderAt(NOON);
     const prayer = within(screen.getByTestId('more-goal-prayer'));
     expect(prayer.queryByTestId(/capability-icon-tefillin/, { includeHiddenElements: true })).toBeNull();
-    expect(screen.getByTestId('more-goal-prayer').props.accessibilityLabel).toMatch(/מתוך 4 פועלים$/);
+    expect(screen.getByTestId('more-goal-prayer').props.accessibilityLabel).toMatch(/מתוך 6 פועלים$/);
   });
 
   it('counts the mitzvot in use on the all-mitzvot tile and opens the library', () => {

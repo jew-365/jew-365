@@ -49,7 +49,21 @@ export type OfferId =
   | 'kids_learning'
   | 'kids_story'
   | 'grandparents_call'
-  | 'shabbat_prep';
+  | 'shabbat_prep'
+  | 'daf_yomi'
+  | 'mishna_yomit'
+  | 'pirkei_avot'
+  | 'iggeret_haramban'
+  | 'visit_sick'
+  | 'friend_call'
+  | 'shabbat_guest'
+  | 'kind_word'
+  | 'child_time'
+  | 'maaser'
+  | 'cheshbon_nefesh'
+  | 'hitbodedut'
+  | 'shabbat_shopping'
+  | 'mikveh_erev_shabbat';
 export type Offer = { id: OfferId; key: string; icon: IconName; action: CapabilityAction };
 
 export type OfferInput = {
@@ -92,7 +106,7 @@ type Candidate = {
 };
 type Ctx = OfferInput & { today: HDate; installAge: number };
 
-const HABIT_OFFERS: readonly { id: OfferId; icon: IconName; kids?: true }[] = [
+const HABIT_OFFERS: readonly { id: OfferId; icon: IconName; married?: true }[] = [
   { id: 'tehillim_chapter', icon: 'tehillim' },
   { id: 'two_mishnayot', icon: 'siddur' },
   { id: 'learning_on_the_way', icon: 'suitcase' },
@@ -100,10 +114,24 @@ const HABIT_OFFERS: readonly { id: OfferId; icon: IconName; kids?: true }[] = [
   { id: 'daily_tzedakah', icon: 'sparkle' },
   { id: 'call_parents', icon: 'phone' },
   { id: 'gratitude', icon: 'sun' },
-  { id: 'kids_learning', icon: 'user', kids: true },
-  { id: 'kids_story', icon: 'night', kids: true },
+  { id: 'kids_learning', icon: 'user', married: true },
+  { id: 'kids_story', icon: 'night', married: true },
   { id: 'grandparents_call', icon: 'chat' },
   { id: 'shabbat_prep', icon: 'challah' },
+  { id: 'daf_yomi', icon: 'chok' },
+  { id: 'mishna_yomit', icon: 'siddur' },
+  { id: 'pirkei_avot', icon: 'guide' },
+  { id: 'iggeret_haramban', icon: 'tehillim' },
+  { id: 'visit_sick', icon: 'phone' },
+  { id: 'friend_call', icon: 'chat' },
+  { id: 'shabbat_guest', icon: 'meals' },
+  { id: 'kind_word', icon: 'rings', married: true },
+  { id: 'child_time', icon: 'user', married: true },
+  { id: 'maaser', icon: 'sparkle' },
+  { id: 'cheshbon_nefesh', icon: 'night' },
+  { id: 'hitbodedut', icon: 'sun' },
+  { id: 'shabbat_shopping', icon: 'challah' },
+  { id: 'mikveh_erev_shabbat', icon: 'waterGlass' },
 ];
 
 // In priority order: a blocked delivery first (spec G1), then the tour, the seasonal and calendar offers, then
@@ -209,15 +237,15 @@ const CANDIDATES: readonly Candidate[] = [
     action: { kind: 'route', href: LEARNING_HREF },
   },
   // The habit mitzvot the user has not switched on (the owner's call, 2026-11-18), last: one at a time like every
-  // offer, to a user who already marks, and the two about children only to a married user.
-  ...HABIT_OFFERS.map(({ id, icon, kids }): Candidate => ({
+  // offer, to a user who already marks, and those about a spouse or children only to a married user.
+  ...HABIT_OFFERS.map(({ id, icon, married }): Candidate => ({
     id,
     icon,
     eligible: (c) =>
       c.offered(id) &&
       !c.enabled(id) &&
       c.markedDays >= HABIT_AFTER_MARKED_DAYS &&
-      (!kids || c.maritalStatus === 'married'),
+      (!married || c.maritalStatus === 'married'),
     action: { kind: 'mitzvot', ids: [id] },
   })),
 ];

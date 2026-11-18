@@ -263,12 +263,14 @@ describe('the habit mitzvot offers', () => {
     expect(pickOffer(input({ ...off, offers: justClosed }))).toBeNull();
   });
 
-  it('offers the two about children only to a married user', () => {
+  it('offers those about a spouse or children only to a married user', () => {
     expect(pickOffer(habitOff('kids_story'))).toBeNull();
     expect(pickOffer(habitOff('kids_story', { maritalStatus: null }))?.id).not.toBe('kids_story');
     expect(pickOffer(habitOff('kids_story', { maritalStatus: 'married' }))!.id).toBe('kids_story');
     expect(pickOffer(habitOff('kids_learning', { maritalStatus: 'married' }))!.id).toBe('kids_learning');
     expect(pickOffer(habitOff('call_parents'))!.id).toBe('call_parents');
+    expect(pickOffer(habitOff('kind_word'))).toBeNull();
+    expect(pickOffer(habitOff('child_time', { maritalStatus: 'married' }))!.id).toBe('child_time');
   });
 
   it('comes after every other offer, and may be the weekly tip', () => {

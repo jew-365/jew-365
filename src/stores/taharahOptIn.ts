@@ -2,7 +2,7 @@ import type { Nusach } from '@/types/mitzvah';
 import { paletteForGender } from '@/theme/colors';
 import { clearTaharahStorage } from '@/services/TaharahStorage';
 import { MITZVOT, findMitzvah } from '@/data/mitzvot';
-import { takeAddedOnHydrate, useMitzvotStore } from './useMitzvotStore';
+import { DEFAULT_ON_MITZVOT, takeAddedOnHydrate, useMitzvotStore } from './useMitzvotStore';
 import { useTaharahStore } from './useTaharahStore';
 import { Gender, MaritalStatus, useUserStore } from './useUserStore';
 
@@ -12,7 +12,7 @@ export const taharahOffered = (user: { gender: Gender | null; maritalStatus: Mar
 // The defaults switch tefillin on for everyone, so a woman used to finish onboarding
 // with tefillin reminders. Applied only when the answer changes, so re-tapping the same chip never
 // undoes a choice made in the library.
-export const MENS_MITZVOT = ['tefillin', 'kiddush_levana'] as const;
+export const MENS_MITZVOT = ['tefillin', 'kiddush_levana', 'mikveh_erev_shabbat'] as const;
 
 export const isMensMitzvah = (id: string): boolean => (MENS_MITZVOT as readonly string[]).includes(id);
 
@@ -22,7 +22,13 @@ function applyGenderDefaults(next: Gender, previous: Gender | null): void {
   if (previous === next) return;
   const { setEnabled } = useMitzvotStore.getState();
   if (next === 'female') registeredMensMitzvot().forEach((id) => setEnabled(id, false));
-  else if (previous === 'female') registeredMensMitzvot().forEach((id) => setEnabled(id, true));
+  // Back from a woman's defaults: only the men's mitzvot that are on by default return, never an off-by-default
+  // one (the mikveh of erev Shabbat).
+  else if (previous === 'female') {
+    registeredMensMitzvot()
+      .filter((id) => DEFAULT_ON_MITZVOT.includes(id))
+      .forEach((id) => setEnabled(id, true));
+  }
 }
 
 export function chooseGender(next: Gender): void {
