@@ -5,6 +5,8 @@ import { HABIT_IDS, LIBRARY_GROUPS, MITZVOT, findMitzvah } from '@/data/mitzvot'
 import { MITZVAH_BOOK_TEXT, hasSiddurText, linkedStandaloneText, mitzvahTextEvening, siddurPlace } from '@/data/siddur';
 import { bodyForReminder } from '@/services/notifications/planners/mitzvot';
 import { readSiddurText } from '@/testing/siddur';
+import { installMishnaFixture } from '@/testing/mishna';
+import { MISHNA_MITZVOT } from '@/data/mishna';
 import en from '@/i18n/en.json';
 import he from '@/i18n/he.json';
 import { isMensMitzvah } from '@/stores/taharahOptIn';
@@ -72,6 +74,9 @@ const WITH_TEXT = [
 ];
 
 describe('the habit mitzvot', () => {
+  // The two Mishnah habits have hours only while the Mishnah add-on is installed (their own suite: mishnaMitzvot).
+  beforeAll(() => installMishnaFixture());
+
   it('are the twenty-four of the owner’s lists, registry mitzvot off by default, before Kiddush Levana', () => {
     expect([...HABIT_IDS].sort()).toEqual(Object.keys(EXPECTED).sort());
     expect(HABIT_IDS).toHaveLength(24);
@@ -93,9 +98,10 @@ describe('the habit mitzvot', () => {
       expect(mitzvah.defaultReminders).toEqual([{ anchor: 'start', offsetMin: 0, label: mitzvah.name.he }]);
       expect(mitzvah.name.en).toBeTruthy();
       expect(mitzvah.description?.he).toBeTruthy();
-      // A habit opens a reader text exactly when one is linked to it (.claude/specs/habit-texts.md).
+      // A habit opens a reader text exactly when one is linked to it, or it reads the Mishnah add-on
+      // (.claude/specs/habit-texts.md).
       expect(hasSiddurText(mitzvah, 'ashkenaz', at(JERUSALEM, '2026-11-18T12:00'), siddurPlace(JERUSALEM, true))).toBe(
-        WITH_TEXT.includes(id),
+        WITH_TEXT.includes(id) || MISHNA_MITZVOT.includes(id),
       );
       expect(mitzvahTextEvening(id)).toBe(false);
     },
@@ -225,7 +231,12 @@ describe('the habit mitzvot', () => {
 
   it('each has a capability of its own id, with words for the capability, the library row and the offer', () => {
     for (const id of HABIT_IDS) {
-      expect(CAPABILITIES.find((cap) => cap.id === id)?.action).toEqual({ kind: 'mitzvot', ids: [id] });
+      // The two Mishnah habits are downloaded first, from their own screen.
+      expect(CAPABILITIES.find((cap) => cap.id === id)?.action).toEqual(
+        MISHNA_MITZVOT.includes(id)
+          ? { kind: 'addon', addon: 'mishna', ids: [id], href: `/mitzvah/${id}` }
+          : { kind: 'mitzvot', ids: [id] },
+      );
       for (const dict of [he, en] as Record<string, string>[]) {
         for (const key of [
           `capability.${id}.title`,

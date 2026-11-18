@@ -7,6 +7,7 @@ import { HALACHA_STORES } from '@/stores/useHalachaStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
 import { useShnayimStore } from '@/stores/useShnayimStore';
+import { useMishnaStore } from '@/stores/useMishnaStore';
 import { useUserStore } from '@/stores/useUserStore';
 import { afterPaint } from '@/utils/afterPaint';
 
@@ -51,6 +52,7 @@ export function useCapabilityStates(batteryKey: unknown = 0): {
   const quietAfter = useUserStore((s) => s.quietAfter.enabled);
   const chok = useChokStore(installedOf);
   const shnayim = useShnayimStore(installedOf);
+  const mishna = useMishnaStore(installedOf);
   const selichot = useSelichotStore((s) => s.installed);
   const kitzur = HALACHA_STORES.kitzur(installedOf);
   const benIshChai = HALACHA_STORES.ben_ish_chai(installedOf);
@@ -75,6 +77,7 @@ export function useCapabilityStates(batteryKey: unknown = 0): {
     quietAfter,
     chok,
     shnayim,
+    mishna,
     selichot,
     kitzur,
     benIshChai,

@@ -187,6 +187,10 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
         he: 'לחלק מההרגלים יש גם נוסח: ״פתח נוסח״ במסך המצווה ובכרטיס שבדף הבית פותח את פרקי אבות, אגרת הרמב״ן, מסילת ישרים פרק ג (חשבון נפש), ליקוטי מוהר״ן על התבודדות, בקשת רחמים ומי שברך לחולה, פסוקים לילדים, ״אלו דברים״ עם כיבוד אב ואם והכנסת אורחים, ופרק התהילים. ״רגע של תודה״ נפתח על מזמור לתודה. הנוסחים נמצאים גם בלשונית סידור, בקבוצה ״כללי״, ועם תרגום לאנגלית היכן שיש. במסך ״דף יומי״ מופיע הדף של היום עם קישור לדף ולשיעור עליו.',
         en: 'Some habits have a text too: Open text on the mitzvah screen and on its Home card opens Pirkei Avot, the Ramban’s letter, Mesillat Yesharim chapter 3 (cheshbon nefesh), Likutei Moharan on hitbodedut, the prayers for the sick, verses for children, “These are the things” with honoring parents and hosting guests, and the chapter of Tehillim. A moment of thanks opens on Mizmor LeTodah. The texts are in the Siddur tab as well, under General, with English where a translation exists. The Daf Yomi screen shows the day’s daf with a link to the page and to a shiur on it.',
       },
+      {
+        he: '״משנה יומית״ ו״שתי משניות״ קוראות מתוך תוסף המשנה: ששה סדרי משנה מנוקדים עם פירוש ברטנורא ותרגום לאנגלית, שיורד פעם אחת ממסך המצווה ואחר כך זמין גם בלי חיבור לאינטרנט; בסוף ההורדה האפליקציה שואלת אם להפעיל את המצווה. משנה יומית קוראת את שתי המשניות של היום לפי מחזור המשנה היומית, ושתי משניות ממשיכות מהמקום שלך: כל יום שסימנת מקדם אותך בשתי משניות. ברטנורא מקופל כמו הפירושים בחק לישראל. ״סיימתי״ מסמן את היום, ובמשנה יומית כל יום מהשבוע שעבר שלא סומן, גם שבת וחג, מופיע כהשלמה מקופלת.',
+        en: 'Mishna Yomit and Two mishnayot read from the Mishnah add-on: the six orders of the Mishnah, vocalized, with Bartenura and an English translation, downloaded once from the mitzvah screen and then available without an internet connection; when the download ends, the app asks whether to turn the mitzvah on. Mishna Yomit reads the day’s two mishnayot by the Mishna Yomit cycle, and Two mishnayot continue from your own place: each day you mark moves you on by two. Bartenura folds like the commentaries in Chok LeYisrael. Done marks the day, and in Mishna Yomit each unmarked day of the past week, Shabbat and Yom Tov included, appears as a folded make-up.',
+      },
     ],
     routes: ['/mitzvot', '/custom-mitzvah'],
     list: 'mitzvot',
@@ -519,6 +523,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: 'נוסחים להרגלים החדשים: פרקי אבות, אגרת הרמב״ן, מסילת ישרים פרק ג, ליקוטי מוהר״ן על התבודדות, תפילות לחולה, פסוקים לילדים ו״אלו דברים״, בלשונית סידור ובכפתור ״פתח נוסח״ של כל מצווה. ״פרק תהילים״ ו״רגע של תודה״ פותחים את ספר התהילים, ובמסך ״דף יומי״ מופיע הדף של היום עם קישורים ללימוד.',
         en: 'Texts for the new habits: Pirkei Avot, the Ramban’s letter, Mesillat Yesharim chapter 3, Likutei Moharan on hitbodedut, prayers for the sick, verses for children and “These are the things”, in the Siddur tab and under Open text on each mitzvah. A chapter of Tehillim and A moment of thanks open the book of Tehillim, and the Daf Yomi screen shows the day’s daf with links for learning it.',
+      },
+      {
+        he: 'תוסף המשנה: ששה סדרי משנה מנוקדים עם ברטנורא ותרגום לאנגלית, להורדה ממסך ״משנה יומית״ או ״שתי משניות״. משנה יומית קוראת את שתי המשניות של היום לפי המחזור, ושתי משניות ממשיכות מהמקום שלך.',
+        en: 'The Mishnah add-on: the six orders of the Mishnah, vocalized, with Bartenura and an English translation, to download from the Mishna Yomit or Two mishnayot screen. Mishna Yomit reads the day’s two mishnayot by the cycle, and Two mishnayot continue from your own place.',
       },
       {
         he: 'התראות ראש חודש והילולות צדיקים פעילות עכשיו כברירת מחדל, גם אצל מי שכבר התקין. מכבים אותן בהגדרות ← המצוות שלי, או במסכים שלהן.',

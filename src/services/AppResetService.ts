@@ -5,6 +5,9 @@ import { clearTaharahStorage } from '@/services/TaharahStorage';
 import { clearLastError, reportError } from '@/services/errors';
 import { cancelChokDownload } from '@/services/ChokContentService';
 import { cancelShnayimDownload } from '@/services/ShnayimContentService';
+import { cancelMishnaDownload } from '@/services/MishnaContentService';
+import { deleteMishnaFiles } from '@/services/mishnaFiles';
+import { useMishnaStore } from '@/stores/useMishnaStore';
 import { cancelHalachaDownloads } from '@/services/HalachaContentService';
 import { deleteHalachaFiles } from '@/services/halachaFiles';
 import { HALACHA_PACKS, resetHalachaStores } from '@/stores/useHalachaStore';
@@ -37,6 +40,7 @@ export const AppResetService = {
       clearLastError();
       cancelChokDownload();
       cancelShnayimDownload();
+      cancelMishnaDownload();
       cancelSelichotDownload();
       cancelHalachaDownloads();
       useUserStore.getState().reset();
@@ -49,6 +53,7 @@ export const AppResetService = {
       useTaharahStore.getState().reset();
       useChokStore.getState().reset();
       useShnayimStore.getState().reset();
+      useMishnaStore.getState().reset();
       useSelichotStore.getState().reset();
       resetHalachaStores();
       try {
@@ -74,6 +79,11 @@ export const AppResetService = {
         }
         try {
           deleteShnayimFiles();
+        } catch (error) {
+          reportError('reset', error);
+        }
+        try {
+          deleteMishnaFiles();
         } catch (error) {
           reportError('reset', error);
         }

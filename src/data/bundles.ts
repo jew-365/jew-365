@@ -55,26 +55,18 @@ export const BUNDLES: readonly Bundle[] = [
   {
     id: 'learning',
     icon: 'chok',
-    members: ['chok', 'shnayim', 'halacha', 'lashonHara', 'shemiratHalashon'],
+    members: ['chok', 'shnayim', 'halacha', 'lashonHara', 'shemiratHalashon', 'mishna_yomit', 'two_mishnayot'],
     recommended: false,
     pick: true,
   },
   { id: 'birchot', icon: 'brachot', members: ['birchot'], recommended: false },
   // The habit mitzvot (the owner's call, 2026-11-18): off unless the user ticks the bundle, which switches on its
-  // recommended members; the rest are the user's to add one by one.
+  // recommended members; the rest are the user's to add one by one. The two Mishnah habits read a downloadable add-on,
+  // so they are in the learning bundle above.
   {
     id: 'habits',
     icon: 'tehillim',
-    members: [
-      'tehillim_chapter',
-      'two_mishnayot',
-      'learning_on_the_way',
-      'torah_class',
-      'daf_yomi',
-      'mishna_yomit',
-      'pirkei_avot',
-      'iggeret_haramban',
-    ],
+    members: ['tehillim_chapter', 'learning_on_the_way', 'torah_class', 'daf_yomi', 'pirkei_avot', 'iggeret_haramban'],
     recommended: false,
     recommendedMembers: ['tehillim_chapter'],
   },

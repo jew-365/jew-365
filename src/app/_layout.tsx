@@ -39,6 +39,7 @@ import { syncBackgroundLocation } from '@/services/backgroundLocation';
 import { bootHeartbeat, markBoot, noteBoot } from '@/services/bootTrace';
 import { reconcileChokInstall } from '@/services/ChokContentService';
 import { reconcileShnayimInstall } from '@/services/ShnayimContentService';
+import { reconcileMishnaInstall } from '@/services/MishnaContentService';
 import { reconcileHalachaInstalls } from '@/services/HalachaContentService';
 import { reconcileSelichotInstall } from '@/services/SelichotContentService';
 import { afterPaint } from '@/utils/afterPaint';
@@ -64,6 +65,7 @@ import { UpdateBanner } from '@/components/UpdateBanner';
 import { ChokEnablePrompt } from '@/components/ChokEnablePrompt';
 import { HalachaEnablePrompt } from '@/components/HalachaEnablePrompt';
 import { ShnayimEnablePrompt } from '@/components/ShnayimEnablePrompt';
+import { MishnaEnablePrompt } from '@/components/MishnaEnablePrompt';
 import { nextQuietBoundary, quietBlockAt } from '@/utils/skipRules';
 import { CHECK_IN_PROMPTED_KEY, latestCheckIn } from '@/utils/checkIn';
 import { holdCovers, NOTIFICATION_WINS_MS, RETURN_HOME_DELAY_MS, shouldReturnHome } from '@/utils/returnHome';
@@ -341,6 +343,7 @@ function RootInner() {
         {isOnboarded ? <UpdateBanner /> : null}
         {isOnboarded ? <ChokEnablePrompt /> : null}
         {isOnboarded ? <ShnayimEnablePrompt /> : null}
+        {isOnboarded ? <MishnaEnablePrompt /> : null}
         {isOnboarded ? <HalachaEnablePrompt /> : null}
         {isOnboarded ? <MarkCelebrationHost /> : null}
         <ShabbatScreen
@@ -441,6 +444,7 @@ function RootLayout() {
     const painted = afterPaint(() => markBoot('painted'));
     reconcileChokInstall();
     reconcileShnayimInstall();
+    reconcileMishnaInstall();
     reconcileSelichotInstall();
     reconcileHalachaInstalls();
     const teardown = initNotificationHandlers();

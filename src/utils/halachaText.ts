@@ -6,11 +6,14 @@ import { SectionHeading, SiddurCredit, SiddurSection, SiddurSegment, SiddurText 
 export type HalachaReading = { headings: SectionHeading[]; portion: HalachaPortion };
 export type HalachaMakeUpFold = { dateKey: string; label: HalachaLabel; readings: HalachaReading[] };
 
+// What the text builder reads of a unit; the Mishnah reader builds one per tractate (utils/mishna.ts).
+export type TextUnit = Pick<HalachaUnit, 'unit' | 'title' | 'credits' | 'sections'>;
+
 export type HalachaTextInput = {
   id: string;
   readings: readonly HalachaReading[];
   makeUps: readonly HalachaMakeUpFold[];
-  units: ReadonlyMap<string, HalachaUnit>;
+  units: ReadonlyMap<string, TextUnit>;
   // The English of each unit, when the app is in English and the track ships it.
   english: ReadonlyMap<string, HalachaEnglishUnit> | null;
 };
@@ -20,7 +23,7 @@ export function halachaUnitsOf(readings: readonly HalachaReading[]): string[] {
   return [...new Set(readings.flatMap((reading) => reading.portion.pieces.map((piece) => piece.u)))];
 }
 
-function unitSegments(unit: HalachaUnit, english: HalachaEnglishUnit | undefined) {
+function unitSegments(unit: TextUnit, english: HalachaEnglishUnit | undefined) {
   let index = 0;
   return unit.sections.flatMap((section) =>
     section.segments.map((segment) => {

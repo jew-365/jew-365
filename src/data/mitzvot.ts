@@ -5,6 +5,7 @@ import { Location, Zmanim } from '@/types/zmanim';
 import { HalachaBook } from '@/types/halacha';
 import { CHOK_TEXT_ID, hasChokContent } from '@/data/chok';
 import { SHNAYIM_TEXT_ID, hasShnayimContent } from '@/data/shnayim';
+import { hasMishnaContent, isMishnaMitzvah } from '@/data/mishna';
 import {
   FESTIVAL_NAMES,
   HALACHA_YOMIT_ID,
@@ -722,6 +723,8 @@ const habitMitzvah = (habit: Habit): Mitzvah => ({
   nuschaotSupported: ALL_NUSCHAOT,
   defaultReminders: [{ anchor: 'start', offsetMin: 0, label: habit.he }],
   computeWindow: ({ zmanim, location }) => {
+    // The two Mishnah habits read the downloadable add-on, so they have no window until it is installed.
+    if (isMishnaMitzvah(habit.id) && !hasMishnaContent()) return null;
     const day = dayOf(zmanim, location);
     const weekday = day.weekday % 7;
     if (!habit.days.includes(weekday)) return null;

@@ -18,6 +18,7 @@ import { loadSiddurText } from '@/services/SiddurService';
 import { taharahOffered } from '@/stores/taharahOptIn';
 import { useChokStore } from '@/stores/useChokStore';
 import { useShnayimStore } from '@/stores/useShnayimStore';
+import { useMishnaStore } from '@/stores/useMishnaStore';
 import { HALACHA_STORES } from '@/stores/useHalachaStore';
 import { useCompletionsStore } from '@/stores/useCompletionsStore';
 import { useCustomMitzvotStore } from '@/stores/useCustomMitzvotStore';
@@ -87,6 +88,7 @@ export function useSettingsSearch(visit: number) {
   );
   const chokInstalled = useChokStore((s) => s.installed !== null);
   const shnayimInstalled = useShnayimStore((s) => s.installed !== null);
+  const mishnaInstalled = useMishnaStore((s) => s.installed !== null);
   const halachaTrack = effectiveHalachaTrack(
     useUserStore((s) => s.halachaTrack),
     useUserStore((s) => s.nusach),
@@ -120,6 +122,7 @@ export function useSettingsSearch(visit: number) {
       user.inIsrael,
       chokInstalled,
       shnayimInstalled,
+      mishnaInstalled,
       halachaInstalled,
       chafetzChaimInstalled,
       shemiratHaLashonInstalled,
@@ -146,6 +149,7 @@ export function useSettingsSearch(visit: number) {
           maritalStatus: user.maritalStatus,
           chokInstalled,
           shnayimInstalled,
+          mishnaInstalled,
           halachaInstalled,
           ownBooksInstalled: [
             ...(chafetzChaimInstalled ? (['chafetz_chaim'] as const) : []),
@@ -189,6 +193,7 @@ export function useSettingsSearch(visit: number) {
       user,
       chokInstalled,
       shnayimInstalled,
+      mishnaInstalled,
       halachaInstalled,
       chafetzChaimInstalled,
       shemiratHaLashonInstalled,
@@ -257,6 +262,7 @@ export function useSettingsSearch(visit: number) {
     user,
     chokInstalled,
     shnayimInstalled,
+    mishnaInstalled,
     halachaInstalled,
     chafetzChaimInstalled,
     shemiratHaLashonInstalled,

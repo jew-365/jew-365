@@ -8,6 +8,7 @@ import { hasChokContent } from '@/data/chok';
 import { effectiveHalachaTrack } from '@/data/halacha';
 import { hasSelichotContent } from '@/data/selichot';
 import { hasShnayimContent } from '@/data/shnayim';
+import { hasMishnaContent } from '@/data/mishna';
 import { HALACHA_STORES } from '@/stores/useHalachaStore';
 import { useMitzvotStore } from '@/stores/useMitzvotStore';
 import { isMensMitzvah } from '@/stores/taharahOptIn';
@@ -22,9 +23,11 @@ export function capabilityInputNow(batteryExempt: boolean | null = null): Capabi
       ? hasChokContent()
       : addon === 'shnayim'
         ? hasShnayimContent()
-        : addon === 'selichot'
-          ? hasSelichotContent(user.nusach)
-          : HALACHA_STORES[addon].getState().installed !== null;
+        : addon === 'mishna'
+          ? hasMishnaContent()
+          : addon === 'selichot'
+            ? hasSelichotContent(user.nusach)
+            : HALACHA_STORES[addon].getState().installed !== null;
   return {
     enabled: (id) => Boolean(activeMitzvot[id]?.enabled),
     // A woman is not offered the men's mitzvot (tefillin, Kiddush Levana), as the library's defaults hold.

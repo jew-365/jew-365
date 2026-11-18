@@ -39,6 +39,12 @@ jest.mock('@/services/shnayimFiles', () => ({
   deleteShnayimFiles: () => mockDeleteShnayimFiles(),
 }));
 
+const mockDeleteMishnaFiles = jest.fn();
+jest.mock('@/services/mishnaFiles', () => ({
+  ...jest.requireActual('@/services/mishnaFiles'),
+  deleteMishnaFiles: () => mockDeleteMishnaFiles(),
+}));
+
 const mockDeleteHalachaFiles = jest.fn();
 jest.mock('@/services/halachaFiles', () => ({
   ...jest.requireActual('@/services/halachaFiles'),
@@ -53,6 +59,7 @@ jest.mock('@/services/selichotFiles', () => ({
 
 import { AppResetService } from '../AppResetService';
 import { useShnayimStore } from '@/stores/useShnayimStore';
+import { useMishnaStore } from '@/stores/useMishnaStore';
 import { HALACHA_STORES } from '@/stores/useHalachaStore';
 import { taharahStorage } from '../TaharahStorage';
 import { useUserStore } from '@/stores/useUserStore';
@@ -144,6 +151,16 @@ describe('AppResetService.reset', () => {
 
     expect(useShnayimStore.getState().installed).toBeNull();
     expect(mockDeleteShnayimFiles).toHaveBeenCalledTimes(1);
+  });
+
+  it('forgets the Mishnah add-on and deletes its files', async () => {
+    useMishnaStore.getState().setInstalled({ version: 1, bytes: 1, installedAt: 1, files: { Berakhot: 'b.json.gz' } });
+    mockDeleteMishnaFiles.mockClear();
+
+    await AppResetService.reset();
+
+    expect(useMishnaStore.getState().installed).toBeNull();
+    expect(mockDeleteMishnaFiles).toHaveBeenCalledTimes(1);
   });
 
   it('forgets every pack of the halacha add-on and deletes its files', async () => {

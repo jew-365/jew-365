@@ -9,6 +9,9 @@ import { iconFor, type IconName } from '@/components/MitzvahIcon';
 import { SectionLabel } from '@/components/SectionLabel';
 import { CHOK_TEXT_ID } from '@/data/chok';
 import { SHNAYIM_TEXT_ID } from '@/data/shnayim';
+import { isMishnaMitzvah } from '@/data/mishna';
+import { MISHNA_SIZE_ESTIMATE_MB } from '@/services/MishnaContentService';
+import { useMishnaStore } from '@/stores/useMishnaStore';
 import { effectiveHalachaTrack, halachaBookOf, isHalachaMitzvah } from '@/data/halacha';
 import { addonCaption } from '@/components/AddonCard';
 import { HALACHA_SIZE_ESTIMATE_MB } from '@/services/HalachaContentService';
@@ -48,12 +51,13 @@ export type MitzvahLibraryListProps = { showMine: boolean; navigable: boolean };
 
 export function MitzvahLibraryList({ showMine, navigable }: MitzvahLibraryListProps) {
   const { t } = useI18n();
-  const { allMitzvot, nameFor, chokInstalled, shnayimInstalled, location, language } = useDayModel();
+  const { allMitzvot, nameFor, chokInstalled, shnayimInstalled, mishnaInstalled, location, language } = useDayModel();
   const router = useRouter();
   const needsReminder = useNeedsReminderDialog();
   const active = useMitzvotStore((s) => s.activeMitzvot);
   const chokDownload = useChokStore((s) => s.download);
   const shnayimDownload = useShnayimStore((s) => s.download);
+  const mishnaDownload = useMishnaStore((s) => s.download);
   // The halacha mitzvot read a book (the user's track, or the Chofetz Chaim): its pack must be installed before they can
   // be switched on.
   const halachaTrack = effectiveHalachaTrack(
@@ -86,11 +90,12 @@ export function MitzvahLibraryList({ showMine, navigable }: MitzvahLibraryListPr
   const todayKey = appDayKey(new Date(), location);
   const opener = (href: Href) => (navigable ? () => router.push(href) : NOTHING);
   const isHalacha = (item: Mitzvah) => isHalachaMitzvah(item.id);
-  // A learning add-on not yet downloaded: Chok LeYisrael, Shnayim Mikra or a halacha book.
+  // A learning add-on not yet downloaded: Chok LeYisrael, Shnayim Mikra, a halacha book or the Mishnah.
   const missingAddon = (item: Mitzvah) =>
     (item.id === CHOK_TEXT_ID && !chokInstalled) ||
     (item.id === SHNAYIM_TEXT_ID && !shnayimInstalled) ||
-    (isHalacha(item) && !halachaPack(item).installed);
+    (isHalacha(item) && !halachaPack(item).installed) ||
+    (isMishnaMitzvah(item.id) && !mishnaInstalled);
   const listed = (item: Mitzvah) => navigable || !missingAddon(item);
 
   const settingRows: SettingRow[] = [
@@ -144,14 +149,16 @@ export function MitzvahLibraryList({ showMine, navigable }: MitzvahLibraryListPr
             : awaitingAddon
               ? item.id === SHNAYIM_TEXT_ID
                 ? shnayimAddonCaption(shnayimDownload, t)
-                : isHalacha(item)
-                  ? addonCaption(
-                      'halacha.addon',
-                      HALACHA_SIZE_ESTIMATE_MB[halachaPack(item).book],
-                      halachaPack(item).download,
-                      t,
-                    )
-                  : chokAddonCaption(chokDownload, t)
+                : isMishnaMitzvah(item.id)
+                  ? addonCaption('mishna.addon', MISHNA_SIZE_ESTIMATE_MB, mishnaDownload, t)
+                  : isHalacha(item)
+                    ? addonCaption(
+                        'halacha.addon',
+                        HALACHA_SIZE_ESTIMATE_MB[halachaPack(item).book],
+                        halachaPack(item).download,
+                        t,
+                      )
+                    : chokAddonCaption(chokDownload, t)
               : gender === 'female' && isMensMitzvah(item.id)
                 ? t('library.notForWomen')
                 : // What the user gets (spec D1); a personal mitzvah has no benefit line, so it keeps its category.

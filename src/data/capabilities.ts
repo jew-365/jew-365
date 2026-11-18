@@ -20,7 +20,7 @@ export const CAPABILITY_GOALS: readonly CapabilityGoal[] = [
   'tools',
 ];
 
-export type AddonKey = 'chok' | 'shnayim' | 'selichot' | HalachaBook;
+export type AddonKey = 'chok' | 'shnayim' | 'selichot' | 'mishna' | HalachaBook;
 
 // What turning a capability on means. `mitzvot`: switching those mitzvot on (the ones the user's nusach offers);
 // `addon`: the add-on is downloaded first, then the same; `notices`: a notice topic's master switch; `setting`:
@@ -103,11 +103,22 @@ export const CAPABILITIES: readonly Capability[] = [
   },
   // The habit mitzvot (`HABIT_IDS` of ./mitzvot.ts), one capability each, named by the mitzvah's own id.
   { id: 'tehillim_chapter', goal: 'learning', icon: 'tehillim', action: mitzvot('tehillim_chapter') },
-  { id: 'two_mishnayot', goal: 'learning', icon: 'siddur', action: mitzvot('two_mishnayot') },
+  // The two Mishnah habits read the Mishnah add-on.
+  {
+    id: 'two_mishnayot',
+    goal: 'learning',
+    icon: 'siddur',
+    action: addon('mishna', ['two_mishnayot'], '/mitzvah/two_mishnayot'),
+  },
   { id: 'learning_on_the_way', goal: 'learning', icon: 'suitcase', action: mitzvot('learning_on_the_way') },
   { id: 'torah_class', goal: 'learning', icon: 'chok', action: mitzvot('torah_class') },
   { id: 'daf_yomi', goal: 'learning', icon: 'chok', action: mitzvot('daf_yomi') },
-  { id: 'mishna_yomit', goal: 'learning', icon: 'siddur', action: mitzvot('mishna_yomit') },
+  {
+    id: 'mishna_yomit',
+    goal: 'learning',
+    icon: 'siddur',
+    action: addon('mishna', ['mishna_yomit'], '/mitzvah/mishna_yomit'),
+  },
   { id: 'pirkei_avot', goal: 'learning', icon: 'guide', action: mitzvot('pirkei_avot') },
   { id: 'iggeret_haramban', goal: 'learning', icon: 'tehillim', action: mitzvot('iggeret_haramban') },
   { id: 'daily_tzedakah', goal: 'chesed', icon: 'sparkle', action: mitzvot('daily_tzedakah') },

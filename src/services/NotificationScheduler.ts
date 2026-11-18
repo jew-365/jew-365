@@ -26,6 +26,7 @@ import { useCompletionsStore, dateKey } from '@/stores/useCompletionsStore';
 import { useTaharahStore } from '@/stores/useTaharahStore';
 import { useChokStore } from '@/stores/useChokStore';
 import { useShnayimStore } from '@/stores/useShnayimStore';
+import { useMishnaStore } from '@/stores/useMishnaStore';
 import { HALACHA_STORES } from '@/stores/useHalachaStore';
 import { HALACHA_BOOKS } from '@/data/halacha';
 import { selectSelichotNusach, useSelichotStore } from '@/stores/useSelichotStore';
@@ -636,6 +637,10 @@ export function initNotificationHandlers(): () => void {
         NotificationScheduler.rebuild().catch(reportScheduleError);
     }),
     useShnayimStore.subscribe((state, prev) => {
+      if ((state.installed === null) !== (prev.installed === null))
+        NotificationScheduler.rebuild().catch(reportScheduleError);
+    }),
+    useMishnaStore.subscribe((state, prev) => {
       if ((state.installed === null) !== (prev.installed === null))
         NotificationScheduler.rebuild().catch(reportScheduleError);
     }),

@@ -19,6 +19,7 @@ import { CHOK_TEXT_ID } from './chok';
 import { SHNAYIM_TEXT_ID } from './shnayim';
 import { isHalachaMitzvah } from './halacha';
 import { halachaReadingsOn } from './halachaContent';
+import { hasMishnaContent, isMishnaMitzvah } from './mishna';
 import { DayWindow, dayWindow } from '@/utils/buildDayTimeline';
 import { SELICHOT_NUSCHAOT, SELICHOT_TEXT_ID, hasSelichotContent } from './selichot';
 import { CHOK_PROGRAM, chokDayHasText } from '@/utils/chok';
@@ -452,6 +453,7 @@ export function hasSiddurText(mitzvah: Mitzvah, nusach: Nusach, windowDate: Date
     return chokDayHasText(day, place.inIsrael, program) && matchesCondition(CHOK_DAYS, dayFeatures(day, place));
   }
   if (isHalachaText(mitzvah.id)) return halachaReadingsOn(mitzvah.id, windowDate, nusach, place.inIsrael).length > 0;
+  if (isMishnaMitzvah(mitzvah.id)) return hasMishnaContent();
   const linked = linkedStandaloneText(mitzvah.id);
   if (linked) {
     return hasStandaloneText(
@@ -484,7 +486,7 @@ export function nextMitzvahTextWindow(
     mitzvah.isCustom ||
     mitzvah.id === CHOK_TEXT_ID ||
     mitzvah.id === SHNAYIM_TEXT_ID ||
-    !(own || linked || isHalachaText(mitzvah.id))
+    !(own || linked || isHalachaText(mitzvah.id) || isMishnaMitzvah(mitzvah.id))
   ) {
     return null;
   }

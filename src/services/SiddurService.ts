@@ -10,6 +10,10 @@ import { chokParashaFile, readChokAsset } from '@/services/chokFiles';
 import { selichotTextFile } from '@/services/selichotFiles';
 import { readShnayimAsset, shnayimParashaFile } from '@/services/shnayimFiles';
 import { useShnayimStore } from '@/stores/useShnayimStore';
+import { mishnaTractateFile, readMishnaAsset } from '@/services/mishnaFiles';
+import { useMishnaStore } from '@/stores/useMishnaStore';
+import { mishnaUnit } from '@/utils/mishna';
+import type { TextUnit } from '@/utils/halachaText';
 import { shnayimAsChok } from '@/utils/shnayim';
 import { useChokStore } from '@/stores/useChokStore';
 import { useSelichotStore } from '@/stores/useSelichotStore';
@@ -53,6 +57,20 @@ export function loadShnayimParasha(parasha: string): Promise<ChokAsset> {
   const file = install ? shnayimParashaFile(install, parasha) : null;
   if (!install || !file) return Promise.reject(new Error(`no shnayim text ${parasha}`));
   return loadOnce(`shnayim/${install.version}/${parasha}`, () => readShnayimAsset(file).then(shnayimAsChok));
+}
+
+// A Mishnah tractate as a unit of the halacha reader's text builder, a section per chapter.
+export function loadMishnaTractate(tractate: string): Promise<TextUnit> {
+  const install = useMishnaStore.getState().installed;
+  const file = install ? mishnaTractateFile(install, tractate) : null;
+  if (!install || !file) return Promise.reject(new Error(`no mishna text ${tractate}`));
+  return loadOnce(`mishna/${install.version}/${tractate}`, () => readMishnaAsset(file).then(mishnaUnit));
+}
+
+export function clearMishnaCache(): void {
+  for (const key of [...loaded.keys()]) {
+    if (key.startsWith('mishna/')) loaded.delete(key);
+  }
 }
 
 export function clearShnayimCache(): void {

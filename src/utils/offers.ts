@@ -105,6 +105,8 @@ type Candidate = {
 };
 type Ctx = OfferInput & { today: HDate; installAge: number };
 
+const MISHNA_HABITS: readonly string[] = ['mishna_yomit', 'two_mishnayot'];
+
 const HABIT_OFFERS: readonly { id: OfferId; icon: IconName; married?: true }[] = [
   { id: 'tehillim_chapter', icon: 'tehillim' },
   { id: 'two_mishnayot', icon: 'siddur' },
@@ -247,7 +249,10 @@ const CANDIDATES: readonly Candidate[] = [
       !c.enabled(id) &&
       c.markedDays >= HABIT_AFTER_MARKED_DAYS &&
       (!married || c.maritalStatus === 'married'),
-    action: { kind: 'mitzvot', ids: [id] },
+    // The two Mishnah habits read a downloadable add-on, so their offer opens the mitzvah screen with its download.
+    action: MISHNA_HABITS.includes(id)
+      ? { kind: 'addon', addon: 'mishna', ids: [id], href: `/mitzvah/${id}` }
+      : { kind: 'mitzvot', ids: [id] },
   })),
 ];
 

@@ -1,4 +1,6 @@
 import { CITIES } from '@/data/cities';
+import { MISHNA_YOMIT_ID, TWO_MISHNAYOT_ID } from '@/data/mishna';
+import { MISHNA_TRACTATES, tractateName } from '@/utils/mishna';
 import { normalizeSearchText } from './searchText';
 import { placeCaption, placeName, searchPlaces, type PlaceIndex } from '@/data/places';
 import { iconFor, type IconName } from '@/components/MitzvahIcon';
@@ -991,6 +993,8 @@ export type SettingsContentInput = {
   halachaInstalled?: boolean;
   // The books of their own mitzvot that are installed (the Chofetz Chaim, Shemirat HaLashon), so those open in the reader.
   ownBooksInstalled?: readonly HalachaBook[];
+  // The Mishnah add-on is installed, so both Mishnah habits open in the reader.
+  mishnaInstalled?: boolean;
   now: Date;
   location: Location;
   inIsrael: boolean;
@@ -1004,7 +1008,9 @@ type ContentText = {
     | typeof HALACHA_YOMIT_ID
     | typeof HILCHOT_HACHAG_ID
     | typeof LASHON_HARA_ID
-    | typeof SHEMIRAT_HALASHON_ID;
+    | typeof SHEMIRAT_HALASHON_ID
+    | typeof MISHNA_YOMIT_ID
+    | typeof TWO_MISHNAYOT_ID;
   title: SettingsSearchName;
   icon: IconName;
   chapters: readonly SiddurChapterTitle[];
@@ -1069,7 +1075,24 @@ const SHEMIRAT_HALASHON_TERMS = [
   'shmirat halashon',
   'guarding the tongue',
 ];
+// The words people type for the Mishnah habits: the book, its commentary and every tractate in both languages.
+const MISHNA_TERMS = [
+  'משנה',
+  'משניות',
+  'ששה סדרי משנה',
+  'ברטנורא',
+  'מסכת',
+  'mishnah',
+  'mishna',
+  'mishnayot',
+  'bartenura',
+  'tractate',
+  ...MISHNA_TRACTATES.flatMap((k) => [tractateName(k).he, k]),
+];
+
 const MITZVAH_TERMS: Readonly<Record<string, readonly string[]>> = {
+  [MISHNA_YOMIT_ID]: [...MISHNA_TERMS, 'משנה יומית', 'mishna yomi', 'mishnah yomit'],
+  [TWO_MISHNAYOT_ID]: MISHNA_TERMS,
   [SHNAYIM_TEXT_ID]: SHNAYIM_TERMS,
   [LASHON_HARA_ID]: LASHON_HARA_TERMS,
   [SHEMIRAT_HALASHON_ID]: SHEMIRAT_HALASHON_TERMS,
@@ -1100,6 +1123,7 @@ export function settingsContentItems({
   shnayimInstalled = false,
   halachaInstalled = false,
   ownBooksInstalled = [],
+  mishnaInstalled = false,
   now,
   location,
   inIsrael,
@@ -1117,6 +1141,11 @@ export function settingsContentItems({
     if (mitzvah.isCustom) continue;
     if (mitzvah.id === CHOK_TEXT_ID || mitzvah.id === SHNAYIM_TEXT_ID) {
       if (mitzvah.id === CHOK_TEXT_ID ? chokInstalled : shnayimInstalled)
+        texts.push({ id: mitzvah.id, title: nameOf(mitzvah), icon: iconFor(mitzvah.icon), chapters: [] });
+      continue;
+    }
+    if (mitzvah.id === MISHNA_YOMIT_ID || mitzvah.id === TWO_MISHNAYOT_ID) {
+      if (mishnaInstalled)
         texts.push({ id: mitzvah.id, title: nameOf(mitzvah), icon: iconFor(mitzvah.icon), chapters: [] });
       continue;
     }
