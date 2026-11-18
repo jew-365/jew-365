@@ -1092,7 +1092,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** the two habits whose text the app already holds open nothing today.
   - **Expected result:** each mitzvah's screen and home card open the text; the reader's "סיימתי" marks the habit; the search finds both.
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
 - [ ] Pirkei Avot as a reader text for "פרקי אבות"
   - **Flag:** OTA.
@@ -1101,7 +1101,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** the text opens from the mitzvah and from the siddur tab's learning group, on the chapter the user picks; the weekly cycle waits for R18.
   - **As built:** the Hebrew is Sefaria's "Pirkei Avot" in "Torat Emet 357", so that Kulp's English aligns mishnah by mishnah; the Edot HaMizrach leaf gives only the opening and closing passages. In the siddur tab under General. No weekly cycle yet (R18).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
 - [ ] Iggeret HaRamban as a reader text
   - **Flag:** OTA.
@@ -1110,7 +1110,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** the text opens from `iggeret_haramban` and the siddur tab, with its credit.
   - **As built:** Sefaria's "HeWiki" version of the Wikisource text (CC BY-SA), which the Community Translation aligns with.
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
 ### Medium — Reader texts for the habit mitzvot
 
@@ -1121,7 +1121,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** one text of three sections opens from `visit_sick`; the list of psalms is the one R19 confirms, read from a print, never from memory.
   - **As built:** Yoreh De'ah 335:5-6 with Denburg's English, and Mi Sheberach from Torat Emet Sefard (better vocalized than Daat's), its Shabbat and Yom Tov wording cut. The psalms are not in it: they wait for R19.
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
 - [ ] The Chida's "לשם יחוד" before tzedakah
   - **Flag:** OTA.
@@ -1136,7 +1136,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** the mitzvah opens the bedtime Shema on that section in the user's nusach; the study text with Sebag's English ("CC-BY"), the owner's yes of 2026-11-18 (Q38).
   - **As built:** one text, Mesillat Yesharim chapter 3 with Sebag's English, under a note that points to the bedtime Shema for the forgiveness and vidui; no section link into the bedtime Shema, whose section differs per nusach.
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
 - [ ] Likutei Moharan II:25 for "התבודדות ותפילה אישית"
   - **Flag:** OTA.
@@ -1145,7 +1145,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** the text opens from `hitbodedut` (the owner's yes of 2026-11-18, Q38).
   - **As built:** Hebrew only: the Community Translation holds nothing for this lesson.
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
 - [ ] Verses and the blessing of the children for the two children's habits
   - **Flag:** OTA.
@@ -1154,7 +1154,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** one short text opens from both mitzvot.
   - **As built:** the three verses with JPS 1917; the blessing of the children is not in it (Daat's leaf is empty, and it belongs to Friday night).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
 - [ ] Daf Yomi: links to the day's daf
   - **Flag:** OTA.
@@ -1163,7 +1163,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** the reminder's body and the screen name today's daf; each link opens the right page for three dapim checked by hand, one of them on a tractate's first day.
   - **As built:** the mitzvah screen shows the day's daf by name with a link to the page (Sefaria, as `@hebcal/learning` 5.1.2 links it; a pure-JS dependency added for it, which also makes `HebcalService.getDafYomi()` find the daf) and to Hadran's shiur; every tractate's first Hadran page read 200 on 2026-11-18. The reminder's body does not name the daf yet. Suite: [src/utils/__tests__/dafYomi.test.ts](src/utils/__tests__/dafYomi.test.ts).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
 - [ ] The Mishnah add-on for "שתי משניות" and "משנה יומית"
   - **Flag:** a `docs/` add-on, then OTA.
@@ -1185,7 +1185,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** a source to read beside the reminder.
   - **Expected result:** one short text opens from the three mitzvot, with English (Kulp, JPS 1917); the owner's yes of 2026-11-18 (Q38).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
 - [ ] A text for the Friday mikveh
   - **Flag:** OTA.
