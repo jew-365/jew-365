@@ -150,6 +150,8 @@ describe('home between midnight and alot', () => {
     mockPush.mockClear();
     mockCancel.mockClear();
     useUserStore.getState().reset();
+    // Both notice topics off, as an install that switched them off: these cases read the switching on.
+    useUserStore.setState({ hilulotEnabled: false, roshChodeshEnabled: false });
     useUserStore.setState({
       language: 'he',
       location: JERUSALEM,
@@ -614,6 +616,8 @@ describe("home's taharah card", () => {
     mockFocused = true;
     mockTabIndex = 0;
     useUserStore.getState().reset();
+    // Both notice topics off, as an install that switched them off: these cases read the switching on.
+    useUserStore.setState({ hilulotEnabled: false, roshChodeshEnabled: false });
     useUserStore.setState({
       language: 'he',
       location: NEW_YORK,

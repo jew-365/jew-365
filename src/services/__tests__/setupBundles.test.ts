@@ -19,6 +19,8 @@ const cap = (id: string) => findCapability(id)!;
 describe('the bundles step over the stores', () => {
   beforeEach(() => {
     user().reset();
+    // An install that switched both notice topics off, so the step's own switching is what is read.
+    useUserStore.setState({ hilulotEnabled: false, roshChodeshEnabled: false });
     useMitzvotStore.getState().reset();
   });
 
@@ -28,7 +30,7 @@ describe('the bundles step over the stores', () => {
     expect(on('havdalah')).toBe(true);
     expect(on('sefirat_haomer')).toBe(true);
     expect(user().roshChodeshEnabled).toBe(true);
-    expect(user().hilulotEnabled).toBe(false);
+    expect(user().hilulotEnabled).toBe(true);
     expect(user().discovery.hints).toContain(setupBundlesHint(null));
 
     // The user's own change survives a second visit.
@@ -73,7 +75,7 @@ describe('the bundles step over the stores', () => {
   });
 
   it('a bundle’s own tick switches on its recommended members, and never an add-on', () => {
-    expect(bundleDefaultMembers(findBundle('calendar')!)).toEqual(['roshChodesh']);
+    expect(bundleDefaultMembers(findBundle('calendar')!)).toEqual(['roshChodesh', 'hilulot']);
     expect(bundleDefaultMembers(findBundle('learning')!)).toEqual([]);
     expect(bundleDefaultMembers(findBundle('birchot')!)).toEqual(['birchot']);
     for (const bundle of BUNDLES) {

@@ -35,6 +35,8 @@ const notices = () => useUserStore.getState().roshChodeshNotices;
 describe('Rosh Chodesh screen notice kinds', () => {
   beforeEach(() => {
     useUserStore.getState().reset();
+    // Both notice topics off, as an install that switched them off: these cases read the switching on.
+    useUserStore.setState({ hilulotEnabled: false, roshChodeshEnabled: false });
     mockPush.mockReset();
   });
 

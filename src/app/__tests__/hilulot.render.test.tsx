@@ -38,6 +38,8 @@ const press = (name: string) => fireEvent.press(screen.getByRole('button', { nam
 describe('Hilulot screen notice kinds', () => {
   beforeEach(() => {
     useUserStore.getState().reset();
+    // Both notice topics off, as an install that switched them off: these cases read the switching on.
+    useUserStore.setState({ hilulotEnabled: false, roshChodeshEnabled: false });
     mockPush.mockReset();
   });
 

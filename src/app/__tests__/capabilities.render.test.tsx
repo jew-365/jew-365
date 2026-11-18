@@ -27,6 +27,8 @@ beforeEach(() => {
   delete mockParams.bundles;
   mockPush.mockReset();
   useUserStore.getState().reset();
+  // Both notice topics off, as an install that switched them off: these cases read the switching on.
+  useUserStore.setState({ hilulotEnabled: false, roshChodeshEnabled: false });
   useMitzvotStore.getState().reset();
   useChokStore.getState().reset();
 });
@@ -161,13 +163,13 @@ describe('the bundles of the catch-up (A6)', () => {
     expect(useUserStore.getState().roshChodeshEnabled).toBe(false);
   });
 
-  it('switches on what is ticked: Shabbat and the festivals and the Rosh Chodesh notices, not the hilulot', () => {
+  it('switches on what is ticked: Shabbat and the festivals and the Rosh Chodesh and hilula notices', () => {
     renderWithTheme(<CapabilitiesScreen />);
     fireEvent.press(screen.getByRole('button', { name: 'הפעלת המסומנים' }));
     for (const id of ['candle_lighting', 'havdalah', 'sefirat_haomer', 'chanukah_candles'])
       expect([id, enabled(id)]).toEqual([id, true]);
     expect(useUserStore.getState().roshChodeshEnabled).toBe(true);
-    expect(useUserStore.getState().hilulotEnabled).toBe(false);
+    expect(useUserStore.getState().hilulotEnabled).toBe(true);
     expect(enabled('birchot_hashachar')).toBe(false);
     expect(screen.getByText('הופעל. אפשר לשנות הכול בכל רגע, כאן וברשימת המצוות.')).toBeOnTheScreen();
   });

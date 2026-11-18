@@ -62,6 +62,8 @@ const continueButton = () => screen.getByRole('button', { name: he('common.conti
 describe('Onboarding mitzvot step', () => {
   beforeEach(() => {
     useUserStore.getState().reset();
+    // Both notice topics off, as an install that switched them off: these cases read the switching on.
+    useUserStore.setState({ hilulotEnabled: false, roshChodeshEnabled: false });
     useMitzvotStore.getState().reset();
     useChokStore.getState().reset();
     useCustomMitzvotStore.getState().reset();

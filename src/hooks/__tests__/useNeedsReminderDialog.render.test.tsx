@@ -64,6 +64,7 @@ const stored = (id: string) => useMitzvotStore.getState().activeMitzvot[id];
 describe('useNeedsReminderDialog', () => {
   beforeEach(() => {
     useUserStore.getState().reset();
+    useUserStore.setState({ hilulotEnabled: false, roshChodeshEnabled: false });
     useMitzvotStore.getState().reset();
   });
 

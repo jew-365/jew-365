@@ -169,7 +169,10 @@ const CANDIDATES: readonly Candidate[] = [
     eligible: (c) => {
       if (c.sawNewSetup) return false;
       const { mitzvot, notices } = bundleSelection(RECOMMENDED_BUNDLES, c.gender, c.offered);
-      return mitzvot.some((id) => !c.enabled(id)) || (notices.includes('roshChodesh') && !c.roshChodeshEnabled);
+      return (
+        mitzvot.some((id) => !c.enabled(id)) ||
+        notices.some((topic) => !(topic === 'hilulot' ? c.hilulotEnabled : c.roshChodeshEnabled))
+      );
     },
     action: { kind: 'route', href: { pathname: '/capabilities', params: { bundles: '1' } } },
   },

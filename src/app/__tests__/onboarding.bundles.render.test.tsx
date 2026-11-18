@@ -34,10 +34,11 @@ describe('the bundles step of the first setup', () => {
   });
 
   it('arrives with the recommended bundles ticked and switched on, for a user who only taps Continue', async () => {
-    // A fresh install: candle lighting, havdalah, the Omer and the Rosh Chodesh notices start off.
+    // A fresh install: candle lighting, havdalah and the Omer start off; both notice topics start on.
     expect(on('candle_lighting')).toBe(false);
     expect(on('sefirat_haomer')).toBe(false);
-    expect(user().roshChodeshEnabled).toBe(false);
+    expect(user().roshChodeshEnabled).toBe(true);
+    expect(user().hilulotEnabled).toBe(true);
 
     await open();
 
@@ -48,9 +49,9 @@ describe('the bundles step of the first setup', () => {
       expect(on(id)).toBe(true);
     }
     expect(user().roshChodeshEnabled).toBe(true);
-    // Hilulot are a member the calendar bundle does not tick, and the unticked bundles stay off.
-    expect(user().hilulotEnabled).toBe(false);
-    expect(checked('bundle-member-hilulot')).toBe(false);
+    // Both members of the calendar bundle are ticked, and the unticked bundles stay off.
+    expect(user().hilulotEnabled).toBe(true);
+    expect(checked('bundle-member-hilulot')).toBe(true);
     expect(on('birchot_hashachar')).toBe(false);
 
     fireEvent.press(screen.getByRole('button', { name: he('common.continue') }));
@@ -92,7 +93,8 @@ describe('the bundles step of the first setup', () => {
     expect(checked('bundle-shabbat')).toBe(true);
 
     fireEvent.press(screen.getByTestId('bundle-member-hilulot'));
-    expect(user().hilulotEnabled).toBe(true);
+    expect(user().hilulotEnabled).toBe(false);
+    expect(user().roshChodeshEnabled).toBe(true);
   });
 
   it('switches a whole bundle off and on again with its tick', async () => {

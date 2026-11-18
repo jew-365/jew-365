@@ -380,8 +380,8 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
     title: { he: 'ראש חודש והילולות', en: 'Rosh Chodesh and hilulot' },
     body: [
       {
-        he: 'התראות ראש חודש והתראות על הילולות צדיקים כבויות כברירת מחדל. מפעילים אותן בהגדרות ← המצוות שלי, בקבוצה ״עוד״, או במסכים שלהן.',
-        en: 'Rosh Chodesh notices and hilula notices are off by default. Switch them on in Settings → My mitzvot, in the More group, or on their own screens.',
+        he: 'התראות ראש חודש והתראות על הילולות צדיקים פעילות כברירת מחדל. מכבים ומפעילים אותן בהגדרות ← המצוות שלי, בקבוצה ״עוד״, או במסכים שלהן.',
+        en: 'Rosh Chodesh notices and hilula notices are on by default. Switch them off or on in Settings → My mitzvot, in the More group, or on their own screens.',
       },
       {
         he: 'בכל מסך מופיעות ההתראות לבחירה: בראש חודש התראה מוקדמת, בערב שלפני וביום עצמו, ובהילולה התראה מוקדמת ובכניסת ההילולה. כל אחת אפשר לכבות או לתזמן: בשקיעה או לפניה, או בשעה קבועה, ובהתראה המוקדמת גם כמה ימים לפני. כל עוד ההתראות פעילות נשארת לפחות אחת דלוקה. מתחת מופיעים ראשי החודשים וההילולות הקרובים. הקשה על צדיק ברשימה פותחת דף עליו, וכך גם הקשה על התראת ההילולה.',
@@ -511,6 +511,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
       {
         he: '25 מצוות והרגלים חדשים, כבויים עד שמפעילים: דף יומי, משנה יומית, פרק תהילים, שתי משניות, פרקי אבות, אגרת הרמב״ן, שיעור תורה, צדקה יומית, מעשר כספים, ביקור חולים, הכנסת אורחים, שיחה עם ההורים, זמן עם הילדים, מילה טובה לבן או בת הזוג, רגע של תודה, חשבון נפש, התבודדות, הכנות לשבת, טבילה בערב שבת ועוד. הם נמצאים במצוות שלי, בין השאר בקבוצות החדשות ״לימוד״ ו״חסד ומשפחה״, ואפשר להפעיל אותם גם מ״עוד״.',
         en: '25 new mitzvot and habits, off until you turn them on: Daf Yomi, Mishna Yomit, a chapter of Tehillim, two mishnayot, Pirkei Avot, Iggeret HaRamban, a Torah class, daily tzedakah, maaser, visiting the sick, hosting guests, a call to your parents, time with the kids, a kind word to your spouse, a moment of thanks, cheshbon nefesh, hitbodedut, getting ready for Shabbat, the mikveh on erev Shabbat and more. They are in My mitzvot, among others in the new Learning and Kindness and family groups, and you can also turn them on from More.',
+      },
+      {
+        he: 'התראות ראש חודש והילולות צדיקים פעילות עכשיו כברירת מחדל, גם אצל מי שכבר התקין. מכבים אותן בהגדרות ← המצוות שלי, או במסכים שלהן.',
+        en: 'Rosh Chodesh and hilula notices are now on by default, for existing installs too. Switch them off in Settings → My mitzvot, or on their own screens.',
       },
       {
         he: 'חק לישראל: תוקנו 85 שגיאות הקלדה בתרגום אונקלוס (מילים שנחתכו לשתיים, נקודתיים במקום שווא או רווח). במסך המצווה מוצע עדכון של התוסף.',

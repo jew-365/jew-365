@@ -214,6 +214,8 @@ describe('NotificationScheduler', () => {
     mockRegisterNotificationTask.mockClear();
     useCompletionsStore.setState({ completions: {}, skipped: {}, checkIns: {}, archivedDays: [] });
     useUserStore.getState().reset();
+    // Both notice topics off, as an install that switched them off: these cases read the switching on.
+    useUserStore.setState({ hilulotEnabled: false, roshChodeshEnabled: false });
     useUserStore.getState().setOnboarded(true);
     useUserStore.getState().setNotificationPermission('granted');
     useUserStore.getState().setLocation(CITIES[0]);

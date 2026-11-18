@@ -75,7 +75,7 @@ describe('the goal bundles', () => {
   it('tick only the recommended members, and never an add-on', () => {
     const calendar = findBundle('calendar')!;
     expect(memberTicked(calendar, 'roshChodesh')).toBe(true);
-    expect(memberTicked(calendar, 'hilulot')).toBe(false);
+    expect(memberTicked(calendar, 'hilulot')).toBe(true);
     expect(memberTicked(findBundle('learning')!, 'chok')).toBe(false);
     expect(memberTicked(findBundle('prayer')!, 'shema')).toBe(true);
     expect(memberTicked(findBundle('prayer')!, 'omer')).toBe(false);
@@ -103,7 +103,7 @@ describe('the gender rule of 2026-11-15', () => {
 });
 
 describe('bundleSelection', () => {
-  it('is the recommended set: the prayers, Shabbat and the festivals, and Rosh Chodesh alone of the calendar', () => {
+  it('is the recommended set: the prayers, Shabbat and the festivals, and both notices of the calendar', () => {
     const { mitzvot, notices } = bundleSelection(RECOMMENDED_BUNDLES, null, all);
     expect(mitzvot).toEqual([
       'shacharit',
@@ -119,7 +119,7 @@ describe('bundleSelection', () => {
       'ushpizin',
       'kiddush_levana',
     ]);
-    expect(notices).toEqual(['roshChodesh']);
+    expect(notices).toEqual(['roshChodesh', 'hilulot']);
   });
 
   it('leaves candle lighting out for a man and keeps havdalah', () => {

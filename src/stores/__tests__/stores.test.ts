@@ -184,21 +184,56 @@ describe('useUserStore auto-scroll', () => {
     expect(scrollSpeedLevel(16)).toBe(15);
   });
 
-  it('keeps hilula notices off until switched on, and reset turns them off', () => {
-    expect(useUserStore.getState().hilulotEnabled).toBe(false);
-    useUserStore.getState().setHilulotEnabled(true);
+  it('keeps hilula notices on until switched off, and reset turns them back on', () => {
     expect(useUserStore.getState().hilulotEnabled).toBe(true);
-    useUserStore.getState().reset();
+    useUserStore.getState().setHilulotEnabled(false);
     expect(useUserStore.getState().hilulotEnabled).toBe(false);
+    expect(useUserStore.getState().roshChodeshEnabled).toBe(true);
+    useUserStore.getState().reset();
+    expect(useUserStore.getState().hilulotEnabled).toBe(true);
   });
 
-  it('keeps Rosh Chodesh notices off until switched on, and reset turns them off', () => {
-    expect(useUserStore.getState().roshChodeshEnabled).toBe(false);
-    useUserStore.getState().setRoshChodeshEnabled(true);
+  it('keeps Rosh Chodesh notices on until switched off, and reset turns them back on', () => {
     expect(useUserStore.getState().roshChodeshEnabled).toBe(true);
-    expect(useUserStore.getState().hilulotEnabled).toBe(false);
-    useUserStore.getState().reset();
+    useUserStore.getState().setRoshChodeshEnabled(false);
     expect(useUserStore.getState().roshChodeshEnabled).toBe(false);
+    expect(useUserStore.getState().hilulotEnabled).toBe(true);
+    useUserStore.getState().reset();
+    expect(useUserStore.getState().roshChodeshEnabled).toBe(true);
+  });
+
+  describe('the notice switches of an install saved before they were on by default', () => {
+    const merge = (saved: object) => useUserStore.persist.getOptions().merge!(saved, useUserStore.getState());
+    const allOff = {
+      before: { ...DEFAULT_HILULA_NOTICES.before, enabled: false },
+      evening: { ...DEFAULT_HILULA_NOTICES.evening, enabled: false },
+    };
+
+    it('switches both on once, for a state saved without the mark', () => {
+      const merged = merge({ hilulotEnabled: false, roshChodeshEnabled: false });
+      expect(merged.hilulotEnabled).toBe(true);
+      expect(merged.roshChodeshEnabled).toBe(true);
+      expect(merged.noticesDefaultOn).toBe(true);
+    });
+
+    it('keeps the user’s choice once the mark is saved', () => {
+      const merged = merge({ hilulotEnabled: false, roshChodeshEnabled: false, noticesDefaultOn: true });
+      expect(merged.hilulotEnabled).toBe(false);
+      expect(merged.roshChodeshEnabled).toBe(false);
+    });
+
+    it('leaves a topic saved with every kind off switched off, its kinds kept', () => {
+      const merged = merge({ hilulotEnabled: false, roshChodeshEnabled: false, hilulaNotices: allOff });
+      expect(merged.hilulotEnabled).toBe(false);
+      expect(merged.hilulaNotices).toEqual(allOff);
+      expect(merged.roshChodeshEnabled).toBe(true);
+    });
+
+    it('starts and resets with the mark, so a fresh install is never switched on again', () => {
+      expect(useUserStore.getState().noticesDefaultOn).toBe(true);
+      useUserStore.getState().reset();
+      expect(useUserStore.getState().noticesDefaultOn).toBe(true);
+    });
   });
 
   describe('notice kinds', () => {
@@ -228,6 +263,7 @@ describe('useUserStore auto-scroll', () => {
 
     it('keeps at least one Rosh Chodesh kind on while the switch is on, and refuses the switch with none', () => {
       const { roshChodeshNotices: kinds } = user();
+      user().setRoshChodeshEnabled(false);
       user().setRoshChodeshNotice('before', off(kinds.before));
       user().setRoshChodeshNotice('evening', off(kinds.evening));
       user().setRoshChodeshNotice('day', off(kinds.day));
@@ -251,6 +287,7 @@ describe('useUserStore auto-scroll', () => {
 
     it('keeps at least one hilula kind on while the switch is on, and refuses the switch with none', () => {
       const { hilulaNotices: kinds } = user();
+      user().setHilulotEnabled(false);
       user().setHilulaNotice('before', off(kinds.before));
       user().setHilulaNotice('evening', off(kinds.evening));
       expect(anyNoticeOn(user().hilulaNotices)).toBe(false);
@@ -303,7 +340,7 @@ describe('useUserStore auto-scroll', () => {
     it('keeps a saved topic with every kind off while its switch is off', () => {
       const { merge } = useUserStore.persist.getOptions();
       const allOff = { before: off(DEFAULT_HILULA_NOTICES.before), evening: off(DEFAULT_HILULA_NOTICES.evening) };
-      expect(merge!({ hilulaNotices: allOff }, user()).hilulaNotices).toEqual(allOff);
+      expect(merge!({ hilulotEnabled: false, hilulaNotices: allOff }, user()).hilulaNotices).toEqual(allOff);
     });
 
     it('reads a saved number of days ahead as a whole day from one to seven', () => {
@@ -339,7 +376,7 @@ describe('useUserStore auto-scroll', () => {
     expect(useUserStore.getState().weeklyReportEnabled).toBe(true);
     useUserStore.getState().setWeeklyReportEnabled(false);
     expect(useUserStore.getState().weeklyReportEnabled).toBe(false);
-    expect(useUserStore.getState().roshChodeshEnabled).toBe(false);
+    expect(useUserStore.getState().roshChodeshEnabled).toBe(true);
     useUserStore.getState().reset();
     expect(useUserStore.getState().weeklyReportEnabled).toBe(true);
   });

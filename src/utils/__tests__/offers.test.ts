@@ -163,8 +163,9 @@ describe('the catch-up of an install that never saw the short setup (A6)', () =>
     expect(pickOffer(input({ sawNewSetup: false, offers: SEEN }))).toBeNull();
   });
 
-  it('counts Rosh Chodesh notices, and for a man not candle lighting', () => {
+  it('counts the Rosh Chodesh and hilula notices, and for a man not candle lighting', () => {
     expect(pickOffer(input({ sawNewSetup: false, roshChodeshEnabled: false, offers: SEEN }))!.id).toBe('catchUp');
+    expect(pickOffer(input({ sawNewSetup: false, hilulotEnabled: false, offers: SEEN }))!.id).toBe('catchUp');
     expect(pickOffer(input({ ...candlesOff, gender: 'male' }))?.id).not.toBe('catchUp');
     expect(pickOffer(input({ ...candlesOff, gender: 'female' }))!.id).toBe('catchUp');
   });

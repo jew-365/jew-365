@@ -165,6 +165,9 @@ type UserState = {
   prayerMode: PrayerMode;
   hilulotEnabled: boolean;
   roshChodeshEnabled: boolean;
+  // Both notice switches became on by default on 2026-11-18 (the owner's call). A saved state without this
+  // mark predates that, so its hydrate switches both on once; later the user's own choice is kept.
+  noticesDefaultOn: boolean;
   hilulaNotices: HilulaNotices;
   roshChodeshNotices: RoshChodeshNotices;
   weeklyReportEnabled: boolean;
@@ -252,7 +255,13 @@ type UserState = {
 type PersistedUserState = Partial<
   Pick<
     UserState,
-    'taharahEnabled' | 'maritalStatus' | 'hilulaNotices' | 'roshChodeshNotices' | 'quietBefore' | 'quietAfter'
+    | 'taharahEnabled'
+    | 'maritalStatus'
+    | 'hilulaNotices'
+    | 'roshChodeshNotices'
+    | 'quietBefore'
+    | 'quietAfter'
+    | 'noticesDefaultOn'
   >
 > & {
   theme?: unknown;
@@ -336,6 +345,12 @@ const mergeSavedUserState = (persisted: unknown, current: UserState): UserState 
   merged.inIsrael = merged.location.inIsrael;
   merged.hilulaNotices = savedNotices(DEFAULT_HILULA_NOTICES, saved.hilulaNotices);
   merged.roshChodeshNotices = savedNotices(DEFAULT_ROSH_CHODESH_NOTICES, saved.roshChodeshNotices);
+  if (saved.noticesDefaultOn !== true) {
+    // A topic saved with every kind off stays off: its kinds are the user's own choice.
+    merged.hilulotEnabled ||= anyNoticeOn(merged.hilulaNotices);
+    merged.roshChodeshEnabled ||= anyNoticeOn(merged.roshChodeshNotices);
+    merged.noticesDefaultOn = true;
+  }
   if (merged.hilulotEnabled && !anyNoticeOn(merged.hilulaNotices)) merged.hilulaNotices = DEFAULT_HILULA_NOTICES;
   if (merged.roshChodeshEnabled && !anyNoticeOn(merged.roshChodeshNotices))
     merged.roshChodeshNotices = DEFAULT_ROSH_CHODESH_NOTICES;
@@ -376,8 +391,9 @@ export const useUserStore = create<UserState>()(
       siddurScrollSpeed: DEFAULT_SIDDUR_SCROLL_SPEED,
       siddurVoice: null,
       prayerMode: 'minyan',
-      hilulotEnabled: false,
-      roshChodeshEnabled: false,
+      hilulotEnabled: true,
+      roshChodeshEnabled: true,
+      noticesDefaultOn: true,
       hilulaNotices: DEFAULT_HILULA_NOTICES,
       roshChodeshNotices: DEFAULT_ROSH_CHODESH_NOTICES,
       weeklyReportEnabled: true,
@@ -532,8 +548,9 @@ export const useUserStore = create<UserState>()(
           siddurScrollSpeed: DEFAULT_SIDDUR_SCROLL_SPEED,
           siddurVoice: null,
           prayerMode: 'minyan',
-          hilulotEnabled: false,
-          roshChodeshEnabled: false,
+          hilulotEnabled: true,
+          roshChodeshEnabled: true,
+          noticesDefaultOn: true,
           hilulaNotices: DEFAULT_HILULA_NOTICES,
           roshChodeshNotices: DEFAULT_ROSH_CHODESH_NOTICES,
           weeklyReportEnabled: true,

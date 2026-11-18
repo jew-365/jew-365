@@ -51,7 +51,6 @@ export const BUNDLES: readonly Bundle[] = [
     icon: 'moon',
     members: ['roshChodesh', 'hilulot'],
     recommended: true,
-    recommendedMembers: ['roshChodesh'],
   },
   {
     id: 'learning',
