@@ -1209,7 +1209,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Decision taken alone (flagged to the owner):** "every notification" was read to include the notices (hilulot, Rosh Chodesh, the pre-block notice, check-in, weekly report, family purity, update), and "the end of the critical window" as the end of the mitzvah's window.
   - **Open:** the iPhone has no way to remove a local notification while the app is closed; there it leaves on entering the app or on a background run. The Kotlin of the patch was not compiled here: the first Android build checks it. Not checked on a phone.
   - **Done:** 2026-11-18. [src/services/__tests__/NotificationScheduler.endedDay.test.ts](src/services/__tests__/NotificationScheduler.endedDay.test.ts) (the full clear on entry, the expiry by the sweep and the hourly task) and [src/services/notifications/__tests__/timeLeft.mitzvot.test.ts](src/services/notifications/__tests__/timeLeft.mitzvot.test.ts) (20 minutes, the red one to the window's end, the payload); the full `pnpm test` green (7,099 passed).
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`); the Android removal with the next Android build · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`); the Android removal with the next Android build · Committed: yes, `fafe150` · Pushed: yes · Live: no · Channel: none
 
 ## Bugs
 
