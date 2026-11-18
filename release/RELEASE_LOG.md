@@ -225,6 +225,7 @@ Every step toward the stores, in order: what was done, what it produced, and eve
 - The public Play page (`hl=iw`, `gl=IL`): "+10 downloads", no rating shown yet, last updated 10 Nov 2026, and the full description without the Ohr HaChaim luach, so the two description changes sent on 2026-11-14 are published.
 - Pages: the privacy policy carries its Analytics section (read live).
 - Replies to both Play reviews, the owner's yes ("כן, פרסם את שתיהן") to the two drafts shown with their dry runs: `play.mjs reply <reviewId> <text> --commit`, posted 2026-11-18 20:57:58 and 20:58:01 UTC (228 and 186 characters of 350). Read back with `play.mjs reviews`: both reviews carry the reply; the first read showed only one, the second a moment later showed both. The text, signed "צוות יהודי 365", thanks the reviewer by first name, says each update adds mitzvot, siddur texts and improvements, invites ideas at 365jew@gmail.com and closes with "שנזכה כולנו לקיים כל מצווה בזמנה!".
+- Android preview build, the owner's call ("ותעשה גם בילד לאנדרואיד"): `eas build --platform android --profile preview` from `c992da1` (a tree equal to `origin/main`), build `4a660d4d-8fb5-48fc-a8fa-41cc90607bc6`, queued 19:47 UTC, FINISHED 21:11 UTC (read from EAS), versionCode 1, APK https://expo.dev/artifacts/eas/-v8qy6OKNMEFXs59sLUYtScYFmLRlULuVoKkGcVQdpI.apk. The first build that compiles the patched builder's `setTimeoutAfter` and the first with `ACCESS_BACKGROUND_LOCATION`. Not installed or checked on a phone yet.
 
 ## Next
 
