@@ -17,6 +17,7 @@ import { NUSACH_IDS } from '@/data/nuschaot';
 import { hasSelichotContent } from '@/data/selichot';
 import { MIDNIGHT_TO_MORNING_PRAYER, siddurPlace, standaloneAvailability } from '@/data/siddur';
 import { HebcalService } from '@/services/HebcalService';
+import { DAF_YOMI_ID, dafYomiOn } from '@/utils/dafYomi';
 import { ZmanimService, candleLightingMinutes, isJerusalem } from '@/services/ZmanimService';
 import { chokPortionOn } from '@/utils/chok';
 import { SHNAYIM_PROGRAM } from '@/utils/shnayim';
@@ -728,6 +729,16 @@ const habitMitzvah = (habit: Habit): Mitzvah => ({
       day.set({ hour, minute, second: 0, millisecond: 0 }).toJSDate();
     return win(at(habit.start), at(weekday === 5 && habit.fridayEnd ? habit.fridayEnd : habit.end));
   },
+  // The Daf Yomi reminder names the day's daf.
+  ...(habit.id === DAF_YOMI_ID
+    ? {
+        bodyKey: 'notifications.dafYomi',
+        bodyParams: ({ zmanim, location }: ComputeContext) => {
+          const day = dayOf(zmanim, location);
+          return { daf: dafYomiOn(new Date(day.year, day.month - 1, day.day)).name };
+        },
+      }
+    : {}),
 });
 
 export const MITZVOT: Mitzvah[] = [

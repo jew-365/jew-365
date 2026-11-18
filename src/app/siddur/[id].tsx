@@ -55,6 +55,7 @@ import { findMitzvah } from '@/data/mitzvot';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import {
   MITZVAH_BOOK_TEXT,
+  TEXT_OPENS_ALSO,
   MITZVAH_STANDALONE_TEXT,
   linkedStandaloneText,
   STANDALONE_TEXTS,
@@ -1082,6 +1083,7 @@ export default function SiddurScreen() {
   const sectionParam =
     params.section ?? (mitzvah && !params.segment ? MITZVAH_BOOK_TEXT[mitzvah.id]?.section : undefined);
   const textId = mitzvahText ?? linkedText ?? standalone;
+  const alsoOpens = textId ? TEXT_OPENS_ALSO[textId] : undefined;
   const evening =
     mitzvah && !mitzvah.isCustom
       ? mitzvahTextEvening(mitzvah.id)
@@ -2631,6 +2633,19 @@ export default function SiddurScreen() {
               )}
               ListFooterComponent={
                 <>
+                  {alsoOpens ? (
+                    <View style={styles.browsingFooter}>
+                      <TapGuard>
+                        <Button
+                          variant="secondary"
+                          label={t('siddur.openAlso', { name: STANDALONE_TEXTS[alsoOpens].name[language] })}
+                          onPress={() => router.push({ pathname: '/siddur/[id]', params: { id: alsoOpens } })}
+                          style={styles.doneAction}
+                        />
+                      </TapGuard>
+                    </View>
+                  ) : null}
+
                   {halachaBrowse ? (
                     <View style={styles.browsingFooter}>
                       <Text style={[typography.caption, styles.browsingNote, { color: colors.textSub }]}>

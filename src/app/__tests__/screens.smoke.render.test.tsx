@@ -651,6 +651,13 @@ const CASES: SmokeCase[] = [
   },
   {
     file: 'siddur/[id]',
+    label: 'the text for the sick ends with a button that opens Tehillim',
+    Screen: SiddurReaderScreen,
+    params: { id: 'visit_sick' },
+    check: both(text(/הַמָּקוֹם יְרַחֵם עָלֶיךָ/, /הַמָּקוֹם יְרַחֵם עָלֶיךָ/), text('פתיחת תהילים', 'Open Tehillim')),
+  },
+  {
+    file: 'siddur/[id]',
     label: 'a habit mitzvah that reads a psalm opens Tehillim',
     Screen: SiddurReaderScreen,
     params: { id: 'gratitude' },

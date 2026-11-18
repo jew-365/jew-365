@@ -256,6 +256,10 @@ export const MITZVAH_BOOK_TEXT: Partial<Record<string, { text: StandaloneTextId;
   gratitude: { text: 'tehillim', section: 'פרק ק' },
 };
 
+// A text whose reader ends with a button to another text: the psalms said for the sick are in Tehillim (the
+// owner's call of 2026-11-18, until the list of psalms is settled, R19).
+export const TEXT_OPENS_ALSO: Partial<Record<SiddurTextId, StandaloneTextId>> = { bikur_cholim: 'tehillim' };
+
 // The standalone text a registry mitzvah reads, its own or a book's.
 export const linkedStandaloneText = (mitzvahId: string): StandaloneTextId | undefined =>
   MITZVAH_STANDALONE_TEXT[mitzvahId] ?? HABIT_TEXT[mitzvahId] ?? MITZVAH_BOOK_TEXT[mitzvahId]?.text;

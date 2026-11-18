@@ -20,7 +20,7 @@ Asked by the owner on 2026-11-18: "כל מה שצריך נוסח במצוות ה
 | `daily_tzedakah` | The Chida's "לשם יחוד" said before giving | Small bundled text |
 | `cheshbon_nefesh` | The forgiveness passage and vidui of the bedtime Shema; Mesillat Yesharim 3 as study | Existing text, a section link; optional study text |
 | `hitbodedut` | Likutei Moharan II:25 (409 words) | Small bundled text |
-| `kids_learning`, `kids_story` | "תורה צוה", Shema, "המלאך הגואל", the blessing of the children | Small bundled text |
+| `kids_learning`, `kids_story` | "תורה צוה", Shema, "המלאך הגואל" (the blessing of the children dropped at the owner's word, 2026-11-18) | Small bundled text |
 | `call_parents`, `grandparents_call`, `shabbat_guest` | Source passages only: Peah 1:1 "אלו דברים", Exodus 20:12, Genesis 18:1-8 | Optional; no liturgical text exists |
 | `mikveh_erev_shabbat` | No recited text was found in an open source | Blocked on the rav and a public-domain print |
 | `two_mishnayot`, `mishna_yomit` | The Mishnah with Bartenura | Downloadable add-on |

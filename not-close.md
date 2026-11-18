@@ -1119,7 +1119,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** "המקום ירחם עליך בתוך שאר חולי ישראל" (Shulchan Arukh Yoreh De'ah 335:6), Mi Sheberach for a man and for a woman (Hebrew Wikisource `מי שברך לחולה`, revision 3008338), and the psalms for the sick from the bundled Tehillim ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
   - **What it solves:** a visitor has the words at hand.
   - **Expected result:** one text of three sections opens from `visit_sick`; the list of psalms is the one R19 confirms, read from a print, never from memory.
-  - **As built:** Yoreh De'ah 335:5-6 with Denburg's English, and Mi Sheberach from Torat Emet Sefard (better vocalized than Daat's), its Shabbat and Yom Tov wording cut. The psalms are not in it: they wait for R19.
+  - **As built:** Yoreh De'ah 335:5-6 with Denburg's English, and Mi Sheberach from Torat Emet Sefard (better vocalized than Daat's), its Shabbat and Yom Tov wording cut. The psalms are not in it: they wait for R19. Until then the reader ends with a button that opens Tehillim (the owner, 2026-11-18: "בינתיים שים קישור לתהילים בקורא"; `TEXT_OPENS_ALSO` in [src/data/siddur.ts](src/data/siddur.ts)).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
@@ -1147,12 +1147,12 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
-- [ ] Verses and the blessing of the children for the two children's habits
+- [ ] Verses for the two children's habits
   - **Flag:** OTA.
   - **What it is:** "תורה צוה לנו משה", Shema, "המלאך הגואל" and the blessing of the children, from Sefaria's Tanakh and siddur nodes; the Chabad twelve pesukim are left out (chabad.org's page is all rights reserved, [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
   - **What it solves:** `kids_learning` and `kids_story` have a short text to say with a child.
   - **Expected result:** one short text opens from both mitzvot.
-  - **As built:** the three verses with JPS 1917; the blessing of the children is not in it (Daat's leaf is empty, and it belongs to Friday night).
+  - **As built:** the three verses with JPS 1917; the blessing of the children is dropped for good, at the owner's word of 2026-11-18 ("ברכת הבנים תסיר לגמרי").
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
@@ -1161,7 +1161,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** on the `daf_yomi` screen and its home card, the day's daf by name (Hebcal already computes it) with a link to Sefaria (`https://www.sefaria.org/<Tractate>.<daf>a?lang=he`, which opens the Sefaria app when installed) and to Hadran's shiur; no text is copied ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 5).
   - **What it solves:** the reminder names no daf and opens nothing.
   - **Expected result:** the reminder's body and the screen name today's daf; each link opens the right page for three dapim checked by hand, one of them on a tractate's first day.
-  - **As built:** the mitzvah screen shows the day's daf by name with a link to the page (Sefaria, as `@hebcal/learning` 5.1.2 links it; a pure-JS dependency added for it, which also makes `HebcalService.getDafYomi()` find the daf) and to Hadran's shiur; every tractate's first Hadran page read 200 on 2026-11-18. The reminder's body does not name the daf yet. Suite: [src/utils/__tests__/dafYomi.test.ts](src/utils/__tests__/dafYomi.test.ts).
+  - **As built:** the mitzvah screen shows the day's daf by name with a link to the page (Sefaria, as `@hebcal/learning` 5.1.2 links it; a pure-JS dependency added for it, which also makes `HebcalService.getDafYomi()` find the daf) and to Hadran's shiur; every tractate's first Hadran page read 200 on 2026-11-18. The reminder names the day's daf too (`bodyParams` and `notifications.dafYomi`: "דף יומי: בכורות דף ס״א"). Suite: [src/utils/__tests__/dafYomi.test.ts](src/utils/__tests__/dafYomi.test.ts).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
@@ -1198,6 +1198,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** the request of [release/licence-requests.md](release/licence-requests.md), section 2b: the vocalized Mishnah "Torat Emet 357", whose page names R' Pinchas Reuven as the rights holder.
   - **What it solves:** the Mishnah add-on is built on it at the owner's word (Q39).
   - **Sent:** 2026-11-18, by Claude on the owner's word, from `365jew@gmail.com` to nosachteiman@gmail.com (R' Sagiv Mahfud, asked to forward it to R' Reuven), a thread of its own.
+  - **The build:** started on 2026-11-18 in a session of its own, at the owner's word ("תפתח סשן חדש עם אופוס שיתחיל בניה"): "תוסף המשנה: שתי משניות ומשנה יומית", `session_01F2nkceWvGEop4ccYLhn7rj`.
   - **Expected result:** the answer quoted and dated in the drafts file; a refusal goes back to the owner ("ואם לא אז נחשוב על פיתרון"). A request to Koren for the Steinsaltz explanation waits until the Daf Yomi text is taken up.
 
 ## Bugs

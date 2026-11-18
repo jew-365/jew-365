@@ -3,6 +3,7 @@ import { CAPABILITIES } from '@/data/capabilities';
 import { CITIES } from '@/data/cities';
 import { HABIT_IDS, LIBRARY_GROUPS, MITZVOT, findMitzvah } from '@/data/mitzvot';
 import { MITZVAH_BOOK_TEXT, hasSiddurText, linkedStandaloneText, mitzvahTextEvening, siddurPlace } from '@/data/siddur';
+import { bodyForReminder } from '@/services/notifications/planners/mitzvot';
 import { readSiddurText } from '@/testing/siddur';
 import en from '@/i18n/en.json';
 import he from '@/i18n/he.json';
@@ -187,6 +188,25 @@ describe('the habit mitzvot', () => {
     expect(sick).toContain('הַמָּקוֹם יְרַחֵם עָלֶיךָ בְּתוֹךְ חוֹלֵי יִשְׂרָאֵל');
     // The Mi Sheberach is the weekday wording: its Shabbat and Yom Tov lines are cut.
     expect(sick).not.toContain('יוֹם טוֹב הוא מִלִזְּעוֹק');
+  });
+
+  it('names the day’s daf in the Daf Yomi reminder, and no other habit fills a body', () => {
+    const daf = findMitzvah('daf_yomi')!;
+    const noon = at(NEW_YORK, '2026-11-18T12:00');
+    const ctx = {
+      date: noon,
+      location: NEW_YORK,
+      settings: SETTINGS,
+      zmanim: ZmanimService.getZmanim(noon, NEW_YORK)!,
+    };
+    expect(daf.bodyParams!(ctx)).toEqual({ daf: { he: 'בכורות דף ס״א', en: 'Bechorot 61' } });
+    expect(daf.bodyKey).toBe('notifications.dafYomi');
+    const params = daf.bodyParams!(ctx);
+    expect(bodyForReminder(daf.defaultReminders[0], daf, noon, false, params)).toBe('דף יומי: בכורות דף ס״א');
+    expect(bodyForReminder(daf.defaultReminders[0], daf, noon, true, params)).toBe('Daf Yomi: Bechorot 61');
+    for (const id of HABIT_IDS.filter((habit) => habit !== 'daf_yomi')) {
+      expect(findMitzvah(id)!.bodyParams).toBeUndefined();
+    }
   });
 
   it('keeps the mikveh of erev Shabbat a men’s mitzvah', () => {
