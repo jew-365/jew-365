@@ -1069,7 +1069,10 @@ export default function SiddurScreen() {
       if (next) return { date: next.date, offSeason: true, passed: false };
     }
     return { date: current?.date ?? appDay(opened, location), offSeason: false, passed: false };
-  }, [requestedDate, mitzvah, location, settings, nusach, place]);
+    // The choice is fixed when the reader opens: a place that moves while the text is read ("my location") must
+    // not pick a new window, nor hand every memo below a new date.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestedDate, mitzvah, nusach]);
   const windowDate = windowChoice.date;
   const mitzvahText = mitzvah && !mitzvah.isCustom ? mitzvahTextId(mitzvah.id) : null;
   const linkedText = mitzvah && !mitzvah.isCustom ? (MITZVAH_STANDALONE_TEXT[mitzvah.id] ?? null) : null;
@@ -1194,10 +1197,13 @@ export default function SiddurScreen() {
       benIshChaiSwapped,
     ],
   );
-  const halachaUnits = useMemo(
-    () => halachaUnitsOf([...halachaMakeUps.flatMap((makeUp) => makeUp.readings), ...halachaReadings]),
-    [halachaMakeUps, halachaReadings],
-  );
+  // Keyed by its content: the load effect depends on it, and a list that is new only by identity (the place moved,
+  // which recomputes the readings above) must not load the text again and draw it from its start.
+  const halachaUnitsKey = halachaUnitsOf([
+    ...halachaMakeUps.flatMap((makeUp) => makeUp.readings),
+    ...halachaReadings,
+  ]).join('|');
+  const halachaUnits = useMemo(() => (halachaUnitsKey ? halachaUnitsKey.split('|') : []), [halachaUnitsKey]);
   // The English beside the Hebrew, when the app is in English and the track's English is installed.
   const halachaEnglish = language === 'en' && englishInstall !== null;
   const halachaKey = halachaInstall

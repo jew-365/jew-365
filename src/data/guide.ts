@@ -505,6 +505,10 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: 'An update that is already downloaded loads by itself the next time you come back to the app, without a tap on the green strip. Never on Shabbat or Yom Tov.',
       },
       {
+        he: 'תוקן: באמצע קריאה בסידור (למשל שחרית עם גלילה אוטומטית) הטקסט קפץ לפעמים חזרה לתחילתו כשהמיקום התעדכן. עכשיו הוא נשאר במקום.',
+        en: 'Fixed: in the middle of reading in the siddur (Shacharit with auto-scroll, for example) the text sometimes jumped back to its start when the location updated. It now stays in place.',
+      },
+      {
         he: 'מצווה אישית בהקשה אחת: ״הוסף מצווה חדשה״ במצוות שלי פותח רשימת תבניות מוכנות, כמו צדקה יומית, פרק תהילים או שיחה עם ההורים. הקשה מוסיפה את המצווה עם שעות ותזכורת, ואפשר לשנות הכול אחר כך. ״מצווה משלי״ פותח את הטופס המלא.',
         en: 'A personal mitzvah in one tap: Add custom mitzvah in My mitzvot opens a list of ready templates, such as daily tzedakah, a chapter of Tehillim or a call to your parents. A tap adds the mitzvah with its hours and a reminder, and you can change anything later. My own opens the full form.',
       },

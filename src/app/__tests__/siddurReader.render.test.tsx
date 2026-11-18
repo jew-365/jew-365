@@ -1776,3 +1776,31 @@ describe('the name verses and personal prayer in the Amidah', () => {
     ).toBeOnTheScreen();
   });
 });
+
+describe('a text being read stays loaded when the place changes', () => {
+  afterEach(() => {
+    mockLoadGate = null;
+    jest.useRealTimers();
+  });
+
+  // The owner's report of 2026-11-18: a minute or so into Shacharit the reader jumped back to the top. "My
+  // location" wrote a new fix, the load effect ran again and the list was drawn anew from its start.
+  it.each([
+    ['opened with a date', { id: 'shacharit', date: '2026-10-28' }],
+    ['opened without one', { id: 'shacharit' }],
+  ])('keeps the list, with no second load, %s', async (_name, params) => {
+    jest.useFakeTimers({ now: at(JERUSALEM, '2026-10-28T07:00'), doNotFake: [...ONLY_DATE] });
+    useUserStore.getState().reset();
+    useUserStore.setState({ language: 'he', location: JERUSALEM, inIsrael: true, nusach: 'ashkenaz' });
+    for (const key of Object.keys(mockParams)) delete mockParams[key];
+    Object.assign(mockParams, params);
+    renderWithTheme(<SiddurReaderScreen />);
+    await screen.findAllByText(FIRST_LINE);
+    await act(async () => {});
+    mockLoadGate = new Promise(() => {});
+    await act(async () => {
+      useUserStore.getState().setLocationState({ ...JERUSALEM, lat: JERUSALEM.lat + 0.02 }, 'ready', 'gps');
+    });
+    expect(screen.queryAllByText(FIRST_LINE).length).toBeGreaterThan(0);
+  });
+});
