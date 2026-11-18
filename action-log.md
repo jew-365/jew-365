@@ -17,6 +17,15 @@ Every task, bug fix and code action of the project that was done and verified, n
 - **Channel:** `production` or `preview` once live; `—` while not live and for Pages, which has none.
 - `unknown` marks a value no record proves. Never guess one.
 
+## 2026-11-18 — Declined: texts for tzedakah and the Friday mikveh
+
+- **Declined: The Chida's "לשם יחוד" before tzedakah** — a short reader text for `daily_tzedakah`, from Hebrew Wikisource's "מורה באצבע".
+  - Declined: "צדקה לא צריך נוסח", the owner, 2026-11-18. The habit keeps its reminder with no text.
+  - Version: none · Committed: no · Pushed: no · Live: n/a · Channel: —
+- **Declined: A text for the Friday mikveh** — a reader text for `mikveh_erev_shabbat`; no recited text was found in an open source ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
+  - Declined: "מקווה לא צריך נוסח", the owner, 2026-11-18. The question R20 (what is said before tzedakah and at the mikveh) existed only for these two and goes with them.
+  - Version: none · Committed: no · Pushed: no · Live: n/a · Channel: —
+
 ## 2026-11-17 — Chok LeYisrael content version 3 on Pages
 
 - **Correct the Torat Emet text defects in the build** — 85 typing errors of Targum Onkelos corrected by a reviewed patch list applied before the parse ([scripts/chok/textPatches.js](scripts/chok/textPatches.js), `applyTextPatches()` in [scripts/chok/build.js](scripts/chok/build.js)): 27 words cut by a space or a line break, 52 colons in place of a sheva or a space, 4 final mems in place of a samekh, one stray letter after a verse and the missing "וַחֲמֵשׁ מְאָה" of Numbers 26:22; the count is stated in [docs/chok/LICENSE.txt](docs/chok/LICENSE.txt). Two items first listed were not defects and stay as printed (Numbers 2:12 and 7:54 match the Masoretic text; the Onkelos of Numbers 31:44 has no five hundred).

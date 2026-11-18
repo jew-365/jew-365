@@ -1082,7 +1082,8 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 - **Rules:** a text is built by [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md) (a pinned Sefaria version or Wikisource revision, vocalized Hebrew, a manifest entry, dated tests) and linked to its mitzvah through `MITZVAH_STANDALONE_TEXT` in [src/data/siddur.ts](src/data/siddur.ts); a large text is a downloadable add-on like Chok LeYisrael. A source whose licence is "unknown", NC or all rights reserved is not used without written permission. Every new text joins the search and the guide in the same change.
 - **Flag:** OTA for a bundled text; a `docs/` add-on is published on Pages before the update that offers it.
 - **The owner's answers, 2026-11-18 (Q38 to Q41):** the optional texts are built too; the Mishnah is built on "Torat Emet 357" while the request is out; Daf Yomi is links for now and the text in the reader later, not urgent; English wherever an open translation exists.
-- **Waits on:** R18 to R20 (the rav), each for its own task only.
+- **Dropped, the owner, 2026-11-18:** no text for the daily tzedakah or the Friday mikveh, and R20 with them ([action-log.md](action-log.md)).
+- **Waits on:** R18 and R19 (the rav), each for its own task only.
 
 ### High — Reader texts for the habit mitzvot
 
@@ -1122,12 +1123,6 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **As built:** Yoreh De'ah 335:5-6 with Denburg's English, and Mi Sheberach from Torat Emet Sefard (better vocalized than Daat's), its Shabbat and Yom Tov wording cut. The psalms are not in it: they wait for R19. Until then the reader ends with a button that opens Tehillim (the owner, 2026-11-18: "בינתיים שים קישור לתהילים בקורא"; `TEXT_OPENS_ALSO` in [src/data/siddur.ts](src/data/siddur.ts)).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
-
-- [ ] The Chida's "לשם יחוד" before tzedakah
-  - **Flag:** OTA.
-  - **What it is:** the formula of Moreh BeEtzba 1 from Hebrew Wikisource `מורה באצבע`, revision 2956527 (the vocalized copy; Sefaria's is not), as a short text for `daily_tzedakah`.
-  - **What it solves:** the daily gift has a kavanah to say.
-  - **Expected result:** the text opens from the mitzvah; built only if R20 confirms it is what should be offered to every nusach.
 
 - [ ] Bedtime forgiveness and vidui for "חשבון נפש", and Mesillat Yesharim 3 as study
   - **Flag:** OTA.
@@ -1188,12 +1183,6 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** one short text opens from the three mitzvot, with English (Kulp, JPS 1917); the owner's yes of 2026-11-18 (Q38).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
-
-- [ ] A text for the Friday mikveh
-  - **Flag:** OTA.
-  - **What it is:** nothing recited was found in an open source; only the Chida's order of immersions (Moreh BeEtzba 137), an unvocalized instruction ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
-  - **What it solves:** `mikveh_erev_shabbat` has no text.
-  - **Expected result:** waits for R20: what is said, and a public-domain print to type it from by the two-pass contract of the Tiklal.
 
 - [ ] Permission for the vocalized Mishnah of Torat Emet
   - **Flag:** none: an email from `365jew@gmail.com`.
@@ -1381,11 +1370,6 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
   - **Question:** Is "המקום ירחם עליך בתוך שאר חולי ישראל" with Mi Sheberach the right text for a visitor, and which psalms are said?
   - **Assumption:** the 36 chapters printed in Tehillim for the sick, then the Psalm 119 letters of the name; a short set of 20, 121 and 130. The list is to be read from a print.
   - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3.
-- **R20 — Tzedakah and the Friday mikveh: what is said.** (same batch; not built)
-  - **Question:** Should the Chida's "לשם יחוד" be offered before tzedakah to every nusach, and is anything said at the mikveh on erev Shabbat?
-  - **Assumption:** the Chida's formula as an option for all; nothing at the mikveh until a text and a print are named.
-  - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3.
-
 ### For the owner
 
 Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were answered by the owner on 2026-10-26 and became the tasks "Add an English (U.K.) localization on the App Store" and "Ask for a store rating inside the app". Q3 to Q7, from the app requests of 2026-10-26, were answered the same day and are written into their tasks (App requests of 2026-10-26 — batch rules). None is open.

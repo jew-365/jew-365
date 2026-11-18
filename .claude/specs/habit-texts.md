@@ -98,4 +98,5 @@ Findings that shape the tasks:
 ## 6. Decisions
 
 - **The owner, 2026-11-18 (Q38 to Q41 in [../../not-close.md](../../not-close.md)):** the optional texts (Mesillat Yesharim 3, Likutei Moharan II:25, the source passages) are built too; the Mishnah is built on "Torat Emet 357" while a request is out to its rights holder; Daf Yomi is links for now, and the text inside the reader is a later task, not urgent; English wherever an open translation exists.
-- **Still open, the rav (R18 to R20):** the Avot cycle per nusach; the psalms and wording for the sick; what, if anything, is said at the Friday mikveh and before tzedakah.
+- **Dropped, the owner, 2026-11-18:** no text for the daily tzedakah ("צדקה לא צריך נוסח") or the Friday mikveh ("מקווה לא צריך נוסח"); R20 goes with them.
+- **Still open, the rav (R18 and R19; the R20 items below are dropped):** the Avot cycle per nusach; the psalms and wording for the sick; what, if anything, is said at the Friday mikveh and before tzedakah.
