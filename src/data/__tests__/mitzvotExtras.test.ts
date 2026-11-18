@@ -211,7 +211,7 @@ describe('custom mitzvah icon', () => {
 
 describe('library groups', () => {
   it('orders the library sections', () => {
-    expect(LIBRARY_GROUPS).toEqual(['prayers', 'daily', 'weekly', 'seasonal', 'other', 'mine']);
+    expect(LIBRARY_GROUPS).toEqual(['prayers', 'daily', 'weekly', 'seasonal', 'learning', 'chesed', 'other', 'mine']);
   });
 
   it('gives every registry mitzvah a group other than mine', () => {
@@ -223,7 +223,16 @@ describe('library groups', () => {
 
   it('files each registry mitzvah under its group', () => {
     expect(Object.fromEntries(MITZVOT.map((m) => [m.id, m.group]))).toMatchObject({
-      chok_leyisrael: 'other',
+      chok_leyisrael: 'learning',
+      halacha_yomit: 'learning',
+      shnayim_mikra: 'learning',
+      tehillim_chapter: 'learning',
+      torah_class: 'learning',
+      daily_tzedakah: 'chesed',
+      call_parents: 'chesed',
+      kids_story: 'chesed',
+      grandparents_call: 'chesed',
+      shabbat_prep: 'weekly',
       kiddush_levana: 'other',
       tefillin: 'daily',
       krias_shma_shacharit: 'daily',

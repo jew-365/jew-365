@@ -112,7 +112,7 @@ describe('the two registry entries', () => {
     ]);
     for (const mitzvah of [HALACHA_YOMIT, HILCHOT_HACHAG]) {
       expect(findMitzvah(mitzvah.id)).toBe(mitzvah);
-      expect(mitzvah).toMatchObject({ category: 'learning', group: 'other', icon: 'chok', skipOn: [] });
+      expect(mitzvah).toMatchObject({ category: 'learning', group: 'learning', icon: 'chok', skipOn: [] });
       expect(mitzvah.nuschaotSupported).toHaveLength(5);
       expect(DEFAULT_ON_MITZVOT).not.toContain(mitzvah.id);
       expect(performMinOf(mitzvah)).toEqual({ alone: 10 });
@@ -288,7 +288,7 @@ describe('the laws of lashon hara', () => {
 
   it('is a learning mitzvah of every nusach after the halachot of the festival, off by default', () => {
     expect(findMitzvah('lashon_hara')).toBe(LASHON_HARA);
-    expect(LASHON_HARA).toMatchObject({ category: 'learning', group: 'other', icon: 'chok', skipOn: [] });
+    expect(LASHON_HARA).toMatchObject({ category: 'learning', group: 'learning', icon: 'chok', skipOn: [] });
     expect(LASHON_HARA.nuschaotSupported).toHaveLength(5);
     expect(DEFAULT_ON_MITZVOT).not.toContain('lashon_hara');
     expect(performMinOf(LASHON_HARA)).toEqual({ alone: 5 });
@@ -366,7 +366,7 @@ describe('Shemirat HaLashon', () => {
 
   it('is a learning mitzvah of every nusach after the laws of lashon hara, off by default, reminded at 20:30', () => {
     expect(findMitzvah('shemirat_halashon')).toBe(SHEMIRAT_HALASHON);
-    expect(SHEMIRAT_HALASHON).toMatchObject({ category: 'learning', group: 'other', skipOn: [] });
+    expect(SHEMIRAT_HALASHON).toMatchObject({ category: 'learning', group: 'learning', skipOn: [] });
     expect(SHEMIRAT_HALASHON.nuschaotSupported).toHaveLength(5);
     expect(DEFAULT_ON_MITZVOT).not.toContain('shemirat_halashon');
     expect(performMinOf(SHEMIRAT_HALASHON)).toEqual({ alone: 5 });

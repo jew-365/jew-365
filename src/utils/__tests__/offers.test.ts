@@ -1,7 +1,16 @@
 import { CITIES } from '@/data/cities';
 import { HebcalService } from '@/services/HebcalService';
 import { at } from '@/testing/zmanim';
-import { OFFER_GAP_DAYS, OFFER_SHOW_DAYS, hubOffers, pickOffer, weeklyTip, type OfferInput } from '../offers';
+import { HABIT_IDS } from '@/data/mitzvot';
+import {
+  HABIT_AFTER_MARKED_DAYS,
+  OFFER_GAP_DAYS,
+  OFFER_SHOW_DAYS,
+  hubOffers,
+  pickOffer,
+  weeklyTip,
+  type OfferInput,
+} from '../offers';
 
 const J = CITIES[0];
 const DAY = 86_400_000;
@@ -226,5 +235,51 @@ describe('the offers that follow the short setup', () => {
     expect(pickOffer(input({ maritalStatus: 'single', taharahOffered: false }))).toBeNull();
     expect(hubOffers(input({ maritalStatus: null })).map((o) => o.id)).not.toContain('taharah');
     expect(weeklyTip(input({ maritalStatus: 'married', taharahOffered: true }))).toBeNull();
+  });
+});
+
+describe('the habit mitzvot offers', () => {
+  const habitOff = (id: string, over: Partial<OfferInput> = {}) =>
+    input({ enabled: (m: string) => m !== id, markedDays: HABIT_AFTER_MARKED_DAYS, offers: SEEN, ...over });
+
+  it('offers a habit that is off, with its own switch-on, only to a user who already marks', () => {
+    const offer = pickOffer(habitOff('daily_tzedakah'))!;
+    expect(offer).toMatchObject({
+      id: 'daily_tzedakah',
+      key: 'daily_tzedakah',
+      action: { kind: 'mitzvot', ids: ['daily_tzedakah'] },
+    });
+    expect(pickOffer(habitOff('daily_tzedakah', { markedDays: HABIT_AFTER_MARKED_DAYS - 1 }))).toBeNull();
+    expect(pickOffer(habitOff('daily_tzedakah', { offered: (m) => m !== 'daily_tzedakah' }))).toBeNull();
+    expect(pickOffer(input({ markedDays: 30, offers: SEEN }))).toBeNull();
+  });
+
+  it('never offers one again once it was closed, and moves on to the next habit after the gap', () => {
+    const off = { enabled: (m: string) => !HABIT_IDS.includes(m), markedDays: 30 };
+    expect(pickOffer(input({ ...off, offers: SEEN }))!.id).toBe('tehillim_chapter');
+    const closed = { ...SEEN, tehillim_chapter: { shownAt: ago(9), closedAt: ago(9) } };
+    expect(pickOffer(input({ ...off, offers: closed }))!.id).toBe('two_mishnayot');
+    const justClosed = { ...SEEN, tehillim_chapter: { shownAt: ago(1), closedAt: ago(1) } };
+    expect(pickOffer(input({ ...off, offers: justClosed }))).toBeNull();
+  });
+
+  it('offers the two about children only to a married user', () => {
+    expect(pickOffer(habitOff('kids_story'))).toBeNull();
+    expect(pickOffer(habitOff('kids_story', { maritalStatus: null }))?.id).not.toBe('kids_story');
+    expect(pickOffer(habitOff('kids_story', { maritalStatus: 'married' }))!.id).toBe('kids_story');
+    expect(pickOffer(habitOff('kids_learning', { maritalStatus: 'married' }))!.id).toBe('kids_learning');
+    expect(pickOffer(habitOff('call_parents'))!.id).toBe('call_parents');
+  });
+
+  it('comes after every other offer, and may be the weekly tip', () => {
+    const off = { enabled: (m: string) => m !== 'daily_tzedakah' && m !== 'birchot_hashachar', markedDays: 30 };
+    expect(pickOffer(input({ ...off, offers: SEEN }))!.id).toBe('birchot');
+    expect(weeklyTip(habitOff('daily_tzedakah'))!.id).toBe('daily_tzedakah');
+  });
+
+  it('has an offer for every habit mitzvah', () => {
+    for (const id of HABIT_IDS) {
+      expect(pickOffer(habitOff(id, { maritalStatus: 'married' }))!.id).toBe(id);
+    }
   });
 });

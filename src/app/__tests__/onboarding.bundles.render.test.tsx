@@ -112,6 +112,36 @@ describe('the bundles step of the first setup', () => {
     expect(on('birchot_hashachar')).toBe(true);
   });
 
+  it('offers the habit mitzvot as two bundles that arrive off, and a tick switches on only the recommended members', async () => {
+    await open();
+    for (const id of ['habits', 'chesed']) expect(checked(`bundle-${id}`)).toBe(false);
+    const habits = [
+      'tehillim_chapter',
+      'two_mishnayot',
+      'daily_tzedakah',
+      'call_parents',
+      'kids_story',
+      'shabbat_prep',
+    ];
+    for (const id of habits) expect(on(id)).toBe(false);
+    // The Shabbat bundle is ticked, yet getting ready for Shabbat is the user's to add.
+    expect(checked('bundle-member-shabbat_prep')).toBe(false);
+
+    fireEvent.press(screen.getByTestId('bundle-chesed'));
+    for (const id of ['daily_tzedakah', 'call_parents', 'gratitude']) expect(on(id)).toBe(true);
+    for (const id of ['kids_learning', 'kids_story', 'grandparents_call']) expect(on(id)).toBe(false);
+
+    fireEvent.press(screen.getByTestId('bundle-member-kids_story'));
+    expect(on('kids_story')).toBe(true);
+
+    fireEvent.press(screen.getByTestId('bundle-habits'));
+    expect(on('tehillim_chapter')).toBe(true);
+    expect(on('torah_class')).toBe(false);
+
+    fireEvent.press(screen.getByTestId('bundle-member-shabbat_prep'));
+    expect(on('shabbat_prep')).toBe(true);
+  });
+
   it('keeps what the user chose on a second visit, and starts again from the recommendation after a change of gender', async () => {
     const first = await open();
     fireEvent.press(screen.getByTestId('bundle-member-omer'));

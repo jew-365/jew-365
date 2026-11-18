@@ -5,7 +5,6 @@ import { HALACHA_LINES } from '@/data/halachaLines';
 import { HILULOT } from '@/data/hilulot';
 import { LIBRARY_GROUPS, MITZVOT } from '@/data/mitzvot';
 import { CITIES } from '@/data/cities';
-import { CUSTOM_TEMPLATES } from '@/data/customTemplates';
 import { translate } from '@/i18n';
 import type { Achievements } from '@/stores/useCompletionsStore';
 import type { SiddurText } from '@/types/siddur';
@@ -124,11 +123,10 @@ describe('search coverage', () => {
     expect(anchors.filter((id) => !ids.has(id))).toEqual([]);
   });
 
-  it('holds every mitzvah, template, tzaddik, guide topic, halacha line, category, tab and badge', () => {
+  it('holds every mitzvah, tzaddik, guide topic, halacha line, category, tab and badge', () => {
     const ids = new Set(content().map((item) => item.id));
     const expected = [
       ...MITZVOT.map((mitzvah) => `mitzvah:${mitzvah.id}`),
-      ...CUSTOM_TEMPLATES.map((template) => `template:${template.id}`),
       ...HILULOT.map((hilula) => `hilula:${hilula.id}`),
       ...GUIDE_TOPICS.map((topic) => `topic:${topic.id}`),
       ...HALACHA_LINES.ashkenazi.map((line) => `hotline:${line.id}`),
@@ -289,12 +287,6 @@ describe('search results', () => {
       }).map((item) => item.id);
     expect(items(false)).not.toContain('siddur:halacha_yomit');
     expect(items(true)).toEqual(expect.arrayContaining(['siddur:halacha_yomit', 'siddur:hilchot_hachag']));
-  });
-
-  it('finds a template of the add-a-mitzvah sheet by its name and by a word of its benefit', () => {
-    expect(close('צדקה יומית')[0]).toBe('template:tzedakah');
-    expect(close('סבתא')).toContain('template:grandparents');
-    expect(close('bedtime story')).toContain('template:story');
   });
 
   it('finds a category of the library and of the siddur tab', () => {

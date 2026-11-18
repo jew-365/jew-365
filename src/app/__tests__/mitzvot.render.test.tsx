@@ -1,9 +1,7 @@
 const mockPush = jest.fn();
-let mockParams: { add?: string } = {};
 
 jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
-  useLocalSearchParams: () => mockParams,
   useRouter: () => ({ push: mockPush, replace: jest.fn(), back: jest.fn(), canGoBack: () => true }),
 }));
 
@@ -102,14 +100,31 @@ describe('Mitzvot library', () => {
 
   it('draws one section per group in order, and no My mitzvot section without a custom mitzvah', () => {
     renderWithTheme(<MitzvotScreen />);
-    expect(sectionTitles()).toEqual(['תפילות', 'מצוות יומיות', 'מצוות שבועיות', 'מצוות עונתיות', 'עוד']);
+    expect(sectionTitles()).toEqual([
+      'תפילות',
+      'מצוות יומיות',
+      'מצוות שבועיות',
+      'מצוות עונתיות',
+      'לימוד',
+      'חסד ומשפחה',
+      'עוד',
+    ]);
     expect(screen.queryByTestId('library-group-mine')).toBeNull();
   });
 
   it('adds My mitzvot as the last section once a custom mitzvah exists', () => {
     addCustom(CUSTOM_ID, CUSTOM_NAME, 1800000000000);
     renderWithTheme(<MitzvotScreen />);
-    expect(sectionTitles()).toEqual(['תפילות', 'מצוות יומיות', 'מצוות שבועיות', 'מצוות עונתיות', 'עוד', 'המצוות שלי']);
+    expect(sectionTitles()).toEqual([
+      'תפילות',
+      'מצוות יומיות',
+      'מצוות שבועיות',
+      'מצוות עונתיות',
+      'לימוד',
+      'חסד ומשפחה',
+      'עוד',
+      'המצוות שלי',
+    ]);
   });
 
   it('titles the sections in English', () => {
@@ -121,6 +136,8 @@ describe('Mitzvot library', () => {
       'Daily mitzvot',
       'Weekly mitzvot',
       'Seasonal mitzvot',
+      'Learning',
+      'Kindness and family',
       'More',
       'My mitzvot',
     ]);
@@ -132,11 +149,14 @@ describe('Mitzvot library', () => {
     expect(groupSwitches('daily')).toEqual(
       names(['tefillin', 'krias_shma_shacharit', 'birchot_hashachar', 'krias_shma_al_hamita']),
     );
-    expect(groupSwitches('weekly')).toEqual(names(['candle_lighting', 'havdalah']));
+    expect(groupSwitches('weekly')).toEqual(names(['candle_lighting', 'havdalah', 'shabbat_prep']));
     expect(groupSwitches('seasonal')).toEqual(names(['sefirat_haomer', 'chanukah_candles', 'selichot', 'ushpizin']));
-    expect(groupSwitches('other')).toEqual([
-      ...names([
-        'kiddush_levana',
+    expect(groupSwitches('learning')).toEqual(
+      names([
+        'tehillim_chapter',
+        'two_mishnayot',
+        'learning_on_the_way',
+        'torah_class',
         'halacha_yomit',
         'hilchot_hachag',
         'lashon_hara',
@@ -144,9 +164,11 @@ describe('Mitzvot library', () => {
         'shnayim_mikra',
         'chok_leyisrael',
       ]),
-      HILULOT,
-      ROSH_CHODESH,
-    ]);
+    );
+    expect(groupSwitches('chesed')).toEqual(
+      names(['daily_tzedakah', 'call_parents', 'kids_learning', 'kids_story', 'gratitude', 'grandparents_call']),
+    );
+    expect(groupSwitches('other')).toEqual([...names(['kiddush_levana']), HILULOT, ROSH_CHODESH]);
   });
 
   it('lists every registry mitzvah once across the sections', () => {
@@ -168,7 +190,11 @@ describe('Mitzvot library', () => {
     addCustom('custom_1800000000001_a', 'שיעור בוקר', 1800000000001);
     renderWithTheme(<MitzvotScreen />);
     expect(groupSwitches('mine')).toEqual(['שיעור בוקר', 'שיעור ערב']);
-    expect(switchLabels().filter((label) => label.startsWith('שיעור'))).toHaveLength(2);
+    expect(switchLabels().filter((label) => label.startsWith('שיעור '))).toEqual([
+      'שיעור תורה',
+      'שיעור בוקר',
+      'שיעור ערב',
+    ]);
     fireEvent.press(screen.getByText('שיעור בוקר'));
     expect(mockPush).toHaveBeenCalledWith('/mitzvah/custom_1800000000001_a');
   });
@@ -176,7 +202,7 @@ describe('Mitzvot library', () => {
   it('draws each section as one divided card holding all its rows', () => {
     renderWithTheme(<MitzvotScreen />);
     const cards = screen.UNSAFE_getAllByType(Card);
-    expect(cards).toHaveLength(5);
+    expect(cards).toHaveLength(7);
     expect(cards.every((card) => card.props.divided === true)).toBe(true);
     const rowsInCards = cards.reduce((sum, card) => sum + within(card).UNSAFE_getAllByType(ListRow).length, 0);
     expect(rowsInCards).toBe(screen.UNSAFE_getAllByType(ListRow).length);
@@ -249,12 +275,8 @@ describe('Mitzvot library', () => {
     expect(screen.UNSAFE_getAllByType(MitzvahIcon).filter((icon) => icon.props.name === 'plus')).toHaveLength(1);
     expect(screen.queryByText('+')).toBeNull();
     expect(within(screen.getByTestId('library-scroll')).queryByRole('button', { name: ADD })).toBeNull();
-    expect(screen.queryByText('מה להוסיף?')).toBeNull();
     fireEvent.press(screen.getByRole('button', { name: ADD }));
-    expect(screen.getByText('מה להוסיף?')).toBeTruthy();
-    fireEvent.press(screen.getByText('מצווה משלי'));
     expect(mockPush).toHaveBeenCalledWith('/custom-mitzvah');
-    expect(screen.queryByText('מה להוסיף?')).toBeNull();
   });
 
   it('draws no active / available segmented control', () => {

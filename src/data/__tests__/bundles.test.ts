@@ -20,8 +20,16 @@ const stateOf =
     states[cap.id] ?? rest;
 
 describe('the goal bundles', () => {
-  it('are the five of the setup study, three of them recommended', () => {
-    expect(BUNDLES.map((b) => b.id)).toEqual(['prayer', 'shabbat', 'calendar', 'learning', 'birchot']);
+  it('are the five of the setup study and the two habit bundles, three of them recommended', () => {
+    expect(BUNDLES.map((b) => b.id)).toEqual([
+      'prayer',
+      'shabbat',
+      'calendar',
+      'learning',
+      'birchot',
+      'habits',
+      'chesed',
+    ]);
     expect(RECOMMENDED_BUNDLES).toEqual(['prayer', 'shabbat', 'calendar']);
   });
 

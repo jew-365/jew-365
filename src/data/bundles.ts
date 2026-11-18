@@ -6,7 +6,7 @@
 import type { IconName } from '@/components/MitzvahIcon';
 import { CAPABILITIES, type Capability, type CapabilityState } from './capabilities';
 
-export type BundleId = 'prayer' | 'shabbat' | 'calendar' | 'learning' | 'birchot';
+export type BundleId = 'prayer' | 'shabbat' | 'calendar' | 'learning' | 'birchot' | 'habits' | 'chesed';
 export type BundleGender = 'male' | 'female' | null;
 
 export type Bundle = {
@@ -27,8 +27,9 @@ export const BUNDLES: readonly Bundle[] = [
   {
     id: 'shabbat',
     icon: 'candles',
-    members: ['candles', 'omer', 'chanukah', 'ushpizin', 'kiddushLevana'],
+    members: ['candles', 'omer', 'chanukah', 'ushpizin', 'kiddushLevana', 'shabbat_prep'],
     recommended: true,
+    recommendedMembers: ['candles', 'omer', 'chanukah', 'ushpizin', 'kiddushLevana'],
   },
   {
     id: 'calendar',
@@ -45,6 +46,22 @@ export const BUNDLES: readonly Bundle[] = [
     pick: true,
   },
   { id: 'birchot', icon: 'brachot', members: ['birchot'], recommended: false },
+  // The habit mitzvot (the owner's call, 2026-11-18): off unless the user ticks the bundle, which switches on its
+  // recommended members; the rest are the user's to add one by one.
+  {
+    id: 'habits',
+    icon: 'tehillim',
+    members: ['tehillim_chapter', 'two_mishnayot', 'learning_on_the_way', 'torah_class'],
+    recommended: false,
+    recommendedMembers: ['tehillim_chapter'],
+  },
+  {
+    id: 'chesed',
+    icon: 'sparkle',
+    members: ['daily_tzedakah', 'call_parents', 'gratitude', 'kids_learning', 'kids_story', 'grandparents_call'],
+    recommended: false,
+    recommendedMembers: ['daily_tzedakah', 'call_parents', 'gratitude'],
+  },
 ];
 
 export const findBundle = (id: string): Bundle | undefined => BUNDLES.find((b) => b.id === id);

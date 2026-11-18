@@ -146,7 +146,7 @@ export const CHOK_LEYISRAEL: Mitzvah = {
   icon: 'chok',
   timeType: 'range-within-day',
   category: 'learning',
-  group: 'other',
+  group: 'learning',
   skipOn: ['shabbat', 'yomtov'],
   nuschaotSupported: ALL_NUSCHAOT,
   defaultReminders: [
@@ -186,7 +186,7 @@ export const HALACHA_YOMIT: Mitzvah = {
   icon: 'chok',
   timeType: 'range-within-day',
   category: 'learning',
-  group: 'other',
+  group: 'learning',
   skipOn: [],
   nuschaotSupported: ALL_NUSCHAOT,
   defaultReminders: [
@@ -219,7 +219,7 @@ export const HILCHOT_HACHAG: Mitzvah = {
   icon: 'chok',
   timeType: 'annual-seasonal',
   category: 'learning',
-  group: 'other',
+  group: 'learning',
   skipOn: [],
   nuschaotSupported: ALL_NUSCHAOT,
   defaultReminders: [
@@ -264,7 +264,7 @@ function ownBookMitzvah(
     icon: 'chok',
     timeType: 'range-within-day',
     category: 'learning',
-    group: 'other',
+    group: 'learning',
     skipOn: [],
     nuschaotSupported: ALL_NUSCHAOT,
     defaultReminders: [{ anchor: 'clock', ...reminder }],
@@ -321,7 +321,7 @@ export const SHNAYIM_MIKRA: Mitzvah = {
   icon: 'chok',
   timeType: 'range-within-day',
   category: 'learning',
-  group: 'other',
+  group: 'learning',
   skipOn: ['shabbat', 'yomtov'],
   nuschaotSupported: ALL_NUSCHAOT,
   defaultReminders: [
@@ -344,6 +344,191 @@ export const SHNAYIM_MIKRA: Mitzvah = {
     return win(ctx.zmanim.alotHaShachar, block?.start ?? nextAlot(ctx));
   },
 };
+
+// The habit mitzvot (the owner's call, 2026-11-18): good practices with no halachic window, each on clock hours of
+// the location's day on its weekdays, off on Shabbat and Yom Tov, off by default, with one reminder at its start.
+// The hours are modest and every reminder is editable on the mitzvah's screen; `description` says what it is for.
+type Habit = {
+  id: string;
+  he: string;
+  en: string;
+  benefit: { he: string; en: string };
+  icon: string;
+  group: LibraryGroup;
+  category: Mitzvah['category'];
+  // [hour, minute] on the location's clock.
+  start: readonly [number, number];
+  end: readonly [number, number];
+  // Sunday is 0.
+  days: readonly number[];
+};
+
+const SUN_TO_FRI = [0, 1, 2, 3, 4, 5];
+const SUN_TO_THU = [0, 1, 2, 3, 4];
+const FRIDAY = [5];
+
+const HABITS: readonly Habit[] = [
+  {
+    id: 'tehillim_chapter',
+    he: 'פרק תהילים',
+    en: 'A chapter of Tehillim',
+    benefit: { he: 'פרק אחד ביום, אחרי התפילה של הבוקר', en: 'One chapter a day, after the morning prayer' },
+    icon: 'tehillim',
+    group: 'learning',
+    category: 'learning',
+    start: [9, 30],
+    end: [16, 30],
+    days: SUN_TO_FRI,
+  },
+  {
+    id: 'two_mishnayot',
+    he: 'שתי משניות',
+    en: 'Two mishnayot',
+    benefit: { he: 'שתי משניות בבוקר, לפני שהיום מתחיל', en: 'Two mishnayot in the morning, before the day begins' },
+    icon: 'siddur',
+    group: 'learning',
+    category: 'learning',
+    start: [6, 30],
+    end: [8, 30],
+    days: SUN_TO_FRI,
+  },
+  {
+    id: 'learning_on_the_way',
+    he: 'לימוד בדרך',
+    en: 'Learning on the way',
+    benefit: {
+      he: 'עשר דקות של לימוד בדרך לעבודה או ללימודים',
+      en: 'Ten minutes of learning on the way to work or class',
+    },
+    icon: 'suitcase',
+    group: 'learning',
+    category: 'learning',
+    start: [7, 0],
+    end: [9, 30],
+    days: SUN_TO_THU,
+  },
+  {
+    id: 'torah_class',
+    he: 'שיעור תורה',
+    en: 'A Torah class',
+    benefit: { he: 'שיעור קבוע בערב, אחרי היום', en: 'A set class in the evening, after the day' },
+    icon: 'chok',
+    group: 'learning',
+    category: 'learning',
+    start: [20, 0],
+    end: [22, 30],
+    days: SUN_TO_THU,
+  },
+  {
+    id: 'daily_tzedakah',
+    he: 'צדקה יומית',
+    en: 'Daily tzedakah',
+    benefit: { he: 'נתינה קטנה בכל יום, עוד לפני הצהריים', en: 'A small gift every day, before noon' },
+    icon: 'sparkle',
+    group: 'chesed',
+    category: 'daily-morning',
+    start: [8, 0],
+    end: [14, 0],
+    days: SUN_TO_FRI,
+  },
+  {
+    id: 'call_parents',
+    he: 'שיחה עם ההורים',
+    en: 'Call my parents',
+    benefit: { he: 'כמה דקות של קשר, בכל ערב', en: 'A few minutes together, every evening' },
+    icon: 'phone',
+    group: 'chesed',
+    category: 'daily-evening',
+    start: [18, 0],
+    end: [21, 0],
+    days: SUN_TO_THU,
+  },
+  {
+    id: 'kids_learning',
+    he: 'לימוד עם הילדים',
+    en: 'Learning with the kids',
+    benefit: { he: 'חצי שעה ביחד אחרי הצהריים', en: 'Half an hour together in the afternoon' },
+    icon: 'user',
+    group: 'chesed',
+    category: 'daily-afternoon',
+    start: [17, 0],
+    end: [19, 0],
+    days: SUN_TO_THU,
+  },
+  {
+    id: 'kids_story',
+    he: 'סיפור לילדים',
+    en: 'A story for the kids',
+    benefit: { he: 'סיפור לפני השינה, מספר שתבחרו', en: 'A bedtime story from a book you choose' },
+    icon: 'night',
+    group: 'chesed',
+    category: 'daily-evening',
+    start: [19, 0],
+    end: [20, 30],
+    days: SUN_TO_THU,
+  },
+  {
+    id: 'gratitude',
+    he: 'רגע של תודה',
+    en: 'A moment of thanks',
+    benefit: { he: 'שלושה דברים טובים מהיום, לפני השינה', en: 'Three good things from today, before bed' },
+    icon: 'sun',
+    group: 'chesed',
+    category: 'daily-evening',
+    start: [21, 0],
+    end: [23, 30],
+    days: SUN_TO_THU,
+  },
+  {
+    id: 'grandparents_call',
+    he: 'שבת שלום לסבא וסבתא',
+    en: 'Shabbat shalom to grandparents',
+    benefit: { he: 'שיחה קצרה לפני שבת', en: 'A short call before Shabbat' },
+    icon: 'chat',
+    group: 'chesed',
+    category: 'weekly',
+    start: [9, 0],
+    end: [13, 0],
+    days: FRIDAY,
+  },
+  {
+    id: 'shabbat_prep',
+    he: 'הכנות לשבת',
+    en: 'Getting ready for Shabbat',
+    benefit: {
+      he: 'רשימה אחת ביום שישי בבוקר, בלי לחץ של הרגע האחרון',
+      en: 'One Friday-morning list, without the last-minute rush',
+    },
+    icon: 'challah',
+    group: 'weekly',
+    category: 'weekly',
+    start: [8, 0],
+    end: [12, 0],
+    days: FRIDAY,
+  },
+];
+
+export const HABIT_IDS: readonly string[] = HABITS.map((habit) => habit.id);
+
+const habitMitzvah = (habit: Habit): Mitzvah => ({
+  id: habit.id,
+  name: { he: habit.he, en: habit.en },
+  description: habit.benefit,
+  icon: habit.icon,
+  timeType: 'range-within-day',
+  category: habit.category,
+  group: habit.group,
+  skipOn: ['shabbat', 'yomtov'],
+  nuschaotSupported: ALL_NUSCHAOT,
+  defaultReminders: [{ anchor: 'start', offsetMin: 0, label: habit.he }],
+  computeWindow: ({ zmanim, location }) => {
+    const day = dayOf(zmanim, location);
+    if (!habit.days.includes(day.weekday % 7)) return null;
+    const at = ([hour, minute]: readonly [number, number]) =>
+      day.set({ hour, minute, second: 0, millisecond: 0 }).toJSDate();
+    return win(at(habit.start), at(habit.end));
+  },
+});
 
 export const MITZVOT: Mitzvah[] = [
   {
@@ -657,6 +842,7 @@ export const MITZVOT: Mitzvah[] = [
     bodyKey: 'notifications.ushpizinNight',
     computeWindow: (ctx) => (ushpizOf(ctx) ? win(nightfall(ctx.zmanim, ctx.location), nextAlot(ctx)) : null),
   },
+  ...HABITS.map(habitMitzvah),
   {
     id: 'kiddush_levana',
     name: { he: 'קידוש לבנה', en: 'Kiddush Levana' },
@@ -708,7 +894,16 @@ export const MITZVOT: Mitzvah[] = [
   CHOK_LEYISRAEL,
 ];
 
-export const LIBRARY_GROUPS: readonly LibraryGroup[] = ['prayers', 'daily', 'weekly', 'seasonal', 'other', 'mine'];
+export const LIBRARY_GROUPS: readonly LibraryGroup[] = [
+  'prayers',
+  'daily',
+  'weekly',
+  'seasonal',
+  'learning',
+  'chesed',
+  'other',
+  'mine',
+];
 
 export function findMitzvah(id: string): Mitzvah | undefined {
   return MITZVOT.find((m) => m.id === id);

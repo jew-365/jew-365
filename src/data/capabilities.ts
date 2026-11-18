@@ -7,11 +7,13 @@ import type { IconName } from '@/components/MitzvahIcon';
 import type { HalachaBook } from '@/types/halacha';
 import type { NoticeTopic } from '@/stores/useUserStore';
 
-export type CapabilityGoal = 'prayer' | 'shabbat' | 'learning' | 'calendar' | 'tracking' | 'personal' | 'tools';
+export type CapabilityGoal =
+  'prayer' | 'shabbat' | 'learning' | 'chesed' | 'calendar' | 'tracking' | 'personal' | 'tools';
 export const CAPABILITY_GOALS: readonly CapabilityGoal[] = [
   'prayer',
   'shabbat',
   'learning',
+  'chesed',
   'calendar',
   'tracking',
   'personal',
@@ -57,6 +59,7 @@ export const CAPABILITIES: readonly Capability[] = [
   { id: 'selichot', goal: 'shabbat', icon: 'shofar', action: addon('selichot', ['selichot'], '/mitzvah/selichot') },
   { id: 'ushpizin', goal: 'shabbat', icon: 'sukkah', action: mitzvot('ushpizin') },
   { id: 'kiddushLevana', goal: 'shabbat', icon: 'moon', action: mitzvot('kiddush_levana') },
+  { id: 'shabbat_prep', goal: 'shabbat', icon: 'challah', action: mitzvot('shabbat_prep') },
   {
     id: 'chok',
     goal: 'learning',
@@ -94,6 +97,17 @@ export const CAPABILITIES: readonly Capability[] = [
     icon: 'tehillim',
     action: route({ pathname: '/siddur/[id]', params: { id: 'tehillim' } }),
   },
+  // The habit mitzvot (`HABIT_IDS` of ./mitzvot.ts), one capability each, named by the mitzvah's own id.
+  { id: 'tehillim_chapter', goal: 'learning', icon: 'tehillim', action: mitzvot('tehillim_chapter') },
+  { id: 'two_mishnayot', goal: 'learning', icon: 'siddur', action: mitzvot('two_mishnayot') },
+  { id: 'learning_on_the_way', goal: 'learning', icon: 'suitcase', action: mitzvot('learning_on_the_way') },
+  { id: 'torah_class', goal: 'learning', icon: 'chok', action: mitzvot('torah_class') },
+  { id: 'daily_tzedakah', goal: 'chesed', icon: 'sparkle', action: mitzvot('daily_tzedakah') },
+  { id: 'call_parents', goal: 'chesed', icon: 'phone', action: mitzvot('call_parents') },
+  { id: 'gratitude', goal: 'chesed', icon: 'sun', action: mitzvot('gratitude') },
+  { id: 'kids_learning', goal: 'chesed', icon: 'user', action: mitzvot('kids_learning') },
+  { id: 'kids_story', goal: 'chesed', icon: 'night', action: mitzvot('kids_story') },
+  { id: 'grandparents_call', goal: 'chesed', icon: 'chat', action: mitzvot('grandparents_call') },
   {
     id: 'roshChodesh',
     goal: 'calendar',
@@ -104,7 +118,7 @@ export const CAPABILITIES: readonly Capability[] = [
   { id: 'schedule', goal: 'calendar', icon: 'calendar', action: route('/schedule') },
   { id: 'tracking', goal: 'tracking', icon: 'star', action: route('/(tabs)/history') },
   { id: 'weeklyReport', goal: 'tracking', icon: 'night', action: { kind: 'setting', focus: 'weeklyReport' } },
-  { id: 'custom', goal: 'personal', icon: 'custom', action: route({ pathname: '/mitzvot', params: { add: '1' } }) },
+  { id: 'custom', goal: 'personal', icon: 'custom', action: route('/custom-mitzvah') },
   { id: 'quietHours', goal: 'personal', icon: 'bell', action: { kind: 'setting', focus: 'quietBefore' } },
   { id: 'compass', goal: 'tools', icon: 'compass', action: route('/compass') },
   {

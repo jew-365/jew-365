@@ -1,5 +1,4 @@
 import { CITIES } from '@/data/cities';
-import { CUSTOM_TEMPLATES, templateBenefitKey, templateNameKey } from '@/data/customTemplates';
 import { normalizeSearchText } from './searchText';
 import { placeCaption, placeName, searchPlaces, type PlaceIndex } from '@/data/places';
 import { iconFor, type IconName } from '@/components/MitzvahIcon';
@@ -101,7 +100,6 @@ export type SettingsSearchHref =
   | { pathname: '/(tabs)/more'; params: { open: 'halacha' } }
   | { pathname: '/guide'; params: { topic: string } }
   | { pathname: '/capabilities'; params: { goal: string } }
-  | { pathname: '/mitzvot'; params: { add: '1' } }
   | { pathname: '/(tabs)/settings'; params: { focus: 'location'; place: string } }
   | ScreenPath;
 
@@ -919,6 +917,8 @@ export const SETTINGS_SEARCH_ITEMS: readonly SettingsSearchSettingItem[] = [
 export type SettingsSearchEntry = {
   item: SettingsSearchItem;
   titleWords: readonly string[];
+  // Each whole title, normalized: a query that is a title outranks an item that only holds the word.
+  titles: readonly string[];
   words: readonly string[];
   bodyWords: readonly string[];
 };
@@ -976,7 +976,7 @@ export function buildSettingsSearchIndex(
     const rest = [...(item.labelKeys ?? []).flatMap(lookup), ...item.terms].flatMap(wordsOf);
     const words = [...new Set([...titleWords, ...rest])];
     const bodyWords = [...new Set((item.body ?? []).flatMap(wordsOf))].filter((word) => !words.includes(word));
-    return { item, titleWords, words, bodyWords };
+    return { item, titleWords, titles: titles.map(normalizeSearchText), words, bodyWords };
   });
 }
 
@@ -1581,6 +1581,8 @@ const LIBRARY_ICONS: Record<LibraryGroup, IconName> = {
   daily: 'sun',
   weekly: 'calendar',
   seasonal: 'moon',
+  learning: 'chok',
+  chesed: 'sparkle',
   other: 'star',
   mine: 'custom',
 };
@@ -1654,20 +1656,6 @@ export function appContentItems({
       ),
       terms: [...inGroup.flatMap(textsOfName), ...textsOfName(name('library.title'))],
       href: '/mitzvot',
-    });
-  }
-  // Each template of the "add a mitzvah" sheet, opening the library with that sheet.
-  for (const template of CUSTOM_TEMPLATES) {
-    const benefit = name(templateBenefitKey(template.id));
-    items.push({
-      id: `template:${template.id}`,
-      kind: 'category',
-      icon: iconFor(template.icon),
-      title: name(templateNameKey(template.id)),
-      caption: withPrefix(name, 'settings.search.kind.template', benefit),
-      terms: textsOfName(name(templateNameKey(template.id))),
-      body: textsOfName(benefit),
-      href: { pathname: '/mitzvot', params: { add: '1' } },
     });
   }
   for (const group of SIDDUR_TAB_GROUPS) {
@@ -1988,15 +1976,35 @@ export type SearchTiers = { close: SettingsSearchItem[]; maybe: SettingsSearchIt
 
 function rankEntries(query: string, entries: readonly SettingsSearchEntry[], fuzzy: boolean): SettingsSearchItem[] {
   const swapped = typedInOtherLayout(query);
-  return entries
-    .map((entry, order) => {
-      const direct = queryScore(query, entry, fuzzy);
-      const viaLayout = swapped ? queryScore(swapped, entry, fuzzy) * 0.9 : 0;
-      return { entry, order, score: Math.max(direct, viaLayout) };
-    })
-    .filter((result) => result.score > 0)
-    .sort((a, b) => b.score - a.score || kindRank(a.entry.item) - kindRank(b.entry.item) || a.order - b.order)
-    .map((result) => result.entry.item);
+  const whole = normalizeSearchText(query);
+  return (
+    entries
+      .map((entry, order) => {
+        const direct = queryScore(query, entry, fuzzy);
+        const viaLayout = swapped ? queryScore(swapped, entry, fuzzy) * 0.9 : 0;
+        return {
+          entry,
+          order,
+          score: Math.max(direct, viaLayout),
+          exact:
+            !entry.item.kind ||
+            ((entry.item.kind === 'siddur' || entry.item.kind === 'mitzvah') && entry.titles.includes(whole))
+              ? 0
+              : 1,
+        };
+      })
+      .filter((result) => result.score > 0)
+      // On a tie a setting comes first, as before, then a mitzvah or a siddur text whose whole name is the query, so "תהילים" is the book
+      // before the mitzvah "פרק תהילים", while "מנחה" stays the mitzvah before its text.
+      .sort(
+        (a, b) =>
+          b.score - a.score ||
+          a.exact - b.exact ||
+          kindRank(a.entry.item) - kindRank(b.entry.item) ||
+          a.order - b.order,
+      )
+      .map((result) => result.entry.item)
+  );
 }
 
 // Two tiers (the owner's call, 2026-10-27): `close` holds exact, prefix and substring matches in

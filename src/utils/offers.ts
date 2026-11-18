@@ -23,6 +23,8 @@ export const TOUR_DAYS = 2;
 export const LEARNING_AFTER_MARKED_DAYS = 5;
 export const BIRCHOT_AFTER_MARKED_DAYS = 2;
 export const SOON_DAYS = 7;
+// A habit mitzvah is offered only to a user who already marks: after this many app days that hold a mark.
+export const HABIT_AFTER_MARKED_DAYS = 7;
 
 export type OfferId =
   | 'battery'
@@ -36,7 +38,18 @@ export type OfferId =
   | 'hilulot'
   | 'tracking'
   | 'birchot'
-  | 'learning';
+  | 'learning'
+  | 'tehillim_chapter'
+  | 'two_mishnayot'
+  | 'learning_on_the_way'
+  | 'torah_class'
+  | 'daily_tzedakah'
+  | 'call_parents'
+  | 'gratitude'
+  | 'kids_learning'
+  | 'kids_story'
+  | 'grandparents_call'
+  | 'shabbat_prep';
 export type Offer = { id: OfferId; key: string; icon: IconName; action: CapabilityAction };
 
 export type OfferInput = {
@@ -78,6 +91,20 @@ type Candidate = {
   action: CapabilityAction;
 };
 type Ctx = OfferInput & { today: HDate; installAge: number };
+
+const HABIT_OFFERS: readonly { id: OfferId; icon: IconName; kids?: true }[] = [
+  { id: 'tehillim_chapter', icon: 'tehillim' },
+  { id: 'two_mishnayot', icon: 'siddur' },
+  { id: 'learning_on_the_way', icon: 'suitcase' },
+  { id: 'torah_class', icon: 'chok' },
+  { id: 'daily_tzedakah', icon: 'sparkle' },
+  { id: 'call_parents', icon: 'phone' },
+  { id: 'gratitude', icon: 'sun' },
+  { id: 'kids_learning', icon: 'user', kids: true },
+  { id: 'kids_story', icon: 'night', kids: true },
+  { id: 'grandparents_call', icon: 'chat' },
+  { id: 'shabbat_prep', icon: 'challah' },
+];
 
 // In priority order: a blocked delivery first (spec G1), then the tour, the seasonal and calendar offers, then
 // the ones that wait for some use of the app.
@@ -181,6 +208,18 @@ const CANDIDATES: readonly Candidate[] = [
     eligible: (c) => !c.learningOn && c.markedDays >= LEARNING_AFTER_MARKED_DAYS,
     action: { kind: 'route', href: LEARNING_HREF },
   },
+  // The habit mitzvot the user has not switched on (the owner's call, 2026-11-18), last: one at a time like every
+  // offer, to a user who already marks, and the two about children only to a married user.
+  ...HABIT_OFFERS.map(({ id, icon, kids }): Candidate => ({
+    id,
+    icon,
+    eligible: (c) =>
+      c.offered(id) &&
+      !c.enabled(id) &&
+      c.markedDays >= HABIT_AFTER_MARKED_DAYS &&
+      (!kids || c.maritalStatus === 'married'),
+    action: { kind: 'mitzvot', ids: [id] },
+  })),
 ];
 
 // The Hebrew year whose Nisan is next: this year's until its 15 Nisan has passed, else the next year's.

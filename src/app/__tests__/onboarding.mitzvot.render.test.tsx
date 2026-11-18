@@ -82,13 +82,29 @@ describe('Onboarding mitzvot step', () => {
     renderWithTheme(<OnboardingMitzvotScreen />);
     expect(screen.getByText('Which mitzvot to track?')).toBeOnTheScreen();
     expect(screen.getByText('You can change this any time in the mitzvot screen')).toBeOnTheScreen();
-    expect(sectionTitles()).toEqual(['Prayers', 'Daily mitzvot', 'Weekly mitzvot', 'Seasonal mitzvot', 'More']);
+    expect(sectionTitles()).toEqual([
+      'Prayers',
+      'Daily mitzvot',
+      'Weekly mitzvot',
+      'Seasonal mitzvot',
+      'Learning',
+      'Kindness and family',
+      'More',
+    ]);
   });
 
   it('lists the groups in order with no My mitzvot, even with a custom mitzvah stored', () => {
     addCustom(CUSTOM_ID, CUSTOM_NAME, 1800000000000);
     renderWithTheme(<OnboardingMitzvotScreen />);
-    expect(sectionTitles()).toEqual(['תפילות', 'מצוות יומיות', 'מצוות שבועיות', 'מצוות עונתיות', 'עוד']);
+    expect(sectionTitles()).toEqual([
+      'תפילות',
+      'מצוות יומיות',
+      'מצוות שבועיות',
+      'מצוות עונתיות',
+      'לימוד',
+      'חסד ומשפחה',
+      'עוד',
+    ]);
     expect(screen.queryByTestId('library-group-mine')).toBeNull();
     expect(screen.queryByText(CUSTOM_NAME)).toBeNull();
   });
@@ -99,7 +115,7 @@ describe('Onboarding mitzvot step', () => {
     expect(groupSwitches('daily')).toEqual(
       names(['tefillin', 'krias_shma_shacharit', 'birchot_hashachar', 'krias_shma_al_hamita']),
     );
-    expect(groupSwitches('weekly')).toEqual(names(['candle_lighting', 'havdalah']));
+    expect(groupSwitches('weekly')).toEqual(names(['candle_lighting', 'havdalah', 'shabbat_prep']));
     expect(groupSwitches('seasonal')).toEqual(expect.arrayContaining(names(['sefirat_haomer'])));
     expect(groupSwitches('other').slice(-2)).toEqual([HILULOT, ROSH_CHODESH]);
     expect([...switchLabels()].sort()).toEqual(
@@ -181,10 +197,11 @@ describe('Onboarding mitzvot step', () => {
     expect(screen.queryByText(`תוסף להורדה · כ־${CHOK_SIZE_ESTIMATE_MB} MB`)).toBeNull();
   });
 
-  it('lists Chok LeYisrael last under More and turns it on once the add-on is installed', () => {
+  it('lists Chok LeYisrael last under Learning and turns it on once the add-on is installed', () => {
     installChokFixture();
     renderWithTheme(<OnboardingMitzvotScreen />);
-    expect(groupSwitches('other').slice(-3)).toEqual([CHOK, HILULOT, ROSH_CHODESH]);
+    expect(groupSwitches('learning').slice(-1)).toEqual([CHOK]);
+    expect(groupSwitches('other').slice(-2)).toEqual([HILULOT, ROSH_CHODESH]);
 
     const toggle = screen.getByRole('switch', { name: CHOK });
     expect(toggle).not.toBeChecked();
