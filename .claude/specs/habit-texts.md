@@ -95,7 +95,7 @@ Findings that shape the tasks:
 - **Alignment risk:** Rashi and Tosafot are keyed by daf and line, the Gemara by Sefaria segment; joining them needs Sefaria's links dataset or matching by the opening words. Tamid has no Rashi; Rashbam on Bava Batra and the Ran on Nedarim are separate texts.
 - **Recommendation:** first a link-out on the mitzvah screen (Sefaria and Hadran for the day's daf), which needs no licence; then a per-tractate add-on of the Vilna text with Rashi (about 0.6 MB gzip for the largest tractate, about 11 MB for all), Tosafot as an optional second file, and the Steinsaltz explanation only after written permission.
 
-## 6. Decisions the tasks wait on
+## 6. Decisions
 
-- **The owner (Q38 to Q41 in [../../not-close.md](../../not-close.md)):** which habits get a text at all; whether the Mishnah waits for Torat Emet's answer or ships from another source; how far Daf Yomi goes (links, text with Rashi, Steinsaltz); whether the texts are Hebrew only like Tehillim or carry English.
-- **The rav (R18 to R20):** the Avot cycle per nusach; the psalms and wording for the sick; what, if anything, is said at the Friday mikveh and before tzedakah.
+- **The owner, 2026-11-18 (Q38 to Q41 in [../../not-close.md](../../not-close.md)):** the optional texts (Mesillat Yesharim 3, Likutei Moharan II:25, the source passages) are built too; the Mishnah is built on "Torat Emet 357" while a request is out to its rights holder; Daf Yomi is links for now, and the text inside the reader is a later task, not urgent; English wherever an open translation exists.
+- **Still open, the rav (R18 to R20):** the Avot cycle per nusach; the psalms and wording for the sick; what, if anything, is said at the Friday mikveh and before tzedakah.

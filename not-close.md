@@ -1080,7 +1080,8 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 - **Spec:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md) holds the research of 2026-11-18: which habit gets which text, every source with its licence as read, the sizes, and what is not verified. A task below names its section there.
 - **Rules:** a text is built by [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md) (a pinned Sefaria version or Wikisource revision, vocalized Hebrew, a manifest entry, dated tests) and linked to its mitzvah through `MITZVAH_STANDALONE_TEXT` in [src/data/siddur.ts](src/data/siddur.ts); a large text is a downloadable add-on like Chok LeYisrael. A source whose licence is "unknown", NC or all rights reserved is not used without written permission. Every new text joins the search and the guide in the same change.
 - **Flag:** OTA for a bundled text; a `docs/` add-on is published on Pages before the update that offers it.
-- **Waits on:** Q38 to Q41 (the owner) and R18 to R20 (the rav).
+- **The owner's answers, 2026-11-18 (Q38 to Q41):** the optional texts are built too; the Mishnah is built on "Torat Emet 357" while the request is out; Daf Yomi is links for now and the text in the reader later, not urgent; English wherever an open translation exists.
+- **Waits on:** R18 to R20 (the rav), each for its own task only.
 
 ### High — Reader texts for the habit mitzvot
 
@@ -1092,13 +1093,13 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 
 - [ ] Pirkei Avot as a reader text for "פרקי אבות"
   - **Flag:** OTA.
-  - **What it is:** the six chapters with "כל ישראל" and "רבי חנניא בן עקשיא", one section per chapter, from Sefaria's Siddur Edot HaMizrach node, version " Shaliehsaboo Edition" ("CC0"), its cantillation marks stripped; English from Kulp ("CC-BY") if Q41 says so ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
+  - **What it is:** the six chapters with "כל ישראל" and "רבי חנניא בן עקשיא", one section per chapter, from Sefaria's Siddur Edot HaMizrach node, version " Shaliehsaboo Edition" ("CC0"), its cantillation marks stripped; English from Kulp ("CC-BY", Q41) ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
   - **What it solves:** the weekly reminder has nothing to read.
   - **Expected result:** the text opens from the mitzvah and from the siddur tab's learning group, on the chapter the user picks; the weekly cycle waits for R18.
 
 - [ ] Iggeret HaRamban as a reader text
   - **Flag:** OTA.
-  - **What it is:** the whole letter (525 words) from Hebrew Wikisource `אגרת הרמב"ן`, revision 2928830 (CC BY-SA), one shared text for every nusach; English from the Sefaria Community Translation ("CC0") if Q41 says so.
+  - **What it is:** the whole letter (525 words) from Hebrew Wikisource `אגרת הרמב"ן`, revision 2928830 (CC BY-SA), one shared text for every nusach; English from the Sefaria Community Translation ("CC0", Q41).
   - **What it solves:** the weekly reading has no text.
   - **Expected result:** the text opens from `iggeret_haramban` and the siddur tab, with its credit.
 
@@ -1120,13 +1121,13 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Flag:** OTA.
   - **What it is:** `cheshbon_nefesh` opens the forgiveness passage and vidui the app already holds in `kriat_shema_al_hamita` (a `section` link, no copy); optionally chapter 3 of Mesillat Yesharim, "Sefaria Vocalized Edition" ("CC0"), as a second text.
   - **What it solves:** the habit has no words to open.
-  - **Expected result:** the mitzvah opens the bedtime Shema on that section in the user's nusach; the study text only on the owner's yes (Q38).
+  - **Expected result:** the mitzvah opens the bedtime Shema on that section in the user's nusach; the study text with Sebag's English ("CC-BY"), the owner's yes of 2026-11-18 (Q38).
 
 - [ ] Likutei Moharan II:25 for "התבודדות ותפילה אישית"
   - **Flag:** OTA.
   - **What it is:** the lesson on hitbodedut (409 words), Sefaria "Likutei Moharan Tinyana - rabenubook.com" ("Public Domain"), Hebrew only; Hishtapchut HaNefesh and Likutei Tefilot from Hebrew Wikisource (CC BY-SA) are a later option.
   - **What it solves:** an opening text for a personal prayer.
-  - **Expected result:** the text opens from `hitbodedut`; built only on the owner's yes (Q38), since it is a Breslov text offered to every nusach.
+  - **Expected result:** the text opens from `hitbodedut` (the owner's yes of 2026-11-18, Q38).
 
 - [ ] Verses and the blessing of the children for the two children's habits
   - **Flag:** OTA.
@@ -1144,7 +1145,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Flag:** a `docs/` add-on, then OTA.
   - **What it is:** a downloadable add-on like Chok LeYisrael (about 8.4 MB raw): the Mishnah with Bartenura "On Your Way" ("Public Domain") folded, the Mishna Yomit of a day by the rule of `@hebcal/learning` reimplemented (the cycle of 20 May 1947, 4,192 mishnayot, two a day; BSD-2-Clause, its chapter table copied with its notice), `two_mishnayot` continuing from the user's own place ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 4).
   - **What it solves:** the two Mishnah habits have nothing to read.
-  - **Expected result:** the day's two mishnayot open with "סיימתי" and a make-up fold; Bikkurim chapter 4 is read from the source and present; the Hebrew source is the one Q39 names.
+  - **Expected result:** the day's two mishnayot open with "סיימתי" and a make-up fold; Bikkurim chapter 4 is read from the source and present; the Hebrew is Sefaria's "Torat Emet 357" (the owner's call of 2026-11-18, Q39), credited as its page names its rights holder, with Kulp's English (Q41); a refusal from Torat Emet reopens the source.
 
 ### Low — Reader texts for the habit mitzvot
 
@@ -1152,13 +1153,13 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Flag:** a `docs/` add-on, then OTA.
   - **What it is:** per-tractate files from Sefaria's "Wikisource Talmud Bavli" ("CC-BY-SA") and Rashi "Vilna Edition" ("Public Domain"), about 0.6 MB gzip for the largest tractate and about 11 MB for all; Tosafot as an optional second file; the Steinsaltz explanation only with written permission ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 5).
   - **What it solves:** learning the daf inside the app, offline.
-  - **Expected result:** the day's daf opens from its tractate's file with Rashi joined to its lines; built only on the owner's yes (Q40), after the links task.
+  - **Expected result:** the day's daf opens inside the reader, from its tractate's file, with Rashi joined to its lines, in place of the links. Not urgent (the owner, 2026-11-18, Q40): after the links task and the rest of the batch.
 
 - [ ] Source passages for guests and parents
   - **Flag:** OTA.
   - **What it is:** Peah 1:1 "אלו דברים", Exodus 20:12 and Genesis 18:1-8 as a short text for `shabbat_guest`, `call_parents` and `grandparents_call`. No liturgical text exists for them ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
   - **What it solves:** a source to read beside the reminder.
-  - **Expected result:** built only on the owner's yes (Q38).
+  - **Expected result:** one short text opens from the three mitzvot, with English (Kulp, JPS 1917); the owner's yes of 2026-11-18 (Q38).
 
 - [ ] A text for the Friday mikveh
   - **Flag:** OTA.
@@ -1166,11 +1167,12 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** `mikveh_erev_shabbat` has no text.
   - **Expected result:** waits for R20: what is said, and a public-domain print to type it from by the two-pass contract of the Tiklal.
 
-- [ ] Ask about the Mishnah's vocalized text and the Steinsaltz explanation
-  - **Flag:** none: emails from `365jew@gmail.com`, on the owner's word.
-  - **What it is:** two rows added to [release/licence-requests.md](release/licence-requests.md): the vocalized Mishnah "Torat Emet 357" (the same rights question as row 3, R' Pinchas Reuven named on Torat Emet's page), and Koren and Sefaria on whether a free store app may carry the William Davidson Hebrew explanation under CC-BY-NC.
-  - **What it solves:** the two sources the Mishnah and Daf Yomi add-ons would most gain from.
-  - **Expected result:** each request sent with its date, and its answer quoted in the drafts file; until then the fallbacks of the spec stand.
+- [ ] Permission for the vocalized Mishnah of Torat Emet
+  - **Flag:** none: an email from `365jew@gmail.com`.
+  - **What it is:** the request of [release/licence-requests.md](release/licence-requests.md), section 2b: the vocalized Mishnah "Torat Emet 357", whose page names R' Pinchas Reuven as the rights holder.
+  - **What it solves:** the Mishnah add-on is built on it at the owner's word (Q39).
+  - **Sent:** 2026-11-18, by Claude on the owner's word, from `365jew@gmail.com` to nosachteiman@gmail.com (R' Sagiv Mahfud, asked to forward it to R' Reuven), a thread of its own.
+  - **Expected result:** the answer quoted and dated in the drafts file; a refusal goes back to the owner ("ואם לא אז נחשוב על פיתרון"). A request to Koren for the Steinsaltz explanation waits until the Daf Yomi text is taken up.
 
 ## Bugs
 
@@ -1437,21 +1439,25 @@ Q32 to Q37 are the batch "Discoverability and ease of use, 2026-11-13", the open
   - **Question:** Besides Tehillim, Mizmor LeTodah, Pirkei Avot, Iggeret HaRamban, the sick, the children's verses, the Mishnah and Daf Yomi, do you want the optional ones: Mesillat Yesharim 3 for cheshbon nefesh, Likutei Moharan II:25 for hitbodedut, and source passages for guests and parents?
   - **Proposal:** yes to Mesillat Yesharim; hitbodedut and the source passages only if you want them, since neither is a text people say.
   - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 2.
+  - **Answered, 2026-11-18:** yes to all three ("לגביי 38 כן").
   - **What it affects:** three tasks of the batch "Reader texts for the habit mitzvot".
 - **Q39 — The Mishnah's Hebrew source.**
   - **Question:** The only complete vocalized Mishnah is "Torat Emet 357", whose rights are the question still open with Sefaria. Wait for an answer, ship it as Chok LeYisrael was shipped, or use Wikisource's vocalized text (CC BY-SA, completeness not verified)?
   - **Proposal:** check Wikisource's text first; if it is complete, use it and ask about Torat Emet in parallel.
   - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 4.
+  - **Answered, 2026-11-18:** build on Torat Emet and write to them in parallel ("תבנה את תורת אמת ובמקביל תשלח להם מייל, סביר להניח שיאשרו ואם לא אז נחשוב על פיתרון"). The request was sent that day ([release/licence-requests.md](release/licence-requests.md), section 2b).
   - **What it affects:** the Mishnah add-on task.
 - **Q40 — How far Daf Yomi goes.**
   - **Question:** Links only (Sefaria and Hadran), or also the Vilna text with Rashi inside the app (about 11 MB for the whole Shas, per tractate), and the Steinsaltz explanation if Koren permits?
   - **Proposal:** links first; the text with Rashi after it; Steinsaltz only with written permission.
   - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 5.
+  - **Answered, 2026-11-18:** links only for now; the text inside the reader later, as a task that is not urgent ("נכון לעכשיו קישורים בלבד, בעתיד נחליף את זה לחלק מהקורא, תרשום משימה לא דחופה על זה").
   - **What it affects:** the two Daf Yomi tasks and the permission request.
 - **Q41 — English for the new texts.**
   - **Question:** Hebrew only, like Tehillim and Tikkun HaKlali, or with English where an open translation exists (Kulp for the Mishnah and Avot, the Community Translation for Iggeret HaRamban)?
   - **Proposal:** English where an open translation exists and aligns; Hebrew only elsewhere.
   - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), sections 3 and 4.
+  - **Answered, 2026-11-18:** English wherever an open translation exists ("איפה שיש אנגלית תכניס גם אנגלית").
   - **What it affects:** every text task of the batch.
 
 ## Other Open Items
