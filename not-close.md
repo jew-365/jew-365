@@ -1192,6 +1192,15 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **The build:** started on 2026-11-18 in a session of its own, at the owner's word ("תפתח סשן חדש עם אופוס שיתחיל בניה"): "תוסף המשנה: שתי משניות ומשנה יומית", `session_01F2nkceWvGEop4ccYLhn7rj`.
   - **Expected result:** the answer quoted and dated in the drafts file; a refusal goes back to the owner ("ואם לא אז נחשוב על פיתרון"). A request to Koren for the Steinsaltz explanation waits until the Daf Yomi text is taken up.
 
+- [ ] The carousel opens with the time that comes next, then the starred times
+  - **Asked by:** the owner, 2026-11-18: "תמיד הראשון יהיה הזמן שעכשיו ואחרי זה כל המועדפים ואחרי זה כל השאר. כרגע זה קודם מועדפים ואז הזמן שעכשיו. זה שגוי".
+  - **Flag:** OTA.
+  - **What it is:** `timeChips()` of [src/utils/homeTimes.ts](src/utils/homeTimes.ts) puts today's next time first, then the starred times at their next time, then the rest by time.
+  - **What it solves:** a starred time hours away hid the time that is running now.
+  - **Expected result:** on home the first chip is the time that comes next, a star or not; the starred ones follow it.
+  - **Done:** 2026-11-18. [src/utils/__tests__/homeTimes.test.ts](src/utils/__tests__/homeTimes.test.ts) pins the order with a starred later time and with a starred time already past; the full `pnpm test` green. Not checked on a phone.
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: no · Pushed: no · Live: no · Channel: none
+
 ## Bugs
 
 - [ ] The reader jumps back to the start of the text while reading

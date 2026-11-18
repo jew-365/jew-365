@@ -87,11 +87,11 @@ describe('the live carousel', () => {
     expect(netz && netz.type === 'time' && netz.pinned).toBe(true);
   });
 
-  it('puts the starred times first, while the lead and the next time follow the clock', () => {
+  it('opens with the time that comes next, then the starred times, then the rest', () => {
     const { chips, lead, next } = timeChips(
       base({ pins: ['plag'], openWindows: [{ start: at(6, 4), end: at(8, 40) }] }),
     );
-    expect(keys(chips).slice(0, 4)).toEqual(['plag', 'sofShma', 'sofTfila', 'chatzot']);
+    expect(keys(chips).slice(0, 4)).toEqual(['sofShma', 'plag', 'sofTfila', 'chatzot']);
     expect(lead).toBe('sofShma');
     expect(next).toBe('sofShma');
     expect(timeChips(base({ now: at(18) })).next).toBeNull();
@@ -112,10 +112,10 @@ describe('the live carousel', () => {
     ]);
   });
 
-  it("leads with a starred time already past today at tomorrow's time, and keeps it out of the earlier times", () => {
+  it("puts a starred time already past today right after the next time, at tomorrow's time, and out of the earlier times", () => {
     const nextDay = ZMANIM.map((z) => ({ id: z.id, at: new Date(z.at.getTime() + 86400000) }));
     const { chips, next } = timeChips(base({ pins: ['alot', 'plag'], nextDay }));
-    expect(keys(chips).slice(0, 3)).toEqual(['plag', 'tomorrow-alot', 'sofShma']);
+    expect(keys(chips).slice(0, 3)).toEqual(['sofShma', 'plag', 'tomorrow-alot']);
     const alot = chips.find((c) => c.key === 'tomorrow-alot');
     expect(alot && alot.type === 'time' && alot.kind === 'tomorrow' && alot.pinned).toBe(true);
     expect(keys(chips)).not.toContain('alot');

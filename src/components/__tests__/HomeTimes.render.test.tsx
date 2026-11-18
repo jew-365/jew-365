@@ -96,12 +96,12 @@ describe('HomeTimes', () => {
     expect(screen.getByTestId('home-times-plag').props.accessibilityLabel).toContain('מועדף');
   });
 
-  it('puts the starred times first, the rest by time', () => {
+  it('puts the time that comes next first, then the starred times, the rest by time', () => {
     renderTimes();
     const keys = screen.getAllByTestId(/^home-times-(netz|sofShma|sofTfila|plag|shkia)$/).map((n) => n.props.testID);
     expect(keys).toEqual([
-      'home-times-plag',
       'home-times-sofShma',
+      'home-times-plag',
       'home-times-sofTfila',
       'home-times-shkia',
       'home-times-netz',

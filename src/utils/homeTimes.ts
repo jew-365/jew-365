@@ -73,8 +73,8 @@ export function pinnedAhead(input: {
     .sort((a, b) => a.at.getTime() - b.at.getTime());
 }
 
-// The starred times lead the carousel at their next time (`pinnedAhead()`), then the rest by time; `next` is the
-// time of today that comes next whatever its place.
+// The time of today that comes next leads the carousel (`next`), then the starred times at their next time
+// (`pinnedAhead()`), then the rest by time.
 export function timeChips(input: TimesInput): { chips: TimeChip[]; lead: string | null; next: string | null } {
   const t = input.now.getTime();
   const running = (at: Date): ChipProgress | null => {
@@ -131,7 +131,14 @@ export function timeChips(input: TimesInput): { chips: TimeChip[]; lead: string 
         }
       : (byTime.find((c) => c.zman === p.id) as TimeChipOf<'time'>),
   );
-  const upcoming = [...head, ...byTime.filter((c) => !(c.zman && aheadIds.has(c.zman)))];
+  // The time that comes next always opens the carousel, then the starred times, then the rest (the owner's
+  // call of 2026-11-18: the stars used to come before it).
+  const first = byTime[0];
+  const upcoming = [
+    ...(first ? [first] : []),
+    ...head.filter((c) => c !== first),
+    ...byTime.filter((c) => c !== first && !(c.zman && aheadIds.has(c.zman))),
+  ];
   const past = day.filter((c) => c.kind === 'past' && !(c.zman && aheadIds.has(c.zman)));
   const tomorrow: TimeChipOf<'time'>[] = (input.tomorrow ?? [])
     .filter((z) => TOMORROW_ZMANIM.includes(z.id) && !aheadIds.has(z.id))
