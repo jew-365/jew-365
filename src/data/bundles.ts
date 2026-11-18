@@ -93,7 +93,6 @@ export const BUNDLES: readonly Bundle[] = [
       'shabbat_guest',
       'kind_word',
       'child_time',
-      'maaser',
     ],
     recommended: false,
     recommendedMembers: ['daily_tzedakah', 'call_parents', 'gratitude'],

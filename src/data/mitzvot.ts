@@ -363,14 +363,11 @@ type Habit = {
   days: readonly number[];
   // An earlier end on Friday, so the window never reaches candle lighting.
   fridayEnd?: readonly [number, number];
-  // Once a month: only on this civil day of the month, or the day after it when it falls on Shabbat.
-  monthDay?: number;
 };
 
 const SUN_TO_FRI = [0, 1, 2, 3, 4, 5];
 const SUN_TO_THU = [0, 1, 2, 3, 4];
 const FRIDAY = [5];
-const ALL_WEEK = [0, 1, 2, 3, 4, 5, 6];
 
 const HABITS: readonly Habit[] = [
   {
@@ -649,22 +646,6 @@ const HABITS: readonly Habit[] = [
     days: [0],
   },
   {
-    id: 'maaser',
-    he: 'מעשר כספים',
-    en: 'Maaser from my income',
-    benefit: {
-      he: 'הפרשת מעשר מהמשכורת, פעם בחודש ב־10 לחודש',
-      en: 'Setting aside a tenth of the salary, once a month on the 10th',
-    },
-    icon: 'sparkle',
-    group: 'chesed',
-    category: 'seasonal',
-    start: [9, 0],
-    end: [21, 0],
-    days: ALL_WEEK,
-    monthDay: 10,
-  },
-  {
     id: 'cheshbon_nefesh',
     he: 'חשבון נפש',
     en: 'Cheshbon nefesh',
@@ -743,10 +724,6 @@ const habitMitzvah = (habit: Habit): Mitzvah => ({
     const day = dayOf(zmanim, location);
     const weekday = day.weekday % 7;
     if (!habit.days.includes(weekday)) return null;
-    if (habit.monthDay !== undefined) {
-      const moved = weekday === SUNDAY && day.day === habit.monthDay + 1;
-      if (!(moved || (day.day === habit.monthDay && weekday !== 6))) return null;
-    }
     const at = ([hour, minute]: readonly [number, number]) =>
       day.set({ hour, minute, second: 0, millisecond: 0 }).toJSDate();
     return win(at(habit.start), at(weekday === 5 && habit.fridayEnd ? habit.fridayEnd : habit.end));

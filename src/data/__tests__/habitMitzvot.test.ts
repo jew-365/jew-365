@@ -21,7 +21,6 @@ const SETTINGS: UserSettings = { nusach: 'ashkenaz', halachicOpinions: { ksSofZm
 const WEEK = ['2026-11-15', '2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19', '2026-11-20', '2026-11-21'];
 const SUN_TO_FRI = [0, 1, 2, 3, 4, 5];
 const SUN_TO_THU = [0, 1, 2, 3, 4];
-// `maaser` is monthly and has its own case below.
 const EXPECTED: Record<string, { group: string; hours: [string, string]; days: number[]; friday?: string }> = {
   tehillim_chapter: { group: 'learning', hours: ['09:30', '16:30'], days: SUN_TO_FRI },
   two_mishnayot: { group: 'learning', hours: ['06:30', '08:30'], days: SUN_TO_FRI },
@@ -56,9 +55,9 @@ const windowOn = (id: string, dayKey: string, location: Location) => {
 };
 
 describe('the habit mitzvot', () => {
-  it('are the twenty-five of the owner’s lists, registry mitzvot off by default, before Kiddush Levana', () => {
-    expect([...HABIT_IDS].sort()).toEqual([...Object.keys(EXPECTED), 'maaser'].sort());
-    expect(HABIT_IDS).toHaveLength(25);
+  it('are the twenty-four of the owner’s lists, registry mitzvot off by default, before Kiddush Levana', () => {
+    expect([...HABIT_IDS].sort()).toEqual(Object.keys(EXPECTED).sort());
+    expect(HABIT_IDS).toHaveLength(24);
     const ids = MITZVOT.map((mitzvah) => mitzvah.id);
     expect(ids.slice(ids.indexOf(HABIT_IDS[0]), ids.indexOf('kiddush_levana'))).toEqual(HABIT_IDS);
     expect(ids[ids.length - 1]).toBe('chok_leyisrael');
@@ -99,21 +98,6 @@ describe('the habit mitzvot', () => {
       }
     },
   );
-
-  it('opens maaser once a month, on the 10th, or on Sunday the 11th when the 10th is Shabbat', () => {
-    expect(findMitzvah('maaser')).toMatchObject({ group: 'chesed', skipOn: ['shabbat', 'yomtov'] });
-    for (const location of [JERUSALEM, NEW_YORK]) {
-      // Tuesday 2026-11-10; Saturday 2026-10-10 moves to Sunday the 11th; no other day of either month opens.
-      const open = (month: string) =>
-        Array.from({ length: 30 }, (_, i) => `${month}-${String(i + 1).padStart(2, '0')}`).filter(
-          (dayKey) => windowOn('maaser', dayKey, location) !== null,
-        );
-      expect(open('2026-11')).toEqual(['2026-11-10']);
-      expect(open('2026-10')).toEqual(['2026-10-11']);
-      const window = windowOn('maaser', '2026-11-10', location)!;
-      expect([clockOf(window.start, location.tz), clockOf(window.end, location.tz)]).toEqual(['09:00', '21:00']);
-    }
-  });
 
   it('keeps the mikveh of erev Shabbat a men’s mitzvah', () => {
     expect(isMensMitzvah('mikveh_erev_shabbat')).toBe(true);

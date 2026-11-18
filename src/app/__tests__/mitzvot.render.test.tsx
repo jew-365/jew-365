@@ -160,7 +160,9 @@ describe('Mitzvot library', () => {
     expect(groupSwitches('learning')[0]).toBe(names(['tehillim_chapter'])[0]);
     expect(groupSwitches('learning').slice(-1)).toEqual(names(['chok_leyisrael']));
     expect(groupSwitches('chesed')).toEqual(inGroup('chesed'));
-    expect(groupSwitches('chesed')).toEqual(expect.arrayContaining(names(['daily_tzedakah', 'visit_sick', 'maaser'])));
+    expect(groupSwitches('chesed')).toEqual(
+      expect.arrayContaining(names(['daily_tzedakah', 'visit_sick', 'shabbat_guest'])),
+    );
     expect(groupSwitches('other')).toEqual([...names(['kiddush_levana']), HILULOT, ROSH_CHODESH]);
   });
 

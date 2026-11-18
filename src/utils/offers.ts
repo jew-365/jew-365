@@ -59,7 +59,6 @@ export type OfferId =
   | 'shabbat_guest'
   | 'kind_word'
   | 'child_time'
-  | 'maaser'
   | 'cheshbon_nefesh'
   | 'hitbodedut'
   | 'shabbat_shopping'
@@ -127,7 +126,6 @@ const HABIT_OFFERS: readonly { id: OfferId; icon: IconName; married?: true }[] =
   { id: 'shabbat_guest', icon: 'meals' },
   { id: 'kind_word', icon: 'rings', married: true },
   { id: 'child_time', icon: 'user', married: true },
-  { id: 'maaser', icon: 'sparkle' },
   { id: 'cheshbon_nefesh', icon: 'night' },
   { id: 'hitbodedut', icon: 'sun' },
   { id: 'shabbat_shopping', icon: 'challah' },

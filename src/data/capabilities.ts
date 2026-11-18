@@ -121,7 +121,6 @@ export const CAPABILITIES: readonly Capability[] = [
   { id: 'shabbat_guest', goal: 'chesed', icon: 'meals', action: mitzvot('shabbat_guest') },
   { id: 'kind_word', goal: 'chesed', icon: 'rings', action: mitzvot('kind_word') },
   { id: 'child_time', goal: 'chesed', icon: 'user', action: mitzvot('child_time') },
-  { id: 'maaser', goal: 'chesed', icon: 'sparkle', action: mitzvot('maaser') },
   {
     id: 'roshChodesh',
     goal: 'calendar',
