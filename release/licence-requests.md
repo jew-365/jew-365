@@ -150,7 +150,7 @@ Subject: Licence labels of Torat Emet, Daat and Metsudah versions
 - **Terms:** no terms page was found on daat.ac.il; ask.
 - **Channel:** urisaf@gmail.com, given on <https://www.daat.ac.il/contact.asp> as the site manager's address (verified), or the form on the same page.
 
-- **Answer (2026-11-18, אורי ספראי, urisaf@gmail.com, read in the 365jew@gmail.com inbox):** "אתם רשאים להשתמש, וזה על אחריותכם המלאה. אין לציין את אתר דעת כמקור." The use may go on, at our own responsibility, and the credit must not name Daat. The reader's credit of the nine texts still names it ("Siddur Ashkenaz — Daat Siddur Ashkenaz"); taking the name out waits for the owner's word ([../not-close.md](../not-close.md)).
+- **Answer (2026-11-18, אורי ספראי, urisaf@gmail.com, read in the 365jew@gmail.com inbox):** "אתם רשאים להשתמש, וזה על אחריותכם המלאה. אין לציין את אתר דעת כמקור." The use may go on, at our own responsibility, and the credit must not name Daat. On the owner's word the same day, the reader's credit of the nine texts changed from "Siddur Ashkenaz — Daat Siddur Ashkenaz" to "Siddur Ashkenaz, via Sefaria" ([../scripts/siddur/manifest.js](../scripts/siddur/manifest.js)); it reaches users with the next over-the-air update. A thank-you reply was sent in the same thread.
 
 **Email (Hebrew):**
 

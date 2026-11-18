@@ -174,7 +174,7 @@ const SOURCES = {
     lang: 'he',
     version: 'Daat Siddur Ashkenaz',
     credit: {
-      title: 'Siddur Ashkenaz — Daat Siddur Ashkenaz',
+      title: 'Siddur Ashkenaz, via Sefaria',
       license: 'Public Domain',
       url: `${SEFARIA}/Siddur_Ashkenaz`,
     },
