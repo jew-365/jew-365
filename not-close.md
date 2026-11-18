@@ -1070,7 +1070,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** a new user hears about Rosh Chodesh and hilulot without finding their switches.
   - **Expected result:** a fresh install has both switches on; an existing install has both on after the update, once, and a later switch-off is kept across launches.
   - **Done:** 2026-11-18. The notice cases of [src/stores/__tests__/stores.test.ts](src/stores/__tests__/stores.test.ts) (the defaults, the one-time switch-on, the mark keeping a later choice, every kind off), [src/data/__tests__/bundles.test.ts](src/data/__tests__/bundles.test.ts), [src/services/__tests__/setupBundles.test.ts](src/services/__tests__/setupBundles.test.ts), [src/app/__tests__/onboarding.bundles.render.test.tsx](src/app/__tests__/onboarding.bundles.render.test.tsx) and the catch-up case of [src/utils/__tests__/offers.test.ts](src/utils/__tests__/offers.test.ts); the full `pnpm test` green. Not checked on a phone. Open with the owner: switching existing installs on was the agent's reading of "default", after the rule for a newly default-on mitzvah; one line of the `merge` to drop if only new installs are meant.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `11c3497` · Pushed: yes · Live: no · Channel: none
 
 ## Bugs
 
