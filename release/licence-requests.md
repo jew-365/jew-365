@@ -95,7 +95,7 @@ Subject: Chok LeYisrael (Torat Emet edition) in a free app: credit and permissio
 
 - **What it settles:** the Groves Center's part only. It holds no copyright in the Bible text and allows any use. The rest of the edition (R' Reuven's and R' Mahfud's work, and Torat Emet's non-commercial term) still waits for R' Mahfud's answer.
 - **What changed (2026-11-16, the owner's word):** the in-app credit (`chok.credit`) and `MANIFEST_CREDIT` in [../scripts/chok/manifest.js](../scripts/chok/manifest.js), so [../docs/chok/manifest.json](../docs/chok/manifest.json) and [../docs/chok/LICENSE.txt](../docs/chok/LICENSE.txt), name R' Reuven and R' Mahfud as the copyright holders and credit the Bible text to the Groves Center in its wording, as "Hebrew Bible text" / "נוסח המקרא", since the edition also holds Mishnah, Gemara, Zohar, halacha and mussar. The credit inside each parasha file (`CREDIT.title`) is unchanged: changing it would make every install download the add-on again.
-- **Thanks:** a reply sent in the same Gmail thread on 2026-11-16, by Claude on the owner's word, from 365jew@gmail.com to info@grovescenter.org; it names the "Hebrew Bible text" wording and offers their exact wording if they prefer it.
+- **Thanks:** a reply sent in the same Gmail thread on 2026-11-16, by Claude on the owner's word, from 365jew@gmail.com to info@grovescenter.org; it names the "Hebrew Bible text" wording and offers their exact wording if they prefer it. Steve answered the same day (2026-11-16): "That is absolutely fine. Because you have non-biblical text, that label is absolutely correct. It's better in general." The wording stays.
 
 ## 2a. Shemirat HaLashon — the Torat Emet text (checked 2026-11-10, no request drafted)
 
