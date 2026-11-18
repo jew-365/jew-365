@@ -658,6 +658,16 @@ const CASES: SmokeCase[] = [
   },
   {
     file: 'siddur/[id]',
+    label: 'the cheshbon nefesh text ends with a button that opens the bedtime Shema',
+    Screen: SiddurReaderScreen,
+    params: { id: 'cheshbon_nefesh' },
+    check: both(
+      text(/המחילה והווידוי שלפני השינה/, /The forgiveness and the confession said before sleep/),
+      text('פתיחת קריאת שמע על המיטה', 'Open Bedtime Shema'),
+    ),
+  },
+  {
+    file: 'siddur/[id]',
     label: 'a habit mitzvah that reads a psalm opens Tehillim',
     Screen: SiddurReaderScreen,
     params: { id: 'gratitude' },

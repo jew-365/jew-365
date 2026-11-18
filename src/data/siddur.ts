@@ -257,9 +257,13 @@ export const MITZVAH_BOOK_TEXT: Partial<Record<string, { text: StandaloneTextId;
   gratitude: { text: 'tehillim', section: 'פרק ק' },
 };
 
-// A text whose reader ends with a button to another text: the psalms said for the sick are in Tehillim (the
-// owner's call of 2026-11-18, until the list of psalms is settled, R19).
-export const TEXT_OPENS_ALSO: Partial<Record<SiddurTextId, StandaloneTextId>> = { bikur_cholim: 'tehillim' };
+// A text whose reader ends with a button to another text (the owner's calls of 2026-11-18): the psalms said
+// for the sick are in Tehillim, until their list is settled (R19), and the forgiveness and vidui that follow
+// the chapter on cheshbon nefesh are in the bedtime Shema.
+export const TEXT_OPENS_ALSO: Partial<Record<SiddurTextId, StandaloneTextId>> = {
+  bikur_cholim: 'tehillim',
+  cheshbon_nefesh: 'kriat_shema_al_hamita',
+};
 
 // The standalone text a registry mitzvah reads, its own or a book's.
 export const linkedStandaloneText = (mitzvahId: string): StandaloneTextId | undefined =>

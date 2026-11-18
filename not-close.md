@@ -1083,7 +1083,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
 - **Flag:** OTA for a bundled text; a `docs/` add-on is published on Pages before the update that offers it.
 - **The owner's answers, 2026-11-18 (Q38 to Q41):** the optional texts are built too; the Mishnah is built on "Torat Emet 357" while the request is out; Daf Yomi is links for now and the text in the reader later, not urgent; English wherever an open translation exists.
 - **Dropped, the owner, 2026-11-18:** no text for the daily tzedakah or the Friday mikveh, and R20 with them ([action-log.md](action-log.md)).
-- **Waits on:** R18 and R19 (the rav), each for its own task only.
+- **Waits on:** R19 (the rav), for the psalms of the sick only; the weekly cycle of Pirkei Avot is dropped (the owner, 2026-11-18: the chapter is picked by hand), and R18 with it.
 
 ### High — Reader texts for the habit mitzvot
 
@@ -1099,8 +1099,8 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Flag:** OTA.
   - **What it is:** the six chapters with "כל ישראל" and "רבי חנניא בן עקשיא", one section per chapter, from Sefaria's Siddur Edot HaMizrach node, version " Shaliehsaboo Edition" ("CC0"), its cantillation marks stripped; English from Kulp ("CC-BY", Q41) ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
   - **What it solves:** the weekly reminder has nothing to read.
-  - **Expected result:** the text opens from the mitzvah and from the siddur tab's learning group, on the chapter the user picks; the weekly cycle waits for R18.
-  - **As built:** the Hebrew is Sefaria's "Pirkei Avot" in "Torat Emet 357", so that Kulp's English aligns mishnah by mishnah; the Edot HaMizrach leaf gives only the opening and closing passages. In the siddur tab under General. No weekly cycle yet (R18).
+  - **Expected result:** the text opens from the mitzvah and from the siddur tab's learning group, on the chapter the user picks; on the chapter the user picks.
+  - **As built:** the Hebrew is Sefaria's "Pirkei Avot" in "Torat Emet 357", so that Kulp's English aligns mishnah by mishnah; the Edot HaMizrach leaf gives only the opening and closing passages. In the siddur tab under General. The reader picks the chapter by hand, for good: the owner's call of 2026-11-18 ("פרקי אבות לבחור פרק ידנית"), so no weekly cycle is built and R18 is dropped.
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
@@ -1129,7 +1129,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it is:** `cheshbon_nefesh` opens the forgiveness passage and vidui the app already holds in `kriat_shema_al_hamita` (a `section` link, no copy); optionally chapter 3 of Mesillat Yesharim, "Sefaria Vocalized Edition" ("CC0"), as a second text.
   - **What it solves:** the habit has no words to open.
   - **Expected result:** the mitzvah opens the bedtime Shema on that section in the user's nusach; the study text with Sebag's English ("CC-BY"), the owner's yes of 2026-11-18 (Q38).
-  - **As built:** one text, Mesillat Yesharim chapter 3 with Sebag's English, under a note that points to the bedtime Shema for the forgiveness and vidui; no section link into the bedtime Shema, whose section differs per nusach.
+  - **As built:** one text, Mesillat Yesharim chapter 3 with Sebag's English, under a note that points to the bedtime Shema for the forgiveness and vidui, and ending with a button that opens the bedtime Shema (the owner's yes of 2026-11-18; `TEXT_OPENS_ALSO`).
   - **Done:** 2026-11-18. Built as the spec's source says; [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) pins the link and the text, the smoke suite opens the reader from the mitzvah, the search coverage suite finds the text, and the full `pnpm test` is green. Not checked on a phone.
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `0a2ec4d` · Pushed: yes · Live: no · Channel: none
 
@@ -1362,10 +1362,6 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
     - R17.8 The Kitzur luach in a leap year: the review of the laws of blessings and prayer in Adar I and the luach's Adar in Adar II (Hebcal reads them the other way round), and the days that read nothing (30 Cheshvan, 30 Adar I, 15 Elul).
   - **Lives in:** [src/data/halacha.ts](src/data/halacha.ts), [src/utils/halacha.ts](src/utils/halacha.ts), [src/data/halachaContent.ts](src/data/halachaContent.ts) and [scripts/halacha/](scripts/halacha); on the review page as R17.1 to R17.8 since 2026-11-10.
 
-- **R18 — Pirkei Avot: the weekly cycle per nusach.** (the batch "Reader texts for the habit mitzvot, 2026-11-18"; not built)
-  - **Question:** Which chapter is read on which Shabbat, and until when, for each nusach?
-  - **Assumption:** a chapter each Shabbat from Pesach to Shavuot; Edot HaMizrach stop at Shavuot; Chabad and Ashkenaz continue to the Shabbat before Rosh Hashanah. Not verified: the doubling of chapters in the last round, the shift between Israel and abroad, and Teiman.
-  - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3; nothing in the code yet.
 - **R19 — Visiting the sick: the wording and the psalms.** (same batch; not built)
   - **Question:** Is "המקום ירחם עליך בתוך שאר חולי ישראל" with Mi Sheberach the right text for a visitor, and which psalms are said?
   - **Assumption:** the 36 chapters printed in Tehillim for the sick, then the Psalm 119 letters of the name; a short set of 20, 121 and 130. The list is to be read from a print.
