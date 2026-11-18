@@ -29,6 +29,8 @@ export type ScheduleCandidate = {
   // A mitzvah reminder's time stage, which picks its sound (orange: the soon sound, red: the last one); a
   // notice has none and takes the plain sound.
   stage?: TimeStage;
+  // When it leaves the tray; absent means `TRAY_STAY_MIN` minutes after its trigger.
+  keepUntil?: Date;
   body: string;
   data: PendingNotificationMeta;
 };

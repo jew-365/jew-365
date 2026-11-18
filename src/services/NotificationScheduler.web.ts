@@ -115,6 +115,7 @@ export async function askForNotifications(): Promise<'granted' | 'refused' | 'bl
 }
 
 export async function dismissCompletedPresentedNotifications(_now?: Date): Promise<void> {}
+export async function dismissAllPresentedNotifications(): Promise<void> {}
 
 export async function registerDailyRebuildTask(): Promise<void> {}
 

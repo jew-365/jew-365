@@ -83,7 +83,7 @@ import {
   askForNotifications,
   NotificationScheduler,
   syncNotificationPermissionStatus,
-  dismissCompletedPresentedNotifications,
+  dismissAllPresentedNotifications,
   refreshSchedulingOnForeground,
 } from '@/services/NotificationScheduler';
 import { clearLastError, reportError, useLastError } from '@/services/errors';
@@ -873,7 +873,7 @@ export default function HomeScreen() {
         setTick((value) => value + 1);
         afterPaint(() => {
           syncNotificationPermissionStatus().catch((error) => reportError('schedule', error));
-          dismissCompletedPresentedNotifications().catch(() => {});
+          dismissAllPresentedNotifications().catch(() => {});
           refreshSchedulingOnForeground().catch((error) => reportError('schedule', error));
         });
       }

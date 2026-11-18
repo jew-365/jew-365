@@ -148,6 +148,7 @@ describe('NotificationScheduler hilula notices', () => {
     expect(before.content.body).toBe(t('hilulot.notice.before.body', { date: 'ג׳ חשון' }));
     expect(before.content.categoryIdentifier).toBeUndefined();
     expect(before.content.data).toEqual({
+      expiresAt: expect.any(Number),
       kind: 'hilula',
       hilula: { day: CHESHVAN_3, when: 'before', ids: RUZHIN_AND_OVADIA_IDS },
     });
@@ -159,6 +160,7 @@ describe('NotificationScheduler hilula notices', () => {
     expect(evening.content.categoryIdentifier).toBeUndefined();
     expect(evening.trigger!.channelId).toBe('hilulot');
     expect(evening.content.data).toEqual({
+      expiresAt: expect.any(Number),
       kind: 'hilula',
       hilula: { day: CHESHVAN_3, when: 'evening', ids: RUZHIN_AND_OVADIA_IDS },
     });
@@ -175,6 +177,7 @@ describe('NotificationScheduler hilula notices', () => {
 
       for (const when of ['before', 'evening']) {
         expect(pendingOf(`hilula:${IYAR_18}:${when}`)!.content.data).toEqual({
+          expiresAt: expect.any(Number),
           kind: 'hilula',
           hilula: { day: IYAR_18, when, ids: ['rashbi', 'rema'] },
         });
@@ -185,6 +188,7 @@ describe('NotificationScheduler hilula notices', () => {
       await NotificationScheduler.rebuild();
 
       expect(pendingOf(`hilula:${IYAR_17}:evening`)!.content.data).toEqual({
+        expiresAt: expect.any(Number),
         kind: 'hilula',
         hilula: { day: IYAR_17, when: 'evening', ids: ['noda_biyehuda'] },
       });

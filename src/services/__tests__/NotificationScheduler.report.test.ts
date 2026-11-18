@@ -135,7 +135,11 @@ describe('NotificationScheduler weekly report', () => {
     expect(report.content.title).toBe('סיכום השבוע מוכן');
     expect(report.content.body).toBe('מה סימנת השבוע, במה להשתפר ומה מחכה בשבוע הבא');
     expect(report.content.categoryIdentifier).toBeUndefined();
-    expect(report.content.data).toEqual({ kind: 'report', report: { week: '2026-10-10' } });
+    expect(report.content.data).toEqual({
+      expiresAt: expect.any(Number),
+      kind: 'report',
+      report: { week: '2026-10-10' },
+    });
   });
 
   it('2 schedules nothing while the setting is off', async () => {
@@ -182,7 +186,11 @@ describe('NotificationScheduler weekly report', () => {
     const block = blockAround('2026-09-12T12:00');
     expect(block.days).toEqual(['2026-09-12', '2026-09-13']);
     expect(pendingOf('report:2026-09-13').trigger!.date.getTime()).toBe(block.end.getTime() + REPORT_DELAY_MS);
-    expect(pendingOf('report:2026-09-13').content.data).toEqual({ kind: 'report', report: { week: '2026-09-13' } });
+    expect(pendingOf('report:2026-09-13').content.data).toEqual({
+      expiresAt: expect.any(Number),
+      kind: 'report',
+      report: { week: '2026-09-13' },
+    });
   });
 
   it('6 plans nothing for a Yom Tov block in mid-week, and drops the report of a Shabbat already past', async () => {

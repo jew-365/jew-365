@@ -334,7 +334,7 @@ describe('NotificationScheduler', () => {
     const running = NotificationScheduler.rebuild();
     expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBeUndefined();
     await running;
-    expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(16);
+    expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(17);
   });
 
   it('6.3 cancelAll empties pending', async () => {
@@ -1846,7 +1846,7 @@ describe('the sample reminder (spec A5)', () => {
     const sent = mockSchedule.mock.calls[0][0];
     expect(sent.identifier).toBe('sample');
     expect(sent.identifier).not.toContain('__');
-    expect(sent.content.data).toEqual({ kind: 'sample' });
+    expect(sent.content.data).toEqual({ expiresAt: expect.any(Number), kind: 'sample' });
     expect(sent.content.categoryIdentifier).toBe(SAMPLE_CATEGORY);
     expect(sent.content.title).toBe('תפילת מנחה');
     expect(sent.content.body).toContain(t('notifications.timeFor', { name: 'תפילת מנחה' }));

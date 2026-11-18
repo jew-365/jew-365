@@ -499,6 +499,8 @@ function candidatesFor(mitzvah: Mitzvah, date: Date, input: PlanInput, thin: Thi
         ...(ios ? { subtitle: line, body: message } : { body: `${line}\n${message}` }),
         color: TIME_STAGE_COLOR[stage],
         stage,
+        // The window's last notification stays to the window's end (the owner's call, 2026-11-18).
+        ...(stage === 'red' ? { keepUntil: planned.window.end } : {}),
         data: {
           mitzvahId: mitzvah.id,
           windowEnd: planned.window.end.toISOString(),

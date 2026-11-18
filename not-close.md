@@ -1200,6 +1200,16 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** on home the first chip is the time that comes next, a star or not; the starred ones follow it.
   - **Done:** 2026-11-18. [src/utils/__tests__/homeTimes.test.ts](src/utils/__tests__/homeTimes.test.ts) pins the order with a starred later time and with a starred time already past; the full `pnpm test` green. Not checked on a phone.
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `7936359` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
+- [ ] Notifications leave the tray: 20 minutes each, the last one to the window's end, all on entering the app
+  - **Asked by:** the owner, 2026-11-18: "כל התראה תישאר למשתמש בנוטפיקציה מקסימום 20 דקות ואחרי זה תיעלם חוץ מההתראה האחרונה שהיא תמשיך עד סוף החלון הקריטי של המצווה. כמו כן ברגע שהמשתמש נכנס לאפליקציה לא משנה מתי כל ההתראות שלו צריכות להיעלם".
+  - **Flag:** OTA for the payload, the clear on entering the app and the hourly sweep; a native Android build for the removal while the app is closed (the expo-notifications patch).
+  - **What it is:** every notification carries `data.expiresAt` (its trigger plus 20 minutes; a window's red notification its window's end), `SCHEDULE_FORMAT` 17; entering the app dismisses the whole tray; the hourly task dismisses the expired; the patched Android builder calls `setTimeoutAfter`.
+  - **What it solves:** notifications piled up in the tray without limit.
+  - **Expected result:** on an Android binary with the patch a notification is gone 20 minutes after it came, the red one at its window's end; on every phone the tray is empty after the app is opened.
+  - **Decision taken alone (flagged to the owner):** "every notification" was read to include the notices (hilulot, Rosh Chodesh, the pre-block notice, check-in, weekly report, family purity, update), and "the end of the critical window" as the end of the mitzvah's window.
+  - **Open:** the iPhone has no way to remove a local notification while the app is closed; there it leaves on entering the app or on a background run. The Kotlin of the patch was not compiled here: the first Android build checks it. Not checked on a phone.
+  - **Done:** 2026-11-18. [src/services/__tests__/NotificationScheduler.endedDay.test.ts](src/services/__tests__/NotificationScheduler.endedDay.test.ts) (the full clear on entry, the expiry by the sweep and the hourly task) and [src/services/notifications/__tests__/timeLeft.mitzvot.test.ts](src/services/notifications/__tests__/timeLeft.mitzvot.test.ts) (20 minutes, the red one to the window's end, the payload); the full `pnpm test` green (7,099 passed).
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`); the Android removal with the next Android build · Committed: no · Pushed: no · Live: no · Channel: none
 
 ## Bugs
 

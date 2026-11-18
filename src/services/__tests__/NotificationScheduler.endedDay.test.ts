@@ -223,19 +223,40 @@ describe('withdrawing reminders of an ended day', () => {
     expect(mockDismiss).not.toHaveBeenCalled();
   });
 
-  it('the launch path withdraws them', async () => {
+  it('entering the app clears the whole tray, whatever is in it', async () => {
     mockState.presented = [
       reminder('maariv', '2026-11-10', at(JERUSALEM, '2026-11-10T20:00')),
       reminder('tefillin', '2026-11-11', at(JERUSALEM, '2026-11-11T05:50')),
+      notice(`hilula:${ABS}:evening`, { kind: 'hilula' }),
     ];
 
     const teardown = initNotificationHandlers();
     try {
       await settled();
-      expect(dismissed()).toEqual(['maariv__2026-11-10__0']);
+      expect(dismissed()).toEqual([`hilula:${ABS}:evening`, 'maariv__2026-11-10__0', 'tefillin__2026-11-11__0']);
     } finally {
       teardown();
     }
+  });
+
+  it('a notification past its time in the tray is withdrawn, by the sweep and by the hourly task', async () => {
+    const expiring = (id: string, expiresAt: number): Presented => ({
+      date: PINNED_NOW.getTime() - 30 * MINUTE,
+      request: { identifier: id, content: { data: { kind: 'hilula', expiresAt } } },
+    });
+    mockState.presented = [
+      expiring('hilula:1:before', PINNED_NOW.getTime()),
+      expiring('hilula:2:before', PINNED_NOW.getTime() + MINUTE),
+      // One scheduled before the field existed keeps its own rule.
+      notice('hilula:3:before', { kind: 'hilula' }),
+    ];
+
+    await dismissCompletedPresentedNotifications(PINNED_NOW);
+    expect(dismissed()).toEqual(['hilula:1:before']);
+
+    mockDismiss.mockClear();
+    await expect(runDailyTask()).resolves.toBe(1);
+    expect(dismissed()).toEqual(['hilula:1:before']);
   });
 
   it('the hourly task withdraws them on every run, also when no rebuild is due, and leaves the other rules to the launch sweep', async () => {

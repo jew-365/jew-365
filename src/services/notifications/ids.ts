@@ -39,7 +39,10 @@ export const IOS_HEADROOM = 4;
 export const HORIZON_MAX_DAYS = 30;
 export const LAST_REBUILD_KEY = 'notifications:last-rebuild-date';
 export const SCHEDULE_FORMAT_KEY = 'notifications:schedule-format';
-export const SCHEDULE_FORMAT = 16;
+export const SCHEDULE_FORMAT = 17;
+// How long a presented notification stays in the tray (the owner's call, 2026-11-18); a window's red one stays to
+// the window's end instead.
+export const TRAY_STAY_MIN = 20;
 export const BLOCK_NOTICE_KIND = 'blockNotice';
 export const CHECK_IN_KIND = 'checkin';
 export const UPDATE_KIND = 'update';
@@ -76,6 +79,8 @@ export type PendingNotificationMeta = {
   roshChodesh?: { day: number; when: RoshChodeshWhen };
   report?: { week: string };
   contentHash?: string;
+  // When the notification leaves the tray, in epoch milliseconds (`requestFor()` of os.ts writes it).
+  expiresAt?: number;
   blockId?: string;
   updateId?: string;
   updateCreatedAt?: string;

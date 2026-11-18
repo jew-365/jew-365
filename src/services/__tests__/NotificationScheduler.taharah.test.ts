@@ -213,7 +213,11 @@ describe('NotificationScheduler taharah reminders', () => {
     expect(reminder.content.title).toBe(t('taharah.notify.discreetTitle'));
     expect(reminder.content.body).toBe(t('taharah.notify.discreet.untilBody', { time: clock(shkia) }));
     expect(reminder.content.categoryIdentifier).toBeUndefined();
-    expect(reminder.content.data).toEqual({ kind: TAHARAH_KIND, taharah: { task: 'hefsek', day: O + 4 } });
+    expect(reminder.content.data).toEqual({
+      expiresAt: expect.any(Number),
+      kind: TAHARAH_KIND,
+      taharah: { task: 'hefsek', day: O + 4 },
+    });
   });
 
   it('3 spells the hefsek out when discreet notifications are off', async () => {
@@ -274,7 +278,11 @@ describe('NotificationScheduler taharah reminders', () => {
       expect(evening.content.categoryIdentifier).toBe(TAHARAH_BEDIKA_CATEGORY);
       expect(morning.trigger!.channelId).toBe('taharah');
       expect(evening.trigger!.channelId).toBe('taharah');
-      expect(morning.content.data).toEqual({ kind: TAHARAH_KIND, taharah: { task: 'bedikaMorning', day: today } });
+      expect(morning.content.data).toEqual({
+        expiresAt: expect.any(Number),
+        kind: TAHARAH_KIND,
+        taharah: { task: 'bedikaMorning', day: today },
+      });
       expect(mockSetCategory).toHaveBeenCalledWith(TAHARAH_BEDIKA_CATEGORY, [
         {
           identifier: MARK_DONE_ACTION,
@@ -336,7 +344,11 @@ describe('NotificationScheduler taharah reminders', () => {
       expect(prep.content.title).toBe(t('taharah.notify.title.tevilaPrep'));
       expect(prep.content.body).toBe(t('taharah.notify.body.tevilaPrepShabbat', { time: clock(block.start) }));
       expect(prep.content.categoryIdentifier).toBeUndefined();
-      expect(prep.content.data).toEqual({ kind: TAHARAH_KIND, taharah: { task: 'tevilaPrep', day: night } });
+      expect(prep.content.data).toEqual({
+        expiresAt: expect.any(Number),
+        kind: TAHARAH_KIND,
+        taharah: { task: 'tevilaPrep', day: night },
+      });
     });
 
     it('6b merges preparation leads that fall inside Shabbat into one reminder ten minutes before candle lighting', async () => {
@@ -430,6 +442,7 @@ describe('NotificationScheduler taharah reminders', () => {
         t('taharah.notify.body.perisha', { reasons: t('taharah.reason.onahBeinonit'), time: clock(shkia) }),
       );
       expect(perisha.content.data).toEqual({
+        expiresAt: expect.any(Number),
         kind: TAHARAH_KIND,
         taharah: { task: 'perisha', day: today, onah: 'day' },
       });
@@ -440,6 +453,7 @@ describe('NotificationScheduler taharah reminders', () => {
       expect(veset.content.title).toBe(t('taharah.notify.title.bedikaVeset'));
       expect(veset.content.body).toBe(t('taharah.notify.body.bedikaVeset', { time: clock(shkia) }));
       expect(veset.content.data).toEqual({
+        expiresAt: expect.any(Number),
         kind: TAHARAH_KIND,
         taharah: { task: 'bedikaVeset', day: today, onah: 'day' },
       });
@@ -707,6 +721,7 @@ ${t('taharah.disputed')}`,
       expect(nudge.content.body).toBe(t('taharah.notify.body.postBlock', { in: t('checkin.in.shabbat') }));
       expect(nudge.content.categoryIdentifier).toBeUndefined();
       expect(nudge.content.data).toEqual({
+        expiresAt: expect.any(Number),
         kind: TAHARAH_KIND,
         taharah: { task: 'postBlock', day: absOn(SHABBAT) },
       });
@@ -786,7 +801,11 @@ ${t('taharah.disputed')}`,
       );
       expect(merged.content.categoryIdentifier).toBeUndefined();
       expect(merged.trigger!.channelId).toBe('taharah');
-      expect(merged.content.data).toEqual({ kind: TAHARAH_KIND, taharah: { task: 'preBlock', day } });
+      expect(merged.content.data).toEqual({
+        expiresAt: expect.any(Number),
+        kind: TAHARAH_KIND,
+        taharah: { task: 'preBlock', day },
+      });
       expect(pendingOf(`taharah:bedikaMorning:${day}`)).toBeUndefined();
       expect(pendingOf(`taharah:bedikaEvening:${day}`)).toBeUndefined();
       expect(
@@ -811,7 +830,11 @@ ${t('taharah.disputed')}`,
       expect(triggerOf(merged)).toBe(minutes(block.start, -10));
       expect(merged.content.title).toBe(t('taharah.notify.title.preBlock', { in: t('checkin.in.shabbat') }));
       expect(merged.content.body).toBe(t('taharah.notify.title.tevilaPrep'));
-      expect(merged.content.data).toEqual({ kind: TAHARAH_KIND, taharah: { task: 'preBlock', day: absOn(SHABBAT) } });
+      expect(merged.content.data).toEqual({
+        expiresAt: expect.any(Number),
+        kind: TAHARAH_KIND,
+        taharah: { task: 'preBlock', day: absOn(SHABBAT) },
+      });
       expect(triggerOf(pendingOf(`taharah:tevilaPrep:${absOn(SHABBAT)}`)!)).toBe(
         minutes(zmanimOn(FRIDAY).tzeitHakochavim, -180),
       );
@@ -898,7 +921,7 @@ ${t('taharah.disputed')}`,
   describe('rebuilds', () => {
     it('12 raises the schedule format stamp so an update rebuilds once', async () => {
       await NotificationScheduler.rebuild();
-      expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(16);
+      expect(StorageService.get(SCHEDULE_FORMAT_KEY)).toBe(17);
     });
 
     it('13 the taharah store and the opt-in drive a rebuild, and the teardown unsubscribes them', () => {

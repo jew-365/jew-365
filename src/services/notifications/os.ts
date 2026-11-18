@@ -25,6 +25,7 @@ import {
   SAMPLE_CATEGORY,
   SAMPLE_KIND,
   TAHARAH_BEDIKA_CATEGORY,
+  TRAY_STAY_MIN,
   pendingNotificationMetaFromContent,
   type NotificationContentLike,
   type PendingNotificationMeta,
@@ -245,6 +246,7 @@ export function contentHash(candidate: ScheduleCandidate): string {
     channelIdOf(candidate.channel, candidate.stage),
     soundOfContent(candidate.channel, candidate.stage),
     candidate.data,
+    expiresAtOf(candidate),
   ]);
   let hash = 0x811c9dc5;
   for (let index = 0; index < text.length; index++) {
@@ -252,6 +254,11 @@ export function contentHash(candidate: ScheduleCandidate): string {
   }
   return hash.toString(16);
 }
+
+// A notification stays `TRAY_STAY_MIN` minutes from its trigger, or to its `keepUntil`.
+export const trayStayFrom = (from: Date): number => from.getTime() + TRAY_STAY_MIN * 60 * 1000;
+export const expiresAtOf = (candidate: ScheduleCandidate): number =>
+  candidate.keepUntil?.getTime() ?? trayStayFrom(candidate.trigger);
 
 function requestFor(candidate: ScheduleCandidate): Notifications.NotificationRequestInput {
   return {
@@ -261,7 +268,7 @@ function requestFor(candidate: ScheduleCandidate): Notifications.NotificationReq
       ...(candidate.subtitle && { subtitle: candidate.subtitle }),
       ...(candidate.color && { color: candidate.color }),
       body: candidate.body,
-      data: { ...candidate.data, contentHash: contentHash(candidate) },
+      data: { ...candidate.data, contentHash: contentHash(candidate), expiresAt: expiresAtOf(candidate) },
       ...(candidate.categoryIdentifier && { categoryIdentifier: candidate.categoryIdentifier }),
       autoDismiss: true,
       sticky: false,
@@ -339,7 +346,7 @@ export async function presentSoundPreview(role: SoundRole): Promise<void> {
     content: {
       title: t('settings.notificationSound.previewTitle'),
       body: `${t(`settings.notificationSound.role.${role}`)}: ${sound ? t(`settings.notificationSound.${sound}`) : ''}`,
-      data: { kind: SOUND_PREVIEW_KIND },
+      data: { kind: SOUND_PREVIEW_KIND, expiresAt: trayStayFrom(new Date()) },
       autoDismiss: true,
       sticky: false,
       sound: soundOfContent('mitzvot', stage),
@@ -358,7 +365,7 @@ export async function presentSample(content: { title: string; subtitle?: string;
       title: content.title,
       ...(content.subtitle && { subtitle: content.subtitle }),
       body: content.body,
-      data: { kind: SAMPLE_KIND },
+      data: { kind: SAMPLE_KIND, expiresAt: trayStayFrom(new Date()) },
       categoryIdentifier: SAMPLE_CATEGORY,
       autoDismiss: true,
       sticky: false,

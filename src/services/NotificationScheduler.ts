@@ -177,6 +177,11 @@ function reminderDayEnded({ identifier, data, presentedAt }: os.TrayNotification
   return !presentedAt || now.getTime() >= appDayEnd(appDay(presentedAt, location), location).getTime();
 }
 
+// Past its time in the tray (`data.expiresAt`); a notification scheduled before that field existed has none.
+function trayStayEnded({ data }: os.TrayNotification, now: Date): boolean {
+  return typeof data.expiresAt === 'number' && now.getTime() >= data.expiresAt;
+}
+
 function shouldSuppressForCompletion(data: PendingNotificationMeta, notificationId?: string): boolean {
   if (isFinishedCheckIn(data)) return true;
   if (isStaleUpdateNotice(data)) return true;
@@ -204,6 +209,7 @@ export async function dismissCompletedPresentedNotifications(now: Date = new Dat
     }
     if (
       reminderDayEnded(tray, now) ||
+      trayStayEnded(tray, now) ||
       isFinishedCheckIn(data) ||
       taharahNotificationSettled(data) ||
       isStaleUpdateNotice(data)
@@ -213,9 +219,18 @@ export async function dismissCompletedPresentedNotifications(now: Date = new Dat
   await os.dismiss(ids);
 }
 
+// Entering the app clears the whole tray (the owner's call, 2026-11-18): at launch and on every return to it.
+export async function dismissAllPresentedNotifications(): Promise<void> {
+  await os.dismiss((await os.getPresented()).map(({ identifier }) => identifier));
+}
+
 async function dismissEndedDayReminders(now: Date): Promise<void> {
   const presented = await os.getPresented();
-  await os.dismiss(presented.filter((tray) => reminderDayEnded(tray, now)).map(({ identifier }) => identifier));
+  await os.dismiss(
+    presented
+      .filter((tray) => reminderDayEnded(tray, now) || trayStayEnded(tray, now))
+      .map(({ identifier }) => identifier),
+  );
 }
 
 export async function notifyIfUpdateReady(now: Date = new Date()): Promise<boolean> {
@@ -233,7 +248,12 @@ export async function notifyIfUpdateReady(now: Date = new Date()): Promise<boole
     identifier: `${UPDATE_KIND}:${update.id}`,
     title: t('update.notice.title'),
     body: t('home.updateReady'),
-    data: { kind: UPDATE_KIND, updateId: update.id, updateCreatedAt: update.createdAt },
+    data: {
+      kind: UPDATE_KIND,
+      updateId: update.id,
+      updateCreatedAt: update.createdAt,
+      expiresAt: os.trayStayFrom(now),
+    },
   });
   StorageService.set(UPDATE_NOTIFIED_KEY, update.id);
   return true;
@@ -575,7 +595,7 @@ export function initNotificationHandlers(): () => void {
   registerNotificationActionTask().catch(() => {});
   const launch = afterPaint(() => {
     syncNotificationPermissionStatus().catch(reportScheduleError);
-    dismissCompletedPresentedNotifications().catch(() => {});
+    dismissAllPresentedNotifications().catch(() => {});
     refreshSchedulingOnForeground().catch(reportScheduleError);
   });
   const unsubscribers = [

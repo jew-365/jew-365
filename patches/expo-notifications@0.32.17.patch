@@ -13,7 +13,7 @@ index c7b932b368f4b8e77f54186eca3774354c5aa3d5..82b8b9e488d22e5d79ee464f9bb615a3
        getAllPresented(
          context,
 diff --git a/android/src/main/java/expo/modules/notifications/notifications/presentation/builders/ExpoNotificationBuilder.kt b/android/src/main/java/expo/modules/notifications/notifications/presentation/builders/ExpoNotificationBuilder.kt
-index 610d3039cefd589647538ad8ba14587d29fab338..1c7719e7a4cea9c50bc66e204ca52bb229b565b6 100644
+index 610d3039cefd589647538ad8ba14587d29fab338..a0a1c5ec6279f4b550b27133e3809dfbeadd3d8a 100644
 --- a/android/src/main/java/expo/modules/notifications/notifications/presentation/builders/ExpoNotificationBuilder.kt
 +++ b/android/src/main/java/expo/modules/notifications/notifications/presentation/builders/ExpoNotificationBuilder.kt
 @@ -5,10 +5,14 @@ import android.content.Context
@@ -31,7 +31,7 @@ index 610d3039cefd589647538ad8ba14587d29fab338..1c7719e7a4cea9c50bc66e204ca52bb2
  import android.util.Log
  import androidx.core.app.NotificationCompat
  import androidx.core.app.RemoteInput
-@@ -102,11 +106,13 @@ open class ExpoNotificationBuilder(
+@@ -102,14 +106,23 @@ open class ExpoNotificationBuilder(
  
      // see "Notification anatomy" https://developer.android.com/develop/ui/views/notifications#Templates
      builder.setContentTitle(content.title)
@@ -47,7 +47,17 @@ index 610d3039cefd589647538ad8ba14587d29fab338..1c7719e7a4cea9c50bc66e204ca52bb2
  
      color?.let { builder.color = it.toInt() }
      notificationContent.badgeCount?.toInt()?.let { builder.setNumber(it) }
-@@ -156,6 +162,28 @@ open class ExpoNotificationBuilder(
++
++    // jew-365 patch: data.expiresAt (epoch milliseconds) is when the notification leaves the tray by itself; one
++    // presented after that time stays a minute.
++    val expiresAt = content.body?.optLong("expiresAt", 0L) ?: 0L
++    if (expiresAt > 0L) {
++      builder.setTimeoutAfter((expiresAt - System.currentTimeMillis()).coerceAtLeast(60_000L))
++    }
+     notificationContent.categoryId?.let { addActionsToBuilder(builder, it) }
+ 
+     applySoundsAndVibrations(content, builder)
+@@ -156,6 +169,28 @@ open class ExpoNotificationBuilder(
      return builder.build()
    }
  

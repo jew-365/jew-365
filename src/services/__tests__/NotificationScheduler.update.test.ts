@@ -174,7 +174,12 @@ describe('NotificationScheduler update notice', () => {
     expect(mockState.pending).toHaveLength(1);
     const [notice] = mockState.pending;
     expect(notice.identifier).toBe('update:u1');
-    expect(notice.content.data).toEqual({ kind: 'update', updateId: 'u1', updateCreatedAt: NEWER });
+    expect(notice.content.data).toEqual({
+      expiresAt: expect.any(Number),
+      kind: 'update',
+      updateId: 'u1',
+      updateCreatedAt: NEWER,
+    });
     expect(notice.content.title).toBe(he['update.notice.title']);
     expect(notice.content.body).toBe(he['home.updateReady']);
     expect(notice.content.autoDismiss).toBe(true);

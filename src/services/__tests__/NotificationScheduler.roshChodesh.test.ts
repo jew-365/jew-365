@@ -156,7 +156,11 @@ describe('NotificationScheduler Rosh Chodesh notices', () => {
     expect(before.content.body).toBe(`נכנס ב${weekday('2026-10-10')} בשקיעה.`);
     expect(before.content.body).toBe('נכנס ביום שבת בשקיעה.');
     expect(before.content.categoryIdentifier).toBeUndefined();
-    expect(before.content.data).toEqual({ kind: 'roshChodesh', roshChodesh: { day: CHESHVAN_1, when: 'before' } });
+    expect(before.content.data).toEqual({
+      expiresAt: expect.any(Number),
+      kind: 'roshChodesh',
+      roshChodesh: { day: CHESHVAN_1, when: 'before' },
+    });
 
     const day = pendingOf(idOf(TISHREI_30, 'day'));
     expect(day.trigger!.date.getTime()).toBe(at(JERUSALEM, '2026-10-11T07:00').getTime());
@@ -164,7 +168,11 @@ describe('NotificationScheduler Rosh Chodesh notices', () => {
     expect(day.content.title).toBe('היום ראש חודש חשון');
     expect(day.content.body).toBe('יעלה ויבוא, הלל ומוסף בשחרית.');
     expect(day.content.categoryIdentifier).toBeUndefined();
-    expect(day.content.data).toEqual({ kind: 'roshChodesh', roshChodesh: { day: TISHREI_30, when: 'day' } });
+    expect(day.content.data).toEqual({
+      expiresAt: expect.any(Number),
+      kind: 'roshChodesh',
+      roshChodesh: { day: TISHREI_30, when: 'day' },
+    });
   });
 
   it('3 leaves the evening notice out when it would fall inside Shabbat and names it in the pre-block notice', async () => {
@@ -189,6 +197,7 @@ describe('NotificationScheduler Rosh Chodesh notices', () => {
     );
     expect(pendingOf(idOf(CHESHVAN_1, 'day')).content.title).toBe('היום ראש חודש חשון');
     expect(pendingOf(idOf(CHESHVAN_1, 'day')).content.data).toEqual({
+      expiresAt: expect.any(Number),
       kind: 'roshChodesh',
       roshChodesh: { day: CHESHVAN_1, when: 'day' },
     });
@@ -238,9 +247,14 @@ describe('NotificationScheduler Rosh Chodesh notices', () => {
       expect(evening.trigger!.channelId).toBe('rosh-chodesh');
       expect(evening.content.title).toBe('הערב נכנס ראש חודש ניסן');
       expect(evening.content.body).toBe('יעלה ויבוא בתפילה ובברכת המזון מהערב.');
-      expect(evening.content.data).toEqual({ kind: 'roshChodesh', roshChodesh: { day: NISAN_1, when: 'evening' } });
+      expect(evening.content.data).toEqual({
+        expiresAt: expect.any(Number),
+        kind: 'roshChodesh',
+        roshChodesh: { day: NISAN_1, when: 'evening' },
+      });
       expect(pendingOf(idOf(NISAN_1, 'day')).trigger!.date.getTime()).toBe(at(JERUSALEM, '2027-04-08T07:00').getTime());
       expect(pendingOf(idOf(NISAN_1, 'day')).content.data).toEqual({
+        expiresAt: expect.any(Number),
         kind: 'roshChodesh',
         roshChodesh: { day: NISAN_1, when: 'day' },
       });

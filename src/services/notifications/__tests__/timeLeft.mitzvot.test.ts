@@ -15,7 +15,7 @@ jest.mock('expo-notifications', () => ({
 
 import * as Notifications from 'expo-notifications';
 import { buildPlan } from '../plan';
-import { contentHash, schedule } from '../os';
+import { contentHash, expiresAtOf, schedule } from '../os';
 import type { PlanInput, ScheduleCandidate } from '../types';
 import { CITIES } from '@/data/cities';
 import { MITZVOT } from '@/data/mitzvot';
@@ -95,6 +95,22 @@ describe('the time-left line of a mitzvah reminder', () => {
     expect(last.body).toBe('הזמן האחרון להתחיל להתפלל');
     // A nag's body does not repeat the mitzvah's name, which is its title.
     for (const c of candidates.filter((n) => n.data.nag?.kind === 'zone')) expect(c.body).toBe('עוד לא סימנת');
+  });
+
+  it('keeps a notification in the tray twenty minutes, and the red one to the end of its window', async () => {
+    const candidates = day(buildPlan(planInput(NIGHT_BEFORE, 3)));
+    const last = candidates[candidates.length - 1];
+    for (const c of candidates) {
+      expect(c.keepUntil).toEqual(c === last ? window().end : undefined);
+      expect(expiresAtOf(c)).toBe(c === last ? window().end.getTime() : c.trigger.getTime() + 20 * 60 * 1000);
+    }
+    (Notifications.scheduleNotificationAsync as jest.Mock).mockClear();
+    await schedule([candidates[0], last]);
+    const sent = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls.map(
+      ([r]) => r.content.data.expiresAt,
+    );
+    expect(sent).toEqual([candidates[0].trigger.getTime() + 20 * 60 * 1000, window().end.getTime()]);
+    (Notifications.scheduleNotificationAsync as jest.Mock).mockClear();
   });
 
   it('opens the body on Android, which sends no subtitle, and is the subtitle on the iPhone (round 4 א+ב)', () => {
