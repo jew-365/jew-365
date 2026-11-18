@@ -1053,7 +1053,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Withdrawn, the owner, 2026-11-18** (after preview `1.0.21-82`): "כל ההצעות שכתבת בהוספת מצווה חדשה אני רוצה אותם בתור מצוות באפליקציה ... ואת היצירת מצווה חדשה תחזיר למה שהיה עם הטופס המלא". The sheet, its data, its undo and its search items are removed; "add a mitzvah" opens the full form again. The eleven proposals are the habit mitzvot of the next item. A custom mitzvah a preview user made from a template stays as it is.
   - **Status:** Version: OTA · Committed: yes, `e07487c` (built), withdrawn in `8967543` · Pushed: yes · Live: preview `1.0.21-82` still shows the sheet until the next preview update · Channel: preview
 
-- [ ] The habit mitzvot (twenty-five): registry mitzvot off by default, in new groups, offered on home and in the first setup
+- [ ] The habit mitzvot (twenty-four): registry mitzvot off by default, in new groups, offered on home and in the first setup
   - **Asked by:** the owner, 2026-11-18 (the request quoted above, and: "שתשייך אותם לקטגוריות מתאימות ואם אין אז תיצור חדשות כמו חסדים", "שיהיה הצעות למשתמש על המצוות האלה במידה והוא לא הפעיל אותם", "אפשרות באנבורדינג להפעיל אותם").
   - **Flag:** OTA.
   - **What it is:** `HABITS` in [src/data/mitzvot.ts](src/data/mitzvot.ts): a chapter of Tehillim, two mishnayot, learning on the way, a Torah class (the new library group "לימוד", which the learning add-ons moved into from "עוד"), daily tzedakah, a call to the parents, learning with the kids, a story for the kids, a moment of thanks, Shabbat shalom to grandparents (the new group "חסד ומשפחה") and getting ready for Shabbat (weekly). Each on the study's hours and weekdays, skipped on Shabbat and Yom Tov, off by default, one reminder at its start. Each has a capability (a new goal "חסד ומשפחה" on the More tab and the capabilities screen), an offer on home after seven marked days (the two about children only for a married user), and a place in the first setup: two new bundles that arrive unticked, "לימוד קצר בכל יום" and "חסד ומשפחה", and getting ready for Shabbat as an unticked member of the Shabbat bundle. The search ranks a text named exactly by the query before a mitzvah that only holds the word, so "תהילים" still opens the book.
@@ -1061,6 +1061,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** the eleven appear off in the library under their groups; switching one on shows it on home on its days at its hours with its reminder; home offers one that is off; the setup's bundles switch them on.
   - **Done:** 2026-11-18. [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) (each one's group, reminder, weekdays and hours on the location's clock in Jerusalem and New York, the Yom Tov skip, its capability, strings and bundle), the habit cases of [src/utils/__tests__/offers.test.ts](src/utils/__tests__/offers.test.ts) and [src/app/__tests__/onboarding.bundles.render.test.tsx](src/app/__tests__/onboarding.bundles.render.test.tsx), the library, onboarding and search suites updated for the new groups; the full `pnpm test` green (7,004). The names, hours and benefit lines are the study's proposed copy, not reviewed word by word; not checked on a phone. Open with the owner: which further habits to add (a list was proposed on 2026-11-18).
   - **Fourteen more, the owner, 2026-11-18** ("אני רוצה כל מה שהצעת חוץ מ 9 ו 12 ו 15 ו 16 ו 19 ואני רוצה שתאחד את 17 ו 18"): Daf Yomi (Sunday to Friday, until 13:00 on Friday), Mishna Yomit, Pirkei Avot (Wednesday evening), Iggeret HaRamban (Sunday morning), visiting the sick (Tuesday), a call to a lonely friend or relative (Monday), hosting guests (Wednesday), a kind word to the spouse, one-on-one time with each child (Sunday), maaser once a month (the 10th of the civil month, Sunday the 11th when the 10th is Shabbat), cheshbon nefesh, hitbodedut, "חלות, יין ודבר תורה לשבת" on Thursday (17 and 18 merged) and the mikveh on erev Shabbat (a men's mitzvah). Each with its capability, offer and bundle place; the prayer bundle keeps its four recommended members and `bundleOn()` counts only those. A change of gender back to a man restores only the default-on men's mitzvot. Declined by the owner: the daily Tanach chapter (9), the weekly review (12), Asher Yatzar (15), a hundred blessings (16) and hafrashat challah (19). The weekdays and hours of the weekly ones are Claude's choice, not the owner's.
+  - **Maaser removed, the owner, 2026-11-18** ("תמחק תמעשר אני ביקשתי שלא להוסיף"): `maaser` and its monthly rule are deleted from the registry, the capabilities, the bundle, the offers, the strings and the guide, in `18fde7e`, pushed; no update carried it, so nothing is retired. Twenty-four remain. Verified: the full `pnpm test` green (7,048), `typecheck`, `lint` and `check:dox`.
   - **Done (the fourteen):** 2026-11-18. [src/data/__tests__/habitMitzvot.test.ts](src/data/__tests__/habitMitzvot.test.ts) now pins all twenty-five (the monthly maaser and Daf Yomi's Friday end included), with the offers, bundle, library, onboarding and gender suites updated; the full `pnpm test` green (7,047). Not checked on a phone.
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `8967543` and `f8f50f2` · Pushed: yes · Live: no · Channel: none
 
@@ -1072,6 +1073,104 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Expected result:** a fresh install has both switches on; an existing install has both on after the update, once, and a later switch-off is kept across launches.
   - **Done:** 2026-11-18. The notice cases of [src/stores/__tests__/stores.test.ts](src/stores/__tests__/stores.test.ts) (the defaults, the one-time switch-on, the mark keeping a later choice, every kind off), [src/data/__tests__/bundles.test.ts](src/data/__tests__/bundles.test.ts), [src/services/__tests__/setupBundles.test.ts](src/services/__tests__/setupBundles.test.ts), [src/app/__tests__/onboarding.bundles.render.test.tsx](src/app/__tests__/onboarding.bundles.render.test.tsx) and the catch-up case of [src/utils/__tests__/offers.test.ts](src/utils/__tests__/offers.test.ts); the full `pnpm test` green. Not checked on a phone. Open with the owner: switching existing installs on was the agent's reading of "default", after the rule for a newly default-on mitzvah; one line of the `merge` to drop if only new installs are meant.
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `11c3497` · Pushed: yes · Live: no · Channel: none
+
+### Reader texts for the habit mitzvot, 2026-11-18 — batch rules
+
+- **Requested:** the owner, 2026-11-18, in a cloud session, in Hebrew: "כל מה שצריך נוסח במצוות החדשות שהוספת תוסיף לו גם נוסח. לא עכשיו, עכשיו רק תיצור משימות בשביל זה. אני רוצה מחקר מעמיק מאיפה אפשר להביא את התוכן של הנוסח". Nothing is built until the owner says so.
+- **Spec:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md) holds the research of 2026-11-18: which habit gets which text, every source with its licence as read, the sizes, and what is not verified. A task below names its section there.
+- **Rules:** a text is built by [scripts/siddur/AGENTS.md](scripts/siddur/AGENTS.md) (a pinned Sefaria version or Wikisource revision, vocalized Hebrew, a manifest entry, dated tests) and linked to its mitzvah through `MITZVAH_STANDALONE_TEXT` in [src/data/siddur.ts](src/data/siddur.ts); a large text is a downloadable add-on like Chok LeYisrael. A source whose licence is "unknown", NC or all rights reserved is not used without written permission. Every new text joins the search and the guide in the same change.
+- **Flag:** OTA for a bundled text; a `docs/` add-on is published on Pages before the update that offers it.
+- **Waits on:** Q38 to Q41 (the owner) and R18 to R20 (the rav).
+
+### High — Reader texts for the habit mitzvot
+
+- [ ] Open the bundled Tehillim from "פרק תהילים", and Psalm 100 from "רגע של תודה"
+  - **Flag:** OTA.
+  - **What it is:** `tehillim_chapter` reads the bundled `tehillim` text ("פתח נוסח" on its screen and on home); `gratitude` reads Mizmor LeTodah, with Nishmat one tap away. No new source ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), sections 2 and 3).
+  - **What it solves:** the two habits whose text the app already holds open nothing today.
+  - **Expected result:** each mitzvah's screen and home card open the text; the reader's "סיימתי" marks the habit; the search finds both.
+
+- [ ] Pirkei Avot as a reader text for "פרקי אבות"
+  - **Flag:** OTA.
+  - **What it is:** the six chapters with "כל ישראל" and "רבי חנניא בן עקשיא", one section per chapter, from Sefaria's Siddur Edot HaMizrach node, version " Shaliehsaboo Edition" ("CC0"), its cantillation marks stripped; English from Kulp ("CC-BY") if Q41 says so ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
+  - **What it solves:** the weekly reminder has nothing to read.
+  - **Expected result:** the text opens from the mitzvah and from the siddur tab's learning group, on the chapter the user picks; the weekly cycle waits for R18.
+
+- [ ] Iggeret HaRamban as a reader text
+  - **Flag:** OTA.
+  - **What it is:** the whole letter (525 words) from Hebrew Wikisource `אגרת הרמב"ן`, revision 2928830 (CC BY-SA), one shared text for every nusach; English from the Sefaria Community Translation ("CC0") if Q41 says so.
+  - **What it solves:** the weekly reading has no text.
+  - **Expected result:** the text opens from `iggeret_haramban` and the siddur tab, with its credit.
+
+### Medium — Reader texts for the habit mitzvot
+
+- [ ] A text for visiting the sick
+  - **Flag:** OTA.
+  - **What it is:** "המקום ירחם עליך בתוך שאר חולי ישראל" (Shulchan Arukh Yoreh De'ah 335:6), Mi Sheberach for a man and for a woman (Hebrew Wikisource `מי שברך לחולה`, revision 3008338), and the psalms for the sick from the bundled Tehillim ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
+  - **What it solves:** a visitor has the words at hand.
+  - **Expected result:** one text of three sections opens from `visit_sick`; the list of psalms is the one R19 confirms, read from a print, never from memory.
+
+- [ ] The Chida's "לשם יחוד" before tzedakah
+  - **Flag:** OTA.
+  - **What it is:** the formula of Moreh BeEtzba 1 from Hebrew Wikisource `מורה באצבע`, revision 2956527 (the vocalized copy; Sefaria's is not), as a short text for `daily_tzedakah`.
+  - **What it solves:** the daily gift has a kavanah to say.
+  - **Expected result:** the text opens from the mitzvah; built only if R20 confirms it is what should be offered to every nusach.
+
+- [ ] Bedtime forgiveness and vidui for "חשבון נפש", and Mesillat Yesharim 3 as study
+  - **Flag:** OTA.
+  - **What it is:** `cheshbon_nefesh` opens the forgiveness passage and vidui the app already holds in `kriat_shema_al_hamita` (a `section` link, no copy); optionally chapter 3 of Mesillat Yesharim, "Sefaria Vocalized Edition" ("CC0"), as a second text.
+  - **What it solves:** the habit has no words to open.
+  - **Expected result:** the mitzvah opens the bedtime Shema on that section in the user's nusach; the study text only on the owner's yes (Q38).
+
+- [ ] Likutei Moharan II:25 for "התבודדות ותפילה אישית"
+  - **Flag:** OTA.
+  - **What it is:** the lesson on hitbodedut (409 words), Sefaria "Likutei Moharan Tinyana - rabenubook.com" ("Public Domain"), Hebrew only; Hishtapchut HaNefesh and Likutei Tefilot from Hebrew Wikisource (CC BY-SA) are a later option.
+  - **What it solves:** an opening text for a personal prayer.
+  - **Expected result:** the text opens from `hitbodedut`; built only on the owner's yes (Q38), since it is a Breslov text offered to every nusach.
+
+- [ ] Verses and the blessing of the children for the two children's habits
+  - **Flag:** OTA.
+  - **What it is:** "תורה צוה לנו משה", Shema, "המלאך הגואל" and the blessing of the children, from Sefaria's Tanakh and siddur nodes; the Chabad twelve pesukim are left out (chabad.org's page is all rights reserved, [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
+  - **What it solves:** `kids_learning` and `kids_story` have a short text to say with a child.
+  - **Expected result:** one short text opens from both mitzvot.
+
+- [ ] Daf Yomi: links to the day's daf
+  - **Flag:** OTA.
+  - **What it is:** on the `daf_yomi` screen and its home card, the day's daf by name (Hebcal already computes it) with a link to Sefaria (`https://www.sefaria.org/<Tractate>.<daf>a?lang=he`, which opens the Sefaria app when installed) and to Hadran's shiur; no text is copied ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 5).
+  - **What it solves:** the reminder names no daf and opens nothing.
+  - **Expected result:** the reminder's body and the screen name today's daf; each link opens the right page for three dapim checked by hand, one of them on a tractate's first day.
+
+- [ ] The Mishnah add-on for "שתי משניות" and "משנה יומית"
+  - **Flag:** a `docs/` add-on, then OTA.
+  - **What it is:** a downloadable add-on like Chok LeYisrael (about 8.4 MB raw): the Mishnah with Bartenura "On Your Way" ("Public Domain") folded, the Mishna Yomit of a day by the rule of `@hebcal/learning` reimplemented (the cycle of 20 May 1947, 4,192 mishnayot, two a day; BSD-2-Clause, its chapter table copied with its notice), `two_mishnayot` continuing from the user's own place ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 4).
+  - **What it solves:** the two Mishnah habits have nothing to read.
+  - **Expected result:** the day's two mishnayot open with "סיימתי" and a make-up fold; Bikkurim chapter 4 is read from the source and present; the Hebrew source is the one Q39 names.
+
+### Low — Reader texts for the habit mitzvot
+
+- [ ] The Daf Yomi add-on: the Vilna text with Rashi, per tractate
+  - **Flag:** a `docs/` add-on, then OTA.
+  - **What it is:** per-tractate files from Sefaria's "Wikisource Talmud Bavli" ("CC-BY-SA") and Rashi "Vilna Edition" ("Public Domain"), about 0.6 MB gzip for the largest tractate and about 11 MB for all; Tosafot as an optional second file; the Steinsaltz explanation only with written permission ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 5).
+  - **What it solves:** learning the daf inside the app, offline.
+  - **Expected result:** the day's daf opens from its tractate's file with Rashi joined to its lines; built only on the owner's yes (Q40), after the links task.
+
+- [ ] Source passages for guests and parents
+  - **Flag:** OTA.
+  - **What it is:** Peah 1:1 "אלו דברים", Exodus 20:12 and Genesis 18:1-8 as a short text for `shabbat_guest`, `call_parents` and `grandparents_call`. No liturgical text exists for them ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
+  - **What it solves:** a source to read beside the reminder.
+  - **Expected result:** built only on the owner's yes (Q38).
+
+- [ ] A text for the Friday mikveh
+  - **Flag:** OTA.
+  - **What it is:** nothing recited was found in an open source; only the Chida's order of immersions (Moreh BeEtzba 137), an unvocalized instruction ([.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3).
+  - **What it solves:** `mikveh_erev_shabbat` has no text.
+  - **Expected result:** waits for R20: what is said, and a public-domain print to type it from by the two-pass contract of the Tiklal.
+
+- [ ] Ask about the Mishnah's vocalized text and the Steinsaltz explanation
+  - **Flag:** none: emails from `365jew@gmail.com`, on the owner's word.
+  - **What it is:** two rows added to [release/licence-requests.md](release/licence-requests.md): the vocalized Mishnah "Torat Emet 357" (the same rights question as row 3, R' Pinchas Reuven named on Torat Emet's page), and Koren and Sefaria on whether a free store app may carry the William Davidson Hebrew explanation under CC-BY-NC.
+  - **What it solves:** the two sources the Mishnah and Daf Yomi add-ons would most gain from.
+  - **Expected result:** each request sent with its date, and its answer quoted in the drafts file; until then the fallbacks of the spec stand.
 
 ## Bugs
 
@@ -1243,6 +1342,19 @@ Every halachic rule and zman of the 2026-10-24 batch, implemented as written unt
     - R17.8 The Kitzur luach in a leap year: the review of the laws of blessings and prayer in Adar I and the luach's Adar in Adar II (Hebcal reads them the other way round), and the days that read nothing (30 Cheshvan, 30 Adar I, 15 Elul).
   - **Lives in:** [src/data/halacha.ts](src/data/halacha.ts), [src/utils/halacha.ts](src/utils/halacha.ts), [src/data/halachaContent.ts](src/data/halachaContent.ts) and [scripts/halacha/](scripts/halacha); on the review page as R17.1 to R17.8 since 2026-11-10.
 
+- **R18 — Pirkei Avot: the weekly cycle per nusach.** (the batch "Reader texts for the habit mitzvot, 2026-11-18"; not built)
+  - **Question:** Which chapter is read on which Shabbat, and until when, for each nusach?
+  - **Assumption:** a chapter each Shabbat from Pesach to Shavuot; Edot HaMizrach stop at Shavuot; Chabad and Ashkenaz continue to the Shabbat before Rosh Hashanah. Not verified: the doubling of chapters in the last round, the shift between Israel and abroad, and Teiman.
+  - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3; nothing in the code yet.
+- **R19 — Visiting the sick: the wording and the psalms.** (same batch; not built)
+  - **Question:** Is "המקום ירחם עליך בתוך שאר חולי ישראל" with Mi Sheberach the right text for a visitor, and which psalms are said?
+  - **Assumption:** the 36 chapters printed in Tehillim for the sick, then the Psalm 119 letters of the name; a short set of 20, 121 and 130. The list is to be read from a print.
+  - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3.
+- **R20 — Tzedakah and the Friday mikveh: what is said.** (same batch; not built)
+  - **Question:** Should the Chida's "לשם יחוד" be offered before tzedakah to every nusach, and is anything said at the mikveh on erev Shabbat?
+  - **Assumption:** the Chida's formula as an option for all; nothing at the mikveh until a text and a print are named.
+  - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 3.
+
 ### For the owner
 
 Q1 (an English (U.K.) localization) and Q2 (when the app asks for a rating) were answered by the owner on 2026-10-26 and became the tasks "Add an English (U.K.) localization on the App Store" and "Ask for a store rating inside the app". Q3 to Q7, from the app requests of 2026-10-26, were answered the same day and are written into their tasks (App requests of 2026-10-26 — batch rules). None is open.
@@ -1320,6 +1432,27 @@ Q32 to Q37 are the batch "Discoverability and ease of use, 2026-11-13", the open
   - **Lives in:** `presentSampleReminder()` and `ensureCategories()` in [src/services/notifications/os.ts](src/services/notifications/os.ts) (A5, G1).
   - **Answered, 2026-11-16:** keep it ("לגביי הכפתור תשאיר אותו"); built that way on 2026-11-15.
   - **What it affects:** the sample only; a tap on its "done" marks nothing.
+
+- **Q38 — Which habits get a text.**
+  - **Question:** Besides Tehillim, Mizmor LeTodah, Pirkei Avot, Iggeret HaRamban, the sick, the children's verses, the Mishnah and Daf Yomi, do you want the optional ones: Mesillat Yesharim 3 for cheshbon nefesh, Likutei Moharan II:25 for hitbodedut, and source passages for guests and parents?
+  - **Proposal:** yes to Mesillat Yesharim; hitbodedut and the source passages only if you want them, since neither is a text people say.
+  - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 2.
+  - **What it affects:** three tasks of the batch "Reader texts for the habit mitzvot".
+- **Q39 — The Mishnah's Hebrew source.**
+  - **Question:** The only complete vocalized Mishnah is "Torat Emet 357", whose rights are the question still open with Sefaria. Wait for an answer, ship it as Chok LeYisrael was shipped, or use Wikisource's vocalized text (CC BY-SA, completeness not verified)?
+  - **Proposal:** check Wikisource's text first; if it is complete, use it and ask about Torat Emet in parallel.
+  - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 4.
+  - **What it affects:** the Mishnah add-on task.
+- **Q40 — How far Daf Yomi goes.**
+  - **Question:** Links only (Sefaria and Hadran), or also the Vilna text with Rashi inside the app (about 11 MB for the whole Shas, per tractate), and the Steinsaltz explanation if Koren permits?
+  - **Proposal:** links first; the text with Rashi after it; Steinsaltz only with written permission.
+  - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), section 5.
+  - **What it affects:** the two Daf Yomi tasks and the permission request.
+- **Q41 — English for the new texts.**
+  - **Question:** Hebrew only, like Tehillim and Tikkun HaKlali, or with English where an open translation exists (Kulp for the Mishnah and Avot, the Community Translation for Iggeret HaRamban)?
+  - **Proposal:** English where an open translation exists and aligns; Hebrew only elsewhere.
+  - **Lives in:** [.claude/specs/habit-texts.md](.claude/specs/habit-texts.md), sections 3 and 4.
+  - **What it affects:** every text task of the batch.
 
 ## Other Open Items
 
