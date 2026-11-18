@@ -1,4 +1,6 @@
 import { HDate, HebrewCalendar, Location as HebcalLocation, flags, holidayDesc } from '@hebcal/core';
+// Registers the daily-learning calendars `getDafYomi()` asks @hebcal/core for; without it the daf is never found.
+import '@hebcal/learning';
 import { DateTime } from 'luxon';
 import { CalendarInfo, HebrewDate, HolyBlock, HolyBlockKind, Location, Zmanim } from '@/types/zmanim';
 import { ZmanimService, candleLightingMinutes, holyBlockExit } from '@/services/ZmanimService';

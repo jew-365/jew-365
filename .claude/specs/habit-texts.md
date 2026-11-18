@@ -1,6 +1,6 @@
 # Reader texts for the habit mitzvot — source research
 
-Asked by the owner on 2026-11-18: "כל מה שצריך נוסח במצוות החדשות שהוספת תוסיף לו גם נוסח … עכשיו רק תיצור משימות בשביל זה … אני רוצה מחקר מעמיק מאיפה אפשר להביא את התוכן של הנוסח". This file is the research; the tasks are the batch "Reader texts for the habit mitzvot" in [../../not-close.md](../../not-close.md). Nothing here is built.
+Asked by the owner on 2026-11-18: "כל מה שצריך נוסח במצוות החדשות שהוספת תוסיף לו גם נוסח … עכשיו רק תיצור משימות בשביל זה … אני רוצה מחקר מעמיק מאיפה אפשר להביא את התוכן של הנוסח". This file is the research; the tasks are the batch "Reader texts for the habit mitzvot" in [../../not-close.md](../../not-close.md). Built on 2026-11-18, at the owner's word ("תבנה את הנוסחים"): the small texts but the tzedakah formula and the mikveh (R20), and the Daf Yomi links; the Mishnah add-on and the Daf Yomi text are not built.
 
 ## 1. How it was read
 

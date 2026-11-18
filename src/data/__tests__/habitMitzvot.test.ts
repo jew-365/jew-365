@@ -2,7 +2,8 @@ import { BUNDLES, RECOMMENDED_BUNDLES, bundleSelection } from '@/data/bundles';
 import { CAPABILITIES } from '@/data/capabilities';
 import { CITIES } from '@/data/cities';
 import { HABIT_IDS, LIBRARY_GROUPS, MITZVOT, findMitzvah } from '@/data/mitzvot';
-import { hasSiddurText, siddurPlace } from '@/data/siddur';
+import { MITZVAH_BOOK_TEXT, hasSiddurText, linkedStandaloneText, mitzvahTextEvening, siddurPlace } from '@/data/siddur';
+import { readSiddurText } from '@/testing/siddur';
 import en from '@/i18n/en.json';
 import he from '@/i18n/he.json';
 import { isMensMitzvah } from '@/stores/taharahOptIn';
@@ -54,6 +55,21 @@ const windowOn = (id: string, dayKey: string, location: Location) => {
   return findMitzvah(id)!.computeWindow({ date: noon, location, settings: SETTINGS, zmanim });
 };
 
+const WITH_TEXT = [
+  'tehillim_chapter',
+  'gratitude',
+  'pirkei_avot',
+  'iggeret_haramban',
+  'cheshbon_nefesh',
+  'hitbodedut',
+  'visit_sick',
+  'kids_learning',
+  'kids_story',
+  'call_parents',
+  'grandparents_call',
+  'shabbat_guest',
+];
+
 describe('the habit mitzvot', () => {
   it('are the twenty-four of the owner’s lists, registry mitzvot off by default, before Kiddush Levana', () => {
     expect([...HABIT_IDS].sort()).toEqual(Object.keys(EXPECTED).sort());
@@ -76,9 +92,11 @@ describe('the habit mitzvot', () => {
       expect(mitzvah.defaultReminders).toEqual([{ anchor: 'start', offsetMin: 0, label: mitzvah.name.he }]);
       expect(mitzvah.name.en).toBeTruthy();
       expect(mitzvah.description?.he).toBeTruthy();
+      // A habit opens a reader text exactly when one is linked to it (.claude/specs/habit-texts.md).
       expect(hasSiddurText(mitzvah, 'ashkenaz', at(JERUSALEM, '2026-11-18T12:00'), siddurPlace(JERUSALEM, true))).toBe(
-        false,
+        WITH_TEXT.includes(id),
       );
+      expect(mitzvahTextEvening(id)).toBe(false);
     },
   );
 
@@ -98,6 +116,78 @@ describe('the habit mitzvot', () => {
       }
     },
   );
+
+  it('links each habit that has a text to it, and Mizmor LeTodah to its psalm in Tehillim', () => {
+    expect(WITH_TEXT.map(linkedStandaloneText)).toEqual([
+      'tehillim',
+      'tehillim',
+      'pirkei_avot',
+      'iggeret_haramban',
+      'cheshbon_nefesh',
+      'hitbodedut',
+      'bikur_cholim',
+      'children_verses',
+      'children_verses',
+      'elu_devarim',
+      'elu_devarim',
+      'elu_devarim',
+    ]);
+    expect(MITZVAH_BOOK_TEXT.gratitude?.section).toBe('פרק ק');
+    const tehillim = readSiddurText('ashkenaz', 'tehillim');
+    const psalm = tehillim.sections.find((section) => section.title.he === 'פרק ק')!;
+    expect(psalm.title.en).toBe('Psalm 100');
+    for (const id of HABIT_IDS.filter((habit) => !WITH_TEXT.includes(habit))) {
+      expect(linkedStandaloneText(id)).toBeUndefined();
+    }
+  });
+
+  it('reads Pirkei Avot as six chapters, each between its opening and closing passages, with English', () => {
+    const avot = readSiddurText('sefard', 'pirkei_avot');
+    expect(avot.sections.map((section) => section.title.he)).toEqual([
+      'פרק ראשון',
+      'פרק שני',
+      'פרק שלישי',
+      'פרק רביעי',
+      'פרק חמישי',
+      'פרק שישי',
+    ]);
+    expect(avot.sections.map((section) => section.segments.length)).toEqual([20, 18, 20, 24, 25, 13]);
+    const text = (segment: { he: { t: string }[][] }) =>
+      segment.he
+        .flat()
+        .map((run) => run.t)
+        .join('');
+    for (const section of avot.sections) {
+      expect(text(section.segments[0])).toMatch(/^כָּל־יִשְׂרָאֵל יֵשׁ לָהֶם חֵלֶק לָעוֹלָם הַבָּא/);
+      expect(text(section.segments[section.segments.length - 1])).toMatch(/^רִבִּי חֲנַנְיָא בֶן־עֲקַשְׁיָא אוֹמֵר/);
+      // No cantillation mark is left in the verses the frame quotes.
+      expect(section.segments.map(text).join('')).not.toMatch(/[\u0591-\u05AF]/);
+    }
+    expect(text(avot.sections[0].segments[1])).toMatch(/^משֶׁה קִבֵּל תּוֹרָה מִסִּינַי/);
+    expect(avot.sections[0].segments[1].en).toMatch(/^Moses received the Torah at Sinai/);
+  });
+
+  it('carries the Ramban’s letter, Mesillat Yesharim 3 and the sick, children and parents texts', () => {
+    const sections = (id: Parameters<typeof readSiddurText>[1]) =>
+      readSiddurText('chabad', id).sections.map((section) => [section.title.he, section.segments.length]);
+    expect(sections('iggeret_haramban')).toEqual([['אגרת הרמב״ן', 14]]);
+    expect(sections('cheshbon_nefesh')).toEqual([['מסילת ישרים · פרק ג', 32]]);
+    expect(sections('hitbodedut')).toEqual([['ליקוטי מוהר״ן תנינא · כה', 12]]);
+    expect(sections('bikur_cholim')).toEqual([
+      ['בקשת רחמים על החולה', 2],
+      ['מי שברך לחולה', 4],
+    ]);
+    expect(sections('children_verses')).toEqual([['פסוקים לילדים', 3]]);
+    expect(sections('elu_devarim')).toEqual([
+      ['אלו דברים', 1],
+      ['כיבוד אב ואם', 1],
+      ['הכנסת אורחים', 8],
+    ]);
+    const sick = JSON.stringify(readSiddurText('chabad', 'bikur_cholim'));
+    expect(sick).toContain('הַמָּקוֹם יְרַחֵם עָלֶיךָ בְּתוֹךְ חוֹלֵי יִשְׂרָאֵל');
+    // The Mi Sheberach is the weekday wording: its Shabbat and Yom Tov lines are cut.
+    expect(sick).not.toContain('יוֹם טוֹב הוא מִלִזְּעוֹק');
+  });
 
   it('keeps the mikveh of erev Shabbat a men’s mitzvah', () => {
     expect(isMensMitzvah('mikveh_erev_shabbat')).toBe(true);

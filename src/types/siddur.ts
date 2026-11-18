@@ -187,7 +187,14 @@ export type StandaloneTextId =
   | 'tehillim'
   | 'nishmat'
   | 'selichot'
-  | 'ushpizin';
+  | 'ushpizin'
+  | 'pirkei_avot'
+  | 'iggeret_haramban'
+  | 'cheshbon_nefesh'
+  | 'hitbodedut'
+  | 'bikur_cholim'
+  | 'children_verses'
+  | 'elu_devarim';
 
 export type SiddurTextId = MitzvahTextId | StandaloneTextId;
 

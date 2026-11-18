@@ -25,7 +25,7 @@ import { findAnyMitzvah } from '@/data/customMitzvotAdapter';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import {
   isHalachaText,
-  MITZVAH_STANDALONE_TEXT,
+  linkedStandaloneText,
   hasSiddurText,
   isSiddurTextId,
   mitzvahTextId,
@@ -53,7 +53,8 @@ import { appDayWindow, currentOrNextWindow, windowDueToday } from '@/utils/build
 import { trackedOn } from '@/utils/checkIn';
 import { clockOf, clockRange, fireTimeText } from '@/utils/clock';
 import { customStartsOn, scheduleDateLabel } from '@/utils/customMitzvah';
-import { appDayKey } from '@/utils/locationDay';
+import { DAF_YOMI_ID, dafYomiBlocks } from '@/utils/dafYomi';
+import { appDay, appDayKey } from '@/utils/locationDay';
 import { windowClosed } from '@/utils/lateMarks';
 import { mitzvahName, reminderLabel } from '@/utils/mitzvahName';
 import { quietHoursOf } from '@/utils/quietHours';
@@ -140,7 +141,7 @@ export default function MitzvahDetailScreen() {
   const textNow = Boolean(mitzvah && window && hasSiddurText(mitzvah, nusach, window.date, place));
   const anytimeTextId =
     mitzvah && !mitzvah.isCustom && !isLearning
-      ? (MITZVAH_STANDALONE_TEXT[mitzvah.id] ?? mitzvahTextId(mitzvah.id) ?? null)
+      ? (linkedStandaloneText(mitzvah.id) ?? mitzvahTextId(mitzvah.id) ?? null)
       : null;
   const textAnytime = anytimeTextId !== null && !addonMissing && siddurTextPresent(nusach, anytimeTextId);
   const showNext = Boolean(mitzvah) && !addonMissing && active.enabled;
@@ -468,6 +469,19 @@ export default function MitzvahDetailScreen() {
                 trackColor={{ false: colors.border, true: colors.gold }}
               />
             </View>
+          </Card>
+        ) : null}
+
+        {mitzvah.id === DAF_YOMI_ID ? (
+          <Card padded>
+            {dafYomiBlocks(appDay(new Date(), location)).map((block, index) => (
+              <ContentBlockView
+                key={`${block.type}-${index}`}
+                block={block}
+                mitzvahId={mitzvah.id}
+                highlighted={false}
+              />
+            ))}
           </Card>
         ) : null}
 

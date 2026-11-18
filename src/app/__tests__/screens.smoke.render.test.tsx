@@ -641,6 +641,23 @@ const CASES: SmokeCase[] = [
   },
   {
     file: 'siddur/[id]',
+    label: 'a habit mitzvah reads its own text',
+    Screen: SiddurReaderScreen,
+    params: { id: 'pirkei_avot' },
+    check: both(
+      text('פרקי אבות', 'Pirkei Avot'),
+      text(/משֶׁה קִבֵּל תּוֹרָה מִסִּינַי/, /Moses received the Torah at Sinai/),
+    ),
+  },
+  {
+    file: 'siddur/[id]',
+    label: 'a habit mitzvah that reads a psalm opens Tehillim',
+    Screen: SiddurReaderScreen,
+    params: { id: 'gratitude' },
+    check: both(text('רגע של תודה', 'A moment of thanks'), text(/תפילה לפני אמירת תהלים/, /Prayer Before Tehillim/)),
+  },
+  {
+    file: 'siddur/[id]',
     label: 'a mitzvah text in nusach Teiman',
     Screen: SiddurReaderScreen,
     params: { id: 'shacharit' },

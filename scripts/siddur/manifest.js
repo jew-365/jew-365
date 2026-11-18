@@ -457,6 +457,155 @@ const SOURCES = {
       url: 'https://he.wikisource.org/w/index.php?oldid=2917763',
     },
   },
+  // The reader texts of the habit mitzvot (.claude/specs/habit-texts.md).
+  pirkeiAvotHe: {
+    title: 'Pirkei Avot',
+    lang: 'he',
+    version: 'Torat Emet 357',
+    credit: { title: 'Pirkei Avot — Torat Emet 357', license: 'Public Domain', url: `${SEFARIA}/Pirkei_Avot` },
+  },
+  pirkeiAvotEn: {
+    title: 'Pirkei Avot',
+    lang: 'en',
+    version: 'Mishnah Yomit by Dr. Joshua Kulp',
+    credit: {
+      title: 'Pirkei Avot — Mishnah Yomit by Dr. Joshua Kulp',
+      license: 'CC-BY',
+      url: `${SEFARIA}/Pirkei_Avot`,
+    },
+  },
+  iggeretRambanHe: {
+    title: 'Iggeret HaRamban',
+    lang: 'he',
+    version: 'HeWiki',
+    credit: { title: 'Iggeret HaRamban — Hebrew Wikisource', license: 'CC-BY-SA', url: `${SEFARIA}/Iggeret_HaRamban` },
+  },
+  iggeretRambanEn: {
+    title: 'Iggeret HaRamban',
+    lang: 'en',
+    version: 'Sefaria Community Translation',
+    credit: {
+      title: 'Iggeret HaRamban — Sefaria Community Translation',
+      license: 'CC0',
+      url: `${SEFARIA}/Iggeret_HaRamban`,
+    },
+  },
+  mesillatYesharimHe: {
+    title: 'Mesillat Yesharim',
+    lang: 'he',
+    version: 'Sefaria Vocalized Edition',
+    credit: {
+      title: 'Mesillat Yesharim — Sefaria Vocalized Edition',
+      license: 'CC0',
+      url: `${SEFARIA}/Mesillat_Yesharim`,
+    },
+  },
+  mesillatYesharimEn: {
+    title: 'Mesillat Yesharim',
+    lang: 'en',
+    version: 'Path of the Just. Trans. Rabbi Yosef Sebag',
+    credit: {
+      title: 'Mesillat Yesharim — Path of the Just, trans. Rabbi Yosef Sebag',
+      license: 'CC-BY',
+      url: `${SEFARIA}/Mesillat_Yesharim`,
+    },
+  },
+  likuteiMoharan2He: {
+    title: 'Likutei Moharan',
+    lang: 'he',
+    version: 'Likutei Moharan Tinyana - rabenubook.com',
+    credit: {
+      title: 'Likutei Moharan, Part II — rabenubook.com',
+      license: 'Public Domain',
+      url: `${SEFARIA}/Likutei_Moharan,_Part_II.25`,
+    },
+  },
+  likuteiMoharan2En: {
+    title: 'Likutei Moharan',
+    lang: 'en',
+    version: 'Sefaria Community Translation',
+    credit: {
+      title: 'Likutei Moharan, Part II — Sefaria Community Translation',
+      license: 'CC0',
+      url: `${SEFARIA}/Likutei_Moharan,_Part_II.25`,
+    },
+  },
+  peahHe: {
+    title: 'Mishnah Peah',
+    lang: 'he',
+    version: 'Torat Emet 357',
+    credit: { title: 'Mishnah Peah — Torat Emet 357', license: 'Public Domain', url: `${SEFARIA}/Mishnah_Peah` },
+  },
+  peahEn: {
+    title: 'Mishnah Peah',
+    lang: 'en',
+    version: 'Mishnah Yomit by Dr. Joshua Kulp',
+    credit: {
+      title: 'Mishnah Peah — Mishnah Yomit by Dr. Joshua Kulp',
+      license: 'CC-BY',
+      url: `${SEFARIA}/Mishnah_Peah`,
+    },
+  },
+  genesisHe: {
+    title: 'Genesis',
+    lang: 'he',
+    version: 'Tanach with Nikkud',
+    credit: { title: 'Genesis — Tanach with Nikkud', license: 'Public Domain', url: `${SEFARIA}/Genesis` },
+  },
+  genesisEn: {
+    title: 'Genesis',
+    lang: 'en',
+    version: 'The Holy Scriptures: A New Translation (JPS 1917)',
+    credit: { title: 'Genesis — The Holy Scriptures (JPS 1917)', license: 'Public Domain', url: `${SEFARIA}/Genesis` },
+  },
+  exodusHe: {
+    title: 'Exodus',
+    lang: 'he',
+    version: 'Tanach with Nikkud',
+    credit: { title: 'Exodus — Tanach with Nikkud', license: 'Public Domain', url: `${SEFARIA}/Exodus` },
+  },
+  exodusEn: {
+    title: 'Exodus',
+    lang: 'en',
+    version: 'The Holy Scriptures: A New Translation (JPS 1917)',
+    credit: { title: 'Exodus — The Holy Scriptures (JPS 1917)', license: 'Public Domain', url: `${SEFARIA}/Exodus` },
+  },
+  deuteronomyHe: {
+    title: 'Deuteronomy',
+    lang: 'he',
+    version: 'Tanach with Nikkud',
+    credit: { title: 'Deuteronomy — Tanach with Nikkud', license: 'Public Domain', url: `${SEFARIA}/Deuteronomy` },
+  },
+  deuteronomyEn: {
+    title: 'Deuteronomy',
+    lang: 'en',
+    version: 'The Holy Scriptures: A New Translation (JPS 1917)',
+    credit: {
+      title: 'Deuteronomy — The Holy Scriptures (JPS 1917)',
+      license: 'Public Domain',
+      url: `${SEFARIA}/Deuteronomy`,
+    },
+  },
+  yorehDeahHe: {
+    title: "Shulchan Arukh, Yoreh De'ah",
+    lang: 'he',
+    version: 'Torat Emet 357',
+    credit: {
+      title: "Shulchan Arukh, Yoreh De'ah — Torat Emet 357",
+      license: 'Public Domain',
+      url: `${SEFARIA}/Shulchan_Arukh,_Yoreh_De%27ah`,
+    },
+  },
+  yorehDeahEn: {
+    title: "Shulchan Arukh, Yoreh De'ah",
+    lang: 'en',
+    version: 'Code of Hebrew Law by Chaim N. Denburg, Montreal, 1955',
+    credit: {
+      title: "Shulchan Arukh, Yoreh De'ah — Code of Hebrew Law, Chaim N. Denburg, 1955",
+      license: 'CC-BY',
+      url: `${SEFARIA}/Shulchan_Arukh,_Yoreh_De%27ah`,
+    },
+  },
 };
 
 const CONDITIONAL_INSTRUCTION = [
@@ -656,6 +805,15 @@ const T = {
   tehillimAfter: { he: 'תפילה לאחר אמירת תהלים', en: 'Prayer After Tehillim' },
   enteringSukkah: { he: 'הכניסה לסוכה', en: 'Entering the Sukkah' },
   ushpizin: { he: 'אושפיזין', en: 'Ushpizin' },
+  iggeretRamban: { he: 'אגרת הרמב״ן', en: "The Ramban's Letter" },
+  cheshbonNefesh: { he: 'מסילת ישרים · פרק ג', en: 'Mesillat Yesharim · Chapter 3' },
+  hitbodedut: { he: 'ליקוטי מוהר״ן תנינא · כה', en: 'Likutei Moharan II · 25' },
+  bikurCholim: { he: 'בקשת רחמים על החולה', en: 'Praying for the Sick' },
+  miSheberachSick: { he: 'מי שברך לחולה', en: 'Mi Sheberach for the Sick' },
+  childrenVerses: { he: 'פסוקים לילדים', en: 'Verses for Children' },
+  eluDevarim: { he: 'אלו דברים', en: 'These Are the Things' },
+  honoringParents: { he: 'כיבוד אב ואם', en: 'Honoring Parents' },
+  hostingGuests: { he: 'הכנסת אורחים', en: 'Hosting Guests' },
   sittingInSukkah: { he: 'בישיבה בסוכה', en: 'Sitting in the Sukkah' },
   sukkahDayVerses: { he: 'פסוקי היום בסוכה', en: "The Day's Verses in the Sukkah" },
   ushpizinChair: { he: 'כסא האושפיזין', en: "The Ushpizin's Chair" },
@@ -5042,6 +5200,15 @@ const TEXTS = {
   },
   tikkun_haklali: { shared: tikkunHaklali() },
   tehillim: { shared: tehillim() },
+  pirkei_avot: { shared: pirkeiAvot() },
+  iggeret_haramban: {
+    shared: [{ he: 'iggeretRambanHe', en: 'iggeretRambanEn', title: T.iggeretRamban, path: '*' }],
+  },
+  cheshbon_nefesh: { shared: cheshbonNefesh() },
+  hitbodedut: { shared: [{ he: 'likuteiMoharan2He', title: T.hitbodedut, path: 'Part II > 24' }] },
+  bikur_cholim: { shared: bikurCholim() },
+  children_verses: { shared: childrenVerses() },
+  elu_devarim: { shared: eluDevarim() },
   nishmat: {
     ashkenaz: ashkenazNishmat(),
     sefard: sefardNishmat(),
@@ -9266,6 +9433,89 @@ function edotSelichot() {
       minyan: SAID_BY.mourners,
       ...note(228, 'ואומרים קדיש יהא שלמא:', "And mourners say the mourner's Kaddish:"),
     },
+  ];
+}
+
+// The reader texts of the habit mitzvot (.claude/specs/habit-texts.md), each one text for every nusach.
+function withoutCantillation(html) {
+  return html.replace(/[\u0591-\u05AF]/g, '');
+}
+
+// Each chapter is read between "כל ישראל" and "רבי חנניא בן עקשיא", as the siddur prints them around it.
+function pirkeiAvot() {
+  const frame = {
+    he: 'edotHe',
+    path: 'Mishna Study for Shabbat > Pirkei Avot',
+    transform: (html) => tanachReading(withoutCantillation(html)),
+  };
+  return ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי'].flatMap((ordinal, index) => {
+    const title = { he: `פרק ${ordinal}`, en: `Chapter ${index + 1}` };
+    return [
+      { ...frame, title, from: 2, to: 2 },
+      { he: 'pirkeiAvotHe', en: 'pirkeiAvotEn', title, path: String(index) },
+      { ...frame, title, from: 21, to: 21 },
+    ];
+  });
+}
+
+function torahVerses(book, title, chapter, from, to = from) {
+  return {
+    he: `${book}He`,
+    en: `${book}En`,
+    title,
+    path: String(chapter - 1),
+    from: from - 1,
+    to: to - 1,
+    transform: tanachReading,
+  };
+}
+
+function cheshbonNefesh() {
+  const note = {
+    he: '<small>המחילה והווידוי שלפני השינה נמצאים בקריאת שמע על המיטה.</small>',
+    en: 'The forgiveness and the confession said before sleep are in the Bedtime Shema.',
+  };
+  return [
+    {
+      he: 'mesillatYesharimHe',
+      en: 'mesillatYesharimEn',
+      title: T.cheshbonNefesh,
+      path: ' > 2',
+      insert: [{ at: 0, ...note }],
+    },
+  ];
+}
+
+function bikurCholim() {
+  return [
+    { he: 'yorehDeahHe', en: 'yorehDeahEn', title: T.bikurCholim, path: '334', from: 4, to: 5 },
+    {
+      ...TORAT_EMET,
+      title: T.miSheberachSick,
+      path: 'Shabbat Morning Services > Prayer for Sick',
+      // The Shabbat and Yom Tov wording is cut: the app is never open then.
+      edits: [1, 3].map((seg) => ({
+        seg,
+        from: ' (<small>בשבת</small> שַׁבָּת הִיא מִלִזְּעוֹק וּרְפוּאָה קְרוֹבָה לָבוֹא). (<small>ביו"ט</small> יוֹם טוֹב הוא מִלִזְּעוֹק וּרְפוּאָה קְרוֹבָה לָבוֹא),',
+        to: ',',
+      })),
+    },
+  ];
+}
+
+function childrenVerses() {
+  return [
+    torahVerses('deuteronomy', T.childrenVerses, 33, 4),
+    torahVerses('deuteronomy', T.childrenVerses, 6, 4),
+    torahVerses('genesis', T.childrenVerses, 48, 16),
+  ];
+}
+
+function eluDevarim() {
+  return [
+    { he: 'peahHe', en: 'peahEn', title: T.eluDevarim, path: '0', from: 0, to: 0 },
+    torahVerses('exodus', T.honoringParents, 20, 12),
+    torahVerses('genesis', T.hostingGuests, 18, 1, 8),
   ];
 }
 

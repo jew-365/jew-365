@@ -205,6 +205,25 @@ export const STANDALONE_TEXTS: Record<StandaloneTextId, StandaloneEntry> = {
     hours: TONIGHT_TO_DAWN,
     season: (year) => new HDate(15, months.TISHREI, year),
   },
+  pirkei_avot: { name: { he: 'פרקי אבות', en: 'Pirkei Avot' }, group: 'general', icon: 'siddur' },
+  iggeret_haramban: { name: { he: 'אגרת הרמב״ן', en: "The Ramban's Letter" }, group: 'general', icon: 'guide' },
+  cheshbon_nefesh: {
+    name: { he: 'חשבון נפש · מסילת ישרים', en: 'Cheshbon Nefesh · Mesillat Yesharim' },
+    group: 'general',
+    icon: 'night',
+  },
+  hitbodedut: {
+    name: { he: 'התבודדות · ליקוטי מוהר״ן', en: 'Hitbodedut · Likutei Moharan' },
+    group: 'general',
+    icon: 'sparkle',
+  },
+  bikur_cholim: { name: { he: 'ביקור חולים', en: 'Visiting the Sick' }, group: 'general', icon: 'sparkle' },
+  children_verses: { name: { he: 'פסוקים לילדים', en: 'Verses for Children' }, group: 'general', icon: 'star' },
+  elu_devarim: {
+    name: { he: 'אלו דברים · כיבוד הורים והכנסת אורחים', en: 'Honoring Parents and Hosting Guests' },
+    group: 'general',
+    icon: 'sparkle',
+  },
 };
 
 export const MITZVAH_STANDALONE_TEXT: Partial<Record<string, StandaloneTextId>> = {
@@ -214,6 +233,32 @@ export const MITZVAH_STANDALONE_TEXT: Partial<Record<string, StandaloneTextId>> 
   chanukah_candles: 'chanukah_candles',
   ushpizin: 'ushpizin',
 };
+
+// The reader texts of the habit mitzvot (.claude/specs/habit-texts.md): day mitzvot, so never an evening text,
+// and a text may serve several of them, so it never points back at one.
+export const HABIT_TEXT: Partial<Record<string, StandaloneTextId>> = {
+  pirkei_avot: 'pirkei_avot',
+  iggeret_haramban: 'iggeret_haramban',
+  cheshbon_nefesh: 'cheshbon_nefesh',
+  hitbodedut: 'hitbodedut',
+  visit_sick: 'bikur_cholim',
+  kids_learning: 'children_verses',
+  kids_story: 'children_verses',
+  call_parents: 'elu_devarim',
+  grandparents_call: 'elu_devarim',
+  shabbat_guest: 'elu_devarim',
+};
+
+// A habit that reads part of a book the app already holds: the reader opens the book for it, on `section`
+// (a section's Hebrew title) when it names one. The book itself never points back at the habit.
+export const MITZVAH_BOOK_TEXT: Partial<Record<string, { text: StandaloneTextId; section?: string }>> = {
+  tehillim_chapter: { text: 'tehillim' },
+  gratitude: { text: 'tehillim', section: 'פרק ק' },
+};
+
+// The standalone text a registry mitzvah reads, its own or a book's.
+export const linkedStandaloneText = (mitzvahId: string): StandaloneTextId | undefined =>
+  MITZVAH_STANDALONE_TEXT[mitzvahId] ?? HABIT_TEXT[mitzvahId] ?? MITZVAH_BOOK_TEXT[mitzvahId]?.text;
 
 const CHOK_DAYS: Condition = { none: ['shabbat', 'yomTov', 'yomKippur'] };
 
@@ -403,7 +448,7 @@ export function hasSiddurText(mitzvah: Mitzvah, nusach: Nusach, windowDate: Date
     return chokDayHasText(day, place.inIsrael, program) && matchesCondition(CHOK_DAYS, dayFeatures(day, place));
   }
   if (isHalachaText(mitzvah.id)) return halachaReadingsOn(mitzvah.id, windowDate, nusach, place.inIsrael).length > 0;
-  const linked = MITZVAH_STANDALONE_TEXT[mitzvah.id];
+  const linked = linkedStandaloneText(mitzvah.id);
   if (linked) {
     return hasStandaloneText(
       linked,
@@ -430,7 +475,7 @@ export function nextMitzvahTextWindow(
   now: Date,
 ): DayWindow | null {
   const own = mitzvahTextId(mitzvah.id);
-  const linked = MITZVAH_STANDALONE_TEXT[mitzvah.id];
+  const linked = linkedStandaloneText(mitzvah.id);
   if (
     mitzvah.isCustom ||
     mitzvah.id === CHOK_TEXT_ID ||

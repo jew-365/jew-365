@@ -54,7 +54,9 @@ import { HachagDay, HalachaDay, halachaMakeUpDays, halachaReadingsOn } from '@/d
 import { findMitzvah } from '@/data/mitzvot';
 import { SELICHOT_TEXT_ID } from '@/data/selichot';
 import {
+  MITZVAH_BOOK_TEXT,
   MITZVAH_STANDALONE_TEXT,
+  linkedStandaloneText,
   STANDALONE_TEXTS,
   customSiddurText,
   hasSiddurText,
@@ -1075,7 +1077,10 @@ export default function SiddurScreen() {
   }, [requestedDate, mitzvah, nusach]);
   const windowDate = windowChoice.date;
   const mitzvahText = mitzvah && !mitzvah.isCustom ? mitzvahTextId(mitzvah.id) : null;
-  const linkedText = mitzvah && !mitzvah.isCustom ? (MITZVAH_STANDALONE_TEXT[mitzvah.id] ?? null) : null;
+  const linkedText = mitzvah && !mitzvah.isCustom ? (linkedStandaloneText(mitzvah.id) ?? null) : null;
+  // A habit that reads part of a book lands on its section unless the caller named a place.
+  const sectionParam =
+    params.section ?? (mitzvah && !params.segment ? MITZVAH_BOOK_TEXT[mitzvah.id]?.section : undefined);
   const textId = mitzvahText ?? linkedText ?? standalone;
   const evening =
     mitzvah && !mitzvah.isCustom
@@ -1553,7 +1558,7 @@ export default function SiddurScreen() {
   useEffect(() => {
     if (offered.current || !bookmarkTextId || !readyText || !sections.length) return;
     offered.current = true;
-    if (params.section || params.segment) return;
+    if (sectionParam || params.segment) return;
     const last = textLastPosition(useSiddurBookmarksStore.getState().lastPositions, bookmarkTextId, placeNusach);
     if (!last) return;
     const away = placeAway(last.segmentKey);
@@ -1567,7 +1572,7 @@ export default function SiddurScreen() {
     placeNusach,
     dailyText,
     location,
-    params.section,
+    sectionParam,
     params.segment,
     placeAway,
     chokInstall,
@@ -2270,7 +2275,7 @@ export default function SiddurScreen() {
   }, [chok, chokWeekKey, shownSlot, doubleChoice, listRef, resetScroll]);
 
   useEffect(() => {
-    if (landedSection.current || (!params.section && !params.segment) || !listShown) return;
+    if (landedSection.current || (!sectionParam && !params.segment) || !listShown) return;
     landedSection.current = true;
     // The search lands on a passage by its segment key, or on a section the picker may not list.
     if (params.segment) {
@@ -2278,11 +2283,11 @@ export default function SiddurScreen() {
       if (index >= 0) jumpTo(index, Date.now() + JUMP_TIMEOUT_MS, params.segment);
       return;
     }
-    const entry = picker.find((candidate) => candidate.title.he === params.section);
-    const index = entry ? entry.index : sections.findIndex((section) => section.title.he === params.section);
+    const entry = picker.find((candidate) => candidate.title.he === sectionParam);
+    const index = entry ? entry.index : sections.findIndex((section) => section.title.he === sectionParam);
     if (index >= 0) jumpTo(index);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- jumpTo is rebuilt on every render; the ref lands once per open
-  }, [params.section, params.segment, listShown, picker, sections]);
+  }, [sectionParam, params.segment, listShown, picker, sections]);
 
   useEffect(() => {
     if (!pendingPlace || load.status !== 'chok' || loadStale) return;

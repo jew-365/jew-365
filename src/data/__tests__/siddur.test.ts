@@ -7,7 +7,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { HDate, gematriya, months } from '@hebcal/core';
 import {
+  HABIT_TEXT,
   MITZVAH_STANDALONE_TEXT,
+  linkedStandaloneText,
   SIDDUR_GROUPS,
   SIDDUR_TEXTS,
   SIDDUR_TEXT_IDS,
@@ -172,7 +174,17 @@ describe('siddur content', () => {
   });
 
   it('keeps a text that every nusach shares in one shared asset, which the map gives every nusach', () => {
-    expect([...SHARED_SIDDUR_TEXT_IDS]).toEqual(['tikkun_haklali', 'tehillim']);
+    expect([...SHARED_SIDDUR_TEXT_IDS]).toEqual([
+      'tikkun_haklali',
+      'tehillim',
+      'pirkei_avot',
+      'iggeret_haramban',
+      'cheshbon_nefesh',
+      'hitbodedut',
+      'bikur_cholim',
+      'children_verses',
+      'elu_devarim',
+    ]);
     expect([...DOWNLOADED_SIDDUR_TEXT_IDS]).toEqual(['selichot']);
     const map = fs.readFileSync(path.join(__dirname, '..', 'siddurAssets.generated.ts'), 'utf8');
     for (const id of SHARED_SIDDUR_TEXT_IDS) {
@@ -188,8 +200,19 @@ describe('siddur content', () => {
   it('registers mitzvah texts only for real mitzvot, and a standalone text for a mitzvah only through MITZVAH_STANDALONE_TEXT', () => {
     for (const id of MITZVAH_TEXT_IDS) expect(findMitzvah(id)).toBeDefined();
     const shared = STANDALONE_IDS.filter((id) => findMitzvah(id) !== undefined);
-    expect(shared).toEqual(['kiddush_levana', 'chanukah_candles', 'selichot', 'ushpizin']);
-    for (const id of shared) expect(MITZVAH_STANDALONE_TEXT[id]).toBe(id);
+    expect(shared).toEqual([
+      'kiddush_levana',
+      'chanukah_candles',
+      'selichot',
+      'ushpizin',
+      'pirkei_avot',
+      'iggeret_haramban',
+      'cheshbon_nefesh',
+      'hitbodedut',
+    ]);
+    for (const id of shared) expect(linkedStandaloneText(id)).toBe(id);
+    // The night mitzvot's table is theirs alone; a habit's text is a day text and sits in HABIT_TEXT.
+    expect(Object.keys(MITZVAH_STANDALONE_TEXT).filter((id) => id in HABIT_TEXT)).toEqual([]);
     expect(MITZVAH_TEXT_IDS.filter((id) => STANDALONE_IDS.includes(id as string as StandaloneTextId))).toEqual([]);
   });
 
@@ -1947,6 +1970,13 @@ describe('standalone texts', () => {
       'birchot_hareiya',
       'mezuzah',
       'kiddush_levana',
+      'pirkei_avot',
+      'iggeret_haramban',
+      'cheshbon_nefesh',
+      'hitbodedut',
+      'bikur_cholim',
+      'children_verses',
+      'elu_devarim',
     ]);
     expect(standaloneTextsIn('meals')).toEqual(['birkat_hamazon', 'al_hamichya', 'borei_nefashot']);
     expect(standaloneTextsIn('occasions')).toEqual(['sheva_berachot', 'chanukah_candles', 'selichot', 'ushpizin']);
