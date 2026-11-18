@@ -1,6 +1,6 @@
 # Reader texts for the habit mitzvot — source research
 
-Asked by the owner on 2026-11-18: "כל מה שצריך נוסח במצוות החדשות שהוספת תוסיף לו גם נוסח … עכשיו רק תיצור משימות בשביל זה … אני רוצה מחקר מעמיק מאיפה אפשר להביא את התוכן של הנוסח". This file is the research; the tasks are the batch "Reader texts for the habit mitzvot" in [../../not-close.md](../../not-close.md). Built on 2026-11-18, at the owner's word ("תבנה את הנוסחים"): the small texts but the tzedakah formula and the mikveh (R20), and the Daf Yomi links; the Mishnah add-on and the Daf Yomi text are not built.
+Asked by the owner on 2026-11-18: "כל מה שצריך נוסח במצוות החדשות שהוספת תוסיף לו גם נוסח … עכשיו רק תיצור משימות בשביל זה … אני רוצה מחקר מעמיק מאיפה אפשר להביא את התוכן של הנוסח". This file is the research; the tasks are the batch "Reader texts for the habit mitzvot" in [../../not-close.md](../../not-close.md). Built on 2026-11-18, at the owner's word ("תבנה את הנוסחים"): the small texts but the tzedakah formula and the mikveh (R20), and the Daf Yomi links; the Mishnah add-on the same day ([../../scripts/mishna/build.js](../../scripts/mishna/build.js)); the Daf Yomi text is not built.
 
 ## 1. How it was read
 
@@ -70,8 +70,8 @@ Findings that shape the tasks:
 | Kehati | — | All rights reserved (search only) | Excluded |
 | English "Mishnah Yomit by Dr. Joshua Kulp" | — | "CC-BY" | 63 tractates, 4,192 mishnayot, 2.25 MB |
 
-- **Schedule:** `@hebcal/learning` (BSD-2-Clause) defines Mishna Yomit: the cycle began on 20 May 1947 (1 Sivan 5707), 4,192 mishnayot, two a day, 2,096 days, in the order of the Shas. It needs `@hebcal/core` 6 and the app has 5, so the rule is reimplemented: `(abs − start) % 2096` over a chapter-length table copied with its notice.
-- **Bikkurim chapter 4:** the schedule and Kulp count its five mishnayot; Torat Emet 357 and Romm seem to lack them (34 against 39). Not confirmed by reading the chapter.
+- **Schedule:** `@hebcal/learning` (BSD-2-Clause) defines Mishna Yomit: the cycle began on 20 May 1947 (1 Sivan 5707), 4,192 mishnayot, two a day, 2,096 days, in the order of the Shas. Built 2026-11-18 on the installed `@hebcal/learning` 5.1.2, which runs on the app's `@hebcal/core` 5: its public `MishnaYomiIndex.lookup()` and `mishnaYomiStart`, nothing copied ([../../src/utils/mishna.ts](../../src/utils/mishna.ts)).
+- **Bikkurim chapter 4:** read 2026-11-18 from Sefaria: Torat Emet 357 and Romm hold chapters `[11, 11, 12]` (34 mishnayot), Kulp `[11, 11, 12, 5]`, and Bartenura "On Your Way" has the chapter too, its version note saying that commentary is not Bartenura's but was printed under his name. The five mishnayot of the androginos are read from Sefaria's vocalized "Version of the Gemara - vocalized" (NLI, "Public Domain", `[0, 0, 0, 5]`), credited apart and only on Bikkurim; the build fails once Torat Emet holds the chapter. Every other chapter of Torat Emet 357 has exactly the cycle's count, so the add-on reads all 4,192.
 - **Size:** Hebrew and Bartenura are about 8.4 MB raw, so this is a downloadable add-on like Chok LeYisrael, never bundled.
 - **Recommendation:** Torat Emet 357 for the Hebrew once its rights are settled (the fallback is Wikisource's vocalized text, or Romm without nikud), Bartenura "On Your Way" folded like Chok LeYisrael's commentary, Kulp for English, the hebcal rule for the schedule.
 
