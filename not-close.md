@@ -860,7 +860,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Sent:** 2026-11-12, by Claude on the owner's word, through the Gmail connector on 365jew@gmail.com, to urisaf@gmail.com, the draft of the drafts file signed אברהם / Avraham with the owner's phone. No bounce in the first minutes. Answer: none yet.
   - **Reminder:** 2026-11-18, by Claude on the owner's word, a short reminder in the same Gmail thread to urisaf@gmail.com. Answer, the same day, from אורי ספראי (urisaf@gmail.com): "אתם רשאים להשתמש, וזה על אחריותכם המלאה. אין לציין את אתר דעת כמקור." Use is allowed at our own responsibility, and Daat is not to be named as the source.
   - **Done:** 2026-11-18, on the owner's word ("כן מאשר"): the credit of the nine texts reads "Siddur Ashkenaz, via Sefaria" (`daatAshkenazHe` in [scripts/siddur/manifest.js](scripts/siddur/manifest.js)), `pnpm siddur:build` changed only the credit line of the nine files under [assets/siddur/ashkenaz/](assets/siddur/ashkenaz), no built file names Daat, and `pnpm test -- scripts/siddur src/data/__tests__/siddur` passed (344). A thank-you reply was sent to אורי ספראי in the same Gmail thread.
-  - **Status:** Version 1.0.21 · Committed: pending · Pushed: no · Live: no, it waits for the next over-the-air update · Channel: none yet
+  - **Status:** Version 1.0.21 · Committed: 65e467c fix(siddur): the Ashkenaz texts' credit no longer names Daat · Pushed: yes · Live: no, it waits for the next over-the-air update · Channel: none yet
 
 - [ ] Ask for Yalkut Yosef as a daily-halacha track
   - **Flag:** none.
