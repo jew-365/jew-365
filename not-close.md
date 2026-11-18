@@ -840,6 +840,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** the app sits in commercial app stores under a non-commercial licence; written permission removes the doubt.
   - **Expected result:** R' Mahfud's answer, and R' Reuven's or Torat Emet's if reached, quoted and dated; the Groves Center's reply recorded; the credit in [src/components/ChokLicenseNotice.tsx](src/components/ChokLicenseNotice.tsx) changed only if one of them asks.
   - **Sent:** 2026-11-12, by Claude on the owner's word, through the Gmail connector on 365jew@gmail.com, to nosachteiman@gmail.com (R' Mahfud's publisher, the address verified on nosachteiman.co.il that day), asking him to forward it to R' Reuven and Torat Emet, and to info@GrovesCenter.org, the draft of the drafts file signed אברהם / Avraham with the owner's phone. No bounce in the first minutes. Answer: R' Mahfud none yet; the Groves Center on 2026-11-16 ("Steve for the Groves Center"): the Westminster Leningrad Codex is in the public domain, any use is allowed, a credit is not required but appreciated, in the wording quoted in section 2 of [release/licence-requests.md](release/licence-requests.md).
+  - **Reminder:** 2026-11-18, by Claude on the owner's word, a short reminder in the same Gmail thread to nosachteiman@gmail.com. Answer: none yet.
   - **Credit changed:** 2026-11-16, on the owner's word: `chok.credit` in both dictionaries and `MANIFEST_CREDIT` (so [docs/chok/manifest.json](docs/chok/manifest.json) and [docs/chok/LICENSE.txt](docs/chok/LICENSE.txt), content version still 2) name R' Reuven and R' Mahfud as the copyright holders and credit the Bible text to the Groves Center in its wording; the credit inside each parasha file is unchanged. Verified by the two render suites, `pnpm test -- scripts/chok` and a second `pnpm chok:build` that wrote 0 files. A thank-you reply was sent in the same Gmail thread on 2026-11-16, by Claude on the owner's word, and the Groves Center approved the "Hebrew Bible text" wording the same day ("that label is absolutely correct").
   - **Status:** Version 1.0.21 · Committed: fb4e388 fix(chok): credit the Bible text to the Groves Center in its own wording · Pushed: yes · Live: the in-app credit not yet, it waits for the next over-the-air update; the manifest and LICENSE.txt with the push to `main` · Production Android: `1.0.21-18` (group `7cac54fe-8e51-477f-aa30-f15a5499f0bf`, from `37b90c8`, 2026-11-17, Android only); iOS production still `1.0.21-17` until Apple approves 1.0.21 · Channel: none yet
 
@@ -849,6 +850,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** the Kitzur and Rambam tracks, the Sefard and Chabad siddur, the Onkelos of Shnayim Mikra and the English siddur all rest on those labels.
   - **Expected result:** Sefaria's answer recorded per version; a version it says should be read more narrowly becomes a task to replace it or to ask its source.
   - **Sent:** 2026-11-12, by Claude on the owner's word, through the Gmail connector on 365jew@gmail.com, to hello@sefaria.org, the draft of the drafts file signed אברהם / Avraham with the owner's phone. No bounce in the first minutes. Answer: an automatic acknowledgement from hello+noreply@sefaria.org the same minute (a reply in 1-2 business days); no answer yet.
+  - **Reminder:** 2026-11-18, by Claude on the owner's word, a short reminder in the same Gmail thread to hello@sefaria.org. Answer: none yet.
 
 - [ ] Ask Daat about its Ashkenaz siddur text
   - **Flag:** none.
@@ -856,6 +858,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** a source whose terms the app has not seen.
   - **Expected result:** Daat's answer recorded, with any credit wording it asks for applied in [scripts/siddur/manifest.js](scripts/siddur/manifest.js) and a `pnpm siddur:build`.
   - **Sent:** 2026-11-12, by Claude on the owner's word, through the Gmail connector on 365jew@gmail.com, to urisaf@gmail.com, the draft of the drafts file signed אברהם / Avraham with the owner's phone. No bounce in the first minutes. Answer: none yet.
+  - **Reminder:** 2026-11-18, by Claude on the owner's word, a short reminder in the same Gmail thread to urisaf@gmail.com. Answer: none yet.
 
 - [ ] Ask for Yalkut Yosef as a daily-halacha track
   - **Flag:** none.
@@ -870,6 +873,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** Q31, a ready daily order by Rav Ovadia's rulings.
   - **Expected result:** the answer recorded; a yes with its terms becomes a spec section and tasks.
   - **Sent:** 2026-11-12, by Claude on the owner's word, through the Gmail connector on 365jew@gmail.com, to info@HalachaYomit.co.il (rechecked on its contact page that day), the draft of the drafts file signed אברהם / Avraham with the owner's phone. No bounce in the first minutes. Answer: none yet.
+  - **Reminder:** 2026-11-18, by Claude on the owner's word, a short reminder in the same Gmail thread to info@HalachaYomit.co.il. Answer: none yet.
 
 - [ ] Ask Rav Ratzabi's office for Shulchan Aruch HaMekutzar
   - **Flag:** none.
