@@ -148,7 +148,7 @@ Subject: Licence labels of Torat Emet, Daat and Metsudah versions
 
 > As you noted, the licenses are listed along with the texts in the About this Text section. If you see a discrepancy, you should determine which you feel you should follow. We can't make the decision for you. Depending on the source, the license is the result of an agreement that we have made with the publisher or it is in the public domain and doesn't need an agreement.
 
-- **What it settles:** nothing per version. Sefaria stands behind its labels in general (an agreement or the public domain) and leaves any discrepancy with a source's own terms to us; it did not say which of the two holds for Torat Emet, Daat or Metsudah. Daat answered for itself (section 4). The Torat Emet and Metsudah versions stay as they are until the owner decides; her signature points technical questions to developers@sefaria.org, not asked.
+- **What it settles:** nothing per version. Sefaria stands behind its labels in general (an agreement or the public domain) and leaves any discrepancy with a source's own terms to us; it did not say which of the two holds for Torat Emet, Daat or Metsudah. Daat answered for itself (section 4). Decided, the owner's decision of 2026-11-19 ("לך עם זה", on the recommendation to carry on as usual and wait for R' Mahfud, one of the Torat Emet rights holders): the Torat Emet and Metsudah versions stay on Sefaria's labels, nothing is replaced, and the question is looked at again when R' Mahfud answers the Chok LeYisrael request; her signature points technical questions to developers@sefaria.org, not asked.
 
 ## 4. Daat — "Daat Siddur Ashkenaz"
 
