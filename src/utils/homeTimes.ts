@@ -73,8 +73,8 @@ export function pinnedAhead(input: {
     .sort((a, b) => a.at.getTime() - b.at.getTime());
 }
 
-// The time of today that comes next leads the carousel (`next`), then the starred times at their next time
-// (`pinnedAhead()`), then the rest by time.
+// The time that runs now leads the carousel (`lead`, else `next`, the time that comes next), then the starred times
+// at their next time (`pinnedAhead()`), then the rest by time.
 export function timeChips(input: TimesInput): { chips: TimeChip[]; lead: string | null; next: string | null } {
   const t = input.now.getTime();
   const running = (at: Date): ChipProgress | null => {
@@ -131,9 +131,11 @@ export function timeChips(input: TimesInput): { chips: TimeChip[]; lead: string 
         }
       : (byTime.find((c) => c.zman === p.id) as TimeChipOf<'time'>),
   );
-  // The time that comes next always opens the carousel, then the starred times, then the rest (the owner's
-  // call of 2026-11-18: the stars used to come before it).
-  const first = byTime[0];
+  // The time that runs now always opens the carousel: the one that closes the user's open window (the chip that
+  // fills), else the time that comes next; then the starred times, then the rest (the owner's calls of
+  // 2026-11-18 and 2026-11-19: the stars, and then a nearer time of no open window, used to come before it).
+  const lead = byTime.find((c) => c.progress) ?? null;
+  const first = lead ?? byTime[0];
   const upcoming = [
     ...(first ? [first] : []),
     ...head.filter((c) => c !== first),
@@ -156,7 +158,6 @@ export function timeChips(input: TimesInput): { chips: TimeChip[]; lead: string 
   const chips: TimeChip[] = [...upcoming];
   if (tomorrow.length) chips.push({ type: 'sep', key: 'sep-tomorrow' }, ...tomorrow);
   if (past.length) chips.push({ type: 'sep', key: 'sep-earlier' }, ...past);
-  const lead = byTime.find((c) => c.progress) ?? null;
   return { chips, lead: lead ? lead.key : null, next: byTime[0]?.key ?? null };
 }
 

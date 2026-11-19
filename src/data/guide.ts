@@ -533,8 +533,8 @@ export const WHATS_NEW: readonly WhatsNewEntry[] = [
         en: '24 new mitzvot and habits, off until you turn them on: Daf Yomi, Mishna Yomit, a chapter of Tehillim, two mishnayot, Pirkei Avot, Iggeret HaRamban, a Torah class, daily tzedakah, visiting the sick, hosting guests, a call to your parents, time with the kids, a kind word to your spouse, a moment of thanks, cheshbon nefesh, hitbodedut, getting ready for Shabbat, the mikveh on erev Shabbat and more. They are in My mitzvot, among others in the new Learning and Kindness and family groups, and you can also turn them on from More.',
       },
       {
-        he: 'בקרוסלת הזמנים שבדף הבית הזמן הקרוב תמיד ראשון, אחריו המועדפים ואחריהם שאר הזמנים.',
-        en: 'In Home’s times carousel the time that comes next is always first, then your favourites, then the rest.',
+        he: 'בקרוסלת הזמנים שבדף הבית הזמן של עכשיו תמיד ראשון (הזמן שמתמלא), אחריו המועדפים ואחריהם שאר הזמנים.',
+        en: 'In Home’s times carousel the time running now (the one that fills) is always first, then your favourites, then the rest.',
       },
       {
         he: 'נוסחים להרגלים החדשים: פרקי אבות, אגרת הרמב״ן, מסילת ישרים פרק ג, ליקוטי מוהר״ן על התבודדות, תפילות לחולה, פסוקים לילדים ו״אלו דברים״, בלשונית סידור ובכפתור ״פתח נוסח״ של כל מצווה. ״פרק תהילים״ ו״רגע של תודה״ פותחים את ספר התהילים, ובמסך ״דף יומי״ מופיע הדף של היום עם קישורים ללימוד.',

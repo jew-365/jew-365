@@ -97,6 +97,24 @@ describe('the live carousel', () => {
     expect(timeChips(base({ now: at(18) })).next).toBeNull();
   });
 
+  it('opens with the time that runs now, before a nearer time that closes no open window', () => {
+    // The owner's screenshot of 2026-11-19: the other opinion's Shema at 08:16 stood before the running 08:48.
+    const { chips, lead, next } = timeChips(
+      base({
+        now: at(6, 56),
+        zmanim: [...ZMANIM, { id: 'sofShmaMga', at: at(8, 16) }],
+        pins: ['sofShma', 'sofTfila'],
+        openWindows: [
+          { start: at(6, 13), end: at(8, 40) },
+          { start: at(6, 13), end: at(9, 35) },
+        ],
+      }),
+    );
+    expect(keys(chips).slice(0, 4)).toEqual(['sofShma', 'sofTfila', 'sofShmaMga', 'chatzot']);
+    expect(lead).toBe('sofShma');
+    expect(next).toBe('sofShmaMga');
+  });
+
   it('places an added time by its time, and at night leads with a starred time of tomorrow', () => {
     const { chips } = timeChips(base({ zmanim: [...ZMANIM, { id: 'minchaKetana', at: at(14, 50) }] }));
     expect(keys(chips).slice(2, 5)).toEqual(['chatzot', 'minchaKetana', 'plag']);

@@ -1192,13 +1192,14 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **The build:** started on 2026-11-18 in a session of its own, at the owner's word ("תפתח סשן חדש עם אופוס שיתחיל בניה"): "תוסף המשנה: שתי משניות ומשנה יומית", `session_01F2nkceWvGEop4ccYLhn7rj`.
   - **Expected result:** the answer quoted and dated in the drafts file; a refusal goes back to the owner ("ואם לא אז נחשוב על פיתרון"). A request to Koren for the Steinsaltz explanation waits until the Daf Yomi text is taken up.
 
-- [ ] The carousel opens with the time that comes next, then the starred times
+- [ ] The carousel opens with the time that runs now, then the starred times
   - **Asked by:** the owner, 2026-11-18: "תמיד הראשון יהיה הזמן שעכשיו ואחרי זה כל המועדפים ואחרי זה כל השאר. כרגע זה קודם מועדפים ואז הזמן שעכשיו. זה שגוי".
   - **Flag:** OTA.
   - **What it is:** `timeChips()` of [src/utils/homeTimes.ts](src/utils/homeTimes.ts) puts today's next time first, then the starred times at their next time, then the rest by time.
   - **What it solves:** a starred time hours away hid the time that is running now.
-  - **Expected result:** on home the first chip is the time that comes next, a star or not; the starred ones follow it.
+  - **Expected result:** on home the first chip is the time that runs now (the one that fills), a star or not, else the time that comes next; the starred ones follow it.
   - **Done:** 2026-11-18. [src/utils/__tests__/homeTimes.test.ts](src/utils/__tests__/homeTimes.test.ts) pins the order with a starred later time and with a starred time already past; the full `pnpm test` green. Not checked on a phone.
+  - **Corrected:** 2026-11-19, the owner's screenshot of preview `1.0.21-84` at 06:56 ("למה יש לי משהו מצד ימין שהוא לא של עכשיו"): the other opinion's Shema (08:16) stood first, before the running 08:48. "הזמן שעכשיו" is the chip that fills, the time that closes the open window, so `timeChips()` now opens with `lead` and only without one with the next time; a test pins the screenshot's case and fails without the fix.
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`) · Committed: yes, `7936359` · Pushed: yes · Live: preview `1.0.21-83` (group `9c05c3a5-a2a4-492a-aeb0-a202ee64ecb3`, from `7936359`, 2026-11-18, read from the publish output) · Channel: preview
 - [ ] Notifications leave the tray: 20 minutes each, the last one to the window's end, all on entering the app
   - **Asked by:** the owner, 2026-11-18: "כל התראה תישאר למשתמש בנוטפיקציה מקסימום 20 דקות ואחרי זה תיעלם חוץ מההתראה האחרונה שהיא תמשיך עד סוף החלון הקריטי של המצווה. כמו כן ברגע שהמשתמש נכנס לאפליקציה לא משנה מתי כל ההתראות שלו צריכות להיעלם".
