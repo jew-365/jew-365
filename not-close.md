@@ -1209,7 +1209,7 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **What it solves:** he was not in the list, so no notice went out for him.
   - **Expected result:** he is in the hilulot screen and the search, his page opens, and his notices are planned (in 5787 the date enters on motzaei Shabbat, so both notices fall inside Shabbat and he is named in the pre-block notice instead).
   - **Done:** 2026-11-19. The page guard, the hilulot, search and guide suites pass, and the full `pnpm test`. The date and the life are from the Encyclopaedia Judaica, Zissil and Breslov Torah as read, and Hamichlol and JDN from search results; the two stories are told as tradition. The page waits for the owner's review like the other pages. Not checked on a phone.
-  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-21`) · Committed: no · Pushed: no · Live: no · Channel: none
+  - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-21`) · Committed: yes, `1bf8f2b` · Pushed: yes · Live: no · Channel: none
 - [ ] Notifications leave the tray: 20 minutes each, the last one to the window's end, all on entering the app
   - **Asked by:** the owner, 2026-11-18: "כל התראה תישאר למשתמש בנוטפיקציה מקסימום 20 דקות ואחרי זה תיעלם חוץ מההתראה האחרונה שהיא תמשיך עד סוף החלון הקריטי של המצווה. כמו כן ברגע שהמשתמש נכנס לאפליקציה לא משנה מתי כל ההתראות שלו צריכות להיעלם".
   - **Flag:** OTA for the payload, the clear on entering the app and the hourly sweep; a native Android build for the removal while the app is closed (the expo-notifications patch).
