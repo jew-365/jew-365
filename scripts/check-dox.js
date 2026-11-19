@@ -80,6 +80,11 @@ function checkLinks(file, body) {
 // so ordinary prose and identifiers cannot trip it.
 const PATHISH = /^[\w@./()[\]-]+$/;
 
+function insideRepo(resolved) {
+  const relative = path.relative(ROOT, resolved);
+  return relative !== '' && !relative.startsWith('..') && !path.isAbsolute(relative);
+}
+
 function checkPlainTextRefs(file, body) {
   const dir = path.dirname(file);
   const withoutFences = body.replace(/```[\s\S]*?```/g, '');
@@ -93,7 +98,7 @@ function checkPlainTextRefs(file, body) {
     const fromDoc = path.resolve(dir, token);
     const fromRoot = path.resolve(ROOT, token);
     const resolved = fs.existsSync(fromDoc) ? fromDoc : fs.existsSync(fromRoot) ? fromRoot : null;
-    if (!resolved || resolved === ROOT) continue;
+    if (!resolved || !insideRepo(resolved)) continue;
     problems.push(`${path.relative(ROOT, file)}: file reference in plain text, should be a link -> ${token}`);
   }
 }
