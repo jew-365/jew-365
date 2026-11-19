@@ -1211,6 +1211,19 @@ The owner's three requests of 2026-11-05 ("אני רוצה לעשות כמה ש�
   - **Done:** 2026-11-18. [src/services/__tests__/NotificationScheduler.endedDay.test.ts](src/services/__tests__/NotificationScheduler.endedDay.test.ts) (the full clear on entry, the expiry by the sweep and the hourly task) and [src/services/notifications/__tests__/timeLeft.mitzvot.test.ts](src/services/notifications/__tests__/timeLeft.mitzvot.test.ts) (20 minutes, the red one to the window's end, the payload); the full `pnpm test` green (7,099 passed).
   - **Status:** Version: OTA, expected with the next update (the WHATS_NEW entry `1.0.21-20`); the Android removal with the next Android build · Committed: yes, `fafe150` · Pushed: yes · Live: preview `1.0.21-84` (group `8a6865c2-c0c1-4688-a420-5840b3b8cea5`, from `2154043`, 2026-11-18, read from the publish output); the Android removal in the preview build `4a660d4d` (from `c992da1`, 2026-11-18, read from EAS), not checked on a phone yet, and in no production build · Channel: preview
 
+### Medium — Store status from a cloud session, 2026-11-18
+
+- [ ] Read both stores from a cloud session, with no computer
+  - **Flag:** none: tooling, nothing reaches users.
+  - **What it is:** the owner asked on 2026-11-18 to know the store status from a phone ("שיהיה לי אפשרות גם בלי מחשב לדעת מה המצב בחנויות"). A Claude Code cloud session in the owner's environment `jew 365` reads both stores, read only:
+    - [scripts/store/cloud-setup.mjs](scripts/store/cloud-setup.mjs), run by the SessionStart hook of [.claude/settings.json](.claude/settings.json), installs `asc` 5.17.0 with its SHA-256 pinned.
+    - [scripts/store/play.mjs](scripts/store/play.mjs) takes its key from `PLAY_SERVICE_ACCOUNT_KEY_B64`, sends no credentials under `PLAY_AUTH=proxy` and refuses every write command under `PLAY_READ_ONLY=1`.
+    - Section 0.5 of [store-console](.claude/skills/store-console/SKILL.md), and of its Codex copy, holds the rules.
+  - **Owner's steps (agents may not touch the keys):** an App Store Connect API key made for the cloud and a new JSON key of `play-cli`, each pasted in base64 into the environment's variables (`ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_PRIVATE_KEY_B64`, `ASC_READ_ONLY=1`, `PLAY_SERVICE_ACCOUNT_KEY_B64`, `PLAY_READ_ONLY=1`), and `api.appstoreconnect.apple.com` added to its allowed domains. The environment lives on the Claude account of the work email; when that account goes back, both cloud keys are revoked and the environment is deleted.
+  - **Expected result:** a cloud session of `jew 365` opens with the hook's line, `asc status --app 6825802248` and `node scripts/store/play.mjs tracks` answer there, and `asc` refuses a write under `ASC_READ_ONLY`.
+  - **Done:** 2026-11-18, the repository half. Verified: [scripts/__tests__/playCli.test.js](scripts/__tests__/playCli.test.js) (13 cases against a mock; 12 of them fail on the previous script), `PLAY_READ_ONLY=1 node scripts/store/play.mjs tracks` against Play with the computer's key, the hook run locally (no output, exit 0), the 5.17.0 checksums file against the installed `asc.exe`, the `linux_amd64` download against the pinned SHA-256, `pnpm lint`, `pnpm format:check` on the new files, `pnpm check:dox`, `pnpm typecheck` (as CI runs it, without the stale local `.expo/types/router.d.ts`) and `pnpm test:tz` (7,112 passed in each of the four zones). Not run yet: the hook on Linux (Docker Desktop was down) and anything in the cloud, which waits for a push and the owner's steps.
+  - **Status:** Version: none (tooling) · Committed: no · Pushed: no · Live: no · Channel: none
+
 ## Bugs
 
 - [ ] The reader jumps back to the start of the text while reading

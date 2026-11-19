@@ -9,6 +9,9 @@ const DEFAULT_PACKAGE = 'com.jew365.app';
 const DEFAULT_KEY_PATH = join(homedir(), '.store-keys', 'play-service-account.json');
 const API_ROOT = process.env.PLAY_API_ROOT ?? 'https://androidpublisher.googleapis.com';
 const SCOPE = 'https://www.googleapis.com/auth/androidpublisher';
+const PROXY_AUTH = process.env.PLAY_AUTH === 'proxy';
+const READ_ONLY = /^(1|true|yes|y|on)$/i.test(process.env.PLAY_READ_ONLY ?? '');
+const WRITE_COMMANDS = new Set(['reply', 'upload', 'promote', 'rollout', 'testers-set']);
 
 const USAGE = `Usage: node scripts/store/play.mjs <command> [args] [--package <id>]
 
@@ -29,7 +32,9 @@ Write (validated only; add --commit to apply, and --not-sent-for-review when Pla
   testers-set <track> <group@googlegroups.com>[,<group>...]
 
 Status values: draft, inProgress, halted, completed (default completed; inProgress needs --fraction).
-Key: PLAY_SERVICE_ACCOUNT_KEY, else ${DEFAULT_KEY_PATH}.`;
+Key: PLAY_SERVICE_ACCOUNT_KEY_B64 (the JSON key in base64), else the file PLAY_SERVICE_ACCOUNT_KEY,
+else ${DEFAULT_KEY_PATH}. PLAY_AUTH=proxy sends no credentials, for a proxy that adds them.
+PLAY_READ_ONLY=1 refuses every write command before any request.`;
 
 function parseArgs(argv) {
   const positional = [];
@@ -53,14 +58,24 @@ function parseArgs(argv) {
 
 const base64url = (value) => Buffer.from(value).toString('base64url');
 
-async function accessToken() {
+function serviceAccountKey() {
+  const encoded = process.env.PLAY_SERVICE_ACCOUNT_KEY_B64;
   const keyPath = process.env.PLAY_SERVICE_ACCOUNT_KEY ?? DEFAULT_KEY_PATH;
   let key;
   try {
-    key = JSON.parse(readFileSync(keyPath, 'utf8'));
+    key = JSON.parse(encoded ? Buffer.from(encoded, 'base64').toString('utf8') : readFileSync(keyPath, 'utf8'));
   } catch (error) {
-    throw new Error(`Cannot read the service account key at ${keyPath} (${error.code ?? error.message})`);
+    if (encoded) throw new Error('PLAY_SERVICE_ACCOUNT_KEY_B64 is not the base64 of a JSON key');
+    throw new Error(`Cannot read the service account key at ${keyPath} (${error.code ?? 'not a JSON key'})`);
   }
+  if (!key.client_email || !key.private_key)
+    throw new Error('The service account key lacks client_email or private_key');
+  return key;
+}
+
+async function accessToken() {
+  if (PROXY_AUTH) return null;
+  const key = serviceAccountKey();
   const tokenUri = key.token_uri ?? 'https://oauth2.googleapis.com/token';
   const now = Math.floor(Date.now() / 1000);
   const unsigned = `${base64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))}.${base64url(
@@ -86,7 +101,7 @@ function client(token, packageName) {
   async function call(method, path, { json, body, contentType, root = appRoot, query } = {}) {
     const url = new URL(`${root}${path}`);
     for (const [name, value] of Object.entries(query ?? {})) url.searchParams.set(name, String(value));
-    const headers = { authorization: `Bearer ${token}` };
+    const headers = token ? { authorization: `Bearer ${token}` } : {};
     if (json !== undefined) headers['content-type'] = 'application/json';
     if (contentType) headers['content-type'] = contentType;
     const response = await fetch(url, { method, headers, body: json !== undefined ? JSON.stringify(json) : body });
@@ -266,6 +281,8 @@ async function main() {
     console.log(USAGE);
     return command && !flags.help ? 1 : 0;
   }
+  if (READ_ONLY && WRITE_COMMANDS.has(command))
+    throw new Error(`${command} would change Google Play, and PLAY_READ_ONLY is set`);
   const api = client(await accessToken(), flags.package ?? DEFAULT_PACKAGE);
   console.log(JSON.stringify(await COMMANDS[command](api, args, flags), null, 2));
   return 0;
