@@ -3666,6 +3666,89 @@ export const HILULA_PAGES: Readonly<Partial<Record<string, HilulaPage>>> = {
       'https://spectator.sme.sk/politics-and-society/c/chatam-sofer-jewish-scholar-died-175-years-ago',
     ],
   },
+  bat_ayin: {
+    bio: {
+      he: 'רבי אברהם דב מאווריטש, בעל ״בת עין״, היה תלמידו המסור של רבי נחום מטשרנוביל ולאחר פטירתו נקשר לבנו רבי מרדכי. הוא מילא את מקום אביו ברבנות חמלניק ואחר כך כיהן כרב באווריטש ובז׳יטומיר. בשנת תקצ״א עלה לארץ ישראל, התיישב בצפת ונעשה מנהיג החסידים בעיר. בימי הפרעות ורעידת האדמה ארגן עזרה לנפגעים וחיזק את התושבים שלא יעזבו. נפטר בי״ב בכסלו תר״א, בימי המגפה בצפת.',
+      en: 'Rabbi Avraham Dov of Avritch, author of Bat Ayin, was a devoted disciple of Rabbi Nachum of Chernobyl and then close to his son Rabbi Mordechai. He succeeded his father as rabbi of Khmelnik and later served in Avritch (Ovruch) and Zhitomir. In 1831 he settled in Safed and led its Chasidim. Through the attacks and the earthquake he organized relief and urged people to stay. He died on 12 Kislev 5601 (1840), during the epidemic in Safed.',
+    },
+    lessons: [
+      {
+        title: {
+          he: 'לא לעזוב בשעת צרה',
+          en: 'Staying through hardship',
+        },
+        text: {
+          he: 'אחרי הפרעות ורעידת האדמה רבים ביקשו לעזוב את צפת. רבי אברהם דב נשאר, ארגן עזרה וחיזק את הנשארים. אהבת הארץ נמדדת דווקא ברגעים שבהם קשה להישאר בה.',
+          en: 'After the attacks and the earthquake many wished to leave Safed. Rabbi Avraham Dov stayed, organized relief and encouraged those who remained. Love of the Land is measured when staying is hard.',
+        },
+      },
+      {
+        title: {
+          he: 'מנהיג שנושא בעול',
+          en: 'A leader who carries the burden',
+        },
+        text: {
+          he: 'הוא לא הסתפק בדברי חיזוק: בשעת האסון דאג בפועל לנפגעים ולנזקקים. מנהיגות אמיתית היא לעמוד עם הציבור בצרתו ולדאוג לצרכיו, ולא רק ללמד אותו.',
+          en: 'He did not stop at words of comfort: in the disaster he saw to the injured and the needy himself. True leadership means standing with the community in its trouble and caring for its needs.',
+        },
+      },
+    ],
+    biblical: false,
+    works: [
+      {
+        title: {
+          he: 'בת עין',
+          en: 'Bat Ayin',
+        },
+        about: {
+          he: 'דברי תורתו בדרך החסידות, שעל שמו הוא נקרא. הספר נדפס לראשונה בירושלים בשנת תר״ז, אחרי פטירתו.',
+          en: 'His Chasidic teachings, the book he is known by. It was first printed in Jerusalem in 1847, after his death.',
+        },
+      },
+    ],
+    stories: [
+      {
+        title: {
+          he: 'רעידת האדמה בצפת',
+          en: 'The earthquake in Safed',
+        },
+        text: {
+          he: 'בכ״ד בטבת תקצ״ז, בשעת התפילה בבית הכנסת שלו בצפת, פקדה את העיר רעידת אדמה קשה. לפי המסופר, רגע לפני שקרסו הבתים קרא רבי אברהם דב למתפללים להתקבץ סביבו. הם נאספו אליו, ורוב בית הכנסת התמוטט, אך החלק שבו עמדו נשאר על תלו והם ניצלו. לוח בכניסה לבית הכנסת אווריטש בעיר העתיקה מזכיר את המעשה עד היום.',
+          en: 'On 24 Tevet 5597 (1 January 1837), during prayers in his synagogue in Safed, a severe earthquake struck the town. As it is told, a moment before the houses fell Rabbi Avraham Dov called the worshippers to gather around him. They came to him, and most of the synagogue collapsed, but the part where they stood remained and they were saved. A plaque at the entrance of the Avritch synagogue in the Old City recalls it to this day.',
+        },
+        source: 'https://zissil.com/topics/Avritch-Bat-Ayin-Synagogue',
+      },
+      {
+        title: {
+          he: 'הקרבן האחרון של המגפה',
+          en: 'The last victim of the epidemic',
+        },
+        text: {
+          he: 'בשנת תר״א פרצה בצפת מגפה קשה ורבים מתושביה מתו או עזבו. לפי המסורת שבפי החסידים, הבטיח רבי אברהם דב לבני הקהילה שהוא יהיה הקרבן האחרון שלה. הוא חלה ונפטר בי״ב בכסלו, ומסופר שעם פטירתו פסקה המגפה. הוא נטמן בבית העלמין העתיק של צפת.',
+          en: 'In 1840 a severe epidemic broke out in Safed, and many of its people died or left. According to the tradition told by Chasidim, Rabbi Avraham Dov promised the community that he would be its last victim. He fell ill and died on 12 Kislev, and it is told that with his death the epidemic ceased. He was buried in the old cemetery of Safed.',
+        },
+        source: 'https://www.breslovtorah.com/?p=53715',
+      },
+    ],
+    grave: {
+      place: {
+        he: 'בית העלמין העתיק בצפת',
+        en: 'The old cemetery of Safed',
+      },
+      lat: null,
+      lng: null,
+      link: true,
+      noLinkReason: null,
+      query: 'בית העלמין העתיק צפת',
+    },
+    sources: [
+      'https://www.encyclopedia.com/religion/encyclopedias-almanacs-transcripts-and-maps/abraham-dov-baer-ovruch',
+      'https://zissil.com/topics/Avritch-Bat-Ayin-Synagogue',
+      'https://www.breslovtorah.com/?p=53715',
+      'https://www.hamichlol.org.il/אברהם_דב_מאבריטש',
+      'https://www.burialmap.com/memorial/abraham-dov-baer-of-ovruch-1760-1840',
+    ],
+  },
   bnei_yissaschar: {
     bio: {
       he: 'רבי צבי אלימלך שפירא מדינוב נולד ביאבורניק שבגליציה, ונקרא על שם קרוב משפחתו, רבי אלימלך מליז׳נסק. היה מתלמידי החוזה מלובלין, רבי מנחם מנדל מרימנוב והמגיד מקוז׳ניץ. כיהן ברבנות בכמה קהילות, ובהן סטריז׳וב ומונקאץ׳, ועיקר מושבו היה בדינוב. נודע כמקובל וכמחבר פורה, ובעיקר בזכות ספרו בני יששכר. נפטר בדינוב בי״ח בטבת ה׳תר״א.',

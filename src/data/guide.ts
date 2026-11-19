@@ -513,6 +513,16 @@ export const GUIDE_TOPICS: readonly GuideTopic[] = [
 
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
   {
+    label: '1.0.21-21',
+    date: '2026-11-19',
+    items: [
+      {
+        he: 'הבת עין, רבי אברהם דב מאווריטש, נוסף לרשימת ההילולות (י״ב בכסלו), עם דף משלו.',
+        en: 'The Bat Ayin, Rabbi Avraham Dov of Avritch, joins the hilulot list (12 Kislev), with a page of his own.',
+      },
+    ],
+  },
+  {
     label: '1.0.21-20',
     date: '2026-11-17',
     items: [

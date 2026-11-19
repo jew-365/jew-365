@@ -239,6 +239,17 @@ export const HILULOT: readonly Hilula[] = [
     year: 5600,
   },
   {
+    id: 'bat_ayin',
+    name: { he: 'הבת עין', en: 'Bat Ayin' },
+    aliases: {
+      he: ['בת עין', 'רבי אברהם דב מאווריטש', 'אברהם דב מאבריטש', 'אווריטש', 'אבריטש'],
+      en: ['Bas Ayin', 'Avraham Dov of Avritch', 'Avraham Dov of Ovruch', 'Avritch', 'Ovruch'],
+    },
+    day: 12,
+    month: KISLEV,
+    year: 5601,
+  },
+  {
     id: 'bnei_yissaschar',
     name: { he: 'הבני יששכר', en: 'Bnei Yissaschar' },
     aliases: {
