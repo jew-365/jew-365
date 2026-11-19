@@ -23,7 +23,7 @@
   <h2>What the app stores</h2>
   <p>Every item below is kept only in the app's local storage on your device:</p>
   <ul>
-    <li><strong>Location</strong> — if you grant location permission, the coordinates are used to calculate halachic times. You can instead pick a city manually and never grant the permission.</li>
+    <li><strong>Location</strong> — if you grant location permission, the coordinates are used to calculate halachic times. You can instead pick a city manually and never grant the permission. On Android, if you turn on “Update my location when the app is closed too” in Settings and grant the “Allow all the time” permission, the app also reads the location in the background, when it is closed or not in use, to update the halachic times and your reminders for where you are. The location still stays on the device only and is not sent to us or to any third party.</li>
     <li><strong>Notification permission status</strong> — so the app knows whether reminders can be scheduled.</li>
     <li><strong>Preferences</strong> — nusach, language, theme, Israel/Diaspora, halachic opinions, which mitzvot are enabled, and their reminder settings.</li>
     <li><strong>Completion history</strong> — which mitzvot you marked done or skipped, and when.</li>
@@ -104,6 +104,7 @@
   <h2>Permissions and why they are needed</h2>
   <ul>
     <li><strong>Location (precise/approximate)</strong> — to compute sunrise, sunset, and the halachic times derived from them. Optional; choosing a city by hand is a full substitute.</li>
+    <li><strong>Background location (Android, “Allow all the time”)</strong> — requested only if you turn on “Update my location when the app is closed too” in Settings, after a screen that explains it. It lets the app update the place, the halachic times and your reminders when the phone moves somewhere else without the app being opened. Off by default; you can turn it off at any time in the app's Settings or in the phone's settings.</li>
     <li><strong>Notifications</strong> — to show local reminders at the times you configured.</li>
     <li><strong>Exact alarms</strong> — halachic times are exact moments; without this permission Android may delay a reminder by tens of minutes.</li>
     <li><strong>Run at boot</strong> — so scheduled reminders survive a device restart.</li>
@@ -135,6 +136,6 @@
   <p>Privacy questions: <a href="mailto:365jew@gmail.com">365jew@gmail.com</a></p>
 </main>
 
-<footer>Jew 365 · Updated 14 November 2026</footer>
+<footer>Jew 365 · Updated 19 November 2026</footer>
 </body>
 </html>
