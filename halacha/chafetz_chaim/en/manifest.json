@@ -1,0 +1,129 @@
+{
+  "format": 1,
+  "version": 1,
+  "track": "chafetz_chaim",
+  "credit": {
+    "he": "תרגום לאנגלית: Chofetz Chaim, Silverstein translation (CC-BY), דרך ספריא",
+    "en": "English: Chofetz Chaim, Silverstein translation (CC-BY), via Sefaria"
+  },
+  "credits": [
+    {
+      "title": "Chofetz Chaim, Silverstein translation, via Sefaria",
+      "license": "CC-BY",
+      "url": "http://www.sefaria.org/shraga-silverstein"
+    }
+  ],
+  "gzipBytes": 106466,
+  "gz": {
+    "preface": {
+      "path": "preface.24ca9c27.json.gz",
+      "sha256": "24ca9c271813b04ffa21dff1be28237911c8e30acbbf8aaeecc7b530f38e1f94",
+      "bytes": 7236
+    },
+    "introduction": {
+      "path": "introduction.5b196c57.json.gz",
+      "sha256": "5b196c5741d1793f95dd677933f6d94f902175120151aa240229d92e0cf7a454",
+      "bytes": 15405
+    },
+    "lashon-hara-01": {
+      "path": "lashon-hara-01.28728152.json.gz",
+      "sha256": "2872815258a5b0021bf32ee0b7724b7c56929cd75765c84aa49d41329003a813",
+      "bytes": 2691
+    },
+    "lashon-hara-02": {
+      "path": "lashon-hara-02.bc552b89.json.gz",
+      "sha256": "bc552b8974785f931b9a21bf8cfba2f9939b0dac3ab25882a76039089b13a50c",
+      "bytes": 5393
+    },
+    "lashon-hara-03": {
+      "path": "lashon-hara-03.3d972763.json.gz",
+      "sha256": "3d972763be521c61e437d447c6b373493f49b3be92f5f8e1111e7f576f67d15a",
+      "bytes": 2673
+    },
+    "lashon-hara-04": {
+      "path": "lashon-hara-04.3dd81bd7.json.gz",
+      "sha256": "3dd81bd7edb085d839004691e459a0cf42a545ed1b9f2e4449af4256f6d8aa16",
+      "bytes": 7936
+    },
+    "lashon-hara-05": {
+      "path": "lashon-hara-05.868601c8.json.gz",
+      "sha256": "868601c8290c3f4fa34f334ad048b9fe1845a6d83ebf98f3bb4ac55c47643cdf",
+      "bytes": 6433
+    },
+    "lashon-hara-06": {
+      "path": "lashon-hara-06.e7e4e6fd.json.gz",
+      "sha256": "e7e4e6fde5d808dabc56f6d8b662cc2996cc2c8afced125a4499d9696610dedf",
+      "bytes": 5370
+    },
+    "lashon-hara-07": {
+      "path": "lashon-hara-07.c7862909.json.gz",
+      "sha256": "c786290991ed91d0d617696e0ea118a7beaf296245a8fbb417cac0aeebe67083",
+      "bytes": 4763
+    },
+    "lashon-hara-08": {
+      "path": "lashon-hara-08.28e132e7.json.gz",
+      "sha256": "28e132e742020cc46e6731e5cf410d521b64dd10d82787cc3b5a9acf4d4b508a",
+      "bytes": 6262
+    },
+    "lashon-hara-09": {
+      "path": "lashon-hara-09.433172f6.json.gz",
+      "sha256": "433172f6cfa5ffb8a7a9cc34a27abbdce3e14f4013bb6d2b138e315c3f324f59",
+      "bytes": 1946
+    },
+    "lashon-hara-10": {
+      "path": "lashon-hara-10.1be422f9.json.gz",
+      "sha256": "1be422f9914514b7900958ac4cb1ff0bb2d58082aa9281768f483982183b1d07",
+      "bytes": 8199
+    },
+    "rechilut-01": {
+      "path": "rechilut-01.5bb71e4b.json.gz",
+      "sha256": "5bb71e4b7eea10670d033e5912276691ddb827d1dc0c486b6db4cbfd66c8d860",
+      "bytes": 3171
+    },
+    "rechilut-02": {
+      "path": "rechilut-02.ff935cdd.json.gz",
+      "sha256": "ff935cddc0adf748ef68d32481c47980fbfc6bda29e651b8333ccfe2be704cf2",
+      "bytes": 1491
+    },
+    "rechilut-03": {
+      "path": "rechilut-03.006004e7.json.gz",
+      "sha256": "006004e70ba294eab8a219f180dedd39e8980f46d4b19db55924f0687cd61b17",
+      "bytes": 1393
+    },
+    "rechilut-04": {
+      "path": "rechilut-04.571eb855.json.gz",
+      "sha256": "571eb8555ab6a96e052f61891209fead3a7ea9a2a74757991a8eef914b2e082a",
+      "bytes": 1213
+    },
+    "rechilut-05": {
+      "path": "rechilut-05.19116be7.json.gz",
+      "sha256": "19116be789dc45422fb5c8c7bf9c8a748600704beeadfcb0c34f406872f5d035",
+      "bytes": 3048
+    },
+    "rechilut-06": {
+      "path": "rechilut-06.588ce798.json.gz",
+      "sha256": "588ce798b6d380383e8e79b8b7e95adf7dd65295a24e1d2a8b76045768b63ee7",
+      "bytes": 4120
+    },
+    "rechilut-07": {
+      "path": "rechilut-07.143614fa.json.gz",
+      "sha256": "143614fac67cc43d26d78b2249fe79c3a5c59e9a5a313590ff7646c7eb7ea5da",
+      "bytes": 2300
+    },
+    "rechilut-08": {
+      "path": "rechilut-08.b724d0ce.json.gz",
+      "sha256": "b724d0ce1af4ede54841a1d2adff60d1eee2fed321f6777ba37f7491afa4742b",
+      "bytes": 1182
+    },
+    "rechilut-09": {
+      "path": "rechilut-09.68b0f00d.json.gz",
+      "sha256": "68b0f00d2e5fd058d2e234b244b6ff105d81cd7e9ff9ffa7dd24a0c142047616",
+      "bytes": 8354
+    },
+    "illustrations": {
+      "path": "illustrations.f5f28c50.json.gz",
+      "sha256": "f5f28c50a1f4a2ae26de7a14bf9cb71185444eb273e0daf3dd958a1005f66839",
+      "bytes": 5887
+    }
+  }
+}

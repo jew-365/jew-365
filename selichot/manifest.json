@@ -1,0 +1,32 @@
+{
+  "format": 1,
+  "version": 3,
+  "gzipBytes": 1466404,
+  "gz": {
+    "ashkenaz": {
+      "path": "ashkenaz.d2c3d2d8.siddur.gz",
+      "sha256": "d2c3d2d8806e3e5f697333c7afbdc4dbe61c87741e1c6d38cb7edc3c62d28523",
+      "bytes": 631803
+    },
+    "sefard": {
+      "path": "sefard.d9fece4a.siddur.gz",
+      "sha256": "d9fece4a416b3315d14655c9283f38133aff76d135042eb9347714b17cabd0d8",
+      "bytes": 334985
+    },
+    "edot_hamizrach": {
+      "path": "edot_hamizrach.7aa05ea5.siddur.gz",
+      "sha256": "7aa05ea5ca8a854122e03508799a8894a5528ea147b638c0b655edca4b23e0ee",
+      "bytes": 45343
+    },
+    "chabad": {
+      "path": "chabad.8c5f515e.siddur.gz",
+      "sha256": "8c5f515e38da7571be7a44a3a8a458c0247501ce255809286bc176dee58aa12c",
+      "bytes": 414302
+    },
+    "teiman": {
+      "path": "teiman.ed9dda54.siddur.gz",
+      "sha256": "ed9dda54f72935dd9454369e1dadeec39e29e1408eb66f81e8fb1a4ad33ea380",
+      "bytes": 39971
+    }
+  }
+}

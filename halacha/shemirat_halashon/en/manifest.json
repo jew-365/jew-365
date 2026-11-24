@@ -1,0 +1,54 @@
+{
+  "format": 1,
+  "version": 1,
+  "track": "shemirat_halashon",
+  "credit": {
+    "he": "תרגום לאנגלית: Shmirath Halashon by Rabbi Shraga Silverstein (CC-BY), דרך ספריא",
+    "en": "English: Shmirath Halashon by Rabbi Shraga Silverstein (CC-BY), via Sefaria"
+  },
+  "credits": [
+    {
+      "title": "Shmirath Halashon by Rabbi Shraga Silverstein, via Sefaria",
+      "license": "CC-BY",
+      "url": "http://www.sefaria.org/shraga-silverstein"
+    }
+  ],
+  "gzipBytes": 238044,
+  "gz": {
+    "introduction": {
+      "path": "introduction.fe6f794c.json.gz",
+      "sha256": "fe6f794c806dedc14f6bff134ee5af1fafd6ebd468580b6f327d192963282eef",
+      "bytes": 9815
+    },
+    "remembering": {
+      "path": "remembering.d14c2486.json.gz",
+      "sha256": "d14c2486a9e972ca81f63f17b09c2082f243052803681377541042f76a6a3de5",
+      "bytes": 46282
+    },
+    "discerning": {
+      "path": "discerning.60709db7.json.gz",
+      "sha256": "60709db7072af34411bdc00bad83368da172360581dca60906d0f64b5bded0e9",
+      "bytes": 47928
+    },
+    "torah": {
+      "path": "torah.dc817b9e.json.gz",
+      "sha256": "dc817b9eec62a8c35fc8aedf61a8aab138da7eba3220b46251f96969b4829f53",
+      "bytes": 40800
+    },
+    "epilogue-1": {
+      "path": "epilogue-1.fd978ff0.json.gz",
+      "sha256": "fd978ff0478a06169ebf83b573fb2fda8a7f5807efbdebce37c5e84a173f220d",
+      "bytes": 15292
+    },
+    "chapters": {
+      "path": "chapters.c028dfb8.json.gz",
+      "sha256": "c028dfb87df21c2e6f940aadeaf4459e570aab467e9868a5ab43b9fe2844d03d",
+      "bytes": 69713
+    },
+    "epilogue-2": {
+      "path": "epilogue-2.05f26c13.json.gz",
+      "sha256": "05f26c13a604f1d3707d1728d2fad109a1e160cb9a40c96fa9cbf10f2bb837f2",
+      "bytes": 8214
+    }
+  }
+}

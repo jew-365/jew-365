@@ -1,0 +1,134 @@
+{
+  "format": 1,
+  "version": 1,
+  "track": "kitzur",
+  "credit": {
+    "he": "תרגום לאנגלית: Kitzur Shulchan Aruch, trans. Rabbi Avrohom Davis, Metsudah Pub., 1996 (CC-BY), דרך ספריא",
+    "en": "English: Kitzur Shulchan Aruch, trans. Rabbi Avrohom Davis, Metsudah Pub., 1996 (CC-BY), via Sefaria"
+  },
+  "credits": [
+    {
+      "title": "Kitzur Shulchan Aruch, trans. Rabbi Avrohom Davis, Metsudah Pub., 1996, via Sefaria",
+      "license": "CC-BY",
+      "url": "https://www.judaicaplace.com/search/brand/Metsudah-Publications/"
+    }
+  ],
+  "gzipBytes": 544998,
+  "gz": {
+    "simanim-001-010": {
+      "path": "simanim-001-010.381ab5cd.json.gz",
+      "sha256": "381ab5cdb705ff9785073771da74a994c5d5aebfa823cc5fd4cd6827d1da9069",
+      "bytes": 33217
+    },
+    "simanim-011-020": {
+      "path": "simanim-011-020.643758e9.json.gz",
+      "sha256": "643758e9f8d797f0cfcc0cb5686673c9ac9971b1679c1e6e6fac4d11b798ab96",
+      "bytes": 30623
+    },
+    "simanim-021-030": {
+      "path": "simanim-021-030.007132be.json.gz",
+      "sha256": "007132be27f8bb8ab48d02f99c226e1a43df781aeb8775d8e737910cc569f963",
+      "bytes": 32453
+    },
+    "simanim-031-040": {
+      "path": "simanim-031-040.337888ea.json.gz",
+      "sha256": "337888ea6486e985ac211a318d380d2d65d35c244efaedb67cb4318e408fc850",
+      "bytes": 20782
+    },
+    "simanim-041-050": {
+      "path": "simanim-041-050.2b2e9930.json.gz",
+      "sha256": "2b2e993078b826c6ae288e86453b3477e148020ebe217373d470b405d39b174c",
+      "bytes": 32042
+    },
+    "simanim-051-060": {
+      "path": "simanim-051-060.368a0560.json.gz",
+      "sha256": "368a056021b5b87341a96e4e5406db207fdf326c91bae1096cc29ec82b09bebc",
+      "bytes": 22716
+    },
+    "simanim-061-070": {
+      "path": "simanim-061-070.5d478174.json.gz",
+      "sha256": "5d478174d21071a1717650e30871ac3304a37cac0a12e2d4f599638c3a07af74",
+      "bytes": 30973
+    },
+    "simanim-071-080": {
+      "path": "simanim-071-080.4e1cad7b.json.gz",
+      "sha256": "4e1cad7b2ea9c2b2dc83718402a95265c460c08f3c35223456ecca65e8805722",
+      "bytes": 40276
+    },
+    "simanim-081-090": {
+      "path": "simanim-081-090.2526c0d9.json.gz",
+      "sha256": "2526c0d95ae17cbe532e4e8b7ffc4596d5b438507fa1102ba240b999fefe36cd",
+      "bytes": 23826
+    },
+    "simanim-091-100": {
+      "path": "simanim-091-100.f169201f.json.gz",
+      "sha256": "f169201fb6abb7e8db0b94462cefbfa52f0eddb0603cc3850aa92e29755b33ad",
+      "bytes": 31951
+    },
+    "simanim-101-110": {
+      "path": "simanim-101-110.19b84059.json.gz",
+      "sha256": "19b840594be9baa092f5a6d8eecd44110f80e111eebf8d34c43213d093545133",
+      "bytes": 14426
+    },
+    "simanim-111-120": {
+      "path": "simanim-111-120.c96ff1d5.json.gz",
+      "sha256": "c96ff1d500f8008100e3fa86e0358ed22e7d28837f89463a62b7915b8a492cd5",
+      "bytes": 23128
+    },
+    "simanim-121-130": {
+      "path": "simanim-121-130.05a78d00.json.gz",
+      "sha256": "05a78d0087b901ba097ccf56281ca1ddb3ac8f49019f072c13e9ebddb5880547",
+      "bytes": 30110
+    },
+    "simanim-131-140": {
+      "path": "simanim-131-140.1e38664a.json.gz",
+      "sha256": "1e38664a322831aa4aa59ac15d3bafdeecd685916fc78833739dcf021a09892d",
+      "bytes": 36361
+    },
+    "simanim-141-150": {
+      "path": "simanim-141-150.b27e1d35.json.gz",
+      "sha256": "b27e1d35657e3f1985e056799659a5dfb94ba3632260bcc4f6315ca7c252ebbf",
+      "bytes": 24214
+    },
+    "simanim-151-160": {
+      "path": "simanim-151-160.38f7412b.json.gz",
+      "sha256": "38f7412b350a99365ee73ba81ae602970c2a4575269f5e1cd022093699111b05",
+      "bytes": 18769
+    },
+    "simanim-161-170": {
+      "path": "simanim-161-170.25d6a2b3.json.gz",
+      "sha256": "25d6a2b3324871dc55df56de104726f70134014514f2854e7a67db73d8673aa8",
+      "bytes": 19129
+    },
+    "simanim-171-180": {
+      "path": "simanim-171-180.9273b5ea.json.gz",
+      "sha256": "9273b5ea61daeb13ed0243d76e8eb679d35c73b7e19a7864d96073ff620b7bb1",
+      "bytes": 12201
+    },
+    "simanim-181-190": {
+      "path": "simanim-181-190.4ca5ba8f.json.gz",
+      "sha256": "4ca5ba8f7234f071f80ddf912a3e646e90f2a7717e2bbfeb71dd3b9e39e2b4ca",
+      "bytes": 16717
+    },
+    "simanim-191-200": {
+      "path": "simanim-191-200.651318f1.json.gz",
+      "sha256": "651318f164e771c712469f09fdaee29ef0f389a1f134a71ccba7d0fb5d000d77",
+      "bytes": 23843
+    },
+    "simanim-201-210": {
+      "path": "simanim-201-210.89fab47e.json.gz",
+      "sha256": "89fab47e8545f31b757ce021bda4cbe3031fe8d7207fd4653d215ed83ec9309e",
+      "bytes": 15337
+    },
+    "simanim-211-220": {
+      "path": "simanim-211-220.e8a365cb.json.gz",
+      "sha256": "e8a365cb4e01eedce27baabaa9f102d75ffa305c7493cec0ff81c7508c93162e",
+      "bytes": 9548
+    },
+    "simanim-221-221": {
+      "path": "simanim-221-221.f9eba868.json.gz",
+      "sha256": "f9eba8686aaf2c23bed0cc6268c60350a259921cf42022568103bb07b40370bd",
+      "bytes": 2356
+    }
+  }
+}

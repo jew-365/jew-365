@@ -1,0 +1,1261 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>מעקב טהרת המשפחה — כללים לאישור הרב</title>
+<meta name="description" content="כללי החישוב ההלכתיים שמיישמת תכונת מעקב טהרת המשפחה באפליקציית יהודי 365, לעיון ולאישור הרב.">
+<link rel="icon" href="favicon.png" sizes="48x48">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<style>
+header,
+main {
+  max-width: 900px;
+}
+
+main > p,
+main > ul,
+main > ol {
+  max-width: 40rem;
+}
+
+main li {
+  margin-bottom: 14px;
+}
+
+h1 {
+  line-height: 1.35;
+}
+
+h2 {
+  margin-top: 40px;
+  scroll-margin-top: 12px;
+}
+
+h3 {
+  font-size: 19px;
+  margin: 0 0 10px;
+}
+
+.source {
+  color: var(--text-sub);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+span.source {
+  display: block;
+  margin: 4px 0 0;
+}
+
+.verify {
+  display: inline-block;
+  padding: 0 11px;
+  border: 1.5px solid var(--gold);
+  border-radius: 999px;
+  color: var(--gold-text);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.6;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.vnote {
+  display: block;
+  margin: 6px 0 0;
+}
+
+.howto {
+  margin: 24px 0 8px;
+  padding: 16px 18px;
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  background: var(--note-bg);
+}
+
+.howto p {
+  margin: 0;
+}
+
+.howto strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.cards {
+  display: grid;
+  gap: 16px;
+}
+
+.card {
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.card p {
+  margin: 0;
+}
+
+.card dl {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  gap: 10px 16px;
+  margin: 0;
+}
+
+.card dt {
+  color: var(--gold-text);
+  font-weight: 700;
+}
+
+.card dd {
+  margin: 0;
+}
+
+.card .vnote,
+.card .source {
+  margin-top: 14px;
+}
+
+.rules {
+  width: 100%;
+  margin: 16px 0 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  table-layout: fixed;
+}
+
+.rules thead th {
+  width: 16%;
+}
+
+.rules thead th:first-child {
+  width: 20%;
+}
+
+.rules caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.rules th,
+.rules td {
+  padding: 10px 12px;
+  text-align: start;
+  vertical-align: top;
+  overflow-wrap: break-word;
+}
+
+.rules thead th {
+  background: var(--note-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.rules tbody tr:last-child > * {
+  border-bottom: 1px solid var(--border);
+}
+
+.rules tbody:last-child tr:last-child > * {
+  border-bottom: none;
+}
+
+.rules tr.note td,
+.rules tr.src td {
+  padding-top: 0;
+}
+
+.rules tr.note td .verify {
+  margin-inline-end: 6px;
+}
+
+.verify-list li {
+  padding-inline-start: 4px;
+}
+
+.verify-list .back {
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.sources a {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  body {
+    padding: 24px 14px 56px;
+  }
+
+  main {
+    padding: 28px 20px;
+  }
+}
+
+@media (max-width: 599.98px) {
+  body {
+    padding: 16px 10px 48px;
+  }
+
+  main {
+    padding: 22px 16px;
+  }
+
+  h1 {
+    font-size: 25px;
+  }
+
+  .card dl {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .card dd {
+    margin-bottom: 10px;
+  }
+
+  .card dd:last-child {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 759.98px) {
+  .rules,
+  .rules tbody,
+  .rules tr,
+  .rules th,
+  .rules td {
+    display: block;
+  }
+
+  .rules {
+    margin-top: 12px;
+    border: 0;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .rules thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .rules tbody {
+    margin: 0 0 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  .rules tbody tr:last-child > *,
+  .rules tbody:last-child tr:last-child > * {
+    border-bottom: none;
+  }
+
+  .rules tr.data th {
+    padding: 12px 16px;
+    background: var(--note-bg);
+    border-bottom: 1px solid var(--border);
+    font-size: 18px;
+  }
+
+  .rules tr.data td {
+    display: grid;
+    grid-template-columns: 46% 1fr;
+    gap: 12px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rules tr.data td::before {
+    content: attr(data-label);
+    color: var(--text-sub);
+    font-weight: 700;
+  }
+
+  .rules tr.note td,
+  .rules tr.src td {
+    padding: 10px 16px 0;
+  }
+
+  .rules tr.src td {
+    padding-bottom: 12px;
+  }
+}
+
+@media print {
+  :root {
+    --bg: #fff;
+    --surface: #fff;
+    --text: #000;
+    --text-sub: #333;
+    --gold: #000;
+    --gold-text: #000;
+    --border: #999;
+    --note-bg: #fff;
+    --shadow: transparent;
+  }
+
+  body {
+    padding: 0;
+    background: #fff;
+    color: #000;
+    font-size: 12pt;
+  }
+
+  header a,
+  .verify-list .back {
+    display: none;
+  }
+
+  main {
+    max-width: none;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: #fff;
+  }
+
+  main > p,
+  main > ul,
+  main > ol {
+    max-width: none;
+  }
+
+  a {
+    color: #000;
+    text-decoration: none;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    direction: ltr;
+    unicode-bidi: isolate;
+    font-size: 10pt;
+    overflow-wrap: anywhere;
+  }
+
+  .verify {
+    border-color: #000;
+  }
+
+  .card,
+  .howto,
+  .rules tbody,
+  main li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  h2,
+  h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}
+.rv-jump {
+  margin: 12px 0 0;
+}
+
+.rv-cta,
+.rv-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 26px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--on-gold);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.rv-send:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.rv-form {
+  margin-top: 16px;
+}
+
+.rv-who {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.rv-who legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.rv-field,
+.rv-note {
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.rv-form input[type="text"],
+.rv-form textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 400;
+}
+
+.rv-form textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.rv-form input[type="text"]:focus,
+.rv-form textarea:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.rv-items {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+main .rv-items li {
+  margin: 0 0 14px;
+}
+
+.rv-item {
+  padding: 16px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  scroll-margin-top: 16px;
+}
+
+.rv-item.answered {
+  border-color: var(--gold);
+}
+
+.rv-q {
+  margin: 0 0 12px;
+}
+
+.rv-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  margin-inline-end: 6px;
+  border-radius: 999px;
+  background: var(--note-bg);
+  color: var(--gold-text);
+  font-weight: 700;
+}
+
+.rv-choice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+.rv-choice label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+
+.rv-choice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.rv-choice label.is-on {
+  border-color: var(--gold);
+  background: var(--note-bg);
+  color: var(--gold-text);
+}
+
+.rv-choice label.is-on::before {
+  content: "✓";
+  margin-inline-end: 6px;
+}
+
+.rv-choice label:focus-within {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.rv-err {
+  display: block;
+  color: var(--gold-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.rv-err:empty {
+  display: none;
+}
+
+.rv-item .rv-err {
+  margin-top: 8px;
+}
+
+.rv-item .back {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.rv-item.invalid,
+.rv-field.invalid input {
+  border-color: var(--gold-text);
+  box-shadow: 0 0 0 2px var(--gold-text);
+}
+
+.rv-general {
+  margin-top: 20px;
+}
+
+.rv-privacy {
+  margin: 14px 0 0;
+  color: var(--text-sub);
+  font-size: 15px;
+}
+
+.rv-bar {
+  position: sticky;
+  bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 2px 16px var(--shadow);
+}
+
+.rv-progress {
+  font-weight: 700;
+}
+
+.rv-status {
+  flex: 1 1 14rem;
+  color: var(--gold-text);
+  font-size: 15px;
+}
+
+.rv-status:empty {
+  display: none;
+}
+
+.rv-done {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border: 1.5px solid var(--gold);
+  border-radius: 12px;
+  background: var(--note-bg);
+}
+
+.rv-done p {
+  margin: 0 0 8px;
+}
+
+.rv-done-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.rv-done-summary {
+  margin: 0;
+  font: inherit;
+  white-space: pre-wrap;
+}
+
+.rv-form.sent .rv-bar {
+  display: none;
+}
+
+@media (max-width: 599.98px) {
+  .rv-send {
+    flex: 1 1 100%;
+  }
+}
+
+@media print {
+  .rv-jump,
+  .rv-bar,
+  .rv-err,
+  .rv-privacy,
+  .rv-item .back {
+    display: none;
+  }
+
+  .rv-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">יהודי 365</span>
+  <a href="./">דף התמיכה</a>
+</header>
+
+<main>
+  <h1>מעקב טהרת המשפחה — כללי החישוב לאישור הרב</h1>
+  <p class="meta">אפליקציית ״יהודי 365״ · גרסת כללים 2 · 8 באוקטובר 2026 (כ״ז בתשרי תשפ״ז)</p>
+
+  <p class="lead">האפליקציה אינה פוסקת הלכה. היא עוזרת לאישה (ולבעלה) לעקוב אחרי המחזור, סופרת ימים לפי זמני ההלכה במיקום שלה, ומזכירה מה לעשות ומתי. בכל ספק היא עוצרת ומפנה לשאלת רב. הדף הזה מפרט בדיוק את הכללים שהיא מיישמת, לפי מנהג, כדי שהרב יאשר או יתקן לפני שהתכונה יוצאת למשתמשות.</p>
+
+  <aside class="howto">
+    <p><strong>איך לענות</strong>ב<a href="#s8">טופס התשובות בסעיף 8</a> יש 14 פריטים. בכל פריט כתוב מה האפליקציה עושה היום, ומסמנים ״נכון״ או ״לא נכון״. ליד כל פריט יש מקום להערה, וכשמסמנים ״לא נכון״ כותבים בה מה הנכון. הסימונים נשמרים בדפדפן, כך שאפשר להפסיק ולחזור, ולחיצה על ״שליחה״ בסוף שולחת הכול אלינו. כל תג ״לאימות״ בדף מוביל לפריט שלו בטופס.</p>
+    <p class="rv-jump"><a class="rv-cta" href="#s8">לטופס התשובות</a></p>
+  </aside>
+
+  <h2 id="s1">1. הגדרות יסוד</h2>
+  <ul>
+    <li>היום העברי מתחיל בשקיעה. ראייה אחרי השקיעה שייכת ליום העברי הבא.</li>
+    <li>עונה: עונת יום מהזריחה עד השקיעה, עונת לילה מהשקיעה עד הזריחה.
+      <span class="vnote"><a class="verify" id="r1" href="#v1">לאימות 1</a> יש הסוברים שעונת היום מתחילה מעלות השחר; האפליקציה מחשבת מהזריחה.</span>
+      <span class="source">מקור: שו״ע יו״ד קפד ד-ה; פניני הלכה טהרת המשפחה ו, ד.</span>
+    </li>
+    <li>ראייה בין השמשות (בין השקיעה לצאת הכוכבים, 13.5 דקות זמניות אחריה): בספירת ימי ההמתנה היא נספרת מהיום הבא (לחומרא), ובעונות הפרישה חוששים לשתי העונות, זו שהסתיימה וזו שהתחילה. <a class="verify" id="r2" href="#v2">לאימות 2</a></li>
+    <li>יום הראייה הוא יום 1 לכל ספירה.</li>
+    <li>כל הזמנים (זריחה, שקיעה, צאת הכוכבים) מחושבים לפי המיקום שבחרה המשתמשת, לא לפי שעון המכשיר.</li>
+  </ul>
+
+  <h2 id="s2">2. טבלת המנהגים</h2>
+  <p>המשתמשת בוחרת מנהג, ובכל פרמטר יכולה לשנות לפי הוראת רבה. ברירת המחדל נגזרת מנוסח התפילה שבחרה: אשכנז ← אשכנז, ספרד ← חסידים, חב״ד ← חב״ד, עדות המזרח ← לפי הרב עובדיה יוסף.</p>
+
+  <table class="rules">
+    <caption>טבלת המנהגים והפרמטרים של כל מנהג</caption>
+    <thead>
+      <tr>
+        <th scope="col">פרמטר</th>
+        <th scope="col">אשכנז</th>
+        <th scope="col">חסידים</th>
+        <th scope="col">חב״ד</th>
+        <th scope="col">ספרדים ע״פ הרב עובדיה יוסף</th>
+        <th scope="col">ספרדים ע״פ הרב מרדכי אליהו</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr class="data">
+        <th scope="row">המתנה לפני הפסק טהרה (יום הראייה = 1)</th>
+        <td data-label="אשכנז">5 ימים</td>
+        <td data-label="חסידים">5 ימים</td>
+        <td data-label="חב״ד">5 ימים</td>
+        <td data-label="ספרדים ע״פ הרב עובדיה יוסף">הפסק מהיום הרביעי</td>
+        <td data-label="ספרדים ע״פ הרב מרדכי אליהו">5 ימים</td>
+      </tr>
+      <tr class="note">
+        <td colspan="6"><a class="verify" id="r3" href="#v3">לאימות 3</a> בתא של הרב עובדיה: האם 4 ימים מתחילת הראייה או ממועד התשמיש האחרון?</td>
+      </tr>
+      <tr class="src">
+        <td colspan="6" class="source">מקור: רמ״א יו״ד קצו, יא (גם ללא תשמיש); פניני הלכה ד, ו; טהרת הבית (שי לש״י, ״מהיום הרביעי מתחילת הראייה״); דרכי טהרה פי״ד סעיף כא.</td>
+      </tr>
+    </tbody>
+
+    <tbody>
+      <tr class="data">
+        <th scope="row">מוך דחוק</th>
+        <td data-label="אשכנז">מומלץ (הידור)</td>
+        <td data-label="חסידים">נדרש</td>
+        <td data-label="חב״ד">נדרש</td>
+        <td data-label="ספרדים ע״פ הרב עובדיה יוסף">רשות</td>
+        <td data-label="ספרדים ע״פ הרב מרדכי אליהו">מומלץ</td>
+      </tr>
+      <tr class="note">
+        <td colspan="6"><a class="verify" id="r4" href="#v4">לאימות 4</a> סטטוס המוך בכל מנהג. דרכי טהרה מתנה את ההפסק במוך בראייה של יום אחד.</td>
+      </tr>
+      <tr class="src">
+        <td colspan="6" class="source">מקור: פניני הלכה ד, ד; טהרת הבית ח״ג יג, ג; דרכי טהרה פי״ד.</td>
+      </tr>
+    </tbody>
+
+    <tbody>
+      <tr class="data">
+        <th scope="row">עונה בינונית</th>
+        <td data-label="אשכנז">יום 30 ו-31</td>
+        <td data-label="חסידים">יום 30 ו-31</td>
+        <td data-label="חב״ד">יום 30 בלבד</td>
+        <td data-label="ספרדים ע״פ הרב עובדיה יוסף">יום 30 בלבד</td>
+        <td data-label="ספרדים ע״פ הרב מרדכי אליהו">יום 30 בלבד</td>
+      </tr>
+      <tr class="note">
+        <td colspan="6"><a class="verify" id="r5" href="#v5">לאימות 5</a> בתא של הרב מרדכי אליהו: האם יום 30 בלבד?</td>
+      </tr>
+      <tr class="src">
+        <td colspan="6" class="source">מקור: שו״ע יו״ד קפט, א (30); חוות דעת וקיצור שו״ע קנה, ג (31); שו״ע הרב וחב״ד (30); טהרת הבית (30 בלבד, אין לחוש ל-31).</td>
+      </tr>
+    </tbody>
+
+    <tbody>
+      <tr class="data">
+        <th scope="row">היקף העונה הבינונית</th>
+        <td data-label="אשכנז">עונה אחת (כעונת הראייה)</td>
+        <td data-label="חסידים">עונה אחת</td>
+        <td data-label="חב״ד">כל היממה (לילה ויום)</td>
+        <td data-label="ספרדים ע״פ הרב עובדיה יוסף">עונה אחת</td>
+        <td data-label="ספרדים ע״פ הרב מרדכי אליהו">עונה אחת</td>
+      </tr>
+      <tr class="note">
+        <td colspan="6"><a class="verify" id="r6" href="#v6">לאימות 6</a> בתאים של אשכנז ושל הרב מרדכי אליהו: יש נוהגים יממה שלמה.</td>
+      </tr>
+      <tr class="src">
+        <td colspan="6" class="source">מקור: mikvah.org (חב״ד: כל יום 30); טהרת הבית (עונה אחת); יועצות הלכה.</td>
+      </tr>
+    </tbody>
+
+    <tbody>
+      <tr class="data">
+        <th scope="row">עונת אור זרוע (העונה שלפני)</th>
+        <td data-label="אשכנז">לא (ניתן להפעיל)</td>
+        <td data-label="חסידים">כן</td>
+        <td data-label="חב״ד">כן</td>
+        <td data-label="ספרדים ע״פ הרב עובדיה יוסף">לא</td>
+        <td data-label="ספרדים ע״פ הרב מרדכי אליהו">לא</td>
+      </tr>
+      <tr class="note">
+        <td colspan="6"><a class="verify" id="r7" href="#v7">לאימות 7</a> ברירת המחדל של אשכנז: רבים מחמירים.</td>
+      </tr>
+      <tr class="src">
+        <td colspan="6" class="source">מקור: אור זרוע א, שנח; פניני הלכה ו הערה 6 (רוב הפוסקים לא קיבלו); שו״ע הרב (חומרא); טהרת הבית (אין צורך).</td>
+      </tr>
+    </tbody>
+
+    <tbody>
+      <tr class="data">
+        <th scope="row">שיטת חישוב ההפלגה</th>
+        <td data-label="אשכנז">ימים, מראייה לראייה כולל שני הקצוות</td>
+        <td data-label="חסידים">ימים</td>
+        <td data-label="חב״ד">עונות: מליל היום הראשון של השבעה נקיים עד עונת הראייה, ומוקרן מהפסק הטהרה הבא</td>
+        <td data-label="ספרדים ע״פ הרב עובדיה יוסף">ימים</td>
+        <td data-label="ספרדים ע״פ הרב מרדכי אליהו">ימים</td>
+      </tr>
+      <tr class="src">
+        <td colspan="6" class="source">מקור: שו״ע יו״ד קפט, א; שו״ע הרב וחישובי חב״ד (mikvah.org).</td>
+      </tr>
+    </tbody>
+
+    <tbody>
+      <tr class="data">
+        <th scope="row">בדיקות בשבעה נקיים</th>
+        <td colspan="5" data-label="כל המנהגים">שתיים ביום (בוקר וערב) בכל המנהגים; יום 1 ויום 7 חובה.</td>
+      </tr>
+      <tr class="src">
+        <td colspan="6" class="source">מקור: שו״ע יו״ד קצו, ד; דרכי טהרה פי״ד ג-ד; יועצות הלכה.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="s3">3. מהלך המחזור — מה האפליקציה עושה בכל שלב</h2>
+  <div class="cards">
+    <article class="card">
+      <h3>ראייה</h3>
+      <dl>
+        <dt>מה נרשם</dt>
+        <dd>המשתמשת מזינה תאריך ושעה (או תאריך ועונה).</dd>
+        <dt>מה האפליקציה עושה</dt>
+        <dd>קובעת את העונה והיום העברי, ומציגה מאיזה יום אפשר לעשות הפסק טהרה.</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <h3>הפסק טהרה</h3>
+      <dl>
+        <dt>מתי</dt>
+        <dd>ביום, לפני השקיעה (לכתחילה ממנחה קטנה).</dd>
+        <dt>תזכורות</dt>
+        <dd>90 דקות לפני השקיעה, עם שעת השקיעה. ביום שישי התזכורת יוצאת לפני הדלקת נרות, כי האפליקציה שותקת לגמרי בשבת וביום טוב.</dd>
+        <dt>מה האפליקציה עושה</dt>
+        <dd>הפסק שלא נעשה — האפליקציה מציעה אותו שוב למחרת. הפסק שתוצאתו לא נקייה אינו נספר.</dd>
+      </dl>
+      <span class="vnote"><a class="verify" id="r8" href="#v8">לאימות 8</a> הפסק אחרי השקיעה — האפליקציה מחשיבה אותו למחר. לפי הרב עובדיה יש בדיעבד עד 3 דקות אחרי השקיעה; זה לא ממומש.</span>
+    </article>
+
+    <article class="card">
+      <h3>שבעה נקיים</h3>
+      <dl>
+        <dt>בדיקות</dt>
+        <dd>שתי בדיקות ביום, בוקר (אחרי הזריחה) וערב (לפני השקיעה), עם תזכורות. בדיקת יום 1 ויום 7 מסומנות חובה.</dd>
+        <dt>בדיקה חסרה</dt>
+        <dd>חסרה בדיקה ביום 1 או ביום 7 — האפליקציה עוצרת (״לשאול רב״) עד שהמשתמשת מזינה את הוראת הרב: להמשיך או להתחיל מחדש.</dd>
+        <dt>בדיקה לא נקייה</dt>
+        <dd>הספירה מתבטלת ונדרש הפסק טהרה חדש בלי המתנה נוספת; אם מדובר בוסת חדש המשתמשת מסמנת ״ראייה חדשה״ וההמתנה חלה שוב. <a class="verify" id="r9" href="#v9">לאימות 9</a></dd>
+        <dt>בדיקה מסופקת</dt>
+        <dd>״לשאול רב״.</dd>
+      </dl>
+      <span class="source">מקור: שו״ע יו״ד קצו, ד; דרכי טהרה פי״ד ו-ח; פניני הלכה ד, ח.</span>
+    </article>
+
+    <article class="card">
+      <h3>טבילה</h3>
+      <dl>
+        <dt>מתי</dt>
+        <dd>ליל היום השמיני, אחרי צאת הכוכבים (13.5 דקות זמניות אחרי השקיעה).</dd>
+        <dt>תזכורות</dt>
+        <dd>תזכורת הכנה 3 שעות לפני, ותזכורת בצאת הכוכבים. לא טבלה — תזכורת בכל לילה עד שסומנה טבילה. ליל שבת או יום טוב — תזכורת ההכנה יוצאת לפני הדלקת נרות בלבד.</dd>
+        <dt>דחייה</dt>
+        <dd>ליל יום הכיפורים וליל צום תשעה באב — הטבילה נדחית ללילה הבא. בשנה שהצום נדחה ליום ראשון, הלילה החסום הוא ליל י׳ באב; ליל שבת ט׳ באב וליל ח׳ באב פתוחים.</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <h3>שבת ויום טוב</h3>
+      <p>אין התראות ואין מסכים. בדיקות והפסק שחלו בשבת מסומנים אחרי השבת במסך ״סיכום״ הקיים באפליקציה.</p>
+    </article>
+
+    <article class="card">
+      <h3>טהורה</h3>
+      <dl>
+        <dt>מה האפליקציה עושה</dt>
+        <dd>מחשבת עונות פרישה (<a href="#s4">סעיף 4</a>) ומזכירה אותן.</dd>
+        <dt>תזכורות</dt>
+        <dd>יום אחרי העונה הבינונית האחרונה היא שואלת ״האם הגיע הוסת?״.</dd>
+      </dl>
+    </article>
+  </div>
+
+  <h2 id="s4">4. עונות פרישה (וסת שאינו קבוע)</h2>
+  <ul>
+    <li><strong>יום החודש:</strong> אותו תאריך עברי בחודש הבא, באותה עונה. ראתה ב-ל׳ בחודש והחודש הבא חסר (כ״ט יום) — האפליקציה מסמנת את היום שאחרי כ״ט (א׳ בחודש שאחריו) ומציינת שהדבר במחלוקת. <a class="verify" id="r10" href="#v10">לאימות 10</a>
+      <span class="source">מקור: שו״ע יו״ד קפט, ב; בדי השולחן קפט; halachipedia.</span>
+    </li>
+    <li><strong>הפלגה:</strong> המרווח בין שתי הראיות האחרונות (כולל שני הקצוות), מוקרן מהראייה האחרונה באותה עונה. רק ההפלגה האחרונה נשמרת.
+      <span class="vnote"><a class="verify" id="r11" href="#v11">לאימות 11</a> האם לשמור גם הפלגות גדולות קודמות שלא נעקרו.</span>
+      <span class="source">מקור: שו״ע יו״ד קפט, א; ש״ך וט״ז שם.</span>
+    </li>
+    <li><strong>עונה בינונית:</strong> יום 30 (ו-31 לפי המנהג), בעונת הראייה או בכל היממה לפי המנהג. מחושבת מחדש מכל ראייה.</li>
+    <li><strong>אור זרוע:</strong> במנהגים שמחזיקים בו, העונה שלפני כל עונת פרישה. כשמשמרים גם 30 וגם 31, אור זרוע לא מוחל על 31 (יועצות הלכה). <a class="verify" id="r12" href="#v12">לאימות 12</a></li>
+    <li><strong>בדיקה בעונת פרישה:</strong> בעונה בינונית האפליקציה מסמנת בדיקה כחובה; ביום החודש ובהפלגה — כהמלצה; עונה שנשמרת רק כאור זרוע — פרישה בלבד, בלי בדיקה. <a class="verify" id="r13" href="#v13">לאימות 13</a>
+      <span class="source">מקור: שו״ע יו״ד קפט, ד; יועצות הלכה.</span>
+    </li>
+    <li><strong>ראייה חדשה</strong> מבטלת את כל עונות הפרישה הישנות ומחשבת מחדש.</li>
+    <li><strong>וסת קבוע:</strong> האפליקציה אינה מחשבת וסת קבוע. כשהיא מזהה שלוש ראיות באותו תאריך עברי ובאותה עונה, או שלוש הפלגות שוות, היא מודיעה ״ייתכן וסת קבוע — לשאול רב״ וממשיכה לחשב כוסת שאינו קבוע.</li>
+  </ul>
+
+  <h2 id="s5">5. השהיה</h2>
+  <ul>
+    <li>הריון, אחרי לידה, הנקה, גיל מעבר: המשתמשת מעבירה את המעקב ל״השהיה״. בהשהיה אין עונות פרישה ואין תזכורות, עד ״ראייה חדשה״.
+      <span class="vnote"><a class="verify" id="r14" href="#v14">לאימות 14</a> מעוברת עד 90 יום; ספרדים — עונה בינונית ביום 60 ו-90; מניקה 24 חודש. בגרסה זו אין חישוב מיוחד, רק השהיה.</span>
+      <span class="source">מקור: שו״ע יו״ד קפט, לג-לד; halachipedia; דרכי טהרה (מניקה 24 חודש).</span>
+    </li>
+  </ul>
+
+  <h2 id="s6">6. מצב בעל</h2>
+  <p>בעל שמתקין את האפליקציה במכשירו רואה רק: עונות פרישה, ליל טבילה, ו״האם הגיע הוסת?״. הוא אינו רואה פרטי בדיקות. אין סנכרון בין מכשירים; הוא מזין את תאריכי הראייה בעצמו.</p>
+  <p>ליל הטבילה במכשיר הבעל הוא הערכה: הלילה שאחרי שבעה נקיים מהיום המוקדם ביותר להפסק לפי המנהג (ליל יום הכיפורים ותשעה באב נדחים כרגיל), ומוצע במשך שלושה לילות. אם הוא רושם את הטבילה בעצמו — לפי הרישום. עונות הפרישה מוצגות לו מהראייה האחרונה גם בלי רישום טבילה, כי במכשירו אין מידע על הספירה.</p>
+
+  <h2 id="s7">7. מחוץ לתחום בגרסה זו</h2>
+  <ul>
+    <li>כתמים (תמיד ״לשאול רב״)</li>
+    <li>וסת הגוף</li>
+    <li>וסת קבוע</li>
+    <li>גלולות ואמצעי מניעה הורמונליים</li>
+    <li>פטור ממחזורים ארוכים</li>
+    <li>דיני כלה</li>
+    <li>בדיקות בפצעים</li>
+  </ul>
+
+  <h2 id="s8">8. טופס התשובות</h2>
+  <p>בכל פריט כתוב מה האפליקציה עושה היום. מסמנים <strong>נכון</strong> או <strong>לא נכון</strong>, ואפשר לכתוב הערה. כשמסמנים ״לא נכון״, כותבים בהערה מה הנכון. ״ראה בדף״ מחזיר להקשר של הפריט.</p>
+
+  <form id="review" class="rv-form" novalidate>
+    <fieldset class="rv-who">
+      <legend>פרטי הרב</legend>
+      <label class="rv-field" for="rv-rav">שם
+        <input id="rv-rav" name="rav" type="text" autocomplete="name" required>
+        <span class="rv-err" aria-live="polite"></span>
+      </label>
+      <label class="rv-field" for="rv-contact">טלפון או מייל לחזרה (רשות)
+        <input id="rv-contact" name="contact" type="text" autocomplete="email" dir="auto">
+      </label>
+    </fieldset>
+
+    <ol class="rv-items">
+      <li id="v1" class="rv-item" data-key="1" data-title="עונת יום">
+        <p class="rv-q"><span class="rv-num">1</span> עונת היום מתחילה בזריחה, לא בעלות השחר.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 1"><label><input type="radio" name="v1" value="נכון">נכון</label><label><input type="radio" name="v1" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v1-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r1">ראה בדף</a>
+      </li>
+      <li id="v2" class="rv-item" data-key="2" data-title="ראייה בין השמשות">
+        <p class="rv-q"><span class="rv-num">2</span> ראייה בבין השמשות: ימי ההמתנה נספרים מהיום הבא, ובעונות הפרישה חוששים לשתי העונות, זו שהסתיימה וזו שהתחילה.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 2"><label><input type="radio" name="v2" value="נכון">נכון</label><label><input type="radio" name="v2" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v2-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r2">ראה בדף</a>
+      </li>
+      <li id="v3" class="rv-item" data-key="3" data-title="הפסק מהיום הרביעי לפי הרב עובדיה">
+        <p class="rv-q"><span class="rv-num">3</span> לפי הרב עובדיה יוסף, הפסק טהרה אפשרי מהיום הרביעי, כשיום הראייה הוא יום 1, בלי קשר למועד התשמיש האחרון.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 3"><label><input type="radio" name="v3" value="נכון">נכון</label><label><input type="radio" name="v3" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v3-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r3">ראה בדף</a>
+      </li>
+      <li id="v4" class="rv-item" data-key="4" data-title="מוך דחוק">
+        <p class="rv-q"><span class="rv-num">4</span> מוך דחוק: באשכנז מומלץ, אצל החסידים ובחב״ד נדרש, לפי הרב עובדיה רשות, ולפי הרב מרדכי אליהו מומלץ. ההפסק אינו מותנה במוך, גם כשהראייה הייתה יום אחד (בדרכי טהרה הוא מותנה).</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 4"><label><input type="radio" name="v4" value="נכון">נכון</label><label><input type="radio" name="v4" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v4-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r4">ראה בדף</a>
+      </li>
+      <li id="v5" class="rv-item" data-key="5" data-title="עונה בינונית לפי הרב מרדכי אליהו">
+        <p class="rv-q"><span class="rv-num">5</span> לפי הרב מרדכי אליהו, העונה הבינונית היא ביום 30 בלבד.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 5"><label><input type="radio" name="v5" value="נכון">נכון</label><label><input type="radio" name="v5" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v5-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r5">ראה בדף</a>
+      </li>
+      <li id="v6" class="rv-item" data-key="6" data-title="היקף העונה הבינונית">
+        <p class="rv-q"><span class="rv-num">6</span> באשכנז ולפי הרב מרדכי אליהו, העונה הבינונית היא עונה אחת, כעונת הראייה, ולא יממה שלמה.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 6"><label><input type="radio" name="v6" value="נכון">נכון</label><label><input type="radio" name="v6" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v6-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r6">ראה בדף</a>
+      </li>
+      <li id="v7" class="rv-item" data-key="7" data-title="אור זרוע באשכנז">
+        <p class="rv-q"><span class="rv-num">7</span> באשכנז, עונת אור זרוע כבויה כברירת מחדל, והמשתמשת יכולה להפעיל אותה.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 7"><label><input type="radio" name="v7" value="נכון">נכון</label><label><input type="radio" name="v7" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v7-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r7">ראה בדף</a>
+      </li>
+      <li id="v8" class="rv-item" data-key="8" data-title="הפסק אחרי השקיעה">
+        <p class="rv-q"><span class="rv-num">8</span> הפסק טהרה שנעשה אחרי השקיעה נחשב ליום הבא. אין היתר בדיעבד של 3 דקות אחרי השקיעה, גם לא לפי הרב עובדיה.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 8"><label><input type="radio" name="v8" value="נכון">נכון</label><label><input type="radio" name="v8" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v8-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r8">ראה בדף</a>
+      </li>
+      <li id="v9" class="rv-item" data-key="9" data-title="בדיקה לא נקייה בשבעה נקיים">
+        <p class="rv-q"><span class="rv-num">9</span> בדיקה לא נקייה בשבעה נקיים מבטלת את הספירה, ונדרש הפסק טהרה חדש בלי המתנה נוספת. רק כשמדובר בוסת חדש ההמתנה חלה שוב.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 9"><label><input type="radio" name="v9" value="נכון">נכון</label><label><input type="radio" name="v9" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v9-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r9">ראה בדף</a>
+      </li>
+      <li id="v10" class="rv-item" data-key="10" data-title="יום החודש כשהחודש הבא חסר">
+        <p class="rv-q"><span class="rv-num">10</span> ראתה ב-ל׳ בחודש והחודש הבא חסר: האפליקציה מסמנת את א׳ שאחרי כ״ט ומציינת שהדבר במחלוקת.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 10"><label><input type="radio" name="v10" value="נכון">נכון</label><label><input type="radio" name="v10" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v10-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r10">ראה בדף</a>
+      </li>
+      <li id="v11" class="rv-item" data-key="11" data-title="הפלגות קודמות">
+        <p class="rv-q"><span class="rv-num">11</span> הפלגה: נשמרת רק ההפלגה האחרונה. הפלגות גדולות קודמות שלא נעקרו אינן נשמרות.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 11"><label><input type="radio" name="v11" value="נכון">נכון</label><label><input type="radio" name="v11" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v11-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r11">ראה בדף</a>
+      </li>
+      <li id="v12" class="rv-item" data-key="12" data-title="אור זרוע ויום 31">
+        <p class="rv-q"><span class="rv-num">12</span> כששומרים גם את יום 30 וגם את יום 31, אור זרוע אינו מוחל על יום 31.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 12"><label><input type="radio" name="v12" value="נכון">נכון</label><label><input type="radio" name="v12" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v12-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r12">ראה בדף</a>
+      </li>
+      <li id="v13" class="rv-item" data-key="13" data-title="בדיקה בעונת פרישה">
+        <p class="rv-q"><span class="rv-num">13</span> בדיקה בעונת פרישה: בעונה בינונית חובה, ביום החודש ובהפלגה המלצה, ובעונה שנשמרת רק כאור זרוע פרישה בלבד, בלי בדיקה.</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 13"><label><input type="radio" name="v13" value="נכון">נכון</label><label><input type="radio" name="v13" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v13-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r13">ראה בדף</a>
+      </li>
+      <li id="v14" class="rv-item" data-key="14" data-title="השהיה">
+        <p class="rv-q"><span class="rv-num">14</span> בהריון, אחרי לידה, בהנקה ובגיל המעבר יש רק השהיה של המעקב, בלי חישוב מיוחד למעוברת (עד 90 יום), לספרדים (עונה בינונית ביום 60 ו-90) ולמניקה (24 חודש).</p>
+        <div class="rv-choice" role="radiogroup" aria-label="פריט 14"><label><input type="radio" name="v14" value="נכון">נכון</label><label><input type="radio" name="v14" value="לא נכון">לא נכון</label></div>
+        <label class="rv-note">הערה<textarea name="v14-note" rows="2" placeholder="אם לא נכון: מה הנכון?"></textarea></label>
+        <span class="rv-err" aria-live="polite"></span>
+        <a class="back" href="#r14">ראה בדף</a>
+      </li>
+    </ol>
+
+    <label class="rv-field rv-general" for="rv-general">הערות על כל כלל אחר בדף (רשות)
+      <textarea id="rv-general" name="general" rows="4"></textarea>
+    </label>
+
+    <p class="rv-privacy">השם, פרטי הקשר והתשובות נשלחים אלינו דרך Formspree ומגיעים למייל <a href="mailto:365jew@gmail.com">365jew@gmail.com</a>.</p>
+
+    <div class="rv-bar">
+      <span class="rv-progress" aria-live="polite"></span>
+      <span class="rv-status" role="status"></span>
+      <a class="rv-mail" hidden>לשלוח במייל במקום</a>
+      <button class="rv-send" type="submit">שליחה</button>
+    </div>
+
+    <div class="rv-done" hidden>
+      <p class="rv-done-title">תודה רבה! התשובות נשלחו.</p>
+      <p>הנה מה שנשלח:</p>
+      <pre class="rv-done-summary"></pre>
+    </div>
+  </form>
+
+  <h2 id="s9">9. מקורות</h2>
+  <ul class="sources">
+    <li>פניני הלכה, טהרת המשפחה: <a href="https://ph.yhb.org.il/category/%D7%98%D7%94%D7%A8%D7%AA-%D7%94%D7%9E%D7%A9%D7%A4%D7%97%D7%94/18-04/">פרק ד</a> · <a href="https://ph.yhb.org.il/category/%D7%98%D7%94%D7%A8%D7%AA-%D7%94%D7%9E%D7%A9%D7%A4%D7%97%D7%94/18-06/">פרק ו</a></li>
+    <li><a href="https://harav.org/books/darcitaara-14/">דרכי טהרה, פרק יד</a> — אתר הרב מרדכי אליהו</li>
+    <li><a href="https://shayleshay.co.il/tahara/rav-ovadia">שי לש״י — פסקי הרב עובדיה</a></li>
+    <li>יועצות הלכה (באנגלית): <a href="https://www.yoatzot.org/faq/or-zarua-24-hour-onah-beinonit/">אור זרוע ועונה בינונית</a> · <a href="https://www.yoatzot.org/faq/keeping-days-30-31-as-onah-beinonit/">שמירת ימים 30 ו-31 כעונה בינונית</a></li>
+    <li><a href="https://halachipedia.com/index.php?title=Veset">Halachipedia — Veset</a> (באנגלית)</li>
+    <li><a href="https://shulchanaruchharav.com/halacha/how-does-one-calculate-the-onah-beinonis-day-30-or-31-from-the-period/">שולחן ערוך הרב — עונה בינונית ביום 30 או 31</a> (באנגלית)</li>
+    <li><a href="https://mikvah.org/halachos-of-taharas-hamishpacha-chabad/calendar">mikvah.org — לוח טהרת המשפחה של חב״ד</a> (באנגלית)</li>
+    <li><a href="https://www.hamichlol.org.il/%D7%95%D7%A1%D7%AA_%D7%94%D7%97%D7%95%D7%93%D7%A9">המכלול — וסת החודש</a></li>
+  </ul>
+</main>
+
+<footer>יהודי 365 · Avraham Sason · <a href="mailto:365jew@gmail.com">365jew@gmail.com</a></footer>
+<script>
+(() => {
+  const ENDPOINT = 'https://formspree.io/f/xwlvgagp';
+  const RULES_VERSION = '2';
+  const DRAFT_KEY = 'jew365-taharah-review-v1';
+  const RIGHT = 'נכון';
+  const WRONG = 'לא נכון';
+
+  const form = document.getElementById('review');
+  if (!form) return;
+  const items = [...form.querySelectorAll('.rv-item')];
+  const ravField = form.querySelector('#rv-rav');
+  const contactField = form.querySelector('#rv-contact');
+  const generalField = form.querySelector('#rv-general');
+  const progress = form.querySelector('.rv-progress');
+  const status = form.querySelector('.rv-status');
+  const sendButton = form.querySelector('.rv-send');
+  const mailLink = form.querySelector('.rv-mail');
+  const done = form.querySelector('.rv-done');
+
+  const draft = {
+    load() {
+      try {
+        return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+      } catch {
+        return {};
+      }
+    },
+    save(value) {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(value));
+      } catch {}
+    },
+    clear() {
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {}
+    },
+  };
+
+  const verdictOf = (item) => item.querySelector('input[type=radio]:checked')?.value ?? '';
+  const noteOf = (item) => item.querySelector('textarea').value.trim();
+
+  function problemOf(item) {
+    const verdict = verdictOf(item);
+    if (!verdict) return 'צריך לסמן נכון או לא נכון.';
+    if (verdict === WRONG && !noteOf(item)) return 'כשמסמנים לא נכון, צריך לכתוב בהערה מה הנכון.';
+    return '';
+  }
+
+  function collect() {
+    const answers = {};
+    for (const item of items) {
+      answers[item.dataset.key] = { verdict: verdictOf(item), note: item.querySelector('textarea').value };
+    }
+    return { rav: ravField.value, contact: contactField.value, general: generalField.value, answers };
+  }
+
+  function restore() {
+    const saved = draft.load();
+    ravField.value = saved.rav ?? '';
+    contactField.value = saved.contact ?? '';
+    generalField.value = saved.general ?? '';
+    for (const item of items) {
+      const answer = saved.answers?.[item.dataset.key];
+      if (!answer) continue;
+      for (const radio of item.querySelectorAll('input[type=radio]')) radio.checked = radio.value === answer.verdict;
+      item.querySelector('textarea').value = answer.note ?? '';
+    }
+  }
+
+  function showProblem(item, message) {
+    item.classList.toggle('invalid', Boolean(message));
+    item.querySelector('.rv-err').textContent = message;
+  }
+
+  function refresh() {
+    let answered = 0;
+    for (const item of items) {
+      const verdict = verdictOf(item);
+      if (verdict) answered += 1;
+      item.classList.toggle('answered', Boolean(verdict));
+      for (const label of item.querySelectorAll('.rv-choice label')) {
+        label.classList.toggle('is-on', label.querySelector('input').checked);
+      }
+      if (item.classList.contains('invalid')) showProblem(item, problemOf(item));
+    }
+    const ravBox = ravField.closest('.rv-field');
+    if (ravBox.classList.contains('invalid') && ravField.value.trim()) {
+      ravBox.classList.remove('invalid');
+      ravBox.querySelector('.rv-err').textContent = '';
+    }
+    progress.textContent = `סומנו ${answered} מתוך ${items.length}`;
+  }
+
+  function lineFor(item) {
+    const note = noteOf(item);
+    return note ? `${verdictOf(item)}. הערה: ${note}` : verdictOf(item);
+  }
+
+  function summary() {
+    const lines = [`שם הרב: ${ravField.value.trim()}`];
+    if (contactField.value.trim()) lines.push(`טלפון או מייל: ${contactField.value.trim()}`);
+    lines.push('');
+    for (const item of items) lines.push(`${item.dataset.key}. ${item.dataset.title}: ${lineFor(item)}`);
+    if (generalField.value.trim()) lines.push('', `הערות נוספות: ${generalField.value.trim()}`);
+    return lines.join('\n');
+  }
+
+  function validate() {
+    let first = null;
+    const ravBox = ravField.closest('.rv-field');
+    const missingName = !ravField.value.trim();
+    ravBox.classList.toggle('invalid', missingName);
+    ravBox.querySelector('.rv-err').textContent = missingName ? 'צריך לכתוב שם.' : '';
+    if (missingName) first = ravField;
+    for (const item of items) {
+      const message = problemOf(item);
+      showProblem(item, message);
+      if (message && !first) first = item;
+    }
+    return first;
+  }
+
+  function payload() {
+    const right = items.filter((item) => verdictOf(item) === RIGHT).length;
+    const name = ravField.value.trim();
+    const contact = contactField.value.trim();
+    const body = {
+      _subject: `תשובת הרב לכללי הטהרה (גרסה ${RULES_VERSION}): ${name}`,
+      'שם הרב': name,
+      'טלפון או מייל': contact || '—',
+      'גרסת כללים': RULES_VERSION,
+      סיכום: `נכון ${right} · לא נכון ${items.length - right}`,
+    };
+    if (contact.includes('@')) body._replyto = contact;
+    for (const item of items) body[`${item.dataset.key.padStart(2, '0')}. ${item.dataset.title}`] = lineFor(item);
+    body['הערות נוספות'] = generalField.value.trim() || '—';
+    return body;
+  }
+
+  function offerMail(text) {
+    const subject = `תשובת הרב לכללי הטהרה (גרסה ${RULES_VERSION})`;
+    mailLink.href = `mailto:365jew@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+    mailLink.hidden = false;
+  }
+
+  form.addEventListener('input', () => {
+    draft.save(collect());
+    refresh();
+  });
+  form.addEventListener('change', () => {
+    draft.save(collect());
+    refresh();
+  });
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const first = validate();
+    if (first) {
+      status.textContent = 'יש פריטים שעוד צריך להשלים, הם מסומנים בדף.';
+      first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      (first.querySelector?.('input[type=radio]') ?? first).focus({ preventScroll: true });
+      return;
+    }
+
+    const text = summary();
+    sendButton.disabled = true;
+    status.textContent = 'שולח…';
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    try {
+      const response = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload()),
+        signal: controller.signal,
+      });
+      if (!response.ok) throw new Error(`Formspree ${response.status}`);
+      draft.clear();
+      form.classList.add('sent');
+      for (const control of form.querySelectorAll('input, textarea')) control.disabled = true;
+      done.querySelector('.rv-done-summary').textContent = text;
+      done.hidden = false;
+      done.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch {
+      status.textContent = navigator.onLine === false
+        ? 'אין חיבור לאינטרנט. התשובות שמורות כאן, ואפשר לנסות שוב.'
+        : 'השליחה לא הצליחה. התשובות שמורות כאן: אפשר לנסות שוב, או לשלוח במייל.';
+      offerMail(text);
+    } finally {
+      clearTimeout(timer);
+      sendButton.disabled = false;
+    }
+  });
+
+  restore();
+  refresh();
+})();
+</script>
+</body>
+</html>

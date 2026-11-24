@@ -1,0 +1,326 @@
+{
+  "format": 1,
+  "version": 1,
+  "credit": {
+    "he": "המשנה: תורת אמת 357 (כל הזכויות שמורות לר׳ פנחס ראובן); ביכורים פרק ד מנוסח הגמרא; ברטנורא: On Your Way, נחלת הכלל; אנגלית: Mishnah Yomit מאת ד״ר יהושע קולפ, CC-BY. דרך ספריא",
+    "en": "The Mishnah: Torat Emet 357 (all rights reserved to R' Pinchas Reuven); Bikkurim chapter 4 from the Gemara's version; Bartenura: On Your Way, public domain; English: Mishnah Yomit by Dr. Joshua Kulp, CC-BY. Via Sefaria"
+  },
+  "gzipBytes": 3040991,
+  "gz": {
+    "Berakhot": {
+      "path": "berakhot.a7b76513.json.gz",
+      "sha256": "a7b76513dde0cff9dcffe2165f743eb15e3b37674c8231d32399da5614c69fbd",
+      "bytes": 37127
+    },
+    "Peah": {
+      "path": "peah.2991b850.json.gz",
+      "sha256": "2991b850727c96380789fe45f834234f1a6881e2144418274abe5e63f1eaa977",
+      "bytes": 43459
+    },
+    "Demai": {
+      "path": "demai.33a674d8.json.gz",
+      "sha256": "33a674d8c2fa76185d93c8487ce6b2b87150985707bda1297e073b3b0f5ae908",
+      "bytes": 33122
+    },
+    "Kilayim": {
+      "path": "kilayim.ee8c2f8f.json.gz",
+      "sha256": "ee8c2f8f76395c01b70399d3433ad077d343cb6a293dc611e331ea3ea43e6c32",
+      "bytes": 55568
+    },
+    "Sheviit": {
+      "path": "sheviit.7e22ff1a.json.gz",
+      "sha256": "7e22ff1a98e6927085bcb65332484d7236c55d66d871c3d66699e27a687473cf",
+      "bytes": 55613
+    },
+    "Terumot": {
+      "path": "terumot.076785df.json.gz",
+      "sha256": "076785df88ee42f1b3beab36dcf6cd26255f315ebf50a2e062a0b7042acb73e4",
+      "bytes": 55062
+    },
+    "Maasrot": {
+      "path": "maasrot.bfb4d96e.json.gz",
+      "sha256": "bfb4d96eb378fe402053a421eb6357f85f5265fa5321dab891e38580edf44a6c",
+      "bytes": 27092
+    },
+    "Maaser Sheni": {
+      "path": "maaser-sheni.ca20193e.json.gz",
+      "sha256": "ca20193e18011f542d115862023287577fd251f96679cdc05eac8c7d161264bf",
+      "bytes": 35589
+    },
+    "Challah": {
+      "path": "challah.ee7f08d0.json.gz",
+      "sha256": "ee7f08d01144faeefe52ab1a8559dc1da65e26fd41fd5560038b7eaf0ce019e4",
+      "bytes": 23982
+    },
+    "Orlah": {
+      "path": "orlah.6cb4b076.json.gz",
+      "sha256": "6cb4b0768598ff17e8c4e89f2c3f7fb4180360be053ba6190576d311df98dcd4",
+      "bytes": 17420
+    },
+    "Bikkurim": {
+      "path": "bikkurim.89f1b6c9.json.gz",
+      "sha256": "89f1b6c9ef19c2e9baad544f93d83a44e2f137b569d53d94038492a434b25fc1",
+      "bytes": 23745
+    },
+    "Shabbat": {
+      "path": "shabbat.99e92c7b.json.gz",
+      "sha256": "99e92c7b25b6bee81c24d22f101e73605f1bcb84abdc7a5fabefdd5c965bea08",
+      "bytes": 104368
+    },
+    "Eruvin": {
+      "path": "eruvin.206774d5.json.gz",
+      "sha256": "206774d52e9ef760646ac67ba7f22cd0070e68f1f060811e6b881ea2820db05a",
+      "bytes": 69451
+    },
+    "Pesachim": {
+      "path": "pesachim.2182951d.json.gz",
+      "sha256": "2182951d81762378d34142a1baa3af0d7d81c988a1a44868b35aa7890db94c59",
+      "bytes": 65486
+    },
+    "Shekalim": {
+      "path": "shekalim.8f92e8b4.json.gz",
+      "sha256": "8f92e8b485dc38fbfeede32a79bc2bbc7c3c92dc3525548c1f78bb5ab6fb90b2",
+      "bytes": 45981
+    },
+    "Yoma": {
+      "path": "yoma.c860e31c.json.gz",
+      "sha256": "c860e31ca413b69abfb250c199315600a113210b82c6d934918549e59472045d",
+      "bytes": 44161
+    },
+    "Sukkah": {
+      "path": "sukkah.ed478909.json.gz",
+      "sha256": "ed4789090821a1880f3b253d8579404d29c94f7f9901b91116bfacd7844b7d1c",
+      "bytes": 35207
+    },
+    "Beitzah": {
+      "path": "beitzah.bb4e168a.json.gz",
+      "sha256": "bb4e168a6af76365c5541b282630ccd04be2338b996f143a88a65400dbb7982a",
+      "bytes": 29366
+    },
+    "Rosh Hashanah": {
+      "path": "rosh-hashanah.57a3d43c.json.gz",
+      "sha256": "57a3d43c5433d4fe6f7ede95f83c2ee6b4069d642ada79d4ffd40732becf83ed",
+      "bytes": 25925
+    },
+    "Taanit": {
+      "path": "taanit.8ae5327b.json.gz",
+      "sha256": "8ae5327b1dd7b0a13cb72b85b10e5e01f227928b71bb15bd20f0fabd72c5c1db",
+      "bytes": 25069
+    },
+    "Megillah": {
+      "path": "megillah.0c2b8d5b.json.gz",
+      "sha256": "0c2b8d5b79d918a14b6558d1309435b7b3c2d4faa35e829befb78b91492487e2",
+      "bytes": 25167
+    },
+    "Moed Katan": {
+      "path": "moed-katan.b86edf29.json.gz",
+      "sha256": "b86edf29b210876d29402ef53fdad3267325ec2e7a8d93922dfe70e833e04d3f",
+      "bytes": 17203
+    },
+    "Chagigah": {
+      "path": "chagigah.568c9f04.json.gz",
+      "sha256": "568c9f0461da2715255b803b814ee43ee1324ae4e6c3e2001443b7c9cbe9b97e",
+      "bytes": 18584
+    },
+    "Yevamot": {
+      "path": "yevamot.6389cdc9.json.gz",
+      "sha256": "6389cdc9a0ebf84d5bc7b985c341c0a51bafb94f351c799bd7c7d674cf580281",
+      "bytes": 78478
+    },
+    "Ketubot": {
+      "path": "ketubot.85d2e100.json.gz",
+      "sha256": "85d2e100b263625023b2cf86a7c63224d66bfe5278c69335a806c5465fb91be1",
+      "bytes": 67390
+    },
+    "Nedarim": {
+      "path": "nedarim.8e5c0958.json.gz",
+      "sha256": "8e5c09582a1bb0c39ddf5f49ce824222d2c07c199b477fd0e8bdc9086749bc38",
+      "bytes": 56769
+    },
+    "Nazir": {
+      "path": "nazir.6fb6208e.json.gz",
+      "sha256": "6fb6208e7609230f5e759670e81256c980759373b2cb145faf718924d1595006",
+      "bytes": 42423
+    },
+    "Sotah": {
+      "path": "sotah.87cea631.json.gz",
+      "sha256": "87cea6312ea5cf1faa468c6169ba69b43bd84ac06657d7d980616d5980a35a3c",
+      "bytes": 54631
+    },
+    "Gittin": {
+      "path": "gittin.e086138c.json.gz",
+      "sha256": "e086138c13c950646229c62fba60a1e5d48c26c16b8608041aaffedef42121e0",
+      "bytes": 52180
+    },
+    "Kiddushin": {
+      "path": "kiddushin.4310c4d2.json.gz",
+      "sha256": "4310c4d269af4d912c295f7d79f995bb7d6cb8fd9158aedb06ef51549e77a9b2",
+      "bytes": 32855
+    },
+    "Bava Kamma": {
+      "path": "bava-kamma.9d066eee.json.gz",
+      "sha256": "9d066eee5e0ba1fc10d980f4b2714602b05590d856cdff080040c68e7abb00d9",
+      "bytes": 57768
+    },
+    "Bava Metzia": {
+      "path": "bava-metzia.d1ed5e8d.json.gz",
+      "sha256": "d1ed5e8d61ae5949b5dea45c88bbe19f07fb42af36273df5b42e14717f6ce68f",
+      "bytes": 72489
+    },
+    "Bava Batra": {
+      "path": "bava-batra.ae9130fa.json.gz",
+      "sha256": "ae9130fad56dff39cadef3f6e54e8c967b7a9c33ce14c8f57bbcc8ec31d14149",
+      "bytes": 68764
+    },
+    "Sanhedrin": {
+      "path": "sanhedrin.c5c8d0d2.json.gz",
+      "sha256": "c5c8d0d2667e0dedf5fcc6a32ab3ab23a13a019401a8077c21e6f957c1ee6fe6",
+      "bytes": 70302
+    },
+    "Makkot": {
+      "path": "makkot.2a2979fd.json.gz",
+      "sha256": "2a2979fdfec641469ad2114398bcaa440f237a64c13e6cb07f258d0122d60a36",
+      "bytes": 29559
+    },
+    "Shevuot": {
+      "path": "shevuot.08a29c57.json.gz",
+      "sha256": "08a29c578c5011e1ab41212ff36fa71d0d26e0ad0774ec544892415cdb9b57e7",
+      "bytes": 39603
+    },
+    "Eduyot": {
+      "path": "eduyot.13e9be9b.json.gz",
+      "sha256": "13e9be9b3329c4cd8c511a3543e10713fac1455ec3be34dcd17add5ff4cf51a5",
+      "bytes": 62844
+    },
+    "Avodah Zarah": {
+      "path": "avodah-zarah.6eb79887.json.gz",
+      "sha256": "6eb7988716b5ca913615d5355250b545d8844df50746f45a5b0cf3bf01bf44d3",
+      "bytes": 38419
+    },
+    "Avot": {
+      "path": "avot.b4edb784.json.gz",
+      "sha256": "b4edb784751f53bc04e82f878e4119720cdcf17ed9a13570b9bb8b5469c75a67",
+      "bytes": 75066
+    },
+    "Horayot": {
+      "path": "horayot.52b6f8dd.json.gz",
+      "sha256": "52b6f8dd4908bcd66668344d95575a7a328bb917e77c9706cdc318e72bcdf776",
+      "bytes": 14971
+    },
+    "Zevachim": {
+      "path": "zevachim.eaef1a50.json.gz",
+      "sha256": "eaef1a501270f17e4bdab6b059712de94e42f0437215151c4f456ce113e5c3a3",
+      "bytes": 78043
+    },
+    "Menachot": {
+      "path": "menachot.b4441a0a.json.gz",
+      "sha256": "b4441a0a294782a2bb22b90dd692906e2cac69c7f19a23564ba1867c9102e351",
+      "bytes": 81068
+    },
+    "Chullin": {
+      "path": "chullin.a06d909b.json.gz",
+      "sha256": "a06d909bcda357042eee55f585f0a070158127c7aa4e1c90cd1983efb07dac9f",
+      "bytes": 71417
+    },
+    "Bekhorot": {
+      "path": "bekhorot.5857b8ba.json.gz",
+      "sha256": "5857b8ba5ea1e393fa1190a7ccce4f37538d441acaf2f596fcae0c2efa282df6",
+      "bytes": 64975
+    },
+    "Arakhin": {
+      "path": "arakhin.df50be06.json.gz",
+      "sha256": "df50be06fde5297c9cb816f8ecec6776cb4e5b683812d8387b197c9b5d65f78c",
+      "bytes": 45172
+    },
+    "Temurah": {
+      "path": "temurah.f212c20f.json.gz",
+      "sha256": "f212c20f99f37ac0abf6f74db0b49cb4e1c136aa89f68abf87ab93b48725ba8d",
+      "bytes": 30654
+    },
+    "Keritot": {
+      "path": "keritot.a45d2e07.json.gz",
+      "sha256": "a45d2e07479ce5846cfcd97392487405ebc40cc178c7d2cabc759ea9e6d98f3c",
+      "bytes": 40534
+    },
+    "Meilah": {
+      "path": "meilah.add9cdd9.json.gz",
+      "sha256": "add9cdd9f8c8d4188768479b73450c886d54595a42f307409890044efd3d2155",
+      "bytes": 26368
+    },
+    "Tamid": {
+      "path": "tamid.d2916f22.json.gz",
+      "sha256": "d2916f225fe707a4528506a7bd791da5c5bd83b5982cb63566cc2b6834a69b63",
+      "bytes": 34770
+    },
+    "Middot": {
+      "path": "middot.80ea614d.json.gz",
+      "sha256": "80ea614dd37de475cb653bfedeee3cef40f8dcb73481a0d86f0873535c378096",
+      "bytes": 32294
+    },
+    "Kinnim": {
+      "path": "kinnim.3378de79.json.gz",
+      "sha256": "3378de792b7aeea4026e62f231f36908d65bb93f8aa8eb33182bc6c795eec550",
+      "bytes": 16405
+    },
+    "Kelim": {
+      "path": "kelim.c545d9ab.json.gz",
+      "sha256": "c545d9ab58b7b9394e01b9d2f1dab3b3189a3ecaa0269cbef518734a59e1e522",
+      "bytes": 183283
+    },
+    "Oholot": {
+      "path": "oholot.5a208066.json.gz",
+      "sha256": "5a208066e0afe524f8979841358b37f8969f01d2891e701b6a2e09b84ce8dcb0",
+      "bytes": 88838
+    },
+    "Negaim": {
+      "path": "negaim.05fa5e9e.json.gz",
+      "sha256": "05fa5e9e574d44d63a6c1eb6ef3f66bb20321b6c89b7bd5700b353b26e34dde8",
+      "bytes": 77655
+    },
+    "Parah": {
+      "path": "parah.196f079d.json.gz",
+      "sha256": "196f079d944fff8a084db30f2118bebe17d0f1a16345e5c5c2fc6116214a632b",
+      "bytes": 62211
+    },
+    "Tahorot": {
+      "path": "tahorot.dd0bf000.json.gz",
+      "sha256": "dd0bf000c962dae54f7445c1a2238c62e01edf5d8f0491cdd7630fdacd04a27d",
+      "bytes": 57208
+    },
+    "Mikvaot": {
+      "path": "mikvaot.3fab8116.json.gz",
+      "sha256": "3fab8116c51ff82cff204d247f6b49ddbb504d315e7338b2c8b7cbff5aa22306",
+      "bytes": 48314
+    },
+    "Niddah": {
+      "path": "niddah.31da052a.json.gz",
+      "sha256": "31da052a35fb8b55adf3baa64619310169ca733ff16a34d47b8b2098ca3d0022",
+      "bytes": 55960
+    },
+    "Makhshirin": {
+      "path": "makhshirin.834f6c5e.json.gz",
+      "sha256": "834f6c5e0680ab7aa9edd8074371cdef7fedbf9fd3701799df6e02623ce08b6f",
+      "bytes": 31434
+    },
+    "Zavim": {
+      "path": "zavim.0daaf2ed.json.gz",
+      "sha256": "0daaf2edbfa3c675a93f376ebe1dacfaaa09341c684eec39559c8d18faa19d18",
+      "bytes": 26438
+    },
+    "Tevul Yom": {
+      "path": "tevul-yom.4ffa2436.json.gz",
+      "sha256": "4ffa243602c0fa7c37fff9b3eed4104a727d9493144be99b14701f9eab496ac4",
+      "bytes": 17708
+    },
+    "Yadayim": {
+      "path": "yadayim.425f7a89.json.gz",
+      "sha256": "425f7a8944ff78cc68c6215d9021cc50602674b4bf3c47959c276af54a96782d",
+      "bytes": 21054
+    },
+    "Oktzin": {
+      "path": "oktzin.e0d7fe09.json.gz",
+      "sha256": "e0d7fe09700b897b389e273eef56fbd7866b64c5d48b1e940a9e943743c145be",
+      "bytes": 20930
+    }
+  }
+}

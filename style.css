@@ -1,0 +1,143 @@
+@font-face {
+  font-family: "Heebo";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/Heebo-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Heebo";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/Heebo-Bold.ttf") format("truetype");
+}
+
+:root {
+  color-scheme: light dark;
+  --bg: #f6f1e8;
+  --surface: #fffdf9;
+  --text: #1d2240;
+  --text-sub: #69645d;
+  --gold: #f08a3c;
+  --gold-text: #a04a0c;
+  --note-bg: #fde9d5;
+  --border: #ebe3d6;
+  --shadow: rgba(94, 62, 28, 0.08);
+  --on-gold: #1d2240;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1626;
+    --surface: #172238;
+    --text: #eef1f7;
+    --text-sub: #9da9bf;
+    --gold: #f59a4a;
+    --gold-text: #f7a65e;
+    --note-bg: #3a2d26;
+    --border: #26334d;
+    --shadow: rgba(0, 0, 0, 0.35);
+    --on-gold: #1d2240;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 32px 20px 64px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Heebo", "Segoe UI", system-ui, -apple-system, sans-serif;
+  line-height: 1.7;
+  font-size: 17px;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+header {
+  max-width: 720px;
+  margin: 0 auto 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.brand {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold-text);
+  text-decoration: none;
+}
+
+h1 {
+  font-size: 28px;
+  margin: 0 0 4px;
+}
+
+h2 {
+  font-size: 20px;
+  margin: 32px 0 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+h2:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.meta {
+  color: var(--text-sub);
+  font-size: 15px;
+  margin: 0 0 24px;
+}
+
+.lead {
+  font-size: 18px;
+  border-inline-start: 3px solid var(--gold);
+  padding-inline-start: 14px;
+  margin: 0 0 8px;
+}
+
+ul {
+  padding-inline-start: 22px;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+a {
+  color: var(--gold-text);
+}
+
+.en-summary {
+  margin: 32px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  color: var(--text-sub);
+  font-size: 15px;
+}
+
+footer {
+  max-width: 720px;
+  margin: 24px auto 0;
+  color: var(--text-sub);
+  font-size: 14px;
+  text-align: center;
+}
